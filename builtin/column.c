@@ -1,34 +1,34 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "gettext.h"
-#include "strbuf.h"
-#include "parse-options.h"
-#include "string-list.h"
-#include "column.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "strbuf.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "string-list.h"
+#अन्तर्भाव "column.h"
 
-static const char * const builtin_column_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव builtin_column_usage[] = {
 	N_("git column [<options>]"),
-	NULL
+	रिक्त
 };
-static unsigned int colopts;
+स्थिर unsigned पूर्णाङ्क colopts;
 
-static int column_config(const char *var, const char *value,
-			 const struct config_context *ctx UNUSED, void *cb)
+स्थिर पूर्णाङ्क column_config(ध्रुव वर्ण *var, ध्रुव वर्ण *मूल्य,
+			 ध्रुव संरचना config_context *ctx UNUSED, शून्य *cb)
 {
-	return git_column_config(var, value, cb, &colopts);
+	प्रत्यागम git_column_config(var, मूल्य, cb, &colopts);
 }
 
-int cmd_column(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+पूर्णाङ्क cmd_column(पूर्णाङ्क argc,
+	       ध्रुव वर्ण **argv,
+	       ध्रुव वर्ण *prefix,
+	       संरचना repository *repo UNUSED)
 {
-	struct string_list list = STRING_LIST_INIT_DUP;
-	struct strbuf sb = STRBUF_INIT;
-	struct column_options copts;
-	const char *command = NULL, *real_command = NULL;
-	struct option options[] = {
+	संरचना string_list list = STRING_LIST_INIT_DUP;
+	संरचना strbuf sb = STRBUF_INIT;
+	संरचना column_options copts;
+	ध्रुव वर्ण *command = रिक्त, *real_command = रिक्त;
+	संरचना option options[] = {
 		OPT_STRING(0, "command", &real_command, N_("name"), N_("lookup config vars")),
 		OPT_COLUMN(0, "mode", &colopts, N_("layout to use")),
 		OPT_UNSIGNED(0, "raw-mode", &colopts, N_("layout to use")),
@@ -40,29 +40,29 @@ int cmd_column(int argc,
 	};
 
 	/* This one is special and must be the first one */
-	if (argc > 1 && starts_with(argv[1], "--command=")) {
+	यदि (argc > 1 && starts_with(argv[1], "--command=")) {
 		command = argv[1] + 10;
-		repo_config(the_repository, column_config, (void *)command);
-	} else
-		repo_config(the_repository, column_config, NULL);
+		repo_config(the_repository, column_config, (शून्य *)command);
+	} अन्यथा
+		repo_config(the_repository, column_config, रिक्त);
 
-	memset(&copts, 0, sizeof(copts));
+	memset(&copts, 0, परिमाण(copts));
 	copts.padding = 1;
 	argc = parse_options(argc, argv, prefix, options, builtin_column_usage, 0);
-	if (copts.padding < 0)
+	यदि (copts.padding < 0)
 		die(_("%s must be non-negative"), "--padding");
-	if (argc)
+	यदि (argc)
 		usage_with_options(builtin_column_usage, options);
-	if (real_command || command) {
-		if (!real_command || !command || strcmp(real_command, command))
+	यदि (real_command || command) {
+		यदि (!real_command || !command || strcmp(real_command, command))
 			die(_("--command must be the first argument"));
 	}
 	finalize_colopts(&colopts, -1);
-	while (!strbuf_getline(&sb, stdin))
+	यावत् (!strbuf_getline(&sb, stdin))
 		string_list_append(&list, sb.buf);
 
 	print_columns(&list, colopts, &copts);
 	strbuf_release(&sb);
 	string_list_clear(&list, 0);
-	return 0;
+	प्रत्यागम 0;
 }

@@ -1,24 +1,24 @@
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "parse-options.h"
-#include "path.h"
-#include "run-command.h"
-#include "server-info.h"
-#include "string-list.h"
-#include "midx.h"
-#include "packfile.h"
-#include "prune-packed.h"
-#include "promisor-remote.h"
-#include "repack.h"
-#include "shallow.h"
-#include "list-objects-filter-options.h"
-#include "oidset.h"
-#include "hex.h"
-#include "wt-status.h"
-#include "read-cache-ll.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "path.h"
+#अन्तर्भाव "run-command.h"
+#अन्तर्भाव "server-info.h"
+#अन्तर्भाव "string-list.h"
+#अन्तर्भाव "midx.h"
+#अन्तर्भाव "packfile.h"
+#अन्तर्भाव "prune-packed.h"
+#अन्तर्भाव "promisor-remote.h"
+#अन्तर्भाव "repack.h"
+#अन्तर्भाव "shallow.h"
+#अन्तर्भाव "list-objects-filter-options.h"
+#अन्तर्भाव "oidset.h"
+#अन्तर्भाव "hex.h"
+#अन्तर्भाव "wt-status.h"
+#अन्तर्भाव "read-cache-ll.h"
 
 #define ALL_INTO_ONE 1
 #define LOOSEN_UNREACHABLE 2
@@ -27,25 +27,25 @@
 #define DELETE_PACK 1
 #define RETAIN_PACK 2
 
-static int pack_everything;
-static int write_bitmaps = -1;
-static int use_delta_islands;
-static int run_update_server_info = 1;
-static char *packdir, *packtmp_name, *packtmp;
-static int midx_must_contain_cruft = 1;
-static int drop_filtered;
-static int dry_run;
-static int write_bitmaps_given;
+स्थिर पूर्णाङ्क pack_everything;
+स्थिर पूर्णाङ्क write_bitmaps = -1;
+स्थिर पूर्णाङ्क use_delta_islands;
+स्थिर पूर्णाङ्क run_update_server_info = 1;
+स्थिर वर्ण *packdir, *packtmp_name, *packtmp;
+स्थिर पूर्णाङ्क midx_must_contain_cruft = 1;
+स्थिर पूर्णाङ्क drop_filtered;
+स्थिर पूर्णाङ्क dry_run;
+स्थिर पूर्णाङ्क write_bitmaps_given;
 
-static const char *const git_repack_usage[] = {
+स्थिर ध्रुव वर्ण *ध्रुव git_repack_usage[] = {
 	N_("git repack [-a] [-A] [-d] [-f] [-F] [-l] [-n] [-q] [-b] [-m]\n"
 	   "[--window=<n>] [--depth=<n>] [--threads=<n>] [--keep-pack=<pack-name>]\n"
 	   "[--write-midx[=<mode>]] [--name-hash-version=<n>] [--path-walk]\n"
 	   "[--filter=<filter-spec>] [--drop-filtered [--dry-run]]"),
-	NULL
+	रिक्त
 };
 
-static const char incremental_bitmap_conflict_error[] = N_(
+स्थिर ध्रुव वर्ण incremental_bitmap_conflict_error[] = N_(
 "Incremental repacks are incompatible with bitmap indexes.  Use\n"
 "--no-write-bitmap-index or disable the pack.writeBitmaps configuration."
 );
@@ -53,145 +53,145 @@ static const char incremental_bitmap_conflict_error[] = N_(
 #define DEFAULT_MIDX_SPLIT_FACTOR 2
 #define DEFAULT_MIDX_NEW_LAYER_THRESHOLD 8
 
-struct repack_config_ctx {
-	struct pack_objects_args *po_args;
-	struct pack_objects_args *cruft_po_args;
-	int midx_split_factor;
-	int midx_new_layer_threshold;
+संरचना repack_config_ctx {
+	संरचना pack_objects_args *po_args;
+	संरचना pack_objects_args *cruft_po_args;
+	पूर्णाङ्क midx_split_factor;
+	पूर्णाङ्क midx_new_layer_threshold;
 };
 
-static int repack_config(const char *var, const char *value,
-			 const struct config_context *ctx, void *cb)
+स्थिर पूर्णाङ्क repack_config(ध्रुव वर्ण *var, ध्रुव वर्ण *मूल्य,
+			 ध्रुव संरचना config_context *ctx, शून्य *cb)
 {
-	struct repack_config_ctx *repack_ctx = cb;
-	struct pack_objects_args *po_args = repack_ctx->po_args;
-	struct pack_objects_args *cruft_po_args = repack_ctx->cruft_po_args;
-	if (!strcmp(var, "repack.usedeltabaseoffset")) {
-		po_args->delta_base_offset = git_config_bool(var, value);
-		return 0;
+	संरचना repack_config_ctx *repack_ctx = cb;
+	संरचना pack_objects_args *po_args = repack_ctx->po_args;
+	संरचना pack_objects_args *cruft_po_args = repack_ctx->cruft_po_args;
+	यदि (!strcmp(var, "repack.usedeltabaseoffset")) {
+		po_args->delta_base_offset = git_config_bool(var, मूल्य);
+		प्रत्यागम 0;
 	}
-	if (!strcmp(var, "repack.packkeptobjects")) {
-		po_args->pack_kept_objects = git_config_bool(var, value);
-		return 0;
+	यदि (!strcmp(var, "repack.packkeptobjects")) {
+		po_args->pack_kept_objects = git_config_bool(var, मूल्य);
+		प्रत्यागम 0;
 	}
-	if (!strcmp(var, "repack.writebitmaps") ||
+	यदि (!strcmp(var, "repack.writebitmaps") ||
 	    !strcmp(var, "pack.writebitmaps")) {
-		write_bitmaps = git_config_bool(var, value);
-		return 0;
+		write_bitmaps = git_config_bool(var, मूल्य);
+		प्रत्यागम 0;
 	}
-	if (!strcmp(var, "repack.usedeltaislands")) {
-		use_delta_islands = git_config_bool(var, value);
-		return 0;
+	यदि (!strcmp(var, "repack.usedeltaislands")) {
+		use_delta_islands = git_config_bool(var, मूल्य);
+		प्रत्यागम 0;
 	}
-	if (strcmp(var, "repack.updateserverinfo") == 0) {
-		run_update_server_info = git_config_bool(var, value);
-		return 0;
+	यदि (strcmp(var, "repack.updateserverinfo") == 0) {
+		run_update_server_info = git_config_bool(var, मूल्य);
+		प्रत्यागम 0;
 	}
-	if (!strcmp(var, "repack.cruftwindow")) {
-		free(cruft_po_args->window);
-		return git_config_string(&cruft_po_args->window, var, value);
+	यदि (!strcmp(var, "repack.cruftwindow")) {
+		मुक्त(cruft_po_args->window);
+		प्रत्यागम git_config_string(&cruft_po_args->window, var, मूल्य);
 	}
-	if (!strcmp(var, "repack.cruftwindowmemory")) {
-		free(cruft_po_args->window_memory);
-		return git_config_string(&cruft_po_args->window_memory, var, value);
+	यदि (!strcmp(var, "repack.cruftwindowmemory")) {
+		मुक्त(cruft_po_args->window_memory);
+		प्रत्यागम git_config_string(&cruft_po_args->window_memory, var, मूल्य);
 	}
-	if (!strcmp(var, "repack.cruftdepth")) {
-		free(cruft_po_args->depth);
-		return git_config_string(&cruft_po_args->depth, var, value);
+	यदि (!strcmp(var, "repack.cruftdepth")) {
+		मुक्त(cruft_po_args->depth);
+		प्रत्यागम git_config_string(&cruft_po_args->depth, var, मूल्य);
 	}
-	if (!strcmp(var, "repack.cruftthreads")) {
-		free(cruft_po_args->threads);
-		return git_config_string(&cruft_po_args->threads, var, value);
+	यदि (!strcmp(var, "repack.cruftthreads")) {
+		मुक्त(cruft_po_args->threads);
+		प्रत्यागम git_config_string(&cruft_po_args->threads, var, मूल्य);
 	}
-	if (!strcmp(var, "repack.midxmustcontaincruft")) {
-		midx_must_contain_cruft = git_config_bool(var, value);
-		return 0;
+	यदि (!strcmp(var, "repack.midxmustcontaincruft")) {
+		midx_must_contain_cruft = git_config_bool(var, मूल्य);
+		प्रत्यागम 0;
 	}
-	if (!strcmp(var, "repack.midxsplitfactor")) {
-		repack_ctx->midx_split_factor = git_config_int(var, value,
+	यदि (!strcmp(var, "repack.midxsplitfactor")) {
+		repack_ctx->midx_split_factor = git_config_int(var, मूल्य,
 							       ctx->kvi);
-		return 0;
+		प्रत्यागम 0;
 	}
-	if (!strcmp(var, "repack.midxnewlayerthreshold")) {
-		repack_ctx->midx_new_layer_threshold = git_config_int(var, value,
+	यदि (!strcmp(var, "repack.midxnewlayerthreshold")) {
+		repack_ctx->midx_new_layer_threshold = git_config_int(var, मूल्य,
 								      ctx->kvi);
-		return 0;
+		प्रत्यागम 0;
 	}
-	return git_default_config(var, value, ctx, cb);
+	प्रत्यागम git_default_config(var, मूल्य, ctx, cb);
 }
 
-static int option_parse_write_bitmaps(const struct option *opt, const char *arg,
-				      int unset)
+स्थिर पूर्णाङ्क option_parse_write_bitmaps(ध्रुव संरचना option *opt, ध्रुव वर्ण *arg,
+				      पूर्णाङ्क unset)
 {
-	int *value = opt->value;
+	पूर्णाङ्क *मूल्य = opt->मूल्य;
 
 	BUG_ON_OPT_ARG(arg);
-	if (unset)
-		*value = 0;
-	else
-		*value = 1;
+	यदि (unset)
+		*मूल्य = 0;
+	अन्यथा
+		*मूल्य = 1;
 
 	write_bitmaps_given = 1;
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int option_parse_write_midx(const struct option *opt, const char *arg,
-				   int unset)
+स्थिर पूर्णाङ्क option_parse_write_midx(ध्रुव संरचना option *opt, ध्रुव वर्ण *arg,
+				   पूर्णाङ्क unset)
 {
-	enum repack_write_midx_mode *cfg = opt->value;
+	गणना repack_write_midx_mode *cfg = opt->मूल्य;
 
-	if (unset) {
+	यदि (unset) {
 		*cfg = REPACK_WRITE_MIDX_NONE;
-		return 0;
+		प्रत्यागम 0;
 	}
 
-	if (!arg || !*arg)
+	यदि (!arg || !*arg)
 		*cfg = REPACK_WRITE_MIDX_DEFAULT;
-	else if (!strcmp(arg, "incremental"))
+	अन्यथा यदि (!strcmp(arg, "incremental"))
 		*cfg = REPACK_WRITE_MIDX_INCREMENTAL;
-	else
-		return error(_("unknown value for %s: %s"), opt->long_name, arg);
+	अन्यथा
+		प्रत्यागम error(_("unknown value for %s: %s"), opt->long_name, arg);
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-int cmd_repack(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+पूर्णाङ्क cmd_repack(पूर्णाङ्क argc,
+	       ध्रुव वर्ण **argv,
+	       ध्रुव वर्ण *prefix,
+	       संरचना repository *repo)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	struct string_list_item *item;
-	struct string_list names = STRING_LIST_INIT_DUP;
-	struct existing_packs existing = EXISTING_PACKS_INIT;
-	struct oidset drop_oids = OIDSET_INIT;
-	struct pack_geometry geometry = { 0 };
-	struct tempfile *refs_snapshot = NULL;
-	int i, ret;
-	int show_progress;
+	संरचना child_process cmd = CHILD_PROCESS_INIT;
+	संरचना string_list_item *item;
+	संरचना string_list names = STRING_LIST_INIT_DUP;
+	संरचना existing_packs existing = EXISTING_PACKS_INIT;
+	संरचना oidset drop_oids = OIDSET_INIT;
+	संरचना pack_geometry geometry = { 0 };
+	संरचना tempfile *refs_snapshot = रिक्त;
+	पूर्णाङ्क i, ret;
+	पूर्णाङ्क show_progress;
 
 	/* variables to be filled by option parsing */
-	struct repack_config_ctx config_ctx;
-	int delete_redundant = 0;
-	const char *unpack_unreachable = NULL;
-	int keep_unreachable = 0;
-	struct string_list keep_pack_list = STRING_LIST_INIT_NODUP;
-	struct pack_objects_args po_args = PACK_OBJECTS_ARGS_INIT;
-	struct pack_objects_args cruft_po_args = PACK_OBJECTS_ARGS_INIT;
-	enum repack_write_midx_mode write_midx = REPACK_WRITE_MIDX_NONE;
-	const char *cruft_expiration = NULL;
-	const char *expire_to = NULL;
-	const char *filter_to = NULL;
-	const char *opt_window = NULL;
-	const char *opt_window_memory = NULL;
-	const char *opt_depth = NULL;
-	const char *opt_threads = NULL;
+	संरचना repack_config_ctx config_ctx;
+	पूर्णाङ्क delete_redundant = 0;
+	ध्रुव वर्ण *unpack_unreachable = रिक्त;
+	पूर्णाङ्क keep_unreachable = 0;
+	संरचना string_list keep_pack_list = STRING_LIST_INIT_NODUP;
+	संरचना pack_objects_args po_args = PACK_OBJECTS_ARGS_INIT;
+	संरचना pack_objects_args cruft_po_args = PACK_OBJECTS_ARGS_INIT;
+	गणना repack_write_midx_mode write_midx = REPACK_WRITE_MIDX_NONE;
+	ध्रुव वर्ण *cruft_expiration = रिक्त;
+	ध्रुव वर्ण *expire_to = रिक्त;
+	ध्रुव वर्ण *filter_to = रिक्त;
+	ध्रुव वर्ण *opt_window = रिक्त;
+	ध्रुव वर्ण *opt_window_memory = रिक्त;
+	ध्रुव वर्ण *opt_depth = रिक्त;
+	ध्रुव वर्ण *opt_threads = रिक्त;
 	unsigned long combine_cruft_below_size = 0ul;
 
-	struct option builtin_repack_options[] = {
-		OPT_BIT('a', NULL, &pack_everything,
+	संरचना option builtin_repack_options[] = {
+		OPT_BIT('a', रिक्त, &pack_everything,
 				N_("pack everything in a single pack"), ALL_INTO_ONE),
-		OPT_BIT('A', NULL, &pack_everything,
+		OPT_BIT('A', रिक्त, &pack_everything,
 				N_("same as -a, and turn unreachable objects loose"),
 				   LOOSEN_UNREACHABLE | ALL_INTO_ONE),
 		OPT_BIT(0, "cruft", &pack_everything,
@@ -204,22 +204,22 @@ int cmd_repack(int argc,
 			     N_("with --cruft, only repack cruft packs smaller than this")),
 		OPT_UNSIGNED(0, "max-cruft-size", &cruft_po_args.max_pack_size,
 			     N_("with --cruft, limit the size of new cruft packs")),
-		OPT_BOOL('d', NULL, &delete_redundant,
+		OPT_BOOL('d', रिक्त, &delete_redundant,
 				N_("remove redundant packs, and run git-prune-packed")),
-		OPT_BOOL('f', NULL, &po_args.no_reuse_delta,
+		OPT_BOOL('f', रिक्त, &po_args.no_reuse_delta,
 				N_("pass --no-reuse-delta to git-pack-objects")),
-		OPT_BOOL('F', NULL, &po_args.no_reuse_object,
+		OPT_BOOL('F', रिक्त, &po_args.no_reuse_object,
 				N_("pass --no-reuse-object to git-pack-objects")),
 		OPT_INTEGER(0, "name-hash-version", &po_args.name_hash_version,
 				N_("specify the name hash version to use for grouping similar objects by path")),
 		OPT_BOOL(0, "path-walk", &po_args.path_walk,
 				N_("pass --path-walk to git-pack-objects")),
-		OPT_NEGBIT('n', NULL, &run_update_server_info,
+		OPT_NEGBIT('n', रिक्त, &run_update_server_info,
 				N_("do not run git-update-server-info"), 1),
 		OPT__QUIET(&po_args.quiet, N_("be quiet")),
 		OPT_BOOL('l', "local", &po_args.local,
 				N_("pass --local to git-pack-objects")),
-		OPT_CALLBACK_F('b', "write-bitmap-index", &write_bitmaps, NULL,
+		OPT_CALLBACK_F('b', "write-bitmap-index", &write_bitmaps, रिक्त,
 				N_("write bitmap index"),
 				PARSE_OPT_NOARG, option_parse_write_bitmaps),
 		OPT_BOOL('i', "delta-islands", &use_delta_islands,
@@ -249,7 +249,7 @@ int cmd_repack(int argc,
 			   N_("mode"),
 			   N_("write a multi-pack index of the resulting packs"),
 			   PARSE_OPT_OPTARG, option_parse_write_midx),
-		OPT_SET_INT_F('m', NULL, &write_midx,
+		OPT_SET_INT_F('m', रिक्त, &write_midx,
 			   N_("write a multi-pack index of the resulting packs"),
 			   REPACK_WRITE_MIDX_DEFAULT,
 			   PARSE_OPT_HIDDEN),
@@ -266,7 +266,7 @@ int cmd_repack(int argc,
 
 	list_objects_filter_init(&po_args.filter_options);
 
-	memset(&config_ctx, 0, sizeof(config_ctx));
+	memset(&config_ctx, 0, परिमाण(config_ctx));
 	config_ctx.po_args = &po_args;
 	config_ctx.cruft_po_args = &cruft_po_args;
 	config_ctx.midx_split_factor = DEFAULT_MIDX_SPLIT_FACTOR;
@@ -285,21 +285,21 @@ int cmd_repack(int argc,
 	die_for_incompatible_opt2(drop_filtered, "--drop-filtered",
 		!!filter_to, "--filter-to");
 
-	if (dry_run && !drop_filtered)
+	यदि (dry_run && !drop_filtered)
 		die(_("--dry-run only takes effect with --drop-filtered"));
 
-	if (drop_filtered) {
-		if (!po_args.filter_options.choice)
+	यदि (drop_filtered) {
+		यदि (!po_args.filter_options.choice)
 			die(_("--drop-filtered requires --filter"));
 
-		if (!(pack_everything & ALL_INTO_ONE))
+		यदि (!(pack_everything & ALL_INTO_ONE))
 			die(_("--drop-filtered requires -a"));
 
 		/*
 		 * Only blob:limit=<n> is supported for now. Reject other
 		 * filter choices early, before walking the object database.
 		 */
-		if (po_args.filter_options.choice != LOFC_BLOB_LIMIT)
+		यदि (po_args.filter_options.choice != LOFC_BLOB_LIMIT)
 			die(_("--drop-filtered only supports --filter=blob:limit=<n> for now"));
 
 		/*
@@ -307,7 +307,7 @@ int cmd_repack(int argc,
 		 * report; a bitmap setting from config is silently overridden
 		 * for the duration of the command.
 		 */
-		if (write_bitmaps_given && write_bitmaps > 0)
+		यदि (write_bitmaps_given && write_bitmaps > 0)
 			die(_("options '%s' and '%s' cannot be used together"),
 				"--drop-filtered", "--write-bitmap-index");
 
@@ -316,7 +316,7 @@ int cmd_repack(int argc,
 		 * dropped objects from, so dropping them would be permanent
 		 * data loss.
 		 */
-		if (!repo_has_promisor_remote(repo))
+		यदि (!repo_has_promisor_remote(repo))
 			die(_("--drop-filtered requires a promisor remote"));
 
 		/*
@@ -329,11 +329,11 @@ int cmd_repack(int argc,
 		 * safety measure. Bare repositories have no such state, so
 		 * the check is skipped there.
 		 */
-		if (!is_bare_repository(repo)) {
-			struct wt_status_state state = { 0 };
+		यदि (!is_bare_repository(repo)) {
+			संरचना wt_status_state state = { 0 };
 
 			wt_status_get_state(repo, &state, 0);
-			if (state.merge_in_progress || state.revert_in_progress ||
+			यदि (state.merge_in_progress || state.revert_in_progress ||
 			    state.rebase_in_progress || state.bisect_in_progress ||
 			    state.cherry_pick_in_progress || state.am_in_progress ||
 			    state.rebase_interactive_in_progress) {
@@ -353,13 +353,13 @@ int cmd_repack(int argc,
 		 * without them and then removing the old packs, so the
 		 * redundant packs must be deleted. Imply -d on a real run.
 		 */
-		if (!dry_run)
+		यदि (!dry_run)
 			delete_redundant = 1;
 
 		ret = enumerate_promisor_blobs(repo, &po_args.filter_options, &drop_oids);
 
-		if (ret)
-			goto cleanup;
+		यदि (ret)
+			गच्छ cleanup;
 
 		/*
 		 * Refuse to drop blobs that the current index references.
@@ -368,56 +368,56 @@ int cmd_repack(int argc,
 		 * nothing. This guard just avoids that churn. Bare
 		 * repositories have no index, so the check is skipped there.
 		 */
-		if (!is_bare_repository(repo) && oidset_size(&drop_oids)) {
-			struct index_state *istate = repo->index;
-			unsigned int i;
+		यदि (!is_bare_repository(repo) && oidset_size(&drop_oids)) {
+			संरचना index_state *istate = repo->index;
+			unsigned पूर्णाङ्क i;
 
-			if (repo_read_index(repo) < 0)
+			यदि (repo_read_index(repo) < 0)
 				die(_("could not read the index"));
 
-			for (i = 0; i < istate->cache_nr; i++) {
-				const struct cache_entry *ce = istate->cache[i];
+			प्रति (i = 0; i < istate->cache_nr; i++) {
+				ध्रुव संरचना cache_entry *ce = istate->cache[i];
 
-				if (oidset_contains(&drop_oids, &ce->oid))
+				यदि (oidset_contains(&drop_oids, &ce->oid))
 					die(_("cannot drop '%s' (%s): it is referenced by the current index"),
 						ce->name, oid_to_hex(&ce->oid));
 			}
 		}
 
-		if (dry_run) {
-			struct oidset_iter iter;
-			const struct object_id *oid;
+		यदि (dry_run) {
+			संरचना oidset_iter iter;
+			ध्रुव संरचना object_id *oid;
 
 			oidset_iter_init(&drop_oids, &iter);
-			while ((oid = oidset_iter_next(&iter)))
+			यावत् ((oid = oidset_iter_next(&iter)))
 				printf("%s\n", oid_to_hex(oid));
 		}
 	}
 
-	if (delete_redundant && repo->repository_format_precious_objects)
+	यदि (delete_redundant && repo->repository_format_precious_objects)
 		die(_("cannot delete packs in a precious-objects repo"));
 
 	die_for_incompatible_opt3(unpack_unreachable || (pack_everything & LOOSEN_UNREACHABLE), "-A",
 				  keep_unreachable, "-k/--keep-unreachable",
 				  pack_everything & PACK_CRUFT, "--cruft");
 
-	if (pack_everything & PACK_CRUFT)
+	यदि (pack_everything & PACK_CRUFT)
 		pack_everything |= ALL_INTO_ONE;
 
-	if (write_bitmaps < 0) {
-		if (write_midx == REPACK_WRITE_MIDX_NONE &&
+	यदि (write_bitmaps < 0) {
+		यदि (write_midx == REPACK_WRITE_MIDX_NONE &&
 		    (!(pack_everything & ALL_INTO_ONE) || !is_bare_repository(repo)))
 			write_bitmaps = 0;
 	}
-	if (po_args.pack_kept_objects < 0)
+	यदि (po_args.pack_kept_objects < 0)
 		po_args.pack_kept_objects = write_bitmaps > 0 &&
 			write_midx == REPACK_WRITE_MIDX_NONE;
 
-	if (write_bitmaps && !(pack_everything & ALL_INTO_ONE) &&
+	यदि (write_bitmaps && !(pack_everything & ALL_INTO_ONE) &&
 	    write_midx == REPACK_WRITE_MIDX_NONE)
 		die(_(incremental_bitmap_conflict_error));
 
-	if (write_bitmaps && po_args.local &&
+	यदि (write_bitmaps && po_args.local &&
 	    odb_has_alternates(repo->objects)) {
 		/*
 		 * When asked to do a local repack, but we have
@@ -430,15 +430,15 @@ int cmd_repack(int argc,
 		write_bitmaps = 0;
 	}
 
-	if (config_ctx.midx_split_factor < 2)
+	यदि (config_ctx.midx_split_factor < 2)
 		die(_("invalid value for %s: %d"), "--midx-split-factor",
 		    config_ctx.midx_split_factor);
-	if (config_ctx.midx_new_layer_threshold < 1)
+	यदि (config_ctx.midx_new_layer_threshold < 1)
 		die(_("invalid value for %s: %d"), "--midx-new-layer-threshold",
 		    config_ctx.midx_new_layer_threshold);
 
-	if (write_midx != REPACK_WRITE_MIDX_NONE && write_bitmaps) {
-		struct strbuf path = STRBUF_INIT;
+	यदि (write_midx != REPACK_WRITE_MIDX_NONE && write_bitmaps) {
+		संरचना strbuf path = STRBUF_INIT;
 
 		strbuf_addf(&path, "%s/%s_XXXXXX",
 			    repo_get_object_directory(repo),
@@ -451,16 +451,16 @@ int cmd_repack(int argc,
 	}
 
 	packdir = mkpathdup("%s/pack", repo_get_object_directory(repo));
-	packtmp_name = xstrfmt(".tmp-%d-pack", (int)getpid());
+	packtmp_name = xstrfmt(".tmp-%d-pack", (पूर्णाङ्क)getpid());
 	packtmp = mkpathdup("%s/%s", packdir, packtmp_name);
 
 	existing.repo = repo;
 	existing_packs_collect(&existing, &keep_pack_list);
 
-	if (geometry.split_factor) {
-		if (pack_everything)
+	यदि (geometry.split_factor) {
+		यदि (pack_everything)
 			die(_("options '%s' and '%s' cannot be used together"), "--geometric", "-A/-a");
-		if (write_midx == REPACK_WRITE_MIDX_INCREMENTAL) {
+		यदि (write_midx == REPACK_WRITE_MIDX_INCREMENTAL) {
 			geometry.midx_layer_threshold = config_ctx.midx_new_layer_threshold;
 			geometry.midx_layer_threshold_set = true;
 		}
@@ -472,12 +472,12 @@ int cmd_repack(int argc,
 
 	show_progress = !po_args.quiet && isatty(2);
 
-	strvec_push(&cmd.args, "--keep-true-parents");
-	for (i = 0; i < keep_pack_list.nr; i++)
+	strvec_धकेलो(&cmd.args, "--keep-true-parents");
+	प्रति (i = 0; i < keep_pack_list.nr; i++)
 		strvec_pushf(&cmd.args, "--keep-pack=%s",
-			     keep_pack_list.items[i].string);
-	strvec_push(&cmd.args, "--non-empty");
-	if (!geometry.split_factor) {
+			     keep_pack_list.वस्तुएँ[i].string);
+	strvec_धकेलो(&cmd.args, "--non-empty");
+	यदि (!geometry.split_factor) {
 		/*
 		 * We need to grab all reachable objects, including those that
 		 * are reachable from reflogs and the index.
@@ -488,90 +488,90 @@ int cmd_repack(int argc,
 		 * repacking all the objects in specified packs and loose ones
 		 * (indeed, --stdin-packs is incompatible with these options).
 		 */
-		strvec_push(&cmd.args, "--all");
-		strvec_push(&cmd.args, "--reflog");
-		strvec_push(&cmd.args, "--indexed-objects");
+		strvec_धकेलो(&cmd.args, "--all");
+		strvec_धकेलो(&cmd.args, "--reflog");
+		strvec_धकेलो(&cmd.args, "--indexed-objects");
 	}
-	if (repo_has_promisor_remote(repo))
-		strvec_push(&cmd.args, "--exclude-promisor-objects");
-	if (write_midx == REPACK_WRITE_MIDX_NONE) {
-		if (write_bitmaps > 0)
-			strvec_push(&cmd.args, "--write-bitmap-index");
-		else if (write_bitmaps < 0)
-			strvec_push(&cmd.args, "--write-bitmap-index-quiet");
+	यदि (repo_has_promisor_remote(repo))
+		strvec_धकेलो(&cmd.args, "--exclude-promisor-objects");
+	यदि (write_midx == REPACK_WRITE_MIDX_NONE) {
+		यदि (write_bitmaps > 0)
+			strvec_धकेलो(&cmd.args, "--write-bitmap-index");
+		अन्यथा यदि (write_bitmaps < 0)
+			strvec_धकेलो(&cmd.args, "--write-bitmap-index-quiet");
 	}
-	if (use_delta_islands)
-		strvec_push(&cmd.args, "--delta-islands");
+	यदि (use_delta_islands)
+		strvec_धकेलो(&cmd.args, "--delta-islands");
 
-	if (pack_everything & ALL_INTO_ONE) {
+	यदि (pack_everything & ALL_INTO_ONE) {
 		repack_promisor_objects(repo, &po_args, &names, packtmp,
-			(drop_filtered && !dry_run) ? &drop_oids : NULL);
+			(drop_filtered && !dry_run) ? &drop_oids : रिक्त);
 
-		if (existing_packs_has_non_kept(&existing) &&
+		यदि (existing_packs_has_non_kept(&existing) &&
 		    delete_redundant &&
 		    !(pack_everything & PACK_CRUFT)) {
 			for_each_string_list_item(item, &names) {
 				strvec_pushf(&cmd.args, "--keep-pack=%s-%s.pack",
 					     packtmp_name, item->string);
 			}
-			if (unpack_unreachable) {
+			यदि (unpack_unreachable) {
 				strvec_pushf(&cmd.args,
 					     "--unpack-unreachable=%s",
 					     unpack_unreachable);
-			} else if (pack_everything & LOOSEN_UNREACHABLE) {
-				strvec_push(&cmd.args,
+			} अन्यथा यदि (pack_everything & LOOSEN_UNREACHABLE) {
+				strvec_धकेलो(&cmd.args,
 					    "--unpack-unreachable");
-			} else if (keep_unreachable) {
-				strvec_push(&cmd.args, "--keep-unreachable");
+			} अन्यथा यदि (keep_unreachable) {
+				strvec_धकेलो(&cmd.args, "--keep-unreachable");
 			}
 		}
 
-		if (keep_unreachable && delete_redundant &&
+		यदि (keep_unreachable && delete_redundant &&
 		    !(pack_everything & PACK_CRUFT))
-			strvec_push(&cmd.args, "--pack-loose-unreachable");
-	} else if (geometry.split_factor) {
+			strvec_धकेलो(&cmd.args, "--pack-loose-unreachable");
+	} अन्यथा यदि (geometry.split_factor) {
 		pack_geometry_repack_promisors(repo, &po_args, &geometry,
 					       &names, packtmp);
 
-		if (midx_must_contain_cruft)
-			strvec_push(&cmd.args, "--stdin-packs");
-		else
-			strvec_push(&cmd.args, "--stdin-packs=follow");
-		strvec_push(&cmd.args, "--unpacked");
-	} else {
-		strvec_push(&cmd.args, "--unpacked");
-		strvec_push(&cmd.args, "--incremental");
+		यदि (midx_must_contain_cruft)
+			strvec_धकेलो(&cmd.args, "--stdin-packs");
+		अन्यथा
+			strvec_धकेलो(&cmd.args, "--stdin-packs=follow");
+		strvec_धकेलो(&cmd.args, "--unpacked");
+	} अन्यथा {
+		strvec_धकेलो(&cmd.args, "--unpacked");
+		strvec_धकेलो(&cmd.args, "--incremental");
 	}
 
-	if (po_args.filter_options.choice)
+	यदि (po_args.filter_options.choice)
 		strvec_pushf(&cmd.args, "--filter=%s",
 			     expand_list_objects_filter_spec(&po_args.filter_options));
-	else if (filter_to)
+	अन्यथा यदि (filter_to)
 		die(_("option '%s' can only be used along with '%s'"), "--filter-to", "--filter");
 
-	if (geometry.split_factor)
+	यदि (geometry.split_factor)
 		cmd.in = -1;
-	else
+	अन्यथा
 		cmd.no_stdin = 1;
 
 	ret = start_command(&cmd);
-	if (ret)
-		goto cleanup;
+	यदि (ret)
+		गच्छ cleanup;
 
-	if (geometry.split_factor) {
+	यदि (geometry.split_factor) {
 		FILE *in = xfdopen(cmd.in, "w");
 		/*
 		 * The resulting pack should contain all objects in packs that
 		 * are going to be rolled up, but exclude objects in packs which
 		 * are being left alone.
 		 */
-		for (i = 0; i < geometry.split; i++)
+		प्रति (i = 0; i < geometry.split; i++)
 			fprintf(in, "%s\n", pack_basename(geometry.pack[i]));
-		for (i = geometry.split; i < geometry.pack_nr; i++) {
-			const char *basename = pack_basename(geometry.pack[i]);
-			char marker = '^';
+		प्रति (i = geometry.split; i < geometry.pack_nr; i++) {
+			ध्रुव वर्ण *basename = pack_basename(geometry.pack[i]);
+			वर्ण marker = '^';
 
-			if (!midx_must_contain_cruft &&
+			यदि (!midx_must_contain_cruft &&
 			    !string_list_has_string(&existing.midx_packs,
 						    basename)) {
 				/*
@@ -588,21 +588,21 @@ int cmd_repack(int argc,
 	}
 
 	{
-		struct write_pack_opts opts = {
+		संरचना write_pack_opts opts = {
 			.packdir = packdir,
 			.destination = packdir,
 			.packtmp = packtmp,
 		};
 		ret = finish_pack_objects_cmd(repo->hash_algo, &opts, &cmd,
 					      &names);
-		if (ret)
-			goto cleanup;
+		यदि (ret)
+			गच्छ cleanup;
 	}
 
-	if (!names.nr) {
-		struct odb_source_files *files = odb_source_files_downcast(existing.source);
+	यदि (!names.nr) {
+		संरचना odb_source_files *files = odb_source_files_downcast(existing.source);
 
-		if (!po_args.quiet)
+		यदि (!po_args.quiet)
 			printf_ln(_("Nothing new to pack."));
 		/*
 		 * If we didn't write any new packs, the non-cruft packs
@@ -617,27 +617,27 @@ int cmd_repack(int argc,
 		 * midx_has_unknown_packs() will make the decision for
 		 * us.
 		 */
-		if (!get_multi_pack_index(files->dirs->packed))
+		यदि (!get_multi_pack_index(files->dirs->packed))
 			midx_must_contain_cruft = 1;
 	}
 
-	if (pack_everything & PACK_CRUFT) {
-		struct write_pack_opts opts = {
+	यदि (pack_everything & PACK_CRUFT) {
+		संरचना write_pack_opts opts = {
 			.po_args = &cruft_po_args,
 			.destination = packtmp,
 			.packtmp = packtmp,
 			.packdir = packdir,
 		};
 
-		if (!cruft_po_args.window)
+		यदि (!cruft_po_args.window)
 			cruft_po_args.window = xstrdup_or_null(po_args.window);
-		if (!cruft_po_args.window_memory)
+		यदि (!cruft_po_args.window_memory)
 			cruft_po_args.window_memory = xstrdup_or_null(po_args.window_memory);
-		if (!cruft_po_args.depth)
+		यदि (!cruft_po_args.depth)
 			cruft_po_args.depth = xstrdup_or_null(po_args.depth);
-		if (!cruft_po_args.threads)
+		यदि (!cruft_po_args.threads)
 			cruft_po_args.threads = xstrdup_or_null(po_args.threads);
-		if (!cruft_po_args.max_pack_size)
+		यदि (!cruft_po_args.max_pack_size)
 			cruft_po_args.max_pack_size = po_args.max_pack_size;
 
 		cruft_po_args.local = po_args.local;
@@ -648,10 +648,10 @@ int cmd_repack(int argc,
 		ret = write_cruft_pack(&opts, cruft_expiration,
 				       combine_cruft_below_size, &names,
 				       &existing);
-		if (ret)
-			goto cleanup;
+		यदि (ret)
+			गच्छ cleanup;
 
-		if (delete_redundant && expire_to) {
+		यदि (delete_redundant && expire_to) {
 			/*
 			 * If `--expire-to` is given with `-d`, it's possible
 			 * that we're about to prune some objects. With cruft
@@ -681,27 +681,27 @@ int cmd_repack(int argc,
 			 * main repository regardless of size.
 			 */
 			opts.destination = expire_to;
-			ret = write_cruft_pack(&opts, NULL, 0ul, &names,
+			ret = write_cruft_pack(&opts, रिक्त, 0ul, &names,
 					       &existing);
-			if (ret)
-				goto cleanup;
+			यदि (ret)
+				गच्छ cleanup;
 		}
 	}
 
-	if (po_args.filter_options.choice && !drop_filtered) {
-		struct write_pack_opts opts = {
+	यदि (po_args.filter_options.choice && !drop_filtered) {
+		संरचना write_pack_opts opts = {
 			.po_args = &po_args,
 			.destination = filter_to,
 			.packdir = packdir,
 			.packtmp = packtmp,
 		};
 
-		if (!opts.destination)
+		यदि (!opts.destination)
 			opts.destination = packtmp;
 
 		ret = write_filtered_pack(&opts, &existing, &names);
-		if (ret)
-			goto cleanup;
+		यदि (ret)
+			गच्छ cleanup;
 	}
 
 	string_list_sort(&names);
@@ -716,18 +716,18 @@ int cmd_repack(int argc,
 				       packtmp);
 	/* End of pack replacement. */
 
-	if (delete_redundant && pack_everything & ALL_INTO_ONE) {
-		if (write_midx == REPACK_WRITE_MIDX_INCREMENTAL)
+	यदि (delete_redundant && pack_everything & ALL_INTO_ONE) {
+		यदि (write_midx == REPACK_WRITE_MIDX_INCREMENTAL)
 			existing_packs_retain_midx_packs(&existing);
 		existing_packs_mark_for_deletion(&existing, &names);
 	}
 
-	if (write_midx != REPACK_WRITE_MIDX_NONE) {
-		struct repack_write_midx_opts opts = {
+	यदि (write_midx != REPACK_WRITE_MIDX_NONE) {
+		संरचना repack_write_midx_opts opts = {
 			.existing = &existing,
 			.geometry = &geometry,
 			.names = &names,
-			.refs_snapshot = refs_snapshot ? get_tempfile_path(refs_snapshot) : NULL,
+			.refs_snapshot = refs_snapshot ? get_tempfile_path(refs_snapshot) : रिक्त,
 			.packdir = packdir,
 			.show_progress = show_progress,
 			.write_bitmaps = write_bitmaps > 0,
@@ -738,44 +738,44 @@ int cmd_repack(int argc,
 		};
 
 		ret = repack_write_midx(&opts);
-		if (ret)
-			goto cleanup;
+		यदि (ret)
+			गच्छ cleanup;
 	}
 
 	odb_reprepare(repo->objects);
 
-	if (delete_redundant) {
-		int opts = 0;
+	यदि (delete_redundant) {
+		पूर्णाङ्क opts = 0;
 		bool wrote_incremental_midx = write_midx == REPACK_WRITE_MIDX_INCREMENTAL;
 
 		existing_packs_remove_redundant(&existing, packdir,
 						wrote_incremental_midx);
 
-		if (geometry.split_factor)
+		यदि (geometry.split_factor)
 			pack_geometry_remove_redundant(&geometry, &names,
 						       &existing, packdir,
 						       wrote_incremental_midx);
-		if (show_progress)
+		यदि (show_progress)
 			opts |= PRUNE_PACKED_VERBOSE;
 		prune_packed_objects(opts);
 
-		if (!keep_unreachable &&
+		यदि (!keep_unreachable &&
 		    (!(pack_everything & LOOSEN_UNREACHABLE) ||
 		     unpack_unreachable) &&
 		    is_repository_shallow(repo))
 			prune_shallow(PRUNE_QUICK);
 	}
 
-	if (run_update_server_info)
+	यदि (run_update_server_info)
 		update_server_info(repo, 0);
 
-	if (git_env_bool(GIT_TEST_MULTI_PACK_INDEX, 0)) {
-		struct odb_source_files *files = odb_source_files_downcast(existing.source);
+	यदि (git_env_bool(GIT_TEST_MULTI_PACK_INDEX, 0)) {
+		संरचना odb_source_files *files = odb_source_files_downcast(existing.source);
 		unsigned flags = 0;
 
-		if (git_env_bool(GIT_TEST_MULTI_PACK_INDEX_WRITE_INCREMENTAL, 0))
+		यदि (git_env_bool(GIT_TEST_MULTI_PACK_INDEX_WRITE_INCREMENTAL, 0))
 			flags |= MIDX_WRITE_INCREMENTAL;
-		write_midx_file(files->dirs->packed, NULL, NULL, flags);
+		write_midx_file(files->dirs->packed, रिक्त, रिक्त, flags);
 	}
 
 cleanup:
@@ -787,5 +787,5 @@ cleanup:
 	pack_objects_args_release(&po_args);
 	pack_objects_args_release(&cruft_po_args);
 
-	return ret;
+	प्रत्यागम ret;
 }
