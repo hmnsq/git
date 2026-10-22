@@ -7,31 +7,31 @@
  * and builtin/tag.c by Kristian Høgsberg and Carlos Rica.
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "editor.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "notes.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
-#include "path.h"
+#অন্তর্ভাৱ "builtin.h"
+#অন্তর্ভাৱ "config.h"
+#অন্তর্ভাৱ "editor.h"
+#অন্তর্ভাৱ "environment.h"
+#অন্তর্ভাৱ "gettext.h"
+#অন্তর্ভাৱ "hex.h"
+#অন্তর্ভাৱ "notes.h"
+#অন্তর্ভাৱ "object-file.h"
+#অন্তর্ভাৱ "object-name.h"
+#অন্তর্ভাৱ "odb.h"
+#অন্তর্ভাৱ "path.h"
 
-#include "pretty.h"
-#include "refs.h"
-#include "exec-cmd.h"
-#include "run-command.h"
-#include "parse-options.h"
-#include "string-list.h"
-#include "notes-merge.h"
-#include "notes-utils.h"
-#include "worktree.h"
-#include "write-or-die.h"
+#অন্তর্ভাৱ "pretty.h"
+#অন্তর্ভাৱ "refs.h"
+#অন্তর্ভাৱ "exec-cmd.h"
+#অন্তর্ভাৱ "run-command.h"
+#অন্তর্ভাৱ "parse-options.h"
+#অন্তর্ভাৱ "string-list.h"
+#অন্তর্ভাৱ "notes-merge.h"
+#অন্তর্ভাৱ "notes-utils.h"
+#অন্তর্ভাৱ "worktree.h"
+#অন্তর্ভাৱ "write-or-die.h"
 
-static const char *separator = "\n";
-static const char * const git_notes_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ *separator = "\n";
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ git_notes_usage[] = {
 	N_("git notes [--ref <notes-ref>] [list [<object>]]"),
 	N_("git notes [--ref <notes-ref>] add [-f] [--allow-empty] [--[no-]separator|--separator=<paragraph-break>] [--[no-]stripspace] [-m <msg> | -F <file> | (-c | -C) <object>] [<object>] [-e]"),
 	N_("git notes [--ref <notes-ref>] copy [-f] <from-object> <to-object>"),
@@ -44,173 +44,173 @@ static const char * const git_notes_usage[] = {
 	N_("git notes [--ref <notes-ref>] remove [<object>...]"),
 	N_("git notes [--ref <notes-ref>] prune [-n] [-v]"),
 	N_("git notes [--ref <notes-ref>] get-ref"),
-	NULL
+	রিক্ত
 };
 
-static const char * const git_notes_list_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ git_notes_list_usage[] = {
 	N_("git notes [list [<object>]]"),
-	NULL
+	রিক্ত
 };
 
-static const char * const git_notes_add_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ git_notes_add_usage[] = {
 	N_("git notes add [<options>] [<object>]"),
-	NULL
+	রিক্ত
 };
 
-static const char * const git_notes_copy_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ git_notes_copy_usage[] = {
 	N_("git notes copy [<options>] <from-object> <to-object>"),
 	N_("git notes copy --stdin [<from-object> <to-object>]..."),
-	NULL
+	রিক্ত
 };
 
-static const char * const git_notes_append_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ git_notes_append_usage[] = {
 	N_("git notes append [<options>] [<object>]"),
-	NULL
+	রিক্ত
 };
 
-static const char * const git_notes_edit_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ git_notes_edit_usage[] = {
 	N_("git notes edit [<object>]"),
-	NULL
+	রিক্ত
 };
 
-static const char * const git_notes_show_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ git_notes_show_usage[] = {
 	N_("git notes show [<object>]"),
-	NULL
+	রিক্ত
 };
 
-static const char * const git_notes_merge_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ git_notes_merge_usage[] = {
 	N_("git notes merge [<options>] <notes-ref>"),
 	N_("git notes merge --commit [<options>]"),
 	N_("git notes merge --abort [<options>]"),
-	NULL
+	রিক্ত
 };
 
-static const char * const git_notes_remove_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ git_notes_remove_usage[] = {
 	N_("git notes remove [<object>]"),
-	NULL
+	রিক্ত
 };
 
-static const char * const git_notes_prune_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ git_notes_prune_usage[] = {
 	N_("git notes prune [<options>]"),
-	NULL
+	রিক্ত
 };
 
-static const char * const git_notes_get_ref_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ git_notes_get_ref_usage[] = {
 	"git notes get-ref",
-	NULL
+	রিক্ত
 };
 
-static const char note_template[] =
+স্থির ধ্রুৱ ৱর্ণ note_template[] =
 	N_("Write/edit the notes for the following object:");
 
-enum notes_stripspace {
+গণনা notes_stripspace {
 	UNSPECIFIED = -1,
 	NO_STRIPSPACE = 0,
 	STRIPSPACE = 1,
 };
 
-struct note_msg {
-	enum notes_stripspace stripspace;
-	struct strbuf buf;
+সংরচনা note_বাৰ্তা {
+	গণনা notes_stripspace stripspace;
+	সংরচনা strbuf buf;
 };
 
-struct note_data {
-	int use_editor;
-	int stripspace;
-	char *edit_path;
-	struct strbuf buf;
-	struct note_msg **messages;
-	size_t msg_nr;
-	size_t msg_alloc;
+সংরচনা note_data {
+	পূর্ণাঙ্ক use_editor;
+	পূর্ণাঙ্ক stripspace;
+	ৱর্ণ *edit_path;
+	সংরচনা strbuf buf;
+	সংরচনা note_বাৰ্তা **messages;
+	size_t বাৰ্তা_nr;
+	size_t বাৰ্তা_alloc;
 };
 
-static void free_note_data(struct note_data *d)
+স্থির শূন্য free_note_data(সংরচনা note_data *d)
 {
-	if (d->edit_path) {
+	যদি (d->edit_path) {
 		unlink_or_warn(d->edit_path);
-		free(d->edit_path);
+		মুক্ত(d->edit_path);
 	}
 	strbuf_release(&d->buf);
 
-	while (d->msg_nr--) {
-		strbuf_release(&d->messages[d->msg_nr]->buf);
-		free(d->messages[d->msg_nr]);
+	যেতিয়ালৈ (d->বাৰ্তা_nr--) {
+		strbuf_release(&d->messages[d->বাৰ্তা_nr]->buf);
+		মুক্ত(d->messages[d->বাৰ্তা_nr]);
 	}
-	free(d->messages);
+	মুক্ত(d->messages);
 }
 
-static int list_each_note(const struct object_id *object_oid,
-			  const struct object_id *note_oid,
-			  char *note_path UNUSED,
-			  void *cb_data UNUSED)
+স্থির পূর্ণাঙ্ক list_each_note(ধ্রুৱ সংরচনা object_id *object_oid,
+			  ধ্রুৱ সংরচনা object_id *note_oid,
+			  ৱর্ণ *note_path UNUSED,
+			  শূন্য *cb_data UNUSED)
 {
 	printf("%s %s\n", oid_to_hex(note_oid), oid_to_hex(object_oid));
-	return 0;
+	ঘূৰাই 0;
 }
 
-static void copy_obj_to_fd(int fd, const struct object_id *oid)
+স্থির শূন্য copy_obj_to_fd(পূর্ণাঙ্ক fd, ধ্রুৱ সংরচনা object_id *oid)
 {
 	size_t size;
-	enum object_type type;
-	char *buf = odb_read_object(the_repository->objects, oid, &type, &size);
-	if (buf) {
-		if (size)
+	গণনা object_type type;
+	ৱর্ণ *buf = odb_read_object(the_repository->objects, oid, &type, &size);
+	যদি (buf) {
+		যদি (size)
 			write_or_die(fd, buf, size);
-		free(buf);
+		মুক্ত(buf);
 	}
 }
 
-static void write_commented_object(int fd, const struct object_id *object)
+স্থির শূন্য write_commented_object(পূর্ণাঙ্ক fd, ধ্রুৱ সংরচনা object_id *object)
 {
-	struct child_process show = CHILD_PROCESS_INIT;
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf cbuf = STRBUF_INIT;
+	সংরচনা child_process show = CHILD_PROCESS_INIT;
+	সংরচনা strbuf buf = STRBUF_INIT;
+	সংরচনা strbuf cbuf = STRBUF_INIT;
 
 	/* Invoke "git show --stat --no-notes $object" */
 	strvec_pushl(&show.args, "show", "--stat", "--no-notes",
-		     oid_to_hex(object), NULL);
+		     oid_to_hex(object), রিক্ত);
 	show.no_stdin = 1;
 	show.out = -1;
 	show.err = 0;
 	show.git_cmd = 1;
-	if (start_command(&show))
+	যদি (start_command(&show))
 		die(_("unable to start 'show' for object '%s'"),
 		    oid_to_hex(object));
 
-	if (strbuf_read(&buf, show.out, 0) < 0)
+	যদি (strbuf_read(&buf, show.out, 0) < 0)
 		die_errno(_("could not read 'show' output"));
-	strbuf_add_commented_lines(&cbuf, buf.buf, buf.len, comment_line_str);
+	strbuf_add_commented_সাৰিগুলি(&cbuf, buf.buf, buf.len, comment_সাৰি_str);
 	write_or_die(fd, cbuf.buf, cbuf.len);
 
 	strbuf_release(&cbuf);
 	strbuf_release(&buf);
 
-	if (finish_command(&show))
+	যদি (finish_command(&show))
 		die(_("failed to finish 'show' for object '%s'"),
 		    oid_to_hex(object));
 }
 
-static void prepare_note_data(const struct object_id *object, struct note_data *d,
-		const struct object_id *old_note)
+স্থির শূন্য prepare_note_data(ধ্রুৱ সংরচনা object_id *object, সংরচনা note_data *d,
+		ধ্রুৱ সংরচনা object_id *old_note)
 {
-	if (d->use_editor || !d->msg_nr) {
-		int fd;
-		struct strbuf buf = STRBUF_INIT;
+	যদি (d->use_editor || !d->বাৰ্তা_nr) {
+		পূর্ণাঙ্ক fd;
+		সংরচনা strbuf buf = STRBUF_INIT;
 
 		/* write the template message before editing: */
 		d->edit_path = repo_git_path(the_repository, "NOTES_EDITMSG");
 		fd = xopen(d->edit_path, O_CREAT | O_TRUNC | O_WRONLY, 0600);
 
-		if (d->msg_nr)
+		যদি (d->বাৰ্তা_nr)
 			write_or_die(fd, d->buf.buf, d->buf.len);
-		else if (old_note)
+		অন্যথা যদি (old_note)
 			copy_obj_to_fd(fd, old_note);
 
 		strbuf_addch(&buf, '\n');
-		strbuf_add_commented_lines(&buf, "\n", strlen("\n"), comment_line_str);
-		strbuf_add_commented_lines(&buf, _(note_template), strlen(_(note_template)),
-					   comment_line_str);
-		strbuf_add_commented_lines(&buf, "\n", strlen("\n"), comment_line_str);
+		strbuf_add_commented_সাৰিগুলি(&buf, "\n", strlen("\n"), comment_সাৰি_str);
+		strbuf_add_commented_সাৰিগুলি(&buf, _(note_template), strlen(_(note_template)),
+					   comment_সাৰি_str);
+		strbuf_add_commented_সাৰিগুলি(&buf, "\n", strlen("\n"), comment_সাৰি_str);
 		write_or_die(fd, buf.buf, buf.len);
 
 		write_commented_object(fd, object);
@@ -219,276 +219,276 @@ static void prepare_note_data(const struct object_id *object, struct note_data *
 		strbuf_release(&buf);
 		strbuf_reset(&d->buf);
 
-		if (launch_editor(d->edit_path, &d->buf, NULL)) {
+		যদি (launch_editor(d->edit_path, &d->buf, রিক্ত)) {
 			die(_("please supply the note contents using either -m or -F option"));
 		}
-		if (d->stripspace)
-			strbuf_stripspace(&d->buf, comment_line_str);
+		যদি (d->stripspace)
+			strbuf_stripspace(&d->buf, comment_সাৰি_str);
 	}
 }
 
-static void write_note_data(struct note_data *d, struct object_id *oid)
+স্থির শূন্য write_note_data(সংরচনা note_data *d, সংরচনা object_id *oid)
 {
-	if (odb_write_object(the_repository->objects, d->buf.buf,
+	যদি (odb_write_object(the_repository->objects, d->buf.buf,
 			     d->buf.len, OBJ_BLOB, oid)) {
-		int status = die_message(_("unable to write note object"));
+		পূর্ণাঙ্ক status = die_message(_("unable to write note object"));
 
-		if (d->edit_path)
+		যদি (d->edit_path)
 			die_message(_("the note contents have been left in %s"),
 				    d->edit_path);
 		exit(status);
 	}
 }
 
-static void append_separator(struct strbuf *message)
+স্থির শূন্য append_separator(সংরচনা strbuf *message)
 {
 	size_t sep_len = 0;
 
-	if (!separator)
-		return;
-	else if ((sep_len = strlen(separator)) && separator[sep_len - 1] == '\n')
+	যদি (!separator)
+		ঘূৰাই;
+	অন্যথা যদি ((sep_len = strlen(separator)) && separator[sep_len - 1] == '\n')
 		strbuf_addstr(message, separator);
-	else
+	অন্যথা
 		strbuf_addf(message, "%s%s", separator, "\n");
 }
 
-static void concat_messages(struct note_data *d)
+স্থির শূন্য concat_messages(সংরচনা note_data *d)
 {
-	struct strbuf msg = STRBUF_INIT;
+	সংরচনা strbuf বাৰ্তা = STRBUF_INIT;
 	size_t i;
 
-	for (i = 0; i < d->msg_nr ; i++) {
-		if (d->buf.len)
+	বাবে (i = 0; i < d->বাৰ্তা_nr ; i++) {
+		যদি (d->buf.len)
 			append_separator(&d->buf);
-		strbuf_add(&msg, d->messages[i]->buf.buf, d->messages[i]->buf.len);
-		strbuf_addbuf(&d->buf, &msg);
-		if ((d->stripspace == UNSPECIFIED &&
+		strbuf_add(&বাৰ্তা, d->messages[i]->buf.buf, d->messages[i]->buf.len);
+		strbuf_addbuf(&d->buf, &বাৰ্তা);
+		যদি ((d->stripspace == UNSPECIFIED &&
 		     d->messages[i]->stripspace == STRIPSPACE) ||
 		    d->stripspace == STRIPSPACE)
-			strbuf_stripspace(&d->buf, NULL);
-		strbuf_reset(&msg);
+			strbuf_stripspace(&d->buf, রিক্ত);
+		strbuf_reset(&বাৰ্তা);
 	}
-	strbuf_release(&msg);
+	strbuf_release(&বাৰ্তা);
 }
 
-static int parse_msg_arg(const struct option *opt, const char *arg, int unset)
+স্থির পূর্ণাঙ্ক parse_বাৰ্তা_arg(ধ্রুৱ সংরচনা option *opt, ধ্রুৱ ৱর্ণ *arg, পূর্ণাঙ্ক unset)
 {
-	struct note_data *d = opt->value;
-	struct note_msg *msg = xmalloc(sizeof(*msg));
+	সংরচনা note_data *d = opt->মান;
+	সংরচনা note_বাৰ্তা *বাৰ্তা = xmalloc(পরিমাণ(*বাৰ্তা));
 
 	BUG_ON_OPT_NEG(unset);
 
-	strbuf_init(&msg->buf, strlen(arg));
-	strbuf_addstr(&msg->buf, arg);
-	ALLOC_GROW_BY(d->messages, d->msg_nr, 1, d->msg_alloc);
-	d->messages[d->msg_nr - 1] = msg;
-	msg->stripspace = STRIPSPACE;
-	return 0;
+	strbuf_init(&বাৰ্তা->buf, strlen(arg));
+	strbuf_addstr(&বাৰ্তা->buf, arg);
+	ALLOC_GROW_BY(d->messages, d->বাৰ্তা_nr, 1, d->বাৰ্তা_alloc);
+	d->messages[d->বাৰ্তা_nr - 1] = বাৰ্তা;
+	বাৰ্তা->stripspace = STRIPSPACE;
+	ঘূৰাই 0;
 }
 
-static int parse_file_arg(const struct option *opt, const char *arg, int unset)
+স্থির পূর্ণাঙ্ক parse_file_arg(ধ্রুৱ সংরচনা option *opt, ধ্রুৱ ৱর্ণ *arg, পূর্ণাঙ্ক unset)
 {
-	struct note_data *d = opt->value;
-	struct note_msg *msg = xmalloc(sizeof(*msg));
+	সংরচনা note_data *d = opt->মান;
+	সংরচনা note_বাৰ্তা *বাৰ্তা = xmalloc(পরিমাণ(*বাৰ্তা));
 
 	BUG_ON_OPT_NEG(unset);
 
-	strbuf_init(&msg->buf , 0);
-	if (!strcmp(arg, "-")) {
-		if (strbuf_read(&msg->buf, 0, 1024) < 0)
+	strbuf_init(&বাৰ্তা->buf , 0);
+	যদি (!strcmp(arg, "-")) {
+		যদি (strbuf_read(&বাৰ্তা->buf, 0, 1024) < 0)
 			die_errno(_("cannot read '%s'"), arg);
-	} else if (strbuf_read_file(&msg->buf, arg, 1024) < 0)
+	} অন্যথা যদি (strbuf_read_file(&বাৰ্তা->buf, arg, 1024) < 0)
 		die_errno(_("could not open or read '%s'"), arg);
 
-	ALLOC_GROW_BY(d->messages, d->msg_nr, 1, d->msg_alloc);
-	d->messages[d->msg_nr - 1] = msg;
-	msg->stripspace = STRIPSPACE;
-	return 0;
+	ALLOC_GROW_BY(d->messages, d->বাৰ্তা_nr, 1, d->বাৰ্তা_alloc);
+	d->messages[d->বাৰ্তা_nr - 1] = বাৰ্তা;
+	বাৰ্তা->stripspace = STRIPSPACE;
+	ঘূৰাই 0;
 }
 
-static int parse_reuse_arg(const struct option *opt, const char *arg, int unset)
+স্থির পূর্ণাঙ্ক parse_reuse_arg(ধ্রুৱ সংরচনা option *opt, ধ্রুৱ ৱর্ণ *arg, পূর্ণাঙ্ক unset)
 {
-	struct note_data *d = opt->value;
-	struct note_msg *msg = xmalloc(sizeof(*msg));
-	char *value;
-	struct object_id object;
-	enum object_type type;
+	সংরচনা note_data *d = opt->মান;
+	সংরচনা note_বাৰ্তা *বাৰ্তা = xmalloc(পরিমাণ(*বাৰ্তা));
+	ৱর্ণ *মান;
+	সংরচনা object_id object;
+	গণনা object_type type;
 	size_t len;
 
 	BUG_ON_OPT_NEG(unset);
 
-	strbuf_init(&msg->buf, 0);
-	if (repo_get_oid(the_repository, arg, &object))
+	strbuf_init(&বাৰ্তা->buf, 0);
+	যদি (repo_get_oid(the_repository, arg, &object))
 		die(_("failed to resolve '%s' as a valid ref."), arg);
-	if (!(value = odb_read_object(the_repository->objects, &object, &type, &len)))
+	যদি (!(মান = odb_read_object(the_repository->objects, &object, &type, &len)))
 		die(_("failed to read object '%s'."), arg);
-	if (type != OBJ_BLOB) {
-		strbuf_release(&msg->buf);
-		free(value);
-		free(msg);
+	যদি (type != OBJ_BLOB) {
+		strbuf_release(&বাৰ্তা->buf);
+		মুক্ত(মান);
+		মুক্ত(বাৰ্তা);
 		die(_("cannot read note data from non-blob object '%s'."), arg);
 	}
 
-	strbuf_add(&msg->buf, value, len);
-	free(value);
+	strbuf_add(&বাৰ্তা->buf, মান, len);
+	মুক্ত(মান);
 
-	msg->buf.len = len;
-	ALLOC_GROW_BY(d->messages, d->msg_nr, 1, d->msg_alloc);
-	d->messages[d->msg_nr - 1] = msg;
-	msg->stripspace = NO_STRIPSPACE;
-	return 0;
+	বাৰ্তা->buf.len = len;
+	ALLOC_GROW_BY(d->messages, d->বাৰ্তা_nr, 1, d->বাৰ্তা_alloc);
+	d->messages[d->বাৰ্তা_nr - 1] = বাৰ্তা;
+	বাৰ্তা->stripspace = NO_STRIPSPACE;
+	ঘূৰাই 0;
 }
 
-static int parse_reedit_arg(const struct option *opt, const char *arg, int unset)
+স্থির পূর্ণাঙ্ক parse_reedit_arg(ধ্রুৱ সংরচনা option *opt, ধ্রুৱ ৱর্ণ *arg, পূর্ণাঙ্ক unset)
 {
-	struct note_data *d = opt->value;
+	সংরচনা note_data *d = opt->মান;
 	BUG_ON_OPT_NEG(unset);
 	d->use_editor = 1;
-	return parse_reuse_arg(opt, arg, unset);
+	ঘূৰাই parse_reuse_arg(opt, arg, unset);
 }
 
-static int parse_separator_arg(const struct option *opt, const char *arg,
-			       int unset)
+স্থির পূর্ণাঙ্ক parse_separator_arg(ধ্রুৱ সংরচনা option *opt, ধ্রুৱ ৱর্ণ *arg,
+			       পূর্ণাঙ্ক unset)
 {
-	if (unset)
-		*(const char **)opt->value = NULL;
-	else
-		*(const char **)opt->value = arg ? arg : "\n";
-	return 0;
+	যদি (unset)
+		*(ধ্রুৱ ৱর্ণ **)opt->মান = রিক্ত;
+	অন্যথা
+		*(ধ্রুৱ ৱর্ণ **)opt->মান = arg ? arg : "\n";
+	ঘূৰাই 0;
 }
 
-static int notes_copy_from_stdin(int force, const char *rewrite_cmd)
+স্থির পূর্ণাঙ্ক notes_copy_from_stdin(পূর্ণাঙ্ক force, ধ্রুৱ ৱর্ণ *rewrite_cmd)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct notes_rewrite_cfg *c = NULL;
-	struct notes_tree *t = NULL;
-	int ret = 0;
-	const char *msg = "Notes added by 'git notes copy'";
+	সংরচনা strbuf buf = STRBUF_INIT;
+	সংরচনা notes_rewrite_cfg *c = রিক্ত;
+	সংরচনা notes_বৃক্ষ *t = রিক্ত;
+	পূর্ণাঙ্ক ret = 0;
+	ধ্রুৱ ৱর্ণ *বাৰ্তা = "Notes added by 'git notes copy'";
 
-	if (rewrite_cmd) {
+	যদি (rewrite_cmd) {
 		c = init_copy_notes_for_rewrite(rewrite_cmd);
-		if (!c)
-			return 0;
-	} else {
-		init_notes(NULL, NULL, NULL, NOTES_INIT_WRITABLE);
-		t = &default_notes_tree;
+		যদি (!c)
+			ঘূৰাই 0;
+	} অন্যথা {
+		init_notes(রিক্ত, রিক্ত, রিক্ত, NOTES_INIT_WRITABLE);
+		t = &default_notes_বৃক্ষ;
 	}
 
-	while (strbuf_getline_lf(&buf, stdin) != EOF) {
-		struct object_id from_obj, to_obj;
-		struct string_list split = STRING_LIST_INIT_NODUP;
-		int err;
+	যেতিয়ালৈ (strbuf_getline_lf(&buf, stdin) != EOF) {
+		সংরচনা object_id from_obj, to_obj;
+		সংরচনা string_list split = STRING_LIST_INIT_NODUP;
+		পূর্ণাঙ্ক err;
 
 		string_list_split_in_place_f(&split, buf.buf, " ", -1,
 					     STRING_LIST_SPLIT_TRIM);
-		if (split.nr < 2)
+		যদি (split.nr < 2)
 			die(_("malformed input line: '%s'."), buf.buf);
-		if (repo_get_oid(the_repository, split.items[0].string, &from_obj))
+		যদি (repo_get_oid(the_repository, split.বস্তুসমূহ[0].string, &from_obj))
 			die(_("failed to resolve '%s' as a valid ref."),
-			    split.items[0].string);
-		if (repo_get_oid(the_repository, split.items[1].string, &to_obj))
+			    split.বস্তুসমূহ[0].string);
+		যদি (repo_get_oid(the_repository, split.বস্তুসমূহ[1].string, &to_obj))
 			die(_("failed to resolve '%s' as a valid ref."),
-			    split.items[1].string);
+			    split.বস্তুসমূহ[1].string);
 
-		if (rewrite_cmd)
+		যদি (rewrite_cmd)
 			err = copy_note_for_rewrite(c, &from_obj, &to_obj);
-		else
+		অন্যথা
 			err = copy_note(t, &from_obj, &to_obj, force,
 					combine_notes_overwrite);
 
-		if (err) {
+		যদি (err) {
 			error(_("failed to copy notes from '%s' to '%s'"),
-			      split.items[0].string, split.items[1].string);
+			      split.বস্তুসমূহ[0].string, split.বস্তুসমূহ[1].string);
 			ret = 1;
 		}
 
 		string_list_clear(&split, 0);
 	}
 
-	if (!rewrite_cmd) {
-		commit_notes(the_repository, t, msg);
+	যদি (!rewrite_cmd) {
+		commit_notes(the_repository, t, বাৰ্তা);
 		free_notes(t);
-	} else {
-		finish_copy_notes_for_rewrite(the_repository, c, msg);
+	} অন্যথা {
+		finish_copy_notes_for_rewrite(the_repository, c, বাৰ্তা);
 	}
 	strbuf_release(&buf);
-	return ret;
+	ঘূৰাই ret;
 }
 
-static struct notes_tree *init_notes_check(const char *subcommand,
-					   int flags)
+স্থির সংরচনা notes_বৃক্ষ *init_notes_check(ধ্রুৱ ৱর্ণ *subcommand,
+					   পূর্ণাঙ্ক flags)
 {
-	struct notes_tree *t;
-	const char *ref;
-	init_notes(NULL, NULL, NULL, flags);
-	t = &default_notes_tree;
+	সংরচনা notes_বৃক্ষ *t;
+	ধ্রুৱ ৱর্ণ *ref;
+	init_notes(রিক্ত, রিক্ত, রিক্ত, flags);
+	t = &default_notes_বৃক্ষ;
 
 	ref = (flags & NOTES_INIT_WRITABLE) ? t->update_ref : t->ref;
-	if (!starts_with(ref, "refs/notes/"))
+	যদি (!starts_with(ref, "refs/notes/"))
 		/*
 		 * TRANSLATORS: the first %s will be replaced by a git
 		 * notes command: 'add', 'merge', 'remove', etc.
 		 */
 		die(_("refusing to %s notes in %s (outside of refs/notes/)"),
 		    subcommand, ref);
-	return t;
+	ঘূৰাই t;
 }
 
-static int list(int argc, const char **argv, const char *prefix,
-		struct repository *repo UNUSED)
+স্থির পূর্ণাঙ্ক list(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+		সংরচনা repository *repo UNUSED)
 {
-	struct notes_tree *t;
-	struct object_id object;
-	const struct object_id *note;
-	int retval = -1;
-	struct option options[] = {
+	সংরচনা notes_বৃক্ষ *t;
+	সংরচনা object_id object;
+	ধ্রুৱ সংরচনা object_id *note;
+	পূর্ণাঙ্ক retval = -1;
+	সংরচনা option options[] = {
 		OPT_END()
 	};
 
-	if (argc)
+	যদি (argc)
 		argc = parse_options(argc, argv, prefix, options,
 				     git_notes_list_usage, 0);
 
-	if (1 < argc) {
+	যদি (1 < argc) {
 		error(_("too many arguments"));
 		usage_with_options(git_notes_list_usage, options);
 	}
 
 	t = init_notes_check("list", 0);
-	if (argc) {
-		if (repo_get_oid(the_repository, argv[0], &object))
+	যদি (argc) {
+		যদি (repo_get_oid(the_repository, argv[0], &object))
 			die(_("failed to resolve '%s' as a valid ref."), argv[0]);
 		note = get_note(t, &object);
-		if (note) {
+		যদি (note) {
 			puts(oid_to_hex(note));
 			retval = 0;
-		} else
+		} অন্যথা
 			retval = error(_("no note found for object %s."),
 				       oid_to_hex(&object));
-	} else
-		retval = for_each_note(t, 0, list_each_note, NULL);
+	} অন্যথা
+		retval = for_each_note(t, 0, list_each_note, রিক্ত);
 
 	free_notes(t);
-	return retval;
+	ঘূৰাই retval;
 }
 
-static int append_edit(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED);
+স্থির পূর্ণাঙ্ক append_edit(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+		       সংরচনা repository *repo UNUSED);
 
-static int add(int argc, const char **argv, const char *prefix,
-	       struct repository *repo)
+স্থির পূর্ণাঙ্ক add(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+	       সংরচনা repository *repo)
 {
-	int force = 0, allow_empty = 0;
-	const char *object_ref;
-	struct notes_tree *t;
-	struct object_id object, new_note;
-	const struct object_id *note;
-	struct note_data d = { .buf = STRBUF_INIT, .stripspace = UNSPECIFIED };
+	পূর্ণাঙ্ক force = 0, allow_empty = 0;
+	ধ্রুৱ ৱর্ণ *object_ref;
+	সংরচনা notes_বৃক্ষ *t;
+	সংরচনা object_id object, new_note;
+	ধ্রুৱ সংরচনা object_id *note;
+	সংরচনা note_data d = { .buf = STRBUF_INIT, .stripspace = UNSPECIFIED };
 
-	struct option options[] = {
+	সংরচনা option options[] = {
 		OPT_CALLBACK_F('m', "message", &d, N_("message"),
 			N_("note contents as a string"), PARSE_OPT_NONEG,
-			parse_msg_arg),
+			parse_বাৰ্তা_arg),
 		OPT_CALLBACK_F('F', "file", &d, N_("file"),
 			N_("note contents in a file"), PARSE_OPT_NONEG,
 			parse_file_arg),
@@ -515,28 +515,28 @@ static int add(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options, git_notes_add_usage,
 			     PARSE_OPT_KEEP_ARGV0);
 
-	if (2 < argc) {
+	যদি (2 < argc) {
 		error(_("too many arguments"));
 		usage_with_options(git_notes_add_usage, options);
 	}
 
-	if (d.msg_nr)
+	যদি (d.বাৰ্তা_nr)
 		concat_messages(&d);
 
 	object_ref = argc > 1 ? argv[1] : "HEAD";
 
-	if (repo_get_oid(the_repository, object_ref, &object))
+	যদি (repo_get_oid(the_repository, object_ref, &object))
 		die(_("failed to resolve '%s' as a valid ref."), object_ref);
 
 	t = init_notes_check("add", NOTES_INIT_WRITABLE);
 	note = get_note(t, &object);
 
-	if (note) {
-		if (!force) {
+	যদি (note) {
+		যদি (!force) {
 			free_notes(t);
-			if (d.msg_nr) {
+			যদি (d.বাৰ্তা_nr) {
 				free_note_data(&d);
-				return error(_("Cannot add notes. "
+				ঘূৰাই error(_("Cannot add notes. "
 					"Found existing notes for object %s. "
 					"Use '-f' to overwrite existing notes"),
 					oid_to_hex(&object));
@@ -549,20 +549,20 @@ static int add(int argc, const char **argv, const char *prefix,
 			 * argv[0-1].
 			 */
 			argv[0] = "edit";
-			return append_edit(argc, argv, prefix, repo);
+			ঘূৰাই append_edit(argc, argv, prefix, repo);
 		}
 		fprintf(stderr, _("Overwriting existing notes for object %s\n"),
 			oid_to_hex(&object));
 	}
 
 	prepare_note_data(&object, &d, note);
-	if (d.buf.len || allow_empty) {
+	যদি (d.buf.len || allow_empty) {
 		write_note_data(&d, &new_note);
-		if (add_note(t, &object, &new_note, combine_notes_overwrite))
+		যদি (add_note(t, &object, &new_note, combine_notes_overwrite))
 			BUG("combine_notes_overwrite failed");
 		commit_notes(the_repository, t,
 			     "Notes added by 'git notes add'");
-	} else {
+	} অন্যথা {
 		fprintf(stderr, _("Removing note for object %s\n"),
 			oid_to_hex(&object));
 		remove_note(t, object.hash);
@@ -572,19 +572,19 @@ static int add(int argc, const char **argv, const char *prefix,
 
 	free_note_data(&d);
 	free_notes(t);
-	return 0;
+	ঘূৰাই 0;
 }
 
-static int copy(int argc, const char **argv, const char *prefix,
-		struct repository *repo UNUSED)
+স্থির পূর্ণাঙ্ক copy(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+		সংরচনা repository *repo UNUSED)
 {
-	int retval = 0, force = 0, from_stdin = 0;
-	const struct object_id *from_note, *note;
-	const char *object_ref;
-	struct object_id object, from_obj;
-	struct notes_tree *t;
-	const char *rewrite_cmd = NULL;
-	struct option options[] = {
+	পূর্ণাঙ্ক retval = 0, force = 0, from_stdin = 0;
+	ধ্রুৱ সংরচনা object_id *from_note, *note;
+	ধ্রুৱ ৱর্ণ *object_ref;
+	সংরচনা object_id object, from_obj;
+	সংরচনা notes_বৃক্ষ *t;
+	ধ্রুৱ ৱর্ণ *rewrite_cmd = রিক্ত;
+	সংরচনা option options[] = {
 		OPT__FORCE(&force, N_("replace existing notes"), PARSE_OPT_NOCOMPLETE),
 		OPT_BOOL(0, "stdin", &from_stdin, N_("read objects from stdin")),
 		OPT_STRING(0, "for-rewrite", &rewrite_cmd, N_("command"),
@@ -596,78 +596,78 @@ static int copy(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options, git_notes_copy_usage,
 			     0);
 
-	if (from_stdin || rewrite_cmd) {
-		if (argc) {
+	যদি (from_stdin || rewrite_cmd) {
+		যদি (argc) {
 			error(_("too many arguments"));
 			usage_with_options(git_notes_copy_usage, options);
-		} else {
-			return notes_copy_from_stdin(force, rewrite_cmd);
+		} অন্যথা {
+			ঘূৰাই notes_copy_from_stdin(force, rewrite_cmd);
 		}
 	}
 
-	if (argc < 1) {
+	যদি (argc < 1) {
 		error(_("too few arguments"));
 		usage_with_options(git_notes_copy_usage, options);
 	}
-	if (2 < argc) {
+	যদি (2 < argc) {
 		error(_("too many arguments"));
 		usage_with_options(git_notes_copy_usage, options);
 	}
 
-	if (repo_get_oid(the_repository, argv[0], &from_obj))
+	যদি (repo_get_oid(the_repository, argv[0], &from_obj))
 		die(_("failed to resolve '%s' as a valid ref."), argv[0]);
 
 	object_ref = 1 < argc ? argv[1] : "HEAD";
 
-	if (repo_get_oid(the_repository, object_ref, &object))
+	যদি (repo_get_oid(the_repository, object_ref, &object))
 		die(_("failed to resolve '%s' as a valid ref."), object_ref);
 
 	t = init_notes_check("copy", NOTES_INIT_WRITABLE);
 	note = get_note(t, &object);
 
-	if (note) {
-		if (!force) {
+	যদি (note) {
+		যদি (!force) {
 			retval = error(_("Cannot copy notes. Found existing "
 				       "notes for object %s. Use '-f' to "
 				       "overwrite existing notes"),
 				       oid_to_hex(&object));
-			goto out;
+			গচ্ছ out;
 		}
 		fprintf(stderr, _("Overwriting existing notes for object %s\n"),
 			oid_to_hex(&object));
 	}
 
 	from_note = get_note(t, &from_obj);
-	if (!from_note) {
+	যদি (!from_note) {
 		retval = error(_("missing notes on source object %s. Cannot "
 			       "copy."), oid_to_hex(&from_obj));
-		goto out;
+		গচ্ছ out;
 	}
 
-	if (add_note(t, &object, from_note, combine_notes_overwrite))
+	যদি (add_note(t, &object, from_note, combine_notes_overwrite))
 		BUG("combine_notes_overwrite failed");
 	commit_notes(the_repository, t,
 		     "Notes added by 'git notes copy'");
 out:
 	free_notes(t);
-	return retval;
+	ঘূৰাই retval;
 }
 
-static int append_edit(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+স্থির পূর্ণাঙ্ক append_edit(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+		       সংরচনা repository *repo UNUSED)
 {
-	int allow_empty = 0;
-	const char *object_ref;
-	struct notes_tree *t;
-	struct object_id object, new_note;
-	const struct object_id *note;
-	char *logmsg;
-	const char * const *usage;
-	struct note_data d = { .buf = STRBUF_INIT, .stripspace = UNSPECIFIED };
-	struct option options[] = {
+	পূর্ণাঙ্ক allow_empty = 0;
+	ধ্রুৱ ৱর্ণ *object_ref;
+	সংরচনা notes_বৃক্ষ *t;
+	সংরচনা object_id object, new_note;
+	ধ্রুৱ সংরচনা object_id *note;
+	ৱর্ণ *logmsg;
+	ধ্রুৱ ৱর্ণ * ধ্রুৱ *usage;
+	সংরচনা note_data d = { .buf = STRBUF_INIT, .stripspace = UNSPECIFIED };
+	সংরচনা option options[] = {
 		OPT_CALLBACK_F('m', "message", &d, N_("message"),
 			N_("note contents as a string"), PARSE_OPT_NONEG,
-			parse_msg_arg),
+			parse_বাৰ্তা_arg),
 		OPT_CALLBACK_F('F', "file", &d, N_("file"),
 			N_("note contents in a file"), PARSE_OPT_NONEG,
 			parse_file_arg),
@@ -689,20 +689,20 @@ static int append_edit(int argc, const char **argv, const char *prefix,
 			N_("remove unnecessary whitespace")),
 		OPT_END()
 	};
-	int edit = !strcmp(argv[0], "edit");
+	পূর্ণাঙ্ক edit = !strcmp(argv[0], "edit");
 
 	usage = edit ? git_notes_edit_usage : git_notes_append_usage;
 	argc = parse_options(argc, argv, prefix, options, usage,
 			     PARSE_OPT_KEEP_ARGV0);
 
-	if (2 < argc) {
+	যদি (2 < argc) {
 		error(_("too many arguments"));
 		usage_with_options(usage, options);
 	}
 
-	if (d.msg_nr) {
+	যদি (d.বাৰ্তা_nr) {
 		concat_messages(&d);
-		if (edit)
+		যদি (edit)
 			fprintf(stderr, _("The -m/-F/-c/-C options have been "
 				"deprecated for the 'edit' subcommand.\n"
 				"Please use 'git notes add -f -m/-F/-c/-C' "
@@ -711,39 +711,39 @@ static int append_edit(int argc, const char **argv, const char *prefix,
 
 	object_ref = 1 < argc ? argv[1] : "HEAD";
 
-	if (repo_get_oid(the_repository, object_ref, &object))
+	যদি (repo_get_oid(the_repository, object_ref, &object))
 		die(_("failed to resolve '%s' as a valid ref."), object_ref);
 
 	t = init_notes_check(argv[0], NOTES_INIT_WRITABLE);
 	note = get_note(t, &object);
 
-	prepare_note_data(&object, &d, edit && note ? note : NULL);
+	prepare_note_data(&object, &d, edit && note ? note : রিক্ত);
 
-	if (note && !edit) {
+	যদি (note && !edit) {
 		/* Append buf to previous note contents */
 		size_t size;
-		enum object_type type;
-		struct strbuf buf = STRBUF_INIT;
-		char *prev_buf = odb_read_object(the_repository->objects, note, &type, &size);
+		গণনা object_type type;
+		সংরচনা strbuf buf = STRBUF_INIT;
+		ৱর্ণ *prev_buf = odb_read_object(the_repository->objects, note, &type, &size);
 
-		if (!prev_buf)
+		যদি (!prev_buf)
 			die(_("unable to read %s"), oid_to_hex(note));
-		if (size)
+		যদি (size)
 			strbuf_add(&buf, prev_buf, size);
-		if (d.buf.len && size)
+		যদি (d.buf.len && size)
 			append_separator(&buf);
-		strbuf_insert(&d.buf, 0, buf.buf, buf.len);
+		strbuf_ঢোকাও(&d.buf, 0, buf.buf, buf.len);
 
-		free(prev_buf);
+		মুক্ত(prev_buf);
 		strbuf_release(&buf);
 	}
 
-	if (d.buf.len || allow_empty) {
+	যদি (d.buf.len || allow_empty) {
 		write_note_data(&d, &new_note);
-		if (add_note(t, &object, &new_note, combine_notes_overwrite))
+		যদি (add_note(t, &object, &new_note, combine_notes_overwrite))
 			BUG("combine_notes_overwrite failed");
 		logmsg = xstrfmt("Notes added by 'git notes %s'", argv[0]);
-	} else {
+	} অন্যথা {
 		fprintf(stderr, _("Removing note for object %s\n"),
 			oid_to_hex(&object));
 		remove_note(t, object.hash);
@@ -751,150 +751,150 @@ static int append_edit(int argc, const char **argv, const char *prefix,
 	}
 	commit_notes(the_repository, t, logmsg);
 
-	free(logmsg);
+	মুক্ত(logmsg);
 	free_note_data(&d);
 	free_notes(t);
-	return 0;
+	ঘূৰাই 0;
 }
 
-static int show(int argc, const char **argv, const char *prefix,
-		struct repository *repo UNUSED)
+স্থির পূর্ণাঙ্ক show(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+		সংরচনা repository *repo UNUSED)
 {
-	const char *object_ref;
-	struct notes_tree *t;
-	struct object_id object;
-	const struct object_id *note;
-	int retval;
-	struct option options[] = {
+	ধ্রুৱ ৱর্ণ *object_ref;
+	সংরচনা notes_বৃক্ষ *t;
+	সংরচনা object_id object;
+	ধ্রুৱ সংরচনা object_id *note;
+	পূর্ণাঙ্ক retval;
+	সংরচনা option options[] = {
 		OPT_END()
 	};
 
 	argc = parse_options(argc, argv, prefix, options, git_notes_show_usage,
 			     0);
 
-	if (1 < argc) {
+	যদি (1 < argc) {
 		error(_("too many arguments"));
 		usage_with_options(git_notes_show_usage, options);
 	}
 
 	object_ref = argc ? argv[0] : "HEAD";
 
-	if (repo_get_oid(the_repository, object_ref, &object))
+	যদি (repo_get_oid(the_repository, object_ref, &object))
 		die(_("failed to resolve '%s' as a valid ref."), object_ref);
 
 	t = init_notes_check("show", 0);
 	note = get_note(t, &object);
 
-	if (!note)
+	যদি (!note)
 		retval = error(_("no note found for object %s."),
 			       oid_to_hex(&object));
-	else {
-		const char *show_args[3] = {"show", oid_to_hex(note), NULL};
+	অন্যথা {
+		ধ্রুৱ ৱর্ণ *show_args[3] = {"show", oid_to_hex(note), রিক্ত};
 		retval = execv_git_cmd(show_args);
 	}
 	free_notes(t);
-	return retval;
+	ঘূৰাই retval;
 }
 
-static int merge_abort(struct notes_merge_options *o)
+স্থির পূর্ণাঙ্ক merge_abort(সংরচনা notes_merge_options *o)
 {
-	int ret = 0;
+	পূর্ণাঙ্ক ret = 0;
 
 	/*
 	 * Remove .git/NOTES_MERGE_PARTIAL and .git/NOTES_MERGE_REF, and call
 	 * notes_merge_abort() to remove .git/NOTES_MERGE_WORKTREE.
 	 */
 
-	if (refs_delete_ref(get_main_ref_store(the_repository), NULL, "NOTES_MERGE_PARTIAL", NULL, 0))
+	যদি (refs_delete_ref(get_main_ref_store(the_repository), রিক্ত, "NOTES_MERGE_PARTIAL", রিক্ত, 0))
 		ret += error(_("failed to delete ref NOTES_MERGE_PARTIAL"));
-	if (refs_delete_ref(get_main_ref_store(the_repository), NULL, "NOTES_MERGE_REF", NULL, REF_NO_DEREF))
+	যদি (refs_delete_ref(get_main_ref_store(the_repository), রিক্ত, "NOTES_MERGE_REF", রিক্ত, REF_NO_DEREF))
 		ret += error(_("failed to delete ref NOTES_MERGE_REF"));
-	if (notes_merge_abort(o))
+	যদি (notes_merge_abort(o))
 		ret += error(_("failed to remove 'git notes merge' worktree"));
-	return ret;
+	ঘূৰাই ret;
 }
 
-static int merge_commit(struct notes_merge_options *o)
+স্থির পূর্ণাঙ্ক merge_commit(সংরচনা notes_merge_options *o)
 {
-	struct strbuf msg = STRBUF_INIT;
-	struct object_id oid, parent_oid;
-	struct notes_tree t = {0};
-	struct commit *partial;
-	struct pretty_print_context pretty_ctx;
-	void *local_ref_to_free;
-	int ret;
+	সংরচনা strbuf বাৰ্তা = STRBUF_INIT;
+	সংরচনা object_id oid, parent_oid;
+	সংরচনা notes_বৃক্ষ t = {0};
+	সংরচনা commit *partial;
+	সংরচনা pretty_print_context pretty_ctx;
+	শূন্য *local_ref_to_free;
+	পূর্ণাঙ্ক ret;
 
 	/*
 	 * Read partial merge result from .git/NOTES_MERGE_PARTIAL,
 	 * and target notes ref from .git/NOTES_MERGE_REF.
 	 */
 
-	if (repo_get_oid(the_repository, "NOTES_MERGE_PARTIAL", &oid))
+	যদি (repo_get_oid(the_repository, "NOTES_MERGE_PARTIAL", &oid))
 		die(_("failed to read ref NOTES_MERGE_PARTIAL"));
-	else if (!(partial = lookup_commit_reference(the_repository, &oid)))
+	অন্যথা যদি (!(partial = lookup_commit_reference(the_repository, &oid)))
 		die(_("could not find commit from NOTES_MERGE_PARTIAL."));
-	else if (repo_parse_commit(the_repository, partial))
+	অন্যথা যদি (repo_parse_commit(the_repository, partial))
 		die(_("could not parse commit from NOTES_MERGE_PARTIAL."));
 
-	if (partial->parents)
+	যদি (partial->parents)
 		oidcpy(&parent_oid, &partial->parents->item->object.oid);
-	else
+	অন্যথা
 		oidclr(&parent_oid, the_repository->hash_algo);
 
 	init_notes(&t, "NOTES_MERGE_PARTIAL", combine_notes_overwrite, 0);
 
 	o->local_ref = local_ref_to_free =
 		refs_resolve_refdup(get_main_ref_store(the_repository),
-				    "NOTES_MERGE_REF", 0, &oid, NULL);
-	if (!o->local_ref)
+				    "NOTES_MERGE_REF", 0, &oid, রিক্ত);
+	যদি (!o->local_ref)
 		die(_("failed to resolve NOTES_MERGE_REF"));
 
-	if (notes_merge_commit(o, &t, partial, &oid))
+	যদি (notes_merge_commit(o, &t, partial, &oid))
 		die(_("failed to finalize notes merge"));
 
 	/* Reuse existing commit message in reflog message */
-	memset(&pretty_ctx, 0, sizeof(pretty_ctx));
-	repo_format_commit_message(the_repository, partial, "%s", &msg,
+	memset(&pretty_ctx, 0, পরিমাণ(pretty_ctx));
+	repo_format_commit_message(the_repository, partial, "%s", &বাৰ্তা,
 				   &pretty_ctx);
-	strbuf_trim(&msg);
-	strbuf_insertstr(&msg, 0, "notes: ");
-	refs_update_ref(get_main_ref_store(the_repository), msg.buf,
+	strbuf_trim(&বাৰ্তা);
+	strbuf_insertstr(&বাৰ্তা, 0, "notes: ");
+	refs_update_ref(get_main_ref_store(the_repository), বাৰ্তা.buf,
 			o->local_ref, &oid,
-			is_null_oid(&parent_oid) ? NULL : &parent_oid,
+			is_null_oid(&parent_oid) ? রিক্ত : &parent_oid,
 			0, UPDATE_REFS_DIE_ON_ERR);
 
 	free_notes(&t);
-	strbuf_release(&msg);
+	strbuf_release(&বাৰ্তা);
 	ret = merge_abort(o);
-	free(local_ref_to_free);
-	return ret;
+	মুক্ত(local_ref_to_free);
+	ঘূৰাই ret;
 }
 
-static int git_config_get_notes_strategy(const char *key,
-					 enum notes_merge_strategy *strategy)
+স্থির পূর্ণাঙ্ক git_config_get_notes_strategy(ধ্রুৱ ৱর্ণ *চাবি,
+					 গণনা notes_merge_strategy *strategy)
 {
-	char *value;
+	ৱর্ণ *মান;
 
-	if (repo_config_get_string(the_repository, key, &value))
-		return 1;
-	if (parse_notes_merge_strategy(value, strategy))
-		git_die_config(the_repository, key, _("unknown notes merge strategy %s"), value);
+	যদি (repo_config_get_string(the_repository, চাবি, &মান))
+		ঘূৰাই 1;
+	যদি (parse_notes_merge_strategy(মান, strategy))
+		git_die_config(the_repository, চাবি, _("unknown notes merge strategy %s"), মান);
 
-	free(value);
-	return 0;
+	মুক্ত(মান);
+	ঘূৰাই 0;
 }
 
-static int merge(int argc, const char **argv, const char *prefix,
-		 struct repository *repo UNUSED)
+স্থির পূর্ণাঙ্ক merge(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+		 সংরচনা repository *repo UNUSED)
 {
-	struct strbuf remote_ref = STRBUF_INIT, msg = STRBUF_INIT;
-	struct object_id result_oid;
-	struct notes_tree *t;
-	struct notes_merge_options o;
-	int do_merge = 0, do_commit = 0, do_abort = 0;
-	int verbosity = 0, result;
-	const char *strategy = NULL;
-	struct option options[] = {
+	সংরচনা strbuf remote_ref = STRBUF_INIT, বাৰ্তা = STRBUF_INIT;
+	সংরচনা object_id result_oid;
+	সংরচনা notes_বৃক্ষ *t;
+	সংরচনা notes_merge_options o;
+	পূর্ণাঙ্ক do_merge = 0, do_commit = 0, do_abort = 0;
+	পূর্ণাঙ্ক verbosity = 0, result;
+	ধ্রুৱ ৱর্ণ *strategy = রিক্ত;
+	সংরচনা option options[] = {
 		OPT_GROUP(N_("General options")),
 		OPT__VERBOSITY(&verbosity),
 		OPT_GROUP(N_("Merge options")),
@@ -911,22 +911,22 @@ static int merge(int argc, const char **argv, const char *prefix,
 			      1, PARSE_OPT_NONEG),
 		OPT_END()
 	};
-	char *notes_ref;
+	ৱর্ণ *notes_ref;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     git_notes_merge_usage, 0);
 
-	if (strategy || do_commit + do_abort == 0)
+	যদি (strategy || do_commit + do_abort == 0)
 		do_merge = 1;
-	if (do_merge + do_commit + do_abort != 1) {
+	যদি (do_merge + do_commit + do_abort != 1) {
 		error(_("cannot mix --commit, --abort or -s/--strategy"));
 		usage_with_options(git_notes_merge_usage, options);
 	}
 
-	if (do_merge && argc != 1) {
+	যদি (do_merge && argc != 1) {
 		error(_("must specify a notes ref to merge"));
 		usage_with_options(git_notes_merge_usage, options);
-	} else if (!do_merge && argc) {
+	} অন্যথা যদি (!do_merge && argc) {
 		error(_("too many arguments"));
 		usage_with_options(git_notes_merge_usage, options);
 	}
@@ -934,10 +934,10 @@ static int merge(int argc, const char **argv, const char *prefix,
 	init_notes_merge_options(the_repository, &o);
 	o.verbosity = verbosity + NOTES_MERGE_VERBOSITY_DEFAULT;
 
-	if (do_abort)
-		return merge_abort(&o);
-	if (do_commit)
-		return merge_commit(&o);
+	যদি (do_abort)
+		ঘূৰাই merge_abort(&o);
+	যদি (do_commit)
+		ঘূৰাই merge_commit(&o);
 
 	notes_ref = default_notes_ref(the_repository);
 	o.local_ref = notes_ref;
@@ -947,56 +947,56 @@ static int merge(int argc, const char **argv, const char *prefix,
 
 	t = init_notes_check("merge", NOTES_INIT_WRITABLE);
 
-	if (strategy) {
-		if (parse_notes_merge_strategy(strategy, &o.strategy)) {
+	যদি (strategy) {
+		যদি (parse_notes_merge_strategy(strategy, &o.strategy)) {
 			error(_("unknown -s/--strategy: %s"), strategy);
 			usage_with_options(git_notes_merge_usage, options);
 		}
-	} else {
-		struct strbuf merge_key = STRBUF_INIT;
-		const char *short_ref = NULL;
+	} অন্যথা {
+		সংরচনা strbuf merge_চাবি = STRBUF_INIT;
+		ধ্রুৱ ৱর্ণ *short_ref = রিক্ত;
 
-		if (!skip_prefix(o.local_ref, "refs/notes/", &short_ref))
+		যদি (!skip_prefix(o.local_ref, "refs/notes/", &short_ref))
 			BUG("local ref %s is outside of refs/notes/",
 			    o.local_ref);
 
-		strbuf_addf(&merge_key, "notes.%s.mergeStrategy", short_ref);
+		strbuf_addf(&merge_চাবি, "notes.%s.mergeStrategy", short_ref);
 
-		if (git_config_get_notes_strategy(merge_key.buf, &o.strategy))
+		যদি (git_config_get_notes_strategy(merge_চাবি.buf, &o.strategy))
 			git_config_get_notes_strategy("notes.mergeStrategy", &o.strategy);
 
-		strbuf_release(&merge_key);
+		strbuf_release(&merge_চাবি);
 	}
 
-	strbuf_addf(&msg, "notes: Merged notes from %s into %s",
+	strbuf_addf(&বাৰ্তা, "notes: Merged notes from %s into %s",
 		    remote_ref.buf, notes_ref);
-	strbuf_add(&(o.commit_msg), msg.buf + 7, msg.len - 7); /* skip "notes: " */
+	strbuf_add(&(o.commit_বাৰ্তা), বাৰ্তা.buf + 7, বাৰ্তা.len - 7); /* skip "notes: " */
 
 	result = notes_merge(&o, t, &result_oid);
 
-	if (result >= 0) /* Merge resulted (trivially) in result_oid */
+	যদি (result >= 0) /* Merge resulted (trivially) in result_oid */
 		/* Update default notes ref with new commit */
-		refs_update_ref(get_main_ref_store(the_repository), msg.buf,
-				notes_ref, &result_oid, NULL, 0,
+		refs_update_ref(get_main_ref_store(the_repository), বাৰ্তা.buf,
+				notes_ref, &result_oid, রিক্ত, 0,
 				UPDATE_REFS_DIE_ON_ERR);
-	else { /* Merge has unresolved conflicts */
-		struct worktree **worktrees;
-		const struct worktree *wt;
-		char *path;
+	অন্যথা { /* Merge has unresolved conflicts */
+		সংরচনা worktree **worktrees;
+		ধ্রুৱ সংরচনা worktree *wt;
+		ৱর্ণ *path;
 
 		/* Update .git/NOTES_MERGE_PARTIAL with partial merge result */
-		refs_update_ref(get_main_ref_store(the_repository), msg.buf,
-				"NOTES_MERGE_PARTIAL", &result_oid, NULL,
+		refs_update_ref(get_main_ref_store(the_repository), বাৰ্তা.buf,
+				"NOTES_MERGE_PARTIAL", &result_oid, রিক্ত,
 				0, UPDATE_REFS_DIE_ON_ERR);
 		/* Store ref-to-be-updated into .git/NOTES_MERGE_REF */
 		worktrees = get_worktrees(the_repository);
 		wt = find_shared_symref(worktrees, "NOTES_MERGE_REF",
 					notes_ref);
-		if (wt)
+		যদি (wt)
 			die(_("a notes merge into %s is already in-progress at %s"),
 			    notes_ref, wt->path);
 		free_worktrees(worktrees);
-		if (refs_update_symref(get_main_ref_store(the_repository), "NOTES_MERGE_REF", notes_ref, NULL))
+		যদি (refs_update_symref(get_main_ref_store(the_repository), "NOTES_MERGE_REF", notes_ref, রিক্ত))
 			die(_("failed to store link to current notes ref (%s)"),
 			    notes_ref);
 
@@ -1005,38 +1005,38 @@ static int merge(int argc, const char **argv, const char *prefix,
 				  "and commit the result with 'git notes merge --commit', "
 				  "or abort the merge with 'git notes merge --abort'.\n"),
 			path);
-		free(path);
+		মুক্ত(path);
 	}
 
 	free_notes(t);
-	free(notes_ref);
+	মুক্ত(notes_ref);
 	strbuf_release(&remote_ref);
-	strbuf_release(&msg);
-	return result < 0; /* return non-zero on conflicts */
+	strbuf_release(&বাৰ্তা);
+	ঘূৰাই result < 0; /* return non-zero on conflicts */
 }
 
 #define IGNORE_MISSING 1
 
-static int remove_one_note(struct notes_tree *t, const char *name, unsigned flag)
+স্থির পূর্ণাঙ্ক remove_one_note(সংরচনা notes_বৃক্ষ *t, ধ্রুৱ ৱর্ণ *name, unsigned flag)
 {
-	int status;
-	struct object_id oid;
-	if (repo_get_oid(the_repository, name, &oid))
-		return error(_("Failed to resolve '%s' as a valid ref."), name);
+	পূর্ণাঙ্ক status;
+	সংরচনা object_id oid;
+	যদি (repo_get_oid(the_repository, name, &oid))
+		ঘূৰাই error(_("Failed to resolve '%s' as a valid ref."), name);
 	status = remove_note(t, oid.hash);
-	if (status)
+	যদি (status)
 		fprintf(stderr, _("Object %s has no note\n"), name);
-	else
+	অন্যথা
 		fprintf(stderr, _("Removing note for object %s\n"), name);
-	return (flag & IGNORE_MISSING) ? 0 : status;
+	ঘূৰাই (flag & IGNORE_MISSING) ? 0 : status;
 }
 
-static int remove_cmd(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+স্থির পূর্ণাঙ্ক remove_cmd(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+		      সংরচনা repository *repo UNUSED)
 {
 	unsigned flag = 0;
-	int from_stdin = 0;
-	struct option options[] = {
+	পূর্ণাঙ্ক from_stdin = 0;
+	সংরচনা option options[] = {
 		OPT_BIT(0, "ignore-missing", &flag,
 			N_("attempt to remove non-existent note is not an error"),
 			IGNORE_MISSING),
@@ -1044,43 +1044,43 @@ static int remove_cmd(int argc, const char **argv, const char *prefix,
 			    N_("read object names from the standard input")),
 		OPT_END()
 	};
-	struct notes_tree *t;
-	int retval = 0;
+	সংরচনা notes_বৃক্ষ *t;
+	পূর্ণাঙ্ক retval = 0;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     git_notes_remove_usage, 0);
 
 	t = init_notes_check("remove", NOTES_INIT_WRITABLE);
 
-	if (!argc && !from_stdin) {
+	যদি (!argc && !from_stdin) {
 		retval = remove_one_note(t, "HEAD", flag);
-	} else {
-		while (*argv) {
+	} অন্যথা {
+		যেতিয়ালৈ (*argv) {
 			retval |= remove_one_note(t, *argv, flag);
 			argv++;
 		}
 	}
-	if (from_stdin) {
-		struct strbuf sb = STRBUF_INIT;
-		while (strbuf_getwholeline(&sb, stdin, '\n') != EOF) {
+	যদি (from_stdin) {
+		সংরচনা strbuf sb = STRBUF_INIT;
+		যেতিয়ালৈ (strbuf_getwholeline(&sb, stdin, '\n') != EOF) {
 			strbuf_rtrim(&sb);
 			retval |= remove_one_note(t, sb.buf, flag);
 		}
 		strbuf_release(&sb);
 	}
-	if (!retval)
+	যদি (!retval)
 		commit_notes(the_repository, t,
 			     "Notes removed by 'git notes remove'");
 	free_notes(t);
-	return retval;
+	ঘূৰাই retval;
 }
 
-static int prune(int argc, const char **argv, const char *prefix,
-		 struct repository *repo UNUSED)
+স্থির পূর্ণাঙ্ক prune(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+		 সংরচনা repository *repo UNUSED)
 {
-	struct notes_tree *t;
-	int show_only = 0, verbose = 0;
-	struct option options[] = {
+	সংরচনা notes_বৃক্ষ *t;
+	পূর্ণাঙ্ক show_only = 0, verbose = 0;
+	সংরচনা option options[] = {
 		OPT__DRY_RUN(&show_only, N_("do not remove, show only")),
 		OPT__VERBOSE(&verbose, N_("report pruned notes")),
 		OPT_END()
@@ -1089,7 +1089,7 @@ static int prune(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options, git_notes_prune_usage,
 			     0);
 
-	if (argc) {
+	যদি (argc) {
 		error(_("too many arguments"));
 		usage_with_options(git_notes_prune_usage, options);
 	}
@@ -1098,40 +1098,40 @@ static int prune(int argc, const char **argv, const char *prefix,
 
 	prune_notes(t, (verbose ? NOTES_PRUNE_VERBOSE : 0) |
 		(show_only ? NOTES_PRUNE_VERBOSE|NOTES_PRUNE_DRYRUN : 0) );
-	if (!show_only)
+	যদি (!show_only)
 		commit_notes(the_repository, t,
 			     "Notes removed by 'git notes prune'");
 	free_notes(t);
-	return 0;
+	ঘূৰাই 0;
 }
 
-static int get_ref(int argc, const char **argv, const char *prefix,
-		   struct repository *repo UNUSED)
+স্থির পূর্ণাঙ্ক get_ref(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+		   সংরচনা repository *repo UNUSED)
 {
-	struct option options[] = { OPT_END() };
-	char *notes_ref;
+	সংরচনা option options[] = { OPT_END() };
+	ৱর্ণ *notes_ref;
 	argc = parse_options(argc, argv, prefix, options,
 			     git_notes_get_ref_usage, 0);
 
-	if (argc) {
+	যদি (argc) {
 		error(_("too many arguments"));
 		usage_with_options(git_notes_get_ref_usage, options);
 	}
 
 	notes_ref = default_notes_ref(the_repository);
 	puts(notes_ref);
-	free(notes_ref);
-	return 0;
+	মুক্ত(notes_ref);
+	ঘূৰাই 0;
 }
 
-int cmd_notes(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo)
+পূর্ণাঙ্ক cmd_notes(পূর্ণাঙ্ক argc,
+	      ধ্রুৱ ৱর্ণ **argv,
+	      ধ্রুৱ ৱর্ণ *prefix,
+	      সংরচনা repository *repo)
 {
-	const char *override_notes_ref = NULL;
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	ধ্রুৱ ৱর্ণ *override_notes_ref = রিক্ত;
+	parse_opt_subcommand_fn *fn = রিক্ত;
+	সংরচনা option options[] = {
 		OPT_STRING(0, "ref", &override_notes_ref, N_("notes-ref"),
 			   N_("use notes from <notes-ref>")),
 		OPT_SUBCOMMAND("list", &fn, list),
@@ -1147,24 +1147,24 @@ int cmd_notes(int argc,
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, রিক্ত);
 	argc = parse_options(argc, argv, prefix, options, git_notes_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL);
-	if (!fn) {
-		if (argc) {
+	যদি (!fn) {
+		যদি (argc) {
 			error(_("unknown subcommand: `%s'"), argv[0]);
 			usage_with_options(git_notes_usage, options);
 		}
 		fn = list;
 	}
 
-	if (override_notes_ref) {
-		struct strbuf sb = STRBUF_INIT;
+	যদি (override_notes_ref) {
+		সংরচনা strbuf sb = STRBUF_INIT;
 		strbuf_addstr(&sb, override_notes_ref);
 		expand_notes_ref(&sb);
 		setenv("GIT_NOTES_REF", sb.buf, 1);
 		strbuf_release(&sb);
 	}
 
-	return !!fn(argc, argv, prefix, repo);
+	ঘূৰাই !!fn(argc, argv, prefix, repo);
 }

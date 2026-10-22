@@ -8,29 +8,29 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "merge.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "run-command.h"
-#include "oid-array.h"
-#include "remote.h"
-#include "dir.h"
-#include "path.h"
-#include "read-cache-ll.h"
-#include "rebase.h"
-#include "refs.h"
-#include "refspec.h"
-#include "submodule.h"
-#include "submodule-config.h"
-#include "wt-status.h"
-#include "commit-reach.h"
-#include "sequencer.h"
+#অন্তর্ভাৱ "builtin.h"
+#অন্তর্ভাৱ "advice.h"
+#অন্তর্ভাৱ "config.h"
+#অন্তর্ভাৱ "environment.h"
+#অন্তর্ভাৱ "gettext.h"
+#অন্তর্ভাৱ "hex.h"
+#অন্তর্ভাৱ "merge.h"
+#অন্তর্ভাৱ "object-name.h"
+#অন্তর্ভাৱ "parse-options.h"
+#অন্তর্ভাৱ "run-command.h"
+#অন্তর্ভাৱ "oid-array.h"
+#অন্তর্ভাৱ "remote.h"
+#অন্তর্ভাৱ "dir.h"
+#অন্তর্ভাৱ "path.h"
+#অন্তর্ভাৱ "read-cache-ll.h"
+#অন্তর্ভাৱ "rebase.h"
+#অন্তর্ভাৱ "refs.h"
+#অন্তর্ভাৱ "refspec.h"
+#অন্তর্ভাৱ "submodule.h"
+#অন্তর্ভাৱ "submodule-config.h"
+#অন্তর্ভাৱ "wt-status.h"
+#অন্তর্ভাৱ "commit-reach.h"
+#অন্তর্ভাৱ "sequencer.h"
 
 /**
  * Parses the value of --rebase. If value is a false value, returns
@@ -38,128 +38,128 @@
  * "merges", returns REBASE_MERGES. If value is a invalid value, dies with
  * a fatal error if fatal is true, otherwise returns REBASE_INVALID.
  */
-static enum rebase_type parse_config_rebase(const char *key, const char *value,
-		int fatal)
+স্থির গণনা rebase_type parse_config_rebase(ধ্রুৱ ৱর্ণ *চাবি, ধ্রুৱ ৱর্ণ *মান,
+		পূর্ণাঙ্ক fatal)
 {
-	enum rebase_type v = rebase_parse_value(value);
-	if (v != REBASE_INVALID)
-		return v;
+	গণনা rebase_type v = rebase_parse_মান(মান);
+	যদি (v != REBASE_INVALID)
+		ঘূৰাই v;
 
-	if (fatal)
-		die(_("invalid value for '%s': '%s'"), key, value);
-	else
-		error(_("invalid value for '%s': '%s'"), key, value);
+	যদি (fatal)
+		die(_("invalid value for '%s': '%s'"), চাবি, মান);
+	অন্যথা
+		error(_("invalid value for '%s': '%s'"), চাবি, মান);
 
-	return REBASE_INVALID;
+	ঘূৰাই REBASE_INVALID;
 }
 
 /**
  * Callback for --rebase, which parses arg with parse_config_rebase().
  */
-static int parse_opt_rebase(const struct option *opt, const char *arg, int unset)
+স্থির পূর্ণাঙ্ক parse_opt_rebase(ধ্রুৱ সংরচনা option *opt, ধ্রুৱ ৱর্ণ *arg, পূর্ণাঙ্ক unset)
 {
-	enum rebase_type *value = opt->value;
+	গণনা rebase_type *মান = opt->মান;
 
-	if (arg)
-		*value = parse_config_rebase("--rebase", arg, 0);
-	else
-		*value = unset ? REBASE_FALSE : REBASE_TRUE;
-	return *value == REBASE_INVALID ? -1 : 0;
+	যদি (arg)
+		*মান = parse_config_rebase("--rebase", arg, 0);
+	অন্যথা
+		*মান = unset ? REBASE_FALSE : REBASE_TRUE;
+	ঘূৰাই *মান == REBASE_INVALID ? -1 : 0;
 }
 
-static const char * const pull_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ pull_usage[] = {
 	N_("git pull [<options>] [<repository> [<refspec>...]]"),
-	NULL
+	রিক্ত
 };
 
 /* Shared options */
-static int opt_verbosity;
-static const char *opt_progress;
-static int recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
-static int recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
+স্থির পূর্ণাঙ্ক opt_verbosity;
+স্থির ধ্রুৱ ৱর্ণ *opt_progress;
+স্থির পূর্ণাঙ্ক recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
+স্থির পূর্ণাঙ্ক recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
 
 /* Options passed to git-merge or git-rebase */
-static enum rebase_type opt_rebase = -1;
-static const char *opt_diffstat;
-static const char *opt_log;
-static const char *opt_signoff;
-static const char *opt_squash;
-static const char *opt_commit;
-static const char *opt_edit;
-static const char *cleanup_arg;
-static char *opt_ff;
-static const char *opt_verify_signatures;
-static const char *opt_verify;
-static int opt_autostash = -1;
-static int config_rebase_autostash;
-static int config_pull_autostash = -1;
-static int check_trust_level = 1;
-static struct strvec opt_strategies = STRVEC_INIT;
-static struct strvec opt_strategy_opts = STRVEC_INIT;
-static const char *opt_gpg_sign;
-static int opt_allow_unrelated_histories;
+স্থির গণনা rebase_type opt_rebase = -1;
+স্থির ধ্রুৱ ৱর্ণ *opt_diffstat;
+স্থির ধ্রুৱ ৱর্ণ *opt_log;
+স্থির ধ্রুৱ ৱর্ণ *opt_signoff;
+স্থির ধ্রুৱ ৱর্ণ *opt_squash;
+স্থির ধ্রুৱ ৱর্ণ *opt_commit;
+স্থির ধ্রুৱ ৱর্ণ *opt_edit;
+স্থির ধ্রুৱ ৱর্ণ *cleanup_arg;
+স্থির ৱর্ণ *opt_ff;
+স্থির ধ্রুৱ ৱর্ণ *opt_verify_signatures;
+স্থির ধ্রুৱ ৱর্ণ *opt_verify;
+স্থির পূর্ণাঙ্ক opt_autostash = -1;
+স্থির পূর্ণাঙ্ক config_rebase_autostash;
+স্থির পূর্ণাঙ্ক config_pull_autostash = -1;
+স্থির পূর্ণাঙ্ক check_trust_level = 1;
+স্থির সংরচনা strvec opt_strategies = STRVEC_INIT;
+স্থির সংরচনা strvec opt_strategy_opts = STRVEC_INIT;
+স্থির ধ্রুৱ ৱর্ণ *opt_gpg_sign;
+স্থির পূর্ণাঙ্ক opt_allow_unrelated_histories;
 
 /* Options passed to git-fetch */
-static const char *opt_all;
-static const char *opt_append;
-static const char *opt_upload_pack;
-static int opt_force;
-static const char *opt_tags;
-static const char *opt_prune;
-static const char *max_children;
-static int opt_dry_run;
-static const char *opt_keep;
-static const char *opt_depth;
-static const char *opt_unshallow;
-static const char *opt_update_shallow;
-static const char *opt_refmap;
-static const char *opt_ipv4;
-static const char *opt_ipv6;
-static int opt_show_forced_updates = -1;
-static const char *set_upstream;
-static struct strvec opt_fetch = STRVEC_INIT;
+স্থির ধ্রুৱ ৱর্ণ *opt_all;
+স্থির ধ্রুৱ ৱর্ণ *opt_append;
+স্থির ধ্রুৱ ৱর্ণ *opt_upload_pack;
+স্থির পূর্ণাঙ্ক opt_force;
+স্থির ধ্রুৱ ৱর্ণ *opt_tags;
+স্থির ধ্রুৱ ৱর্ণ *opt_prune;
+স্থির ধ্রুৱ ৱর্ণ *max_children;
+স্থির পূর্ণাঙ্ক opt_dry_run;
+স্থির ধ্রুৱ ৱর্ণ *opt_keep;
+স্থির ধ্রুৱ ৱর্ণ *opt_depth;
+স্থির ধ্রুৱ ৱর্ণ *opt_unshallow;
+স্থির ধ্রুৱ ৱর্ণ *opt_update_shallow;
+স্থির ধ্রুৱ ৱর্ণ *opt_refmap;
+স্থির ধ্রুৱ ৱর্ণ *opt_ipv4;
+স্থির ধ্রুৱ ৱর্ণ *opt_ipv6;
+স্থির পূর্ণাঙ্ক opt_show_forced_updates = -1;
+স্থির ধ্রুৱ ৱর্ণ *set_upstream;
+স্থির সংরচনা strvec opt_fetch = STRVEC_INIT;
 
 /**
  * Pushes "-q" or "-v" switches into arr to match the opt_verbosity level.
  */
-static void argv_push_verbosity(struct strvec *arr)
+স্থির শূন্য argv_ঠেলো_verbosity(সংরচনা strvec *arr)
 {
-	int verbosity;
+	পূর্ণাঙ্ক verbosity;
 
-	for (verbosity = opt_verbosity; verbosity > 0; verbosity--)
-		strvec_push(arr, "-v");
+	বাবে (verbosity = opt_verbosity; verbosity > 0; verbosity--)
+		strvec_ঠেলো(arr, "-v");
 
-	for (verbosity = opt_verbosity; verbosity < 0; verbosity++)
-		strvec_push(arr, "-q");
+	বাবে (verbosity = opt_verbosity; verbosity < 0; verbosity++)
+		strvec_ঠেলো(arr, "-q");
 }
 
 /**
  * Pushes "-f" switches into arr to match the opt_force level.
  */
-static void argv_push_force(struct strvec *arr)
+স্থির শূন্য argv_ঠেলো_force(সংরচনা strvec *arr)
 {
-	int force = opt_force;
-	while (force-- > 0)
-		strvec_push(arr, "-f");
+	পূর্ণাঙ্ক force = opt_force;
+	যেতিয়ালৈ (force-- > 0)
+		strvec_ঠেলো(arr, "-f");
 }
 
 /**
  * Sets the GIT_REFLOG_ACTION environment variable to the concatenation of argv
  */
-static void set_reflog_message(int argc, const char **argv)
+স্থির শূন্য set_reflog_message(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv)
 {
-	int i;
-	struct strbuf msg = STRBUF_INIT;
+	পূর্ণাঙ্ক i;
+	সংরচনা strbuf বাৰ্তা = STRBUF_INIT;
 
-	for (i = 0; i < argc; i++) {
-		if (i)
-			strbuf_addch(&msg, ' ');
-		strbuf_addstr(&msg, argv[i]);
+	বাবে (i = 0; i < argc; i++) {
+		যদি (i)
+			strbuf_addch(&বাৰ্তা, ' ');
+		strbuf_addstr(&বাৰ্তা, argv[i]);
 	}
 
-	setenv("GIT_REFLOG_ACTION", msg.buf, 0);
+	setenv("GIT_REFLOG_ACTION", বাৰ্তা.buf, 0);
 
-	strbuf_release(&msg);
+	strbuf_release(&বাৰ্তা);
 }
 
 /**
@@ -168,24 +168,24 @@ static void set_reflog_message(int argc, const char **argv)
  * "--ff-only". Otherwise, if pull.ff is set to an invalid value, die with an
  * error.
  */
-static const char *config_get_ff(void)
+স্থির ধ্রুৱ ৱর্ণ *config_get_ff(শূন্য)
 {
-	const char *value;
+	ধ্রুৱ ৱর্ণ *মান;
 
-	if (repo_config_get_value(the_repository, "pull.ff", &value))
-		return NULL;
+	যদি (repo_config_get_মান(the_repository, "pull.ff", &মান))
+		ঘূৰাই রিক্ত;
 
-	switch (git_parse_maybe_bool(value)) {
-	case 0:
-		return "--no-ff";
-	case 1:
-		return "--ff";
+	ৱিকল্প (git_parse_maybe_bool(মান)) {
+	পক্ষ 0:
+		ঘূৰাই "--no-ff";
+	পক্ষ 1:
+		ঘূৰাই "--ff";
 	}
 
-	if (!strcmp(value, "only"))
-		return "--ff-only";
+	যদি (!strcmp(মান, "only"))
+		ঘূৰাই "--ff-only";
 
-	die(_("invalid value for '%s': '%s'"), "pull.ff", value);
+	die(_("invalid value for '%s': '%s'"), "pull.ff", মান);
 }
 
 /**
@@ -195,38 +195,38 @@ static const char *config_get_ff(void)
  * looks for the value of "pull.rebase". If both configuration keys do not
  * exist, returns REBASE_FALSE.
  */
-static enum rebase_type config_get_rebase(int *rebase_unspecified)
+স্থির গণনা rebase_type config_get_rebase(পূর্ণাঙ্ক *rebase_unspecified)
 {
-	struct branch *curr_branch = branch_get("HEAD");
-	const char *value;
+	সংরচনা branch *curr_branch = branch_get("HEAD");
+	ধ্রুৱ ৱর্ণ *মান;
 
-	if (curr_branch) {
-		char *key = xstrfmt("branch.%s.rebase", curr_branch->name);
+	যদি (curr_branch) {
+		ৱর্ণ *চাবি = xstrfmt("branch.%s.rebase", curr_branch->name);
 
-		if (!repo_config_get_value(the_repository, key, &value)) {
-			enum rebase_type ret = parse_config_rebase(key, value, 1);
-			free(key);
-			return ret;
+		যদি (!repo_config_get_মান(the_repository, চাবি, &মান)) {
+			গণনা rebase_type ret = parse_config_rebase(চাবি, মান, 1);
+			মুক্ত(চাবি);
+			ঘূৰাই ret;
 		}
 
-		free(key);
+		মুক্ত(চাবি);
 	}
 
-	if (!repo_config_get_value(the_repository, "pull.rebase", &value))
-		return parse_config_rebase("pull.rebase", value, 1);
+	যদি (!repo_config_get_মান(the_repository, "pull.rebase", &মান))
+		ঘূৰাই parse_config_rebase("pull.rebase", মান, 1);
 
 	*rebase_unspecified = 1;
 
-	return REBASE_FALSE;
+	ঘূৰাই REBASE_FALSE;
 }
 
 /**
  * Read config variables.
  */
-static int git_pull_config(const char *var, const char *value,
-			   const struct config_context *ctx, void *cb)
+স্থির পূর্ণাঙ্ক git_pull_config(ধ্রুৱ ৱর্ণ *var, ধ্রুৱ ৱর্ণ *মান,
+			   ধ্রুৱ সংরচনা config_context *ctx, শূন্য *cb)
 {
-	if (!strcmp(var, "rebase.autostash")) {
+	যদি (!strcmp(var, "rebase.autostash")) {
 		/*
 		 * run_rebase() also reads this option. The reason we handle it here is
 		 * that when pull.rebase is true, a fast-forward may occur without
@@ -235,40 +235,40 @@ static int git_pull_config(const char *var, const char *value,
 		 *
 		 * run_merge() handles merge.autostash, so we don't handle it here.
 		 */
-		config_rebase_autostash = git_config_bool(var, value);
-		return 0;
-	} else if (!strcmp(var, "pull.autostash")) {
-		config_pull_autostash = git_config_bool(var, value);
-		return 0;
-	} else if (!strcmp(var, "submodule.recurse")) {
-		recurse_submodules = git_config_bool(var, value) ?
+		config_rebase_autostash = git_config_bool(var, মান);
+		ঘূৰাই 0;
+	} অন্যথা যদি (!strcmp(var, "pull.autostash")) {
+		config_pull_autostash = git_config_bool(var, মান);
+		ঘূৰাই 0;
+	} অন্যথা যদি (!strcmp(var, "submodule.recurse")) {
+		recurse_submodules = git_config_bool(var, মান) ?
 			RECURSE_SUBMODULES_ON : RECURSE_SUBMODULES_OFF;
-		return 0;
-	} else if (!strcmp(var, "gpg.mintrustlevel")) {
+		ঘূৰাই 0;
+	} অন্যথা যদি (!strcmp(var, "gpg.mintrustlevel")) {
 		check_trust_level = 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	ঘূৰাই git_default_config(var, মান, ctx, cb);
 }
 
 /**
  * Appends merge candidates from FETCH_HEAD that are not marked not-for-merge
  * into merge_heads.
  */
-static void get_merge_heads(struct oid_array *merge_heads)
+স্থির শূন্য get_merge_heads(সংরচনা oid_array *merge_heads)
 {
-	const char *filename = git_path_fetch_head(the_repository);
+	ধ্রুৱ ৱর্ণ *filename = git_path_fetch_head(the_repository);
 	FILE *fp;
-	struct strbuf sb = STRBUF_INIT;
-	struct object_id oid;
+	সংরচনা strbuf sb = STRBUF_INIT;
+	সংরচনা object_id oid;
 
 	fp = xfopen(filename, "r");
-	while (strbuf_getline_lf(&sb, fp) != EOF) {
-		const char *p;
-		if (parse_oid_hex(sb.buf, &oid, &p))
-			continue;  /* invalid line: does not start with object ID */
-		if (starts_with(p, "\tnot-for-merge\t"))
-			continue;  /* ref is not-for-merge */
+	যেতিয়ালৈ (strbuf_getline_lf(&sb, fp) != EOF) {
+		ধ্রুৱ ৱর্ণ *p;
+		যদি (parse_oid_hex(sb.buf, &oid, &p))
+			অনুৱর্ত;  /* invalid line: does not start with object ID */
+		যদি (starts_with(p, "\tnot-for-merge\t"))
+			অনুৱর্ত;  /* ref is not-for-merge */
 		oid_array_append(merge_heads, &oid);
 	}
 	fclose(fp);
@@ -279,15 +279,15 @@ static void get_merge_heads(struct oid_array *merge_heads)
  * Used by die_no_merge_candidates() as a for_each_remote() callback to
  * retrieve the name of the remote if the repository only has one remote.
  */
-static int get_only_remote(struct remote *remote, void *cb_data)
+স্থির পূর্ণাঙ্ক get_only_remote(সংরচনা remote *remote, শূন্য *cb_data)
 {
-	const char **remote_name = cb_data;
+	ধ্রুৱ ৱর্ণ **remote_name = cb_data;
 
-	if (*remote_name)
-		return -1;
+	যদি (*remote_name)
+		ঘূৰাই -1;
 
 	*remote_name = remote->name;
-	return 0;
+	ঘূৰাই 0;
 }
 
 /**
@@ -312,43 +312,43 @@ static int get_only_remote(struct remote *remote, void *cb_data)
  *    branch to merge didn't get fetched. (Either it doesn't exist, or wasn't
  *    part of the configured fetch refspec.)
  */
-static void NORETURN die_no_merge_candidates(const char *repo, const char **refspecs)
+স্থির শূন্য NORETURN die_no_merge_candidates(ধ্রুৱ ৱর্ণ *repo, ধ্রুৱ ৱর্ণ **refspecs)
 {
-	struct branch *curr_branch = branch_get("HEAD");
-	const char *remote = curr_branch ? curr_branch->remote_name : NULL;
+	সংরচনা branch *curr_branch = branch_get("HEAD");
+	ধ্রুৱ ৱর্ণ *remote = curr_branch ? curr_branch->remote_name : রিক্ত;
 
-	if (*refspecs) {
-		if (opt_rebase)
+	যদি (*refspecs) {
+		যদি (opt_rebase)
 			fprintf_ln(stderr, _("There is no candidate for rebasing against among the refs that you just fetched."));
-		else
+		অন্যথা
 			fprintf_ln(stderr, _("There are no candidates for merging among the refs that you just fetched."));
 		fprintf_ln(stderr, _("Generally this means that you provided a wildcard refspec which had no\n"
 					"matches on the remote end."));
-	} else if (repo && curr_branch && (!remote || strcmp(repo, remote))) {
+	} অন্যথা যদি (repo && curr_branch && (!remote || strcmp(repo, remote))) {
 		fprintf_ln(stderr, _("You asked to pull from the remote '%s', but did not specify\n"
 			"a branch. Because this is not the default configured remote\n"
 			"for your current branch, you must specify a branch on the command line."),
 			repo);
-	} else if (!curr_branch) {
+	} অন্যথা যদি (!curr_branch) {
 		fprintf_ln(stderr, _("You are not currently on a branch."));
-		if (opt_rebase)
+		যদি (opt_rebase)
 			fprintf_ln(stderr, _("Please specify which branch you want to rebase against."));
-		else
+		অন্যথা
 			fprintf_ln(stderr, _("Please specify which branch you want to merge with."));
 		fprintf_ln(stderr, _("See git-pull(1) for details."));
 		fprintf(stderr, "\n");
 		fprintf_ln(stderr, "    git pull %s %s", _("<remote>"), _("<branch>"));
 		fprintf(stderr, "\n");
-	} else if (!curr_branch->merge_nr) {
-		const char *remote_name = NULL;
+	} অন্যথা যদি (!curr_branch->merge_nr) {
+		ধ্রুৱ ৱর্ণ *remote_name = রিক্ত;
 
-		if (for_each_remote(get_only_remote, &remote_name) || !remote_name)
+		যদি (for_each_remote(get_only_remote, &remote_name) || !remote_name)
 			remote_name = _("<remote>");
 
 		fprintf_ln(stderr, _("There is no tracking information for the current branch."));
-		if (opt_rebase)
+		যদি (opt_rebase)
 			fprintf_ln(stderr, _("Please specify which branch you want to rebase against."));
-		else
+		অন্যথা
 			fprintf_ln(stderr, _("Please specify which branch you want to merge with."));
 		fprintf_ln(stderr, _("See git-pull(1) for details."));
 		fprintf(stderr, "\n");
@@ -358,7 +358,7 @@ static void NORETURN die_no_merge_candidates(const char *repo, const char **refs
 		fprintf(stderr, "\n");
 		fprintf_ln(stderr, "    git branch --set-upstream-to=%s/%s %s\n",
 				remote_name, _("<branch>"), curr_branch->name);
-	} else
+	} অন্যথা
 		fprintf_ln(stderr, _("Your configuration specifies to merge with the ref '%s'\n"
 			"from the remote, but no such ref was fetched."),
 			curr_branch->merge[0]->src);
@@ -370,14 +370,14 @@ static void NORETURN die_no_merge_candidates(const char *repo, const char **refs
  * as a string and `refspecs` as a null-terminated array of strings. If `repo`
  * is not provided in argv, it is set to NULL.
  */
-static void parse_repo_refspecs(int argc, const char **argv, const char **repo,
-		const char ***refspecs)
+স্থির শূন্য parse_repo_refspecs(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ **repo,
+		ধ্রুৱ ৱর্ণ ***refspecs)
 {
-	if (argc > 0) {
+	যদি (argc > 0) {
 		*repo = *argv++;
 		argc--;
-	} else
-		*repo = NULL;
+	} অন্যথা
+		*repo = রিক্ত;
 	*refspecs = argv;
 }
 
@@ -385,90 +385,90 @@ static void parse_repo_refspecs(int argc, const char **argv, const char **repo,
  * Runs git-fetch, returning its exit status. `repo` and `refspecs` are the
  * repository and refspecs to fetch, or NULL if they are not provided.
  */
-static int run_fetch(const char *repo, const char **refspecs)
+স্থির পূর্ণাঙ্ক run_fetch(ধ্রুৱ ৱর্ণ *repo, ধ্রুৱ ৱর্ণ **refspecs)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	সংরচনা child_process cmd = CHILD_PROCESS_INIT;
 
-	strvec_pushl(&cmd.args, "fetch", "--update-head-ok", NULL);
+	strvec_pushl(&cmd.args, "fetch", "--update-head-ok", রিক্ত);
 
 	/* Shared options */
-	argv_push_verbosity(&cmd.args);
-	if (opt_progress)
-		strvec_push(&cmd.args, opt_progress);
+	argv_ঠেলো_verbosity(&cmd.args);
+	যদি (opt_progress)
+		strvec_ঠেলো(&cmd.args, opt_progress);
 
 	/* Options passed to git-fetch */
-	if (opt_all)
-		strvec_push(&cmd.args, opt_all);
-	if (opt_append)
-		strvec_push(&cmd.args, opt_append);
-	if (opt_upload_pack)
-		strvec_push(&cmd.args, opt_upload_pack);
-	argv_push_force(&cmd.args);
-	if (opt_tags)
-		strvec_push(&cmd.args, opt_tags);
-	if (opt_prune)
-		strvec_push(&cmd.args, opt_prune);
-	if (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
-		switch (recurse_submodules_cli) {
-		case RECURSE_SUBMODULES_ON:
-			strvec_push(&cmd.args, "--recurse-submodules=on");
-			break;
-		case RECURSE_SUBMODULES_OFF:
-			strvec_push(&cmd.args, "--recurse-submodules=no");
-			break;
-		case RECURSE_SUBMODULES_ON_DEMAND:
-			strvec_push(&cmd.args, "--recurse-submodules=on-demand");
-			break;
-		default:
+	যদি (opt_all)
+		strvec_ঠেলো(&cmd.args, opt_all);
+	যদি (opt_append)
+		strvec_ঠেলো(&cmd.args, opt_append);
+	যদি (opt_upload_pack)
+		strvec_ঠেলো(&cmd.args, opt_upload_pack);
+	argv_ঠেলো_force(&cmd.args);
+	যদি (opt_tags)
+		strvec_ঠেলো(&cmd.args, opt_tags);
+	যদি (opt_prune)
+		strvec_ঠেলো(&cmd.args, opt_prune);
+	যদি (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
+		ৱিকল্প (recurse_submodules_cli) {
+		পক্ষ RECURSE_SUBMODULES_ON:
+			strvec_ঠেলো(&cmd.args, "--recurse-submodules=on");
+			ভঙ্গ;
+		পক্ষ RECURSE_SUBMODULES_OFF:
+			strvec_ঠেলো(&cmd.args, "--recurse-submodules=no");
+			ভঙ্গ;
+		পক্ষ RECURSE_SUBMODULES_ON_DEMAND:
+			strvec_ঠেলো(&cmd.args, "--recurse-submodules=on-demand");
+			ভঙ্গ;
+		স্ৱভাৱ:
 			BUG("submodule recursion option not understood");
 		}
-	if (max_children)
-		strvec_push(&cmd.args, max_children);
-	if (opt_dry_run)
-		strvec_push(&cmd.args, "--dry-run");
-	if (opt_keep)
-		strvec_push(&cmd.args, opt_keep);
-	if (opt_depth)
-		strvec_push(&cmd.args, opt_depth);
-	if (opt_unshallow)
-		strvec_push(&cmd.args, opt_unshallow);
-	if (opt_update_shallow)
-		strvec_push(&cmd.args, opt_update_shallow);
-	if (opt_refmap)
-		strvec_push(&cmd.args, opt_refmap);
-	if (opt_ipv4)
-		strvec_push(&cmd.args, opt_ipv4);
-	if (opt_ipv6)
-		strvec_push(&cmd.args, opt_ipv6);
-	if (opt_show_forced_updates > 0)
-		strvec_push(&cmd.args, "--show-forced-updates");
-	else if (opt_show_forced_updates == 0)
-		strvec_push(&cmd.args, "--no-show-forced-updates");
-	if (set_upstream)
-		strvec_push(&cmd.args, set_upstream);
+	যদি (max_children)
+		strvec_ঠেলো(&cmd.args, max_children);
+	যদি (opt_dry_run)
+		strvec_ঠেলো(&cmd.args, "--dry-run");
+	যদি (opt_keep)
+		strvec_ঠেলো(&cmd.args, opt_keep);
+	যদি (opt_depth)
+		strvec_ঠেলো(&cmd.args, opt_depth);
+	যদি (opt_unshallow)
+		strvec_ঠেলো(&cmd.args, opt_unshallow);
+	যদি (opt_update_shallow)
+		strvec_ঠেলো(&cmd.args, opt_update_shallow);
+	যদি (opt_refmap)
+		strvec_ঠেলো(&cmd.args, opt_refmap);
+	যদি (opt_ipv4)
+		strvec_ঠেলো(&cmd.args, opt_ipv4);
+	যদি (opt_ipv6)
+		strvec_ঠেলো(&cmd.args, opt_ipv6);
+	যদি (opt_show_forced_updates > 0)
+		strvec_ঠেলো(&cmd.args, "--show-forced-updates");
+	অন্যথা যদি (opt_show_forced_updates == 0)
+		strvec_ঠেলো(&cmd.args, "--no-show-forced-updates");
+	যদি (set_upstream)
+		strvec_ঠেলো(&cmd.args, set_upstream);
 	strvec_pushv(&cmd.args, opt_fetch.v);
 
-	if (repo) {
-		strvec_push(&cmd.args, repo);
+	যদি (repo) {
+		strvec_ঠেলো(&cmd.args, repo);
 		strvec_pushv(&cmd.args, refspecs);
-	} else if (*refspecs)
+	} অন্যথা যদি (*refspecs)
 		BUG("refspecs without repo?");
 	cmd.git_cmd = 1;
 	cmd.odb_to_close = the_repository->objects;
-	return run_command(&cmd);
+	ঘূৰাই run_command(&cmd);
 }
 
 /**
  * "Pulls into void" by branching off merge_head.
  */
-static int pull_into_void(const struct object_id *merge_head,
-		const struct object_id *curr_head)
+স্থির পূর্ণাঙ্ক pull_into_void(ধ্রুৱ সংরচনা object_id *merge_head,
+		ধ্রুৱ সংরচনা object_id *curr_head)
 {
-	if (opt_verify_signatures) {
-		struct commit *commit;
+	যদি (opt_verify_signatures) {
+		সংরচনা commit *commit;
 
 		commit = lookup_commit(the_repository, merge_head);
-		if (!commit)
+		যদি (!commit)
 			die(_("unable to access commit %s"),
 			    oid_to_hex(merge_head));
 
@@ -482,92 +482,92 @@ static int pull_into_void(const struct object_id *merge_head,
 	 * index/worktree changes that the user already made on the unborn
 	 * branch.
 	 */
-	if (checkout_fast_forward(the_repository,
-				  the_hash_algo->empty_tree,
+	যদি (checkout_fast_forward(the_repository,
+				  the_hash_algo->empty_বৃক্ষ,
 				  merge_head, 0))
-		return 1;
+		ঘূৰাই 1;
 
-	if (refs_update_ref(get_main_ref_store(the_repository), "initial pull", "HEAD", merge_head, curr_head, 0, UPDATE_REFS_DIE_ON_ERR))
-		return 1;
+	যদি (refs_update_ref(get_main_ref_store(the_repository), "initial pull", "HEAD", merge_head, curr_head, 0, UPDATE_REFS_DIE_ON_ERR))
+		ঘূৰাই 1;
 
-	return 0;
+	ঘূৰাই 0;
 }
 
-static int rebase_submodules(void)
+স্থির পূর্ণাঙ্ক rebase_submodules(শূন্য)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
+	সংরচনা child_process cp = CHILD_PROCESS_INIT;
 
 	cp.git_cmd = 1;
 	cp.no_stdin = 1;
 	strvec_pushl(&cp.args, "submodule", "update",
-		     "--recursive", "--rebase", NULL);
-	argv_push_verbosity(&cp.args);
+		     "--recursive", "--rebase", রিক্ত);
+	argv_ঠেলো_verbosity(&cp.args);
 
-	return run_command(&cp);
+	ঘূৰাই run_command(&cp);
 }
 
-static int update_submodules(void)
+স্থির পূর্ণাঙ্ক update_submodules(শূন্য)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
+	সংরচনা child_process cp = CHILD_PROCESS_INIT;
 
 	cp.git_cmd = 1;
 	cp.no_stdin = 1;
 	strvec_pushl(&cp.args, "submodule", "update",
-		     "--recursive", "--checkout", NULL);
-	argv_push_verbosity(&cp.args);
+		     "--recursive", "--checkout", রিক্ত);
+	argv_ঠেলো_verbosity(&cp.args);
 
-	return run_command(&cp);
+	ঘূৰাই run_command(&cp);
 }
 
 /**
  * Runs git-merge, returning its exit status.
  */
-static int run_merge(void)
+স্থির পূর্ণাঙ্ক run_merge(শূন্য)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	সংরচনা child_process cmd = CHILD_PROCESS_INIT;
 
-	strvec_pushl(&cmd.args, "merge", NULL);
+	strvec_pushl(&cmd.args, "merge", রিক্ত);
 
 	/* Shared options */
-	argv_push_verbosity(&cmd.args);
-	if (opt_progress)
-		strvec_push(&cmd.args, opt_progress);
+	argv_ঠেলো_verbosity(&cmd.args);
+	যদি (opt_progress)
+		strvec_ঠেলো(&cmd.args, opt_progress);
 
 	/* Options passed to git-merge */
-	if (opt_diffstat)
-		strvec_push(&cmd.args, opt_diffstat);
-	if (opt_log)
-		strvec_push(&cmd.args, opt_log);
-	if (opt_signoff)
-		strvec_push(&cmd.args, opt_signoff);
-	if (opt_squash)
-		strvec_push(&cmd.args, opt_squash);
-	if (opt_commit)
-		strvec_push(&cmd.args, opt_commit);
-	if (opt_edit)
-		strvec_push(&cmd.args, opt_edit);
-	if (cleanup_arg)
+	যদি (opt_diffstat)
+		strvec_ঠেলো(&cmd.args, opt_diffstat);
+	যদি (opt_log)
+		strvec_ঠেলো(&cmd.args, opt_log);
+	যদি (opt_signoff)
+		strvec_ঠেলো(&cmd.args, opt_signoff);
+	যদি (opt_squash)
+		strvec_ঠেলো(&cmd.args, opt_squash);
+	যদি (opt_commit)
+		strvec_ঠেলো(&cmd.args, opt_commit);
+	যদি (opt_edit)
+		strvec_ঠেলো(&cmd.args, opt_edit);
+	যদি (cleanup_arg)
 		strvec_pushf(&cmd.args, "--cleanup=%s", cleanup_arg);
-	if (opt_ff)
-		strvec_push(&cmd.args, opt_ff);
-	if (opt_verify)
-		strvec_push(&cmd.args, opt_verify);
-	if (opt_verify_signatures)
-		strvec_push(&cmd.args, opt_verify_signatures);
+	যদি (opt_ff)
+		strvec_ঠেলো(&cmd.args, opt_ff);
+	যদি (opt_verify)
+		strvec_ঠেলো(&cmd.args, opt_verify);
+	যদি (opt_verify_signatures)
+		strvec_ঠেলো(&cmd.args, opt_verify_signatures);
 	strvec_pushv(&cmd.args, opt_strategies.v);
 	strvec_pushv(&cmd.args, opt_strategy_opts.v);
-	if (opt_gpg_sign)
-		strvec_push(&cmd.args, opt_gpg_sign);
-	if (opt_autostash == 0)
-		strvec_push(&cmd.args, "--no-autostash");
-	else if (opt_autostash == 1)
-		strvec_push(&cmd.args, "--autostash");
-	if (opt_allow_unrelated_histories > 0)
-		strvec_push(&cmd.args, "--allow-unrelated-histories");
+	যদি (opt_gpg_sign)
+		strvec_ঠেলো(&cmd.args, opt_gpg_sign);
+	যদি (opt_autostash == 0)
+		strvec_ঠেলো(&cmd.args, "--no-autostash");
+	অন্যথা যদি (opt_autostash == 1)
+		strvec_ঠেলো(&cmd.args, "--autostash");
+	যদি (opt_allow_unrelated_histories > 0)
+		strvec_ঠেলো(&cmd.args, "--allow-unrelated-histories");
 
-	strvec_push(&cmd.args, "FETCH_HEAD");
+	strvec_ঠেলো(&cmd.args, "FETCH_HEAD");
 	cmd.git_cmd = 1;
-	return run_command(&cmd);
+	ঘূৰাই run_command(&cmd);
 }
 
 /**
@@ -577,27 +577,27 @@ static int run_merge(void)
  * remote is not the branch's configured remote or the branch does not have any
  * configured upstream branch.
  */
-static const char *get_upstream_branch(const char *remote)
+স্থির ধ্রুৱ ৱর্ণ *get_upstream_branch(ধ্রুৱ ৱর্ণ *remote)
 {
-	struct remote *rm;
-	struct branch *curr_branch;
-	const char *curr_branch_remote;
+	সংরচনা remote *rm;
+	সংরচনা branch *curr_branch;
+	ধ্রুৱ ৱর্ণ *curr_branch_remote;
 
 	rm = remote_get(remote);
-	if (!rm)
-		return NULL;
+	যদি (!rm)
+		ঘূৰাই রিক্ত;
 
 	curr_branch = branch_get("HEAD");
-	if (!curr_branch)
-		return NULL;
+	যদি (!curr_branch)
+		ঘূৰাই রিক্ত;
 
-	curr_branch_remote = remote_for_branch(curr_branch, NULL);
-	assert(curr_branch_remote);
+	curr_branch_remote = remote_for_branch(curr_branch, রিক্ত);
+	প্রতিজ্ঞা(curr_branch_remote);
 
-	if (strcmp(curr_branch_remote, rm->name))
-		return NULL;
+	যদি (strcmp(curr_branch_remote, rm->name))
+		ঘূৰাই রিক্ত;
 
-	return branch_get_upstream(curr_branch, NULL);
+	ঘূৰাই branch_get_upstream(curr_branch, রিক্ত);
 }
 
 /**
@@ -606,36 +606,36 @@ static const char *get_upstream_branch(const char *remote)
  * FIXME: The current implementation assumes the default mapping of
  * refs/heads/<branch_name> to refs/remotes/<remote_name>/<branch_name>.
  */
-static const char *get_tracking_branch(const char *remote, const char *refspec)
+স্থির ধ্রুৱ ৱর্ণ *get_tracking_branch(ধ্রুৱ ৱর্ণ *remote, ধ্রুৱ ৱর্ণ *refspec)
 {
-	struct refspec_item spec;
-	const char *spec_src;
-	const char *merge_branch;
+	সংরচনা refspec_item spec;
+	ধ্রুৱ ৱর্ণ *spec_src;
+	ধ্রুৱ ৱর্ণ *merge_branch;
 
-	if (!refspec_item_init_fetch(&spec, refspec, the_hash_algo))
+	যদি (!refspec_item_init_fetch(&spec, refspec, the_hash_algo))
 		die(_("invalid refspec '%s'"), refspec);
 	spec_src = spec.src;
-	if (!*spec_src || !strcmp(spec_src, "HEAD"))
+	যদি (!*spec_src || !strcmp(spec_src, "HEAD"))
 		spec_src = "HEAD";
-	else if (skip_prefix(spec_src, "heads/", &spec_src))
+	অন্যথা যদি (skip_prefix(spec_src, "heads/", &spec_src))
 		;
-	else if (skip_prefix(spec_src, "refs/heads/", &spec_src))
+	অন্যথা যদি (skip_prefix(spec_src, "refs/heads/", &spec_src))
 		;
-	else if (starts_with(spec_src, "refs/") ||
+	অন্যথা যদি (starts_with(spec_src, "refs/") ||
 		starts_with(spec_src, "tags/") ||
 		starts_with(spec_src, "remotes/"))
 		spec_src = "";
 
-	if (*spec_src) {
-		if (!strcmp(remote, "."))
+	যদি (*spec_src) {
+		যদি (!strcmp(remote, "."))
 			merge_branch = mkpath("refs/heads/%s", spec_src);
-		else
+		অন্যথা
 			merge_branch = mkpath("refs/remotes/%s/%s", remote, spec_src);
-	} else
-		merge_branch = NULL;
+	} অন্যথা
+		merge_branch = রিক্ত;
 
 	refspec_item_clear(&spec);
-	return merge_branch;
+	ঘূৰাই merge_branch;
 }
 
 /**
@@ -643,76 +643,76 @@ static const char *get_tracking_branch(const char *remote, const char *refspec)
  * current branch forked from its remote-tracking branch. Returns 0 on success,
  * -1 on failure.
  */
-static int get_rebase_fork_point(struct object_id *fork_point, const char *repo,
-		const char *refspec)
+স্থির পূর্ণাঙ্ক get_rebase_fork_point(সংরচনা object_id *fork_point, ধ্রুৱ ৱর্ণ *repo,
+		ধ্রুৱ ৱর্ণ *refspec)
 {
-	int ret;
-	struct branch *curr_branch;
-	const char *remote_branch;
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct strbuf sb = STRBUF_INIT;
+	পূর্ণাঙ্ক ret;
+	সংরচনা branch *curr_branch;
+	ধ্রুৱ ৱর্ণ *remote_branch;
+	সংরচনা child_process cp = CHILD_PROCESS_INIT;
+	সংরচনা strbuf sb = STRBUF_INIT;
 
 	curr_branch = branch_get("HEAD");
-	if (!curr_branch)
-		return -1;
+	যদি (!curr_branch)
+		ঘূৰাই -1;
 
-	if (refspec)
+	যদি (refspec)
 		remote_branch = get_tracking_branch(repo, refspec);
-	else
+	অন্যথা
 		remote_branch = get_upstream_branch(repo);
 
-	if (!remote_branch)
-		return -1;
+	যদি (!remote_branch)
+		ঘূৰাই -1;
 
 	strvec_pushl(&cp.args, "merge-base", "--fork-point",
-		     remote_branch, curr_branch->name, NULL);
+		     remote_branch, curr_branch->name, রিক্ত);
 	cp.no_stdin = 1;
 	cp.no_stderr = 1;
 	cp.git_cmd = 1;
 
 	ret = capture_command(&cp, &sb, GIT_MAX_HEXSZ);
-	if (ret)
-		goto cleanup;
+	যদি (ret)
+		গচ্ছ cleanup;
 
 	ret = get_oid_hex(sb.buf, fork_point);
-	if (ret)
-		goto cleanup;
+	যদি (ret)
+		গচ্ছ cleanup;
 
 cleanup:
 	strbuf_release(&sb);
-	return ret ? -1 : 0;
+	ঘূৰাই ret ? -1 : 0;
 }
 
 /**
  * Sets merge_base to the octopus merge base of curr_head, merge_head and
  * fork_point. Returns 0 if a merge base is found, 1 otherwise.
  */
-static int get_octopus_merge_base(struct object_id *merge_base,
-		const struct object_id *curr_head,
-		const struct object_id *merge_head,
-		const struct object_id *fork_point)
+স্থির পূর্ণাঙ্ক get_octopus_merge_base(সংরচনা object_id *merge_base,
+		ধ্রুৱ সংরচনা object_id *curr_head,
+		ধ্রুৱ সংরচনা object_id *merge_head,
+		ধ্রুৱ সংরচনা object_id *fork_point)
 {
-	struct commit_list *revs = NULL, *result = NULL;
+	সংরচনা commit_list *revs = রিক্ত, *result = রিক্ত;
 
-	commit_list_insert(lookup_commit_reference(the_repository, curr_head),
+	commit_list_ঢোকাও(lookup_commit_reference(the_repository, curr_head),
 			   &revs);
-	commit_list_insert(lookup_commit_reference(the_repository, merge_head),
+	commit_list_ঢোকাও(lookup_commit_reference(the_repository, merge_head),
 			   &revs);
-	if (!is_null_oid(fork_point))
-		commit_list_insert(lookup_commit_reference(the_repository, fork_point),
+	যদি (!is_null_oid(fork_point))
+		commit_list_ঢোকাও(lookup_commit_reference(the_repository, fork_point),
 				   &revs);
 
-	if (get_octopus_merge_bases(revs, &result) < 0)
+	যদি (get_octopus_merge_bases(revs, &result) < 0)
 		exit(128);
 	commit_list_free(revs);
 	reduce_heads_replace(&result);
 
-	if (!result)
-		return 1;
+	যদি (!result)
+		ঘূৰাই 1;
 
 	oidcpy(merge_base, &result->item->object.oid);
 	commit_list_free(result);
-	return 0;
+	ঘূৰাই 0;
 }
 
 /**
@@ -720,26 +720,26 @@ static int get_octopus_merge_base(struct object_id *merge_base,
  * fork point calculated by get_rebase_fork_point(), compute the <newbase> and
  * <upstream> arguments to use for the upcoming git-rebase invocation.
  */
-static int get_rebase_newbase_and_upstream(struct object_id *newbase,
-		struct object_id *upstream,
-		const struct object_id *curr_head,
-		const struct object_id *merge_head,
-		const struct object_id *fork_point)
+স্থির পূর্ণাঙ্ক get_rebase_newbase_and_upstream(সংরচনা object_id *newbase,
+		সংরচনা object_id *upstream,
+		ধ্রুৱ সংরচনা object_id *curr_head,
+		ধ্রুৱ সংরচনা object_id *merge_head,
+		ধ্রুৱ সংরচনা object_id *fork_point)
 {
-	struct object_id oct_merge_base;
+	সংরচনা object_id oct_merge_base;
 
-	if (!get_octopus_merge_base(&oct_merge_base, curr_head, merge_head, fork_point))
-		if (!is_null_oid(fork_point) && oideq(&oct_merge_base, fork_point))
-			fork_point = NULL;
+	যদি (!get_octopus_merge_base(&oct_merge_base, curr_head, merge_head, fork_point))
+		যদি (!is_null_oid(fork_point) && oideq(&oct_merge_base, fork_point))
+			fork_point = রিক্ত;
 
-	if (fork_point && !is_null_oid(fork_point))
+	যদি (fork_point && !is_null_oid(fork_point))
 		oidcpy(upstream, fork_point);
-	else
+	অন্যথা
 		oidcpy(upstream, merge_head);
 
 	oidcpy(newbase, merge_head);
 
-	return 0;
+	ঘূৰাই 0;
 }
 
 /**
@@ -747,70 +747,70 @@ static int get_rebase_newbase_and_upstream(struct object_id *newbase,
  * get_rebase_newbase_and_upstream(), runs git-rebase with the
  * appropriate arguments and returns its exit status.
  */
-static int run_rebase(const struct object_id *newbase,
-		const struct object_id *upstream)
+স্থির পূর্ণাঙ্ক run_rebase(ধ্রুৱ সংরচনা object_id *newbase,
+		ধ্রুৱ সংরচনা object_id *upstream)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	সংরচনা child_process cmd = CHILD_PROCESS_INIT;
 
-	strvec_push(&cmd.args, "rebase");
+	strvec_ঠেলো(&cmd.args, "rebase");
 
 	/* Shared options */
-	argv_push_verbosity(&cmd.args);
+	argv_ঠেলো_verbosity(&cmd.args);
 
 	/* Options passed to git-rebase */
-	if (opt_rebase == REBASE_MERGES)
-		strvec_push(&cmd.args, "--rebase-merges");
-	else if (opt_rebase == REBASE_INTERACTIVE)
-		strvec_push(&cmd.args, "--interactive");
-	if (opt_diffstat)
-		strvec_push(&cmd.args, opt_diffstat);
+	যদি (opt_rebase == REBASE_MERGES)
+		strvec_ঠেলো(&cmd.args, "--rebase-merges");
+	অন্যথা যদি (opt_rebase == REBASE_INTERACTIVE)
+		strvec_ঠেলো(&cmd.args, "--interactive");
+	যদি (opt_diffstat)
+		strvec_ঠেলো(&cmd.args, opt_diffstat);
 	strvec_pushv(&cmd.args, opt_strategies.v);
 	strvec_pushv(&cmd.args, opt_strategy_opts.v);
-	if (opt_gpg_sign)
-		strvec_push(&cmd.args, opt_gpg_sign);
-	if (opt_signoff)
-		strvec_push(&cmd.args, opt_signoff);
-	if (opt_autostash == 0)
-		strvec_push(&cmd.args, "--no-autostash");
-	else if (opt_autostash == 1)
-		strvec_push(&cmd.args, "--autostash");
-	if (opt_verify_signatures &&
+	যদি (opt_gpg_sign)
+		strvec_ঠেলো(&cmd.args, opt_gpg_sign);
+	যদি (opt_signoff)
+		strvec_ঠেলো(&cmd.args, opt_signoff);
+	যদি (opt_autostash == 0)
+		strvec_ঠেলো(&cmd.args, "--no-autostash");
+	অন্যথা যদি (opt_autostash == 1)
+		strvec_ঠেলো(&cmd.args, "--autostash");
+	যদি (opt_verify_signatures &&
 	    !strcmp(opt_verify_signatures, "--verify-signatures"))
 		warning(_("ignoring --verify-signatures for rebase"));
 
-	strvec_push(&cmd.args, "--onto");
-	strvec_push(&cmd.args, oid_to_hex(newbase));
+	strvec_ঠেলো(&cmd.args, "--onto");
+	strvec_ঠেলো(&cmd.args, oid_to_hex(newbase));
 
-	strvec_push(&cmd.args, oid_to_hex(upstream));
+	strvec_ঠেলো(&cmd.args, oid_to_hex(upstream));
 
 	cmd.git_cmd = 1;
-	return run_command(&cmd);
+	ঘূৰাই run_command(&cmd);
 }
 
-static int get_can_ff(struct object_id *orig_head,
-		      struct oid_array *merge_heads)
+স্থির পূর্ণাঙ্ক get_can_ff(সংরচনা object_id *orig_head,
+		      সংরচনা oid_array *merge_heads)
 {
-	int ret;
-	struct commit_list *list = NULL;
-	struct commit *merge_head, *head;
-	struct object_id *orig_merge_head;
+	পূর্ণাঙ্ক ret;
+	সংরচনা commit_list *list = রিক্ত;
+	সংরচনা commit *merge_head, *head;
+	সংরচনা object_id *orig_merge_head;
 
-	if (merge_heads->nr > 1)
-		return 0;
+	যদি (merge_heads->nr > 1)
+		ঘূৰাই 0;
 
 	orig_merge_head = &merge_heads->oid[0];
 	head = lookup_commit_reference(the_repository, orig_head);
-	if (!head)
-		return 0;
+	যদি (!head)
+		ঘূৰাই 0;
 	merge_head = lookup_commit_reference(the_repository, orig_merge_head);
-	if (!merge_head)
-		return 0;
-	commit_list_insert(head, &list);
+	যদি (!merge_head)
+		ঘূৰাই 0;
+	commit_list_ঢোকাও(head, &list);
 	ret = repo_is_descendant_of(the_repository, merge_head, list);
 	commit_list_free(list);
-	if (ret < 0)
+	যদি (ret < 0)
 		exit(128);
-	return ret;
+	ঘূৰাই ret;
 }
 
 /*
@@ -818,34 +818,34 @@ static int get_can_ff(struct object_id *orig_head,
  * Unfortunately is_descendant_of() cannot be used as it asks
  * if orig_head is a descendant of at least one of them.
  */
-static int already_up_to_date(struct object_id *orig_head,
-			      struct oid_array *merge_heads)
+স্থির পূর্ণাঙ্ক already_up_to_date(সংরচনা object_id *orig_head,
+			      সংরচনা oid_array *merge_heads)
 {
-	struct commit *ours;
+	সংরচনা commit *ours;
 
 	ours = lookup_commit_reference(the_repository, orig_head);
-	if (!ours)
-		return 0;
-	for (size_t i = 0; i < merge_heads->nr; i++) {
-		struct commit_list *list = NULL;
-		struct commit *theirs;
-		int ok;
+	যদি (!ours)
+		ঘূৰাই 0;
+	বাবে (size_t i = 0; i < merge_heads->nr; i++) {
+		সংরচনা commit_list *list = রিক্ত;
+		সংরচনা commit *theirs;
+		পূর্ণাঙ্ক ok;
 
 		theirs = lookup_commit_reference(the_repository, &merge_heads->oid[i]);
-		if (!theirs)
-			return 0;
-		commit_list_insert(theirs, &list);
+		যদি (!theirs)
+			ঘূৰাই 0;
+		commit_list_ঢোকাও(theirs, &list);
 		ok = repo_is_descendant_of(the_repository, ours, list);
 		commit_list_free(list);
-		if (ok < 0)
+		যদি (ok < 0)
 			exit(128);
-		if (!ok)
-			return 0;
+		যদি (!ok)
+			ঘূৰাই 0;
 	}
-	return 1;
+	ঘূৰাই 1;
 }
 
-static void show_advice_pull_non_ff(void)
+স্থির শূন্য show_advice_pull_non_ff(শূন্য)
 {
 	advise(_("You have divergent branches and need to specify how to reconcile them.\n"
 		 "You can do so by running one of the following commands sometime before\n"
@@ -861,23 +861,23 @@ static void show_advice_pull_non_ff(void)
 		 "invocation.\n"));
 }
 
-int cmd_pull(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repository UNUSED)
+পূর্ণাঙ্ক cmd_pull(পূর্ণাঙ্ক argc,
+	     ধ্রুৱ ৱর্ণ **argv,
+	     ধ্রুৱ ৱর্ণ *prefix,
+	     সংরচনা repository *repository UNUSED)
 {
-	const char *repo, **refspecs;
-	struct oid_array merge_heads = OID_ARRAY_INIT;
-	struct object_id orig_head, curr_head;
-	struct object_id rebase_fork_point;
-	int rebase_unspecified = 0;
-	int can_ff;
-	int divergent;
-	int ret;
-	static struct option pull_options[] = {
+	ধ্রুৱ ৱর্ণ *repo, **refspecs;
+	সংরচনা oid_array merge_heads = OID_ARRAY_INIT;
+	সংরচনা object_id orig_head, curr_head;
+	সংরচনা object_id rebase_fork_point;
+	পূর্ণাঙ্ক rebase_unspecified = 0;
+	পূর্ণাঙ্ক can_ff;
+	পূর্ণাঙ্ক divergent;
+	পূর্ণাঙ্ক ret;
+	স্থির সংরচনা option pull_options[] = {
 		/* Shared options */
 		OPT__VERBOSITY(&opt_verbosity),
-		OPT_PASSTHRU(0, "progress", &opt_progress, NULL,
+		OPT_PASSTHRU(0, "progress", &opt_progress, রিক্ত,
 			N_("force progress reporting"),
 			PARSE_OPT_NOARG),
 		OPT_CALLBACK_F(0, "recurse-submodules",
@@ -891,44 +891,44 @@ int cmd_pull(int argc,
 			"(false|true|merges|interactive)",
 			N_("incorporate changes by rebasing rather than merging"),
 			PARSE_OPT_OPTARG, parse_opt_rebase),
-		OPT_PASSTHRU('n', NULL, &opt_diffstat, NULL,
+		OPT_PASSTHRU('n', রিক্ত, &opt_diffstat, রিক্ত,
 			N_("do not show a diffstat at the end of the merge"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG),
-		OPT_PASSTHRU(0, "stat", &opt_diffstat, NULL,
+		OPT_PASSTHRU(0, "stat", &opt_diffstat, রিক্ত,
 			N_("show a diffstat at the end of the merge"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "summary", &opt_diffstat, NULL,
+		OPT_PASSTHRU(0, "summary", &opt_diffstat, রিক্ত,
 			N_("(synonym to --stat)"),
 			PARSE_OPT_NOARG | PARSE_OPT_HIDDEN),
-		OPT_PASSTHRU(0, "compact-summary", &opt_diffstat, NULL,
+		OPT_PASSTHRU(0, "compact-summary", &opt_diffstat, রিক্ত,
 			N_("show a compact-summary at the end of the merge"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU(0, "log", &opt_log, N_("n"),
 			N_("add (at most <n>) entries from shortlog to merge commit message"),
 			PARSE_OPT_OPTARG),
-		OPT_PASSTHRU(0, "signoff", &opt_signoff, NULL,
+		OPT_PASSTHRU(0, "signoff", &opt_signoff, রিক্ত,
 			N_("add a Signed-off-by trailer"),
 			PARSE_OPT_OPTARG),
-		OPT_PASSTHRU(0, "squash", &opt_squash, NULL,
+		OPT_PASSTHRU(0, "squash", &opt_squash, রিক্ত,
 			N_("create a single commit instead of doing a merge"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "commit", &opt_commit, NULL,
+		OPT_PASSTHRU(0, "commit", &opt_commit, রিক্ত,
 			N_("perform a commit if the merge succeeds (default)"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "edit", &opt_edit, NULL,
+		OPT_PASSTHRU(0, "edit", &opt_edit, রিক্ত,
 			N_("edit message before committing"),
 			PARSE_OPT_NOARG),
 		OPT_CLEANUP(&cleanup_arg),
-		OPT_PASSTHRU(0, "ff", &opt_ff, NULL,
+		OPT_PASSTHRU(0, "ff", &opt_ff, রিক্ত,
 			N_("allow fast-forward"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "ff-only", &opt_ff, NULL,
+		OPT_PASSTHRU(0, "ff-only", &opt_ff, রিক্ত,
 			N_("abort if fast-forward is not possible"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG),
-		OPT_PASSTHRU(0, "verify", &opt_verify, NULL,
+		OPT_PASSTHRU(0, "verify", &opt_verify, রিক্ত,
 			N_("control use of pre-merge-commit and commit-msg hooks"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "verify-signatures", &opt_verify_signatures, NULL,
+		OPT_PASSTHRU(0, "verify-signatures", &opt_verify_signatures, রিক্ত,
 			N_("verify that the named commit has a valid GPG signature"),
 			PARSE_OPT_NOARG),
 		OPT_BOOL(0, "autostash", &opt_autostash,
@@ -949,20 +949,20 @@ int cmd_pull(int argc,
 
 		/* Options passed to git-fetch */
 		OPT_GROUP(N_("Options related to fetching")),
-		OPT_PASSTHRU(0, "all", &opt_all, NULL,
+		OPT_PASSTHRU(0, "all", &opt_all, রিক্ত,
 			N_("fetch from all remotes"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU('a', "append", &opt_append, NULL,
+		OPT_PASSTHRU('a', "append", &opt_append, রিক্ত,
 			N_("append to .git/FETCH_HEAD instead of overwriting"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU(0, "upload-pack", &opt_upload_pack, N_("path"),
 			N_("path to upload pack on remote end"),
 			0),
 		OPT__FORCE(&opt_force, N_("force overwrite of local branch"), 0),
-		OPT_PASSTHRU('t', "tags", &opt_tags, NULL,
+		OPT_PASSTHRU('t', "tags", &opt_tags, রিক্ত,
 			N_("fetch all tags and associated objects"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU('p', "prune", &opt_prune, NULL,
+		OPT_PASSTHRU('p', "prune", &opt_prune, রিক্ত,
 			N_("prune remote-tracking branches no longer on remote"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU('j', "jobs", &max_children, N_("n"),
@@ -970,7 +970,7 @@ int cmd_pull(int argc,
 			PARSE_OPT_OPTARG),
 		OPT_BOOL(0, "dry-run", &opt_dry_run,
 			N_("dry run")),
-		OPT_PASSTHRU('k', "keep", &opt_keep, NULL,
+		OPT_PASSTHRU('k', "keep", &opt_keep, রিক্ত,
 			N_("keep downloaded pack"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU(0, "depth", &opt_depth, N_("depth"),
@@ -985,10 +985,10 @@ int cmd_pull(int argc,
 		OPT_PASSTHRU_ARGV(0, "deepen", &opt_fetch, N_("n"),
 			N_("deepen history of shallow clone"),
 			0),
-		OPT_PASSTHRU(0, "unshallow", &opt_unshallow, NULL,
+		OPT_PASSTHRU(0, "unshallow", &opt_unshallow, রিক্ত,
 			N_("convert to a complete repository"),
 			PARSE_OPT_NONEG | PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "update-shallow", &opt_update_shallow, NULL,
+		OPT_PASSTHRU(0, "update-shallow", &opt_update_shallow, রিক্ত,
 			N_("accept refs that update .git/shallow"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU(0, "refmap", &opt_refmap, N_("refmap"),
@@ -998,10 +998,10 @@ int cmd_pull(int argc,
 			N_("server-specific"),
 			N_("option to transmit"),
 			0),
-		OPT_PASSTHRU('4',  "ipv4", &opt_ipv4, NULL,
+		OPT_PASSTHRU('4',  "ipv4", &opt_ipv4, রিক্ত,
 			N_("use IPv4 addresses only"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU('6',  "ipv6", &opt_ipv6, NULL,
+		OPT_PASSTHRU('6',  "ipv6", &opt_ipv6, রিক্ত,
 			N_("use IPv6 addresses only"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU_ARGV(0, "negotiation-restrict", &opt_fetch, N_("revision"),
@@ -1013,30 +1013,30 @@ int cmd_pull(int argc,
 			0),
 		OPT_BOOL(0, "show-forced-updates", &opt_show_forced_updates,
 			 N_("check for forced-updates on all updated branches")),
-		OPT_PASSTHRU(0, "set-upstream", &set_upstream, NULL,
+		OPT_PASSTHRU(0, "set-upstream", &set_upstream, রিক্ত,
 			N_("set upstream for git pull/fetch"),
 			PARSE_OPT_NOARG),
 
 		OPT_END()
 	};
 
-	if (!getenv("GIT_REFLOG_ACTION"))
+	যদি (!getenv("GIT_REFLOG_ACTION"))
 		set_reflog_message(argc, argv);
 
-	repo_config(the_repository, git_pull_config, NULL);
-	if (the_repository->gitdir) {
+	repo_config(the_repository, git_pull_config, রিক্ত);
+	যদি (the_repository->gitdir) {
 		prepare_repo_settings(the_repository);
 		the_repository->settings.command_requires_full_index = 0;
 	}
 
 	argc = parse_options(argc, argv, prefix, pull_options, pull_usage, 0);
-	if (opt_autostash == -1)
+	যদি (opt_autostash == -1)
 		opt_autostash = config_pull_autostash;
 
-	if (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
+	যদি (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
 		recurse_submodules = recurse_submodules_cli;
 
-	if (cleanup_arg)
+	যদি (cleanup_arg)
 		/*
 		 * this only checks the validity of cleanup_arg; we don't need
 		 * a valid value for use_editor
@@ -1045,7 +1045,7 @@ int cmd_pull(int argc,
 
 	parse_repo_refspecs(argc, argv, &repo, &refspecs);
 
-	if (!opt_ff) {
+	যদি (!opt_ff) {
 		opt_ff = xstrdup_or_null(config_get_ff());
 		/*
 		 * A subtle point: opt_ff was set on the line above via
@@ -1058,50 +1058,50 @@ int cmd_pull(int argc,
 		 * "--rebase" can override a config setting of
 		 * pull.ff=only.
 		 */
-		if (opt_rebase >= 0 && opt_ff && !strcmp(opt_ff, "--ff-only")) {
-			free(opt_ff);
+		যদি (opt_rebase >= 0 && opt_ff && !strcmp(opt_ff, "--ff-only")) {
+			মুক্ত(opt_ff);
 			opt_ff = xstrdup("--ff");
 		}
 	}
 
-	if (opt_rebase < 0)
+	যদি (opt_rebase < 0)
 		opt_rebase = config_get_rebase(&rebase_unspecified);
 
-	if (repo_read_index_unmerged(the_repository))
+	যদি (repo_read_index_unmerged(the_repository))
 		die_resolve_conflict("pull");
 
-	if (file_exists(git_path_merge_head(the_repository)))
+	যদি (file_exists(git_path_merge_head(the_repository)))
 		die_conclude_merge();
 
-	if (repo_get_oid(the_repository, "HEAD", &orig_head))
+	যদি (repo_get_oid(the_repository, "HEAD", &orig_head))
 		oidclr(&orig_head, the_repository->hash_algo);
 
-	if (opt_rebase) {
-		if (opt_autostash == -1)
+	যদি (opt_rebase) {
+		যদি (opt_autostash == -1)
 			opt_autostash = config_rebase_autostash;
 
-		if (is_null_oid(&orig_head) && !is_index_unborn(the_repository->index))
+		যদি (is_null_oid(&orig_head) && !is_index_unborn(the_repository->index))
 			die(_("Updating an unborn branch with changes added to the index."));
 
-		if (!opt_autostash)
-			require_clean_work_tree(the_repository,
+		যদি (!opt_autostash)
+			require_clean_work_বৃক্ষ(the_repository,
 				N_("pull with rebase"),
 				_("Please commit or stash them."), 1, 0);
 
-		if (get_rebase_fork_point(&rebase_fork_point, repo, *refspecs))
+		যদি (get_rebase_fork_point(&rebase_fork_point, repo, *refspecs))
 			oidclr(&rebase_fork_point, the_repository->hash_algo);
 	}
 
-	if (run_fetch(repo, refspecs))
-		return 1;
+	যদি (run_fetch(repo, refspecs))
+		ঘূৰাই 1;
 
-	if (opt_dry_run)
-		return 0;
+	যদি (opt_dry_run)
+		ঘূৰাই 0;
 
-	if (repo_get_oid(the_repository, "HEAD", &curr_head))
+	যদি (repo_get_oid(the_repository, "HEAD", &curr_head))
 		oidclr(&curr_head, the_repository->hash_algo);
 
-	if (!is_null_oid(&orig_head) && !is_null_oid(&curr_head) &&
+	যদি (!is_null_oid(&orig_head) && !is_null_oid(&curr_head) &&
 			!oideq(&orig_head, &curr_head)) {
 		/*
 		 * The fetch involved updating the current branch.
@@ -1115,7 +1115,7 @@ int cmd_pull(int argc,
 			"fast-forwarding your working tree from\n"
 			"commit %s."), oid_to_hex(&orig_head));
 
-		if (checkout_fast_forward(the_repository, &orig_head,
+		যদি (checkout_fast_forward(the_repository, &orig_head,
 					  &curr_head, 0))
 			die(_("Cannot fast-forward your working tree.\n"
 				"After making sure that you saved anything precious from\n"
@@ -1127,19 +1127,19 @@ int cmd_pull(int argc,
 
 	get_merge_heads(&merge_heads);
 
-	if (!merge_heads.nr)
+	যদি (!merge_heads.nr)
 		die_no_merge_candidates(repo, refspecs);
 
-	if (is_null_oid(&orig_head)) {
-		if (merge_heads.nr > 1)
+	যদি (is_null_oid(&orig_head)) {
+		যদি (merge_heads.nr > 1)
 			die(_("Cannot merge multiple branches into empty head."));
 		ret = pull_into_void(merge_heads.oid, &curr_head);
-		goto cleanup;
+		গচ্ছ cleanup;
 	}
-	if (merge_heads.nr > 1) {
-		if (opt_rebase)
+	যদি (merge_heads.nr > 1) {
+		যদি (opt_rebase)
 			die(_("Cannot rebase onto multiple branches."));
-		if (opt_ff && !strcmp(opt_ff, "--ff-only"))
+		যদি (opt_ff && !strcmp(opt_ff, "--ff-only"))
 			die(_("Cannot fast-forward to multiple branches."));
 	}
 
@@ -1147,51 +1147,51 @@ int cmd_pull(int argc,
 	divergent = !can_ff && !already_up_to_date(&orig_head, &merge_heads);
 
 	/* ff-only takes precedence over rebase */
-	if (opt_ff && !strcmp(opt_ff, "--ff-only")) {
-		if (divergent)
+	যদি (opt_ff && !strcmp(opt_ff, "--ff-only")) {
+		যদি (divergent)
 			die_ff_impossible();
 		opt_rebase = REBASE_FALSE;
 	}
 	/* If no action specified and we can't fast forward, then warn. */
-	if (!opt_ff && rebase_unspecified && divergent) {
+	যদি (!opt_ff && rebase_unspecified && divergent) {
 		show_advice_pull_non_ff();
 		die(_("Need to specify how to reconcile divergent branches."));
 	}
 
-	if (opt_rebase) {
-		struct object_id newbase;
-		struct object_id upstream;
+	যদি (opt_rebase) {
+		সংরচনা object_id newbase;
+		সংরচনা object_id upstream;
 		get_rebase_newbase_and_upstream(&newbase, &upstream, &curr_head,
 						merge_heads.oid, &rebase_fork_point);
 
-		if ((recurse_submodules == RECURSE_SUBMODULES_ON ||
+		যদি ((recurse_submodules == RECURSE_SUBMODULES_ON ||
 		     recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND) &&
 		    submodule_touches_in_range(the_repository, &upstream, &curr_head))
 			die(_("cannot rebase with locally recorded submodule modifications"));
 
-		if (can_ff) {
+		যদি (can_ff) {
 			/* we can fast-forward this without invoking rebase */
-			free(opt_ff);
+			মুক্ত(opt_ff);
 			opt_ff = xstrdup("--ff-only");
 			ret = run_merge();
-		} else {
+		} অন্যথা {
 			ret = run_rebase(&newbase, &upstream);
 		}
 
-		if (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
+		যদি (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
 			     recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND))
 			ret = rebase_submodules();
 
-		goto cleanup;
-	} else {
+		গচ্ছ cleanup;
+	} অন্যথা {
 		ret = run_merge();
-		if (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
+		যদি (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
 			     recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND))
 			ret = update_submodules();
-		goto cleanup;
+		গচ্ছ cleanup;
 	}
 
 cleanup:
 	oid_array_clear(&merge_heads);
-	return ret;
+	ঘূৰাই ret;
 }

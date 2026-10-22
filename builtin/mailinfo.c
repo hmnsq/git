@@ -3,72 +3,72 @@
  * email to figure out authorship and subject
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "environment.h"
-#include "gettext.h"
-#include "strbuf.h"
-#include "mailinfo.h"
-#include "parse-options.h"
+#অন্তর্ভাৱ "builtin.h"
+#অন্তর্ভাৱ "abspath.h"
+#অন্তর্ভাৱ "environment.h"
+#অন্তর্ভাৱ "gettext.h"
+#অন্তর্ভাৱ "strbuf.h"
+#অন্তর্ভাৱ "mailinfo.h"
+#অন্তর্ভাৱ "parse-options.h"
 
-static const char * const mailinfo_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ mailinfo_usage[] = {
 	/* TRANSLATORS: keep <> in "<" mail ">" info. */
 	N_("git mailinfo [<options>] <msg> <patch> < mail >info"),
-	NULL,
+	রিক্ত,
 };
 
-struct metainfo_charset
+সংরচনা metainfo_charset
 {
-	enum {
+	গণনা {
 		CHARSET_DEFAULT,
 		CHARSET_NO_REENCODE,
 		CHARSET_EXPLICIT,
 	} policy;
-	const char *charset;
+	ধ্রুৱ ৱর্ণ *charset;
 };
 
-static int parse_opt_explicit_encoding(const struct option *opt,
-				       const char *arg, int unset)
+স্থির পূর্ণাঙ্ক parse_opt_explicit_encoding(ধ্রুৱ সংরচনা option *opt,
+				       ধ্রুৱ ৱর্ণ *arg, পূর্ণাঙ্ক unset)
 {
-	struct metainfo_charset *meta_charset = opt->value;
+	সংরচনা metainfo_charset *meta_charset = opt->মান;
 
 	BUG_ON_OPT_NEG(unset);
 
 	meta_charset->policy = CHARSET_EXPLICIT;
 	meta_charset->charset = arg;
 
-	return 0;
+	ঘূৰাই 0;
 }
 
-static int parse_opt_quoted_cr(const struct option *opt, const char *arg, int unset)
+স্থির পূর্ণাঙ্ক parse_opt_quoted_cr(ধ্রুৱ সংরচনা option *opt, ধ্রুৱ ৱর্ণ *arg, পূর্ণাঙ্ক unset)
 {
 	BUG_ON_OPT_NEG(unset);
 
-	if (mailinfo_parse_quoted_cr_action(arg, opt->value) != 0)
-		return error(_("bad action '%s' for '%s'"), arg, "--quoted-cr");
-	return 0;
+	যদি (mailinfo_parse_quoted_cr_action(arg, opt->মান) != 0)
+		ঘূৰাই error(_("bad action '%s' for '%s'"), arg, "--quoted-cr");
+	ঘূৰাই 0;
 }
 
-int cmd_mailinfo(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+পূর্ণাঙ্ক cmd_mailinfo(পূর্ণাঙ্ক argc,
+		 ধ্রুৱ ৱর্ণ **argv,
+		 ধ্রুৱ ৱর্ণ *prefix,
+		 সংরচনা repository *repo UNUSED)
 {
-	struct metainfo_charset meta_charset;
-	struct mailinfo mi;
-	int status;
-	char *msgfile, *patchfile;
+	সংরচনা metainfo_charset meta_charset;
+	সংরচনা mailinfo mi;
+	পূর্ণাঙ্ক status;
+	ৱর্ণ *msgfile, *patchfile;
 
-	struct option options[] = {
-		OPT_BOOL('k', NULL, &mi.keep_subject, N_("keep subject")),
-		OPT_BOOL('b', NULL, &mi.keep_non_patch_brackets_in_subject,
+	সংরচনা option options[] = {
+		OPT_BOOL('k', রিক্ত, &mi.keep_subject, N_("keep subject")),
+		OPT_BOOL('b', রিক্ত, &mi.keep_non_patch_brackets_in_subject,
 			 N_("keep non patch brackets in subject")),
 		OPT_BOOL('m', "message-id", &mi.add_message_id,
 			 N_("copy Message-ID to the end of commit message")),
-		OPT_SET_INT_F('u', NULL, &meta_charset.policy,
+		OPT_SET_INT_F('u', রিক্ত, &meta_charset.policy,
 			      N_("re-code metadata to i18n.commitEncoding"),
 			      CHARSET_DEFAULT, PARSE_OPT_NONEG),
-		OPT_SET_INT_F('n', NULL, &meta_charset.policy,
+		OPT_SET_INT_F('n', রিক্ত, &meta_charset.policy,
 			      N_("disable charset re-coding of metadata"),
 			      CHARSET_NO_REENCODE, PARSE_OPT_NONEG),
 		OPT_CALLBACK_F(0, "encoding", &meta_charset, N_("encoding"),
@@ -88,23 +88,23 @@ int cmd_mailinfo(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, mailinfo_usage, 0);
 
-	if (argc != 2)
+	যদি (argc != 2)
 		usage_with_options(mailinfo_usage, options);
 
-	switch (meta_charset.policy) {
-	case CHARSET_DEFAULT:
+	ৱিকল্প (meta_charset.policy) {
+	পক্ষ CHARSET_DEFAULT:
 		mi.metainfo_charset = get_commit_output_encoding();
-		break;
-	case CHARSET_NO_REENCODE:
-		mi.metainfo_charset = NULL;
-		break;
-	case CHARSET_EXPLICIT:
-		break;
-	default:
+		ভঙ্গ;
+	পক্ষ CHARSET_NO_REENCODE:
+		mi.metainfo_charset = রিক্ত;
+		ভঙ্গ;
+	পক্ষ CHARSET_EXPLICIT:
+		ভঙ্গ;
+	স্ৱভাৱ:
 		BUG("invalid meta_charset.policy");
 	}
 
-	mi.input = stdin;
+	mi.প্ৰবেশ = stdin;
 	mi.output = stdout;
 
 	msgfile = prefix_filename(prefix, argv[0]);
@@ -113,7 +113,7 @@ int cmd_mailinfo(int argc,
 	status = !!mailinfo(&mi, msgfile, patchfile);
 	clear_mailinfo(&mi);
 
-	free(msgfile);
-	free(patchfile);
-	return status;
+	মুক্ত(msgfile);
+	মুক্ত(patchfile);
+	ঘূৰাই status;
 }

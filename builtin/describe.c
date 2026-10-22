@@ -1,190 +1,190 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "lockfile.h"
-#include "commit.h"
-#include "tag.h"
-#include "refs.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "read-cache-ll.h"
-#include "revision.h"
-#include "diff.h"
-#include "hashmap.h"
-#include "setup.h"
-#include "strvec.h"
-#include "run-command.h"
-#include "odb.h"
-#include "list-objects.h"
-#include "commit-slab.h"
-#include "wildmatch.h"
-#include "prio-queue.h"
-#include "oidset.h"
+#অন্তর্ভাৱ "builtin.h"
+#অন্তর্ভাৱ "config.h"
+#অন্তর্ভাৱ "environment.h"
+#অন্তর্ভাৱ "gettext.h"
+#অন্তর্ভাৱ "hex.h"
+#অন্তর্ভাৱ "lockfile.h"
+#অন্তর্ভাৱ "commit.h"
+#অন্তর্ভাৱ "tag.h"
+#অন্তর্ভাৱ "refs.h"
+#অন্তর্ভাৱ "object-name.h"
+#অন্তর্ভাৱ "parse-options.h"
+#অন্তর্ভাৱ "read-cache-ll.h"
+#অন্তর্ভাৱ "revision.h"
+#অন্তর্ভাৱ "diff.h"
+#অন্তর্ভাৱ "hashmap.h"
+#অন্তর্ভাৱ "setup.h"
+#অন্তর্ভাৱ "strvec.h"
+#অন্তর্ভাৱ "run-command.h"
+#অন্তর্ভাৱ "odb.h"
+#অন্তর্ভাৱ "list-objects.h"
+#অন্তর্ভাৱ "commit-slab.h"
+#অন্তর্ভাৱ "wildmatch.h"
+#অন্তর্ভাৱ "prio-queue.h"
+#অন্তর্ভাৱ "oidset.h"
 
 #define MAX_TAGS	(FLAG_BITS - 1)
 #define DEFAULT_CANDIDATES 10
 
-define_commit_slab(commit_names, struct commit_name *);
+define_commit_slab(commit_names, সংরচনা commit_name *);
 
-static const char * const describe_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ describe_usage[] = {
 	N_("git describe [--all] [--tags] [--contains] [--abbrev=<n>] [<commit-ish>...]"),
 	N_("git describe [--all] [--tags] [--contains] [--abbrev=<n>] --dirty[=<mark>]"),
 	N_("git describe <blob>"),
-	NULL
+	রিক্ত
 };
 
-static int debug;	/* Display lots of verbose info */
-static int all;	/* Any valid ref can be used */
-static int tags;	/* Allow lightweight tags */
-static int longformat;
-static int first_parent;
-static int abbrev = -1; /* unspecified */
-static int max_candidates = DEFAULT_CANDIDATES;
-static struct hashmap names;
-static int have_util;
-static struct string_list patterns = STRING_LIST_INIT_NODUP;
-static struct string_list exclude_patterns = STRING_LIST_INIT_NODUP;
-static int always;
-static const char *suffix, *dirty, *broken;
-static struct commit_names commit_names;
+স্থির পূর্ণাঙ্ক debug;	/* Display lots of verbose info */
+স্থির পূর্ণাঙ্ক all;	/* Any valid ref can be used */
+স্থির পূর্ণাঙ্ক tags;	/* Allow lightweight tags */
+স্থির পূর্ণাঙ্ক longformat;
+স্থির পূর্ণাঙ্ক first_parent;
+স্থির পূর্ণাঙ্ক abbrev = -1; /* unspecified */
+স্থির পূর্ণাঙ্ক max_candidates = DEFAULT_CANDIDATES;
+স্থির সংরচনা hashmap names;
+স্থির পূর্ণাঙ্ক have_util;
+স্থির সংরচনা string_list patterns = STRING_LIST_INIT_NODUP;
+স্থির সংরচনা string_list exclude_patterns = STRING_LIST_INIT_NODUP;
+স্থির পূর্ণাঙ্ক always;
+স্থির ধ্রুৱ ৱর্ণ *suffix, *dirty, *broken;
+স্থির সংরচনা commit_names commit_names;
 
 /* diff-index command arguments to check if working tree is dirty. */
-static const char *diff_index_args[] = {
-	"diff-index", "--quiet", "HEAD", "--", NULL
+স্থির ধ্রুৱ ৱর্ণ *diff_index_args[] = {
+	"diff-index", "--quiet", "HEAD", "--", রিক্ত
 };
 
-static const char *update_index_args[] = {
-	"update-index", "--unmerged", "-q", "--refresh", NULL
+স্থির ধ্রুৱ ৱর্ণ *update_index_args[] = {
+	"update-index", "--unmerged", "-q", "--refresh", রিক্ত
 };
 
-struct commit_name {
-	struct hashmap_entry entry;
-	struct object_id peeled;
-	struct tag *tag;
+সংরচনা commit_name {
+	সংরচনা hashmap_entry entry;
+	সংরচনা object_id peeled;
+	সংরচনা tag *tag;
 	unsigned prio:2; /* annotated tag = 2, tag = 1, head = 0 */
 	unsigned name_checked:1;
 	unsigned misnamed:1;
-	struct object_id oid;
-	char *path;
+	সংরচনা object_id oid;
+	ৱর্ণ *path;
 };
 
-static const char *prio_names[] = {
+স্থির ধ্রুৱ ৱর্ণ *prio_names[] = {
 	N_("head"), N_("lightweight"), N_("annotated"),
 };
 
-static int commit_name_neq(const void *cmp_data UNUSED,
-			   const struct hashmap_entry *eptr,
-			   const struct hashmap_entry *entry_or_key,
-			   const void *peeled)
+স্থির পূর্ণাঙ্ক commit_name_neq(ধ্রুৱ শূন্য *cmp_data UNUSED,
+			   ধ্রুৱ সংরচনা hashmap_entry *eptr,
+			   ধ্রুৱ সংরচনা hashmap_entry *entry_or_চাবি,
+			   ধ্রুৱ শূন্য *peeled)
 {
-	const struct commit_name *cn1, *cn2;
+	ধ্রুৱ সংরচনা commit_name *cn1, *cn2;
 
-	cn1 = container_of(eptr, const struct commit_name, entry);
-	cn2 = container_of(entry_or_key, const struct commit_name, entry);
+	cn1 = container_of(eptr, ধ্রুৱ সংরচনা commit_name, entry);
+	cn2 = container_of(entry_or_চাবি, ধ্রুৱ সংরচনা commit_name, entry);
 
-	return !oideq(&cn1->peeled, peeled ? peeled : &cn2->peeled);
+	ঘূৰাই !oideq(&cn1->peeled, peeled ? peeled : &cn2->peeled);
 }
 
-static inline struct commit_name *find_commit_name(const struct object_id *peeled)
+স্থির অন্তঃস্থ সংরচনা commit_name *find_commit_name(ধ্রুৱ সংরচনা object_id *peeled)
 {
-	return hashmap_get_entry_from_hash(&names, oidhash(peeled), peeled,
-						struct commit_name, entry);
+	ঘূৰাই hashmap_get_entry_from_hash(&names, oidhash(peeled), peeled,
+						সংরচনা commit_name, entry);
 }
 
-static int replace_name(struct commit_name *e,
-			       int prio,
-			       const struct object_id *oid,
-			       struct tag **tag)
+স্থির পূর্ণাঙ্ক replace_name(সংরচনা commit_name *e,
+			       পূর্ণাঙ্ক prio,
+			       ধ্রুৱ সংরচনা object_id *oid,
+			       সংরচনা tag **tag)
 {
-	if (!e || e->prio < prio)
-		return 1;
+	যদি (!e || e->prio < prio)
+		ঘূৰাই 1;
 
-	if (e->prio == 2 && prio == 2) {
+	যদি (e->prio == 2 && prio == 2) {
 		/* Multiple annotated tags point to the same commit.
 		 * Select one to keep based upon their tagger date.
 		 */
-		struct tag *t;
+		সংরচনা tag *t;
 
-		if (!e->tag) {
+		যদি (!e->tag) {
 			t = lookup_tag(the_repository, &e->oid);
-			if (!t || parse_tag(the_repository, t))
-				return 1;
+			যদি (!t || parse_tag(the_repository, t))
+				ঘূৰাই 1;
 			e->tag = t;
 		}
 
 		t = lookup_tag(the_repository, oid);
-		if (!t || parse_tag(the_repository, t))
-			return 0;
+		যদি (!t || parse_tag(the_repository, t))
+			ঘূৰাই 0;
 		*tag = t;
 
-		if (e->tag->date < t->date)
-			return 1;
+		যদি (e->tag->date < t->date)
+			ঘূৰাই 1;
 	}
 
-	return 0;
+	ঘূৰাই 0;
 }
 
-static void add_to_known_names(const char *path,
-			       const struct object_id *peeled,
-			       int prio,
-			       const struct object_id *oid)
+স্থির শূন্য add_to_known_names(ধ্রুৱ ৱর্ণ *path,
+			       ধ্রুৱ সংরচনা object_id *peeled,
+			       পূর্ণাঙ্ক prio,
+			       ধ্রুৱ সংরচনা object_id *oid)
 {
-	struct commit_name *e = find_commit_name(peeled);
-	struct tag *tag = NULL;
-	if (replace_name(e, prio, oid, &tag)) {
-		if (!e) {
-			e = xmalloc(sizeof(struct commit_name));
+	সংরচনা commit_name *e = find_commit_name(peeled);
+	সংরচনা tag *tag = রিক্ত;
+	যদি (replace_name(e, prio, oid, &tag)) {
+		যদি (!e) {
+			e = xmalloc(পরিমাণ(সংরচনা commit_name));
 			oidcpy(&e->peeled, peeled);
 			hashmap_entry_init(&e->entry, oidhash(peeled));
 			hashmap_add(&names, &e->entry);
-			e->path = NULL;
+			e->path = রিক্ত;
 		}
 		e->tag = tag;
 		e->prio = prio;
 		e->name_checked = 0;
 		e->misnamed = 0;
 		oidcpy(&e->oid, oid);
-		free(e->path);
+		মুক্ত(e->path);
 		e->path = xstrdup(path);
 	}
 }
 
-static int get_name(const struct reference *ref, void *cb_data UNUSED)
+স্থির পূর্ণাঙ্ক get_name(ধ্রুৱ সংরচনা reference *ref, শূন্য *cb_data UNUSED)
 {
-	int is_tag = 0;
-	struct object_id peeled;
-	int is_annotated, prio;
-	const char *path_to_match = NULL;
+	পূর্ণাঙ্ক is_tag = 0;
+	সংরচনা object_id peeled;
+	পূর্ণাঙ্ক is_annotated, prio;
+	ধ্রুৱ ৱর্ণ *path_to_match = রিক্ত;
 
-	if (skip_prefix(ref->name, "refs/tags/", &path_to_match)) {
+	যদি (skip_prefix(ref->name, "refs/tags/", &path_to_match)) {
 		is_tag = 1;
-	} else if (all) {
-		if ((exclude_patterns.nr || patterns.nr) &&
+	} অন্যথা যদি (all) {
+		যদি ((exclude_patterns.nr || patterns.nr) &&
 		    !skip_prefix(ref->name, "refs/heads/", &path_to_match) &&
 		    !skip_prefix(ref->name, "refs/remotes/", &path_to_match)) {
 			/* Only accept reference of known type if there are match/exclude patterns */
-			return 0;
+			ঘূৰাই 0;
 		}
-	} else {
+	} অন্যথা {
 		/* Reject anything outside refs/tags/ unless --all */
-		return 0;
+		ঘূৰাই 0;
 	}
 
 	/*
 	 * If we're given exclude patterns, first exclude any tag which match
 	 * any of the exclude pattern.
 	 */
-	if (exclude_patterns.nr) {
-		struct string_list_item *item;
+	যদি (exclude_patterns.nr) {
+		সংরচনা string_list_item *item;
 
 		for_each_string_list_item(item, &exclude_patterns) {
-			if (!wildmatch(item->string, path_to_match, 0))
-				return 0;
+			যদি (!wildmatch(item->string, path_to_match, 0))
+				ঘূৰাই 0;
 		}
 	}
 
@@ -192,25 +192,25 @@ static int get_name(const struct reference *ref, void *cb_data UNUSED)
 	 * If we're given patterns, accept only tags which match at least one
 	 * pattern.
 	 */
-	if (patterns.nr) {
-		int found = 0;
-		struct string_list_item *item;
+	যদি (patterns.nr) {
+		পূর্ণাঙ্ক found = 0;
+		সংরচনা string_list_item *item;
 
 		for_each_string_list_item(item, &patterns) {
-			if (!wildmatch(item->string, path_to_match, 0)) {
+			যদি (!wildmatch(item->string, path_to_match, 0)) {
 				found = 1;
-				break;
+				ভঙ্গ;
 			}
 		}
 
-		if (!found)
-			return 0;
+		যদি (!found)
+			ঘূৰাই 0;
 	}
 
 	/* Is it annotated? */
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
+	যদি (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
 		is_annotated = !oideq(ref->oid, &peeled);
-	} else {
+	} অন্যথা {
 		oidcpy(&peeled, ref->oid);
 		is_annotated = 0;
 	}
@@ -221,88 +221,88 @@ static int get_name(const struct reference *ref, void *cb_data UNUSED)
 	 * we still remember lightweight ones, only to give hints
 	 * in an error message).  --all allows any refs to be used.
 	 */
-	if (is_annotated)
+	যদি (is_annotated)
 		prio = 2;
-	else if (is_tag)
+	অন্যথা যদি (is_tag)
 		prio = 1;
-	else
+	অন্যথা
 		prio = 0;
 
 	add_to_known_names(all ? ref->name + 5 : ref->name + 10,
 			   &peeled, prio, ref->oid);
-	return 0;
+	ঘূৰাই 0;
 }
 
-struct possible_tag {
-	struct commit_name *name;
-	int depth;
-	int found_order;
+সংরচনা possible_tag {
+	সংরচনা commit_name *name;
+	পূর্ণাঙ্ক depth;
+	পূর্ণাঙ্ক found_order;
 	unsigned flag_within;
 };
 
-static int compare_pt(const void *a_, const void *b_)
+স্থির পূর্ণাঙ্ক compare_pt(ধ্রুৱ শূন্য *a_, ধ্রুৱ শূন্য *b_)
 {
-	struct possible_tag *a = (struct possible_tag *)a_;
-	struct possible_tag *b = (struct possible_tag *)b_;
-	if (a->depth != b->depth)
-		return a->depth - b->depth;
-	if (a->found_order != b->found_order)
-		return a->found_order - b->found_order;
-	return 0;
+	সংরচনা possible_tag *a = (সংরচনা possible_tag *)a_;
+	সংরচনা possible_tag *b = (সংরচনা possible_tag *)b_;
+	যদি (a->depth != b->depth)
+		ঘূৰাই a->depth - b->depth;
+	যদি (a->found_order != b->found_order)
+		ঘূৰাই a->found_order - b->found_order;
+	ঘূৰাই 0;
 }
 
-static unsigned long finish_depth_computation(struct prio_queue *queue,
-					      struct possible_tag *best)
+স্থির unsigned long finish_depth_computation(সংরচনা prio_queue *queue,
+					      সংরচনা possible_tag *best)
 {
 	unsigned long seen_commits = 0;
-	struct oidset unflagged = OIDSET_INIT;
-	struct commit *c;
+	সংরচনা oidset unflagged = OIDSET_INIT;
+	সংরচনা commit *c;
 
 	prio_queue_for_each(queue, c) {
-		if (!(c->object.flags & best->flag_within))
-			oidset_insert(&unflagged, &c->object.oid);
+		যদি (!(c->object.flags & best->flag_within))
+			oidset_ঢোকাও(&unflagged, &c->object.oid);
 	}
 
-	while ((c = prio_queue_get(queue))) {
-		struct commit_list *parents = c->parents;
+	যেতিয়ালৈ ((c = prio_queue_get(queue))) {
+		সংরচনা commit_list *parents = c->parents;
 		seen_commits++;
-		if (c->object.flags & best->flag_within) {
-			if (!oidset_size(&unflagged))
-				break;
-		} else {
+		যদি (c->object.flags & best->flag_within) {
+			যদি (!oidset_size(&unflagged))
+				ভঙ্গ;
+		} অন্যথা {
 			oidset_remove(&unflagged, &c->object.oid);
 			best->depth++;
 		}
-		while (parents) {
+		যেতিয়ালৈ (parents) {
 			unsigned seen, flag_before, flag_after;
-			struct commit *p = parents->item;
+			সংরচনা commit *p = parents->item;
 			repo_parse_commit(the_repository, p);
 			seen = p->object.flags & SEEN;
-			if (!seen)
+			যদি (!seen)
 				prio_queue_put(queue, p);
 			flag_before = p->object.flags & best->flag_within;
 			p->object.flags |= c->object.flags;
 			flag_after = p->object.flags & best->flag_within;
-			if (!seen && !flag_after)
-				oidset_insert(&unflagged, &p->object.oid);
-			if (seen && !flag_before && flag_after)
+			যদি (!seen && !flag_after)
+				oidset_ঢোকাও(&unflagged, &p->object.oid);
+			যদি (seen && !flag_before && flag_after)
 				oidset_remove(&unflagged, &p->object.oid);
 			parents = parents->next;
 		}
 	}
 	oidset_clear(&unflagged);
-	return seen_commits;
+	ঘূৰাই seen_commits;
 }
 
-static void append_name(struct commit_name *n, struct strbuf *dst)
+স্থির শূন্য append_name(সংরচনা commit_name *n, সংরচনা strbuf *dst)
 {
-	if (n->prio == 2 && !n->tag) {
+	যদি (n->prio == 2 && !n->tag) {
 		n->tag = lookup_tag(the_repository, &n->oid);
-		if (!n->tag || parse_tag(the_repository, n->tag))
+		যদি (!n->tag || parse_tag(the_repository, n->tag))
 			die(_("annotated tag %s not available"), n->path);
 	}
-	if (n->tag && !n->name_checked) {
-		if (strcmp(n->tag->tag, all ? n->path + 5 : n->path)) {
+	যদি (n->tag && !n->name_checked) {
+		যদি (strcmp(n->tag->tag, all ? n->path + 5 : n->path)) {
 			warning(_("tag '%s' is externally known as '%s'"),
 				n->path, n->tag->tag);
 			n->misnamed = 1;
@@ -310,60 +310,60 @@ static void append_name(struct commit_name *n, struct strbuf *dst)
 		n->name_checked = 1;
 	}
 
-	if (n->tag) {
-		if (all)
+	যদি (n->tag) {
+		যদি (all)
 			strbuf_addstr(dst, "tags/");
 		strbuf_addstr(dst, n->tag->tag);
-	} else {
+	} অন্যথা {
 		strbuf_addstr(dst, n->path);
 	}
 }
 
-static void append_suffix(int depth, const struct object_id *oid, struct strbuf *dst)
+স্থির শূন্য append_suffix(পূর্ণাঙ্ক depth, ধ্রুৱ সংরচনা object_id *oid, সংরচনা strbuf *dst)
 {
 	strbuf_addf(dst, "-%d-g%s", depth,
 		    repo_find_unique_abbrev(the_repository, oid, abbrev));
 }
 
-static void describe_commit(struct commit *cmit, struct strbuf *dst)
+স্থির শূন্য describe_commit(সংরচনা commit *cmit, সংরচনা strbuf *dst)
 {
-	struct commit *c, *gave_up_on = NULL;
-	struct prio_queue queue = { compare_commits_by_commit_date };
-	struct commit_name *n;
-	struct possible_tag all_matches[MAX_TAGS];
-	unsigned int match_cnt = 0, annotated_cnt = 0, cur_match;
+	সংরচনা commit *c, *gave_up_on = রিক্ত;
+	সংরচনা prio_queue queue = { compare_commits_by_commit_date };
+	সংরচনা commit_name *n;
+	সংরচনা possible_tag all_matches[MAX_TAGS];
+	unsigned পূর্ণাঙ্ক match_cnt = 0, annotated_cnt = 0, cur_match;
 	unsigned long seen_commits = 0;
-	unsigned int unannotated_cnt = 0;
+	unsigned পূর্ণাঙ্ক unannotated_cnt = 0;
 
 	n = find_commit_name(&cmit->object.oid);
-	if (n && (tags || all || n->prio == 2)) {
+	যদি (n && (tags || all || n->prio == 2)) {
 		/*
 		 * Exact match to an existing ref.
 		 */
 		append_name(n, dst);
-		if (n->misnamed || longformat)
+		যদি (n->misnamed || longformat)
 			append_suffix(0, n->tag ? get_tagged_oid(n->tag) : &cmit->object.oid, dst);
-		if (suffix)
+		যদি (suffix)
 			strbuf_addstr(dst, suffix);
-		return;
+		ঘূৰাই;
 	}
 
-	if (!max_candidates)
+	যদি (!max_candidates)
 		die(_("no tag exactly matches '%s'"), oid_to_hex(&cmit->object.oid));
-	if (debug)
+	যদি (debug)
 		fprintf(stderr, _("No exact match on refs or tags, searching to describe\n"));
 
-	if (!have_util) {
-		struct hashmap_iter iter;
-		struct commit *c;
-		struct commit_name *n;
+	যদি (!have_util) {
+		সংরচনা hashmap_iter iter;
+		সংরচনা commit *c;
+		সংরচনা commit_name *n;
 
 		init_commit_names(&commit_names);
 		hashmap_for_each_entry(&names, &iter, n,
 					entry /* member name */) {
 			c = lookup_commit_reference_gently(the_repository,
 							   &n->peeled, 1);
-			if (c)
+			যদি (c)
 				*commit_names_at(&commit_names, c) = n;
 		}
 		have_util = 1;
@@ -371,86 +371,86 @@ static void describe_commit(struct commit *cmit, struct strbuf *dst)
 
 	cmit->object.flags = SEEN;
 	prio_queue_put(&queue, cmit);
-	while ((c = prio_queue_get(&queue))) {
-		struct commit_list *parents = c->parents;
-		struct commit_name **slot;
+	যেতিয়ালৈ ((c = prio_queue_get(&queue))) {
+		সংরচনা commit_list *parents = c->parents;
+		সংরচনা commit_name **slot;
 
 		seen_commits++;
 
-		if (match_cnt == max_candidates ||
+		যদি (match_cnt == max_candidates ||
 		    match_cnt == hashmap_get_size(&names)) {
 			gave_up_on = c;
-			break;
+			ভঙ্গ;
 		}
 
 		slot = commit_names_peek(&commit_names, c);
-		n = slot ? *slot : NULL;
-		if (n) {
-			if (!tags && !all && n->prio < 2) {
+		n = slot ? *slot : রিক্ত;
+		যদি (n) {
+			যদি (!tags && !all && n->prio < 2) {
 				unannotated_cnt++;
-			} else if (match_cnt < max_candidates) {
-				struct possible_tag *t = &all_matches[match_cnt++];
+			} অন্যথা যদি (match_cnt < max_candidates) {
+				সংরচনা possible_tag *t = &all_matches[match_cnt++];
 				t->name = n;
 				t->depth = seen_commits - 1;
 				t->flag_within = 1u << match_cnt;
 				t->found_order = match_cnt;
 				c->object.flags |= t->flag_within;
-				if (n->prio == 2)
+				যদি (n->prio == 2)
 					annotated_cnt++;
 			}
 		}
-		for (cur_match = 0; cur_match < match_cnt; cur_match++) {
-			struct possible_tag *t = &all_matches[cur_match];
-			if (!(c->object.flags & t->flag_within))
+		বাবে (cur_match = 0; cur_match < match_cnt; cur_match++) {
+			সংরচনা possible_tag *t = &all_matches[cur_match];
+			যদি (!(c->object.flags & t->flag_within))
 				t->depth++;
 		}
 		/* Stop if last remaining path already covered by best candidate(s) */
-		if (annotated_cnt && !prio_queue_size(&queue)) {
-			int best_depth = INT_MAX;
+		যদি (annotated_cnt && !prio_queue_size(&queue)) {
+			পূর্ণাঙ্ক best_depth = INT_MAX;
 			unsigned best_within = 0;
-			for (cur_match = 0; cur_match < match_cnt; cur_match++) {
-				struct possible_tag *t = &all_matches[cur_match];
-				if (t->depth < best_depth) {
+			বাবে (cur_match = 0; cur_match < match_cnt; cur_match++) {
+				সংরচনা possible_tag *t = &all_matches[cur_match];
+				যদি (t->depth < best_depth) {
 					best_depth = t->depth;
 					best_within = t->flag_within;
-				} else if (t->depth == best_depth) {
+				} অন্যথা যদি (t->depth == best_depth) {
 					best_within |= t->flag_within;
 				}
 			}
-			if ((c->object.flags & best_within) == best_within) {
-				if (debug)
+			যদি ((c->object.flags & best_within) == best_within) {
+				যদি (debug)
 					fprintf(stderr, _("finished search at %s\n"),
 						oid_to_hex(&c->object.oid));
-				break;
+				ভঙ্গ;
 			}
 		}
-		while (parents) {
-			struct commit *p = parents->item;
+		যেতিয়ালৈ (parents) {
+			সংরচনা commit *p = parents->item;
 			repo_parse_commit(the_repository, p);
-			if (!(p->object.flags & SEEN))
+			যদি (!(p->object.flags & SEEN))
 				prio_queue_put(&queue, p);
 			p->object.flags |= c->object.flags;
 			parents = parents->next;
 
-			if (first_parent)
-				break;
+			যদি (first_parent)
+				ভঙ্গ;
 		}
 	}
 
-	if (!match_cnt) {
-		struct object_id *cmit_oid = &cmit->object.oid;
-		if (always) {
+	যদি (!match_cnt) {
+		সংরচনা object_id *cmit_oid = &cmit->object.oid;
+		যদি (always) {
 			strbuf_add_unique_abbrev(dst, cmit_oid, abbrev);
-			if (suffix)
+			যদি (suffix)
 				strbuf_addstr(dst, suffix);
 			clear_prio_queue(&queue);
-			return;
+			ঘূৰাই;
 		}
-		if (unannotated_cnt)
+		যদি (unannotated_cnt)
 			die(_("No annotated tags can describe '%s'.\n"
 			    "However, there were unannotated tags: try --tags."),
 			    oid_to_hex(cmit_oid));
-		else
+		অন্যথা
 			die(_("No tags can describe '%s'.\n"
 			    "Try --always, or create some tags."),
 			    oid_to_hex(cmit_oid));
@@ -458,31 +458,31 @@ static void describe_commit(struct commit *cmit, struct strbuf *dst)
 
 	QSORT(all_matches, match_cnt, compare_pt);
 
-	if (gave_up_on) {
+	যদি (gave_up_on) {
 		prio_queue_put(&queue, gave_up_on);
 		seen_commits--;
 	}
 	seen_commits += finish_depth_computation(&queue, &all_matches[0]);
 	clear_prio_queue(&queue);
 
-	if (debug) {
-		static int label_width = -1;
-		if (label_width < 0) {
-			int i, w;
-			for (i = 0; i < ARRAY_SIZE(prio_names); i++) {
+	যদি (debug) {
+		স্থির পূর্ণাঙ্ক label_width = -1;
+		যদি (label_width < 0) {
+			পূর্ণাঙ্ক i, w;
+			বাবে (i = 0; i < ARRAY_SIZE(prio_names); i++) {
 				w = strlen(_(prio_names[i]));
-				if (label_width < w)
+				যদি (label_width < w)
 					label_width = w;
 			}
 		}
-		for (cur_match = 0; cur_match < match_cnt; cur_match++) {
-			struct possible_tag *t = &all_matches[cur_match];
+		বাবে (cur_match = 0; cur_match < match_cnt; cur_match++) {
+			সংরচনা possible_tag *t = &all_matches[cur_match];
 			fprintf(stderr, " %-*s %8d %s\n",
 				label_width, _(prio_names[t->name->prio]),
 				t->depth, t->name->path);
 		}
 		fprintf(stderr, _("traversed %lu commits\n"), seen_commits);
-		if (gave_up_on) {
+		যদি (gave_up_on) {
 			fprintf(stderr,
 				_("found %i tags; gave up search at %s\n"),
 				max_candidates,
@@ -491,62 +491,62 @@ static void describe_commit(struct commit *cmit, struct strbuf *dst)
 	}
 
 	append_name(all_matches[0].name, dst);
-	if (all_matches[0].name->misnamed || abbrev)
+	যদি (all_matches[0].name->misnamed || abbrev)
 		append_suffix(all_matches[0].depth, &cmit->object.oid, dst);
-	if (suffix)
+	যদি (suffix)
 		strbuf_addstr(dst, suffix);
 }
 
-struct process_commit_data {
-	struct commit *current_commit;
-	const struct object_id *looking_for;
-	struct strbuf *dst;
-	struct rev_info *revs;
+সংরচনা process_commit_data {
+	সংরচনা commit *current_commit;
+	ধ্রুৱ সংরচনা object_id *looking_for;
+	সংরচনা strbuf *dst;
+	সংরচনা rev_info *revs;
 };
 
-static void process_commit(struct commit *commit, void *data)
+স্থির শূন্য process_commit(সংরচনা commit *commit, শূন্য *data)
 {
-	struct process_commit_data *pcd = data;
+	সংরচনা process_commit_data *pcd = data;
 	pcd->current_commit = commit;
 }
 
-static void process_object(struct object *obj, const char *path, void *data)
+স্থির শূন্য process_object(সংরচনা object *obj, ধ্রুৱ ৱর্ণ *path, শূন্য *data)
 {
-	struct process_commit_data *pcd = data;
+	সংরচনা process_commit_data *pcd = data;
 
-	if (oideq(pcd->looking_for, &obj->oid) && !pcd->dst->len) {
+	যদি (oideq(pcd->looking_for, &obj->oid) && !pcd->dst->len) {
 		reset_revision_walk();
-		if (pcd->current_commit) {
+		যদি (pcd->current_commit) {
 			describe_commit(pcd->current_commit, pcd->dst);
 			strbuf_addf(pcd->dst, ":%s", path);
 		}
 		commit_list_free(pcd->revs->commits);
-		pcd->revs->commits = NULL;
+		pcd->revs->commits = রিক্ত;
 	}
 }
 
-static void describe_blob(const struct object_id *oid, struct strbuf *dst)
+স্থির শূন্য describe_blob(ধ্রুৱ সংরচনা object_id *oid, সংরচনা strbuf *dst)
 {
-	struct rev_info revs;
-	struct strvec args = STRVEC_INIT;
-	struct object_id head_oid;
-	struct process_commit_data pcd = { NULL, oid, dst, &revs};
+	সংরচনা rev_info revs;
+	সংরচনা strvec args = STRVEC_INIT;
+	সংরচনা object_id head_oid;
+	সংরচনা process_commit_data pcd = { রিক্ত, oid, dst, &revs};
 
-	if (repo_get_oid(the_repository, "HEAD", &head_oid))
+	যদি (repo_get_oid(the_repository, "HEAD", &head_oid))
 		die(_("cannot search for blob '%s' on an unborn branch"),
 		    oid_to_hex(oid));
 
 	strvec_pushl(&args, "internal: The first arg is not parsed",
 		     "--objects", "--in-commit-order", "--reverse",
 		     oid_to_hex(&head_oid),
-		     NULL);
+		     রিক্ত);
 
-	repo_init_revisions(the_repository, &revs, NULL);
-	setup_revisions_from_strvec(&args, &revs, NULL);
-	if (args.nr > 1)
+	repo_init_revisions(the_repository, &revs, রিক্ত);
+	setup_revisions_from_strvec(&args, &revs, রিক্ত);
+	যদি (args.nr > 1)
 		BUG("setup_revisions could not handle all args?");
 
-	if (prepare_revision_walk(&revs))
+	যদি (prepare_revision_walk(&revs))
 		die("revision walk setup failed");
 
 	traverse_commit_list(&revs, process_commit, process_object, &pcd);
@@ -554,60 +554,60 @@ static void describe_blob(const struct object_id *oid, struct strbuf *dst)
 	release_revisions(&revs);
 	strvec_clear(&args);
 
-	if (!dst->len)
+	যদি (!dst->len)
 		die(_("blob '%s' not reachable from HEAD"), oid_to_hex(oid));
 }
 
-static void describe(const char *arg, int last_one)
+স্থির শূন্য describe(ধ্রুৱ ৱর্ণ *arg, পূর্ণাঙ্ক last_one)
 {
-	struct object_id oid;
-	struct commit *cmit;
-	struct strbuf sb = STRBUF_INIT;
+	সংরচনা object_id oid;
+	সংরচনা commit *cmit;
+	সংরচনা strbuf sb = STRBUF_INIT;
 
-	if (debug)
+	যদি (debug)
 		fprintf(stderr, _("describe %s\n"), arg);
 
-	if (repo_get_oid(the_repository, arg, &oid))
+	যদি (repo_get_oid(the_repository, arg, &oid))
 		die(_("Not a valid object name %s"), arg);
 	cmit = lookup_commit_reference_gently(the_repository, &oid, 1);
 
-	if (cmit)
+	যদি (cmit)
 		describe_commit(cmit, &sb);
-	else if (odb_read_object_info(the_repository->objects,
-				      &oid, NULL) == OBJ_BLOB)
+	অন্যথা যদি (odb_read_object_info(the_repository->objects,
+				      &oid, রিক্ত) == OBJ_BLOB)
 		describe_blob(&oid, &sb);
-	else
+	অন্যথা
 		die(_("%s is neither a commit nor blob"), arg);
 
 	puts(sb.buf);
 
-	if (!last_one)
+	যদি (!last_one)
 		clear_commit_marks(cmit, -1);
 
 	strbuf_release(&sb);
 }
 
-static int option_parse_exact_match(const struct option *opt, const char *arg,
-				    int unset)
+স্থির পূর্ণাঙ্ক option_parse_exact_match(ধ্রুৱ সংরচনা option *opt, ধ্রুৱ ৱর্ণ *arg,
+				    পূর্ণাঙ্ক unset)
 {
-	int *val = opt->value;
+	পূর্ণাঙ্ক *val = opt->মান;
 
 	BUG_ON_OPT_ARG(arg);
 
 	*val = unset ? DEFAULT_CANDIDATES : 0;
-	return 0;
+	ঘূৰাই 0;
 }
 
-int cmd_describe(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED )
+পূর্ণাঙ্ক cmd_describe(পূর্ণাঙ্ক argc,
+		 ধ্রুৱ ৱর্ণ **argv,
+		 ধ্রুৱ ৱর্ণ *prefix,
+		 সংরচনা repository *repo UNUSED )
 {
-	struct refs_for_each_ref_options for_each_ref_opts = {
+	সংরচনা refs_for_each_ref_options for_each_ref_opts = {
 		.flags = REFS_FOR_EACH_INCLUDE_BROKEN,
 	};
-	int contains = 0;
-	struct option options[] = {
+	পূর্ণাঙ্ক contains = 0;
+	সংরচনা option options[] = {
 		OPT_BOOL(0, "contains",   &contains, N_("find the tag that comes after the commit")),
 		OPT_BOOL(0, "debug",      &debug, N_("debug search strategy on stderr")),
 		OPT_BOOL(0, "all",        &all, N_("use any ref")),
@@ -615,7 +615,7 @@ int cmd_describe(int argc,
 		OPT_BOOL(0, "long",       &longformat, N_("always use long format")),
 		OPT_BOOL(0, "first-parent", &first_parent, N_("only follow first parent")),
 		OPT__ABBREV(&abbrev),
-		OPT_CALLBACK_F(0, "exact-match", &max_candidates, NULL,
+		OPT_CALLBACK_F(0, "exact-match", &max_candidates, রিক্ত,
 			       N_("only output exact matches"),
 			       PARSE_OPT_NOARG, option_parse_exact_match),
 		OPT_INTEGER(0, "candidates", &max_candidates,
@@ -629,7 +629,7 @@ int cmd_describe(int argc,
 		{
 			.type = OPTION_STRING,
 			.long_name = "dirty",
-			.value = &dirty,
+			.মান = &dirty,
 			.argh = N_("mark"),
 			.help = N_("append <mark> on dirty working tree (default: \"-dirty\")"),
 			.flags = PARSE_OPT_OPTARG,
@@ -638,7 +638,7 @@ int cmd_describe(int argc,
 		{
 			.type = OPTION_STRING,
 			.long_name = "broken",
-			.value = &broken,
+			.মান = &broken,
 			.argh = N_("mark"),
 			.help = N_("append <mark> on broken working tree (default: \"-broken\")"),
 			.flags = PARSE_OPT_OPTARG,
@@ -647,42 +647,42 @@ int cmd_describe(int argc,
 		OPT_END(),
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, রিক্ত);
 	argc = parse_options(argc, argv, prefix, options, describe_usage, 0);
-	if (abbrev < 0)
+	যদি (abbrev < 0)
 		abbrev = DEFAULT_ABBREV;
 
-	if (max_candidates < 0)
+	যদি (max_candidates < 0)
 		max_candidates = 0;
-	else if (max_candidates > MAX_TAGS)
+	অন্যথা যদি (max_candidates > MAX_TAGS)
 		max_candidates = MAX_TAGS;
 
 	save_commit_buffer = 0;
 
-	if (longformat && abbrev == 0)
+	যদি (longformat && abbrev == 0)
 		die(_("options '%s' and '%s' cannot be used together"), "--long", "--abbrev=0");
 
-	if (contains) {
-		struct string_list_item *item;
-		struct strvec args;
-		const char **argv_copy;
-		int ret;
+	যদি (contains) {
+		সংরচনা string_list_item *item;
+		সংরচনা strvec args;
+		ধ্রুৱ ৱর্ণ **argv_copy;
+		পূর্ণাঙ্ক ret;
 
 		strvec_init(&args);
 		strvec_pushl(&args, "name-rev",
 			     "--peel-tag", "--name-only", "--no-undefined",
-			     NULL);
-		if (always)
-			strvec_push(&args, "--always");
-		if (!all)
-			strvec_push(&args, "--tags");
+			     রিক্ত);
+		যদি (always)
+			strvec_ঠেলো(&args, "--always");
+		যদি (!all)
+			strvec_ঠেলো(&args, "--tags");
 
 		for_each_string_list_item(item, &patterns)
 			strvec_pushf(&args, "--refs=refs/tags/%s", item->string);
 		for_each_string_list_item(item, &exclude_patterns)
 			strvec_pushf(&args, "--exclude=refs/tags/%s", item->string);
 
-		if (all) {
+		যদি (all) {
 			for_each_string_list_item(item, &patterns)
 				strvec_pushf(&args, "--refs=refs/heads/%s", item->string);
 			for_each_string_list_item(item, &exclude_patterns)
@@ -693,39 +693,39 @@ int cmd_describe(int argc,
 				strvec_pushf(&args, "--exclude=refs/remotes/%s", item->string);
 		}
 
-		if (argc)
+		যদি (argc)
 			strvec_pushv(&args, argv);
-		else
-			strvec_push(&args, "HEAD");
+		অন্যথা
+			strvec_ঠেলো(&args, "HEAD");
 
 		/*
 		 * `cmd_name_rev()` modifies the array, so we'd leak its
 		 * contained strings if we didn't do a copy here.
 		 */
 		ALLOC_ARRAY(argv_copy, args.nr + 1);
-		for (size_t i = 0; i < args.nr; i++)
+		বাবে (size_t i = 0; i < args.nr; i++)
 			argv_copy[i] = args.v[i];
-		argv_copy[args.nr] = NULL;
+		argv_copy[args.nr] = রিক্ত;
 
 		ret = cmd_name_rev(args.nr, argv_copy, prefix, the_repository);
 
 		strvec_clear(&args);
-		free(argv_copy);
-		return ret;
+		মুক্ত(argv_copy);
+		ঘূৰাই ret;
 	}
 
-	if (!all)
+	যদি (!all)
 		for_each_ref_opts.prefix = "refs/tags/";
 
-	hashmap_init(&names, commit_name_neq, NULL, 0);
+	hashmap_init(&names, commit_name_neq, রিক্ত, 0);
 	refs_for_each_ref_ext(get_main_ref_store(the_repository),
-			      get_name, NULL, &for_each_ref_opts);
-	if (!hashmap_get_size(&names) && !always)
+			      get_name, রিক্ত, &for_each_ref_opts);
+	যদি (!hashmap_get_size(&names) && !always)
 		die(_("No names found, cannot describe anything."));
 
-	if (argc == 0) {
-		if (broken) {
-			struct child_process cp = CHILD_PROCESS_INIT;
+	যদি (argc == 0) {
+		যদি (broken) {
+			সংরচনা child_process cp = CHILD_PROCESS_INIT;
 
 			strvec_pushv(&cp.args, update_index_args);
 			cp.git_cmd = 1;
@@ -739,57 +739,57 @@ int cmd_describe(int argc,
 			cp.no_stdin = 1;
 			cp.no_stdout = 1;
 
-			if (!dirty)
+			যদি (!dirty)
 				dirty = "-dirty";
 
-			switch (run_command(&cp)) {
-			case 0:
-				suffix = NULL;
-				break;
-			case 1:
+			ৱিকল্প (run_command(&cp)) {
+			পক্ষ 0:
+				suffix = রিক্ত;
+				ভঙ্গ;
+			পক্ষ 1:
 				suffix = dirty;
-				break;
-			default:
+				ভঙ্গ;
+			স্ৱভাৱ:
 				/* diff-index aborted abnormally */
 				suffix = broken;
 			}
-		} else if (dirty) {
-			struct lock_file index_lock = LOCK_INIT;
-			struct rev_info revs;
-			int fd;
+		} অন্যথা যদি (dirty) {
+			সংরচনা lock_file index_lock = LOCK_INIT;
+			সংরচনা rev_info revs;
+			পূর্ণাঙ্ক fd;
 
-			setup_work_tree(the_repository);
+			setup_work_বৃক্ষ(the_repository);
 			prepare_repo_settings(the_repository);
 			the_repository->settings.command_requires_full_index = 0;
 			repo_read_index(the_repository);
 			refresh_index(the_repository->index, REFRESH_QUIET|REFRESH_UNMERGED,
-				      NULL, NULL, NULL);
+				      রিক্ত, রিক্ত, রিক্ত);
 			fd = repo_hold_locked_index(the_repository,
 						    &index_lock, 0);
-			if (0 <= fd)
+			যদি (0 <= fd)
 				repo_update_index_if_able(the_repository, &index_lock);
 
 			repo_init_revisions(the_repository, &revs, prefix);
 
-			if (setup_revisions(ARRAY_SIZE(diff_index_args) - 1,
-					    diff_index_args, &revs, NULL) != 1)
+			যদি (setup_revisions(ARRAY_SIZE(diff_index_args) - 1,
+					    diff_index_args, &revs, রিক্ত) != 1)
 				BUG("malformed internal diff-index command line");
 			run_diff_index(&revs, 0);
 
-			if (!diff_result_code(&revs))
-				suffix = NULL;
-			else
+			যদি (!diff_result_code(&revs))
+				suffix = রিক্ত;
+			অন্যথা
 				suffix = dirty;
 			release_revisions(&revs);
 		}
 		describe("HEAD", 1);
-	} else if (dirty) {
+	} অন্যথা যদি (dirty) {
 		die(_("option '%s' and commit-ishes cannot be used together"), "--dirty");
-	} else if (broken) {
+	} অন্যথা যদি (broken) {
 		die(_("option '%s' and commit-ishes cannot be used together"), "--broken");
-	} else {
-		while (argc-- > 0)
+	} অন্যথা {
+		যেতিয়ালৈ (argc-- > 0)
 			describe(*argv++, argc == 0);
 	}
-	return 0;
+	ঘূৰাই 0;
 }

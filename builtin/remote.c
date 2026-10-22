@@ -1,27 +1,27 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "date.h"
-#include "gettext.h"
-#include "ident.h"
-#include "parse-options.h"
-#include "path.h"
-#include "transport.h"
-#include "remote.h"
-#include "string-list.h"
-#include "strbuf.h"
-#include "run-command.h"
-#include "rebase.h"
-#include "refs.h"
-#include "refspec.h"
-#include "odb.h"
-#include "strvec.h"
-#include "commit-reach.h"
-#include "progress.h"
+#অন্তর্ভাৱ "builtin.h"
+#অন্তর্ভাৱ "advice.h"
+#অন্তর্ভাৱ "config.h"
+#অন্তর্ভাৱ "date.h"
+#অন্তর্ভাৱ "gettext.h"
+#অন্তর্ভাৱ "ident.h"
+#অন্তর্ভাৱ "parse-options.h"
+#অন্তর্ভাৱ "path.h"
+#অন্তর্ভাৱ "transport.h"
+#অন্তর্ভাৱ "remote.h"
+#অন্তর্ভাৱ "string-list.h"
+#অন্তর্ভাৱ "strbuf.h"
+#অন্তর্ভাৱ "run-command.h"
+#অন্তর্ভাৱ "rebase.h"
+#অন্তর্ভাৱ "refs.h"
+#অন্তর্ভাৱ "refspec.h"
+#অন্তর্ভাৱ "odb.h"
+#অন্তর্ভাৱ "strvec.h"
+#অন্তর্ভাৱ "commit-reach.h"
+#অন্তর্ভাৱ "progress.h"
 
-static const char * const builtin_remote_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ builtin_remote_usage[] = {
 	"git remote [-v | --verbose]",
 	N_("git remote add [-t <branch>] [-m <master>] [-f] [--tags | --no-tags] [--mirror=<fetch|push>] <name> <url>"),
 	N_("git remote rename [--[no-]progress] <old> <new>"),
@@ -35,84 +35,84 @@ static const char * const builtin_remote_usage[] = {
 	N_("git remote set-url [--push] <name> <newurl> [<oldurl>]"),
 	N_("git remote set-url --add <name> <newurl>"),
 	N_("git remote set-url --delete <name> <url>"),
-	NULL
+	রিক্ত
 };
 
-static const char * const builtin_remote_add_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ builtin_remote_add_usage[] = {
 	N_("git remote add [<options>] <name> <url>"),
-	NULL
+	রিক্ত
 };
 
-static const char * const builtin_remote_rename_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ builtin_remote_rename_usage[] = {
 	N_("git remote rename [--[no-]progress] <old> <new>"),
-	NULL
+	রিক্ত
 };
 
-static const char * const builtin_remote_rm_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ builtin_remote_rm_usage[] = {
 	N_("git remote remove <name>"),
-	NULL
+	রিক্ত
 };
 
-static const char * const builtin_remote_sethead_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ builtin_remote_sethead_usage[] = {
 	N_("git remote set-head <name> (-a | --auto | -d | --delete | <branch>)"),
-	NULL
+	রিক্ত
 };
 
-static const char * const builtin_remote_setbranches_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ builtin_remote_setbranches_usage[] = {
 	N_("git remote set-branches <name> <branch>..."),
 	N_("git remote set-branches --add <name> <branch>..."),
-	NULL
+	রিক্ত
 };
 
-static const char * const builtin_remote_show_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ builtin_remote_show_usage[] = {
 	N_("git remote show [<options>] <name>"),
-	NULL
+	রিক্ত
 };
 
-static const char * const builtin_remote_prune_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ builtin_remote_prune_usage[] = {
 	N_("git remote prune [<options>] <name>"),
-	NULL
+	রিক্ত
 };
 
-static const char * const builtin_remote_update_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ builtin_remote_update_usage[] = {
 	N_("git remote update [<options>] [<group> | <remote>]..."),
-	NULL
+	রিক্ত
 };
 
-static const char * const builtin_remote_geturl_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ builtin_remote_geturl_usage[] = {
 	N_("git remote get-url [--push] [--all] <name>"),
-	NULL
+	রিক্ত
 };
 
-static const char * const builtin_remote_seturl_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ builtin_remote_seturl_usage[] = {
 	N_("git remote set-url [--push] <name> <newurl> [<oldurl>]"),
 	N_("git remote set-url --add <name> <newurl>"),
 	N_("git remote set-url --delete <name> <url>"),
-	NULL
+	রিক্ত
 };
 
 #define GET_REF_STATES (1<<0)
 #define GET_HEAD_NAMES (1<<1)
-#define GET_PUSH_REF_STATES (1<<2)
+#define GET_ঠেলো_REF_STATES (1<<2)
 
-static int verbose;
+স্থির পূর্ণাঙ্ক verbose;
 
-static int fetch_remote(const char *name)
+স্থির পূর্ণাঙ্ক fetch_remote(ধ্রুৱ ৱর্ণ *name)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	সংরচনা child_process cmd = CHILD_PROCESS_INIT;
 
-	strvec_push(&cmd.args, "fetch");
-	if (verbose)
-		strvec_push(&cmd.args, "-v");
-	strvec_push(&cmd.args, name);
+	strvec_ঠেলো(&cmd.args, "fetch");
+	যদি (verbose)
+		strvec_ঠেলো(&cmd.args, "-v");
+	strvec_ঠেলো(&cmd.args, name);
 	cmd.git_cmd = 1;
 	printf_ln(_("Updating %s"), name);
-	if (run_command(&cmd))
-		return error(_("Could not fetch %s"), name);
-	return 0;
+	যদি (run_command(&cmd))
+		ঘূৰাই error(_("Could not fetch %s"), name);
+	ঘূৰাই 0;
 }
 
-enum {
+গণনা {
 	TAGS_UNSET = 0,
 	TAGS_DEFAULT = 1,
 	TAGS_SET = 2
@@ -120,73 +120,73 @@ enum {
 
 #define MIRROR_NONE 0
 #define MIRROR_FETCH 1
-#define MIRROR_PUSH 2
-#define MIRROR_BOTH (MIRROR_FETCH|MIRROR_PUSH)
+#define MIRROR_ঠেলো 2
+#define MIRROR_BOTH (MIRROR_FETCH|MIRROR_ঠেলো)
 
-static void add_branch(const char *key, const char *branchname,
-		       const char *remotename, int mirror, struct strbuf *tmp)
+স্থির শূন্য add_branch(ধ্রুৱ ৱর্ণ *চাবি, ধ্রুৱ ৱর্ণ *branchname,
+		       ধ্রুৱ ৱর্ণ *remotename, পূর্ণাঙ্ক mirror, সংরচনা strbuf *tmp)
 {
 	strbuf_reset(tmp);
 	strbuf_addch(tmp, '+');
-	if (mirror)
+	যদি (mirror)
 		strbuf_addf(tmp, "refs/%s:refs/%s",
 				branchname, branchname);
-	else
+	অন্যথা
 		strbuf_addf(tmp, "refs/heads/%s:refs/remotes/%s/%s",
 				branchname, remotename, branchname);
-	repo_config_set_multivar(the_repository, key, tmp->buf, "^$", 0);
+	repo_config_set_multivar(the_repository, চাবি, tmp->buf, "^$", 0);
 }
 
-static const char mirror_advice[] =
+স্থির ধ্রুৱ ৱর্ণ mirror_advice[] =
 N_("--mirror is dangerous and deprecated; please\n"
    "\t use --mirror=fetch or --mirror=push instead");
 
-static int parse_mirror_opt(const struct option *opt, const char *arg, int not)
+স্থির পূর্ণাঙ্ক parse_mirror_opt(ধ্রুৱ সংরচনা option *opt, ধ্রুৱ ৱর্ণ *arg, পূর্ণাঙ্ক not)
 {
-	unsigned *mirror = opt->value;
-	if (not)
+	unsigned *mirror = opt->মান;
+	যদি (not)
 		*mirror = MIRROR_NONE;
-	else if (!arg) {
+	অন্যথা যদি (!arg) {
 		warning("%s", _(mirror_advice));
 		*mirror = MIRROR_BOTH;
 	}
-	else if (!strcmp(arg, "fetch"))
+	অন্যথা যদি (!strcmp(arg, "fetch"))
 		*mirror = MIRROR_FETCH;
-	else if (!strcmp(arg, "push"))
-		*mirror = MIRROR_PUSH;
-	else
-		return error(_("unknown --mirror argument: %s"), arg);
-	return 0;
+	অন্যথা যদি (!strcmp(arg, "push"))
+		*mirror = MIRROR_ঠেলো;
+	অন্যথা
+		ঘূৰাই error(_("unknown --mirror argument: %s"), arg);
+	ঘূৰাই 0;
 }
 
-static int check_remote_collision(struct remote *remote, void *data)
+স্থির পূর্ণাঙ্ক check_remote_collision(সংরচনা remote *remote, শূন্য *data)
 {
-	const char *name = data;
-	const char *p;
+	ধ্রুৱ ৱর্ণ *name = data;
+	ধ্রুৱ ৱর্ণ *p;
 
-	if (skip_prefix(name, remote->name, &p) && *p == '/')
+	যদি (skip_prefix(name, remote->name, &p) && *p == '/')
 		die(_("remote name '%s' is a subset of existing remote '%s'"),
 		    name, remote->name);
-	if (skip_prefix(remote->name, name, &p) && *p == '/')
+	যদি (skip_prefix(remote->name, name, &p) && *p == '/')
 		die(_("remote name '%s' is a superset of existing remote '%s'"),
 		    name, remote->name);
 
-	return 0;
+	ঘূৰাই 0;
 }
 
-static int add(int argc, const char **argv, const char *prefix,
-	       struct repository *repo UNUSED)
+স্থির পূর্ণাঙ্ক add(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+	       সংরচনা repository *repo UNUSED)
 {
-	int fetch = 0, fetch_tags = TAGS_DEFAULT;
+	পূর্ণাঙ্ক fetch = 0, fetch_tags = TAGS_DEFAULT;
 	unsigned mirror = MIRROR_NONE;
-	struct string_list track = STRING_LIST_INIT_NODUP;
-	const char *master = NULL;
-	struct remote *remote;
-	struct strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT;
-	const char *name, *url;
-	int result = 0;
+	সংরচনা string_list track = STRING_LIST_INIT_NODUP;
+	ধ্রুৱ ৱর্ণ *master = রিক্ত;
+	সংরচনা remote *remote;
+	সংরচনা strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT;
+	ধ্রুৱ ৱর্ণ *name, *url;
+	পূর্ণাঙ্ক result = 0;
 
-	struct option options[] = {
+	সংরচনা option options[] = {
 		OPT_BOOL('f', "fetch", &fetch, N_("fetch the remote branches")),
 		OPT_SET_INT(0, "tags", &fetch_tags,
 			    N_("import all tags and associated objects when fetching\n"
@@ -204,68 +204,68 @@ static int add(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_add_usage, 0);
 
-	if (argc != 2)
+	যদি (argc != 2)
 		usage_with_options(builtin_remote_add_usage, options);
 
-	if (mirror && master)
+	যদি (mirror && master)
 		die(_("specifying a master branch makes no sense with --mirror"));
-	if (mirror && !(mirror & MIRROR_FETCH) && track.nr)
+	যদি (mirror && !(mirror & MIRROR_FETCH) && track.nr)
 		die(_("specifying branches to track makes sense only with fetch mirrors"));
 
 	name = argv[0];
 	url = argv[1];
 
 	remote = remote_get(name);
-	if (remote_is_configured(remote, 1)) {
+	যদি (remote_is_configured(remote, 1)) {
 		error(_("remote %s already exists."), name);
 		exit(3);
 	}
 
-	if (!valid_remote_name(name))
+	যদি (!valid_remote_name(name))
 		die(_("'%s' is not a valid remote name"), name);
 
-	for_each_remote(check_remote_collision, (void *)name);
+	for_each_remote(check_remote_collision, (শূন্য *)name);
 
 	strbuf_addf(&buf, "remote.%s.url", name);
 	repo_config_set(the_repository, buf.buf, url);
 
-	if (!mirror || mirror & MIRROR_FETCH) {
+	যদি (!mirror || mirror & MIRROR_FETCH) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.fetch", name);
-		if (track.nr == 0)
+		যদি (track.nr == 0)
 			string_list_append(&track, "*");
-		for (size_t i = 0; i < track.nr; i++) {
-			add_branch(buf.buf, track.items[i].string,
+		বাবে (size_t i = 0; i < track.nr; i++) {
+			add_branch(buf.buf, track.বস্তুসমূহ[i].string,
 				   name, mirror, &buf2);
 		}
 	}
 
-	if (mirror & MIRROR_PUSH) {
+	যদি (mirror & MIRROR_ঠেলো) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.mirror", name);
 		repo_config_set(the_repository, buf.buf, "true");
 	}
 
-	if (fetch_tags != TAGS_DEFAULT) {
+	যদি (fetch_tags != TAGS_DEFAULT) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.tagOpt", name);
 		repo_config_set(the_repository, buf.buf,
 				fetch_tags == TAGS_SET ? "--tags" : "--no-tags");
 	}
 
-	if (fetch && fetch_remote(name)) {
+	যদি (fetch && fetch_remote(name)) {
 		result = 1;
-		goto out;
+		গচ্ছ out;
 	}
 
-	if (master) {
+	যদি (master) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "refs/remotes/%s/HEAD", name);
 
 		strbuf_reset(&buf2);
 		strbuf_addf(&buf2, "refs/remotes/%s/%s", name, master);
 
-		if (refs_update_symref(get_main_ref_store(the_repository), buf.buf, buf2.buf, "remote add"))
+		যদি (refs_update_symref(get_main_ref_store(the_repository), buf.buf, buf2.buf, "remote add"))
 			result = error(_("Could not setup master '%s'"), master);
 	}
 
@@ -274,110 +274,110 @@ out:
 	strbuf_release(&buf2);
 	string_list_clear(&track, 0);
 
-	return result;
+	ঘূৰাই result;
 }
 
-struct branch_info {
-	char *remote_name;
-	struct string_list merge;
-	enum rebase_type rebase;
-	char *push_remote_name;
+সংরচনা branch_info {
+	ৱর্ণ *remote_name;
+	সংরচনা string_list merge;
+	গণনা rebase_type rebase;
+	ৱর্ণ *ঠেলো_remote_name;
 };
 
-static struct string_list branch_list = STRING_LIST_INIT_DUP;
+স্থির সংরচনা string_list branch_list = STRING_LIST_INIT_DUP;
 
-static const char *abbrev_ref(const char *name, const char *prefix)
+স্থির ধ্রুৱ ৱর্ণ *abbrev_ref(ধ্রুৱ ৱর্ণ *name, ধ্রুৱ ৱর্ণ *prefix)
 {
 	skip_prefix(name, prefix, &name);
-	return name;
+	ঘূৰাই name;
 }
 #define abbrev_branch(name) abbrev_ref((name), "refs/heads/")
 
-static int config_read_branches(const char *key, const char *value,
-				const struct config_context *ctx UNUSED,
-				void *data UNUSED)
+স্থির পূর্ণাঙ্ক config_read_branches(ধ্রুৱ ৱর্ণ *চাবি, ধ্রুৱ ৱর্ণ *মান,
+				ধ্রুৱ সংরচনা config_context *ctx UNUSED,
+				শূন্য *data UNUSED)
 {
-	const char *orig_key = key;
-	char *name;
-	struct string_list_item *item;
-	struct branch_info *info;
-	enum { REMOTE, MERGE, REBASE, PUSH_REMOTE } type;
-	size_t key_len;
+	ধ্রুৱ ৱর্ণ *orig_চাবি = চাবি;
+	ৱর্ণ *name;
+	সংরচনা string_list_item *item;
+	সংরচনা branch_info *info;
+	গণনা { REMOTE, MERGE, REBASE, ঠেলো_REMOTE } type;
+	size_t চাবি_len;
 
-	if (!starts_with(key, "branch."))
-		return 0;
+	যদি (!starts_with(চাবি, "branch."))
+		ঘূৰাই 0;
 
-	key += strlen("branch.");
-	if (strip_suffix(key, ".remote", &key_len))
+	চাবি += strlen("branch.");
+	যদি (strip_suffix(চাবি, ".remote", &চাবি_len))
 		type = REMOTE;
-	else if (strip_suffix(key, ".merge", &key_len))
+	অন্যথা যদি (strip_suffix(চাবি, ".merge", &চাবি_len))
 		type = MERGE;
-	else if (strip_suffix(key, ".rebase", &key_len))
+	অন্যথা যদি (strip_suffix(চাবি, ".rebase", &চাবি_len))
 		type = REBASE;
-	else if (strip_suffix(key, ".pushremote", &key_len))
-		type = PUSH_REMOTE;
-	else
-		return 0;
+	অন্যথা যদি (strip_suffix(চাবি, ".pushremote", &চাবি_len))
+		type = ঠেলো_REMOTE;
+	অন্যথা
+		ঘূৰাই 0;
 
-	name = xmemdupz(key, key_len);
-	item = string_list_insert(&branch_list, name);
+	name = xmemdupz(চাবি, চাবি_len);
+	item = string_list_ঢোকাও(&branch_list, name);
 
-	if (!item->util)
-		item->util = xcalloc(1, sizeof(struct branch_info));
+	যদি (!item->util)
+		item->util = xcalloc(1, পরিমাণ(সংরচনা branch_info));
 	info = item->util;
-	switch (type) {
-	case REMOTE:
-		if (info->remote_name)
-			warning(_("more than one %s"), orig_key);
-		info->remote_name = xstrdup(value);
-		break;
-	case MERGE: {
-		const char *space = strchr(value, ' ');
-		value = abbrev_branch(value);
-		while (space) {
-			char *merge;
-			merge = xstrndup(value, space - value);
+	ৱিকল্প (type) {
+	পক্ষ REMOTE:
+		যদি (info->remote_name)
+			warning(_("more than one %s"), orig_চাবি);
+		info->remote_name = xstrdup(মান);
+		ভঙ্গ;
+	পক্ষ MERGE: {
+		ধ্রুৱ ৱর্ণ *space = strchr(মান, ' ');
+		মান = abbrev_branch(মান);
+		যেতিয়ালৈ (space) {
+			ৱর্ণ *merge;
+			merge = xstrndup(মান, space - মান);
 			string_list_append(&info->merge, merge);
-			value = abbrev_branch(space + 1);
-			space = strchr(value, ' ');
+			মান = abbrev_branch(space + 1);
+			space = strchr(মান, ' ');
 		}
-		string_list_append(&info->merge, xstrdup(value));
-		break;
+		string_list_append(&info->merge, xstrdup(মান));
+		ভঙ্গ;
 	}
-	case REBASE:
+	পক্ষ REBASE:
 		/*
 		 * Consider invalid values as false and check the
 		 * truth value with >= REBASE_TRUE.
 		 */
-		info->rebase = rebase_parse_value(value);
-		if (info->rebase == REBASE_INVALID)
+		info->rebase = rebase_parse_মান(মান);
+		যদি (info->rebase == REBASE_INVALID)
 			warning(_("unhandled branch.%s.rebase=%s; assuming "
-				  "'true'"), name, value);
-		break;
-	case PUSH_REMOTE:
-		if (info->push_remote_name)
-			warning(_("more than one %s"), orig_key);
-		info->push_remote_name = xstrdup(value);
-		break;
-	default:
+				  "'true'"), name, মান);
+		ভঙ্গ;
+	পক্ষ ঠেলো_REMOTE:
+		যদি (info->ঠেলো_remote_name)
+			warning(_("more than one %s"), orig_চাবি);
+		info->ঠেলো_remote_name = xstrdup(মান);
+		ভঙ্গ;
+	স্ৱভাৱ:
 		BUG("unexpected type=%d", type);
 	}
 
-	free(name);
-	return 0;
+	মুক্ত(name);
+	ঘূৰাই 0;
 }
 
-static void read_branches(void)
+স্থির শূন্য read_branches(শূন্য)
 {
-	if (branch_list.nr)
-		return;
-	repo_config(the_repository, config_read_branches, NULL);
+	যদি (branch_list.nr)
+		ঘূৰাই;
+	repo_config(the_repository, config_read_branches, রিক্ত);
 }
 
-struct ref_states {
-	struct remote *remote;
-	struct string_list new_refs, skipped, stale, tracked, heads, push;
-	int queried;
+সংরচনা ref_states {
+	সংরচনা remote *remote;
+	সংরচনা string_list new_refs, skipped, stale, tracked, heads, ঠেলো;
+	পূর্ণাঙ্ক queried;
 };
 
 #define REF_STATES_INIT { \
@@ -386,31 +386,31 @@ struct ref_states {
 	.stale = STRING_LIST_INIT_DUP, \
 	.tracked = STRING_LIST_INIT_DUP, \
 	.heads = STRING_LIST_INIT_DUP, \
-	.push = STRING_LIST_INIT_DUP, \
+	.ঠেলো = STRING_LIST_INIT_DUP, \
 }
 
-static int get_ref_states(const struct ref *remote_refs, struct ref_states *states)
+স্থির পূর্ণাঙ্ক get_ref_states(ধ্রুৱ সংরচনা ref *remote_refs, সংরচনা ref_states *states)
 {
-	struct ref *fetch_map = NULL, **tail = &fetch_map;
-	struct ref *ref, *stale_refs;
-	int i;
+	সংরচনা ref *fetch_map = রিক্ত, **tail = &fetch_map;
+	সংরচনা ref *ref, *stale_refs;
+	পূর্ণাঙ্ক i;
 
-	for (i = 0; i < states->remote->fetch.nr; i++)
-		if (get_fetch_map(remote_refs, &states->remote->fetch.items[i], &tail, 1))
+	বাবে (i = 0; i < states->remote->fetch.nr; i++)
+		যদি (get_fetch_map(remote_refs, &states->remote->fetch.বস্তুসমূহ[i], &tail, 1))
 			die(_("Could not get fetch map for refspec %s"),
-				states->remote->fetch.items[i].raw);
+				states->remote->fetch.বস্তুসমূহ[i].raw);
 
-	for (ref = fetch_map; ref; ref = ref->next) {
-		if (refname_matches_negative_refspec_item(ref->name, &states->remote->fetch))
+	বাবে (ref = fetch_map; ref; ref = ref->next) {
+		যদি (refname_matches_negative_refspec_item(ref->name, &states->remote->fetch))
 			string_list_append(&states->skipped, abbrev_branch(ref->name));
-		else if (!ref->peer_ref || !refs_ref_exists(get_main_ref_store(the_repository), ref->peer_ref->name))
+		অন্যথা যদি (!ref->peer_ref || !refs_ref_exists(get_main_ref_store(the_repository), ref->peer_ref->name))
 			string_list_append(&states->new_refs, abbrev_branch(ref->name));
-		else
+		অন্যথা
 			string_list_append(&states->tracked, abbrev_branch(ref->name));
 	}
 	stale_refs = get_stale_heads(&states->remote->fetch, fetch_map);
-	for (ref = stale_refs; ref; ref = ref->next) {
-		struct string_list_item *item =
+	বাবে (ref = stale_refs; ref; ref = ref->next) {
+		সংরচনা string_list_item *item =
 			string_list_append(&states->stale, abbrev_branch(ref->name));
 		item->util = xstrdup(ref->name);
 	}
@@ -422,204 +422,204 @@ static int get_ref_states(const struct ref *remote_refs, struct ref_states *stat
 	string_list_sort(&states->tracked);
 	string_list_sort(&states->stale);
 
-	return 0;
+	ঘূৰাই 0;
 }
 
-struct push_info {
-	char *dest;
-	int forced;
-	enum {
-		PUSH_STATUS_CREATE = 0,
-		PUSH_STATUS_DELETE,
-		PUSH_STATUS_UPTODATE,
-		PUSH_STATUS_FASTFORWARD,
-		PUSH_STATUS_OUTOFDATE,
-		PUSH_STATUS_NOTQUERIED
+সংরচনা ঠেলো_info {
+	ৱর্ণ *dest;
+	পূর্ণাঙ্ক forced;
+	গণনা {
+		ঠেলো_STATUS_CREATE = 0,
+		ঠেলো_STATUS_DELETE,
+		ঠেলো_STATUS_UPTODATE,
+		ঠেলো_STATUS_FASTFORWARD,
+		ঠেলো_STATUS_OUTOFDATE,
+		ঠেলো_STATUS_NOTQUERIED
 	} status;
 };
 
-static int get_push_ref_states(const struct ref *remote_refs,
-	struct ref_states *states)
+স্থির পূর্ণাঙ্ক get_ঠেলো_ref_states(ধ্রুৱ সংরচনা ref *remote_refs,
+	সংরচনা ref_states *states)
 {
-	struct remote *remote = states->remote;
-	struct ref *ref, *local_refs, *push_map;
-	if (remote->mirror)
-		return 0;
+	সংরচনা remote *remote = states->remote;
+	সংরচনা ref *ref, *local_refs, *ঠেলো_map;
+	যদি (remote->mirror)
+		ঘূৰাই 0;
 
 	local_refs = get_local_heads();
-	push_map = copy_ref_list(remote_refs);
+	ঠেলো_map = copy_ref_list(remote_refs);
 
-	match_push_refs(local_refs, &push_map, &remote->push, MATCH_REFS_NONE);
+	match_ঠেলো_refs(local_refs, &ঠেলো_map, &remote->ঠেলো, MATCH_REFS_NONE);
 
-	for (ref = push_map; ref; ref = ref->next) {
-		struct string_list_item *item;
-		struct push_info *info;
+	বাবে (ref = ঠেলো_map; ref; ref = ref->next) {
+		সংরচনা string_list_item *item;
+		সংরচনা ঠেলো_info *info;
 
-		if (!ref->peer_ref)
-			continue;
+		যদি (!ref->peer_ref)
+			অনুৱর্ত;
 		oidcpy(&ref->new_oid, &ref->peer_ref->new_oid);
 
-		item = string_list_append(&states->push,
+		item = string_list_append(&states->ঠেলো,
 					  abbrev_branch(ref->peer_ref->name));
-		item->util = xcalloc(1, sizeof(struct push_info));
+		item->util = xcalloc(1, পরিমাণ(সংরচনা ঠেলো_info));
 		info = item->util;
 		info->forced = ref->force;
 		info->dest = xstrdup(abbrev_branch(ref->name));
 
-		if (is_null_oid(&ref->new_oid)) {
-			info->status = PUSH_STATUS_DELETE;
-		} else if (oideq(&ref->old_oid, &ref->new_oid))
-			info->status = PUSH_STATUS_UPTODATE;
-		else if (is_null_oid(&ref->old_oid))
-			info->status = PUSH_STATUS_CREATE;
-		else if (odb_has_object(the_repository->objects, &ref->old_oid,
+		যদি (is_null_oid(&ref->new_oid)) {
+			info->status = ঠেলো_STATUS_DELETE;
+		} অন্যথা যদি (oideq(&ref->old_oid, &ref->new_oid))
+			info->status = ঠেলো_STATUS_UPTODATE;
+		অন্যথা যদি (is_null_oid(&ref->old_oid))
+			info->status = ঠেলো_STATUS_CREATE;
+		অন্যথা যদি (odb_has_object(the_repository->objects, &ref->old_oid,
 					ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR) &&
 			 ref_newer(&ref->new_oid, &ref->old_oid))
-			info->status = PUSH_STATUS_FASTFORWARD;
-		else
-			info->status = PUSH_STATUS_OUTOFDATE;
+			info->status = ঠেলো_STATUS_FASTFORWARD;
+		অন্যথা
+			info->status = ঠেলো_STATUS_OUTOFDATE;
 	}
 	free_refs(local_refs);
-	free_refs(push_map);
-	return 0;
+	free_refs(ঠেলো_map);
+	ঘূৰাই 0;
 }
 
-static int get_push_ref_states_noquery(struct ref_states *states)
+স্থির পূর্ণাঙ্ক get_ঠেলো_ref_states_noquery(সংরচনা ref_states *states)
 {
-	int i;
-	struct remote *remote = states->remote;
-	struct string_list_item *item;
-	struct push_info *info;
+	পূর্ণাঙ্ক i;
+	সংরচনা remote *remote = states->remote;
+	সংরচনা string_list_item *item;
+	সংরচনা ঠেলো_info *info;
 
-	if (remote->mirror)
-		return 0;
+	যদি (remote->mirror)
+		ঘূৰাই 0;
 
-	if (!remote->push.nr) {
-		item = string_list_append(&states->push, _("(matching)"));
-		info = item->util = xcalloc(1, sizeof(struct push_info));
-		info->status = PUSH_STATUS_NOTQUERIED;
+	যদি (!remote->ঠেলো.nr) {
+		item = string_list_append(&states->ঠেলো, _("(matching)"));
+		info = item->util = xcalloc(1, পরিমাণ(সংরচনা ঠেলো_info));
+		info->status = ঠেলো_STATUS_NOTQUERIED;
 		info->dest = xstrdup(item->string);
 	}
-	for (i = 0; i < remote->push.nr; i++) {
-		const struct refspec_item *spec = &remote->push.items[i];
-		if (spec->matching)
-			item = string_list_append(&states->push, _("(matching)"));
-		else if (strlen(spec->src))
-			item = string_list_append(&states->push, spec->src);
-		else
-			item = string_list_append(&states->push, _("(delete)"));
+	বাবে (i = 0; i < remote->ঠেলো.nr; i++) {
+		ধ্রুৱ সংরচনা refspec_item *spec = &remote->ঠেলো.বস্তুসমূহ[i];
+		যদি (spec->matching)
+			item = string_list_append(&states->ঠেলো, _("(matching)"));
+		অন্যথা যদি (strlen(spec->src))
+			item = string_list_append(&states->ঠেলো, spec->src);
+		অন্যথা
+			item = string_list_append(&states->ঠেলো, _("(delete)"));
 
-		info = item->util = xcalloc(1, sizeof(struct push_info));
+		info = item->util = xcalloc(1, পরিমাণ(সংরচনা ঠেলো_info));
 		info->forced = spec->force;
-		info->status = PUSH_STATUS_NOTQUERIED;
+		info->status = ঠেলো_STATUS_NOTQUERIED;
 		info->dest = xstrdup(spec->dst ? spec->dst : item->string);
 	}
-	return 0;
+	ঘূৰাই 0;
 }
 
-static int get_head_names(const struct ref *remote_refs, struct ref_states *states)
+স্থির পূর্ণাঙ্ক get_head_names(ধ্রুৱ সংরচনা ref *remote_refs, সংরচনা ref_states *states)
 {
-	struct ref *ref, *matches;
-	struct ref *fetch_map = NULL, **fetch_map_tail = &fetch_map;
-	struct refspec_item refspec = {
+	সংরচনা ref *ref, *matches;
+	সংরচনা ref *fetch_map = রিক্ত, **fetch_map_tail = &fetch_map;
+	সংরচনা refspec_item refspec = {
 		.force = 0,
 		.pattern = 1,
-		.src = (char *) "refs/heads/*",
-		.dst = (char *) "refs/heads/*",
+		.src = (ৱর্ণ *) "refs/heads/*",
+		.dst = (ৱর্ণ *) "refs/heads/*",
 	};
 
 	get_fetch_map(remote_refs, &refspec, &fetch_map_tail, 0);
 	matches = guess_remote_head(find_ref_by_name(remote_refs, "HEAD"),
 				    fetch_map, REMOTE_GUESS_HEAD_ALL);
-	for (ref = matches; ref; ref = ref->next)
+	বাবে (ref = matches; ref; ref = ref->next)
 		string_list_append(&states->heads, abbrev_branch(ref->name));
 
 	free_refs(fetch_map);
 	free_refs(matches);
-	return 0;
+	ঘূৰাই 0;
 }
 
-struct known_remote {
-	struct known_remote *next;
-	struct remote *remote;
+সংরচনা known_remote {
+	সংরচনা known_remote *next;
+	সংরচনা remote *remote;
 };
 
-struct known_remotes {
-	struct remote *to_delete;
-	struct known_remote *list;
+সংরচনা known_remotes {
+	সংরচনা remote *to_delete;
+	সংরচনা known_remote *list;
 };
 
-static int add_known_remote(struct remote *remote, void *cb_data)
+স্থির পূর্ণাঙ্ক add_known_remote(সংরচনা remote *remote, শূন্য *cb_data)
 {
-	struct known_remotes *all = cb_data;
-	struct known_remote *r;
+	সংরচনা known_remotes *all = cb_data;
+	সংরচনা known_remote *r;
 
-	if (!strcmp(all->to_delete->name, remote->name))
-		return 0;
+	যদি (!strcmp(all->to_delete->name, remote->name))
+		ঘূৰাই 0;
 
-	r = xmalloc(sizeof(*r));
+	r = xmalloc(পরিমাণ(*r));
 	r->remote = remote;
 	r->next = all->list;
 	all->list = r;
-	return 0;
+	ঘূৰাই 0;
 }
 
-struct branches_for_remote {
-	struct remote *remote;
-	struct string_list *branches, *skipped;
-	struct known_remotes *keep;
+সংরচনা branches_for_remote {
+	সংরচনা remote *remote;
+	সংরচনা string_list *branches, *skipped;
+	সংরচনা known_remotes *keep;
 };
 
-static int add_branch_for_removal(const struct reference *ref, void *cb_data)
+স্থির পূর্ণাঙ্ক add_branch_for_removal(ধ্রুৱ সংরচনা reference *ref, শূন্য *cb_data)
 {
-	struct branches_for_remote *branches = cb_data;
-	struct refspec_item refspec;
-	struct known_remote *kr;
+	সংরচনা branches_for_remote *branches = cb_data;
+	সংরচনা refspec_item refspec;
+	সংরচনা known_remote *kr;
 
-	memset(&refspec, 0, sizeof(refspec));
-	refspec.dst = (char *)ref->name;
-	if (remote_find_tracking(branches->remote, &refspec))
-		return 0;
-	free(refspec.src);
+	memset(&refspec, 0, পরিমাণ(refspec));
+	refspec.dst = (ৱর্ণ *)ref->name;
+	যদি (remote_find_tracking(branches->remote, &refspec))
+		ঘূৰাই 0;
+	মুক্ত(refspec.src);
 
 	/* don't delete a branch if another remote also uses it */
-	for (kr = branches->keep->list; kr; kr = kr->next) {
-		memset(&refspec, 0, sizeof(refspec));
-		refspec.dst = (char *)ref->name;
-		if (!remote_find_tracking(kr->remote, &refspec)) {
-			free(refspec.src);
-			return 0;
+	বাবে (kr = branches->keep->list; kr; kr = kr->next) {
+		memset(&refspec, 0, পরিমাণ(refspec));
+		refspec.dst = (ৱর্ণ *)ref->name;
+		যদি (!remote_find_tracking(kr->remote, &refspec)) {
+			মুক্ত(refspec.src);
+			ঘূৰাই 0;
 		}
 	}
 
 	/* don't delete non-remote-tracking refs */
-	if (!starts_with(ref->name, "refs/remotes/")) {
+	যদি (!starts_with(ref->name, "refs/remotes/")) {
 		/* advise user how to delete local branches */
-		if (starts_with(ref->name, "refs/heads/"))
+		যদি (starts_with(ref->name, "refs/heads/"))
 			string_list_append(branches->skipped,
 					   abbrev_branch(ref->name));
 		/* silently skip over other non-remote refs */
-		return 0;
+		ঘূৰাই 0;
 	}
 
 	string_list_append(branches->branches, ref->name);
 
-	return 0;
+	ঘূৰাই 0;
 }
 
-struct rename_info {
-	const char *old_name;
-	const char *new_name;
-	struct ref_transaction *transaction;
-	struct progress *progress;
-	struct strbuf *err;
+সংরচনা rename_info {
+	ধ্রুৱ ৱর্ণ *old_name;
+	ধ্রুৱ ৱর্ণ *new_name;
+	সংরচনা ref_transaction *transaction;
+	সংরচনা progress *progress;
+	সংরচনা strbuf *err;
 	uint32_t progress_nr;
 	uint64_t index;
 };
 
-static void compute_renamed_ref(struct rename_info *rename,
-				const char *refname,
-				struct strbuf *out)
+স্থির শূন্য compute_renamed_ref(সংরচনা rename_info *rename,
+				ধ্রুৱ ৱর্ণ *refname,
+				সংরচনা strbuf *out)
 {
 	strbuf_reset(out);
 	strbuf_addstr(out, refname);
@@ -627,27 +627,27 @@ static void compute_renamed_ref(struct rename_info *rename,
 		      rename->new_name, strlen(rename->new_name));
 }
 
-static int rename_one_reflog_entry(const char *old_refname,
-				   struct object_id *old_oid,
-				   struct object_id *new_oid,
-				   const char *committer,
-				   timestamp_t timestamp, int tz,
-				   const char *msg, void *cb_data)
+স্থির পূর্ণাঙ্ক rename_one_reflog_entry(ধ্রুৱ ৱর্ণ *old_refname,
+				   সংরচনা object_id *old_oid,
+				   সংরচনা object_id *new_oid,
+				   ধ্রুৱ ৱর্ণ *committer,
+				   timestamp_t timestamp, পূর্ণাঙ্ক tz,
+				   ধ্রুৱ ৱর্ণ *বাৰ্তা, শূন্য *cb_data)
 {
-	struct rename_info *rename = cb_data;
-	struct strbuf new_refname = STRBUF_INIT;
-	struct strbuf identity = STRBUF_INIT;
-	struct strbuf name = STRBUF_INIT;
-	struct strbuf mail = STRBUF_INIT;
-	struct ident_split ident;
-	const char *date;
-	int error;
+	সংরচনা rename_info *rename = cb_data;
+	সংরচনা strbuf new_refname = STRBUF_INIT;
+	সংরচনা strbuf identity = STRBUF_INIT;
+	সংরচনা strbuf name = STRBUF_INIT;
+	সংরচনা strbuf mail = STRBUF_INIT;
+	সংরচনা ident_split ident;
+	ধ্রুৱ ৱর্ণ *date;
+	পূর্ণাঙ্ক error;
 
 	compute_renamed_ref(rename, old_refname, &new_refname);
 
-	if (split_ident_line(&ident, committer, strlen(committer)) < 0) {
+	যদি (split_ident_সাৰি(&ident, committer, strlen(committer)) < 0) {
 		error = -1;
-		goto out;
+		গচ্ছ out;
 	}
 
 	strbuf_add(&name, ident.name_begin, ident.name_end - ident.name_begin);
@@ -658,7 +658,7 @@ static int rename_one_reflog_entry(const char *old_refname,
 					  WANT_BLANK_IDENT, date, 0));
 
 	error = ref_transaction_update_reflog(rename->transaction, new_refname.buf,
-					      new_oid, old_oid, identity.buf, msg,
+					      new_oid, old_oid, identity.buf, বাৰ্তা,
 					      rename->index++, rename->err);
 
 out:
@@ -666,24 +666,24 @@ out:
 	strbuf_release(&identity);
 	strbuf_release(&name);
 	strbuf_release(&mail);
-	return error;
+	ঘূৰাই error;
 }
 
-static int rename_one_reflog(const char *old_refname,
-			     const struct object_id *old_oid,
-			     struct rename_info *rename)
+স্থির পূর্ণাঙ্ক rename_one_reflog(ধ্রুৱ ৱর্ণ *old_refname,
+			     ধ্রুৱ সংরচনা object_id *old_oid,
+			     সংরচনা rename_info *rename)
 {
-	struct strbuf new_refname = STRBUF_INIT;
-	struct strbuf message = STRBUF_INIT;
-	int error;
+	সংরচনা strbuf new_refname = STRBUF_INIT;
+	সংরচনা strbuf message = STRBUF_INIT;
+	পূর্ণাঙ্ক error;
 
-	if (!refs_reflog_exists(get_main_ref_store(the_repository), old_refname))
-		return 0;
+	যদি (!refs_reflog_exists(get_main_ref_store(the_repository), old_refname))
+		ঘূৰাই 0;
 
 	error = refs_for_each_reflog_ent(get_main_ref_store(the_repository),
 					 old_refname, rename_one_reflog_entry, rename);
-	if (error < 0)
-		goto out;
+	যদি (error < 0)
+		গচ্ছ out;
 
 	compute_renamed_ref(rename, old_refname, &new_refname);
 
@@ -701,27 +701,27 @@ static int rename_one_reflog(const char *old_refname,
 	error = ref_transaction_update_reflog(rename->transaction, new_refname.buf,
 					      old_oid, old_oid, git_committer_info(0),
 					      message.buf, rename->index++, rename->err);
-	if (error < 0)
-		return error;
+	যদি (error < 0)
+		ঘূৰাই error;
 
 out:
 	strbuf_release(&new_refname);
 	strbuf_release(&message);
-	return error;
+	ঘূৰাই error;
 }
 
-static int rename_one_ref(const struct reference *ref, void *cb_data)
+স্থির পূর্ণাঙ্ক rename_one_ref(ধ্রুৱ সংরচনা reference *ref, শূন্য *cb_data)
 {
-	struct strbuf new_referent = STRBUF_INIT;
-	struct strbuf new_refname = STRBUF_INIT;
-	struct rename_info *rename = cb_data;
-	const struct object_id *oid = ref->oid;
-	const char *referent = ref->target;
-	int error;
+	সংরচনা strbuf new_referent = STRBUF_INIT;
+	সংরচনা strbuf new_refname = STRBUF_INIT;
+	সংরচনা rename_info *rename = cb_data;
+	ধ্রুৱ সংরচনা object_id *oid = ref->oid;
+	ধ্রুৱ ৱর্ণ *referent = ref->target;
+	পূর্ণাঙ্ক error;
 
 	compute_renamed_ref(rename, ref->name, &new_refname);
 
-	if (ref->flags & REF_ISSYMREF) {
+	যদি (ref->flags & REF_ISSYMREF) {
 		/*
 		 * Stupidly enough `referent` is not pointing to the immediate
 		 * target of a symref, but it's the recursively resolved value.
@@ -730,121 +730,121 @@ static int rename_one_ref(const struct reference *ref, void *cb_data)
 		 */
 		referent = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
 						   ref->name, RESOLVE_REF_NO_RECURSE,
-						   NULL, NULL);
+						   রিক্ত, রিক্ত);
 		compute_renamed_ref(rename, referent, &new_referent);
-		oid = NULL;
+		oid = রিক্ত;
 	}
 
 	error = ref_transaction_delete(rename->transaction, ref->name,
-				       oid, referent, REF_NO_DEREF, NULL, rename->err);
-	if (error < 0)
-		goto out;
+				       oid, referent, REF_NO_DEREF, রিক্ত, rename->err);
+	যদি (error < 0)
+		গচ্ছ out;
 
 	error = ref_transaction_update(rename->transaction, new_refname.buf, oid, null_oid(the_hash_algo),
-				       (ref->flags & REF_ISSYMREF) ? new_referent.buf : NULL, NULL,
+				       (ref->flags & REF_ISSYMREF) ? new_referent.buf : রিক্ত, রিক্ত,
 				       REF_SKIP_CREATE_REFLOG | REF_NO_DEREF | REF_SKIP_OID_VERIFICATION,
-				       NULL, rename->err);
-	if (error < 0)
-		goto out;
+				       রিক্ত, rename->err);
+	যদি (error < 0)
+		গচ্ছ out;
 
 	error = rename_one_reflog(ref->name, oid, rename);
-	if (error < 0)
-		goto out;
+	যদি (error < 0)
+		গচ্ছ out;
 
 	display_progress(rename->progress, ++rename->progress_nr);
 
 out:
 	strbuf_release(&new_referent);
 	strbuf_release(&new_refname);
-	return error;
+	ঘূৰাই error;
 }
 
-static int migrate_file(struct remote *remote)
+স্থির পূর্ণাঙ্ক migrate_file(সংরচনা remote *remote)
 {
-	struct strbuf buf = STRBUF_INIT;
+	সংরচনা strbuf buf = STRBUF_INIT;
 
 	strbuf_addf(&buf, "remote.%s.url", remote->name);
-	for (size_t i = 0; i < remote->url.nr; i++)
+	বাবে (size_t i = 0; i < remote->url.nr; i++)
 		repo_config_set_multivar(the_repository, buf.buf, remote->url.v[i], "^$", 0);
 	strbuf_reset(&buf);
 	strbuf_addf(&buf, "remote.%s.push", remote->name);
-	for (int i = 0; i < remote->push.nr; i++)
-		repo_config_set_multivar(the_repository, buf.buf, remote->push.items[i].raw, "^$", 0);
+	বাবে (পূর্ণাঙ্ক i = 0; i < remote->ঠেলো.nr; i++)
+		repo_config_set_multivar(the_repository, buf.buf, remote->ঠেলো.বস্তুসমূহ[i].raw, "^$", 0);
 	strbuf_reset(&buf);
 	strbuf_addf(&buf, "remote.%s.fetch", remote->name);
-	for (int i = 0; i < remote->fetch.nr; i++)
-		repo_config_set_multivar(the_repository, buf.buf, remote->fetch.items[i].raw, "^$", 0);
+	বাবে (পূর্ণাঙ্ক i = 0; i < remote->fetch.nr; i++)
+		repo_config_set_multivar(the_repository, buf.buf, remote->fetch.বস্তুসমূহ[i].raw, "^$", 0);
 #ifndef WITH_BREAKING_CHANGES
-	if (remote->origin == REMOTE_REMOTES)
+	যদি (remote->origin == REMOTE_REMOTES)
 		unlink_or_warn(repo_git_path_replace(the_repository, &buf,
 						     "remotes/%s", remote->name));
-	else if (remote->origin == REMOTE_BRANCHES)
+	অন্যথা যদি (remote->origin == REMOTE_BRANCHES)
 		unlink_or_warn(repo_git_path_replace(the_repository, &buf,
 						     "branches/%s", remote->name));
 #endif /* WITH_BREAKING_CHANGES */
 	strbuf_release(&buf);
 
-	return 0;
+	ঘূৰাই 0;
 }
 
-struct push_default_info
+সংরচনা ঠেলো_default_info
 {
-	const char *old_name;
-	enum config_scope scope;
-	struct strbuf origin;
-	int linenr;
+	ধ্রুৱ ৱর্ণ *old_name;
+	গণনা config_scope scope;
+	সংরচনা strbuf origin;
+	পূর্ণাঙ্ক linenr;
 };
 
-static int config_read_push_default(const char *key, const char *value,
-	const struct config_context *ctx, void *cb)
+স্থির পূর্ণাঙ্ক config_read_ঠেলো_default(ধ্রুৱ ৱর্ণ *চাবি, ধ্রুৱ ৱর্ণ *মান,
+	ধ্রুৱ সংরচনা config_context *ctx, শূন্য *cb)
 {
-	const struct key_value_info *kvi = ctx->kvi;
+	ধ্রুৱ সংরচনা চাবি_মান_info *kvi = ctx->kvi;
 
-	struct push_default_info* info = cb;
-	if (strcmp(key, "remote.pushdefault") ||
-	    !value || strcmp(value, info->old_name))
-		return 0;
+	সংরচনা ঠেলো_default_info* info = cb;
+	যদি (strcmp(চাবি, "remote.pushdefault") ||
+	    !মান || strcmp(মান, info->old_name))
+		ঘূৰাই 0;
 
 	info->scope = kvi->scope;
 	strbuf_reset(&info->origin);
 	strbuf_addstr(&info->origin, config_origin_type_name(kvi->origin_type));
 	info->linenr = kvi->linenr;
 
-	return 0;
+	ঘূৰাই 0;
 }
 
-static void handle_push_default(const char* old_name, const char* new_name)
+স্থির শূন্য handle_ঠেলো_default(ধ্রুৱ ৱর্ণ* old_name, ধ্রুৱ ৱর্ণ* new_name)
 {
-	struct push_default_info push_default = {
+	সংরচনা ঠেলো_default_info ঠেলো_default = {
 		.old_name = old_name,
 		.scope = CONFIG_SCOPE_UNKNOWN,
 		.origin = STRBUF_INIT,
 		.linenr = -1,
 	};
-	repo_config(the_repository, config_read_push_default, &push_default);
-	if (push_default.scope >= CONFIG_SCOPE_COMMAND)
+	repo_config(the_repository, config_read_ঠেলো_default, &ঠেলো_default);
+	যদি (ঠেলো_default.scope >= CONFIG_SCOPE_COMMAND)
 		; /* pass */
-	else if (push_default.scope >= CONFIG_SCOPE_LOCAL) {
-		int result = repo_config_set_gently(the_repository, "remote.pushDefault",
+	অন্যথা যদি (ঠেলো_default.scope >= CONFIG_SCOPE_LOCAL) {
+		পূর্ণাঙ্ক result = repo_config_set_gently(the_repository, "remote.pushDefault",
 						    new_name);
-		if (new_name && result && result != CONFIG_NOTHING_SET)
+		যদি (new_name && result && result != CONFIG_NOTHING_SET)
 			die(_("could not set '%s'"), "remote.pushDefault");
-		else if (!new_name && result && result != CONFIG_NOTHING_SET)
+		অন্যথা যদি (!new_name && result && result != CONFIG_NOTHING_SET)
 			die(_("could not unset '%s'"), "remote.pushDefault");
-	} else if (push_default.scope >= CONFIG_SCOPE_SYSTEM) {
+	} অন্যথা যদি (ঠেলো_default.scope >= CONFIG_SCOPE_SYSTEM) {
 		/* warn */
 		warning(_("The %s configuration remote.pushDefault in:\n"
 			  "\t%s:%d\n"
 			  "now names the non-existent remote '%s'"),
-			config_scope_name(push_default.scope),
-			push_default.origin.buf, push_default.linenr,
+			config_scope_name(ঠেলো_default.scope),
+			ঠেলো_default.origin.buf, ঠেলো_default.linenr,
 			old_name);
 	}
 
-	strbuf_release(&push_default.origin);
+	strbuf_release(&ঠেলো_default.origin);
 }
 
-static const char conflicting_remote_refs_advice[] = N_(
+স্থির ধ্রুৱ ৱর্ণ conflicting_remote_refs_advice[] = N_(
 	"The remote you are trying to rename has conflicting references in the\n"
 	"new target refspec. This is most likely caused by you trying to nest\n"
 	"a remote into itself, e.g. by renaming 'parent' into 'parent/child'\n"
@@ -853,74 +853,74 @@ static const char conflicting_remote_refs_advice[] = N_(
 	"If that is the case, you can address this by first renaming the\n"
 	"remote to a different name.\n");
 
-static int mv(int argc, const char **argv, const char *prefix,
-	      struct repository *repo UNUSED)
+স্থির পূর্ণাঙ্ক mv(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+	      সংরচনা repository *repo UNUSED)
 {
-	int show_progress = isatty(2);
-	struct option options[] = {
+	পূর্ণাঙ্ক show_progress = isatty(2);
+	সংরচনা option options[] = {
 		OPT_BOOL(0, "progress", &show_progress, N_("force progress reporting")),
 		OPT_END()
 	};
-	struct remote *oldremote, *newremote;
-	struct strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT, buf3 = STRBUF_INIT,
+	সংরচনা remote *oldremote, *newremote;
+	সংরচনা strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT, buf3 = STRBUF_INIT,
 		old_remote_context = STRBUF_INIT, err = STRBUF_INIT;
-	struct rename_info rename = {
+	সংরচনা rename_info rename = {
 		.err = &err,
 	};
-	int refspecs_need_update = 0;
-	int result = 0;
+	পূর্ণাঙ্ক refspecs_need_update = 0;
+	পূর্ণাঙ্ক result = 0;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_rename_usage, 0);
 
-	if (argc != 2)
+	যদি (argc != 2)
 		usage_with_options(builtin_remote_rename_usage, options);
 
 	rename.old_name = argv[0];
 	rename.new_name = argv[1];
 
 	oldremote = remote_get(rename.old_name);
-	if (!remote_is_configured(oldremote, 1)) {
+	যদি (!remote_is_configured(oldremote, 1)) {
 		error(_("No such remote: '%s'"), rename.old_name);
 		exit(2);
 	}
 
-	if (!strcmp(rename.old_name, rename.new_name) && oldremote->origin != REMOTE_CONFIG)
-		return migrate_file(oldremote);
+	যদি (!strcmp(rename.old_name, rename.new_name) && oldremote->origin != REMOTE_CONFIG)
+		ঘূৰাই migrate_file(oldremote);
 
 	newremote = remote_get(rename.new_name);
-	if (remote_is_configured(newremote, 1)) {
+	যদি (remote_is_configured(newremote, 1)) {
 		error(_("remote %s already exists."), rename.new_name);
 		exit(3);
 	}
 
-	if (!valid_remote_name(rename.new_name))
+	যদি (!valid_remote_name(rename.new_name))
 		die(_("'%s' is not a valid remote name"), rename.new_name);
 
 	strbuf_addf(&buf, "remote.%s", rename.old_name);
 	strbuf_addf(&buf2, "remote.%s", rename.new_name);
-	if (repo_config_rename_section(the_repository, buf.buf, buf2.buf) < 1) {
+	যদি (repo_config_rename_section(the_repository, buf.buf, buf2.buf) < 1) {
 		result = error(_("Could not rename config section '%s' to '%s'"),
 			       buf.buf, buf2.buf);
-		goto out;
+		গচ্ছ out;
 	}
 
 	strbuf_addf(&old_remote_context, ":refs/remotes/%s/", rename.old_name);
 
-	for (int i = 0; i < oldremote->fetch.nr && !refspecs_need_update; i++)
-		refspecs_need_update = !!strstr(oldremote->fetch.items[i].raw,
+	বাবে (পূর্ণাঙ্ক i = 0; i < oldremote->fetch.nr && !refspecs_need_update; i++)
+		refspecs_need_update = !!strstr(oldremote->fetch.বস্তুসমূহ[i].raw,
 						old_remote_context.buf);
 
-	if (refspecs_need_update) {
-		struct refs_for_each_ref_options opts = {
+	যদি (refspecs_need_update) {
+		সংরচনা refs_for_each_ref_options opts = {
 			.flags = REFS_FOR_EACH_INCLUDE_BROKEN,
 		};
 		rename.transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 							       0, &err);
-		if (!rename.transaction)
-			goto out;
+		যদি (!rename.transaction)
+			গচ্ছ out;
 
-		if (show_progress)
+		যদি (show_progress)
 			rename.progress = start_delayed_progress(the_repository,
 								 _("Renaming remote references"), 0);
 
@@ -930,34 +930,34 @@ static int mv(int argc, const char **argv, const char *prefix,
 
 		result = refs_for_each_ref_ext(get_main_ref_store(the_repository),
 					       rename_one_ref, &rename, &opts);
-		if (result < 0)
+		যদি (result < 0)
 			die(_("queueing remote ref renames failed: %s"), rename.err->buf);
 
 		result = ref_transaction_prepare(rename.transaction, &err);
-		if (result < 0) {
+		যদি (result < 0) {
 			error("renaming remote references failed: %s", err.buf);
-			if (result == REF_TRANSACTION_ERROR_NAME_CONFLICT)
+			যদি (result == REF_TRANSACTION_ERROR_NAME_CONFLICT)
 				advise(conflicting_remote_refs_advice);
-			die(NULL);
+			die(রিক্ত);
 		}
 	}
 
-	if (oldremote->fetch.nr) {
+	যদি (oldremote->fetch.nr) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.fetch", rename.new_name);
-		repo_config_set_multivar(the_repository, buf.buf, NULL, NULL, CONFIG_FLAGS_MULTI_REPLACE);
-		for (int i = 0; i < oldremote->fetch.nr; i++) {
-			char *ptr;
+		repo_config_set_multivar(the_repository, buf.buf, রিক্ত, রিক্ত, CONFIG_FLAGS_MULTI_REPLACE);
+		বাবে (পূর্ণাঙ্ক i = 0; i < oldremote->fetch.nr; i++) {
+			ৱর্ণ *ptr;
 
 			strbuf_reset(&buf2);
-			strbuf_addstr(&buf2, oldremote->fetch.items[i].raw);
+			strbuf_addstr(&buf2, oldremote->fetch.বস্তুসমূহ[i].raw);
 			ptr = strstr(buf2.buf, old_remote_context.buf);
-			if (ptr) {
+			যদি (ptr) {
 				strbuf_splice(&buf2,
 					      ptr-buf2.buf + strlen(":refs/remotes/"),
 					      strlen(rename.old_name), rename.new_name,
 					      strlen(rename.new_name));
-			} else
+			} অন্যথা
 				warning(_("Not updating non-default fetch refspec\n"
 					  "\t%s\n"
 					  "\tPlease update the configuration manually if necessary."),
@@ -968,29 +968,29 @@ static int mv(int argc, const char **argv, const char *prefix,
 	}
 
 	read_branches();
-	for (size_t i = 0; i < branch_list.nr; i++) {
-		struct string_list_item *item = branch_list.items + i;
-		struct branch_info *info = item->util;
-		if (info->remote_name && !strcmp(info->remote_name, rename.old_name)) {
+	বাবে (size_t i = 0; i < branch_list.nr; i++) {
+		সংরচনা string_list_item *item = branch_list.বস্তুসমূহ + i;
+		সংরচনা branch_info *info = item->util;
+		যদি (info->remote_name && !strcmp(info->remote_name, rename.old_name)) {
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "branch.%s.remote", item->string);
 			repo_config_set(the_repository, buf.buf, rename.new_name);
 		}
-		if (info->push_remote_name && !strcmp(info->push_remote_name, rename.old_name)) {
+		যদি (info->ঠেলো_remote_name && !strcmp(info->ঠেলো_remote_name, rename.old_name)) {
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "branch.%s.pushRemote", item->string);
 			repo_config_set(the_repository, buf.buf, rename.new_name);
 		}
 	}
 
-	if (refspecs_need_update) {
+	যদি (refspecs_need_update) {
 		result = ref_transaction_commit(rename.transaction, &err);
-		if (result < 0)
+		যদি (result < 0)
 			die(_("renaming remote refs failed: %s"), rename.err->buf);
 
 		stop_progress(&rename.progress);
 
-		handle_push_default(rename.old_name, rename.new_name);
+		handle_ঠেলো_default(rename.old_name, rename.new_name);
 	}
 
 out:
@@ -1000,35 +1000,35 @@ out:
 	strbuf_release(&buf2);
 	strbuf_release(&buf3);
 	strbuf_release(&err);
-	return result;
+	ঘূৰাই result;
 }
 
-static int rm(int argc, const char **argv, const char *prefix,
-	      struct repository *repo UNUSED)
+স্থির পূর্ণাঙ্ক rm(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+	      সংরচনা repository *repo UNUSED)
 {
-	struct option options[] = {
+	সংরচনা option options[] = {
 		OPT_END()
 	};
-	struct remote *remote;
-	struct strbuf buf = STRBUF_INIT;
-	struct known_remotes known_remotes = { NULL, NULL };
-	struct string_list branches = STRING_LIST_INIT_DUP;
-	struct string_list skipped = STRING_LIST_INIT_DUP;
-	struct branches_for_remote cb_data;
-	int result;
+	সংরচনা remote *remote;
+	সংরচনা strbuf buf = STRBUF_INIT;
+	সংরচনা known_remotes known_remotes = { রিক্ত, রিক্ত };
+	সংরচনা string_list branches = STRING_LIST_INIT_DUP;
+	সংরচনা string_list skipped = STRING_LIST_INIT_DUP;
+	সংরচনা branches_for_remote cb_data;
+	পূর্ণাঙ্ক result;
 
-	memset(&cb_data, 0, sizeof(cb_data));
+	memset(&cb_data, 0, পরিমাণ(cb_data));
 	cb_data.branches = &branches;
 	cb_data.skipped = &skipped;
 	cb_data.keep = &known_remotes;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_rm_usage, 0);
-	if (argc != 1)
+	যদি (argc != 1)
 		usage_with_options(builtin_remote_rm_usage, options);
 
 	remote = remote_get(argv[0]);
-	if (!remote_is_configured(remote, 1)) {
+	যদি (!remote_is_configured(remote, 1)) {
 		error(_("No such remote: '%s'"), argv[0]);
 		exit(2);
 	}
@@ -1037,25 +1037,25 @@ static int rm(int argc, const char **argv, const char *prefix,
 	for_each_remote(add_known_remote, &known_remotes);
 
 	read_branches();
-	for (size_t i = 0; i < branch_list.nr; i++) {
-		struct string_list_item *item = branch_list.items + i;
-		struct branch_info *info = item->util;
-		if (info->remote_name && !strcmp(info->remote_name, remote->name)) {
-			const char *keys[] = { "remote", "merge", NULL }, **k;
-			for (k = keys; *k; k++) {
+	বাবে (size_t i = 0; i < branch_list.nr; i++) {
+		সংরচনা string_list_item *item = branch_list.বস্তুসমূহ + i;
+		সংরচনা branch_info *info = item->util;
+		যদি (info->remote_name && !strcmp(info->remote_name, remote->name)) {
+			ধ্রুৱ ৱর্ণ *চাবিগুলি[] = { "remote", "merge", রিক্ত }, **k;
+			বাবে (k = চাবিগুলি; *k; k++) {
 				strbuf_reset(&buf);
 				strbuf_addf(&buf, "branch.%s.%s",
 						item->string, *k);
-				result = repo_config_set_gently(the_repository, buf.buf, NULL);
-				if (result && result != CONFIG_NOTHING_SET)
+				result = repo_config_set_gently(the_repository, buf.buf, রিক্ত);
+				যদি (result && result != CONFIG_NOTHING_SET)
 					die(_("could not unset '%s'"), buf.buf);
 			}
 		}
-		if (info->push_remote_name && !strcmp(info->push_remote_name, remote->name)) {
+		যদি (info->ঠেলো_remote_name && !strcmp(info->ঠেলো_remote_name, remote->name)) {
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "branch.%s.pushremote", item->string);
-			result = repo_config_set_gently(the_repository, buf.buf, NULL);
-			if (result && result != CONFIG_NOTHING_SET)
+			result = repo_config_set_gently(the_repository, buf.buf, রিক্ত);
+			যদি (result && result != CONFIG_NOTHING_SET)
 				die(_("could not unset '%s'"), buf.buf);
 		}
 	}
@@ -1070,120 +1070,120 @@ static int rm(int argc, const char **argv, const char *prefix,
 				   add_branch_for_removal, &cb_data);
 	strbuf_release(&buf);
 
-	if (!result)
+	যদি (!result)
 		result = refs_delete_refs(get_main_ref_store(the_repository),
 					  "remote: remove", &branches,
 					  REF_NO_DEREF);
 	string_list_clear(&branches, 0);
 
-	if (skipped.nr) {
+	যদি (skipped.nr) {
 		fprintf_ln(stderr,
 			   Q_("Note: A branch outside the refs/remotes/ hierarchy was not removed;\n"
 			      "to delete it, use:",
 			      "Note: Some branches outside the refs/remotes/ hierarchy were not removed;\n"
 			      "to delete them, use:",
 			      skipped.nr));
-		for (size_t i = 0; i < skipped.nr; i++)
+		বাবে (size_t i = 0; i < skipped.nr; i++)
 			fprintf(stderr, "  git branch -d %s\n",
-				skipped.items[i].string);
+				skipped.বস্তুসমূহ[i].string);
 	}
 	string_list_clear(&skipped, 0);
 
-	if (!result) {
+	যদি (!result) {
 		strbuf_addf(&buf, "remote.%s", remote->name);
-		if (repo_config_rename_section(the_repository, buf.buf, NULL) < 1) {
+		যদি (repo_config_rename_section(the_repository, buf.buf, রিক্ত) < 1) {
 			result = error(_("Could not remove config section '%s'"), buf.buf);
-			goto out;
+			গচ্ছ out;
 		}
 
-		handle_push_default(remote->name, NULL);
+		handle_ঠেলো_default(remote->name, রিক্ত);
 	}
 
 out:
-	for (struct known_remote *r = known_remotes.list; r;) {
-		struct known_remote *next = r->next;
-		free(r);
+	বাবে (সংরচনা known_remote *r = known_remotes.list; r;) {
+		সংরচনা known_remote *next = r->next;
+		মুক্ত(r);
 		r = next;
 	}
 	strbuf_release(&buf);
-	return result;
+	ঘূৰাই result;
 }
 
-static void clear_push_info(void *util, const char *string UNUSED)
+স্থির শূন্য clear_ঠেলো_info(শূন্য *util, ধ্রুৱ ৱর্ণ *string UNUSED)
 {
-	struct push_info *info = util;
-	free(info->dest);
-	free(info);
+	সংরচনা ঠেলো_info *info = util;
+	মুক্ত(info->dest);
+	মুক্ত(info);
 }
 
-static void free_remote_ref_states(struct ref_states *states)
+স্থির শূন্য free_remote_ref_states(সংরচনা ref_states *states)
 {
 	string_list_clear(&states->new_refs, 0);
 	string_list_clear(&states->skipped, 0);
 	string_list_clear(&states->stale, 1);
 	string_list_clear(&states->tracked, 0);
 	string_list_clear(&states->heads, 0);
-	string_list_clear_func(&states->push, clear_push_info);
+	string_list_clear_func(&states->ঠেলো, clear_ঠেলো_info);
 }
 
-static int append_ref_to_tracked_list(const struct reference *ref, void *cb_data)
+স্থির পূর্ণাঙ্ক append_ref_to_tracked_list(ধ্রুৱ সংরচনা reference *ref, শূন্য *cb_data)
 {
-	struct ref_states *states = cb_data;
-	struct refspec_item refspec;
+	সংরচনা ref_states *states = cb_data;
+	সংরচনা refspec_item refspec;
 
-	if (ref->flags & REF_ISSYMREF)
-		return 0;
+	যদি (ref->flags & REF_ISSYMREF)
+		ঘূৰাই 0;
 
-	memset(&refspec, 0, sizeof(refspec));
-	refspec.dst = (char *)ref->name;
-	if (!remote_find_tracking(states->remote, &refspec)) {
+	memset(&refspec, 0, পরিমাণ(refspec));
+	refspec.dst = (ৱর্ণ *)ref->name;
+	যদি (!remote_find_tracking(states->remote, &refspec)) {
 		string_list_append(&states->tracked, abbrev_branch(refspec.src));
-		free(refspec.src);
+		মুক্ত(refspec.src);
 	}
 
-	return 0;
+	ঘূৰাই 0;
 }
 
-static int get_remote_ref_states(const char *name,
-				 struct ref_states *states,
-				 int query)
+স্থির পূর্ণাঙ্ক get_remote_ref_states(ধ্রুৱ ৱর্ণ *name,
+				 সংরচনা ref_states *states,
+				 পূর্ণাঙ্ক query)
 {
 	states->remote = remote_get(name);
-	if (!states->remote)
-		return error(_("No such remote: '%s'"), name);
+	যদি (!states->remote)
+		ঘূৰাই error(_("No such remote: '%s'"), name);
 
 	read_branches();
 
-	if (query) {
-		struct transport *transport;
-		const struct ref *remote_refs;
+	যদি (query) {
+		সংরচনা transport *transport;
+		ধ্রুৱ সংরচনা ref *remote_refs;
 
 		transport = transport_get(states->remote, states->remote->url.v[0]);
-		remote_refs = transport_get_remote_refs(transport, NULL);
+		remote_refs = transport_get_remote_refs(transport, রিক্ত);
 
 		states->queried = 1;
-		if (query & GET_REF_STATES)
+		যদি (query & GET_REF_STATES)
 			get_ref_states(remote_refs, states);
-		if (query & GET_HEAD_NAMES)
+		যদি (query & GET_HEAD_NAMES)
 			get_head_names(remote_refs, states);
-		if (query & GET_PUSH_REF_STATES)
-			get_push_ref_states(remote_refs, states);
+		যদি (query & GET_ঠেলো_REF_STATES)
+			get_ঠেলো_ref_states(remote_refs, states);
 		transport_disconnect(transport);
-	} else {
+	} অন্যথা {
 		refs_for_each_ref(get_main_ref_store(the_repository),
 				  append_ref_to_tracked_list, states);
 		string_list_sort(&states->tracked);
-		get_push_ref_states_noquery(states);
+		get_ঠেলো_ref_states_noquery(states);
 	}
 
-	return 0;
+	ঘূৰাই 0;
 }
 
-struct show_info {
-	struct string_list list;
-	struct ref_states states;
-	int width, width2;
-	int any_rebase;
+সংরচনা show_info {
+	সংরচনা string_list list;
+	সংরচনা ref_states states;
+	পূর্ণাঙ্ক width, width2;
+	পূর্ণাঙ্ক any_rebase;
 };
 
 #define SHOW_INFO_INIT { \
@@ -1191,282 +1191,282 @@ struct show_info {
 	.states = REF_STATES_INIT, \
 }
 
-static int add_remote_to_show_info(struct string_list_item *item, void *cb_data)
+স্থির পূর্ণাঙ্ক add_remote_to_show_info(সংরচনা string_list_item *item, শূন্য *cb_data)
 {
-	struct show_info *info = cb_data;
-	int n = strlen(item->string);
-	if (n > info->width)
+	সংরচনা show_info *info = cb_data;
+	পূর্ণাঙ্ক n = strlen(item->string);
+	যদি (n > info->width)
 		info->width = n;
-	string_list_insert(&info->list, item->string);
-	return 0;
+	string_list_ঢোকাও(&info->list, item->string);
+	ঘূৰাই 0;
 }
 
-static int show_remote_info_item(struct string_list_item *item, void *cb_data)
+স্থির পূর্ণাঙ্ক show_remote_info_item(সংরচনা string_list_item *item, শূন্য *cb_data)
 {
-	struct show_info *info = cb_data;
-	struct ref_states *states = &info->states;
-	const char *name = item->string;
+	সংরচনা show_info *info = cb_data;
+	সংরচনা ref_states *states = &info->states;
+	ধ্রুৱ ৱর্ণ *name = item->string;
 
-	if (states->queried) {
-		const char *fmt = "%s";
-		const char *arg = "";
-		if (string_list_has_string(&states->new_refs, name)) {
+	যদি (states->queried) {
+		ধ্রুৱ ৱর্ণ *fmt = "%s";
+		ধ্রুৱ ৱর্ণ *arg = "";
+		যদি (string_list_has_string(&states->new_refs, name)) {
 			fmt = _(" new (next fetch will store in remotes/%s)");
 			arg = states->remote->name;
-		} else if (string_list_has_string(&states->tracked, name))
+		} অন্যথা যদি (string_list_has_string(&states->tracked, name))
 			arg = _(" tracked");
-		else if (string_list_has_string(&states->skipped, name))
+		অন্যথা যদি (string_list_has_string(&states->skipped, name))
 			arg = _(" skipped");
-		else if (string_list_has_string(&states->stale, name))
+		অন্যথা যদি (string_list_has_string(&states->stale, name))
 			arg = _(" stale (use 'git remote prune' to remove)");
-		else
+		অন্যথা
 			arg = _(" ???");
 		printf("    %-*s", info->width, name);
 		printf(fmt, arg);
 		printf("\n");
-	} else
+	} অন্যথা
 		printf("    %s\n", name);
 
-	return 0;
+	ঘূৰাই 0;
 }
 
-static int add_local_to_show_info(struct string_list_item *branch_item, void *cb_data)
+স্থির পূর্ণাঙ্ক add_local_to_show_info(সংরচনা string_list_item *branch_item, শূন্য *cb_data)
 {
-	struct show_info *show_info = cb_data;
-	struct ref_states *states = &show_info->states;
-	struct branch_info *branch_info = branch_item->util;
-	struct string_list_item *item;
-	int n;
+	সংরচনা show_info *show_info = cb_data;
+	সংরচনা ref_states *states = &show_info->states;
+	সংরচনা branch_info *branch_info = branch_item->util;
+	সংরচনা string_list_item *item;
+	পূর্ণাঙ্ক n;
 
-	if (!branch_info->merge.nr || !branch_info->remote_name ||
+	যদি (!branch_info->merge.nr || !branch_info->remote_name ||
 	    strcmp(states->remote->name, branch_info->remote_name))
-		return 0;
-	if ((n = strlen(branch_item->string)) > show_info->width)
+		ঘূৰাই 0;
+	যদি ((n = strlen(branch_item->string)) > show_info->width)
 		show_info->width = n;
-	if (branch_info->rebase >= REBASE_TRUE)
+	যদি (branch_info->rebase >= REBASE_TRUE)
 		show_info->any_rebase = 1;
 
-	item = string_list_insert(&show_info->list, branch_item->string);
+	item = string_list_ঢোকাও(&show_info->list, branch_item->string);
 	item->util = branch_info;
 
-	return 0;
+	ঘূৰাই 0;
 }
 
-static int show_local_info_item(struct string_list_item *item, void *cb_data)
+স্থির পূর্ণাঙ্ক show_local_info_item(সংরচনা string_list_item *item, শূন্য *cb_data)
 {
-	struct show_info *show_info = cb_data;
-	struct branch_info *branch_info = item->util;
-	struct string_list *merge = &branch_info->merge;
-	int width = show_info->width + 4;
+	সংরচনা show_info *show_info = cb_data;
+	সংরচনা branch_info *branch_info = item->util;
+	সংরচনা string_list *merge = &branch_info->merge;
+	পূর্ণাঙ্ক width = show_info->width + 4;
 
-	if (branch_info->rebase >= REBASE_TRUE && branch_info->merge.nr > 1) {
+	যদি (branch_info->rebase >= REBASE_TRUE && branch_info->merge.nr > 1) {
 		error(_("invalid branch.%s.merge; cannot rebase onto > 1 branch"),
 			item->string);
-		return 0;
+		ঘূৰাই 0;
 	}
 
 	printf("    %-*s ", show_info->width, item->string);
-	if (branch_info->rebase >= REBASE_TRUE) {
-		const char *msg;
-		if (branch_info->rebase == REBASE_INTERACTIVE)
-			msg = _("rebases interactively onto remote %s");
-		else if (branch_info->rebase == REBASE_MERGES)
-			msg = _("rebases interactively (with merges) onto "
+	যদি (branch_info->rebase >= REBASE_TRUE) {
+		ধ্রুৱ ৱর্ণ *বাৰ্তা;
+		যদি (branch_info->rebase == REBASE_INTERACTIVE)
+			বাৰ্তা = _("rebases interactively onto remote %s");
+		অন্যথা যদি (branch_info->rebase == REBASE_MERGES)
+			বাৰ্তা = _("rebases interactively (with merges) onto "
 				"remote %s");
-		else
-			msg = _("rebases onto remote %s");
-		printf_ln(msg, merge->items[0].string);
-		return 0;
-	} else if (show_info->any_rebase) {
-		printf_ln(_(" merges with remote %s"), merge->items[0].string);
+		অন্যথা
+			বাৰ্তা = _("rebases onto remote %s");
+		printf_ln(বাৰ্তা, merge->বস্তুসমূহ[0].string);
+		ঘূৰাই 0;
+	} অন্যথা যদি (show_info->any_rebase) {
+		printf_ln(_(" merges with remote %s"), merge->বস্তুসমূহ[0].string);
 		width++;
-	} else {
-		printf_ln(_("merges with remote %s"), merge->items[0].string);
+	} অন্যথা {
+		printf_ln(_("merges with remote %s"), merge->বস্তুসমূহ[0].string);
 	}
-	for (size_t i = 1; i < merge->nr; i++)
+	বাবে (size_t i = 1; i < merge->nr; i++)
 		printf(_("%-*s    and with remote %s\n"), width, "",
-		       merge->items[i].string);
+		       merge->বস্তুসমূহ[i].string);
 
-	return 0;
+	ঘূৰাই 0;
 }
 
-static int add_push_to_show_info(struct string_list_item *push_item, void *cb_data)
+স্থির পূর্ণাঙ্ক add_ঠেলো_to_show_info(সংরচনা string_list_item *ঠেলো_item, শূন্য *cb_data)
 {
-	struct show_info *show_info = cb_data;
-	struct push_info *push_info = push_item->util;
-	struct string_list_item *item;
-	int n;
-	if ((n = strlen(push_item->string)) > show_info->width)
+	সংরচনা show_info *show_info = cb_data;
+	সংরচনা ঠেলো_info *ঠেলো_info = ঠেলো_item->util;
+	সংরচনা string_list_item *item;
+	পূর্ণাঙ্ক n;
+	যদি ((n = strlen(ঠেলো_item->string)) > show_info->width)
 		show_info->width = n;
-	if ((n = strlen(push_info->dest)) > show_info->width2)
+	যদি ((n = strlen(ঠেলো_info->dest)) > show_info->width2)
 		show_info->width2 = n;
-	item = string_list_append(&show_info->list, push_item->string);
-	item->util = push_item->util;
-	return 0;
+	item = string_list_append(&show_info->list, ঠেলো_item->string);
+	item->util = ঠেলো_item->util;
+	ঘূৰাই 0;
 }
 
 /*
  * Sorting comparison for a string list that has push_info
  * structs in its util field
  */
-static int cmp_string_with_push(const void *va, const void *vb)
+স্থির পূর্ণাঙ্ক cmp_string_with_ঠেলো(ধ্রুৱ শূন্য *va, ধ্রুৱ শূন্য *vb)
 {
-	const struct string_list_item *a = va;
-	const struct string_list_item *b = vb;
-	const struct push_info *a_push = a->util;
-	const struct push_info *b_push = b->util;
-	int cmp = strcmp(a->string, b->string);
-	return cmp ? cmp : strcmp(a_push->dest, b_push->dest);
+	ধ্রুৱ সংরচনা string_list_item *a = va;
+	ধ্রুৱ সংরচনা string_list_item *b = vb;
+	ধ্রুৱ সংরচনা ঠেলো_info *a_ঠেলো = a->util;
+	ধ্রুৱ সংরচনা ঠেলো_info *b_ঠেলো = b->util;
+	পূর্ণাঙ্ক cmp = strcmp(a->string, b->string);
+	ঘূৰাই cmp ? cmp : strcmp(a_ঠেলো->dest, b_ঠেলো->dest);
 }
 
-static int show_push_info_item(struct string_list_item *item, void *cb_data)
+স্থির পূর্ণাঙ্ক show_ঠেলো_info_item(সংরচনা string_list_item *item, শূন্য *cb_data)
 {
-	struct show_info *show_info = cb_data;
-	struct push_info *push_info = item->util;
-	const char *src = item->string, *status = NULL;
+	সংরচনা show_info *show_info = cb_data;
+	সংরচনা ঠেলো_info *ঠেলো_info = item->util;
+	ধ্রুৱ ৱর্ণ *src = item->string, *status = রিক্ত;
 
-	switch (push_info->status) {
-	case PUSH_STATUS_CREATE:
+	ৱিকল্প (ঠেলো_info->status) {
+	পক্ষ ঠেলো_STATUS_CREATE:
 		status = _("create");
-		break;
-	case PUSH_STATUS_DELETE:
+		ভঙ্গ;
+	পক্ষ ঠেলো_STATUS_DELETE:
 		status = _("delete");
 		src = _("(none)");
-		break;
-	case PUSH_STATUS_UPTODATE:
+		ভঙ্গ;
+	পক্ষ ঠেলো_STATUS_UPTODATE:
 		status = _("up to date");
-		break;
-	case PUSH_STATUS_FASTFORWARD:
+		ভঙ্গ;
+	পক্ষ ঠেলো_STATUS_FASTFORWARD:
 		status = _("fast-forwardable");
-		break;
-	case PUSH_STATUS_OUTOFDATE:
+		ভঙ্গ;
+	পক্ষ ঠেলো_STATUS_OUTOFDATE:
 		status = _("local out of date");
-		break;
-	case PUSH_STATUS_NOTQUERIED:
-		break;
+		ভঙ্গ;
+	পক্ষ ঠেলো_STATUS_NOTQUERIED:
+		ভঙ্গ;
 	}
-	if (status) {
-		if (push_info->forced)
+	যদি (status) {
+		যদি (ঠেলো_info->forced)
 			printf_ln(_("    %-*s forces to %-*s (%s)"), show_info->width, src,
-			       show_info->width2, push_info->dest, status);
-		else
+			       show_info->width2, ঠেলো_info->dest, status);
+		অন্যথা
 			printf_ln(_("    %-*s pushes to %-*s (%s)"), show_info->width, src,
-			       show_info->width2, push_info->dest, status);
-	} else {
-		if (push_info->forced)
+			       show_info->width2, ঠেলো_info->dest, status);
+	} অন্যথা {
+		যদি (ঠেলো_info->forced)
 			printf_ln(_("    %-*s forces to %s"), show_info->width, src,
-			       push_info->dest);
-		else
+			       ঠেলো_info->dest);
+		অন্যথা
 			printf_ln(_("    %-*s pushes to %s"), show_info->width, src,
-			       push_info->dest);
+			       ঠেলো_info->dest);
 	}
-	return 0;
+	ঘূৰাই 0;
 }
 
-static int get_one_entry(struct remote *remote, void *priv)
+স্থির পূর্ণাঙ্ক get_one_entry(সংরচনা remote *remote, শূন্য *priv)
 {
-	struct string_list *list = priv;
-	struct strbuf remote_info_buf = STRBUF_INIT;
-	struct strvec *url;
+	সংরচনা string_list *list = priv;
+	সংরচনা strbuf remote_info_buf = STRBUF_INIT;
+	সংরচনা strvec *url;
 
-	if (remote->url.nr > 0) {
-		struct strbuf promisor_config = STRBUF_INIT;
-		const char *partial_clone_filter = NULL;
+	যদি (remote->url.nr > 0) {
+		সংরচনা strbuf promisor_config = STRBUF_INIT;
+		ধ্রুৱ ৱর্ণ *partial_clone_filter = রিক্ত;
 
 		strbuf_addf(&promisor_config, "remote.%s.partialclonefilter", remote->name);
 		strbuf_addf(&remote_info_buf, "%s (fetch)", remote->url.v[0]);
-		if (!repo_config_get_string_tmp(the_repository, promisor_config.buf, &partial_clone_filter))
+		যদি (!repo_config_get_string_tmp(the_repository, promisor_config.buf, &partial_clone_filter))
 			strbuf_addf(&remote_info_buf, " [%s]", partial_clone_filter);
 
 		strbuf_release(&promisor_config);
 		string_list_append(list, remote->name)->util =
-				strbuf_detach(&remote_info_buf, NULL);
-	} else
-		string_list_append(list, remote->name)->util = NULL;
-	url = push_url_of_remote(remote);
-	for (size_t i = 0; i < url->nr; i++) {
+				strbuf_detach(&remote_info_buf, রিক্ত);
+	} অন্যথা
+		string_list_append(list, remote->name)->util = রিক্ত;
+	url = ঠেলো_url_of_remote(remote);
+	বাবে (size_t i = 0; i < url->nr; i++) {
 		strbuf_addf(&remote_info_buf, "%s (push)", url->v[i]);
 		string_list_append(list, remote->name)->util =
-				strbuf_detach(&remote_info_buf, NULL);
+				strbuf_detach(&remote_info_buf, রিক্ত);
 	}
 
-	return 0;
+	ঘূৰাই 0;
 }
 
-static int show_all(void)
+স্থির পূর্ণাঙ্ক show_all(শূন্য)
 {
-	struct string_list list = STRING_LIST_INIT_DUP;
-	int result;
+	সংরচনা string_list list = STRING_LIST_INIT_DUP;
+	পূর্ণাঙ্ক result;
 
 	result = for_each_remote(get_one_entry, &list);
 
-	if (!result) {
+	যদি (!result) {
 		string_list_sort(&list);
-		for (size_t i = 0; i < list.nr; i++) {
-			struct string_list_item *item = list.items + i;
-			if (verbose)
+		বাবে (size_t i = 0; i < list.nr; i++) {
+			সংরচনা string_list_item *item = list.বস্তুসমূহ + i;
+			যদি (verbose)
 				printf("%s\t%s\n", item->string,
-					item->util ? (const char *)item->util : "");
-			else {
-				if (i && !strcmp((item - 1)->string, item->string))
-					continue;
+					item->util ? (ধ্রুৱ ৱর্ণ *)item->util : "");
+			অন্যথা {
+				যদি (i && !strcmp((item - 1)->string, item->string))
+					অনুৱর্ত;
 				printf("%s\n", item->string);
 			}
 		}
 	}
 	string_list_clear(&list, 1);
-	return result;
+	ঘূৰাই result;
 }
 
-static int show(int argc, const char **argv, const char *prefix,
-		struct repository *repo UNUSED)
+স্থির পূর্ণাঙ্ক show(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+		সংরচনা repository *repo UNUSED)
 {
-	int no_query = 0, result = 0, query_flag = 0;
-	struct option options[] = {
-		OPT_BOOL('n', NULL, &no_query, N_("do not query remotes")),
+	পূর্ণাঙ্ক no_query = 0, result = 0, query_flag = 0;
+	সংরচনা option options[] = {
+		OPT_BOOL('n', রিক্ত, &no_query, N_("do not query remotes")),
 		OPT_END()
 	};
-	struct show_info info = SHOW_INFO_INIT;
+	সংরচনা show_info info = SHOW_INFO_INIT;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_show_usage,
 			     0);
 
-	if (argc < 1)
-		return show_all();
+	যদি (argc < 1)
+		ঘূৰাই show_all();
 
-	if (!no_query)
-		query_flag = (GET_REF_STATES | GET_HEAD_NAMES | GET_PUSH_REF_STATES);
+	যদি (!no_query)
+		query_flag = (GET_REF_STATES | GET_HEAD_NAMES | GET_ঠেলো_REF_STATES);
 
-	for (; argc; argc--, argv++) {
+	বাবে (; argc; argc--, argv++) {
 		size_t i;
-		struct strvec *url;
+		সংরচনা strvec *url;
 
 		get_remote_ref_states(*argv, &info.states, query_flag);
 
 		printf_ln(_("* remote %s"), *argv);
 		printf_ln(_("  Fetch URL: %s"), info.states.remote->url.v[0]);
-		url = push_url_of_remote(info.states.remote);
-		for (i = 0; i < url->nr; i++)
+		url = ঠেলো_url_of_remote(info.states.remote);
+		বাবে (i = 0; i < url->nr; i++)
 			/*
 			 * TRANSLATORS: the colon ':' should align
 			 * with the one in " Fetch URL: %s"
 			 * translation.
 			 */
 			printf_ln(_("  Push  URL: %s"), url->v[i]);
-		if (!i)
+		যদি (!i)
 			printf_ln(_("  Push  URL: %s"), _("(no URL)"));
-		if (no_query)
+		যদি (no_query)
 			printf_ln(_("  HEAD branch: %s"), _("(not queried)"));
-		else if (!info.states.heads.nr)
+		অন্যথা যদি (!info.states.heads.nr)
 			printf_ln(_("  HEAD branch: %s"), _("(unknown)"));
-		else if (info.states.heads.nr == 1)
-			printf_ln(_("  HEAD branch: %s"), info.states.heads.items[0].string);
-		else {
+		অন্যথা যদি (info.states.heads.nr == 1)
+			printf_ln(_("  HEAD branch: %s"), info.states.heads.বস্তুসমূহ[0].string);
+		অন্যথা {
 			printf(_("  HEAD branch (remote HEAD is ambiguous,"
 				 " may be one of the following):\n"));
-			for (i = 0; i < info.states.heads.nr; i++)
-				printf("    %s\n", info.states.heads.items[i].string);
+			বাবে (i = 0; i < info.states.heads.nr; i++)
+				printf("    %s\n", info.states.heads.বস্তুসমূহ[i].string);
 		}
 
 		/* remote branch info */
@@ -1475,7 +1475,7 @@ static int show(int argc, const char **argv, const char *prefix,
 		for_each_string_list(&info.states.skipped, add_remote_to_show_info, &info);
 		for_each_string_list(&info.states.tracked, add_remote_to_show_info, &info);
 		for_each_string_list(&info.states.stale, add_remote_to_show_info, &info);
-		if (info.list.nr)
+		যদি (info.list.nr)
 			printf_ln(Q_("  Remote branch:%s",
 				     "  Remote branches:%s",
 				     info.list.nr),
@@ -1487,7 +1487,7 @@ static int show(int argc, const char **argv, const char *prefix,
 		info.width = 0;
 		info.any_rebase = 0;
 		for_each_string_list(&branch_list, add_local_to_show_info, &info);
-		if (info.list.nr)
+		যদি (info.list.nr)
 			printf_ln(Q_("  Local branch configured for 'git pull':",
 				     "  Local branches configured for 'git pull':",
 				     info.list.nr));
@@ -1495,64 +1495,64 @@ static int show(int argc, const char **argv, const char *prefix,
 		string_list_clear(&info.list, 0);
 
 		/* git push info */
-		if (info.states.remote->mirror)
+		যদি (info.states.remote->mirror)
 			printf_ln(_("  Local refs will be mirrored by 'git push'"));
 
 		info.width = info.width2 = 0;
-		for_each_string_list(&info.states.push, add_push_to_show_info, &info);
-		QSORT(info.list.items, info.list.nr, cmp_string_with_push);
-		if (info.list.nr)
+		for_each_string_list(&info.states.ঠেলো, add_ঠেলো_to_show_info, &info);
+		QSORT(info.list.বস্তুসমূহ, info.list.nr, cmp_string_with_ঠেলো);
+		যদি (info.list.nr)
 			printf_ln(Q_("  Local ref configured for 'git push'%s:",
 				     "  Local refs configured for 'git push'%s:",
 				     info.list.nr),
 				  no_query ? _(" (status not queried)") : "");
-		for_each_string_list(&info.list, show_push_info_item, &info);
+		for_each_string_list(&info.list, show_ঠেলো_info_item, &info);
 		string_list_clear(&info.list, 0);
 
 		free_remote_ref_states(&info.states);
 	}
 
-	return result;
+	ঘূৰাই result;
 }
 
-static void report_set_head_auto(const char *remote, const char *head_name,
-			struct strbuf *b_local_head, int was_detached) {
-	struct strbuf buf_prefix = STRBUF_INIT;
-	const char *prev_head = NULL;
+স্থির শূন্য report_set_head_auto(ধ্রুৱ ৱর্ণ *remote, ধ্রুৱ ৱর্ণ *head_name,
+			সংরচনা strbuf *b_local_head, পূর্ণাঙ্ক was_detached) {
+	সংরচনা strbuf buf_prefix = STRBUF_INIT;
+	ধ্রুৱ ৱর্ণ *prev_head = রিক্ত;
 
 	strbuf_addf(&buf_prefix, "refs/remotes/%s/", remote);
 	skip_prefix(b_local_head->buf, buf_prefix.buf, &prev_head);
 
-	if (prev_head && !strcmp(prev_head, head_name))
+	যদি (prev_head && !strcmp(prev_head, head_name))
 		printf(_("'%s/HEAD' is unchanged and points to '%s'\n"),
 			remote, head_name);
-	else if (prev_head)
+	অন্যথা যদি (prev_head)
 		printf(_("'%s/HEAD' has changed from '%s' and now points to '%s'\n"),
 			remote, prev_head, head_name);
-	else if (!b_local_head->len)
+	অন্যথা যদি (!b_local_head->len)
 		printf(_("'%s/HEAD' is now created and points to '%s'\n"),
 			remote, head_name);
-	else if (was_detached && b_local_head->len)
+	অন্যথা যদি (was_detached && b_local_head->len)
 		printf(_("'%s/HEAD' was detached at '%s' and now points to '%s'\n"),
 			remote, b_local_head->buf, head_name);
-	else
+	অন্যথা
 		printf(_("'%s/HEAD' used to point to '%s' "
 			"(which is not a remote branch), but now points to '%s'\n"),
 			remote, b_local_head->buf, head_name);
 	strbuf_release(&buf_prefix);
 }
 
-static int set_head(int argc, const char **argv, const char *prefix,
-		    struct repository *repo UNUSED)
+স্থির পূর্ণাঙ্ক set_head(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+		    সংরচনা repository *repo UNUSED)
 {
-	int opt_a = 0, opt_d = 0, result = 0, was_detached;
-	struct strbuf b_head = STRBUF_INIT, b_remote_head = STRBUF_INIT,
+	পূর্ণাঙ্ক opt_a = 0, opt_d = 0, result = 0, was_detached;
+	সংরচনা strbuf b_head = STRBUF_INIT, b_remote_head = STRBUF_INIT,
 		b_local_head = STRBUF_INIT;
-	char *head_name = NULL;
-	struct ref_store *refs = get_main_ref_store(the_repository);
-	struct remote *remote;
+	ৱর্ণ *head_name = রিক্ত;
+	সংরচনা ref_store *refs = get_main_ref_store(the_repository);
+	সংরচনা remote *remote;
 
-	struct option options[] = {
+	সংরচনা option options[] = {
 		OPT_BOOL('a', "auto", &opt_a,
 			 N_("set refs/remotes/<name>/HEAD according to remote")),
 		OPT_BOOL('d', "delete", &opt_d,
@@ -1563,51 +1563,51 @@ static int set_head(int argc, const char **argv, const char *prefix,
 			     builtin_remote_sethead_usage, 0);
 
 	/* All modes require at least a remote name. */
-	if (!argc)
+	যদি (!argc)
 		usage_with_options(builtin_remote_sethead_usage, options);
 
 	strbuf_addf(&b_head, "refs/remotes/%s/HEAD", argv[0]);
 	remote = remote_get(argv[0]);
 
-	if (!opt_a && !opt_d && argc == 2) {
+	যদি (!opt_a && !opt_d && argc == 2) {
 		head_name = xstrdup(argv[1]);
-	} else if (opt_a && !opt_d && argc == 1) {
-		struct ref_states states = REF_STATES_INIT;
+	} অন্যথা যদি (opt_a && !opt_d && argc == 1) {
+		সংরচনা ref_states states = REF_STATES_INIT;
 		get_remote_ref_states(argv[0], &states, GET_HEAD_NAMES);
-		if (!states.heads.nr)
+		যদি (!states.heads.nr)
 			result |= error(_("Cannot determine remote HEAD"));
-		else if (states.heads.nr > 1) {
+		অন্যথা যদি (states.heads.nr > 1) {
 			result |= error(_("Multiple remote HEAD branches. "
 					  "Please choose one explicitly with:"));
-			for (size_t i = 0; i < states.heads.nr; i++)
+			বাবে (size_t i = 0; i < states.heads.nr; i++)
 				fprintf(stderr, "  git remote set-head %s %s\n",
-					argv[0], states.heads.items[i].string);
-		} else
-			head_name = xstrdup(states.heads.items[0].string);
+					argv[0], states.heads.বস্তুসমূহ[i].string);
+		} অন্যথা
+			head_name = xstrdup(states.heads.বস্তুসমূহ[0].string);
 		free_remote_ref_states(&states);
-	} else if (opt_d && !opt_a && argc == 1) {
-		if (refs_delete_ref(refs, NULL, b_head.buf, NULL, REF_NO_DEREF))
+	} অন্যথা যদি (opt_d && !opt_a && argc == 1) {
+		যদি (refs_delete_ref(refs, রিক্ত, b_head.buf, রিক্ত, REF_NO_DEREF))
 			result |= error(_("Could not delete %s"), b_head.buf);
-	} else
+	} অন্যথা
 		usage_with_options(builtin_remote_sethead_usage, options);
 
-	if (!head_name)
-		goto cleanup;
+	যদি (!head_name)
+		গচ্ছ cleanup;
 	strbuf_addf(&b_remote_head, "refs/remotes/%s/%s", argv[0], head_name);
-	if (!refs_ref_exists(refs, b_remote_head.buf)) {
+	যদি (!refs_ref_exists(refs, b_remote_head.buf)) {
 		result |= error(_("Not a valid ref: %s"), b_remote_head.buf);
-		goto cleanup;
+		গচ্ছ cleanup;
 	}
 	was_detached = refs_update_symref_extended(refs, b_head.buf, b_remote_head.buf,
 			"remote set-head", &b_local_head, 0);
-	if (was_detached == -1) {
+	যদি (was_detached == -1) {
 		result |= error(_("Could not set up %s"), b_head.buf);
-		goto cleanup;
+		গচ্ছ cleanup;
 	}
-	if (opt_a)
+	যদি (opt_a)
 		report_set_head_auto(argv[0], head_name, &b_local_head, was_detached);
-	if (remote->follow_remote_head == FOLLOW_REMOTE_ALWAYS) {
-		struct strbuf config_name = STRBUF_INIT;
+	যদি (remote->follow_remote_head == FOLLOW_REMOTE_ALWAYS) {
+		সংরচনা strbuf config_name = STRBUF_INIT;
 		strbuf_addf(&config_name,
 			"remote.%s.followremotehead", remote->name);
 		repo_config_set(the_repository, config_name.buf, "warn");
@@ -1615,25 +1615,25 @@ static int set_head(int argc, const char **argv, const char *prefix,
 	}
 
 cleanup:
-	free(head_name);
+	মুক্ত(head_name);
 	strbuf_release(&b_head);
 	strbuf_release(&b_remote_head);
 	strbuf_release(&b_local_head);
-	return result;
+	ঘূৰাই result;
 }
 
-static int prune_remote(const char *remote, int dry_run)
+স্থির পূর্ণাঙ্ক prune_remote(ধ্রুৱ ৱর্ণ *remote, পূর্ণাঙ্ক dry_run)
 {
-	int result = 0;
-	struct ref_states states = REF_STATES_INIT;
-	struct string_list refs_to_prune = STRING_LIST_INIT_NODUP;
-	struct string_list_item *item;
+	পূর্ণাঙ্ক result = 0;
+	সংরচনা ref_states states = REF_STATES_INIT;
+	সংরচনা string_list refs_to_prune = STRING_LIST_INIT_NODUP;
+	সংরচনা string_list_item *item;
 
 	get_remote_ref_states(remote, &states, GET_REF_STATES);
 
-	if (!states.stale.nr) {
+	যদি (!states.stale.nr) {
 		free_remote_ref_states(&states);
-		return 0;
+		ঘূৰাই 0;
 	}
 
 	printf_ln(_("Pruning %s"), remote);
@@ -1643,17 +1643,17 @@ static int prune_remote(const char *remote, int dry_run)
 		string_list_append(&refs_to_prune, item->util);
 	string_list_sort(&refs_to_prune);
 
-	if (!dry_run)
+	যদি (!dry_run)
 		result |= refs_delete_refs(get_main_ref_store(the_repository),
 					   "remote: prune", &refs_to_prune, 0);
 
 	for_each_string_list_item(item, &states.stale) {
-		const char *refname = item->util;
+		ধ্রুৱ ৱর্ণ *refname = item->util;
 
-		if (dry_run)
+		যদি (dry_run)
 			printf_ln(_(" * [would prune] %s"),
 			       abbrev_ref(refname, "refs/remotes/"));
-		else
+		অন্যথা
 			printf_ln(_(" * [pruned] %s"),
 			       abbrev_ref(refname, "refs/remotes/"));
 	}
@@ -1663,14 +1663,14 @@ static int prune_remote(const char *remote, int dry_run)
 
 	string_list_clear(&refs_to_prune, 0);
 	free_remote_ref_states(&states);
-	return result;
+	ঘূৰাই result;
 }
 
-static int prune(int argc, const char **argv, const char *prefix,
-		 struct repository *repo UNUSED)
+স্থির পূর্ণাঙ্ক prune(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+		 সংরচনা repository *repo UNUSED)
 {
-	int dry_run = 0, result = 0;
-	struct option options[] = {
+	পূর্ণাঙ্ক dry_run = 0, result = 0;
+	সংরচনা option options[] = {
 		OPT__DRY_RUN(&dry_run, N_("dry run")),
 		OPT_END()
 	};
@@ -1678,138 +1678,138 @@ static int prune(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_prune_usage, 0);
 
-	if (argc < 1)
+	যদি (argc < 1)
 		usage_with_options(builtin_remote_prune_usage, options);
 
-	for (; argc; argc--, argv++)
+	বাবে (; argc; argc--, argv++)
 		result |= prune_remote(*argv, dry_run);
 
-	return result;
+	ঘূৰাই result;
 }
 
-static int get_remote_default(const char *key, const char *value UNUSED,
-			      const struct config_context *ctx UNUSED,
-			      void *priv)
+স্থির পূর্ণাঙ্ক get_remote_default(ধ্রুৱ ৱর্ণ *চাবি, ধ্রুৱ ৱর্ণ *মান UNUSED,
+			      ধ্রুৱ সংরচনা config_context *ctx UNUSED,
+			      শূন্য *priv)
 {
-	if (strcmp(key, "remotes.default") == 0) {
-		int *found = priv;
+	যদি (strcmp(চাবি, "remotes.default") == 0) {
+		পূর্ণাঙ্ক *found = priv;
 		*found = 1;
 	}
-	return 0;
+	ঘূৰাই 0;
 }
 
-static int update(int argc, const char **argv, const char *prefix,
-		  struct repository *repo UNUSED)
+স্থির পূর্ণাঙ্ক update(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+		  সংরচনা repository *repo UNUSED)
 {
-	int i, prune = -1;
-	struct option options[] = {
+	পূর্ণাঙ্ক i, prune = -1;
+	সংরচনা option options[] = {
 		OPT_BOOL('p', "prune", &prune,
 			 N_("prune remotes after fetching")),
 		OPT_END()
 	};
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	int default_defined = 0;
+	সংরচনা child_process cmd = CHILD_PROCESS_INIT;
+	পূর্ণাঙ্ক default_defined = 0;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_update_usage,
 			     PARSE_OPT_KEEP_ARGV0);
 
-	strvec_push(&cmd.args, "fetch");
+	strvec_ঠেলো(&cmd.args, "fetch");
 
-	if (prune != -1)
-		strvec_push(&cmd.args, prune ? "--prune" : "--no-prune");
-	if (verbose)
-		strvec_push(&cmd.args, "-v");
-	strvec_push(&cmd.args, "--multiple");
-	if (argc < 2)
-		strvec_push(&cmd.args, "default");
-	for (i = 1; i < argc; i++)
-		strvec_push(&cmd.args, argv[i]);
+	যদি (prune != -1)
+		strvec_ঠেলো(&cmd.args, prune ? "--prune" : "--no-prune");
+	যদি (verbose)
+		strvec_ঠেলো(&cmd.args, "-v");
+	strvec_ঠেলো(&cmd.args, "--multiple");
+	যদি (argc < 2)
+		strvec_ঠেলো(&cmd.args, "default");
+	বাবে (i = 1; i < argc; i++)
+		strvec_ঠেলো(&cmd.args, argv[i]);
 
-	if (strcmp(cmd.args.v[cmd.args.nr-1], "default") == 0) {
+	যদি (strcmp(cmd.args.v[cmd.args.nr-1], "default") == 0) {
 		repo_config(the_repository, get_remote_default, &default_defined);
-		if (!default_defined) {
-			strvec_pop(&cmd.args);
-			strvec_push(&cmd.args, "--all");
+		যদি (!default_defined) {
+			strvec_বেৰ_কৰো(&cmd.args);
+			strvec_ঠেলো(&cmd.args, "--all");
 		}
 	}
 
 	cmd.git_cmd = 1;
-	return run_command(&cmd);
+	ঘূৰাই run_command(&cmd);
 }
 
-static int remove_all_fetch_refspecs(const char *key)
+স্থির পূর্ণাঙ্ক remove_all_fetch_refspecs(ধ্রুৱ ৱর্ণ *চাবি)
 {
-	return repo_config_set_multivar_gently(the_repository, key, NULL, NULL,
+	ঘূৰাই repo_config_set_multivar_gently(the_repository, চাবি, রিক্ত, রিক্ত,
 					       CONFIG_FLAGS_MULTI_REPLACE);
 }
 
-static void add_branches(struct remote *remote, const char **branches,
-			 const char *key)
+স্থির শূন্য add_branches(সংরচনা remote *remote, ধ্রুৱ ৱর্ণ **branches,
+			 ধ্রুৱ ৱর্ণ *চাবি)
 {
-	const char *remotename = remote->name;
-	int mirror = remote->mirror;
-	struct strbuf refspec = STRBUF_INIT;
+	ধ্রুৱ ৱর্ণ *remotename = remote->name;
+	পূর্ণাঙ্ক mirror = remote->mirror;
+	সংরচনা strbuf refspec = STRBUF_INIT;
 
-	for (; *branches; branches++)
-		add_branch(key, *branches, remotename, mirror, &refspec);
+	বাবে (; *branches; branches++)
+		add_branch(চাবি, *branches, remotename, mirror, &refspec);
 
 	strbuf_release(&refspec);
 }
 
-static int set_remote_branches(const char *remotename, const char **branches,
-				int add_mode)
+স্থির পূর্ণাঙ্ক set_remote_branches(ধ্রুৱ ৱর্ণ *remotename, ধ্রুৱ ৱর্ণ **branches,
+				পূর্ণাঙ্ক add_mode)
 {
-	struct strbuf key = STRBUF_INIT;
-	struct remote *remote;
+	সংরচনা strbuf চাবি = STRBUF_INIT;
+	সংরচনা remote *remote;
 
-	strbuf_addf(&key, "remote.%s.fetch", remotename);
+	strbuf_addf(&চাবি, "remote.%s.fetch", remotename);
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	যদি (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
 		exit(2);
 	}
 
-	if (!add_mode && remove_all_fetch_refspecs(key.buf)) {
-		strbuf_release(&key);
-		return 1;
+	যদি (!add_mode && remove_all_fetch_refspecs(চাবি.buf)) {
+		strbuf_release(&চাবি);
+		ঘূৰাই 1;
 	}
-	add_branches(remote, branches, key.buf);
+	add_branches(remote, branches, চাবি.buf);
 
-	strbuf_release(&key);
-	return 0;
+	strbuf_release(&চাবি);
+	ঘূৰাই 0;
 }
 
-static int set_branches(int argc, const char **argv, const char *prefix,
-			struct repository *repo UNUSED)
+স্থির পূর্ণাঙ্ক set_branches(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+			সংরচনা repository *repo UNUSED)
 {
-	int add_mode = 0;
-	struct option options[] = {
+	পূর্ণাঙ্ক add_mode = 0;
+	সংরচনা option options[] = {
 		OPT_BOOL('\0', "add", &add_mode, N_("add branch")),
 		OPT_END()
 	};
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_setbranches_usage, 0);
-	if (argc == 0) {
+	যদি (argc == 0) {
 		error(_("no remote specified"));
 		usage_with_options(builtin_remote_setbranches_usage, options);
 	}
-	argv[argc] = NULL;
+	argv[argc] = রিক্ত;
 
-	return set_remote_branches(argv[0], argv + 1, add_mode);
+	ঘূৰাই set_remote_branches(argv[0], argv + 1, add_mode);
 }
 
-static int get_url(int argc, const char **argv, const char *prefix,
-		   struct repository *repo UNUSED)
+স্থির পূর্ণাঙ্ক get_url(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+		   সংরচনা repository *repo UNUSED)
 {
-	int push_mode = 0, all_mode = 0;
-	const char *remotename = NULL;
-	struct remote *remote;
-	struct strvec *url;
-	struct option options[] = {
-		OPT_BOOL('\0', "push", &push_mode,
+	পূর্ণাঙ্ক ঠেলো_mode = 0, all_mode = 0;
+	ধ্রুৱ ৱর্ণ *remotename = রিক্ত;
+	সংরচনা remote *remote;
+	সংরচনা strvec *url;
+	সংরচনা option options[] = {
+		OPT_BOOL('\0', "push", &ঠেলো_mode,
 			 N_("query push URLs rather than fetch URLs")),
 		OPT_BOOL('\0', "all", &all_mode,
 			 N_("return all URLs")),
@@ -1818,43 +1818,43 @@ static int get_url(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_geturl_usage, 0);
 
-	if (argc != 1)
+	যদি (argc != 1)
 		usage_with_options(builtin_remote_geturl_usage, options);
 
 	remotename = argv[0];
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	যদি (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
 		exit(2);
 	}
 
-	url = push_mode ? push_url_of_remote(remote) : &remote->url;
+	url = ঠেলো_mode ? ঠেলো_url_of_remote(remote) : &remote->url;
 
-	if (all_mode) {
-		for (size_t i = 0; i < url->nr; i++)
+	যদি (all_mode) {
+		বাবে (size_t i = 0; i < url->nr; i++)
 			printf_ln("%s", url->v[i]);
-	} else {
+	} অন্যথা {
 		printf_ln("%s", url->v[0]);
 	}
 
-	return 0;
+	ঘূৰাই 0;
 }
 
-static int set_url(int argc, const char **argv, const char *prefix,
-		   struct repository *repo UNUSED)
+স্থির পূর্ণাঙ্ক set_url(পূর্ণাঙ্ক argc, ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+		   সংরচনা repository *repo UNUSED)
 {
-	int push_mode = 0, add_mode = 0, delete_mode = 0;
-	int matches = 0, negative_matches = 0;
-	const char *remotename = NULL;
-	const char *newurl = NULL;
-	const char *oldurl = NULL;
-	struct remote *remote;
+	পূর্ণাঙ্ক ঠেলো_mode = 0, add_mode = 0, delete_mode = 0;
+	পূর্ণাঙ্ক matches = 0, negative_matches = 0;
+	ধ্রুৱ ৱর্ণ *remotename = রিক্ত;
+	ধ্রুৱ ৱর্ণ *newurl = রিক্ত;
+	ধ্রুৱ ৱর্ণ *oldurl = রিক্ত;
+	সংরচনা remote *remote;
 	regex_t old_regex;
-	struct strvec *urlset;
-	struct strbuf name_buf = STRBUF_INIT;
-	struct option options[] = {
-		OPT_BOOL('\0', "push", &push_mode,
+	সংরচনা strvec *urlset;
+	সংরচনা strbuf name_buf = STRBUF_INIT;
+	সংরচনা option options[] = {
+		OPT_BOOL('\0', "push", &ঠেলো_mode,
 			 N_("manipulate push URLs")),
 		OPT_BOOL('\0', "add", &add_mode,
 			 N_("add URL")),
@@ -1866,81 +1866,81 @@ static int set_url(int argc, const char **argv, const char *prefix,
 			     builtin_remote_seturl_usage,
 			     PARSE_OPT_KEEP_ARGV0);
 
-	if (add_mode && delete_mode)
+	যদি (add_mode && delete_mode)
 		die(_("--add --delete doesn't make sense"));
 
-	if (argc < 3 || argc > 4 || ((add_mode || delete_mode) && argc != 3))
+	যদি (argc < 3 || argc > 4 || ((add_mode || delete_mode) && argc != 3))
 		usage_with_options(builtin_remote_seturl_usage, options);
 
 	remotename = argv[1];
 	newurl = argv[2];
-	if (argc > 3)
+	যদি (argc > 3)
 		oldurl = argv[3];
 
-	if (delete_mode)
+	যদি (delete_mode)
 		oldurl = newurl;
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	যদি (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
 		exit(2);
 	}
 
-	if (push_mode) {
+	যদি (ঠেলো_mode) {
 		strbuf_addf(&name_buf, "remote.%s.pushurl", remotename);
 		urlset = &remote->pushurl;
-	} else {
+	} অন্যথা {
 		strbuf_addf(&name_buf, "remote.%s.url", remotename);
 		urlset = &remote->url;
 	}
 
 	/* Special cases that add new entry. */
-	if ((!oldurl && !delete_mode) || add_mode) {
-		if (add_mode)
+	যদি ((!oldurl && !delete_mode) || add_mode) {
+		যদি (add_mode)
 			repo_config_set_multivar(the_repository, name_buf.buf, newurl,
 						       "^$", 0);
-		else
+		অন্যথা
 			repo_config_set(the_repository, name_buf.buf, newurl);
-		goto out;
+		গচ্ছ out;
 	}
 
 	/* Old URL specified. Demand that one matches. */
-	if (regcomp(&old_regex, oldurl, REG_EXTENDED))
+	যদি (regcomp(&old_regex, oldurl, REG_EXTENDED))
 		die(_("Invalid old URL pattern: %s"), oldurl);
 
-	for (size_t i = 0; i < urlset->nr; i++)
-		if (!regexec(&old_regex, urlset->v[i], 0, NULL, 0))
+	বাবে (size_t i = 0; i < urlset->nr; i++)
+		যদি (!regexec(&old_regex, urlset->v[i], 0, রিক্ত, 0))
 			matches++;
-		else
+		অন্যথা
 			negative_matches++;
-	if (!delete_mode && !matches)
+	যদি (!delete_mode && !matches)
 		die(_("No such URL found: %s"), oldurl);
-	if (delete_mode && !negative_matches && !push_mode)
+	যদি (delete_mode && !negative_matches && !ঠেলো_mode)
 		die(_("Will not delete all non-push URLs"));
 
 	regfree(&old_regex);
 
-	if (!delete_mode)
+	যদি (!delete_mode)
 		repo_config_set_multivar(the_repository, name_buf.buf, newurl, oldurl, 0);
-	else
-		repo_config_set_multivar(the_repository, name_buf.buf, NULL, oldurl,
+	অন্যথা
+		repo_config_set_multivar(the_repository, name_buf.buf, রিক্ত, oldurl,
 					 CONFIG_FLAGS_MULTI_REPLACE);
 out:
 	strbuf_release(&name_buf);
-	return 0;
+	ঘূৰাই 0;
 }
 
-int cmd_remote(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+পূর্ণাঙ্ক cmd_remote(পূর্ণাঙ্ক argc,
+	       ধ্রুৱ ৱর্ণ **argv,
+	       ধ্রুৱ ৱর্ণ *prefix,
+	       সংরচনা repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	parse_opt_subcommand_fn *fn = রিক্ত;
+	সংরচনা option options[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose; must be placed before a subcommand")),
 		OPT_SUBCOMMAND("add", &fn, add),
 		OPT_SUBCOMMAND("rename", &fn, mv),
-		OPT_SUBCOMMAND_F("rm", &fn, rm, NULL, PARSE_OPT_NOCOMPLETE),
+		OPT_SUBCOMMAND_F("rm", &fn, rm, রিক্ত, PARSE_OPT_NOCOMPLETE),
 		OPT_SUBCOMMAND("remove", &fn, rm),
 		OPT_SUBCOMMAND("set-head", &fn, set_head),
 		OPT_SUBCOMMAND("set-branches", &fn, set_branches),
@@ -1955,13 +1955,13 @@ int cmd_remote(int argc,
 	argc = parse_options(argc, argv, prefix, options, builtin_remote_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL);
 
-	if (fn) {
-		return !!fn(argc, argv, prefix, repo);
-	} else {
-		if (argc) {
+	যদি (fn) {
+		ঘূৰাই !!fn(argc, argv, prefix, repo);
+	} অন্যথা {
+		যদি (argc) {
 			error(_("unknown subcommand: `%s'"), argv[0]);
 			usage_with_options(builtin_remote_usage, options);
 		}
-		return !!show_all();
+		ঘূৰাই !!show_all();
 	}
 }

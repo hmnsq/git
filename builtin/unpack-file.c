@@ -1,51 +1,51 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "hex.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
+#অন্তর্ভাৱ "builtin.h"
+#অন্তর্ভাৱ "config.h"
+#অন্তর্ভাৱ "environment.h"
+#অন্তর্ভাৱ "hex.h"
+#অন্তর্ভাৱ "object-file.h"
+#অন্তর্ভাৱ "object-name.h"
+#অন্তর্ভাৱ "odb.h"
 
-static char *create_temp_file(struct object_id *oid)
+স্থির ৱর্ণ *create_temp_file(সংরচনা object_id *oid)
 {
-	static char path[50];
-	void *buf;
-	enum object_type type;
+	স্থির ৱর্ণ path[50];
+	শূন্য *buf;
+	গণনা object_type type;
 	size_t size;
-	int fd;
+	পূর্ণাঙ্ক fd;
 
 	buf = odb_read_object(the_repository->objects, oid, &type, &size);
-	if (!buf || type != OBJ_BLOB)
+	যদি (!buf || type != OBJ_BLOB)
 		die("unable to read blob object %s", oid_to_hex(oid));
 
-	xsnprintf(path, sizeof(path), ".merge_file_XXXXXX");
+	xsnprintf(path, পরিমাণ(path), ".merge_file_XXXXXX");
 	fd = xmkstemp(path);
-	if (write_in_full(fd, buf, size) < 0)
+	যদি (write_in_full(fd, buf, size) < 0)
 		die_errno("unable to write temp-file");
 	close(fd);
-	free(buf);
-	return path;
+	মুক্ত(buf);
+	ঘূৰাই path;
 }
 
-static const char usage_msg[] =
+স্থির ধ্রুৱ ৱর্ণ usage_বাৰ্তা[] =
 "git unpack-file <blob>";
 
-int cmd_unpack_file(int argc,
-		    const char **argv,
-		    const char *prefix UNUSED,
-		    struct repository *repo UNUSED)
+পূর্ণাঙ্ক cmd_unpack_file(পূর্ণাঙ্ক argc,
+		    ধ্রুৱ ৱর্ণ **argv,
+		    ধ্রুৱ ৱর্ণ *prefix UNUSED,
+		    সংরচনা repository *repo UNUSED)
 {
-	struct object_id oid;
+	সংরচনা object_id oid;
 
-	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 2)
-		usage(usage_msg);
-	if (repo_get_oid(the_repository, argv[1], &oid))
+	show_usage_if_asked(argc, argv, usage_বাৰ্তা);
+	যদি (argc != 2)
+		usage(usage_বাৰ্তা);
+	যদি (repo_get_oid(the_repository, argv[1], &oid))
 		die("Not a valid object name %s", argv[1]);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, রিক্ত);
 
 	puts(create_temp_file(&oid));
-	return 0;
+	ঘূৰাই 0;
 }

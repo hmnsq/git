@@ -10,160 +10,160 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "lockfile.h"
-#include "object.h"
-#include "pretty.h"
-#include "refs.h"
-#include "diff.h"
-#include "diffcore.h"
-#include "tree.h"
-#include "branch.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "path.h"
-#include "repository.h"
-#include "unpack-trees.h"
-#include "cache-tree.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "submodule.h"
-#include "trace.h"
-#include "trace2.h"
-#include "dir.h"
-#include "add-interactive.h"
+#অন্তর্ভাৱ "builtin.h"
+#অন্তর্ভাৱ "advice.h"
+#অন্তর্ভাৱ "config.h"
+#অন্তর্ভাৱ "environment.h"
+#অন্তর্ভাৱ "gettext.h"
+#অন্তর্ভাৱ "hash.h"
+#অন্তর্ভাৱ "hex.h"
+#অন্তর্ভাৱ "lockfile.h"
+#অন্তর্ভাৱ "object.h"
+#অন্তর্ভাৱ "pretty.h"
+#অন্তর্ভাৱ "refs.h"
+#অন্তর্ভাৱ "diff.h"
+#অন্তর্ভাৱ "diffcore.h"
+#অন্তর্ভাৱ "tree.h"
+#অন্তর্ভাৱ "branch.h"
+#অন্তর্ভাৱ "object-name.h"
+#অন্তর্ভাৱ "parse-options.h"
+#অন্তর্ভাৱ "path.h"
+#অন্তর্ভাৱ "repository.h"
+#অন্তর্ভাৱ "unpack-trees.h"
+#অন্তর্ভাৱ "cache-tree.h"
+#অন্তর্ভাৱ "setup.h"
+#অন্তর্ভাৱ "sparse-index.h"
+#অন্তর্ভাৱ "submodule.h"
+#অন্তর্ভাৱ "trace.h"
+#অন্তর্ভাৱ "trace2.h"
+#অন্তর্ভাৱ "dir.h"
+#অন্তর্ভাৱ "add-interactive.h"
 
 #define REFRESH_INDEX_DELAY_WARNING_IN_MS (2 * 1000)
 
-static const char * const git_reset_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ git_reset_usage[] = {
 	N_("git reset [--mixed | --soft | --hard | --merge | --keep] [-q] [<commit>]"),
 	N_("git reset [-q] [<tree-ish>] [--] <pathspec>..."),
 	N_("git reset [-q] [--pathspec-from-file [--pathspec-file-nul]] [<tree-ish>]"),
 	N_("git reset --patch [<tree-ish>] [--] [<pathspec>...]"),
-	NULL
+	রিক্ত
 };
 
-enum reset_type { MIXED, SOFT, HARD, MERGE, KEEP, NONE };
-static const char *reset_type_names[] = {
-	N_("mixed"), N_("soft"), N_("hard"), N_("merge"), N_("keep"), NULL
+গণনা reset_type { MIXED, SOFT, HARD, MERGE, KEEP, NONE };
+স্থির ধ্রুৱ ৱর্ণ *reset_type_names[] = {
+	N_("mixed"), N_("soft"), N_("hard"), N_("merge"), N_("keep"), রিক্ত
 };
 
-static inline int is_merge(void)
+স্থির অন্তঃস্থ পূর্ণাঙ্ক is_merge(শূন্য)
 {
-	return !access(git_path_merge_head(the_repository), F_OK);
+	ঘূৰাই !access(git_path_merge_head(the_repository), F_OK);
 }
 
-static int reset_index(const char *ref, const struct object_id *oid, int reset_type, int quiet)
+স্থির পূর্ণাঙ্ক reset_index(ধ্রুৱ ৱর্ণ *ref, ধ্রুৱ সংরচনা object_id *oid, পূর্ণাঙ্ক reset_type, পূর্ণাঙ্ক quiet)
 {
-	int i, nr = 0;
-	struct tree_desc desc[2];
-	struct tree *tree;
-	struct unpack_trees_options opts;
-	int ret = -1;
+	পূর্ণাঙ্ক i, nr = 0;
+	সংরচনা বৃক্ষ_desc desc[2];
+	সংরচনা বৃক্ষ *বৃক্ষ;
+	সংরচনা unpack_trees_options opts;
+	পূর্ণাঙ্ক ret = -1;
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, পরিমাণ(opts));
 	opts.head_idx = 1;
 	opts.src_index = the_repository->index;
 	opts.dst_index = the_repository->index;
 	opts.fn = oneway_merge;
 	opts.merge = 1;
-	init_checkout_metadata(&opts.meta, ref, oid, NULL);
-	if (!quiet)
+	init_checkout_metadata(&opts.meta, ref, oid, রিক্ত);
+	যদি (!quiet)
 		opts.verbose_update = 1;
-	switch (reset_type) {
-	case KEEP:
-	case MERGE:
+	ৱিকল্প (reset_type) {
+	পক্ষ KEEP:
+	পক্ষ MERGE:
 		opts.update = 1;
 		opts.preserve_ignored = 0; /* FIXME: !overwrite_ignore */
-		break;
-	case HARD:
+		ভঙ্গ;
+	পক্ষ HARD:
 		opts.update = 1;
 		opts.reset = UNPACK_RESET_OVERWRITE_UNTRACKED;
-		opts.skip_cache_tree_update = 1;
-		break;
-	case MIXED:
+		opts.skip_cache_বৃক্ষ_update = 1;
+		ভঙ্গ;
+	পক্ষ MIXED:
 		opts.reset = UNPACK_RESET_PROTECT_UNTRACKED;
-		opts.skip_cache_tree_update = 1;
+		opts.skip_cache_বৃক্ষ_update = 1;
 		/* but opts.update=0, so working tree not updated */
-		break;
-	default:
+		ভঙ্গ;
+	স্ৱভাৱ:
 		BUG("invalid reset_type passed to reset_index");
 	}
 
 	repo_read_index_unmerged(the_repository);
 
-	if (reset_type == KEEP) {
-		struct object_id head_oid;
-		if (repo_get_oid(the_repository, "HEAD", &head_oid))
-			return error(_("You do not have a valid HEAD."));
-		if (!fill_tree_descriptor(the_repository, desc + nr, &head_oid))
-			return error(_("Failed to find tree of HEAD."));
+	যদি (reset_type == KEEP) {
+		সংরচনা object_id head_oid;
+		যদি (repo_get_oid(the_repository, "HEAD", &head_oid))
+			ঘূৰাই error(_("You do not have a valid HEAD."));
+		যদি (!fill_বৃক্ষ_descriptor(the_repository, desc + nr, &head_oid))
+			ঘূৰাই error(_("Failed to find tree of HEAD."));
 		nr++;
 		opts.fn = twoway_merge;
 	}
 
-	if (!fill_tree_descriptor(the_repository, desc + nr, oid)) {
+	যদি (!fill_বৃক্ষ_descriptor(the_repository, desc + nr, oid)) {
 		error(_("Failed to find tree of %s."), oid_to_hex(oid));
-		goto out;
+		গচ্ছ out;
 	}
 	nr++;
 
-	if (unpack_trees(nr, desc, &opts))
-		goto out;
+	যদি (unpack_trees(nr, desc, &opts))
+		গচ্ছ out;
 
-	if (reset_type == MIXED || reset_type == HARD) {
-		tree = repo_parse_tree_indirect(the_repository, oid);
-		if (!tree) {
+	যদি (reset_type == MIXED || reset_type == HARD) {
+		বৃক্ষ = repo_parse_বৃক্ষ_indirect(the_repository, oid);
+		যদি (!বৃক্ষ) {
 			error(_("unable to read tree (%s)"), oid_to_hex(oid));
-			goto out;
+			গচ্ছ out;
 		}
-		prime_cache_tree(the_repository, the_repository->index, tree);
+		মৌলিক_cache_বৃক্ষ(the_repository, the_repository->index, বৃক্ষ);
 	}
 
 	ret = 0;
 
 out:
-	for (i = 0; i < nr; i++)
-		free((void *)desc[i].buffer);
-	return ret;
+	বাবে (i = 0; i < nr; i++)
+		মুক্ত((শূন্য *)desc[i].buffer);
+	ঘূৰাই ret;
 }
 
-static void print_new_head_line(struct commit *commit)
+স্থির শূন্য print_new_head_সাৰি(সংরচনা commit *commit)
 {
-	struct strbuf buf = STRBUF_INIT;
+	সংরচনা strbuf buf = STRBUF_INIT;
 
 	printf(_("HEAD is now at %s"),
 		repo_find_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV));
 
 	pp_commit_easy(CMIT_FMT_ONELINE, commit, &buf);
-	if (buf.len > 0)
+	যদি (buf.len > 0)
 		printf(" %s", buf.buf);
 	putchar('\n');
 	strbuf_release(&buf);
 }
 
-static void update_index_from_diff(struct diff_queue_struct *q,
-				   struct diff_options *opt UNUSED,
-				   void *data)
+স্থির শূন্য update_index_from_diff(সংরচনা diff_queue_struct *q,
+				   সংরচনা diff_options *opt UNUSED,
+				   শূন্য *data)
 {
-	int i;
-	int intent_to_add = *(int *)data;
+	পূর্ণাঙ্ক i;
+	পূর্ণাঙ্ক intent_to_add = *(পূর্ণাঙ্ক *)data;
 
-	for (i = 0; i < q->nr; i++) {
-		int pos;
-		struct diff_filespec *one = q->queue[i]->one;
-		int is_in_reset_tree = one->mode && !is_null_oid(&one->oid);
-		struct cache_entry *ce;
+	বাবে (i = 0; i < q->nr; i++) {
+		পূর্ণাঙ্ক pos;
+		সংরচনা diff_filespec *one = q->queue[i]->one;
+		পূর্ণাঙ্ক is_in_reset_বৃক্ষ = one->mode && !is_null_oid(&one->oid);
+		সংরচনা cache_entry *ce;
 
-		if (!is_in_reset_tree && !intent_to_add) {
+		যদি (!is_in_reset_বৃক্ষ && !intent_to_add) {
 			remove_file_from_index(the_repository->index, one->path);
-			continue;
+			অনুৱর্ত;
 		}
 
 		ce = make_cache_entry(the_repository->index, one->mode, &one->oid, one->path,
@@ -178,14 +178,14 @@ static void update_index_from_diff(struct diff_queue_struct *q,
 		 * to properly construct the reset sparse directory.
 		 */
 		pos = index_name_pos(the_repository->index, one->path, strlen(one->path));
-		if ((pos >= 0 && ce_skip_worktree(the_repository->index->cache[pos])) ||
+		যদি ((pos >= 0 && ce_skip_worktree(the_repository->index->cache[pos])) ||
 		    (pos < 0 && !path_in_sparse_checkout(one->path, the_repository->index)))
 			ce->ce_flags |= CE_SKIP_WORKTREE;
 
-		if (!ce)
+		যদি (!ce)
 			die(_("make_cache_entry failed for path '%s'"),
 			    one->path);
-		if (!is_in_reset_tree) {
+		যদি (!is_in_reset_বৃক্ষ) {
 			ce->ce_flags |= CE_INTENT_TO_ADD;
 			set_object_name_for_intent_to_add_entry(ce);
 		}
@@ -194,13 +194,13 @@ static void update_index_from_diff(struct diff_queue_struct *q,
 	}
 }
 
-static int read_from_tree(const struct pathspec *pathspec,
-			  struct object_id *tree_oid,
-			  int intent_to_add)
+স্থির পূর্ণাঙ্ক read_from_বৃক্ষ(ধ্রুৱ সংরচনা pathspec *pathspec,
+			  সংরচনা object_id *বৃক্ষ_oid,
+			  পূর্ণাঙ্ক intent_to_add)
 {
-	struct diff_options opt;
+	সংরচনা diff_options opt;
 
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, পরিমাণ(opt));
 	copy_pathspec(&opt.pathspec, pathspec);
 	opt.output_format = DIFF_FORMAT_CALLBACK;
 	opt.format_callback = update_index_from_diff;
@@ -211,46 +211,46 @@ static int read_from_tree(const struct pathspec *pathspec,
 	opt.change = diff_change;
 	opt.add_remove = diff_addremove;
 
-	if (pathspec->nr && pathspec_needs_expanded_index(the_repository->index, pathspec))
+	যদি (pathspec->nr && pathspec_needs_expanded_index(the_repository->index, pathspec))
 		ensure_full_index(the_repository->index);
 
-	if (do_diff_cache(tree_oid, &opt))
-		return 1;
+	যদি (do_diff_cache(বৃক্ষ_oid, &opt))
+		ঘূৰাই 1;
 	diffcore_std(&opt);
 	diff_flush(&opt);
 
-	return 0;
+	ঘূৰাই 0;
 }
 
-static void set_reflog_message(struct strbuf *sb, const char *action,
-			       const char *rev)
+স্থির শূন্য set_reflog_message(সংরচনা strbuf *sb, ধ্রুৱ ৱর্ণ *action,
+			       ধ্রুৱ ৱর্ণ *rev)
 {
-	const char *rla = getenv("GIT_REFLOG_ACTION");
+	ধ্রুৱ ৱর্ণ *rla = getenv("GIT_REFLOG_ACTION");
 
 	strbuf_reset(sb);
-	if (rla)
+	যদি (rla)
 		strbuf_addf(sb, "%s: %s", rla, action);
-	else if (rev)
+	অন্যথা যদি (rev)
 		strbuf_addf(sb, "reset: moving to %s", rev);
-	else
+	অন্যথা
 		strbuf_addf(sb, "reset: %s", action);
 }
 
-static void die_if_unmerged_cache(int reset_type)
+স্থির শূন্য die_if_unmerged_cache(পূর্ণাঙ্ক reset_type)
 {
-	if (is_merge() || unmerged_index(the_repository->index))
+	যদি (is_merge() || unmerged_index(the_repository->index))
 		die(_("Cannot do a %s reset in the middle of a merge."),
 		    _(reset_type_names[reset_type]));
 
 }
 
-static void parse_args(struct pathspec *pathspec,
-		       const char **argv, const char *prefix,
-		       int patch_mode,
-		       const char **rev_ret)
+স্থির শূন্য parse_args(সংরচনা pathspec *pathspec,
+		       ধ্রুৱ ৱর্ণ **argv, ধ্রুৱ ৱর্ণ *prefix,
+		       পূর্ণাঙ্ক patch_mode,
+		       ধ্রুৱ ৱর্ণ **rev_ret)
 {
-	const char *rev = "HEAD";
-	struct object_id unused;
+	ধ্রুৱ ৱর্ণ *rev = "HEAD";
+	সংরচনা object_id unused;
 	/*
 	 * Possible arguments are:
 	 *
@@ -263,10 +263,10 @@ static void parse_args(struct pathspec *pathspec,
 	 * At this point, argv points immediately after [-opts].
 	 */
 
-	if (argv[0]) {
-		if (!strcmp(argv[0], "--")) {
+	যদি (argv[0]) {
+		যদি (!strcmp(argv[0], "--")) {
 			argv++; /* reset to HEAD, possibly with paths */
-		} else if (argv[1] && !strcmp(argv[1], "--")) {
+		} অন্যথা যদি (argv[1] && !strcmp(argv[1], "--")) {
 			rev = argv[0];
 			argv += 2;
 		}
@@ -275,7 +275,7 @@ static void parse_args(struct pathspec *pathspec,
 		 * has to be unambiguous. If there is a single argument, it
 		 * can not be a tree
 		 */
-		else if ((!argv[1] && !repo_get_oid_committish(the_repository, argv[0], &unused)) ||
+		অন্যথা যদি ((!argv[1] && !repo_get_oid_committish(the_repository, argv[0], &unused)) ||
 			 (argv[1] && !repo_get_oid_treeish(the_repository, argv[0], &unused))) {
 			/*
 			 * Ok, argv[0] looks like a commit/tree; it should not
@@ -283,7 +283,7 @@ static void parse_args(struct pathspec *pathspec,
 			 */
 			verify_non_filename(the_repository, prefix, argv[0]);
 			rev = *argv++;
-		} else {
+		} অন্যথা {
 			/* Otherwise we treat this as a filename */
 			verify_filename(the_repository, prefix, argv[0], 1);
 		}
@@ -298,56 +298,56 @@ static void parse_args(struct pathspec *pathspec,
 		       prefix, argv);
 }
 
-static int reset_refs(const char *rev, const struct object_id *oid)
+স্থির পূর্ণাঙ্ক reset_refs(ধ্রুৱ ৱর্ণ *rev, ধ্রুৱ সংরচনা object_id *oid)
 {
-	int update_ref_status;
-	struct strbuf msg = STRBUF_INIT;
-	struct object_id *orig = NULL, oid_orig,
-		*old_orig = NULL, oid_old_orig;
+	পূর্ণাঙ্ক update_ref_status;
+	সংরচনা strbuf বাৰ্তা = STRBUF_INIT;
+	সংরচনা object_id *orig = রিক্ত, oid_orig,
+		*old_orig = রিক্ত, oid_old_orig;
 
-	if (!repo_get_oid(the_repository, "ORIG_HEAD", &oid_old_orig))
+	যদি (!repo_get_oid(the_repository, "ORIG_HEAD", &oid_old_orig))
 		old_orig = &oid_old_orig;
-	if (!repo_get_oid(the_repository, "HEAD", &oid_orig)) {
+	যদি (!repo_get_oid(the_repository, "HEAD", &oid_orig)) {
 		orig = &oid_orig;
-		set_reflog_message(&msg, "updating ORIG_HEAD", NULL);
-		refs_update_ref(get_main_ref_store(the_repository), msg.buf,
+		set_reflog_message(&বাৰ্তা, "updating ORIG_HEAD", রিক্ত);
+		refs_update_ref(get_main_ref_store(the_repository), বাৰ্তা.buf,
 				"ORIG_HEAD", orig, old_orig, 0,
-				UPDATE_REFS_MSG_ON_ERR);
-	} else if (old_orig)
-		refs_delete_ref(get_main_ref_store(the_repository), NULL,
+				UPDATE_REFS_বাৰ্তা_ON_ERR);
+	} অন্যথা যদি (old_orig)
+		refs_delete_ref(get_main_ref_store(the_repository), রিক্ত,
 				"ORIG_HEAD", old_orig, 0);
-	set_reflog_message(&msg, "updating HEAD", rev);
+	set_reflog_message(&বাৰ্তা, "updating HEAD", rev);
 	update_ref_status = refs_update_ref(get_main_ref_store(the_repository),
-					    msg.buf, "HEAD", oid, orig, 0,
-					    UPDATE_REFS_MSG_ON_ERR);
-	strbuf_release(&msg);
-	return update_ref_status;
+					    বাৰ্তা.buf, "HEAD", oid, orig, 0,
+					    UPDATE_REFS_বাৰ্তা_ON_ERR);
+	strbuf_release(&বাৰ্তা);
+	ঘূৰাই update_ref_status;
 }
 
-static int git_reset_config(const char *var, const char *value,
-			    const struct config_context *ctx, void *cb)
+স্থির পূর্ণাঙ্ক git_reset_config(ধ্রুৱ ৱর্ণ *var, ধ্রুৱ ৱর্ণ *মান,
+			    ধ্রুৱ সংরচনা config_context *ctx, শূন্য *cb)
 {
-	if (!strcmp(var, "submodule.recurse"))
-		return git_default_submodule_config(var, value, cb);
+	যদি (!strcmp(var, "submodule.recurse"))
+		ঘূৰাই git_default_submodule_config(var, মান, cb);
 
-	return git_default_config(var, value, ctx, cb);
+	ঘূৰাই git_default_config(var, মান, ctx, cb);
 }
 
-int cmd_reset(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo UNUSED)
+পূর্ণাঙ্ক cmd_reset(পূর্ণাঙ্ক argc,
+	      ধ্রুৱ ৱর্ণ **argv,
+	      ধ্রুৱ ৱর্ণ *prefix,
+	      সংরচনা repository *repo UNUSED)
 {
-	int reset_type = NONE, update_ref_status = 0, quiet = 0;
-	int no_refresh = 0;
-	int patch_mode = 0, pathspec_file_nul = 0, unborn;
-	const char *rev;
-	char *pathspec_from_file = NULL;
-	struct object_id oid;
-	struct pathspec pathspec;
-	int intent_to_add = 0;
-	struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-	const struct option options[] = {
+	পূর্ণাঙ্ক reset_type = NONE, update_ref_status = 0, quiet = 0;
+	পূর্ণাঙ্ক no_refresh = 0;
+	পূর্ণাঙ্ক patch_mode = 0, pathspec_file_nul = 0, unborn;
+	ধ্রুৱ ৱর্ণ *rev;
+	ৱর্ণ *pathspec_from_file = রিক্ত;
+	সংরচনা object_id oid;
+	সংরচনা pathspec pathspec;
+	পূর্ণাঙ্ক intent_to_add = 0;
+	সংরচনা interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+	ধ্রুৱ সংরচনা option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet, only report errors")),
 		OPT_BOOL(0, "no-refresh", &no_refresh,
 				N_("skip refreshing the index after reset")),
@@ -366,7 +366,7 @@ int cmd_reset(int argc,
 		OPT_SET_INT_F(0, "keep", &reset_type,
 			      N_("reset HEAD but keep local changes"),
 			      KEEP, PARSE_OPT_NONEG),
-		OPT_CALLBACK_F(0, "recurse-submodules", NULL,
+		OPT_CALLBACK_F(0, "recurse-submodules", রিক্ত,
 			       "reset", "control recursive updating of submodules",
 			       PARSE_OPT_OPTARG,
 			       option_parse_recurse_submodules_worktree_updater),
@@ -382,170 +382,170 @@ int cmd_reset(int argc,
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_reset_config, NULL);
+	repo_config(the_repository, git_reset_config, রিক্ত);
 
 	argc = parse_options(argc, argv, prefix, options, git_reset_usage,
 						PARSE_OPT_KEEP_DASHDASH);
 	parse_args(&pathspec, argv, prefix, patch_mode, &rev);
 
-	if (pathspec_from_file) {
-		if (patch_mode)
+	যদি (pathspec_from_file) {
+		যদি (patch_mode)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--patch");
 
-		if (pathspec.nr)
+		যদি (pathspec.nr)
 			die(_("'%s' and pathspec arguments cannot be used together"), "--pathspec-from-file");
 
 		parse_pathspec_file(&pathspec, 0,
 				    PATHSPEC_PREFER_FULL,
 				    prefix, pathspec_from_file, pathspec_file_nul);
-	} else if (pathspec_file_nul) {
+	} অন্যথা যদি (pathspec_file_nul) {
 		die(_("the option '%s' requires '%s'"), "--pathspec-file-nul", "--pathspec-from-file");
 	}
 
 	unborn = !strcmp(rev, "HEAD") && repo_get_oid(the_repository, "HEAD",
 						      &oid);
-	if (unborn) {
+	যদি (unborn) {
 		/* reset on unborn branch: treat as reset to empty tree */
-		oidcpy(&oid, the_hash_algo->empty_tree);
-	} else if (!pathspec.nr && !patch_mode) {
-		struct commit *commit;
-		if (repo_get_oid_committish(the_repository, rev, &oid))
+		oidcpy(&oid, the_hash_algo->empty_বৃক্ষ);
+	} অন্যথা যদি (!pathspec.nr && !patch_mode) {
+		সংরচনা commit *commit;
+		যদি (repo_get_oid_committish(the_repository, rev, &oid))
 			die(_("Failed to resolve '%s' as a valid revision."), rev);
 		commit = lookup_commit_reference(the_repository, &oid);
-		if (!commit)
+		যদি (!commit)
 			die(_("Could not parse object '%s'."), rev);
 		oidcpy(&oid, &commit->object.oid);
-	} else {
-		struct tree *tree;
-		if (repo_get_oid_treeish(the_repository, rev, &oid))
+	} অন্যথা {
+		সংরচনা বৃক্ষ *বৃক্ষ;
+		যদি (repo_get_oid_treeish(the_repository, rev, &oid))
 			die(_("Failed to resolve '%s' as a valid tree."), rev);
-		tree = repo_parse_tree_indirect(the_repository, &oid);
-		if (!tree)
+		বৃক্ষ = repo_parse_বৃক্ষ_indirect(the_repository, &oid);
+		যদি (!বৃক্ষ)
 			die(_("Could not parse object '%s'."), rev);
-		oidcpy(&oid, &tree->object.oid);
+		oidcpy(&oid, &বৃক্ষ->object.oid);
 	}
 
-	if (interactive_opts.context < -1)
+	যদি (interactive_opts.context < -1)
 		die(_("'%s' cannot be negative"), "--unified");
-	if (interactive_opts.interhunkcontext < -1)
+	যদি (interactive_opts.interhunkcontext < -1)
 		die(_("'%s' cannot be negative"), "--inter-hunk-context");
 
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	if (patch_mode) {
-		if (reset_type != NONE)
+	যদি (patch_mode) {
+		যদি (reset_type != NONE)
 			die(_("options '%s' and '%s' cannot be used together"), "--patch", "--{hard,mixed,soft}");
 		trace2_cmd_mode("patch-interactive");
 		update_ref_status = !!run_add_p(the_repository, ADD_P_RESET,
 						&interactive_opts, rev, &pathspec, 0);
-		goto cleanup;
-	} else {
-		if (interactive_opts.context != -1)
+		গচ্ছ cleanup;
+	} অন্যথা {
+		যদি (interactive_opts.context != -1)
 			die(_("the option '%s' requires '%s'"), "--unified", "--patch");
-		if (interactive_opts.interhunkcontext != -1)
+		যদি (interactive_opts.interhunkcontext != -1)
 			die(_("the option '%s' requires '%s'"), "--inter-hunk-context", "--patch");
-		if (!interactive_opts.auto_advance)
+		যদি (!interactive_opts.auto_advance)
 			die(_("the option '%s' requires '%s'"), "--no-auto-advance", "--patch");
 	}
 
 	/* git reset tree [--] paths... can be used to
 	 * load chosen paths from the tree into the index without
 	 * affecting the working tree nor HEAD. */
-	if (pathspec.nr) {
-		if (reset_type == MIXED)
+	যদি (pathspec.nr) {
+		যদি (reset_type == MIXED)
 			warning(_("--mixed with paths is deprecated; use 'git reset -- <paths>' instead."));
-		else if (reset_type != NONE)
+		অন্যথা যদি (reset_type != NONE)
 			die(_("Cannot do %s reset with paths."),
 					_(reset_type_names[reset_type]));
 	}
-	if (reset_type == NONE)
+	যদি (reset_type == NONE)
 		reset_type = MIXED; /* by default */
 
-	if (pathspec.nr)
+	যদি (pathspec.nr)
 		trace2_cmd_mode("path");
-	else
+	অন্যথা
 		trace2_cmd_mode(reset_type_names[reset_type]);
 
-	if (reset_type != SOFT && (reset_type != MIXED || repo_get_work_tree(the_repository)))
-		setup_work_tree(the_repository);
+	যদি (reset_type != SOFT && (reset_type != MIXED || repo_get_work_বৃক্ষ(the_repository)))
+		setup_work_বৃক্ষ(the_repository);
 
-	if (reset_type == MIXED && is_bare_repository(the_repository))
+	যদি (reset_type == MIXED && is_bare_repository(the_repository))
 		die(_("%s reset is not allowed in a bare repository"),
 		    _(reset_type_names[reset_type]));
 
-	if (intent_to_add && reset_type != MIXED)
+	যদি (intent_to_add && reset_type != MIXED)
 		die(_("the option '%s' requires '%s'"), "-N", "--mixed");
 
-	if (repo_read_index(the_repository) < 0)
+	যদি (repo_read_index(the_repository) < 0)
 		die(_("index file corrupt"));
 
 	/* Soft reset does not touch the index file nor the working tree
 	 * at all, but requires them in a good order.  Other resets reset
 	 * the index file to the tree object we are switching to. */
-	if (reset_type == SOFT || reset_type == KEEP)
+	যদি (reset_type == SOFT || reset_type == KEEP)
 		die_if_unmerged_cache(reset_type);
 
-	if (reset_type != SOFT) {
-		struct lock_file lock = LOCK_INIT;
+	যদি (reset_type != SOFT) {
+		সংরচনা lock_file lock = LOCK_INIT;
 		repo_hold_locked_index(the_repository, &lock,
 				       LOCK_DIE_ON_ERROR);
-		if (reset_type == MIXED) {
-			int flags = quiet ? REFRESH_QUIET : REFRESH_IN_PORCELAIN;
-			if (read_from_tree(&pathspec, &oid, intent_to_add)) {
+		যদি (reset_type == MIXED) {
+			পূর্ণাঙ্ক flags = quiet ? REFRESH_QUIET : REFRESH_IN_PORCELAIN;
+			যদি (read_from_বৃক্ষ(&pathspec, &oid, intent_to_add)) {
 				update_ref_status = 1;
-				goto cleanup;
+				গচ্ছ cleanup;
 			}
 			the_repository->index->updated_skipworktree = 1;
-			if (!no_refresh && repo_get_work_tree(the_repository)) {
+			যদি (!no_refresh && repo_get_work_বৃক্ষ(the_repository)) {
 				uint64_t t_begin, t_delta_in_ms;
 
 				t_begin = getnanotime();
-				refresh_index(the_repository->index, flags, NULL, NULL,
+				refresh_index(the_repository->index, flags, রিক্ত, রিক্ত,
 					      _("Unstaged changes after reset:"));
 				t_delta_in_ms = (getnanotime() - t_begin) / 1000000;
-				if (!quiet && advice_enabled(ADVICE_RESET_NO_REFRESH_WARNING) && t_delta_in_ms > REFRESH_INDEX_DELAY_WARNING_IN_MS) {
+				যদি (!quiet && advice_enabled(ADVICE_RESET_NO_REFRESH_WARNING) && t_delta_in_ms > REFRESH_INDEX_DELAY_WARNING_IN_MS) {
 					advise(_("It took %.2f seconds to refresh the index after reset.  You can use\n"
 						 "'--no-refresh' to avoid this."), t_delta_in_ms / 1000.0);
 				}
 			}
-		} else {
-			struct object_id dummy;
-			char *ref = NULL;
-			int err;
+		} অন্যথা {
+			সংরচনা object_id dummy;
+			ৱর্ণ *ref = রিক্ত;
+			পূর্ণাঙ্ক err;
 
 			repo_dwim_ref(the_repository, rev, strlen(rev),
 				      &dummy, &ref, 0);
-			if (ref && !starts_with(ref, "refs/"))
+			যদি (ref && !starts_with(ref, "refs/"))
 				FREE_AND_NULL(ref);
 
 			err = reset_index(ref, &oid, reset_type, quiet);
-			if (reset_type == KEEP && !err)
+			যদি (reset_type == KEEP && !err)
 				err = reset_index(ref, &oid, MIXED, quiet);
-			if (err)
+			যদি (err)
 				die(_("Could not reset index file to revision '%s'."), rev);
-			free(ref);
+			মুক্ত(ref);
 		}
 
-		if (write_locked_index(the_repository->index, &lock, COMMIT_LOCK))
+		যদি (write_locked_index(the_repository->index, &lock, COMMIT_LOCK))
 			die(_("Could not write new index file."));
 	}
 
-	if (!pathspec.nr && !unborn) {
+	যদি (!pathspec.nr && !unborn) {
 		/* Any resets without paths update HEAD to the head being
 		 * switched to, saving the previous head in ORIG_HEAD before. */
 		update_ref_status = reset_refs(rev, &oid);
 
-		if (reset_type == HARD && !update_ref_status && !quiet)
-			print_new_head_line(lookup_commit_reference(the_repository, &oid));
+		যদি (reset_type == HARD && !update_ref_status && !quiet)
+			print_new_head_সাৰি(lookup_commit_reference(the_repository, &oid));
 	}
-	if (!pathspec.nr)
+	যদি (!pathspec.nr)
 		remove_branch_state(the_repository, 0);
 
 	discard_index(the_repository->index);
 
 cleanup:
 	clear_pathspec(&pathspec);
-	free(pathspec_from_file);
-	return update_ref_status;
+	মুক্ত(pathspec_from_file);
+	ঘূৰাই update_ref_status;
 }

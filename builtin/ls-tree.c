@@ -4,297 +4,297 @@
  * Copyright (C) Linus Torvalds, 2005
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
+#অন্তর্ভাৱ "builtin.h"
 
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-name.h"
-#include "odb.h"
-#include "tree.h"
-#include "path.h"
-#include "quote.h"
-#include "parse-options.h"
-#include "pathspec.h"
+#অন্তর্ভাৱ "config.h"
+#অন্তর্ভাৱ "environment.h"
+#অন্তর্ভাৱ "gettext.h"
+#অন্তর্ভাৱ "hex.h"
+#অন্তর্ভাৱ "object-name.h"
+#অন্তর্ভাৱ "odb.h"
+#অন্তর্ভাৱ "tree.h"
+#অন্তর্ভাৱ "path.h"
+#অন্তর্ভাৱ "quote.h"
+#অন্তর্ভাৱ "parse-options.h"
+#অন্তর্ভাৱ "pathspec.h"
 
-static const char * const ls_tree_usage[] = {
+স্থির ধ্রুৱ ৱর্ণ * ধ্রুৱ ls_বৃক্ষ_usage[] = {
 	N_("git ls-tree [<options>] <tree-ish> [<path>...]"),
-	NULL
+	রিক্ত
 };
 
-static void expand_objectsize(struct strbuf *line, const struct object_id *oid,
-			      const enum object_type type, unsigned int padded)
+স্থির শূন্য expand_objectsize(সংরচনা strbuf *সাৰি, ধ্রুৱ সংরচনা object_id *oid,
+			      ধ্রুৱ গণনা object_type type, unsigned পূর্ণাঙ্ক padded)
 {
-	static const char padding[] = "       ";
+	স্থির ধ্রুৱ ৱর্ণ padding[] = "       ";
 	size_t min_len = padded ? strlen(padding) : 0;
-	size_t orig_len = line->len;
+	size_t orig_len = সাৰি->len;
 	size_t len;
 
-	if (type == OBJ_BLOB) {
+	যদি (type == OBJ_BLOB) {
 		size_t size;
-		if (odb_read_object_info(the_repository->objects, oid, &size) < 0)
+		যদি (odb_read_object_info(the_repository->objects, oid, &size) < 0)
 			die(_("could not get object info about '%s'"),
 			    oid_to_hex(oid));
-		strbuf_add_uint(line, size);
-	} else {
-		strbuf_addstr(line, "-");
+		strbuf_add_uint(সাৰি, size);
+	} অন্যথা {
+		strbuf_addstr(সাৰি, "-");
 	}
-	len = line->len - orig_len;
-	if (len < min_len)
-		strbuf_insert(line, orig_len, padding, min_len - len);
+	len = সাৰি->len - orig_len;
+	যদি (len < min_len)
+		strbuf_ঢোকাও(সাৰি, orig_len, padding, min_len - len);
 }
 
-struct ls_tree_options {
+সংরচনা ls_বৃক্ষ_options {
 	unsigned null_termination:1;
-	int abbrev;
-	enum ls_tree_path_options {
+	পূর্ণাঙ্ক abbrev;
+	গণনা ls_বৃক্ষ_path_options {
 		LS_RECURSIVE = 1 << 0,
-		LS_TREE_ONLY = 1 << 1,
+		LS_বৃক্ষ_ONLY = 1 << 1,
 		LS_SHOW_TREES = 1 << 2,
 	} ls_options;
-	struct pathspec pathspec;
-	const char *prefix;
-	const char *format;
+	সংরচনা pathspec pathspec;
+	ধ্রুৱ ৱর্ণ *prefix;
+	ধ্রুৱ ৱর্ণ *format;
 };
 
-static int show_recursive(struct ls_tree_options *options, const char *base,
-			  size_t baselen, const char *pathname)
+স্থির পূর্ণাঙ্ক show_recursive(সংরচনা ls_বৃক্ষ_options *options, ধ্রুৱ ৱর্ণ *base,
+			  size_t baselen, ধ্রুৱ ৱর্ণ *pathname)
 {
-	int i;
+	পূর্ণাঙ্ক i;
 
-	if (options->ls_options & LS_RECURSIVE)
-		return 1;
+	যদি (options->ls_options & LS_RECURSIVE)
+		ঘূৰাই 1;
 
-	if (!options->pathspec.nr)
-		return 0;
+	যদি (!options->pathspec.nr)
+		ঘূৰাই 0;
 
-	for (i = 0; i < options->pathspec.nr; i++) {
-		const char *spec = options->pathspec.items[i].match;
+	বাবে (i = 0; i < options->pathspec.nr; i++) {
+		ধ্রুৱ ৱর্ণ *spec = options->pathspec.বস্তুসমূহ[i].match;
 		size_t len, speclen;
 
-		if (strncmp(base, spec, baselen))
-			continue;
+		যদি (strncmp(base, spec, baselen))
+			অনুৱর্ত;
 		len = strlen(pathname);
 		spec += baselen;
 		speclen = strlen(spec);
-		if (speclen <= len)
-			continue;
-		if (spec[len] && spec[len] != '/')
-			continue;
-		if (memcmp(pathname, spec, len))
-			continue;
-		return 1;
+		যদি (speclen <= len)
+			অনুৱর্ত;
+		যদি (spec[len] && spec[len] != '/')
+			অনুৱর্ত;
+		যদি (memcmp(pathname, spec, len))
+			অনুৱর্ত;
+		ঘূৰাই 1;
 	}
-	return 0;
+	ঘূৰাই 0;
 }
 
-static int show_tree_fmt(const struct object_id *oid, struct strbuf *base,
-			 const char *pathname, unsigned mode, void *context)
+স্থির পূর্ণাঙ্ক show_বৃক্ষ_fmt(ধ্রুৱ সংরচনা object_id *oid, সংরচনা strbuf *base,
+			 ধ্রুৱ ৱর্ণ *pathname, unsigned mode, শূন্য *context)
 {
-	struct ls_tree_options *options = context;
-	int recurse = 0;
-	struct strbuf sb = STRBUF_INIT;
-	enum object_type type = object_type(mode);
-	const char *format = options->format;
+	সংরচনা ls_বৃক্ষ_options *options = context;
+	পূর্ণাঙ্ক recurse = 0;
+	সংরচনা strbuf sb = STRBUF_INIT;
+	গণনা object_type type = object_type(mode);
+	ধ্রুৱ ৱর্ণ *format = options->format;
 
-	if (type == OBJ_TREE && show_recursive(options, base->buf, base->len, pathname))
-		recurse = READ_TREE_RECURSIVE;
-	if (type == OBJ_TREE && recurse && !(options->ls_options & LS_SHOW_TREES))
-		return recurse;
-	if (type == OBJ_BLOB && (options->ls_options & LS_TREE_ONLY))
-		return 0;
+	যদি (type == OBJ_বৃক্ষ && show_recursive(options, base->buf, base->len, pathname))
+		recurse = READ_বৃক্ষ_RECURSIVE;
+	যদি (type == OBJ_বৃক্ষ && recurse && !(options->ls_options & LS_SHOW_TREES))
+		ঘূৰাই recurse;
+	যদি (type == OBJ_BLOB && (options->ls_options & LS_বৃক্ষ_ONLY))
+		ঘূৰাই 0;
 
-	while (strbuf_expand_step(&sb, &format)) {
+	যেতিয়ালৈ (strbuf_expand_step(&sb, &format)) {
 		size_t len;
 
-		if (skip_prefix(format, "%", &format))
+		যদি (skip_prefix(format, "%", &format))
 			strbuf_addch(&sb, '%');
-		else if ((len = strbuf_expand_literal(&sb, format)))
+		অন্যথা যদি ((len = strbuf_expand_literal(&sb, format)))
 			format += len;
-		else if (skip_prefix(format, "(objectmode)", &format))
+		অন্যথা যদি (skip_prefix(format, "(objectmode)", &format))
 			strbuf_addf(&sb, "%06o", mode);
-		else if (skip_prefix(format, "(objecttype)", &format))
+		অন্যথা যদি (skip_prefix(format, "(objecttype)", &format))
 			strbuf_addstr(&sb, type_name(type));
-		else if (skip_prefix(format, "(objectsize:padded)", &format))
+		অন্যথা যদি (skip_prefix(format, "(objectsize:padded)", &format))
 			expand_objectsize(&sb, oid, type, 1);
-		else if (skip_prefix(format, "(objectsize)", &format))
+		অন্যথা যদি (skip_prefix(format, "(objectsize)", &format))
 			expand_objectsize(&sb, oid, type, 0);
-		else if (skip_prefix(format, "(objectname)", &format))
+		অন্যথা যদি (skip_prefix(format, "(objectname)", &format))
 			strbuf_add_unique_abbrev(&sb, oid, options->abbrev);
-		else if (skip_prefix(format, "(path)", &format)) {
-			const char *name;
-			const char *prefix = options->prefix;
-			struct strbuf sbuf = STRBUF_INIT;
+		অন্যথা যদি (skip_prefix(format, "(path)", &format)) {
+			ধ্রুৱ ৱর্ণ *name;
+			ধ্রুৱ ৱর্ণ *prefix = options->prefix;
+			সংরচনা strbuf sbuf = STRBUF_INIT;
 			size_t baselen = base->len;
 
 			strbuf_addstr(base, pathname);
 			name = relative_path(base->buf, prefix, &sbuf);
-			quote_c_style(name, &sb, NULL, 0);
+			quote_c_style(name, &sb, রিক্ত, 0);
 			strbuf_setlen(base, baselen);
 			strbuf_release(&sbuf);
-		} else
+		} অন্যথা
 			strbuf_expand_bad_format(format, "ls-tree");
 	}
 	strbuf_addch(&sb, options->null_termination ? '\0' : '\n');
 	fwrite(sb.buf, sb.len, 1, stdout);
 	strbuf_release(&sb);
-	return recurse;
+	ঘূৰাই recurse;
 }
 
-static int show_tree_common(struct ls_tree_options *options, int *recurse,
-			    struct strbuf *base, const char *pathname,
-			    enum object_type type)
+স্থির পূর্ণাঙ্ক show_বৃক্ষ_common(সংরচনা ls_বৃক্ষ_options *options, পূর্ণাঙ্ক *recurse,
+			    সংরচনা strbuf *base, ধ্রুৱ ৱর্ণ *pathname,
+			    গণনা object_type type)
 {
-	int ret = -1;
+	পূর্ণাঙ্ক ret = -1;
 	*recurse = 0;
 
-	if (type == OBJ_BLOB) {
-		if (options->ls_options & LS_TREE_ONLY)
+	যদি (type == OBJ_BLOB) {
+		যদি (options->ls_options & LS_বৃক্ষ_ONLY)
 			ret = 0;
-	} else if (type == OBJ_TREE &&
+	} অন্যথা যদি (type == OBJ_বৃক্ষ &&
 		   show_recursive(options, base->buf, base->len, pathname)) {
-		*recurse = READ_TREE_RECURSIVE;
-		if (!(options->ls_options & LS_SHOW_TREES))
+		*recurse = READ_বৃক্ষ_RECURSIVE;
+		যদি (!(options->ls_options & LS_SHOW_TREES))
 			ret = *recurse;
 	}
 
-	return ret;
+	ঘূৰাই ret;
 }
 
-static void show_tree_common_default_long(struct ls_tree_options *options,
-					  struct strbuf *base,
-					  const char *pathname,
-					  const size_t baselen)
+স্থির শূন্য show_বৃক্ষ_common_default_long(সংরচনা ls_বৃক্ষ_options *options,
+					  সংরচনা strbuf *base,
+					  ধ্রুৱ ৱর্ণ *pathname,
+					  ধ্রুৱ size_t baselen)
 {
-	const char *prefix = options->prefix;
+	ধ্রুৱ ৱর্ণ *prefix = options->prefix;
 
 	strbuf_addstr(base, pathname);
 
-	if (options->null_termination) {
-		struct strbuf sb = STRBUF_INIT;
-		const char *name = relative_path(base->buf, prefix, &sb);
+	যদি (options->null_termination) {
+		সংরচনা strbuf sb = STRBUF_INIT;
+		ধ্রুৱ ৱর্ণ *name = relative_path(base->buf, prefix, &sb);
 
 		fputs(name, stdout);
 		fputc('\0', stdout);
 
 		strbuf_release(&sb);
-	} else {
+	} অন্যথা {
 		write_name_quoted_relative(base->buf, prefix, stdout, '\n');
 	}
 
 	strbuf_setlen(base, baselen);
 }
 
-static int show_tree_default(const struct object_id *oid, struct strbuf *base,
-			     const char *pathname, unsigned mode,
-			     void *context)
+স্থির পূর্ণাঙ্ক show_বৃক্ষ_default(ধ্রুৱ সংরচনা object_id *oid, সংরচনা strbuf *base,
+			     ধ্রুৱ ৱর্ণ *pathname, unsigned mode,
+			     শূন্য *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	enum object_type type = object_type(mode);
+	সংরচনা ls_বৃক্ষ_options *options = context;
+	পূর্ণাঙ্ক early;
+	পূর্ণাঙ্ক recurse;
+	গণনা object_type type = object_type(mode);
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_বৃক্ষ_common(options, &recurse, base, pathname, type);
+	যদি (early >= 0)
+		ঘূৰাই early;
 
 	printf("%06o %s %s\t", mode, type_name(object_type(mode)),
 	       repo_find_unique_abbrev(the_repository, oid, options->abbrev));
-	show_tree_common_default_long(options, base, pathname, base->len);
-	return recurse;
+	show_বৃক্ষ_common_default_long(options, base, pathname, base->len);
+	ঘূৰাই recurse;
 }
 
-static int show_tree_long(const struct object_id *oid, struct strbuf *base,
-			  const char *pathname, unsigned mode,
-			  void *context)
+স্থির পূর্ণাঙ্ক show_বৃক্ষ_long(ধ্রুৱ সংরচনা object_id *oid, সংরচনা strbuf *base,
+			  ধ্রুৱ ৱর্ণ *pathname, unsigned mode,
+			  শূন্য *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	char size_text[24];
-	enum object_type type = object_type(mode);
+	সংরচনা ls_বৃক্ষ_options *options = context;
+	পূর্ণাঙ্ক early;
+	পূর্ণাঙ্ক recurse;
+	ৱর্ণ size_text[24];
+	গণনা object_type type = object_type(mode);
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_বৃক্ষ_common(options, &recurse, base, pathname, type);
+	যদি (early >= 0)
+		ঘূৰাই early;
 
-	if (type == OBJ_BLOB) {
+	যদি (type == OBJ_BLOB) {
 		size_t size;
-		if (odb_read_object_info(the_repository->objects, oid, &size) == OBJ_BAD)
-			xsnprintf(size_text, sizeof(size_text), "BAD");
-		else
-			xsnprintf(size_text, sizeof(size_text),
+		যদি (odb_read_object_info(the_repository->objects, oid, &size) == OBJ_BAD)
+			xsnprintf(size_text, পরিমাণ(size_text), "BAD");
+		অন্যথা
+			xsnprintf(size_text, পরিমাণ(size_text),
 				  "%" PRIuMAX, (uintmax_t)size);
-	} else {
-		xsnprintf(size_text, sizeof(size_text), "-");
+	} অন্যথা {
+		xsnprintf(size_text, পরিমাণ(size_text), "-");
 	}
 
 	printf("%06o %s %s %7s\t", mode, type_name(type),
 	       repo_find_unique_abbrev(the_repository, oid, options->abbrev),
 	       size_text);
-	show_tree_common_default_long(options, base, pathname, base->len);
-	return recurse;
+	show_বৃক্ষ_common_default_long(options, base, pathname, base->len);
+	ঘূৰাই recurse;
 }
 
-static int show_tree_name_only(const struct object_id *oid UNUSED,
-			       struct strbuf *base,
-			       const char *pathname, unsigned mode,
-			       void *context)
+স্থির পূর্ণাঙ্ক show_বৃক্ষ_name_only(ধ্রুৱ সংরচনা object_id *oid UNUSED,
+			       সংরচনা strbuf *base,
+			       ধ্রুৱ ৱর্ণ *pathname, unsigned mode,
+			       শূন্য *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	const size_t baselen = base->len;
-	enum object_type type = object_type(mode);
-	const char *prefix;
+	সংরচনা ls_বৃক্ষ_options *options = context;
+	পূর্ণাঙ্ক early;
+	পূর্ণাঙ্ক recurse;
+	ধ্রুৱ size_t baselen = base->len;
+	গণনা object_type type = object_type(mode);
+	ধ্রুৱ ৱর্ণ *prefix;
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_বৃক্ষ_common(options, &recurse, base, pathname, type);
+	যদি (early >= 0)
+		ঘূৰাই early;
 
 	prefix = options->prefix;
 	strbuf_addstr(base, pathname);
-	if (options->null_termination) {
-		struct strbuf sb = STRBUF_INIT;
-		const char *name = relative_path(base->buf, prefix, &sb);
+	যদি (options->null_termination) {
+		সংরচনা strbuf sb = STRBUF_INIT;
+		ধ্রুৱ ৱর্ণ *name = relative_path(base->buf, prefix, &sb);
 
 		fputs(name, stdout);
 		fputc('\0', stdout);
 
 		strbuf_release(&sb);
-	} else {
+	} অন্যথা {
 		write_name_quoted_relative(base->buf, prefix, stdout, '\n');
 	}
 	strbuf_setlen(base, baselen);
-	return recurse;
+	ঘূৰাই recurse;
 }
 
-static int show_tree_object(const struct object_id *oid, struct strbuf *base,
-			    const char *pathname, unsigned mode,
-			    void *context)
+স্থির পূর্ণাঙ্ক show_বৃক্ষ_object(ধ্রুৱ সংরচনা object_id *oid, সংরচনা strbuf *base,
+			    ধ্রুৱ ৱর্ণ *pathname, unsigned mode,
+			    শূন্য *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	enum object_type type = object_type(mode);
-	const char *str;
+	সংরচনা ls_বৃক্ষ_options *options = context;
+	পূর্ণাঙ্ক early;
+	পূর্ণাঙ্ক recurse;
+	গণনা object_type type = object_type(mode);
+	ধ্রুৱ ৱর্ণ *str;
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_বৃক্ষ_common(options, &recurse, base, pathname, type);
+	যদি (early >= 0)
+		ঘূৰাই early;
 
 	str = repo_find_unique_abbrev(the_repository, oid, options->abbrev);
-	if (options->null_termination) {
+	যদি (options->null_termination) {
 		fputs(str, stdout);
 		fputc('\0', stdout);
-	} else  {
+	} অন্যথা  {
 		puts(str);
 	}
-	return recurse;
+	ঘূৰাই recurse;
 }
 
-enum ls_tree_cmdmode {
+গণনা ls_বৃক্ষ_cmdmode {
 	MODE_DEFAULT = 0,
 	MODE_LONG,
 	MODE_NAME_ONLY,
@@ -302,60 +302,60 @@ enum ls_tree_cmdmode {
 	MODE_OBJECT_ONLY,
 };
 
-struct ls_tree_cmdmode_to_fmt {
-	enum ls_tree_cmdmode mode;
-	const char *const fmt;
-	read_tree_fn_t fn;
+সংরচনা ls_বৃক্ষ_cmdmode_to_fmt {
+	গণনা ls_বৃক্ষ_cmdmode mode;
+	ধ্রুৱ ৱর্ণ *ধ্রুৱ fmt;
+	read_বৃক্ষ_fn_t fn;
 };
 
-static struct ls_tree_cmdmode_to_fmt ls_tree_cmdmode_format[] = {
+স্থির সংরচনা ls_বৃক্ষ_cmdmode_to_fmt ls_বৃক্ষ_cmdmode_format[] = {
 	{
 		.mode = MODE_DEFAULT,
 		.fmt = "%(objectmode) %(objecttype) %(objectname)%x09%(path)",
-		.fn = show_tree_default,
+		.fn = show_বৃক্ষ_default,
 	},
 	{
 		.mode = MODE_LONG,
 		.fmt = "%(objectmode) %(objecttype) %(objectname) %(objectsize:padded)%x09%(path)",
-		.fn = show_tree_long,
+		.fn = show_বৃক্ষ_long,
 	},
 	{
 		.mode = MODE_NAME_ONLY, /* And MODE_NAME_STATUS */
 		.fmt = "%(path)",
-		.fn = show_tree_name_only,
+		.fn = show_বৃক্ষ_name_only,
 	},
 	{
 		.mode = MODE_OBJECT_ONLY,
 		.fmt = "%(objectname)",
-		.fn = show_tree_object
+		.fn = show_বৃক্ষ_object
 	},
 	{
 		/* fallback */
-		.fn = show_tree_default,
+		.fn = show_বৃক্ষ_default,
 	},
 };
 
-int cmd_ls_tree(int argc,
-		const char **argv,
-		const char *prefix,
-		struct repository *repo UNUSED)
+পূর্ণাঙ্ক cmd_ls_বৃক্ষ(পূর্ণাঙ্ক argc,
+		ধ্রুৱ ৱর্ণ **argv,
+		ধ্রুৱ ৱর্ণ *prefix,
+		সংরচনা repository *repo UNUSED)
 {
-	struct object_id oid;
-	struct tree *tree;
-	int i, full_tree = 0;
-	int full_name = !prefix || !*prefix;
-	read_tree_fn_t fn = NULL;
-	enum ls_tree_cmdmode cmdmode = MODE_DEFAULT;
-	int null_termination = 0;
-	struct ls_tree_options options = { 0 };
-	const struct option ls_tree_options[] = {
-		OPT_BIT('d', NULL, &options.ls_options, N_("only show trees"),
-			LS_TREE_ONLY),
-		OPT_BIT('r', NULL, &options.ls_options, N_("recurse into subtrees"),
+	সংরচনা object_id oid;
+	সংরচনা বৃক্ষ *বৃক্ষ;
+	পূর্ণাঙ্ক i, full_বৃক্ষ = 0;
+	পূর্ণাঙ্ক full_name = !prefix || !*prefix;
+	read_বৃক্ষ_fn_t fn = রিক্ত;
+	গণনা ls_বৃক্ষ_cmdmode cmdmode = MODE_DEFAULT;
+	পূর্ণাঙ্ক null_termination = 0;
+	সংরচনা ls_বৃক্ষ_options options = { 0 };
+	ধ্রুৱ সংরচনা option ls_বৃক্ষ_options[] = {
+		OPT_BIT('d', রিক্ত, &options.ls_options, N_("only show trees"),
+			LS_বৃক্ষ_ONLY),
+		OPT_BIT('r', রিক্ত, &options.ls_options, N_("recurse into subtrees"),
 			LS_RECURSIVE),
-		OPT_BIT('t', NULL, &options.ls_options, N_("show trees when recursing"),
+		OPT_BIT('t', রিক্ত, &options.ls_options, N_("show trees when recursing"),
 			LS_SHOW_TREES),
-		OPT_BOOL('z', NULL, &null_termination,
+		OPT_BOOL('z', রিক্ত, &null_termination,
 			 N_("terminate entries with NUL byte")),
 		OPT_CMDMODE('l', "long", &cmdmode, N_("include object size"),
 			    MODE_LONG),
@@ -366,7 +366,7 @@ int cmd_ls_tree(int argc,
 		OPT_CMDMODE(0, "object-only", &cmdmode, N_("list only objects"),
 			    MODE_OBJECT_ONLY),
 		OPT_BOOL(0, "full-name", &full_name, N_("use full path names")),
-		OPT_BOOL(0, "full-tree", &full_tree,
+		OPT_BOOL(0, "full-tree", &full_বৃক্ষ,
 			 N_("list entire tree; not just current directory "
 			    "(implies --full-name)")),
 		OPT_STRING_F(0, "format", &options.format, N_("format"),
@@ -375,39 +375,39 @@ int cmd_ls_tree(int argc,
 		OPT__ABBREV(&options.abbrev),
 		OPT_END()
 	};
-	struct ls_tree_cmdmode_to_fmt *m2f = ls_tree_cmdmode_format;
-	int ret;
+	সংরচনা ls_বৃক্ষ_cmdmode_to_fmt *m2f = ls_বৃক্ষ_cmdmode_format;
+	পূর্ণাঙ্ক ret;
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, রিক্ত);
 
-	argc = parse_options(argc, argv, prefix, ls_tree_options,
-			     ls_tree_usage, 0);
+	argc = parse_options(argc, argv, prefix, ls_বৃক্ষ_options,
+			     ls_বৃক্ষ_usage, 0);
 	options.null_termination = null_termination;
 
-	if (full_tree)
-		prefix = NULL;
-	options.prefix = full_name ? NULL : prefix;
+	যদি (full_বৃক্ষ)
+		prefix = রিক্ত;
+	options.prefix = full_name ? রিক্ত : prefix;
 
 	/*
 	 * We wanted to detect conflicts between --name-only and
 	 * --name-status, but once we're done with that subsequent
 	 * code should only need to check the primary name.
 	 */
-	if (cmdmode == MODE_NAME_STATUS)
+	যদি (cmdmode == MODE_NAME_STATUS)
 		cmdmode = MODE_NAME_ONLY;
 
 	/* -d -r should imply -t, but -d by itself should not have to. */
-	if ( (LS_TREE_ONLY|LS_RECURSIVE) ==
-	    ((LS_TREE_ONLY|LS_RECURSIVE) & options.ls_options))
+	যদি ( (LS_বৃক্ষ_ONLY|LS_RECURSIVE) ==
+	    ((LS_বৃক্ষ_ONLY|LS_RECURSIVE) & options.ls_options))
 		options.ls_options |= LS_SHOW_TREES;
 
-	if (options.format && cmdmode)
-		usage_msg_opt(
+	যদি (options.format && cmdmode)
+		usage_বাৰ্তা_opt(
 			_("--format can't be combined with other format-altering options"),
-			ls_tree_usage, ls_tree_options);
-	if (argc < 1)
-		usage_with_options(ls_tree_usage, ls_tree_options);
-	if (repo_get_oid_with_flags(the_repository, argv[0], &oid,
+			ls_বৃক্ষ_usage, ls_বৃক্ষ_options);
+	যদি (argc < 1)
+		usage_with_options(ls_বৃক্ষ_usage, ls_বৃক্ষ_options);
+	যদি (repo_get_oid_with_flags(the_repository, argv[0], &oid,
 				    GET_OID_HASH_ANY))
 		die("Not a valid object name %s", argv[0]);
 
@@ -421,32 +421,32 @@ int cmd_ls_tree(int argc,
 		       ~(PATHSPEC_FROMTOP | PATHSPEC_LITERAL),
 		       PATHSPEC_PREFER_CWD,
 		       prefix, argv + 1);
-	for (i = 0; i < options.pathspec.nr; i++)
-		options.pathspec.items[i].nowildcard_len = options.pathspec.items[i].len;
+	বাবে (i = 0; i < options.pathspec.nr; i++)
+		options.pathspec.বস্তুসমূহ[i].nowildcard_len = options.pathspec.বস্তুসমূহ[i].len;
 	options.pathspec.has_wildcard = 0;
-	tree = repo_parse_tree_indirect(the_repository, &oid);
-	if (!tree)
+	বৃক্ষ = repo_parse_বৃক্ষ_indirect(the_repository, &oid);
+	যদি (!বৃক্ষ)
 		die("not a tree object");
 	/*
 	 * The generic show_tree_fmt() is slower than show_tree(), so
 	 * take the fast path if possible.
 	 */
-	while (m2f) {
-		if (!m2f->fmt) {
-			fn = options.format ? show_tree_fmt : show_tree_default;
-		} else if (options.format && !strcmp(options.format, m2f->fmt)) {
+	যেতিয়ালৈ (m2f) {
+		যদি (!m2f->fmt) {
+			fn = options.format ? show_বৃক্ষ_fmt : show_বৃক্ষ_default;
+		} অন্যথা যদি (options.format && !strcmp(options.format, m2f->fmt)) {
 			cmdmode = m2f->mode;
 			fn = m2f->fn;
-		} else if (!options.format && cmdmode == m2f->mode) {
+		} অন্যথা যদি (!options.format && cmdmode == m2f->mode) {
 			fn = m2f->fn;
-		} else {
+		} অন্যথা {
 			m2f++;
-			continue;
+			অনুৱর্ত;
 		}
-		break;
+		ভঙ্গ;
 	}
 
-	ret = !!read_tree(the_repository, tree, &options.pathspec, fn, &options);
+	ret = !!read_বৃক্ষ(the_repository, বৃক্ষ, &options.pathspec, fn, &options);
 	clear_pathspec(&options.pathspec);
-	return ret;
+	ঘূৰাই ret;
 }

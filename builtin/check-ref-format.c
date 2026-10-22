@@ -4,12 +4,12 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "refs.h"
-#include "setup.h"
-#include "strbuf.h"
+#অন্তর্ভাৱ "builtin.h"
+#অন্তর্ভাৱ "refs.h"
+#অন্তর্ভাৱ "setup.h"
+#অন্তর্ভাৱ "strbuf.h"
 
-static const char builtin_check_ref_format_usage[] =
+স্থির ধ্রুৱ ৱর্ণ builtin_check_ref_format_usage[] =
 "git check-ref-format [--normalize] [<options>] <refname>\n"
 "   or: git check-ref-format --branch <branchname-shorthand>";
 
@@ -20,84 +20,84 @@ static const char builtin_check_ref_format_usage[] =
  * This function is similar to normalize_path_copy(), but stripped down
  * to meet check_ref_format's simpler needs.
  */
-static char *collapse_slashes(const char *refname)
+স্থির ৱর্ণ *collapse_slashes(ধ্রুৱ ৱর্ণ *refname)
 {
-	char *ret = xmallocz(strlen(refname));
-	char ch;
-	char prev = '/';
-	char *cp = ret;
+	ৱর্ণ *ret = xmallocz(strlen(refname));
+	ৱর্ণ ch;
+	ৱর্ণ prev = '/';
+	ৱর্ণ *cp = ret;
 
-	while ((ch = *refname++) != '\0') {
-		if (prev == '/' && ch == prev)
-			continue;
+	যেতিয়ালৈ ((ch = *refname++) != '\0') {
+		যদি (prev == '/' && ch == prev)
+			অনুৱর্ত;
 
 		*cp++ = ch;
 		prev = ch;
 	}
 	*cp = '\0';
-	return ret;
+	ঘূৰাই ret;
 }
 
-static int check_ref_format_branch(const char *arg)
+স্থির পূর্ণাঙ্ক check_ref_format_branch(ধ্রুৱ ৱর্ণ *arg)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *name;
-	int nongit;
+	সংরচনা strbuf sb = STRBUF_INIT;
+	ধ্রুৱ ৱর্ণ *name;
+	পূর্ণাঙ্ক nongit;
 
 	setup_git_directory_gently(the_repository, &nongit);
-	if (check_branch_ref(the_repository, &sb, arg) ||
+	যদি (check_branch_ref(the_repository, &sb, arg) ||
 	    !skip_prefix(sb.buf, "refs/heads/", &name))
 		die("'%s' is not a valid branch name", arg);
 	printf("%s\n", name);
 	strbuf_release(&sb);
-	return 0;
+	ঘূৰাই 0;
 }
 
-int cmd_check_ref_format(int argc,
-			 const char **argv,
-			 const char *prefix,
-			 struct repository *repo UNUSED)
+পূর্ণাঙ্ক cmd_check_ref_format(পূর্ণাঙ্ক argc,
+			 ধ্রুৱ ৱর্ণ **argv,
+			 ধ্রুৱ ৱর্ণ *prefix,
+			 সংরচনা repository *repo UNUSED)
 {
-	int i;
-	int normalize = 0;
-	int flags = 0;
-	const char *refname;
-	char *to_free = NULL;
-	int ret = 1;
+	পূর্ণাঙ্ক i;
+	পূর্ণাঙ্ক normalize = 0;
+	পূর্ণাঙ্ক flags = 0;
+	ধ্রুৱ ৱর্ণ *refname;
+	ৱর্ণ *to_free = রিক্ত;
+	পূর্ণাঙ্ক ret = 1;
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
 	show_usage_if_asked(argc, argv,
 			    builtin_check_ref_format_usage);
 
-	if (argc == 3 && !strcmp(argv[1], "--branch"))
-		return check_ref_format_branch(argv[2]);
+	যদি (argc == 3 && !strcmp(argv[1], "--branch"))
+		ঘূৰাই check_ref_format_branch(argv[2]);
 
-	for (i = 1; i < argc && argv[i][0] == '-'; i++) {
-		if (!strcmp(argv[i], "--normalize") || !strcmp(argv[i], "--print"))
+	বাবে (i = 1; i < argc && argv[i][0] == '-'; i++) {
+		যদি (!strcmp(argv[i], "--normalize") || !strcmp(argv[i], "--print"))
 			normalize = 1;
-		else if (!strcmp(argv[i], "--allow-onelevel"))
+		অন্যথা যদি (!strcmp(argv[i], "--allow-onelevel"))
 			flags |= REFNAME_ALLOW_ONELEVEL;
-		else if (!strcmp(argv[i], "--no-allow-onelevel"))
+		অন্যথা যদি (!strcmp(argv[i], "--no-allow-onelevel"))
 			flags &= ~REFNAME_ALLOW_ONELEVEL;
-		else if (!strcmp(argv[i], "--refspec-pattern"))
+		অন্যথা যদি (!strcmp(argv[i], "--refspec-pattern"))
 			flags |= REFNAME_REFSPEC_PATTERN;
-		else
+		অন্যথা
 			usage(builtin_check_ref_format_usage);
 	}
-	if (! (i == argc - 1))
+	যদি (! (i == argc - 1))
 		usage(builtin_check_ref_format_usage);
 
 	refname = argv[i];
-	if (normalize)
+	যদি (normalize)
 		refname = to_free = collapse_slashes(refname);
-	if (check_refname_format(refname, flags))
-		goto cleanup;
-	if (normalize)
+	যদি (check_refname_format(refname, flags))
+		গচ্ছ cleanup;
+	যদি (normalize)
 		printf("%s\n", refname);
 
 	ret = 0;
 cleanup:
-	free(to_free);
-	return ret;
+	মুক্ত(to_free);
+	ঘূৰাই ret;
 }

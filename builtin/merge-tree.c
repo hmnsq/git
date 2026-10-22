@@ -1,166 +1,166 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "environment.h"
-#include "tree-walk.h"
-#include "xdiff-interface.h"
-#include "help.h"
-#include "gettext.h"
-#include "hex.h"
-#include "commit.h"
-#include "commit-reach.h"
-#include "merge-ort.h"
-#include "object-name.h"
-#include "odb.h"
-#include "parse-options.h"
-#include "blob.h"
-#include "merge-blobs.h"
-#include "quote.h"
-#include "tree.h"
-#include "config.h"
-#include "strvec.h"
-#include "write-or-die.h"
+#অন্তর্ভাৱ "builtin.h"
+#অন্তর্ভাৱ "environment.h"
+#অন্তর্ভাৱ "tree-walk.h"
+#অন্তর্ভাৱ "xdiff-interface.h"
+#অন্তর্ভাৱ "help.h"
+#অন্তর্ভাৱ "gettext.h"
+#অন্তর্ভাৱ "hex.h"
+#অন্তর্ভাৱ "commit.h"
+#অন্তর্ভাৱ "commit-reach.h"
+#অন্তর্ভাৱ "merge-ort.h"
+#অন্তর্ভাৱ "object-name.h"
+#অন্তর্ভাৱ "odb.h"
+#অন্তর্ভাৱ "parse-options.h"
+#অন্তর্ভাৱ "blob.h"
+#অন্তর্ভাৱ "merge-blobs.h"
+#অন্তর্ভাৱ "quote.h"
+#অন্তর্ভাৱ "tree.h"
+#অন্তর্ভাৱ "config.h"
+#অন্তর্ভাৱ "strvec.h"
+#অন্তর্ভাৱ "write-or-die.h"
 
-static int line_termination = '\n';
+স্থির পূর্ণাঙ্ক সাৰি_termination = '\n';
 
-struct merge_list {
-	struct merge_list *next;
-	struct merge_list *link;	/* other stages for this object */
+সংরচনা merge_list {
+	সংরচনা merge_list *next;
+	সংরচনা merge_list *link;	/* other stages for this object */
 
-	unsigned int stage : 2;
-	unsigned int mode;
-	const char *path;
-	struct blob *blob;
+	unsigned পূর্ণাঙ্ক stage : 2;
+	unsigned পূর্ণাঙ্ক mode;
+	ধ্রুৱ ৱর্ণ *path;
+	সংরচনা blob *blob;
 };
 
-static struct merge_list *merge_result, **merge_result_end = &merge_result;
+স্থির সংরচনা merge_list *merge_result, **merge_result_end = &merge_result;
 
-static void add_merge_entry(struct merge_list *entry)
+স্থির শূন্য add_merge_entry(সংরচনা merge_list *entry)
 {
 	*merge_result_end = entry;
 	merge_result_end = &entry->next;
 }
 
-static void trivial_merge_trees(struct tree_desc t[3], const char *base);
+স্থির শূন্য trivial_merge_trees(সংরচনা বৃক্ষ_desc t[3], ধ্রুৱ ৱর্ণ *base);
 
-static const char *explanation(struct merge_list *entry)
+স্থির ধ্রুৱ ৱর্ণ *explanation(সংরচনা merge_list *entry)
 {
-	switch (entry->stage) {
-	case 0:
-		return "merged";
-	case 3:
-		return "added in remote";
-	case 2:
-		if (entry->link)
-			return "added in both";
-		return "added in local";
+	ৱিকল্প (entry->stage) {
+	পক্ষ 0:
+		ঘূৰাই "merged";
+	পক্ষ 3:
+		ঘূৰাই "added in remote";
+	পক্ষ 2:
+		যদি (entry->link)
+			ঘূৰাই "added in both";
+		ঘূৰাই "added in local";
 	}
 
 	/* Existed in base */
 	entry = entry->link;
-	if (!entry)
-		return "removed in both";
+	যদি (!entry)
+		ঘূৰাই "removed in both";
 
-	if (entry->link)
-		return "changed in both";
+	যদি (entry->link)
+		ঘূৰাই "changed in both";
 
-	if (entry->stage == 3)
-		return "removed in local";
-	return "removed in remote";
+	যদি (entry->stage == 3)
+		ঘূৰাই "removed in local";
+	ঘূৰাই "removed in remote";
 }
 
-static void *result(struct merge_list *entry, size_t *size)
+স্থির শূন্য *result(সংরচনা merge_list *entry, size_t *size)
 {
-	enum object_type type;
-	struct blob *base, *our, *their;
-	const char *path = entry->path;
+	গণনা object_type type;
+	সংরচনা blob *base, *our, *their;
+	ধ্রুৱ ৱর্ণ *path = entry->path;
 
-	if (!entry->stage)
-		return odb_read_object(the_repository->objects,
+	যদি (!entry->stage)
+		ঘূৰাই odb_read_object(the_repository->objects,
 				       &entry->blob->object.oid, &type,
 				       size);
-	base = NULL;
-	if (entry->stage == 1) {
+	base = রিক্ত;
+	যদি (entry->stage == 1) {
 		base = entry->blob;
 		entry = entry->link;
 	}
-	our = NULL;
-	if (entry && entry->stage == 2) {
+	our = রিক্ত;
+	যদি (entry && entry->stage == 2) {
 		our = entry->blob;
 		entry = entry->link;
 	}
-	their = NULL;
-	if (entry)
+	their = রিক্ত;
+	যদি (entry)
 		their = entry->blob;
-	return merge_blobs(the_repository->index, path,
+	ঘূৰাই merge_blobs(the_repository->index, path,
 			   base, our, their, size);
 }
 
-static void *origin(struct merge_list *entry, size_t *size)
+স্থির শূন্য *origin(সংরচনা merge_list *entry, size_t *size)
 {
-	enum object_type type;
-	while (entry) {
-		if (entry->stage == 2)
-			return odb_read_object(the_repository->objects,
+	গণনা object_type type;
+	যেতিয়ালৈ (entry) {
+		যদি (entry->stage == 2)
+			ঘূৰাই odb_read_object(the_repository->objects,
 					       &entry->blob->object.oid,
 					       &type, size);
 		entry = entry->link;
 	}
-	return NULL;
+	ঘূৰাই রিক্ত;
 }
 
-static int show_outf(void *priv UNUSED, mmfile_t *mb, int nbuf)
+স্থির পূর্ণাঙ্ক show_outf(শূন্য *priv UNUSED, mmfile_t *mb, পূর্ণাঙ্ক nbuf)
 {
-	int i;
-	for (i = 0; i < nbuf; i++)
-		printf("%.*s", (int) mb[i].size, mb[i].ptr);
-	return 0;
+	পূর্ণাঙ্ক i;
+	বাবে (i = 0; i < nbuf; i++)
+		printf("%.*s", (পূর্ণাঙ্ক) mb[i].size, mb[i].ptr);
+	ঘূৰাই 0;
 }
 
-static void show_diff(struct merge_list *entry)
+স্থির শূন্য show_diff(সংরচনা merge_list *entry)
 {
 	size_t size;
 	mmfile_t src, dst;
 	xpparam_t xpp;
 	xdemitconf_t xecfg;
-	xdemitcb_t ecb = { .out_line = show_outf };
+	xdemitcb_t ecb = { .out_সাৰি = show_outf };
 
-	memset(&xpp, 0, sizeof(xpp));
+	memset(&xpp, 0, পরিমাণ(xpp));
 	xpp.flags = 0;
-	memset(&xecfg, 0, sizeof(xecfg));
+	memset(&xecfg, 0, পরিমাণ(xecfg));
 	xecfg.ctxlen = 3;
 
 	src.ptr = origin(entry, &size);
-	if (!src.ptr)
+	যদি (!src.ptr)
 		size = 0;
 	src.size = size;
 	dst.ptr = result(entry, &size);
-	if (!dst.ptr)
+	যদি (!dst.ptr)
 		size = 0;
 	dst.size = size;
-	if (xdi_diff(&src, &dst, &xpp, &xecfg, &ecb))
+	যদি (xdi_diff(&src, &dst, &xpp, &xecfg, &ecb))
 		die("unable to generate diff");
-	free(src.ptr);
-	free(dst.ptr);
+	মুক্ত(src.ptr);
+	মুক্ত(dst.ptr);
 }
 
-static void show_result_list(struct merge_list *entry)
+স্থির শূন্য show_result_list(সংরচনা merge_list *entry)
 {
 	printf("%s\n", explanation(entry));
-	do {
-		struct merge_list *link = entry->link;
-		static const char *desc[4] = { "result", "base", "our", "their" };
+	কৰা {
+		সংরচনা merge_list *link = entry->link;
+		স্থির ধ্রুৱ ৱর্ণ *desc[4] = { "result", "base", "our", "their" };
 		printf("  %-6s %o %s %s\n", desc[entry->stage], entry->mode, oid_to_hex(&entry->blob->object.oid), entry->path);
 		entry = link;
-	} while (entry);
+	} যেতিয়ালৈ (entry);
 }
 
-static void show_result(void)
+স্থির শূন্য show_result(শূন্য)
 {
-	struct merge_list *walk;
+	সংরচনা merge_list *walk;
 
 	walk = merge_result;
-	while (walk) {
+	যেতিয়ালৈ (walk) {
 		show_result_list(walk);
 		show_diff(walk);
 		walk = walk->next;
@@ -168,45 +168,45 @@ static void show_result(void)
 }
 
 /* An empty entry never compares same, not even to another empty entry */
-static int same_entry(struct name_entry *a, struct name_entry *b)
+স্থির পূর্ণাঙ্ক same_entry(সংরচনা name_entry *a, সংরচনা name_entry *b)
 {
-	return	!is_null_oid(&a->oid) &&
+	ঘূৰাই	!is_null_oid(&a->oid) &&
 		!is_null_oid(&b->oid) &&
 		oideq(&a->oid, &b->oid) &&
 		a->mode == b->mode;
 }
 
-static int both_empty(struct name_entry *a, struct name_entry *b)
+স্থির পূর্ণাঙ্ক both_empty(সংরচনা name_entry *a, সংরচনা name_entry *b)
 {
-	return is_null_oid(&a->oid) && is_null_oid(&b->oid);
+	ঘূৰাই is_null_oid(&a->oid) && is_null_oid(&b->oid);
 }
 
-static struct merge_list *create_entry(unsigned stage, unsigned mode, const struct object_id *oid, const char *path)
+স্থির সংরচনা merge_list *create_entry(unsigned stage, unsigned mode, ধ্রুৱ সংরচনা object_id *oid, ধ্রুৱ ৱর্ণ *path)
 {
-	struct merge_list *res = xcalloc(1, sizeof(*res));
+	সংরচনা merge_list *res = xcalloc(1, পরিমাণ(*res));
 
 	res->stage = stage;
 	res->path = path;
 	res->mode = mode;
 	res->blob = lookup_blob(the_repository, oid);
-	return res;
+	ঘূৰাই res;
 }
 
-static char *traverse_path(const struct traverse_info *info, const struct name_entry *n)
+স্থির ৱর্ণ *traverse_path(ধ্রুৱ সংরচনা traverse_info *info, ধ্রুৱ সংরচনা name_entry *n)
 {
-	struct strbuf buf = STRBUF_INIT;
+	সংরচনা strbuf buf = STRBUF_INIT;
 	strbuf_make_traverse_path(&buf, info, n->path, n->pathlen);
-	return strbuf_detach(&buf, NULL);
+	ঘূৰাই strbuf_detach(&buf, রিক্ত);
 }
 
-static void resolve(const struct traverse_info *info, struct name_entry *ours, struct name_entry *result)
+স্থির শূন্য resolve(ধ্রুৱ সংরচনা traverse_info *info, সংরচনা name_entry *ours, সংরচনা name_entry *result)
 {
-	struct merge_list *orig, *final;
-	const char *path;
+	সংরচনা merge_list *orig, *final;
+	ধ্রুৱ ৱর্ণ *path;
 
 	/* If it's already ours, don't bother showing it */
-	if (!ours)
-		return;
+	যদি (!ours)
+		ঘূৰাই;
 
 	path = traverse_path(info, result);
 	orig = create_entry(2, ours->mode, &ours->oid, path);
@@ -217,81 +217,81 @@ static void resolve(const struct traverse_info *info, struct name_entry *ours, s
 	add_merge_entry(final);
 }
 
-static void unresolved_directory(const struct traverse_info *info,
-				 struct name_entry n[3])
+স্থির শূন্য unresolved_directory(ধ্রুৱ সংরচনা traverse_info *info,
+				 সংরচনা name_entry n[3])
 {
-	struct repository *r = the_repository;
-	char *newbase;
-	struct name_entry *p;
-	struct tree_desc t[3];
-	void *buf0, *buf1, *buf2;
+	সংরচনা repository *r = the_repository;
+	ৱর্ণ *newbase;
+	সংরচনা name_entry *p;
+	সংরচনা বৃক্ষ_desc t[3];
+	শূন্য *buf0, *buf1, *buf2;
 
-	for (p = n; p < n + 3; p++) {
-		if (p->mode && S_ISDIR(p->mode))
-			break;
+	বাবে (p = n; p < n + 3; p++) {
+		যদি (p->mode && S_ISDIR(p->mode))
+			ভঙ্গ;
 	}
-	if (n + 3 <= p)
-		return; /* there is no tree here */
+	যদি (n + 3 <= p)
+		ঘূৰাই; /* there is no tree here */
 
 	newbase = traverse_path(info, p);
 
-#define ENTRY_OID(e) (((e)->mode && S_ISDIR((e)->mode)) ? &(e)->oid : NULL)
-	buf0 = fill_tree_descriptor(r, t + 0, ENTRY_OID(n + 0));
-	buf1 = fill_tree_descriptor(r, t + 1, ENTRY_OID(n + 1));
-	buf2 = fill_tree_descriptor(r, t + 2, ENTRY_OID(n + 2));
+#define ENTRY_OID(e) (((e)->mode && S_ISDIR((e)->mode)) ? &(e)->oid : রিক্ত)
+	buf0 = fill_বৃক্ষ_descriptor(r, t + 0, ENTRY_OID(n + 0));
+	buf1 = fill_বৃক্ষ_descriptor(r, t + 1, ENTRY_OID(n + 1));
+	buf2 = fill_বৃক্ষ_descriptor(r, t + 2, ENTRY_OID(n + 2));
 #undef ENTRY_OID
 
 	trivial_merge_trees(t, newbase);
 
-	free(buf0);
-	free(buf1);
-	free(buf2);
-	free(newbase);
+	মুক্ত(buf0);
+	মুক্ত(buf1);
+	মুক্ত(buf2);
+	মুক্ত(newbase);
 }
 
 
-static struct merge_list *link_entry(unsigned stage, const struct traverse_info *info, struct name_entry *n, struct merge_list *entry)
+স্থির সংরচনা merge_list *link_entry(unsigned stage, ধ্রুৱ সংরচনা traverse_info *info, সংরচনা name_entry *n, সংরচনা merge_list *entry)
 {
-	const char *path;
-	struct merge_list *link;
+	ধ্রুৱ ৱর্ণ *path;
+	সংরচনা merge_list *link;
 
-	if (!n->mode)
-		return entry;
-	if (entry)
+	যদি (!n->mode)
+		ঘূৰাই entry;
+	যদি (entry)
 		path = entry->path;
-	else
+	অন্যথা
 		path = traverse_path(info, n);
 	link = create_entry(stage, n->mode, &n->oid, path);
 	link->link = entry;
-	return link;
+	ঘূৰাই link;
 }
 
-static void unresolved(const struct traverse_info *info, struct name_entry n[3])
+স্থির শূন্য unresolved(ধ্রুৱ সংরচনা traverse_info *info, সংরচনা name_entry n[3])
 {
-	struct merge_list *entry = NULL;
-	int i;
+	সংরচনা merge_list *entry = রিক্ত;
+	পূর্ণাঙ্ক i;
 	unsigned dirmask = 0, mask = 0;
 
-	for (i = 0; i < 3; i++) {
+	বাবে (i = 0; i < 3; i++) {
 		mask |= (1 << i);
 		/*
 		 * Treat missing entries as directories so that we return
 		 * after unresolved_directory has handled this.
 		 */
-		if (!n[i].mode || S_ISDIR(n[i].mode))
+		যদি (!n[i].mode || S_ISDIR(n[i].mode))
 			dirmask |= (1 << i);
 	}
 
 	unresolved_directory(info, n);
 
-	if (dirmask == mask)
-		return;
+	যদি (dirmask == mask)
+		ঘূৰাই;
 
-	if (n[2].mode && !S_ISDIR(n[2].mode))
+	যদি (n[2].mode && !S_ISDIR(n[2].mode))
 		entry = link_entry(3, info, n + 2, entry);
-	if (n[1].mode && !S_ISDIR(n[1].mode))
+	যদি (n[1].mode && !S_ISDIR(n[1].mode))
 		entry = link_entry(2, info, n + 1, entry);
-	if (n[0].mode && !S_ISDIR(n[0].mode))
+	যদি (n[0].mode && !S_ISDIR(n[0].mode))
 		entry = link_entry(1, info, n + 0, entry);
 
 	add_merge_entry(entry);
@@ -326,22 +326,22 @@ static void unresolved(const struct traverse_info *info, struct name_entry n[3])
  * The successful merge rules are the same as for the three-way merge
  * in git-read-tree.
  */
-static int threeway_callback(int n UNUSED, unsigned long mask,
+স্থির পূর্ণাঙ্ক threeway_callback(পূর্ণাঙ্ক n UNUSED, unsigned long mask,
 			     unsigned long dirmask UNUSED,
-			     struct name_entry *entry, struct traverse_info *info)
+			     সংরচনা name_entry *entry, সংরচনা traverse_info *info)
 {
 	/* Same in both? */
-	if (same_entry(entry+1, entry+2) || both_empty(entry+1, entry+2)) {
+	যদি (same_entry(entry+1, entry+2) || both_empty(entry+1, entry+2)) {
 		/* Modified, added or removed identically */
-		resolve(info, NULL, entry+1);
-		return mask;
+		resolve(info, রিক্ত, entry+1);
+		ঘূৰাই mask;
 	}
 
-	if (same_entry(entry+0, entry+1)) {
-		if (!is_null_oid(&entry[2].oid) && !S_ISDIR(entry[2].mode)) {
+	যদি (same_entry(entry+0, entry+1)) {
+		যদি (!is_null_oid(&entry[2].oid) && !S_ISDIR(entry[2].mode)) {
 			/* We did not touch, they modified -- take theirs */
 			resolve(info, entry+1, entry+2);
-			return mask;
+			ঘূৰাই mask;
 		}
 		/*
 		 * If we did not touch a directory but they made it
@@ -350,85 +350,85 @@ static int threeway_callback(int n UNUSED, unsigned long mask,
 		 */
 	}
 
-	if (same_entry(entry+0, entry+2) || both_empty(entry+0, entry+2)) {
+	যদি (same_entry(entry+0, entry+2) || both_empty(entry+0, entry+2)) {
 		/* We added, modified or removed, they did not touch -- take ours */
-		resolve(info, NULL, entry+1);
-		return mask;
+		resolve(info, রিক্ত, entry+1);
+		ঘূৰাই mask;
 	}
 
 	unresolved(info, entry);
-	return mask;
+	ঘূৰাই mask;
 }
 
-static void trivial_merge_trees(struct tree_desc t[3], const char *base)
+স্থির শূন্য trivial_merge_trees(সংরচনা বৃক্ষ_desc t[3], ধ্রুৱ ৱর্ণ *base)
 {
-	struct traverse_info info;
+	সংরচনা traverse_info info;
 
 	setup_traverse_info(&info, base);
 	info.fn = threeway_callback;
 	traverse_trees(the_repository->index, 3, t, &info);
 }
 
-static void *get_tree_descriptor(struct repository *r,
-				 struct tree_desc *desc,
-				 const char *rev)
+স্থির শূন্য *get_বৃক্ষ_descriptor(সংরচনা repository *r,
+				 সংরচনা বৃক্ষ_desc *desc,
+				 ধ্রুৱ ৱর্ণ *rev)
 {
-	struct object_id oid;
-	void *buf;
+	সংরচনা object_id oid;
+	শূন্য *buf;
 
-	if (repo_get_oid(r, rev, &oid))
+	যদি (repo_get_oid(r, rev, &oid))
 		die("unknown rev %s", rev);
-	buf = fill_tree_descriptor(r, desc, &oid);
-	if (!buf)
+	buf = fill_বৃক্ষ_descriptor(r, desc, &oid);
+	যদি (!buf)
 		die("%s is not a tree", rev);
-	return buf;
+	ঘূৰাই buf;
 }
 
-static int trivial_merge(const char *base,
-			 const char *branch1,
-			 const char *branch2)
+স্থির পূর্ণাঙ্ক trivial_merge(ধ্রুৱ ৱর্ণ *base,
+			 ধ্রুৱ ৱর্ণ *branch1,
+			 ধ্রুৱ ৱর্ণ *branch2)
 {
-	struct repository *r = the_repository;
-	struct tree_desc t[3];
-	void *buf1, *buf2, *buf3;
+	সংরচনা repository *r = the_repository;
+	সংরচনা বৃক্ষ_desc t[3];
+	শূন্য *buf1, *buf2, *buf3;
 
-	buf1 = get_tree_descriptor(r, t+0, base);
-	buf2 = get_tree_descriptor(r, t+1, branch1);
-	buf3 = get_tree_descriptor(r, t+2, branch2);
+	buf1 = get_বৃক্ষ_descriptor(r, t+0, base);
+	buf2 = get_বৃক্ষ_descriptor(r, t+1, branch1);
+	buf3 = get_বৃক্ষ_descriptor(r, t+2, branch2);
 	trivial_merge_trees(t, "");
-	free(buf1);
-	free(buf2);
-	free(buf3);
+	মুক্ত(buf1);
+	মুক্ত(buf2);
+	মুক্ত(buf3);
 
 	show_result();
-	return 0;
+	ঘূৰাই 0;
 }
 
-enum mode {
+গণনা mode {
 	MODE_UNKNOWN,
 	MODE_TRIVIAL,
 	MODE_REAL,
 };
 
-struct merge_tree_options {
-	int mode;
-	int allow_unrelated_histories;
-	int show_messages;
-	int name_only;
-	int use_stdin;
-	struct merge_options merge_options;
+সংরচনা merge_বৃক্ষ_options {
+	পূর্ণাঙ্ক mode;
+	পূর্ণাঙ্ক allow_unrelated_histories;
+	পূর্ণাঙ্ক show_messages;
+	পূর্ণাঙ্ক name_only;
+	পূর্ণাঙ্ক use_stdin;
+	সংরচনা merge_options merge_options;
 };
 
-static int real_merge(struct merge_tree_options *o,
-		      const char *merge_base,
-		      const char *branch1, const char *branch2,
-		      const char *prefix)
+স্থির পূর্ণাঙ্ক real_merge(সংরচনা merge_বৃক্ষ_options *o,
+		      ধ্রুৱ ৱর্ণ *merge_base,
+		      ধ্রুৱ ৱর্ণ *branch1, ধ্রুৱ ৱর্ণ *branch2,
+		      ধ্রুৱ ৱর্ণ *prefix)
 {
-	struct commit *parent1, *parent2;
-	struct commit_list *merge_bases = NULL;
-	struct merge_result result = { 0 };
-	int show_messages = o->show_messages;
-	struct merge_options opt;
+	সংরচনা commit *parent1, *parent2;
+	সংরচনা commit_list *merge_bases = রিক্ত;
+	সংরচনা merge_result result = { 0 };
+	পূর্ণাঙ্ক show_messages = o->show_messages;
+	সংরচনা merge_options opt;
 
 	copy_merge_options(&opt, &o->merge_options);
 	opt.show_rename_progress = 0;
@@ -436,44 +436,44 @@ static int real_merge(struct merge_tree_options *o,
 	opt.branch1 = branch1;
 	opt.branch2 = branch2;
 
-	if (merge_base) {
-		struct tree *base_tree, *parent1_tree, *parent2_tree;
+	যদি (merge_base) {
+		সংরচনা বৃক্ষ *base_বৃক্ষ, *parent1_বৃক্ষ, *parent2_বৃক্ষ;
 
 		/*
 		 * We actually only need the trees because we already
 		 * have a merge base.
 		 */
-		struct object_id base_oid, head_oid, merge_oid;
+		সংরচনা object_id base_oid, head_oid, merge_oid;
 
-		if (repo_get_oid_treeish(the_repository, merge_base, &base_oid))
+		যদি (repo_get_oid_treeish(the_repository, merge_base, &base_oid))
 			die(_("could not parse as tree '%s'"), merge_base);
-		base_tree = repo_parse_tree_indirect(the_repository,
+		base_বৃক্ষ = repo_parse_বৃক্ষ_indirect(the_repository,
 						     &base_oid);
-		if (!base_tree)
+		যদি (!base_বৃক্ষ)
 			die(_("unable to read tree (%s)"), oid_to_hex(&base_oid));
-		if (repo_get_oid_treeish(the_repository, branch1, &head_oid))
+		যদি (repo_get_oid_treeish(the_repository, branch1, &head_oid))
 			die(_("could not parse as tree '%s'"), branch1);
-		parent1_tree = repo_parse_tree_indirect(the_repository,
+		parent1_বৃক্ষ = repo_parse_বৃক্ষ_indirect(the_repository,
 							&head_oid);
-		if (!parent1_tree)
+		যদি (!parent1_বৃক্ষ)
 			die(_("unable to read tree (%s)"), oid_to_hex(&head_oid));
-		if (repo_get_oid_treeish(the_repository, branch2, &merge_oid))
+		যদি (repo_get_oid_treeish(the_repository, branch2, &merge_oid))
 			die(_("could not parse as tree '%s'"), branch2);
-		parent2_tree = repo_parse_tree_indirect(the_repository,
+		parent2_বৃক্ষ = repo_parse_বৃক্ষ_indirect(the_repository,
 							&merge_oid);
-		if (!parent2_tree)
+		যদি (!parent2_বৃক্ষ)
 			die(_("unable to read tree (%s)"), oid_to_hex(&merge_oid));
 
 		opt.ancestor = merge_base;
-		merge_incore_nonrecursive(&opt, base_tree, parent1_tree, parent2_tree, &result);
-	} else {
+		merge_incore_nonrecursive(&opt, base_বৃক্ষ, parent1_বৃক্ষ, parent2_বৃক্ষ, &result);
+	} অন্যথা {
 		parent1 = get_merge_parent(branch1);
-		if (!parent1)
+		যদি (!parent1)
 			help_unknown_ref(branch1, "merge-tree",
 					 _("not something we can merge"));
 
 		parent2 = get_merge_parent(branch2);
-		if (!parent2)
+		যদি (!parent2)
 			help_unknown_ref(branch2, "merge-tree",
 					 _("not something we can merge"));
 
@@ -481,80 +481,80 @@ static int real_merge(struct merge_tree_options *o,
 		 * Get the merge bases, in reverse order; see comment above
 		 * merge_incore_recursive in merge-ort.h
 		 */
-		if (repo_get_merge_bases(the_repository, parent1,
+		যদি (repo_get_merge_bases(the_repository, parent1,
 					 parent2, &merge_bases) < 0)
 			exit(128);
-		if (!merge_bases && !o->allow_unrelated_histories)
+		যদি (!merge_bases && !o->allow_unrelated_histories)
 			die(_("refusing to merge unrelated histories"));
 		merge_bases = commit_list_reverse(merge_bases);
 		merge_incore_recursive(&opt, merge_bases, parent1, parent2, &result);
 		commit_list_free(merge_bases);
 	}
 
-	if (result.clean < 0)
+	যদি (result.clean < 0)
 		die(_("failure to merge"));
 
-	if (o->merge_options.mergeability_only)
-		goto cleanup;
+	যদি (o->merge_options.mergeability_only)
+		গচ্ছ cleanup;
 
-	if (show_messages == -1)
+	যদি (show_messages == -1)
 		show_messages = !result.clean;
 
-	if (o->use_stdin)
-		printf("%d%c", result.clean, line_termination);
-	printf("%s%c", oid_to_hex(&result.tree->object.oid), line_termination);
-	if (!result.clean) {
-		struct string_list conflicted_files = STRING_LIST_INIT_NODUP;
-		const char *last = NULL;
+	যদি (o->use_stdin)
+		printf("%d%c", result.clean, সাৰি_termination);
+	printf("%s%c", oid_to_hex(&result.বৃক্ষ->object.oid), সাৰি_termination);
+	যদি (!result.clean) {
+		সংরচনা string_list conflicted_files = STRING_LIST_INIT_NODUP;
+		ধ্রুৱ ৱর্ণ *last = রিক্ত;
 
 		merge_get_conflicted_files(&result, &conflicted_files);
-		for (size_t i = 0; i < conflicted_files.nr; i++) {
-			const char *name = conflicted_files.items[i].string;
-			struct stage_info *c = conflicted_files.items[i].util;
-			if (!o->name_only)
+		বাবে (size_t i = 0; i < conflicted_files.nr; i++) {
+			ধ্রুৱ ৱর্ণ *name = conflicted_files.বস্তুসমূহ[i].string;
+			সংরচনা stage_info *c = conflicted_files.বস্তুসমূহ[i].util;
+			যদি (!o->name_only)
 				printf("%06o %s %d\t",
 				       c->mode, oid_to_hex(&c->oid), c->stage);
-			else if (last && !strcmp(last, name))
-				continue;
+			অন্যথা যদি (last && !strcmp(last, name))
+				অনুৱর্ত;
 			write_name_quoted_relative(
-				name, prefix, stdout, line_termination);
+				name, prefix, stdout, সাৰি_termination);
 			last = name;
 		}
 		string_list_clear(&conflicted_files, 1);
 	}
-	if (show_messages) {
-		putchar(line_termination);
-		merge_display_update_messages(&opt, line_termination == '\0',
+	যদি (show_messages) {
+		putchar(সাৰি_termination);
+		merge_display_update_messages(&opt, সাৰি_termination == '\0',
 					      &result);
 	}
-	if (o->use_stdin)
-		putchar(line_termination);
+	যদি (o->use_stdin)
+		putchar(সাৰি_termination);
 
 cleanup:
 	merge_finalize(&opt, &result);
 	clear_merge_options(&opt);
-	return !result.clean; /* result.clean < 0 handled above */
+	ঘূৰাই !result.clean; /* result.clean < 0 handled above */
 }
 
-int cmd_merge_tree(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+পূর্ণাঙ্ক cmd_merge_বৃক্ষ(পূর্ণাঙ্ক argc,
+		   ধ্রুৱ ৱর্ণ **argv,
+		   ধ্রুৱ ৱর্ণ *prefix,
+		   সংরচনা repository *repo UNUSED)
 {
-	struct merge_tree_options o = { .show_messages = -1 };
-	struct strvec xopts = STRVEC_INIT;
-	int expected_remaining_argc;
-	int original_argc;
-	const char *merge_base = NULL;
-	int ret;
-	int quiet = 0;
+	সংরচনা merge_বৃক্ষ_options o = { .show_messages = -1 };
+	সংরচনা strvec xopts = STRVEC_INIT;
+	পূর্ণাঙ্ক expected_remaining_argc;
+	পূর্ণাঙ্ক original_argc;
+	ধ্রুৱ ৱর্ণ *merge_base = রিক্ত;
+	পূর্ণাঙ্ক ret;
+	পূর্ণাঙ্ক quiet = 0;
 
-	const char * const merge_tree_usage[] = {
+	ধ্রুৱ ৱর্ণ * ধ্রুৱ merge_বৃক্ষ_usage[] = {
 		N_("git merge-tree [--write-tree] [<options>] <branch1> <branch2>"),
 		N_("git merge-tree [--trivial-merge] <base-tree> <branch1> <branch2>"),
-		NULL
+		রিক্ত
 	};
-	struct option mt_options[] = {
+	সংরচনা option mt_options[] = {
 		OPT_CMDMODE(0, "write-tree", &o.mode,
 			    N_("do a real merge instead of a trivial merge"),
 			    MODE_REAL),
@@ -566,7 +566,7 @@ int cmd_merge_tree(int argc,
 			   &quiet,
 			   N_("suppress all output; only exit status wanted"),
 			   PARSE_OPT_NONEG),
-		OPT_SET_INT('z', NULL, &line_termination,
+		OPT_SET_INT('z', রিক্ত, &সাৰি_termination,
 			    N_("separate paths with the NUL character"), '\0'),
 		OPT_BOOL_F(0, "name-only",
 			   &o.name_only,
@@ -595,56 +595,56 @@ int cmd_merge_tree(int argc,
 	/* Parse arguments */
 	original_argc = argc - 1; /* ignoring argv[0] */
 	argc = parse_options(argc, argv, prefix, mt_options,
-			     merge_tree_usage, PARSE_OPT_STOP_AT_NON_OPTION);
+			     merge_বৃক্ষ_usage, PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (quiet && o.show_messages == -1)
+	যদি (quiet && o.show_messages == -1)
 		o.show_messages = 0;
 	o.merge_options.mergeability_only = quiet;
 	die_for_incompatible_opt2(quiet, "--quiet", o.show_messages, "--messages");
 	die_for_incompatible_opt2(quiet, "--quiet", o.name_only, "--name-only");
 	die_for_incompatible_opt2(quiet, "--quiet", o.use_stdin, "--stdin");
-	die_for_incompatible_opt2(quiet, "--quiet", !line_termination, "-z");
+	die_for_incompatible_opt2(quiet, "--quiet", !সাৰি_termination, "-z");
 
-	if (xopts.nr && o.mode == MODE_TRIVIAL)
+	যদি (xopts.nr && o.mode == MODE_TRIVIAL)
 		die(_("--trivial-merge is incompatible with all other options"));
-	for (size_t x = 0; x < xopts.nr; x++)
-		if (parse_merge_opt(&o.merge_options, xopts.v[x]))
+	বাবে (size_t x = 0; x < xopts.nr; x++)
+		যদি (parse_merge_opt(&o.merge_options, xopts.v[x]))
 			die(_("unknown strategy option: -X%s"), xopts.v[x]);
 
 	/* Handle --stdin */
-	if (o.use_stdin) {
-		struct strbuf buf = STRBUF_INIT;
+	যদি (o.use_stdin) {
+		সংরচনা strbuf buf = STRBUF_INIT;
 
-		if (o.mode == MODE_TRIVIAL)
+		যদি (o.mode == MODE_TRIVIAL)
 			die(_("--trivial-merge is incompatible with all other options"));
-		if (merge_base)
+		যদি (merge_base)
 			die(_("options '%s' and '%s' cannot be used together"),
 			    "--merge-base", "--stdin");
-		line_termination = '\0';
-		while (strbuf_getline_lf(&buf, stdin) != EOF) {
-			struct string_list split = STRING_LIST_INIT_NODUP;
-			const char *input_merge_base = NULL;
+		সাৰি_termination = '\0';
+		যেতিয়ালৈ (strbuf_getline_lf(&buf, stdin) != EOF) {
+			সংরচনা string_list split = STRING_LIST_INIT_NODUP;
+			ধ্রুৱ ৱর্ণ *প্ৰবেশ_merge_base = রিক্ত;
 
 			string_list_split_in_place_f(&split, buf.buf, " ", -1,
 						     STRING_LIST_SPLIT_TRIM);
 
-			if (split.nr < 2)
+			যদি (split.nr < 2)
 				die(_("malformed input line: '%s'."), buf.buf);
 
 			/* parse the merge-base */
-			if (!strcmp(split.items[1].string, "--")) {
-				input_merge_base = split.items[0].string;
+			যদি (!strcmp(split.বস্তুসমূহ[1].string, "--")) {
+				প্ৰবেশ_merge_base = split.বস্তুসমূহ[0].string;
 			}
 
-			if (input_merge_base && split.nr == 4) {
-				real_merge(&o, input_merge_base,
-					   split.items[2].string, split.items[3].string,
+			যদি (প্ৰবেশ_merge_base && split.nr == 4) {
+				real_merge(&o, প্ৰবেশ_merge_base,
+					   split.বস্তুসমূহ[2].string, split.বস্তুসমূহ[3].string,
 					   prefix);
-			} else if (!input_merge_base && split.nr == 2) {
-				real_merge(&o, NULL,
-					   split.items[0].string, split.items[1].string,
+			} অন্যথা যদি (!প্ৰবেশ_merge_base && split.nr == 2) {
+				real_merge(&o, রিক্ত,
+					   split.বস্তুসমূহ[0].string, split.বস্তুসমূহ[1].string,
 					   prefix);
-			} else {
+			} অন্যথা {
 				die(_("malformed input line: '%s'."), buf.buf);
 			}
 			maybe_flush_or_die(stdout, "stdout");
@@ -654,50 +654,50 @@ int cmd_merge_tree(int argc,
 		strbuf_release(&buf);
 
 		ret = 0;
-		goto out;
+		গচ্ছ out;
 	}
 
 	/* Figure out which mode to use */
-	switch (o.mode) {
-	default:
+	ৱিকল্প (o.mode) {
+	স্ৱভাৱ:
 		BUG("unexpected command mode %d", o.mode);
-	case MODE_UNKNOWN:
-		switch (argc) {
-		default:
-			usage_with_options(merge_tree_usage, mt_options);
-		case 2:
+	পক্ষ MODE_UNKNOWN:
+		ৱিকল্প (argc) {
+		স্ৱভাৱ:
+			usage_with_options(merge_বৃক্ষ_usage, mt_options);
+		পক্ষ 2:
 			o.mode = MODE_REAL;
-			break;
-		case 3:
+			ভঙ্গ;
+		পক্ষ 3:
 			o.mode = MODE_TRIVIAL;
-			break;
+			ভঙ্গ;
 		}
 		expected_remaining_argc = argc;
-		break;
-	case MODE_REAL:
+		ভঙ্গ;
+	পক্ষ MODE_REAL:
 		expected_remaining_argc = 2;
-		break;
-	case MODE_TRIVIAL:
+		ভঙ্গ;
+	পক্ষ MODE_TRIVIAL:
 		expected_remaining_argc = 3;
 		/* Removal of `--trivial-merge` is expected */
 		original_argc--;
-		break;
+		ভঙ্গ;
 	}
-	if (o.mode == MODE_TRIVIAL && argc < original_argc)
+	যদি (o.mode == MODE_TRIVIAL && argc < original_argc)
 		die(_("--trivial-merge is incompatible with all other options"));
 
-	if (argc != expected_remaining_argc)
-		usage_with_options(merge_tree_usage, mt_options);
+	যদি (argc != expected_remaining_argc)
+		usage_with_options(merge_বৃক্ষ_usage, mt_options);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, রিক্ত);
 
 	/* Do the relevant type of merge */
-	if (o.mode == MODE_REAL)
+	যদি (o.mode == MODE_REAL)
 		ret = real_merge(&o, merge_base, argv[0], argv[1], prefix);
-	else
+	অন্যথা
 		ret = trivial_merge(argv[0], argv[1], argv[2]);
 
 out:
 	strvec_clear(&xopts);
-	return ret;
+	ঘূৰাই ret;
 }
