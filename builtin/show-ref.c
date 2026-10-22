@@ -1,17 +1,17 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refs/refs-internal.h"
-#include "object-name.h"
-#include "odb.h"
-#include "object.h"
-#include "string-list.h"
-#include "parse-options.h"
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "hex.h"
+#ضمن "refs/refs-internal.h"
+#ضمن "object-name.h"
+#ضمن "odb.h"
+#ضمن "object.h"
+#ضمن "string-list.h"
+#ضمن "parse-options.h"
 
-static const char * const show_ref_usage[] = {
+ساكن ثابت حرف * ثابت show_ref_usage[] = {
 	N_("git show-ref [--head] [-d | --dereference]\n"
 	   "             [-s | --hash[=<n>]] [--abbrev[=<n>]] [--branches] [--tags]\n"
 	   "             [--] [<pattern>...]"),
@@ -20,98 +20,98 @@ static const char * const show_ref_usage[] = {
 	   "             [--] [<ref>...]"),
 	N_("git show-ref --exclude-existing[=<pattern>]"),
 	N_("git show-ref --exists <ref>"),
-	NULL
+	عدم
 };
 
-struct show_one_options {
-	int quiet;
-	int hash_only;
-	int abbrev;
-	int deref_tags;
+بنية show_one_options {
+	صحيح quiet;
+	صحيح hash_only;
+	صحيح abbrev;
+	صحيح deref_ٹیگ_سوچی;
 };
 
-static void show_one(const struct show_one_options *opts,
-		     const struct reference *ref)
+ساكن فراغ show_one(ثابت بنية show_one_options *opts,
+		     ثابت بنية reference *ref)
 {
-	const char *hex;
-	struct object_id peeled;
+	ثابت حرف *hex;
+	بنية object_id peeled;
 
-	if (!odb_has_object(the_repository->objects, ref->oid,
+	إذا (!odb_has_object(the_repository->objects, ref->oid,
 			    ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR))
 		die("git show-ref: bad ref %s (%s)", ref->name,
-		    oid_to_hex(ref->oid));
+		    oid_منزل_hex(ref->oid));
 
-	if (opts->quiet)
-		return;
+	إذا (opts->quiet)
+		أرجع;
 
-	hex = repo_find_unique_abbrev(the_repository, ref->oid, opts->abbrev);
-	if (opts->hash_only)
-		printf("%s\n", hex);
-	else
-		printf("%s %s\n", hex, ref->name);
+	hex = repo_لبھو_unique_abbrev(the_repository, ref->oid, opts->abbrev);
+	إذا (opts->hash_only)
+		لکھو("%s\n", hex);
+	وإلا
+		لکھو("%s %s\n", hex, ref->name);
 
-	if (!opts->deref_tags)
-		return;
+	إذا (!opts->deref_ٹیگ_سوچی)
+		أرجع;
 
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
-		hex = repo_find_unique_abbrev(the_repository, &peeled, opts->abbrev);
-		printf("%s %s^{}\n", hex, ref->name);
+	إذا (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
+		hex = repo_لبھو_unique_abbrev(the_repository, &peeled, opts->abbrev);
+		لکھو("%s %s^{}\n", hex, ref->name);
 	}
 }
 
-struct show_ref_data {
-	const struct show_one_options *show_one_opts;
-	const char **patterns;
-	int found_match;
-	int show_head;
+بنية show_ref_انکڑے {
+	ثابت بنية show_one_options *show_one_opts;
+	ثابت حرف **patterns;
+	صحيح لبھیا_میل;
+	صحيح show_سر;
 };
 
-static int show_ref(const struct reference *ref, void *cbdata)
+ساكن صحيح show_ref(ثابت بنية reference *ref, فراغ *cbdata)
 {
-	struct show_ref_data *data = cbdata;
+	بنية show_ref_انکڑے *انکڑے = cbdata;
 
-	if (data->show_head && !strcmp(ref->name, "HEAD"))
-		goto match;
+	إذا (انکڑے->show_سر && !strcmp(ref->name, "HEAD"))
+		اذهب میل;
 
-	if (data->patterns) {
-		int reflen = strlen(ref->name);
-		const char **p = data->patterns, *m;
-		while ((m = *p++) != NULL) {
-			int len = strlen(m);
-			if (len > reflen)
-				continue;
-			if (memcmp(m, ref->name + reflen - len, len))
-				continue;
-			if (len == reflen)
-				goto match;
-			if (ref->name[reflen - len - 1] == '/')
-				goto match;
+	إذا (انکڑے->patterns) {
+		صحيح reflen = لڑی_لمبائی(ref->name);
+		ثابت حرف **p = انکڑے->patterns, *m;
+		طالما ((m = *p++) != عدم) {
+			صحيح len = لڑی_لمبائی(m);
+			إذا (len > reflen)
+				استمر;
+			إذا (memcmp(m, ref->name + reflen - len, len))
+				استمر;
+			إذا (len == reflen)
+				اذهب میل;
+			إذا (ref->name[reflen - len - 1] == '/')
+				اذهب میل;
 		}
-		return 0;
+		أرجع 0;
 	}
 
-match:
-	data->found_match++;
+میل:
+	انکڑے->لبھیا_میل++;
 
-	show_one(data->show_one_opts, ref);
+	show_one(انکڑے->show_one_opts, ref);
 
-	return 0;
+	أرجع 0;
 }
 
-static int add_existing(const struct reference *ref, void *cbdata)
+ساكن صحيح جوڑو_existing(ثابت بنية reference *ref, فراغ *cbdata)
 {
-	struct string_list *list = (struct string_list *)cbdata;
-	string_list_insert(list, ref->name);
-	return 0;
+	بنية string_list *list = (بنية string_list *)cbdata;
+	string_list_داخل_کرو(list, ref->name);
+	أرجع 0;
 }
 
-struct exclude_existing_options {
+بنية exclude_existing_options {
 	/*
 	 * We need an explicit `enabled` field because it is perfectly valid
 	 * for `pattern` to be `NULL` even if `--exclude-existing` was given.
 	 */
-	int enabled;
-	const char *pattern;
+	صحيح enabled;
+	ثابت حرف *نمونہ;
 };
 
 /*
@@ -123,202 +123,202 @@ struct exclude_existing_options {
  * (4) ignore if refname is a ref that exists in the local repository;
  * (5) otherwise output the line.
  */
-static int cmd_show_ref__exclude_existing(const struct exclude_existing_options *opts)
+ساكن صحيح cmd_show_ref__exclude_existing(ثابت بنية exclude_existing_options *opts)
 {
-	struct string_list existing_refs = STRING_LIST_INIT_DUP;
-	char buf[1024];
-	int patternlen = opts->pattern ? strlen(opts->pattern) : 0;
+	بنية string_list existing_refs = STRING_LIST_INIT_DUP;
+	حرف buf[1024];
+	صحيح patternlen = opts->نمونہ ? لڑی_لمبائی(opts->نمونہ) : 0;
 
-	refs_for_each_ref(get_main_ref_store(the_repository), add_existing,
+	refs_for_each_ref(get_main_ref_store(the_repository), جوڑو_existing,
 			  &existing_refs);
-	while (fgets(buf, sizeof(buf), stdin)) {
-		char *ref;
-		int len = strlen(buf);
+	طالما (fgets(buf, حجم(buf), stdin)) {
+		حرف *ref;
+		صحيح len = لڑی_لمبائی(buf);
 
-		if (len > 0 && buf[len - 1] == '\n')
+		إذا (len > 0 && buf[len - 1] == '\n')
 			buf[--len] = '\0';
-		if (3 <= len && !strcmp(buf + len - 3, "^{}")) {
+		إذا (3 <= len && !strcmp(buf + len - 3, "^{}")) {
 			len -= 3;
 			buf[len] = '\0';
 		}
-		for (ref = buf + len; buf < ref; ref--)
-			if (isspace(ref[-1]))
-				break;
-		if (opts->pattern) {
-			int reflen = buf + len - ref;
-			if (reflen < patternlen)
-				continue;
-			if (strncmp(ref, opts->pattern, patternlen))
-				continue;
+		لكل (ref = buf + len; buf < ref; ref--)
+			إذا (خلا_اے(ref[-1]))
+				اكسر;
+		إذا (opts->نمونہ) {
+			صحيح reflen = buf + len - ref;
+			إذا (reflen < patternlen)
+				استمر;
+			إذا (لڑی_مقابلہ(ref, opts->نمونہ, patternlen))
+				استمر;
 		}
-		if (check_refname_format(ref, 0)) {
+		إذا (check_refname_format(ref, 0)) {
 			warning("ref '%s' ignored", ref);
-			continue;
+			استمر;
 		}
-		if (!string_list_has_string(&existing_refs, ref)) {
-			printf("%s\n", buf);
+		إذا (!string_list_has_string(&existing_refs, ref)) {
+			لکھو("%s\n", buf);
 		}
 	}
 
 	string_list_clear(&existing_refs, 0);
-	return 0;
+	أرجع 0;
 }
 
-static int cmd_show_ref__verify(const struct show_one_options *show_one_opts,
-				const char **refs)
+ساكن صحيح cmd_show_ref__verify(ثابت بنية show_one_options *show_one_opts,
+				ثابت حرف **refs)
 {
-	if (!refs || !*refs)
+	إذا (!refs || !*refs)
 		die("--verify requires a reference");
 
-	while (*refs) {
-		struct object_id oid;
+	طالما (*refs) {
+		بنية object_id oid;
 
-		if ((starts_with(*refs, "refs/") || refname_is_safe(*refs)) &&
+		إذا ((starts_with(*refs, "refs/") || refname_is_محفوظ(*refs)) &&
 		    !refs_read_ref(get_main_ref_store(the_repository), *refs, &oid)) {
-			struct reference ref = {
+			بنية reference ref = {
 				.name = *refs,
 				.oid = &oid,
 			};
 
 			show_one(show_one_opts, &ref);
-		} else if (!show_one_opts->quiet) {
+		} وإلا إذا (!show_one_opts->quiet) {
 			die("'%s' - not a valid ref", *refs);
-		} else {
-			return 1;
+		} وإلا {
+			أرجع 1;
 		}
 
 		refs++;
 	}
 
-	return 0;
+	أرجع 0;
 }
 
-struct patterns_options {
-	int show_head;
-	int branches_only;
-	int tags_only;
+بنية patterns_options {
+	صحيح show_سر;
+	صحيح branches_only;
+	صحيح ٹیگ_سوچی_only;
 };
 
-static int cmd_show_ref__patterns(const struct patterns_options *opts,
-				  const struct show_one_options *show_one_opts,
-				  const char **patterns)
+ساكن صحيح cmd_show_ref__patterns(ثابت بنية patterns_options *opts,
+				  ثابت بنية show_one_options *show_one_opts,
+				  ثابت حرف **patterns)
 {
-	struct show_ref_data show_ref_data = {
+	بنية show_ref_انکڑے show_ref_انکڑے = {
 		.show_one_opts = show_one_opts,
-		.show_head = opts->show_head,
+		.show_سر = opts->show_سر,
 	};
 
-	if (patterns && *patterns)
-		show_ref_data.patterns = patterns;
+	إذا (patterns && *patterns)
+		show_ref_انکڑے.patterns = patterns;
 
-	if (opts->show_head)
-		refs_head_ref(get_main_ref_store(the_repository), show_ref,
-			      &show_ref_data);
-	if (opts->branches_only || opts->tags_only) {
-		struct refs_for_each_ref_options for_each_ref_opts = { 0 };
+	إذا (opts->show_سر)
+		refs_سر_ref(get_main_ref_store(the_repository), show_ref,
+			      &show_ref_انکڑے);
+	إذا (opts->branches_only || opts->ٹیگ_سوچی_only) {
+		بنية refs_for_each_ref_options for_each_ref_opts = { 0 };
 
-		if (opts->branches_only) {
-			for_each_ref_opts.prefix = "refs/heads/";
+		إذا (opts->branches_only) {
+			for_each_ref_opts.اگیتر = "refs/heads/";
 			refs_for_each_ref_ext(get_main_ref_store(the_repository),
-					      show_ref, &show_ref_data, &for_each_ref_opts);
+					      show_ref, &show_ref_انکڑے, &for_each_ref_opts);
 		}
 
-		if (opts->tags_only) {
-			for_each_ref_opts.prefix = "refs/tags/";
+		إذا (opts->ٹیگ_سوچی_only) {
+			for_each_ref_opts.اگیتر = "refs/tags/";
 			refs_for_each_ref_ext(get_main_ref_store(the_repository),
-					      show_ref, &show_ref_data, &for_each_ref_opts);
+					      show_ref, &show_ref_انکڑے, &for_each_ref_opts);
 		}
-	} else {
+	} وإلا {
 		refs_for_each_ref(get_main_ref_store(the_repository),
-				  show_ref, &show_ref_data);
+				  show_ref, &show_ref_انکڑے);
 	}
-	if (!show_ref_data.found_match)
-		return 1;
+	إذا (!show_ref_انکڑے.لبھیا_میل)
+		أرجع 1;
 
-	return 0;
+	أرجع 0;
 }
 
-static int cmd_show_ref__exists(const char **refs)
+ساكن صحيح cmd_show_ref__exists(ثابت حرف **refs)
 {
-	struct strbuf unused_referent = STRBUF_INIT;
-	struct object_id unused_oid;
-	unsigned int unused_type;
-	int failure_errno = 0;
-	const char *ref;
-	int ret = 0;
+	بنية strbuf بن_ورتیا_referent = STRBUF_INIT;
+	بنية object_id بن_ورتیا_oid;
+	بنانشانی صحيح بن_ورتیا_type;
+	صحيح failure_errno = 0;
+	ثابت حرف *ref;
+	صحيح ret = 0;
 
-	if (!refs || !*refs)
+	إذا (!refs || !*refs)
 		die("--exists requires a reference");
 	ref = *refs++;
-	if (*refs)
+	إذا (*refs)
 		die("--exists requires exactly one reference");
 
-	if (refs_read_raw_ref(get_main_ref_store(the_repository), ref,
-			      &unused_oid, &unused_referent, &unused_type,
+	إذا (refs_read_raw_ref(get_main_ref_store(the_repository), ref,
+			      &بن_ورتیا_oid, &بن_ورتیا_referent, &بن_ورتیا_type,
 			      &failure_errno)) {
-		if (failure_errno == ENOENT || failure_errno == EISDIR) {
+		إذا (failure_errno == ENOENT || failure_errno == EISDIR) {
 			error(_("reference does not exist"));
 			ret = 2;
-		} else {
+		} وإلا {
 			errno = failure_errno;
 			error_errno(_("failed to look up reference"));
 			ret = 1;
 		}
 
-		goto out;
+		اذهب باہرلا;
 	}
 
-out:
-	strbuf_release(&unused_referent);
-	return ret;
+باہرلا:
+	strbuf_release(&بن_ورتیا_referent);
+	أرجع ret;
 }
 
-static int hash_callback(const struct option *opt, const char *arg, int unset)
+ساكن صحيح hash_callback(ثابت بنية option *opt, ثابت حرف *arg, صحيح unset)
 {
-	struct show_one_options *opts = opt->value;
-	struct option abbrev_opt = *opt;
+	بنية show_one_options *opts = opt->قدر;
+	بنية option abbrev_opt = *opt;
 
 	opts->hash_only = 1;
 	/* Use full length SHA1 if no argument */
-	if (!arg)
-		return 0;
+	إذا (!arg)
+		أرجع 0;
 
-	abbrev_opt.value = &opts->abbrev;
-	return parse_opt_abbrev_cb(&abbrev_opt, arg, unset);
+	abbrev_opt.قدر = &opts->abbrev;
+	أرجع parse_opt_abbrev_cb(&abbrev_opt, arg, unset);
 }
 
-static int exclude_existing_callback(const struct option *opt, const char *arg,
-				     int unset)
+ساكن صحيح exclude_existing_callback(ثابت بنية option *opt, ثابت حرف *arg,
+				     صحيح unset)
 {
-	struct exclude_existing_options *opts = opt->value;
+	بنية exclude_existing_options *opts = opt->قدر;
 	BUG_ON_OPT_NEG(unset);
 	opts->enabled = 1;
-	opts->pattern = arg;
-	return 0;
+	opts->نمونہ = arg;
+	أرجع 0;
 }
 
-int cmd_show_ref(int argc,
-const char **argv,
-const char *prefix,
-struct repository *repo UNUSED)
+صحيح cmd_show_ref(صحيح argc,
+ثابت حرف **argv,
+ثابت حرف *اگیتر,
+بنية repository *repo بن_ورتیا)
 {
-	struct exclude_existing_options exclude_existing_opts = {0};
-	struct patterns_options patterns_opts = {0};
-	struct show_one_options show_one_opts = {0};
-	int verify = 0, exists = 0;
-	const struct option show_ref_options[] = {
-		OPT_BOOL(0, "tags", &patterns_opts.tags_only, N_("only show tags (can be combined with --branches)")),
+	بنية exclude_existing_options exclude_existing_opts = {0};
+	بنية patterns_options patterns_opts = {0};
+	بنية show_one_options show_one_opts = {0};
+	صحيح verify = 0, exists = 0;
+	ثابت بنية option show_ref_options[] = {
+		OPT_BOOL(0, "tags", &patterns_opts.ٹیگ_سوچی_only, N_("only show tags (can be combined with --branches)")),
 		OPT_BOOL(0, "branches", &patterns_opts.branches_only, N_("only show branches (can be combined with --tags)")),
 		OPT_HIDDEN_BOOL(0, "heads", &patterns_opts.branches_only,
 				N_("deprecated synonym for --branches")),
 		OPT_BOOL(0, "exists", &exists, N_("check for reference existence without resolving")),
 		OPT_BOOL(0, "verify", &verify, N_("stricter reference checking, "
 			    "requires exact ref path")),
-		OPT_HIDDEN_BOOL('h', NULL, &patterns_opts.show_head,
+		OPT_HIDDEN_BOOL('h', عدم, &patterns_opts.show_سر,
 				N_("show the HEAD reference, even if it would be filtered out")),
-		OPT_BOOL(0, "head", &patterns_opts.show_head,
+		OPT_BOOL(0, "head", &patterns_opts.show_سر,
 		  N_("show the HEAD reference, even if it would be filtered out")),
-		OPT_BOOL('d', "dereference", &show_one_opts.deref_tags,
+		OPT_BOOL('d', "dereference", &show_one_opts.deref_ٹیگ_سوچی,
 			    N_("dereference tags into object IDs")),
 		OPT_CALLBACK_F('s', "hash", &show_one_opts, N_("n"),
 			       N_("only show SHA1 hash using <n> digits"),
@@ -329,24 +329,24 @@ struct repository *repo UNUSED)
 		OPT_CALLBACK_F(0, "exclude-existing", &exclude_existing_opts,
 			       N_("pattern"), N_("show refs from stdin that aren't in local repository"),
 			       PARSE_OPT_OPTARG | PARSE_OPT_NONEG, exclude_existing_callback),
-		OPT_END()
+		OPT_سرا()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, عدم);
 
-	argc = parse_options(argc, argv, prefix, show_ref_options,
+	argc = parse_options(argc, argv, اگیتر, show_ref_options,
 			     show_ref_usage, 0);
 
 	die_for_incompatible_opt3(exclude_existing_opts.enabled, "--exclude-existing",
 				  verify, "--verify",
 				  exists, "--exists");
 
-	if (exclude_existing_opts.enabled)
-		return cmd_show_ref__exclude_existing(&exclude_existing_opts);
-	else if (verify)
-		return cmd_show_ref__verify(&show_one_opts, argv);
-	else if (exists)
-		return cmd_show_ref__exists(argv);
-	else
-		return cmd_show_ref__patterns(&patterns_opts, &show_one_opts, argv);
+	إذا (exclude_existing_opts.enabled)
+		أرجع cmd_show_ref__exclude_existing(&exclude_existing_opts);
+	وإلا إذا (verify)
+		أرجع cmd_show_ref__verify(&show_one_opts, argv);
+	وإلا إذا (exists)
+		أرجع cmd_show_ref__exists(argv);
+	وإلا
+		أرجع cmd_show_ref__patterns(&patterns_opts, &show_one_opts, argv);
 }

@@ -2,73 +2,73 @@
  * Another stupid program, this one parsing the headers of an
  * email to figure out authorship and subject
  */
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "environment.h"
-#include "gettext.h"
-#include "strbuf.h"
-#include "mailinfo.h"
-#include "parse-options.h"
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
+#ضمن "builtin.h"
+#ضمن "abspath.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "strbuf.h"
+#ضمن "mailinfo.h"
+#ضمن "parse-options.h"
 
-static const char * const mailinfo_usage[] = {
+ساكن ثابت حرف * ثابت mailinfo_usage[] = {
 	/* TRANSLATORS: keep <> in "<" mail ">" info. */
 	N_("git mailinfo [<options>] <msg> <patch> < mail >info"),
-	NULL,
+	عدم,
 };
 
-struct metainfo_charset
+بنية metainfo_charset
 {
-	enum {
+	تعداد {
 		CHARSET_DEFAULT,
 		CHARSET_NO_REENCODE,
 		CHARSET_EXPLICIT,
 	} policy;
-	const char *charset;
+	ثابت حرف *charset;
 };
 
-static int parse_opt_explicit_encoding(const struct option *opt,
-				       const char *arg, int unset)
+ساكن صحيح parse_opt_explicit_encoding(ثابت بنية option *opt,
+				       ثابت حرف *arg, صحيح unset)
 {
-	struct metainfo_charset *meta_charset = opt->value;
+	بنية metainfo_charset *meta_charset = opt->قدر;
 
 	BUG_ON_OPT_NEG(unset);
 
 	meta_charset->policy = CHARSET_EXPLICIT;
 	meta_charset->charset = arg;
 
-	return 0;
+	أرجع 0;
 }
 
-static int parse_opt_quoted_cr(const struct option *opt, const char *arg, int unset)
+ساكن صحيح parse_opt_quoted_cr(ثابت بنية option *opt, ثابت حرف *arg, صحيح unset)
 {
 	BUG_ON_OPT_NEG(unset);
 
-	if (mailinfo_parse_quoted_cr_action(arg, opt->value) != 0)
-		return error(_("bad action '%s' for '%s'"), arg, "--quoted-cr");
-	return 0;
+	إذا (mailinfo_parse_quoted_cr_action(arg, opt->قدر) != 0)
+		أرجع error(_("bad action '%s' for '%s'"), arg, "--quoted-cr");
+	أرجع 0;
 }
 
-int cmd_mailinfo(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+صحيح cmd_mailinfo(صحيح argc,
+		 ثابت حرف **argv,
+		 ثابت حرف *اگیتر,
+		 بنية repository *repo بن_ورتیا)
 {
-	struct metainfo_charset meta_charset;
-	struct mailinfo mi;
-	int status;
-	char *msgfile, *patchfile;
+	بنية metainfo_charset meta_charset;
+	بنية mailinfo mi;
+	صحيح حالت;
+	حرف *msgfile, *patchfile;
 
-	struct option options[] = {
-		OPT_BOOL('k', NULL, &mi.keep_subject, N_("keep subject")),
-		OPT_BOOL('b', NULL, &mi.keep_non_patch_brackets_in_subject,
+	بنية option options[] = {
+		OPT_BOOL('k', عدم, &mi.keep_subject, N_("keep subject")),
+		OPT_BOOL('b', عدم, &mi.keep_non_patch_brackets_وچ_subject,
 			 N_("keep non patch brackets in subject")),
-		OPT_BOOL('m', "message-id", &mi.add_message_id,
+		OPT_BOOL('m', "message-id", &mi.جوڑو_سنیہا_id,
 			 N_("copy Message-ID to the end of commit message")),
-		OPT_SET_INT_F('u', NULL, &meta_charset.policy,
+		OPT_سیٹ_INT_F('u', عدم, &meta_charset.policy,
 			      N_("re-code metadata to i18n.commitEncoding"),
 			      CHARSET_DEFAULT, PARSE_OPT_NONEG),
-		OPT_SET_INT_F('n', NULL, &meta_charset.policy,
+		OPT_سیٹ_INT_F('n', عدم, &meta_charset.policy,
 			      N_("disable charset re-coding of metadata"),
 			      CHARSET_NO_REENCODE, PARSE_OPT_NONEG),
 		OPT_CALLBACK_F(0, "encoding", &meta_charset, N_("encoding"),
@@ -78,42 +78,42 @@ int cmd_mailinfo(int argc,
 		OPT_CALLBACK_F(0, "quoted-cr", &mi.quoted_cr, N_("<action>"),
 			       N_("action when quoted CR is found"),
 			       PARSE_OPT_NONEG, parse_opt_quoted_cr),
-		OPT_HIDDEN_BOOL(0, "inbody-headers", &mi.use_inbody_headers,
+		OPT_HIDDEN_BOOL(0, "inbody-headers", &mi.use_inbody_سرخیاں,
 			 N_("use headers in message's body")),
-		OPT_END()
+		OPT_سرا()
 	};
 
-	setup_mailinfo(the_repository, &mi);
+	تیاری_mailinfo(the_repository, &mi);
 	meta_charset.policy = CHARSET_DEFAULT;
 
-	argc = parse_options(argc, argv, prefix, options, mailinfo_usage, 0);
+	argc = parse_options(argc, argv, اگیتر, options, mailinfo_usage, 0);
 
-	if (argc != 2)
+	إذا (argc != 2)
 		usage_with_options(mailinfo_usage, options);
 
-	switch (meta_charset.policy) {
-	case CHARSET_DEFAULT:
+	بدل (meta_charset.policy) {
+	حالة CHARSET_DEFAULT:
 		mi.metainfo_charset = get_commit_output_encoding();
-		break;
-	case CHARSET_NO_REENCODE:
-		mi.metainfo_charset = NULL;
-		break;
-	case CHARSET_EXPLICIT:
-		break;
-	default:
+		اكسر;
+	حالة CHARSET_NO_REENCODE:
+		mi.metainfo_charset = عدم;
+		اكسر;
+	حالة CHARSET_EXPLICIT:
+		اكسر;
+	افتراضي:
 		BUG("invalid meta_charset.policy");
 	}
 
-	mi.input = stdin;
+	mi.داخلہ = stdin;
 	mi.output = stdout;
 
-	msgfile = prefix_filename(prefix, argv[0]);
-	patchfile = prefix_filename(prefix, argv[1]);
+	msgfile = اگیتر_filename(اگیتر, argv[0]);
+	patchfile = اگیتر_filename(اگیتر, argv[1]);
 
-	status = !!mailinfo(&mi, msgfile, patchfile);
+	حالت = !!mailinfo(&mi, msgfile, patchfile);
 	clear_mailinfo(&mi);
 
-	free(msgfile);
-	free(patchfile);
-	return status;
+	حرر(msgfile);
+	حرر(patchfile);
+	أرجع حالت;
 }

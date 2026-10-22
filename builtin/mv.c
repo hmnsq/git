@@ -4,40 +4,40 @@
  * Copyright (C) 2006 Johannes Schindelin
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
+#تعریف_کرو DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "advice.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "name-hash.h"
-#include "object-file.h"
-#include "path.h"
-#include "pathspec.h"
-#include "lockfile.h"
-#include "dir.h"
-#include "string-list.h"
-#include "parse-options.h"
-#include "read-cache-ll.h"
-#include "symlinks.h"
+#ضمن "builtin.h"
+#ضمن "abspath.h"
+#ضمن "advice.h"
+#ضمن "config.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "name-hash.h"
+#ضمن "object-file.h"
+#ضمن "path.h"
+#ضمن "pathspec.h"
+#ضمن "lockfile.h"
+#ضمن "dir.h"
+#ضمن "string-list.h"
+#ضمن "parse-options.h"
+#ضمن "read-cache-ll.h"
+#ضمن "symlinks.h"
 
-#include "setup.h"
-#include "strvec.h"
-#include "submodule.h"
-#include "entry.h"
+#ضمن "setup.h"
+#ضمن "strvec.h"
+#ضمن "submodule.h"
+#ضمن "entry.h"
 
-static const char * const builtin_mv_usage[] = {
+ساكن ثابت حرف * ثابت builtin_mv_usage[] = {
 	N_("git mv [-v] [-f] [-n] [-k] <source> <destination>"),
 	N_("git mv [-v] [-f] [-n] [-k] <source>... <destination-directory>"),
-	NULL
+	عدم
 };
 
-enum update_mode {
+تعداد update_منوال {
 	WORKING_DIRECTORY = (1 << 1),
-	INDEX = (1 << 2),
+	اشاریہ_2 = (1 << 2),
 	SPARSE = (1 << 3),
 	SKIP_WORKTREE_DIR = (1 << 4),
 	/*
@@ -46,101 +46,101 @@ enum update_mode {
 	 * to move a file and any of its parent directories at the same point
 	 * in time.
 	 */
-	MOVE_VIA_PARENT_DIR = (1 << 5),
+	MOVE_راہیں_ماپا_DIR = (1 << 5),
 };
 
-static int needs_worktree_rename(enum update_mode mode, enum update_mode dst_mode)
+ساكن صحيح needs_worktree_rename(تعداد update_منوال منوال, تعداد update_منوال dst_منوال)
 {
-	return !(mode & (INDEX | SPARSE | SKIP_WORKTREE_DIR)) &&
-	       !(dst_mode & (SKIP_WORKTREE_DIR | SPARSE));
+	أرجع !(منوال & (اشاریہ_2 | SPARSE | SKIP_WORKTREE_DIR)) &&
+	       !(dst_منوال & (SKIP_WORKTREE_DIR | SPARSE));
 }
 
-#define DUP_BASENAME 1
-#define KEEP_TRAILING_SLASH 2
+#تعریف_کرو DUP_BASENAME 1
+#تعریف_کرو KEEP_TRAILING_SLASH 2
 
-static void internal_prefix_pathspec(struct strvec *out,
-				     const char *prefix,
-				     const char **pathspec,
-				     int count, unsigned flags)
+ساكن فراغ اندرونی_اگیتر_pathspec(بنية strvec *باہرلا,
+				     ثابت حرف *اگیتر,
+				     ثابت حرف **pathspec,
+				     صحيح گنتی, بنانشانی flags)
 {
-	int prefixlen = prefix ? strlen(prefix) : 0;
+	صحيح prefixlen = اگیتر ? لڑی_لمبائی(اگیتر) : 0;
 
 	/* Create an intermediate copy of the pathspec based on the flags */
-	for (int i = 0; i < count; i++) {
-		size_t length = strlen(pathspec[i]);
-		size_t to_copy = length;
-		const char *maybe_basename;
-		char *trimmed, *prefixed_path;
+	لكل (صحيح i = 0; i < گنتی; i++) {
+		ناپ_t لمائی = لڑی_لمبائی(pathspec[i]);
+		ناپ_t منزل_copy = لمائی;
+		ثابت حرف *maybe_basename;
+		حرف *trimmed, *prefixed_رستہ;
 
-		while (!(flags & KEEP_TRAILING_SLASH) &&
-		       to_copy > 0 && is_dir_sep(pathspec[i][to_copy - 1]))
-			to_copy--;
+		طالما (!(flags & KEEP_TRAILING_SLASH) &&
+		       منزل_copy > 0 && is_dir_sep(pathspec[i][منزل_copy - 1]))
+			منزل_copy--;
 
-		trimmed = xmemdupz(pathspec[i], to_copy);
+		trimmed = xmemdupz(pathspec[i], منزل_copy);
 		maybe_basename = (flags & DUP_BASENAME) ? basename(trimmed) : trimmed;
-		prefixed_path = prefix_path(the_repository, prefix, prefixlen, maybe_basename);
-		strvec_push(out, prefixed_path);
+		prefixed_رستہ = اگیتر_رستہ(the_repository, اگیتر, prefixlen, maybe_basename);
+		strvec_ڈالو(باہرلا, prefixed_رستہ);
 
-		free(prefixed_path);
-		free(trimmed);
+		حرر(prefixed_رستہ);
+		حرر(trimmed);
 	}
 }
 
-static char *add_slash(const char *path)
+ساكن حرف *جوڑو_slash(ثابت حرف *رستہ)
 {
-	size_t len = strlen(path);
-	if (len && path[len - 1] != '/') {
-		char *with_slash = xmalloc(st_add(len, 2));
-		memcpy(with_slash, path, len);
+	ناپ_t len = لڑی_لمبائی(رستہ);
+	إذا (len && رستہ[len - 1] != '/') {
+		حرف *with_slash = xmalloc(st_جوڑو(len, 2));
+		حافظہ_نقل(with_slash, رستہ, len);
 		with_slash[len++] = '/';
 		with_slash[len] = 0;
-		return with_slash;
+		أرجع with_slash;
 	}
-	return xstrdup(path);
+	أرجع xstrdup(رستہ);
 }
 
-#define SUBMODULE_WITH_GITDIR ((const char *)1)
+#تعریف_کرو SUBMODULE_WITH_GITDIR ((ثابت حرف *)1)
 
-static const char *submodule_gitfile_path(const char *src, int first)
+ساكن ثابت حرف *submodule_gitfile_رستہ(ثابت حرف *src, صحيح پہلا)
 {
-	struct strbuf submodule_dotgit = STRBUF_INIT;
-	const char *path;
+	بنية strbuf submodule_dotgit = STRBUF_INIT;
+	ثابت حرف *رستہ;
 
-	if (!S_ISGITLINK(the_repository->index->cache[first]->ce_mode))
+	إذا (!S_ISGITLINK(the_repository->اشاریہ->cache[پہلا]->ce_منوال))
 		die(_("Directory %s is in index and no submodule?"), src);
-	if (!is_staging_gitmodules_ok(the_repository->index))
+	إذا (!is_staging_gitmodules_ok(the_repository->اشاریہ))
 		die(_("Please stage your changes to .gitmodules or stash them to proceed"));
 
 	strbuf_addf(&submodule_dotgit, "%s/.git", src);
 
-	path = read_gitfile(submodule_dotgit.buf);
+	رستہ = read_gitfile(submodule_dotgit.buf);
 	strbuf_release(&submodule_dotgit);
-	if (path)
-		return path;
-	return SUBMODULE_WITH_GITDIR;
+	إذا (رستہ)
+		أرجع رستہ;
+	أرجع SUBMODULE_WITH_GITDIR;
 }
 
-static int index_range_of_same_dir(const char *src, int length,
-				   int *first_p, int *last_p)
+ساكن صحيح اشاریہ_range_دا_same_dir(ثابت حرف *src, صحيح لمائی,
+				   صحيح *پہلا_p, صحيح *آخری_p)
 {
-	char *src_w_slash = add_slash(src);
-	int first, last, len_w_slash = length + 1;
+	حرف *src_w_slash = جوڑو_slash(src);
+	صحيح پہلا, آخری, len_w_slash = لمائی + 1;
 
-	first = index_name_pos(the_repository->index, src_w_slash, len_w_slash);
-	if (first >= 0)
+	پہلا = اشاریہ_name_pos(the_repository->اشاریہ, src_w_slash, len_w_slash);
+	إذا (پہلا >= 0)
 		die(_("%.*s is in index"), len_w_slash, src_w_slash);
 
-	first = -1 - first;
-	for (last = first; last < the_repository->index->cache_nr; last++) {
-		const char *path = the_repository->index->cache[last]->name;
-		if (strncmp(path, src_w_slash, len_w_slash))
-			break;
+	پہلا = -1 - پہلا;
+	لكل (آخری = پہلا; آخری < the_repository->اشاریہ->cache_nr; آخری++) {
+		ثابت حرف *رستہ = the_repository->اشاریہ->cache[آخری]->name;
+		إذا (لڑی_مقابلہ(رستہ, src_w_slash, len_w_slash))
+			اكسر;
 	}
 
-	free(src_w_slash);
-	*first_p = first;
-	*last_p = last;
-	return last - first;
+	حرر(src_w_slash);
+	*پہلا_p = پہلا;
+	*آخری_p = آخری;
+	أرجع آخری - پہلا;
 }
 
 /*
@@ -150,44 +150,44 @@ static int index_range_of_same_dir(const char *src, int length,
  * Return 1 if such index entries exist.
  * Return 0 otherwise.
  */
-static int empty_dir_has_sparse_contents(const char *name)
+ساكن صحيح خالی_تھاواں_dir_has_sparse_contents(ثابت حرف *name)
 {
-	int ret = 0;
-	char *with_slash = add_slash(name);
-	int length = strlen(with_slash);
+	صحيح ret = 0;
+	حرف *with_slash = جوڑو_slash(name);
+	صحيح لمائی = لڑی_لمبائی(with_slash);
 
-	int pos = index_name_pos(the_repository->index, with_slash, length);
-	const struct cache_entry *ce;
+	صحيح pos = اشاریہ_name_pos(the_repository->اشاریہ, with_slash, لمائی);
+	ثابت بنية cache_اندراج *ce;
 
-	if (pos < 0) {
+	إذا (pos < 0) {
 		pos = -pos - 1;
-		if (pos >= the_repository->index->cache_nr)
-			goto free_return;
-		ce = the_repository->index->cache[pos];
-		if (strncmp(with_slash, ce->name, length))
-			goto free_return;
-		if (ce_skip_worktree(ce))
+		إذا (pos >= the_repository->اشاریہ->cache_nr)
+			اذهب free_return;
+		ce = the_repository->اشاریہ->cache[pos];
+		إذا (لڑی_مقابلہ(with_slash, ce->name, لمائی))
+			اذهب free_return;
+		إذا (ce_skip_worktree(ce))
 			ret = 1;
 	}
 
 free_return:
-	free(with_slash);
-	return ret;
+	حرر(with_slash);
+	أرجع ret;
 }
 
-static void remove_empty_src_dirs(const char **src_dir, size_t src_dir_nr)
+ساكن فراغ remove_خالی_تھاواں_src_dirs(ثابت حرف **src_dir, ناپ_t src_dir_nr)
 {
-	size_t i;
-	struct strbuf a_src_dir = STRBUF_INIT;
+	ناپ_t i;
+	بنية strbuf a_src_dir = STRBUF_INIT;
 
-	for (i = 0; i < src_dir_nr; i++) {
-		int dummy;
+	لكل (i = 0; i < src_dir_nr; i++) {
+		صحيح dummy;
 		strbuf_addstr(&a_src_dir, src_dir[i]);
 		/*
 		 * if entries under a_src_dir are all moved away,
 		 * recursively remove a_src_dir to cleanup
 		 */
-		if (index_range_of_same_dir(a_src_dir.buf, a_src_dir.len,
+		إذا (اشاریہ_range_دا_same_dir(a_src_dir.buf, a_src_dir.len,
 					    &dummy, &dummy) < 1) {
 			remove_dir_recursively(&a_src_dir, 0);
 		}
@@ -197,68 +197,68 @@ static void remove_empty_src_dirs(const char **src_dir, size_t src_dir_nr)
 	strbuf_release(&a_src_dir);
 }
 
-struct pathmap_entry {
-	struct hashmap_entry ent;
-	const char *path;
+بنية pathmap_اندراج {
+	بنية hashmap_اندراج ent;
+	ثابت حرف *رستہ;
 };
 
-static int pathmap_cmp(const void *cmp_data UNUSED,
-		       const struct hashmap_entry *a,
-		       const struct hashmap_entry *b,
-		       const void *key UNUSED)
+ساكن صحيح pathmap_cmp(ثابت فراغ *cmp_انکڑے بن_ورتیا,
+		       ثابت بنية hashmap_اندراج *a,
+		       ثابت بنية hashmap_اندراج *b,
+		       ثابت فراغ *کلید بن_ورتیا)
 {
-	const struct pathmap_entry *e1 = container_of(a, struct pathmap_entry, ent);
-	const struct pathmap_entry *e2 = container_of(b, struct pathmap_entry, ent);
-	return fspathcmp(e1->path, e2->path);
+	ثابت بنية pathmap_اندراج *e1 = container_دا(a, بنية pathmap_اندراج, ent);
+	ثابت بنية pathmap_اندراج *e2 = container_دا(b, بنية pathmap_اندراج, ent);
+	أرجع fspathcmp(e1->رستہ, e2->رستہ);
 }
 
-int cmd_mv(int argc,
-	   const char **argv,
-	   const char *prefix,
-	   struct repository *repo UNUSED)
+صحيح cmd_mv(صحيح argc,
+	   ثابت حرف **argv,
+	   ثابت حرف *اگیتر,
+	   بنية repository *repo بن_ورتیا)
 {
-	int i, flags, gitmodules_modified = 0;
-	int verbose = 0, show_only = 0, force = 0, ignore_errors = 0, ignore_sparse = 0;
-	struct option builtin_mv_options[] = {
+	صحيح i, flags, gitmodules_modified = 0;
+	صحيح verbose = 0, show_only = 0, force = 0, ignore_errors = 0, ignore_sparse = 0;
+	بنية option builtin_mv_options[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose")),
-		OPT__DRY_RUN(&show_only, N_("dry run")),
+		OPT_DRY_لگاتار(&show_only, N_("dry run")),
 		OPT__FORCE(&force, N_("force move/rename even if target exists"),
 			   PARSE_OPT_NOCOMPLETE),
-		OPT_BOOL('k', NULL, &ignore_errors, N_("skip move/rename errors")),
+		OPT_BOOL('k', عدم, &ignore_errors, N_("skip move/rename errors")),
 		OPT_BOOL(0, "sparse", &ignore_sparse, N_("allow updating entries outside of the sparse-checkout cone")),
-		OPT_END(),
+		OPT_سرا(),
 	};
-	struct strvec sources = STRVEC_INIT;
-	struct strvec dest_paths = STRVEC_INIT;
-	struct strvec destinations = STRVEC_INIT;
-	struct strvec submodule_gitfiles_to_free = STRVEC_INIT;
-	const char **submodule_gitfiles;
-	char *dst_w_slash = NULL;
-	struct strvec src_dir = STRVEC_INIT;
-	enum update_mode *modes, dst_mode = 0;
-	struct stat st, dest_st;
-	struct string_list src_for_dst = STRING_LIST_INIT_DUP;
-	struct lock_file lock_file = LOCK_INIT;
-	struct cache_entry *ce;
-	struct string_list only_match_skip_worktree = STRING_LIST_INIT_DUP;
-	struct string_list dirty_paths = STRING_LIST_INIT_DUP;
-	struct hashmap moved_dirs = HASHMAP_INIT(pathmap_cmp, NULL);
-	struct strbuf pathbuf = STRBUF_INIT;
-	int ret;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	بنية strvec sources = STRVEC_INIT;
+	بنية strvec dest_paths = STRVEC_INIT;
+	بنية strvec destinations = STRVEC_INIT;
+	بنية strvec submodule_gitfiles_منزل_free = STRVEC_INIT;
+	ثابت حرف **submodule_gitfiles;
+	حرف *dst_w_slash = عدم;
+	بنية strvec src_dir = STRVEC_INIT;
+	تعداد update_منوال *modes, dst_منوال = 0;
+	بنية stat st, dest_st;
+	بنية string_list src_for_dst = STRING_LIST_INIT_DUP;
+	بنية جندرا_file جندرا_file = جندرا_INIT;
+	بنية cache_اندراج *ce;
+	بنية string_list only_میل_skip_worktree = STRING_LIST_INIT_DUP;
+	بنية string_list dirty_paths = STRING_LIST_INIT_DUP;
+	بنية hashmap moved_dirs = HASHMAP_INIT(pathmap_cmp, عدم);
+	بنية strbuf pathbuf = STRBUF_INIT;
+	صحيح ret;
+	بنية repo_config_اقدار *cfg = repo_config_اقدار(the_repository);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, عدم);
 
-	argc = parse_options(argc, argv, prefix, builtin_mv_options,
+	argc = parse_options(argc, argv, اگیتر, builtin_mv_options,
 			     builtin_mv_usage, 0);
-	if (--argc < 1)
+	إذا (--argc < 1)
 		usage_with_options(builtin_mv_usage, builtin_mv_options);
 
-	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
-	if (repo_read_index(the_repository) < 0)
+	repo_hold_locked_اشاریہ(the_repository, &جندرا_file, جندرا_DIE_ON_ERROR);
+	إذا (repo_read_اشاریہ(the_repository) < 0)
 		die(_("index file corrupt"));
 
-	internal_prefix_pathspec(&sources, prefix, argv, argc, 0);
+	اندرونی_اگیتر_pathspec(&sources, اگیتر, argv, argc, 0);
 	CALLOC_ARRAY(modes, argc);
 
 	/*
@@ -267,24 +267,24 @@ int cmd_mv(int argc,
 	 * "git mv directory no-such-dir/".
 	 */
 	flags = KEEP_TRAILING_SLASH;
-	if (argc == 1 && is_directory(argv[0]) && !is_directory(argv[1]))
+	إذا (argc == 1 && is_directory(argv[0]) && !is_directory(argv[1]))
 		flags = 0;
-	internal_prefix_pathspec(&dest_paths, prefix, argv + argc, 1, flags);
-	dst_w_slash = add_slash(dest_paths.v[0]);
-	submodule_gitfiles = xcalloc(argc, sizeof(char *));
+	اندرونی_اگیتر_pathspec(&dest_paths, اگیتر, argv + argc, 1, flags);
+	dst_w_slash = جوڑو_slash(dest_paths.v[0]);
+	submodule_gitfiles = xcalloc(argc, حجم(حرف *));
 
-	if (dest_paths.v[0][0] == '\0')
+	إذا (dest_paths.v[0][0] == '\0')
 		/* special case: "." was normalized to "" */
-		internal_prefix_pathspec(&destinations, dest_paths.v[0], argv, argc, DUP_BASENAME);
-	else if (!lstat(dest_paths.v[0], &st) && S_ISDIR(st.st_mode)) {
-		internal_prefix_pathspec(&destinations, dst_w_slash, argv, argc, DUP_BASENAME);
-	} else if (!path_in_sparse_checkout(dst_w_slash, the_repository->index) &&
-		   empty_dir_has_sparse_contents(dst_w_slash)) {
-		internal_prefix_pathspec(&destinations, dst_w_slash, argv, argc, DUP_BASENAME);
-		dst_mode = SKIP_WORKTREE_DIR;
-	} else if (argc != 1) {
+		اندرونی_اگیتر_pathspec(&destinations, dest_paths.v[0], argv, argc, DUP_BASENAME);
+	وإلا إذا (!lstat(dest_paths.v[0], &st) && S_ISDIR(st.st_منوال)) {
+		اندرونی_اگیتر_pathspec(&destinations, dst_w_slash, argv, argc, DUP_BASENAME);
+	} وإلا إذا (!رستہ_وچ_sparse_checkout(dst_w_slash, the_repository->اشاریہ) &&
+		   خالی_تھاواں_dir_has_sparse_contents(dst_w_slash)) {
+		اندرونی_اگیتر_pathspec(&destinations, dst_w_slash, argv, argc, DUP_BASENAME);
+		dst_منوال = SKIP_WORKTREE_DIR;
+	} وإلا إذا (argc != 1) {
 		die(_("destination '%s' is not a directory"), dest_paths.v[0]);
-	} else {
+	} وإلا {
 		strvec_pushv(&destinations, dest_paths.v);
 
 		/*
@@ -295,207 +295,207 @@ int cmd_mv(int argc,
 		 * is deprecated at this point) sparse-checkout. As
 		 * SPARSE here is only considering cone-mode situation.
 		 */
-		if (!path_in_cone_mode_sparse_checkout(destinations.v[0], the_repository->index))
-			dst_mode = SPARSE;
+		إذا (!رستہ_وچ_cone_منوال_sparse_checkout(destinations.v[0], the_repository->اشاریہ))
+			dst_منوال = SPARSE;
 	}
 
 	/* Checking */
-	for (i = 0; i < argc; i++) {
-		const char *src = sources.v[i], *dst = destinations.v[i];
-		int length;
-		const char *bad = NULL;
-		int skip_sparse = 0;
+	لكل (i = 0; i < argc; i++) {
+		ثابت حرف *src = sources.v[i], *dst = destinations.v[i];
+		صحيح لمائی;
+		ثابت حرف *bad = عدم;
+		صحيح skip_sparse = 0;
 
-		if (show_only)
-			printf(_("Checking rename of '%s' to '%s'\n"), src, dst);
+		إذا (show_only)
+			لکھو(_("Checking rename of '%s' to '%s'\n"), src, dst);
 
-		length = strlen(src);
-		if (lstat(src, &st) < 0) {
-			int pos;
-			const struct cache_entry *ce;
+		لمائی = لڑی_لمبائی(src);
+		إذا (lstat(src, &st) < 0) {
+			صحيح pos;
+			ثابت بنية cache_اندراج *ce;
 
-			pos = index_name_pos(the_repository->index, src, length);
-			if (pos < 0) {
-				char *src_w_slash = add_slash(src);
-				if (!path_in_sparse_checkout(src_w_slash, the_repository->index) &&
-				    empty_dir_has_sparse_contents(src)) {
-					free(src_w_slash);
+			pos = اشاریہ_name_pos(the_repository->اشاریہ, src, لمائی);
+			إذا (pos < 0) {
+				حرف *src_w_slash = جوڑو_slash(src);
+				إذا (!رستہ_وچ_sparse_checkout(src_w_slash, the_repository->اشاریہ) &&
+				    خالی_تھاواں_dir_has_sparse_contents(src)) {
+					حرر(src_w_slash);
 					modes[i] |= SKIP_WORKTREE_DIR;
-					goto dir_check;
+					اذهب dir_check;
 				}
-				free(src_w_slash);
+				حرر(src_w_slash);
 				/* only error if existence is expected. */
-				if (!(modes[i] & SPARSE))
+				إذا (!(modes[i] & SPARSE))
 					bad = _("bad source");
-				goto act_on_entry;
+				اذهب act_on_اندراج;
 			}
-			ce = the_repository->index->cache[pos];
-			if (!ce_skip_worktree(ce)) {
+			ce = the_repository->اشاریہ->cache[pos];
+			إذا (!ce_skip_worktree(ce)) {
 				bad = _("bad source");
-				goto act_on_entry;
+				اذهب act_on_اندراج;
 			}
-			if (!ignore_sparse) {
-				string_list_append(&only_match_skip_worktree, src);
-				goto act_on_entry;
+			إذا (!ignore_sparse) {
+				string_list_append(&only_میل_skip_worktree, src);
+				اذهب act_on_اندراج;
 			}
 			/* Check if dst exists in index */
-			if (index_name_pos(the_repository->index, dst, strlen(dst)) < 0) {
+			إذا (اشاریہ_name_pos(the_repository->اشاریہ, dst, لڑی_لمبائی(dst)) < 0) {
 				modes[i] |= SPARSE;
-				goto act_on_entry;
+				اذهب act_on_اندراج;
 			}
-			if (!force) {
+			إذا (!force) {
 				bad = _("destination exists");
-				goto act_on_entry;
+				اذهب act_on_اندراج;
 			}
 			modes[i] |= SPARSE;
-			goto act_on_entry;
+			اذهب act_on_اندراج;
 		}
-		if (!strncmp(src, dst, length) &&
-		    (dst[length] == 0 || dst[length] == '/')) {
+		إذا (!لڑی_مقابلہ(src, dst, لمائی) &&
+		    (dst[لمائی] == 0 || dst[لمائی] == '/')) {
 			bad = _("can not move directory into itself");
-			goto act_on_entry;
+			اذهب act_on_اندراج;
 		}
-		if (S_ISDIR(st.st_mode)
+		إذا (S_ISDIR(st.st_منوال)
 		    && lstat(dst, &dest_st) == 0) {
 			bad = _("destination already exists");
-			goto act_on_entry;
+			اذهب act_on_اندراج;
 		}
 
 dir_check:
-		if (S_ISDIR(st.st_mode)) {
-			struct pathmap_entry *entry;
-			char *dst_with_slash;
-			size_t dst_with_slash_len;
-			int j, n;
-			int first = index_name_pos(the_repository->index, src, length), last;
+		إذا (S_ISDIR(st.st_منوال)) {
+			بنية pathmap_اندراج *اندراج;
+			حرف *dst_with_slash;
+			ناپ_t dst_with_slash_len;
+			صحيح j, n;
+			صحيح پہلا = اشاریہ_name_pos(the_repository->اشاریہ, src, لمائی), آخری;
 
-			if (first >= 0) {
-				const char *path = submodule_gitfile_path(src, first);
-				if (path != SUBMODULE_WITH_GITDIR)
-					path = strvec_push(&submodule_gitfiles_to_free, path);
-				submodule_gitfiles[i] = path;
-				goto act_on_entry;
-			} else if (index_range_of_same_dir(src, length,
-							   &first, &last) < 1) {
+			إذا (پہلا >= 0) {
+				ثابت حرف *رستہ = submodule_gitfile_رستہ(src, پہلا);
+				إذا (رستہ != SUBMODULE_WITH_GITDIR)
+					رستہ = strvec_ڈالو(&submodule_gitfiles_منزل_free, رستہ);
+				submodule_gitfiles[i] = رستہ;
+				اذهب act_on_اندراج;
+			} وإلا إذا (اشاریہ_range_دا_same_dir(src, لمائی,
+							   &پہلا, &آخری) < 1) {
 				bad = _("source directory is empty");
-				goto act_on_entry;
+				اذهب act_on_اندراج;
 			}
 
-			entry = xmalloc(sizeof(*entry));
-			entry->path = src;
-			hashmap_entry_init(&entry->ent, fspathhash(src));
-			hashmap_add(&moved_dirs, &entry->ent);
+			اندراج = xmalloc(حجم(*اندراج));
+			اندراج->رستہ = src;
+			hashmap_اندراج_init(&اندراج->ent, fspathhash(src));
+			hashmap_جوڑو(&moved_dirs, &اندراج->ent);
 
 			/* last - first >= 1 */
 			modes[i] |= WORKING_DIRECTORY;
 
-			strvec_push(&src_dir, src);
+			strvec_ڈالو(&src_dir, src);
 
-			n = argc + last - first;
+			n = argc + آخری - پہلا;
 			REALLOC_ARRAY(modes, n);
 			REALLOC_ARRAY(submodule_gitfiles, n);
 
-			dst_with_slash = add_slash(dst);
-			dst_with_slash_len = strlen(dst_with_slash);
+			dst_with_slash = جوڑو_slash(dst);
+			dst_with_slash_len = لڑی_لمبائی(dst_with_slash);
 
-			for (j = 0; j < last - first; j++) {
-				const struct cache_entry *ce = the_repository->index->cache[first + j];
-				const char *path = ce->name;
-				char *prefixed_path = prefix_path(the_repository, dst_with_slash,
-								  dst_with_slash_len, path + length + 1);
+			لكل (j = 0; j < آخری - پہلا; j++) {
+				ثابت بنية cache_اندراج *ce = the_repository->اشاریہ->cache[پہلا + j];
+				ثابت حرف *رستہ = ce->name;
+				حرف *prefixed_رستہ = اگیتر_رستہ(the_repository, dst_with_slash,
+								  dst_with_slash_len, رستہ + لمائی + 1);
 
-				strvec_push(&sources, path);
-				strvec_push(&destinations, prefixed_path);
+				strvec_ڈالو(&sources, رستہ);
+				strvec_ڈالو(&destinations, prefixed_رستہ);
 
-				modes[argc + j] = MOVE_VIA_PARENT_DIR | (ce_skip_worktree(ce) ? SPARSE : INDEX);
-				submodule_gitfiles[argc + j] = NULL;
+				modes[argc + j] = MOVE_راہیں_ماپا_DIR | (ce_skip_worktree(ce) ? SPARSE : اشاریہ_2);
+				submodule_gitfiles[argc + j] = عدم;
 
-				free(prefixed_path);
+				حرر(prefixed_رستہ);
 			}
 
-			free(dst_with_slash);
-			argc += last - first;
-			goto act_on_entry;
+			حرر(dst_with_slash);
+			argc += آخری - پہلا;
+			اذهب act_on_اندراج;
 		}
-		if (!(ce = index_file_exists(the_repository->index, src, length, 0))) {
+		إذا (!(ce = اشاریہ_file_exists(the_repository->اشاریہ, src, لمائی, 0))) {
 			bad = _("not under version control");
-			goto act_on_entry;
+			اذهب act_on_اندراج;
 		}
-		if (ce_stage(ce)) {
+		إذا (ce_stage(ce)) {
 			bad = _("conflicted");
-			goto act_on_entry;
+			اذهب act_on_اندراج;
 		}
-		if (lstat(dst, &st) == 0 &&
+		إذا (lstat(dst, &st) == 0 &&
 		    (!repo_ignore_case(the_repository) || strcasecmp(src, dst))) {
 			bad = _("destination exists");
-			if (force) {
+			إذا (force) {
 				/*
 				 * only files can overwrite each other:
 				 * check both source and destination
 				 */
-				if (S_ISREG(st.st_mode) || S_ISLNK(st.st_mode)) {
-					if (verbose)
+				إذا (S_ISREG(st.st_منوال) || S_ISLNK(st.st_منوال)) {
+					إذا (verbose)
 						warning(_("overwriting '%s'"), dst);
-					bad = NULL;
-				} else
+					bad = عدم;
+				} وإلا
 					bad = _("Cannot overwrite");
 			}
-			goto act_on_entry;
+			اذهب act_on_اندراج;
 		}
-		if (string_list_has_string(&src_for_dst, dst)) {
+		إذا (string_list_has_string(&src_for_dst, dst)) {
 			bad = _("multiple sources for the same target");
-			goto act_on_entry;
+			اذهب act_on_اندراج;
 		}
-		if (is_dir_sep(dst[strlen(dst) - 1])) {
+		إذا (is_dir_sep(dst[لڑی_لمبائی(dst) - 1])) {
 			bad = _("destination directory does not exist");
-			goto act_on_entry;
+			اذهب act_on_اندراج;
 		}
-		if (has_symlink_leading_path(dst, strlen(dst))) {
+		إذا (has_symlink_leading_رستہ(dst, لڑی_لمبائی(dst))) {
 			bad = _("destination is beyond a symbolic link");
-			goto act_on_entry;
+			اذهب act_on_اندراج;
 		}
 
 		/*
 		 * If we are going to move SRC to DST on disk, DST's leading
 		 * directories must already exist.
 		 */
-		if (needs_worktree_rename(modes[i], dst_mode)) {
-			const char *slash_ = strrchr(dst, '/');
+		إذا (needs_worktree_rename(modes[i], dst_منوال)) {
+			ثابت حرف *slash_ = strrchr(dst, '/');
 
-			if (slash_) {
-				struct stat dir_st;
-				char *dst_dir = xstrdup(dst);
-				char *slash = &dst_dir[slash_ - dst];
+			إذا (slash_) {
+				بنية stat dir_st;
+				حرف *dst_dir = xstrdup(dst);
+				حرف *slash = &dst_dir[slash_ - dst];
 
 				*slash = '\0';
-				if (lstat(dst_dir, &dir_st) < 0) {
+				إذا (lstat(dst_dir, &dir_st) < 0) {
 					/*
 					 * other errors fall through to rename(),
 					 * which reports them
 					 */
-					if (errno == ENOENT || errno == ENOTDIR)
+					إذا (errno == ENOENT || errno == ENOTDIR)
 						bad = _("destination directory does not exist");
-				} else if (!S_ISDIR(dir_st.st_mode)) {
+				} وإلا إذا (!S_ISDIR(dir_st.st_منوال)) {
 					bad = _("destination is not a directory");
 				}
 
-				free(dst_dir);
+				حرر(dst_dir);
 			}
 
-			if (bad)
-				goto act_on_entry;
+			إذا (bad)
+				اذهب act_on_اندراج;
 		}
 
-		if (ignore_sparse &&
-		    (dst_mode & (SKIP_WORKTREE_DIR | SPARSE)) &&
-		    index_entry_exists(the_repository->index, dst, strlen(dst))) {
+		إذا (ignore_sparse &&
+		    (dst_منوال & (SKIP_WORKTREE_DIR | SPARSE)) &&
+		    اشاریہ_اندراج_exists(the_repository->اشاریہ, dst, لڑی_لمبائی(dst))) {
 			bad = _("destination exists in the index");
-			if (force) {
-				if (verbose)
+			إذا (force) {
+				إذا (verbose)
 					warning(_("overwriting '%s'"), dst);
-				bad = NULL;
-			} else {
-				goto act_on_entry;
+				bad = عدم;
+			} وإلا {
+				اذهب act_on_اندراج;
 			}
 		}
 		/*
@@ -504,31 +504,31 @@ dir_check:
 		 * allows us to point the user to the --sparse
 		 * option as a way to have a successful run.
 		 */
-		if (!ignore_sparse &&
-		    !path_in_sparse_checkout(src, the_repository->index)) {
-			string_list_append(&only_match_skip_worktree, src);
+		إذا (!ignore_sparse &&
+		    !رستہ_وچ_sparse_checkout(src, the_repository->اشاریہ)) {
+			string_list_append(&only_میل_skip_worktree, src);
 			skip_sparse = 1;
 		}
-		if (!ignore_sparse &&
-		    !path_in_sparse_checkout(dst, the_repository->index)) {
-			string_list_append(&only_match_skip_worktree, dst);
+		إذا (!ignore_sparse &&
+		    !رستہ_وچ_sparse_checkout(dst, the_repository->اشاریہ)) {
+			string_list_append(&only_میل_skip_worktree, dst);
 			skip_sparse = 1;
 		}
 
-		if (skip_sparse)
-			goto remove_entry;
+		إذا (skip_sparse)
+			اذهب remove_اندراج;
 
-		string_list_insert(&src_for_dst, dst);
+		string_list_داخل_کرو(&src_for_dst, dst);
 
-act_on_entry:
-		if (!bad)
-			continue;
-		if (!ignore_errors)
+act_on_اندراج:
+		إذا (!bad)
+			استمر;
+		إذا (!ignore_errors)
 			die(_("%s, source=%s, destination=%s"),
 			     bad, src, dst);
-remove_entry:
-		if (--argc > 0) {
-			int n = argc - i;
+remove_اندراج:
+		إذا (--argc > 0) {
+			صحيح n = argc - i;
 			strvec_remove(&sources, i);
 			strvec_remove(&destinations, i);
 			MOVE_ARRAY(modes + i, modes + i + 1, n);
@@ -538,25 +538,25 @@ remove_entry:
 		}
 	}
 
-	for (i = 0; i < argc; i++) {
-		const char *slash_pos;
+	لكل (i = 0; i < argc; i++) {
+		ثابت حرف *slash_pos;
 
-		if (modes[i] & MOVE_VIA_PARENT_DIR)
-			continue;
+		إذا (modes[i] & MOVE_راہیں_ماپا_DIR)
+			استمر;
 
 		strbuf_reset(&pathbuf);
 		strbuf_addstr(&pathbuf, sources.v[i]);
 
 		slash_pos = strrchr(pathbuf.buf, '/');
-		while (slash_pos > pathbuf.buf) {
-			struct pathmap_entry needle;
+		طالما (slash_pos > pathbuf.buf) {
+			بنية pathmap_اندراج needle;
 
 			strbuf_setlen(&pathbuf, slash_pos - pathbuf.buf);
 
-			needle.path = pathbuf.buf;
-			hashmap_entry_init(&needle.ent, fspathhash(pathbuf.buf));
+			needle.رستہ = pathbuf.buf;
+			hashmap_اندراج_init(&needle.ent, fspathhash(pathbuf.buf));
 
-			if (hashmap_get_entry(&moved_dirs, &needle, ent, NULL))
+			إذا (hashmap_get_اندراج(&moved_dirs, &needle, ent, عدم))
 				die(_("cannot move both '%s' and its parent directory '%s'"),
 				    sources.v[i], pathbuf.buf);
 
@@ -564,57 +564,57 @@ remove_entry:
 		}
 	}
 
-	if (only_match_skip_worktree.nr) {
-		advise_on_updating_sparse_paths(&only_match_skip_worktree);
-		if (!ignore_errors) {
+	إذا (only_میل_skip_worktree.nr) {
+		advise_on_updating_sparse_paths(&only_میل_skip_worktree);
+		إذا (!ignore_errors) {
 			ret = 1;
-			goto out;
+			اذهب باہرلا;
 		}
 	}
 
-	for (i = 0; i < argc; i++) {
-		const char *src = sources.v[i], *dst = destinations.v[i];
-		enum update_mode mode = modes[i];
-		int pos;
-		int sparse_and_dirty = 0;
-		struct checkout state = CHECKOUT_INIT;
-		state.istate = the_repository->index;
+	لكل (i = 0; i < argc; i++) {
+		ثابت حرف *src = sources.v[i], *dst = destinations.v[i];
+		تعداد update_منوال منوال = modes[i];
+		صحيح pos;
+		صحيح sparse_and_dirty = 0;
+		بنية checkout state = CHECKOUT_INIT;
+		state.istate = the_repository->اشاریہ;
 
-		if (force)
+		إذا (force)
 			state.force = 1;
-		if (show_only || verbose)
-			printf(_("Renaming %s to %s\n"), src, dst);
-		if (show_only)
-			continue;
-		if (needs_worktree_rename(mode, dst_mode) &&
+		إذا (show_only || verbose)
+			لکھو(_("Renaming %s to %s\n"), src, dst);
+		إذا (show_only)
+			استمر;
+		إذا (needs_worktree_rename(منوال, dst_منوال) &&
 		    rename(src, dst) < 0) {
-			if (ignore_errors)
-				continue;
+			إذا (ignore_errors)
+				استمر;
 			die_errno(_("renaming '%s' to '%s' failed"), src, dst);
 		}
-		if (submodule_gitfiles[i]) {
-			if (!update_path_in_gitmodules(src, dst))
+		إذا (submodule_gitfiles[i]) {
+			إذا (!update_رستہ_وچ_gitmodules(src, dst))
 				gitmodules_modified = 1;
-			if (submodule_gitfiles[i] != SUBMODULE_WITH_GITDIR)
-				connect_work_tree_and_git_dir(dst,
+			إذا (submodule_gitfiles[i] != SUBMODULE_WITH_GITDIR)
+				connect_work_درخت_and_git_dir(dst,
 							      submodule_gitfiles[i],
 							      1);
 		}
 
-		if (mode & (WORKING_DIRECTORY | SKIP_WORKTREE_DIR))
-			continue;
+		إذا (منوال & (WORKING_DIRECTORY | SKIP_WORKTREE_DIR))
+			استمر;
 
-		pos = index_name_pos(the_repository->index, src, strlen(src));
-		if (pos < 0)
+		pos = اشاریہ_name_pos(the_repository->اشاریہ, src, لڑی_لمبائی(src));
+		إذا (pos < 0)
 			BUG("could not find source in index: '%s'", src);
-		if (!(mode & SPARSE) && !lstat(src, &st))
-			sparse_and_dirty = ie_modified(the_repository->index,
-						       the_repository->index->cache[pos],
+		إذا (!(منوال & SPARSE) && !lstat(src, &st))
+			sparse_and_dirty = ie_modified(the_repository->اشاریہ,
+						       the_repository->اشاریہ->cache[pos],
 						       &st,
 						       0);
-		rename_index_entry_at(the_repository->index, pos, dst);
+		rename_اشاریہ_اندراج_at(the_repository->اشاریہ, pos, dst);
 
-		if (ignore_sparse &&
+		إذا (ignore_sparse &&
 		    cfg->apply_sparse_checkout &&
 		    cfg->core_sparse_checkout_cone) {
 			/*
@@ -623,40 +623,40 @@ remove_entry:
 			 * <destination> is out-of-cone) at this point. It
 			 * should be added in a future patch.
 			 */
-			if ((mode & SPARSE) &&
-			    path_in_sparse_checkout(dst, the_repository->index)) {
+			إذا ((منوال & SPARSE) &&
+			    رستہ_وچ_sparse_checkout(dst, the_repository->اشاریہ)) {
 				/* from out-of-cone to in-cone */
-				int dst_pos = index_name_pos(the_repository->index, dst,
-							     strlen(dst));
-				struct cache_entry *dst_ce = the_repository->index->cache[dst_pos];
+				صحيح dst_pos = اشاریہ_name_pos(the_repository->اشاریہ, dst,
+							     لڑی_لمبائی(dst));
+				بنية cache_اندراج *dst_ce = the_repository->اشاریہ->cache[dst_pos];
 
 				dst_ce->ce_flags &= ~CE_SKIP_WORKTREE;
 
-				if (checkout_entry(dst_ce, &state, NULL, NULL))
+				إذا (checkout_اندراج(dst_ce, &state, عدم, عدم))
 					die(_("cannot checkout %s"), dst_ce->name);
-			} else if ((dst_mode & (SKIP_WORKTREE_DIR | SPARSE)) &&
-				   !(mode & SPARSE) &&
-				   !path_in_sparse_checkout(dst, the_repository->index)) {
+			} وإلا إذا ((dst_منوال & (SKIP_WORKTREE_DIR | SPARSE)) &&
+				   !(منوال & SPARSE) &&
+				   !رستہ_وچ_sparse_checkout(dst, the_repository->اشاریہ)) {
 				/* from in-cone to out-of-cone */
-				int dst_pos = index_name_pos(the_repository->index, dst,
-							     strlen(dst));
-				struct cache_entry *dst_ce = the_repository->index->cache[dst_pos];
+				صحيح dst_pos = اشاریہ_name_pos(the_repository->اشاریہ, dst,
+							     لڑی_لمبائی(dst));
+				بنية cache_اندراج *dst_ce = the_repository->اشاریہ->cache[dst_pos];
 
 				/*
 				 * if src is clean, it will suffice to remove it
 				 */
-				if (!sparse_and_dirty) {
+				إذا (!sparse_and_dirty) {
 					dst_ce->ce_flags |= CE_SKIP_WORKTREE;
 					unlink_or_warn(src);
-				} else {
+				} وإلا {
 					/*
 					 * if src is dirty, move it to the
 					 * destination and create leading
 					 * dirs if necessary
 					 */
-					char *dst_dup = xstrdup(dst);
+					حرف *dst_dup = xstrdup(dst);
 					string_list_append(&dirty_paths, dst);
-					safe_create_leading_directories(the_repository, dst_dup);
+					محفوظ_create_leading_directories(the_repository, dst_dup);
 					FREE_AND_NULL(dst_dup);
 					rename(src, dst);
 				}
@@ -664,33 +664,33 @@ remove_entry:
 		}
 	}
 
-	remove_empty_src_dirs(src_dir.v, src_dir.nr);
+	remove_خالی_تھاواں_src_dirs(src_dir.v, src_dir.nr);
 
-	if (dirty_paths.nr)
-		advise_on_moving_dirty_path(&dirty_paths);
+	إذا (dirty_paths.nr)
+		advise_on_moving_dirty_رستہ(&dirty_paths);
 
-	if (gitmodules_modified)
-		stage_updated_gitmodules(the_repository->index);
+	إذا (gitmodules_modified)
+		stage_updated_gitmodules(the_repository->اشاریہ);
 
-	if (write_locked_index(the_repository->index, &lock_file,
-			       COMMIT_LOCK | SKIP_IF_UNCHANGED))
+	إذا (write_locked_اشاریہ(the_repository->اشاریہ, &جندرا_file,
+			       COMMIT_جندرا | SKIP_IF_UNCHANGED))
 		die(_("Unable to write new index file"));
 
 	ret = 0;
 
-out:
+باہرلا:
 	strvec_clear(&src_dir);
-	free(dst_w_slash);
+	حرر(dst_w_slash);
 	string_list_clear(&src_for_dst, 0);
 	string_list_clear(&dirty_paths, 0);
-	string_list_clear(&only_match_skip_worktree, 0);
+	string_list_clear(&only_میل_skip_worktree, 0);
 	strvec_clear(&sources);
 	strvec_clear(&dest_paths);
 	strvec_clear(&destinations);
-	strvec_clear(&submodule_gitfiles_to_free);
-	hashmap_clear_and_free(&moved_dirs, struct pathmap_entry, ent);
+	strvec_clear(&submodule_gitfiles_منزل_free);
+	hashmap_clear_and_free(&moved_dirs, بنية pathmap_اندراج, ent);
 	strbuf_release(&pathbuf);
-	free(submodule_gitfiles);
-	free(modes);
-	return ret;
+	حرر(submodule_gitfiles);
+	حرر(modes);
+	أرجع ret;
 }

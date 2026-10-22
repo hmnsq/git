@@ -1,26 +1,26 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "gettext.h"
-#include "hash.h"
-#include "apply.h"
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
+#ضمن "builtin.h"
+#ضمن "gettext.h"
+#ضمن "hash.h"
+#ضمن "apply.h"
 
-static const char * const apply_usage[] = {
+ساكن ثابت حرف * ثابت apply_usage[] = {
 	N_("git apply [<options>] [<patch>...]"),
-	NULL
+	عدم
 };
 
-int cmd_apply(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo)
+صحيح cmd_apply(صحيح argc,
+	      ثابت حرف **argv,
+	      ثابت حرف *اگیتر,
+	      بنية repository *repo)
 {
-	int force_apply = 0;
-	int options = 0;
-	int ret;
-	struct apply_state state;
+	صحيح force_apply = 0;
+	صحيح options = 0;
+	صحيح ret;
+	بنية apply_state state;
 
-	if (init_apply_state(&state, the_repository, prefix))
-		exit(128);
+	إذا (init_apply_state(&state, the_repository, اگیتر))
+		باہر_نکلو(128);
 
 	/*
 	 * We could to redo the "apply.c" machinery to make this
@@ -28,24 +28,24 @@ int cmd_apply(int argc,
 	 * is worth the effort.
 	 * cf. https://lore.kernel.org/git/xmqqcypfcmn4.fsf@gitster.g/
 	 */
-	if (!the_hash_algo)
-		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
+	إذا (!the_hash_algo)
+		repo_سیٹ_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	argc = apply_parse_options(argc, argv,
 				   &state, &force_apply, &options,
 				   apply_usage);
 
-	if (repo) {
+	إذا (repo) {
 		prepare_repo_settings(repo);
-		repo->settings.command_requires_full_index = 0;
+		repo->settings.command_requires_بھریا_اشاریہ = 0;
 	}
 
-	if (check_apply_state(&state, force_apply))
-		exit(128);
+	إذا (check_apply_state(&state, force_apply))
+		باہر_نکلو(128);
 
 	ret = apply_all_patches(&state, argc, argv, options);
 
 	clear_apply_state(&state);
 
-	return ret;
+	أرجع ret;
 }

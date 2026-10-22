@@ -8,45 +8,45 @@
  * Clone a repository into a different directory that does not yet exist.
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
+#تعریف_کرو DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
+#ضمن "builtin.h"
 
-#include "abspath.h"
-#include "advice.h"
-#include "config.h"
-#include "copy.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "lockfile.h"
-#include "parse-options.h"
-#include "refs.h"
-#include "refspec.h"
-#include "object-file.h"
-#include "odb.h"
-#include "tree.h"
-#include "tree-walk.h"
-#include "unpack-trees.h"
-#include "transport.h"
-#include "strbuf.h"
-#include "dir.h"
-#include "dir-iterator.h"
-#include "iterator.h"
-#include "sigchain.h"
-#include "branch.h"
-#include "remote.h"
-#include "run-command.h"
-#include "setup.h"
-#include "connected.h"
-#include "packfile.h"
-#include "path.h"
-#include "pkt-line.h"
-#include "list-objects-filter-options.h"
-#include "hook.h"
-#include "bundle.h"
-#include "bundle-uri.h"
+#ضمن "abspath.h"
+#ضمن "advice.h"
+#ضمن "config.h"
+#ضمن "copy.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "hex.h"
+#ضمن "lockfile.h"
+#ضمن "parse-options.h"
+#ضمن "refs.h"
+#ضمن "refspec.h"
+#ضمن "object-file.h"
+#ضمن "odb.h"
+#ضمن "tree.h"
+#ضمن "tree-walk.h"
+#ضمن "unpack-trees.h"
+#ضمن "transport.h"
+#ضمن "strbuf.h"
+#ضمن "dir.h"
+#ضمن "dir-iterator.h"
+#ضمن "iterator.h"
+#ضمن "sigchain.h"
+#ضمن "branch.h"
+#ضمن "remote.h"
+#ضمن "run-command.h"
+#ضمن "setup.h"
+#ضمن "connected.h"
+#ضمن "packfile.h"
+#ضمن "path.h"
+#ضمن "pkt-line.h"
+#ضمن "list-objects-filter-options.h"
+#ضمن "hook.h"
+#ضمن "bundle.h"
+#ضمن "bundle-uri.h"
 
 /*
  * Overall FIXMEs:
@@ -57,131 +57,131 @@
  *
  */
 
-struct clone_opts {
-	int wants_head;
-	int detach;
+بنية clone_opts {
+	صحيح چاہندا_سر;
+	صحيح detach;
 };
-#define CLONE_OPTS_INIT { \
-	.wants_head = 1 /* default enabled */ \
+#تعریف_کرو CLONE_OPTS_INIT { \
+	.چاہندا_سر = 1 /* default enabled */ \
 }
 
-static int option_no_checkout, option_bare, option_mirror, option_single_branch = -1;
-static int option_local = -1, option_no_hardlinks, option_shared;
-static int option_tags = 1; /* default enabled */
-static int option_shallow_submodules;
-static int config_reject_shallow = -1;    /* unspecified */
-static char *remote_name = NULL;
-static char *option_branch = NULL;
-static int option_verbosity;
-static struct string_list option_required_reference = STRING_LIST_INIT_NODUP;
-static struct string_list option_optional_reference = STRING_LIST_INIT_NODUP;
-static int max_jobs = -1;
-static struct string_list option_recurse_submodules = STRING_LIST_INIT_NODUP;
-static int config_filter_submodules = -1;    /* unspecified */
-static int option_remote_submodules;
+ساكن صحيح option_no_checkout, option_bare, option_mirror, option_single_branch = -1;
+ساكن صحيح option_local = -1, option_no_hardlinks, option_shared;
+ساكن صحيح option_ٹیگ_سوچی = 1; /* default enabled */
+ساكن صحيح option_shallow_submodules;
+ساكن صحيح config_reject_shallow = -1;    /* unspecified */
+ساكن حرف *remote_name = عدم;
+ساكن حرف *option_branch = عدم;
+ساكن صحيح option_verbosity;
+ساكن بنية string_list option_required_reference = STRING_LIST_INIT_NODUP;
+ساكن بنية string_list option_optional_reference = STRING_LIST_INIT_NODUP;
+ساكن صحيح max_jobs = -1;
+ساكن بنية string_list option_recurse_submodules = STRING_LIST_INIT_NODUP;
+ساكن صحيح config_filter_submodules = -1;    /* unspecified */
+ساكن صحيح option_remote_submodules;
 
-static int recurse_submodules_cb(const struct option *opt,
-				 const char *arg, int unset)
+ساكن صحيح recurse_submodules_cb(ثابت بنية option *opt,
+				 ثابت حرف *arg, صحيح unset)
 {
-	if (unset)
-		string_list_clear((struct string_list *)opt->value, 0);
-	else if (arg)
-		string_list_append((struct string_list *)opt->value, arg);
-	else
-		string_list_append((struct string_list *)opt->value,
-				   (const char *)opt->defval);
+	إذا (unset)
+		string_list_clear((بنية string_list *)opt->قدر, 0);
+	وإلا إذا (arg)
+		string_list_append((بنية string_list *)opt->قدر, arg);
+	وإلا
+		string_list_append((بنية string_list *)opt->قدر,
+				   (ثابت حرف *)opt->defval);
 
-	return 0;
+	أرجع 0;
 }
 
-static const char *get_repo_path_1(struct strbuf *path, int *is_bundle)
+ساكن ثابت حرف *get_repo_رستہ_1(بنية strbuf *رستہ, صحيح *is_bundle)
 {
-	static const char *suffix[] = { "/.git", "", ".git/.git", ".git" };
-	static const char *bundle_suffix[] = { ".bundle", "" };
-	size_t baselen = path->len;
-	struct stat st;
-	int i;
+	ساكن ثابت حرف *suffix[] = { "/.git", "", ".git/.git", ".git" };
+	ساكن ثابت حرف *bundle_suffix[] = { ".bundle", "" };
+	ناپ_t baselen = رستہ->len;
+	بنية stat st;
+	صحيح i;
 
-	for (i = 0; i < ARRAY_SIZE(suffix); i++) {
-		strbuf_setlen(path, baselen);
-		strbuf_addstr(path, suffix[i]);
-		if (stat(path->buf, &st))
-			continue;
-		if (S_ISDIR(st.st_mode) && is_git_directory(path->buf)) {
+	لكل (i = 0; i < ARRAY_ناپ(suffix); i++) {
+		strbuf_setlen(رستہ, baselen);
+		strbuf_addstr(رستہ, suffix[i]);
+		إذا (stat(رستہ->buf, &st))
+			استمر;
+		إذا (S_ISDIR(st.st_منوال) && is_git_directory(رستہ->buf)) {
 			*is_bundle = 0;
-			return path->buf;
-		} else if (S_ISREG(st.st_mode) && st.st_size > 8) {
+			أرجع رستہ->buf;
+		} وإلا إذا (S_ISREG(st.st_منوال) && st.st_ناپ > 8) {
 			/* Is it a "gitfile"? */
-			char signature[8];
-			const char *dst;
-			int len, fd = open(path->buf, O_RDONLY);
-			if (fd < 0)
-				continue;
-			len = read_in_full(fd, signature, 8);
+			حرف signature[8];
+			ثابت حرف *dst;
+			صحيح len, fd = open(رستہ->buf, O_RDONLY);
+			إذا (fd < 0)
+				استمر;
+			len = read_وچ_بھریا(fd, signature, 8);
 			close(fd);
-			if (len != 8 || strncmp(signature, "gitdir: ", 8))
-				continue;
-			dst = read_gitfile(path->buf);
-			if (dst) {
+			إذا (len != 8 || لڑی_مقابلہ(signature, "gitdir: ", 8))
+				استمر;
+			dst = read_gitfile(رستہ->buf);
+			إذا (dst) {
 				*is_bundle = 0;
-				return dst;
+				أرجع dst;
 			}
 		}
 	}
 
-	for (i = 0; i < ARRAY_SIZE(bundle_suffix); i++) {
-		strbuf_setlen(path, baselen);
-		strbuf_addstr(path, bundle_suffix[i]);
-		if (!stat(path->buf, &st) && S_ISREG(st.st_mode)) {
+	لكل (i = 0; i < ARRAY_ناپ(bundle_suffix); i++) {
+		strbuf_setlen(رستہ, baselen);
+		strbuf_addstr(رستہ, bundle_suffix[i]);
+		إذا (!stat(رستہ->buf, &st) && S_ISREG(st.st_منوال)) {
 			*is_bundle = 1;
-			return path->buf;
+			أرجع رستہ->buf;
 		}
 	}
 
-	return NULL;
+	أرجع عدم;
 }
 
-static char *get_repo_path(const char *repo, int *is_bundle)
+ساكن حرف *get_repo_رستہ(ثابت حرف *repo, صحيح *is_bundle)
 {
-	struct strbuf path = STRBUF_INIT;
-	const char *raw;
-	char *canon;
+	بنية strbuf رستہ = STRBUF_INIT;
+	ثابت حرف *raw;
+	حرف *canon;
 
-	strbuf_addstr(&path, repo);
-	raw = get_repo_path_1(&path, is_bundle);
-	canon = raw ? absolute_pathdup(raw) : NULL;
-	strbuf_release(&path);
-	return canon;
+	strbuf_addstr(&رستہ, repo);
+	raw = get_repo_رستہ_1(&رستہ, is_bundle);
+	canon = raw ? absolute_pathdup(raw) : عدم;
+	strbuf_release(&رستہ);
+	أرجع canon;
 }
 
-struct collect_alternates_data {
-	struct strvec *alternates;
+بنية collect_alternates_انکڑے {
+	بنية strvec *alternates;
 	bool required;
 };
 
-static int collect_one_alternate(struct string_list_item *item, void *cb_data)
+ساكن صحيح collect_one_alternate(بنية string_list_شے *شے, فراغ *cb_انکڑے)
 {
-	struct collect_alternates_data *data = cb_data;
-	struct strbuf err = STRBUF_INIT;
-	char *ref_git = compute_alternate_path(item->string, &err);
+	بنية collect_alternates_انکڑے *انکڑے = cb_انکڑے;
+	بنية strbuf err = STRBUF_INIT;
+	حرف *ref_git = compute_alternate_رستہ(شے->string, &err);
 
-	if (!ref_git) {
-		if (data->required)
+	إذا (!ref_git) {
+		إذا (انکڑے->required)
 			die("%s", err.buf);
-		else
+		وإلا
 			fprintf(stderr,
 				_("info: Could not add alternate for '%s': %s\n"),
-				item->string, err.buf);
-	} else {
-		strvec_pushf(data->alternates, "%s/objects", ref_git);
+				شے->string, err.buf);
+	} وإلا {
+		strvec_pushf(انکڑے->alternates, "%s/objects", ref_git);
 	}
 
 	strbuf_release(&err);
-	free(ref_git);
-	return 0;
+	حرر(ref_git);
+	أرجع 0;
 }
 
-static void read_alternates(struct strvec *alternates, const char *src_repo)
+ساكن فراغ read_alternates(بنية strvec *alternates, ثابت حرف *src_repo)
 {
 	/*
 	 * Read from the source objects/info/alternates file
@@ -195,93 +195,93 @@ static void read_alternates(struct strvec *alternates, const char *src_repo)
 	 * to turn entries with paths relative to the original
 	 * absolute, so that they can be used in the new repository.
 	 */
-	FILE *in;
-	struct strbuf path = STRBUF_INIT;
-	struct strbuf line = STRBUF_INIT;
+	FILE *وچ;
+	بنية strbuf رستہ = STRBUF_INIT;
+	بنية strbuf سطر = STRBUF_INIT;
 
-	strbuf_addf(&path, "%s/objects/info/alternates", src_repo);
+	strbuf_addf(&رستہ, "%s/objects/info/alternates", src_repo);
 
-	in = fopen(path.buf, "r");
-	if (!in) {
-		if (errno == ENOENT)
-			goto out;
-		die_errno("could not read alternates file '%s'", path.buf);
+	وچ = fopen(رستہ.buf, "r");
+	إذا (!وچ) {
+		إذا (errno == ENOENT)
+			اذهب باہرلا;
+		die_errno("could not read alternates file '%s'", رستہ.buf);
 	}
 
-	while (strbuf_getline(&line, in) != EOF) {
-		char *abs_path;
-		if (!line.len || line.buf[0] == '#')
-			continue;
-		if (is_absolute_path(line.buf)) {
-			strvec_push(alternates, line.buf);
-			continue;
+	طالما (strbuf_getline(&سطر, وچ) != EOF) {
+		حرف *abs_رستہ;
+		إذا (!سطر.len || سطر.buf[0] == '#')
+			استمر;
+		إذا (is_absolute_رستہ(سطر.buf)) {
+			strvec_ڈالو(alternates, سطر.buf);
+			استمر;
 		}
-		abs_path = mkpathdup("%s/objects/%s", src_repo, line.buf);
-		if (!normalize_path_copy(abs_path, abs_path))
-			strvec_push(alternates, abs_path);
-		else
+		abs_رستہ = mkpathdup("%s/objects/%s", src_repo, سطر.buf);
+		إذا (!normalize_رستہ_copy(abs_رستہ, abs_رستہ))
+			strvec_ڈالو(alternates, abs_رستہ);
+		وإلا
 			warning("skipping invalid relative alternate: %s/%s",
-				src_repo, line.buf);
-		free(abs_path);
+				src_repo, سطر.buf);
+		حرر(abs_رستہ);
 	}
 
-out:
-	strbuf_release(&path);
-	strbuf_release(&line);
-	if (in)
-		fclose(in);
+باہرلا:
+	strbuf_release(&رستہ);
+	strbuf_release(&سطر);
+	إذا (وچ)
+		fclose(وچ);
 }
 
-static void collect_alternates(struct strvec *alternates,
-			       const char *local_source_repo)
+ساكن فراغ collect_alternates(بنية strvec *alternates,
+			       ثابت حرف *local_سروت_repo)
 {
-	if (option_required_reference.nr || option_optional_reference.nr) {
-		struct collect_alternates_data data = {
+	إذا (option_required_reference.nr || option_optional_reference.nr) {
+		بنية collect_alternates_انکڑے انکڑے = {
 			.alternates = alternates,
 			.required = true,
 		};
 
 		for_each_string_list(&option_required_reference,
-				     collect_one_alternate, &data);
-		data.required = false;
+				     collect_one_alternate, &انکڑے);
+		انکڑے.required = false;
 		for_each_string_list(&option_optional_reference,
-				     collect_one_alternate, &data);
+				     collect_one_alternate, &انکڑے);
 	}
 
-	if (local_source_repo) {
-		struct strbuf commondir = STRBUF_INIT;
+	إذا (local_سروت_repo) {
+		بنية strbuf commondir = STRBUF_INIT;
 
-		get_common_dir(&commondir, local_source_repo);
-		if (option_shared)
+		get_common_dir(&commondir, local_سروت_repo);
+		إذا (option_shared)
 			strvec_pushf(alternates, "%s/objects", commondir.buf);
-		else
+		وإلا
 			read_alternates(alternates, commondir.buf);
 
 		strbuf_release(&commondir);
 	}
 }
 
-static void mkdir_if_missing(const char *pathname, mode_t mode)
+ساكن فراغ mkdir_if_missing(ثابت حرف *pathname, منوال_t منوال)
 {
-	struct stat st;
+	بنية stat st;
 
-	if (!mkdir(pathname, mode))
-		return;
+	إذا (!mkdir(pathname, منوال))
+		أرجع;
 
-	if (errno != EEXIST)
+	إذا (errno != EEXIST)
 		die_errno(_("failed to create directory '%s'"), pathname);
-	else if (stat(pathname, &st))
+	وإلا إذا (stat(pathname, &st))
 		die_errno(_("failed to stat '%s'"), pathname);
-	else if (!S_ISDIR(st.st_mode))
+	وإلا إذا (!S_ISDIR(st.st_منوال))
 		die(_("%s exists and is not a directory"), pathname);
 }
 
-static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
-				   const char *src_repo)
+ساكن فراغ copy_or_link_directory(بنية strbuf *src, بنية strbuf *dest,
+				   ثابت حرف *src_repo)
 {
-	int src_len, dest_len;
-	struct dir_iterator *iter;
-	int iter_status;
+	صحيح src_len, dest_len;
+	بنية dir_iterator *iter;
+	صحيح iter_حالت;
 
 	/*
 	 * Refuse copying directories by default which aren't owned by us. The
@@ -295,18 +295,18 @@ static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
 	 * operation as the hardlinked files can be rewritten at will by the
 	 * potentially-untrusted user. We thus refuse to do so by default.
 	 */
-	die_upon_dubious_ownership(NULL, NULL, src_repo);
+	die_upon_dubious_ownership(عدم, عدم, src_repo);
 
 	mkdir_if_missing(dest->buf, 0777);
 
 	iter = dir_iterator_begin(src->buf, DIR_ITERATOR_PEDANTIC);
 
-	if (!iter) {
-		if (errno == ENOTDIR) {
-			int saved_errno = errno;
-			struct stat st;
+	إذا (!iter) {
+		إذا (errno == ENOTDIR) {
+			صحيح saved_errno = errno;
+			بنية stat st;
 
-			if (!lstat(src->buf, &st) && S_ISLNK(st.st_mode))
+			إذا (!lstat(src->buf, &st) && S_ISLNK(st.st_منوال))
 				die(_("'%s' is a symlink, refusing to clone with --local"),
 				    src->buf);
 			errno = saved_errno;
@@ -319,30 +319,30 @@ static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
 	strbuf_addch(dest, '/');
 	dest_len = dest->len;
 
-	while ((iter_status = dir_iterator_advance(iter)) == ITER_OK) {
+	طالما ((iter_حالت = dir_iterator_advance(iter)) == ITER_OK) {
 		strbuf_setlen(src, src_len);
-		strbuf_addstr(src, iter->relative_path);
+		strbuf_addstr(src, iter->relative_رستہ);
 		strbuf_setlen(dest, dest_len);
-		strbuf_addstr(dest, iter->relative_path);
+		strbuf_addstr(dest, iter->relative_رستہ);
 
-		if (S_ISLNK(iter->st.st_mode))
+		إذا (S_ISLNK(iter->st.st_منوال))
 			die(_("symlink '%s' exists, refusing to clone with --local"),
-			    iter->relative_path);
+			    iter->relative_رستہ);
 
-		if (S_ISDIR(iter->st.st_mode)) {
+		إذا (S_ISDIR(iter->st.st_منوال)) {
 			mkdir_if_missing(dest->buf, 0777);
-			continue;
+			استمر;
 		}
 
 		/* Alternates were already handled earlier. */
-		if (!fspathcmp(iter->relative_path, "info/alternates"))
-			continue;
+		إذا (!fspathcmp(iter->relative_رستہ, "info/alternates"))
+			استمر;
 
-		if (unlink(dest->buf) && errno != ENOENT)
+		إذا (unlink(dest->buf) && errno != ENOENT)
 			die_errno(_("failed to unlink '%s'"), dest->buf);
-		if (!option_no_hardlinks) {
-			if (!link(src->buf, dest->buf)) {
-				struct stat st;
+		إذا (!option_no_hardlinks) {
+			إذا (!link(src->buf, dest->buf)) {
+				بنية stat st;
 
 				/*
 				 * Sanity-check whether the created hardlink
@@ -350,27 +350,27 @@ static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
 				 * catches time-of-check-time-of-use bugs in
 				 * case the source file was meanwhile swapped.
 				 */
-				if (lstat(dest->buf, &st))
+				إذا (lstat(dest->buf, &st))
 					die(_("hardlink cannot be checked at '%s'"), dest->buf);
-				if (st.st_mode != iter->st.st_mode ||
+				إذا (st.st_منوال != iter->st.st_منوال ||
 				    st.st_ino != iter->st.st_ino ||
 				    st.st_dev != iter->st.st_dev ||
-				    st.st_size != iter->st.st_size ||
+				    st.st_ناپ != iter->st.st_ناپ ||
 				    st.st_uid != iter->st.st_uid ||
 				    st.st_gid != iter->st.st_gid)
 					die(_("hardlink different from source at '%s'"), dest->buf);
 
-				continue;
+				استمر;
 			}
-			if (option_local > 0)
+			إذا (option_local > 0)
 				die_errno(_("failed to create link '%s'"), dest->buf);
 			option_no_hardlinks = 1;
 		}
-		if (copy_file_with_time(the_repository, dest->buf, src->buf, 0666))
+		إذا (copy_file_with_ویلا(the_repository, dest->buf, src->buf, 0666))
 			die_errno(_("failed to copy file to '%s'"), dest->buf);
 	}
 
-	if (iter_status != ITER_DONE) {
+	إذا (iter_حالت != ITER_پورا) {
 		strbuf_setlen(src, src_len);
 		die(_("failed to iterate over '%s'"), src->buf);
 	}
@@ -378,11 +378,11 @@ static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
 	dir_iterator_free(iter);
 }
 
-static void clone_local(const char *src_repo, const char *dest_repo)
+ساكن فراغ clone_local(ثابت حرف *src_repo, ثابت حرف *dest_repo)
 {
-	if (!option_shared) {
-		struct strbuf src = STRBUF_INIT;
-		struct strbuf dest = STRBUF_INIT;
+	إذا (!option_shared) {
+		بنية strbuf src = STRBUF_INIT;
+		بنية strbuf dest = STRBUF_INIT;
 		get_common_dir(&src, src_repo);
 		get_common_dir(&dest, dest_repo);
 		strbuf_addstr(&src, "/objects");
@@ -392,258 +392,258 @@ static void clone_local(const char *src_repo, const char *dest_repo)
 		strbuf_release(&dest);
 	}
 
-	if (0 <= option_verbosity)
+	إذا (0 <= option_verbosity)
 		fprintf(stderr, _("done.\n"));
 }
 
-static const char *junk_work_tree;
-static int junk_work_tree_flags;
-static const char *junk_git_dir;
-static int junk_git_dir_flags;
-static enum {
+ساكن ثابت حرف *junk_work_درخت;
+ساكن صحيح junk_work_درخت_flags;
+ساكن ثابت حرف *junk_git_dir;
+ساكن صحيح junk_git_dir_flags;
+ساكن تعداد {
 	JUNK_LEAVE_NONE,
 	JUNK_LEAVE_REPO,
 	JUNK_LEAVE_ALL
-} junk_mode = JUNK_LEAVE_NONE;
+} junk_منوال = JUNK_LEAVE_NONE;
 
-static const char junk_leave_repo_msg[] =
+ساكن ثابت حرف junk_leave_repo_پیغام[] =
 N_("Clone succeeded, but checkout failed.\n"
    "You can inspect what was checked out with 'git status'\n"
    "and retry with 'git restore --source=HEAD :/'\n");
 
-static void remove_junk(void)
+ساكن فراغ remove_junk(فراغ)
 {
-	struct strbuf sb = STRBUF_INIT;
+	بنية strbuf sb = STRBUF_INIT;
 
-	switch (junk_mode) {
-	case JUNK_LEAVE_REPO:
-		warning("%s", _(junk_leave_repo_msg));
+	بدل (junk_منوال) {
+	حالة JUNK_LEAVE_REPO:
+		warning("%s", _(junk_leave_repo_پیغام));
 		/* fall-through */
-	case JUNK_LEAVE_ALL:
-		return;
-	default:
+	حالة JUNK_LEAVE_ALL:
+		أرجع;
+	افتراضي:
 		/* proceed to removal */
-		break;
+		اكسر;
 	}
 
-	if (junk_git_dir) {
+	إذا (junk_git_dir) {
 		strbuf_addstr(&sb, junk_git_dir);
 		remove_dir_recursively(&sb, junk_git_dir_flags);
 		strbuf_reset(&sb);
 	}
-	if (junk_work_tree) {
-		strbuf_addstr(&sb, junk_work_tree);
-		remove_dir_recursively(&sb, junk_work_tree_flags);
+	إذا (junk_work_درخت) {
+		strbuf_addstr(&sb, junk_work_درخت);
+		remove_dir_recursively(&sb, junk_work_درخت_flags);
 	}
 	strbuf_release(&sb);
 }
 
-static void remove_junk_on_signal(int signo)
+ساكن فراغ remove_junk_on_signal(صحيح signo)
 {
 	remove_junk();
-	sigchain_pop(signo);
-	raise(signo);
+	sigchain_نکالو(signo);
+	ارفع(signo);
 }
 
-static struct ref *find_remote_branch(const struct ref *refs, const char *branch)
+ساكن بنية ref *لبھو_remote_branch(ثابت بنية ref *refs, ثابت حرف *branch)
 {
-	struct ref *ref;
-	struct strbuf head = STRBUF_INIT;
-	strbuf_addstr(&head, "refs/heads/");
-	strbuf_addstr(&head, branch);
-	ref = find_ref_by_name(refs, head.buf);
-	strbuf_release(&head);
+	بنية ref *ref;
+	بنية strbuf سر = STRBUF_INIT;
+	strbuf_addstr(&سر, "refs/heads/");
+	strbuf_addstr(&سر, branch);
+	ref = لبھو_ref_by_name(refs, سر.buf);
+	strbuf_release(&سر);
 
-	if (ref)
-		return ref;
+	إذا (ref)
+		أرجع ref;
 
-	strbuf_addstr(&head, "refs/tags/");
-	strbuf_addstr(&head, branch);
-	ref = find_ref_by_name(refs, head.buf);
-	strbuf_release(&head);
+	strbuf_addstr(&سر, "refs/tags/");
+	strbuf_addstr(&سر, branch);
+	ref = لبھو_ref_by_name(refs, سر.buf);
+	strbuf_release(&سر);
 
-	return ref;
+	أرجع ref;
 }
 
-static struct ref *wanted_peer_refs(struct clone_opts *opts,
-				    const struct ref *refs,
-				    struct refspec *refspec)
+ساكن بنية ref *wanted_peer_refs(بنية clone_opts *opts,
+				    ثابت بنية ref *refs,
+				    بنية refspec *refspec)
 {
-	struct ref *local_refs = NULL;
-	struct ref **tail = &local_refs;
-	struct ref *to_free = NULL;
+	بنية ref *local_refs = عدم;
+	بنية ref **پوچھ = &local_refs;
+	بنية ref *منزل_free = عدم;
 
-	if (opts->wants_head) {
-		struct ref *head = copy_ref(find_ref_by_name(refs, "HEAD"));
-		if (head)
-			tail_link_ref(head, &tail);
-		if (option_single_branch)
-			refs = to_free =
-				guess_remote_head(head, refs,
-						  REMOTE_GUESS_HEAD_QUIET);
-	} else if (option_single_branch) {
-		local_refs = NULL;
-		tail = &local_refs;
-		refs = to_free = copy_ref(find_remote_branch(refs, option_branch));
+	إذا (opts->چاہندا_سر) {
+		بنية ref *سر = copy_ref(لبھو_ref_by_name(refs, "HEAD"));
+		إذا (سر)
+			پوچھ_link_ref(سر, &پوچھ);
+		إذا (option_single_branch)
+			refs = منزل_free =
+				guess_remote_سر(سر, refs,
+						  REMOTE_GUESS_سر_QUIET);
+	} وإلا إذا (option_single_branch) {
+		local_refs = عدم;
+		پوچھ = &local_refs;
+		refs = منزل_free = copy_ref(لبھو_remote_branch(refs, option_branch));
 	}
 
-	for (size_t i = 0; i < refspec->nr; i++)
-		get_fetch_map(refs, &refspec->items[i], &tail, 0);
+	لكل (ناپ_t i = 0; i < refspec->nr; i++)
+		get_fetch_map(refs, &refspec->اشیاء[i], &پوچھ, 0);
 
-	free_one_ref(to_free);
+	free_one_ref(منزل_free);
 
-	return local_refs;
+	أرجع local_refs;
 }
 
-static void write_remote_refs(const struct ref *local_refs)
+ساكن فراغ write_remote_refs(ثابت بنية ref *local_refs)
 {
-	const struct ref *r;
+	ثابت بنية ref *r;
 
-	struct ref_transaction *t;
-	struct strbuf err = STRBUF_INIT;
+	بنية ref_transaction *t;
+	بنية strbuf err = STRBUF_INIT;
 
 	t = ref_store_transaction_begin(get_main_ref_store(the_repository),
 					REF_TRANSACTION_FLAG_INITIAL, &err);
-	if (!t)
+	إذا (!t)
 		die("%s", err.buf);
 
-	for (r = local_refs; r; r = r->next) {
-		if (!r->peer_ref)
-			continue;
-		if (ref_transaction_create(t, r->peer_ref->name, &r->old_oid,
-					   NULL, 0, NULL, &err))
+	لكل (r = local_refs; r; r = r->اگلا) {
+		إذا (!r->peer_ref)
+			استمر;
+		إذا (ref_transaction_create(t, r->peer_ref->name, &r->old_oid,
+					   عدم, 0, عدم, &err))
 			die("%s", err.buf);
 	}
 
-	if (ref_transaction_commit(t, &err))
+	إذا (ref_transaction_commit(t, &err))
 		die("%s", err.buf);
 
 	strbuf_release(&err);
 	ref_transaction_free(t);
 }
 
-static void write_followtags(const struct ref *refs, const char *msg)
+ساكن فراغ write_followtags(ثابت بنية ref *refs, ثابت حرف *پیغام)
 {
-	const struct ref *ref;
-	for (ref = refs; ref; ref = ref->next) {
-		if (!starts_with(ref->name, "refs/tags/"))
-			continue;
-		if (ends_with(ref->name, "^{}"))
-			continue;
-		if (!odb_has_object(the_repository->objects, &ref->old_oid, 0))
-			continue;
-		refs_update_ref(get_main_ref_store(the_repository), msg,
-				ref->name, &ref->old_oid, NULL, 0,
+	ثابت بنية ref *ref;
+	لكل (ref = refs; ref; ref = ref->اگلا) {
+		إذا (!starts_with(ref->name, "refs/tags/"))
+			استمر;
+		إذا (سرے_with(ref->name, "^{}"))
+			استمر;
+		إذا (!odb_has_object(the_repository->objects, &ref->old_oid, 0))
+			استمر;
+		refs_update_ref(get_main_ref_store(the_repository), پیغام,
+				ref->name, &ref->old_oid, عدم, 0,
 				UPDATE_REFS_DIE_ON_ERR);
 	}
 }
 
-static const struct object_id *iterate_ref_map(void *cb_data)
+ساكن ثابت بنية object_id *iterate_ref_map(فراغ *cb_انکڑے)
 {
-	struct ref **rm = cb_data;
-	struct ref *ref = *rm;
+	بنية ref **rm = cb_انکڑے;
+	بنية ref *ref = *rm;
 
 	/*
 	 * Skip anything missing a peer_ref, which we are not
 	 * actually going to write a ref for.
 	 */
-	while (ref && !ref->peer_ref)
-		ref = ref->next;
-	if (!ref)
-		return NULL;
+	طالما (ref && !ref->peer_ref)
+		ref = ref->اگلا;
+	إذا (!ref)
+		أرجع عدم;
 
-	*rm = ref->next;
-	return &ref->old_oid;
+	*rm = ref->اگلا;
+	أرجع &ref->old_oid;
 }
 
-static void update_remote_refs(const struct ref *refs,
-			       const struct ref *mapped_refs,
-			       const struct ref *remote_head_points_at,
-			       const char *branch_top,
-			       const char *msg,
-			       struct transport *transport,
-			       int check_connectivity)
+ساكن فراغ update_remote_refs(ثابت بنية ref *refs,
+			       ثابت بنية ref *mapped_refs,
+			       ثابت بنية ref *remote_سر_points_at,
+			       ثابت حرف *branch_چوٹی,
+			       ثابت حرف *پیغام,
+			       بنية transport *transport,
+			       صحيح check_connectivity)
 {
-	const struct ref *rm = mapped_refs;
+	ثابت بنية ref *rm = mapped_refs;
 
-	if (check_connectivity) {
-		struct check_connected_options opt = CHECK_CONNECTED_INIT;
+	إذا (check_connectivity) {
+		بنية check_connected_options opt = CHECK_CONNECTED_INIT;
 
 		opt.transport = transport;
-		opt.progress = transport->progress;
+		opt.ترقی = transport->ترقی;
 
-		if (check_connected(iterate_ref_map, &rm, &opt))
+		إذا (check_connected(iterate_ref_map, &rm, &opt))
 			die(_("remote did not send all necessary objects"));
 	}
 
-	if (refs) {
+	إذا (refs) {
 		write_remote_refs(mapped_refs);
-		if (option_single_branch && option_tags)
-			write_followtags(refs, msg);
+		إذا (option_single_branch && option_ٹیگ_سوچی)
+			write_followtags(refs, پیغام);
 	}
 
-	if (remote_head_points_at && remote_head_points_at->peer_ref && !option_bare) {
-		struct strbuf head_ref = STRBUF_INIT;
-		strbuf_addstr(&head_ref, branch_top);
-		strbuf_addstr(&head_ref, "HEAD");
-		if (refs_update_symref(get_main_ref_store(the_repository), head_ref.buf,
-				       remote_head_points_at->peer_ref->name,
-				       msg) < 0)
-			die(_("unable to update %s"), head_ref.buf);
-		strbuf_release(&head_ref);
+	إذا (remote_سر_points_at && remote_سر_points_at->peer_ref && !option_bare) {
+		بنية strbuf سر_ref = STRBUF_INIT;
+		strbuf_addstr(&سر_ref, branch_چوٹی);
+		strbuf_addstr(&سر_ref, "HEAD");
+		إذا (refs_update_symref(get_main_ref_store(the_repository), سر_ref.buf,
+				       remote_سر_points_at->peer_ref->name,
+				       پیغام) < 0)
+			die(_("unable to update %s"), سر_ref.buf);
+		strbuf_release(&سر_ref);
 	}
 }
 
-static void update_head(struct clone_opts *opts, const struct ref *our, const struct ref *remote,
-			const char *unborn, const char *msg)
+ساكن فراغ update_سر(بنية clone_opts *opts, ثابت بنية ref *our, ثابت بنية ref *remote,
+			ثابت حرف *unborn, ثابت حرف *پیغام)
 {
-	const char *head;
-	if (our && !opts->detach && skip_prefix(our->name, "refs/heads/", &head)) {
+	ثابت حرف *سر;
+	إذا (our && !opts->detach && skip_اگیتر(our->name, "refs/heads/", &سر)) {
 		/* Local default branch link */
-		if (refs_update_symref(get_main_ref_store(the_repository), "HEAD", our->name, NULL) < 0)
+		إذا (refs_update_symref(get_main_ref_store(the_repository), "HEAD", our->name, عدم) < 0)
 			die(_("unable to update HEAD"));
-		if (!option_bare) {
+		إذا (!option_bare) {
 			refs_update_ref(get_main_ref_store(the_repository),
-					msg, "HEAD", &our->old_oid, NULL, 0,
+					پیغام, "HEAD", &our->old_oid, عدم, 0,
 					UPDATE_REFS_DIE_ON_ERR);
-			install_branch_config(0, head, remote_name, our->name);
+			install_branch_config(0, سر, remote_name, our->name);
 		}
-	} else if (our) {
-		struct commit *c = lookup_commit_or_die(&our->old_oid,
+	} وإلا إذا (our) {
+		بنية commit *c = lookup_commit_or_die(&our->old_oid,
 							our->name);
 
 		/* --branch specifies a non-branch (i.e. tags), detach HEAD */
-		refs_update_ref(get_main_ref_store(the_repository), msg,
-				"HEAD", &c->object.oid, NULL, REF_NO_DEREF,
+		refs_update_ref(get_main_ref_store(the_repository), پیغام,
+				"HEAD", &c->object.oid, عدم, REF_NO_DEREF,
 				UPDATE_REFS_DIE_ON_ERR);
-	} else if (remote) {
+	} وإلا إذا (remote) {
 		/*
 		 * We know remote HEAD points to a non-branch, or
 		 * HEAD points to a branch but we don't know which one.
 		 * Detach HEAD in all these cases.
 		 */
-		refs_update_ref(get_main_ref_store(the_repository), msg,
-				"HEAD", &remote->old_oid, NULL, REF_NO_DEREF,
+		refs_update_ref(get_main_ref_store(the_repository), پیغام,
+				"HEAD", &remote->old_oid, عدم, REF_NO_DEREF,
 				UPDATE_REFS_DIE_ON_ERR);
-	} else if (unborn && skip_prefix(unborn, "refs/heads/", &head)) {
+	} وإلا إذا (unborn && skip_اگیتر(unborn, "refs/heads/", &سر)) {
 		/*
 		 * Unborn head from remote; same as "our" case above except
 		 * that we have no ref to update.
 		 */
-		if (refs_update_symref(get_main_ref_store(the_repository), "HEAD", unborn, NULL) < 0)
+		إذا (refs_update_symref(get_main_ref_store(the_repository), "HEAD", unborn, عدم) < 0)
 			die(_("unable to update HEAD"));
-		if (!option_bare)
-			install_branch_config(0, head, remote_name, unborn);
+		إذا (!option_bare)
+			install_branch_config(0, سر, remote_name, unborn);
 	}
 }
 
-static int git_sparse_checkout_init(const char *repo)
+ساكن صحيح git_sparse_checkout_init(ثابت حرف *repo)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	int result = 0;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	بنية بچہ_process cmd = بچہ_PROCESS_INIT;
+	صحيح نتیجہ = 0;
+	بنية repo_config_اقدار *cfg = repo_config_اقدار(the_repository);
 
-	strvec_pushl(&cmd.args, "-C", repo, "sparse-checkout", "set", NULL);
+	strvec_pushl(&cmd.دلیلاں, "-C", repo, "sparse-checkout", "set", عدم);
 
 	/*
 	 * We must apply the setting in the current process
@@ -652,193 +652,193 @@ static int git_sparse_checkout_init(const char *repo)
 	cfg->apply_sparse_checkout = 1;
 
 	cmd.git_cmd = 1;
-	if (run_command(&cmd)) {
+	إذا (لگاتار_command(&cmd)) {
 		error(_("failed to initialize sparse-checkout"));
-		result = 1;
+		نتیجہ = 1;
 	}
 
-	return result;
+	أرجع نتیجہ;
 }
 
-static int checkout(int submodule_progress,
-		    struct list_objects_filter_options *filter_options,
-		    int filter_submodules,
-		    enum ref_storage_format ref_storage_format)
+ساكن صحيح checkout(صحيح submodule_ترقی,
+		    بنية list_objects_filter_options *filter_options,
+		    صحيح filter_submodules,
+		    تعداد ref_storage_format ref_storage_format)
 {
-	struct object_id oid;
-	char *head;
-	struct lock_file lock_file = LOCK_INIT;
-	struct unpack_trees_options opts;
-	struct tree *tree;
-	struct tree_desc t;
-	int err = 0;
-	struct run_hooks_opt hook_opt = RUN_HOOKS_OPT_INIT_FORCE_SERIAL;
+	بنية object_id oid;
+	حرف *سر;
+	بنية جندرا_file جندرا_file = جندرا_INIT;
+	بنية unpack_trees_options opts;
+	بنية درخت *درخت;
+	بنية درخت_desc t;
+	صحيح err = 0;
+	بنية لگاتار_hooks_opt hook_opt = لگاتار_HOOKS_OPT_INIT_FORCE_SERIAL;
 
-	if (option_no_checkout)
-		return 0;
+	إذا (option_no_checkout)
+		أرجع 0;
 
-	head = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
-				   RESOLVE_REF_READING, &oid, NULL);
-	if (!head) {
+	سر = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
+				   RESOLVE_REF_READING, &oid, عدم);
+	إذا (!سر) {
 		warning(_("remote HEAD refers to nonexistent ref, "
 			  "unable to checkout"));
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(head, "HEAD")) {
-		if (advice_enabled(ADVICE_DETACHED_HEAD))
-			detach_advice(oid_to_hex(&oid));
-		FREE_AND_NULL(head);
-	} else {
-		if (!starts_with(head, "refs/heads/"))
+	إذا (!strcmp(سر, "HEAD")) {
+		إذا (advice_enabled(ADVICE_DETACHED_سر))
+			detach_advice(oid_منزل_hex(&oid));
+		FREE_AND_NULL(سر);
+	} وإلا {
+		إذا (!starts_with(سر, "refs/heads/"))
 			die(_("HEAD not found below refs/heads!"));
 	}
 
 	/* We need to be in the new work tree for the checkout */
-	setup_work_tree(the_repository);
+	تیاری_work_درخت(the_repository);
 
-	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
+	repo_hold_locked_اشاریہ(the_repository, &جندرا_file, جندرا_DIE_ON_ERROR);
 
-	memset(&opts, 0, sizeof opts);
+	memset(&opts, 0, حجم opts);
 	opts.update = 1;
-	opts.merge = 1;
+	opts.ملاؤ = 1;
 	opts.clone = 1;
 	opts.preserve_ignored = 0;
-	opts.fn = oneway_merge;
+	opts.fn = oneway_ملاؤ;
 	opts.verbose_update = (option_verbosity >= 0);
-	opts.src_index = the_repository->index;
-	opts.dst_index = the_repository->index;
-	init_checkout_metadata(&opts.meta, head, &oid, NULL);
+	opts.src_اشاریہ = the_repository->اشاریہ;
+	opts.dst_اشاریہ = the_repository->اشاریہ;
+	init_checkout_metadata(&opts.meta, سر, &oid, عدم);
 
-	tree = repo_parse_tree_indirect(the_repository, &oid);
-	if (!tree)
-		die(_("unable to parse commit %s"), oid_to_hex(&oid));
-	if (repo_parse_tree(the_repository, tree) < 0)
-		exit(128);
-	init_tree_desc(&t, &tree->object.oid, tree->buffer, tree->size);
-	if (unpack_trees(1, &t, &opts) < 0)
+	درخت = repo_parse_درخت_اسدھا(the_repository, &oid);
+	إذا (!درخت)
+		die(_("unable to parse commit %s"), oid_منزل_hex(&oid));
+	إذا (repo_parse_درخت(the_repository, درخت) < 0)
+		باہر_نکلو(128);
+	init_درخت_desc(&t, &درخت->object.oid, درخت->بفر, درخت->ناپ);
+	إذا (unpack_trees(1, &t, &opts) < 0)
 		die(_("unable to checkout working tree"));
 
-	free(head);
+	حرر(سر);
 
-	if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+	إذا (write_locked_اشاریہ(the_repository->اشاریہ, &جندرا_file, COMMIT_جندرا))
 		die(_("unable to write new index file"));
 
-	strvec_pushl(&hook_opt.args, oid_to_hex(null_oid(the_hash_algo)),
-		     oid_to_hex(&oid), "1", NULL);
-	err |= run_hooks_opt(the_repository, "post-checkout", &hook_opt);
+	strvec_pushl(&hook_opt.دلیلاں, oid_منزل_hex(null_oid(the_hash_algo)),
+		     oid_منزل_hex(&oid), "1", عدم);
+	err |= لگاتار_hooks_opt(the_repository, "post-checkout", &hook_opt);
 
-	if (!err && (option_recurse_submodules.nr > 0)) {
-		struct child_process cmd = CHILD_PROCESS_INIT;
-		strvec_pushl(&cmd.args, "submodule", "update", "--require-init",
-			     "--recursive", NULL);
+	إذا (!err && (option_recurse_submodules.nr > 0)) {
+		بنية بچہ_process cmd = بچہ_PROCESS_INIT;
+		strvec_pushl(&cmd.دلیلاں, "submodule", "update", "--require-init",
+			     "--recursive", عدم);
 
-		if (option_shallow_submodules == 1)
-			strvec_push(&cmd.args, "--depth=1");
+		إذا (option_shallow_submodules == 1)
+			strvec_ڈالو(&cmd.دلیلاں, "--depth=1");
 
-		if (max_jobs != -1)
-			strvec_pushf(&cmd.args, "--jobs=%d", max_jobs);
+		إذا (max_jobs != -1)
+			strvec_pushf(&cmd.دلیلاں, "--jobs=%d", max_jobs);
 
-		if (submodule_progress)
-			strvec_push(&cmd.args, "--progress");
+		إذا (submodule_ترقی)
+			strvec_ڈالو(&cmd.دلیلاں, "--progress");
 
-		if (option_verbosity < 0)
-			strvec_push(&cmd.args, "--quiet");
+		إذا (option_verbosity < 0)
+			strvec_ڈالو(&cmd.دلیلاں, "--quiet");
 
-		if (option_remote_submodules) {
-			strvec_push(&cmd.args, "--remote");
-			strvec_push(&cmd.args, "--no-fetch");
+		إذا (option_remote_submodules) {
+			strvec_ڈالو(&cmd.دلیلاں, "--remote");
+			strvec_ڈالو(&cmd.دلیلاں, "--no-fetch");
 		}
 
-		if (ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
-			strvec_pushf(&cmd.args, "--ref-storage-format=%s",
-				     ref_storage_format_to_name(ref_storage_format));
+		إذا (ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
+			strvec_pushf(&cmd.دلیلاں, "--ref-storage-format=%s",
+				     ref_storage_format_منزل_name(ref_storage_format));
 
-		if (filter_submodules && filter_options->choice)
-			strvec_pushf(&cmd.args, "--filter=%s",
+		إذا (filter_submodules && filter_options->choice)
+			strvec_pushf(&cmd.دلیلاں, "--filter=%s",
 				     expand_list_objects_filter_spec(filter_options));
 
-		if (option_single_branch >= 0)
-			strvec_push(&cmd.args, option_single_branch ?
+		إذا (option_single_branch >= 0)
+			strvec_ڈالو(&cmd.دلیلاں, option_single_branch ?
 					       "--single-branch" :
 					       "--no-single-branch");
 
 		cmd.git_cmd = 1;
-		err = run_command(&cmd);
+		err = لگاتار_command(&cmd);
 	}
 
-	return err;
+	أرجع err;
 }
 
-static int git_clone_config(const char *k, const char *v,
-			    const struct config_context *ctx, void *cb)
+ساكن صحيح git_clone_config(ثابت حرف *k, ثابت حرف *v,
+			    ثابت بنية config_context *ctx, فراغ *cb)
 {
-	if (!strcmp(k, "clone.defaultremotename")) {
-		if (!v)
-			return config_error_nonbool(k);
-		free(remote_name);
+	إذا (!strcmp(k, "clone.defaultremotename")) {
+		إذا (!v)
+			أرجع config_error_nonbool(k);
+		حرر(remote_name);
 		remote_name = xstrdup(v);
 	}
-	if (!strcmp(k, "clone.rejectshallow"))
+	إذا (!strcmp(k, "clone.rejectshallow"))
 		config_reject_shallow = git_config_bool(k, v);
-	if (!strcmp(k, "clone.filtersubmodules"))
+	إذا (!strcmp(k, "clone.filtersubmodules"))
 		config_filter_submodules = git_config_bool(k, v);
 
-	return git_default_config(k, v, ctx, cb);
+	أرجع git_default_config(k, v, ctx, cb);
 }
 
-static int write_one_config(const char *key, const char *value,
-			    const struct config_context *ctx,
-			    void *data)
+ساكن صحيح write_one_config(ثابت حرف *کلید, ثابت حرف *قدر,
+			    ثابت بنية config_context *ctx,
+			    فراغ *انکڑے)
 {
 	/*
 	 * give git_clone_config a chance to write config values back to the
 	 * environment, since repo_config_set_multivar_gently only deals with
 	 * config-file writes
 	 */
-	int apply_failed = git_clone_config(key, value, ctx, data);
-	if (apply_failed)
-		return apply_failed;
+	صحيح apply_failed = git_clone_config(کلید, قدر, ctx, انکڑے);
+	إذا (apply_failed)
+		أرجع apply_failed;
 
-	return repo_config_set_multivar_gently(the_repository, key,
-					       value ? value : "true",
+	أرجع repo_config_سیٹ_multivar_gently(the_repository, کلید,
+					       قدر ? قدر : "true",
 					       CONFIG_REGEX_NONE, 0);
 }
 
-static void write_config(struct string_list *config)
+ساكن فراغ write_config(بنية string_list *config)
 {
-	int i;
+	صحيح i;
 
-	for (i = 0; i < config->nr; i++) {
-		if (git_config_parse_parameter(config->items[i].string,
-					       write_one_config, NULL) < 0)
+	لكل (i = 0; i < config->nr; i++) {
+		إذا (git_config_parse_parameter(config->اشیاء[i].string,
+					       write_one_config, عدم) < 0)
 			die(_("unable to write parameters to config file"));
 	}
 }
 
-static void write_refspec_config(const char *src_ref_prefix,
-		const struct ref *our_head_points_at,
-		const struct ref *remote_head_points_at,
-		struct strbuf *branch_top)
+ساكن فراغ write_refspec_config(ثابت حرف *src_ref_اگیتر,
+		ثابت بنية ref *our_سر_points_at,
+		ثابت بنية ref *remote_سر_points_at,
+		بنية strbuf *branch_چوٹی)
 {
-	struct strbuf key = STRBUF_INIT;
-	struct strbuf value = STRBUF_INIT;
+	بنية strbuf کلید = STRBUF_INIT;
+	بنية strbuf قدر = STRBUF_INIT;
 
-	if (option_mirror || !option_bare) {
-		if (option_single_branch && !option_mirror) {
-			if (option_branch) {
-				if (starts_with(our_head_points_at->name, "refs/tags/"))
-					strbuf_addf(&value, "+%s:%s", our_head_points_at->name,
-						our_head_points_at->name);
-				else
-					strbuf_addf(&value, "+%s:%s%s", our_head_points_at->name,
-						branch_top->buf, option_branch);
-			} else if (remote_head_points_at) {
-				const char *head = remote_head_points_at->name;
-				if (!skip_prefix(head, "refs/heads/", &head))
+	إذا (option_mirror || !option_bare) {
+		إذا (option_single_branch && !option_mirror) {
+			إذا (option_branch) {
+				إذا (starts_with(our_سر_points_at->name, "refs/tags/"))
+					strbuf_addf(&قدر, "+%s:%s", our_سر_points_at->name,
+						our_سر_points_at->name);
+				وإلا
+					strbuf_addf(&قدر, "+%s:%s%s", our_سر_points_at->name,
+						branch_چوٹی->buf, option_branch);
+			} وإلا إذا (remote_سر_points_at) {
+				ثابت حرف *سر = remote_سر_points_at->name;
+				إذا (!skip_اگیتر(سر, "refs/heads/", &سر))
 					BUG("remote HEAD points at non-head?");
 
-				strbuf_addf(&value, "+%s:%s%s", remote_head_points_at->name,
-						branch_top->buf, head);
+				strbuf_addf(&قدر, "+%s:%s%s", remote_سر_points_at->name,
+						branch_چوٹی->buf, سر);
 			}
 			/*
 			 * otherwise, the next "git fetch" will
@@ -846,107 +846,107 @@ static void write_refspec_config(const char *src_ref_prefix,
 			 * any remote-tracking branch, which is what
 			 * we want.
 			 */
-		} else {
-			strbuf_addf(&value, "+%s*:%s*", src_ref_prefix, branch_top->buf);
+		} وإلا {
+			strbuf_addf(&قدر, "+%s*:%s*", src_ref_اگیتر, branch_چوٹی->buf);
 		}
 		/* Configure the remote */
-		if (value.len) {
-			strbuf_addf(&key, "remote.%s.fetch", remote_name);
-			repo_config_set_multivar(the_repository, key.buf, value.buf, "^$", 0);
-			strbuf_reset(&key);
+		إذا (قدر.len) {
+			strbuf_addf(&کلید, "remote.%s.fetch", remote_name);
+			repo_config_سیٹ_multivar(the_repository, کلید.buf, قدر.buf, "^$", 0);
+			strbuf_reset(&کلید);
 
-			if (option_mirror) {
-				strbuf_addf(&key, "remote.%s.mirror", remote_name);
-				repo_config_set(the_repository, key.buf, "true");
-				strbuf_reset(&key);
+			إذا (option_mirror) {
+				strbuf_addf(&کلید, "remote.%s.mirror", remote_name);
+				repo_config_سیٹ(the_repository, کلید.buf, "true");
+				strbuf_reset(&کلید);
 			}
 		}
 	}
 
-	strbuf_release(&key);
-	strbuf_release(&value);
+	strbuf_release(&کلید);
+	strbuf_release(&قدر);
 }
 
-static void dissociate_from_references(void)
+ساكن فراغ dissociate_from_references(فراغ)
 {
-	char *alternates = repo_git_path(the_repository, "objects/info/alternates");
+	حرف *alternates = repo_git_رستہ(the_repository, "objects/info/alternates");
 
-	if (!access(alternates, F_OK)) {
-		struct child_process cmd = CHILD_PROCESS_INIT;
+	إذا (!access(alternates, F_OK)) {
+		بنية بچہ_process cmd = بچہ_PROCESS_INIT;
 
 		cmd.git_cmd = 1;
 		cmd.no_stdin = 1;
-		strvec_pushl(&cmd.args, "repack", "-a", "-d", NULL);
-		if (run_command(&cmd))
+		strvec_pushl(&cmd.دلیلاں, "repack", "-a", "-d", عدم);
+		إذا (لگاتار_command(&cmd))
 			die(_("cannot repack to clean up"));
-		if (unlink(alternates) && errno != ENOENT)
+		إذا (unlink(alternates) && errno != ENOENT)
 			die_errno(_("cannot unlink temporary alternates file"));
 	}
-	free(alternates);
+	حرر(alternates);
 }
 
-static int path_exists(const char *path)
+ساكن صحيح رستہ_exists(ثابت حرف *رستہ)
 {
-	struct stat sb;
-	return !stat(path, &sb);
+	بنية stat sb;
+	أرجع !stat(رستہ, &sb);
 }
 
-int cmd_clone(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repository UNUSED)
+صحيح cmd_clone(صحيح argc,
+	      ثابت حرف **argv,
+	      ثابت حرف *اگیتر,
+	      بنية repository *repository بن_ورتیا)
 {
-	int is_bundle = 0, is_local;
-	int reject_shallow = 0;
-	const char *repo_name, *repo, *work_tree, *git_dir;
-	char *repo_to_free = NULL;
-	char *path = NULL, *dir, *display_repo = NULL;
-	int dest_exists, real_dest_exists = 0;
-	const struct ref *refs, *remote_head;
-	struct ref *remote_head_points_at = NULL;
-	const struct ref *our_head_points_at;
-	char *unborn_head = NULL;
-	struct ref *mapped_refs = NULL;
-	const struct ref *ref;
-	struct strbuf key = STRBUF_INIT;
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf branch_top = STRBUF_INIT, reflog_msg = STRBUF_INIT;
-	struct transport *transport = NULL;
-	const char *src_ref_prefix = "refs/heads/";
-	struct remote *remote;
-	int err = 0, complete_refs_before_fetch = 1;
-	int submodule_progress;
-	int filter_submodules = 0;
-	int hash_algo;
-	enum ref_storage_format ref_storage_format = REF_STORAGE_FORMAT_UNKNOWN;
-	const int do_not_override_repo_unix_permissions = -1;
-	int option_reject_shallow = -1; /* unspecified */
-	int deepen = 0;
-	char *option_template = NULL, *option_depth = NULL, *option_since = NULL;
-	char *option_origin = NULL;
-	struct string_list option_not = STRING_LIST_INIT_NODUP;
-	const char *real_git_dir = NULL;
-	const char *ref_storage_format_uri = NULL;
-	const char *option_upload_pack = "git-upload-pack";
-	int option_progress = -1;
-	int option_sparse_checkout = 0;
-	enum transport_family family = TRANSPORT_FAMILY_ALL;
-	struct string_list option_config = STRING_LIST_INIT_DUP;
-	int option_dissociate = 0;
-	struct list_objects_filter_options filter_options = LIST_OBJECTS_FILTER_INIT;
-	int option_filter_submodules = -1; /* unspecified */
-	struct string_list server_options = STRING_LIST_INIT_NODUP;
-	const char *bundle_uri = NULL;
-	char *option_rev = NULL;
+	صحيح is_bundle = 0, is_local;
+	صحيح reject_shallow = 0;
+	ثابت حرف *repo_name, *repo, *work_درخت, *git_dir;
+	حرف *repo_منزل_free = عدم;
+	حرف *رستہ = عدم, *dir, *display_repo = عدم;
+	صحيح dest_exists, real_dest_exists = 0;
+	ثابت بنية ref *refs, *remote_سر;
+	بنية ref *remote_سر_points_at = عدم;
+	ثابت بنية ref *our_سر_points_at;
+	حرف *unborn_سر = عدم;
+	بنية ref *mapped_refs = عدم;
+	ثابت بنية ref *ref;
+	بنية strbuf کلید = STRBUF_INIT;
+	بنية strbuf buf = STRBUF_INIT;
+	بنية strbuf branch_چوٹی = STRBUF_INIT, reflog_پیغام = STRBUF_INIT;
+	بنية transport *transport = عدم;
+	ثابت حرف *src_ref_اگیتر = "refs/heads/";
+	بنية remote *remote;
+	صحيح err = 0, complete_refs_before_fetch = 1;
+	صحيح submodule_ترقی;
+	صحيح filter_submodules = 0;
+	صحيح hash_algo;
+	تعداد ref_storage_format ref_storage_format = REF_STORAGE_FORMAT_UNKNOWN;
+	ثابت صحيح do_not_override_repo_unix_permissions = -1;
+	صحيح option_reject_shallow = -1; /* unspecified */
+	صحيح deepen = 0;
+	حرف *option_template = عدم, *option_ڈونگھائی = عدم, *option_since = عدم;
+	حرف *option_origin = عدم;
+	بنية string_list option_not = STRING_LIST_INIT_NODUP;
+	ثابت حرف *real_git_dir = عدم;
+	ثابت حرف *ref_storage_format_uri = عدم;
+	ثابت حرف *option_upload_pack = "git-upload-pack";
+	صحيح option_ترقی = -1;
+	صحيح option_sparse_checkout = 0;
+	تعداد transport_family family = TRANSPORT_FAMILY_ALL;
+	بنية string_list option_config = STRING_LIST_INIT_DUP;
+	صحيح option_dissociate = 0;
+	بنية list_objects_filter_options filter_options = LIST_OBJECTS_FILTER_INIT;
+	صحيح option_filter_submodules = -1; /* unspecified */
+	بنية string_list server_options = STRING_LIST_INIT_NODUP;
+	ثابت حرف *bundle_uri = عدم;
+	حرف *option_rev = عدم;
 
-	struct clone_opts opts = CLONE_OPTS_INIT;
+	بنية clone_opts opts = CLONE_OPTS_INIT;
 
-	struct transport_ls_refs_options transport_ls_refs_options =
+	بنية transport_ls_refs_options transport_ls_refs_options =
 		TRANSPORT_LS_REFS_OPTIONS_INIT;
 
-	struct option builtin_clone_options[] = {
+	بنية option builtin_clone_options[] = {
 		OPT__VERBOSITY(&option_verbosity),
-		OPT_BOOL(0, "progress", &option_progress,
+		OPT_BOOL(0, "progress", &option_ترقی,
 			 N_("force progress reporting")),
 		OPT_BOOL(0, "reject-shallow", &option_reject_shallow,
 			 N_("don't clone shallow repository")),
@@ -966,7 +966,7 @@ int cmd_clone(int argc,
 		{
 			.type = OPTION_CALLBACK,
 			.long_name = "recurse-submodules",
-			.value = &option_recurse_submodules,
+			.قدر = &option_recurse_submodules,
 			.argh = N_("pathspec"),
 			.help = N_("initialize submodules in the clone"),
 			.flags = PARSE_OPT_OPTARG,
@@ -992,7 +992,7 @@ int cmd_clone(int argc,
 			   N_("clone single revision <rev> and check out")),
 		OPT_STRING('u', "upload-pack", &option_upload_pack, N_("path"),
 			   N_("path to git-upload-pack on the remote")),
-		OPT_STRING(0, "depth", &option_depth, N_("depth"),
+		OPT_STRING(0, "depth", &option_ڈونگھائی, N_("depth"),
 			   N_("create a shallow clone of that depth")),
 		OPT_STRING(0, "shallow-since", &option_since, N_("time"),
 			   N_("create a shallow clone since a specific time")),
@@ -1000,7 +1000,7 @@ int cmd_clone(int argc,
 				N_("deepen history of shallow clone, excluding ref")),
 		OPT_BOOL(0, "single-branch", &option_single_branch,
 			 N_("clone only one branch, HEAD or --branch")),
-		OPT_BOOL(0, "tags", &option_tags,
+		OPT_BOOL(0, "tags", &option_ٹیگ_سوچی,
 			 N_("clone tags, and make later fetches not to follow them")),
 		OPT_BOOL(0, "shallow-submodules", &option_shallow_submodules,
 			 N_("any cloned submodules will be shallow")),
@@ -1023,180 +1023,180 @@ int cmd_clone(int argc,
 			 N_("initialize sparse-checkout file to include only files at root")),
 		OPT_STRING(0, "bundle-uri", &bundle_uri,
 			   N_("uri"), N_("a URI for downloading bundles before fetching from origin remote")),
-		OPT_END()
+		OPT_سرا()
 	};
-	struct strvec alternates = STRVEC_INIT;
+	بنية strvec alternates = STRVEC_INIT;
 
-	const char * const builtin_clone_usage[] = {
+	ثابت حرف * ثابت builtin_clone_usage[] = {
 		N_("git clone [<options>] [--] <repo> [<dir>]"),
-		NULL
+		عدم
 	};
 
 	filter_options.allow_auto_filter = 1;
 
-	packet_trace_identity("clone");
+	packet_trace_پچھان_تت("clone");
 
-	repo_config(the_repository, git_clone_config, NULL);
+	repo_config(the_repository, git_clone_config, عدم);
 
-	argc = parse_options(argc, argv, prefix, builtin_clone_options,
+	argc = parse_options(argc, argv, اگیتر, builtin_clone_options,
 			     builtin_clone_usage, 0);
 
-	if (argc > 2)
-		usage_msg_opt(_("Too many arguments."),
+	إذا (argc > 2)
+		usage_پیغام_opt(_("Too many arguments."),
 			builtin_clone_usage, builtin_clone_options);
 
-	if (argc == 0)
-		usage_msg_opt(_("You must specify a repository to clone."),
+	إذا (argc == 0)
+		usage_پیغام_opt(_("You must specify a repository to clone."),
 			builtin_clone_usage, builtin_clone_options);
 
-	if (option_depth || option_since || option_not.nr)
+	إذا (option_ڈونگھائی || option_since || option_not.nr)
 		deepen = 1;
-	if (option_single_branch == -1)
+	إذا (option_single_branch == -1)
 		option_single_branch = deepen ? 1 : 0;
 
-	if (ref_storage_format_uri) {
-		ref_storage_format = ref_storage_format_by_uri(ref_storage_format_uri, NULL);
-		if (ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
+	إذا (ref_storage_format_uri) {
+		ref_storage_format = ref_storage_format_by_uri(ref_storage_format_uri, عدم);
+		إذا (ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
 			die(_("unknown ref storage format '%s'"), ref_storage_format_uri);
 	}
 
-	if (option_mirror) {
+	إذا (option_mirror) {
 		option_bare = 1;
-		option_tags = 0;
+		option_ٹیگ_سوچی = 0;
 	}
 
-	if (option_bare) {
-		if (real_git_dir)
+	إذا (option_bare) {
+		إذا (real_git_dir)
 			die(_("options '%s' and '%s' cannot be used together"), "--bare", "--separate-git-dir");
 		option_no_checkout = 1;
 	}
 
-	if (bundle_uri && deepen)
+	إذا (bundle_uri && deepen)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--bundle-uri",
 		    "--depth/--shallow-since/--shallow-exclude");
 
 	repo_name = argv[0];
 
-	path = get_repo_path(repo_name, &is_bundle);
-	if (path) {
-		FREE_AND_NULL(path);
-		repo = repo_to_free = absolute_pathdup(repo_name);
-	} else if (strchr(repo_name, ':')) {
+	رستہ = get_repo_رستہ(repo_name, &is_bundle);
+	إذا (رستہ) {
+		FREE_AND_NULL(رستہ);
+		repo = repo_منزل_free = absolute_pathdup(repo_name);
+	} وإلا إذا (strchr(repo_name, ':')) {
 		repo = repo_name;
 		display_repo = transport_anonymize_url(repo);
-	} else
+	} وإلا
 		die(_("repository '%s' does not exist"), repo_name);
 
 	/* no need to be strict, transport_set_option() will validate it again */
-	if (option_depth && atoi(option_depth) < 1)
-		die(_("depth %s is not a positive number"), option_depth);
+	إذا (option_ڈونگھائی && atoi(option_ڈونگھائی) < 1)
+		die(_("depth %s is not a positive number"), option_ڈونگھائی);
 
-	if (argc == 2)
+	إذا (argc == 2)
 		dir = xstrdup(argv[1]);
-	else
+	وإلا
 		dir = git_url_basename(repo_name, is_bundle, option_bare);
 	strip_dir_trailing_slashes(dir);
 
-	dest_exists = path_exists(dir);
-	if (dest_exists && !is_empty_dir(dir))
+	dest_exists = رستہ_exists(dir);
+	إذا (dest_exists && !is_خالی_تھاواں_dir(dir))
 		die(_("destination path '%s' already exists and is not "
 			"an empty directory."), dir);
 
-	if (real_git_dir) {
-		real_dest_exists = path_exists(real_git_dir);
-		if (real_dest_exists && !is_empty_dir(real_git_dir))
+	إذا (real_git_dir) {
+		real_dest_exists = رستہ_exists(real_git_dir);
+		إذا (real_dest_exists && !is_خالی_تھاواں_dir(real_git_dir))
 			die(_("repository path '%s' already exists and is not "
 				"an empty directory."), real_git_dir);
 	}
 
 
-	strbuf_addf(&reflog_msg, "clone: from %s",
+	strbuf_addf(&reflog_پیغام, "clone: from %s",
 		    display_repo ? display_repo : repo);
-	free(display_repo);
+	حرر(display_repo);
 
-	if (option_bare)
-		work_tree = NULL;
-	else {
-		work_tree = getenv("GIT_WORK_TREE");
-		if (work_tree && path_exists(work_tree))
-			die(_("working tree '%s' already exists."), work_tree);
+	إذا (option_bare)
+		work_درخت = عدم;
+	وإلا {
+		work_درخت = getenv("GIT_WORK_TREE");
+		إذا (work_درخت && رستہ_exists(work_درخت))
+			die(_("working tree '%s' already exists."), work_درخت);
 	}
 
-	if (option_bare || work_tree)
+	إذا (option_bare || work_درخت)
 		git_dir = xstrdup(dir);
-	else {
-		work_tree = dir;
+	وإلا {
+		work_درخت = dir;
 		git_dir = mkpathdup("%s/.git", dir);
 	}
 
 	atexit(remove_junk);
-	sigchain_push_common(remove_junk_on_signal);
+	sigchain_ڈالو_common(remove_junk_on_signal);
 
-	if (!option_bare) {
-		if (safe_create_leading_directories_const(the_repository, work_tree) < 0)
+	إذا (!option_bare) {
+		إذا (محفوظ_create_leading_directories_const(the_repository, work_درخت) < 0)
 			die_errno(_("could not create leading directories of '%s'"),
-				  work_tree);
-		if (dest_exists)
-			junk_work_tree_flags |= REMOVE_DIR_KEEP_TOPLEVEL;
-		else if (mkdir(work_tree, 0777))
+				  work_درخت);
+		إذا (dest_exists)
+			junk_work_درخت_flags |= REMOVE_DIR_KEEP_TOPLEVEL;
+		وإلا إذا (mkdir(work_درخت, 0777))
 			die_errno(_("could not create work tree dir '%s'"),
-				  work_tree);
-		junk_work_tree = work_tree;
+				  work_درخت);
+		junk_work_درخت = work_درخت;
 	}
 
-	if (real_git_dir) {
-		if (real_dest_exists)
+	إذا (real_git_dir) {
+		إذا (real_dest_exists)
 			junk_git_dir_flags |= REMOVE_DIR_KEEP_TOPLEVEL;
 		junk_git_dir = real_git_dir;
-	} else {
-		if (dest_exists)
+	} وإلا {
+		إذا (dest_exists)
 			junk_git_dir_flags |= REMOVE_DIR_KEEP_TOPLEVEL;
 		junk_git_dir = git_dir;
 	}
-	if (safe_create_leading_directories_const(the_repository, git_dir) < 0)
+	إذا (محفوظ_create_leading_directories_const(the_repository, git_dir) < 0)
 		die(_("could not create leading directories of '%s'"), git_dir);
 
-	if (0 <= option_verbosity) {
-		if (option_bare)
+	إذا (0 <= option_verbosity) {
+		إذا (option_bare)
 			fprintf(stderr, _("Cloning into bare repository '%s'...\n"), dir);
-		else
+		وإلا
 			fprintf(stderr, _("Cloning into '%s'...\n"), dir);
 	}
 
-	if (option_recurse_submodules.nr > 0) {
-		struct string_list_item *item;
-		struct strbuf sb = STRBUF_INIT;
-		int val;
+	إذا (option_recurse_submodules.nr > 0) {
+		بنية string_list_شے *شے;
+		بنية strbuf sb = STRBUF_INIT;
+		صحيح val;
 
 		/* remove duplicates */
-		string_list_sort_u(&option_recurse_submodules, 0);
+		string_list_ترتیب_دیو_u(&option_recurse_submodules, 0);
 
 		/*
 		 * NEEDSWORK: In a multi-working-tree world, this needs to be
 		 * set in the per-worktree config.
 		 */
-		for_each_string_list_item(item, &option_recurse_submodules) {
+		for_each_string_list_شے(شے, &option_recurse_submodules) {
 			strbuf_addf(&sb, "submodule.active=%s",
-				    item->string);
+				    شے->string);
 			string_list_append(&option_config, sb.buf);
 			strbuf_reset(&sb);
 		}
 
-		if (!repo_config_get_bool(the_repository, "submodule.stickyRecursiveClone", &val) &&
+		إذا (!repo_config_get_bool(the_repository, "submodule.stickyRecursiveClone", &val) &&
 		    val)
 			string_list_append(&option_config, "submodule.recurse=true");
 
-		if (option_required_reference.nr &&
+		إذا (option_required_reference.nr &&
 		    option_optional_reference.nr)
 			die(_("clone --recursive is not compatible with "
 			      "both --reference and --reference-if-able"));
-		else if (option_required_reference.nr) {
+		وإلا إذا (option_required_reference.nr) {
 			string_list_append(&option_config,
 				"submodule.alternateLocation=superproject");
 			string_list_append(&option_config,
 				"submodule.alternateErrorStrategy=die");
-		} else if (option_optional_reference.nr) {
+		} وإلا إذا (option_optional_reference.nr) {
 			string_list_append(&option_config,
 				"submodule.alternateLocation=superproject");
 			string_list_append(&option_config,
@@ -1212,12 +1212,12 @@ int cmd_clone(int argc,
 	 * repository, and reference backends may persist that information into
 	 * their on-disk data structures.
 	 */
-	create_repository(the_repository, git_dir, real_git_dir, work_tree,
+	create_repository(the_repository, git_dir, real_git_dir, work_درخت,
 			  option_template, GIT_HASH_UNKNOWN, ref_storage_format_uri,
-			  do_not_override_repo_unix_permissions, NULL);
+			  do_not_override_repo_unix_permissions, عدم);
 
-	if (real_git_dir) {
-		free((char *)git_dir);
+	إذا (real_git_dir) {
+		حرر((حرف *)git_dir);
 		git_dir = real_git_dir;
 	}
 
@@ -1255,10 +1255,10 @@ int cmd_clone(int argc,
 	 *
 	 * This is sufficient for Git commands to discover the Git directory.
 	 */
-	initialize_repository_version(the_repository, GIT_HASH_UNKNOWN,
+	initialize_repository_نسخہ(the_repository, GIT_HASH_UNKNOWN,
 				      the_repository->ref_storage_format, 1);
 
-	refs_create_refdir_stubs(the_repository, git_dir, NULL);
+	refs_create_refdir_stubs(the_repository, git_dir, عدم);
 
 	/*
 	 * additional config can be injected with -c, make sure it's included
@@ -1270,24 +1270,24 @@ int cmd_clone(int argc,
 	 * re-read config after init_db and write_config to pick up any config
 	 * injected by --template and --config, respectively.
 	 */
-	repo_config(the_repository, git_clone_config, NULL);
+	repo_config(the_repository, git_clone_config, عدم);
 
 	/*
 	 * If option_reject_shallow is specified from CLI option,
 	 * ignore config_reject_shallow from git_clone_config.
 	 */
-	if (config_reject_shallow != -1)
+	إذا (config_reject_shallow != -1)
 		reject_shallow = config_reject_shallow;
-	if (option_reject_shallow != -1)
+	إذا (option_reject_shallow != -1)
 		reject_shallow = option_reject_shallow;
 
 	/*
 	 * If option_filter_submodules is specified from CLI option,
 	 * ignore config_filter_submodules from git_clone_config.
 	 */
-	if (config_filter_submodules != -1)
+	إذا (config_filter_submodules != -1)
 		filter_submodules = config_filter_submodules;
-	if (option_filter_submodules != -1)
+	إذا (option_filter_submodules != -1)
 		filter_submodules = option_filter_submodules;
 
 	/*
@@ -1295,10 +1295,10 @@ int cmd_clone(int argc,
 	 * filter flags (but not with filter configs, as those should be
 	 * set-and-forget).
 	 */
-	if (option_filter_submodules > 0 && !filter_options.choice)
+	إذا (option_filter_submodules > 0 && !filter_options.choice)
 		die(_("the option '%s' requires '%s'"),
 		    "--also-filter-submodules", "--filter");
-	if (option_filter_submodules > 0 && !option_recurse_submodules.nr)
+	إذا (option_filter_submodules > 0 && !option_recurse_submodules.nr)
 		die(_("the option '%s' requires '%s'"),
 		    "--also-filter-submodules", "--recurse-submodules");
 
@@ -1306,148 +1306,148 @@ int cmd_clone(int argc,
 	 * apply the remote name provided by --origin only after this second
 	 * call to git_config, to ensure it overrides all config-based values.
 	 */
-	if (option_origin) {
-		free(remote_name);
+	إذا (option_origin) {
+		حرر(remote_name);
 		remote_name = xstrdup(option_origin);
 	}
 
-	if (!remote_name)
+	إذا (!remote_name)
 		remote_name = xstrdup("origin");
 
-	if (!valid_remote_name(remote_name))
+	إذا (!valid_remote_name(remote_name))
 		die(_("'%s' is not a valid remote name"), remote_name);
 
-	if (option_bare) {
-		if (option_mirror)
-			src_ref_prefix = "refs/";
-		strbuf_addstr(&branch_top, src_ref_prefix);
+	إذا (option_bare) {
+		إذا (option_mirror)
+			src_ref_اگیتر = "refs/";
+		strbuf_addstr(&branch_چوٹی, src_ref_اگیتر);
 
-		repo_config_set(the_repository, "core.bare", "true");
-	} else if (!option_rev) {
-		strbuf_addf(&branch_top, "refs/remotes/%s/", remote_name);
+		repo_config_سیٹ(the_repository, "core.bare", "true");
+	} وإلا إذا (!option_rev) {
+		strbuf_addf(&branch_چوٹی, "refs/remotes/%s/", remote_name);
 	}
 
-	strbuf_addf(&key, "remote.%s.url", remote_name);
-	repo_config_set(the_repository, key.buf, repo);
-	strbuf_reset(&key);
+	strbuf_addf(&کلید, "remote.%s.url", remote_name);
+	repo_config_سیٹ(the_repository, کلید.buf, repo);
+	strbuf_reset(&کلید);
 
-	if (!option_tags) {
-		strbuf_addf(&key, "remote.%s.tagOpt", remote_name);
-		repo_config_set(the_repository, key.buf, "--no-tags");
-		strbuf_reset(&key);
+	إذا (!option_ٹیگ_سوچی) {
+		strbuf_addf(&کلید, "remote.%s.tagOpt", remote_name);
+		repo_config_سیٹ(the_repository, کلید.buf, "--no-tags");
+		strbuf_reset(&کلید);
 	}
 
 	remote = remote_get_early(remote_name);
 
-	if (!option_rev)
-		refspec_appendf(&remote->fetch, "+%s*:%s*", src_ref_prefix,
-				branch_top.buf);
+	إذا (!option_rev)
+		refspec_appendf(&remote->fetch, "+%s*:%s*", src_ref_اگیتر,
+				branch_چوٹی.buf);
 
-	path = get_repo_path(remote->url.v[0], &is_bundle);
-	is_local = option_local != 0 && path && !is_bundle;
-	if (is_local) {
-		if (option_depth)
+	رستہ = get_repo_رستہ(remote->url.v[0], &is_bundle);
+	is_local = option_local != 0 && رستہ && !is_bundle;
+	إذا (is_local) {
+		إذا (option_ڈونگھائی)
 			warning(_("--depth is ignored in local clones; use file:// instead."));
-		if (option_since)
+		إذا (option_since)
 			warning(_("--shallow-since is ignored in local clones; use file:// instead."));
-		if (option_not.nr)
+		إذا (option_not.nr)
 			warning(_("--shallow-exclude is ignored in local clones; use file:// instead."));
-		if (filter_options.choice)
+		إذا (filter_options.choice)
 			warning(_("--filter is ignored in local clones; use file:// instead."));
-		if (!access(mkpath("%s/shallow", path), F_OK)) {
-			if (reject_shallow)
+		إذا (!access(mkpath("%s/shallow", رستہ), F_OK)) {
+			إذا (reject_shallow)
 				die(_("source repository is shallow, reject to clone."));
-			if (option_local > 0)
+			إذا (option_local > 0)
 				warning(_("source repository is shallow, ignoring --local"));
 			is_local = 0;
 		}
 	}
-	if (option_local > 0 && !is_local)
+	إذا (option_local > 0 && !is_local)
 		warning(_("--local is ignored"));
 
-	collect_alternates(&alternates, is_local ? path : NULL);
+	collect_alternates(&alternates, is_local ? رستہ : عدم);
 	create_object_database(the_repository, &alternates);
 
-	transport = transport_get(remote, path ? path : remote->url.v[0]);
-	transport_set_verbosity(transport, option_verbosity, option_progress);
+	transport = transport_get(remote, رستہ ? رستہ : remote->url.v[0]);
+	transport_سیٹ_verbosity(transport, option_verbosity, option_ترقی);
 	transport->family = family;
 	transport->cloning = 1;
 
-	if (is_bundle) {
-		struct bundle_header header = BUNDLE_HEADER_INIT;
-		int fd = read_bundle_header(path, &header);
-		int has_filter = header.filter.choice != LOFC_DISABLED;
+	إذا (is_bundle) {
+		بنية bundle_سرخی سرخی = BUNDLE_سرخی_INIT;
+		صحيح fd = read_bundle_سرخی(رستہ, &سرخی);
+		صحيح has_filter = سرخی.filter.choice != LOFC_DISABLED;
 
-		if (fd > 0)
+		إذا (fd > 0)
 			close(fd);
-		bundle_header_release(&header);
-		if (has_filter)
+		bundle_سرخی_release(&سرخی);
+		إذا (has_filter)
 			die(_("cannot clone from filtered bundle"));
 	}
 
-	transport_set_option(transport, TRANS_OPT_KEEP, "yes");
+	transport_سیٹ_option(transport, TRANS_OPT_KEEP, "yes");
 
 	die_for_incompatible_opt2(!!option_rev, "--revision",
 				  !!option_branch, "--branch");
 	die_for_incompatible_opt2(!!option_rev, "--revision",
 				  option_mirror, "--mirror");
 
-	if (reject_shallow)
-		transport_set_option(transport, TRANS_OPT_REJECT_SHALLOW, "1");
-	if (option_depth)
-		transport_set_option(transport, TRANS_OPT_DEPTH,
-				     option_depth);
-	if (option_since)
-		transport_set_option(transport, TRANS_OPT_DEEPEN_SINCE,
+	إذا (reject_shallow)
+		transport_سیٹ_option(transport, TRANS_OPT_REJECT_SHALLOW, "1");
+	إذا (option_ڈونگھائی)
+		transport_سیٹ_option(transport, TRANS_OPT_ڈونگھائی,
+				     option_ڈونگھائی);
+	إذا (option_since)
+		transport_سیٹ_option(transport, TRANS_OPT_DEEPEN_SINCE,
 				     option_since);
-	if (option_not.nr)
-		transport_set_option(transport, TRANS_OPT_DEEPEN_NOT,
-				     (const char *)&option_not);
-	if (option_single_branch) {
-		transport_set_option(transport, TRANS_OPT_FOLLOWTAGS, "1");
+	إذا (option_not.nr)
+		transport_سیٹ_option(transport, TRANS_OPT_DEEPEN_NOT,
+				     (ثابت حرف *)&option_not);
+	إذا (option_single_branch) {
+		transport_سیٹ_option(transport, TRANS_OPT_FOLLOWTAGS, "1");
 
-		if (option_branch)
-			opts.wants_head = 0;
+		إذا (option_branch)
+			opts.چاہندا_سر = 0;
 	}
 
-	if (option_upload_pack)
-		transport_set_option(transport, TRANS_OPT_UPLOADPACK,
+	إذا (option_upload_pack)
+		transport_سیٹ_option(transport, TRANS_OPT_UPLOADPACK,
 				     option_upload_pack);
 
-	if (server_options.nr)
+	إذا (server_options.nr)
 		transport->server_options = &server_options;
 
-	if (filter_options.choice) {
-		const char *spec =
+	إذا (filter_options.choice) {
+		ثابت حرف *spec =
 			expand_list_objects_filter_spec(&filter_options);
-		transport_set_option(transport, TRANS_OPT_LIST_OBJECTS_FILTER,
+		transport_سیٹ_option(transport, TRANS_OPT_LIST_OBJECTS_FILTER,
 				     spec);
-		transport_set_option(transport, TRANS_OPT_FROM_PROMISOR, "1");
+		transport_سیٹ_option(transport, TRANS_OPT_FROM_PROMISOR, "1");
 	}
 
-	if (transport->smart_options && !deepen && !filter_options.choice)
+	إذا (transport->smart_options && !deepen && !filter_options.choice)
 		transport->smart_options->check_self_contained_and_connected = 1;
 
-	if (option_rev) {
-		option_tags = 0;
+	إذا (option_rev) {
+		option_ٹیگ_سوچی = 0;
 		option_single_branch = 0;
-		opts.wants_head = 0;
+		opts.چاہندا_سر = 0;
 		opts.detach = 1;
 
 		refspec_append(&remote->fetch, option_rev);
 	}
 
-	if (option_tags || option_branch)
+	إذا (option_ٹیگ_سوچی || option_branch)
 		/*
 		 * Add tags refspec when user asked for tags (implicitly) or
 		 * specified --branch, whose argument might be a tag.
 		 */
-		refspec_append(&remote->fetch, TAG_REFSPEC);
+		refspec_append(&remote->fetch, ٹیگ_REFSPEC);
 
 	refspec_ref_prefixes(&remote->fetch,
 			     &transport_ls_refs_options.ref_prefixes);
-	if (option_branch)
-		expand_ref_prefix(&transport_ls_refs_options.ref_prefixes,
+	إذا (option_branch)
+		expand_ref_اگیتر(&transport_ls_refs_options.ref_prefixes,
 				  option_branch);
 
 	/*
@@ -1458,8 +1458,8 @@ int cmd_clone(int argc,
 	 * ref_prefixes will be empty so we fall back to asking about HEAD to
 	 * reduce traffic from the server.
 	 */
-	if (opts.wants_head || transport_ls_refs_options.ref_prefixes.nr == 0)
-		strvec_push(&transport_ls_refs_options.ref_prefixes, "HEAD");
+	إذا (opts.چاہندا_سر || transport_ls_refs_options.ref_prefixes.nr == 0)
+		strvec_ڈالو(&transport_ls_refs_options.ref_prefixes, "HEAD");
 
 	refs = transport_get_remote_refs(transport, &transport_ls_refs_options);
 
@@ -1468,78 +1468,78 @@ int cmd_clone(int argc,
 	 * ours to the same thing.
 	 */
 	hash_algo = hash_algo_by_ptr(transport_get_hash_algo(transport));
-	initialize_repository_version(the_repository, hash_algo, the_repository->ref_storage_format, 1);
-	repo_set_hash_algo(the_repository, hash_algo);
-	create_reference_database(the_repository, NULL, 1);
+	initialize_repository_نسخہ(the_repository, hash_algo, the_repository->ref_storage_format, 1);
+	repo_سیٹ_hash_algo(the_repository, hash_algo);
+	create_reference_database(the_repository, عدم, 1);
 	startup_info->have_repository = 1;
 
 	/*
 	 * Before fetching from the remote, download and install bundle
 	 * data from the --bundle-uri option.
 	 */
-	if (bundle_uri) {
-		struct remote_state *state;
-		int has_heuristic = 0;
+	إذا (bundle_uri) {
+		بنية remote_state *state;
+		صحيح has_heuristic = 0;
 
 		/*
 		 * We need to save the remote state as our remote's lifetime is
 		 * tied to it.
 		 */
 		state = the_repository->remote_state;
-		the_repository->remote_state = NULL;
+		the_repository->remote_state = عدم;
 		repo_clear(the_repository);
 
 		/* At this point, we need the_repository to match the cloned repo. */
-		if (repo_init(the_repository, git_dir, work_tree))
+		إذا (repo_init(the_repository, git_dir, work_درخت))
 			warning(_("failed to initialize the repo, skipping bundle URI"));
-		else if (fetch_bundle_uri(the_repository, bundle_uri, &has_heuristic))
+		وإلا إذا (fetch_bundle_uri(the_repository, bundle_uri, &has_heuristic))
 			warning(_("failed to fetch objects from bundle URI '%s'"),
 				bundle_uri);
-		else if (has_heuristic)
-			repo_config_set_gently(the_repository, "fetch.bundleuri", bundle_uri);
+		وإلا إذا (has_heuristic)
+			repo_config_سیٹ_gently(the_repository, "fetch.bundleuri", bundle_uri);
 
 		remote_state_clear(the_repository->remote_state);
-		free(the_repository->remote_state);
+		حرر(the_repository->remote_state);
 		the_repository->remote_state = state;
-	} else {
+	} وإلا {
 		/*
 		* Populate transport->got_remote_bundle_uri and
 		* transport->bundle_uri. We might get nothing.
 		*/
 		transport_get_remote_bundle_uri(transport);
 
-		if (transport->bundles &&
-		    hashmap_get_size(&transport->bundles->bundles)) {
-			struct remote_state *state;
+		إذا (transport->bundles &&
+		    hashmap_get_ناپ(&transport->bundles->bundles)) {
+			بنية remote_state *state;
 
 			/*
 			 * We need to save the remote state as our remote's
 			 * lifetime is tied to it.
 			 */
 			state = the_repository->remote_state;
-			the_repository->remote_state = NULL;
+			the_repository->remote_state = عدم;
 			repo_clear(the_repository);
 
 			/* At this point, we need the_repository to match the cloned repo. */
-			if (repo_init(the_repository, git_dir, work_tree))
+			إذا (repo_init(the_repository, git_dir, work_درخت))
 				warning(_("failed to initialize the repo, skipping bundle URI"));
-			else if (fetch_bundle_list(the_repository,
+			وإلا إذا (fetch_bundle_list(the_repository,
 						   transport->bundles))
 				warning(_("failed to fetch advertised bundles"));
 
 			remote_state_clear(the_repository->remote_state);
-			free(the_repository->remote_state);
+			حرر(the_repository->remote_state);
 			the_repository->remote_state = state;
-		} else {
+		} وإلا {
 			clear_bundle_list(transport->bundles);
 			FREE_AND_NULL(transport->bundles);
 		}
 	}
 
-	if (refs)
+	إذا (refs)
 		mapped_refs = wanted_peer_refs(&opts, refs, &remote->fetch);
 
-	if (mapped_refs) {
+	إذا (mapped_refs) {
 		/*
 		 * transport_get_remote_refs() may return refs with null sha-1
 		 * in mapped_refs (see struct transport->get_refs_list
@@ -1550,52 +1550,52 @@ int cmd_clone(int argc,
 		 * return reliable ref set, we can delay cloning until after
 		 * remote HEAD check.
 		 */
-		for (ref = refs; ref; ref = ref->next)
-			if (is_null_oid(&ref->old_oid)) {
+		لكل (ref = refs; ref; ref = ref->اگلا)
+			إذا (is_null_oid(&ref->old_oid)) {
 				complete_refs_before_fetch = 0;
-				break;
+				اكسر;
 			}
 
-		if (!is_local && !complete_refs_before_fetch) {
-			if (transport_fetch_refs(transport, mapped_refs))
+		إذا (!is_local && !complete_refs_before_fetch) {
+			إذا (transport_fetch_refs(transport, mapped_refs))
 				die(_("remote transport reported error"));
 		}
 	}
 
-	remote_head = find_ref_by_name(refs, "HEAD");
-	remote_head_points_at = guess_remote_head(remote_head, mapped_refs,
-						  REMOTE_GUESS_HEAD_QUIET);
+	remote_سر = لبھو_ref_by_name(refs, "HEAD");
+	remote_سر_points_at = guess_remote_سر(remote_سر, mapped_refs,
+						  REMOTE_GUESS_سر_QUIET);
 
-	if (option_branch) {
-		our_head_points_at = find_remote_branch(mapped_refs, option_branch);
-		if (!our_head_points_at)
+	إذا (option_branch) {
+		our_سر_points_at = لبھو_remote_branch(mapped_refs, option_branch);
+		إذا (!our_سر_points_at)
 			die(_("Remote branch %s not found in upstream %s"),
 			    option_branch, remote_name);
-	} else if (option_rev) {
-		our_head_points_at = mapped_refs;
-		if (!our_head_points_at)
+	} وإلا إذا (option_rev) {
+		our_سر_points_at = mapped_refs;
+		إذا (!our_سر_points_at)
 			die(_("Remote revision %s not found in upstream %s"),
 			    option_rev, remote_name);
-	} else if (remote_head_points_at) {
-		our_head_points_at = remote_head_points_at;
-	} else if (remote_head) {
-		our_head_points_at = NULL;
-	} else {
-		char *to_free = NULL;
-		const char *branch;
+	} وإلا إذا (remote_سر_points_at) {
+		our_سر_points_at = remote_سر_points_at;
+	} وإلا إذا (remote_سر) {
+		our_سر_points_at = عدم;
+	} وإلا {
+		حرف *منزل_free = عدم;
+		ثابت حرف *branch;
 
-		if (!mapped_refs) {
+		إذا (!mapped_refs) {
 			warning(_("You appear to have cloned an empty repository."));
 			option_no_checkout = 1;
 		}
 
-		if (transport_ls_refs_options.unborn_head_target &&
-		    skip_prefix(transport_ls_refs_options.unborn_head_target,
+		إذا (transport_ls_refs_options.unborn_سر_نشانہ &&
+		    skip_اگیتر(transport_ls_refs_options.unborn_سر_نشانہ,
 				"refs/heads/", &branch)) {
-			unborn_head  = xstrdup(transport_ls_refs_options.unborn_head_target);
-		} else {
-			branch = to_free = repo_default_branch_name(the_repository, 0);
-			unborn_head = xstrfmt("refs/heads/%s", branch);
+			unborn_سر  = xstrdup(transport_ls_refs_options.unborn_سر_نشانہ);
+		} وإلا {
+			branch = منزل_free = repo_default_branch_name(the_repository, 0);
+			unborn_سر = xstrfmt("refs/heads/%s", branch);
 		}
 
 		/*
@@ -1609,30 +1609,30 @@ int cmd_clone(int argc,
 		 * But for an empty repo, find_remote_branch() can never find
 		 * a match.
 		 */
-		our_head_points_at = find_remote_branch(mapped_refs, branch);
+		our_سر_points_at = لبھو_remote_branch(mapped_refs, branch);
 
-		free(to_free);
+		حرر(منزل_free);
 	}
 
-	if (!option_rev)
-		write_refspec_config(src_ref_prefix, our_head_points_at,
-				     remote_head_points_at, &branch_top);
+	إذا (!option_rev)
+		write_refspec_config(src_ref_اگیتر, our_سر_points_at,
+				     remote_سر_points_at, &branch_چوٹی);
 
-	if (filter_options.choice)
-		partial_clone_register(remote_name, &filter_options);
+	إذا (filter_options.choice)
+		partial_clone_رجسٹر(remote_name, &filter_options);
 
-	if (is_local)
-		clone_local(path, git_dir);
-	else if (mapped_refs && complete_refs_before_fetch) {
-		if (transport_fetch_refs(transport, mapped_refs))
+	إذا (is_local)
+		clone_local(رستہ, git_dir);
+	وإلا إذا (mapped_refs && complete_refs_before_fetch) {
+		إذا (transport_fetch_refs(transport, mapped_refs))
 			die(_("remote transport reported error"));
 	}
 
-	update_remote_refs(refs, mapped_refs, remote_head_points_at,
-			   branch_top.buf, reflog_msg.buf, transport,
+	update_remote_refs(refs, mapped_refs, remote_سر_points_at,
+			   branch_چوٹی.buf, reflog_پیغام.buf, transport,
 			   !is_local);
 
-	update_head(&opts, our_head_points_at, remote_head, unborn_head, reflog_msg.buf);
+	update_سر(&opts, our_سر_points_at, remote_سر, unborn_سر, reflog_پیغام.buf);
 
 	/*
 	 * We want to show progress for recursive submodule clones iff
@@ -1640,21 +1640,21 @@ int cmd_clone(int argc,
 	 * the final decision for this flag, so we need to rescue the value
 	 * before we free the transport.
 	 */
-	submodule_progress = transport->progress;
+	submodule_ترقی = transport->ترقی;
 
 	transport_unlock_pack(transport, 0);
 	transport_disconnect(transport);
 
-	if (option_dissociate) {
+	إذا (option_dissociate) {
 		odb_close(the_repository->objects);
 		dissociate_from_references();
 	}
 
-	if (option_sparse_checkout && git_sparse_checkout_init(dir))
-		return 1;
+	إذا (option_sparse_checkout && git_sparse_checkout_init(dir))
+		أرجع 1;
 
-	junk_mode = JUNK_LEAVE_REPO;
-	err = checkout(submodule_progress,
+	junk_منوال = JUNK_LEAVE_REPO;
+	err = checkout(submodule_ترقی,
 		       &filter_options,
 		       filter_submodules,
 		       ref_storage_format);
@@ -1666,19 +1666,19 @@ int cmd_clone(int argc,
 	string_list_clear(&server_options, 0);
 	strvec_clear(&alternates);
 
-	free(remote_name);
-	strbuf_release(&reflog_msg);
-	strbuf_release(&branch_top);
+	حرر(remote_name);
+	strbuf_release(&reflog_پیغام);
+	strbuf_release(&branch_چوٹی);
 	strbuf_release(&buf);
-	strbuf_release(&key);
+	strbuf_release(&کلید);
 	free_refs(mapped_refs);
-	free_refs(remote_head_points_at);
-	free(unborn_head);
-	free(dir);
-	free(path);
-	free(repo_to_free);
-	junk_mode = JUNK_LEAVE_ALL;
+	free_refs(remote_سر_points_at);
+	حرر(unborn_سر);
+	حرر(dir);
+	حرر(رستہ);
+	حرر(repo_منزل_free);
+	junk_منوال = JUNK_LEAVE_ALL;
 
 	transport_ls_refs_options_release(&transport_ls_refs_options);
-	return err;
+	أرجع err;
 }

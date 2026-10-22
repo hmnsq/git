@@ -1,77 +1,77 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
+#تعریف_کرو DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "delta.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "pack.h"
-#include "csum-file.h"
-#include "blob.h"
-#include "commit.h"
-#include "tag.h"
-#include "tree.h"
-#include "progress.h"
-#include "fsck.h"
-#include "strbuf.h"
-#include "thread-utils.h"
-#include "packfile.h"
-#include "pack-revindex.h"
-#include "object-file.h"
-#include "odb.h"
-#include "odb/streaming.h"
-#include "oid-array.h"
-#include "oidset.h"
-#include "path.h"
-#include "replace-object.h"
-#include "tree-walk.h"
-#include "promisor-remote.h"
-#include "run-command.h"
-#include "setup.h"
-#include "strvec.h"
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "delta.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "hex.h"
+#ضمن "pack.h"
+#ضمن "csum-file.h"
+#ضمن "blob.h"
+#ضمن "commit.h"
+#ضمن "tag.h"
+#ضمن "tree.h"
+#ضمن "progress.h"
+#ضمن "fsck.h"
+#ضمن "strbuf.h"
+#ضمن "thread-utils.h"
+#ضمن "packfile.h"
+#ضمن "pack-revindex.h"
+#ضمن "object-file.h"
+#ضمن "odb.h"
+#ضمن "odb/streaming.h"
+#ضمن "oid-array.h"
+#ضمن "oidset.h"
+#ضمن "path.h"
+#ضمن "replace-object.h"
+#ضمن "tree-walk.h"
+#ضمن "promisor-remote.h"
+#ضمن "run-command.h"
+#ضمن "setup.h"
+#ضمن "strvec.h"
 
-static const char index_pack_usage[] =
+ساكن ثابت حرف اشاریہ_pack_usage[] =
 "git index-pack [-v] [-o <index-file>] [--keep | --keep=<msg>] [--[no-]rev-index] [--verify] [--strict[=<msg-id>=<severity>...]] [--fsck-objects[=<msg-id>=<severity>...]] (<pack-file> | --stdin [--fix-thin] [<pack-file>])";
 
-struct object_entry {
-	struct pack_idx_entry idx;
-	size_t size;
-	unsigned char hdr_size;
-	signed char type;
-	signed char real_type;
+بنية object_اندراج {
+	بنية pack_idx_اندراج idx;
+	ناپ_t ناپ;
+	بنانشانی حرف hdr_ناپ;
+	نشانیوالا حرف type;
+	نشانیوالا حرف real_type;
 };
 
-struct object_stat {
-	unsigned delta_depth;
-	int base_object_no;
+بنية object_stat {
+	بنانشانی delta_ڈونگھائی;
+	صحيح ادھار_object_no;
 };
 
-struct base_data {
+بنية ادھار_انکڑے {
 	/* Initialized by make_base(). */
-	struct base_data *base;
-	struct object_entry *obj;
-	int ref_first, ref_last;
-	int ofs_first, ofs_last;
+	بنية ادھار_انکڑے *ادھار;
+	بنية object_اندراج *obj;
+	صحيح ref_پہلا, ref_آخری;
+	صحيح ofs_پہلا, ofs_آخری;
 	/*
 	 * Threads should increment retain_data if they are about to call
 	 * patch_delta() using this struct's data as a base, and decrement this
 	 * when they are done. While retain_data is nonzero, this struct's data
 	 * will not be freed even if the delta base cache limit is exceeded.
 	 */
-	int retain_data;
+	صحيح retain_انکڑے;
 	/*
 	 * The number of direct children that have not been fully processed
 	 * (entered work_head, entered done_head, left done_head). When this
 	 * number reaches zero, this struct base_data can be freed.
 	 */
-	int children_remaining;
+	صحيح children_بچیا;
 
 	/* Not initialized by make_base(). */
-	struct list_head list;
-	void *data;
-	size_t size;
+	بنية list_سر list;
+	فراغ *انکڑے;
+	ناپ_t ناپ;
 };
 
 /*
@@ -81,7 +81,7 @@ struct base_data {
  *
  * Guarded by work_mutex.
  */
-static LIST_HEAD(work_head);
+ساكن LIST_سر(work_سر);
 
 /*
  * Stack of struct base_data that have children, all of whom have been
@@ -91,7 +91,7 @@ static LIST_HEAD(work_head);
  *
  * Guarded by work_mutex.
  */
-static LIST_HEAD(done_head);
+ساكن LIST_سر(پورا_سر);
 
 /*
  * All threads share one delta base cache.
@@ -99,211 +99,211 @@ static LIST_HEAD(done_head);
  * base_cache_used is guarded by work_mutex, and base_cache_limit is read-only
  * in a thread.
  */
-static size_t base_cache_used;
-static size_t base_cache_limit;
+ساكن ناپ_t ادھار_cache_ورتیا;
+ساكن ناپ_t ادھار_cache_حد_بندی;
 
-struct thread_local_data {
+بنية thread_local_انکڑے {
 	pthread_t thread;
-	int pack_fd;
+	صحيح pack_fd;
 };
 
 /* Remember to update object flag allocation in object.h */
-#define FLAG_LINK (1u<<20)
-#define FLAG_CHECKED (1u<<21)
+#تعریف_کرو FLAG_LINK (1u<<20)
+#تعریف_کرو FLAG_CHECKED (1u<<21)
 
-struct ofs_delta_entry {
-	off_t offset;
-	int obj_no;
+بنية ofs_delta_اندراج {
+	off_t وتھ;
+	صحيح obj_no;
 };
 
-struct ref_delta_entry {
-	struct object_id oid;
-	int obj_no;
+بنية ref_delta_اندراج {
+	بنية object_id oid;
+	صحيح obj_no;
 };
 
-static struct object_entry *objects;
-static struct object_stat *obj_stat;
-static struct ofs_delta_entry *ofs_deltas;
-static struct ref_delta_entry *ref_deltas;
-static struct thread_local_data nothread_data;
-static int nr_objects;
-static int nr_ofs_deltas;
-static int nr_ref_deltas;
-static int ref_deltas_alloc;
-static int nr_resolved_deltas;
-static int nr_threads;
+ساكن بنية object_اندراج *objects;
+ساكن بنية object_stat *obj_stat;
+ساكن بنية ofs_delta_اندراج *ofs_deltas;
+ساكن بنية ref_delta_اندراج *ref_deltas;
+ساكن بنية thread_local_انکڑے nothread_انکڑے;
+ساكن صحيح nr_objects;
+ساكن صحيح nr_ofs_deltas;
+ساكن صحيح nr_ref_deltas;
+ساكن صحيح ref_deltas_alloc;
+ساكن صحيح nr_resolved_deltas;
+ساكن صحيح nr_دھاگے;
 
-static int from_stdin;
-static int strict;
-static int do_fsck_object;
-static struct fsck_options fsck_options;
-static int verbose;
-static const char *progress_title;
-static int show_resolving_progress;
-static int show_stat;
-static int check_self_contained_and_connected;
+ساكن صحيح from_stdin;
+ساكن صحيح strict;
+ساكن صحيح do_fsck_object;
+ساكن بنية fsck_options fsck_options;
+ساكن صحيح verbose;
+ساكن ثابت حرف *ترقی_title;
+ساكن صحيح show_resolving_ترقی;
+ساكن صحيح show_stat;
+ساكن صحيح check_self_contained_and_connected;
 
-static struct progress *progress;
+ساكن بنية ترقی *ترقی;
 
-static unsigned char input_buffer[DEFAULT_IO_BUFFER_SIZE];
-static unsigned int input_offset, input_len;
-static off_t consumed_bytes;
-static off_t max_input_size;
-static unsigned deepest_delta;
-static struct git_hash_ctx input_ctx;
-static uint32_t input_crc32;
-static int input_fd, output_fd;
-static const char *curr_pack;
+ساكن بنانشانی حرف داخلہ_بفر[DEFAULT_IO_بفر_ناپ];
+ساكن بنانشانی صحيح داخلہ_وتھ, داخلہ_len;
+ساكن off_t consumed_بائٹاں;
+ساكن off_t max_داخلہ_ناپ;
+ساكن بنانشانی سبھ_توں_ڈونگھا_delta;
+ساكن بنية git_hash_ctx داخلہ_ctx;
+ساكن uint32_t داخلہ_چکری_جانچ_32;
+ساكن صحيح داخلہ_fd, output_fd;
+ساكن ثابت حرف *curr_pack;
 
 /*
  * outgoing_links is guarded by read_mutex, and record_outgoing_links is
  * read-only in a thread.
  */
-static struct oidset outgoing_links = OIDSET_INIT;
-static int record_outgoing_links;
+ساكن بنية oidset outgoing_links = OIDSET_INIT;
+ساكن صحيح ریکارڈ_outgoing_links;
 
-static struct thread_local_data *thread_data;
-static int nr_dispatched;
-static int threads_active;
+ساكن بنية thread_local_انکڑے *thread_انکڑے;
+ساكن صحيح nr_dispatched;
+ساكن صحيح دھاگے_سرگرم;
 
-static pthread_mutex_t read_mutex;
-#define read_lock()		lock_mutex(&read_mutex)
-#define read_unlock()		unlock_mutex(&read_mutex)
+ساكن pthread_mutex_t read_mutex;
+#تعریف_کرو read_جندرا()		جندرا_mutex(&read_mutex)
+#تعریف_کرو read_unlock()		unlock_mutex(&read_mutex)
 
-static pthread_mutex_t counter_mutex;
-#define counter_lock()		lock_mutex(&counter_mutex)
-#define counter_unlock()	unlock_mutex(&counter_mutex)
+ساكن pthread_mutex_t counter_mutex;
+#تعریف_کرو counter_جندرا()		جندرا_mutex(&counter_mutex)
+#تعریف_کرو counter_unlock()	unlock_mutex(&counter_mutex)
 
-static pthread_mutex_t work_mutex;
-#define work_lock()		lock_mutex(&work_mutex)
-#define work_unlock()		unlock_mutex(&work_mutex)
+ساكن pthread_mutex_t work_mutex;
+#تعریف_کرو work_جندرا()		جندرا_mutex(&work_mutex)
+#تعریف_کرو work_unlock()		unlock_mutex(&work_mutex)
 
-static pthread_mutex_t deepest_delta_mutex;
-#define deepest_delta_lock()	lock_mutex(&deepest_delta_mutex)
-#define deepest_delta_unlock()	unlock_mutex(&deepest_delta_mutex)
+ساكن pthread_mutex_t سبھ_توں_ڈونگھا_delta_mutex;
+#تعریف_کرو سبھ_توں_ڈونگھا_delta_جندرا()	جندرا_mutex(&سبھ_توں_ڈونگھا_delta_mutex)
+#تعریف_کرو سبھ_توں_ڈونگھا_delta_unlock()	unlock_mutex(&سبھ_توں_ڈونگھا_delta_mutex)
 
-static pthread_key_t key;
+ساكن pthread_کلید_t کلید;
 
-static inline void lock_mutex(pthread_mutex_t *mutex)
+ساكن مضمن فراغ جندرا_mutex(pthread_mutex_t *mutex)
 {
-	if (threads_active)
-		pthread_mutex_lock(mutex);
+	إذا (دھاگے_سرگرم)
+		pthread_mutex_جندرا(mutex);
 }
 
-static inline void unlock_mutex(pthread_mutex_t *mutex)
+ساكن مضمن فراغ unlock_mutex(pthread_mutex_t *mutex)
 {
-	if (threads_active)
+	إذا (دھاگے_سرگرم)
 		pthread_mutex_unlock(mutex);
 }
 
 /*
  * Mutex and conditional variable can't be statically-initialized on Windows.
  */
-static void init_thread(void)
+ساكن فراغ init_thread(فراغ)
 {
-	int i;
+	صحيح i;
 	init_recursive_mutex(&read_mutex);
-	pthread_mutex_init(&counter_mutex, NULL);
-	pthread_mutex_init(&work_mutex, NULL);
-	if (show_stat)
-		pthread_mutex_init(&deepest_delta_mutex, NULL);
-	pthread_key_create(&key, NULL);
-	CALLOC_ARRAY(thread_data, nr_threads);
-	for (i = 0; i < nr_threads; i++) {
-		thread_data[i].pack_fd = xopen(curr_pack, O_RDONLY);
+	pthread_mutex_init(&counter_mutex, عدم);
+	pthread_mutex_init(&work_mutex, عدم);
+	إذا (show_stat)
+		pthread_mutex_init(&سبھ_توں_ڈونگھا_delta_mutex, عدم);
+	pthread_کلید_create(&کلید, عدم);
+	CALLOC_ARRAY(thread_انکڑے, nr_دھاگے);
+	لكل (i = 0; i < nr_دھاگے; i++) {
+		thread_انکڑے[i].pack_fd = xopen(curr_pack, O_RDONLY);
 	}
 
-	threads_active = 1;
+	دھاگے_سرگرم = 1;
 }
 
-static void cleanup_thread(void)
+ساكن فراغ cleanup_thread(فراغ)
 {
-	int i;
-	if (!threads_active)
-		return;
-	threads_active = 0;
+	صحيح i;
+	إذا (!دھاگے_سرگرم)
+		أرجع;
+	دھاگے_سرگرم = 0;
 	pthread_mutex_destroy(&read_mutex);
 	pthread_mutex_destroy(&counter_mutex);
 	pthread_mutex_destroy(&work_mutex);
-	if (show_stat)
-		pthread_mutex_destroy(&deepest_delta_mutex);
-	for (i = 0; i < nr_threads; i++)
-		close(thread_data[i].pack_fd);
-	pthread_key_delete(key);
-	free(thread_data);
+	إذا (show_stat)
+		pthread_mutex_destroy(&سبھ_توں_ڈونگھا_delta_mutex);
+	لكل (i = 0; i < nr_دھاگے; i++)
+		close(thread_انکڑے[i].pack_fd);
+	pthread_کلید_delete(کلید);
+	حرر(thread_انکڑے);
 }
 
-static int mark_link(struct object *obj, enum object_type type,
-		     void *data UNUSED,
-		     struct fsck_options *options UNUSED)
+ساكن صحيح mark_link(بنية object *obj, تعداد object_type type,
+		     فراغ *انکڑے بن_ورتیا,
+		     بنية fsck_options *options بن_ورتیا)
 {
-	if (!obj)
-		return -1;
+	إذا (!obj)
+		أرجع -1;
 
-	if (type != OBJ_ANY && obj->type != type)
-		die(_("object type mismatch at %s"), oid_to_hex(&obj->oid));
+	إذا (type != OBJ_ANY && obj->type != type)
+		die(_("object type mismatch at %s"), oid_منزل_hex(&obj->oid));
 
 	obj->flags |= FLAG_LINK;
-	return 0;
+	أرجع 0;
 }
 
 /* The content of each linked object must have been checked
    or it must be already present in the object database */
-static unsigned check_object(struct object *obj)
+ساكن بنانشانی check_object(بنية object *obj)
 {
-	if (!obj)
-		return 0;
+	إذا (!obj)
+		أرجع 0;
 
-	if (!(obj->flags & FLAG_LINK))
-		return 0;
+	إذا (!(obj->flags & FLAG_LINK))
+		أرجع 0;
 
-	if (!(obj->flags & FLAG_CHECKED)) {
-		size_t size;
-		int type = odb_read_object_info(the_repository->objects,
-						&obj->oid, &size);
-		if (type <= 0)
+	إذا (!(obj->flags & FLAG_CHECKED)) {
+		ناپ_t ناپ;
+		صحيح type = odb_read_object_info(the_repository->objects,
+						&obj->oid, &ناپ);
+		إذا (type <= 0)
 			die(_("did not receive expected object %s"),
-			      oid_to_hex(&obj->oid));
-		if (type != obj->type)
+			      oid_منزل_hex(&obj->oid));
+		إذا (type != obj->type)
 			die(_("object %s: expected type %s, found %s"),
-			    oid_to_hex(&obj->oid),
+			    oid_منزل_hex(&obj->oid),
 			    type_name(obj->type), type_name(type));
 		obj->flags |= FLAG_CHECKED;
-		return 1;
+		أرجع 1;
 	}
 
-	return 0;
+	أرجع 0;
 }
 
-static unsigned check_objects(void)
+ساكن بنانشانی check_objects(فراغ)
 {
-	unsigned i, max, foreign_nr = 0;
+	بنانشانی i, max, foreign_nr = 0;
 
-	max = get_max_object_index(the_repository);
+	max = get_max_object_اشاریہ(the_repository);
 
-	if (verbose)
-		progress = start_delayed_progress(the_repository,
+	إذا (verbose)
+		ترقی = شروع_delayed_ترقی(the_repository,
 						  _("Checking objects"), max);
 
-	for (i = 0; i < max; i++) {
-		foreign_nr += check_object(get_indexed_object(the_repository, i));
-		display_progress(progress, i + 1);
+	لكل (i = 0; i < max; i++) {
+		foreign_nr += check_object(get_اشاریہ_دار_object(the_repository, i));
+		display_ترقی(ترقی, i + 1);
 	}
 
-	stop_progress(&progress);
-	return foreign_nr;
+	stop_ترقی(&ترقی);
+	أرجع foreign_nr;
 }
 
 
 /* Discard current buffer used content. */
-static void flush(void)
+ساكن فراغ flush(فراغ)
 {
-	if (input_offset) {
-		if (output_fd >= 0)
-			write_or_die(output_fd, input_buffer, input_offset);
-		git_hash_update(&input_ctx, input_buffer, input_offset);
-		memmove(input_buffer, input_buffer + input_offset, input_len);
-		input_offset = 0;
+	إذا (داخلہ_وتھ) {
+		إذا (output_fd >= 0)
+			write_or_die(output_fd, داخلہ_بفر, داخلہ_وتھ);
+		git_hash_update(&داخلہ_ctx, داخلہ_بفر, داخلہ_وتھ);
+		memmove(داخلہ_بفر, داخلہ_بفر + داخلہ_وتھ, داخلہ_len);
+		داخلہ_وتھ = 0;
 	}
 }
 
@@ -311,519 +311,519 @@ static void flush(void)
  * Make sure at least "min" bytes are available in the buffer, and
  * return the pointer to the buffer.
  */
-static void *fill(int min)
+ساكن فراغ *fill(صحيح min)
 {
-	if (min <= input_len)
-		return input_buffer + input_offset;
-	if (min > sizeof(input_buffer))
+	إذا (min <= داخلہ_len)
+		أرجع داخلہ_بفر + داخلہ_وتھ;
+	إذا (min > حجم(داخلہ_بفر))
 		die(Q_("cannot fill %d byte",
 		       "cannot fill %d bytes",
 		       min),
 		    min);
 	flush();
-	do {
-		ssize_t ret = xread(input_fd, input_buffer + input_len,
-				sizeof(input_buffer) - input_len);
-		if (ret <= 0) {
-			if (!ret)
+	افعل {
+		ssize_t ret = xread(داخلہ_fd, داخلہ_بفر + داخلہ_len,
+				حجم(داخلہ_بفر) - داخلہ_len);
+		إذا (ret <= 0) {
+			إذا (!ret)
 				die(_("early EOF"));
 			die_errno(_("read error on input"));
 		}
-		input_len += ret;
-		if (from_stdin)
-			display_throughput(progress, consumed_bytes + input_len);
-	} while (input_len < min);
-	return input_buffer;
+		داخلہ_len += ret;
+		إذا (from_stdin)
+			display_throughput(ترقی, consumed_بائٹاں + داخلہ_len);
+	} طالما (داخلہ_len < min);
+	أرجع داخلہ_بفر;
 }
 
-static void use(int bytes)
+ساكن فراغ use(صحيح بائٹاں)
 {
-	if (bytes > input_len)
+	إذا (بائٹاں > داخلہ_len)
 		die(_("used more bytes than were available"));
-	input_crc32 = crc32(input_crc32, input_buffer + input_offset, bytes);
-	input_len -= bytes;
-	input_offset += bytes;
+	داخلہ_چکری_جانچ_32 = چکری_جانچ_32(داخلہ_چکری_جانچ_32, داخلہ_بفر + داخلہ_وتھ, بائٹاں);
+	داخلہ_len -= بائٹاں;
+	داخلہ_وتھ += بائٹاں;
 
 	/* make sure off_t is sufficiently large not to wrap */
-	if (signed_add_overflows(consumed_bytes, bytes))
+	إذا (signed_جوڑو_overflows(consumed_بائٹاں, بائٹاں))
 		die(_("pack too large for current definition of off_t"));
-	consumed_bytes += bytes;
-	if (max_input_size && consumed_bytes > max_input_size) {
-		struct strbuf size_limit = STRBUF_INIT;
-		strbuf_humanise_bytes(&size_limit, max_input_size);
+	consumed_بائٹاں += بائٹاں;
+	إذا (max_داخلہ_ناپ && consumed_بائٹاں > max_داخلہ_ناپ) {
+		بنية strbuf ناپ_حد_بندی = STRBUF_INIT;
+		strbuf_humanise_بائٹاں(&ناپ_حد_بندی, max_داخلہ_ناپ);
 		die(_("pack exceeds maximum allowed size (%s)"),
-		    size_limit.buf);
+		    ناپ_حد_بندی.buf);
 	}
 }
 
-static const char *open_pack_file(const char *pack_name)
+ساكن ثابت حرف *open_pack_file(ثابت حرف *pack_name)
 {
-	if (from_stdin) {
-		input_fd = 0;
-		if (!pack_name) {
-			struct strbuf tmp_file = STRBUF_INIT;
+	إذا (from_stdin) {
+		داخلہ_fd = 0;
+		إذا (!pack_name) {
+			بنية strbuf tmp_file = STRBUF_INIT;
 			output_fd = odb_mkstemp(the_repository->objects, &tmp_file,
 						"pack/tmp_pack_XXXXXX");
-			pack_name = strbuf_detach(&tmp_file, NULL);
-		} else {
+			pack_name = strbuf_detach(&tmp_file, عدم);
+		} وإلا {
 			output_fd = xopen(pack_name, O_CREAT|O_EXCL|O_RDWR, 0600);
 		}
-		nothread_data.pack_fd = output_fd;
-	} else {
-		input_fd = xopen(pack_name, O_RDONLY);
+		nothread_انکڑے.pack_fd = output_fd;
+	} وإلا {
+		داخلہ_fd = xopen(pack_name, O_RDONLY);
 		output_fd = -1;
-		nothread_data.pack_fd = input_fd;
+		nothread_انکڑے.pack_fd = داخلہ_fd;
 	}
-	git_hash_init(&input_ctx, the_hash_algo);
-	return pack_name;
+	git_hash_init(&داخلہ_ctx, the_hash_algo);
+	أرجع pack_name;
 }
 
-static void parse_pack_header(void)
+ساكن فراغ parse_pack_سرخی(فراغ)
 {
-	unsigned char *hdr = fill(sizeof(struct pack_header));
+	بنانشانی حرف *hdr = fill(حجم(بنية pack_سرخی));
 
 	/* Header consistency check */
-	if (get_be32(hdr) != PACK_SIGNATURE)
+	إذا (get_be32(hdr) != PACK_SIGNATURE)
 		die(_("pack signature mismatch"));
 	hdr += 4;
-	if (!pack_version_ok_native(get_be32(hdr)))
+	إذا (!pack_نسخہ_ok_native(get_be32(hdr)))
 		die(_("pack version %"PRIu32" unsupported"),
 		    get_be32(hdr));
 	hdr += 4;
 
 	nr_objects = get_be32(hdr);
-	use(sizeof(struct pack_header));
+	use(حجم(بنية pack_سرخی));
 }
 
-__attribute__((format (printf, 2, 3)))
-static NORETURN void bad_object(off_t offset, const char *format, ...)
+__attribute__((format (لکھو, 2, 3)))
+ساكن NORETURN فراغ bad_object(off_t وتھ, ثابت حرف *format, ...)
 {
 	va_list params;
-	char buf[1024];
+	حرف buf[1024];
 
-	va_start(params, format);
-	vsnprintf(buf, sizeof(buf), format, params);
-	va_end(params);
+	va_شروع(params, format);
+	vsnprintf(buf, حجم(buf), format, params);
+	va_سرا(params);
 	die(_("pack has bad object at offset %"PRIuMAX": %s"),
-	    (uintmax_t)offset, buf);
+	    (uintmax_t)وتھ, buf);
 }
 
-static inline struct thread_local_data *get_thread_data(void)
+ساكن مضمن بنية thread_local_انکڑے *get_thread_انکڑے(فراغ)
 {
-	if (HAVE_THREADS) {
-		if (threads_active)
-			return pthread_getspecific(key);
-		assert(!threads_active &&
+	إذا (HAVE_دھاگے) {
+		إذا (دھاگے_سرگرم)
+			أرجع pthread_getspecific(کلید);
+		أكد(!دھاگے_سرگرم &&
 		       "This should only be reached when all threads are gone");
 	}
-	return &nothread_data;
+	أرجع &nothread_انکڑے;
 }
 
-static void set_thread_data(struct thread_local_data *data)
+ساكن فراغ سیٹ_thread_انکڑے(بنية thread_local_انکڑے *انکڑے)
 {
-	if (threads_active)
-		pthread_setspecific(key, data);
+	إذا (دھاگے_سرگرم)
+		pthread_setspecific(کلید, انکڑے);
 }
 
-static void free_base_data(struct base_data *c)
+ساكن فراغ free_ادھار_انکڑے(بنية ادھار_انکڑے *c)
 {
-	if (c->data) {
-		FREE_AND_NULL(c->data);
-		base_cache_used -= c->size;
+	إذا (c->انکڑے) {
+		FREE_AND_NULL(c->انکڑے);
+		ادھار_cache_ورتیا -= c->ناپ;
 	}
 }
 
-static void prune_base_data(struct base_data *retain)
+ساكن فراغ prune_ادھار_انکڑے(بنية ادھار_انکڑے *retain)
 {
-	struct list_head *pos;
+	بنية list_سر *pos;
 
-	if (base_cache_used <= base_cache_limit)
-		return;
+	إذا (ادھار_cache_ورتیا <= ادھار_cache_حد_بندی)
+		أرجع;
 
-	list_for_each_prev(pos, &done_head) {
-		struct base_data *b = list_entry(pos, struct base_data, list);
-		if (b->retain_data || b == retain)
-			continue;
-		if (b->data) {
-			free_base_data(b);
-			if (base_cache_used <= base_cache_limit)
-				return;
+	list_for_each_prev(pos, &پورا_سر) {
+		بنية ادھار_انکڑے *b = list_اندراج(pos, بنية ادھار_انکڑے, list);
+		إذا (b->retain_انکڑے || b == retain)
+			استمر;
+		إذا (b->انکڑے) {
+			free_ادھار_انکڑے(b);
+			إذا (ادھار_cache_ورتیا <= ادھار_cache_حد_بندی)
+				أرجع;
 		}
 	}
 
-	list_for_each_prev(pos, &work_head) {
-		struct base_data *b = list_entry(pos, struct base_data, list);
-		if (b->retain_data || b == retain)
-			continue;
-		if (b->data) {
-			free_base_data(b);
-			if (base_cache_used <= base_cache_limit)
-				return;
+	list_for_each_prev(pos, &work_سر) {
+		بنية ادھار_انکڑے *b = list_اندراج(pos, بنية ادھار_انکڑے, list);
+		إذا (b->retain_انکڑے || b == retain)
+			استمر;
+		إذا (b->انکڑے) {
+			free_ادھار_انکڑے(b);
+			إذا (ادھار_cache_ورتیا <= ادھار_cache_حد_بندی)
+				أرجع;
 		}
 	}
 }
 
-static int is_delta_type(enum object_type type)
+ساكن صحيح is_delta_type(تعداد object_type type)
 {
-	return (type == OBJ_REF_DELTA || type == OBJ_OFS_DELTA);
+	أرجع (type == OBJ_REF_DELTA || type == OBJ_OFS_DELTA);
 }
 
-static void *unpack_entry_data(off_t offset, size_t size,
-			       enum object_type type, struct object_id *oid)
+ساكن فراغ *unpack_اندراج_انکڑے(off_t وتھ, ناپ_t ناپ,
+			       تعداد object_type type, بنية object_id *oid)
 {
-	static char fixed_buf[8192];
-	int status;
-	git_zstream stream;
-	void *buf;
-	struct git_hash_ctx c;
-	char hdr[32];
-	int hdrlen;
+	ساكن حرف fixed_buf[8192];
+	صحيح حالت;
+	git_zstream دھارا;
+	فراغ *buf;
+	بنية git_hash_ctx c;
+	حرف hdr[32];
+	صحيح hdrlen;
 
-	if (!is_delta_type(type)) {
-		hdrlen = format_object_header(hdr, sizeof(hdr), type, size);
+	إذا (!is_delta_type(type)) {
+		hdrlen = format_object_سرخی(hdr, حجم(hdr), type, ناپ);
 		git_hash_init(&c, the_hash_algo);
 		git_hash_update(&c, hdr, hdrlen);
-	} else
-		oid = NULL;
-	if (type == OBJ_BLOB &&
-	    size > repo_settings_get_big_file_threshold(the_repository))
+	} وإلا
+		oid = عدم;
+	إذا (type == OBJ_BLOB &&
+	    ناپ > repo_settings_get_big_file_حد(the_repository))
 		buf = fixed_buf;
-	else
-		buf = xmallocz(size);
+	وإلا
+		buf = xmallocz(ناپ);
 
-	memset(&stream, 0, sizeof(stream));
-	git_inflate_init(&stream);
-	stream.next_out = buf;
-	stream.avail_out = buf == fixed_buf ? sizeof(fixed_buf) : size;
+	memset(&دھارا, 0, حجم(دھارا));
+	git_inflate_init(&دھارا);
+	دھارا.اگلا_باہرلا = buf;
+	دھارا.avail_باہرلا = buf == fixed_buf ? حجم(fixed_buf) : ناپ;
 
-	do {
-		unsigned char *last_out = stream.next_out;
-		stream.next_in = fill(1);
-		stream.avail_in = input_len;
-		status = git_inflate(&stream, 0);
-		use(input_len - stream.avail_in);
-		if (oid)
-			git_hash_update(&c, last_out, stream.next_out - last_out);
-		if (buf == fixed_buf) {
-			stream.next_out = buf;
-			stream.avail_out = sizeof(fixed_buf);
+	افعل {
+		بنانشانی حرف *آخری_باہرلا = دھارا.اگلا_باہرلا;
+		دھارا.اگلا_وچ = fill(1);
+		دھارا.avail_وچ = داخلہ_len;
+		حالت = git_inflate(&دھارا, 0);
+		use(داخلہ_len - دھارا.avail_وچ);
+		إذا (oid)
+			git_hash_update(&c, آخری_باہرلا, دھارا.اگلا_باہرلا - آخری_باہرلا);
+		إذا (buf == fixed_buf) {
+			دھارا.اگلا_باہرلا = buf;
+			دھارا.avail_باہرلا = حجم(fixed_buf);
 		}
-	} while (status == Z_OK);
-	if (stream.total_out != size || status != Z_STREAM_END)
-		bad_object(offset, _("inflate returned %d"), status);
-	git_inflate_end(&stream);
-	if (oid)
+	} طالما (حالت == Z_OK);
+	إذا (دھارا.کل_باہرلا != ناپ || حالت != Z_دھارا_سرا)
+		bad_object(وتھ, _("inflate returned %d"), حالت);
+	git_inflate_سرا(&دھارا);
+	إذا (oid)
 		git_hash_final_oid(oid, &c);
-	return buf == fixed_buf ? NULL : buf;
+	أرجع buf == fixed_buf ? عدم : buf;
 }
 
-static void *unpack_raw_entry(struct object_entry *obj,
-			      off_t *ofs_offset,
-			      struct object_id *ref_oid,
-			      struct object_id *oid)
+ساكن فراغ *unpack_raw_اندراج(بنية object_اندراج *obj,
+			      off_t *ofs_وتھ,
+			      بنية object_id *ref_oid,
+			      بنية object_id *oid)
 {
-	unsigned char *p;
-	size_t size, c;
-	off_t base_offset;
-	unsigned shift;
-	void *data;
+	بنانشانی حرف *p;
+	ناپ_t ناپ, c;
+	off_t ادھار_وتھ;
+	بنانشانی کھسکاؤ;
+	فراغ *انکڑے;
 
-	obj->idx.offset = consumed_bytes;
-	input_crc32 = crc32(0, NULL, 0);
+	obj->idx.وتھ = consumed_بائٹاں;
+	داخلہ_چکری_جانچ_32 = چکری_جانچ_32(0, عدم, 0);
 
 	p = fill(1);
 	c = *p;
 	use(1);
 	obj->type = (c >> 4) & 7;
-	size = (c & 15);
-	shift = 4;
-	while (c & 0x80) {
-		if ((bitsizeof(size_t) - 7) < shift)
+	ناپ = (c & 15);
+	کھسکاؤ = 4;
+	طالما (c & 0x80) {
+		إذا ((bitsizeof(ناپ_t) - 7) < کھسکاؤ)
 			die(_("object size too large for this platform"));
 		p = fill(1);
 		c = *p;
 		use(1);
-		size += (c & 0x7f) << shift;
-		shift += 7;
+		ناپ += (c & 0x7f) << کھسکاؤ;
+		کھسکاؤ += 7;
 	}
-	obj->size = size;
+	obj->ناپ = ناپ;
 
-	switch (obj->type) {
-	case OBJ_REF_DELTA:
+	بدل (obj->type) {
+	حالة OBJ_REF_DELTA:
 		oidread(ref_oid, fill(the_hash_algo->rawsz),
 			the_repository->hash_algo);
 		use(the_hash_algo->rawsz);
-		break;
-	case OBJ_OFS_DELTA:
+		اكسر;
+	حالة OBJ_OFS_DELTA:
 		p = fill(1);
 		c = *p;
 		use(1);
-		base_offset = c & 127;
-		while (c & 128) {
-			base_offset += 1;
-			if (!base_offset || MSB(base_offset, 7))
-				bad_object(obj->idx.offset, _("offset value overflow for delta base object"));
+		ادھار_وتھ = c & 127;
+		طالما (c & 128) {
+			ادھار_وتھ += 1;
+			إذا (!ادھار_وتھ || MSB(ادھار_وتھ, 7))
+				bad_object(obj->idx.وتھ, _("offset value overflow for delta base object"));
 			p = fill(1);
 			c = *p;
 			use(1);
-			base_offset = (base_offset << 7) + (c & 127);
+			ادھار_وتھ = (ادھار_وتھ << 7) + (c & 127);
 		}
-		*ofs_offset = obj->idx.offset - base_offset;
-		if (*ofs_offset <= 0 || *ofs_offset >= obj->idx.offset)
-			bad_object(obj->idx.offset, _("delta base offset is out of bound"));
-		break;
-	case OBJ_COMMIT:
-	case OBJ_TREE:
-	case OBJ_BLOB:
-	case OBJ_TAG:
-		break;
-	default:
-		bad_object(obj->idx.offset, _("unknown object type %d"), obj->type);
+		*ofs_وتھ = obj->idx.وتھ - ادھار_وتھ;
+		إذا (*ofs_وتھ <= 0 || *ofs_وتھ >= obj->idx.وتھ)
+			bad_object(obj->idx.وتھ, _("delta base offset is out of bound"));
+		اكسر;
+	حالة OBJ_COMMIT:
+	حالة OBJ_درخت:
+	حالة OBJ_BLOB:
+	حالة OBJ_ٹیگ:
+		اكسر;
+	افتراضي:
+		bad_object(obj->idx.وتھ, _("unknown object type %d"), obj->type);
 	}
-	obj->hdr_size = consumed_bytes - obj->idx.offset;
+	obj->hdr_ناپ = consumed_بائٹاں - obj->idx.وتھ;
 
-	data = unpack_entry_data(obj->idx.offset, obj->size, obj->type, oid);
-	obj->idx.crc32 = input_crc32;
-	return data;
+	انکڑے = unpack_اندراج_انکڑے(obj->idx.وتھ, obj->ناپ, obj->type, oid);
+	obj->idx.چکری_جانچ_32 = داخلہ_چکری_جانچ_32;
+	أرجع انکڑے;
 }
 
-static void *unpack_data(struct object_entry *obj,
-			 int (*consume)(const unsigned char *, unsigned long, void *),
-			 void *cb_data)
+ساكن فراغ *unpack_انکڑے(بنية object_اندراج *obj,
+			 صحيح (*consume)(ثابت بنانشانی حرف *, بنانشانی لما, فراغ *),
+			 فراغ *cb_انکڑے)
 {
-	off_t from = obj[0].idx.offset + obj[0].hdr_size;
-	off_t len = obj[1].idx.offset - from;
-	unsigned char *data, *inbuf;
-	git_zstream stream;
-	int status;
+	off_t from = obj[0].idx.وتھ + obj[0].hdr_ناپ;
+	off_t len = obj[1].idx.وتھ - from;
+	بنانشانی حرف *انکڑے, *inbuf;
+	git_zstream دھارا;
+	صحيح حالت;
 
-	data = xmallocz(consume ? 64*1024 : obj->size);
-	inbuf = xmalloc((len < 64*1024) ? (int)len : 64*1024);
+	انکڑے = xmallocz(consume ? 64*1024 : obj->ناپ);
+	inbuf = xmalloc((len < 64*1024) ? (صحيح)len : 64*1024);
 
-	memset(&stream, 0, sizeof(stream));
-	git_inflate_init(&stream);
-	stream.next_out = data;
-	stream.avail_out = consume ? 64*1024 : obj->size;
+	memset(&دھارا, 0, حجم(دھارا));
+	git_inflate_init(&دھارا);
+	دھارا.اگلا_باہرلا = انکڑے;
+	دھارا.avail_باہرلا = consume ? 64*1024 : obj->ناپ;
 
-	do {
+	افعل {
 		ssize_t n = (len < 64*1024) ? (ssize_t)len : 64*1024;
-		n = xpread(get_thread_data()->pack_fd, inbuf, n, from);
-		if (n < 0)
+		n = xpread(get_thread_انکڑے()->pack_fd, inbuf, n, from);
+		إذا (n < 0)
 			die_errno(_("cannot pread pack file"));
-		if (!n)
+		إذا (!n)
 			die(Q_("premature end of pack file, %"PRIuMAX" byte missing",
 			       "premature end of pack file, %"PRIuMAX" bytes missing",
 			       len),
 			    (uintmax_t)len);
 		from += n;
 		len -= n;
-		stream.next_in = inbuf;
-		stream.avail_in = n;
-		if (!consume)
-			status = git_inflate(&stream, 0);
-		else {
-			do {
-				status = git_inflate(&stream, 0);
-				if (consume(data, stream.next_out - data, cb_data)) {
-					free(inbuf);
-					free(data);
-					return NULL;
+		دھارا.اگلا_وچ = inbuf;
+		دھارا.avail_وچ = n;
+		إذا (!consume)
+			حالت = git_inflate(&دھارا, 0);
+		وإلا {
+			افعل {
+				حالت = git_inflate(&دھارا, 0);
+				إذا (consume(انکڑے, دھارا.اگلا_باہرلا - انکڑے, cb_انکڑے)) {
+					حرر(inbuf);
+					حرر(انکڑے);
+					أرجع عدم;
 				}
-				stream.next_out = data;
-				stream.avail_out = 64*1024;
-			} while (status == Z_OK && stream.avail_in);
+				دھارا.اگلا_باہرلا = انکڑے;
+				دھارا.avail_باہرلا = 64*1024;
+			} طالما (حالت == Z_OK && دھارا.avail_وچ);
 		}
-	} while (len && status == Z_OK && !stream.avail_in);
+	} طالما (len && حالت == Z_OK && !دھارا.avail_وچ);
 
 	/* This has been inflated OK when first encountered, so... */
-	if (status != Z_STREAM_END || stream.total_out != obj->size)
+	إذا (حالت != Z_دھارا_سرا || دھارا.کل_باہرلا != obj->ناپ)
 		die(_("serious inflate inconsistency"));
 
-	git_inflate_end(&stream);
-	free(inbuf);
-	if (consume) {
-		FREE_AND_NULL(data);
+	git_inflate_سرا(&دھارا);
+	حرر(inbuf);
+	إذا (consume) {
+		FREE_AND_NULL(انکڑے);
 	}
-	return data;
+	أرجع انکڑے;
 }
 
-static void *get_data_from_pack(struct object_entry *obj)
+ساكن فراغ *get_انکڑے_from_pack(بنية object_اندراج *obj)
 {
-	return unpack_data(obj, NULL, NULL);
+	أرجع unpack_انکڑے(obj, عدم, عدم);
 }
 
-static int compare_ofs_delta_bases(off_t offset1, off_t offset2,
-				   enum object_type type1,
-				   enum object_type type2)
+ساكن صحيح compare_ofs_delta_bases(off_t offset1, off_t offset2,
+				   تعداد object_type type1,
+				   تعداد object_type type2)
 {
-	int cmp = type1 - type2;
-	if (cmp)
-		return cmp;
-	return offset1 < offset2 ? -1 :
+	صحيح cmp = type1 - type2;
+	إذا (cmp)
+		أرجع cmp;
+	أرجع offset1 < offset2 ? -1 :
 	       offset1 > offset2 ?  1 :
 	       0;
 }
 
-static int find_ofs_delta(const off_t offset)
+ساكن صحيح لبھو_ofs_delta(ثابت off_t وتھ)
 {
-	int first = 0, last = nr_ofs_deltas;
+	صحيح پہلا = 0, آخری = nr_ofs_deltas;
 
-	while (first < last) {
-		int next = first + (last - first) / 2;
-		struct ofs_delta_entry *delta = &ofs_deltas[next];
-		int cmp;
+	طالما (پہلا < آخری) {
+		صحيح اگلا = پہلا + (آخری - پہلا) / 2;
+		بنية ofs_delta_اندراج *delta = &ofs_deltas[اگلا];
+		صحيح cmp;
 
-		cmp = compare_ofs_delta_bases(offset, delta->offset,
+		cmp = compare_ofs_delta_bases(وتھ, delta->وتھ,
 					      OBJ_OFS_DELTA,
 					      objects[delta->obj_no].type);
-		if (!cmp)
-			return next;
-		if (cmp < 0) {
-			last = next;
-			continue;
+		إذا (!cmp)
+			أرجع اگلا;
+		إذا (cmp < 0) {
+			آخری = اگلا;
+			استمر;
 		}
-		first = next+1;
+		پہلا = اگلا+1;
 	}
-	return -first-1;
+	أرجع -پہلا-1;
 }
 
-static void find_ofs_delta_children(off_t offset,
-				    int *first_index, int *last_index)
+ساكن فراغ لبھو_ofs_delta_children(off_t وتھ,
+				    صحيح *پہلا_اشاریہ, صحيح *آخری_اشاریہ)
 {
-	int first = find_ofs_delta(offset);
-	int last = first;
-	int end = nr_ofs_deltas - 1;
+	صحيح پہلا = لبھو_ofs_delta(وتھ);
+	صحيح آخری = پہلا;
+	صحيح سرا = nr_ofs_deltas - 1;
 
-	if (first < 0) {
-		*first_index = 0;
-		*last_index = -1;
-		return;
+	إذا (پہلا < 0) {
+		*پہلا_اشاریہ = 0;
+		*آخری_اشاریہ = -1;
+		أرجع;
 	}
-	while (first > 0 && ofs_deltas[first - 1].offset == offset)
-		--first;
-	while (last < end && ofs_deltas[last + 1].offset == offset)
-		++last;
-	*first_index = first;
-	*last_index = last;
+	طالما (پہلا > 0 && ofs_deltas[پہلا - 1].وتھ == وتھ)
+		--پہلا;
+	طالما (آخری < سرا && ofs_deltas[آخری + 1].وتھ == وتھ)
+		++آخری;
+	*پہلا_اشاریہ = پہلا;
+	*آخری_اشاریہ = آخری;
 }
 
-static int compare_ref_delta_bases(const struct object_id *oid1,
-				   const struct object_id *oid2,
-				   enum object_type type1,
-				   enum object_type type2)
+ساكن صحيح compare_ref_delta_bases(ثابت بنية object_id *oid1,
+				   ثابت بنية object_id *oid2,
+				   تعداد object_type type1,
+				   تعداد object_type type2)
 {
-	int cmp = type1 - type2;
-	if (cmp)
-		return cmp;
-	return oidcmp(oid1, oid2);
+	صحيح cmp = type1 - type2;
+	إذا (cmp)
+		أرجع cmp;
+	أرجع oidcmp(oid1, oid2);
 }
 
-static int find_ref_delta(const struct object_id *oid)
+ساكن صحيح لبھو_ref_delta(ثابت بنية object_id *oid)
 {
-	int first = 0, last = nr_ref_deltas;
+	صحيح پہلا = 0, آخری = nr_ref_deltas;
 
-	while (first < last) {
-		int next = first + (last - first) / 2;
-		struct ref_delta_entry *delta = &ref_deltas[next];
-		int cmp;
+	طالما (پہلا < آخری) {
+		صحيح اگلا = پہلا + (آخری - پہلا) / 2;
+		بنية ref_delta_اندراج *delta = &ref_deltas[اگلا];
+		صحيح cmp;
 
 		cmp = compare_ref_delta_bases(oid, &delta->oid,
 					      OBJ_REF_DELTA,
 					      objects[delta->obj_no].type);
-		if (!cmp)
-			return next;
-		if (cmp < 0) {
-			last = next;
-			continue;
+		إذا (!cmp)
+			أرجع اگلا;
+		إذا (cmp < 0) {
+			آخری = اگلا;
+			استمر;
 		}
-		first = next+1;
+		پہلا = اگلا+1;
 	}
-	return -first-1;
+	أرجع -پہلا-1;
 }
 
-static void find_ref_delta_children(const struct object_id *oid,
-				    int *first_index, int *last_index)
+ساكن فراغ لبھو_ref_delta_children(ثابت بنية object_id *oid,
+				    صحيح *پہلا_اشاریہ, صحيح *آخری_اشاریہ)
 {
-	int first = find_ref_delta(oid);
-	int last = first;
-	int end = nr_ref_deltas - 1;
+	صحيح پہلا = لبھو_ref_delta(oid);
+	صحيح آخری = پہلا;
+	صحيح سرا = nr_ref_deltas - 1;
 
-	if (first < 0) {
-		*first_index = 0;
-		*last_index = -1;
-		return;
+	إذا (پہلا < 0) {
+		*پہلا_اشاریہ = 0;
+		*آخری_اشاریہ = -1;
+		أرجع;
 	}
-	while (first > 0 && oideq(&ref_deltas[first - 1].oid, oid))
-		--first;
-	while (last < end && oideq(&ref_deltas[last + 1].oid, oid))
-		++last;
-	*first_index = first;
-	*last_index = last;
+	طالما (پہلا > 0 && oideq(&ref_deltas[پہلا - 1].oid, oid))
+		--پہلا;
+	طالما (آخری < سرا && oideq(&ref_deltas[آخری + 1].oid, oid))
+		++آخری;
+	*پہلا_اشاریہ = پہلا;
+	*آخری_اشاریہ = آخری;
 }
 
-struct compare_data {
-	struct object_entry *entry;
-	struct odb_stream *st;
-	unsigned char *buf;
-	unsigned long buf_size;
+بنية compare_انکڑے {
+	بنية object_اندراج *اندراج;
+	بنية odb_دھارا *st;
+	بنانشانی حرف *buf;
+	بنانشانی لما buf_ناپ;
 };
 
-static int compare_objects(const unsigned char *buf, unsigned long size,
-			   void *cb_data)
+ساكن صحيح compare_objects(ثابت بنانشانی حرف *buf, بنانشانی لما ناپ,
+			   فراغ *cb_انکڑے)
 {
-	struct compare_data *data = cb_data;
+	بنية compare_انکڑے *انکڑے = cb_انکڑے;
 
-	if (data->buf_size < size) {
-		free(data->buf);
-		data->buf = xmalloc(size);
-		data->buf_size = size;
+	إذا (انکڑے->buf_ناپ < ناپ) {
+		حرر(انکڑے->buf);
+		انکڑے->buf = xmalloc(ناپ);
+		انکڑے->buf_ناپ = ناپ;
 	}
 
-	while (size) {
-		ssize_t len = odb_stream_read(data->st, data->buf, size);
-		if (len == 0)
+	طالما (ناپ) {
+		ssize_t len = odb_دھارا_read(انکڑے->st, انکڑے->buf, ناپ);
+		إذا (len == 0)
 			die(_("SHA1 COLLISION FOUND WITH %s !"),
-			    oid_to_hex(&data->entry->idx.oid));
-		if (len < 0)
+			    oid_منزل_hex(&انکڑے->اندراج->idx.oid));
+		إذا (len < 0)
 			die(_("unable to read %s"),
-			    oid_to_hex(&data->entry->idx.oid));
-		if (memcmp(buf, data->buf, len))
+			    oid_منزل_hex(&انکڑے->اندراج->idx.oid));
+		إذا (memcmp(buf, انکڑے->buf, len))
 			die(_("SHA1 COLLISION FOUND WITH %s !"),
-			    oid_to_hex(&data->entry->idx.oid));
-		size -= len;
+			    oid_منزل_hex(&انکڑے->اندراج->idx.oid));
+		ناپ -= len;
 		buf += len;
 	}
-	return 0;
+	أرجع 0;
 }
 
-static int check_collison(struct object_entry *entry)
+ساكن صحيح check_collison(بنية object_اندراج *اندراج)
 {
-	struct compare_data data;
+	بنية compare_انکڑے انکڑے;
 
-	if (entry->size <= repo_settings_get_big_file_threshold(the_repository) ||
-	    entry->type != OBJ_BLOB)
-		return -1;
+	إذا (اندراج->ناپ <= repo_settings_get_big_file_حد(the_repository) ||
+	    اندراج->type != OBJ_BLOB)
+		أرجع -1;
 
-	memset(&data, 0, sizeof(data));
-	data.entry = entry;
-	data.st = odb_stream_from_object(the_repository->objects, &entry->idx.oid, NULL);
-	if (!data.st)
-		return -1;
-	if (data.st->size != entry->size || data.st->type != entry->type)
+	memset(&انکڑے, 0, حجم(انکڑے));
+	انکڑے.اندراج = اندراج;
+	انکڑے.st = odb_دھارا_from_object(the_repository->objects, &اندراج->idx.oid, عدم);
+	إذا (!انکڑے.st)
+		أرجع -1;
+	إذا (انکڑے.st->ناپ != اندراج->ناپ || انکڑے.st->type != اندراج->type)
 		die(_("SHA1 COLLISION FOUND WITH %s !"),
-		    oid_to_hex(&entry->idx.oid));
-	unpack_data(entry, compare_objects, &data);
-	odb_stream_close(data.st);
-	free(data.buf);
-	return 0;
+		    oid_منزل_hex(&اندراج->idx.oid));
+	unpack_انکڑے(اندراج, compare_objects, &انکڑے);
+	odb_دھارا_close(انکڑے.st);
+	حرر(انکڑے.buf);
+	أرجع 0;
 }
 
-static void record_outgoing_link(const struct object_id *oid)
+ساكن فراغ ریکارڈ_outgoing_link(ثابت بنية object_id *oid)
 {
-	oidset_insert(&outgoing_links, oid);
+	oidset_داخل_کرو(&outgoing_links, oid);
 }
 
-static void maybe_record_name_entry(const struct name_entry *entry)
+ساكن فراغ maybe_ریکارڈ_name_اندراج(ثابت بنية name_اندراج *اندراج)
 {
 	/*
 	 * Checking only trees here results in a significantly faster packfile
@@ -848,126 +848,126 @@ static void maybe_record_name_entry(const struct name_entry *entry)
 	 * happens only once - when refetched, the blob goes into a promisor
 	 * pack, so it won't be GC-ed, the tradeoff seems worth it.
 	*/
-	if (S_ISDIR(entry->mode))
-		record_outgoing_link(&entry->oid);
+	إذا (S_ISDIR(اندراج->منوال))
+		ریکارڈ_outgoing_link(&اندراج->oid);
 }
 
-static void do_record_outgoing_links(struct object *obj)
+ساكن فراغ do_ریکارڈ_outgoing_links(بنية object *obj)
 {
-	if (obj->type == OBJ_TREE) {
-		struct tree *tree = (struct tree *)obj;
-		struct tree_desc desc;
-		struct name_entry entry;
-		if (init_tree_desc_gently(&desc, &tree->object.oid,
-					  tree->buffer, tree->size, 0))
+	إذا (obj->type == OBJ_درخت) {
+		بنية درخت *درخت = (بنية درخت *)obj;
+		بنية درخت_desc desc;
+		بنية name_اندراج اندراج;
+		إذا (init_درخت_desc_gently(&desc, &درخت->object.oid,
+					  درخت->بفر, درخت->ناپ, 0))
 			/*
 			 * Error messages are given when packs are
 			 * verified, so do not print any here.
 			 */
-			return;
-		while (tree_entry_gently(&desc, &entry))
-			maybe_record_name_entry(&entry);
-	} else if (obj->type == OBJ_COMMIT) {
-		struct commit *commit = (struct commit *) obj;
-		struct commit_list *parents = commit->parents;
+			أرجع;
+		طالما (درخت_اندراج_gently(&desc, &اندراج))
+			maybe_ریکارڈ_name_اندراج(&اندراج);
+	} وإلا إذا (obj->type == OBJ_COMMIT) {
+		بنية commit *commit = (بنية commit *) obj;
+		بنية commit_list *parents = commit->parents;
 
-		record_outgoing_link(get_commit_tree_oid(commit));
-		for (; parents; parents = parents->next)
-			record_outgoing_link(&parents->item->object.oid);
-	} else if (obj->type == OBJ_TAG) {
-		struct tag *tag = (struct tag *) obj;
-		record_outgoing_link(get_tagged_oid(tag));
+		ریکارڈ_outgoing_link(get_commit_درخت_oid(commit));
+		لكل (; parents; parents = parents->اگلا)
+			ریکارڈ_outgoing_link(&parents->شے->object.oid);
+	} وإلا إذا (obj->type == OBJ_ٹیگ) {
+		بنية ٹیگ *ٹیگ = (بنية ٹیگ *) obj;
+		ریکارڈ_outgoing_link(get_tagged_oid(ٹیگ));
 	}
 }
 
-static void sha1_object(const void *data, struct object_entry *obj_entry,
-			unsigned long size, enum object_type type,
-			const struct object_id *oid)
+ساكن فراغ sha1_object(ثابت فراغ *انکڑے, بنية object_اندراج *obj_اندراج,
+			بنانشانی لما ناپ, تعداد object_type type,
+			ثابت بنية object_id *oid)
 {
-	void *new_data = NULL;
-	int collision_test_needed = 0;
+	فراغ *new_انکڑے = عدم;
+	صحيح collision_test_needed = 0;
 
-	assert(data || obj_entry);
+	أكد(انکڑے || obj_اندراج);
 
-	if (startup_info->have_repository) {
-		read_lock();
+	إذا (startup_info->have_repository) {
+		read_جندرا();
 		collision_test_needed = odb_has_object(the_repository->objects, oid,
 						       ODB_HAS_OBJECT_FETCH_PROMISOR);
 		read_unlock();
 	}
 
-	if (collision_test_needed && !data) {
-		read_lock();
-		if (!check_collison(obj_entry))
+	إذا (collision_test_needed && !انکڑے) {
+		read_جندرا();
+		إذا (!check_collison(obj_اندراج))
 			collision_test_needed = 0;
 		read_unlock();
 	}
-	if (collision_test_needed) {
-		void *has_data;
-		enum object_type has_type;
-		size_t has_size;
-		read_lock();
-		has_type = odb_read_object_info(the_repository->objects, oid, &has_size);
-		if (has_type < 0)
-			die(_("cannot read existing object info %s"), oid_to_hex(oid));
-		if (has_type != type || has_size != size)
-			die(_("SHA1 COLLISION FOUND WITH %s !"), oid_to_hex(oid));
-		has_data = odb_read_object(the_repository->objects, oid,
-					   &has_type, &has_size);
+	إذا (collision_test_needed) {
+		فراغ *has_انکڑے;
+		تعداد object_type has_type;
+		ناپ_t has_ناپ;
+		read_جندرا();
+		has_type = odb_read_object_info(the_repository->objects, oid, &has_ناپ);
+		إذا (has_type < 0)
+			die(_("cannot read existing object info %s"), oid_منزل_hex(oid));
+		إذا (has_type != type || has_ناپ != ناپ)
+			die(_("SHA1 COLLISION FOUND WITH %s !"), oid_منزل_hex(oid));
+		has_انکڑے = odb_read_object(the_repository->objects, oid,
+					   &has_type, &has_ناپ);
 		read_unlock();
-		if (!data)
-			data = new_data = get_data_from_pack(obj_entry);
-		if (!has_data)
-			die(_("cannot read existing object %s"), oid_to_hex(oid));
-		if (size != has_size || type != has_type ||
-		    memcmp(data, has_data, size) != 0)
-			die(_("SHA1 COLLISION FOUND WITH %s !"), oid_to_hex(oid));
-		free(has_data);
+		إذا (!انکڑے)
+			انکڑے = new_انکڑے = get_انکڑے_from_pack(obj_اندراج);
+		إذا (!has_انکڑے)
+			die(_("cannot read existing object %s"), oid_منزل_hex(oid));
+		إذا (ناپ != has_ناپ || type != has_type ||
+		    memcmp(انکڑے, has_انکڑے, ناپ) != 0)
+			die(_("SHA1 COLLISION FOUND WITH %s !"), oid_منزل_hex(oid));
+		حرر(has_انکڑے);
 	}
 
-	if (strict || do_fsck_object || record_outgoing_links) {
-		read_lock();
-		if (type == OBJ_BLOB) {
-			struct blob *blob = lookup_blob(the_repository, oid);
-			if (blob)
+	إذا (strict || do_fsck_object || ریکارڈ_outgoing_links) {
+		read_جندرا();
+		إذا (type == OBJ_BLOB) {
+			بنية blob *blob = lookup_blob(the_repository, oid);
+			إذا (blob)
 				blob->object.flags |= FLAG_CHECKED;
-			else
-				die(_("invalid blob object %s"), oid_to_hex(oid));
-			if (do_fsck_object &&
-			    fsck_object(&blob->object, (void *)data, size, &fsck_options))
+			وإلا
+				die(_("invalid blob object %s"), oid_منزل_hex(oid));
+			إذا (do_fsck_object &&
+			    fsck_object(&blob->object, (فراغ *)انکڑے, ناپ, &fsck_options))
 				die(_("fsck error in packed object"));
-		} else {
-			struct object *obj;
-			int eaten;
-			void *buf = (void *) data;
+		} وإلا {
+			بنية object *obj;
+			صحيح eaten;
+			فراغ *buf = (فراغ *) انکڑے;
 
-			assert(data && "data can only be NULL for large _blobs_");
+			أكد(انکڑے && "data can only be NULL for large _blobs_");
 
 			/*
 			 * we do not need to free the memory here, as the
 			 * buf is deleted by the caller.
 			 */
-			obj = parse_object_buffer(the_repository, oid, type,
-						  size, buf,
+			obj = parse_object_بفر(the_repository, oid, type,
+						  ناپ, buf,
 						  &eaten);
-			if (!obj)
+			إذا (!obj)
 				die(_("invalid %s"), type_name(type));
-			if (do_fsck_object &&
-			    fsck_object(obj, buf, size, &fsck_options))
+			إذا (do_fsck_object &&
+			    fsck_object(obj, buf, ناپ, &fsck_options))
 				die(_("fsck error in packed object"));
-			if (strict && fsck_walk(obj, NULL, &fsck_options))
-				die(_("Not all child objects of %s are reachable"), oid_to_hex(&obj->oid));
-			if (record_outgoing_links)
-				do_record_outgoing_links(obj);
+			إذا (strict && fsck_walk(obj, عدم, &fsck_options))
+				die(_("Not all child objects of %s are reachable"), oid_منزل_hex(&obj->oid));
+			إذا (ریکارڈ_outgoing_links)
+				do_ریکارڈ_outgoing_links(obj);
 
-			if (obj->type == OBJ_TREE) {
-				struct tree *item = (struct tree *) obj;
-				item->buffer = NULL;
+			إذا (obj->type == OBJ_درخت) {
+				بنية درخت *شے = (بنية درخت *) obj;
+				شے->بفر = عدم;
 				obj->parsed = 0;
 			}
-			if (obj->type == OBJ_COMMIT) {
-				struct commit *commit = (struct commit *) obj;
-				if (detach_commit_buffer(commit, NULL) != data)
+			إذا (obj->type == OBJ_COMMIT) {
+				بنية commit *commit = (بنية commit *) obj;
+				إذا (detach_commit_بفر(commit, عدم) != انکڑے)
 					BUG("parse_object_buffer transmogrified our buffer");
 			}
 			obj->flags |= FLAG_CHECKED;
@@ -975,7 +975,7 @@ static void sha1_object(const void *data, struct object_entry *obj_entry,
 		read_unlock();
 	}
 
-	free(new_data);
+	حرر(new_انکڑے);
 }
 
 /*
@@ -989,178 +989,178 @@ static void sha1_object(const void *data, struct object_entry *obj_entry,
  * none, the ultimate base object), and reconstruct each node in the delta
  * chain in order to generate the reconstructed data for this node.
  */
-static void *get_base_data(struct base_data *c)
+ساكن فراغ *get_ادھار_انکڑے(بنية ادھار_انکڑے *c)
 {
-	if (!c->data) {
-		struct object_entry *obj = c->obj;
-		struct base_data **delta = NULL;
-		int delta_nr = 0, delta_alloc = 0;
+	إذا (!c->انکڑے) {
+		بنية object_اندراج *obj = c->obj;
+		بنية ادھار_انکڑے **delta = عدم;
+		صحيح delta_nr = 0, delta_alloc = 0;
 
-		while (is_delta_type(c->obj->type) && !c->data) {
+		طالما (is_delta_type(c->obj->type) && !c->انکڑے) {
 			ALLOC_GROW(delta, delta_nr + 1, delta_alloc);
 			delta[delta_nr++] = c;
-			c = c->base;
+			c = c->ادھار;
 		}
-		if (!delta_nr) {
-			c->data = get_data_from_pack(obj);
-			c->size = obj->size;
-			base_cache_used += c->size;
-			prune_base_data(c);
+		إذا (!delta_nr) {
+			c->انکڑے = get_انکڑے_from_pack(obj);
+			c->ناپ = obj->ناپ;
+			ادھار_cache_ورتیا += c->ناپ;
+			prune_ادھار_انکڑے(c);
 		}
-		for (; delta_nr > 0; delta_nr--) {
-			void *base, *raw;
+		لكل (; delta_nr > 0; delta_nr--) {
+			فراغ *ادھار, *raw;
 			c = delta[delta_nr - 1];
 			obj = c->obj;
-			base = get_base_data(c->base);
-			raw = get_data_from_pack(obj);
-			c->data = patch_delta(
-				base, c->base->size,
-				raw, obj->size,
-				&c->size);
-			free(raw);
-			if (!c->data)
-				bad_object(obj->idx.offset, _("failed to apply delta"));
-			base_cache_used += c->size;
-			prune_base_data(c);
+			ادھار = get_ادھار_انکڑے(c->ادھار);
+			raw = get_انکڑے_from_pack(obj);
+			c->انکڑے = patch_delta(
+				ادھار, c->ادھار->ناپ,
+				raw, obj->ناپ,
+				&c->ناپ);
+			حرر(raw);
+			إذا (!c->انکڑے)
+				bad_object(obj->idx.وتھ, _("failed to apply delta"));
+			ادھار_cache_ورتیا += c->ناپ;
+			prune_ادھار_انکڑے(c);
 		}
-		free(delta);
+		حرر(delta);
 	}
-	return c->data;
+	أرجع c->انکڑے;
 }
 
-static struct base_data *make_base(struct object_entry *obj,
-				   struct base_data *parent)
+ساكن بنية ادھار_انکڑے *make_ادھار(بنية object_اندراج *obj,
+				   بنية ادھار_انکڑے *ماپا)
 {
-	struct base_data *base = xcalloc(1, sizeof(struct base_data));
-	base->base = parent;
-	base->obj = obj;
-	find_ref_delta_children(&obj->idx.oid,
-				&base->ref_first, &base->ref_last);
-	find_ofs_delta_children(obj->idx.offset,
-				&base->ofs_first, &base->ofs_last);
-	base->children_remaining = base->ref_last - base->ref_first +
-		base->ofs_last - base->ofs_first + 2;
-	return base;
+	بنية ادھار_انکڑے *ادھار = xcalloc(1, حجم(بنية ادھار_انکڑے));
+	ادھار->ادھار = ماپا;
+	ادھار->obj = obj;
+	لبھو_ref_delta_children(&obj->idx.oid,
+				&ادھار->ref_پہلا, &ادھار->ref_آخری);
+	لبھو_ofs_delta_children(obj->idx.وتھ,
+				&ادھار->ofs_پہلا, &ادھار->ofs_آخری);
+	ادھار->children_بچیا = ادھار->ref_آخری - ادھار->ref_پہلا +
+		ادھار->ofs_آخری - ادھار->ofs_پہلا + 2;
+	أرجع ادھار;
 }
 
-static struct base_data *resolve_delta(struct object_entry *delta_obj,
-				       struct base_data *base)
+ساكن بنية ادھار_انکڑے *resolve_delta(بنية object_اندراج *delta_obj,
+				       بنية ادھار_انکڑے *ادھار)
 {
-	void *delta_data, *result_data;
-	struct base_data *result;
-	size_t result_size;
+	فراغ *delta_انکڑے, *نتیجہ_انکڑے;
+	بنية ادھار_انکڑے *نتیجہ;
+	ناپ_t نتیجہ_ناپ;
 
-	if (show_stat) {
-		int i = delta_obj - objects;
-		int j = base->obj - objects;
-		obj_stat[i].delta_depth = obj_stat[j].delta_depth + 1;
-		deepest_delta_lock();
-		if (deepest_delta < obj_stat[i].delta_depth)
-			deepest_delta = obj_stat[i].delta_depth;
-		deepest_delta_unlock();
-		obj_stat[i].base_object_no = j;
+	إذا (show_stat) {
+		صحيح i = delta_obj - objects;
+		صحيح j = ادھار->obj - objects;
+		obj_stat[i].delta_ڈونگھائی = obj_stat[j].delta_ڈونگھائی + 1;
+		سبھ_توں_ڈونگھا_delta_جندرا();
+		إذا (سبھ_توں_ڈونگھا_delta < obj_stat[i].delta_ڈونگھائی)
+			سبھ_توں_ڈونگھا_delta = obj_stat[i].delta_ڈونگھائی;
+		سبھ_توں_ڈونگھا_delta_unlock();
+		obj_stat[i].ادھار_object_no = j;
 	}
-	delta_data = get_data_from_pack(delta_obj);
-	assert(base->data);
-	result_data = patch_delta(base->data, base->size,
-				  delta_data, delta_obj->size, &result_size);
-	free(delta_data);
-	if (!result_data)
-		bad_object(delta_obj->idx.offset, _("failed to apply delta"));
-	hash_object_file(the_hash_algo, result_data, result_size,
+	delta_انکڑے = get_انکڑے_from_pack(delta_obj);
+	أكد(ادھار->انکڑے);
+	نتیجہ_انکڑے = patch_delta(ادھار->انکڑے, ادھار->ناپ,
+				  delta_انکڑے, delta_obj->ناپ, &نتیجہ_ناپ);
+	حرر(delta_انکڑے);
+	إذا (!نتیجہ_انکڑے)
+		bad_object(delta_obj->idx.وتھ, _("failed to apply delta"));
+	hash_object_file(the_hash_algo, نتیجہ_انکڑے, نتیجہ_ناپ,
 			 delta_obj->real_type, &delta_obj->idx.oid);
-	sha1_object(result_data, NULL, result_size, delta_obj->real_type,
+	sha1_object(نتیجہ_انکڑے, عدم, نتیجہ_ناپ, delta_obj->real_type,
 		    &delta_obj->idx.oid);
 
-	result = make_base(delta_obj, base);
-	result->data = result_data;
-	result->size = result_size;
+	نتیجہ = make_ادھار(delta_obj, ادھار);
+	نتیجہ->انکڑے = نتیجہ_انکڑے;
+	نتیجہ->ناپ = نتیجہ_ناپ;
 
-	counter_lock();
+	counter_جندرا();
 	nr_resolved_deltas++;
 	counter_unlock();
 
-	return result;
+	أرجع نتیجہ;
 }
 
-static int compare_ofs_delta_entry(const void *a, const void *b)
+ساكن صحيح compare_ofs_delta_اندراج(ثابت فراغ *a, ثابت فراغ *b)
 {
-	const struct ofs_delta_entry *delta_a = a;
-	const struct ofs_delta_entry *delta_b = b;
+	ثابت بنية ofs_delta_اندراج *delta_a = a;
+	ثابت بنية ofs_delta_اندراج *delta_b = b;
 
-	return delta_a->offset < delta_b->offset ? -1 :
-	       delta_a->offset > delta_b->offset ?  1 :
+	أرجع delta_a->وتھ < delta_b->وتھ ? -1 :
+	       delta_a->وتھ > delta_b->وتھ ?  1 :
 	       0;
 }
 
-static int compare_ref_delta_entry(const void *a, const void *b)
+ساكن صحيح compare_ref_delta_اندراج(ثابت فراغ *a, ثابت فراغ *b)
 {
-	const struct ref_delta_entry *delta_a = a;
-	const struct ref_delta_entry *delta_b = b;
+	ثابت بنية ref_delta_اندراج *delta_a = a;
+	ثابت بنية ref_delta_اندراج *delta_b = b;
 
-	return oidcmp(&delta_a->oid, &delta_b->oid);
+	أرجع oidcmp(&delta_a->oid, &delta_b->oid);
 }
 
-static void *threaded_second_pass(void *data)
+ساكن فراغ *threaded_دوجا_pass(فراغ *انکڑے)
 {
-	if (data)
-		set_thread_data(data);
-	for (;;) {
-		struct base_data *parent = NULL;
-		struct object_entry *child_obj = NULL;
-		struct base_data *child = NULL;
+	إذا (انکڑے)
+		سیٹ_thread_انکڑے(انکڑے);
+	لكل (;;) {
+		بنية ادھار_انکڑے *ماپا = عدم;
+		بنية object_اندراج *بچہ_obj = عدم;
+		بنية ادھار_انکڑے *بچہ = عدم;
 
-		counter_lock();
-		display_progress(progress, nr_resolved_deltas);
+		counter_جندرا();
+		display_ترقی(ترقی, nr_resolved_deltas);
 		counter_unlock();
 
-		work_lock();
-		if (list_empty(&work_head)) {
+		work_جندرا();
+		إذا (list_خالی_تھاواں(&work_سر)) {
 			/*
 			 * Take an object from the object array.
 			 */
-			while (nr_dispatched < nr_objects &&
+			طالما (nr_dispatched < nr_objects &&
 			       is_delta_type(objects[nr_dispatched].type))
 				nr_dispatched++;
-			if (nr_dispatched >= nr_objects) {
+			إذا (nr_dispatched >= nr_objects) {
 				work_unlock();
-				break;
+				اكسر;
 			}
-			child_obj = &objects[nr_dispatched++];
-		} else {
+			بچہ_obj = &objects[nr_dispatched++];
+		} وإلا {
 			/*
 			 * Peek at the top of the stack, and take a child from
 			 * it.
 			 */
-			parent = list_first_entry(&work_head, struct base_data,
+			ماپا = list_پہلا_اندراج(&work_سر, بنية ادھار_انکڑے,
 						  list);
 
-			while (parent->ref_first <= parent->ref_last) {
-				int offset = ref_deltas[parent->ref_first++].obj_no;
-				child_obj = objects + offset;
-				if (child_obj->real_type != OBJ_REF_DELTA) {
-					child_obj = NULL;
-					continue;
+			طالما (ماپا->ref_پہلا <= ماپا->ref_آخری) {
+				صحيح وتھ = ref_deltas[ماپا->ref_پہلا++].obj_no;
+				بچہ_obj = objects + وتھ;
+				إذا (بچہ_obj->real_type != OBJ_REF_DELTA) {
+					بچہ_obj = عدم;
+					استمر;
 				}
-				child_obj->real_type = parent->obj->real_type;
-				break;
+				بچہ_obj->real_type = ماپا->obj->real_type;
+				اكسر;
 			}
 
-			if (!child_obj && parent->ofs_first <= parent->ofs_last) {
-				child_obj = objects +
-					ofs_deltas[parent->ofs_first++].obj_no;
-				assert(child_obj->real_type == OBJ_OFS_DELTA);
-				child_obj->real_type = parent->obj->real_type;
+			إذا (!بچہ_obj && ماپا->ofs_پہلا <= ماپا->ofs_آخری) {
+				بچہ_obj = objects +
+					ofs_deltas[ماپا->ofs_پہلا++].obj_no;
+				أكد(بچہ_obj->real_type == OBJ_OFS_DELTA);
+				بچہ_obj->real_type = ماپا->obj->real_type;
 			}
 
-			if (parent->ref_first > parent->ref_last &&
-			    parent->ofs_first > parent->ofs_last) {
+			إذا (ماپا->ref_پہلا > ماپا->ref_آخری &&
+			    ماپا->ofs_پہلا > ماپا->ofs_آخری) {
 				/*
 				 * This parent has run out of children, so move
 				 * it to done_head.
 				 */
-				list_del(&parent->list);
-				list_add(&parent->list, &done_head);
+				list_del(&ماپا->list);
+				list_جوڑو(&ماپا->list, &پورا_سر);
 			}
 
 			/*
@@ -1174,19 +1174,19 @@ static void *threaded_second_pass(void *data)
 			 * limit is exceeded, so in the typical case, this does
 			 * not happen.
 			 */
-			get_base_data(parent);
-			parent->retain_data++;
+			get_ادھار_انکڑے(ماپا);
+			ماپا->retain_انکڑے++;
 		}
 		work_unlock();
 
-		if (child_obj) {
-			if (parent) {
-				child = resolve_delta(child_obj, parent);
-				if (!child->children_remaining)
-					FREE_AND_NULL(child->data);
-			} else{
-				child = make_base(child_obj, NULL);
-				if (child->children_remaining) {
+		إذا (بچہ_obj) {
+			إذا (ماپا) {
+				بچہ = resolve_delta(بچہ_obj, ماپا);
+				إذا (!بچہ->children_بچیا)
+					FREE_AND_NULL(بچہ->انکڑے);
+			} وإلا{
+				بچہ = make_ادھار(بچہ_obj, عدم);
+				إذا (بچہ->children_بچیا) {
 					/*
 					 * Since this child has its own delta children,
 					 * we will need this data in the future.
@@ -1194,51 +1194,51 @@ static void *threaded_second_pass(void *data)
 					 * have access to this object's data while
 					 * outside the work mutex.
 					 */
-					child->data = get_data_from_pack(child_obj);
-					child->size = child_obj->size;
+					بچہ->انکڑے = get_انکڑے_from_pack(بچہ_obj);
+					بچہ->ناپ = بچہ_obj->ناپ;
 				}
 			}
 		}
 
-		work_lock();
-		if (parent)
-			parent->retain_data--;
+		work_جندرا();
+		إذا (ماپا)
+			ماپا->retain_انکڑے--;
 
-		if (child && child->data) {
+		إذا (بچہ && بچہ->انکڑے) {
 			/*
 			 * This child has its own children, so add it to
 			 * work_head.
 			 */
-			list_add(&child->list, &work_head);
-			base_cache_used += child->size;
-			prune_base_data(NULL);
-		} else if (child) {
+			list_جوڑو(&بچہ->list, &work_سر);
+			ادھار_cache_ورتیا += بچہ->ناپ;
+			prune_ادھار_انکڑے(عدم);
+		} وإلا إذا (بچہ) {
 			/*
 			 * This child does not have its own children. It may be
 			 * the last descendant of its ancestors; free those
 			 * that we can.
 			 */
-			struct base_data *p = parent;
+			بنية ادھار_انکڑے *p = ماپا;
 
-			while (p) {
-				struct base_data *next_p;
+			طالما (p) {
+				بنية ادھار_انکڑے *اگلا_p;
 
-				p->children_remaining--;
-				if (p->children_remaining)
-					break;
+				p->children_بچیا--;
+				إذا (p->children_بچیا)
+					اكسر;
 
-				next_p = p->base;
-				free_base_data(p);
+				اگلا_p = p->ادھار;
+				free_ادھار_انکڑے(p);
 				list_del(&p->list);
-				free(p);
+				حرر(p);
 
-				p = next_p;
+				p = اگلا_p;
 			}
-			FREE_AND_NULL(child);
+			FREE_AND_NULL(بچہ);
 		}
 		work_unlock();
 	}
-	return NULL;
+	أرجع عدم;
 }
 
 /*
@@ -1247,74 +1247,74 @@ static void *threaded_second_pass(void *data)
  * - calculate SHA1 of all non-delta objects;
  * - remember base (SHA1 or offset) for all deltas.
  */
-static void parse_pack_objects(unsigned char *hash)
+ساكن فراغ parse_pack_objects(بنانشانی حرف *hash)
 {
-	int i, nr_delays = 0;
-	struct ofs_delta_entry *ofs_delta = ofs_deltas;
-	struct object_id ref_delta_oid;
-	struct stat st;
-	struct git_hash_ctx tmp_ctx;
+	صحيح i, nr_delays = 0;
+	بنية ofs_delta_اندراج *ofs_delta = ofs_deltas;
+	بنية object_id ref_delta_oid;
+	بنية stat st;
+	بنية git_hash_ctx tmp_ctx;
 
-	if (verbose)
-		progress = start_progress(
+	إذا (verbose)
+		ترقی = شروع_ترقی(
 				the_repository,
-				progress_title ? progress_title :
+				ترقی_title ? ترقی_title :
 				from_stdin ? _("Receiving objects") : _("Indexing objects"),
 				nr_objects);
-	for (i = 0; i < nr_objects; i++) {
-		struct object_entry *obj = &objects[i];
-		void *data = unpack_raw_entry(obj, &ofs_delta->offset,
+	لكل (i = 0; i < nr_objects; i++) {
+		بنية object_اندراج *obj = &objects[i];
+		فراغ *انکڑے = unpack_raw_اندراج(obj, &ofs_delta->وتھ,
 					      &ref_delta_oid,
 					      &obj->idx.oid);
 		obj->real_type = obj->type;
-		if (obj->type == OBJ_OFS_DELTA) {
+		إذا (obj->type == OBJ_OFS_DELTA) {
 			nr_ofs_deltas++;
 			ofs_delta->obj_no = i;
 			ofs_delta++;
-		} else if (obj->type == OBJ_REF_DELTA) {
+		} وإلا إذا (obj->type == OBJ_REF_DELTA) {
 			ALLOC_GROW(ref_deltas, nr_ref_deltas + 1, ref_deltas_alloc);
 			oidcpy(&ref_deltas[nr_ref_deltas].oid, &ref_delta_oid);
 			ref_deltas[nr_ref_deltas].obj_no = i;
 			nr_ref_deltas++;
-		} else if (!data) {
+		} وإلا إذا (!انکڑے) {
 			/* large blobs, check later */
 			obj->real_type = OBJ_BAD;
 			nr_delays++;
-		} else
-			sha1_object(data, NULL, obj->size, obj->type,
+		} وإلا
+			sha1_object(انکڑے, عدم, obj->ناپ, obj->type,
 				    &obj->idx.oid);
-		free(data);
-		display_progress(progress, i+1);
+		حرر(انکڑے);
+		display_ترقی(ترقی, i+1);
 	}
-	objects[i].idx.offset = consumed_bytes;
-	stop_progress(&progress);
+	objects[i].idx.وتھ = consumed_بائٹاں;
+	stop_ترقی(&ترقی);
 
 	/* Check pack integrity */
 	flush();
 	git_hash_init(&tmp_ctx, the_hash_algo);
-	git_hash_clone(&tmp_ctx, &input_ctx);
+	git_hash_clone(&tmp_ctx, &داخلہ_ctx);
 	git_hash_final(hash, &tmp_ctx);
-	if (!hasheq(fill(the_hash_algo->rawsz), hash, the_repository->hash_algo))
+	إذا (!hasheq(fill(the_hash_algo->rawsz), hash, the_repository->hash_algo))
 		die(_("pack is corrupted (SHA1 mismatch)"));
 	use(the_hash_algo->rawsz);
 
 	/* If input_fd is a file, we should have reached its end now. */
-	if (fstat(input_fd, &st))
+	إذا (fstat(داخلہ_fd, &st))
 		die_errno(_("cannot fstat packfile"));
-	if (S_ISREG(st.st_mode) &&
-			lseek(input_fd, 0, SEEK_CUR) - input_len != st.st_size)
+	إذا (S_ISREG(st.st_منوال) &&
+			lseek(داخلہ_fd, 0, SEEK_CUR) - داخلہ_len != st.st_ناپ)
 		die(_("pack has junk at the end"));
 
-	for (i = 0; i < nr_objects; i++) {
-		struct object_entry *obj = &objects[i];
-		if (obj->real_type != OBJ_BAD)
-			continue;
+	لكل (i = 0; i < nr_objects; i++) {
+		بنية object_اندراج *obj = &objects[i];
+		إذا (obj->real_type != OBJ_BAD)
+			استمر;
 		obj->real_type = obj->type;
-		sha1_object(NULL, obj, obj->size, obj->type,
+		sha1_object(عدم, obj, obj->ناپ, obj->type,
 			    &obj->idx.oid);
 		nr_delays--;
 	}
-	if (nr_delays)
+	إذا (nr_delays)
 		die(_("confusion beyond insanity in parse_pack_objects()"));
 }
 
@@ -1326,39 +1326,39 @@ static void parse_pack_objects(unsigned char *hash)
  *   recursively checking if the resulting object is used as a base
  *   for some more deltas.
  */
-static void resolve_deltas(struct pack_idx_option *opts)
+ساكن فراغ resolve_deltas(بنية pack_idx_option *opts)
 {
-	int i;
+	صحيح i;
 
-	if (!nr_ofs_deltas && !nr_ref_deltas)
-		return;
+	إذا (!nr_ofs_deltas && !nr_ref_deltas)
+		أرجع;
 
 	/* Sort deltas by base SHA1/offset for fast searching */
-	QSORT(ofs_deltas, nr_ofs_deltas, compare_ofs_delta_entry);
-	QSORT(ref_deltas, nr_ref_deltas, compare_ref_delta_entry);
+	QSORT(ofs_deltas, nr_ofs_deltas, compare_ofs_delta_اندراج);
+	QSORT(ref_deltas, nr_ref_deltas, compare_ref_delta_اندراج);
 
-	if (verbose || show_resolving_progress)
-		progress = start_progress(the_repository,
+	إذا (verbose || show_resolving_ترقی)
+		ترقی = شروع_ترقی(the_repository,
 					  _("Resolving deltas"),
 					  nr_ref_deltas + nr_ofs_deltas);
 
 	nr_dispatched = 0;
-	base_cache_limit = opts->delta_base_cache_limit * nr_threads;
-	if (nr_threads > 1 || getenv("GIT_FORCE_THREADS")) {
+	ادھار_cache_حد_بندی = opts->delta_ادھار_cache_حد_بندی * nr_دھاگے;
+	إذا (nr_دھاگے > 1 || getenv("GIT_FORCE_THREADS")) {
 		init_thread();
-		for (i = 0; i < nr_threads; i++) {
-			int ret = pthread_create(&thread_data[i].thread, NULL,
-						 threaded_second_pass, thread_data + i);
-			if (ret)
+		لكل (i = 0; i < nr_دھاگے; i++) {
+			صحيح ret = pthread_create(&thread_انکڑے[i].thread, عدم,
+						 threaded_دوجا_pass, thread_انکڑے + i);
+			إذا (ret)
 				die(_("unable to create thread: %s"),
 				    strerror(ret));
 		}
-		for (i = 0; i < nr_threads; i++)
-			pthread_join(thread_data[i].thread, NULL);
+		لكل (i = 0; i < nr_دھاگے; i++)
+			pthread_join(thread_انکڑے[i].thread, عدم);
 		cleanup_thread();
-		return;
+		أرجع;
 	}
-	threaded_second_pass(&nothread_data);
+	threaded_دوجا_pass(&nothread_انکڑے);
 }
 
 /*
@@ -1366,117 +1366,117 @@ static void resolve_deltas(struct pack_idx_option *opts)
  * - append objects to convert thin pack to full pack if required
  * - write the final pack hash
  */
-static void fix_unresolved_deltas(struct hashfile *f);
-static void conclude_pack(int fix_thin_pack, const char *curr_pack, unsigned char *pack_hash)
+ساكن فراغ fix_unresolved_deltas(بنية hashfile *f);
+ساكن فراغ conclude_pack(صحيح fix_thin_pack, ثابت حرف *curr_pack, بنانشانی حرف *pack_hash)
 {
-	if (nr_ref_deltas + nr_ofs_deltas == nr_resolved_deltas) {
-		stop_progress(&progress);
+	إذا (nr_ref_deltas + nr_ofs_deltas == nr_resolved_deltas) {
+		stop_ترقی(&ترقی);
 		/* Flush remaining pack final hash. */
 		flush();
-		return;
+		أرجع;
 	}
 
-	if (fix_thin_pack) {
-		struct hashfile *f;
-		unsigned char read_hash[GIT_MAX_RAWSZ], tail_hash[GIT_MAX_RAWSZ];
-		struct strbuf msg = STRBUF_INIT;
-		int nr_unresolved = nr_ofs_deltas + nr_ref_deltas - nr_resolved_deltas;
-		int nr_objects_initial = nr_objects;
-		if (nr_unresolved <= 0)
+	إذا (fix_thin_pack) {
+		بنية hashfile *f;
+		بنانشانی حرف read_hash[GIT_MAX_RAWSZ], پوچھ_hash[GIT_MAX_RAWSZ];
+		بنية strbuf پیغام = STRBUF_INIT;
+		صحيح nr_unresolved = nr_ofs_deltas + nr_ref_deltas - nr_resolved_deltas;
+		صحيح nr_objects_initial = nr_objects;
+		إذا (nr_unresolved <= 0)
 			die(_("confusion beyond insanity"));
 		REALLOC_ARRAY(objects, nr_objects + nr_unresolved + 1);
 		memset(objects + nr_objects + 1, 0,
-		       nr_unresolved * sizeof(*objects));
+		       nr_unresolved * حجم(*objects));
 		f = hashfd(the_repository->hash_algo, output_fd, curr_pack);
 		fix_unresolved_deltas(f);
-		strbuf_addf(&msg, Q_("completed with %d local object",
+		strbuf_addf(&پیغام, Q_("completed with %d local object",
 				     "completed with %d local objects",
 				     nr_objects - nr_objects_initial),
 			    nr_objects - nr_objects_initial);
-		stop_progress_msg(&progress, msg.buf);
-		strbuf_release(&msg);
-		finalize_hashfile(f, tail_hash, FSYNC_COMPONENT_PACK, 0);
+		stop_ترقی_پیغام(&ترقی, پیغام.buf);
+		strbuf_release(&پیغام);
+		finalize_hashfile(f, پوچھ_hash, FSYNC_COMPONENT_PACK, 0);
 		hashcpy(read_hash, pack_hash, the_repository->hash_algo);
-		fixup_pack_header_footer(the_hash_algo, output_fd, pack_hash,
+		fixup_pack_سرخی_footer(the_hash_algo, output_fd, pack_hash,
 					 curr_pack, nr_objects,
-					 read_hash, consumed_bytes-the_hash_algo->rawsz);
-		if (!hasheq(read_hash, tail_hash, the_repository->hash_algo))
+					 read_hash, consumed_بائٹاں-the_hash_algo->rawsz);
+		إذا (!hasheq(read_hash, پوچھ_hash, the_repository->hash_algo))
 			die(_("Unexpected tail checksum for %s "
 			      "(disk corruption?)"), curr_pack);
 	}
-	if (nr_ofs_deltas + nr_ref_deltas != nr_resolved_deltas)
+	إذا (nr_ofs_deltas + nr_ref_deltas != nr_resolved_deltas)
 		die(Q_("pack has %d unresolved delta",
 		       "pack has %d unresolved deltas",
 		       nr_ofs_deltas + nr_ref_deltas - nr_resolved_deltas),
 		    nr_ofs_deltas + nr_ref_deltas - nr_resolved_deltas);
 }
 
-static int write_compressed(struct hashfile *f, void *in, unsigned int size)
+ساكن صحيح write_compressed(بنية hashfile *f, فراغ *وچ, بنانشانی صحيح ناپ)
 {
-	git_zstream stream;
-	int status;
-	unsigned char outbuf[4096];
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	git_zstream دھارا;
+	صحيح حالت;
+	بنانشانی حرف outbuf[4096];
+	بنية repo_config_اقدار *cfg = repo_config_اقدار(the_repository);
 
-	git_deflate_init(&stream, cfg->zlib_compression_level);
-	stream.next_in = in;
-	stream.avail_in = size;
+	git_deflate_init(&دھارا, cfg->zlib_compression_level);
+	دھارا.اگلا_وچ = وچ;
+	دھارا.avail_وچ = ناپ;
 
-	do {
-		stream.next_out = outbuf;
-		stream.avail_out = sizeof(outbuf);
-		status = git_deflate(&stream, Z_FINISH);
-		hashwrite(f, outbuf, sizeof(outbuf) - stream.avail_out);
-	} while (status == Z_OK);
+	افعل {
+		دھارا.اگلا_باہرلا = outbuf;
+		دھارا.avail_باہرلا = حجم(outbuf);
+		حالت = git_deflate(&دھارا, Z_انت);
+		hashwrite(f, outbuf, حجم(outbuf) - دھارا.avail_باہرلا);
+	} طالما (حالت == Z_OK);
 
-	if (status != Z_STREAM_END)
-		die(_("unable to deflate appended object (%d)"), status);
-	size = stream.total_out;
-	git_deflate_end(&stream);
-	return size;
+	إذا (حالت != Z_دھارا_سرا)
+		die(_("unable to deflate appended object (%d)"), حالت);
+	ناپ = دھارا.کل_باہرلا;
+	git_deflate_سرا(&دھارا);
+	أرجع ناپ;
 }
 
-static struct object_entry *append_obj_to_pack(struct hashfile *f,
-			       const unsigned char *sha1, void *buf,
-			       unsigned long size, enum object_type type)
+ساكن بنية object_اندراج *append_obj_منزل_pack(بنية hashfile *f,
+			       ثابت بنانشانی حرف *sha1, فراغ *buf,
+			       بنانشانی لما ناپ, تعداد object_type type)
 {
-	struct object_entry *obj = &objects[nr_objects++];
-	unsigned char header[10];
-	unsigned long s = size;
-	int n = 0;
-	unsigned char c = (type << 4) | (s & 15);
+	بنية object_اندراج *obj = &objects[nr_objects++];
+	بنانشانی حرف سرخی[10];
+	بنانشانی لما s = ناپ;
+	صحيح n = 0;
+	بنانشانی حرف c = (type << 4) | (s & 15);
 	s >>= 4;
-	while (s) {
-		header[n++] = c | 0x80;
+	طالما (s) {
+		سرخی[n++] = c | 0x80;
 		c = s & 0x7f;
 		s >>= 7;
 	}
-	header[n++] = c;
-	crc32_begin(f);
-	hashwrite(f, header, n);
-	obj[0].size = size;
-	obj[0].hdr_size = n;
+	سرخی[n++] = c;
+	چکری_جانچ_32_begin(f);
+	hashwrite(f, سرخی, n);
+	obj[0].ناپ = ناپ;
+	obj[0].hdr_ناپ = n;
 	obj[0].type = type;
 	obj[0].real_type = type;
-	obj[1].idx.offset = obj[0].idx.offset + n;
-	obj[1].idx.offset += write_compressed(f, buf, size);
-	obj[0].idx.crc32 = crc32_end(f);
+	obj[1].idx.وتھ = obj[0].idx.وتھ + n;
+	obj[1].idx.وتھ += write_compressed(f, buf, ناپ);
+	obj[0].idx.چکری_جانچ_32 = چکری_جانچ_32_سرا(f);
 	hashflush(f);
 	oidread(&obj->idx.oid, sha1, the_repository->hash_algo);
-	return obj;
+	أرجع obj;
 }
 
-static int delta_pos_compare(const void *_a, const void *_b)
+ساكن صحيح delta_pos_compare(ثابت فراغ *_a, ثابت فراغ *_b)
 {
-	struct ref_delta_entry *a = *(struct ref_delta_entry **)_a;
-	struct ref_delta_entry *b = *(struct ref_delta_entry **)_b;
-	return a->obj_no - b->obj_no;
+	بنية ref_delta_اندراج *a = *(بنية ref_delta_اندراج **)_a;
+	بنية ref_delta_اندراج *b = *(بنية ref_delta_اندراج **)_b;
+	أرجع a->obj_no - b->obj_no;
 }
 
-static void fix_unresolved_deltas(struct hashfile *f)
+ساكن فراغ fix_unresolved_deltas(بنية hashfile *f)
 {
-	struct ref_delta_entry **sorted_by_pos;
-	int i;
+	بنية ref_delta_اندراج **sorted_by_pos;
+	صحيح i;
 
 	/*
 	 * Since many unresolved deltas may well be themselves base objects
@@ -1489,244 +1489,244 @@ static void fix_unresolved_deltas(struct hashfile *f)
 	 * resolving deltas in the same order as their position in the pack.
 	 */
 	ALLOC_ARRAY(sorted_by_pos, nr_ref_deltas);
-	for (i = 0; i < nr_ref_deltas; i++)
+	لكل (i = 0; i < nr_ref_deltas; i++)
 		sorted_by_pos[i] = &ref_deltas[i];
 	QSORT(sorted_by_pos, nr_ref_deltas, delta_pos_compare);
 
-	if (repo_has_promisor_remote(the_repository)) {
+	إذا (repo_has_promisor_remote(the_repository)) {
 		/*
 		 * Prefetch the delta bases.
 		 */
-		struct oid_array to_fetch = OID_ARRAY_INIT;
-		for (i = 0; i < nr_ref_deltas; i++) {
-			struct ref_delta_entry *d = sorted_by_pos[i];
-			if (!odb_read_object_info_extended(the_repository->objects,
-							   &d->oid, NULL,
+		بنية oid_array منزل_fetch = OID_ARRAY_INIT;
+		لكل (i = 0; i < nr_ref_deltas; i++) {
+			بنية ref_delta_اندراج *d = sorted_by_pos[i];
+			إذا (!odb_read_object_info_extended(the_repository->objects,
+							   &d->oid, عدم,
 							   OBJECT_INFO_FOR_PREFETCH))
-				continue;
-			oid_array_append(&to_fetch, &d->oid);
+				استمر;
+			oid_array_append(&منزل_fetch, &d->oid);
 		}
-		promisor_remote_get_direct(the_repository,
-					   to_fetch.oid, to_fetch.nr);
-		oid_array_clear(&to_fetch);
+		promisor_remote_get_سدھا(the_repository,
+					   منزل_fetch.oid, منزل_fetch.nr);
+		oid_array_clear(&منزل_fetch);
 	}
 
-	for (i = 0; i < nr_ref_deltas; i++) {
-		struct ref_delta_entry *d = sorted_by_pos[i];
-		enum object_type type;
-		void *data;
-		size_t size;
+	لكل (i = 0; i < nr_ref_deltas; i++) {
+		بنية ref_delta_اندراج *d = sorted_by_pos[i];
+		تعداد object_type type;
+		فراغ *انکڑے;
+		ناپ_t ناپ;
 
-		if (objects[d->obj_no].real_type != OBJ_REF_DELTA)
-			continue;
-		data = odb_read_object(the_repository->objects, &d->oid,
-				       &type, &size);
-		if (!data)
-			continue;
+		إذا (objects[d->obj_no].real_type != OBJ_REF_DELTA)
+			استمر;
+		انکڑے = odb_read_object(the_repository->objects, &d->oid,
+				       &type, &ناپ);
+		إذا (!انکڑے)
+			استمر;
 
-		if (check_object_signature(the_repository, &d->oid, data, size,
+		إذا (check_object_signature(the_repository, &d->oid, انکڑے, ناپ,
 					   type) < 0)
-			die(_("local object %s is corrupt"), oid_to_hex(&d->oid));
+			die(_("local object %s is corrupt"), oid_منزل_hex(&d->oid));
 
 		/*
 		 * Add this as an object to the objects array and call
 		 * threaded_second_pass() (which will pick up the added
 		 * object).
 		 */
-		append_obj_to_pack(f, d->oid.hash, data, size, type);
-		free(data);
-		threaded_second_pass(NULL);
+		append_obj_منزل_pack(f, d->oid.hash, انکڑے, ناپ, type);
+		حرر(انکڑے);
+		threaded_دوجا_pass(عدم);
 
-		display_progress(progress, nr_resolved_deltas);
+		display_ترقی(ترقی, nr_resolved_deltas);
 	}
-	free(sorted_by_pos);
+	حرر(sorted_by_pos);
 }
 
-static const char *derive_filename(const char *pack_name, const char *strip,
-				   const char *suffix, struct strbuf *buf)
+ساكن ثابت حرف *derive_filename(ثابت حرف *pack_name, ثابت حرف *strip,
+				   ثابت حرف *suffix, بنية strbuf *buf)
 {
-	size_t len;
-	if (!strip_suffix(pack_name, strip, &len) || !len ||
+	ناپ_t len;
+	إذا (!strip_suffix(pack_name, strip, &len) || !len ||
 	    pack_name[len - 1] != '.')
 		die(_("packfile name '%s' does not end with '.%s'"),
 		    pack_name, strip);
-	strbuf_add(buf, pack_name, len);
+	strbuf_جوڑو(buf, pack_name, len);
 	strbuf_addstr(buf, suffix);
-	return buf->buf;
+	أرجع buf->buf;
 }
 
-static void write_special_file(const char *suffix, const char *msg,
-			       const char *pack_name, const unsigned char *hash,
-			       const char **report)
+ساكن فراغ write_special_file(ثابت حرف *suffix, ثابت حرف *پیغام,
+			       ثابت حرف *pack_name, ثابت بنانشانی حرف *hash,
+			       ثابت حرف **report)
 {
-	struct strbuf name_buf = STRBUF_INIT;
-	const char *filename;
-	int fd;
-	int msg_len = strlen(msg);
+	بنية strbuf name_buf = STRBUF_INIT;
+	ثابت حرف *filename;
+	صحيح fd;
+	صحيح پیغام_len = لڑی_لمبائی(پیغام);
 
-	if (pack_name)
+	إذا (pack_name)
 		filename = derive_filename(pack_name, "pack", suffix, &name_buf);
-	else
+	وإلا
 		filename = odb_pack_name(the_repository, &name_buf, hash, suffix);
 
-	fd = safe_create_file_with_leading_directories(the_repository, filename);
-	if (fd < 0) {
-		if (errno != EEXIST)
+	fd = محفوظ_create_file_with_leading_directories(the_repository, filename);
+	إذا (fd < 0) {
+		إذا (errno != EEXIST)
 			die_errno(_("cannot write %s file '%s'"),
 				  suffix, filename);
-	} else {
-		if (msg_len > 0) {
-			write_or_die(fd, msg, msg_len);
+	} وإلا {
+		إذا (پیغام_len > 0) {
+			write_or_die(fd, پیغام, پیغام_len);
 			write_or_die(fd, "\n", 1);
 		}
-		if (close(fd) != 0)
+		إذا (close(fd) != 0)
 			die_errno(_("cannot close written %s file '%s'"),
 				  suffix, filename);
-		if (report)
+		إذا (report)
 			*report = suffix;
 	}
 	strbuf_release(&name_buf);
 }
 
-static void rename_tmp_packfile(const char **final_name,
-				const char *curr_name,
-				struct strbuf *name, unsigned char *hash,
-				const char *ext, int make_read_only_if_same)
+ساكن فراغ rename_tmp_packfile(ثابت حرف **final_name,
+				ثابت حرف *curr_name,
+				بنية strbuf *name, بنانشانی حرف *hash,
+				ثابت حرف *ext, صحيح make_read_only_if_same)
 {
-	if (!*final_name || strcmp(*final_name, curr_name)) {
-		if (!*final_name)
+	إذا (!*final_name || strcmp(*final_name, curr_name)) {
+		إذا (!*final_name)
 			*final_name = odb_pack_name(the_repository, name, hash, ext);
-		if (finalize_object_file(the_repository, curr_name, *final_name))
+		إذا (finalize_object_file(the_repository, curr_name, *final_name))
 			die(_("unable to rename temporary '*.%s' file to '%s'"),
 			    ext, *final_name);
-	} else if (make_read_only_if_same) {
+	} وإلا إذا (make_read_only_if_same) {
 		chmod(*final_name, 0444);
 	}
 }
 
-static void final(const char *final_pack_name, const char *curr_pack_name,
-		  const char *final_index_name, const char *curr_index_name,
-		  const char *final_rev_index_name, const char *curr_rev_index_name,
-		  const char *keep_msg, const char *promisor_msg,
-		  unsigned char *hash)
+ساكن فراغ final(ثابت حرف *final_pack_name, ثابت حرف *curr_pack_name,
+		  ثابت حرف *final_اشاریہ_name, ثابت حرف *curr_اشاریہ_name,
+		  ثابت حرف *final_rev_اشاریہ_name, ثابت حرف *curr_rev_اشاریہ_name,
+		  ثابت حرف *keep_پیغام, ثابت حرف *promisor_پیغام,
+		  بنانشانی حرف *hash)
 {
-	const char *report = "pack";
-	struct strbuf pack_name = STRBUF_INIT;
-	struct strbuf index_name = STRBUF_INIT;
-	struct strbuf rev_index_name = STRBUF_INIT;
+	ثابت حرف *report = "pack";
+	بنية strbuf pack_name = STRBUF_INIT;
+	بنية strbuf اشاریہ_name = STRBUF_INIT;
+	بنية strbuf rev_اشاریہ_name = STRBUF_INIT;
 
-	if (!from_stdin) {
-		close(input_fd);
-	} else {
+	إذا (!from_stdin) {
+		close(داخلہ_fd);
+	} وإلا {
 		fsync_component_or_die(FSYNC_COMPONENT_PACK, output_fd, curr_pack_name);
-		if (close(output_fd))
+		إذا (close(output_fd))
 			die_errno(_("error while closing pack file"));
 	}
 
-	if (keep_msg)
-		write_special_file("keep", keep_msg, final_pack_name, hash,
+	إذا (keep_پیغام)
+		write_special_file("keep", keep_پیغام, final_pack_name, hash,
 				   &report);
-	if (promisor_msg)
-		write_special_file("promisor", promisor_msg, final_pack_name,
-				   hash, NULL);
+	إذا (promisor_پیغام)
+		write_special_file("promisor", promisor_پیغام, final_pack_name,
+				   hash, عدم);
 
 	rename_tmp_packfile(&final_pack_name, curr_pack_name, &pack_name,
 			    hash, "pack", from_stdin);
-	if (curr_rev_index_name)
-		rename_tmp_packfile(&final_rev_index_name, curr_rev_index_name,
-				    &rev_index_name, hash, "rev", 1);
-	rename_tmp_packfile(&final_index_name, curr_index_name, &index_name,
+	إذا (curr_rev_اشاریہ_name)
+		rename_tmp_packfile(&final_rev_اشاریہ_name, curr_rev_اشاریہ_name,
+				    &rev_اشاریہ_name, hash, "rev", 1);
+	rename_tmp_packfile(&final_اشاریہ_name, curr_اشاریہ_name, &اشاریہ_name,
 			    hash, "idx", 1);
 
-	if (do_fsck_object && startup_info->have_repository) {
-		struct odb_source_files *files =
-			odb_source_files_downcast(the_repository->objects->source);
-		packfile_store_load_pack(files->dirs->packed, final_index_name, 0);
+	إذا (do_fsck_object && startup_info->have_repository) {
+		بنية odb_سروت_files *files =
+			odb_سروت_files_downcast(the_repository->objects->سروت);
+		packfile_store_لدو_pack(files->dirs->packed, final_اشاریہ_name, 0);
 	}
 
-	if (!from_stdin) {
-		printf("%s\n", hash_to_hex(hash));
-	} else {
-		struct strbuf buf = STRBUF_INIT;
+	إذا (!from_stdin) {
+		لکھو("%s\n", hash_منزل_hex(hash));
+	} وإلا {
+		بنية strbuf buf = STRBUF_INIT;
 
-		strbuf_addf(&buf, "%s\t%s\n", report, hash_to_hex(hash));
+		strbuf_addf(&buf, "%s\t%s\n", report, hash_منزل_hex(hash));
 		write_or_die(1, buf.buf, buf.len);
 		strbuf_release(&buf);
 
 		/* Write the last part of the buffer to stdout */
-		write_in_full(1, input_buffer + input_offset, input_len);
+		write_وچ_بھریا(1, داخلہ_بفر + داخلہ_وتھ, داخلہ_len);
 	}
 
-	strbuf_release(&rev_index_name);
-	strbuf_release(&index_name);
+	strbuf_release(&rev_اشاریہ_name);
+	strbuf_release(&اشاریہ_name);
 	strbuf_release(&pack_name);
 }
 
-static int git_index_pack_config(const char *k, const char *v,
-				 const struct config_context *ctx, void *cb)
+ساكن صحيح git_اشاریہ_pack_config(ثابت حرف *k, ثابت حرف *v,
+				 ثابت بنية config_context *ctx, فراغ *cb)
 {
-	struct pack_idx_option *opts = cb;
+	بنية pack_idx_option *opts = cb;
 
-	if (!strcmp(k, "pack.indexversion")) {
-		opts->version = git_config_int(k, v, ctx->kvi);
-		if (opts->version > 2)
-			die(_("bad pack.indexVersion=%"PRIu32), opts->version);
-		return 0;
+	إذا (!strcmp(k, "pack.indexversion")) {
+		opts->نسخہ = git_config_int(k, v, ctx->kvi);
+		إذا (opts->نسخہ > 2)
+			die(_("bad pack.indexVersion=%"PRIu32), opts->نسخہ);
+		أرجع 0;
 	}
-	if (!strcmp(k, "pack.threads")) {
-		nr_threads = git_config_int(k, v, ctx->kvi);
-		if (nr_threads < 0)
+	إذا (!strcmp(k, "pack.threads")) {
+		nr_دھاگے = git_config_int(k, v, ctx->kvi);
+		إذا (nr_دھاگے < 0)
 			die(_("invalid number of threads specified (%d)"),
-			    nr_threads);
-		if (!HAVE_THREADS && nr_threads != 1) {
+			    nr_دھاگے);
+		إذا (!HAVE_دھاگے && nr_دھاگے != 1) {
 			warning(_("no threads support, ignoring %s"), k);
-			nr_threads = 1;
+			nr_دھاگے = 1;
 		}
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(k, "pack.writereverseindex")) {
-		if (git_config_bool(k, v))
+	إذا (!strcmp(k, "pack.writereverseindex")) {
+		إذا (git_config_bool(k, v))
 			opts->flags |= WRITE_REV;
-		else
+		وإلا
 			opts->flags &= ~WRITE_REV;
 	}
-	if (!strcmp(k, "core.deltabasecachelimit")) {
-		opts->delta_base_cache_limit = git_config_ulong(k, v, ctx->kvi);
-		return 0;
+	إذا (!strcmp(k, "core.deltabasecachelimit")) {
+		opts->delta_ادھار_cache_حد_بندی = git_config_ulong(k, v, ctx->kvi);
+		أرجع 0;
 	}
-	return git_default_config(k, v, ctx, cb);
+	أرجع git_default_config(k, v, ctx, cb);
 }
 
-static int cmp_uint32(const void *a_, const void *b_)
+ساكن صحيح cmp_uint32(ثابت فراغ *a_, ثابت فراغ *b_)
 {
 	uint32_t a = *((uint32_t *)a_);
 	uint32_t b = *((uint32_t *)b_);
 
-	return (a < b) ? -1 : (a != b);
+	أرجع (a < b) ? -1 : (a != b);
 }
 
-static void read_v2_anomalous_offsets(struct packed_git *p,
-				      struct pack_idx_option *opts)
+ساكن فراغ read_v2_anomalous_offsets(بنية packed_git *p,
+				      بنية pack_idx_option *opts)
 {
-	const uint32_t *idx1, *idx2;
+	ثابت uint32_t *idx1, *idx2;
 	uint32_t i;
 
 	/* The address of the 4-byte offset table */
-	idx1 = (((const uint32_t *)((const uint8_t *)p->index_data + p->crc_offset))
-		+ (size_t)p->num_objects /* CRC32 table */
+	idx1 = (((ثابت uint32_t *)((ثابت uint8_t *)p->اشاریہ_انکڑے + p->چکری_جانچ_وتھ))
+		+ (ناپ_t)p->عدد_objects /* CRC32 table */
 		);
 
 	/* The address of the 8-byte offset table */
-	idx2 = idx1 + p->num_objects;
+	idx2 = idx1 + p->عدد_objects;
 
-	for (i = 0; i < p->num_objects; i++) {
+	لكل (i = 0; i < p->عدد_objects; i++) {
 		uint32_t off = ntohl(idx1[i]);
-		if (!(off & 0x80000000))
-			continue;
+		إذا (!(off & 0x80000000))
+			استمر;
 		off = off & 0x7fffffff;
-		check_pack_index_ptr(p, &idx2[off * 2]);
-		if (idx2[off * 2])
-			continue;
+		check_pack_اشاریہ_ptr(p, &idx2[off * 2]);
+		إذا (idx2[off * 2])
+			استمر;
 		/*
 		 * The real offset is ntohl(idx2[off * 2]) in high 4
 		 * octets, and ntohl(idx2[off * 2 + 1]) in low 4
@@ -1739,20 +1739,20 @@ static void read_v2_anomalous_offsets(struct packed_git *p,
 	QSORT(opts->anomaly, opts->anomaly_nr, cmp_uint32);
 }
 
-static void read_idx_option(struct pack_idx_option *opts, const char *pack_name)
+ساكن فراغ read_idx_option(بنية pack_idx_option *opts, ثابت حرف *pack_name)
 {
-	struct packed_git *p = add_packed_git(the_repository, pack_name,
-					      strlen(pack_name), 1);
+	بنية packed_git *p = جوڑو_packed_git(the_repository, pack_name,
+					      لڑی_لمبائی(pack_name), 1);
 
-	if (!p)
+	إذا (!p)
 		die(_("Cannot open existing pack file '%s'"), pack_name);
-	if (open_pack_index(p))
+	إذا (open_pack_اشاریہ(p))
 		die(_("Cannot open existing pack idx file for '%s'"), pack_name);
 
 	/* Read the attributes from the existing idx file */
-	opts->version = p->index_version;
+	opts->نسخہ = p->اشاریہ_نسخہ;
 
-	if (opts->version == 2)
+	إذا (opts->نسخہ == 2)
 		read_v2_anomalous_offsets(p, opts);
 
 	/*
@@ -1762,148 +1762,148 @@ static void read_idx_option(struct pack_idx_option *opts, const char *pack_name)
 	 * know we haven't installed this pack (hence we never have
 	 * read anything from it).
 	 */
-	close_pack_index(p);
-	free(p);
+	close_pack_اشاریہ(p);
+	حرر(p);
 }
 
-static void show_pack_info(int stat_only)
+ساكن فراغ show_pack_info(صحيح stat_only)
 {
-	int i, baseobjects = nr_objects - nr_ref_deltas - nr_ofs_deltas;
-	unsigned long *chain_histogram = NULL;
+	صحيح i, baseobjects = nr_objects - nr_ref_deltas - nr_ofs_deltas;
+	بنانشانی لما *chain_histogram = عدم;
 
-	if (deepest_delta)
-		CALLOC_ARRAY(chain_histogram, deepest_delta);
+	إذا (سبھ_توں_ڈونگھا_delta)
+		CALLOC_ARRAY(chain_histogram, سبھ_توں_ڈونگھا_delta);
 
-	for (i = 0; i < nr_objects; i++) {
-		struct object_entry *obj = &objects[i];
+	لكل (i = 0; i < nr_objects; i++) {
+		بنية object_اندراج *obj = &objects[i];
 
-		if (is_delta_type(obj->type))
-			chain_histogram[obj_stat[i].delta_depth - 1]++;
-		if (stat_only)
-			continue;
-		printf("%s %-6s %"PRIuMAX" %"PRIuMAX" %"PRIuMAX,
-		       oid_to_hex(&obj->idx.oid),
-		       type_name(obj->real_type), (uintmax_t)obj->size,
-		       (uintmax_t)(obj[1].idx.offset - obj->idx.offset),
-		       (uintmax_t)obj->idx.offset);
-		if (is_delta_type(obj->type)) {
-			struct object_entry *bobj = &objects[obj_stat[i].base_object_no];
-			printf(" %u %s", obj_stat[i].delta_depth,
-			       oid_to_hex(&bobj->idx.oid));
+		إذا (is_delta_type(obj->type))
+			chain_histogram[obj_stat[i].delta_ڈونگھائی - 1]++;
+		إذا (stat_only)
+			استمر;
+		لکھو("%s %-6s %"PRIuMAX" %"PRIuMAX" %"PRIuMAX,
+		       oid_منزل_hex(&obj->idx.oid),
+		       type_name(obj->real_type), (uintmax_t)obj->ناپ,
+		       (uintmax_t)(obj[1].idx.وتھ - obj->idx.وتھ),
+		       (uintmax_t)obj->idx.وتھ);
+		إذا (is_delta_type(obj->type)) {
+			بنية object_اندراج *bobj = &objects[obj_stat[i].ادھار_object_no];
+			لکھو(" %u %s", obj_stat[i].delta_ڈونگھائی,
+			       oid_منزل_hex(&bobj->idx.oid));
 		}
-		putchar('\n');
+		حرف_لکھو('\n');
 	}
 
-	if (baseobjects)
+	إذا (baseobjects)
 		printf_ln(Q_("non delta: %d object",
 			     "non delta: %d objects",
 			     baseobjects),
 			  baseobjects);
-	for (i = 0; i < deepest_delta; i++) {
-		if (!chain_histogram[i])
-			continue;
+	لكل (i = 0; i < سبھ_توں_ڈونگھا_delta; i++) {
+		إذا (!chain_histogram[i])
+			استمر;
 		printf_ln(Q_("chain length = %d: %lu object",
 			     "chain length = %d: %lu objects",
 			     chain_histogram[i]),
 			  i + 1,
 			  chain_histogram[i]);
 	}
-	free(chain_histogram);
+	حرر(chain_histogram);
 }
 
-static void repack_local_links(void)
+ساكن فراغ repack_local_links(فراغ)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	FILE *out;
-	struct strbuf line = STRBUF_INIT;
-	struct oidset_iter iter;
-	struct object_id *oid;
-	char *base_name = NULL;
+	بنية بچہ_process cmd = بچہ_PROCESS_INIT;
+	FILE *باہرلا;
+	بنية strbuf سطر = STRBUF_INIT;
+	بنية oidset_iter iter;
+	بنية object_id *oid;
+	حرف *ادھار_name = عدم;
 
-	if (!oidset_size(&outgoing_links))
-		return;
+	إذا (!oidset_ناپ(&outgoing_links))
+		أرجع;
 
 	oidset_iter_init(&outgoing_links, &iter);
-	while ((oid = oidset_iter_next(&iter))) {
-		struct odb_source_info source_info;
-		struct object_info info = {
-			.source_infop = &source_info,
+	طالما ((oid = oidset_iter_اگلا(&iter))) {
+		بنية odb_سروت_info سروت_info;
+		بنية object_info info = {
+			.سروت_infop = &سروت_info,
 		};
 
-		if (odb_read_object_info_extended(the_repository->objects, oid, &info, 0))
+		إذا (odb_read_object_info_extended(the_repository->objects, oid, &info, 0))
 			/* Missing; assume it is a promisor object */
-			continue;
-		if (source_info.source->type == ODB_SOURCE_PACKED &&
-		    source_info.u.packed.pack->pack_promisor)
-			continue;
+			استمر;
+		إذا (سروت_info.سروت->type == ODB_سروت_PACKED &&
+		    سروت_info.u.packed.pack->pack_promisor)
+			استمر;
 
-		if (!cmd.args.nr) {
-			base_name = mkpathdup(
+		إذا (!cmd.دلیلاں.nr) {
+			ادھار_name = mkpathdup(
 				"%s/pack/pack",
 				repo_get_object_directory(the_repository));
-			strvec_push(&cmd.args, "pack-objects");
-			strvec_push(&cmd.args,
+			strvec_ڈالو(&cmd.دلیلاں, "pack-objects");
+			strvec_ڈالو(&cmd.دلیلاں,
 				    "--exclude-promisor-objects-best-effort");
-			strvec_push(&cmd.args, base_name);
+			strvec_ڈالو(&cmd.دلیلاں, ادھار_name);
 			cmd.git_cmd = 1;
-			cmd.in = -1;
-			cmd.out = -1;
-			if (start_command(&cmd))
+			cmd.وچ = -1;
+			cmd.باہرلا = -1;
+			إذا (شروع_command(&cmd))
 				die(_("could not start pack-objects to repack local links"));
 		}
 
-		if (write_in_full(cmd.in, oid_to_hex(oid), the_hash_algo->hexsz) < 0 ||
-		    write_in_full(cmd.in, "\n", 1) < 0)
+		إذا (write_وچ_بھریا(cmd.وچ, oid_منزل_hex(oid), the_hash_algo->hexsz) < 0 ||
+		    write_وچ_بھریا(cmd.وچ, "\n", 1) < 0)
 			die(_("failed to feed local object to pack-objects"));
 	}
 
-	if (!cmd.args.nr)
-		return;
+	إذا (!cmd.دلیلاں.nr)
+		أرجع;
 
-	close(cmd.in);
+	close(cmd.وچ);
 
-	out = xfdopen(cmd.out, "r");
-	while (strbuf_getline_lf(&line, out) != EOF) {
-		unsigned char binary[GIT_MAX_RAWSZ];
-		if (line.len != the_hash_algo->hexsz ||
-		    !hex_to_bytes(binary, line.buf, line.len))
+	باہرلا = xfdopen(cmd.باہرلا, "r");
+	طالما (strbuf_getline_lf(&سطر, باہرلا) != EOF) {
+		بنانشانی حرف ثنائی[GIT_MAX_RAWSZ];
+		إذا (سطر.len != the_hash_algo->hexsz ||
+		    !hex_منزل_بائٹاں(ثنائی, سطر.buf, سطر.len))
 			die(_("index-pack: Expecting full hex object ID lines only from pack-objects."));
 
 		/*
 		 * pack-objects creates the .pack and .idx files, but not the
 		 * .promisor file. Create the .promisor file, which is empty.
 		 */
-		write_special_file("promisor", "", NULL, binary, NULL);
+		write_special_file("promisor", "", عدم, ثنائی, عدم);
 	}
 
-	fclose(out);
-	if (finish_command(&cmd))
+	fclose(باہرلا);
+	إذا (انت_command(&cmd))
 		die(_("could not finish pack-objects to repack local links"));
-	strbuf_release(&line);
-	free(base_name);
+	strbuf_release(&سطر);
+	حرر(ادھار_name);
 }
 
-int cmd_index_pack(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo)
+صحيح cmd_اشاریہ_pack(صحيح argc,
+		   ثابت حرف **argv,
+		   ثابت حرف *اگیتر,
+		   بنية repository *repo)
 {
-	int i, fix_thin_pack = 0, verify = 0, stat_only = 0, rev_index;
-	const char *curr_index;
-	char *curr_rev_index = NULL;
-	const char *index_name = NULL, *pack_name = NULL, *rev_index_name = NULL;
-	const char *keep_msg = NULL;
-	const char *promisor_msg = NULL;
-	struct strbuf index_name_buf = STRBUF_INIT;
-	struct strbuf rev_index_name_buf = STRBUF_INIT;
-	struct pack_idx_entry **idx_objects;
-	struct pack_idx_option opts;
-	unsigned char pack_hash[GIT_MAX_RAWSZ];
-	unsigned foreign_nr = 1;	/* zero is a "good" value, assume bad */
-	int report_end_of_input = 0;
-	int hash_algo = 0;
+	صحيح i, fix_thin_pack = 0, verify = 0, stat_only = 0, rev_اشاریہ;
+	ثابت حرف *curr_اشاریہ;
+	حرف *curr_rev_اشاریہ = عدم;
+	ثابت حرف *اشاریہ_name = عدم, *pack_name = عدم, *rev_اشاریہ_name = عدم;
+	ثابت حرف *keep_پیغام = عدم;
+	ثابت حرف *promisor_پیغام = عدم;
+	بنية strbuf اشاریہ_name_buf = STRBUF_INIT;
+	بنية strbuf rev_اشاریہ_name_buf = STRBUF_INIT;
+	بنية pack_idx_اندراج **idx_objects;
+	بنية pack_idx_option opts;
+	بنانشانی حرف pack_hash[GIT_MAX_RAWSZ];
+	بنانشانی foreign_nr = 1;	/* zero is a "good" value, assume bad */
+	صحيح report_سرا_دا_داخلہ = 0;
+	صحيح hash_algo = 0;
 
-	show_usage_if_asked(argc, argv, index_pack_usage);
+	show_usage_if_asked(argc, argv, اشاریہ_pack_usage);
 
 	/*
 	 * index-pack never needs to fetch missing objects except when
@@ -1920,116 +1920,116 @@ int cmd_index_pack(int argc,
 
 	reset_pack_idx_option(&opts);
 	opts.flags |= WRITE_REV;
-	repo_config(the_repository, git_index_pack_config, &opts);
-	if (prefix && chdir(prefix))
+	repo_config(the_repository, git_اشاریہ_pack_config, &opts);
+	إذا (اگیتر && chdir(اگیتر))
 		die(_("Cannot come back to cwd"));
 
-	if (git_env_bool(GIT_TEST_NO_WRITE_REV_INDEX, 0))
-		rev_index = 0;
-	else
-		rev_index = !!(opts.flags & (WRITE_REV_VERIFY | WRITE_REV));
+	إذا (git_env_bool(GIT_TEST_NO_WRITE_REV_اشاریہ, 0))
+		rev_اشاریہ = 0;
+	وإلا
+		rev_اشاریہ = !!(opts.flags & (WRITE_REV_VERIFY | WRITE_REV));
 
-	for (i = 1; i < argc; i++) {
-		const char *arg = argv[i];
+	لكل (i = 1; i < argc; i++) {
+		ثابت حرف *arg = argv[i];
 
-		if (*arg == '-') {
-			if (!strcmp(arg, "--stdin")) {
+		إذا (*arg == '-') {
+			إذا (!strcmp(arg, "--stdin")) {
 				from_stdin = 1;
-			} else if (!strcmp(arg, "--fix-thin")) {
+			} وإلا إذا (!strcmp(arg, "--fix-thin")) {
 				fix_thin_pack = 1;
-			} else if (skip_to_optional_arg(arg, "--strict", &arg)) {
+			} وإلا إذا (skip_منزل_optional_arg(arg, "--strict", &arg)) {
 				strict = 1;
 				do_fsck_object = 1;
-				fsck_set_msg_types(&fsck_options, arg);
-			} else if (!strcmp(arg, "--check-self-contained-and-connected")) {
+				fsck_سیٹ_پیغام_types(&fsck_options, arg);
+			} وإلا إذا (!strcmp(arg, "--check-self-contained-and-connected")) {
 				strict = 1;
 				check_self_contained_and_connected = 1;
-			} else if (skip_to_optional_arg(arg, "--fsck-objects", &arg)) {
+			} وإلا إذا (skip_منزل_optional_arg(arg, "--fsck-objects", &arg)) {
 				do_fsck_object = 1;
-				fsck_set_msg_types(&fsck_options, arg);
-			} else if (!strcmp(arg, "--verify")) {
+				fsck_سیٹ_پیغام_types(&fsck_options, arg);
+			} وإلا إذا (!strcmp(arg, "--verify")) {
 				verify = 1;
-			} else if (!strcmp(arg, "--verify-stat")) {
+			} وإلا إذا (!strcmp(arg, "--verify-stat")) {
 				verify = 1;
 				show_stat = 1;
-			} else if (!strcmp(arg, "--verify-stat-only")) {
+			} وإلا إذا (!strcmp(arg, "--verify-stat-only")) {
 				verify = 1;
 				show_stat = 1;
 				stat_only = 1;
-			} else if (skip_to_optional_arg(arg, "--keep", &keep_msg)) {
+			} وإلا إذا (skip_منزل_optional_arg(arg, "--keep", &keep_پیغام)) {
 				; /* nothing to do */
-			} else if (skip_to_optional_arg(arg, "--promisor", &promisor_msg)) {
-				record_outgoing_links = 1;
-			} else if (starts_with(arg, "--threads=")) {
-				char *end;
-				nr_threads = strtoul(arg+10, &end, 0);
-				if (!arg[10] || *end || nr_threads < 0)
-					usage(index_pack_usage);
-				if (!HAVE_THREADS && nr_threads != 1) {
+			} وإلا إذا (skip_منزل_optional_arg(arg, "--promisor", &promisor_پیغام)) {
+				ریکارڈ_outgoing_links = 1;
+			} وإلا إذا (starts_with(arg, "--threads=")) {
+				حرف *سرا;
+				nr_دھاگے = strtoul(arg+10, &سرا, 0);
+				إذا (!arg[10] || *سرا || nr_دھاگے < 0)
+					usage(اشاریہ_pack_usage);
+				إذا (!HAVE_دھاگے && nr_دھاگے != 1) {
 					warning(_("no threads support, ignoring %s"), arg);
-					nr_threads = 1;
+					nr_دھاگے = 1;
 				}
-			} else if (skip_prefix(arg, "--pack_header=", &arg)) {
-				if (parse_pack_header_option(arg,
-							     input_buffer,
-							     &input_len) < 0)
+			} وإلا إذا (skip_اگیتر(arg, "--pack_header=", &arg)) {
+				إذا (parse_pack_سرخی_option(arg,
+							     داخلہ_بفر,
+							     &داخلہ_len) < 0)
 					die(_("bad --pack_header: %s"), arg);
-			} else if (!strcmp(arg, "-v")) {
+			} وإلا إذا (!strcmp(arg, "-v")) {
 				verbose = 1;
-			} else if (!strcmp(arg, "--progress-title")) {
-				if (progress_title || (i+1) >= argc)
-					usage(index_pack_usage);
-				progress_title = argv[++i];
-			} else if (!strcmp(arg, "--show-resolving-progress")) {
-				show_resolving_progress = 1;
-			} else if (!strcmp(arg, "--report-end-of-input")) {
-				report_end_of_input = 1;
-			} else if (!strcmp(arg, "-o")) {
-				if (index_name || (i+1) >= argc)
-					usage(index_pack_usage);
-				index_name = argv[++i];
-			} else if (starts_with(arg, "--index-version=")) {
-				char *c;
-				opts.version = strtoul(arg + 16, &c, 10);
-				if (opts.version > 2)
+			} وإلا إذا (!strcmp(arg, "--progress-title")) {
+				إذا (ترقی_title || (i+1) >= argc)
+					usage(اشاریہ_pack_usage);
+				ترقی_title = argv[++i];
+			} وإلا إذا (!strcmp(arg, "--show-resolving-progress")) {
+				show_resolving_ترقی = 1;
+			} وإلا إذا (!strcmp(arg, "--report-end-of-input")) {
+				report_سرا_دا_داخلہ = 1;
+			} وإلا إذا (!strcmp(arg, "-o")) {
+				إذا (اشاریہ_name || (i+1) >= argc)
+					usage(اشاریہ_pack_usage);
+				اشاریہ_name = argv[++i];
+			} وإلا إذا (starts_with(arg, "--index-version=")) {
+				حرف *c;
+				opts.نسخہ = strtoul(arg + 16, &c, 10);
+				إذا (opts.نسخہ > 2)
 					die(_("bad %s"), arg);
-				if (*c == ',')
-					opts.off32_limit = strtoul(c+1, &c, 0);
-				if (*c || opts.off32_limit & 0x80000000)
+				إذا (*c == ',')
+					opts.off32_حد_بندی = strtoul(c+1, &c, 0);
+				إذا (*c || opts.off32_حد_بندی & 0x80000000)
 					die(_("bad %s"), arg);
-			} else if (skip_prefix(arg, "--max-input-size=", &arg)) {
-				max_input_size = strtoumax(arg, NULL, 10);
-			} else if (skip_prefix(arg, "--object-format=", &arg)) {
+			} وإلا إذا (skip_اگیتر(arg, "--max-input-size=", &arg)) {
+				max_داخلہ_ناپ = strtoumax(arg, عدم, 10);
+			} وإلا إذا (skip_اگیتر(arg, "--object-format=", &arg)) {
 				hash_algo = hash_algo_by_name(arg);
-				if (hash_algo == GIT_HASH_UNKNOWN)
+				إذا (hash_algo == GIT_HASH_UNKNOWN)
 					die(_("unknown hash algorithm '%s'"), arg);
-				repo_set_hash_algo(the_repository, hash_algo);
-			} else if (!strcmp(arg, "--rev-index")) {
-				rev_index = 1;
-			} else if (!strcmp(arg, "--no-rev-index")) {
-				rev_index = 0;
-			} else
-				usage(index_pack_usage);
-			continue;
+				repo_سیٹ_hash_algo(the_repository, hash_algo);
+			} وإلا إذا (!strcmp(arg, "--rev-index")) {
+				rev_اشاریہ = 1;
+			} وإلا إذا (!strcmp(arg, "--no-rev-index")) {
+				rev_اشاریہ = 0;
+			} وإلا
+				usage(اشاریہ_pack_usage);
+			استمر;
 		}
 
-		if (pack_name)
-			usage(index_pack_usage);
+		إذا (pack_name)
+			usage(اشاریہ_pack_usage);
 		pack_name = arg;
 	}
 
-	if (!pack_name && !from_stdin)
-		usage(index_pack_usage);
-	if (fix_thin_pack && !from_stdin)
+	إذا (!pack_name && !from_stdin)
+		usage(اشاریہ_pack_usage);
+	إذا (fix_thin_pack && !from_stdin)
 		die(_("the option '%s' requires '%s'"), "--fix-thin", "--stdin");
-	if (promisor_msg && pack_name)
+	إذا (promisor_پیغام && pack_name)
 		die(_("--promisor cannot be used with a pack name"));
-	if (from_stdin && !startup_info->have_repository)
+	إذا (from_stdin && !startup_info->have_repository)
 		die(_("--stdin requires a git repository"));
-	if (from_stdin && hash_algo)
+	إذا (from_stdin && hash_algo)
 		die(_("options '%s' and '%s' cannot be used together"), "--object-format", "--stdin");
-	if (!index_name && pack_name)
-		index_name = derive_filename(pack_name, "pack", "idx", &index_name_buf);
+	إذا (!اشاریہ_name && pack_name)
+		اشاریہ_name = derive_filename(pack_name, "pack", "idx", &اشاریہ_name_buf);
 
 	/*
 	 * Packfiles and indices do not carry enough information to be able to
@@ -2037,29 +2037,29 @@ int cmd_index_pack(int argc,
 	 * nor has the user told us which object hash to use we have no other
 	 * choice but to guess the object hash.
 	 */
-	if (!the_repository->hash_algo)
-		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
+	إذا (!the_repository->hash_algo)
+		repo_سیٹ_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	opts.flags &= ~(WRITE_REV | WRITE_REV_VERIFY);
-	if (rev_index) {
+	إذا (rev_اشاریہ) {
 		opts.flags |= verify ? WRITE_REV_VERIFY : WRITE_REV;
-		if (index_name)
-			rev_index_name = derive_filename(index_name,
+		إذا (اشاریہ_name)
+			rev_اشاریہ_name = derive_filename(اشاریہ_name,
 							 "idx", "rev",
-							 &rev_index_name_buf);
+							 &rev_اشاریہ_name_buf);
 	}
 
-	if (verify) {
-		if (!index_name)
+	إذا (verify) {
+		إذا (!اشاریہ_name)
 			die(_("--verify with no packfile name given"));
-		read_idx_option(&opts, index_name);
+		read_idx_option(&opts, اشاریہ_name);
 		opts.flags |= WRITE_IDX_VERIFY | WRITE_IDX_STRICT;
 	}
-	if (strict)
+	إذا (strict)
 		opts.flags |= WRITE_IDX_STRICT;
 
-	if (HAVE_THREADS && !nr_threads) {
-		nr_threads = online_cpus();
+	إذا (HAVE_دھاگے && !nr_دھاگے) {
+		nr_دھاگے = online_cpus();
 		/*
 		 * Experiments show that going above 20 threads doesn't help,
 		 * no matter how many cores you have. Below that, we tend to
@@ -2068,56 +2068,56 @@ int cmd_index_pack(int argc,
 		 * never reduce the level below "3", though, to match a
 		 * historical value that nobody complained about.
 		 */
-		if (nr_threads < 4)
+		إذا (nr_دھاگے < 4)
 			; /* too few cores to consider capping */
-		else if (nr_threads < 6)
-			nr_threads = 3; /* historic cap */
-		else if (nr_threads < 40)
-			nr_threads /= 2;
-		else
-			nr_threads = 20; /* hard cap */
+		وإلا إذا (nr_دھاگے < 6)
+			nr_دھاگے = 3; /* historic cap */
+		وإلا إذا (nr_دھاگے < 40)
+			nr_دھاگے /= 2;
+		وإلا
+			nr_دھاگے = 20; /* hard cap */
 	}
 
 	curr_pack = open_pack_file(pack_name);
-	parse_pack_header();
-	CALLOC_ARRAY(objects, st_add(nr_objects, 1));
-	if (show_stat)
-		CALLOC_ARRAY(obj_stat, st_add(nr_objects, 1));
+	parse_pack_سرخی();
+	CALLOC_ARRAY(objects, st_جوڑو(nr_objects, 1));
+	إذا (show_stat)
+		CALLOC_ARRAY(obj_stat, st_جوڑو(nr_objects, 1));
 	CALLOC_ARRAY(ofs_deltas, nr_objects);
 	parse_pack_objects(pack_hash);
-	if (report_end_of_input)
-		write_in_full(2, "\0", 1);
+	إذا (report_سرا_دا_داخلہ)
+		write_وچ_بھریا(2, "\0", 1);
 	resolve_deltas(&opts);
 	conclude_pack(fix_thin_pack, curr_pack, pack_hash);
-	free(ofs_deltas);
-	free(ref_deltas);
-	if (strict)
+	حرر(ofs_deltas);
+	حرر(ref_deltas);
+	إذا (strict)
 		foreign_nr = check_objects();
 
-	if (show_stat)
+	إذا (show_stat)
 		show_pack_info(stat_only);
 
 	ALLOC_ARRAY(idx_objects, nr_objects);
-	for (i = 0; i < nr_objects; i++)
+	لكل (i = 0; i < nr_objects; i++)
 		idx_objects[i] = &objects[i].idx;
-	curr_index = write_idx_file(the_repository, index_name, idx_objects,
+	curr_اشاریہ = write_idx_file(the_repository, اشاریہ_name, idx_objects,
 				    nr_objects, &opts, pack_hash);
-	if (rev_index)
-		curr_rev_index = write_rev_file(the_repository, rev_index_name,
+	إذا (rev_اشاریہ)
+		curr_rev_اشاریہ = write_rev_file(the_repository, rev_اشاریہ_name,
 						idx_objects, nr_objects,
 						pack_hash, opts.flags);
-	free(idx_objects);
+	حرر(idx_objects);
 
-	if (!verify)
+	إذا (!verify)
 		final(pack_name, curr_pack,
-		      index_name, curr_index,
-		      rev_index_name, curr_rev_index,
-		      keep_msg, promisor_msg,
+		      اشاریہ_name, curr_اشاریہ,
+		      rev_اشاریہ_name, curr_rev_اشاریہ,
+		      keep_پیغام, promisor_پیغام,
 		      pack_hash);
-	else
-		close(input_fd);
+	وإلا
+		close(داخلہ_fd);
 
-	if (do_fsck_object) {
+	إذا (do_fsck_object) {
 		/*
 		 * We cannot perform queued consistency checks when running
 		 * outside of a repository because those require us to read
@@ -2126,32 +2126,32 @@ int cmd_index_pack(int argc,
 		 * TODO: we may eventually set up an in-memory object database,
 		 * which would allow us to perform these queued checks.
 		 */
-		if (!startup_info->have_repository &&
+		إذا (!startup_info->have_repository &&
 		    fsck_has_queued_checks(&fsck_options))
 			die(_("cannot perform queued object checks outside "
 			      "of a repository"));
 
-		if (fsck_finish(&fsck_options))
+		إذا (fsck_انت(&fsck_options))
 			die(_("fsck error in pack objects"));
 	}
 
-	free(opts.anomaly);
-	free(objects);
-	strbuf_release(&index_name_buf);
-	strbuf_release(&rev_index_name_buf);
-	if (!pack_name)
-		free((void *) curr_pack);
-	if (!index_name)
-		free((void *) curr_index);
-	free(curr_rev_index);
+	حرر(opts.anomaly);
+	حرر(objects);
+	strbuf_release(&اشاریہ_name_buf);
+	strbuf_release(&rev_اشاریہ_name_buf);
+	إذا (!pack_name)
+		حرر((فراغ *) curr_pack);
+	إذا (!اشاریہ_name)
+		حرر((فراغ *) curr_اشاریہ);
+	حرر(curr_rev_اشاریہ);
 
 	repack_local_links();
 
 	/*
 	 * Let the caller know this pack is not self contained
 	 */
-	if (check_self_contained_and_connected && foreign_nr)
-		return 1;
+	إذا (check_self_contained_and_connected && foreign_nr)
+		أرجع 1;
 
-	return 0;
+	أرجع 0;
 }

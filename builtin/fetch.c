@@ -2,208 +2,208 @@
  * "git fetch"
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
+#تعریف_کرو DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "gettext.h"
-#include "environment.h"
-#include "hex.h"
-#include "refs.h"
-#include "refspec.h"
-#include "object-name.h"
-#include "odb.h"
-#include "odb/source.h"
-#include "oidset.h"
-#include "oid-array.h"
-#include "commit.h"
-#include "string-list.h"
-#include "remote.h"
-#include "transport.h"
-#include "run-command.h"
-#include "parse-options.h"
-#include "sigchain.h"
-#include "submodule-config.h"
-#include "submodule.h"
-#include "connected.h"
-#include "strvec.h"
-#include "utf8.h"
-#include "pager.h"
-#include "path.h"
-#include "pkt-line.h"
-#include "list-objects-filter-options.h"
-#include "commit-reach.h"
-#include "branch.h"
-#include "promisor-remote.h"
-#include "commit-graph.h"
-#include "shallow.h"
-#include "trace.h"
-#include "trace2.h"
-#include "bundle-uri.h"
+#ضمن "builtin.h"
+#ضمن "advice.h"
+#ضمن "config.h"
+#ضمن "gettext.h"
+#ضمن "environment.h"
+#ضمن "hex.h"
+#ضمن "refs.h"
+#ضمن "refspec.h"
+#ضمن "object-name.h"
+#ضمن "odb.h"
+#ضمن "odb/source.h"
+#ضمن "oidset.h"
+#ضمن "oid-array.h"
+#ضمن "commit.h"
+#ضمن "string-list.h"
+#ضمن "remote.h"
+#ضمن "transport.h"
+#ضمن "run-command.h"
+#ضمن "parse-options.h"
+#ضمن "sigchain.h"
+#ضمن "submodule-config.h"
+#ضمن "submodule.h"
+#ضمن "connected.h"
+#ضمن "strvec.h"
+#ضمن "utf8.h"
+#ضمن "pager.h"
+#ضمن "path.h"
+#ضمن "pkt-line.h"
+#ضمن "list-objects-filter-options.h"
+#ضمن "commit-reach.h"
+#ضمن "branch.h"
+#ضمن "promisor-remote.h"
+#ضمن "commit-graph.h"
+#ضمن "shallow.h"
+#ضمن "trace.h"
+#ضمن "trace2.h"
+#ضمن "bundle-uri.h"
 
-#define FORCED_UPDATES_DELAY_WARNING_IN_MS (10 * 1000)
+#تعریف_کرو FORCED_UPDATES_DELAY_WARNING_وچ_MS (10 * 1000)
 
-static const char * const builtin_fetch_usage[] = {
+ساكن ثابت حرف * ثابت builtin_fetch_usage[] = {
 	N_("git fetch [<options>] [<repository> [<refspec>...]]"),
 	N_("git fetch [<options>] <group>"),
 	N_("git fetch --multiple [<options>] [(<repository>|<group>)...]"),
 	N_("git fetch --all [<options>]"),
-	NULL
+	عدم
 };
 
-enum {
-	TAGS_UNSET = 0,
-	TAGS_DEFAULT = 1,
-	TAGS_SET = 2
+تعداد {
+	ٹیگ_سوچی_UNSET = 0,
+	ٹیگ_سوچی_DEFAULT = 1,
+	ٹیگ_سوچی_سیٹ = 2
 };
 
-enum display_format {
-	DISPLAY_FORMAT_FULL,
+تعداد display_format {
+	DISPLAY_FORMAT_بھریا,
 	DISPLAY_FORMAT_COMPACT,
 	DISPLAY_FORMAT_PORCELAIN,
 };
 
-struct display_state {
-	struct strbuf buf;
+بنية display_state {
+	بنية strbuf buf;
 
-	int refcol_width;
-	enum display_format format;
+	صحيح refcol_چوڑائی;
+	تعداد display_format format;
 
-	char *url;
-	int url_len, shown_url;
+	حرف *url;
+	صحيح url_len, shown_url;
 };
 
-static uint64_t forced_updates_ms = 0;
-static int prefetch = 0;
-static int prune = -1; /* unspecified */
-#define PRUNE_BY_DEFAULT 0 /* do we prune by default? */
+ساكن uint64_t forced_updates_ms = 0;
+ساكن صحيح prefetch = 0;
+ساكن صحيح prune = -1; /* unspecified */
+#تعریف_کرو PRUNE_BY_DEFAULT 0 /* do we prune by default? */
 
-static int prune_tags = -1; /* unspecified */
-#define PRUNE_TAGS_BY_DEFAULT 0 /* do we prune tags by default? */
+ساكن صحيح prune_ٹیگ_سوچی = -1; /* unspecified */
+#تعریف_کرو PRUNE_ٹیگ_سوچی_BY_DEFAULT 0 /* do we prune tags by default? */
 
-static int append, dry_run, force, keep, update_head_ok;
-static int write_fetch_head = 1;
-static int verbosity, deepen_relative, set_upstream, refetch;
-static int progress = -1;
-static int tags = TAGS_DEFAULT, update_shallow, deepen;
-static int atomic_fetch;
-static enum transport_family family;
-static const char *depth;
-static const char *deepen_since;
-static const char *upload_pack;
-static struct string_list deepen_not = STRING_LIST_INIT_NODUP;
-static struct strbuf default_rla = STRBUF_INIT;
-static struct transport *gtransport;
-static struct transport *gsecondary;
-static struct refspec refmap;
-static struct string_list server_options = STRING_LIST_INIT_DUP;
-static struct string_list negotiation_restrict = STRING_LIST_INIT_NODUP;
-static struct string_list negotiation_include = STRING_LIST_INIT_NODUP;
+ساكن صحيح append, dry_لگاتار, force, keep, update_سر_ok;
+ساكن صحيح write_fetch_سر = 1;
+ساكن صحيح verbosity, deepen_relative, سیٹ_upstream, refetch;
+ساكن صحيح ترقی = -1;
+ساكن صحيح ٹیگ_سوچی = ٹیگ_سوچی_DEFAULT, update_shallow, deepen;
+ساكن صحيح atomic_fetch;
+ساكن تعداد transport_family family;
+ساكن ثابت حرف *ڈونگھائی;
+ساكن ثابت حرف *deepen_since;
+ساكن ثابت حرف *upload_pack;
+ساكن بنية string_list deepen_not = STRING_LIST_INIT_NODUP;
+ساكن بنية strbuf default_rla = STRBUF_INIT;
+ساكن بنية transport *gtransport;
+ساكن بنية transport *gsecondary;
+ساكن بنية refspec refmap;
+ساكن بنية string_list server_options = STRING_LIST_INIT_DUP;
+ساكن بنية string_list negotiation_restrict = STRING_LIST_INIT_NODUP;
+ساكن بنية string_list negotiation_include = STRING_LIST_INIT_NODUP;
 
-struct fetch_config {
-	enum display_format display_format;
-	char *follow_remote_head_raw;
-	int follow_remote_head_seen;
-	int all;
-	int prune;
-	int prune_tags;
-	int show_forced_updates;
-	int recurse_submodules;
-	int parallel;
-	int submodule_fetch_jobs;
+بنية fetch_config {
+	تعداد display_format display_format;
+	حرف *follow_remote_سر_raw;
+	صحيح follow_remote_سر_تکیا;
+	صحيح all;
+	صحيح prune;
+	صحيح prune_ٹیگ_سوچی;
+	صحيح show_forced_updates;
+	صحيح recurse_submodules;
+	صحيح parallel;
+	صحيح submodule_fetch_jobs;
 };
 
-static int git_fetch_config(const char *k, const char *v,
-			    const struct config_context *ctx, void *cb)
+ساكن صحيح git_fetch_config(ثابت حرف *k, ثابت حرف *v,
+			    ثابت بنية config_context *ctx, فراغ *cb)
 {
-	struct fetch_config *fetch_config = cb;
+	بنية fetch_config *fetch_config = cb;
 
-	if (!strcmp(k, "fetch.all")) {
+	إذا (!strcmp(k, "fetch.all")) {
 		fetch_config->all = git_config_bool(k, v);
-		return 0;
+		أرجع 0;
 	}
 
-	if (!strcmp(k, "fetch.prune")) {
+	إذا (!strcmp(k, "fetch.prune")) {
 		fetch_config->prune = git_config_bool(k, v);
-		return 0;
+		أرجع 0;
 	}
 
-	if (!strcmp(k, "fetch.prunetags")) {
-		fetch_config->prune_tags = git_config_bool(k, v);
-		return 0;
+	إذا (!strcmp(k, "fetch.prunetags")) {
+		fetch_config->prune_ٹیگ_سوچی = git_config_bool(k, v);
+		أرجع 0;
 	}
 
-	if (!strcmp(k, "fetch.showforcedupdates")) {
+	إذا (!strcmp(k, "fetch.showforcedupdates")) {
 		fetch_config->show_forced_updates = git_config_bool(k, v);
-		return 0;
+		أرجع 0;
 	}
 
-	if (!strcmp(k, "submodule.recurse")) {
-		int r = git_config_bool(k, v) ?
+	إذا (!strcmp(k, "submodule.recurse")) {
+		صحيح r = git_config_bool(k, v) ?
 			RECURSE_SUBMODULES_ON : RECURSE_SUBMODULES_OFF;
 		fetch_config->recurse_submodules = r;
-		return 0;
+		أرجع 0;
 	}
 
-	if (!strcmp(k, "submodule.fetchjobs")) {
+	إذا (!strcmp(k, "submodule.fetchjobs")) {
 		fetch_config->submodule_fetch_jobs = parse_submodule_fetchjobs(k, v, ctx->kvi);
-		return 0;
-	} else if (!strcmp(k, "fetch.recursesubmodules")) {
+		أرجع 0;
+	} وإلا إذا (!strcmp(k, "fetch.recursesubmodules")) {
 		fetch_config->recurse_submodules = parse_fetch_recurse_submodules_arg(k, v);
-		return 0;
+		أرجع 0;
 	}
 
-	if (!strcmp(k, "fetch.parallel")) {
+	إذا (!strcmp(k, "fetch.parallel")) {
 		fetch_config->parallel = git_config_int(k, v, ctx->kvi);
-		if (fetch_config->parallel < 0)
+		إذا (fetch_config->parallel < 0)
 			die(_("fetch.parallel cannot be negative"));
-		if (!fetch_config->parallel)
+		إذا (!fetch_config->parallel)
 			fetch_config->parallel = online_cpus();
-		return 0;
+		أرجع 0;
 	}
 
-	if (!strcmp(k, "fetch.output")) {
-		if (!v)
-			return config_error_nonbool(k);
-		else if (!strcasecmp(v, "full"))
-			fetch_config->display_format = DISPLAY_FORMAT_FULL;
-		else if (!strcasecmp(v, "compact"))
+	إذا (!strcmp(k, "fetch.output")) {
+		إذا (!v)
+			أرجع config_error_nonbool(k);
+		وإلا إذا (!strcasecmp(v, "full"))
+			fetch_config->display_format = DISPLAY_FORMAT_بھریا;
+		وإلا إذا (!strcasecmp(v, "compact"))
 			fetch_config->display_format = DISPLAY_FORMAT_COMPACT;
-		else
+		وإلا
 			die(_("invalid value for '%s': '%s'"),
 			    "fetch.output", v);
-		return 0;
+		أرجع 0;
 	}
 
-	if (!strcmp(k, "fetch.followremotehead")) {
-		free(fetch_config->follow_remote_head_raw);
-		fetch_config->follow_remote_head_raw = xstrdup_or_null(v);
-		fetch_config->follow_remote_head_seen = 1;
-		return 0;
+	إذا (!strcmp(k, "fetch.followremotehead")) {
+		حرر(fetch_config->follow_remote_سر_raw);
+		fetch_config->follow_remote_سر_raw = xstrdup_or_null(v);
+		fetch_config->follow_remote_سر_تکیا = 1;
+		أرجع 0;
 	}
 
-	return git_default_config(k, v, ctx, cb);
+	أرجع git_default_config(k, v, ctx, cb);
 }
 
-static enum follow_remote_head_settings get_follow_remote_head(const char *setting)
+ساكن تعداد follow_remote_سر_settings get_follow_remote_سر(ثابت حرف *setting)
 {
-	if (!setting)
+	إذا (!setting)
 		die(_("missing value for 'fetch.followRemoteHEAD'"));
-	else if (!strcmp(setting, "never"))
-		return FOLLOW_REMOTE_NEVER;
-	else if (!strcmp(setting, "create"))
-		return FOLLOW_REMOTE_CREATE;
-	else if (!strcmp(setting, "warn"))
-		return FOLLOW_REMOTE_WARN;
-	else if (!strcmp(setting, "always"))
-		return FOLLOW_REMOTE_ALWAYS;
+	وإلا إذا (!strcmp(setting, "never"))
+		أرجع FOLLOW_REMOTE_NEVER;
+	وإلا إذا (!strcmp(setting, "create"))
+		أرجع FOLLOW_REMOTE_CREATE;
+	وإلا إذا (!strcmp(setting, "warn"))
+		أرجع FOLLOW_REMOTE_WARN;
+	وإلا إذا (!strcmp(setting, "always"))
+		أرجع FOLLOW_REMOTE_ALWAYS;
 	warning(_("unrecognized fetch.followRemoteHEAD value '%s' ignored"), setting);
-	return BUILTIN_FOLLOW_REMOTE_HEAD_DFLT;
+	أرجع BUILTIN_FOLLOW_REMOTE_سر_DFLT;
 }
 
-static int parse_refmap_arg(const struct option *opt, const char *arg, int unset)
+ساكن صحيح parse_refmap_arg(ثابت بنية option *opt, ثابت حرف *arg, صحيح unset)
 {
 	BUG_ON_OPT_NEG(unset);
 
@@ -211,50 +211,50 @@ static int parse_refmap_arg(const struct option *opt, const char *arg, int unset
 	 * "git fetch --refmap='' origin foo"
 	 * can be used to tell the command not to store anywhere
 	 */
-	refspec_append(opt->value, arg);
+	refspec_append(opt->قدر, arg);
 
-	return 0;
+	أرجع 0;
 }
 
-static void unlock_pack(unsigned int flags)
+ساكن فراغ unlock_pack(بنانشانی صحيح flags)
 {
-	if (gtransport)
+	إذا (gtransport)
 		transport_unlock_pack(gtransport, flags);
-	if (gsecondary)
+	إذا (gsecondary)
 		transport_unlock_pack(gsecondary, flags);
 }
 
-static void unlock_pack_atexit(void)
+ساكن فراغ unlock_pack_atexit(فراغ)
 {
 	unlock_pack(0);
 }
 
-static void unlock_pack_on_signal(int signo)
+ساكن فراغ unlock_pack_on_signal(صحيح signo)
 {
-	unlock_pack(TRANSPORT_UNLOCK_PACK_IN_SIGNAL_HANDLER);
-	sigchain_pop(signo);
-	raise(signo);
+	unlock_pack(TRANSPORT_UNLOCK_PACK_وچ_SIGNAL_HANDLER);
+	sigchain_نکالو(signo);
+	ارفع(signo);
 }
 
-static void add_merge_config(struct ref **head,
-			   const struct ref *remote_refs,
-		           struct branch *branch,
-		           struct ref ***tail)
+ساكن فراغ جوڑو_ملاؤ_config(بنية ref **سر,
+			   ثابت بنية ref *remote_refs,
+		           بنية branch *branch,
+		           بنية ref ***پوچھ)
 {
-	int i;
+	صحيح i;
 
-	for (i = 0; i < branch->merge_nr; i++) {
-		struct ref *rm, **old_tail = *tail;
-		struct refspec_item refspec;
+	لكل (i = 0; i < branch->ملاؤ_nr; i++) {
+		بنية ref *rm, **old_پوچھ = *پوچھ;
+		بنية refspec_شے refspec;
 
-		for (rm = *head; rm; rm = rm->next) {
-			if (branch_merge_matches(branch, i, rm->name)) {
-				rm->fetch_head_status = FETCH_HEAD_MERGE;
-				break;
+		لكل (rm = *سر; rm; rm = rm->اگلا) {
+			إذا (branch_ملاؤ_matches(branch, i, rm->name)) {
+				rm->fetch_سر_حالت = FETCH_سر_ملاؤ;
+				اكسر;
 			}
 		}
-		if (rm)
-			continue;
+		إذا (rm)
+			استمر;
 
 		/*
 		 * Not fetched to a remote-tracking branch?  We need to fetch
@@ -266,122 +266,122 @@ static void add_merge_config(struct ref **head,
 		 * there is no entry in the resulting FETCH_HEAD marked
 		 * for merging.
 		 */
-		memset(&refspec, 0, sizeof(refspec));
-		refspec.src = branch->merge[i]->src;
-		get_fetch_map(remote_refs, &refspec, tail, 1);
-		for (rm = *old_tail; rm; rm = rm->next)
-			rm->fetch_head_status = FETCH_HEAD_MERGE;
+		memset(&refspec, 0, حجم(refspec));
+		refspec.src = branch->ملاؤ[i]->src;
+		get_fetch_map(remote_refs, &refspec, پوچھ, 1);
+		لكل (rm = *old_پوچھ; rm; rm = rm->اگلا)
+			rm->fetch_سر_حالت = FETCH_سر_ملاؤ;
 	}
 }
 
-static void create_fetch_oidset(struct ref **head, struct oidset *out)
+ساكن فراغ create_fetch_oidset(بنية ref **سر, بنية oidset *باہرلا)
 {
-	struct ref *rm = *head;
-	while (rm) {
-		oidset_insert(out, &rm->old_oid);
-		rm = rm->next;
+	بنية ref *rm = *سر;
+	طالما (rm) {
+		oidset_داخل_کرو(باہرلا, &rm->old_oid);
+		rm = rm->اگلا;
 	}
 }
 
-struct refname_hash_entry {
-	struct hashmap_entry ent;
-	struct object_id oid;
-	int ignore;
-	char refname[FLEX_ARRAY];
+بنية refname_hash_اندراج {
+	بنية hashmap_اندراج ent;
+	بنية object_id oid;
+	صحيح ignore;
+	حرف refname[FLEX_ARRAY];
 };
 
-static int refname_hash_entry_cmp(const void *hashmap_cmp_fn_data UNUSED,
-				  const struct hashmap_entry *eptr,
-				  const struct hashmap_entry *entry_or_key,
-				  const void *keydata)
+ساكن صحيح refname_hash_اندراج_cmp(ثابت فراغ *hashmap_cmp_fn_انکڑے بن_ورتیا,
+				  ثابت بنية hashmap_اندراج *eptr,
+				  ثابت بنية hashmap_اندراج *اندراج_or_کلید,
+				  ثابت فراغ *keydata)
 {
-	const struct refname_hash_entry *e1, *e2;
+	ثابت بنية refname_hash_اندراج *e1, *e2;
 
-	e1 = container_of(eptr, const struct refname_hash_entry, ent);
-	e2 = container_of(entry_or_key, const struct refname_hash_entry, ent);
-	return strcmp(e1->refname, keydata ? keydata : e2->refname);
+	e1 = container_دا(eptr, ثابت بنية refname_hash_اندراج, ent);
+	e2 = container_دا(اندراج_or_کلید, ثابت بنية refname_hash_اندراج, ent);
+	أرجع strcmp(e1->refname, keydata ? keydata : e2->refname);
 }
 
-static struct refname_hash_entry *refname_hash_add(struct hashmap *map,
-						   const char *refname,
-						   const struct object_id *oid)
+ساكن بنية refname_hash_اندراج *refname_hash_جوڑو(بنية hashmap *map,
+						   ثابت حرف *refname,
+						   ثابت بنية object_id *oid)
 {
-	struct refname_hash_entry *ent;
-	size_t len = strlen(refname);
+	بنية refname_hash_اندراج *ent;
+	ناپ_t len = لڑی_لمبائی(refname);
 
 	FLEX_ALLOC_MEM(ent, refname, refname, len);
-	hashmap_entry_init(&ent->ent, strhash(refname));
+	hashmap_اندراج_init(&ent->ent, strhash(refname));
 	oidcpy(&ent->oid, oid);
-	hashmap_add(map, &ent->ent);
-	return ent;
+	hashmap_جوڑو(map, &ent->ent);
+	أرجع ent;
 }
 
-static int add_one_refname(const struct reference *ref, void *cbdata)
+ساكن صحيح جوڑو_one_refname(ثابت بنية reference *ref, فراغ *cbdata)
 {
-	struct hashmap *refname_map = cbdata;
+	بنية hashmap *refname_map = cbdata;
 
-	(void) refname_hash_add(refname_map, ref->name, ref->oid);
-	return 0;
+	(فراغ) refname_hash_جوڑو(refname_map, ref->name, ref->oid);
+	أرجع 0;
 }
 
-static void refname_hash_init(struct hashmap *map)
+ساكن فراغ refname_hash_init(بنية hashmap *map)
 {
-	hashmap_init(map, refname_hash_entry_cmp, NULL, 0);
+	hashmap_init(map, refname_hash_اندراج_cmp, عدم, 0);
 }
 
-static int refname_hash_exists(struct hashmap *map, const char *refname)
+ساكن صحيح refname_hash_exists(بنية hashmap *map, ثابت حرف *refname)
 {
-	return !!hashmap_get_from_hash(map, strhash(refname), refname);
+	أرجع !!hashmap_get_from_hash(map, strhash(refname), refname);
 }
 
-static void clear_item(struct refname_hash_entry *item)
+ساكن فراغ clear_شے(بنية refname_hash_اندراج *شے)
 {
-	item->ignore = 1;
+	شے->ignore = 1;
 }
 
 
-static void add_already_queued_tags(const char *refname,
-				    const struct object_id *old_oid UNUSED,
-				    const struct object_id *new_oid,
-				    void *cb_data)
+ساكن فراغ جوڑو_already_queued_ٹیگ_سوچی(ثابت حرف *refname,
+				    ثابت بنية object_id *old_oid بن_ورتیا,
+				    ثابت بنية object_id *new_oid,
+				    فراغ *cb_انکڑے)
 {
-	struct hashmap *queued_tags = cb_data;
-	if (starts_with(refname, "refs/tags/") && new_oid)
-		(void) refname_hash_add(queued_tags, refname, new_oid);
+	بنية hashmap *queued_ٹیگ_سوچی = cb_انکڑے;
+	إذا (starts_with(refname, "refs/tags/") && new_oid)
+		(فراغ) refname_hash_جوڑو(queued_ٹیگ_سوچی, refname, new_oid);
 }
 
-static void find_non_local_tags(const struct ref *refs,
-				struct ref_transaction *transaction,
-				struct ref **head,
-				struct ref ***tail)
+ساكن فراغ لبھو_non_local_ٹیگ_سوچی(ثابت بنية ref *refs,
+				بنية ref_transaction *transaction,
+				بنية ref **سر,
+				بنية ref ***پوچھ)
 {
-	struct hashmap existing_refs;
-	struct hashmap remote_refs;
-	struct oidset fetch_oids = OIDSET_INIT;
-	struct string_list remote_refs_list = STRING_LIST_INIT_NODUP;
-	struct string_list_item *remote_ref_item;
-	const struct ref *ref;
-	struct refname_hash_entry *item = NULL;
+	بنية hashmap existing_refs;
+	بنية hashmap remote_refs;
+	بنية oidset fetch_oids = OIDSET_INIT;
+	بنية string_list remote_refs_list = STRING_LIST_INIT_NODUP;
+	بنية string_list_شے *remote_ref_شے;
+	ثابت بنية ref *ref;
+	بنية refname_hash_اندراج *شے = عدم;
 
 	refname_hash_init(&existing_refs);
 	refname_hash_init(&remote_refs);
-	create_fetch_oidset(head, &fetch_oids);
+	create_fetch_oidset(سر, &fetch_oids);
 
-	refs_for_each_ref(get_main_ref_store(the_repository), add_one_refname,
+	refs_for_each_ref(get_main_ref_store(the_repository), جوڑو_one_refname,
 			  &existing_refs);
 
 	/*
 	 * If we already have a transaction, then we need to filter out all
 	 * tags which have already been queued up.
 	 */
-	if (transaction)
+	إذا (transaction)
 		ref_transaction_for_each_queued_update(transaction,
-						       add_already_queued_tags,
+						       جوڑو_already_queued_ٹیگ_سوچی,
 						       &existing_refs);
 
-	for (ref = refs; ref; ref = ref->next) {
-		if (!starts_with(ref->name, "refs/tags/"))
-			continue;
+	لكل (ref = refs; ref; ref = ref->اگلا) {
+		إذا (!starts_with(ref->name, "refs/tags/"))
+			استمر;
 
 		/*
 		 * The peeled ref always follows the matching base
@@ -389,15 +389,15 @@ static void find_non_local_tags(const struct ref *refs,
 		 * to fetch then we can mark the ref entry in the list
 		 * as one to ignore by setting util to NULL.
 		 */
-		if (ends_with(ref->name, "^{}")) {
-			if (item &&
+		إذا (سرے_with(ref->name, "^{}")) {
+			إذا (شے &&
 			    !odb_has_object(the_repository->objects, &ref->old_oid, 0) &&
-			    !oidset_contains(&fetch_oids, &ref->old_oid) &&
-			    !odb_has_object(the_repository->objects, &item->oid, 0) &&
-			    !oidset_contains(&fetch_oids, &item->oid))
-				clear_item(item);
-			item = NULL;
-			continue;
+			    !oidset_شامل_اے(&fetch_oids, &ref->old_oid) &&
+			    !odb_has_object(the_repository->objects, &شے->oid, 0) &&
+			    !oidset_شامل_اے(&fetch_oids, &شے->oid))
+				clear_شے(شے);
+			شے = عدم;
+			استمر;
 		}
 
 		/*
@@ -406,91 +406,91 @@ static void find_non_local_tags(const struct ref *refs,
 		 * to check if it is a lightweight tag that we want to
 		 * fetch.
 		 */
-		if (item &&
-		    !odb_has_object(the_repository->objects, &item->oid, 0) &&
-		    !oidset_contains(&fetch_oids, &item->oid))
-			clear_item(item);
+		إذا (شے &&
+		    !odb_has_object(the_repository->objects, &شے->oid, 0) &&
+		    !oidset_شامل_اے(&fetch_oids, &شے->oid))
+			clear_شے(شے);
 
-		item = NULL;
+		شے = عدم;
 
 		/* skip duplicates and refs that we already have */
-		if (refname_hash_exists(&remote_refs, ref->name) ||
+		إذا (refname_hash_exists(&remote_refs, ref->name) ||
 		    refname_hash_exists(&existing_refs, ref->name))
-			continue;
+			استمر;
 
-		item = refname_hash_add(&remote_refs, ref->name, &ref->old_oid);
-		string_list_insert(&remote_refs_list, ref->name);
+		شے = refname_hash_جوڑو(&remote_refs, ref->name, &ref->old_oid);
+		string_list_داخل_کرو(&remote_refs_list, ref->name);
 	}
-	hashmap_clear_and_free(&existing_refs, struct refname_hash_entry, ent);
+	hashmap_clear_and_free(&existing_refs, بنية refname_hash_اندراج, ent);
 
 	/*
 	 * We may have a final lightweight tag that needs to be
 	 * checked to see if it needs fetching.
 	 */
-	if (item &&
-	    !odb_has_object(the_repository->objects, &item->oid, 0) &&
-	    !oidset_contains(&fetch_oids, &item->oid))
-		clear_item(item);
+	إذا (شے &&
+	    !odb_has_object(the_repository->objects, &شے->oid, 0) &&
+	    !oidset_شامل_اے(&fetch_oids, &شے->oid))
+		clear_شے(شے);
 
 	/*
 	 * For all the tags in the remote_refs_list,
 	 * add them to the list of refs to be fetched
 	 */
-	for_each_string_list_item(remote_ref_item, &remote_refs_list) {
-		const char *refname = remote_ref_item->string;
-		struct ref *rm;
-		unsigned int hash = strhash(refname);
+	for_each_string_list_شے(remote_ref_شے, &remote_refs_list) {
+		ثابت حرف *refname = remote_ref_شے->string;
+		بنية ref *rm;
+		بنانشانی صحيح hash = strhash(refname);
 
-		item = hashmap_get_entry_from_hash(&remote_refs, hash, refname,
-					struct refname_hash_entry, ent);
-		if (!item)
+		شے = hashmap_get_اندراج_from_hash(&remote_refs, hash, refname,
+					بنية refname_hash_اندراج, ent);
+		إذا (!شے)
 			BUG("unseen remote ref?");
 
 		/* Unless we have already decided to ignore this item... */
-		if (item->ignore)
-			continue;
+		إذا (شے->ignore)
+			استمر;
 
-		rm = alloc_ref(item->refname);
-		rm->peer_ref = alloc_ref(item->refname);
-		oidcpy(&rm->old_oid, &item->oid);
-		**tail = rm;
-		*tail = &rm->next;
+		rm = alloc_ref(شے->refname);
+		rm->peer_ref = alloc_ref(شے->refname);
+		oidcpy(&rm->old_oid, &شے->oid);
+		**پوچھ = rm;
+		*پوچھ = &rm->اگلا;
 	}
-	hashmap_clear_and_free(&remote_refs, struct refname_hash_entry, ent);
+	hashmap_clear_and_free(&remote_refs, بنية refname_hash_اندراج, ent);
 	string_list_clear(&remote_refs_list, 0);
 	oidset_clear(&fetch_oids);
 }
 
-static void filter_prefetch_refspec(struct refspec *rs)
+ساكن فراغ filter_prefetch_refspec(بنية refspec *rs)
 {
-	int i;
+	صحيح i;
 
-	if (!prefetch)
-		return;
+	إذا (!prefetch)
+		أرجع;
 
-	for (i = 0; i < rs->nr; i++) {
-		struct strbuf new_dst = STRBUF_INIT;
-		char *old_dst;
-		const char *sub = NULL;
+	لكل (i = 0; i < rs->nr; i++) {
+		بنية strbuf new_dst = STRBUF_INIT;
+		حرف *old_dst;
+		ثابت حرف *sub = عدم;
 
-		if (rs->items[i].negative)
-			continue;
-		if (!rs->items[i].dst ||
-		    (rs->items[i].src &&
-		     starts_with(rs->items[i].src,
-				 ref_namespace[NAMESPACE_TAGS].ref))) {
-			int j;
+		إذا (rs->اشیاء[i].negative)
+			استمر;
+		إذا (!rs->اشیاء[i].dst ||
+		    (rs->اشیاء[i].src &&
+		     starts_with(rs->اشیاء[i].src,
+				 ref_namespace[NAMESPACE_ٹیگ_سوچی].ref))) {
+			صحيح j;
 
-			refspec_item_clear(&rs->items[i]);
+			refspec_شے_clear(&rs->اشیاء[i]);
 
-			for (j = i + 1; j < rs->nr; j++)
-				rs->items[j - 1] = rs->items[j];
+			لكل (j = i + 1; j < rs->nr; j++)
+				rs->اشیاء[j - 1] = rs->اشیاء[j];
 			rs->nr--;
 			i--;
-			continue;
+			استمر;
 		}
 
-		old_dst = rs->items[i].dst;
+		old_dst = rs->اشیاء[i].dst;
 		strbuf_addstr(&new_dst, ref_namespace[NAMESPACE_PREFETCH].ref);
 
 		/*
@@ -498,48 +498,48 @@ static void filter_prefetch_refspec(struct refspec *rs)
 		 * sub after that prefix. Otherwise, start at
 		 * the beginning of the string.
 		 */
-		if (!skip_prefix(old_dst, "refs/", &sub))
+		إذا (!skip_اگیتر(old_dst, "refs/", &sub))
 			sub = old_dst;
 		strbuf_addstr(&new_dst, sub);
 
-		rs->items[i].dst = strbuf_detach(&new_dst, NULL);
-		rs->items[i].force = 1;
+		rs->اشیاء[i].dst = strbuf_detach(&new_dst, عدم);
+		rs->اشیاء[i].force = 1;
 
-		free(old_dst);
+		حرر(old_dst);
 	}
 }
 
-static struct ref *get_ref_map(struct remote *remote,
-			       const struct ref *remote_refs,
-			       struct refspec *rs,
-			       int tags, int *autotags)
+ساكن بنية ref *get_ref_map(بنية remote *remote,
+			       ثابت بنية ref *remote_refs,
+			       بنية refspec *rs,
+			       صحيح ٹیگ_سوچی, صحيح *autotags)
 {
-	int i;
-	struct ref *rm;
-	struct ref *ref_map = NULL;
-	struct ref **tail = &ref_map;
+	صحيح i;
+	بنية ref *rm;
+	بنية ref *ref_map = عدم;
+	بنية ref **پوچھ = &ref_map;
 
 	/* opportunistically-updated references: */
-	struct ref *orefs = NULL, **oref_tail = &orefs;
+	بنية ref *orefs = عدم, **oref_پوچھ = &orefs;
 
-	struct hashmap existing_refs;
-	int existing_refs_populated = 0;
+	بنية hashmap existing_refs;
+	صحيح existing_refs_populated = 0;
 
 	filter_prefetch_refspec(rs);
-	if (remote)
+	إذا (remote)
 		filter_prefetch_refspec(&remote->fetch);
 
-	if (rs->nr) {
-		struct refspec *fetch_refspec;
+	إذا (rs->nr) {
+		بنية refspec *fetch_refspec;
 
-		for (i = 0; i < rs->nr; i++) {
-			get_fetch_map(remote_refs, &rs->items[i], &tail, 0);
-			if (rs->items[i].dst && rs->items[i].dst[0])
+		لكل (i = 0; i < rs->nr; i++) {
+			get_fetch_map(remote_refs, &rs->اشیاء[i], &پوچھ, 0);
+			إذا (rs->اشیاء[i].dst && rs->اشیاء[i].dst[0])
 				*autotags = 1;
 		}
 		/* Merge everything on the command line (but not --tags) */
-		for (rm = ref_map; rm; rm = rm->next)
-			rm->fetch_head_status = FETCH_HEAD_MERGE;
+		لكل (rm = ref_map; rm; rm = rm->اگلا)
+			rm->fetch_سر_حالت = FETCH_سر_ملاؤ;
 
 		/*
 		 * For any refs that we happen to be fetching via
@@ -561,31 +561,31 @@ static struct ref *get_ref_map(struct remote *remote,
 		 * by ref_remove_duplicates() in favor of one of these
 		 * opportunistic entries with FETCH_HEAD_IGNORE.
 		 */
-		if (refmap.nr)
+		إذا (refmap.nr)
 			fetch_refspec = &refmap;
-		else
+		وإلا
 			fetch_refspec = &remote->fetch;
 
-		for (i = 0; i < fetch_refspec->nr; i++)
-			get_fetch_map(ref_map, &fetch_refspec->items[i], &oref_tail, 1);
-	} else if (refmap.nr) {
+		لكل (i = 0; i < fetch_refspec->nr; i++)
+			get_fetch_map(ref_map, &fetch_refspec->اشیاء[i], &oref_پوچھ, 1);
+	} وإلا إذا (refmap.nr) {
 		die("--refmap option is only meaningful with command-line refspec(s)");
-	} else {
+	} وإلا {
 		/* Use the defaults */
-		struct branch *branch = branch_get(NULL);
-		int has_merge = branch_has_merge_config(branch);
-		if (remote &&
+		بنية branch *branch = branch_get(عدم);
+		صحيح has_ملاؤ = branch_has_ملاؤ_config(branch);
+		إذا (remote &&
 		    (remote->fetch.nr ||
 		     /* Note: has_merge implies non-NULL branch->remote_name */
-		     (has_merge && !strcmp(branch->remote_name, remote->name)))) {
-			for (i = 0; i < remote->fetch.nr; i++) {
-				get_fetch_map(remote_refs, &remote->fetch.items[i], &tail, 0);
-				if (remote->fetch.items[i].dst &&
-				    remote->fetch.items[i].dst[0])
+		     (has_ملاؤ && !strcmp(branch->remote_name, remote->name)))) {
+			لكل (i = 0; i < remote->fetch.nr; i++) {
+				get_fetch_map(remote_refs, &remote->fetch.اشیاء[i], &پوچھ, 0);
+				إذا (remote->fetch.اشیاء[i].dst &&
+				    remote->fetch.اشیاء[i].dst[0])
 					*autotags = 1;
-				if (!i && !has_merge && ref_map &&
-				    !remote->fetch.items[0].pattern)
-					ref_map->fetch_head_status = FETCH_HEAD_MERGE;
+				إذا (!i && !has_ملاؤ && ref_map &&
+				    !remote->fetch.اشیاء[0].نمونہ)
+					ref_map->fetch_سر_حالت = FETCH_سر_ملاؤ;
 			}
 			/*
 			 * if the remote we're fetching from is the same
@@ -594,35 +594,35 @@ static struct ref *get_ref_map(struct remote *remote,
 			 *
 			 * Note: has_merge implies non-NULL branch->remote_name
 			 */
-			if (has_merge &&
+			إذا (has_ملاؤ &&
 			    !strcmp(branch->remote_name, remote->name))
-				add_merge_config(&ref_map, remote_refs, branch, &tail);
-		} else if (!prefetch) {
+				جوڑو_ملاؤ_config(&ref_map, remote_refs, branch, &پوچھ);
+		} وإلا إذا (!prefetch) {
 			ref_map = get_remote_ref(remote_refs, "HEAD");
-			if (!ref_map)
+			إذا (!ref_map)
 				die(_("couldn't find remote ref HEAD"));
-			ref_map->fetch_head_status = FETCH_HEAD_MERGE;
-			tail = &ref_map->next;
+			ref_map->fetch_سر_حالت = FETCH_سر_ملاؤ;
+			پوچھ = &ref_map->اگلا;
 		}
 	}
 
-	if (tags == TAGS_SET) {
-		struct refspec_item tag_refspec;
+	إذا (ٹیگ_سوچی == ٹیگ_سوچی_سیٹ) {
+		بنية refspec_شے ٹیگ_refspec;
 
 		/* also fetch all tags */
-		refspec_item_init_push(&tag_refspec, TAG_REFSPEC,
+		refspec_شے_init_ڈالو(&ٹیگ_refspec, ٹیگ_REFSPEC,
 				       the_hash_algo);
-		get_fetch_map(remote_refs, &tag_refspec, &tail, 0);
-		refspec_item_clear(&tag_refspec);
-	} else if (tags == TAGS_DEFAULT && *autotags) {
-		find_non_local_tags(remote_refs, NULL, &ref_map, &tail);
+		get_fetch_map(remote_refs, &ٹیگ_refspec, &پوچھ, 0);
+		refspec_شے_clear(&ٹیگ_refspec);
+	} وإلا إذا (ٹیگ_سوچی == ٹیگ_سوچی_DEFAULT && *autotags) {
+		لبھو_non_local_ٹیگ_سوچی(remote_refs, عدم, &ref_map, &پوچھ);
 	}
 
 	/* Now append any refs to be updated opportunistically: */
-	*tail = orefs;
-	for (rm = orefs; rm; rm = rm->next) {
-		rm->fetch_head_status = FETCH_HEAD_IGNORE;
-		tail = &rm->next;
+	*پوچھ = orefs;
+	لكل (rm = orefs; rm; rm = rm->اگلا) {
+		rm->fetch_سر_حالت = FETCH_سر_IGNORE;
+		پوچھ = &rm->اگلا;
 	}
 
 	/*
@@ -630,92 +630,92 @@ static struct ref *get_ref_map(struct remote *remote,
 	 * necessary as negative refspecs might remove an otherwise conflicting
 	 * duplicate.
 	 */
-	if (rs->nr)
+	إذا (rs->nr)
 		ref_map = apply_negative_refspecs(ref_map, rs);
-	else
+	وإلا
 		ref_map = apply_negative_refspecs(ref_map, &remote->fetch);
 
 	ref_map = ref_remove_duplicates(ref_map);
 
-	for (rm = ref_map; rm; rm = rm->next) {
-		if (rm->peer_ref) {
-			const char *refname = rm->peer_ref->name;
-			struct refname_hash_entry *peer_item;
-			unsigned int hash = strhash(refname);
+	لكل (rm = ref_map; rm; rm = rm->اگلا) {
+		إذا (rm->peer_ref) {
+			ثابت حرف *refname = rm->peer_ref->name;
+			بنية refname_hash_اندراج *peer_شے;
+			بنانشانی صحيح hash = strhash(refname);
 
-			if (!existing_refs_populated) {
+			إذا (!existing_refs_populated) {
 				refname_hash_init(&existing_refs);
 				refs_for_each_ref(get_main_ref_store(the_repository),
-						  add_one_refname,
+						  جوڑو_one_refname,
 						  &existing_refs);
 				existing_refs_populated = 1;
 			}
 
-			peer_item = hashmap_get_entry_from_hash(&existing_refs,
+			peer_شے = hashmap_get_اندراج_from_hash(&existing_refs,
 						hash, refname,
-						struct refname_hash_entry, ent);
-			if (peer_item) {
-				struct object_id *old_oid = &peer_item->oid;
+						بنية refname_hash_اندراج, ent);
+			إذا (peer_شے) {
+				بنية object_id *old_oid = &peer_شے->oid;
 				oidcpy(&rm->peer_ref->old_oid, old_oid);
 			}
 		}
 	}
-	if (existing_refs_populated)
-		hashmap_clear_and_free(&existing_refs, struct refname_hash_entry, ent);
+	إذا (existing_refs_populated)
+		hashmap_clear_and_free(&existing_refs, بنية refname_hash_اندراج, ent);
 
-	return ref_map;
+	أرجع ref_map;
 }
 
-static int s_update_ref(const char *action,
-			struct ref *ref,
-			struct ref_transaction *transaction,
-			int check_old)
+ساكن صحيح s_update_ref(ثابت حرف *action,
+			بنية ref *ref,
+			بنية ref_transaction *transaction,
+			صحيح check_old)
 {
-	char *msg;
-	char *rla = getenv("GIT_REFLOG_ACTION");
-	struct strbuf err = STRBUF_INIT;
-	int ret;
+	حرف *پیغام;
+	حرف *rla = getenv("GIT_REFLOG_ACTION");
+	بنية strbuf err = STRBUF_INIT;
+	صحيح ret;
 
-	if (dry_run)
-		return 0;
-	if (!rla)
+	إذا (dry_لگاتار)
+		أرجع 0;
+	إذا (!rla)
 		rla = default_rla.buf;
-	msg = xstrfmt("%s: %s", rla, action);
+	پیغام = xstrfmt("%s: %s", rla, action);
 
 	ret = ref_transaction_update(transaction, ref->name, &ref->new_oid,
-				     check_old ? &ref->old_oid : NULL,
-				     NULL, NULL, 0, msg, &err);
+				     check_old ? &ref->old_oid : عدم,
+				     عدم, عدم, 0, پیغام, &err);
 
-	if (ret)
+	إذا (ret)
 		error("%s", err.buf);
 	strbuf_release(&err);
-	free(msg);
-	return ret;
+	حرر(پیغام);
+	أرجع ret;
 }
 
-static int refcol_width(const struct ref *ref_map, int compact_format)
+ساكن صحيح refcol_چوڑائی(ثابت بنية ref *ref_map, صحيح compact_format)
 {
-	const struct ref *ref;
-	int max, width = 10;
+	ثابت بنية ref *ref;
+	صحيح max, چوڑائی = 10;
 
-	max = term_columns();
-	if (compact_format)
+	max = رکن_columns();
+	إذا (compact_format)
 		max = max * 2 / 3;
 
-	for (ref = ref_map; ref; ref = ref->next) {
-		int rlen, llen = 0, len;
+	لكل (ref = ref_map; ref; ref = ref->اگلا) {
+		صحيح rlen, llen = 0, len;
 
-		if (ref->status == REF_STATUS_REJECT_SHALLOW ||
+		إذا (ref->حالت == REF_حالت_REJECT_SHALLOW ||
 		    !ref->peer_ref ||
 		    !strcmp(ref->name, "HEAD"))
-			continue;
+			استمر;
 
 		/* uptodate lines are only shown on high verbosity level */
-		if (verbosity <= 0 && oideq(&ref->peer_ref->old_oid, &ref->old_oid))
-			continue;
+		إذا (verbosity <= 0 && oideq(&ref->peer_ref->old_oid, &ref->old_oid))
+			استمر;
 
 		rlen = utf8_strwidth(prettify_refname(ref->name));
-		if (!compact_format)
+		إذا (!compact_format)
 			llen = utf8_strwidth(prettify_refname(ref->peer_ref->name));
 
 		/*
@@ -725,163 +725,163 @@ static int refcol_width(const struct ref *ref_map, int compact_format)
 		 * will be printed in update_local_ref)
 		 */
 		len = 21 /* flag and summary */ + rlen + 4 /* -> */ + llen;
-		if (len >= max)
-			continue;
+		إذا (len >= max)
+			استمر;
 
-		if (width < rlen)
-			width = rlen;
+		إذا (چوڑائی < rlen)
+			چوڑائی = rlen;
 	}
 
-	return width;
+	أرجع چوڑائی;
 }
 
-static void display_state_init(struct display_state *display_state, struct ref *ref_map,
-			       const char *raw_url, enum display_format format)
+ساكن فراغ display_state_init(بنية display_state *display_state, بنية ref *ref_map,
+			       ثابت حرف *raw_url, تعداد display_format format)
 {
-	int i;
+	صحيح i;
 
-	memset(display_state, 0, sizeof(*display_state));
+	memset(display_state, 0, حجم(*display_state));
 	strbuf_init(&display_state->buf, 0);
 	display_state->format = format;
 
-	if (raw_url)
+	إذا (raw_url)
 		display_state->url = transport_anonymize_url(raw_url);
-	else
+	وإلا
 		display_state->url = xstrdup("foreign");
 
-	display_state->url_len = strlen(display_state->url);
-	for (i = display_state->url_len - 1; 0 <= i && display_state->url[i] == '/'; i--)
+	display_state->url_len = لڑی_لمبائی(display_state->url);
+	لكل (i = display_state->url_len - 1; 0 <= i && display_state->url[i] == '/'; i--)
 		;
 	display_state->url_len = i + 1;
-	if (4 < i && !strncmp(".git", display_state->url + i - 3, 4))
+	إذا (4 < i && !لڑی_مقابلہ(".git", display_state->url + i - 3, 4))
 		display_state->url_len = i - 3;
 
-	if (verbosity < 0)
-		return;
+	إذا (verbosity < 0)
+		أرجع;
 
-	switch (display_state->format) {
-	case DISPLAY_FORMAT_FULL:
-	case DISPLAY_FORMAT_COMPACT:
-		display_state->refcol_width = refcol_width(ref_map,
+	بدل (display_state->format) {
+	حالة DISPLAY_FORMAT_بھریا:
+	حالة DISPLAY_FORMAT_COMPACT:
+		display_state->refcol_چوڑائی = refcol_چوڑائی(ref_map,
 							   display_state->format == DISPLAY_FORMAT_COMPACT);
-		break;
-	case DISPLAY_FORMAT_PORCELAIN:
+		اكسر;
+	حالة DISPLAY_FORMAT_PORCELAIN:
 		/* We don't need to precompute anything here. */
-		break;
-	default:
+		اكسر;
+	افتراضي:
 		BUG("unexpected display format %d", display_state->format);
 	}
 }
 
-static void display_state_release(struct display_state *display_state)
+ساكن فراغ display_state_release(بنية display_state *display_state)
 {
 	strbuf_release(&display_state->buf);
-	free(display_state->url);
+	حرر(display_state->url);
 }
 
-static void print_remote_to_local(struct display_state *display_state,
-				  const char *remote, const char *local)
+ساكن فراغ print_remote_منزل_local(بنية display_state *display_state,
+				  ثابت حرف *remote, ثابت حرف *local)
 {
 	strbuf_addf(&display_state->buf, "%-*s -> %s",
-		    display_state->refcol_width, remote, local);
+		    display_state->refcol_چوڑائی, remote, local);
 }
 
-static int find_and_replace(struct strbuf *haystack,
-			    const char *needle,
-			    const char *placeholder)
+ساكن صحيح لبھو_and_replace(بنية strbuf *haystack,
+			    ثابت حرف *needle,
+			    ثابت حرف *placeholder)
 {
-	const char *p = NULL;
-	int plen, nlen;
+	ثابت حرف *p = عدم;
+	صحيح plen, nlen;
 
-	nlen = strlen(needle);
-	if (ends_with(haystack->buf, needle))
+	nlen = لڑی_لمبائی(needle);
+	إذا (سرے_with(haystack->buf, needle))
 		p = haystack->buf + haystack->len - nlen;
-	else
-		p = strstr(haystack->buf, needle);
-	if (!p)
-		return 0;
+	وإلا
+		p = لڑی_کھوج(haystack->buf, needle);
+	إذا (!p)
+		أرجع 0;
 
-	if (p > haystack->buf && p[-1] != '/')
-		return 0;
+	إذا (p > haystack->buf && p[-1] != '/')
+		أرجع 0;
 
-	plen = strlen(p);
-	if (plen > nlen && p[nlen] != '/')
-		return 0;
+	plen = لڑی_لمبائی(p);
+	إذا (plen > nlen && p[nlen] != '/')
+		أرجع 0;
 
 	strbuf_splice(haystack, p - haystack->buf, nlen,
-		      placeholder, strlen(placeholder));
-	return 1;
+		      placeholder, لڑی_لمبائی(placeholder));
+	أرجع 1;
 }
 
-static void print_compact(struct display_state *display_state,
-			  const char *remote, const char *local)
+ساكن فراغ print_compact(بنية display_state *display_state,
+			  ثابت حرف *remote, ثابت حرف *local)
 {
-	struct strbuf r = STRBUF_INIT;
-	struct strbuf l = STRBUF_INIT;
+	بنية strbuf r = STRBUF_INIT;
+	بنية strbuf l = STRBUF_INIT;
 
-	if (!strcmp(remote, local)) {
-		strbuf_addf(&display_state->buf, "%-*s -> *", display_state->refcol_width, remote);
-		return;
+	إذا (!strcmp(remote, local)) {
+		strbuf_addf(&display_state->buf, "%-*s -> *", display_state->refcol_چوڑائی, remote);
+		أرجع;
 	}
 
 	strbuf_addstr(&r, remote);
 	strbuf_addstr(&l, local);
 
-	if (!find_and_replace(&r, local, "*"))
-		find_and_replace(&l, remote, "*");
-	print_remote_to_local(display_state, r.buf, l.buf);
+	إذا (!لبھو_and_replace(&r, local, "*"))
+		لبھو_and_replace(&l, remote, "*");
+	print_remote_منزل_local(display_state, r.buf, l.buf);
 
 	strbuf_release(&r);
 	strbuf_release(&l);
 }
 
-static void display_ref_update(struct display_state *display_state, char code,
-			       const char *summary, const char *error,
-			       const char *remote, const char *local,
-			       const struct object_id *old_oid,
-			       const struct object_id *new_oid,
-			       int summary_width)
+ساكن فراغ display_ref_update(بنية display_state *display_state, حرف کوڈ,
+			       ثابت حرف *summary, ثابت حرف *error,
+			       ثابت حرف *remote, ثابت حرف *local,
+			       ثابت بنية object_id *old_oid,
+			       ثابت بنية object_id *new_oid,
+			       صحيح summary_چوڑائی)
 {
 	FILE *f = stderr;
 
-	if (verbosity < 0)
-		return;
+	إذا (verbosity < 0)
+		أرجع;
 
 	strbuf_reset(&display_state->buf);
 
-	switch (display_state->format) {
-	case DISPLAY_FORMAT_FULL:
-	case DISPLAY_FORMAT_COMPACT: {
-		int width;
+	بدل (display_state->format) {
+	حالة DISPLAY_FORMAT_بھریا:
+	حالة DISPLAY_FORMAT_COMPACT: {
+		صحيح چوڑائی;
 
-		if (!display_state->shown_url) {
+		إذا (!display_state->shown_url) {
 			strbuf_addf(&display_state->buf, _("From %.*s\n"),
 				    display_state->url_len, display_state->url);
 			display_state->shown_url = 1;
 		}
 
-		width = (summary_width + strlen(summary) - gettext_width(summary));
+		چوڑائی = (summary_چوڑائی + لڑی_لمبائی(summary) - gettext_چوڑائی(summary));
 		remote = prettify_refname(remote);
 		local = prettify_refname(local);
 
-		strbuf_addf(&display_state->buf, " %c %-*s ", code, width, summary);
+		strbuf_addf(&display_state->buf, " %c %-*s ", کوڈ, چوڑائی, summary);
 
-		if (display_state->format != DISPLAY_FORMAT_COMPACT)
-			print_remote_to_local(display_state, remote, local);
-		else
+		إذا (display_state->format != DISPLAY_FORMAT_COMPACT)
+			print_remote_منزل_local(display_state, remote, local);
+		وإلا
 			print_compact(display_state, remote, local);
 
-		if (error)
+		إذا (error)
 			strbuf_addf(&display_state->buf, "  (%s)", error);
 
-		break;
+		اكسر;
 	}
-	case DISPLAY_FORMAT_PORCELAIN:
-		strbuf_addf(&display_state->buf, "%c %s %s %s", code,
-			    oid_to_hex(old_oid), oid_to_hex(new_oid), local);
+	حالة DISPLAY_FORMAT_PORCELAIN:
+		strbuf_addf(&display_state->buf, "%c %s %s %s", کوڈ,
+			    oid_منزل_hex(old_oid), oid_منزل_hex(new_oid), local);
 		f = stdout;
-		break;
-	default:
+		اكسر;
+	افتراضي:
 		BUG("unexpected display format %d", display_state->format);
 	};
 	strbuf_addch(&display_state->buf, '\n');
@@ -889,44 +889,44 @@ static void display_ref_update(struct display_state *display_state, char code,
 	fputs(display_state->buf.buf, f);
 }
 
-struct ref_update_display_info {
+بنية ref_update_display_info {
 	bool failed;
-	char success_code;
-	char fail_code;
-	char *summary;
-	char *fail_detail;
-	char *success_detail;
-	char *ref;
-	char *remote;
-	struct object_id old_oid;
-	struct object_id new_oid;
+	حرف success_کوڈ;
+	حرف fail_کوڈ;
+	حرف *summary;
+	حرف *fail_detail;
+	حرف *success_detail;
+	حرف *ref;
+	حرف *remote;
+	بنية object_id old_oid;
+	بنية object_id new_oid;
 };
 
-struct ref_update_display_info_array {
-	struct ref_update_display_info *info;
-	size_t alloc, nr;
+بنية ref_update_display_info_array {
+	بنية ref_update_display_info *info;
+	ناپ_t alloc, nr;
 };
 
-static struct ref_update_display_info *ref_update_display_info_append(
-					   struct ref_update_display_info_array *array,
-					   char success_code,
-					   char fail_code,
-					   const char *summary,
-					   const char *success_detail,
-					   const char *fail_detail,
-					   const char *ref,
-					   const char *remote,
-					   const struct object_id *old_oid,
-					   const struct object_id *new_oid)
+ساكن بنية ref_update_display_info *ref_update_display_info_append(
+					   بنية ref_update_display_info_array *array,
+					   حرف success_کوڈ,
+					   حرف fail_کوڈ,
+					   ثابت حرف *summary,
+					   ثابت حرف *success_detail,
+					   ثابت حرف *fail_detail,
+					   ثابت حرف *ref,
+					   ثابت حرف *remote,
+					   ثابت بنية object_id *old_oid,
+					   ثابت بنية object_id *new_oid)
 {
-	struct ref_update_display_info *info;
+	بنية ref_update_display_info *info;
 
 	ALLOC_GROW(array->info, array->nr + 1, array->alloc);
 	info = &array->info[array->nr++];
 
 	info->failed = false;
-	info->success_code = success_code;
-	info->fail_code = fail_code;
+	info->success_کوڈ = success_کوڈ;
+	info->fail_کوڈ = fail_کوڈ;
 	info->summary = xstrdup(summary);
 	info->success_detail = xstrdup_or_null(success_detail);
 	info->fail_detail = xstrdup_or_null(fail_detail);
@@ -936,101 +936,101 @@ static struct ref_update_display_info *ref_update_display_info_append(
 	oidcpy(&info->old_oid, old_oid);
 	oidcpy(&info->new_oid, new_oid);
 
-	return info;
+	أرجع info;
 }
 
-static void ref_update_display_info_set_failed(struct ref_update_display_info *info)
+ساكن فراغ ref_update_display_info_سیٹ_failed(بنية ref_update_display_info *info)
 {
 	info->failed = true;
 }
 
-static void ref_update_display_info_free(struct ref_update_display_info *info)
+ساكن فراغ ref_update_display_info_free(بنية ref_update_display_info *info)
 {
-	free(info->summary);
-	free(info->success_detail);
-	free(info->fail_detail);
-	free(info->remote);
-	free(info->ref);
+	حرر(info->summary);
+	حرر(info->success_detail);
+	حرر(info->fail_detail);
+	حرر(info->remote);
+	حرر(info->ref);
 }
 
-static void ref_update_display_info_display(struct ref_update_display_info *info,
-					    struct display_state *display_state,
-					    int summary_width)
+ساكن فراغ ref_update_display_info_display(بنية ref_update_display_info *info,
+					    بنية display_state *display_state,
+					    صحيح summary_چوڑائی)
 {
 	display_ref_update(display_state,
-			   info->failed ? info->fail_code : info->success_code,
+			   info->failed ? info->fail_کوڈ : info->success_کوڈ,
 			   info->summary,
 			   info->failed ? info->fail_detail : info->success_detail,
 			   info->remote, info->ref, &info->old_oid,
-			   &info->new_oid, summary_width);
+			   &info->new_oid, summary_چوڑائی);
 }
 
-static int update_local_ref(struct ref *ref,
-			    struct ref_transaction *transaction,
-			    const struct ref *remote_ref,
-			    const struct fetch_config *config,
-			    struct ref_update_display_info_array *display_array)
+ساكن صحيح update_local_ref(بنية ref *ref,
+			    بنية ref_transaction *transaction,
+			    ثابت بنية ref *remote_ref,
+			    ثابت بنية fetch_config *config,
+			    بنية ref_update_display_info_array *display_array)
 {
-	struct commit *current = NULL, *updated;
-	int fast_forward = 0;
+	بنية commit *current = عدم, *updated;
+	صحيح fast_forward = 0;
 
-	if (!odb_has_object(the_repository->objects, &ref->new_oid,
+	إذا (!odb_has_object(the_repository->objects, &ref->new_oid,
 			    ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR))
-		die(_("object %s not found"), oid_to_hex(&ref->new_oid));
+		die(_("object %s not found"), oid_منزل_hex(&ref->new_oid));
 
-	if (oideq(&ref->old_oid, &ref->new_oid)) {
-		if (verbosity > 0)
+	إذا (oideq(&ref->old_oid, &ref->new_oid)) {
+		إذا (verbosity > 0)
 			ref_update_display_info_append(display_array, '=', '=',
-						       _("[up to date]"), NULL,
-						       NULL, ref->name,
+						       _("[up to date]"), عدم,
+						       عدم, ref->name,
 						       remote_ref->name, &ref->old_oid,
 						       &ref->new_oid);
-		return 0;
+		أرجع 0;
 	}
 
-	if (!update_head_ok &&
+	إذا (!update_سر_ok &&
 	    !is_null_oid(&ref->old_oid) &&
-	    branch_checked_out(ref->name)) {
-		struct ref_update_display_info *info;
+	    branch_checked_باہرلا(ref->name)) {
+		بنية ref_update_display_info *info;
 		/*
 		 * If this is the head, and it's not okay to update
 		 * the head, and the old value of the head isn't empty...
 		 */
 		info = ref_update_display_info_append(display_array, '!', '!',
-						      _("[rejected]"), NULL,
+						      _("[rejected]"), عدم,
 						      _("can't fetch into checked-out branch"),
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
-		ref_update_display_info_set_failed(info);
-		return 1;
+		ref_update_display_info_سیٹ_failed(info);
+		أرجع 1;
 	}
 
-	if (!is_null_oid(&ref->old_oid) &&
+	إذا (!is_null_oid(&ref->old_oid) &&
 	    starts_with(ref->name, "refs/tags/")) {
-		struct ref_update_display_info *info;
+		بنية ref_update_display_info *info;
 
-		if (force || ref->force) {
-			int r;
+		إذا (force || ref->force) {
+			صحيح r;
 
 			r = s_update_ref("updating tag", ref, transaction, 0);
 
 			info = ref_update_display_info_append(display_array, 't', '!',
-							      _("[tag update]"), NULL,
+							      _("[tag update]"), عدم,
 							      _("unable to update local ref"),
 							      ref->name, remote_ref->name,
 							      &ref->old_oid, &ref->new_oid);
-			if (r)
-				ref_update_display_info_set_failed(info);
+			إذا (r)
+				ref_update_display_info_سیٹ_failed(info);
 
-			return r;
-		} else {
+			أرجع r;
+		} وإلا {
 			info = ref_update_display_info_append(display_array, '!', '!',
-							      _("[rejected]"), NULL,
+							      _("[rejected]"), عدم,
 							      _("would clobber existing tag"),
 							      ref->name, remote_ref->name,
 							      &ref->old_oid, &ref->new_oid);
-			ref_update_display_info_set_failed(info);
-			return 1;
+			ref_update_display_info_سیٹ_failed(info);
+			أرجع 1;
 		}
 	}
 
@@ -1038,79 +1038,79 @@ static int update_local_ref(struct ref *ref,
 						 &ref->old_oid, 1);
 	updated = lookup_commit_reference_gently(the_repository,
 						 &ref->new_oid, 1);
-	if (!current || !updated) {
-		struct ref_update_display_info *info;
-		const char *msg;
-		const char *what;
-		int r;
+	إذا (!current || !updated) {
+		بنية ref_update_display_info *info;
+		ثابت حرف *پیغام;
+		ثابت حرف *what;
+		صحيح r;
 		/*
 		 * Nicely describe the new ref we're fetching.
 		 * Base this on the remote's ref name, as it's
 		 * more likely to follow a standard layout.
 		 */
-		if (starts_with(remote_ref->name, "refs/tags/")) {
-			msg = "storing tag";
+		إذا (starts_with(remote_ref->name, "refs/tags/")) {
+			پیغام = "storing tag";
 			what = _("[new tag]");
-		} else if (starts_with(remote_ref->name, "refs/heads/")) {
-			msg = "storing head";
+		} وإلا إذا (starts_with(remote_ref->name, "refs/heads/")) {
+			پیغام = "storing head";
 			what = _("[new branch]");
-		} else {
-			msg = "storing ref";
+		} وإلا {
+			پیغام = "storing ref";
 			what = _("[new ref]");
 		}
 
-		r = s_update_ref(msg, ref, transaction, 0);
+		r = s_update_ref(پیغام, ref, transaction, 0);
 
 		info = ref_update_display_info_append(display_array, '*', '!',
-						      what, NULL,
+						      what, عدم,
 						      _("unable to update local ref"),
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
-		if (r)
-			ref_update_display_info_set_failed(info);
+		إذا (r)
+			ref_update_display_info_سیٹ_failed(info);
 
-		return r;
+		أرجع r;
 	}
 
-	if (config->show_forced_updates) {
+	إذا (config->show_forced_updates) {
 		uint64_t t_before = getnanotime();
-		fast_forward = repo_in_merge_bases(the_repository, current,
+		fast_forward = repo_وچ_ملاؤ_bases(the_repository, current,
 						   updated);
-		if (fast_forward < 0)
-			die(NULL);
+		إذا (fast_forward < 0)
+			die(عدم);
 		forced_updates_ms += (getnanotime() - t_before) / 1000000;
-	} else {
+	} وإلا {
 		fast_forward = 1;
 	}
 
-	if (fast_forward) {
-		struct ref_update_display_info *info;
-		struct strbuf quickref = STRBUF_INIT;
-		int r;
+	إذا (fast_forward) {
+		بنية ref_update_display_info *info;
+		بنية strbuf quickref = STRBUF_INIT;
+		صحيح r;
 
-		strbuf_add_unique_abbrev(&quickref, &current->object.oid, DEFAULT_ABBREV);
+		strbuf_جوڑو_unique_abbrev(&quickref, &current->object.oid, DEFAULT_ABBREV);
 		strbuf_addstr(&quickref, "..");
-		strbuf_add_unique_abbrev(&quickref, &ref->new_oid, DEFAULT_ABBREV);
+		strbuf_جوڑو_unique_abbrev(&quickref, &ref->new_oid, DEFAULT_ABBREV);
 		r = s_update_ref("fast-forward", ref, transaction, 1);
 
 		info = ref_update_display_info_append(display_array, ' ', '!',
-						      quickref.buf, NULL,
+						      quickref.buf, عدم,
 						      _("unable to update local ref"),
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
-		if (r)
-			ref_update_display_info_set_failed(info);
+		إذا (r)
+			ref_update_display_info_سیٹ_failed(info);
 
 		strbuf_release(&quickref);
-		return r;
-	} else if (force || ref->force) {
-		struct ref_update_display_info *info;
-		struct strbuf quickref = STRBUF_INIT;
-		int r;
+		أرجع r;
+	} وإلا إذا (force || ref->force) {
+		بنية ref_update_display_info *info;
+		بنية strbuf quickref = STRBUF_INIT;
+		صحيح r;
 
-		strbuf_add_unique_abbrev(&quickref, &current->object.oid, DEFAULT_ABBREV);
+		strbuf_جوڑو_unique_abbrev(&quickref, &current->object.oid, DEFAULT_ABBREV);
 		strbuf_addstr(&quickref, "...");
-		strbuf_add_unique_abbrev(&quickref, &ref->new_oid, DEFAULT_ABBREV);
+		strbuf_جوڑو_unique_abbrev(&quickref, &ref->new_oid, DEFAULT_ABBREV);
 		r = s_update_ref("forced-update", ref, transaction, 1);
 
 		info = ref_update_display_info_append(display_array, '+', '!',
@@ -1119,90 +1119,90 @@ static int update_local_ref(struct ref *ref,
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
 
-		if (r)
-			ref_update_display_info_set_failed(info);
+		إذا (r)
+			ref_update_display_info_سیٹ_failed(info);
 
 		strbuf_release(&quickref);
-		return r;
-	} else {
-		struct ref_update_display_info *info;
+		أرجع r;
+	} وإلا {
+		بنية ref_update_display_info *info;
 		info = ref_update_display_info_append(display_array, '!', '!',
-						      _("[rejected]"), NULL,
+						      _("[rejected]"), عدم,
 						      _("non-fast-forward"),
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
-		ref_update_display_info_set_failed(info);
-		return 1;
+		ref_update_display_info_سیٹ_failed(info);
+		أرجع 1;
 	}
 }
 
-static const struct object_id *iterate_ref_map(void *cb_data)
+ساكن ثابت بنية object_id *iterate_ref_map(فراغ *cb_انکڑے)
 {
-	struct ref **rm = cb_data;
-	struct ref *ref = *rm;
+	بنية ref **rm = cb_انکڑے;
+	بنية ref *ref = *rm;
 
-	while (ref && ref->status == REF_STATUS_REJECT_SHALLOW)
-		ref = ref->next;
-	if (!ref)
-		return NULL;
-	*rm = ref->next;
-	return &ref->old_oid;
+	طالما (ref && ref->حالت == REF_حالت_REJECT_SHALLOW)
+		ref = ref->اگلا;
+	إذا (!ref)
+		أرجع عدم;
+	*rm = ref->اگلا;
+	أرجع &ref->old_oid;
 }
 
-struct fetch_head {
+بنية fetch_سر {
 	FILE *fp;
-	struct strbuf buf;
+	بنية strbuf buf;
 };
 
-static int open_fetch_head(struct fetch_head *fetch_head)
+ساكن صحيح open_fetch_سر(بنية fetch_سر *fetch_سر)
 {
-	const char *filename = git_path_fetch_head(the_repository);
+	ثابت حرف *filename = git_رستہ_fetch_سر(the_repository);
 
-	if (write_fetch_head) {
-		fetch_head->fp = fopen(filename, "a");
-		if (!fetch_head->fp)
-			return error_errno(_("cannot open '%s'"), filename);
-		strbuf_init(&fetch_head->buf, 0);
-	} else {
-		fetch_head->fp = NULL;
+	إذا (write_fetch_سر) {
+		fetch_سر->fp = fopen(filename, "a");
+		إذا (!fetch_سر->fp)
+			أرجع error_errno(_("cannot open '%s'"), filename);
+		strbuf_init(&fetch_سر->buf, 0);
+	} وإلا {
+		fetch_سر->fp = عدم;
 	}
 
-	return 0;
+	أرجع 0;
 }
 
-static void append_fetch_head(struct fetch_head *fetch_head,
-			      const struct object_id *old_oid,
-			      enum fetch_head_status fetch_head_status,
-			      const char *note,
-			      const char *url, size_t url_len)
+ساكن فراغ append_fetch_سر(بنية fetch_سر *fetch_سر,
+			      ثابت بنية object_id *old_oid,
+			      تعداد fetch_سر_حالت fetch_سر_حالت,
+			      ثابت حرف *note,
+			      ثابت حرف *url, ناپ_t url_len)
 {
-	char old_oid_hex[GIT_MAX_HEXSZ + 1];
-	const char *merge_status_marker;
-	size_t i;
+	حرف old_oid_hex[GIT_MAX_HEXSZ + 1];
+	ثابت حرف *ملاؤ_حالت_marker;
+	ناپ_t i;
 
-	if (!fetch_head->fp)
-		return;
+	إذا (!fetch_سر->fp)
+		أرجع;
 
-	switch (fetch_head_status) {
-	case FETCH_HEAD_NOT_FOR_MERGE:
-		merge_status_marker = "not-for-merge";
-		break;
-	case FETCH_HEAD_MERGE:
-		merge_status_marker = "";
-		break;
-	default:
+	بدل (fetch_سر_حالت) {
+	حالة FETCH_سر_NOT_FOR_ملاؤ:
+		ملاؤ_حالت_marker = "not-for-merge";
+		اكسر;
+	حالة FETCH_سر_ملاؤ:
+		ملاؤ_حالت_marker = "";
+		اكسر;
+	افتراضي:
 		/* do not write anything to FETCH_HEAD */
-		return;
+		أرجع;
 	}
 
-	strbuf_addf(&fetch_head->buf, "%s\t%s\t%s",
-		    oid_to_hex_r(old_oid_hex, old_oid), merge_status_marker, note);
-	for (i = 0; i < url_len; ++i)
-		if ('\n' == url[i])
-			strbuf_addstr(&fetch_head->buf, "\\n");
-		else
-			strbuf_addch(&fetch_head->buf, url[i]);
-	strbuf_addch(&fetch_head->buf, '\n');
+	strbuf_addf(&fetch_سر->buf, "%s\t%s\t%s",
+		    oid_منزل_hex_r(old_oid_hex, old_oid), ملاؤ_حالت_marker, note);
+	لكل (i = 0; i < url_len; ++i)
+		إذا ('\n' == url[i])
+			strbuf_addstr(&fetch_سر->buf, "\\n");
+		وإلا
+			strbuf_addch(&fetch_سر->buf, url[i]);
+	strbuf_addch(&fetch_سر->buf, '\n');
 
 	/*
 	 * When using an atomic fetch, we do not want to update FETCH_HEAD if
@@ -1210,59 +1210,59 @@ static void append_fetch_head(struct fetch_head *fetch_head,
 	 * updates to a buffer first and only commit it as soon as all
 	 * references have been successfully updated.
 	 */
-	if (!atomic_fetch) {
-		strbuf_write(&fetch_head->buf, fetch_head->fp);
-		strbuf_reset(&fetch_head->buf);
+	إذا (!atomic_fetch) {
+		strbuf_write(&fetch_سر->buf, fetch_سر->fp);
+		strbuf_reset(&fetch_سر->buf);
 	}
 }
 
-static void commit_fetch_head(struct fetch_head *fetch_head)
+ساكن فراغ commit_fetch_سر(بنية fetch_سر *fetch_سر)
 {
-	if (!fetch_head->fp || !atomic_fetch)
-		return;
-	strbuf_write(&fetch_head->buf, fetch_head->fp);
+	إذا (!fetch_سر->fp || !atomic_fetch)
+		أرجع;
+	strbuf_write(&fetch_سر->buf, fetch_سر->fp);
 }
 
-static void close_fetch_head(struct fetch_head *fetch_head)
+ساكن فراغ close_fetch_سر(بنية fetch_سر *fetch_سر)
 {
-	if (!fetch_head->fp)
-		return;
+	إذا (!fetch_سر->fp)
+		أرجع;
 
-	fclose(fetch_head->fp);
-	strbuf_release(&fetch_head->buf);
+	fclose(fetch_سر->fp);
+	strbuf_release(&fetch_سر->buf);
 }
 
-static const char warn_show_forced_updates[] =
+ساكن ثابت حرف warn_show_forced_updates[] =
 N_("fetch normally indicates which branches had a forced update,\n"
    "but that check has been disabled; to re-enable, use '--show-forced-updates'\n"
    "flag or run 'git config fetch.showForcedUpdates true'");
-static const char warn_time_show_forced_updates[] =
+ساكن ثابت حرف warn_ویلا_show_forced_updates[] =
 N_("it took %.2f seconds to check forced updates; you can use\n"
    "'--no-show-forced-updates' or run 'git config fetch.showForcedUpdates false'\n"
    "to avoid this check\n");
 
-static int store_updated_refs(struct display_state *display_state,
-			      int connectivity_checked,
-			      struct ref_transaction *transaction, struct ref *ref_map,
-			      struct fetch_head *fetch_head,
-			      const struct fetch_config *config,
-			      struct ref_update_display_info_array *display_array)
+ساكن صحيح store_updated_refs(بنية display_state *display_state,
+			      صحيح connectivity_checked,
+			      بنية ref_transaction *transaction, بنية ref *ref_map,
+			      بنية fetch_سر *fetch_سر,
+			      ثابت بنية fetch_config *config,
+			      بنية ref_update_display_info_array *display_array)
 {
-	int rc = 0;
-	struct strbuf note = STRBUF_INIT;
-	const char *what, *kind;
-	struct ref *rm;
-	int want_status;
+	صحيح rc = 0;
+	بنية strbuf note = STRBUF_INIT;
+	ثابت حرف *what, *قسم;
+	بنية ref *rm;
+	صحيح want_حالت;
 
-	if (!connectivity_checked) {
-		struct check_connected_options opt = CHECK_CONNECTED_INIT;
+	إذا (!connectivity_checked) {
+		بنية check_connected_options opt = CHECK_CONNECTED_INIT;
 
 		opt.exclude_hidden_refs_section = "fetch";
 		rm = ref_map;
-		if (check_connected(iterate_ref_map, &rm, &opt)) {
+		إذا (check_connected(iterate_ref_map, &rm, &opt)) {
 			rc = error(_("%s did not send all necessary objects"),
 				   display_state->url);
-			goto abort;
+			اذهب abort;
 		}
 	}
 
@@ -1271,17 +1271,17 @@ static int store_updated_refs(struct display_state *display_state,
 	 * merged entries are written before not-for-merge. That lets readers
 	 * use FETCH_HEAD as a refname to refer to the ref to be merged.
 	 */
-	for (want_status = FETCH_HEAD_MERGE;
-	     want_status <= FETCH_HEAD_IGNORE;
-	     want_status++) {
-		for (rm = ref_map; rm; rm = rm->next) {
-			struct ref *ref = NULL;
+	لكل (want_حالت = FETCH_سر_ملاؤ;
+	     want_حالت <= FETCH_سر_IGNORE;
+	     want_حالت++) {
+		لكل (rm = ref_map; rm; rm = rm->اگلا) {
+			بنية ref *ref = عدم;
 
-			if (rm->status == REF_STATUS_REJECT_SHALLOW) {
-				if (want_status == FETCH_HEAD_MERGE)
+			إذا (rm->حالت == REF_حالت_REJECT_SHALLOW) {
+				إذا (want_حالت == FETCH_سر_ملاؤ)
 					warning(_("rejected %s because shallow roots are not allowed to be updated"),
 						rm->peer_ref ? rm->peer_ref->name : rm->name);
-				continue;
+				استمر;
 			}
 
 			/*
@@ -1293,8 +1293,8 @@ static int store_updated_refs(struct display_state *display_state,
 			 * in case FETCH_HEAD is not to be updated, so we can
 			 * skip the classification in that case.
 			 */
-			if (fetch_head->fp) {
-				struct commit *commit = NULL;
+			إذا (fetch_سر->fp) {
+				بنية commit *commit = عدم;
 
 				/*
 				 * References in "refs/tags/" are often going to point
@@ -1304,63 +1304,63 @@ static int store_updated_refs(struct display_state *display_state,
 				 * regress performance in repositories with many
 				 * annotated tags.
 				 */
-				if (!starts_with(rm->name, "refs/tags/"))
-					commit = lookup_commit_in_graph(the_repository, &rm->old_oid);
-				if (!commit) {
+				إذا (!starts_with(rm->name, "refs/tags/"))
+					commit = lookup_commit_وچ_گراف(the_repository, &rm->old_oid);
+				إذا (!commit) {
 					commit = lookup_commit_reference_gently(the_repository,
 										&rm->old_oid,
 										1);
-					if (!commit)
-						rm->fetch_head_status = FETCH_HEAD_NOT_FOR_MERGE;
+					إذا (!commit)
+						rm->fetch_سر_حالت = FETCH_سر_NOT_FOR_ملاؤ;
 				}
 			}
 
-			if (rm->fetch_head_status != want_status)
-				continue;
+			إذا (rm->fetch_سر_حالت != want_حالت)
+				استمر;
 
-			if (rm->peer_ref) {
+			إذا (rm->peer_ref) {
 				ref = alloc_ref(rm->peer_ref->name);
 				oidcpy(&ref->old_oid, &rm->peer_ref->old_oid);
 				oidcpy(&ref->new_oid, &rm->old_oid);
 				ref->force = rm->peer_ref->force;
 			}
 
-			if (config->recurse_submodules != RECURSE_SUBMODULES_OFF &&
+			إذا (config->recurse_submodules != RECURSE_SUBMODULES_OFF &&
 			    (!rm->peer_ref || !oideq(&ref->old_oid, &ref->new_oid))) {
 				check_for_new_submodule_commits(&rm->old_oid);
 			}
 
-			if (!strcmp(rm->name, "HEAD")) {
-				kind = "";
+			إذا (!strcmp(rm->name, "HEAD")) {
+				قسم = "";
 				what = "";
-			} else if (skip_prefix(rm->name, "refs/heads/", &what)) {
-				kind = "branch";
-			} else if (skip_prefix(rm->name, "refs/tags/", &what)) {
-				kind = "tag";
-			} else if (skip_prefix(rm->name, "refs/remotes/", &what)) {
-				kind = "remote-tracking branch";
-			} else {
-				kind = "";
+			} وإلا إذا (skip_اگیتر(rm->name, "refs/heads/", &what)) {
+				قسم = "branch";
+			} وإلا إذا (skip_اگیتر(rm->name, "refs/tags/", &what)) {
+				قسم = "tag";
+			} وإلا إذا (skip_اگیتر(rm->name, "refs/remotes/", &what)) {
+				قسم = "remote-tracking branch";
+			} وإلا {
+				قسم = "";
 				what = rm->name;
 			}
 
 			strbuf_reset(&note);
-			if (*what) {
-				if (*kind)
-					strbuf_addf(&note, "%s ", kind);
+			إذا (*what) {
+				إذا (*قسم)
+					strbuf_addf(&note, "%s ", قسم);
 				strbuf_addf(&note, "'%s' of ", what);
 			}
 
-			append_fetch_head(fetch_head, &rm->old_oid,
-					  rm->fetch_head_status,
+			append_fetch_سر(fetch_سر, &rm->old_oid,
+					  rm->fetch_سر_حالت,
 					  note.buf, display_state->url,
 					  display_state->url_len);
 
-			if (ref) {
+			إذا (ref) {
 				rc |= update_local_ref(ref, transaction, rm,
 						       config, display_array);
-				free(ref);
-			} else if (write_fetch_head || dry_run) {
+				حرر(ref);
+			} وإلا إذا (write_fetch_سر || dry_لگاتار) {
 				/*
 				 * Display fetches written to FETCH_HEAD (or
 				 * would be written to FETCH_HEAD, if --dry-run
@@ -1368,26 +1368,26 @@ static int store_updated_refs(struct display_state *display_state,
 				 */
 
 				ref_update_display_info_append(display_array, '*', '*',
-							       *kind ? kind : "branch",
-							       NULL, NULL, "FETCH_HEAD",
+							       *قسم ? قسم : "branch",
+							       عدم, عدم, "FETCH_HEAD",
 							       rm->name, &rm->new_oid,
 							       &rm->old_oid);
 			}
 		}
 	}
 
-	if (advice_enabled(ADVICE_FETCH_SHOW_FORCED_UPDATES)) {
-		if (!config->show_forced_updates) {
+	إذا (advice_enabled(ADVICE_FETCH_SHOW_FORCED_UPDATES)) {
+		إذا (!config->show_forced_updates) {
 			warning(_(warn_show_forced_updates));
-		} else if (forced_updates_ms > FORCED_UPDATES_DELAY_WARNING_IN_MS) {
-			warning(_(warn_time_show_forced_updates),
+		} وإلا إذا (forced_updates_ms > FORCED_UPDATES_DELAY_WARNING_وچ_MS) {
+			warning(_(warn_ویلا_show_forced_updates),
 				forced_updates_ms / 1000.0);
 		}
 	}
 
  abort:
 	strbuf_release(&note);
-	return rc;
+	أرجع rc;
 }
 
 /*
@@ -1395,11 +1395,11 @@ static int store_updated_refs(struct display_state *display_state,
  * everything we are going to fetch already exists and is connected
  * locally.
  */
-static int check_exist_and_connected(struct ref *ref_map)
+ساكن صحيح check_exist_and_connected(بنية ref *ref_map)
 {
-	struct ref *rm = ref_map;
-	struct check_connected_options opt = CHECK_CONNECTED_INIT;
-	struct ref *r;
+	بنية ref *rm = ref_map;
+	بنية check_connected_options opt = CHECK_CONNECTED_INIT;
+	بنية ref *r;
 
 	/*
 	 * If we are deepening a shallow clone we already have these
@@ -1408,286 +1408,286 @@ static int check_exist_and_connected(struct ref *ref_map)
 	 * really need to perform.  Claiming failure now will ensure
 	 * we perform the network exchange to deepen our history.
 	 */
-	if (deepen)
-		return -1;
+	إذا (deepen)
+		أرجع -1;
 
 	/*
 	 * Similarly, if we need to refetch, we always want to perform a full
 	 * fetch ignoring existing objects.
 	 */
-	if (refetch)
-		return -1;
+	إذا (refetch)
+		أرجع -1;
 
 
 	/*
 	 * check_connected() allows objects to merely be promised, but
 	 * we need all direct targets to exist.
 	 */
-	for (r = rm; r; r = r->next) {
-		if (!odb_has_object(the_repository->objects, &r->old_oid,
+	لكل (r = rm; r; r = r->اگلا) {
+		إذا (!odb_has_object(the_repository->objects, &r->old_oid,
 				    ODB_HAS_OBJECT_RECHECK_PACKED))
-			return -1;
+			أرجع -1;
 	}
 
 	opt.quiet = 1;
 	opt.exclude_hidden_refs_section = "fetch";
-	return check_connected(iterate_ref_map, &rm, &opt);
+	أرجع check_connected(iterate_ref_map, &rm, &opt);
 }
 
-static int fetch_and_consume_refs(struct display_state *display_state,
-				  struct transport *transport,
-				  struct ref_transaction *transaction,
-				  struct ref *ref_map,
-				  struct fetch_head *fetch_head,
-				  const struct fetch_config *config,
-				  struct ref_update_display_info_array *display_array)
+ساكن صحيح fetch_and_consume_refs(بنية display_state *display_state,
+				  بنية transport *transport,
+				  بنية ref_transaction *transaction,
+				  بنية ref *ref_map,
+				  بنية fetch_سر *fetch_سر,
+				  ثابت بنية fetch_config *config,
+				  بنية ref_update_display_info_array *display_array)
 {
-	int connectivity_checked = 1;
-	int ret;
+	صحيح connectivity_checked = 1;
+	صحيح ret;
 
 	/*
 	 * We don't need to perform a fetch in case we can already satisfy all
 	 * refs.
 	 */
 	ret = check_exist_and_connected(ref_map);
-	if (ret) {
+	إذا (ret) {
 		trace2_region_enter("fetch", "fetch_refs", the_repository);
 		ret = transport_fetch_refs(transport, ref_map);
 		trace2_region_leave("fetch", "fetch_refs", the_repository);
-		if (ret)
-			goto out;
+		إذا (ret)
+			اذهب باہرلا;
 		connectivity_checked = transport->smart_options ?
 			transport->smart_options->connectivity_checked : 0;
 	}
 
 	trace2_region_enter("fetch", "consume_refs", the_repository);
 	ret = store_updated_refs(display_state, connectivity_checked,
-				 transaction, ref_map, fetch_head, config,
+				 transaction, ref_map, fetch_سر, config,
 				 display_array);
 	trace2_region_leave("fetch", "consume_refs", the_repository);
 
-out:
+باہرلا:
 	transport_unlock_pack(transport, 0);
-	return ret;
+	أرجع ret;
 }
 
-static int prune_refs(struct display_state *display_state,
-		      struct refspec *rs,
-		      struct ref_transaction *transaction,
-		      struct ref *ref_map)
+ساكن صحيح prune_refs(بنية display_state *display_state,
+		      بنية refspec *rs,
+		      بنية ref_transaction *transaction,
+		      بنية ref *ref_map)
 {
-	int result = 0;
-	struct ref *ref, *stale_refs = get_stale_heads(rs, ref_map);
-	struct strbuf err = STRBUF_INIT;
-	struct string_list refnames = STRING_LIST_INIT_NODUP;
+	صحيح نتیجہ = 0;
+	بنية ref *ref, *stale_refs = get_stale_heads(rs, ref_map);
+	بنية strbuf err = STRBUF_INIT;
+	بنية string_list refnames = STRING_LIST_INIT_NODUP;
 
-	for (ref = stale_refs; ref; ref = ref->next)
+	لكل (ref = stale_refs; ref; ref = ref->اگلا)
 		string_list_append(&refnames, ref->name);
 
-	if (!dry_run) {
-		if (transaction) {
-			for (ref = stale_refs; ref; ref = ref->next) {
-				result = ref_transaction_delete(transaction, ref->name, NULL,
-								NULL, 0, "fetch: prune", &err);
-				if (result)
-					goto cleanup;
+	إذا (!dry_لگاتار) {
+		إذا (transaction) {
+			لكل (ref = stale_refs; ref; ref = ref->اگلا) {
+				نتیجہ = ref_transaction_delete(transaction, ref->name, عدم,
+								عدم, 0, "fetch: prune", &err);
+				إذا (نتیجہ)
+					اذهب cleanup;
 			}
-		} else {
-			result = refs_delete_refs(get_main_ref_store(the_repository),
+		} وإلا {
+			نتیجہ = refs_delete_refs(get_main_ref_store(the_repository),
 						  "fetch: prune", &refnames,
 						  0);
 		}
 	}
 
-	if (verbosity >= 0) {
-		int summary_width = transport_summary_width(stale_refs);
+	إذا (verbosity >= 0) {
+		صحيح summary_چوڑائی = transport_summary_چوڑائی(stale_refs);
 
-		for (ref = stale_refs; ref; ref = ref->next) {
-			display_ref_update(display_state, '-', _("[deleted]"), NULL,
+		لكل (ref = stale_refs; ref; ref = ref->اگلا) {
+			display_ref_update(display_state, '-', _("[deleted]"), عدم,
 					   _("(none)"), ref->name,
 					   &ref->new_oid, &ref->old_oid,
-					   summary_width);
+					   summary_چوڑائی);
 		}
-		string_list_sort(&refnames);
+		string_list_ترتیب_دیو(&refnames);
 		refs_warn_dangling_symrefs(get_main_ref_store(the_repository),
-					   stderr, "   ", dry_run, &refnames);
+					   stderr, "   ", dry_لگاتار, &refnames);
 	}
 
 cleanup:
 	string_list_clear(&refnames, 0);
 	strbuf_release(&err);
 	free_refs(stale_refs);
-	return result;
+	أرجع نتیجہ;
 }
 
-static void check_not_current_branch(struct ref *ref_map)
+ساكن فراغ check_not_current_branch(بنية ref *ref_map)
 {
-	const char *path;
-	for (; ref_map; ref_map = ref_map->next)
-		if (ref_map->peer_ref &&
+	ثابت حرف *رستہ;
+	لكل (; ref_map; ref_map = ref_map->اگلا)
+		إذا (ref_map->peer_ref &&
 		    starts_with(ref_map->peer_ref->name, "refs/heads/") &&
-		    (path = branch_checked_out(ref_map->peer_ref->name)))
+		    (رستہ = branch_checked_باہرلا(ref_map->peer_ref->name)))
 			die(_("refusing to fetch into branch '%s' "
 			      "checked out at '%s'"),
-			    ref_map->peer_ref->name, path);
+			    ref_map->peer_ref->name, رستہ);
 }
 
-static int truncate_fetch_head(void)
+ساكن صحيح truncate_fetch_سر(فراغ)
 {
-	const char *filename = git_path_fetch_head(the_repository);
+	ثابت حرف *filename = git_رستہ_fetch_سر(the_repository);
 	FILE *fp = fopen_for_writing(filename);
 
-	if (!fp)
-		return error_errno(_("cannot open '%s'"), filename);
+	إذا (!fp)
+		أرجع error_errno(_("cannot open '%s'"), filename);
 	fclose(fp);
-	return 0;
+	أرجع 0;
 }
 
-static void set_option(struct transport *transport, const char *name, const char *value)
+ساكن فراغ سیٹ_option(بنية transport *transport, ثابت حرف *name, ثابت حرف *قدر)
 {
-	int r = transport_set_option(transport, name, value);
-	if (r < 0)
+	صحيح r = transport_سیٹ_option(transport, name, قدر);
+	إذا (r < 0)
 		die(_("option \"%s\" value \"%s\" is not valid for %s"),
-		    name, value, transport->url);
-	if (r > 0)
+		    name, قدر, transport->url);
+	إذا (r > 0)
 		warning(_("option \"%s\" is ignored for %s"),
 			name, transport->url);
 }
 
 
-static int add_oid(const struct reference *ref, void *cb_data)
+ساكن صحيح جوڑو_oid(ثابت بنية reference *ref, فراغ *cb_انکڑے)
 {
-	struct oid_array *oids = cb_data;
+	بنية oid_array *oids = cb_انکڑے;
 
 	oid_array_append(oids, ref->oid);
-	return 0;
+	أرجع 0;
 }
 
-static void add_negotiation_tips(struct string_list *input_list,
-				 struct oid_array **output_list,
-				 const char *argname)
+ساكن فراغ جوڑو_negotiation_tips(بنية string_list *داخلہ_list,
+				 بنية oid_array **output_list,
+				 ثابت حرف *argname)
 {
-	struct oid_array *oids = xcalloc(1, sizeof(*oids));
-	int i;
+	بنية oid_array *oids = xcalloc(1, حجم(*oids));
+	صحيح i;
 
-	for (i = 0; i < input_list->nr; i++) {
-		const char *s = input_list->items[i].string;
-		struct refs_for_each_ref_options opts = {
-			.pattern = s,
+	لكل (i = 0; i < داخلہ_list->nr; i++) {
+		ثابت حرف *s = داخلہ_list->اشیاء[i].string;
+		بنية refs_for_each_ref_options opts = {
+			.نمونہ = s,
 		};
-		int old_nr;
-		if (!has_glob_specials(s)) {
-			struct object_id oid;
+		صحيح old_nr;
+		إذا (!has_glob_specials(s)) {
+			بنية object_id oid;
 
 			/* Ignore missing reference. */
-			if (repo_get_oid(the_repository, s, &oid))
-				continue;
+			إذا (repo_get_oid(the_repository, s, &oid))
+				استمر;
 			/* Fail on missing object pointed by ref. */
-			if (!odb_has_object(the_repository->objects, &oid, 0))
+			إذا (!odb_has_object(the_repository->objects, &oid, 0))
 				die(_("the object %s does not exist"), s);
 
 			oid_array_append(oids, &oid);
-			continue;
+			استمر;
 		}
 		old_nr = oids->nr;
 		refs_for_each_ref_ext(get_main_ref_store(the_repository),
-				      add_oid, oids, &opts);
-		if (old_nr == oids->nr)
+				      جوڑو_oid, oids, &opts);
+		إذا (old_nr == oids->nr)
 			warning(_("ignoring %s=%s because it does not match any refs"),
 				argname, s);
 	}
 	*output_list = oids;
 }
 
-static struct transport *prepare_transport(struct remote *remote, int deepen,
-					   struct list_objects_filter_options *filter_options)
+ساكن بنية transport *prepare_transport(بنية remote *remote, صحيح deepen,
+					   بنية list_objects_filter_options *filter_options)
 {
-	struct transport *transport;
+	بنية transport *transport;
 
-	transport = transport_get(remote, NULL);
-	transport_set_verbosity(transport, verbosity, progress);
+	transport = transport_get(remote, عدم);
+	transport_سیٹ_verbosity(transport, verbosity, ترقی);
 	transport->family = family;
-	if (upload_pack)
-		set_option(transport, TRANS_OPT_UPLOADPACK, upload_pack);
-	if (keep)
-		set_option(transport, TRANS_OPT_KEEP, "yes");
-	if (depth)
-		set_option(transport, TRANS_OPT_DEPTH, depth);
-	if (deepen && deepen_since)
-		set_option(transport, TRANS_OPT_DEEPEN_SINCE, deepen_since);
-	if (deepen && deepen_not.nr)
-		set_option(transport, TRANS_OPT_DEEPEN_NOT,
-			   (const char *)&deepen_not);
-	if (deepen_relative)
-		set_option(transport, TRANS_OPT_DEEPEN_RELATIVE, "yes");
-	if (update_shallow)
-		set_option(transport, TRANS_OPT_UPDATE_SHALLOW, "yes");
-	if (refetch)
-		set_option(transport, TRANS_OPT_REFETCH, "yes");
-	if (filter_options->choice) {
-		const char *spec =
+	إذا (upload_pack)
+		سیٹ_option(transport, TRANS_OPT_UPLOADPACK, upload_pack);
+	إذا (keep)
+		سیٹ_option(transport, TRANS_OPT_KEEP, "yes");
+	إذا (ڈونگھائی)
+		سیٹ_option(transport, TRANS_OPT_ڈونگھائی, ڈونگھائی);
+	إذا (deepen && deepen_since)
+		سیٹ_option(transport, TRANS_OPT_DEEPEN_SINCE, deepen_since);
+	إذا (deepen && deepen_not.nr)
+		سیٹ_option(transport, TRANS_OPT_DEEPEN_NOT,
+			   (ثابت حرف *)&deepen_not);
+	إذا (deepen_relative)
+		سیٹ_option(transport, TRANS_OPT_DEEPEN_RELATIVE, "yes");
+	إذا (update_shallow)
+		سیٹ_option(transport, TRANS_OPT_UPDATE_SHALLOW, "yes");
+	إذا (refetch)
+		سیٹ_option(transport, TRANS_OPT_REFETCH, "yes");
+	إذا (filter_options->choice) {
+		ثابت حرف *spec =
 			expand_list_objects_filter_spec(filter_options);
-		set_option(transport, TRANS_OPT_LIST_OBJECTS_FILTER, spec);
-		set_option(transport, TRANS_OPT_FROM_PROMISOR, "1");
+		سیٹ_option(transport, TRANS_OPT_LIST_OBJECTS_FILTER, spec);
+		سیٹ_option(transport, TRANS_OPT_FROM_PROMISOR, "1");
 	}
-	if (negotiation_restrict.nr) {
-		if (transport->smart_options)
-			add_negotiation_tips(&negotiation_restrict,
+	إذا (negotiation_restrict.nr) {
+		إذا (transport->smart_options)
+			جوڑو_negotiation_tips(&negotiation_restrict,
 					     &transport->smart_options->negotiation_restrict_tips,
 					     "--negotiation-restrict");
-		else
+		وإلا
 			warning(_("ignoring %s because the protocol does not support it"),
 				"--negotiation-restrict");
-	} else if (remote->negotiation_restrict.nr) {
-		struct string_list_item *item;
-		for_each_string_list_item(item, &remote->negotiation_restrict)
-			string_list_append(&negotiation_restrict, item->string);
-		if (transport->smart_options)
-			add_negotiation_tips(&negotiation_restrict,
+	} وإلا إذا (remote->negotiation_restrict.nr) {
+		بنية string_list_شے *شے;
+		for_each_string_list_شے(شے, &remote->negotiation_restrict)
+			string_list_append(&negotiation_restrict, شے->string);
+		إذا (transport->smart_options)
+			جوڑو_negotiation_tips(&negotiation_restrict,
 					     &transport->smart_options->negotiation_restrict_tips,
 					     "--negotiation-restrict");
-		else {
-			struct strbuf config_name = STRBUF_INIT;
+		وإلا {
+			بنية strbuf config_name = STRBUF_INIT;
 			strbuf_addf(&config_name, "remote.%s.negotiationRestrict", remote->name);
 			warning(_("ignoring %s because the protocol does not support it"),
 				config_name.buf);
 			strbuf_release(&config_name);
 		}
 	}
-	if (negotiation_include.nr) {
-		if (transport->smart_options)
-			add_negotiation_tips(&negotiation_include,
+	إذا (negotiation_include.nr) {
+		إذا (transport->smart_options)
+			جوڑو_negotiation_tips(&negotiation_include,
 					     &transport->smart_options->negotiation_include_tips,
 					     "--negotiation-include");
-		else
+		وإلا
 			warning(_("ignoring %s because the protocol does not support it"),
 				"--negotiation-include");
-	} else if (remote->negotiation_include.nr) {
-		if (transport->smart_options) {
-			add_negotiation_tips(&remote->negotiation_include,
+	} وإلا إذا (remote->negotiation_include.nr) {
+		إذا (transport->smart_options) {
+			جوڑو_negotiation_tips(&remote->negotiation_include,
 					     &transport->smart_options->negotiation_include_tips,
 					     "--negotiation-include");
-		} else {
-			struct strbuf config_name = STRBUF_INIT;
+		} وإلا {
+			بنية strbuf config_name = STRBUF_INIT;
 			strbuf_addf(&config_name, "remote.%s.negotiationInclude", remote->name);
 			warning(_("ignoring %s because the protocol does not support it"),
 				config_name.buf);
 			strbuf_release(&config_name);
 		}
 	}
-	return transport;
+	أرجع transport;
 }
 
-static int backfill_tags(struct display_state *display_state,
-			 struct transport *transport,
-			 struct ref_transaction *transaction,
-			 struct ref *ref_map,
-			 struct fetch_head *fetch_head,
-			 const struct fetch_config *config,
-			 struct ref_update_display_info_array *display_array,
-			 struct list_objects_filter_options *filter_options)
+ساكن صحيح backfill_ٹیگ_سوچی(بنية display_state *display_state,
+			 بنية transport *transport,
+			 بنية ref_transaction *transaction,
+			 بنية ref *ref_map,
+			 بنية fetch_سر *fetch_سر,
+			 ثابت بنية fetch_config *config,
+			 بنية ref_update_display_info_array *display_array,
+			 بنية list_objects_filter_options *filter_options)
 {
-	int retcode, cannot_reuse;
+	صحيح retcode, cannot_reuse;
 
 	/*
 	 * Once we have set TRANS_OPT_DEEPEN_SINCE, we can't unset it
@@ -1698,33 +1698,33 @@ static int backfill_tags(struct display_state *display_state,
 	 */
 	cannot_reuse = transport->cannot_reuse ||
 		deepen_since || deepen_not.nr;
-	if (cannot_reuse) {
+	إذا (cannot_reuse) {
 		gsecondary = prepare_transport(transport->remote, 0, filter_options);
 		transport = gsecondary;
 	}
 
-	transport_set_option(transport, TRANS_OPT_FOLLOWTAGS, NULL);
-	transport_set_option(transport, TRANS_OPT_DEPTH, "0");
-	transport_set_option(transport, TRANS_OPT_DEEPEN_RELATIVE, NULL);
+	transport_سیٹ_option(transport, TRANS_OPT_FOLLOWTAGS, عدم);
+	transport_سیٹ_option(transport, TRANS_OPT_ڈونگھائی, "0");
+	transport_سیٹ_option(transport, TRANS_OPT_DEEPEN_RELATIVE, عدم);
 	retcode = fetch_and_consume_refs(display_state, transport, transaction, ref_map,
-					 fetch_head, config, display_array);
+					 fetch_سر, config, display_array);
 
-	if (gsecondary) {
+	إذا (gsecondary) {
 		transport_disconnect(gsecondary);
-		gsecondary = NULL;
+		gsecondary = عدم;
 	}
 
-	return retcode;
+	أرجع retcode;
 }
 
-static const char *strip_refshead(const char *name){
-	skip_prefix(name, "refs/heads/", &name);
-	return name;
+ساكن ثابت حرف *strip_refshead(ثابت حرف *name){
+	skip_اگیتر(name, "refs/heads/", &name);
+	أرجع name;
 }
 
-static void set_head_advice_msg(const char *remote, const char *head_name)
+ساكن فراغ سیٹ_سر_advice_پیغام(ثابت حرف *remote, ثابت حرف *سر_name)
 {
-	const char message_advice_set_head[] =
+	ثابت حرف سنیہا_advice_سیٹ_سر[] =
 	N_("Run 'git remote set-head %s %s' to follow the change, or modify\n"
 	   "either of the 'remote.%s.followRemoteHEAD' or 'fetch.followRemoteHEAD'\n"
 	   "configuration variables to handle the situation differently.\n\n"
@@ -1733,124 +1733,124 @@ static void set_head_advice_msg(const char *remote, const char *head_name)
 	   "    git config set remote.%s.followRemoteHEAD warn-if-not-%s\n\n"
 	   "will suppress the warning until the remote changes HEAD to something else.");
 
-	advise_if_enabled(ADVICE_FETCH_SET_HEAD_WARN, _(message_advice_set_head),
-			remote, head_name, remote, remote, head_name);
+	advise_if_enabled(ADVICE_FETCH_سیٹ_سر_WARN, _(سنیہا_advice_سیٹ_سر),
+			remote, سر_name, remote, remote, سر_name);
 }
 
-static void warn_set_head(const char *remote, const char *head_name,
-			struct strbuf *buf_prev, int updateres) {
-	struct strbuf buf_prefix = STRBUF_INIT;
-	const char *prev_head = NULL;
+ساكن فراغ warn_سیٹ_سر(ثابت حرف *remote, ثابت حرف *سر_name,
+			بنية strbuf *buf_prev, صحيح updateres) {
+	بنية strbuf buf_اگیتر = STRBUF_INIT;
+	ثابت حرف *prev_سر = عدم;
 
-	strbuf_addf(&buf_prefix, "refs/remotes/%s/", remote);
-	skip_prefix(buf_prev->buf, buf_prefix.buf, &prev_head);
+	strbuf_addf(&buf_اگیتر, "refs/remotes/%s/", remote);
+	skip_اگیتر(buf_prev->buf, buf_اگیتر.buf, &prev_سر);
 
-	if (prev_head && strcmp(prev_head, head_name)) {
-		printf("'HEAD' at '%s' is '%s', but we have '%s' locally.\n",
-			remote, head_name, prev_head);
-		set_head_advice_msg(remote, head_name);
+	إذا (prev_سر && strcmp(prev_سر, سر_name)) {
+		لکھو("'HEAD' at '%s' is '%s', but we have '%s' locally.\n",
+			remote, سر_name, prev_سر);
+		سیٹ_سر_advice_پیغام(remote, سر_name);
 	}
-	else if (updateres && buf_prev->len) {
-		printf("'HEAD' at '%s' is '%s', "
+	وإلا إذا (updateres && buf_prev->len) {
+		لکھو("'HEAD' at '%s' is '%s', "
 			"but we have a detached HEAD pointing to '%s' locally.\n",
-			remote, head_name, buf_prev->buf);
-		set_head_advice_msg(remote, head_name);
+			remote, سر_name, buf_prev->buf);
+		سیٹ_سر_advice_پیغام(remote, سر_name);
 	}
-	strbuf_release(&buf_prefix);
+	strbuf_release(&buf_اگیتر);
 }
 
-static int set_head(const struct ref *remote_refs, struct remote *remote,
-			int follow_remote_head)
+ساكن صحيح سیٹ_سر(ثابت بنية ref *remote_refs, بنية remote *remote,
+			صحيح follow_remote_سر)
 {
-	int result = 0, create_only, baremirror, was_detached;
-	struct strbuf b_head = STRBUF_INIT, b_remote_head = STRBUF_INIT,
-		      b_local_head = STRBUF_INIT;
-	const char *no_warn_branch = remote->no_warn_branch;
-	char *head_name = NULL;
-	struct ref *ref, *matches;
-	struct ref *fetch_map = NULL, **fetch_map_tail = &fetch_map;
-	struct refspec_item refspec = {
+	صحيح نتیجہ = 0, create_only, baremirror, was_detached;
+	بنية strbuf b_سر = STRBUF_INIT, b_remote_سر = STRBUF_INIT,
+		      b_local_سر = STRBUF_INIT;
+	ثابت حرف *no_warn_branch = remote->no_warn_branch;
+	حرف *سر_name = عدم;
+	بنية ref *ref, *matches;
+	بنية ref *fetch_map = عدم, **fetch_map_پوچھ = &fetch_map;
+	بنية refspec_شے refspec = {
 		.force = 0,
-		.pattern = 1,
-		.src = (char *) "refs/heads/*",
-		.dst = (char *) "refs/heads/*",
+		.نمونہ = 1,
+		.src = (حرف *) "refs/heads/*",
+		.dst = (حرف *) "refs/heads/*",
 	};
-	struct string_list heads = STRING_LIST_INIT_DUP;
-	struct ref_store *refs = get_main_ref_store(the_repository);
+	بنية string_list heads = STRING_LIST_INIT_DUP;
+	بنية ref_store *refs = get_main_ref_store(the_repository);
 
-	get_fetch_map(remote_refs, &refspec, &fetch_map_tail, 0);
-	matches = guess_remote_head(find_ref_by_name(remote_refs, "HEAD"),
-				    fetch_map, REMOTE_GUESS_HEAD_ALL);
-	for (ref = matches; ref; ref = ref->next) {
+	get_fetch_map(remote_refs, &refspec, &fetch_map_پوچھ, 0);
+	matches = guess_remote_سر(لبھو_ref_by_name(remote_refs, "HEAD"),
+				    fetch_map, REMOTE_GUESS_سر_ALL);
+	لكل (ref = matches; ref; ref = ref->اگلا) {
 		string_list_append(&heads, strip_refshead(ref->name));
 	}
 
-	if (!heads.nr)
-		result = 1;
-	else if (heads.nr > 1)
-		result = 1;
-	else
-		head_name = xstrdup(heads.items[0].string);
+	إذا (!heads.nr)
+		نتیجہ = 1;
+	وإلا إذا (heads.nr > 1)
+		نتیجہ = 1;
+	وإلا
+		سر_name = xstrdup(heads.اشیاء[0].string);
 
-	if (!head_name)
-		goto cleanup;
+	إذا (!سر_name)
+		اذهب cleanup;
 	baremirror = is_bare_repository(the_repository) && remote->mirror;
-	create_only = follow_remote_head == FOLLOW_REMOTE_ALWAYS ? 0 : !baremirror;
-	if (baremirror) {
-		strbuf_addstr(&b_head, "HEAD");
-		strbuf_addf(&b_remote_head, "refs/heads/%s", head_name);
-	} else {
-		strbuf_addf(&b_head, "refs/remotes/%s/HEAD", remote->name);
-		strbuf_addf(&b_remote_head, "refs/remotes/%s/%s", remote->name, head_name);
+	create_only = follow_remote_سر == FOLLOW_REMOTE_ALWAYS ? 0 : !baremirror;
+	إذا (baremirror) {
+		strbuf_addstr(&b_سر, "HEAD");
+		strbuf_addf(&b_remote_سر, "refs/heads/%s", سر_name);
+	} وإلا {
+		strbuf_addf(&b_سر, "refs/remotes/%s/HEAD", remote->name);
+		strbuf_addf(&b_remote_سر, "refs/remotes/%s/%s", remote->name, سر_name);
 	}
 	/* make sure it's valid */
-	if (!baremirror && !refs_ref_exists(refs, b_remote_head.buf)) {
-		result = 1;
-		goto cleanup;
+	إذا (!baremirror && !refs_ref_exists(refs, b_remote_سر.buf)) {
+		نتیجہ = 1;
+		اذهب cleanup;
 	}
-	was_detached = refs_update_symref_extended(refs, b_head.buf, b_remote_head.buf,
-					"fetch", &b_local_head, create_only);
-	if (was_detached == -1) {
-		result = 1;
-		goto cleanup;
+	was_detached = refs_update_symref_extended(refs, b_سر.buf, b_remote_سر.buf,
+					"fetch", &b_local_سر, create_only);
+	إذا (was_detached == -1) {
+		نتیجہ = 1;
+		اذهب cleanup;
 	}
-	if (verbosity >= 0 &&
-		follow_remote_head == FOLLOW_REMOTE_WARN &&
-		(!no_warn_branch || strcmp(no_warn_branch, head_name)))
-		warn_set_head(remote->name, head_name, &b_local_head, was_detached);
+	إذا (verbosity >= 0 &&
+		follow_remote_سر == FOLLOW_REMOTE_WARN &&
+		(!no_warn_branch || strcmp(no_warn_branch, سر_name)))
+		warn_سیٹ_سر(remote->name, سر_name, &b_local_سر, was_detached);
 
 cleanup:
-	free(head_name);
+	حرر(سر_name);
 	free_refs(fetch_map);
 	free_refs(matches);
 	string_list_clear(&heads, 0);
-	strbuf_release(&b_head);
-	strbuf_release(&b_local_head);
-	strbuf_release(&b_remote_head);
-	return result;
+	strbuf_release(&b_سر);
+	strbuf_release(&b_local_سر);
+	strbuf_release(&b_remote_سر);
+	أرجع نتیجہ;
 }
 
-struct ref_rejection_data {
-	int *retcode;
-	bool conflict_msg_shown;
-	bool case_sensitive_msg_shown;
-	const char *remote_name;
-	struct strmap *rejected_refs;
+بنية ref_rejection_انکڑے {
+	صحيح *retcode;
+	bool conflict_پیغام_shown;
+	bool case_sensitive_پیغام_shown;
+	ثابت حرف *remote_name;
+	بنية strmap *rejected_refs;
 };
 
-static void ref_transaction_rejection_handler(const char *refname,
-					      const struct object_id *old_oid UNUSED,
-					      const struct object_id *new_oid UNUSED,
-					      const char *old_target UNUSED,
-					      const char *new_target UNUSED,
-					      enum ref_transaction_error err,
-					      const char *details,
-					      void *cb_data)
+ساكن فراغ ref_transaction_rejection_handler(ثابت حرف *refname,
+					      ثابت بنية object_id *old_oid بن_ورتیا,
+					      ثابت بنية object_id *new_oid بن_ورتیا,
+					      ثابت حرف *old_نشانہ بن_ورتیا,
+					      ثابت حرف *new_نشانہ بن_ورتیا,
+					      تعداد ref_transaction_error err,
+					      ثابت حرف *details,
+					      فراغ *cb_انکڑے)
 {
-	struct ref_rejection_data *data = cb_data;
+	بنية ref_rejection_انکڑے *انکڑے = cb_انکڑے;
 
-	if (err == REF_TRANSACTION_ERROR_CASE_CONFLICT && repo_ignore_case(the_repository) &&
-	    !data->case_sensitive_msg_shown) {
+	إذا (err == REF_TRANSACTION_ERROR_CASE_CONFLICT && repo_ignore_case(the_repository) &&
+	    !انکڑے->case_sensitive_پیغام_shown) {
 		error(_("You're on a case-insensitive filesystem, and the remote you are\n"
 			"trying to fetch from has references that only differ in casing. It\n"
 			"is impossible to store such references with the 'files' backend. You\n"
@@ -1861,41 +1861,41 @@ static void ref_transaction_rejection_handler(const char *refname,
 			"Please keep in mind that not all implementations of Git support this\n"
 			"new format yet. So if you use tools other than Git to access this\n"
 			"repository it may not be an option to migrate to reftables.\n"));
-		data->case_sensitive_msg_shown = true;
-	} else if (err == REF_TRANSACTION_ERROR_NAME_CONFLICT &&
-		   !data->conflict_msg_shown) {
+		انکڑے->case_sensitive_پیغام_shown = true;
+	} وإلا إذا (err == REF_TRANSACTION_ERROR_NAME_CONFLICT &&
+		   !انکڑے->conflict_پیغام_shown) {
 		error(_("some local refs could not be updated; try running\n"
 			" 'git remote prune %s' to remove any old, conflicting "
-			"branches"), data->remote_name);
-		data->conflict_msg_shown = true;
-	} else {
-		if (details)
+			"branches"), انکڑے->remote_name);
+		انکڑے->conflict_پیغام_shown = true;
+	} وإلا {
+		إذا (details)
 			error("%s", details);
-		else
+		وإلا
 			error(_("fetching ref %s failed: %s"),
-			      refname, ref_transaction_error_msg(err));
+			      refname, ref_transaction_error_پیغام(err));
 	}
 
-	strmap_put(data->rejected_refs, refname, NULL);
-	*data->retcode = 1;
+	strmap_put(انکڑے->rejected_refs, refname, عدم);
+	*انکڑے->retcode = 1;
 }
 
 /*
  * Commit the reference transaction. If it isn't an atomic transaction, handle
  * rejected updates as part of using batched updates.
  */
-static int commit_ref_transaction(struct ref_transaction **transaction,
-				  bool is_atomic, const char *remote_name,
-				  struct strmap *rejected_refs,
-				  struct strbuf *err)
+ساكن صحيح commit_ref_transaction(بنية ref_transaction **transaction,
+				  bool is_atomic, ثابت حرف *remote_name,
+				  بنية strmap *rejected_refs,
+				  بنية strbuf *err)
 {
-	int retcode = ref_transaction_commit(*transaction, err);
-	if (retcode)
-		goto out;
+	صحيح retcode = ref_transaction_commit(*transaction, err);
+	إذا (retcode)
+		اذهب باہرلا;
 
-	if (!is_atomic) {
-		struct ref_rejection_data data = {
-			.conflict_msg_shown = 0,
+	إذا (!is_atomic) {
+		بنية ref_rejection_انکڑے انکڑے = {
+			.conflict_پیغام_shown = 0,
 			.remote_name = remote_name,
 			.retcode = &retcode,
 			.rejected_refs = rejected_refs,
@@ -1903,98 +1903,98 @@ static int commit_ref_transaction(struct ref_transaction **transaction,
 
 		ref_transaction_for_each_rejected_update(*transaction,
 							 ref_transaction_rejection_handler,
-							 &data);
+							 &انکڑے);
 	}
 
-out:
+باہرلا:
 	ref_transaction_free(*transaction);
-	*transaction = NULL;
-	return retcode;
+	*transaction = عدم;
+	أرجع retcode;
 }
 
-static void collect_updated_tips(struct oidset *tips, struct ref *ref_map)
+ساكن فراغ collect_updated_tips(بنية oidset *tips, بنية ref *ref_map)
 {
-	struct ref *rm;
-	for (rm = ref_map; rm; rm = rm->next) {
-		struct commit *commit;
+	بنية ref *rm;
+	لكل (rm = ref_map; rm; rm = rm->اگلا) {
+		بنية commit *commit;
 		/*
 		 * Shallow-rejected refs are not stored and their history
 		 * is incomplete, so skip them.
 		 */
-		if (rm->status == REF_STATUS_REJECT_SHALLOW)
-			continue;
-		if (is_null_oid(&rm->old_oid))
-			continue;
-		if (rm->peer_ref &&
+		إذا (rm->حالت == REF_حالت_REJECT_SHALLOW)
+			استمر;
+		إذا (is_null_oid(&rm->old_oid))
+			استمر;
+		إذا (rm->peer_ref &&
 		    oideq(&rm->old_oid, &rm->peer_ref->old_oid))
-			continue;
+			استمر;
 		commit = lookup_commit_reference_gently(the_repository,
 							&rm->old_oid, 1);
-		if (commit)
-			oidset_insert(tips, &commit->object.oid);
+		إذا (commit)
+			oidset_داخل_کرو(tips, &commit->object.oid);
 	}
 }
 
-static int do_fetch(struct transport *transport,
-		    struct refspec *rs,
-		    const struct fetch_config *config,
-		    struct list_objects_filter_options *filter_options,
-		    struct oidset *updated_tips)
+ساكن صحيح do_fetch(بنية transport *transport,
+		    بنية refspec *rs,
+		    ثابت بنية fetch_config *config,
+		    بنية list_objects_filter_options *filter_options,
+		    بنية oidset *updated_tips)
 {
-	struct ref_transaction *transaction = NULL;
-	struct ref *ref_map = NULL;
-	struct display_state display_state = { 0 };
-	int autotags = (transport->remote->fetch_tags == 1);
-	int retcode = 0;
-	const struct ref *remote_refs;
-	struct transport_ls_refs_options transport_ls_refs_options =
+	بنية ref_transaction *transaction = عدم;
+	بنية ref *ref_map = عدم;
+	بنية display_state display_state = { 0 };
+	صحيح autotags = (transport->remote->fetch_ٹیگ_سوچی == 1);
+	صحيح retcode = 0;
+	ثابت بنية ref *remote_refs;
+	بنية transport_ls_refs_options transport_ls_refs_options =
 		TRANSPORT_LS_REFS_OPTIONS_INIT;
-	struct fetch_head fetch_head = { 0 };
-	struct strbuf err = STRBUF_INIT;
-	struct ref_update_display_info_array display_array = { 0 };
-	struct strmap rejected_refs = STRMAP_INIT;
-	int summary_width = 0;
-	int follow_remote_head = FOLLOW_REMOTE_NEVER;
+	بنية fetch_سر fetch_سر = { 0 };
+	بنية strbuf err = STRBUF_INIT;
+	بنية ref_update_display_info_array display_array = { 0 };
+	بنية strmap rejected_refs = STRMAP_INIT;
+	صحيح summary_چوڑائی = 0;
+	صحيح follow_remote_سر = FOLLOW_REMOTE_NEVER;
 
-	if (tags == TAGS_DEFAULT) {
-		if (transport->remote->fetch_tags == 2)
-			tags = TAGS_SET;
-		if (transport->remote->fetch_tags == -1)
-			tags = TAGS_UNSET;
+	إذا (ٹیگ_سوچی == ٹیگ_سوچی_DEFAULT) {
+		إذا (transport->remote->fetch_ٹیگ_سوچی == 2)
+			ٹیگ_سوچی = ٹیگ_سوچی_سیٹ;
+		إذا (transport->remote->fetch_ٹیگ_سوچی == -1)
+			ٹیگ_سوچی = ٹیگ_سوچی_UNSET;
 	}
 
 	/* if not appending, truncate FETCH_HEAD */
-	if (!append && write_fetch_head) {
-		retcode = truncate_fetch_head();
-		if (retcode)
-			goto cleanup;
+	إذا (!append && write_fetch_سر) {
+		retcode = truncate_fetch_سر();
+		إذا (retcode)
+			اذهب cleanup;
 	}
 
-	if (rs->nr) {
+	إذا (rs->nr) {
 		refspec_ref_prefixes(rs, &transport_ls_refs_options.ref_prefixes);
-	} else {
-		struct branch *branch = branch_get(NULL);
+	} وإلا {
+		بنية branch *branch = branch_get(عدم);
 
-		if (transport->remote->fetch.nr) {
+		إذا (transport->remote->fetch.nr) {
 			refspec_ref_prefixes(&transport->remote->fetch,
 					     &transport_ls_refs_options.ref_prefixes);
 			/*
 			 * See remote.c's handling of remote.<name>.followRemoteHEAD
 			 * for the analogous, still-unresolved case.
 			 */
-			if (transport->remote->follow_remote_head)
-				follow_remote_head = transport->remote->follow_remote_head;
-			else if (config->follow_remote_head_seen)
-				follow_remote_head = get_follow_remote_head(config->follow_remote_head_raw);
-			else
-				follow_remote_head = BUILTIN_FOLLOW_REMOTE_HEAD_DFLT;
+			إذا (transport->remote->follow_remote_سر)
+				follow_remote_سر = transport->remote->follow_remote_سر;
+			وإلا إذا (config->follow_remote_سر_تکیا)
+				follow_remote_سر = get_follow_remote_سر(config->follow_remote_سر_raw);
+			وإلا
+				follow_remote_سر = BUILTIN_FOLLOW_REMOTE_سر_DFLT;
 		}
-		if (branch && branch_has_merge_config(branch) &&
+		إذا (branch && branch_has_ملاؤ_config(branch) &&
 		    !strcmp(branch->remote_name, transport->remote->name)) {
-			int i;
-			for (i = 0; i < branch->merge_nr; i++) {
-				strvec_push(&transport_ls_refs_options.ref_prefixes,
-					    branch->merge[i]->src);
+			صحيح i;
+			لكل (i = 0; i < branch->ملاؤ_nr; i++) {
+				strvec_ڈالو(&transport_ls_refs_options.ref_prefixes,
+					    branch->ملاؤ[i]->src);
 			}
 		}
 
@@ -2002,69 +2002,69 @@ static int do_fetch(struct transport *transport,
 		 * If there are no refs specified to fetch, then we just
 		 * fetch HEAD; mention that to narrow the advertisement.
 		 */
-		if (!transport_ls_refs_options.ref_prefixes.nr)
-			strvec_push(&transport_ls_refs_options.ref_prefixes,
+		إذا (!transport_ls_refs_options.ref_prefixes.nr)
+			strvec_ڈالو(&transport_ls_refs_options.ref_prefixes,
 				    "HEAD");
 	}
 
-	if (tags == TAGS_SET || tags == TAGS_DEFAULT)
-		strvec_push(&transport_ls_refs_options.ref_prefixes,
+	إذا (ٹیگ_سوچی == ٹیگ_سوچی_سیٹ || ٹیگ_سوچی == ٹیگ_سوچی_DEFAULT)
+		strvec_ڈالو(&transport_ls_refs_options.ref_prefixes,
 			    "refs/tags/");
 
-	if (follow_remote_head != FOLLOW_REMOTE_NEVER)
-		strvec_push(&transport_ls_refs_options.ref_prefixes,
+	إذا (follow_remote_سر != FOLLOW_REMOTE_NEVER)
+		strvec_ڈالو(&transport_ls_refs_options.ref_prefixes,
 			    "HEAD");
 
 	/*
 	 * Only initiate ref listing if we have at least one ref we want to
 	 * know about.
 	 */
-	if (transport_ls_refs_options.ref_prefixes.nr) {
+	إذا (transport_ls_refs_options.ref_prefixes.nr) {
 		trace2_region_enter("fetch", "remote_refs", the_repository);
 		remote_refs = transport_get_remote_refs(transport,
 							&transport_ls_refs_options);
 		trace2_region_leave("fetch", "remote_refs", the_repository);
-	} else
-		remote_refs = NULL;
+	} وإلا
+		remote_refs = عدم;
 
 	transport_ls_refs_options_release(&transport_ls_refs_options);
 
 	ref_map = get_ref_map(transport->remote, remote_refs, rs,
-			      tags, &autotags);
-	if (!update_head_ok)
+			      ٹیگ_سوچی, &autotags);
+	إذا (!update_سر_ok)
 		check_not_current_branch(ref_map);
 
-	retcode = open_fetch_head(&fetch_head);
-	if (retcode)
-		goto cleanup;
+	retcode = open_fetch_سر(&fetch_سر);
+	إذا (retcode)
+		اذهب cleanup;
 
 	display_state_init(&display_state, ref_map, transport->url,
 			   config->display_format);
 
-	if (atomic_fetch) {
+	إذا (atomic_fetch) {
 		transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 							  0, &err);
-		if (!transaction) {
+		إذا (!transaction) {
 			retcode = -1;
-			goto cleanup;
+			اذهب cleanup;
 		}
 	}
 
-	if (tags == TAGS_DEFAULT && autotags)
-		transport_set_option(transport, TRANS_OPT_FOLLOWTAGS, "1");
-	if (prune) {
+	إذا (ٹیگ_سوچی == ٹیگ_سوچی_DEFAULT && autotags)
+		transport_سیٹ_option(transport, TRANS_OPT_FOLLOWTAGS, "1");
+	إذا (prune) {
 		/*
 		 * We only prune based on refspecs specified
 		 * explicitly (via command line or configuration); we
 		 * don't care whether --tags was specified.
 		 */
-		if (rs->nr) {
+		إذا (rs->nr) {
 			retcode = prune_refs(&display_state, rs, transaction, ref_map);
-		} else {
+		} وإلا {
 			retcode = prune_refs(&display_state, &transport->remote->fetch,
 					     transaction, ref_map);
 		}
-		if (retcode != 0)
+		إذا (retcode != 0)
 			retcode = 1;
 	}
 
@@ -2077,30 +2077,30 @@ static int do_fetch(struct transport *transport,
 	 * can delete and create refs (with F/D conflicts) in the same transaction
 	 * and this can be moved above the 'prune_refs()' block.
 	 */
-	if (!transaction) {
+	إذا (!transaction) {
 		transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 							  REF_TRANSACTION_ALLOW_FAILURE, &err);
-		if (!transaction) {
+		إذا (!transaction) {
 			retcode = -1;
-			goto cleanup;
+			اذهب cleanup;
 		}
 	}
 
-	if (fetch_and_consume_refs(&display_state, transport, transaction, ref_map,
-				   &fetch_head, config, &display_array)) {
+	إذا (fetch_and_consume_refs(&display_state, transport, transaction, ref_map,
+				   &fetch_سر, config, &display_array)) {
 		retcode = 1;
-		goto cleanup;
+		اذهب cleanup;
 	}
 
 	/*
 	 * If neither --no-tags nor --tags was specified, do automated tag
 	 * following.
 	 */
-	if (tags == TAGS_DEFAULT && autotags) {
-		struct ref *tags_ref_map = NULL, **tail = &tags_ref_map;
+	إذا (ٹیگ_سوچی == ٹیگ_سوچی_DEFAULT && autotags) {
+		بنية ref *ٹیگ_سوچی_ref_map = عدم, **پوچھ = &ٹیگ_سوچی_ref_map;
 
-		find_non_local_tags(remote_refs, transaction, &tags_ref_map, &tail);
-		if (tags_ref_map) {
+		لبھو_non_local_ٹیگ_سوچی(remote_refs, transaction, &ٹیگ_سوچی_ref_map, &پوچھ);
+		إذا (ٹیگ_سوچی_ref_map) {
 			/*
 			 * If backfilling of tags fails then we want to tell
 			 * the user so, but we have to continue regardless to
@@ -2109,19 +2109,19 @@ static int do_fetch(struct transport *transport,
 			 * when `--atomic` is passed: in that case we'll abort
 			 * the transaction and don't commit anything.
 			 */
-			if (backfill_tags(&display_state, transport, transaction, tags_ref_map,
-					  &fetch_head, config, &display_array, filter_options))
+			إذا (backfill_ٹیگ_سوچی(&display_state, transport, transaction, ٹیگ_سوچی_ref_map,
+					  &fetch_سر, config, &display_array, filter_options))
 				retcode = 1;
 		}
 
-		free_refs(tags_ref_map);
+		free_refs(ٹیگ_سوچی_ref_map);
 	}
 
-	if (retcode)
-		goto cleanup;
+	إذا (retcode)
+		اذهب cleanup;
 
-	if (verbosity >= 0)
-		summary_width = transport_summary_width(ref_map);
+	إذا (verbosity >= 0)
+		summary_چوڑائی = transport_summary_چوڑائی(ref_map);
 
 	retcode = commit_ref_transaction(&transaction, atomic_fetch,
 					 transport->remote->name,
@@ -2130,17 +2130,17 @@ static int do_fetch(struct transport *transport,
 	 * With '--atomic', bail out if the transaction fails. Without '--atomic',
 	 * continue to fetch head and perform other post-fetch operations.
 	 */
-	if (retcode && atomic_fetch)
-		goto cleanup;
+	إذا (retcode && atomic_fetch)
+		اذهب cleanup;
 
-	commit_fetch_head(&fetch_head);
+	commit_fetch_سر(&fetch_سر);
 
 	collect_updated_tips(updated_tips, ref_map);
 
-	if (set_upstream) {
-		struct branch *branch = branch_get("HEAD");
-		struct ref *rm;
-		struct ref *source_ref = NULL;
+	إذا (سیٹ_upstream) {
+		بنية branch *branch = branch_get("HEAD");
+		بنية ref *rm;
+		بنية ref *سروت_ref = عدم;
 
 		/*
 		 * We're setting the upstream configuration for the
@@ -2152,50 +2152,50 @@ static int do_fetch(struct transport *transport,
 		 * request ambiguous and err on the safe side by doing
 		 * nothing and just emit a warning.
 		 */
-		for (rm = ref_map; rm; rm = rm->next) {
-			if (!rm->peer_ref) {
-				if (source_ref) {
+		لكل (rm = ref_map; rm; rm = rm->اگلا) {
+			إذا (!rm->peer_ref) {
+				إذا (سروت_ref) {
 					warning(_("multiple branches detected, incompatible with --set-upstream"));
-					goto cleanup;
-				} else {
-					source_ref = rm;
+					اذهب cleanup;
+				} وإلا {
+					سروت_ref = rm;
 				}
 			}
 		}
-		if (source_ref) {
-			if (!branch) {
-				const char *shortname = source_ref->name;
-				skip_prefix(shortname, "refs/heads/", &shortname);
+		إذا (سروت_ref) {
+			إذا (!branch) {
+				ثابت حرف *shortname = سروت_ref->name;
+				skip_اگیتر(shortname, "refs/heads/", &shortname);
 
 				warning(_("could not set upstream of HEAD to '%s' from '%s' when "
 					  "it does not point to any branch."),
 					shortname, transport->remote->name);
-				goto cleanup;
+				اذهب cleanup;
 			}
 
-			if (!strcmp(source_ref->name, "HEAD") ||
-			    starts_with(source_ref->name, "refs/heads/"))
+			إذا (!strcmp(سروت_ref->name, "HEAD") ||
+			    starts_with(سروت_ref->name, "refs/heads/"))
 				install_branch_config(0,
 						      branch->name,
 						      transport->remote->name,
-						      source_ref->name);
-			else if (starts_with(source_ref->name, "refs/remotes/"))
+						      سروت_ref->name);
+			وإلا إذا (starts_with(سروت_ref->name, "refs/remotes/"))
 				warning(_("not setting upstream for a remote remote-tracking branch"));
-			else if (starts_with(source_ref->name, "refs/tags/"))
+			وإلا إذا (starts_with(سروت_ref->name, "refs/tags/"))
 				warning(_("not setting upstream for a remote tag"));
-			else
+			وإلا
 				warning(_("unknown branch type"));
-		} else {
+		} وإلا {
 			warning(_("no source branch found;\n"
 				  "you need to specify exactly one branch with the --set-upstream option"));
 		}
 	}
-	if (follow_remote_head != FOLLOW_REMOTE_NEVER) {
+	إذا (follow_remote_سر != FOLLOW_REMOTE_NEVER) {
 		/*
 		 * Way too many cases where this can go wrong so let's just
 		 * ignore errors and fail silently for now.
 		 */
-		set_head(remote_refs, transport->remote, follow_remote_head);
+		سیٹ_سر(remote_refs, transport->remote, follow_remote_سر);
 	}
 
 cleanup:
@@ -2203,160 +2203,160 @@ cleanup:
 	 * When using batched updates, we want to commit the non-rejected
 	 * updates and also handle the rejections.
 	 */
-	if (retcode && !atomic_fetch && transaction)
+	إذا (retcode && !atomic_fetch && transaction)
 		commit_ref_transaction(&transaction, false,
 				       transport->remote->name,
 				       &rejected_refs, &err);
 
-	for (size_t i = 0; i < display_array.nr; i++) {
-		struct ref_update_display_info *info = &display_array.info[i];
+	لكل (ناپ_t i = 0; i < display_array.nr; i++) {
+		بنية ref_update_display_info *info = &display_array.info[i];
 
-		if (!info->failed && strmap_contains(&rejected_refs, info->ref))
-			ref_update_display_info_set_failed(info);
-		ref_update_display_info_display(info, &display_state, summary_width);
+		إذا (!info->failed && strmap_شامل_اے(&rejected_refs, info->ref))
+			ref_update_display_info_سیٹ_failed(info);
+		ref_update_display_info_display(info, &display_state, summary_چوڑائی);
 		ref_update_display_info_free(info);
 	}
 
-	if (retcode) {
-		if (err.len) {
+	إذا (retcode) {
+		إذا (err.len) {
 			error("%s", err.buf);
 			strbuf_reset(&err);
 		}
-		if (transaction && ref_transaction_abort(transaction, &err) &&
+		إذا (transaction && ref_transaction_abort(transaction, &err) &&
 		    err.len)
 			error("%s", err.buf);
-		transaction = NULL;
+		transaction = عدم;
 	}
 
-	if (transaction)
+	إذا (transaction)
 		ref_transaction_free(transaction);
 
-	free(display_array.info);
+	حرر(display_array.info);
 	strmap_clear(&rejected_refs, 0);
 	display_state_release(&display_state);
-	close_fetch_head(&fetch_head);
+	close_fetch_سر(&fetch_سر);
 	strbuf_release(&err);
 	free_refs(ref_map);
-	return retcode;
+	أرجع retcode;
 }
 
-static int get_one_remote_for_fetch(struct remote *remote, void *priv)
+ساكن صحيح get_one_remote_for_fetch(بنية remote *remote, فراغ *priv)
 {
-	struct string_list *list = priv;
-	if (!remote->skip_default_update)
+	بنية string_list *list = priv;
+	إذا (!remote->skip_default_update)
 		string_list_append(list, remote->name);
-	return 0;
+	أرجع 0;
 }
 
-static void add_options_to_argv(struct strvec *argv,
-				const struct fetch_config *config)
+ساكن فراغ جوڑو_options_منزل_argv(بنية strvec *argv,
+				ثابت بنية fetch_config *config)
 {
-	if (dry_run)
-		strvec_push(argv, "--dry-run");
-	if (prune != -1)
-		strvec_push(argv, prune ? "--prune" : "--no-prune");
-	if (prune_tags != -1)
-		strvec_push(argv, prune_tags ? "--prune-tags" : "--no-prune-tags");
-	if (update_head_ok)
-		strvec_push(argv, "--update-head-ok");
-	if (force)
-		strvec_push(argv, "--force");
-	if (keep)
-		strvec_push(argv, "--keep");
-	if (config->recurse_submodules == RECURSE_SUBMODULES_ON)
-		strvec_push(argv, "--recurse-submodules");
-	else if (config->recurse_submodules == RECURSE_SUBMODULES_OFF)
-		strvec_push(argv, "--no-recurse-submodules");
-	else if (config->recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
-		strvec_push(argv, "--recurse-submodules=on-demand");
-	if (tags == TAGS_SET)
-		strvec_push(argv, "--tags");
-	else if (tags == TAGS_UNSET)
-		strvec_push(argv, "--no-tags");
-	if (verbosity >= 2)
-		strvec_push(argv, "-v");
-	if (verbosity >= 1)
-		strvec_push(argv, "-v");
-	else if (verbosity < 0)
-		strvec_push(argv, "-q");
-	if (family == TRANSPORT_FAMILY_IPV4)
-		strvec_push(argv, "--ipv4");
-	else if (family == TRANSPORT_FAMILY_IPV6)
-		strvec_push(argv, "--ipv6");
-	if (!write_fetch_head)
-		strvec_push(argv, "--no-write-fetch-head");
-	if (config->display_format == DISPLAY_FORMAT_PORCELAIN)
+	إذا (dry_لگاتار)
+		strvec_ڈالو(argv, "--dry-run");
+	إذا (prune != -1)
+		strvec_ڈالو(argv, prune ? "--prune" : "--no-prune");
+	إذا (prune_ٹیگ_سوچی != -1)
+		strvec_ڈالو(argv, prune_ٹیگ_سوچی ? "--prune-tags" : "--no-prune-tags");
+	إذا (update_سر_ok)
+		strvec_ڈالو(argv, "--update-head-ok");
+	إذا (force)
+		strvec_ڈالو(argv, "--force");
+	إذا (keep)
+		strvec_ڈالو(argv, "--keep");
+	إذا (config->recurse_submodules == RECURSE_SUBMODULES_ON)
+		strvec_ڈالو(argv, "--recurse-submodules");
+	وإلا إذا (config->recurse_submodules == RECURSE_SUBMODULES_OFF)
+		strvec_ڈالو(argv, "--no-recurse-submodules");
+	وإلا إذا (config->recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+		strvec_ڈالو(argv, "--recurse-submodules=on-demand");
+	إذا (ٹیگ_سوچی == ٹیگ_سوچی_سیٹ)
+		strvec_ڈالو(argv, "--tags");
+	وإلا إذا (ٹیگ_سوچی == ٹیگ_سوچی_UNSET)
+		strvec_ڈالو(argv, "--no-tags");
+	إذا (verbosity >= 2)
+		strvec_ڈالو(argv, "-v");
+	إذا (verbosity >= 1)
+		strvec_ڈالو(argv, "-v");
+	وإلا إذا (verbosity < 0)
+		strvec_ڈالو(argv, "-q");
+	إذا (family == TRANSPORT_FAMILY_IPV4)
+		strvec_ڈالو(argv, "--ipv4");
+	وإلا إذا (family == TRANSPORT_FAMILY_IPV6)
+		strvec_ڈالو(argv, "--ipv6");
+	إذا (!write_fetch_سر)
+		strvec_ڈالو(argv, "--no-write-fetch-head");
+	إذا (config->display_format == DISPLAY_FORMAT_PORCELAIN)
 		strvec_pushf(argv, "--porcelain");
 }
 
 /* Fetch multiple remotes in parallel */
 
-struct parallel_fetch_state {
-	const char **argv;
-	struct string_list *remotes;
-	int next, result;
-	const struct fetch_config *config;
+بنية parallel_fetch_state {
+	ثابت حرف **argv;
+	بنية string_list *remotes;
+	صحيح اگلا, نتیجہ;
+	ثابت بنية fetch_config *config;
 };
 
-static int fetch_next_remote(struct child_process *cp,
-			     struct strbuf *out UNUSED,
-			     void *cb, void **task_cb)
+ساكن صحيح fetch_اگلا_remote(بنية بچہ_process *cp,
+			     بنية strbuf *باہرلا بن_ورتیا,
+			     فراغ *cb, فراغ **task_cb)
 {
-	struct parallel_fetch_state *state = cb;
-	char *remote;
+	بنية parallel_fetch_state *state = cb;
+	حرف *remote;
 
-	if (state->next < 0 || state->next >= state->remotes->nr)
-		return 0;
+	إذا (state->اگلا < 0 || state->اگلا >= state->remotes->nr)
+		أرجع 0;
 
-	remote = state->remotes->items[state->next++].string;
+	remote = state->remotes->اشیاء[state->اگلا++].string;
 	*task_cb = remote;
 
-	strvec_pushv(&cp->args, state->argv);
-	strvec_push(&cp->args, remote);
+	strvec_pushv(&cp->دلیلاں, state->argv);
+	strvec_ڈالو(&cp->دلیلاں, remote);
 	cp->git_cmd = 1;
 
-	if (verbosity >= 0 && state->config->display_format != DISPLAY_FORMAT_PORCELAIN)
-		printf(_("Fetching %s\n"), remote);
+	إذا (verbosity >= 0 && state->config->display_format != DISPLAY_FORMAT_PORCELAIN)
+		لکھو(_("Fetching %s\n"), remote);
 
-	return 1;
+	أرجع 1;
 }
 
-static int fetch_failed_to_start(struct strbuf *out UNUSED,
-				 void *cb, void *task_cb)
+ساكن صحيح fetch_failed_منزل_شروع(بنية strbuf *باہرلا بن_ورتیا,
+				 فراغ *cb, فراغ *task_cb)
 {
-	struct parallel_fetch_state *state = cb;
-	const char *remote = task_cb;
+	بنية parallel_fetch_state *state = cb;
+	ثابت حرف *remote = task_cb;
 
-	state->result = error(_("could not fetch %s"), remote);
+	state->نتیجہ = error(_("could not fetch %s"), remote);
 
-	return 0;
+	أرجع 0;
 }
 
-static int fetch_finished(int result, struct strbuf *out,
-			  void *cb, void *task_cb)
+ساكن صحيح fetch_مکمل(صحيح نتیجہ, بنية strbuf *باہرلا,
+			  فراغ *cb, فراغ *task_cb)
 {
-	struct parallel_fetch_state *state = cb;
-	const char *remote = task_cb;
+	بنية parallel_fetch_state *state = cb;
+	ثابت حرف *remote = task_cb;
 
-	if (result) {
-		strbuf_addf(out, _("could not fetch '%s' (exit code: %d)\n"),
-			    remote, result);
-		state->result = -1;
+	إذا (نتیجہ) {
+		strbuf_addf(باہرلا, _("could not fetch '%s' (exit code: %d)\n"),
+			    remote, نتیجہ);
+		state->نتیجہ = -1;
 	}
 
-	return 0;
+	أرجع 0;
 }
 
-static int fetch_multiple(struct string_list *list, int max_children,
-			  const struct fetch_config *config)
+ساكن صحيح fetch_مضرب(بنية string_list *list, صحيح max_children,
+			  ثابت بنية fetch_config *config)
 {
-	int i, result = 0;
-	struct strvec argv = STRVEC_INIT;
+	صحيح i, نتیجہ = 0;
+	بنية strvec argv = STRVEC_INIT;
 
-	if (!append && write_fetch_head) {
-		int errcode = truncate_fetch_head();
-		if (errcode)
-			return errcode;
+	إذا (!append && write_fetch_سر) {
+		صحيح errcode = truncate_fetch_سر();
+		إذا (errcode)
+			أرجع errcode;
 	}
 
 	/*
@@ -2365,69 +2365,69 @@ static int fetch_multiple(struct string_list *list, int max_children,
 	 */
 	strvec_pushl(&argv, "-c", "fetch.bundleURI=",
 		     "fetch", "--append", "--no-auto-gc",
-		     "--no-write-commit-graph", NULL);
-	for (i = 0; i < server_options.nr; i++)
-		strvec_pushf(&argv, "--server-option=%s", server_options.items[i].string);
-	add_options_to_argv(&argv, config);
+		     "--no-write-commit-graph", عدم);
+	لكل (i = 0; i < server_options.nr; i++)
+		strvec_pushf(&argv, "--server-option=%s", server_options.اشیاء[i].string);
+	جوڑو_options_منزل_argv(&argv, config);
 
-	if (max_children != 1 && list->nr != 1) {
-		struct parallel_fetch_state state = { argv.v, list, 0, 0, config };
-		const struct run_process_parallel_opts opts = {
+	إذا (max_children != 1 && list->nr != 1) {
+		بنية parallel_fetch_state state = { argv.v, list, 0, 0, config };
+		ثابت بنية لگاتار_process_parallel_opts opts = {
 			.tr2_category = "fetch",
 			.tr2_label = "parallel/fetch",
 
 			.processes = max_children,
 
-			.get_next_task = &fetch_next_remote,
-			.start_failure = &fetch_failed_to_start,
-			.task_finished = &fetch_finished,
-			.data = &state,
+			.get_اگلا_task = &fetch_اگلا_remote,
+			.شروع_failure = &fetch_failed_منزل_شروع,
+			.task_مکمل = &fetch_مکمل,
+			.انکڑے = &state,
 		};
 
-		strvec_push(&argv, "--end-of-options");
+		strvec_ڈالو(&argv, "--end-of-options");
 
-		run_processes_parallel(&opts);
-		result = state.result;
-	} else
-		for (i = 0; i < list->nr; i++) {
-			const char *name = list->items[i].string;
-			struct child_process cmd = CHILD_PROCESS_INIT;
+		لگاتار_processes_parallel(&opts);
+		نتیجہ = state.نتیجہ;
+	} وإلا
+		لكل (i = 0; i < list->nr; i++) {
+			ثابت حرف *name = list->اشیاء[i].string;
+			بنية بچہ_process cmd = بچہ_PROCESS_INIT;
 
-			strvec_pushv(&cmd.args, argv.v);
-			strvec_push(&cmd.args, name);
-			if (verbosity >= 0 && config->display_format != DISPLAY_FORMAT_PORCELAIN)
-				printf(_("Fetching %s\n"), name);
+			strvec_pushv(&cmd.دلیلاں, argv.v);
+			strvec_ڈالو(&cmd.دلیلاں, name);
+			إذا (verbosity >= 0 && config->display_format != DISPLAY_FORMAT_PORCELAIN)
+				لکھو(_("Fetching %s\n"), name);
 			cmd.git_cmd = 1;
-			if (run_command(&cmd)) {
+			إذا (لگاتار_command(&cmd)) {
 				error(_("could not fetch %s"), name);
-				result = 1;
+				نتیجہ = 1;
 			}
 		}
 
 	strvec_clear(&argv);
-	return !!result;
+	أرجع !!نتیجہ;
 }
 
 /*
  * Fetching from the promisor remote should use the given filter-spec
  * or inherit the default filter-spec from the config.
  */
-static inline void fetch_one_setup_partial(struct remote *remote,
-					   struct list_objects_filter_options *filter_options)
+ساكن مضمن فراغ fetch_one_تیاری_partial(بنية remote *remote,
+					   بنية list_objects_filter_options *filter_options)
 {
 	/*
 	 * Explicit --no-filter argument overrides everything, regardless
 	 * of any prior partial clones and fetches.
 	 */
-	if (filter_options->no_filter)
-		return;
+	إذا (filter_options->no_filter)
+		أرجع;
 
 	/*
 	 * If no prior partial clone/fetch and the current fetch DID NOT
 	 * request a partial-fetch, do a normal fetch.
 	 */
-	if (!repo_has_promisor_remote(the_repository) && !filter_options->choice)
-		return;
+	إذا (!repo_has_promisor_remote(the_repository) && !filter_options->choice)
+		أرجع;
 
 	/*
 	 * If this is a partial-fetch request, we enable partial on
@@ -2435,9 +2435,9 @@ static inline void fetch_one_setup_partial(struct remote *remote,
 	 * filter-spec as the default for subsequent fetches to this
 	 * remote if there is currently no default filter-spec.
 	 */
-	if (filter_options->choice) {
-		partial_clone_register(remote->name, filter_options);
-		return;
+	إذا (filter_options->choice) {
+		partial_clone_رجسٹر(remote->name, filter_options);
+		أرجع;
 	}
 
 	/*
@@ -2445,137 +2445,137 @@ static inline void fetch_one_setup_partial(struct remote *remote,
 	 * explicitly given filter-spec or inherit the filter-spec from
 	 * the config.
 	 */
-	if (!filter_options->choice)
+	إذا (!filter_options->choice)
 		partial_clone_get_default_filter_spec(filter_options, remote->name);
-	return;
+	أرجع;
 }
 
-static int fetch_one(struct remote *remote, int argc, const char **argv,
-		     int prune_tags_ok, int use_stdin_refspecs,
-		     const struct fetch_config *config,
-		     struct list_objects_filter_options *filter_options,
-		     struct oidset *updated_tips)
+ساكن صحيح fetch_one(بنية remote *remote, صحيح argc, ثابت حرف **argv,
+		     صحيح prune_ٹیگ_سوچی_ok, صحيح use_stdin_refspecs,
+		     ثابت بنية fetch_config *config,
+		     بنية list_objects_filter_options *filter_options,
+		     بنية oidset *updated_tips)
 {
-	struct refspec rs = REFSPEC_INIT_FETCH(the_hash_algo);
-	int i;
-	int exit_code;
-	int maybe_prune_tags;
-	int remote_via_config = remote_is_configured(remote, 0);
+	بنية refspec rs = REFSPEC_INIT_FETCH(the_hash_algo);
+	صحيح i;
+	صحيح exit_کوڈ;
+	صحيح maybe_prune_ٹیگ_سوچی;
+	صحيح remote_راہیں_config = remote_is_configured(remote, 0);
 
-	if (!remote)
+	إذا (!remote)
 		die(_("no remote repository specified; please specify either a URL or a\n"
 		      "remote name from which new revisions should be fetched"));
 
 	gtransport = prepare_transport(remote, 1, filter_options);
 
-	if (prune < 0) {
+	إذا (prune < 0) {
 		/* no command line request */
-		if (0 <= remote->prune)
+		إذا (0 <= remote->prune)
 			prune = remote->prune;
-		else if (0 <= config->prune)
+		وإلا إذا (0 <= config->prune)
 			prune = config->prune;
-		else
+		وإلا
 			prune = PRUNE_BY_DEFAULT;
 	}
 
-	if (prune_tags < 0) {
+	إذا (prune_ٹیگ_سوچی < 0) {
 		/* no command line request */
-		if (0 <= remote->prune_tags)
-			prune_tags = remote->prune_tags;
-		else if (0 <= config->prune_tags)
-			prune_tags = config->prune_tags;
-		else
-			prune_tags = PRUNE_TAGS_BY_DEFAULT;
+		إذا (0 <= remote->prune_ٹیگ_سوچی)
+			prune_ٹیگ_سوچی = remote->prune_ٹیگ_سوچی;
+		وإلا إذا (0 <= config->prune_ٹیگ_سوچی)
+			prune_ٹیگ_سوچی = config->prune_ٹیگ_سوچی;
+		وإلا
+			prune_ٹیگ_سوچی = PRUNE_ٹیگ_سوچی_BY_DEFAULT;
 	}
 
-	maybe_prune_tags = prune_tags_ok && prune_tags;
-	if (maybe_prune_tags && remote_via_config)
-		refspec_append(&remote->fetch, TAG_REFSPEC);
+	maybe_prune_ٹیگ_سوچی = prune_ٹیگ_سوچی_ok && prune_ٹیگ_سوچی;
+	إذا (maybe_prune_ٹیگ_سوچی && remote_راہیں_config)
+		refspec_append(&remote->fetch, ٹیگ_REFSPEC);
 
-	if (maybe_prune_tags && (argc || !remote_via_config))
-		refspec_append(&rs, TAG_REFSPEC);
+	إذا (maybe_prune_ٹیگ_سوچی && (argc || !remote_راہیں_config))
+		refspec_append(&rs, ٹیگ_REFSPEC);
 
-	for (i = 0; i < argc; i++) {
-		if (!strcmp(argv[i], "tag")) {
+	لكل (i = 0; i < argc; i++) {
+		إذا (!strcmp(argv[i], "tag")) {
 			i++;
-			if (i >= argc)
+			إذا (i >= argc)
 				die(_("you need to specify a tag name"));
 
 			refspec_appendf(&rs, "refs/tags/%s:refs/tags/%s",
 					argv[i], argv[i]);
-		} else {
+		} وإلا {
 			refspec_append(&rs, argv[i]);
 		}
 	}
 
-	if (use_stdin_refspecs) {
-		struct strbuf line = STRBUF_INIT;
-		while (strbuf_getline_lf(&line, stdin) != EOF)
-			refspec_append(&rs, line.buf);
-		strbuf_release(&line);
+	إذا (use_stdin_refspecs) {
+		بنية strbuf سطر = STRBUF_INIT;
+		طالما (strbuf_getline_lf(&سطر, stdin) != EOF)
+			refspec_append(&rs, سطر.buf);
+		strbuf_release(&سطر);
 	}
 
-	if (server_options.nr)
+	إذا (server_options.nr)
 		gtransport->server_options = &server_options;
 
-	sigchain_push_common(unlock_pack_on_signal);
+	sigchain_ڈالو_common(unlock_pack_on_signal);
 	atexit(unlock_pack_atexit);
-	sigchain_push(SIGPIPE, SIG_IGN);
-	exit_code = do_fetch(gtransport, &rs, config, filter_options,
+	sigchain_ڈالو(SIGPIPE, SIG_IGN);
+	exit_کوڈ = do_fetch(gtransport, &rs, config, filter_options,
 			     updated_tips);
-	sigchain_pop(SIGPIPE);
+	sigchain_نکالو(SIGPIPE);
 	refspec_clear(&rs);
 	transport_disconnect(gtransport);
-	gtransport = NULL;
-	return exit_code;
+	gtransport = عدم;
+	أرجع exit_کوڈ;
 }
 
-int cmd_fetch(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo UNUSED)
+صحيح cmd_fetch(صحيح argc,
+	      ثابت حرف **argv,
+	      ثابت حرف *اگیتر,
+	      بنية repository *repo بن_ورتیا)
 {
-	struct fetch_config config = {
-		.display_format = DISPLAY_FORMAT_FULL,
-		.follow_remote_head_raw = NULL,
-		.follow_remote_head_seen = 0,
+	بنية fetch_config config = {
+		.display_format = DISPLAY_FORMAT_بھریا,
+		.follow_remote_سر_raw = عدم,
+		.follow_remote_سر_تکیا = 0,
 		.prune = -1,
-		.prune_tags = -1,
+		.prune_ٹیگ_سوچی = -1,
 		.show_forced_updates = 1,
 		.recurse_submodules = RECURSE_SUBMODULES_DEFAULT,
 		.parallel = 1,
 		.submodule_fetch_jobs = -1,
 	};
-	const char *submodule_prefix = "";
-	const char *bundle_uri;
-	struct string_list list = STRING_LIST_INIT_DUP;
-	struct list_objects_filter_options filter_options = LIST_OBJECTS_FILTER_INIT;
-	struct remote *remote = NULL;
-	int all = -1, multiple = 0;
-	int result = 0;
-	int prune_tags_ok = 1;
-	int enable_auto_gc = 1;
-	int unshallow = 0;
-	int max_jobs = -1;
-	int recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
-	int recurse_submodules_default = RECURSE_SUBMODULES_ON_DEMAND;
-	int fetch_write_commit_graph = -1;
-	int stdin_refspecs = 0;
-	int negotiate_only = 0;
-	int porcelain = 0;
-	int i;
-	enum {
-		GRAPH_WRITE_REACHABLE,
-		GRAPH_WRITE_TIPS,
-		GRAPH_WRITE_SKIP,
-	} graph_write_mode = GRAPH_WRITE_REACHABLE;
-	struct oidset updated_tips = OIDSET_INIT;
+	ثابت حرف *submodule_اگیتر = "";
+	ثابت حرف *bundle_uri;
+	بنية string_list list = STRING_LIST_INIT_DUP;
+	بنية list_objects_filter_options filter_options = LIST_OBJECTS_FILTER_INIT;
+	بنية remote *remote = عدم;
+	صحيح all = -1, مضرب = 0;
+	صحيح نتیجہ = 0;
+	صحيح prune_ٹیگ_سوچی_ok = 1;
+	صحيح enable_auto_gc = 1;
+	صحيح unshallow = 0;
+	صحيح max_jobs = -1;
+	صحيح recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
+	صحيح recurse_submodules_default = RECURSE_SUBMODULES_ON_DEMAND;
+	صحيح fetch_write_commit_گراف = -1;
+	صحيح stdin_refspecs = 0;
+	صحيح negotiate_only = 0;
+	صحيح porcelain = 0;
+	صحيح i;
+	تعداد {
+		گراف_WRITE_REACHABLE,
+		گراف_WRITE_TIPS,
+		گراف_WRITE_SKIP,
+	} گراف_write_منوال = گراف_WRITE_REACHABLE;
+	بنية oidset updated_tips = OIDSET_INIT;
 
-	struct option builtin_fetch_options[] = {
+	بنية option builtin_fetch_options[] = {
 		OPT__VERBOSITY(&verbosity),
 		OPT_BOOL(0, "all", &all,
 			 N_("fetch from all remotes")),
-		OPT_BOOL(0, "set-upstream", &set_upstream,
+		OPT_BOOL(0, "set-upstream", &سیٹ_upstream,
 			 N_("set upstream for git pull/fetch")),
 		OPT_BOOL('a', "append", &append,
 			 N_("append to .git/FETCH_HEAD instead of overwriting")),
@@ -2584,33 +2584,33 @@ int cmd_fetch(int argc,
 		OPT_STRING(0, "upload-pack", &upload_pack, N_("path"),
 			   N_("path to upload pack on remote end")),
 		OPT__FORCE(&force, N_("force overwrite of local reference"), 0),
-		OPT_BOOL('m', "multiple", &multiple,
+		OPT_BOOL('m', "multiple", &مضرب,
 			 N_("fetch from multiple remotes")),
-		OPT_SET_INT('t', "tags", &tags,
-			    N_("fetch all tags and associated objects"), TAGS_SET),
-		OPT_SET_INT('n', NULL, &tags,
-			    N_("do not fetch all tags (--no-tags)"), TAGS_UNSET),
+		OPT_سیٹ_INT('t', "tags", &ٹیگ_سوچی,
+			    N_("fetch all tags and associated objects"), ٹیگ_سوچی_سیٹ),
+		OPT_سیٹ_INT('n', عدم, &ٹیگ_سوچی,
+			    N_("do not fetch all tags (--no-tags)"), ٹیگ_سوچی_UNSET),
 		OPT_INTEGER('j', "jobs", &max_jobs,
 			    N_("number of submodules fetched in parallel")),
 		OPT_BOOL(0, "prefetch", &prefetch,
 			 N_("modify the refspec to place all refs within refs/prefetch/")),
 		OPT_BOOL('p', "prune", &prune,
 			 N_("prune remote-tracking branches no longer on remote")),
-		OPT_BOOL('P', "prune-tags", &prune_tags,
+		OPT_BOOL('P', "prune-tags", &prune_ٹیگ_سوچی,
 			 N_("prune local tags no longer on remote and clobber changed tags")),
 		OPT_CALLBACK_F(0, "recurse-submodules", &recurse_submodules_cli, N_("on-demand"),
 			    N_("control recursive fetching of submodules"),
 			    PARSE_OPT_OPTARG, option_fetch_parse_recurse_submodules),
-		OPT_BOOL(0, "dry-run", &dry_run,
+		OPT_BOOL(0, "dry-run", &dry_لگاتار,
 			 N_("dry run")),
 		OPT_BOOL(0, "porcelain", &porcelain, N_("machine-readable output")),
-		OPT_BOOL(0, "write-fetch-head", &write_fetch_head,
+		OPT_BOOL(0, "write-fetch-head", &write_fetch_سر,
 			 N_("write fetched references to the FETCH_HEAD file")),
 		OPT_BOOL('k', "keep", &keep, N_("keep downloaded pack")),
-		OPT_BOOL('u', "update-head-ok", &update_head_ok,
+		OPT_BOOL('u', "update-head-ok", &update_سر_ok,
 			    N_("allow updating of HEAD ref")),
-		OPT_BOOL(0, "progress", &progress, N_("force progress reporting")),
-		OPT_STRING(0, "depth", &depth, N_("depth"),
+		OPT_BOOL(0, "progress", &ترقی, N_("force progress reporting")),
+		OPT_STRING(0, "depth", &ڈونگھائی, N_("depth"),
 			   N_("deepen history of shallow clone")),
 		OPT_STRING(0, "shallow-since", &deepen_since, N_("time"),
 			   N_("deepen history of shallow repository based on time")),
@@ -2618,16 +2618,16 @@ int cmd_fetch(int argc,
 				N_("deepen history of shallow clone, excluding ref")),
 		OPT_INTEGER(0, "deepen", &deepen_relative,
 			    N_("deepen history of shallow clone")),
-		OPT_SET_INT_F(0, "unshallow", &unshallow,
+		OPT_سیٹ_INT_F(0, "unshallow", &unshallow,
 			      N_("convert to a complete repository"),
 			      1, PARSE_OPT_NONEG),
-		OPT_SET_INT_F(0, "refetch", &refetch,
+		OPT_سیٹ_INT_F(0, "refetch", &refetch,
 			      N_("re-fetch without negotiating common commits"),
 			      1, PARSE_OPT_NONEG),
 		{
 			.type = OPTION_STRING,
 			.long_name = "submodule-prefix",
-			.value = &submodule_prefix,
+			.قدر = &submodule_اگیتر,
 			.argh = N_("dir"),
 			.help = N_("prepend this to submodule path output"),
 			.flags = PARSE_OPT_HIDDEN,
@@ -2657,81 +2657,81 @@ int cmd_fetch(int argc,
 			 N_("run 'maintenance --auto' after fetching")),
 		OPT_BOOL(0, "show-forced-updates", &config.show_forced_updates,
 			 N_("check for forced-updates on all updated branches")),
-		OPT_BOOL(0, "write-commit-graph", &fetch_write_commit_graph,
+		OPT_BOOL(0, "write-commit-graph", &fetch_write_commit_گراف,
 			 N_("write the commit-graph after fetching")),
 		OPT_BOOL(0, "stdin", &stdin_refspecs,
 			 N_("accept refspecs from stdin")),
-		OPT_END()
+		OPT_سرا()
 	};
 
 	filter_options.allow_auto_filter = 1;
 
 	refspec_init_fetch(&refmap, the_hash_algo);
 
-	packet_trace_identity("fetch");
+	packet_trace_پچھان_تت("fetch");
 
 	/* Record the command line for the reflog */
 	strbuf_addstr(&default_rla, "fetch");
-	for (i = 1; i < argc; i++) {
+	لكل (i = 1; i < argc; i++) {
 		/* This handles non-URLs gracefully */
-		char *anon = transport_anonymize_url(argv[i]);
+		حرف *anon = transport_anonymize_url(argv[i]);
 
 		strbuf_addf(&default_rla, " %s", anon);
-		free(anon);
+		حرر(anon);
 	}
 
 	repo_config(the_repository, git_fetch_config, &config);
-	if (the_repository->gitdir) {
+	إذا (the_repository->gitdir) {
 		prepare_repo_settings(the_repository);
-		the_repository->settings.command_requires_full_index = 0;
+		the_repository->settings.command_requires_بھریا_اشاریہ = 0;
 	}
 
-	argc = parse_options(argc, argv, prefix,
+	argc = parse_options(argc, argv, اگیتر,
 			     builtin_fetch_options, builtin_fetch_usage, 0);
 
-	if (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
+	إذا (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
 		config.recurse_submodules = recurse_submodules_cli;
 
-	if (negotiate_only) {
-		switch (recurse_submodules_cli) {
-		case RECURSE_SUBMODULES_OFF:
-		case RECURSE_SUBMODULES_DEFAULT:
+	إذا (negotiate_only) {
+		بدل (recurse_submodules_cli) {
+		حالة RECURSE_SUBMODULES_OFF:
+		حالة RECURSE_SUBMODULES_DEFAULT:
 			/*
 			 * --negotiate-only should never recurse into
 			 * submodules. Skip it by setting recurse_submodules to
 			 * RECURSE_SUBMODULES_OFF.
 			 */
 			config.recurse_submodules = RECURSE_SUBMODULES_OFF;
-			break;
+			اكسر;
 
-		default:
+		افتراضي:
 			die(_("options '%s' and '%s' cannot be used together"),
 			    "--negotiate-only", "--recurse-submodules");
 		}
 	}
 
-	if (config.recurse_submodules != RECURSE_SUBMODULES_OFF) {
-		int *sfjc = config.submodule_fetch_jobs == -1
-			    ? &config.submodule_fetch_jobs : NULL;
-		int *rs = config.recurse_submodules == RECURSE_SUBMODULES_DEFAULT
-			  ? &config.recurse_submodules : NULL;
+	إذا (config.recurse_submodules != RECURSE_SUBMODULES_OFF) {
+		صحيح *sfjc = config.submodule_fetch_jobs == -1
+			    ? &config.submodule_fetch_jobs : عدم;
+		صحيح *rs = config.recurse_submodules == RECURSE_SUBMODULES_DEFAULT
+			  ? &config.recurse_submodules : عدم;
 
 		fetch_config_from_gitmodules(the_repository, sfjc, rs);
 	}
 
 
-	if (porcelain) {
-		switch (recurse_submodules_cli) {
-		case RECURSE_SUBMODULES_OFF:
-		case RECURSE_SUBMODULES_DEFAULT:
+	إذا (porcelain) {
+		بدل (recurse_submodules_cli) {
+		حالة RECURSE_SUBMODULES_OFF:
+		حالة RECURSE_SUBMODULES_DEFAULT:
 			/*
 			 * Reference updates in submodules would be ambiguous
 			 * in porcelain mode, so we reject this combination.
 			 */
 			config.recurse_submodules = RECURSE_SUBMODULES_OFF;
-			break;
+			اكسر;
 
-		default:
+		افتراضي:
 			die(_("options '%s' and '%s' cannot be used together"),
 			    "--porcelain", "--recurse-submodules");
 		}
@@ -2739,40 +2739,40 @@ int cmd_fetch(int argc,
 		config.display_format = DISPLAY_FORMAT_PORCELAIN;
 	}
 
-	if (deepen_relative) {
-		if (deepen_relative < 0)
+	إذا (deepen_relative) {
+		إذا (deepen_relative < 0)
 			die(_("negative depth in --deepen is not supported"));
-		if (depth)
+		إذا (ڈونگھائی)
 			die(_("options '%s' and '%s' cannot be used together"), "--deepen", "--depth");
-		depth = xstrfmt("%d", deepen_relative);
+		ڈونگھائی = xstrfmt("%d", deepen_relative);
 	}
-	if (unshallow) {
-		if (depth)
+	إذا (unshallow) {
+		إذا (ڈونگھائی)
 			die(_("options '%s' and '%s' cannot be used together"), "--depth", "--unshallow");
-		else if (!is_repository_shallow(the_repository))
+		وإلا إذا (!is_repository_shallow(the_repository))
 			die(_("--unshallow on a complete repository does not make sense"));
-		else
-			depth = xstrfmt("%d", INFINITE_DEPTH);
+		وإلا
+			ڈونگھائی = xstrfmt("%d", INFINITE_ڈونگھائی);
 	}
 
 	/* no need to be strict, transport_set_option() will validate it again */
-	if (depth && atoi(depth) < 1)
-		die(_("depth %s is not a positive number"), depth);
-	if (depth || deepen_since || deepen_not.nr)
+	إذا (ڈونگھائی && atoi(ڈونگھائی) < 1)
+		die(_("depth %s is not a positive number"), ڈونگھائی);
+	إذا (ڈونگھائی || deepen_since || deepen_not.nr)
 		deepen = 1;
 
 	/* FETCH_HEAD never gets updated in --dry-run mode */
-	if (dry_run)
-		write_fetch_head = 0;
+	إذا (dry_لگاتار)
+		write_fetch_سر = 0;
 
-	if (!max_jobs)
+	إذا (!max_jobs)
 		max_jobs = online_cpus();
 
-	if (!repo_config_get_string_tmp(the_repository, "fetch.bundleuri", &bundle_uri) &&
-	    fetch_bundle_uri(the_repository, bundle_uri, NULL))
+	إذا (!repo_config_get_string_tmp(the_repository, "fetch.bundleuri", &bundle_uri) &&
+	    fetch_bundle_uri(the_repository, bundle_uri, عدم))
 		warning(_("failed to fetch bundles from '%s'"), bundle_uri);
 
-	if (all < 0) {
+	إذا (all < 0) {
 		/*
 		 * no --[no-]all given;
 		 * only use config option if no remote was explicitly specified
@@ -2780,112 +2780,112 @@ int cmd_fetch(int argc,
 		all = (!argc) ? config.all : 0;
 	}
 
-	if (all) {
-		if (argc == 1)
+	إذا (all) {
+		إذا (argc == 1)
 			die(_("fetch --all does not take a repository argument"));
-		else if (argc > 1)
+		وإلا إذا (argc > 1)
 			die(_("fetch --all does not make sense with refspecs"));
 
-		(void) for_each_remote(get_one_remote_for_fetch, &list);
+		(فراغ) for_each_remote(get_one_remote_for_fetch, &list);
 
 		/* do not do fetch_multiple() of one */
-		if (list.nr == 1)
-			remote = remote_get(list.items[0].string);
-	} else if (argc == 0) {
+		إذا (list.nr == 1)
+			remote = remote_get(list.اشیاء[0].string);
+	} وإلا إذا (argc == 0) {
 		/* No arguments -- use default remote */
-		remote = remote_get(NULL);
-	} else if (multiple) {
+		remote = remote_get(عدم);
+	} وإلا إذا (مضرب) {
 		/* All arguments are assumed to be remotes or groups */
-		for (i = 0; i < argc; i++)
-			if (!add_remote_or_group(argv[i], &list))
+		لكل (i = 0; i < argc; i++)
+			إذا (!جوڑو_remote_or_گروہ(argv[i], &list))
 				die(_("no such remote or remote group: %s"),
 				    argv[i]);
-	} else {
+	} وإلا {
 		/* Single remote or group */
-		(void) add_remote_or_group(argv[0], &list);
-		if (list.nr > 1) {
+		(فراغ) جوڑو_remote_or_گروہ(argv[0], &list);
+		إذا (list.nr > 1) {
 			/* More than one remote */
-			if (argc > 1)
+			إذا (argc > 1)
 				die(_("fetching a group and specifying refspecs does not make sense"));
-		} else {
+		} وإلا {
 			/* Zero or one remotes */
 			remote = remote_get(argv[0]);
-			prune_tags_ok = (argc == 1);
+			prune_ٹیگ_سوچی_ok = (argc == 1);
 			argc--;
 			argv++;
 		}
 	}
 	string_list_remove_duplicates(&list, 0);
 
-	if (negotiate_only) {
-		struct oidset acked_commits = OIDSET_INIT;
-		struct oidset_iter iter;
-		const struct object_id *oid;
+	إذا (negotiate_only) {
+		بنية oidset acked_commits = OIDSET_INIT;
+		بنية oidset_iter iter;
+		ثابت بنية object_id *oid;
 
 		trace2_region_enter("fetch", "negotiate-only", the_repository);
-		if (!remote)
+		إذا (!remote)
 			die(_("must supply remote when using --negotiate-only"));
 		gtransport = prepare_transport(remote, 1, &filter_options);
 
-		if (!gtransport->smart_options) {
+		إذا (!gtransport->smart_options) {
 			warning(_("protocol does not support --negotiate-only, exiting"));
-			result = 1;
+			نتیجہ = 1;
 			trace2_region_leave("fetch", "negotiate-only", the_repository);
-			goto cleanup;
+			اذهب cleanup;
 		}
-		if (!gtransport->smart_options->negotiation_restrict_tips)
+		إذا (!gtransport->smart_options->negotiation_restrict_tips)
 			die(_("%s needs one or more %s"), "--negotiate-only",
 			    "--negotiation-restrict=*");
 
 		gtransport->smart_options->acked_commits = &acked_commits;
 
-		if (server_options.nr)
+		إذا (server_options.nr)
 			gtransport->server_options = &server_options;
-		result = transport_fetch_refs(gtransport, NULL);
-		gtransport->smart_options->acked_commits = NULL;
+		نتیجہ = transport_fetch_refs(gtransport, عدم);
+		gtransport->smart_options->acked_commits = عدم;
 
 		oidset_iter_init(&acked_commits, &iter);
-		while ((oid = oidset_iter_next(&iter)))
-			printf("%s\n", oid_to_hex(oid));
+		طالما ((oid = oidset_iter_اگلا(&iter)))
+			لکھو("%s\n", oid_منزل_hex(oid));
 		oidset_clear(&acked_commits);
 		trace2_region_leave("fetch", "negotiate-only", the_repository);
-	} else if (remote) {
-		if (filter_options.choice || repo_has_promisor_remote(the_repository)) {
+	} وإلا إذا (remote) {
+		إذا (filter_options.choice || repo_has_promisor_remote(the_repository)) {
 			trace2_region_enter("fetch", "setup-partial", the_repository);
-			fetch_one_setup_partial(remote, &filter_options);
+			fetch_one_تیاری_partial(remote, &filter_options);
 			trace2_region_leave("fetch", "setup-partial", the_repository);
 		}
 		trace2_region_enter("fetch", "fetch-one", the_repository);
-		result = fetch_one(remote, argc, argv, prune_tags_ok, stdin_refspecs,
+		نتیجہ = fetch_one(remote, argc, argv, prune_ٹیگ_سوچی_ok, stdin_refspecs,
 				   &config, &filter_options, &updated_tips);
-		if (prepare_commit_graph(the_repository)) {
-			if (oidset_size(&updated_tips))
-				graph_write_mode = GRAPH_WRITE_TIPS;
-			else
-				graph_write_mode = GRAPH_WRITE_SKIP;
+		إذا (prepare_commit_گراف(the_repository)) {
+			إذا (oidset_ناپ(&updated_tips))
+				گراف_write_منوال = گراف_WRITE_TIPS;
+			وإلا
+				گراف_write_منوال = گراف_WRITE_SKIP;
 		}
 		trace2_region_leave("fetch", "fetch-one", the_repository);
-	} else {
-		int max_children = max_jobs;
+	} وإلا {
+		صحيح max_children = max_jobs;
 
-		if (filter_options.choice)
+		إذا (filter_options.choice)
 			die(_("--filter can only be used with the remote "
 			      "configured in extensions.partialclone"));
 
-		if (atomic_fetch)
+		إذا (atomic_fetch)
 			die(_("--atomic can only be used when fetching "
 			      "from one remote"));
 
-		if (stdin_refspecs)
+		إذا (stdin_refspecs)
 			die(_("--stdin can only be used when fetching "
 			      "from one remote"));
 
-		if (max_children < 0)
+		إذا (max_children < 0)
 			max_children = config.parallel;
 
 		/* TODO should this also die if we have a previous partial-clone? */
 		trace2_region_enter("fetch", "fetch-multiple", the_repository);
-		result = fetch_multiple(&list, max_children, &config);
+		نتیجہ = fetch_مضرب(&list, max_children, &config);
 		trace2_region_leave("fetch", "fetch-multiple", the_repository);
 	}
 
@@ -2898,25 +2898,25 @@ int cmd_fetch(int argc,
 	 * the fetched history from each remote, so there is no need
 	 * to fetch submodules from here.
 	 */
-	if (!result && remote && (config.recurse_submodules != RECURSE_SUBMODULES_OFF)) {
-		struct strvec options = STRVEC_INIT;
-		int max_children = max_jobs;
+	إذا (!نتیجہ && remote && (config.recurse_submodules != RECURSE_SUBMODULES_OFF)) {
+		بنية strvec options = STRVEC_INIT;
+		صحيح max_children = max_jobs;
 
-		if (max_children < 0)
+		إذا (max_children < 0)
 			max_children = config.submodule_fetch_jobs;
-		if (max_children < 0)
+		إذا (max_children < 0)
 			max_children = config.parallel;
 
-		add_options_to_argv(&options, &config);
-		trace2_region_enter_printf("fetch", "recurse-submodule", the_repository, "%s", submodule_prefix);
-		result = fetch_submodules(the_repository,
+		جوڑو_options_منزل_argv(&options, &config);
+		trace2_region_enter_printf("fetch", "recurse-submodule", the_repository, "%s", submodule_اگیتر);
+		نتیجہ = fetch_submodules(the_repository,
 					  &options,
-					  submodule_prefix,
+					  submodule_اگیتر,
 					  config.recurse_submodules,
 					  recurse_submodules_default,
 					  verbosity < 0,
 					  max_children);
-		trace2_region_leave_printf("fetch", "recurse-submodule", the_repository, "%s", submodule_prefix);
+		trace2_region_leave_printf("fetch", "recurse-submodule", the_repository, "%s", submodule_اگیتر);
 		strvec_clear(&options);
 	}
 
@@ -2928,61 +2928,61 @@ int cmd_fetch(int argc,
 	 * whenever objects were not fetched e.g. if we already have all
 	 * of them.
 	 */
-	if (negotiate_only)
-		goto cleanup;
+	إذا (negotiate_only)
+		اذهب cleanup;
 
 	prepare_repo_settings(the_repository);
-	if (fetch_write_commit_graph > 0 ||
-	    (fetch_write_commit_graph < 0 &&
-	     the_repository->settings.fetch_write_commit_graph)) {
-		int commit_graph_flags = COMMIT_GRAPH_WRITE_SPLIT;
+	إذا (fetch_write_commit_گراف > 0 ||
+	    (fetch_write_commit_گراف < 0 &&
+	     the_repository->settings.fetch_write_commit_گراف)) {
+		صحيح commit_گراف_flags = COMMIT_گراف_WRITE_ونڈو;
 
-		if (progress)
-			commit_graph_flags |= COMMIT_GRAPH_WRITE_PROGRESS;
+		إذا (ترقی)
+			commit_گراف_flags |= COMMIT_گراف_WRITE_ترقی;
 
-		if (graph_write_mode != GRAPH_WRITE_SKIP) {
+		إذا (گراف_write_منوال != گراف_WRITE_SKIP) {
 			trace2_region_enter("fetch", "write-commit-graph",
 					    the_repository);
-			if (graph_write_mode == GRAPH_WRITE_TIPS)
-				write_commit_graph(
+			إذا (گراف_write_منوال == گراف_WRITE_TIPS)
+				write_commit_گراف(
 					the_repository,
-					the_repository->objects->source->path,
-					NULL, &updated_tips,
-					commit_graph_flags, NULL);
-			else
-				write_commit_graph_reachable(
+					the_repository->objects->سروت->رستہ,
+					عدم, &updated_tips,
+					commit_گراف_flags, عدم);
+			وإلا
+				write_commit_گراف_reachable(
 					the_repository,
-					the_repository->objects->source->path,
-					commit_graph_flags, NULL);
+					the_repository->objects->سروت->رستہ,
+					commit_گراف_flags, عدم);
 			trace2_region_leave("fetch", "write-commit-graph",
 					    the_repository);
 		}
 	}
 
-	if (enable_auto_gc) {
-		if (refetch) {
+	إذا (enable_auto_gc) {
+		إذا (refetch) {
 			/*
 			 * Hint auto-maintenance strongly to encourage repacking,
 			 * but respect config settings disabling it.
 			 */
-			int opt_val;
-			if (repo_config_get_int(the_repository, "gc.autopacklimit", &opt_val))
+			صحيح opt_val;
+			إذا (repo_config_get_int(the_repository, "gc.autopacklimit", &opt_val))
 				opt_val = -1;
-			if (opt_val != 0)
-				git_config_push_parameter("gc.autoPackLimit=1");
+			إذا (opt_val != 0)
+				git_config_ڈالو_parameter("gc.autoPackLimit=1");
 
-			if (repo_config_get_int(the_repository, "maintenance.incremental-repack.auto", &opt_val))
+			إذا (repo_config_get_int(the_repository, "maintenance.incremental-repack.auto", &opt_val))
 				opt_val = -1;
-			if (opt_val != 0)
-				git_config_push_parameter("maintenance.incremental-repack.auto=-1");
+			إذا (opt_val != 0)
+				git_config_ڈالو_parameter("maintenance.incremental-repack.auto=-1");
 		}
-		run_auto_maintenance(the_repository, verbosity < 0);
+		لگاتار_auto_maintenance(the_repository, verbosity < 0);
 	}
 
  cleanup:
 	oidset_clear(&updated_tips);
 	string_list_clear(&list, 0);
 	list_objects_filter_release(&filter_options);
-	free(config.follow_remote_head_raw);
-	return result;
+	حرر(config.follow_remote_سر_raw);
+	أرجع نتیجہ;
 }

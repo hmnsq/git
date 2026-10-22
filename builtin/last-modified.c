@@ -1,46 +1,46 @@
-#include "git-compat-util.h"
-#include "bloom.h"
-#include "builtin.h"
-#include "commit-graph.h"
-#include "commit-slab.h"
-#include "commit.h"
-#include "config.h"
-#include "diff.h"
-#include "diffcore.h"
-#include "environment.h"
-#include "ewah/ewok.h"
-#include "hashmap.h"
-#include "hex.h"
-#include "object-name.h"
-#include "object.h"
-#include "parse-options.h"
-#include "prio-queue.h"
-#include "quote.h"
-#include "repository.h"
-#include "revision.h"
+#ضمن "git-compat-util.h"
+#ضمن "bloom.h"
+#ضمن "builtin.h"
+#ضمن "commit-graph.h"
+#ضمن "commit-slab.h"
+#ضمن "commit.h"
+#ضمن "config.h"
+#ضمن "diff.h"
+#ضمن "diffcore.h"
+#ضمن "environment.h"
+#ضمن "ewah/ewok.h"
+#ضمن "hashmap.h"
+#ضمن "hex.h"
+#ضمن "object-name.h"
+#ضمن "object.h"
+#ضمن "parse-options.h"
+#ضمن "prio-queue.h"
+#ضمن "quote.h"
+#ضمن "repository.h"
+#ضمن "revision.h"
 
 /* Remember to update object flag allocation in object.h */
-#define PARENT1 (1u<<16) /* used instead of SEEN */
-#define PARENT2 (1u<<17) /* used instead of BOTTOM, BOUNDARY */
+#تعریف_کرو PARENT1 (1u<<16) /* used instead of SEEN */
+#تعریف_کرو PARENT2 (1u<<17) /* used instead of BOTTOM, BOUNDARY */
 
-struct last_modified_entry {
-	struct hashmap_entry hashent;
-	struct object_id oid;
-	struct bloom_key key;
-	size_t diff_idx;
-	const char path[FLEX_ARRAY];
+بنية آخری_modified_اندراج {
+	بنية hashmap_اندراج hashent;
+	بنية object_id oid;
+	بنية bloom_کلید کلید;
+	ناپ_t diff_idx;
+	ثابت حرف رستہ[FLEX_ARRAY];
 };
 
-static int last_modified_entry_hashcmp(const void *unused UNUSED,
-				       const struct hashmap_entry *hent1,
-				       const struct hashmap_entry *hent2,
-				       const void *path)
+ساكن صحيح آخری_modified_اندراج_hashcmp(ثابت فراغ *بن_ورتیا_2 بن_ورتیا,
+				       ثابت بنية hashmap_اندراج *hent1,
+				       ثابت بنية hashmap_اندراج *hent2,
+				       ثابت فراغ *رستہ)
 {
-	const struct last_modified_entry *ent1 =
-		container_of(hent1, const struct last_modified_entry, hashent);
-	const struct last_modified_entry *ent2 =
-		container_of(hent2, const struct last_modified_entry, hashent);
-	return strcmp(ent1->path, path ? path : ent2->path);
+	ثابت بنية آخری_modified_اندراج *ent1 =
+		container_دا(hent1, ثابت بنية آخری_modified_اندراج, hashent);
+	ثابت بنية آخری_modified_اندراج *ent2 =
+		container_دا(hent2, ثابت بنية آخری_modified_اندراج, hashent);
+	أرجع strcmp(ent1->رستہ, رستہ ? رستہ : ent2->رستہ);
 }
 
 /*
@@ -48,84 +48,84 @@ static int last_modified_entry_hashcmp(const void *unused UNUSED,
  * represents a path in `lm->all_paths`. An active bit indicates the path still
  * needs to be associated to a commit.
  */
-define_commit_slab(active_paths_for_commit, struct bitmap *);
+define_commit_slab(سرگرم_paths_for_commit, بنية bitmap *);
 
-struct last_modified {
-	struct hashmap paths;
-	struct rev_info rev;
+بنية آخری_modified {
+	بنية hashmap paths;
+	بنية rev_info rev;
 	bool show_trees;
 	bool nul_termination;
-	int max_depth;
+	صحيح max_ڈونگھائی;
 
-	const char **all_paths;
-	size_t all_paths_nr;
-	struct active_paths_for_commit active_paths;
+	ثابت حرف **all_paths;
+	ناپ_t all_paths_nr;
+	بنية سرگرم_paths_for_commit سرگرم_paths;
 
 	/* 'scratch' to avoid allocating a bitmap every process_parent() */
-	struct bitmap *scratch;
+	بنية bitmap *scratch;
 };
 
-static struct bitmap *active_paths_for(struct last_modified *lm, struct commit *c)
+ساكن بنية bitmap *سرگرم_paths_for(بنية آخری_modified *lm, بنية commit *c)
 {
-	struct bitmap **bitmap = active_paths_for_commit_at(&lm->active_paths, c);
-	if (!*bitmap)
-		*bitmap = bitmap_word_alloc(lm->all_paths_nr / BITS_IN_EWORD + 1);
+	بنية bitmap **bitmap = سرگرم_paths_for_commit_at(&lm->سرگرم_paths, c);
+	إذا (!*bitmap)
+		*bitmap = bitmap_لفظ_alloc(lm->all_paths_nr / بٹ_وچ_EWORD + 1);
 
-	return *bitmap;
+	أرجع *bitmap;
 }
 
-static void active_paths_free(struct last_modified *lm, struct commit *c)
+ساكن فراغ سرگرم_paths_free(بنية آخری_modified *lm, بنية commit *c)
 {
-	struct bitmap **bitmap = active_paths_for_commit_at(&lm->active_paths, c);
-	if (*bitmap) {
+	بنية bitmap **bitmap = سرگرم_paths_for_commit_at(&lm->سرگرم_paths, c);
+	إذا (*bitmap) {
 		bitmap_free(*bitmap);
-		*bitmap = NULL;
+		*bitmap = عدم;
 	}
 }
 
-static void last_modified_release(struct last_modified *lm)
+ساكن فراغ آخری_modified_release(بنية آخری_modified *lm)
 {
-	struct hashmap_iter iter;
-	struct last_modified_entry *ent;
+	بنية hashmap_iter iter;
+	بنية آخری_modified_اندراج *ent;
 
-	hashmap_for_each_entry(&lm->paths, &iter, ent, hashent)
-		bloom_key_clear(&ent->key);
+	hashmap_for_each_اندراج(&lm->paths, &iter, ent, hashent)
+		bloom_کلید_clear(&ent->کلید);
 
-	hashmap_clear_and_free(&lm->paths, struct last_modified_entry, hashent);
+	hashmap_clear_and_free(&lm->paths, بنية آخری_modified_اندراج, hashent);
 	release_revisions(&lm->rev);
 
-	free(lm->all_paths);
+	حرر(lm->all_paths);
 }
 
-struct last_modified_callback_data {
-	struct last_modified *lm;
-	struct commit *commit;
+بنية آخری_modified_callback_انکڑے {
+	بنية آخری_modified *lm;
+	بنية commit *commit;
 };
 
-static void add_path_from_diff(struct diff_queue_struct *q,
-			       struct diff_options *opt UNUSED, void *data)
+ساكن فراغ جوڑو_رستہ_from_diff(بنية diff_قطار_struct *q,
+			       بنية diff_options *opt بن_ورتیا, فراغ *انکڑے)
 {
-	struct last_modified *lm = data;
+	بنية آخری_modified *lm = انکڑے;
 
-	for (int i = 0; i < q->nr; i++) {
-		struct diff_filepair *p = q->queue[i];
-		struct last_modified_entry *ent;
-		const char *path = p->two->path;
+	لكل (صحيح i = 0; i < q->nr; i++) {
+		بنية diff_filepair *p = q->قطار[i];
+		بنية آخری_modified_اندراج *ent;
+		ثابت حرف *رستہ = p->two->رستہ;
 
-		FLEX_ALLOC_STR(ent, path, path);
+		FLEX_ALLOC_STR(ent, رستہ, رستہ);
 		oidcpy(&ent->oid, &p->two->oid);
-		if (lm->rev.bloom_filter_settings)
-			bloom_key_fill(&ent->key, path, strlen(path),
+		إذا (lm->rev.bloom_filter_settings)
+			bloom_کلید_fill(&ent->کلید, رستہ, لڑی_لمبائی(رستہ),
 				       lm->rev.bloom_filter_settings);
-		hashmap_entry_init(&ent->hashent, strhash(ent->path));
-		hashmap_add(&lm->paths, &ent->hashent);
+		hashmap_اندراج_init(&ent->hashent, strhash(ent->رستہ));
+		hashmap_جوڑو(&lm->paths, &ent->hashent);
 	}
 }
 
-static int populate_paths_from_revs(struct last_modified *lm)
+ساكن صحيح populate_paths_from_revs(بنية آخری_modified *lm)
 {
-	int num_interesting = 0, ret = 0;
-	struct diff_options diffopt;
+	صحيح عدد_interesting = 0, ret = 0;
+	بنية diff_options diffopt;
 
 	/*
 	 * Create a copy of `struct diff_options`. In this copy a callback is
@@ -134,95 +134,95 @@ static int populate_paths_from_revs(struct last_modified *lm)
 	 * empty tree. This results in all paths in the target revision being
 	 * listed. After `paths` is populated, we don't need this copy no more.
 	 */
-	memcpy(&diffopt, &lm->rev.diffopt, sizeof(diffopt));
+	حافظہ_نقل(&diffopt, &lm->rev.diffopt, حجم(diffopt));
 	copy_pathspec(&diffopt.pathspec, &lm->rev.diffopt.pathspec);
 	diffopt.output_format = DIFF_FORMAT_CALLBACK;
-	diffopt.format_callback = add_path_from_diff;
-	diffopt.format_callback_data = lm;
+	diffopt.format_callback = جوڑو_رستہ_from_diff;
+	diffopt.format_callback_انکڑے = lm;
 
-	for (size_t i = 0; i < lm->rev.pending.nr; i++) {
-		struct object_array_entry *obj = lm->rev.pending.objects + i;
+	لكل (ناپ_t i = 0; i < lm->rev.pending.nr; i++) {
+		بنية object_array_اندراج *obj = lm->rev.pending.objects + i;
 
-		if (obj->item->flags & UNINTERESTING)
-			continue;
+		إذا (obj->شے->flags & UNINTERESTING)
+			استمر;
 
-		if (num_interesting++) {
+		إذا (عدد_interesting++) {
 			ret = error(_("last-modified can only operate on one commit at a time"));
-			goto out;
+			اذهب باہرلا;
 		}
 
-		if (!repo_peel_to_type(lm->rev.repo, obj->path, 0, obj->item, OBJ_COMMIT)) {
-			ret = error(_("revision argument '%s' is a %s, not a commit-ish"), obj->name, type_name(obj->item->type));
-			goto out;
+		إذا (!repo_peel_منزل_type(lm->rev.repo, obj->رستہ, 0, obj->شے, OBJ_COMMIT)) {
+			ret = error(_("revision argument '%s' is a %s, not a commit-ish"), obj->name, type_name(obj->شے->type));
+			اذهب باہرلا;
 		}
 
-		diff_tree_oid(lm->rev.repo->hash_algo->empty_tree,
-			      &obj->item->oid, "", &diffopt);
+		diff_درخت_oid(lm->rev.repo->hash_algo->خالی_تھاواں_درخت,
+			      &obj->شے->oid, "", &diffopt);
 		diff_flush(&diffopt);
 	}
 
-out:
+باہرلا:
 	clear_pathspec(&diffopt.pathspec);
 
-	return ret;
+	أرجع ret;
 }
 
-static void last_modified_emit(struct last_modified *lm,
-			       const char *path, const struct commit *commit)
+ساكن فراغ آخری_modified_emit(بنية آخری_modified *lm,
+			       ثابت حرف *رستہ, ثابت بنية commit *commit)
 
 {
-	if (commit->object.flags & BOUNDARY)
-		putchar('^');
-	printf("%s\t", oid_to_hex(&commit->object.oid));
+	إذا (commit->object.flags & BOUNDARY)
+		حرف_لکھو('^');
+	لکھو("%s\t", oid_منزل_hex(&commit->object.oid));
 
-	if (lm->nul_termination)
-		printf("%s%c", path, '\0');
-	else
-		write_name_quoted(path, stdout, '\n');
+	إذا (lm->nul_termination)
+		لکھو("%s%c", رستہ, '\0');
+	وإلا
+		write_name_quoted(رستہ, stdout, '\n');
 }
 
-static void mark_path(const char *path, const struct object_id *oid,
-		      struct last_modified_callback_data *data)
+ساكن فراغ mark_رستہ(ثابت حرف *رستہ, ثابت بنية object_id *oid,
+		      بنية آخری_modified_callback_انکڑے *انکڑے)
 {
-	struct last_modified_entry *ent;
+	بنية آخری_modified_اندراج *ent;
 
 	/* Is it even a path that we are interested in? */
-	ent = hashmap_get_entry_from_hash(&data->lm->paths, strhash(path), path,
-					  struct last_modified_entry, hashent);
-	if (!ent)
-		return;
+	ent = hashmap_get_اندراج_from_hash(&انکڑے->lm->paths, strhash(رستہ), رستہ,
+					  بنية آخری_modified_اندراج, hashent);
+	إذا (!ent)
+		أرجع;
 
 	/*
 	 * Is it arriving at a version of interest, or is it from a side branch
 	 * which did not contribute to the final state?
 	 */
-	if (oid && !oideq(oid, &ent->oid))
-		return;
+	إذا (oid && !oideq(oid, &ent->oid))
+		أرجع;
 
-	last_modified_emit(data->lm, path, data->commit);
+	آخری_modified_emit(انکڑے->lm, رستہ, انکڑے->commit);
 
-	hashmap_remove(&data->lm->paths, &ent->hashent, path);
-	bloom_key_clear(&ent->key);
-	free(ent);
+	hashmap_remove(&انکڑے->lm->paths, &ent->hashent, رستہ);
+	bloom_کلید_clear(&ent->کلید);
+	حرر(ent);
 }
 
-static void last_modified_diff(struct diff_queue_struct *q,
-			       struct diff_options *opt UNUSED, void *cbdata)
+ساكن فراغ آخری_modified_diff(بنية diff_قطار_struct *q,
+			       بنية diff_options *opt بن_ورتیا, فراغ *cbdata)
 {
-	struct last_modified_callback_data *data = cbdata;
+	بنية آخری_modified_callback_انکڑے *انکڑے = cbdata;
 
-	for (int i = 0; i < q->nr; i++) {
-		struct diff_filepair *p = q->queue[i];
-		switch (p->status) {
-		case DIFF_STATUS_DELETED:
+	لكل (صحيح i = 0; i < q->nr; i++) {
+		بنية diff_filepair *p = q->قطار[i];
+		بدل (p->حالت) {
+		حالة DIFF_حالت_DELETED:
 			/*
 			 * There's no point in feeding a deletion, as it could
 			 * not have resulted in our current state, which
 			 * actually has the file.
 			 */
-			break;
+			اكسر;
 
-		default:
+		افتراضي:
 			/*
 			 * Otherwise, we care only that we somehow arrived at
 			 * a final oid state. Note that this covers some
@@ -240,66 +240,66 @@ static void last_modified_diff(struct diff_queue_struct *q,
 			 * the behavior (e.g., to "--follow" the content across
 			 * renames) can come later.
 			 */
-			mark_path(p->two->path, &p->two->oid, data);
-			break;
+			mark_رستہ(p->two->رستہ, &p->two->oid, انکڑے);
+			اكسر;
 		}
 	}
 }
 
-static void pass_to_parent(struct bitmap *c,
-			   struct bitmap *p,
-			   size_t pos)
+ساكن فراغ pass_منزل_ماپا(بنية bitmap *c,
+			   بنية bitmap *p,
+			   ناپ_t pos)
 {
 	bitmap_unset(c, pos);
-	bitmap_set(p, pos);
+	bitmap_سیٹ(p, pos);
 }
 
-static bool maybe_changed_path(struct last_modified *lm,
-			       struct commit *origin,
-			       struct bitmap *active)
+ساكن bool maybe_بدلیا_رستہ(بنية آخری_modified *lm,
+			       بنية commit *origin,
+			       بنية bitmap *سرگرم)
 {
-	struct bloom_filter *filter;
-	struct last_modified_entry *ent;
-	struct hashmap_iter iter;
+	بنية bloom_filter *filter;
+	بنية آخری_modified_اندراج *ent;
+	بنية hashmap_iter iter;
 
-	if (!lm->rev.bloom_filter_settings)
-		return true;
+	إذا (!lm->rev.bloom_filter_settings)
+		أرجع true;
 
-	if (commit_graph_generation(origin) == GENERATION_NUMBER_INFINITY)
-		return true;
+	إذا (commit_گراف_generation(origin) == GENERATION_نمبر_INFINITY)
+		أرجع true;
 
 	filter = get_bloom_filter(lm->rev.repo, origin);
-	if (!filter)
-		return true;
+	إذا (!filter)
+		أرجع true;
 
-	hashmap_for_each_entry(&lm->paths, &iter, ent, hashent) {
-		if (active && !bitmap_get(active, ent->diff_idx))
-			continue;
+	hashmap_for_each_اندراج(&lm->paths, &iter, ent, hashent) {
+		إذا (سرگرم && !bitmap_get(سرگرم, ent->diff_idx))
+			استمر;
 
-		if (bloom_filter_contains(filter, &ent->key,
+		إذا (bloom_filter_شامل_اے(filter, &ent->کلید,
 					  lm->rev.bloom_filter_settings))
-			return true;
+			أرجع true;
 	}
-	return false;
+	أرجع false;
 }
 
-static void process_parent(struct last_modified *lm,
-			   struct prio_queue *queue,
-			   struct commit *c, struct bitmap *active_c,
-			   struct commit *parent, int parent_i)
+ساكن فراغ process_ماپا(بنية آخری_modified *lm,
+			   بنية prio_قطار *قطار,
+			   بنية commit *c, بنية bitmap *سرگرم_c,
+			   بنية commit *ماپا, صحيح ماپا_i)
 {
-	struct bitmap *active_p;
+	بنية bitmap *سرگرم_p;
 
-	if (repo_parse_commit(lm->rev.repo, parent))
-		return;
-	active_p = active_paths_for(lm, parent);
+	إذا (repo_parse_commit(lm->rev.repo, ماپا))
+		أرجع;
+	سرگرم_p = سرگرم_paths_for(lm, ماپا);
 
 	/*
 	 * The first time entering this function for this commit (i.e. first parent)
 	 * see if Bloom filters will tell us it's worth to do the diff.
 	 */
-	if (parent_i || maybe_changed_path(lm, c, active_c)) {
-		diff_tree_oid(&parent->object.oid,
+	إذا (ماپا_i || maybe_بدلیا_رستہ(lm, c, سرگرم_c)) {
+		diff_درخت_oid(&ماپا->object.oid,
 			      &c->object.oid, "", &lm->rev.diffopt);
 		diffcore_std(&lm->rev.diffopt);
 	}
@@ -311,256 +311,256 @@ static void process_parent(struct last_modified *lm,
 	 * First, collect all paths that are *not* TREESAME in 'scratch'.
 	 * Then, pass paths that *are* TREESAME and active to the parent.
 	 */
-	for (int i = 0; i < diff_queued_diff.nr; i++) {
-		struct diff_filepair *fp = diff_queued_diff.queue[i];
-		const char *path = fp->two->path;
-		struct last_modified_entry *ent =
-			hashmap_get_entry_from_hash(&lm->paths, strhash(path), path,
-						    struct last_modified_entry, hashent);
-		if (ent) {
-			size_t k = ent->diff_idx;
-			if (bitmap_get(active_c, k))
-				bitmap_set(lm->scratch, k);
+	لكل (صحيح i = 0; i < diff_queued_diff.nr; i++) {
+		بنية diff_filepair *fp = diff_queued_diff.قطار[i];
+		ثابت حرف *رستہ = fp->two->رستہ;
+		بنية آخری_modified_اندراج *ent =
+			hashmap_get_اندراج_from_hash(&lm->paths, strhash(رستہ), رستہ,
+						    بنية آخری_modified_اندراج, hashent);
+		إذا (ent) {
+			ناپ_t k = ent->diff_idx;
+			إذا (bitmap_get(سرگرم_c, k))
+				bitmap_سیٹ(lm->scratch, k);
 		}
 	}
-	for (size_t i = 0; i < lm->all_paths_nr; i++) {
-		if (bitmap_get(active_c, i) && !bitmap_get(lm->scratch, i))
-			pass_to_parent(active_c, active_p, i);
+	لكل (ناپ_t i = 0; i < lm->all_paths_nr; i++) {
+		إذا (bitmap_get(سرگرم_c, i) && !bitmap_get(lm->scratch, i))
+			pass_منزل_ماپا(سرگرم_c, سرگرم_p, i);
 	}
 
 	/*
 	 * If parent has any active paths, put it on the queue (if not already).
 	 */
-	if (!bitmap_is_empty(active_p) && !(parent->object.flags & PARENT1)) {
-		parent->object.flags |= PARENT1;
-		prio_queue_put(queue, parent);
+	إذا (!bitmap_is_خالی_تھاواں(سرگرم_p) && !(ماپا->object.flags & PARENT1)) {
+		ماپا->object.flags |= PARENT1;
+		prio_قطار_put(قطار, ماپا);
 	}
-	if (!(parent->object.flags & PARENT1))
-		active_paths_free(lm, parent);
+	إذا (!(ماپا->object.flags & PARENT1))
+		سرگرم_paths_free(lm, ماپا);
 
-	MEMZERO_ARRAY(lm->scratch->words, lm->scratch->word_alloc);
-	diff_queue_clear(&diff_queued_diff);
+	MEMZERO_ARRAY(lm->scratch->الفاظ, lm->scratch->لفظ_alloc);
+	diff_قطار_clear(&diff_queued_diff);
 }
 
-static int last_modified_run(struct last_modified *lm)
+ساكن صحيح آخری_modified_لگاتار(بنية آخری_modified *lm)
 {
-	int max_count, queue_popped = 0;
-	struct commit *c, *n;
-	struct prio_queue queue = { compare_commits_by_gen_then_commit_date };
-	struct prio_queue not_queue = { compare_commits_by_gen_then_commit_date };
-	struct commit_list *list;
-	struct last_modified_callback_data data = { .lm = lm };
+	صحيح max_گنتی, قطار_popped = 0;
+	بنية commit *c, *n;
+	بنية prio_قطار قطار = { compare_commits_by_gen_then_commit_date };
+	بنية prio_قطار not_قطار = { compare_commits_by_gen_then_commit_date };
+	بنية commit_list *list;
+	بنية آخری_modified_callback_انکڑے انکڑے = { .lm = lm };
 
 	lm->rev.diffopt.output_format = DIFF_FORMAT_CALLBACK;
-	lm->rev.diffopt.format_callback = last_modified_diff;
-	lm->rev.diffopt.format_callback_data = &data;
+	lm->rev.diffopt.format_callback = آخری_modified_diff;
+	lm->rev.diffopt.format_callback_انکڑے = &انکڑے;
 	lm->rev.no_walk = 1;
 
 	prepare_revision_walk(&lm->rev);
 
-	max_count = lm->rev.max_count;
+	max_گنتی = lm->rev.max_گنتی;
 
-	init_active_paths_for_commit(&lm->active_paths);
-	lm->scratch = bitmap_word_alloc(lm->all_paths_nr);
+	init_سرگرم_paths_for_commit(&lm->سرگرم_paths);
+	lm->scratch = bitmap_لفظ_alloc(lm->all_paths_nr);
 
 	/*
 	 * lm->rev.commits holds the set of boundary commits for our walk.
 	 *
 	 * Loop through each such commit, and place it in the appropriate queue.
 	 */
-	for (list = lm->rev.commits; list; list = list->next) {
-		struct commit *c = list->item;
+	لكل (list = lm->rev.commits; list; list = list->اگلا) {
+		بنية commit *c = list->شے;
 
-		if (c->object.flags & BOTTOM) {
-			prio_queue_put(&not_queue, c);
+		إذا (c->object.flags & BOTTOM) {
+			prio_قطار_put(&not_قطار, c);
 			c->object.flags |= PARENT2;
-		} else if (!(c->object.flags & PARENT1)) {
+		} وإلا إذا (!(c->object.flags & PARENT1)) {
 			/*
 			 * If the commit is a starting point (and hasn't been
 			 * seen yet), then initialize the set of interesting
 			 * paths, too.
 			 */
-			struct bitmap *active;
+			بنية bitmap *سرگرم;
 
-			prio_queue_put(&queue, c);
+			prio_قطار_put(&قطار, c);
 			c->object.flags |= PARENT1;
 
-			active = active_paths_for(lm, c);
-			for (size_t i = 0; i < lm->all_paths_nr; i++)
-				bitmap_set(active, i);
+			سرگرم = سرگرم_paths_for(lm, c);
+			لكل (ناپ_t i = 0; i < lm->all_paths_nr; i++)
+				bitmap_سیٹ(سرگرم, i);
 		}
 	}
 
-	while ((c = prio_queue_get(&queue))) {
-		int parent_i;
-		struct commit_list *p;
-		struct bitmap *active_c = active_paths_for(lm, c);
+	طالما ((c = prio_قطار_get(&قطار))) {
+		صحيح ماپا_i;
+		بنية commit_list *p;
+		بنية bitmap *سرگرم_c = سرگرم_paths_for(lm, c);
 
-		if ((0 <= max_count && max_count < ++queue_popped) ||
+		إذا ((0 <= max_گنتی && max_گنتی < ++قطار_popped) ||
 		    (c->object.flags & PARENT2)) {
 			/*
 			 * Either a boundary commit, or we have already seen too
 			 * many others. Either way, stop here.
 			 */
 			c->object.flags |= PARENT2 | BOUNDARY;
-			data.commit = c;
-			diff_tree_oid(lm->rev.repo->hash_algo->empty_tree,
+			انکڑے.commit = c;
+			diff_درخت_oid(lm->rev.repo->hash_algo->خالی_تھاواں_درخت,
 				      &c->object.oid,
 				      "", &lm->rev.diffopt);
 			diff_flush(&lm->rev.diffopt);
-			goto cleanup;
+			اذهب cleanup;
 		}
 
 		/*
 		 * Otherwise, make sure that 'c' isn't reachable from anything
 		 * in the '--not' queue.
 		 */
-		if (repo_parse_commit(lm->rev.repo, c))
-			goto cleanup;
+		إذا (repo_parse_commit(lm->rev.repo, c))
+			اذهب cleanup;
 
-		while ((n = prio_queue_get(&not_queue))) {
-			struct commit_list *np;
+		طالما ((n = prio_قطار_get(&not_قطار))) {
+			بنية commit_list *np;
 
-			if (repo_parse_commit(lm->rev.repo, n))
-				continue;
+			إذا (repo_parse_commit(lm->rev.repo, n))
+				استمر;
 
-			for (np = n->parents; np; np = np->next) {
-				if (!(np->item->object.flags & PARENT2)) {
-					prio_queue_put(&not_queue, np->item);
-					np->item->object.flags |= PARENT2;
+			لكل (np = n->parents; np; np = np->اگلا) {
+				إذا (!(np->شے->object.flags & PARENT2)) {
+					prio_قطار_put(&not_قطار, np->شے);
+					np->شے->object.flags |= PARENT2;
 				}
 			}
 
-			if (commit_graph_generation(n) < commit_graph_generation(c))
-				break;
+			إذا (commit_گراف_generation(n) < commit_گراف_generation(c))
+				اكسر;
 		}
 
 		/*
 		 * Look at each parent and pass on each path that's TREESAME
 		 * with that parent. Stop early when no active paths remain.
 		 */
-		for (p = c->parents, parent_i = 0; p; p = p->next, parent_i++) {
-			process_parent(lm, &queue,
-				       c, active_c,
-				       p->item, parent_i);
+		لكل (p = c->parents, ماپا_i = 0; p; p = p->اگلا, ماپا_i++) {
+			process_ماپا(lm, &قطار,
+				       c, سرگرم_c,
+				       p->شے, ماپا_i);
 
-			if (bitmap_is_empty(active_c))
-				break;
+			إذا (bitmap_is_خالی_تھاواں(سرگرم_c))
+				اكسر;
 		}
 
 		/*
 		 * Paths that remain active, or not TREESAME with any parent,
 		 * were changed by 'c'.
 		 */
-		if (!bitmap_is_empty(active_c))  {
-			data.commit = c;
-			for (size_t i = 0; i < lm->all_paths_nr; i++) {
-				if (bitmap_get(active_c, i))
-					mark_path(lm->all_paths[i], NULL, &data);
+		إذا (!bitmap_is_خالی_تھاواں(سرگرم_c))  {
+			انکڑے.commit = c;
+			لكل (ناپ_t i = 0; i < lm->all_paths_nr; i++) {
+				إذا (bitmap_get(سرگرم_c, i))
+					mark_رستہ(lm->all_paths[i], عدم, &انکڑے);
 			}
 		}
 
 cleanup:
-		active_paths_free(lm, c);
+		سرگرم_paths_free(lm, c);
 	}
 
-	if (hashmap_get_size(&lm->paths))
+	إذا (hashmap_get_ناپ(&lm->paths))
 		BUG("paths remaining beyond boundary in last-modified");
 
-	clear_prio_queue(&not_queue);
-	clear_prio_queue(&queue);
-	clear_active_paths_for_commit(&lm->active_paths);
+	clear_prio_قطار(&not_قطار);
+	clear_prio_قطار(&قطار);
+	clear_سرگرم_paths_for_commit(&lm->سرگرم_paths);
 	bitmap_free(lm->scratch);
 
-	return 0;
+	أرجع 0;
 }
 
-static int last_modified_init(struct last_modified *lm, struct repository *r,
-			      const char *prefix, int argc, const char **argv)
+ساكن صحيح آخری_modified_init(بنية آخری_modified *lm, بنية repository *r,
+			      ثابت حرف *اگیتر, صحيح argc, ثابت حرف **argv)
 {
-	struct hashmap_iter iter;
-	struct last_modified_entry *ent;
+	بنية hashmap_iter iter;
+	بنية آخری_modified_اندراج *ent;
 
-	hashmap_init(&lm->paths, last_modified_entry_hashcmp, NULL, 0);
+	hashmap_init(&lm->paths, آخری_modified_اندراج_hashcmp, عدم, 0);
 
-	repo_init_revisions(r, &lm->rev, prefix);
+	repo_init_revisions(r, &lm->rev, اگیتر);
 	lm->rev.def = "HEAD";
 	lm->rev.combine_merges = 1;
-	lm->rev.show_root_diff = 1;
+	lm->rev.show_جڑ_diff = 1;
 	lm->rev.boundary = 1;
 	lm->rev.no_commit_id = 1;
 	lm->rev.diff = 1;
-	lm->rev.diffopt.flags.no_recursive_diff_tree_combined = 1;
+	lm->rev.diffopt.flags.no_recursive_diff_درخت_combined = 1;
 	lm->rev.diffopt.flags.recursive = 1;
-	lm->rev.diffopt.flags.tree_in_recursive = lm->show_trees;
-	lm->rev.diffopt.max_depth = lm->max_depth;
-	lm->rev.diffopt.max_depth_valid = lm->max_depth >= 0;
+	lm->rev.diffopt.flags.درخت_وچ_recursive = lm->show_trees;
+	lm->rev.diffopt.max_ڈونگھائی = lm->max_ڈونگھائی;
+	lm->rev.diffopt.max_ڈونگھائی_valid = lm->max_ڈونگھائی >= 0;
 
-	argc = setup_revisions(argc, argv, &lm->rev, NULL);
-	if (argc > 1) {
+	argc = تیاری_revisions(argc, argv, &lm->rev, عدم);
+	إذا (argc > 1) {
 		error(_("unknown last-modified argument: %s"), argv[1]);
-		return argc;
+		أرجع argc;
 	}
 
 	lm->rev.bloom_filter_settings = get_bloom_filter_settings(lm->rev.repo);
 
-	if (populate_paths_from_revs(lm) < 0)
-		return -1;
+	إذا (populate_paths_from_revs(lm) < 0)
+		أرجع -1;
 
-	CALLOC_ARRAY(lm->all_paths, hashmap_get_size(&lm->paths));
+	CALLOC_ARRAY(lm->all_paths, hashmap_get_ناپ(&lm->paths));
 	lm->all_paths_nr = 0;
-	hashmap_for_each_entry(&lm->paths, &iter, ent, hashent) {
+	hashmap_for_each_اندراج(&lm->paths, &iter, ent, hashent) {
 		ent->diff_idx = lm->all_paths_nr++;
-		lm->all_paths[ent->diff_idx] = ent->path;
+		lm->all_paths[ent->diff_idx] = ent->رستہ;
 	}
 
-	return 0;
+	أرجع 0;
 }
 
-int cmd_last_modified(int argc, const char **argv, const char *prefix,
-		      struct repository *repo)
+صحيح cmd_آخری_modified(صحيح argc, ثابت حرف **argv, ثابت حرف *اگیتر,
+		      بنية repository *repo)
 {
-	int ret;
-	struct last_modified lm = { 0 };
+	صحيح ret;
+	بنية آخری_modified lm = { 0 };
 
-	const char * const last_modified_usage[] = {
+	ثابت حرف * ثابت آخری_modified_usage[] = {
 		N_("git last-modified [--recursive] [--show-trees] [--max-depth=<depth>] [-z]\n"
 		   "                  [<revision-range>] [[--] <pathspec>...]"),
-		NULL
+		عدم
 	};
 
-	struct option last_modified_options[] = {
-		OPT_SET_INT('r', "recursive", &lm.max_depth,
+	بنية option آخری_modified_options[] = {
+		OPT_سیٹ_INT('r', "recursive", &lm.max_ڈونگھائی,
 			    N_("recurse into subtrees"), -1),
 		OPT_BOOL('t', "show-trees", &lm.show_trees,
 			 N_("show tree entries when recursing into subtrees")),
-		OPT_INTEGER_F(0, "max-depth", &lm.max_depth,
+		OPT_INTEGER_F(0, "max-depth", &lm.max_ڈونگھائی,
 			      N_("maximum tree depth to recurse"), PARSE_OPT_NONEG),
-		OPT_BOOL('z', NULL, &lm.nul_termination,
+		OPT_BOOL('z', عدم, &lm.nul_termination,
 			 N_("lines are separated with NUL character")),
-		OPT_END()
+		OPT_سرا()
 	};
 
-	argc = parse_options(argc, argv, prefix, last_modified_options,
-			     last_modified_usage,
+	argc = parse_options(argc, argv, اگیتر, آخری_modified_options,
+			     آخری_modified_usage,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT |
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, عدم);
 
-	ret = last_modified_init(&lm, repo, prefix, argc, argv);
-	if (ret > 0)
-		usage_with_options(last_modified_usage,
-				   last_modified_options);
-	if (ret)
-		goto out;
+	ret = آخری_modified_init(&lm, repo, اگیتر, argc, argv);
+	إذا (ret > 0)
+		usage_with_options(آخری_modified_usage,
+				   آخری_modified_options);
+	إذا (ret)
+		اذهب باہرلا;
 
-	ret = last_modified_run(&lm);
-	if (ret)
-		goto out;
+	ret = آخری_modified_لگاتار(&lm);
+	إذا (ret)
+		اذهب باہرلا;
 
-out:
-	last_modified_release(&lm);
+باہرلا:
+	آخری_modified_release(&lm);
 
-	return ret;
+	أرجع ret;
 }

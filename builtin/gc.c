@@ -10,245 +10,245 @@
  * Copyright (c) 2006 Shawn O. Pearce
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
+#تعریف_کرو DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "date.h"
-#include "dir.h"
-#include "environment.h"
-#include "hex.h"
-#include "config.h"
-#include "tempfile.h"
-#include "lockfile.h"
-#include "parse-options.h"
-#include "run-command.h"
-#include "sigchain.h"
-#include "strvec.h"
-#include "commit.h"
-#include "commit-graph.h"
-#include "packfile.h"
-#include "object-file.h"
-#include "odb.h"
-#include "path.h"
-#include "reflog.h"
-#include "rerere.h"
-#include "revision.h"
-#include "refs.h"
-#include "remote.h"
-#include "exec-cmd.h"
-#include "gettext.h"
-#include "hook.h"
-#include "setup.h"
-#include "trace2.h"
-#include "worktree.h"
+#ضمن "builtin.h"
+#ضمن "abspath.h"
+#ضمن "date.h"
+#ضمن "dir.h"
+#ضمن "environment.h"
+#ضمن "hex.h"
+#ضمن "config.h"
+#ضمن "tempfile.h"
+#ضمن "lockfile.h"
+#ضمن "parse-options.h"
+#ضمن "run-command.h"
+#ضمن "sigchain.h"
+#ضمن "strvec.h"
+#ضمن "commit.h"
+#ضمن "commit-graph.h"
+#ضمن "packfile.h"
+#ضمن "object-file.h"
+#ضمن "odb.h"
+#ضمن "path.h"
+#ضمن "reflog.h"
+#ضمن "rerere.h"
+#ضمن "revision.h"
+#ضمن "refs.h"
+#ضمن "remote.h"
+#ضمن "exec-cmd.h"
+#ضمن "gettext.h"
+#ضمن "hook.h"
+#ضمن "setup.h"
+#ضمن "trace2.h"
+#ضمن "worktree.h"
 
-#define FAILED_RUN "failed to run %s"
+#تعریف_کرو FAILED_لگاتار "failed to run %s"
 
-static const char * const builtin_gc_usage[] = {
+ساكن ثابت حرف * ثابت builtin_gc_usage[] = {
 	N_("git gc [<options>]"),
-	NULL
+	عدم
 };
 
-static timestamp_t gc_log_expire_time;
-static struct tempfile *pidfile;
-static struct lock_file log_lock;
-static struct string_list pack_garbage = STRING_LIST_INIT_DUP;
+ساكن timestamp_t gc_log_expire_ویلا;
+ساكن بنية tempfile *pidfile;
+ساكن بنية جندرا_file log_جندرا;
+ساكن بنية string_list pack_garbage = STRING_LIST_INIT_DUP;
 
-static void clean_pack_garbage(void)
+ساكن فراغ clean_pack_garbage(فراغ)
 {
-	int i;
-	for (i = 0; i < pack_garbage.nr; i++)
-		unlink_or_warn(pack_garbage.items[i].string);
+	صحيح i;
+	لكل (i = 0; i < pack_garbage.nr; i++)
+		unlink_or_warn(pack_garbage.اشیاء[i].string);
 	string_list_clear(&pack_garbage, 0);
 }
 
-static void report_pack_garbage(unsigned seen_bits, const char *path)
+ساكن فراغ report_pack_garbage(بنانشانی تکیا_بٹ, ثابت حرف *رستہ)
 {
-	if (seen_bits == PACKDIR_FILE_IDX)
-		string_list_append(&pack_garbage, path);
+	إذا (تکیا_بٹ == PACKDIR_FILE_IDX)
+		string_list_append(&pack_garbage, رستہ);
 }
 
-static void process_log_file(void)
+ساكن فراغ process_log_file(فراغ)
 {
-	struct stat st;
-	if (fstat(get_lock_file_fd(&log_lock), &st)) {
+	بنية stat st;
+	إذا (fstat(get_جندرا_file_fd(&log_جندرا), &st)) {
 		/*
 		 * Perhaps there was an i/o error or another
 		 * unlikely situation.  Try to make a note of
 		 * this in gc.log along with any existing
 		 * messages.
 		 */
-		int saved_errno = errno;
+		صحيح saved_errno = errno;
 		fprintf(stderr, _("Failed to fstat %s: %s"),
-			get_lock_file_path(&log_lock),
+			get_جندرا_file_رستہ(&log_جندرا),
 			strerror(saved_errno));
 		fflush(stderr);
-		commit_lock_file(&log_lock);
+		commit_جندرا_file(&log_جندرا);
 		errno = saved_errno;
-	} else if (st.st_size) {
+	} وإلا إذا (st.st_ناپ) {
 		/* There was some error recorded in the lock file */
-		commit_lock_file(&log_lock);
-	} else {
-		char *path = repo_git_path(the_repository, "gc.log");
+		commit_جندرا_file(&log_جندرا);
+	} وإلا {
+		حرف *رستہ = repo_git_رستہ(the_repository, "gc.log");
 		/* No error, clean up any old gc.log */
-		unlink(path);
-		rollback_lock_file(&log_lock);
-		free(path);
+		unlink(رستہ);
+		rollback_جندرا_file(&log_جندرا);
+		حرر(رستہ);
 	}
 }
 
-static void process_log_file_at_exit(void)
+ساكن فراغ process_log_file_at_exit(فراغ)
 {
 	fflush(stderr);
 	process_log_file();
 }
 
-static int gc_config_is_timestamp_never(const char *var)
+ساكن صحيح gc_config_is_timestamp_never(ثابت حرف *var)
 {
-	const char *value;
+	ثابت حرف *قدر;
 	timestamp_t expire;
 
-	if (!repo_config_get_value(the_repository, var, &value) && value) {
-		if (parse_expiry_date(value, &expire))
-			die(_("failed to parse '%s' value '%s'"), var, value);
-		return expire == 0;
+	إذا (!repo_config_get_قدر(the_repository, var, &قدر) && قدر) {
+		إذا (parse_expiry_date(قدر, &expire))
+			die(_("failed to parse '%s' value '%s'"), var, قدر);
+		أرجع expire == 0;
 	}
-	return 0;
+	أرجع 0;
 }
 
-struct gc_config {
-	int pack_refs;
-	int prune_reflogs;
-	int cruft_packs;
-	unsigned long max_cruft_size;
-	int aggressive_depth;
-	int aggressive_window;
-	int detach_auto;
-	char *gc_log_expire;
-	char *prune_expire;
-	char *prune_worktrees_expire;
-	char *repack_expire_to;
+بنية gc_config {
+	صحيح pack_refs;
+	صحيح prune_reflogs;
+	صحيح cruft_packs;
+	بنانشانی لما max_cruft_ناپ;
+	صحيح aggressive_ڈونگھائی;
+	صحيح aggressive_کھڑکی;
+	صحيح detach_auto;
+	حرف *gc_log_expire;
+	حرف *prune_expire;
+	حرف *prune_worktrees_expire;
+	حرف *repack_expire_منزل;
 };
 
-#define GC_CONFIG_INIT { \
+#تعریف_کرو GC_CONFIG_INIT { \
 	.pack_refs = 1, \
 	.prune_reflogs = 1, \
 	.cruft_packs = 1, \
-	.aggressive_depth = 50, \
-	.aggressive_window = 250, \
+	.aggressive_ڈونگھائی = 50, \
+	.aggressive_کھڑکی = 250, \
 	.detach_auto = 1, \
 	.gc_log_expire = xstrdup("1.day.ago"), \
 	.prune_expire = xstrdup("2.weeks.ago"), \
 	.prune_worktrees_expire = xstrdup("3.months.ago"), \
 }
 
-static void gc_config_release(struct gc_config *cfg)
+ساكن فراغ gc_config_release(بنية gc_config *cfg)
 {
-	free(cfg->gc_log_expire);
-	free(cfg->prune_expire);
-	free(cfg->prune_worktrees_expire);
+	حرر(cfg->gc_log_expire);
+	حرر(cfg->prune_expire);
+	حرر(cfg->prune_worktrees_expire);
 }
 
-static void gc_config(struct gc_config *cfg)
+ساكن فراغ gc_config(بنية gc_config *cfg)
 {
-	const char *value;
-	char *owned = NULL;
+	ثابت حرف *قدر;
+	حرف *owned = عدم;
 
-	if (!repo_config_get_value(the_repository, "gc.packrefs", &value)) {
-		if (value && !strcmp(value, "notbare"))
+	إذا (!repo_config_get_قدر(the_repository, "gc.packrefs", &قدر)) {
+		إذا (قدر && !strcmp(قدر, "notbare"))
 			cfg->pack_refs = -1;
-		else
-			cfg->pack_refs = git_config_bool("gc.packrefs", value);
+		وإلا
+			cfg->pack_refs = git_config_bool("gc.packrefs", قدر);
 	}
 
-	if (gc_config_is_timestamp_never("gc.reflogexpire") &&
+	إذا (gc_config_is_timestamp_never("gc.reflogexpire") &&
 	    gc_config_is_timestamp_never("gc.reflogexpireunreachable"))
 		cfg->prune_reflogs = 0;
 
-	repo_config_get_int(the_repository, "gc.aggressivewindow", &cfg->aggressive_window);
-	repo_config_get_int(the_repository, "gc.aggressivedepth", &cfg->aggressive_depth);
+	repo_config_get_int(the_repository, "gc.aggressivewindow", &cfg->aggressive_کھڑکی);
+	repo_config_get_int(the_repository, "gc.aggressivedepth", &cfg->aggressive_ڈونگھائی);
 	repo_config_get_bool(the_repository, "gc.autodetach", &cfg->detach_auto);
 	repo_config_get_bool(the_repository, "gc.cruftpacks", &cfg->cruft_packs);
-	repo_config_get_ulong(the_repository, "gc.maxcruftsize", &cfg->max_cruft_size);
+	repo_config_get_ulong(the_repository, "gc.maxcruftsize", &cfg->max_cruft_ناپ);
 
-	if (!repo_config_get_expiry(the_repository, "gc.pruneexpire", &owned)) {
-		free(cfg->prune_expire);
+	إذا (!repo_config_get_expiry(the_repository, "gc.pruneexpire", &owned)) {
+		حرر(cfg->prune_expire);
 		cfg->prune_expire = owned;
 	}
 
-	if (!repo_config_get_expiry(the_repository, "gc.worktreepruneexpire", &owned)) {
-		free(cfg->prune_worktrees_expire);
+	إذا (!repo_config_get_expiry(the_repository, "gc.worktreepruneexpire", &owned)) {
+		حرر(cfg->prune_worktrees_expire);
 		cfg->prune_worktrees_expire = owned;
 	}
 
-	if (!repo_config_get_expiry(the_repository, "gc.logexpiry", &owned)) {
-		free(cfg->gc_log_expire);
+	إذا (!repo_config_get_expiry(the_repository, "gc.logexpiry", &owned)) {
+		حرر(cfg->gc_log_expire);
 		cfg->gc_log_expire = owned;
 	}
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, عدم);
 }
 
-enum schedule_priority {
-	SCHEDULE_NONE = 0,
-	SCHEDULE_WEEKLY = 1,
-	SCHEDULE_DAILY = 2,
-	SCHEDULE_HOURLY = 3,
+تعداد ویلا_سارنی_ترجیح {
+	ویلا_سارنی_NONE = 0,
+	ویلا_سارنی_WEEKLY = 1,
+	ویلا_سارنی_DAILY = 2,
+	ویلا_سارنی_HOURLY = 3,
 };
 
-static enum schedule_priority parse_schedule(const char *value)
+ساكن تعداد ویلا_سارنی_ترجیح parse_ویلا_سارنی(ثابت حرف *قدر)
 {
-	if (!value)
-		return SCHEDULE_NONE;
-	if (!strcasecmp(value, "hourly"))
-		return SCHEDULE_HOURLY;
-	if (!strcasecmp(value, "daily"))
-		return SCHEDULE_DAILY;
-	if (!strcasecmp(value, "weekly"))
-		return SCHEDULE_WEEKLY;
-	return SCHEDULE_NONE;
+	إذا (!قدر)
+		أرجع ویلا_سارنی_NONE;
+	إذا (!strcasecmp(قدر, "hourly"))
+		أرجع ویلا_سارنی_HOURLY;
+	إذا (!strcasecmp(قدر, "daily"))
+		أرجع ویلا_سارنی_DAILY;
+	إذا (!strcasecmp(قدر, "weekly"))
+		أرجع ویلا_سارنی_WEEKLY;
+	أرجع ویلا_سارنی_NONE;
 }
 
-enum maintenance_task_label {
+تعداد maintenance_task_label {
 	TASK_PREFETCH,
 	TASK_LOOSE_OBJECTS,
 	TASK_INCREMENTAL_REPACK,
 	TASK_GEOMETRIC_REPACK,
 	TASK_GC,
-	TASK_COMMIT_GRAPH,
+	TASK_COMMIT_گراف,
 	TASK_PACK_REFS,
 	TASK_REFLOG_EXPIRE,
 	TASK_WORKTREE_PRUNE,
 	TASK_RERERE_GC,
 
 	/* Leave as final value */
-	TASK__COUNT
+	TASK_گنتی
 };
 
-struct maintenance_run_opts {
-	enum maintenance_task_label *tasks;
-	size_t tasks_nr, tasks_alloc;
-	int auto_flag;
-	int detach;
-	int quiet;
-	enum schedule_priority schedule;
+بنية maintenance_لگاتار_opts {
+	تعداد maintenance_task_label *tasks;
+	ناپ_t tasks_nr, tasks_alloc;
+	صحيح auto_flag;
+	صحيح detach;
+	صحيح quiet;
+	تعداد ویلا_سارنی_ترجیح ویلا_سارنی;
 };
-#define MAINTENANCE_RUN_OPTS_INIT { \
+#تعریف_کرو MAINTENANCE_لگاتار_OPTS_INIT { \
 	.detach = -1, \
 }
 
-static void maintenance_run_opts_release(struct maintenance_run_opts *opts)
+ساكن فراغ maintenance_لگاتار_opts_release(بنية maintenance_لگاتار_opts *opts)
 {
-	free(opts->tasks);
+	حرر(opts->tasks);
 }
 
-static int pack_refs_condition(UNUSED struct gc_config *cfg)
+ساكن صحيح pack_refs_condition(بن_ورتیا بنية gc_config *cfg)
 {
-	struct string_list included_refs = STRING_LIST_INIT_NODUP;
-	struct ref_exclusions excludes = REF_EXCLUSIONS_INIT;
-	struct refs_optimize_opts optimize_opts = {
+	بنية string_list included_refs = STRING_LIST_INIT_NODUP;
+	بنية ref_exclusions excludes = REF_EXCLUSIONS_INIT;
+	بنية refs_optimize_opts optimize_opts = {
 		.exclusions = &excludes,
 		.includes = &included_refs,
 		.flags = REFS_OPTIMIZE_PRUNE | REFS_OPTIMIZE_AUTO,
@@ -258,196 +258,196 @@ static int pack_refs_condition(UNUSED struct gc_config *cfg)
 	/* Check for all refs, similar to 'git refs optimize --all'. */
 	string_list_append(optimize_opts.includes, "*");
 
-	if (refs_optimize_required(get_main_ref_store(the_repository),
+	إذا (refs_optimize_required(get_main_ref_store(the_repository),
 				   &optimize_opts, &required))
-		return 0;
+		أرجع 0;
 
 	clear_ref_exclusions(&excludes);
 	string_list_clear(&included_refs, 0);
 
-	return required;
+	أرجع required;
 }
 
-static int maintenance_task_pack_refs(struct maintenance_run_opts *opts,
-				      UNUSED struct gc_config *cfg)
+ساكن صحيح maintenance_task_pack_refs(بنية maintenance_لگاتار_opts *opts,
+				      بن_ورتیا بنية gc_config *cfg)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	بنية بچہ_process cmd = بچہ_PROCESS_INIT;
 
 	cmd.git_cmd = 1;
-	strvec_pushl(&cmd.args, "pack-refs", "--all", "--prune", NULL);
-	if (opts->auto_flag)
-		strvec_push(&cmd.args, "--auto");
+	strvec_pushl(&cmd.دلیلاں, "pack-refs", "--all", "--prune", عدم);
+	إذا (opts->auto_flag)
+		strvec_ڈالو(&cmd.دلیلاں, "--auto");
 
-	return run_command(&cmd);
+	أرجع لگاتار_command(&cmd);
 }
 
-struct count_reflog_entries_data {
-	struct expire_reflog_policy_cb policy;
-	size_t count;
-	size_t limit;
+بنية گنتی_reflog_entries_انکڑے {
+	بنية expire_reflog_policy_cb policy;
+	ناپ_t گنتی;
+	ناپ_t حد_بندی;
 };
 
-static int count_reflog_entries(const char *refname UNUSED,
-				struct object_id *old_oid, struct object_id *new_oid,
-				const char *committer, timestamp_t timestamp,
-				int tz, const char *msg, void *cb_data)
+ساكن صحيح گنتی_reflog_entries(ثابت حرف *refname بن_ورتیا,
+				بنية object_id *old_oid, بنية object_id *new_oid,
+				ثابت حرف *committer, timestamp_t timestamp,
+				صحيح tz, ثابت حرف *پیغام, فراغ *cb_انکڑے)
 {
-	struct count_reflog_entries_data *data = cb_data;
-	if (should_expire_reflog_ent(old_oid, new_oid, committer, timestamp, tz, msg, &data->policy))
-		data->count++;
-	return data->count >= data->limit;
+	بنية گنتی_reflog_entries_انکڑے *انکڑے = cb_انکڑے;
+	إذا (should_expire_reflog_ent(old_oid, new_oid, committer, timestamp, tz, پیغام, &انکڑے->policy))
+		انکڑے->گنتی++;
+	أرجع انکڑے->گنتی >= انکڑے->حد_بندی;
 }
 
-static int reflog_expire_condition(struct gc_config *cfg UNUSED)
+ساكن صحيح reflog_expire_condition(بنية gc_config *cfg بن_ورتیا)
 {
-	timestamp_t now = time(NULL);
-	struct count_reflog_entries_data data = {
+	timestamp_t now = ویلا(عدم);
+	بنية گنتی_reflog_entries_انکڑے انکڑے = {
 		.policy = {
 			.opts = REFLOG_EXPIRE_OPTIONS_INIT(now),
 		},
 	};
-	int limit = 100;
+	صحيح حد_بندی = 100;
 
-	repo_config_get_int(the_repository, "maintenance.reflog-expire.auto", &limit);
-	if (!limit)
-		return 0;
-	if (limit < 0)
-		return 1;
-	data.limit = limit;
+	repo_config_get_int(the_repository, "maintenance.reflog-expire.auto", &حد_بندی);
+	إذا (!حد_بندی)
+		أرجع 0;
+	إذا (حد_بندی < 0)
+		أرجع 1;
+	انکڑے.حد_بندی = حد_بندی;
 
-	repo_config(the_repository, reflog_expire_config, &data.policy.opts);
+	repo_config(the_repository, reflog_expire_config, &انکڑے.policy.opts);
 
-	reflog_expire_options_set_refname(&data.policy.opts, "HEAD");
+	reflog_expire_options_سیٹ_refname(&انکڑے.policy.opts, "HEAD");
 	refs_for_each_reflog_ent(get_main_ref_store(the_repository), "HEAD",
-				 count_reflog_entries, &data);
+				 گنتی_reflog_entries, &انکڑے);
 
-	reflog_expiry_cleanup(&data.policy);
-	reflog_clear_expire_config(&data.policy.opts);
-	return data.count >= data.limit;
+	reflog_expiry_cleanup(&انکڑے.policy);
+	reflog_clear_expire_config(&انکڑے.policy.opts);
+	أرجع انکڑے.گنتی >= انکڑے.حد_بندی;
 }
 
-static int maintenance_task_reflog_expire(struct maintenance_run_opts *opts UNUSED,
-					  struct gc_config *cfg UNUSED)
+ساكن صحيح maintenance_task_reflog_expire(بنية maintenance_لگاتار_opts *opts بن_ورتیا,
+					  بنية gc_config *cfg بن_ورتیا)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	بنية بچہ_process cmd = بچہ_PROCESS_INIT;
 	cmd.git_cmd = 1;
-	strvec_pushl(&cmd.args, "reflog", "expire", "--all", NULL);
-	return run_command(&cmd);
+	strvec_pushl(&cmd.دلیلاں, "reflog", "expire", "--all", عدم);
+	أرجع لگاتار_command(&cmd);
 }
 
-static int maintenance_task_worktree_prune(struct maintenance_run_opts *opts UNUSED,
-					   struct gc_config *cfg)
+ساكن صحيح maintenance_task_worktree_prune(بنية maintenance_لگاتار_opts *opts بن_ورتیا,
+					   بنية gc_config *cfg)
 {
-	struct child_process prune_worktrees_cmd = CHILD_PROCESS_INIT;
+	بنية بچہ_process prune_worktrees_cmd = بچہ_PROCESS_INIT;
 
 	prune_worktrees_cmd.git_cmd = 1;
-	strvec_pushl(&prune_worktrees_cmd.args, "worktree", "prune", "--expire", NULL);
-	strvec_push(&prune_worktrees_cmd.args, cfg->prune_worktrees_expire);
+	strvec_pushl(&prune_worktrees_cmd.دلیلاں, "worktree", "prune", "--expire", عدم);
+	strvec_ڈالو(&prune_worktrees_cmd.دلیلاں, cfg->prune_worktrees_expire);
 
-	return run_command(&prune_worktrees_cmd);
+	أرجع لگاتار_command(&prune_worktrees_cmd);
 }
 
-static int worktree_prune_condition(struct gc_config *cfg)
+ساكن صحيح worktree_prune_condition(بنية gc_config *cfg)
 {
-	struct strbuf buf = STRBUF_INIT;
-	int should_prune = 0, limit = 1;
+	بنية strbuf buf = STRBUF_INIT;
+	صحيح should_prune = 0, حد_بندی = 1;
 	timestamp_t expiry_date;
-	struct dirent *d;
-	DIR *dir = NULL;
+	بنية dirent *d;
+	DIR *dir = عدم;
 
-	repo_config_get_int(the_repository, "maintenance.worktree-prune.auto", &limit);
-	if (limit <= 0) {
-		should_prune = limit < 0;
-		goto out;
+	repo_config_get_int(the_repository, "maintenance.worktree-prune.auto", &حد_بندی);
+	إذا (حد_بندی <= 0) {
+		should_prune = حد_بندی < 0;
+		اذهب باہرلا;
 	}
 
-	if (parse_expiry_date(cfg->prune_worktrees_expire, &expiry_date))
-		goto out;
+	إذا (parse_expiry_date(cfg->prune_worktrees_expire, &expiry_date))
+		اذهب باہرلا;
 
-	dir = opendir(repo_git_path_replace(the_repository, &buf, "worktrees"));
-	if (!dir)
-		goto out;
+	dir = opendir(repo_git_رستہ_replace(the_repository, &buf, "worktrees"));
+	إذا (!dir)
+		اذهب باہرلا;
 
-	while (limit && (d = readdir_skip_dot_and_dotdot(dir))) {
-		char *wtpath;
+	طالما (حد_بندی && (d = readdir_skip_dot_and_dotdot(dir))) {
+		حرف *wtpath;
 		strbuf_reset(&buf);
-		if (should_prune_worktree(the_repository, d->d_name, &buf, &wtpath, expiry_date))
-			limit--;
-		free(wtpath);
+		إذا (should_prune_worktree(the_repository, d->d_name, &buf, &wtpath, expiry_date))
+			حد_بندی--;
+		حرر(wtpath);
 	}
 
-	should_prune = !limit;
+	should_prune = !حد_بندی;
 
-out:
-	if (dir)
+باہرلا:
+	إذا (dir)
 		closedir(dir);
 	strbuf_release(&buf);
-	return should_prune;
+	أرجع should_prune;
 }
 
-static int maintenance_task_rerere_gc(struct maintenance_run_opts *opts UNUSED,
-				      struct gc_config *cfg UNUSED)
+ساكن صحيح maintenance_task_rerere_gc(بنية maintenance_لگاتار_opts *opts بن_ورتیا,
+				      بنية gc_config *cfg بن_ورتیا)
 {
-	struct child_process rerere_cmd = CHILD_PROCESS_INIT;
+	بنية بچہ_process rerere_cmd = بچہ_PROCESS_INIT;
 	rerere_cmd.git_cmd = 1;
-	strvec_pushl(&rerere_cmd.args, "rerere", "gc", NULL);
-	return run_command(&rerere_cmd);
+	strvec_pushl(&rerere_cmd.دلیلاں, "rerere", "gc", عدم);
+	أرجع لگاتار_command(&rerere_cmd);
 }
 
-static int rerere_gc_condition(struct gc_config *cfg UNUSED)
+ساكن صحيح rerere_gc_condition(بنية gc_config *cfg بن_ورتیا)
 {
-	int limit = 512;
+	صحيح حد_بندی = 512;
 
-	repo_config_get_int(the_repository, "maintenance.rerere-gc.auto", &limit);
-	if (!limit)
-		return 0; /* never prune */
-	if (limit < 0)
-		return 1; /* always prune */
+	repo_config_get_int(the_repository, "maintenance.rerere-gc.auto", &حد_بندی);
+	إذا (!حد_بندی)
+		أرجع 0; /* never prune */
+	إذا (حد_بندی < 0)
+		أرجع 1; /* always prune */
 
-	return rerere_gc_needed(the_repository, (size_t)limit);
+	أرجع rerere_gc_needed(the_repository, (ناپ_t)حد_بندی);
 }
 
-#define OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, aggressive) \
+#تعریف_کرو OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, aggressive) \
 	.prune_expire = (cfg)->prune_expire, \
-	.expire_to = (cfg)->repack_expire_to, \
+	.expire_منزل = (cfg)->repack_expire_منزل, \
 	.cruft_packs = (cfg)->cruft_packs, \
-	.max_cruft_size = (cfg)->max_cruft_size, \
-	.window = (aggressive) ? (cfg)->aggressive_window : 0, \
-	.depth = (aggressive) ? (cfg)->aggressive_depth : 0
+	.max_cruft_ناپ = (cfg)->max_cruft_ناپ, \
+	.کھڑکی = (aggressive) ? (cfg)->aggressive_کھڑکی : 0, \
+	.ڈونگھائی = (aggressive) ? (cfg)->aggressive_ڈونگھائی : 0
 
 /* return NULL on success, else hostname running the gc */
-static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
+ساكن ثابت حرف *جندرا_repo_for_gc(صحيح force, pid_t* ret_pid)
 {
-	struct lock_file lock = LOCK_INIT;
-	char my_host[HOST_NAME_MAX + 1];
-	struct strbuf sb = STRBUF_INIT;
-	struct stat st;
+	بنية جندرا_file جندرا = جندرا_INIT;
+	حرف my_host[HOST_NAME_MAX + 1];
+	بنية strbuf sb = STRBUF_INIT;
+	بنية stat st;
 	uintmax_t pid;
 	FILE *fp;
-	int fd;
-	char *pidfile_path;
+	صحيح fd;
+	حرف *pidfile_رستہ;
 
-	if (is_tempfile_active(pidfile))
+	إذا (is_tempfile_سرگرم(pidfile))
 		/* already locked */
-		return NULL;
+		أرجع عدم;
 
-	if (xgethostname(my_host, sizeof(my_host)))
-		xsnprintf(my_host, sizeof(my_host), "unknown");
+	إذا (xgethostname(my_host, حجم(my_host)))
+		xsnprintf(my_host, حجم(my_host), "unknown");
 
-	pidfile_path = repo_git_path(the_repository, "gc.pid");
-	fd = hold_lock_file_for_update(&lock, pidfile_path,
-				       LOCK_DIE_ON_ERROR);
-	if (!force) {
-		static char locking_host[HOST_NAME_MAX + 1];
-		static char *scan_fmt;
-		int should_exit;
+	pidfile_رستہ = repo_git_رستہ(the_repository, "gc.pid");
+	fd = hold_جندرا_file_for_update(&جندرا, pidfile_رستہ,
+				       جندرا_DIE_ON_ERROR);
+	إذا (!force) {
+		ساكن حرف locking_host[HOST_NAME_MAX + 1];
+		ساكن حرف *جانچ_fmt;
+		صحيح should_exit;
 
-		if (!scan_fmt)
-			scan_fmt = xstrfmt("%s %%%ds", "%"SCNuMAX, HOST_NAME_MAX);
-		fp = fopen(pidfile_path, "r");
-		memset(locking_host, 0, sizeof(locking_host));
+		إذا (!جانچ_fmt)
+			جانچ_fmt = xstrfmt("%s %%%ds", "%"SCNuMAX, HOST_NAME_MAX);
+		fp = fopen(pidfile_رستہ, "r");
+		memset(locking_host, 0, حجم(locking_host));
 		should_exit =
-			fp != NULL &&
+			fp != عدم &&
 			!fstat(fileno(fp), &st) &&
 			/*
 			 * 12 hour limit is very generous as gc should
@@ -458,29 +458,29 @@ static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
 			 * after the user verifies that no gc is
 			 * running.
 			 */
-			time(NULL) - st.st_mtime <= 12 * 3600 &&
-			fscanf(fp, scan_fmt, &pid, locking_host) == 2 &&
+			ویلا(عدم) - st.st_mtime <= 12 * 3600 &&
+			fscanf(fp, جانچ_fmt, &pid, locking_host) == 2 &&
 			/* be gentle to concurrent "gc" on remote hosts */
 			(strcmp(locking_host, my_host) || !kill(pid, 0) || errno == EPERM);
-		if (fp)
+		إذا (fp)
 			fclose(fp);
-		if (should_exit) {
-			if (fd >= 0)
-				rollback_lock_file(&lock);
+		إذا (should_exit) {
+			إذا (fd >= 0)
+				rollback_جندرا_file(&جندرا);
 			*ret_pid = pid;
-			free(pidfile_path);
-			return locking_host;
+			حرر(pidfile_رستہ);
+			أرجع locking_host;
 		}
 	}
 
 	strbuf_addf(&sb, "%"PRIuMAX" %s",
 		    (uintmax_t) getpid(), my_host);
-	write_in_full(fd, sb.buf, sb.len);
+	write_وچ_بھریا(fd, sb.buf, sb.len);
 	strbuf_release(&sb);
-	commit_lock_file(&lock);
-	pidfile = register_tempfile(pidfile_path);
-	free(pidfile_path);
-	return NULL;
+	commit_جندرا_file(&جندرا);
+	pidfile = رجسٹر_tempfile(pidfile_رستہ);
+	حرر(pidfile_رستہ);
+	أرجع عدم;
 }
 
 /*
@@ -489,29 +489,29 @@ static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
  * message and returns with a non-[01] status code if an error occurred
  * while reading gc.log
  */
-static int report_last_gc_error(void)
+ساكن صحيح report_آخری_gc_error(فراغ)
 {
-	struct strbuf sb = STRBUF_INIT;
-	int ret = 0;
+	بنية strbuf sb = STRBUF_INIT;
+	صحيح ret = 0;
 	ssize_t len;
-	struct stat st;
-	char *gc_log_path = repo_git_path(the_repository, "gc.log");
+	بنية stat st;
+	حرف *gc_log_رستہ = repo_git_رستہ(the_repository, "gc.log");
 
-	if (stat(gc_log_path, &st)) {
-		if (errno == ENOENT)
-			goto done;
+	إذا (stat(gc_log_رستہ, &st)) {
+		إذا (errno == ENOENT)
+			اذهب پورا;
 
-		ret = die_message_errno(_("cannot stat '%s'"), gc_log_path);
-		goto done;
+		ret = die_سنیہا_errno(_("cannot stat '%s'"), gc_log_رستہ);
+		اذهب پورا;
 	}
 
-	if (st.st_mtime < gc_log_expire_time)
-		goto done;
+	إذا (st.st_mtime < gc_log_expire_ویلا)
+		اذهب پورا;
 
-	len = strbuf_read_file(&sb, gc_log_path, 0);
-	if (len < 0)
-		ret = die_message_errno(_("cannot read '%s'"), gc_log_path);
-	else if (len > 0) {
+	len = strbuf_read_file(&sb, gc_log_رستہ, 0);
+	إذا (len < 0)
+		ret = die_سنیہا_errno(_("cannot read '%s'"), gc_log_رستہ);
+	وإلا إذا (len > 0) {
 		/*
 		 * A previous gc failed.  Report the error, and don't
 		 * bother with an automatic gc run since it is likely
@@ -523,77 +523,77 @@ static int report_last_gc_error(void)
 			       "Automatic cleanup will not be performed "
 			       "until the file is removed.\n\n"
 			       "%s"),
-			    gc_log_path, sb.buf);
+			    gc_log_رستہ, sb.buf);
 		ret = 1;
 	}
 	strbuf_release(&sb);
-done:
-	free(gc_log_path);
-	return ret;
+پورا:
+	حرر(gc_log_رستہ);
+	أرجع ret;
 }
 
-static int gc_foreground_tasks(struct maintenance_run_opts *opts,
-			       struct gc_config *cfg)
+ساكن صحيح gc_foreground_tasks(بنية maintenance_لگاتار_opts *opts,
+			       بنية gc_config *cfg)
 {
-	if (cfg->pack_refs && maintenance_task_pack_refs(opts, cfg))
-		return error(FAILED_RUN, "pack-refs");
-	if (cfg->prune_reflogs && maintenance_task_reflog_expire(opts, cfg))
-		return error(FAILED_RUN, "reflog");
-	return 0;
+	إذا (cfg->pack_refs && maintenance_task_pack_refs(opts, cfg))
+		أرجع error(FAILED_لگاتار, "pack-refs");
+	إذا (cfg->prune_reflogs && maintenance_task_reflog_expire(opts, cfg))
+		أرجع error(FAILED_لگاتار, "reflog");
+	أرجع 0;
 }
 
-static int maintenance_task_odb(struct maintenance_run_opts *opts,
-				struct gc_config *cfg,
-				int keep_largest_pack,
-				int aggressive)
+ساكن صحيح maintenance_task_odb(بنية maintenance_لگاتار_opts *opts,
+				بنية gc_config *cfg,
+				صحيح keep_سبھ_توں_وڈا_pack,
+				صحيح aggressive)
 {
-	struct odb_optimize_options odb_opts = {
+	بنية odb_optimize_options odb_opts = {
 		.strategy = ODB_OPTIMIZE_INCREMENTAL,
-		.keep_largest_pack = keep_largest_pack,
+		.keep_سبھ_توں_وڈا_pack = keep_سبھ_توں_وڈا_pack,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, aggressive),
 	};
 
-	if (opts->auto_flag)
+	إذا (opts->auto_flag)
 		odb_opts.flags |= ODB_OPTIMIZE_AUTO;
-	if (!opts->quiet)
+	إذا (!opts->quiet)
 		odb_opts.flags |= ODB_OPTIMIZE_VERBOSE;
-	if (aggressive)
+	إذا (aggressive)
 		odb_opts.flags |= ODB_OPTIMIZE_NO_REUSE_DELTAS;
 
-	return odb_optimize(the_repository->objects, &odb_opts);
+	أرجع odb_optimize(the_repository->objects, &odb_opts);
 }
 
-int cmd_gc(int argc,
-	   const char **argv,
-	   const char *prefix,
-	   struct repository *repo UNUSED)
+صحيح cmd_gc(صحيح argc,
+	   ثابت حرف **argv,
+	   ثابت حرف *اگیتر,
+	   بنية repository *repo بن_ورتیا)
 {
-	int aggressive = 0;
-	int force = 0;
-	const char *name;
+	صحيح aggressive = 0;
+	صحيح force = 0;
+	ثابت حرف *name;
 	pid_t pid;
-	int daemonized = 0;
-	int keep_largest_pack = -1;
-	int skip_foreground_tasks = 0;
+	صحيح daemonized = 0;
+	صحيح keep_سبھ_توں_وڈا_pack = -1;
+	صحيح skip_foreground_tasks = 0;
 	timestamp_t dummy;
-	struct maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
-	struct gc_config cfg = GC_CONFIG_INIT;
-	const char *prune_expire_sentinel = "sentinel";
-	const char *prune_expire_arg = prune_expire_sentinel;
-	int ret;
-	struct option builtin_gc_options[] = {
+	بنية maintenance_لگاتار_opts opts = MAINTENANCE_لگاتار_OPTS_INIT;
+	بنية gc_config cfg = GC_CONFIG_INIT;
+	ثابت حرف *prune_expire_sentinel = "sentinel";
+	ثابت حرف *prune_expire_arg = prune_expire_sentinel;
+	صحيح ret;
+	بنية option builtin_gc_options[] = {
 		OPT__QUIET(&opts.quiet, N_("suppress progress reporting")),
 		{
 			.type = OPTION_STRING,
 			.long_name = "prune",
-			.value = &prune_expire_arg,
+			.قدر = &prune_expire_arg,
 			.argh = N_("date"),
 			.help = N_("prune unreferenced objects"),
 			.flags = PARSE_OPT_OPTARG,
 			.defval = (intptr_t)prune_expire_arg,
 		},
 		OPT_BOOL(0, "cruft", &cfg.cruft_packs, N_("pack unreferenced objects separately")),
-		OPT_UNSIGNED(0, "max-cruft-size", &cfg.max_cruft_size,
+		OPT_UNSIGNED(0, "max-cruft-size", &cfg.max_cruft_ناپ,
 			     N_("with --cruft, limit the size of new cruft packs")),
 		OPT_BOOL(0, "aggressive", &aggressive, N_("be more thorough (increased runtime)")),
 		OPT_BOOL_F(0, "auto", &opts.auto_flag, N_("enable auto-gc mode"),
@@ -603,13 +603,13 @@ int cmd_gc(int argc,
 		OPT_BOOL_F(0, "force", &force,
 			   N_("force running gc even if there may be another gc running"),
 			   PARSE_OPT_NOCOMPLETE),
-		OPT_BOOL(0, "keep-largest-pack", &keep_largest_pack,
+		OPT_BOOL(0, "keep-largest-pack", &keep_سبھ_توں_وڈا_pack,
 			 N_("repack all other packs except the largest pack")),
-		OPT_STRING(0, "expire-to", &cfg.repack_expire_to, N_("dir"),
+		OPT_STRING(0, "expire-to", &cfg.repack_expire_منزل, N_("dir"),
 			   N_("pack prefix to store a pack containing pruned objects")),
 		OPT_HIDDEN_BOOL(0, "skip-foreground-tasks", &skip_foreground_tasks,
 			   N_("skip maintenance tasks typically done in the foreground")),
-		OPT_END()
+		OPT_سرا()
 	};
 
 	show_usage_with_options_if_asked(argc, argv,
@@ -617,71 +617,71 @@ int cmd_gc(int argc,
 
 	gc_config(&cfg);
 
-	if (parse_expiry_date(cfg.gc_log_expire, &gc_log_expire_time))
+	إذا (parse_expiry_date(cfg.gc_log_expire, &gc_log_expire_ویلا))
 		die(_("failed to parse gc.logExpiry value %s"), cfg.gc_log_expire);
 
-	if (cfg.pack_refs < 0)
+	إذا (cfg.pack_refs < 0)
 		cfg.pack_refs = !is_bare_repository(the_repository);
 
-	argc = parse_options(argc, argv, prefix, builtin_gc_options,
+	argc = parse_options(argc, argv, اگیتر, builtin_gc_options,
 			     builtin_gc_usage, 0);
-	if (argc > 0)
+	إذا (argc > 0)
 		usage_with_options(builtin_gc_usage, builtin_gc_options);
 
-	if (prune_expire_arg != prune_expire_sentinel) {
-		free(cfg.prune_expire);
+	إذا (prune_expire_arg != prune_expire_sentinel) {
+		حرر(cfg.prune_expire);
 		cfg.prune_expire = xstrdup_or_null(prune_expire_arg);
 	}
-	if (cfg.prune_expire && parse_expiry_date(cfg.prune_expire, &dummy))
+	إذا (cfg.prune_expire && parse_expiry_date(cfg.prune_expire, &dummy))
 		die(_("failed to parse prune expiry value %s"), cfg.prune_expire);
 
-	if (opts.auto_flag) {
-		struct odb_optimize_options optimize_opts = {
+	إذا (opts.auto_flag) {
+		بنية odb_optimize_options optimize_opts = {
 			.strategy = ODB_OPTIMIZE_INCREMENTAL,
 			OPTIMIZE_FIELDS_FROM_GC_CONFIG(&cfg, 0),
 		};
 
-		if (cfg.detach_auto && opts.detach < 0)
+		إذا (cfg.detach_auto && opts.detach < 0)
 			opts.detach = 1;
 
 		/*
 		 * Auto-gc should be least intrusive as possible.
 		 */
-		if (!odb_optimize_required(the_repository->objects, &optimize_opts) ||
-		    run_hooks(the_repository, "pre-auto-gc")) {
+		إذا (!odb_optimize_required(the_repository->objects, &optimize_opts) ||
+		    لگاتار_hooks(the_repository, "pre-auto-gc")) {
 			ret = 0;
-			goto out;
+			اذهب باہرلا;
 		}
 
-		if (!opts.quiet) {
-			if (opts.detach > 0)
+		إذا (!opts.quiet) {
+			إذا (opts.detach > 0)
 				fprintf(stderr, _("Auto packing the repository in background for optimum performance.\n"));
-			else
+			وإلا
 				fprintf(stderr, _("Auto packing the repository for optimum performance.\n"));
 			fprintf(stderr, _("See \"git help gc\" for manual housekeeping.\n"));
 		}
 	}
 
-	if (opts.detach > 0) {
-		ret = report_last_gc_error();
-		if (ret == 1) {
+	إذا (opts.detach > 0) {
+		ret = report_آخری_gc_error();
+		إذا (ret == 1) {
 			/* Last gc --auto failed. Skip this one. */
 			ret = 0;
-			goto out;
+			اذهب باہرلا;
 
-		} else if (ret) {
+		} وإلا إذا (ret) {
 			/* an I/O error occurred, already reported */
-			goto out;
+			اذهب باہرلا;
 		}
 
-		if (!skip_foreground_tasks) {
-			if (lock_repo_for_gc(force, &pid)) {
+		إذا (!skip_foreground_tasks) {
+			إذا (جندرا_repo_for_gc(force, &pid)) {
 				ret = 0;
-				goto out;
+				اذهب باہرلا;
 			}
 
-			if (gc_foreground_tasks(&opts, &cfg) < 0)
-				die(NULL);
+			إذا (gc_foreground_tasks(&opts, &cfg) < 0)
+				die(عدم);
 			delete_tempfile(&pidfile);
 		}
 
@@ -692,475 +692,475 @@ int cmd_gc(int argc,
 		daemonized = !daemonize();
 	}
 
-	name = lock_repo_for_gc(force, &pid);
-	if (name) {
-		if (opts.auto_flag) {
+	name = جندرا_repo_for_gc(force, &pid);
+	إذا (name) {
+		إذا (opts.auto_flag) {
 			ret = 0;
-			goto out; /* be quiet on --auto */
+			اذهب باہرلا; /* be quiet on --auto */
 		}
 
 		die(_("gc is already running on machine '%s' pid %"PRIuMAX" (use --force if not)"),
 		    name, (uintmax_t)pid);
 	}
 
-	if (daemonized) {
-		char *path = repo_git_path(the_repository, "gc.log");
-		hold_lock_file_for_update(&log_lock, path,
-					  LOCK_DIE_ON_ERROR);
-		dup2(get_lock_file_fd(&log_lock), 2);
+	إذا (daemonized) {
+		حرف *رستہ = repo_git_رستہ(the_repository, "gc.log");
+		hold_جندرا_file_for_update(&log_جندرا, رستہ,
+					  جندرا_DIE_ON_ERROR);
+		dup2(get_جندرا_file_fd(&log_جندرا), 2);
 		atexit(process_log_file_at_exit);
-		free(path);
+		حرر(رستہ);
 	}
 
-	if (opts.detach <= 0 && !skip_foreground_tasks)
+	إذا (opts.detach <= 0 && !skip_foreground_tasks)
 		gc_foreground_tasks(&opts, &cfg);
 
-	if (cfg.prune_worktrees_expire &&
+	إذا (cfg.prune_worktrees_expire &&
 	    maintenance_task_worktree_prune(&opts, &cfg))
-		die(FAILED_RUN, "worktree");
+		die(FAILED_لگاتار, "worktree");
 
-	if (maintenance_task_rerere_gc(&opts, &cfg))
-		die(FAILED_RUN, "rerere");
+	إذا (maintenance_task_rerere_gc(&opts, &cfg))
+		die(FAILED_لگاتار, "rerere");
 
-	if (maintenance_task_odb(&opts, &cfg, keep_largest_pack, aggressive))
-		die(NULL);
+	إذا (maintenance_task_odb(&opts, &cfg, keep_سبھ_توں_وڈا_pack, aggressive))
+		die(عدم);
 
 	report_garbage = report_pack_garbage;
 	odb_reprepare(the_repository->objects);
-	if (pack_garbage.nr > 0) {
+	إذا (pack_garbage.nr > 0) {
 		odb_close(the_repository->objects);
 		clean_pack_garbage();
 	}
 
-	if (the_repository->settings.gc_write_commit_graph == 1)
-		write_commit_graph_reachable(the_repository,
-					     the_repository->objects->source->path,
-					     !opts.quiet && !daemonized ? COMMIT_GRAPH_WRITE_PROGRESS : 0,
-					     NULL);
+	إذا (the_repository->settings.gc_write_commit_گراف == 1)
+		write_commit_گراف_reachable(the_repository,
+					     the_repository->objects->سروت->رستہ,
+					     !opts.quiet && !daemonized ? COMMIT_گراف_WRITE_ترقی : 0,
+					     عدم);
 
-	if (!daemonized) {
-		char *path = repo_git_path(the_repository, "gc.log");
-		unlink(path);
-		free(path);
+	إذا (!daemonized) {
+		حرف *رستہ = repo_git_رستہ(the_repository, "gc.log");
+		unlink(رستہ);
+		حرر(رستہ);
 	}
 
-out:
-	maintenance_run_opts_release(&opts);
+باہرلا:
+	maintenance_لگاتار_opts_release(&opts);
 	gc_config_release(&cfg);
-	return 0;
+	أرجع 0;
 }
 
-static const char *const builtin_maintenance_run_usage[] = {
+ساكن ثابت حرف *ثابت builtin_maintenance_لگاتار_usage[] = {
 	N_("git maintenance run [--auto] [--[no-]quiet] [--task=<task>] [--schedule]"),
-	NULL
+	عدم
 };
 
-static int maintenance_opt_schedule(const struct option *opt, const char *arg,
-				    int unset)
+ساكن صحيح maintenance_opt_ویلا_سارنی(ثابت بنية option *opt, ثابت حرف *arg,
+				    صحيح unset)
 {
-	enum schedule_priority *priority = opt->value;
+	تعداد ویلا_سارنی_ترجیح *ترجیح = opt->قدر;
 
-	if (unset)
+	إذا (unset)
 		die(_("--no-schedule is not allowed"));
 
-	*priority = parse_schedule(arg);
+	*ترجیح = parse_ویلا_سارنی(arg);
 
-	if (!*priority)
+	إذا (!*ترجیح)
 		die(_("unrecognized --schedule argument '%s'"), arg);
 
-	return 0;
+	أرجع 0;
 }
 
-struct cg_auto_data {
-	int num_not_in_graph;
-	int limit;
+بنية cg_auto_انکڑے {
+	صحيح عدد_not_وچ_گراف;
+	صحيح حد_بندی;
 };
 
-static int dfs_on_ref(const struct reference *ref, void *cb_data)
+ساكن صحيح dfs_on_ref(ثابت بنية reference *ref, فراغ *cb_انکڑے)
 {
-	struct cg_auto_data *data = (struct cg_auto_data *)cb_data;
-	int result = 0;
-	const struct object_id *maybe_peeled = ref->oid;
-	struct object_id peeled;
-	struct commit_list *stack = NULL;
-	struct commit *commit;
+	بنية cg_auto_انکڑے *انکڑے = (بنية cg_auto_انکڑے *)cb_انکڑے;
+	صحيح نتیجہ = 0;
+	ثابت بنية object_id *maybe_peeled = ref->oid;
+	بنية object_id peeled;
+	بنية commit_list *ڈھیر = عدم;
+	بنية commit *commit;
 
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled))
+	إذا (!reference_get_peeled_oid(the_repository, ref, &peeled))
 		maybe_peeled = &peeled;
-	if (odb_read_object_info(the_repository->objects, maybe_peeled, NULL) != OBJ_COMMIT)
-		return 0;
+	إذا (odb_read_object_info(the_repository->objects, maybe_peeled, عدم) != OBJ_COMMIT)
+		أرجع 0;
 
 	commit = lookup_commit(the_repository, maybe_peeled);
-	if (!commit || commit->object.flags & SEEN)
-		return 0;
-	commit->object.flags |= SEEN;
+	إذا (!commit || commit->object.flags & تکیا_2)
+		أرجع 0;
+	commit->object.flags |= تکیا_2;
 
-	if (repo_parse_commit(the_repository, commit) ||
-	    commit_graph_position(commit) != COMMIT_NOT_FROM_GRAPH)
-		return 0;
+	إذا (repo_parse_commit(the_repository, commit) ||
+	    commit_گراف_position(commit) != COMMIT_NOT_FROM_گراف)
+		أرجع 0;
 
-	data->num_not_in_graph++;
+	انکڑے->عدد_not_وچ_گراف++;
 
-	if (data->num_not_in_graph >= data->limit)
-		return 1;
+	إذا (انکڑے->عدد_not_وچ_گراف >= انکڑے->حد_بندی)
+		أرجع 1;
 
-	commit_list_insert(commit, &stack);
+	commit_list_داخل_کرو(commit, &ڈھیر);
 
-	while (!result && stack) {
-		struct commit_list *parent;
+	طالما (!نتیجہ && ڈھیر) {
+		بنية commit_list *ماپا;
 
-		commit = pop_commit(&stack);
+		commit = نکالو_commit(&ڈھیر);
 
-		for (parent = commit->parents; parent; parent = parent->next) {
-			if (repo_parse_commit(the_repository, parent->item) ||
-			    commit_graph_position(parent->item) != COMMIT_NOT_FROM_GRAPH ||
-			    parent->item->object.flags & SEEN)
-				continue;
+		لكل (ماپا = commit->parents; ماپا; ماپا = ماپا->اگلا) {
+			إذا (repo_parse_commit(the_repository, ماپا->شے) ||
+			    commit_گراف_position(ماپا->شے) != COMMIT_NOT_FROM_گراف ||
+			    ماپا->شے->object.flags & تکیا_2)
+				استمر;
 
-			parent->item->object.flags |= SEEN;
-			data->num_not_in_graph++;
+			ماپا->شے->object.flags |= تکیا_2;
+			انکڑے->عدد_not_وچ_گراف++;
 
-			if (data->num_not_in_graph >= data->limit) {
-				result = 1;
-				break;
+			إذا (انکڑے->عدد_not_وچ_گراف >= انکڑے->حد_بندی) {
+				نتیجہ = 1;
+				اكسر;
 			}
 
-			commit_list_insert(parent->item, &stack);
+			commit_list_داخل_کرو(ماپا->شے, &ڈھیر);
 		}
 	}
 
-	commit_list_free(stack);
-	return result;
+	commit_list_free(ڈھیر);
+	أرجع نتیجہ;
 }
 
-static int should_write_commit_graph(struct gc_config *cfg UNUSED)
+ساكن صحيح should_write_commit_گراف(بنية gc_config *cfg بن_ورتیا)
 {
-	int result;
-	struct cg_auto_data data;
+	صحيح نتیجہ;
+	بنية cg_auto_انکڑے انکڑے;
 
-	data.num_not_in_graph = 0;
-	data.limit = 100;
+	انکڑے.عدد_not_وچ_گراف = 0;
+	انکڑے.حد_بندی = 100;
 	repo_config_get_int(the_repository, "maintenance.commit-graph.auto",
-			    &data.limit);
+			    &انکڑے.حد_بندی);
 
-	if (!data.limit)
-		return 0;
-	if (data.limit < 0)
-		return 1;
+	إذا (!انکڑے.حد_بندی)
+		أرجع 0;
+	إذا (انکڑے.حد_بندی < 0)
+		أرجع 1;
 
-	result = refs_for_each_ref(get_main_ref_store(the_repository),
-				   dfs_on_ref, &data);
+	نتیجہ = refs_for_each_ref(get_main_ref_store(the_repository),
+				   dfs_on_ref, &انکڑے);
 
-	repo_clear_commit_marks(the_repository, SEEN);
+	repo_clear_commit_marks(the_repository, تکیا_2);
 
-	return result;
+	أرجع نتیجہ;
 }
 
-static int run_write_commit_graph(struct maintenance_run_opts *opts)
+ساكن صحيح لگاتار_write_commit_گراف(بنية maintenance_لگاتار_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	بنية بچہ_process بچہ = بچہ_PROCESS_INIT;
 
-	child.git_cmd = 1;
-	child.odb_to_close = the_repository->objects;
-	strvec_pushl(&child.args, "commit-graph", "write",
-		     "--split", "--reachable", NULL);
+	بچہ.git_cmd = 1;
+	بچہ.odb_منزل_close = the_repository->objects;
+	strvec_pushl(&بچہ.دلیلاں, "commit-graph", "write",
+		     "--split", "--reachable", عدم);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
-	else
-		strvec_push(&child.args, "--progress");
+	إذا (opts->quiet)
+		strvec_ڈالو(&بچہ.دلیلاں, "--no-progress");
+	وإلا
+		strvec_ڈالو(&بچہ.دلیلاں, "--progress");
 
-	return !!run_command(&child);
+	أرجع !!لگاتار_command(&بچہ);
 }
 
-static int maintenance_task_commit_graph(struct maintenance_run_opts *opts,
-					 struct gc_config *cfg UNUSED)
+ساكن صحيح maintenance_task_commit_گراف(بنية maintenance_لگاتار_opts *opts,
+					 بنية gc_config *cfg بن_ورتیا)
 {
 	prepare_repo_settings(the_repository);
-	if (!the_repository->settings.core_commit_graph)
-		return 0;
+	إذا (!the_repository->settings.core_commit_گراف)
+		أرجع 0;
 
-	if (run_write_commit_graph(opts)) {
+	إذا (لگاتار_write_commit_گراف(opts)) {
 		error(_("failed to write commit-graph"));
-		return 1;
+		أرجع 1;
 	}
 
-	return 0;
+	أرجع 0;
 }
 
-static int fetch_remote(struct remote *remote, void *cbdata)
+ساكن صحيح fetch_remote(بنية remote *remote, فراغ *cbdata)
 {
-	struct maintenance_run_opts *opts = cbdata;
-	struct child_process child = CHILD_PROCESS_INIT;
+	بنية maintenance_لگاتار_opts *opts = cbdata;
+	بنية بچہ_process بچہ = بچہ_PROCESS_INIT;
 
-	if (remote->skip_default_update)
-		return 0;
+	إذا (remote->skip_default_update)
+		أرجع 0;
 
-	child.git_cmd = 1;
-	strvec_pushl(&child.args, "fetch", remote->name,
+	بچہ.git_cmd = 1;
+	strvec_pushl(&بچہ.دلیلاں, "fetch", remote->name,
 		     "--prefetch", "--prune", "--no-tags",
 		     "--no-write-fetch-head", "--recurse-submodules=no",
-		     NULL);
+		     عدم);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--quiet");
+	إذا (opts->quiet)
+		strvec_ڈالو(&بچہ.دلیلاں, "--quiet");
 
-	return !!run_command(&child);
+	أرجع !!لگاتار_command(&بچہ);
 }
 
-static int maintenance_task_prefetch(struct maintenance_run_opts *opts,
-				     struct gc_config *cfg UNUSED)
+ساكن صحيح maintenance_task_prefetch(بنية maintenance_لگاتار_opts *opts,
+				     بنية gc_config *cfg بن_ورتیا)
 {
-	if (for_each_remote(fetch_remote, opts)) {
+	إذا (for_each_remote(fetch_remote, opts)) {
 		error(_("failed to prefetch remotes"));
-		return 1;
+		أرجع 1;
 	}
 
-	return 0;
+	أرجع 0;
 }
 
-static int maintenance_task_gc_foreground(struct maintenance_run_opts *opts,
-					  struct gc_config *cfg)
+ساكن صحيح maintenance_task_gc_foreground(بنية maintenance_لگاتار_opts *opts,
+					  بنية gc_config *cfg)
 {
-	return gc_foreground_tasks(opts, cfg);
+	أرجع gc_foreground_tasks(opts, cfg);
 }
 
-static int maintenance_task_gc_background(struct maintenance_run_opts *opts,
-					  struct gc_config *cfg UNUSED)
+ساكن صحيح maintenance_task_gc_background(بنية maintenance_لگاتار_opts *opts,
+					  بنية gc_config *cfg بن_ورتیا)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	بنية بچہ_process بچہ = بچہ_PROCESS_INIT;
 
-	child.git_cmd = 1;
-	child.odb_to_close = the_repository->objects;
-	strvec_push(&child.args, "gc");
+	بچہ.git_cmd = 1;
+	بچہ.odb_منزل_close = the_repository->objects;
+	strvec_ڈالو(&بچہ.دلیلاں, "gc");
 
-	if (opts->auto_flag)
-		strvec_push(&child.args, "--auto");
-	if (opts->quiet)
-		strvec_push(&child.args, "--quiet");
-	else
-		strvec_push(&child.args, "--no-quiet");
-	strvec_push(&child.args, "--no-detach");
-	strvec_push(&child.args, "--skip-foreground-tasks");
+	إذا (opts->auto_flag)
+		strvec_ڈالو(&بچہ.دلیلاں, "--auto");
+	إذا (opts->quiet)
+		strvec_ڈالو(&بچہ.دلیلاں, "--quiet");
+	وإلا
+		strvec_ڈالو(&بچہ.دلیلاں, "--no-quiet");
+	strvec_ڈالو(&بچہ.دلیلاں, "--no-detach");
+	strvec_ڈالو(&بچہ.دلیلاں, "--skip-foreground-tasks");
 
-	return run_command(&child);
+	أرجع لگاتار_command(&بچہ);
 }
 
-static int gc_condition(struct gc_config *cfg)
+ساكن صحيح gc_condition(بنية gc_config *cfg)
 {
-	struct odb_optimize_options opts = {
+	بنية odb_optimize_options opts = {
 		.strategy = ODB_OPTIMIZE_INCREMENTAL,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, 0),
 	};
-	return odb_optimize_required(the_repository->objects, &opts);
+	أرجع odb_optimize_required(the_repository->objects, &opts);
 }
 
-static int prune_packed(struct maintenance_run_opts *opts)
+ساكن صحيح prune_packed(بنية maintenance_لگاتار_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	بنية بچہ_process بچہ = بچہ_PROCESS_INIT;
 
-	child.git_cmd = 1;
-	strvec_push(&child.args, "prune-packed");
+	بچہ.git_cmd = 1;
+	strvec_ڈالو(&بچہ.دلیلاں, "prune-packed");
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--quiet");
+	إذا (opts->quiet)
+		strvec_ڈالو(&بچہ.دلیلاں, "--quiet");
 
-	return !!run_command(&child);
+	أرجع !!لگاتار_command(&بچہ);
 }
 
-struct write_loose_object_data {
-	FILE *in;
-	int count;
-	int batch_size;
+بنية write_loose_object_انکڑے {
+	FILE *وچ;
+	صحيح گنتی;
+	صحيح batch_ناپ;
 };
 
-static int loose_object_auto_limit = 100;
+ساكن صحيح loose_object_auto_حد_بندی = 100;
 
-static int loose_object_count(const struct object_id *oid UNUSED,
-			      const char *path UNUSED,
-			      void *data)
+ساكن صحيح loose_object_گنتی(ثابت بنية object_id *oid بن_ورتیا,
+			      ثابت حرف *رستہ بن_ورتیا,
+			      فراغ *انکڑے)
 {
-	int *count = (int*)data;
-	if (++(*count) >= loose_object_auto_limit)
-		return 1;
-	return 0;
+	صحيح *گنتی = (صحيح*)انکڑے;
+	إذا (++(*گنتی) >= loose_object_auto_حد_بندی)
+		أرجع 1;
+	أرجع 0;
 }
 
-static int loose_object_auto_condition(struct gc_config *cfg UNUSED)
+ساكن صحيح loose_object_auto_condition(بنية gc_config *cfg بن_ورتیا)
 {
-	int count = 0;
+	صحيح گنتی = 0;
 
 	repo_config_get_int(the_repository, "maintenance.loose-objects.auto",
-			    &loose_object_auto_limit);
+			    &loose_object_auto_حد_بندی);
 
-	if (!loose_object_auto_limit)
-		return 0;
-	if (loose_object_auto_limit < 0)
-		return 1;
+	إذا (!loose_object_auto_حد_بندی)
+		أرجع 0;
+	إذا (loose_object_auto_حد_بندی < 0)
+		أرجع 1;
 
-	return for_each_loose_file_in_source(the_repository->objects->source,
-					     loose_object_count,
-					     NULL, NULL, &count);
+	أرجع for_each_loose_file_وچ_سروت(the_repository->objects->سروت,
+					     loose_object_گنتی,
+					     عدم, عدم, &گنتی);
 }
 
-static int bail_on_loose(const struct object_id *oid UNUSED,
-			 const char *path UNUSED,
-			 void *data UNUSED)
+ساكن صحيح bail_on_loose(ثابت بنية object_id *oid بن_ورتیا,
+			 ثابت حرف *رستہ بن_ورتیا,
+			 فراغ *انکڑے بن_ورتیا)
 {
-	return 1;
+	أرجع 1;
 }
 
-static int write_loose_object_to_stdin(const struct object_id *oid,
-				       const char *path UNUSED,
-				       void *data)
+ساكن صحيح write_loose_object_منزل_stdin(ثابت بنية object_id *oid,
+				       ثابت حرف *رستہ بن_ورتیا,
+				       فراغ *انکڑے)
 {
-	struct write_loose_object_data *d = (struct write_loose_object_data *)data;
+	بنية write_loose_object_انکڑے *d = (بنية write_loose_object_انکڑے *)انکڑے;
 
-	fprintf(d->in, "%s\n", oid_to_hex(oid));
+	fprintf(d->وچ, "%s\n", oid_منزل_hex(oid));
 
 	/* If batch_size is INT_MAX, then this will return 0 always. */
-	return ++(d->count) > d->batch_size;
+	أرجع ++(d->گنتی) > d->batch_ناپ;
 }
 
-static int pack_loose(struct maintenance_run_opts *opts)
+ساكن صحيح pack_loose(بنية maintenance_لگاتار_opts *opts)
 {
-	struct repository *r = the_repository;
-	int result = 0;
-	struct write_loose_object_data data;
-	struct child_process pack_proc = CHILD_PROCESS_INIT;
+	بنية repository *r = the_repository;
+	صحيح نتیجہ = 0;
+	بنية write_loose_object_انکڑے انکڑے;
+	بنية بچہ_process pack_proc = بچہ_PROCESS_INIT;
 
 	/*
 	 * Do not start pack-objects process
 	 * if there are no loose objects.
 	 */
-	if (!for_each_loose_file_in_source(r->objects->source,
+	إذا (!for_each_loose_file_وچ_سروت(r->objects->سروت,
 					   bail_on_loose,
-					   NULL, NULL, NULL))
-		return 0;
+					   عدم, عدم, عدم))
+		أرجع 0;
 
 	pack_proc.git_cmd = 1;
 
-	strvec_push(&pack_proc.args, "pack-objects");
-	if (opts->quiet)
-		strvec_push(&pack_proc.args, "--quiet");
-	else
-		strvec_push(&pack_proc.args, "--no-quiet");
-	strvec_pushf(&pack_proc.args, "%s/pack/loose", r->objects->source->path);
+	strvec_ڈالو(&pack_proc.دلیلاں, "pack-objects");
+	إذا (opts->quiet)
+		strvec_ڈالو(&pack_proc.دلیلاں, "--quiet");
+	وإلا
+		strvec_ڈالو(&pack_proc.دلیلاں, "--no-quiet");
+	strvec_pushf(&pack_proc.دلیلاں, "%s/pack/loose", r->objects->سروت->رستہ);
 
-	pack_proc.in = -1;
+	pack_proc.وچ = -1;
 
 	/*
 	 * git-pack-objects(1) ends up writing the pack hash to stdout, which
 	 * we do not care for.
 	 */
-	pack_proc.out = -1;
+	pack_proc.باہرلا = -1;
 
-	if (start_command(&pack_proc)) {
+	إذا (شروع_command(&pack_proc)) {
 		error(_("failed to start 'git pack-objects' process"));
-		return 1;
+		أرجع 1;
 	}
 
-	data.in = xfdopen(pack_proc.in, "w");
-	data.count = 0;
-	data.batch_size = 50000;
+	انکڑے.وچ = xfdopen(pack_proc.وچ, "w");
+	انکڑے.گنتی = 0;
+	انکڑے.batch_ناپ = 50000;
 
 	repo_config_get_int(r, "maintenance.loose-objects.batchSize",
-			    &data.batch_size);
+			    &انکڑے.batch_ناپ);
 
 	/* If configured as 0, then remove limit. */
-	if (!data.batch_size)
-		data.batch_size = INT_MAX;
-	else if (data.batch_size > 0)
-		data.batch_size--; /* Decrease for equality on limit. */
+	إذا (!انکڑے.batch_ناپ)
+		انکڑے.batch_ناپ = ودھ_توں_ودھ_عدد;
+	وإلا إذا (انکڑے.batch_ناپ > 0)
+		انکڑے.batch_ناپ--; /* Decrease for equality on limit. */
 
-	for_each_loose_file_in_source(r->objects->source,
-				      write_loose_object_to_stdin,
-				      NULL, NULL, &data);
+	for_each_loose_file_وچ_سروت(r->objects->سروت,
+				      write_loose_object_منزل_stdin,
+				      عدم, عدم, &انکڑے);
 
-	fclose(data.in);
+	fclose(انکڑے.وچ);
 
-	if (finish_command(&pack_proc)) {
+	إذا (انت_command(&pack_proc)) {
 		error(_("failed to finish 'git pack-objects' process"));
-		result = 1;
+		نتیجہ = 1;
 	}
 
-	return result;
+	أرجع نتیجہ;
 }
 
-static int maintenance_task_loose_objects(struct maintenance_run_opts *opts,
-					  struct gc_config *cfg UNUSED)
+ساكن صحيح maintenance_task_loose_objects(بنية maintenance_لگاتار_opts *opts,
+					  بنية gc_config *cfg بن_ورتیا)
 {
-	return prune_packed(opts) || pack_loose(opts);
+	أرجع prune_packed(opts) || pack_loose(opts);
 }
 
-static int incremental_repack_auto_condition(struct gc_config *cfg UNUSED)
+ساكن صحيح incremental_repack_auto_condition(بنية gc_config *cfg بن_ورتیا)
 {
-	struct packed_git *p;
-	int incremental_repack_auto_limit = 10;
-	int count = 0;
+	بنية packed_git *p;
+	صحيح incremental_repack_auto_حد_بندی = 10;
+	صحيح گنتی = 0;
 
 	prepare_repo_settings(the_repository);
-	if (!the_repository->settings.core_multi_pack_index)
-		return 0;
+	إذا (!the_repository->settings.core_multi_pack_اشاریہ)
+		أرجع 0;
 
 	repo_config_get_int(the_repository, "maintenance.incremental-repack.auto",
-			    &incremental_repack_auto_limit);
+			    &incremental_repack_auto_حد_بندی);
 
-	if (!incremental_repack_auto_limit)
-		return 0;
-	if (incremental_repack_auto_limit < 0)
-		return 1;
+	إذا (!incremental_repack_auto_حد_بندی)
+		أرجع 0;
+	إذا (incremental_repack_auto_حد_بندی < 0)
+		أرجع 1;
 
 	repo_for_each_pack(the_repository, p) {
-		if (count >= incremental_repack_auto_limit)
-			break;
-		if (!p->multi_pack_index)
-			count++;
+		إذا (گنتی >= incremental_repack_auto_حد_بندی)
+			اكسر;
+		إذا (!p->multi_pack_اشاریہ)
+			گنتی++;
 	}
 
-	return count >= incremental_repack_auto_limit;
+	أرجع گنتی >= incremental_repack_auto_حد_بندی;
 }
 
-static int multi_pack_index_write(struct maintenance_run_opts *opts)
+ساكن صحيح multi_pack_اشاریہ_write(بنية maintenance_لگاتار_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	بنية بچہ_process بچہ = بچہ_PROCESS_INIT;
 
-	child.git_cmd = 1;
-	strvec_pushl(&child.args, "multi-pack-index", "write", NULL);
+	بچہ.git_cmd = 1;
+	strvec_pushl(&بچہ.دلیلاں, "multi-pack-index", "write", عدم);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
-	else
-		strvec_push(&child.args, "--progress");
+	إذا (opts->quiet)
+		strvec_ڈالو(&بچہ.دلیلاں, "--no-progress");
+	وإلا
+		strvec_ڈالو(&بچہ.دلیلاں, "--progress");
 
-	if (run_command(&child))
-		return error(_("failed to write multi-pack-index"));
+	إذا (لگاتار_command(&بچہ))
+		أرجع error(_("failed to write multi-pack-index"));
 
-	return 0;
+	أرجع 0;
 }
 
-static int multi_pack_index_expire(struct maintenance_run_opts *opts)
+ساكن صحيح multi_pack_اشاریہ_expire(بنية maintenance_لگاتار_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	بنية بچہ_process بچہ = بچہ_PROCESS_INIT;
 
-	child.git_cmd = 1;
-	child.odb_to_close = the_repository->objects;
-	strvec_pushl(&child.args, "multi-pack-index", "expire", NULL);
+	بچہ.git_cmd = 1;
+	بچہ.odb_منزل_close = the_repository->objects;
+	strvec_pushl(&بچہ.دلیلاں, "multi-pack-index", "expire", عدم);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
-	else
-		strvec_push(&child.args, "--progress");
+	إذا (opts->quiet)
+		strvec_ڈالو(&بچہ.دلیلاں, "--no-progress");
+	وإلا
+		strvec_ڈالو(&بچہ.دلیلاں, "--progress");
 
-	if (run_command(&child))
-		return error(_("'git multi-pack-index expire' failed"));
+	إذا (لگاتار_command(&بچہ))
+		أرجع error(_("'git multi-pack-index expire' failed"));
 
-	return 0;
+	أرجع 0;
 }
 
-#define TWO_GIGABYTES (INT32_MAX)
+#تعریف_کرو TWO_GIGABYTES (INT32_MAX)
 
-static off_t get_auto_pack_size(void)
+ساكن off_t get_auto_pack_ناپ(فراغ)
 {
 	/*
 	 * The "auto" value is special: we optimize for
@@ -1174,99 +1174,99 @@ static off_t get_auto_pack_size(void)
 	 * at least two packs if there are three or more
 	 * packs.
 	 */
-	off_t max_size = 0;
-	off_t second_largest_size = 0;
-	off_t result_size;
-	struct packed_git *p;
-	struct repository *r = the_repository;
+	off_t max_ناپ = 0;
+	off_t دوجا_سبھ_توں_وڈا_ناپ = 0;
+	off_t نتیجہ_ناپ;
+	بنية packed_git *p;
+	بنية repository *r = the_repository;
 
 	odb_reprepare(r->objects);
 	repo_for_each_pack(r, p) {
-		if (p->pack_size > max_size) {
-			second_largest_size = max_size;
-			max_size = p->pack_size;
-		} else if (p->pack_size > second_largest_size)
-			second_largest_size = p->pack_size;
+		إذا (p->pack_ناپ > max_ناپ) {
+			دوجا_سبھ_توں_وڈا_ناپ = max_ناپ;
+			max_ناپ = p->pack_ناپ;
+		} وإلا إذا (p->pack_ناپ > دوجا_سبھ_توں_وڈا_ناپ)
+			دوجا_سبھ_توں_وڈا_ناپ = p->pack_ناپ;
 	}
 
-	result_size = second_largest_size + 1;
+	نتیجہ_ناپ = دوجا_سبھ_توں_وڈا_ناپ + 1;
 
 	/* But limit ourselves to a batch size of 2g */
-	if (result_size > TWO_GIGABYTES)
-		result_size = TWO_GIGABYTES;
+	إذا (نتیجہ_ناپ > TWO_GIGABYTES)
+		نتیجہ_ناپ = TWO_GIGABYTES;
 
-	return result_size;
+	أرجع نتیجہ_ناپ;
 }
 
-static int multi_pack_index_repack(struct maintenance_run_opts *opts)
+ساكن صحيح multi_pack_اشاریہ_repack(بنية maintenance_لگاتار_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	بنية بچہ_process بچہ = بچہ_PROCESS_INIT;
 
-	child.git_cmd = 1;
-	child.odb_to_close = the_repository->objects;
-	strvec_pushl(&child.args, "multi-pack-index", "repack", NULL);
+	بچہ.git_cmd = 1;
+	بچہ.odb_منزل_close = the_repository->objects;
+	strvec_pushl(&بچہ.دلیلاں, "multi-pack-index", "repack", عدم);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
-	else
-		strvec_push(&child.args, "--progress");
+	إذا (opts->quiet)
+		strvec_ڈالو(&بچہ.دلیلاں, "--no-progress");
+	وإلا
+		strvec_ڈالو(&بچہ.دلیلاں, "--progress");
 
-	strvec_pushf(&child.args, "--batch-size=%"PRIuMAX,
-				  (uintmax_t)get_auto_pack_size());
+	strvec_pushf(&بچہ.دلیلاں, "--batch-size=%"PRIuMAX,
+				  (uintmax_t)get_auto_pack_ناپ());
 
-	if (run_command(&child))
-		return error(_("'git multi-pack-index repack' failed"));
+	إذا (لگاتار_command(&بچہ))
+		أرجع error(_("'git multi-pack-index repack' failed"));
 
-	return 0;
+	أرجع 0;
 }
 
-static int maintenance_task_incremental_repack(struct maintenance_run_opts *opts,
-					       struct gc_config *cfg UNUSED)
+ساكن صحيح maintenance_task_incremental_repack(بنية maintenance_لگاتار_opts *opts,
+					       بنية gc_config *cfg بن_ورتیا)
 {
 	prepare_repo_settings(the_repository);
-	if (!the_repository->settings.core_multi_pack_index) {
+	إذا (!the_repository->settings.core_multi_pack_اشاریہ) {
 		warning(_("skipping incremental-repack task because core.multiPackIndex is disabled"));
-		return 0;
+		أرجع 0;
 	}
 
-	if (multi_pack_index_write(opts))
-		return 1;
-	if (multi_pack_index_expire(opts))
-		return 1;
-	if (multi_pack_index_repack(opts))
-		return 1;
-	return 0;
+	إذا (multi_pack_اشاریہ_write(opts))
+		أرجع 1;
+	إذا (multi_pack_اشاریہ_expire(opts))
+		أرجع 1;
+	إذا (multi_pack_اشاریہ_repack(opts))
+		أرجع 1;
+	أرجع 0;
 }
 
-static int maintenance_task_geometric_repack(struct maintenance_run_opts *opts,
-					     struct gc_config *cfg)
+ساكن صحيح maintenance_task_geometric_repack(بنية maintenance_لگاتار_opts *opts,
+					     بنية gc_config *cfg)
 {
-	struct odb_optimize_options odb_opts = {
+	بنية odb_optimize_options odb_opts = {
 		.strategy = ODB_OPTIMIZE_GEOMETRIC,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, 0),
 	};
 
-	if (!opts->quiet)
+	إذا (!opts->quiet)
 		odb_opts.flags |= ODB_OPTIMIZE_VERBOSE;
 
-	return odb_optimize(the_repository->objects, &odb_opts);
+	أرجع odb_optimize(the_repository->objects, &odb_opts);
 }
 
-static int geometric_repack_auto_condition(struct gc_config *cfg)
+ساكن صحيح geometric_repack_auto_condition(بنية gc_config *cfg)
 {
-	struct odb_optimize_options opts = {
+	بنية odb_optimize_options opts = {
 		.strategy = ODB_OPTIMIZE_GEOMETRIC,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, 0),
 	};
-	return odb_optimize_required(the_repository->objects, &opts);
+	أرجع odb_optimize_required(the_repository->objects, &opts);
 }
 
-typedef int (*maintenance_task_fn)(struct maintenance_run_opts *opts,
-				   struct gc_config *cfg);
-typedef int (*maintenance_auto_fn)(struct gc_config *cfg);
+تعريفنوع صحيح (*maintenance_task_fn)(بنية maintenance_لگاتار_opts *opts,
+				   بنية gc_config *cfg);
+تعريفنوع صحيح (*maintenance_auto_fn)(بنية gc_config *cfg);
 
-struct maintenance_task {
-	const char *name;
+بنية maintenance_task {
+	ثابت حرف *name;
 
 	/*
 	 * Work that will be executed before detaching. This should not include
@@ -1288,7 +1288,7 @@ struct maintenance_task {
 	maintenance_auto_fn auto_condition;
 };
 
-static const struct maintenance_task tasks[] = {
+ساكن ثابت بنية maintenance_task tasks[] = {
 	[TASK_PREFETCH] = {
 		.name = "prefetch",
 		.background = maintenance_task_prefetch,
@@ -1314,10 +1314,10 @@ static const struct maintenance_task tasks[] = {
 		.background = maintenance_task_gc_background,
 		.auto_condition = gc_condition,
 	},
-	[TASK_COMMIT_GRAPH] = {
+	[TASK_COMMIT_گراف] = {
 		.name = "commit-graph",
-		.background = maintenance_task_commit_graph,
-		.auto_condition = should_write_commit_graph,
+		.background = maintenance_task_commit_گراف,
+		.auto_condition = should_write_commit_گراف,
 	},
 	[TASK_PACK_REFS] = {
 		.name = "pack-refs",
@@ -1341,65 +1341,65 @@ static const struct maintenance_task tasks[] = {
 	},
 };
 
-enum task_phase {
+تعداد task_phase {
 	TASK_PHASE_FOREGROUND,
 	TASK_PHASE_BACKGROUND,
 };
 
-enum auto_gc_hook_result {
+تعداد auto_gc_hook_نتیجہ {
 	AUTO_GC_HOOK_UNDECIDED = 0,
-	AUTO_GC_HOOK_RUN = 1,
+	AUTO_GC_HOOK_لگاتار = 1,
 	AUTO_GC_HOOK_SKIP = 2,
 };
 
-static int maybe_run_task(const struct maintenance_task *task,
-			  struct repository *repo,
-			  struct maintenance_run_opts *opts,
-			  struct gc_config *cfg,
-			  enum task_phase phase,
-			  enum auto_gc_hook_result *auto_gc_hook_result)
+ساكن صحيح maybe_لگاتار_task(ثابت بنية maintenance_task *task,
+			  بنية repository *repo,
+			  بنية maintenance_لگاتار_opts *opts,
+			  بنية gc_config *cfg,
+			  تعداد task_phase phase,
+			  تعداد auto_gc_hook_نتیجہ *auto_gc_hook_نتیجہ)
 {
-	int foreground = (phase == TASK_PHASE_FOREGROUND);
+	صحيح foreground = (phase == TASK_PHASE_FOREGROUND);
 	maintenance_task_fn fn = foreground ? task->foreground : task->background;
-	const char *region = foreground ? "maintenance foreground" : "maintenance";
-	int ret = 0;
+	ثابت حرف *region = foreground ? "maintenance foreground" : "maintenance";
+	صحيح ret = 0;
 
-	if (!fn)
-		return 0;
-	if (opts->auto_flag) {
-		if (*auto_gc_hook_result == AUTO_GC_HOOK_SKIP)
-			return 0;
+	إذا (!fn)
+		أرجع 0;
+	إذا (opts->auto_flag) {
+		إذا (*auto_gc_hook_نتیجہ == AUTO_GC_HOOK_SKIP)
+			أرجع 0;
 
-		if (!task->auto_condition || !task->auto_condition(cfg))
-			return 0;
+		إذا (!task->auto_condition || !task->auto_condition(cfg))
+			أرجع 0;
 
-		if (*auto_gc_hook_result == AUTO_GC_HOOK_UNDECIDED)
-			*auto_gc_hook_result = run_hooks(repo, "pre-auto-gc") ?
-				AUTO_GC_HOOK_SKIP : AUTO_GC_HOOK_RUN;
-		if (*auto_gc_hook_result == AUTO_GC_HOOK_SKIP)
-			return 0;
+		إذا (*auto_gc_hook_نتیجہ == AUTO_GC_HOOK_UNDECIDED)
+			*auto_gc_hook_نتیجہ = لگاتار_hooks(repo, "pre-auto-gc") ?
+				AUTO_GC_HOOK_SKIP : AUTO_GC_HOOK_لگاتار;
+		إذا (*auto_gc_hook_نتیجہ == AUTO_GC_HOOK_SKIP)
+			أرجع 0;
 	}
 
 	trace2_region_enter(region, task->name, repo);
-	if (fn(opts, cfg)) {
+	إذا (fn(opts, cfg)) {
 		error(_("task '%s' failed"), task->name);
 		ret = 1;
 	}
 	trace2_region_leave(region, task->name, repo);
 
-	return ret;
+	أرجع ret;
 }
 
-static int maintenance_run_tasks(struct maintenance_run_opts *opts,
-				 struct gc_config *cfg)
+ساكن صحيح maintenance_لگاتار_tasks(بنية maintenance_لگاتار_opts *opts,
+				 بنية gc_config *cfg)
 {
-	int result = 0;
-	struct lock_file lk;
-	struct repository *r = the_repository;
-	char *lock_path = xstrfmt("%s/maintenance", r->objects->source->path);
-	enum auto_gc_hook_result auto_gc_hook_result = AUTO_GC_HOOK_UNDECIDED;
+	صحيح نتیجہ = 0;
+	بنية جندرا_file lk;
+	بنية repository *r = the_repository;
+	حرف *جندرا_رستہ = xstrfmt("%s/maintenance", r->objects->سروت->رستہ);
+	تعداد auto_gc_hook_نتیجہ auto_gc_hook_نتیجہ = AUTO_GC_HOOK_UNDECIDED;
 
-	if (repo_hold_lock_file_for_update(r, &lk, lock_path, LOCK_NO_DEREF) < 0) {
+	إذا (repo_hold_جندرا_file_for_update(r, &lk, جندرا_رستہ, جندرا_NO_DEREF) < 0) {
 		/*
 		 * Another maintenance command is running.
 		 *
@@ -1407,81 +1407,81 @@ static int maintenance_run_tasks(struct maintenance_run_opts *opts,
 		 * recursive process stack. Do not report an error in
 		 * that case.
 		 */
-		if (!opts->auto_flag && !opts->quiet)
+		إذا (!opts->auto_flag && !opts->quiet)
 			warning(_("lock file '%s' exists, skipping maintenance"),
-				lock_path);
-		free(lock_path);
-		return 0;
+				جندرا_رستہ);
+		حرر(جندرا_رستہ);
+		أرجع 0;
 	}
-	free(lock_path);
+	حرر(جندرا_رستہ);
 
-	for (size_t i = 0; i < opts->tasks_nr; i++)
-		if (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
-				   TASK_PHASE_FOREGROUND, &auto_gc_hook_result))
-			result = 1;
+	لكل (ناپ_t i = 0; i < opts->tasks_nr; i++)
+		إذا (maybe_لگاتار_task(&tasks[opts->tasks[i]], r, opts, cfg,
+				   TASK_PHASE_FOREGROUND, &auto_gc_hook_نتیجہ))
+			نتیجہ = 1;
 
 	/* Failure to daemonize is ok, we'll continue in foreground. */
-	if (opts->detach > 0) {
+	إذا (opts->detach > 0) {
 		trace2_region_enter("maintenance", "detach", the_repository);
 		daemonize();
 		trace2_region_leave("maintenance", "detach", the_repository);
 	}
 
-	for (size_t i = 0; i < opts->tasks_nr; i++)
-		if (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
-				   TASK_PHASE_BACKGROUND, &auto_gc_hook_result))
-			result = 1;
+	لكل (ناپ_t i = 0; i < opts->tasks_nr; i++)
+		إذا (maybe_لگاتار_task(&tasks[opts->tasks[i]], r, opts, cfg,
+				   TASK_PHASE_BACKGROUND, &auto_gc_hook_نتیجہ))
+			نتیجہ = 1;
 
-	rollback_lock_file(&lk);
-	return result;
+	rollback_جندرا_file(&lk);
+	أرجع نتیجہ;
 }
 
-enum maintenance_type {
+تعداد maintenance_type {
 	/* As invoked via `git maintenance run --schedule=`. */
 	MAINTENANCE_TYPE_SCHEDULED = (1 << 0),
 	/* As invoked via `git maintenance run` and with `--auto`. */
 	MAINTENANCE_TYPE_MANUAL    = (1 << 1),
 };
 
-struct maintenance_strategy {
-	struct {
-		unsigned type;
-		enum schedule_priority schedule;
-	} tasks[TASK__COUNT];
+بنية maintenance_strategy {
+	بنية {
+		بنانشانی type;
+		تعداد ویلا_سارنی_ترجیح ویلا_سارنی;
+	} tasks[TASK_گنتی];
 };
 
-static const struct maintenance_strategy none_strategy = { 0 };
+ساكن ثابت بنية maintenance_strategy none_strategy = { 0 };
 
-static const struct maintenance_strategy gc_strategy = {
+ساكن ثابت بنية maintenance_strategy gc_strategy = {
 	.tasks = {
 		[TASK_GC] = {
 			.type = MAINTENANCE_TYPE_MANUAL | MAINTENANCE_TYPE_SCHEDULED,
-			.schedule = SCHEDULE_DAILY,
+			.ویلا_سارنی = ویلا_سارنی_DAILY,
 		},
 	},
 };
 
-static const struct maintenance_strategy incremental_strategy = {
+ساكن ثابت بنية maintenance_strategy incremental_strategy = {
 	.tasks = {
-		[TASK_COMMIT_GRAPH] = {
+		[TASK_COMMIT_گراف] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED,
-			.schedule = SCHEDULE_HOURLY,
+			.ویلا_سارنی = ویلا_سارنی_HOURLY,
 		},
 		[TASK_PREFETCH] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED,
-			.schedule = SCHEDULE_HOURLY,
+			.ویلا_سارنی = ویلا_سارنی_HOURLY,
 		},
 		[TASK_INCREMENTAL_REPACK] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED,
-			.schedule = SCHEDULE_DAILY,
+			.ویلا_سارنی = ویلا_سارنی_DAILY,
 		},
 		[TASK_LOOSE_OBJECTS] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED,
-			.schedule = SCHEDULE_DAILY,
+			.ویلا_سارنی = ویلا_سارنی_DAILY,
 		},
 		[TASK_PACK_REFS] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED,
-			.schedule = SCHEDULE_WEEKLY,
+			.ویلا_سارنی = ویلا_سارنی_WEEKLY,
 		},
 		/*
 		 * Historically, the "incremental" strategy was only available
@@ -1500,67 +1500,67 @@ static const struct maintenance_strategy incremental_strategy = {
 	},
 };
 
-static const struct maintenance_strategy geometric_strategy = {
+ساكن ثابت بنية maintenance_strategy geometric_strategy = {
 	.tasks = {
-		[TASK_COMMIT_GRAPH] = {
+		[TASK_COMMIT_گراف] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED | MAINTENANCE_TYPE_MANUAL,
-			.schedule = SCHEDULE_HOURLY,
+			.ویلا_سارنی = ویلا_سارنی_HOURLY,
 		},
 		[TASK_GEOMETRIC_REPACK] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED | MAINTENANCE_TYPE_MANUAL,
-			.schedule = SCHEDULE_DAILY,
+			.ویلا_سارنی = ویلا_سارنی_DAILY,
 		},
 		[TASK_PACK_REFS] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED | MAINTENANCE_TYPE_MANUAL,
-			.schedule = SCHEDULE_DAILY,
+			.ویلا_سارنی = ویلا_سارنی_DAILY,
 		},
 		[TASK_RERERE_GC] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED | MAINTENANCE_TYPE_MANUAL,
-			.schedule = SCHEDULE_WEEKLY,
+			.ویلا_سارنی = ویلا_سارنی_WEEKLY,
 		},
 		[TASK_REFLOG_EXPIRE] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED | MAINTENANCE_TYPE_MANUAL,
-			.schedule = SCHEDULE_WEEKLY,
+			.ویلا_سارنی = ویلا_سارنی_WEEKLY,
 		},
 		[TASK_WORKTREE_PRUNE] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED | MAINTENANCE_TYPE_MANUAL,
-			.schedule = SCHEDULE_WEEKLY,
+			.ویلا_سارنی = ویلا_سارنی_WEEKLY,
 		},
 	},
 };
 
-static struct maintenance_strategy parse_maintenance_strategy(const char *name)
+ساكن بنية maintenance_strategy parse_maintenance_strategy(ثابت حرف *name)
 {
-	if (!strcasecmp(name, "incremental"))
-		return incremental_strategy;
-	if (!strcasecmp(name, "gc"))
-		return gc_strategy;
-	if (!strcasecmp(name, "geometric"))
-		return geometric_strategy;
+	إذا (!strcasecmp(name, "incremental"))
+		أرجع incremental_strategy;
+	إذا (!strcasecmp(name, "gc"))
+		أرجع gc_strategy;
+	إذا (!strcasecmp(name, "geometric"))
+		أرجع geometric_strategy;
 	die(_("unknown maintenance strategy: '%s'"), name);
 }
 
-static void initialize_task_config(struct maintenance_run_opts *opts,
-				   const struct string_list *selected_tasks)
+ساكن فراغ initialize_task_config(بنية maintenance_لگاتار_opts *opts,
+				   ثابت بنية string_list *selected_tasks)
 {
-	struct strbuf config_name = STRBUF_INIT;
-	struct maintenance_strategy strategy;
-	enum maintenance_type type;
-	const char *config_str;
+	بنية strbuf config_name = STRBUF_INIT;
+	بنية maintenance_strategy strategy;
+	تعداد maintenance_type type;
+	ثابت حرف *config_str;
 
 	/*
 	 * In case the user has asked us to run tasks explicitly we only use
 	 * those specified tasks. Specifically, we do _not_ want to consult the
 	 * config or maintenance strategy.
 	 */
-	if (selected_tasks->nr) {
-		for (size_t i = 0; i < selected_tasks->nr; i++) {
-			enum maintenance_task_label label = (intptr_t)selected_tasks->items[i].util;;
+	إذا (selected_tasks->nr) {
+		لكل (ناپ_t i = 0; i < selected_tasks->nr; i++) {
+			تعداد maintenance_task_label label = (intptr_t)selected_tasks->اشیاء[i].util;;
 			ALLOC_GROW(opts->tasks, opts->tasks_nr + 1, opts->tasks_alloc);
 			opts->tasks[opts->tasks_nr++] = label;
 		}
 
-		return;
+		أرجع;
 	}
 
 	/*
@@ -1576,36 +1576,36 @@ static void initialize_task_config(struct maintenance_run_opts *opts,
 	 * override specific aspects of our strategy. Furthermore, both
 	 * strategies can be overridden by setting "maintenance.strategy".
 	 */
-	if (opts->schedule) {
+	إذا (opts->ویلا_سارنی) {
 		strategy = none_strategy;
 		type = MAINTENANCE_TYPE_SCHEDULED;
-	} else {
+	} وإلا {
 		strategy = geometric_strategy;
 		type = MAINTENANCE_TYPE_MANUAL;
 	}
 
-	if (!repo_config_get_string_tmp(the_repository, "maintenance.strategy", &config_str))
+	إذا (!repo_config_get_string_tmp(the_repository, "maintenance.strategy", &config_str))
 		strategy = parse_maintenance_strategy(config_str);
 
-	for (size_t i = 0; i < TASK__COUNT; i++) {
-		int config_value;
+	لكل (ناپ_t i = 0; i < TASK_گنتی; i++) {
+		صحيح config_قدر;
 
 		strbuf_reset(&config_name);
 		strbuf_addf(&config_name, "maintenance.%s.enabled",
 			    tasks[i].name);
-		if (!repo_config_get_bool(the_repository, config_name.buf, &config_value))
-			strategy.tasks[i].type = config_value ? type : 0;
-		if (!(strategy.tasks[i].type & type))
-			continue;
+		إذا (!repo_config_get_bool(the_repository, config_name.buf, &config_قدر))
+			strategy.tasks[i].type = config_قدر ? type : 0;
+		إذا (!(strategy.tasks[i].type & type))
+			استمر;
 
-		if (opts->schedule) {
+		إذا (opts->ویلا_سارنی) {
 			strbuf_reset(&config_name);
 			strbuf_addf(&config_name, "maintenance.%s.schedule",
 				    tasks[i].name);
-			if (!repo_config_get_string_tmp(the_repository, config_name.buf, &config_str))
-				strategy.tasks[i].schedule = parse_schedule(config_str);
-			if (strategy.tasks[i].schedule < opts->schedule)
-				continue;
+			إذا (!repo_config_get_string_tmp(the_repository, config_name.buf, &config_str))
+				strategy.tasks[i].ویلا_سارنی = parse_ویلا_سارنی(config_str);
+			إذا (strategy.tasks[i].ویلا_سارنی < opts->ویلا_سارنی)
+				استمر;
 		}
 
 		ALLOC_GROW(opts->tasks, opts->tasks_nr + 1, opts->tasks_alloc);
@@ -1615,278 +1615,278 @@ static void initialize_task_config(struct maintenance_run_opts *opts,
 	strbuf_release(&config_name);
 }
 
-static int task_option_parse(const struct option *opt,
-			     const char *arg, int unset)
+ساكن صحيح task_option_parse(ثابت بنية option *opt,
+			     ثابت حرف *arg, صحيح unset)
 {
-	struct string_list *selected_tasks = opt->value;
-	size_t i;
+	بنية string_list *selected_tasks = opt->قدر;
+	ناپ_t i;
 
 	BUG_ON_OPT_NEG(unset);
 
-	for (i = 0; i < TASK__COUNT; i++)
-		if (!strcasecmp(tasks[i].name, arg))
-			break;
-	if (i >= TASK__COUNT) {
+	لكل (i = 0; i < TASK_گنتی; i++)
+		إذا (!strcasecmp(tasks[i].name, arg))
+			اكسر;
+	إذا (i >= TASK_گنتی) {
 		error(_("'%s' is not a valid task"), arg);
-		return 1;
+		أرجع 1;
 	}
 
-	if (unsorted_string_list_has_string(selected_tasks, arg)) {
+	إذا (unsorted_string_list_has_string(selected_tasks, arg)) {
 		error(_("task '%s' cannot be selected multiple times"), arg);
-		return 1;
+		أرجع 1;
 	}
 
-	string_list_append(selected_tasks, arg)->util = (void *)(intptr_t)i;
+	string_list_append(selected_tasks, arg)->util = (فراغ *)(intptr_t)i;
 
-	return 0;
+	أرجع 0;
 }
 
-static int maintenance_run(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+ساكن صحيح maintenance_لگاتار(صحيح argc, ثابت حرف **argv, ثابت حرف *اگیتر,
+			   بنية repository *repo بن_ورتیا)
 {
-	struct maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
-	struct string_list selected_tasks = STRING_LIST_INIT_DUP;
-	struct gc_config cfg = GC_CONFIG_INIT;
-	struct option builtin_maintenance_run_options[] = {
+	بنية maintenance_لگاتار_opts opts = MAINTENANCE_لگاتار_OPTS_INIT;
+	بنية string_list selected_tasks = STRING_LIST_INIT_DUP;
+	بنية gc_config cfg = GC_CONFIG_INIT;
+	بنية option builtin_maintenance_لگاتار_options[] = {
 		OPT_BOOL(0, "auto", &opts.auto_flag,
 			 N_("run tasks based on the state of the repository")),
 		OPT_BOOL(0, "detach", &opts.detach,
 			 N_("perform maintenance in the background")),
-		OPT_CALLBACK(0, "schedule", &opts.schedule, N_("frequency"),
+		OPT_CALLBACK(0, "schedule", &opts.ویلا_سارنی, N_("frequency"),
 			     N_("run tasks based on frequency"),
-			     maintenance_opt_schedule),
+			     maintenance_opt_ویلا_سارنی),
 		OPT_BOOL(0, "quiet", &opts.quiet,
 			 N_("do not report progress or other information over stderr")),
 		OPT_CALLBACK_F(0, "task", &selected_tasks, N_("task"),
 			N_("run a specific task"),
 			PARSE_OPT_NONEG, task_option_parse),
-		OPT_END()
+		OPT_سرا()
 	};
-	int ret;
+	صحيح ret;
 
 	opts.quiet = !isatty(2);
 
-	argc = parse_options(argc, argv, prefix,
-			     builtin_maintenance_run_options,
-			     builtin_maintenance_run_usage,
+	argc = parse_options(argc, argv, اگیتر,
+			     builtin_maintenance_لگاتار_options,
+			     builtin_maintenance_لگاتار_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 
 	die_for_incompatible_opt2(opts.auto_flag, "--auto",
-				  opts.schedule, "--schedule=");
+				  opts.ویلا_سارنی, "--schedule=");
 	die_for_incompatible_opt2(selected_tasks.nr, "--task=",
-				  opts.schedule, "--schedule=");
+				  opts.ویلا_سارنی, "--schedule=");
 
 	gc_config(&cfg);
 	initialize_task_config(&opts, &selected_tasks);
 
-	if (argc != 0)
-		usage_with_options(builtin_maintenance_run_usage,
-				   builtin_maintenance_run_options);
+	إذا (argc != 0)
+		usage_with_options(builtin_maintenance_لگاتار_usage,
+				   builtin_maintenance_لگاتار_options);
 
-	ret = maintenance_run_tasks(&opts, &cfg);
+	ret = maintenance_لگاتار_tasks(&opts, &cfg);
 
 	string_list_clear(&selected_tasks, 0);
-	maintenance_run_opts_release(&opts);
+	maintenance_لگاتار_opts_release(&opts);
 	gc_config_release(&cfg);
-	return ret;
+	أرجع ret;
 }
 
-static char *get_maintpath(void)
+ساكن حرف *get_maintpath(فراغ)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *p = the_repository->worktree ?
+	بنية strbuf sb = STRBUF_INIT;
+	ثابت حرف *p = the_repository->worktree ?
 		the_repository->worktree : the_repository->gitdir;
 
 	strbuf_realpath(&sb, p, 1);
-	return strbuf_detach(&sb, NULL);
+	أرجع strbuf_detach(&sb, عدم);
 }
 
-static char const * const builtin_maintenance_register_usage[] = {
+ساكن حرف ثابت * ثابت builtin_maintenance_رجسٹر_usage[] = {
 	"git maintenance register [--config-file <path>]",
-	NULL
+	عدم
 };
 
-static int maintenance_register(int argc, const char **argv, const char *prefix,
-				struct repository *repo UNUSED)
+ساكن صحيح maintenance_رجسٹر(صحيح argc, ثابت حرف **argv, ثابت حرف *اگیتر,
+				بنية repository *repo بن_ورتیا)
 {
-	char *config_file = NULL;
-	struct option options[] = {
+	حرف *config_file = عدم;
+	بنية option options[] = {
 		OPT_STRING(0, "config-file", &config_file, N_("file"), N_("use given config file")),
-		OPT_END(),
+		OPT_سرا(),
 	};
-	int found = 0;
-	const char *key = "maintenance.repo";
-	char *maintpath = get_maintpath();
-	struct string_list_item *item;
-	const struct string_list *list;
+	صحيح لبھیا_2 = 0;
+	ثابت حرف *کلید = "maintenance.repo";
+	حرف *maintpath = get_maintpath();
+	بنية string_list_شے *شے;
+	ثابت بنية string_list *list;
 
-	argc = parse_options(argc, argv, prefix, options,
-			     builtin_maintenance_register_usage, 0);
-	if (argc)
-		usage_with_options(builtin_maintenance_register_usage,
+	argc = parse_options(argc, argv, اگیتر, options,
+			     builtin_maintenance_رجسٹر_usage, 0);
+	إذا (argc)
+		usage_with_options(builtin_maintenance_رجسٹر_usage,
 				   options);
 
 	/* Disable foreground maintenance */
-	repo_config_set(the_repository, "maintenance.auto", "false");
+	repo_config_سیٹ(the_repository, "maintenance.auto", "false");
 
 	/* Set maintenance strategy, if unset */
-	if (repo_config_get(the_repository, "maintenance.strategy"))
-		repo_config_set(the_repository, "maintenance.strategy", "incremental");
+	إذا (repo_config_get(the_repository, "maintenance.strategy"))
+		repo_config_سیٹ(the_repository, "maintenance.strategy", "incremental");
 
-	if (!repo_config_get_string_multi(the_repository, key, &list)) {
-		for_each_string_list_item(item, list) {
-			if (!strcmp(maintpath, item->string)) {
-				found = 1;
-				break;
+	إذا (!repo_config_get_string_multi(the_repository, کلید, &list)) {
+		for_each_string_list_شے(شے, list) {
+			إذا (!strcmp(maintpath, شے->string)) {
+				لبھیا_2 = 1;
+				اكسر;
 			}
 		}
 	}
 
-	if (!found) {
-		int rc;
-		char *global_config_file = NULL;
+	إذا (!لبھیا_2) {
+		صحيح rc;
+		حرف *global_config_file = عدم;
 
-		if (!config_file) {
+		إذا (!config_file) {
 			global_config_file = git_global_config();
 			config_file = global_config_file;
 		}
-		if (!config_file)
+		إذا (!config_file)
 			die(_("$HOME not set"));
-		rc = repo_config_set_multivar_in_file_gently(the_repository,
+		rc = repo_config_سیٹ_multivar_وچ_file_gently(the_repository,
 			config_file, "maintenance.repo", maintpath,
-			CONFIG_REGEX_NONE, NULL, 0);
-		free(global_config_file);
+			CONFIG_REGEX_NONE, عدم, 0);
+		حرر(global_config_file);
 
-		if (rc)
+		إذا (rc)
 			die(_("unable to add '%s' value of '%s'"),
-			    key, maintpath);
+			    کلید, maintpath);
 	}
 
-	free(maintpath);
-	return 0;
+	حرر(maintpath);
+	أرجع 0;
 }
 
-static char const * const builtin_maintenance_unregister_usage[] = {
+ساكن حرف ثابت * ثابت builtin_maintenance_unregister_usage[] = {
 	"git maintenance unregister [--config-file <path>] [--force]",
-	NULL
+	عدم
 };
 
-static int maintenance_unregister(int argc, const char **argv, const char *prefix,
-				  struct repository *repo UNUSED)
+ساكن صحيح maintenance_unregister(صحيح argc, ثابت حرف **argv, ثابت حرف *اگیتر,
+				  بنية repository *repo بن_ورتیا)
 {
-	int force = 0;
-	char *config_file = NULL;
-	struct option options[] = {
+	صحيح force = 0;
+	حرف *config_file = عدم;
+	بنية option options[] = {
 		OPT_STRING(0, "config-file", &config_file, N_("file"), N_("use given config file")),
 		OPT__FORCE(&force,
 			   N_("return success even if repository was not registered"),
 			   PARSE_OPT_NOCOMPLETE),
-		OPT_END(),
+		OPT_سرا(),
 	};
-	const char *key = "maintenance.repo";
-	char *maintpath = get_maintpath();
-	int found = 0;
-	struct string_list_item *item;
-	const struct string_list *list;
-	struct config_set cs = { { 0 } };
+	ثابت حرف *کلید = "maintenance.repo";
+	حرف *maintpath = get_maintpath();
+	صحيح لبھیا_2 = 0;
+	بنية string_list_شے *شے;
+	ثابت بنية string_list *list;
+	بنية config_سیٹ cs = { { 0 } };
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, اگیتر, options,
 			     builtin_maintenance_unregister_usage, 0);
-	if (argc)
+	إذا (argc)
 		usage_with_options(builtin_maintenance_unregister_usage,
 				   options);
 
-	if (config_file) {
+	إذا (config_file) {
 		git_configset_init(&cs);
-		git_configset_add_file(&cs, config_file);
+		git_configset_جوڑو_file(&cs, config_file);
 	}
-	if (!(config_file
-	      ? git_configset_get_string_multi(&cs, key, &list)
-	      : repo_config_get_string_multi(the_repository, key, &list))) {
-		for_each_string_list_item(item, list) {
-			if (!strcmp(maintpath, item->string)) {
-				found = 1;
-				break;
+	إذا (!(config_file
+	      ? git_configset_get_string_multi(&cs, کلید, &list)
+	      : repo_config_get_string_multi(the_repository, کلید, &list))) {
+		for_each_string_list_شے(شے, list) {
+			إذا (!strcmp(maintpath, شے->string)) {
+				لبھیا_2 = 1;
+				اكسر;
 			}
 		}
 	}
 
-	if (found) {
-		int rc;
-		char *global_config_file = NULL;
+	إذا (لبھیا_2) {
+		صحيح rc;
+		حرف *global_config_file = عدم;
 
-		if (!config_file) {
+		إذا (!config_file) {
 			global_config_file = git_global_config();
 			config_file = global_config_file;
 		}
-		if (!config_file)
+		إذا (!config_file)
 			die(_("$HOME not set"));
-		rc = repo_config_set_multivar_in_file_gently(the_repository,
-			config_file, key, NULL, maintpath, NULL,
-			CONFIG_FLAGS_MULTI_REPLACE | CONFIG_FLAGS_FIXED_VALUE);
-		free(global_config_file);
+		rc = repo_config_سیٹ_multivar_وچ_file_gently(the_repository,
+			config_file, کلید, عدم, maintpath, عدم,
+			CONFIG_FLAGS_MULTI_REPLACE | CONFIG_FLAGS_FIXED_قدر);
+		حرر(global_config_file);
 
-		if (rc &&
-		    (!force || rc == CONFIG_NOTHING_SET))
+		إذا (rc &&
+		    (!force || rc == CONFIG_NOTHING_سیٹ))
 			die(_("unable to unset '%s' value of '%s'"),
-			    key, maintpath);
-	} else if (!force) {
+			    کلید, maintpath);
+	} وإلا إذا (!force) {
 		die(_("repository '%s' is not registered"), maintpath);
 	}
 
 	git_configset_clear(&cs);
-	free(maintpath);
-	return 0;
+	حرر(maintpath);
+	أرجع 0;
 }
 
-static const char *get_frequency(enum schedule_priority schedule)
+ساكن ثابت حرف *get_frequency(تعداد ویلا_سارنی_ترجیح ویلا_سارنی)
 {
-	switch (schedule) {
-	case SCHEDULE_HOURLY:
-		return "hourly";
-	case SCHEDULE_DAILY:
-		return "daily";
-	case SCHEDULE_WEEKLY:
-		return "weekly";
-	default:
-		BUG("invalid schedule %d", schedule);
+	بدل (ویلا_سارنی) {
+	حالة ویلا_سارنی_HOURLY:
+		أرجع "hourly";
+	حالة ویلا_سارنی_DAILY:
+		أرجع "daily";
+	حالة ویلا_سارنی_WEEKLY:
+		أرجع "weekly";
+	افتراضي:
+		BUG("invalid schedule %d", ویلا_سارنی);
 	}
 }
 
-static const char *extraconfig[] = {
+ساكن ثابت حرف *extraconfig[] = {
 	"credential.interactive=false",
 	"core.askPass=true", /* 'true' returns success, but no output. */
-	NULL
+	عدم
 };
 
-static const char *get_extra_config_parameters(void) {
-	static const char *result = NULL;
-	struct strbuf builder = STRBUF_INIT;
+ساكن ثابت حرف *get_extra_config_parameters(فراغ) {
+	ساكن ثابت حرف *نتیجہ = عدم;
+	بنية strbuf builder = STRBUF_INIT;
 
-	if (result)
-		return result;
+	إذا (نتیجہ)
+		أرجع نتیجہ;
 
-	for (const char **s = extraconfig; s && *s; s++)
+	لكل (ثابت حرف **s = extraconfig; s && *s; s++)
 		strbuf_addf(&builder, "-c %s ", *s);
 
-	result = strbuf_detach(&builder, NULL);
-	return result;
+	نتیجہ = strbuf_detach(&builder, عدم);
+	أرجع نتیجہ;
 }
 
-static const char *get_extra_launchctl_strings(void) {
-	static const char *result = NULL;
-	struct strbuf builder = STRBUF_INIT;
+ساكن ثابت حرف *get_extra_launchctl_لڑیاں(فراغ) {
+	ساكن ثابت حرف *نتیجہ = عدم;
+	بنية strbuf builder = STRBUF_INIT;
 
-	if (result)
-		return result;
+	إذا (نتیجہ)
+		أرجع نتیجہ;
 
-	for (const char **s = extraconfig; s && *s; s++) {
+	لكل (ثابت حرف **s = extraconfig; s && *s; s++) {
 		strbuf_addstr(&builder, "<string>-c</string>\n");
 		strbuf_addf(&builder, "<string>%s</string>\n", *s);
 	}
 
-	result = strbuf_detach(&builder, NULL);
-	return result;
+	نتیجہ = strbuf_detach(&builder, عدم);
+	أرجع نتیجہ;
 }
 
 /*
@@ -1929,173 +1929,173 @@ static const char *get_extra_launchctl_strings(void) {
  *     | "qux" |    true     | "qux" (allocated) |     false     |
  *     +-------+-------------+-------------------+---------------+
  */
-static int get_schedule_cmd(const char *cmd, int *is_available, char **out)
+ساكن صحيح get_ویلا_سارنی_cmd(ثابت حرف *cmd, صحيح *is_دستیاب, حرف **باہرلا)
 {
-	char *testing = xstrdup_or_null(getenv("GIT_TEST_MAINT_SCHEDULER"));
-	struct string_list_item *item;
-	struct string_list list = STRING_LIST_INIT_NODUP;
+	حرف *testing = xstrdup_or_null(getenv("GIT_TEST_MAINT_SCHEDULER"));
+	بنية string_list_شے *شے;
+	بنية string_list list = STRING_LIST_INIT_NODUP;
 
-	if (!testing) {
-		if (out)
-			*out = xstrdup(cmd);
-		return 0;
+	إذا (!testing) {
+		إذا (باہرلا)
+			*باہرلا = xstrdup(cmd);
+		أرجع 0;
 	}
 
-	if (is_available)
-		*is_available = 0;
+	إذا (is_دستیاب)
+		*is_دستیاب = 0;
 
-	string_list_split_in_place(&list, testing, ",", -1);
-	for_each_string_list_item(item, &list) {
-		struct string_list pair = STRING_LIST_INIT_NODUP;
+	string_list_ونڈو_وچ_رکھو(&list, testing, ",", -1);
+	for_each_string_list_شے(شے, &list) {
+		بنية string_list pair = STRING_LIST_INIT_NODUP;
 
-		if (string_list_split_in_place(&pair, item->string, ":", 2) != 2)
-			continue;
+		إذا (string_list_ونڈو_وچ_رکھو(&pair, شے->string, ":", 2) != 2)
+			استمر;
 
-		if (!strcmp(cmd, pair.items[0].string)) {
-			if (out)
-				*out = xstrdup(pair.items[1].string);
-			if (is_available)
-				*is_available = 1;
+		إذا (!strcmp(cmd, pair.اشیاء[0].string)) {
+			إذا (باہرلا)
+				*باہرلا = xstrdup(pair.اشیاء[1].string);
+			إذا (is_دستیاب)
+				*is_دستیاب = 1;
 			string_list_clear(&pair, 0);
-			goto out;
+			اذهب باہرلا;
 		}
 
 		string_list_clear(&pair, 0);
 	}
 
-	if (out)
-		*out = xstrdup(cmd);
+	إذا (باہرلا)
+		*باہرلا = xstrdup(cmd);
 
-out:
+باہرلا:
 	string_list_clear(&list, 0);
-	free(testing);
-	return 1;
+	حرر(testing);
+	أرجع 1;
 }
 
-static int get_random_minute(void)
+ساكن صحيح get_random_minute(فراغ)
 {
 	/* Use a static value when under tests. */
-	if (getenv("GIT_TEST_MAINT_SCHEDULER"))
-		return 13;
+	إذا (getenv("GIT_TEST_MAINT_SCHEDULER"))
+		أرجع 13;
 
-	return git_rand(0) % 60;
+	أرجع git_rand(0) % 60;
 }
 
-static int is_launchctl_available(void)
+ساكن صحيح is_launchctl_دستیاب(فراغ)
 {
-	int is_available;
-	if (get_schedule_cmd("launchctl", &is_available, NULL))
-		return is_available;
+	صحيح is_دستیاب;
+	إذا (get_ویلا_سارنی_cmd("launchctl", &is_دستیاب, عدم))
+		أرجع is_دستیاب;
 
-#ifdef __APPLE__
-	return 1;
-#else
-	return 0;
-#endif
+#جے_تعریف_شدہ __APPLE__
+	أرجع 1;
+#وإلا
+	أرجع 0;
+#جے_انت
 }
 
-static char *launchctl_service_name(const char *frequency)
+ساكن حرف *launchctl_service_name(ثابت حرف *frequency)
 {
-	struct strbuf label = STRBUF_INIT;
+	بنية strbuf label = STRBUF_INIT;
 	strbuf_addf(&label, "org.git-scm.git.%s", frequency);
-	return strbuf_detach(&label, NULL);
+	أرجع strbuf_detach(&label, عدم);
 }
 
-static char *launchctl_service_filename(const char *name)
+ساكن حرف *launchctl_service_filename(ثابت حرف *name)
 {
-	char *expanded;
-	struct strbuf filename = STRBUF_INIT;
+	حرف *expanded;
+	بنية strbuf filename = STRBUF_INIT;
 	strbuf_addf(&filename, "~/Library/LaunchAgents/%s.plist", name);
 
-	expanded = interpolate_path(filename.buf, 1);
-	if (!expanded)
+	expanded = interpolate_رستہ(filename.buf, 1);
+	إذا (!expanded)
 		die(_("failed to expand path '%s'"), filename.buf);
 
 	strbuf_release(&filename);
-	return expanded;
+	أرجع expanded;
 }
 
-static char *launchctl_get_uid(void)
+ساكن حرف *launchctl_get_uid(فراغ)
 {
-	return xstrfmt("gui/%d", getuid());
+	أرجع xstrfmt("gui/%d", getuid());
 }
 
-static int launchctl_boot_plist(int enable, const char *filename)
+ساكن صحيح launchctl_boot_plist(صحيح enable, ثابت حرف *filename)
 {
-	char *cmd;
-	int result;
-	struct child_process child = CHILD_PROCESS_INIT;
-	char *uid = launchctl_get_uid();
+	حرف *cmd;
+	صحيح نتیجہ;
+	بنية بچہ_process بچہ = بچہ_PROCESS_INIT;
+	حرف *uid = launchctl_get_uid();
 
-	get_schedule_cmd("launchctl", NULL, &cmd);
-	strvec_split(&child.args, cmd);
-	strvec_pushl(&child.args, enable ? "bootstrap" : "bootout", uid,
-		     filename, NULL);
+	get_ویلا_سارنی_cmd("launchctl", عدم, &cmd);
+	strvec_ونڈو(&بچہ.دلیلاں, cmd);
+	strvec_pushl(&بچہ.دلیلاں, enable ? "bootstrap" : "bootout", uid,
+		     filename, عدم);
 
-	child.no_stderr = 1;
-	child.no_stdout = 1;
+	بچہ.no_stderr = 1;
+	بچہ.no_stdout = 1;
 
-	if (start_command(&child))
+	إذا (شروع_command(&بچہ))
 		die(_("failed to start launchctl"));
 
-	result = finish_command(&child);
+	نتیجہ = انت_command(&بچہ);
 
-	free(cmd);
-	free(uid);
-	return result;
+	حرر(cmd);
+	حرر(uid);
+	أرجع نتیجہ;
 }
 
-static int launchctl_remove_plist(enum schedule_priority schedule)
+ساكن صحيح launchctl_remove_plist(تعداد ویلا_سارنی_ترجیح ویلا_سارنی)
 {
-	const char *frequency = get_frequency(schedule);
-	char *name = launchctl_service_name(frequency);
-	char *filename = launchctl_service_filename(name);
-	int result = launchctl_boot_plist(0, filename);
+	ثابت حرف *frequency = get_frequency(ویلا_سارنی);
+	حرف *name = launchctl_service_name(frequency);
+	حرف *filename = launchctl_service_filename(name);
+	صحيح نتیجہ = launchctl_boot_plist(0, filename);
 	unlink(filename);
-	free(filename);
-	free(name);
-	return result;
+	حرر(filename);
+	حرر(name);
+	أرجع نتیجہ;
 }
 
-static int launchctl_remove_plists(void)
+ساكن صحيح launchctl_remove_plists(فراغ)
 {
-	return launchctl_remove_plist(SCHEDULE_HOURLY) ||
-	       launchctl_remove_plist(SCHEDULE_DAILY) ||
-	       launchctl_remove_plist(SCHEDULE_WEEKLY);
+	أرجع launchctl_remove_plist(ویلا_سارنی_HOURLY) ||
+	       launchctl_remove_plist(ویلا_سارنی_DAILY) ||
+	       launchctl_remove_plist(ویلا_سارنی_WEEKLY);
 }
 
-static int launchctl_list_contains_plist(const char *name, const char *cmd)
+ساكن صحيح launchctl_list_شامل_اے_plist(ثابت حرف *name, ثابت حرف *cmd)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	بنية بچہ_process بچہ = بچہ_PROCESS_INIT;
 
-	strvec_split(&child.args, cmd);
-	strvec_pushl(&child.args, "list", name, NULL);
+	strvec_ونڈو(&بچہ.دلیلاں, cmd);
+	strvec_pushl(&بچہ.دلیلاں, "list", name, عدم);
 
-	child.no_stderr = 1;
-	child.no_stdout = 1;
+	بچہ.no_stderr = 1;
+	بچہ.no_stdout = 1;
 
-	if (start_command(&child))
+	إذا (شروع_command(&بچہ))
 		die(_("failed to start launchctl"));
 
 	/* Returns failure if 'name' doesn't exist. */
-	return !finish_command(&child);
+	أرجع !انت_command(&بچہ);
 }
 
-static int launchctl_schedule_plist(const char *exec_path, enum schedule_priority schedule)
+ساكن صحيح launchctl_ویلا_سارنی_plist(ثابت حرف *exec_رستہ, تعداد ویلا_سارنی_ترجیح ویلا_سارنی)
 {
-	int i, fd;
-	const char *preamble, *repeat;
-	const char *frequency = get_frequency(schedule);
-	char *name = launchctl_service_name(frequency);
-	char *filename = launchctl_service_filename(name);
-	struct lock_file lk = LOCK_INIT;
-	static unsigned long lock_file_timeout_ms = ULONG_MAX;
-	struct strbuf plist = STRBUF_INIT, plist2 = STRBUF_INIT;
-	struct stat st;
-	char *cmd;
-	int minute = get_random_minute();
+	صحيح i, fd;
+	ثابت حرف *preamble, *repeat;
+	ثابت حرف *frequency = get_frequency(ویلا_سارنی);
+	حرف *name = launchctl_service_name(frequency);
+	حرف *filename = launchctl_service_filename(name);
+	بنية جندرا_file lk = جندرا_INIT;
+	ساكن بنانشانی لما جندرا_file_timeout_ms = ULONG_MAX;
+	بنية strbuf plist = STRBUF_INIT, plist2 = STRBUF_INIT;
+	بنية stat st;
+	حرف *cmd;
+	صحيح minute = get_random_minute();
 
-	get_schedule_cmd("launchctl", NULL, &cmd);
+	get_ویلا_سارنی_cmd("launchctl", عدم, &cmd);
 	preamble = "<?xml version=\"1.0\"?>\n"
 		   "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
 		   "<plist version=\"1.0\">"
@@ -2115,30 +2115,30 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 		   "</array>\n"
 		   "<key>StartCalendarInterval</key>\n"
 		   "<array>\n";
-	strbuf_addf(&plist, preamble, name, exec_path, exec_path,
-		    get_extra_launchctl_strings(), frequency);
+	strbuf_addf(&plist, preamble, name, exec_رستہ, exec_رستہ,
+		    get_extra_launchctl_لڑیاں(), frequency);
 
-	switch (schedule) {
-	case SCHEDULE_HOURLY:
+	بدل (ویلا_سارنی) {
+	حالة ویلا_سارنی_HOURLY:
 		repeat = "<dict>\n"
 			 "<key>Hour</key><integer>%d</integer>\n"
 			 "<key>Minute</key><integer>%d</integer>\n"
 			 "</dict>\n";
-		for (i = 1; i <= 23; i++)
+		لكل (i = 1; i <= 23; i++)
 			strbuf_addf(&plist, repeat, i, minute);
-		break;
+		اكسر;
 
-	case SCHEDULE_DAILY:
+	حالة ویلا_سارنی_DAILY:
 		repeat = "<dict>\n"
 			 "<key>Weekday</key><integer>%d</integer>\n"
 			 "<key>Hour</key><integer>0</integer>\n"
 			 "<key>Minute</key><integer>%d</integer>\n"
 			 "</dict>\n";
-		for (i = 1; i <= 6; i++)
+		لكل (i = 1; i <= 6; i++)
 			strbuf_addf(&plist, repeat, i, minute);
-		break;
+		اكسر;
 
-	case SCHEDULE_WEEKLY:
+	حالة ویلا_سارنی_WEEKLY:
 		strbuf_addf(&plist,
 			    "<dict>\n"
 			    "<key>Weekday</key><integer>0</integer>\n"
@@ -2146,133 +2146,133 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 			    "<key>Minute</key><integer>%d</integer>\n"
 			    "</dict>\n",
 			    minute);
-		break;
+		اكسر;
 
-	default:
+	افتراضي:
 		/* unreachable */
-		break;
+		اكسر;
 	}
 	strbuf_addstr(&plist, "</array>\n</dict>\n</plist>\n");
 
-	if (safe_create_leading_directories(the_repository, filename))
+	إذا (محفوظ_create_leading_directories(the_repository, filename))
 		die(_("failed to create directories for '%s'"), filename);
 
-	if ((long)lock_file_timeout_ms < 0 &&
+	إذا ((لما)جندرا_file_timeout_ms < 0 &&
 	    repo_config_get_ulong(the_repository, "gc.launchctlplistlocktimeoutms",
-				 &lock_file_timeout_ms))
-		lock_file_timeout_ms = 150;
+				 &جندرا_file_timeout_ms))
+		جندرا_file_timeout_ms = 150;
 
-	fd = hold_lock_file_for_update_timeout(&lk, filename, LOCK_DIE_ON_ERROR,
-					       lock_file_timeout_ms);
+	fd = hold_جندرا_file_for_update_timeout(&lk, filename, جندرا_DIE_ON_ERROR,
+					       جندرا_file_timeout_ms);
 
 	/*
 	 * Does this file already exist? With the intended contents? Is it
 	 * registered already? Then it does not need to be re-registered.
 	 */
-	if (!stat(filename, &st) && st.st_size == plist.len &&
+	إذا (!stat(filename, &st) && st.st_ناپ == plist.len &&
 	    strbuf_read_file(&plist2, filename, plist.len) == plist.len &&
 	    !strbuf_cmp(&plist, &plist2) &&
-	    launchctl_list_contains_plist(name, cmd))
-		rollback_lock_file(&lk);
-	else {
-		if (write_in_full(fd, plist.buf, plist.len) < 0 ||
-		    commit_lock_file(&lk))
+	    launchctl_list_شامل_اے_plist(name, cmd))
+		rollback_جندرا_file(&lk);
+	وإلا {
+		إذا (write_وچ_بھریا(fd, plist.buf, plist.len) < 0 ||
+		    commit_جندرا_file(&lk))
 			die_errno(_("could not write '%s'"), filename);
 
 		/* bootout might fail if not already running, so ignore */
 		launchctl_boot_plist(0, filename);
-		if (launchctl_boot_plist(1, filename))
+		إذا (launchctl_boot_plist(1, filename))
 			die(_("failed to bootstrap service %s"), filename);
 	}
 
-	free(filename);
-	free(name);
-	free(cmd);
+	حرر(filename);
+	حرر(name);
+	حرر(cmd);
 	strbuf_release(&plist);
 	strbuf_release(&plist2);
-	return 0;
+	أرجع 0;
 }
 
-static int launchctl_add_plists(void)
+ساكن صحيح launchctl_جوڑو_plists(فراغ)
 {
-	const char *exec_path = git_exec_path();
+	ثابت حرف *exec_رستہ = git_exec_رستہ();
 
-	return launchctl_schedule_plist(exec_path, SCHEDULE_HOURLY) ||
-	       launchctl_schedule_plist(exec_path, SCHEDULE_DAILY) ||
-	       launchctl_schedule_plist(exec_path, SCHEDULE_WEEKLY);
+	أرجع launchctl_ویلا_سارنی_plist(exec_رستہ, ویلا_سارنی_HOURLY) ||
+	       launchctl_ویلا_سارنی_plist(exec_رستہ, ویلا_سارنی_DAILY) ||
+	       launchctl_ویلا_سارنی_plist(exec_رستہ, ویلا_سارنی_WEEKLY);
 }
 
-static int launchctl_update_schedule(int run_maintenance, int fd UNUSED)
+ساكن صحيح launchctl_update_ویلا_سارنی(صحيح لگاتار_maintenance, صحيح fd بن_ورتیا)
 {
-	if (run_maintenance)
-		return launchctl_add_plists();
-	else
-		return launchctl_remove_plists();
+	إذا (لگاتار_maintenance)
+		أرجع launchctl_جوڑو_plists();
+	وإلا
+		أرجع launchctl_remove_plists();
 }
 
-static int is_schtasks_available(void)
+ساكن صحيح is_schtasks_دستیاب(فراغ)
 {
-	int is_available;
-	if (get_schedule_cmd("schtasks", &is_available, NULL))
-		return is_available;
+	صحيح is_دستیاب;
+	إذا (get_ویلا_سارنی_cmd("schtasks", &is_دستیاب, عدم))
+		أرجع is_دستیاب;
 
-#ifdef GIT_WINDOWS_NATIVE
-	return 1;
-#else
-	return 0;
-#endif
+#جے_تعریف_شدہ GIT_WINDOWS_NATIVE
+	أرجع 1;
+#وإلا
+	أرجع 0;
+#جے_انت
 }
 
-static char *schtasks_task_name(const char *frequency)
+ساكن حرف *schtasks_task_name(ثابت حرف *frequency)
 {
-	struct strbuf label = STRBUF_INIT;
+	بنية strbuf label = STRBUF_INIT;
 	strbuf_addf(&label, "Git Maintenance (%s)", frequency);
-	return strbuf_detach(&label, NULL);
+	أرجع strbuf_detach(&label, عدم);
 }
 
-static int schtasks_remove_task(enum schedule_priority schedule)
+ساكن صحيح schtasks_remove_task(تعداد ویلا_سارنی_ترجیح ویلا_سارنی)
 {
-	char *cmd;
-	struct child_process child = CHILD_PROCESS_INIT;
-	const char *frequency = get_frequency(schedule);
-	char *name = schtasks_task_name(frequency);
+	حرف *cmd;
+	بنية بچہ_process بچہ = بچہ_PROCESS_INIT;
+	ثابت حرف *frequency = get_frequency(ویلا_سارنی);
+	حرف *name = schtasks_task_name(frequency);
 
-	get_schedule_cmd("schtasks", NULL, &cmd);
-	strvec_split(&child.args, cmd);
-	strvec_pushl(&child.args, "/delete", "/tn", name, "/f", NULL);
-	free(name);
-	free(cmd);
+	get_ویلا_سارنی_cmd("schtasks", عدم, &cmd);
+	strvec_ونڈو(&بچہ.دلیلاں, cmd);
+	strvec_pushl(&بچہ.دلیلاں, "/delete", "/tn", name, "/f", عدم);
+	حرر(name);
+	حرر(cmd);
 
-	return run_command(&child);
+	أرجع لگاتار_command(&بچہ);
 }
 
-static int schtasks_remove_tasks(void)
+ساكن صحيح schtasks_remove_tasks(فراغ)
 {
-	return schtasks_remove_task(SCHEDULE_HOURLY) ||
-	       schtasks_remove_task(SCHEDULE_DAILY) ||
-	       schtasks_remove_task(SCHEDULE_WEEKLY);
+	أرجع schtasks_remove_task(ویلا_سارنی_HOURLY) ||
+	       schtasks_remove_task(ویلا_سارنی_DAILY) ||
+	       schtasks_remove_task(ویلا_سارنی_WEEKLY);
 }
 
-static int schtasks_schedule_task(const char *exec_path, enum schedule_priority schedule)
+ساكن صحيح schtasks_ویلا_سارنی_task(ثابت حرف *exec_رستہ, تعداد ویلا_سارنی_ترجیح ویلا_سارنی)
 {
-	char *cmd;
-	int result;
-	struct child_process child = CHILD_PROCESS_INIT;
-	const char *xml;
-	struct tempfile *tfile;
-	const char *frequency = get_frequency(schedule);
-	char *name = schtasks_task_name(frequency);
-	struct strbuf tfilename = STRBUF_INIT;
-	int minute = get_random_minute();
+	حرف *cmd;
+	صحيح نتیجہ;
+	بنية بچہ_process بچہ = بچہ_PROCESS_INIT;
+	ثابت حرف *xml;
+	بنية tempfile *tfile;
+	ثابت حرف *frequency = get_frequency(ویلا_سارنی);
+	حرف *name = schtasks_task_name(frequency);
+	بنية strbuf tfilename = STRBUF_INIT;
+	صحيح minute = get_random_minute();
 
-	get_schedule_cmd("schtasks", NULL, &cmd);
+	get_ویلا_سارنی_cmd("schtasks", عدم, &cmd);
 
 	strbuf_addf(&tfilename, "%s/schedule_%s_XXXXXX",
 		    repo_get_common_dir(the_repository), frequency);
 	tfile = xmks_tempfile(tfilename.buf);
 	strbuf_release(&tfilename);
 
-	if (!fdopen_tempfile(tfile, "w"))
+	إذا (!fdopen_tempfile(tfile, "w"))
 		die(_("failed to create temp xml file"));
 
 	xml = "<?xml version=\"1.0\" ?>\n"
@@ -2281,8 +2281,8 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 	      "<CalendarTrigger>\n";
 	fputs(xml, tfile->fp);
 
-	switch (schedule) {
-	case SCHEDULE_HOURLY:
+	بدل (ویلا_سارنی) {
+	حالة ویلا_سارنی_HOURLY:
 		fprintf(tfile->fp,
 			"<StartBoundary>2020-01-01T01:%02d:00</StartBoundary>\n"
 			"<Enabled>true</Enabled>\n"
@@ -2295,9 +2295,9 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 			"<StopAtDurationEnd>false</StopAtDurationEnd>\n"
 			"</Repetition>\n",
 			minute);
-		break;
+		اكسر;
 
-	case SCHEDULE_DAILY:
+	حالة ویلا_سارنی_DAILY:
 		fprintf(tfile->fp,
 			"<StartBoundary>2020-01-01T00:%02d:00</StartBoundary>\n"
 			"<Enabled>true</Enabled>\n"
@@ -2313,9 +2313,9 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 			"<WeeksInterval>1</WeeksInterval>\n"
 			"</ScheduleByWeek>\n",
 			minute);
-		break;
+		اكسر;
 
-	case SCHEDULE_WEEKLY:
+	حالة ویلا_سارنی_WEEKLY:
 		fprintf(tfile->fp,
 			"<StartBoundary>2020-01-01T00:%02d:00</StartBoundary>\n"
 			"<Enabled>true</Enabled>\n"
@@ -2326,10 +2326,10 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 			"<WeeksInterval>1</WeeksInterval>\n"
 			"</ScheduleByWeek>\n",
 			minute);
-		break;
+		اكسر;
 
-	default:
-		break;
+	افتراضي:
+		اكسر;
 	}
 
 	xml = "</CalendarTrigger>\n"
@@ -2356,127 +2356,127 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 	      "</Exec>\n"
 	      "</Actions>\n"
 	      "</Task>\n";
-	fprintf(tfile->fp, xml, exec_path, exec_path,
+	fprintf(tfile->fp, xml, exec_رستہ, exec_رستہ,
 		get_extra_config_parameters(), frequency);
-	strvec_split(&child.args, cmd);
-	strvec_pushl(&child.args, "/create", "/tn", name, "/f", "/xml",
-				  get_tempfile_path(tfile), NULL);
+	strvec_ونڈو(&بچہ.دلیلاں, cmd);
+	strvec_pushl(&بچہ.دلیلاں, "/create", "/tn", name, "/f", "/xml",
+				  get_tempfile_رستہ(tfile), عدم);
 	close_tempfile_gently(tfile);
 
-	child.no_stdout = 1;
-	child.no_stderr = 1;
+	بچہ.no_stdout = 1;
+	بچہ.no_stderr = 1;
 
-	if (start_command(&child))
+	إذا (شروع_command(&بچہ))
 		die(_("failed to start schtasks"));
-	result = finish_command(&child);
+	نتیجہ = انت_command(&بچہ);
 
 	delete_tempfile(&tfile);
-	free(name);
-	free(cmd);
-	return result;
+	حرر(name);
+	حرر(cmd);
+	أرجع نتیجہ;
 }
 
-static int schtasks_schedule_tasks(void)
+ساكن صحيح schtasks_ویلا_سارنی_tasks(فراغ)
 {
-	const char *exec_path = git_exec_path();
+	ثابت حرف *exec_رستہ = git_exec_رستہ();
 
-	return schtasks_schedule_task(exec_path, SCHEDULE_HOURLY) ||
-	       schtasks_schedule_task(exec_path, SCHEDULE_DAILY) ||
-	       schtasks_schedule_task(exec_path, SCHEDULE_WEEKLY);
+	أرجع schtasks_ویلا_سارنی_task(exec_رستہ, ویلا_سارنی_HOURLY) ||
+	       schtasks_ویلا_سارنی_task(exec_رستہ, ویلا_سارنی_DAILY) ||
+	       schtasks_ویلا_سارنی_task(exec_رستہ, ویلا_سارنی_WEEKLY);
 }
 
-static int schtasks_update_schedule(int run_maintenance, int fd UNUSED)
+ساكن صحيح schtasks_update_ویلا_سارنی(صحيح لگاتار_maintenance, صحيح fd بن_ورتیا)
 {
-	if (run_maintenance)
-		return schtasks_schedule_tasks();
-	else
-		return schtasks_remove_tasks();
+	إذا (لگاتار_maintenance)
+		أرجع schtasks_ویلا_سارنی_tasks();
+	وإلا
+		أرجع schtasks_remove_tasks();
 }
 
-MAYBE_UNUSED
-static int check_crontab_process(const char *cmd)
+MAYBE_بن_ورتیا
+ساكن صحيح check_crontab_process(ثابت حرف *cmd)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	بنية بچہ_process بچہ = بچہ_PROCESS_INIT;
 
-	strvec_split(&child.args, cmd);
-	strvec_push(&child.args, "-l");
-	child.no_stdin = 1;
-	child.no_stdout = 1;
-	child.no_stderr = 1;
-	child.silent_exec_failure = 1;
+	strvec_ونڈو(&بچہ.دلیلاں, cmd);
+	strvec_ڈالو(&بچہ.دلیلاں, "-l");
+	بچہ.no_stdin = 1;
+	بچہ.no_stdout = 1;
+	بچہ.no_stderr = 1;
+	بچہ.silent_exec_failure = 1;
 
-	if (start_command(&child))
-		return 0;
+	إذا (شروع_command(&بچہ))
+		أرجع 0;
 	/* Ignore exit code, as an empty crontab will return error. */
-	finish_command(&child);
-	return 1;
+	انت_command(&بچہ);
+	أرجع 1;
 }
 
-static int is_crontab_available(void)
+ساكن صحيح is_crontab_دستیاب(فراغ)
 {
-	char *cmd;
-	int is_available;
-	int ret;
+	حرف *cmd;
+	صحيح is_دستیاب;
+	صحيح ret;
 
-	if (get_schedule_cmd("crontab", &is_available, &cmd)) {
-		ret = is_available;
-		goto out;
+	إذا (get_ویلا_سارنی_cmd("crontab", &is_دستیاب, &cmd)) {
+		ret = is_دستیاب;
+		اذهب باہرلا;
 	}
 
-#ifdef __APPLE__
+#جے_تعریف_شدہ __APPLE__
 	/*
 	 * macOS has cron, but it requires special permissions and will
 	 * create a UI alert when attempting to run this command.
 	 */
 	ret = 0;
-#else
+#وإلا
 	ret = check_crontab_process(cmd);
-#endif
+#جے_انت
 
-out:
-	free(cmd);
-	return ret;
+باہرلا:
+	حرر(cmd);
+	أرجع ret;
 }
 
-#define BEGIN_LINE "# BEGIN GIT MAINTENANCE SCHEDULE"
-#define END_LINE "# END GIT MAINTENANCE SCHEDULE"
+#تعریف_کرو BEGIN_سطر "# BEGIN GIT MAINTENANCE SCHEDULE"
+#تعریف_کرو سرا_سطر "# END GIT MAINTENANCE SCHEDULE"
 
-static int crontab_update_schedule(int run_maintenance, int fd)
+ساكن صحيح crontab_update_ویلا_سارنی(صحيح لگاتار_maintenance, صحيح fd)
 {
-	char *cmd;
-	int result = 0;
-	int in_old_region = 0;
-	struct child_process crontab_list = CHILD_PROCESS_INIT;
-	struct child_process crontab_edit = CHILD_PROCESS_INIT;
-	FILE *cron_list, *cron_in;
-	struct strbuf line = STRBUF_INIT;
-	struct tempfile *tmpedit = NULL;
-	int minute = get_random_minute();
+	حرف *cmd;
+	صحيح نتیجہ = 0;
+	صحيح وچ_old_region = 0;
+	بنية بچہ_process crontab_list = بچہ_PROCESS_INIT;
+	بنية بچہ_process crontab_edit = بچہ_PROCESS_INIT;
+	FILE *cron_list, *cron_وچ;
+	بنية strbuf سطر = STRBUF_INIT;
+	بنية tempfile *tmpedit = عدم;
+	صحيح minute = get_random_minute();
 
-	get_schedule_cmd("crontab", NULL, &cmd);
-	strvec_split(&crontab_list.args, cmd);
-	strvec_push(&crontab_list.args, "-l");
-	crontab_list.in = -1;
-	crontab_list.out = dup(fd);
+	get_ویلا_سارنی_cmd("crontab", عدم, &cmd);
+	strvec_ونڈو(&crontab_list.دلیلاں, cmd);
+	strvec_ڈالو(&crontab_list.دلیلاں, "-l");
+	crontab_list.وچ = -1;
+	crontab_list.باہرلا = dup(fd);
 	crontab_list.git_cmd = 0;
 
-	if (start_command(&crontab_list)) {
-		result = error(_("failed to run 'crontab -l'; your system might not support 'cron'"));
-		goto out;
+	إذا (شروع_command(&crontab_list)) {
+		نتیجہ = error(_("failed to run 'crontab -l'; your system might not support 'cron'"));
+		اذهب باہرلا;
 	}
 
 	/* Ignore exit code, as an empty crontab will return error. */
-	finish_command(&crontab_list);
+	انت_command(&crontab_list);
 
 	tmpedit = mks_tempfile_t(".git_cron_edit_tmpXXXXXX");
-	if (!tmpedit) {
-		result = error(_("failed to create crontab temporary file"));
-		goto out;
+	إذا (!tmpedit) {
+		نتیجہ = error(_("failed to create crontab temporary file"));
+		اذهب باہرلا;
 	}
-	cron_in = fdopen_tempfile(tmpedit, "w");
-	if (!cron_in) {
-		result = error(_("failed to open temporary file"));
-		goto out;
+	cron_وچ = fdopen_tempfile(tmpedit, "w");
+	إذا (!cron_وچ) {
+		نتیجہ = error(_("failed to open temporary file"));
+		اذهب باہرلا;
 	}
 
 	/*
@@ -2486,120 +2486,120 @@ static int crontab_update_schedule(int run_maintenance, int fd)
 	cron_list = fdopen(fd, "r");
 	rewind(cron_list);
 
-	while (!strbuf_getline_lf(&line, cron_list)) {
-		if (!in_old_region && !strcmp(line.buf, BEGIN_LINE))
-			in_old_region = 1;
-		else if (in_old_region && !strcmp(line.buf, END_LINE))
-			in_old_region = 0;
-		else if (!in_old_region)
-			fprintf(cron_in, "%s\n", line.buf);
+	طالما (!strbuf_getline_lf(&سطر, cron_list)) {
+		إذا (!وچ_old_region && !strcmp(سطر.buf, BEGIN_سطر))
+			وچ_old_region = 1;
+		وإلا إذا (وچ_old_region && !strcmp(سطر.buf, سرا_سطر))
+			وچ_old_region = 0;
+		وإلا إذا (!وچ_old_region)
+			fprintf(cron_وچ, "%s\n", سطر.buf);
 	}
-	strbuf_release(&line);
+	strbuf_release(&سطر);
 
-	if (run_maintenance) {
-		struct strbuf line_format = STRBUF_INIT;
-		const char *exec_path = git_exec_path();
+	إذا (لگاتار_maintenance) {
+		بنية strbuf سطر_format = STRBUF_INIT;
+		ثابت حرف *exec_رستہ = git_exec_رستہ();
 
-		fprintf(cron_in, "%s\n", BEGIN_LINE);
-		fprintf(cron_in,
+		fprintf(cron_وچ, "%s\n", BEGIN_سطر);
+		fprintf(cron_وچ,
 			"# The following schedule was created by Git\n");
-		fprintf(cron_in, "# Any edits made in this region might be\n");
-		fprintf(cron_in,
+		fprintf(cron_وچ, "# Any edits made in this region might be\n");
+		fprintf(cron_وچ,
 			"# replaced in the future by a Git command.\n\n");
 
-		strbuf_addf(&line_format,
+		strbuf_addf(&سطر_format,
 			    "%%d %%s * * %%s \"%s/git\" --exec-path=\"%s\" %s for-each-repo --keep-going --config=maintenance.repo maintenance run --schedule=%%s\n",
-			    exec_path, exec_path, get_extra_config_parameters());
-		fprintf(cron_in, line_format.buf, minute, "1-23", "*", "hourly");
-		fprintf(cron_in, line_format.buf, minute, "0", "1-6", "daily");
-		fprintf(cron_in, line_format.buf, minute, "0", "0", "weekly");
-		strbuf_release(&line_format);
+			    exec_رستہ, exec_رستہ, get_extra_config_parameters());
+		fprintf(cron_وچ, سطر_format.buf, minute, "1-23", "*", "hourly");
+		fprintf(cron_وچ, سطر_format.buf, minute, "0", "1-6", "daily");
+		fprintf(cron_وچ, سطر_format.buf, minute, "0", "0", "weekly");
+		strbuf_release(&سطر_format);
 
-		fprintf(cron_in, "\n%s\n", END_LINE);
+		fprintf(cron_وچ, "\n%s\n", سرا_سطر);
 	}
 
-	fflush(cron_in);
+	fflush(cron_وچ);
 
-	strvec_split(&crontab_edit.args, cmd);
-	strvec_push(&crontab_edit.args, get_tempfile_path(tmpedit));
+	strvec_ونڈو(&crontab_edit.دلیلاں, cmd);
+	strvec_ڈالو(&crontab_edit.دلیلاں, get_tempfile_رستہ(tmpedit));
 	crontab_edit.git_cmd = 0;
 
-	if (start_command(&crontab_edit)) {
-		result = error(_("failed to run 'crontab'; your system might not support 'cron'"));
-		goto out;
+	إذا (شروع_command(&crontab_edit)) {
+		نتیجہ = error(_("failed to run 'crontab'; your system might not support 'cron'"));
+		اذهب باہرلا;
 	}
 
-	if (finish_command(&crontab_edit))
-		result = error(_("'crontab' died"));
-	else
+	إذا (انت_command(&crontab_edit))
+		نتیجہ = error(_("'crontab' died"));
+	وإلا
 		fclose(cron_list);
 
-out:
+باہرلا:
 	delete_tempfile(&tmpedit);
-	free(cmd);
-	return result;
+	حرر(cmd);
+	أرجع نتیجہ;
 }
 
-static int real_is_systemd_timer_available(void)
+ساكن صحيح real_is_systemd_timer_دستیاب(فراغ)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	بنية بچہ_process بچہ = بچہ_PROCESS_INIT;
 
-	strvec_pushl(&child.args, "systemctl", "--user", "list-timers", NULL);
-	child.no_stdin = 1;
-	child.no_stdout = 1;
-	child.no_stderr = 1;
-	child.silent_exec_failure = 1;
+	strvec_pushl(&بچہ.دلیلاں, "systemctl", "--user", "list-timers", عدم);
+	بچہ.no_stdin = 1;
+	بچہ.no_stdout = 1;
+	بچہ.no_stderr = 1;
+	بچہ.silent_exec_failure = 1;
 
-	if (start_command(&child))
-		return 0;
-	if (finish_command(&child))
-		return 0;
-	return 1;
+	إذا (شروع_command(&بچہ))
+		أرجع 0;
+	إذا (انت_command(&بچہ))
+		أرجع 0;
+	أرجع 1;
 }
 
-static int is_systemd_timer_available(void)
+ساكن صحيح is_systemd_timer_دستیاب(فراغ)
 {
-	int is_available;
+	صحيح is_دستیاب;
 
-	if (get_schedule_cmd("systemctl", &is_available, NULL))
-		return is_available;
+	إذا (get_ویلا_سارنی_cmd("systemctl", &is_دستیاب, عدم))
+		أرجع is_دستیاب;
 
-	return real_is_systemd_timer_available();
+	أرجع real_is_systemd_timer_دستیاب();
 }
 
-static char *xdg_config_home_systemd(const char *filename)
+ساكن حرف *xdg_config_home_systemd(ثابت حرف *filename)
 {
-	return xdg_config_home_for("systemd/user", filename);
+	أرجع xdg_config_home_for("systemd/user", filename);
 }
 
-#define SYSTEMD_UNIT_FORMAT "git-maintenance@%s.%s"
+#تعریف_کرو SYSTEMD_UNIT_FORMAT "git-maintenance@%s.%s"
 
-static int systemd_timer_delete_timer_file(enum schedule_priority priority)
+ساكن صحيح systemd_timer_delete_timer_file(تعداد ویلا_سارنی_ترجیح ترجیح)
 {
-	int ret = 0;
-	const char *frequency = get_frequency(priority);
-	char *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
-	char *filename = xdg_config_home_systemd(local_timer_name);
+	صحيح ret = 0;
+	ثابت حرف *frequency = get_frequency(ترجیح);
+	حرف *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
+	حرف *filename = xdg_config_home_systemd(local_timer_name);
 
-	if (unlink(filename) && !is_missing_file_error(errno))
+	إذا (unlink(filename) && !is_missing_file_error(errno))
 		ret = error_errno(_("failed to delete '%s'"), filename);
 
-	free(filename);
-	free(local_timer_name);
-	return ret;
+	حرر(filename);
+	حرر(local_timer_name);
+	أرجع ret;
 }
 
-static int systemd_timer_delete_service_template(void)
+ساكن صحيح systemd_timer_delete_service_template(فراغ)
 {
-	int ret = 0;
-	char *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
-	char *filename = xdg_config_home_systemd(local_service_name);
-	if (unlink(filename) && !is_missing_file_error(errno))
+	صحيح ret = 0;
+	حرف *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
+	حرف *filename = xdg_config_home_systemd(local_service_name);
+	إذا (unlink(filename) && !is_missing_file_error(errno))
 		ret = error_errno(_("failed to delete '%s'"), filename);
 
-	free(filename);
-	free(local_service_name);
-	return ret;
+	حرر(filename);
+	حرر(local_service_name);
+	أرجع ret;
 }
 
 /*
@@ -2607,41 +2607,41 @@ static int systemd_timer_delete_service_template(void)
  * file using a custom minute. This timer file cannot use the templating
  * system, so we generate a specific file for each.
  */
-static int systemd_timer_write_timer_file(enum schedule_priority schedule,
-					  int minute)
+ساكن صحيح systemd_timer_write_timer_file(تعداد ویلا_سارنی_ترجیح ویلا_سارنی,
+					  صحيح minute)
 {
-	int res = -1;
-	char *filename;
+	صحيح res = -1;
+	حرف *filename;
 	FILE *file;
-	const char *unit;
-	char *schedule_pattern = NULL;
-	const char *frequency = get_frequency(schedule);
-	char *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
+	ثابت حرف *unit;
+	حرف *ویلا_سارنی_نمونہ = عدم;
+	ثابت حرف *frequency = get_frequency(ویلا_سارنی);
+	حرف *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
 
 	filename = xdg_config_home_systemd(local_timer_name);
 
-	if (safe_create_leading_directories(the_repository, filename)) {
+	إذا (محفوظ_create_leading_directories(the_repository, filename)) {
 		error(_("failed to create directories for '%s'"), filename);
-		goto error;
+		اذهب error;
 	}
 	file = fopen_or_warn(filename, "w");
-	if (!file)
-		goto error;
+	إذا (!file)
+		اذهب error;
 
-	switch (schedule) {
-	case SCHEDULE_HOURLY:
-		schedule_pattern = xstrfmt("*-*-* 1..23:%02d:00", minute);
-		break;
+	بدل (ویلا_سارنی) {
+	حالة ویلا_سارنی_HOURLY:
+		ویلا_سارنی_نمونہ = xstrfmt("*-*-* 1..23:%02d:00", minute);
+		اكسر;
 
-	case SCHEDULE_DAILY:
-		schedule_pattern = xstrfmt("Tue..Sun *-*-* 0:%02d:00", minute);
-		break;
+	حالة ویلا_سارنی_DAILY:
+		ویلا_سارنی_نمونہ = xstrfmt("Tue..Sun *-*-* 0:%02d:00", minute);
+		اكسر;
 
-	case SCHEDULE_WEEKLY:
-		schedule_pattern = xstrfmt("Mon 0:%02d:00", minute);
-		break;
+	حالة ویلا_سارنی_WEEKLY:
+		ویلا_سارنی_نمونہ = xstrfmt("Mon 0:%02d:00", minute);
+		اكسر;
 
-	default:
+	افتراضي:
 		BUG("Unhandled schedule_priority");
 	}
 
@@ -2658,23 +2658,23 @@ static int systemd_timer_write_timer_file(enum schedule_priority schedule,
 	       "\n"
 	       "[Install]\n"
 	       "WantedBy=timers.target\n";
-	if (fprintf(file, unit, schedule_pattern) < 0) {
+	إذا (fprintf(file, unit, ویلا_سارنی_نمونہ) < 0) {
 		error(_("failed to write to '%s'"), filename);
 		fclose(file);
-		goto error;
+		اذهب error;
 	}
-	if (fclose(file) == EOF) {
+	إذا (fclose(file) == EOF) {
 		error_errno(_("failed to flush '%s'"), filename);
-		goto error;
+		اذهب error;
 	}
 
 	res = 0;
 
 error:
-	free(schedule_pattern);
-	free(local_timer_name);
-	free(filename);
-	return res;
+	حرر(ویلا_سارنی_نمونہ);
+	حرر(local_timer_name);
+	حرر(filename);
+	أرجع res;
 }
 
 /*
@@ -2684,22 +2684,22 @@ error:
  * and will use this file and insert the <schedule> into the template at
  * the position of "%i".
  */
-static int systemd_timer_write_service_template(const char *exec_path)
+ساكن صحيح systemd_timer_write_service_template(ثابت حرف *exec_رستہ)
 {
-	int res = -1;
-	char *filename;
+	صحيح res = -1;
+	حرف *filename;
 	FILE *file;
-	const char *unit;
-	char *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
+	ثابت حرف *unit;
+	حرف *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
 
 	filename = xdg_config_home_systemd(local_service_name);
-	if (safe_create_leading_directories(the_repository, filename)) {
+	إذا (محفوظ_create_leading_directories(the_repository, filename)) {
 		error(_("failed to create directories for '%s'"), filename);
-		goto error;
+		اذهب error;
 	}
 	file = fopen_or_warn(filename, "w");
-	if (!file)
-		goto error;
+	إذا (!file)
+		اذهب error;
 
 	unit = "# This file was created and is maintained by Git.\n"
 	       "# Any edits made in this file might be replaced in the future\n"
@@ -2720,32 +2720,32 @@ static int systemd_timer_write_service_template(const char *exec_path)
 	       "RestrictSUIDSGID=yes\n"
 	       "SystemCallArchitectures=native\n"
 	       "SystemCallFilter=@system-service\n";
-	if (fprintf(file, unit, exec_path, exec_path, get_extra_config_parameters()) < 0) {
+	إذا (fprintf(file, unit, exec_رستہ, exec_رستہ, get_extra_config_parameters()) < 0) {
 		error(_("failed to write to '%s'"), filename);
 		fclose(file);
-		goto error;
+		اذهب error;
 	}
-	if (fclose(file) == EOF) {
+	إذا (fclose(file) == EOF) {
 		error_errno(_("failed to flush '%s'"), filename);
-		goto error;
+		اذهب error;
 	}
 
 	res = 0;
 
 error:
-	free(local_service_name);
-	free(filename);
-	return res;
+	حرر(local_service_name);
+	حرر(filename);
+	أرجع res;
 }
 
-static int systemd_timer_enable_unit(int enable,
-				     enum schedule_priority schedule,
-				     int minute)
+ساكن صحيح systemd_timer_enable_unit(صحيح enable,
+				     تعداد ویلا_سارنی_ترجیح ویلا_سارنی,
+				     صحيح minute)
 {
-	char *cmd = NULL;
-	struct child_process child = CHILD_PROCESS_INIT;
-	const char *frequency = get_frequency(schedule);
-	int ret;
+	حرف *cmd = عدم;
+	بنية بچہ_process بچہ = بچہ_PROCESS_INIT;
+	ثابت حرف *frequency = get_frequency(ویلا_سارنی);
+	صحيح ret;
 
 	/*
 	 * Disabling the systemd unit while it is already disabled makes
@@ -2756,25 +2756,25 @@ static int systemd_timer_enable_unit(int enable,
 	 * On the other hand, enabling a systemd unit which is already enabled
 	 * produces no error.
 	 */
-	if (!enable) {
-		child.no_stderr = 1;
-	} else if (systemd_timer_write_timer_file(schedule, minute)) {
+	إذا (!enable) {
+		بچہ.no_stderr = 1;
+	} وإلا إذا (systemd_timer_write_timer_file(ویلا_سارنی, minute)) {
 		ret = -1;
-		goto out;
+		اذهب باہرلا;
 	}
 
-	get_schedule_cmd("systemctl", NULL, &cmd);
-	strvec_split(&child.args, cmd);
-	strvec_pushl(&child.args, "--user", enable ? "enable" : "disable",
-		     "--now", NULL);
-	strvec_pushf(&child.args, SYSTEMD_UNIT_FORMAT, frequency, "timer");
+	get_ویلا_سارنی_cmd("systemctl", عدم, &cmd);
+	strvec_ونڈو(&بچہ.دلیلاں, cmd);
+	strvec_pushl(&بچہ.دلیلاں, "--user", enable ? "enable" : "disable",
+		     "--now", عدم);
+	strvec_pushf(&بچہ.دلیلاں, SYSTEMD_UNIT_FORMAT, frequency, "timer");
 
-	if (start_command(&child)) {
+	إذا (شروع_command(&بچہ)) {
 		ret = error(_("failed to start systemctl"));
-		goto out;
+		اذهب باہرلا;
 	}
 
-	if (finish_command(&child)) {
+	إذا (انت_command(&بچہ)) {
 		/*
 		 * Disabling an already disabled systemd unit makes
 		 * systemctl fail.
@@ -2782,83 +2782,83 @@ static int systemd_timer_enable_unit(int enable,
 		 *
 		 * Enabling an enabled systemd unit doesn't fail.
 		 */
-		if (enable) {
+		إذا (enable) {
 			ret = error(_("failed to run systemctl"));
-			goto out;
+			اذهب باہرلا;
 		}
 	}
 
 	ret = 0;
 
-out:
-	free(cmd);
-	return ret;
+باہرلا:
+	حرر(cmd);
+	أرجع ret;
 }
 
 /*
  * A previous version of Git wrote the timer units as template files.
  * Clean these up, if they exist.
  */
-static void systemd_timer_delete_stale_timer_templates(void)
+ساكن فراغ systemd_timer_delete_stale_timer_templates(فراغ)
 {
-	char *timer_template_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "timer");
-	char *filename = xdg_config_home_systemd(timer_template_name);
+	حرف *timer_template_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "timer");
+	حرف *filename = xdg_config_home_systemd(timer_template_name);
 
-	if (unlink(filename) && !is_missing_file_error(errno))
+	إذا (unlink(filename) && !is_missing_file_error(errno))
 		warning(_("failed to delete '%s'"), filename);
 
-	free(filename);
-	free(timer_template_name);
+	حرر(filename);
+	حرر(timer_template_name);
 }
 
-static int systemd_timer_delete_unit_files(void)
+ساكن صحيح systemd_timer_delete_unit_files(فراغ)
 {
 	systemd_timer_delete_stale_timer_templates();
 
 	/* Purposefully not short-circuited to make sure all are called. */
-	return systemd_timer_delete_timer_file(SCHEDULE_HOURLY) |
-	       systemd_timer_delete_timer_file(SCHEDULE_DAILY) |
-	       systemd_timer_delete_timer_file(SCHEDULE_WEEKLY) |
+	أرجع systemd_timer_delete_timer_file(ویلا_سارنی_HOURLY) |
+	       systemd_timer_delete_timer_file(ویلا_سارنی_DAILY) |
+	       systemd_timer_delete_timer_file(ویلا_سارنی_WEEKLY) |
 	       systemd_timer_delete_service_template();
 }
 
-static int systemd_timer_delete_units(void)
+ساكن صحيح systemd_timer_delete_units(فراغ)
 {
-	int minute = get_random_minute();
+	صحيح minute = get_random_minute();
 	/* Purposefully not short-circuited to make sure all are called. */
-	return systemd_timer_enable_unit(0, SCHEDULE_HOURLY, minute) |
-	       systemd_timer_enable_unit(0, SCHEDULE_DAILY, minute) |
-	       systemd_timer_enable_unit(0, SCHEDULE_WEEKLY, minute) |
+	أرجع systemd_timer_enable_unit(0, ویلا_سارنی_HOURLY, minute) |
+	       systemd_timer_enable_unit(0, ویلا_سارنی_DAILY, minute) |
+	       systemd_timer_enable_unit(0, ویلا_سارنی_WEEKLY, minute) |
 	       systemd_timer_delete_unit_files();
 }
 
-static int systemd_timer_setup_units(void)
+ساكن صحيح systemd_timer_تیاری_units(فراغ)
 {
-	int minute = get_random_minute();
-	const char *exec_path = git_exec_path();
+	صحيح minute = get_random_minute();
+	ثابت حرف *exec_رستہ = git_exec_رستہ();
 
-	int ret = systemd_timer_write_service_template(exec_path) ||
-		  systemd_timer_enable_unit(1, SCHEDULE_HOURLY, minute) ||
-		  systemd_timer_enable_unit(1, SCHEDULE_DAILY, minute) ||
-		  systemd_timer_enable_unit(1, SCHEDULE_WEEKLY, minute);
+	صحيح ret = systemd_timer_write_service_template(exec_رستہ) ||
+		  systemd_timer_enable_unit(1, ویلا_سارنی_HOURLY, minute) ||
+		  systemd_timer_enable_unit(1, ویلا_سارنی_DAILY, minute) ||
+		  systemd_timer_enable_unit(1, ویلا_سارنی_WEEKLY, minute);
 
-	if (ret)
+	إذا (ret)
 		systemd_timer_delete_units();
-	else
+	وإلا
 		systemd_timer_delete_stale_timer_templates();
 
-	return ret;
+	أرجع ret;
 }
 
-static int systemd_timer_update_schedule(int run_maintenance, int fd UNUSED)
+ساكن صحيح systemd_timer_update_ویلا_سارنی(صحيح لگاتار_maintenance, صحيح fd بن_ورتیا)
 {
-	if (run_maintenance)
-		return systemd_timer_setup_units();
-	else
-		return systemd_timer_delete_units();
+	إذا (لگاتار_maintenance)
+		أرجع systemd_timer_تیاری_units();
+	وإلا
+		أرجع systemd_timer_delete_units();
 }
 
-enum scheduler {
+تعداد scheduler {
 	SCHEDULER_INVALID = -1,
 	SCHEDULER_AUTO,
 	SCHEDULER_CRON,
@@ -2867,236 +2867,236 @@ enum scheduler {
 	SCHEDULER_SCHTASKS,
 };
 
-static const struct {
-	const char *name;
-	int (*is_available)(void);
-	int (*update_schedule)(int run_maintenance, int fd);
+ساكن ثابت بنية {
+	ثابت حرف *name;
+	صحيح (*is_دستیاب)(فراغ);
+	صحيح (*update_ویلا_سارنی)(صحيح لگاتار_maintenance, صحيح fd);
 } scheduler_fn[] = {
 	[SCHEDULER_CRON] = {
 		.name = "crontab",
-		.is_available = is_crontab_available,
-		.update_schedule = crontab_update_schedule,
+		.is_دستیاب = is_crontab_دستیاب,
+		.update_ویلا_سارنی = crontab_update_ویلا_سارنی,
 	},
 	[SCHEDULER_SYSTEMD] = {
 		.name = "systemctl",
-		.is_available = is_systemd_timer_available,
-		.update_schedule = systemd_timer_update_schedule,
+		.is_دستیاب = is_systemd_timer_دستیاب,
+		.update_ویلا_سارنی = systemd_timer_update_ویلا_سارنی,
 	},
 	[SCHEDULER_LAUNCHCTL] = {
 		.name = "launchctl",
-		.is_available = is_launchctl_available,
-		.update_schedule = launchctl_update_schedule,
+		.is_دستیاب = is_launchctl_دستیاب,
+		.update_ویلا_سارنی = launchctl_update_ویلا_سارنی,
 	},
 	[SCHEDULER_SCHTASKS] = {
 		.name = "schtasks",
-		.is_available = is_schtasks_available,
-		.update_schedule = schtasks_update_schedule,
+		.is_دستیاب = is_schtasks_دستیاب,
+		.update_ویلا_سارنی = schtasks_update_ویلا_سارنی,
 	},
 };
 
-static enum scheduler parse_scheduler(const char *value)
+ساكن تعداد scheduler parse_scheduler(ثابت حرف *قدر)
 {
-	if (!value)
-		return SCHEDULER_INVALID;
-	else if (!strcasecmp(value, "auto"))
-		return SCHEDULER_AUTO;
-	else if (!strcasecmp(value, "cron") || !strcasecmp(value, "crontab"))
-		return SCHEDULER_CRON;
-	else if (!strcasecmp(value, "systemd") ||
-		 !strcasecmp(value, "systemd-timer"))
-		return SCHEDULER_SYSTEMD;
-	else if (!strcasecmp(value, "launchctl"))
-		return SCHEDULER_LAUNCHCTL;
-	else if (!strcasecmp(value, "schtasks"))
-		return SCHEDULER_SCHTASKS;
-	else
-		return SCHEDULER_INVALID;
+	إذا (!قدر)
+		أرجع SCHEDULER_INVALID;
+	وإلا إذا (!strcasecmp(قدر, "auto"))
+		أرجع SCHEDULER_AUTO;
+	وإلا إذا (!strcasecmp(قدر, "cron") || !strcasecmp(قدر, "crontab"))
+		أرجع SCHEDULER_CRON;
+	وإلا إذا (!strcasecmp(قدر, "systemd") ||
+		 !strcasecmp(قدر, "systemd-timer"))
+		أرجع SCHEDULER_SYSTEMD;
+	وإلا إذا (!strcasecmp(قدر, "launchctl"))
+		أرجع SCHEDULER_LAUNCHCTL;
+	وإلا إذا (!strcasecmp(قدر, "schtasks"))
+		أرجع SCHEDULER_SCHTASKS;
+	وإلا
+		أرجع SCHEDULER_INVALID;
 }
 
-static int maintenance_opt_scheduler(const struct option *opt, const char *arg,
-				     int unset)
+ساكن صحيح maintenance_opt_scheduler(ثابت بنية option *opt, ثابت حرف *arg,
+				     صحيح unset)
 {
-	enum scheduler *scheduler = opt->value;
+	تعداد scheduler *scheduler = opt->قدر;
 
 	BUG_ON_OPT_NEG(unset);
 
 	*scheduler = parse_scheduler(arg);
-	if (*scheduler == SCHEDULER_INVALID)
-		return error(_("unrecognized --scheduler argument '%s'"), arg);
-	return 0;
+	إذا (*scheduler == SCHEDULER_INVALID)
+		أرجع error(_("unrecognized --scheduler argument '%s'"), arg);
+	أرجع 0;
 }
 
-struct maintenance_start_opts {
-	enum scheduler scheduler;
+بنية maintenance_شروع_opts {
+	تعداد scheduler scheduler;
 };
 
-static enum scheduler resolve_scheduler(enum scheduler scheduler)
+ساكن تعداد scheduler resolve_scheduler(تعداد scheduler scheduler)
 {
-	if (scheduler != SCHEDULER_AUTO)
-		return scheduler;
+	إذا (scheduler != SCHEDULER_AUTO)
+		أرجع scheduler;
 
-#if defined(__APPLE__)
-	return SCHEDULER_LAUNCHCTL;
+#إذا defined(__APPLE__)
+	أرجع SCHEDULER_LAUNCHCTL;
 
-#elif defined(GIT_WINDOWS_NATIVE)
-	return SCHEDULER_SCHTASKS;
+#وإلاإذا defined(GIT_WINDOWS_NATIVE)
+	أرجع SCHEDULER_SCHTASKS;
 
-#elif defined(__linux__)
-	if (is_systemd_timer_available())
-		return SCHEDULER_SYSTEMD;
-	else if (is_crontab_available())
-		return SCHEDULER_CRON;
-	else
+#وإلاإذا defined(__linux__)
+	إذا (is_systemd_timer_دستیاب())
+		أرجع SCHEDULER_SYSTEMD;
+	وإلا إذا (is_crontab_دستیاب())
+		أرجع SCHEDULER_CRON;
+	وإلا
 		die(_("neither systemd timers nor crontab are available"));
 
-#else
-	return SCHEDULER_CRON;
-#endif
+#وإلا
+	أرجع SCHEDULER_CRON;
+#جے_انت
 }
 
-static void validate_scheduler(enum scheduler scheduler)
+ساكن فراغ validate_scheduler(تعداد scheduler scheduler)
 {
-	if (scheduler == SCHEDULER_INVALID)
+	إذا (scheduler == SCHEDULER_INVALID)
 		BUG("invalid scheduler");
-	if (scheduler == SCHEDULER_AUTO)
+	إذا (scheduler == SCHEDULER_AUTO)
 		BUG("resolve_scheduler should have been called before");
 
-	if (!scheduler_fn[scheduler].is_available())
+	إذا (!scheduler_fn[scheduler].is_دستیاب())
 		die(_("%s scheduler is not available"),
 		    scheduler_fn[scheduler].name);
 }
 
-static int update_background_schedule(const struct maintenance_start_opts *opts,
-				      int enable)
+ساكن صحيح update_background_ویلا_سارنی(ثابت بنية maintenance_شروع_opts *opts,
+				      صحيح enable)
 {
-	unsigned int i;
-	int result = 0;
-	struct lock_file lk;
-	char *lock_path = xstrfmt("%s/schedule", the_repository->objects->source->path);
+	بنانشانی صحيح i;
+	صحيح نتیجہ = 0;
+	بنية جندرا_file lk;
+	حرف *جندرا_رستہ = xstrfmt("%s/schedule", the_repository->objects->سروت->رستہ);
 
-	if (hold_lock_file_for_update(&lk, lock_path, LOCK_NO_DEREF) < 0) {
-		if (errno == EEXIST)
+	إذا (hold_جندرا_file_for_update(&lk, جندرا_رستہ, جندرا_NO_DEREF) < 0) {
+		إذا (errno == EEXIST)
 			error(_("unable to create '%s.lock': %s.\n\n"
 			    "Another scheduled git-maintenance(1) process seems to be running in this\n"
 			    "repository. Please make sure no other maintenance processes are running and\n"
 			    "then try again. If it still fails, a git-maintenance(1) process may have\n"
 			    "crashed in this repository earlier: remove the file manually to continue."),
-			    absolute_path(lock_path), strerror(errno));
-		else
+			    absolute_رستہ(جندرا_رستہ), strerror(errno));
+		وإلا
 			error_errno(_("cannot acquire lock for scheduled background maintenance"));
-		free(lock_path);
-		return -1;
+		حرر(جندرا_رستہ);
+		أرجع -1;
 	}
 
-	for (i = 1; i < ARRAY_SIZE(scheduler_fn); i++) {
-		if (enable && opts->scheduler == i)
-			continue;
-		if (!scheduler_fn[i].is_available())
-			continue;
-		scheduler_fn[i].update_schedule(0, get_lock_file_fd(&lk));
+	لكل (i = 1; i < ARRAY_ناپ(scheduler_fn); i++) {
+		إذا (enable && opts->scheduler == i)
+			استمر;
+		إذا (!scheduler_fn[i].is_دستیاب())
+			استمر;
+		scheduler_fn[i].update_ویلا_سارنی(0, get_جندرا_file_fd(&lk));
 	}
 
-	if (enable)
-		result = scheduler_fn[opts->scheduler].update_schedule(
-			1, get_lock_file_fd(&lk));
+	إذا (enable)
+		نتیجہ = scheduler_fn[opts->scheduler].update_ویلا_سارنی(
+			1, get_جندرا_file_fd(&lk));
 
-	rollback_lock_file(&lk);
+	rollback_جندرا_file(&lk);
 
-	free(lock_path);
-	return result;
+	حرر(جندرا_رستہ);
+	أرجع نتیجہ;
 }
 
-static const char *const builtin_maintenance_start_usage[] = {
+ساكن ثابت حرف *ثابت builtin_maintenance_شروع_usage[] = {
 	N_("git maintenance start [--scheduler=<scheduler>]"),
-	NULL
+	عدم
 };
 
-static int maintenance_start(int argc, const char **argv, const char *prefix,
-			     struct repository *repo)
+ساكن صحيح maintenance_شروع(صحيح argc, ثابت حرف **argv, ثابت حرف *اگیتر,
+			     بنية repository *repo)
 {
-	struct maintenance_start_opts opts = { 0 };
-	struct option options[] = {
+	بنية maintenance_شروع_opts opts = { 0 };
+	بنية option options[] = {
 		OPT_CALLBACK_F(
 			0, "scheduler", &opts.scheduler, N_("scheduler"),
 			N_("scheduler to trigger git maintenance run"),
 			PARSE_OPT_NONEG, maintenance_opt_scheduler),
-		OPT_END()
+		OPT_سرا()
 	};
-	const char *register_args[] = { "register", NULL };
+	ثابت حرف *رجسٹر_دلیلاں[] = { "register", عدم };
 
-	argc = parse_options(argc, argv, prefix, options,
-			     builtin_maintenance_start_usage, 0);
-	if (argc)
-		usage_with_options(builtin_maintenance_start_usage, options);
+	argc = parse_options(argc, argv, اگیتر, options,
+			     builtin_maintenance_شروع_usage, 0);
+	إذا (argc)
+		usage_with_options(builtin_maintenance_شروع_usage, options);
 
 	opts.scheduler = resolve_scheduler(opts.scheduler);
 	validate_scheduler(opts.scheduler);
 
-	if (update_background_schedule(&opts, 1))
+	إذا (update_background_ویلا_سارنی(&opts, 1))
 		die(_("failed to set up maintenance schedule"));
 
-	if (maintenance_register(ARRAY_SIZE(register_args)-1, register_args, NULL, repo))
+	إذا (maintenance_رجسٹر(ARRAY_ناپ(رجسٹر_دلیلاں)-1, رجسٹر_دلیلاں, عدم, repo))
 		warning(_("failed to add repo to global config"));
-	return 0;
+	أرجع 0;
 }
 
-static const char *const builtin_maintenance_stop_usage[] = {
+ساكن ثابت حرف *ثابت builtin_maintenance_stop_usage[] = {
 	"git maintenance stop",
-	NULL
+	عدم
 };
 
-static int maintenance_stop(int argc, const char **argv, const char *prefix,
-			    struct repository *repo UNUSED)
+ساكن صحيح maintenance_stop(صحيح argc, ثابت حرف **argv, ثابت حرف *اگیتر,
+			    بنية repository *repo بن_ورتیا)
 {
-	struct option options[] = {
-		OPT_END()
+	بنية option options[] = {
+		OPT_سرا()
 	};
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, اگیتر, options,
 			     builtin_maintenance_stop_usage, 0);
-	if (argc)
+	إذا (argc)
 		usage_with_options(builtin_maintenance_stop_usage, options);
-	return update_background_schedule(NULL, 0);
+	أرجع update_background_ویلا_سارنی(عدم, 0);
 }
 
-static const char *const builtin_maintenance_is_needed_usage[] = {
+ساكن ثابت حرف *ثابت builtin_maintenance_is_needed_usage[] = {
 	"git maintenance is-needed [--task=<task>] [--schedule]",
-	NULL
+	عدم
 };
 
-static int maintenance_is_needed(int argc, const char **argv, const char *prefix,
-				 struct repository *repo UNUSED)
+ساكن صحيح maintenance_is_needed(صحيح argc, ثابت حرف **argv, ثابت حرف *اگیتر,
+				 بنية repository *repo بن_ورتیا)
 {
-	struct maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
-	struct string_list selected_tasks = STRING_LIST_INIT_DUP;
-	struct gc_config cfg = GC_CONFIG_INIT;
-	struct option options[] = {
+	بنية maintenance_لگاتار_opts opts = MAINTENANCE_لگاتار_OPTS_INIT;
+	بنية string_list selected_tasks = STRING_LIST_INIT_DUP;
+	بنية gc_config cfg = GC_CONFIG_INIT;
+	بنية option options[] = {
 		OPT_BOOL(0, "auto", &opts.auto_flag,
 			 N_("run tasks based on the state of the repository")),
 		OPT_CALLBACK_F(0, "task", &selected_tasks, N_("task"),
 			       N_("check a specific task"),
 			       PARSE_OPT_NONEG, task_option_parse),
-		OPT_END()
+		OPT_سرا()
 	};
 	bool is_needed = false;
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, اگیتر, options,
 			     builtin_maintenance_is_needed_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
-	if (argc)
+	إذا (argc)
 		usage_with_options(builtin_maintenance_is_needed_usage, options);
 
 	gc_config(&cfg);
 	initialize_task_config(&opts, &selected_tasks);
 
-	if (opts.auto_flag) {
-		for (size_t i = 0; i < opts.tasks_nr; i++) {
-			if (tasks[opts.tasks[i]].auto_condition &&
+	إذا (opts.auto_flag) {
+		لكل (ناپ_t i = 0; i < opts.tasks_nr; i++) {
+			إذا (tasks[opts.tasks[i]].auto_condition &&
 			    tasks[opts.tasks[i]].auto_condition(&cfg)) {
 				is_needed = true;
-				break;
+				اكسر;
 			}
 		}
-	} else {
+	} وإلا {
 		/*
 		 * When not using --auto we always require maintenance right now.
 		 *
@@ -3110,36 +3110,36 @@ static int maintenance_is_needed(int argc, const char **argv, const char *prefix
 	}
 
 	string_list_clear(&selected_tasks, 0);
-	maintenance_run_opts_release(&opts);
+	maintenance_لگاتار_opts_release(&opts);
 	gc_config_release(&cfg);
 
-	if (is_needed)
-		return 0;
-	return 1;
+	إذا (is_needed)
+		أرجع 0;
+	أرجع 1;
 }
 
-static const char *const builtin_maintenance_usage[] = {
+ساكن ثابت حرف *ثابت builtin_maintenance_usage[] = {
 	N_("git maintenance <subcommand> [<options>]"),
-	NULL,
+	عدم,
 };
 
-int cmd_maintenance(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo)
+صحيح cmd_maintenance(صحيح argc,
+		    ثابت حرف **argv,
+		    ثابت حرف *اگیتر,
+		    بنية repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option builtin_maintenance_options[] = {
-		OPT_SUBCOMMAND("run", &fn, maintenance_run),
-		OPT_SUBCOMMAND("start", &fn, maintenance_start),
+	parse_opt_subcommand_fn *fn = عدم;
+	بنية option builtin_maintenance_options[] = {
+		OPT_SUBCOMMAND("run", &fn, maintenance_لگاتار),
+		OPT_SUBCOMMAND("start", &fn, maintenance_شروع),
 		OPT_SUBCOMMAND("stop", &fn, maintenance_stop),
-		OPT_SUBCOMMAND("register", &fn, maintenance_register),
+		OPT_SUBCOMMAND("register", &fn, maintenance_رجسٹر),
 		OPT_SUBCOMMAND("unregister", &fn, maintenance_unregister),
 		OPT_SUBCOMMAND("is-needed", &fn, maintenance_is_needed),
-		OPT_END(),
+		OPT_سرا(),
 	};
 
-	argc = parse_options(argc, argv, prefix, builtin_maintenance_options,
+	argc = parse_options(argc, argv, اگیتر, builtin_maintenance_options,
 			     builtin_maintenance_usage, 0);
-	return fn(argc, argv, prefix, repo);
+	أرجع fn(argc, argv, اگیتر, repo);
 }

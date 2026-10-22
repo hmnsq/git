@@ -1,272 +1,272 @@
-#include "builtin.h"
-#include "gettext.h"
-#include "hex.h"
-#include "config.h"
-#include "commit.h"
-#include "tree.h"
-#include "blob.h"
-#include "tag.h"
-#include "refs.h"
-#include "cache-tree.h"
-#include "fsck.h"
-#include "parse-options.h"
-#include "progress.h"
-#include "packfile.h"
-#include "object-name.h"
-#include "odb.h"
-#include "odb/streaming.h"
-#include "path.h"
-#include "read-cache-ll.h"
-#include "replace-object.h"
-#include "resolve-undo.h"
-#include "run-command.h"
-#include "sparse-index.h"
-#include "worktree.h"
+#ضمن "builtin.h"
+#ضمن "gettext.h"
+#ضمن "hex.h"
+#ضمن "config.h"
+#ضمن "commit.h"
+#ضمن "tree.h"
+#ضمن "blob.h"
+#ضمن "tag.h"
+#ضمن "refs.h"
+#ضمن "cache-tree.h"
+#ضمن "fsck.h"
+#ضمن "parse-options.h"
+#ضمن "progress.h"
+#ضمن "packfile.h"
+#ضمن "object-name.h"
+#ضمن "odb.h"
+#ضمن "odb/streaming.h"
+#ضمن "path.h"
+#ضمن "read-cache-ll.h"
+#ضمن "replace-object.h"
+#ضمن "resolve-undo.h"
+#ضمن "run-command.h"
+#ضمن "sparse-index.h"
+#ضمن "worktree.h"
 
-#define REACHABLE 0x0001
-#define SEEN      0x0002
-#define HAS_OBJ   0x0004
+#تعریف_کرو REACHABLE 0x0001
+#تعریف_کرو تکیا_2      0x0002
+#تعریف_کرو HAS_OBJ   0x0004
 /* This flag is set if something points to this object. */
-#define USED      0x0008
+#تعریف_کرو ورتیا      0x0008
 
-static int show_root;
-static int show_tags;
-static int show_unreachable;
-static int include_reflogs = 1;
-static int connectivity_only;
-static int check_strict;
-static struct fsck_options fsck_walk_options;
-static struct fsck_options fsck_obj_options;
-static int errors_found;
-static int write_lost_and_found;
-static int verbose;
-static int show_progress = -1;
-static int show_dangling = 1;
-static timestamp_t now;
-#define ERROR_OBJECT 01
-#define ERROR_REACHABLE 02
-#define ERROR_REFS 010
-#define ERROR_COMMIT_GRAPH 020
+ساكن صحيح show_جڑ;
+ساكن صحيح show_ٹیگ_سوچی;
+ساكن صحيح show_unreachable;
+ساكن صحيح include_reflogs = 1;
+ساكن صحيح connectivity_only;
+ساكن صحيح check_strict;
+ساكن بنية fsck_options fsck_walk_options;
+ساكن بنية fsck_options fsck_obj_options;
+ساكن صحيح errors_لبھیا;
+ساكن صحيح write_گواچا_and_لبھیا;
+ساكن صحيح verbose;
+ساكن صحيح show_ترقی = -1;
+ساكن صحيح show_dangling = 1;
+ساكن timestamp_t now;
+#تعریف_کرو ERROR_OBJECT 01
+#تعریف_کرو ERROR_REACHABLE 02
+#تعریف_کرو ERROR_REFS 010
+#تعریف_کرو ERROR_COMMIT_گراف 020
 
-static const char *describe_object(const struct object_id *oid)
+ساكن ثابت حرف *describe_object(ثابت بنية object_id *oid)
 {
-	return fsck_describe_object(&fsck_walk_options, oid);
+	أرجع fsck_describe_object(&fsck_walk_options, oid);
 }
 
-static const char *printable_type(struct repository *repo,
-				  const struct object_id *oid,
-				  enum object_type type)
+ساكن ثابت حرف *printable_type(بنية repository *repo,
+				  ثابت بنية object_id *oid,
+				  تعداد object_type type)
 {
-	const char *ret;
+	ثابت حرف *ret;
 
-	if (type == OBJ_NONE)
-		type = odb_read_object_info(repo->objects, oid, NULL);
+	إذا (type == OBJ_NONE)
+		type = odb_read_object_info(repo->objects, oid, عدم);
 
 	ret = type_name(type);
-	if (!ret)
+	إذا (!ret)
 		ret = _("unknown");
 
-	return ret;
+	أرجع ret;
 }
 
-static int objerror(struct repository *repo, struct object *obj, const char *err)
+ساكن صحيح objerror(بنية repository *repo, بنية object *obj, ثابت حرف *err)
 {
-	errors_found |= ERROR_OBJECT;
+	errors_لبھیا |= ERROR_OBJECT;
 	/* TRANSLATORS: e.g. error in tree 01bfda: <more explanation> */
 	fprintf_ln(stderr, _("error in %s %s: %s"),
 		   printable_type(repo, &obj->oid, obj->type),
 		   describe_object(&obj->oid), err);
-	return -1;
+	أرجع -1;
 }
 
-static int fsck_objects_error_func(struct fsck_options *o,
-				   void *fsck_report,
-				   enum fsck_msg_type msg_type,
-				   enum fsck_msg_id msg_id UNUSED,
-				   const char *message)
+ساكن صحيح fsck_objects_error_func(بنية fsck_options *o,
+				   فراغ *fsck_report,
+				   تعداد fsck_پیغام_type پیغام_type,
+				   تعداد fsck_پیغام_id پیغام_id بن_ورتیا,
+				   ثابت حرف *سنیہا)
 {
-	struct fsck_object_report *report = fsck_report;
-	const struct object_id *oid = report->oid;
-	enum object_type object_type = report->object_type;
+	بنية fsck_object_report *report = fsck_report;
+	ثابت بنية object_id *oid = report->oid;
+	تعداد object_type object_type = report->object_type;
 
-	switch (msg_type) {
-	case FSCK_WARN:
+	بدل (پیغام_type) {
+	حالة FSCK_WARN:
 		/* TRANSLATORS: e.g. warning in tree 01bfda: <more explanation> */
 		fprintf_ln(stderr, _("warning in %s %s: %s"),
 			   printable_type(o->repo, oid, object_type),
-			   describe_object(oid), message);
-		return 0;
-	case FSCK_ERROR:
+			   describe_object(oid), سنیہا);
+		أرجع 0;
+	حالة FSCK_ERROR:
 		/* TRANSLATORS: e.g. error in tree 01bfda: <more explanation> */
 		fprintf_ln(stderr, _("error in %s %s: %s"),
 			   printable_type(o->repo, oid, object_type),
-			   describe_object(oid), message);
-		return 1;
-	default:
+			   describe_object(oid), سنیہا);
+		أرجع 1;
+	افتراضي:
 		BUG("%d (FSCK_IGNORE?) should never trigger this callback",
-		    msg_type);
+		    پیغام_type);
 	}
 }
 
-static struct object_array pending;
+ساكن بنية object_array pending;
 
-static int mark_object(struct object *obj, enum object_type type,
-		       void *data, struct fsck_options *options)
+ساكن صحيح mark_object(بنية object *obj, تعداد object_type type,
+		       فراغ *انکڑے, بنية fsck_options *options)
 {
-	struct object *parent = data;
+	بنية object *ماپا = انکڑے;
 
 	/*
 	 * The only case data is NULL or type is OBJ_ANY is when
 	 * mark_object_reachable() calls us.  All the callers of
 	 * that function has non-NULL obj hence ...
 	 */
-	if (!obj) {
+	إذا (!obj) {
 		/* ... these references to parent->fld are safe here */
 		printf_ln(_("broken link from %7s %s"),
-			  printable_type(options->repo, &parent->oid, parent->type),
-			  describe_object(&parent->oid));
+			  printable_type(options->repo, &ماپا->oid, ماپا->type),
+			  describe_object(&ماپا->oid));
 		printf_ln(_("broken link from %7s %s"),
 			  (type == OBJ_ANY ? _("unknown") : type_name(type)),
 			  _("unknown"));
-		errors_found |= ERROR_REACHABLE;
-		return 1;
+		errors_لبھیا |= ERROR_REACHABLE;
+		أرجع 1;
 	}
 
-	if (type != OBJ_ANY && obj->type != type)
+	إذا (type != OBJ_ANY && obj->type != type)
 		/* ... and the reference to parent is safe here */
-		objerror(options->repo, parent, _("wrong object type in link"));
+		objerror(options->repo, ماپا, _("wrong object type in link"));
 
-	if (obj->flags & REACHABLE)
-		return 0;
+	إذا (obj->flags & REACHABLE)
+		أرجع 0;
 	obj->flags |= REACHABLE;
 
-	if (is_promisor_object(options->repo, &obj->oid))
+	إذا (is_promisor_object(options->repo, &obj->oid))
 		/*
 		 * Further recursion does not need to be performed on this
 		 * object since it is a promisor object (so it does not need to
 		 * be added to "pending").
 		 */
-		return 0;
+		أرجع 0;
 
-	if (!(obj->flags & HAS_OBJ)) {
-		if (parent && !odb_has_object(options->repo->objects, &obj->oid,
+	إذا (!(obj->flags & HAS_OBJ)) {
+		إذا (ماپا && !odb_has_object(options->repo->objects, &obj->oid,
 					      ODB_HAS_OBJECT_RECHECK_PACKED)) {
 			printf_ln(_("broken link from %7s %s\n"
 				    "              to %7s %s"),
-				  printable_type(options->repo, &parent->oid, parent->type),
-				  describe_object(&parent->oid),
+				  printable_type(options->repo, &ماپا->oid, ماپا->type),
+				  describe_object(&ماپا->oid),
 				  printable_type(options->repo, &obj->oid, obj->type),
 				  describe_object(&obj->oid));
-			errors_found |= ERROR_REACHABLE;
+			errors_لبھیا |= ERROR_REACHABLE;
 		}
-		return 1;
+		أرجع 1;
 	}
 
-	add_object_array(obj, NULL, &pending);
-	return 0;
+	جوڑو_object_array(obj, عدم, &pending);
+	أرجع 0;
 }
 
-static void mark_object_reachable(struct object *obj)
+ساكن فراغ mark_object_reachable(بنية object *obj)
 {
-	mark_object(obj, OBJ_ANY, NULL, &fsck_walk_options);
+	mark_object(obj, OBJ_ANY, عدم, &fsck_walk_options);
 }
 
-static int traverse_one_object(struct object *obj)
+ساكن صحيح traverse_one_object(بنية object *obj)
 {
-	int result = fsck_walk(obj, obj, &fsck_walk_options);
+	صحيح نتیجہ = fsck_walk(obj, obj, &fsck_walk_options);
 
-	if (obj->type == OBJ_TREE) {
-		struct tree *tree = (struct tree *)obj;
-		free_tree_buffer(tree);
+	إذا (obj->type == OBJ_درخت) {
+		بنية درخت *درخت = (بنية درخت *)obj;
+		free_درخت_بفر(درخت);
 	}
-	return result;
+	أرجع نتیجہ;
 }
 
-static int traverse_reachable(struct repository *repo)
+ساكن صحيح traverse_reachable(بنية repository *repo)
 {
-	struct progress *progress = NULL;
-	unsigned int nr = 0;
-	int result = 0;
-	if (show_progress)
-		progress = start_delayed_progress(repo,
+	بنية ترقی *ترقی = عدم;
+	بنانشانی صحيح nr = 0;
+	صحيح نتیجہ = 0;
+	إذا (show_ترقی)
+		ترقی = شروع_delayed_ترقی(repo,
 						  _("Checking connectivity"), 0);
-	while (pending.nr) {
-		result |= traverse_one_object(object_array_pop(&pending));
-		display_progress(progress, ++nr);
+	طالما (pending.nr) {
+		نتیجہ |= traverse_one_object(object_array_نکالو(&pending));
+		display_ترقی(ترقی, ++nr);
 	}
-	stop_progress(&progress);
-	return !!result;
+	stop_ترقی(&ترقی);
+	أرجع !!نتیجہ;
 }
 
-static int mark_used(struct object *obj, enum object_type type UNUSED,
-		     void *data UNUSED, struct fsck_options *options UNUSED)
+ساكن صحيح mark_ورتیا(بنية object *obj, تعداد object_type type بن_ورتیا,
+		     فراغ *انکڑے بن_ورتیا, بنية fsck_options *options بن_ورتیا)
 {
-	if (!obj)
-		return 1;
-	obj->flags |= USED;
-	return 0;
+	إذا (!obj)
+		أرجع 1;
+	obj->flags |= ورتیا;
+	أرجع 0;
 }
 
-static int mark_unreachable_referents(const struct object_id *oid,
-				      struct object_info *oi UNUSED,
-				      void *data)
+ساكن صحيح mark_unreachable_referents(ثابت بنية object_id *oid,
+				      بنية object_info *oi بن_ورتیا,
+				      فراغ *انکڑے)
 {
-	struct repository *repo = data;
-	struct fsck_options options;
-	struct object *obj = lookup_object(data, oid);
+	بنية repository *repo = انکڑے;
+	بنية fsck_options options;
+	بنية object *obj = lookup_object(انکڑے, oid);
 
-	if (!obj || !(obj->flags & HAS_OBJ))
-		return 0; /* not part of our original set */
-	if (obj->flags & REACHABLE)
-		return 0; /* reachable objects already traversed */
+	إذا (!obj || !(obj->flags & HAS_OBJ))
+		أرجع 0; /* not part of our original set */
+	إذا (obj->flags & REACHABLE)
+		أرجع 0; /* reachable objects already traversed */
 
 	/*
 	 * Avoid passing OBJ_NONE to fsck_walk, which will parse the object
 	 * (and we want to avoid parsing blobs).
 	 */
-	if (obj->type == OBJ_NONE) {
-		enum object_type type = odb_read_object_info(repo->objects,
-							     &obj->oid, NULL);
-		if (type > 0)
+	إذا (obj->type == OBJ_NONE) {
+		تعداد object_type type = odb_read_object_info(repo->objects,
+							     &obj->oid, عدم);
+		إذا (type > 0)
 			object_as_type(obj, type, 0);
 	}
 
 	fsck_options_init(&options, repo, FSCK_OPTIONS_DEFAULT);
-	options.walk = mark_used;
-	fsck_walk(obj, NULL, &options);
-	if (obj->type == OBJ_TREE)
-		free_tree_buffer((struct tree *)obj);
+	options.walk = mark_ورتیا;
+	fsck_walk(obj, عدم, &options);
+	إذا (obj->type == OBJ_درخت)
+		free_درخت_بفر((بنية درخت *)obj);
 
-	return 0;
+	أرجع 0;
 }
 
 /*
  * Check a single reachable object
  */
-static void check_reachable_object(struct repository *repo, struct object *obj)
+ساكن فراغ check_reachable_object(بنية repository *repo, بنية object *obj)
 {
 	/*
 	 * We obviously want the object to be parsed,
 	 * except if it was in a pack-file and we didn't
 	 * do a full fsck
 	 */
-	if (!(obj->flags & HAS_OBJ)) {
-		if (is_promisor_object(repo, &obj->oid))
-			return;
-		if (has_object_pack(repo, &obj->oid))
-			return; /* it is in pack - forget about it */
+	إذا (!(obj->flags & HAS_OBJ)) {
+		إذا (is_promisor_object(repo, &obj->oid))
+			أرجع;
+		إذا (has_object_pack(repo, &obj->oid))
+			أرجع; /* it is in pack - forget about it */
 		printf_ln(_("missing %s %s"),
 			  printable_type(repo, &obj->oid, obj->type),
 			  describe_object(&obj->oid));
-		errors_found |= ERROR_REACHABLE;
-		return;
+		errors_لبھیا |= ERROR_REACHABLE;
+		أرجع;
 	}
 }
 
 /*
  * Check a single unreachable object
  */
-static void check_unreachable_object(struct repository *repo, struct object *obj)
+ساكن فراغ check_unreachable_object(بنية repository *repo, بنية object *obj)
 {
 	/*
 	 * Missing unreachable object? Ignore it. It's not like
@@ -274,18 +274,18 @@ static void check_unreachable_object(struct repository *repo, struct object *obj
 	 * to complain about it being unreachable (since it does
 	 * not exist).
 	 */
-	if (!(obj->flags & HAS_OBJ))
-		return;
+	إذا (!(obj->flags & HAS_OBJ))
+		أرجع;
 
 	/*
 	 * Unreachable object that exists? Show it if asked to,
 	 * since this is something that is prunable.
 	 */
-	if (show_unreachable) {
+	إذا (show_unreachable) {
 		printf_ln(_("unreachable %s %s"),
 			  printable_type(repo, &obj->oid, obj->type),
 			  describe_object(&obj->oid));
-		return;
+		أرجع;
 	}
 
 	/*
@@ -300,35 +300,35 @@ static void check_unreachable_object(struct repository *repo, struct object *obj
 	 * deleted a branch by mistake, this is a prime candidate to
 	 * start looking at, for example.
 	 */
-	if (!(obj->flags & USED)) {
-		if (show_dangling)
+	إذا (!(obj->flags & ورتیا)) {
+		إذا (show_dangling)
 			printf_ln(_("dangling %s %s"),
 				  printable_type(repo, &obj->oid, obj->type),
 				  describe_object(&obj->oid));
-		if (write_lost_and_found) {
-			char *filename = repo_git_path(repo, "lost-found/%s/%s",
+		إذا (write_گواچا_and_لبھیا) {
+			حرف *filename = repo_git_رستہ(repo, "lost-found/%s/%s",
 				obj->type == OBJ_COMMIT ? "commit" : "other",
 				describe_object(&obj->oid));
 			FILE *f;
 
-			if (safe_create_leading_directories_const(repo, filename)) {
+			إذا (محفوظ_create_leading_directories_const(repo, filename)) {
 				error(_("could not create lost-found"));
-				free(filename);
-				return;
+				حرر(filename);
+				أرجع;
 			}
 			f = xfopen(filename, "w");
-			if (obj->type == OBJ_BLOB) {
-				if (odb_stream_blob_to_fd(repo->objects, fileno(f),
-							  &obj->oid, NULL, 1))
+			إذا (obj->type == OBJ_BLOB) {
+				إذا (odb_دھارا_blob_منزل_fd(repo->objects, fileno(f),
+							  &obj->oid, عدم, 1))
 					die_errno(_("could not write '%s'"), filename);
-			} else
+			} وإلا
 				fprintf(f, "%s\n", describe_object(&obj->oid));
-			if (fclose(f))
+			إذا (fclose(f))
 				die_errno(_("could not finish '%s'"),
 					  filename);
-			free(filename);
+			حرر(filename);
 		}
-		return;
+		أرجع;
 	}
 
 	/*
@@ -338,20 +338,20 @@ static void check_unreachable_object(struct repository *repo, struct object *obj
 	 */
 }
 
-static void check_object(struct repository *repo, struct object *obj)
+ساكن فراغ check_object(بنية repository *repo, بنية object *obj)
 {
-	if (verbose)
+	إذا (verbose)
 		fprintf_ln(stderr, _("Checking %s"), describe_object(&obj->oid));
 
-	if (obj->flags & REACHABLE)
+	إذا (obj->flags & REACHABLE)
 		check_reachable_object(repo, obj);
-	else
+	وإلا
 		check_unreachable_object(repo, obj);
 }
 
-static void check_connectivity(struct repository *repo)
+ساكن فراغ check_connectivity(بنية repository *repo)
 {
-	int i, max;
+	صحيح i, max;
 
 	/* Traverse the pending reachable objects */
 	traverse_reachable(repo);
@@ -361,7 +361,7 @@ static void check_connectivity(struct repository *repo)
 	 * unreachable objects with USED. Do that now to make --dangling, etc
 	 * accurate.
 	 */
-	if (connectivity_only && (show_dangling || write_lost_and_found)) {
+	إذا (connectivity_only && (show_dangling || write_گواچا_and_لبھیا)) {
 		/*
 		 * Even though we already have a "struct object" for each of
 		 * these in memory, we must not iterate over the internal
@@ -372,184 +372,184 @@ static void check_connectivity(struct repository *repo)
 		 * and ignore any that weren't present in our earlier
 		 * traversal.
 		 */
-		odb_for_each_object(repo->objects, NULL,
+		odb_for_each_object(repo->objects, عدم,
 				    mark_unreachable_referents, repo, 0);
 	}
 
 	/* Look up all the requirements, warn about missing objects.. */
-	max = get_max_object_index(repo);
-	if (verbose)
+	max = get_max_object_اشاریہ(repo);
+	إذا (verbose)
 		fprintf_ln(stderr, _("Checking connectivity (%d objects)"), max);
 
-	for (i = 0; i < max; i++) {
-		struct object *obj = get_indexed_object(repo, i);
+	لكل (i = 0; i < max; i++) {
+		بنية object *obj = get_اشاریہ_دار_object(repo, i);
 
-		if (obj)
+		إذا (obj)
 			check_object(repo, obj);
 	}
 }
 
-static int fsck_obj_buffer(const struct object_id *oid, enum object_type type,
-			   unsigned long size, void *buffer, int *eaten, void *cb_data)
+ساكن صحيح fsck_obj_بفر(ثابت بنية object_id *oid, تعداد object_type type,
+			   بنانشانی لما ناپ, فراغ *بفر, صحيح *eaten, فراغ *cb_انکڑے)
 {
-	struct repository *repo = cb_data;
-	struct object *obj;
-	int err;
+	بنية repository *repo = cb_انکڑے;
+	بنية object *obj;
+	صحيح err;
 
 	/*
 	 * Note, buffer may be NULL if type is OBJ_BLOB. See
 	 * verify_packfile(), data_valid variable for details.
 	 */
-	obj = parse_object_buffer(repo, oid, type, size, buffer, eaten);
-	if (!obj) {
-		errors_found |= ERROR_OBJECT;
+	obj = parse_object_بفر(repo, oid, type, ناپ, بفر, eaten);
+	إذا (!obj) {
+		errors_لبھیا |= ERROR_OBJECT;
 		err = error(_("%s: object corrupt or missing"),
-			    oid_to_hex(oid));
-		goto out;
+			    oid_منزل_hex(oid));
+		اذهب باہرلا;
 	}
 
 	obj->flags &= ~REACHABLE;
-	obj->flags |= HAS_OBJ | SEEN;
+	obj->flags |= HAS_OBJ | تکیا_2;
 
-	if (verbose)
+	إذا (verbose)
 		fprintf_ln(stderr, _("Checking %s %s"),
 			   printable_type(repo, &obj->oid, obj->type),
 			   describe_object(&obj->oid));
 
-	if (fsck_walk(obj, NULL, &fsck_obj_options))
+	إذا (fsck_walk(obj, عدم, &fsck_obj_options))
 		objerror(repo, obj, _("broken links"));
 
-	err = fsck_object(obj, buffer, size, &fsck_obj_options);
-	if (err)
-		goto out;
+	err = fsck_object(obj, بفر, ناپ, &fsck_obj_options);
+	إذا (err)
+		اذهب باہرلا;
 
-	if (obj->type == OBJ_COMMIT) {
-		struct commit *commit = (struct commit *) obj;
+	إذا (obj->type == OBJ_COMMIT) {
+		بنية commit *commit = (بنية commit *) obj;
 
-		if (!commit->parents && show_root)
+		إذا (!commit->parents && show_جڑ)
 			printf_ln(_("root %s"),
 				  describe_object(&commit->object.oid));
 	}
 
-	if (obj->type == OBJ_TAG) {
-		struct tag *tag = (struct tag *) obj;
+	إذا (obj->type == OBJ_ٹیگ) {
+		بنية ٹیگ *ٹیگ = (بنية ٹیگ *) obj;
 
-		if (show_tags && tag->tagged) {
+		إذا (show_ٹیگ_سوچی && ٹیگ->tagged) {
 			printf_ln(_("tagged %s %s (%s) in %s"),
-				  printable_type(repo, &tag->tagged->oid, tag->tagged->type),
-				  describe_object(&tag->tagged->oid),
-				  tag->tag,
-				  describe_object(&tag->object.oid));
+				  printable_type(repo, &ٹیگ->tagged->oid, ٹیگ->tagged->type),
+				  describe_object(&ٹیگ->tagged->oid),
+				  ٹیگ->ٹیگ,
+				  describe_object(&ٹیگ->object.oid));
 		}
 	}
 
-out:
-	if (obj && obj->type == OBJ_TREE)
-		free_tree_buffer((struct tree *)obj);
-	return err;
+باہرلا:
+	إذا (obj && obj->type == OBJ_درخت)
+		free_درخت_بفر((بنية درخت *)obj);
+	أرجع err;
 }
 
-static int default_refs;
+ساكن صحيح default_refs;
 
-static void fsck_handle_reflog_oid(struct repository *repo,
-				   const char *refname, struct object_id *oid,
+ساكن فراغ fsck_handle_reflog_oid(بنية repository *repo,
+				   ثابت حرف *refname, بنية object_id *oid,
 				   timestamp_t timestamp)
 {
-	struct object *obj;
+	بنية object *obj;
 
-	if (!is_null_oid(oid)) {
+	إذا (!is_null_oid(oid)) {
 		obj = lookup_object(repo, oid);
-		if (obj && (obj->flags & HAS_OBJ)) {
-			if (timestamp)
+		إذا (obj && (obj->flags & HAS_OBJ)) {
+			إذا (timestamp)
 				fsck_put_object_name(&fsck_walk_options, oid,
 						     "%s@{%"PRItime"}",
 						     refname, timestamp);
-			obj->flags |= USED;
+			obj->flags |= ورتیا;
 			mark_object_reachable(obj);
-		} else if (!is_promisor_object(repo, oid)) {
+		} وإلا إذا (!is_promisor_object(repo, oid)) {
 			error(_("%s: invalid reflog entry %s"),
-			      refname, oid_to_hex(oid));
-			errors_found |= ERROR_REACHABLE;
+			      refname, oid_منزل_hex(oid));
+			errors_لبھیا |= ERROR_REACHABLE;
 		}
 	}
 }
 
-static int fsck_handle_reflog_ent(const char *refname,
-				  struct object_id *ooid, struct object_id *noid,
-				  const char *email UNUSED,
-				  timestamp_t timestamp, int tz UNUSED,
-				  const char *message UNUSED, void *cb_data)
+ساكن صحيح fsck_handle_reflog_ent(ثابت حرف *refname,
+				  بنية object_id *ooid, بنية object_id *noid,
+				  ثابت حرف *email بن_ورتیا,
+				  timestamp_t timestamp, صحيح tz بن_ورتیا,
+				  ثابت حرف *سنیہا بن_ورتیا, فراغ *cb_انکڑے)
 {
-	struct repository *repo = cb_data;
+	بنية repository *repo = cb_انکڑے;
 
-	if (now && timestamp > now)
-		return 0;
+	إذا (now && timestamp > now)
+		أرجع 0;
 
-	if (verbose)
+	إذا (verbose)
 		fprintf_ln(stderr, _("Checking reflog %s->%s"),
-			   oid_to_hex(ooid), oid_to_hex(noid));
+			   oid_منزل_hex(ooid), oid_منزل_hex(noid));
 
 	fsck_handle_reflog_oid(repo, refname, ooid, 0);
 	fsck_handle_reflog_oid(repo, refname, noid, timestamp);
-	return 0;
+	أرجع 0;
 }
 
-static int fsck_handle_reflog(const char *logname, void *cb_data)
+ساكن صحيح fsck_handle_reflog(ثابت حرف *logname, فراغ *cb_انکڑے)
 {
-	struct strbuf refname = STRBUF_INIT;
-	struct worktree *wt = cb_data;
+	بنية strbuf refname = STRBUF_INIT;
+	بنية worktree *wt = cb_انکڑے;
 
 	strbuf_worktree_ref(wt, &refname, logname);
 	refs_for_each_reflog_ent(get_main_ref_store(wt->repo),
 				 refname.buf, fsck_handle_reflog_ent,
 				 wt->repo);
 	strbuf_release(&refname);
-	return 0;
+	أرجع 0;
 }
 
-struct ref_snapshot {
-	char *refname;
-	struct object_id oid;
+بنية ref_snapshot {
+	حرف *refname;
+	بنية object_id oid;
 	/* TODO: Maybe supplement with latest reflog entry info too? */
 };
 
-struct snapshot {
-	size_t nr;
-	size_t alloc;
-	struct ref_snapshot *ref;
+بنية snapshot {
+	ناپ_t nr;
+	ناپ_t alloc;
+	بنية ref_snapshot *ref;
 	/* TODO: Consider also snapshotting the index of each worktree. */
 };
 
-struct snapshot_ref_data {
-	struct repository *repo;
-	struct snapshot *snap;
+بنية snapshot_ref_انکڑے {
+	بنية repository *repo;
+	بنية snapshot *snap;
 };
 
-static int snapshot_ref(const struct reference *ref, void *cb_data)
+ساكن صحيح snapshot_ref(ثابت بنية reference *ref, فراغ *cb_انکڑے)
 {
-	struct snapshot_ref_data *data = cb_data;
-	struct snapshot *snap = data->snap;
-	struct object *obj;
+	بنية snapshot_ref_انکڑے *انکڑے = cb_انکڑے;
+	بنية snapshot *snap = انکڑے->snap;
+	بنية object *obj;
 
-	obj = parse_object(data->repo, ref->oid);
-	if (!obj) {
-		if (is_promisor_object(data->repo, ref->oid)) {
+	obj = parse_object(انکڑے->repo, ref->oid);
+	إذا (!obj) {
+		إذا (is_promisor_object(انکڑے->repo, ref->oid)) {
 			/*
 			 * Increment default_refs anyway, because this is a
 			 * valid ref.
 			 */
 			 default_refs++;
-			 return 0;
+			 أرجع 0;
 		}
 		error(_("%s: invalid sha1 pointer %s"),
-		      ref->name, oid_to_hex(ref->oid));
-		errors_found |= ERROR_REACHABLE;
+		      ref->name, oid_منزل_hex(ref->oid));
+		errors_لبھیا |= ERROR_REACHABLE;
 		/* We'll continue with the rest despite the error.. */
-		return 0;
+		أرجع 0;
 	}
-	if (obj->type != OBJ_COMMIT && is_branch(ref->name)) {
+	إذا (obj->type != OBJ_COMMIT && is_branch(ref->name)) {
 		error(_("%s: not a commit"), ref->name);
-		errors_found |= ERROR_REFS;
+		errors_لبھیا |= ERROR_REFS;
 	}
 	default_refs++;
 
@@ -558,78 +558,78 @@ static int snapshot_ref(const struct reference *ref, void *cb_data)
 	oidcpy(&snap->ref[snap->nr].oid, ref->oid);
 	snap->nr++;
 
-	return 0;
+	أرجع 0;
 }
 
-static int fsck_handle_ref(const struct reference *ref, void *cb_data)
+ساكن صحيح fsck_handle_ref(ثابت بنية reference *ref, فراغ *cb_انکڑے)
 {
-	struct repository *repo = cb_data;
-	struct object *obj;
+	بنية repository *repo = cb_انکڑے;
+	بنية object *obj;
 
 	obj = parse_object(repo, ref->oid);
-	obj->flags |= USED;
+	obj->flags |= ورتیا;
 	fsck_put_object_name(&fsck_walk_options,
 			     ref->oid, "%s", ref->name);
 	mark_object_reachable(obj);
 
-	return 0;
+	أرجع 0;
 }
 
-static void snapshot_refs(struct repository *repo,
-			  struct snapshot *snap, int argc, const char **argv)
+ساكن فراغ snapshot_refs(بنية repository *repo,
+			  بنية snapshot *snap, صحيح argc, ثابت حرف **argv)
 {
-	struct refs_for_each_ref_options opts = {
+	بنية refs_for_each_ref_options opts = {
 		.flags = REFS_FOR_EACH_INCLUDE_BROKEN,
 	};
-	struct snapshot_ref_data data = {
+	بنية snapshot_ref_انکڑے انکڑے = {
 		.repo = repo,
 		.snap = snap,
 	};
-	struct worktree **worktrees, **p;
-	const char *head_points_at;
-	struct object_id head_oid;
+	بنية worktree **worktrees, **p;
+	ثابت حرف *سر_points_at;
+	بنية object_id سر_oid;
 
-	for (int i = 0; i < argc; i++) {
-		const char *arg = argv[i];
-		struct object_id oid;
-		if (!repo_get_oid(repo, arg, &oid)) {
-			struct reference ref = {
+	لكل (صحيح i = 0; i < argc; i++) {
+		ثابت حرف *arg = argv[i];
+		بنية object_id oid;
+		إذا (!repo_get_oid(repo, arg, &oid)) {
+			بنية reference ref = {
 				.name = arg,
 				.oid = &oid,
 			};
 
-			snapshot_ref(&ref, &data);
-			continue;
+			snapshot_ref(&ref, &انکڑے);
+			استمر;
 		}
 		error(_("invalid parameter: expected sha1, got '%s'"), arg);
-		errors_found |= ERROR_OBJECT;
+		errors_لبھیا |= ERROR_OBJECT;
 	}
 
-	if (argc) {
+	إذا (argc) {
 		include_reflogs = 0;
-		return;
+		أرجع;
 	}
 
 	refs_for_each_ref_ext(get_main_ref_store(repo),
-			      snapshot_ref, &data, &opts);
+			      snapshot_ref, &انکڑے, &opts);
 
 	worktrees = get_worktrees(repo);
-	for (p = worktrees; *p; p++) {
-		struct worktree *wt = *p;
-		struct strbuf refname = STRBUF_INIT;
+	لكل (p = worktrees; *p; p++) {
+		بنية worktree *wt = *p;
+		بنية strbuf refname = STRBUF_INIT;
 
 		strbuf_worktree_ref(wt, &refname, "HEAD");
 
-		head_points_at = refs_resolve_ref_unsafe(get_main_ref_store(repo),
-							 refname.buf, 0, &head_oid, NULL);
+		سر_points_at = refs_resolve_ref_unsafe(get_main_ref_store(repo),
+							 refname.buf, 0, &سر_oid, عدم);
 
-		if (head_points_at && !is_null_oid(&head_oid)) {
-			struct reference ref = {
+		إذا (سر_points_at && !is_null_oid(&سر_oid)) {
+			بنية reference ref = {
 				.name = refname.buf,
-				.oid = &head_oid,
+				.oid = &سر_oid,
 			};
 
-			snapshot_ref(&ref, &data);
+			snapshot_ref(&ref, &انکڑے);
 		}
 		strbuf_release(&refname);
 
@@ -642,33 +642,33 @@ static void snapshot_refs(struct repository *repo,
 	free_worktrees(worktrees);
 
 	/* Ignore reflogs newer than now */
-	now = time(NULL);
+	now = ویلا(عدم);
 }
 
 
-static void free_snapshot_refs(struct snapshot *snap)
+ساكن فراغ free_snapshot_refs(بنية snapshot *snap)
 {
-	for (size_t i = 0; i < snap->nr; i++)
-		free(snap->ref[i].refname);
-	free(snap->ref);
+	لكل (ناپ_t i = 0; i < snap->nr; i++)
+		حرر(snap->ref[i].refname);
+	حرر(snap->ref);
 }
 
-static void process_refs(struct repository *repo, struct snapshot *snap)
+ساكن فراغ process_refs(بنية repository *repo, بنية snapshot *snap)
 {
-	struct worktree **worktrees, **p;
+	بنية worktree **worktrees, **p;
 
-	for (size_t i = 0; i < snap->nr; i++) {
-		struct reference ref = {
+	لكل (ناپ_t i = 0; i < snap->nr; i++) {
+		بنية reference ref = {
 			.name = snap->ref[i].refname,
 			.oid = &snap->ref[i].oid,
 		};
 		fsck_handle_ref(&ref, repo);
 	}
 
-	if (include_reflogs) {
+	إذا (include_reflogs) {
 		worktrees = get_worktrees(repo);
-		for (p = worktrees; *p; p++) {
-			struct worktree *wt = *p;
+		لكل (p = worktrees; *p; p++) {
+			بنية worktree *wt = *p;
 
 			refs_for_each_reflog(get_worktree_ref_store(wt),
 					     fsck_handle_reflog, wt);
@@ -688,197 +688,197 @@ static void process_refs(struct repository *repo, struct snapshot *snap)
 	 * So we just print a warning about it, and clear the
 	 * "show_unreachable" flag.
 	 */
-	if (!default_refs) {
+	إذا (!default_refs) {
 		fprintf_ln(stderr, _("notice: No default references"));
 		show_unreachable = 0;
 	}
 }
 
-static int fsck_cache_tree(struct repository *repo, struct cache_tree *it, const char *index_path)
+ساكن صحيح fsck_cache_درخت(بنية repository *repo, بنية cache_درخت *it, ثابت حرف *اشاریہ_رستہ)
 {
-	int i;
-	int err = 0;
+	صحيح i;
+	صحيح err = 0;
 
-	if (verbose)
-		fprintf_ln(stderr, _("Checking cache tree of %s"), index_path);
+	إذا (verbose)
+		fprintf_ln(stderr, _("Checking cache tree of %s"), اشاریہ_رستہ);
 
-	if (0 <= it->entry_count) {
-		struct object *obj = parse_object(repo, &it->oid);
-		if (!obj) {
+	إذا (0 <= it->اندراج_گنتی) {
+		بنية object *obj = parse_object(repo, &it->oid);
+		إذا (!obj) {
 			error(_("%s: invalid sha1 pointer in cache-tree of %s"),
-			      oid_to_hex(&it->oid), index_path);
-			errors_found |= ERROR_REFS;
-			return 1;
+			      oid_منزل_hex(&it->oid), اشاریہ_رستہ);
+			errors_لبھیا |= ERROR_REFS;
+			أرجع 1;
 		}
-		obj->flags |= USED;
+		obj->flags |= ورتیا;
 		fsck_put_object_name(&fsck_walk_options, &it->oid, ":");
 		mark_object_reachable(obj);
-		if (obj->type != OBJ_TREE)
+		إذا (obj->type != OBJ_درخت)
 			err |= objerror(repo, obj, _("non-tree in cache-tree"));
 	}
-	for (i = 0; i < it->subtree_nr; i++)
-		err |= fsck_cache_tree(repo, it->down[i]->cache_tree, index_path);
-	return err;
+	لكل (i = 0; i < it->subtree_nr; i++)
+		err |= fsck_cache_درخت(repo, it->تھلے[i]->cache_درخت, اشاریہ_رستہ);
+	أرجع err;
 }
 
-static int fsck_resolve_undo(struct index_state *istate,
-			     const char *index_path)
+ساكن صحيح fsck_resolve_undo(بنية اشاریہ_state *istate,
+			     ثابت حرف *اشاریہ_رستہ)
 {
-	struct string_list_item *item;
-	struct string_list *resolve_undo = istate->resolve_undo;
+	بنية string_list_شے *شے;
+	بنية string_list *resolve_undo = istate->resolve_undo;
 
-	if (!resolve_undo)
-		return 0;
+	إذا (!resolve_undo)
+		أرجع 0;
 
-	for_each_string_list_item(item, resolve_undo) {
-		const char *path = item->string;
-		struct resolve_undo_info *ru = item->util;
-		int i;
+	for_each_string_list_شے(شے, resolve_undo) {
+		ثابت حرف *رستہ = شے->string;
+		بنية resolve_undo_info *ru = شے->util;
+		صحيح i;
 
-		if (!ru)
-			continue;
-		for (i = 0; i < 3; i++) {
-			struct object *obj;
+		إذا (!ru)
+			استمر;
+		لكل (i = 0; i < 3; i++) {
+			بنية object *obj;
 
-			if (!ru->mode[i] || !S_ISREG(ru->mode[i]))
-				continue;
+			إذا (!ru->منوال[i] || !S_ISREG(ru->منوال[i]))
+				استمر;
 
 			obj = parse_object(istate->repo, &ru->oid[i]);
-			if (!obj) {
+			إذا (!obj) {
 				error(_("%s: invalid sha1 pointer in resolve-undo of %s"),
-				      oid_to_hex(&ru->oid[i]),
-				      index_path);
-				errors_found |= ERROR_REFS;
-				continue;
+				      oid_منزل_hex(&ru->oid[i]),
+				      اشاریہ_رستہ);
+				errors_لبھیا |= ERROR_REFS;
+				استمر;
 			}
-			obj->flags |= USED;
+			obj->flags |= ورتیا;
 			fsck_put_object_name(&fsck_walk_options, &ru->oid[i],
-					     ":(%d):%s", i, path);
+					     ":(%d):%s", i, رستہ);
 			mark_object_reachable(obj);
 		}
 	}
-	return 0;
+	أرجع 0;
 }
 
-static void fsck_index(struct index_state *istate, const char *index_path,
-		       int is_current_worktree)
+ساكن فراغ fsck_اشاریہ(بنية اشاریہ_state *istate, ثابت حرف *اشاریہ_رستہ,
+		       صحيح is_current_worktree)
 {
-	unsigned int i;
+	بنانشانی صحيح i;
 
 	/* TODO: audit for interaction with sparse-index. */
-	ensure_full_index(istate);
-	for (i = 0; i < istate->cache_nr; i++) {
-		unsigned int mode;
-		struct blob *blob;
-		struct object *obj;
+	ensure_بھریا_اشاریہ(istate);
+	لكل (i = 0; i < istate->cache_nr; i++) {
+		بنانشانی صحيح منوال;
+		بنية blob *blob;
+		بنية object *obj;
 
-		mode = istate->cache[i]->ce_mode;
-		if (S_ISGITLINK(mode))
-			continue;
+		منوال = istate->cache[i]->ce_منوال;
+		إذا (S_ISGITLINK(منوال))
+			استمر;
 		blob = lookup_blob(istate->repo,
 				   &istate->cache[i]->oid);
-		if (!blob)
-			continue;
+		إذا (!blob)
+			استمر;
 		obj = &blob->object;
-		obj->flags |= USED;
+		obj->flags |= ورتیا;
 		fsck_put_object_name(&fsck_walk_options, &obj->oid,
 				     "%s:%s",
-				     is_current_worktree ? "" : index_path,
+				     is_current_worktree ? "" : اشاریہ_رستہ,
 				     istate->cache[i]->name);
 		mark_object_reachable(obj);
 	}
-	if (istate->cache_tree)
-		fsck_cache_tree(istate->repo, istate->cache_tree, index_path);
-	fsck_resolve_undo(istate, index_path);
+	إذا (istate->cache_درخت)
+		fsck_cache_درخت(istate->repo, istate->cache_درخت, اشاریہ_رستہ);
+	fsck_resolve_undo(istate, اشاریہ_رستہ);
 }
 
-static int mark_object_for_connectivity(const struct object_id *oid,
-					struct object_info *oi UNUSED,
-					void *cb_data)
+ساكن صحيح mark_object_for_connectivity(ثابت بنية object_id *oid,
+					بنية object_info *oi بن_ورتیا,
+					فراغ *cb_انکڑے)
 {
-	struct repository *repo = cb_data;
-	struct object *obj = lookup_unknown_object(repo, oid);
+	بنية repository *repo = cb_انکڑے;
+	بنية object *obj = lookup_unknown_object(repo, oid);
 	obj->flags |= HAS_OBJ;
-	return 0;
+	أرجع 0;
 }
 
-static void fsck_refs(struct repository *r)
+ساكن فراغ fsck_refs(بنية repository *r)
 {
-	struct child_process refs_verify = CHILD_PROCESS_INIT;
-	struct progress *progress = NULL;
+	بنية بچہ_process refs_verify = بچہ_PROCESS_INIT;
+	بنية ترقی *ترقی = عدم;
 
-	if (show_progress)
-		progress = start_progress(r, _("Checking ref database"), 1);
+	إذا (show_ترقی)
+		ترقی = شروع_ترقی(r, _("Checking ref database"), 1);
 
-	if (verbose)
+	إذا (verbose)
 		fprintf_ln(stderr, _("Checking ref database"));
 
-	child_process_init(&refs_verify);
+	بچہ_process_init(&refs_verify);
 	refs_verify.git_cmd = 1;
-	strvec_pushl(&refs_verify.args, "refs", "verify", NULL);
-	if (verbose)
-		strvec_push(&refs_verify.args, "--verbose");
-	if (check_strict)
-		strvec_push(&refs_verify.args, "--strict");
+	strvec_pushl(&refs_verify.دلیلاں, "refs", "verify", عدم);
+	إذا (verbose)
+		strvec_ڈالو(&refs_verify.دلیلاں, "--verbose");
+	إذا (check_strict)
+		strvec_ڈالو(&refs_verify.دلیلاں, "--strict");
 
-	if (run_command(&refs_verify))
-		errors_found |= ERROR_REFS;
+	إذا (لگاتار_command(&refs_verify))
+		errors_لبھیا |= ERROR_REFS;
 
-	display_progress(progress, 1);
-	stop_progress(&progress);
+	display_ترقی(ترقی, 1);
+	stop_ترقی(&ترقی);
 }
 
-static char const * const fsck_usage[] = {
+ساكن حرف ثابت * ثابت fsck_usage[] = {
 	N_("git fsck [--tags] [--root] [--unreachable] [--cache] [--no-reflogs]\n"
 	   "         [--[no-]full] [--strict] [--verbose] [--lost-found]\n"
 	   "         [--[no-]dangling] [--[no-]progress] [--connectivity-only]\n"
 	   "         [--[no-]name-objects] [--[no-]references] [<object>...]"),
-	NULL
+	عدم
 };
 
-int cmd_fsck(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo)
+صحيح cmd_fsck(صحيح argc,
+	     ثابت حرف **argv,
+	     ثابت حرف *اگیتر,
+	     بنية repository *repo)
 {
-	struct odb_fsck_options odb_fsck_opts = {
-		.flags = ODB_FSCK_FULL,
-		.object_cb = fsck_obj_buffer,
+	بنية odb_fsck_options odb_fsck_opts = {
+		.flags = ODB_FSCK_بھریا,
+		.object_cb = fsck_obj_بفر,
 		.object_payload = repo,
 	};
-	int keep_cache_objects = 0;
-	int name_objects = 0;
-	int check_references = 1;
-	struct option fsck_opts[] = {
+	صحيح keep_cache_objects = 0;
+	صحيح name_objects = 0;
+	صحيح check_references = 1;
+	بنية option fsck_opts[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose")),
 		OPT_BOOL(0, "unreachable", &show_unreachable, N_("show unreachable objects")),
 		OPT_BOOL(0, "dangling", &show_dangling, N_("show dangling objects")),
-		OPT_BOOL(0, "tags", &show_tags, N_("report tags")),
-		OPT_BOOL(0, "root", &show_root, N_("report root nodes")),
+		OPT_BOOL(0, "tags", &show_ٹیگ_سوچی, N_("report tags")),
+		OPT_BOOL(0, "root", &show_جڑ, N_("report root nodes")),
 		OPT_BOOL(0, "cache", &keep_cache_objects, N_("make index objects head nodes")),
 		OPT_BOOL(0, "reflogs", &include_reflogs, N_("make reflogs head nodes (default)")),
-		OPT_BIT(0, "full", &odb_fsck_opts.flags,
-			N_("also consider packs and alternate objects"), ODB_FSCK_FULL),
+		OPT_ثنائی_ہندسہ(0, "full", &odb_fsck_opts.flags,
+			N_("also consider packs and alternate objects"), ODB_FSCK_بھریا),
 		OPT_BOOL(0, "connectivity-only", &connectivity_only, N_("check only connectivity")),
 		OPT_BOOL(0, "strict", &check_strict, N_("enable more strict checking")),
-		OPT_BOOL(0, "lost-found", &write_lost_and_found,
+		OPT_BOOL(0, "lost-found", &write_گواچا_and_لبھیا,
 					N_("write dangling objects in .git/lost-found")),
-		OPT_BOOL(0, "progress", &show_progress, N_("show progress")),
+		OPT_BOOL(0, "progress", &show_ترقی, N_("show progress")),
 		OPT_BOOL(0, "name-objects", &name_objects, N_("show verbose names for reachable objects")),
 		OPT_BOOL(0, "references", &check_references, N_("check reference database consistency")),
-		OPT_END(),
+		OPT_سرا(),
 	};
-	struct snapshot snap = {
+	بنية snapshot snap = {
 		.nr = 0,
 		.alloc = 0,
-		.ref = NULL
+		.ref = عدم
 	};
 
-	errors_found = 0;
+	errors_لبھیا = 0;
 	disable_replace_refs();
-	save_commit_buffer = 0;
+	save_commit_بفر = 0;
 
-	argc = parse_options(argc, argv, prefix, fsck_opts, fsck_usage, 0);
+	argc = parse_options(argc, argv, اگیتر, fsck_opts, fsck_usage, 0);
 
 	/* fsck knows how to handle missing promisor objects */
 	repo->fetch_if_missing = 0;
@@ -887,32 +887,32 @@ int cmd_fsck(int argc,
 	fsck_walk_options.walk = mark_object;
 
 	fsck_options_init(&fsck_obj_options, repo, FSCK_OPTIONS_DEFAULT);
-	fsck_obj_options.walk = mark_used;
+	fsck_obj_options.walk = mark_ورتیا;
 	fsck_obj_options.error_func = fsck_objects_error_func;
-	if (check_strict)
+	إذا (check_strict)
 		fsck_obj_options.strict = 1;
 
-	if (show_progress == -1)
-		show_progress = isatty(2);
-	if (verbose) {
-		show_progress = 0;
+	إذا (show_ترقی == -1)
+		show_ترقی = isatty(2);
+	إذا (verbose) {
+		show_ترقی = 0;
 		odb_fsck_opts.flags |= ODB_FSCK_VERBOSE;
 	}
-	if (show_progress)
-		odb_fsck_opts.flags |= ODB_FSCK_PROGRESS;
+	إذا (show_ترقی)
+		odb_fsck_opts.flags |= ODB_FSCK_ترقی;
 
-	if (write_lost_and_found) {
-		odb_fsck_opts.flags |= ODB_FSCK_FULL;
+	إذا (write_گواچا_and_لبھیا) {
+		odb_fsck_opts.flags |= ODB_FSCK_بھریا;
 		include_reflogs = 0;
 	}
 
-	if (name_objects)
-		fsck_enable_object_names(&fsck_walk_options);
+	إذا (name_objects)
+		fsck_enable_object_ناں(&fsck_walk_options);
 
 	repo_config(repo, git_fsck_config, &fsck_obj_options);
 	prepare_repo_settings(repo);
 
-	if (check_references)
+	إذا (check_references)
 		fsck_refs(repo);
 
 	/*
@@ -926,79 +926,79 @@ int cmd_fsck(int argc,
 	/* Ensure we get a "fresh" view of the odb */
 	odb_reprepare(repo->objects);
 
-	if (connectivity_only) {
-		odb_for_each_object(repo->objects, NULL,
+	إذا (connectivity_only) {
+		odb_for_each_object(repo->objects, عدم,
 				    mark_object_for_connectivity, repo, 0);
-	} else {
-		if (odb_fsck(repo->objects, &odb_fsck_opts) < 0)
-			errors_found |= ERROR_OBJECT;
+	} وإلا {
+		إذا (odb_fsck(repo->objects, &odb_fsck_opts) < 0)
+			errors_لبھیا |= ERROR_OBJECT;
 
-		if (fsck_finish(&fsck_obj_options))
-			errors_found |= ERROR_OBJECT;
+		إذا (fsck_انت(&fsck_obj_options))
+			errors_لبھیا |= ERROR_OBJECT;
 	}
 
 	/* Process the snapshotted refs and the reflogs. */
 	process_refs(repo, &snap);
 
 	/* If not given any explicit objects, process index files too. */
-	if (!argc)
+	إذا (!argc)
 		keep_cache_objects = 1;
-	if (keep_cache_objects) {
+	إذا (keep_cache_objects) {
 		/*
 		 * TODO: Consider first walking these indexes in snapshot_refs,
 		 * to snapshot where the index entries used to point, and then
 		 * check those snapshotted locations here.
 		 */
-		struct worktree **worktrees, **p;
+		بنية worktree **worktrees, **p;
 
-		verify_index_checksum = 1;
-		verify_ce_order = 1;
+		verify_اشاریہ_checksum = 1;
+		verify_ce_ترتیب = 1;
 
 		worktrees = get_worktrees(repo);
-		for (p = worktrees; *p; p++) {
-			struct worktree *wt = *p;
-			struct index_state istate =
-				INDEX_STATE_INIT(repo);
-			char *path, *wt_gitdir;
+		لكل (p = worktrees; *p; p++) {
+			بنية worktree *wt = *p;
+			بنية اشاریہ_state istate =
+				اشاریہ_STATE_INIT(repo);
+			حرف *رستہ, *wt_gitdir;
 
 			/*
 			 * Make a copy since the buffer is reusable
 			 * and may get overwritten by other calls
 			 * while we're examining the index.
 			 */
-			path = xstrdup(worktree_git_path(wt, "index"));
+			رستہ = xstrdup(worktree_git_رستہ(wt, "index"));
 			wt_gitdir = get_worktree_git_dir(wt);
 
-			read_index_from(&istate, path, wt_gitdir);
-			fsck_index(&istate, path, wt->is_current);
+			read_اشاریہ_from(&istate, رستہ, wt_gitdir);
+			fsck_اشاریہ(&istate, رستہ, wt->is_current);
 
-			discard_index(&istate);
-			free(wt_gitdir);
-			free(path);
+			discard_اشاریہ(&istate);
+			حرر(wt_gitdir);
+			حرر(رستہ);
 		}
 		free_worktrees(worktrees);
 	}
 
 	check_connectivity(repo);
 
-	if (repo->settings.core_commit_graph) {
-		struct odb_source_files *files = odb_source_files_downcast(repo->objects->source);
-		struct child_process commit_graph_verify = CHILD_PROCESS_INIT;
+	إذا (repo->settings.core_commit_گراف) {
+		بنية odb_سروت_files *files = odb_سروت_files_downcast(repo->objects->سروت);
+		بنية بچہ_process commit_گراف_verify = بچہ_PROCESS_INIT;
 
-		for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-			child_process_init(&commit_graph_verify);
-			commit_graph_verify.git_cmd = 1;
-			strvec_pushl(&commit_graph_verify.args, "commit-graph",
-				     "verify", "--object-dir", dir->abspath, NULL);
-			if (show_progress)
-				strvec_push(&commit_graph_verify.args, "--progress");
-			else
-				strvec_push(&commit_graph_verify.args, "--no-progress");
-			if (run_command(&commit_graph_verify))
-				errors_found |= ERROR_COMMIT_GRAPH;
+		لكل (بنية odb_files_dir *dir = files->dirs; dir; dir = dir->اگلا) {
+			بچہ_process_init(&commit_گراف_verify);
+			commit_گراف_verify.git_cmd = 1;
+			strvec_pushl(&commit_گراف_verify.دلیلاں, "commit-graph",
+				     "verify", "--object-dir", dir->abspath, عدم);
+			إذا (show_ترقی)
+				strvec_ڈالو(&commit_گراف_verify.دلیلاں, "--progress");
+			وإلا
+				strvec_ڈالو(&commit_گراف_verify.دلیلاں, "--no-progress");
+			إذا (لگاتار_command(&commit_گراف_verify))
+				errors_لبھیا |= ERROR_COMMIT_گراف;
 		}
 	}
 
 	free_snapshot_refs(&snap);
-	return errors_found;
+	أرجع errors_لبھیا;
 }

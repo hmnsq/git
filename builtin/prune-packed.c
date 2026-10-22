@@ -1,35 +1,35 @@
-#include "builtin.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "prune-packed.h"
+#ضمن "builtin.h"
+#ضمن "gettext.h"
+#ضمن "parse-options.h"
+#ضمن "prune-packed.h"
 
-static const char * const prune_packed_usage[] = {
+ساكن ثابت حرف * ثابت prune_packed_usage[] = {
 	"git prune-packed [-n | --dry-run] [-q | --quiet]",
-	NULL
+	عدم
 };
 
-int cmd_prune_packed(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo UNUSED)
+صحيح cmd_prune_packed(صحيح argc,
+		     ثابت حرف **argv,
+		     ثابت حرف *اگیتر,
+		     بنية repository *repo بن_ورتیا)
 {
-	int opts = isatty(2) ? PRUNE_PACKED_VERBOSE : 0;
-	const struct option prune_packed_options[] = {
-		OPT_BIT('n', "dry-run", &opts, N_("dry run"),
-			PRUNE_PACKED_DRY_RUN),
+	صحيح opts = isatty(2) ? PRUNE_PACKED_VERBOSE : 0;
+	ثابت بنية option prune_packed_options[] = {
+		OPT_ثنائی_ہندسہ('n', "dry-run", &opts, N_("dry run"),
+			PRUNE_PACKED_DRY_لگاتار),
 		OPT_NEGBIT('q', "quiet", &opts, N_("be quiet"),
 			   PRUNE_PACKED_VERBOSE),
-		OPT_END()
+		OPT_سرا()
 	};
 
-	argc = parse_options(argc, argv, prefix, prune_packed_options,
+	argc = parse_options(argc, argv, اگیتر, prune_packed_options,
 			     prune_packed_usage, 0);
 
-	if (argc > 0)
-		usage_msg_opt(_("too many arguments"),
+	إذا (argc > 0)
+		usage_پیغام_opt(_("too many arguments"),
 			      prune_packed_usage,
 			      prune_packed_options);
 
 	prune_packed_objects(opts);
-	return 0;
+	أرجع 0;
 }
