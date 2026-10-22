@@ -30,17 +30,17 @@ static char const * const builtin_sparse_checkout_usage[] = {
 
 static void write_patterns_to_file(FILE *fp, struct pattern_list *pl)
 {
-	int i;
+	цяло i;
 
-	for (i = 0; i < pl->nr; i++) {
+	за (i = 0; i < pl->nr; i++) {
 		struct path_pattern *p = pl->patterns[i];
 
-		if (p->flags & PATTERN_FLAG_NEGATIVE)
+		ако (p->flags & PATTERN_FLAG_NEGATIVE)
 			fprintf(fp, "!");
 
 		fprintf(fp, "%s", p->pattern);
 
-		if (p->flags & PATTERN_FLAG_MUSTBEDIR)
+		ако (p->flags & PATTERN_FLAG_MUSTBEDIR)
 			fprintf(fp, "/");
 
 		fprintf(fp, "\n");
@@ -52,7 +52,7 @@ static char const * const builtin_sparse_checkout_list_usage[] = {
 	NULL
 };
 
-static int sparse_checkout_list(int argc, const char **argv, const char *prefix,
+static цяло sparse_checkout_list(цяло argc, const char **argv, const char *prefix,
 				struct repository *repo UNUSED)
 {
 	static struct option builtin_sparse_checkout_list_options[] = {
@@ -60,11 +60,11 @@ static int sparse_checkout_list(int argc, const char **argv, const char *prefix,
 	};
 	struct pattern_list pl;
 	char *sparse_filename;
-	int res;
+	цяло res;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
 	setup_work_tree(the_repository);
-	if (!cfg->apply_sparse_checkout)
+	ако (!cfg->apply_sparse_checkout)
 		die(_("this worktree is not sparse"));
 
 	argc = parse_options(argc, argv, prefix,
@@ -79,13 +79,13 @@ static int sparse_checkout_list(int argc, const char **argv, const char *prefix,
 	res = add_patterns_from_file_to_list(sparse_filename, "", 0, &pl, NULL, 0);
 	free(sparse_filename);
 
-	if (res < 0) {
+	ако (res < 0) {
 		warning(_("this worktree is not sparse (sparse-checkout file may not exist)"));
-		return 0;
+		върни 0;
 	}
 
-	if (pl.use_cone_patterns) {
-		int i;
+	ако (pl.use_cone_patterns) {
+		цяло i;
 		struct pattern_entry *pe;
 		struct hashmap_iter iter;
 		struct string_list sl = STRING_LIST_INIT_DUP;
@@ -97,24 +97,24 @@ static int sparse_checkout_list(int argc, const char **argv, const char *prefix,
 
 		string_list_sort_u(&sl, 0);
 
-		for (i = 0; i < sl.nr; i++) {
+		за (i = 0; i < sl.nr; i++) {
 			quote_c_style(sl.items[i].string, NULL, stdout, 0);
 			printf("\n");
 		}
 
 		string_list_clear(&sl, 0);
-	} else {
+	} иначе {
 		write_patterns_to_file(stdout, &pl);
 	}
 
 	clear_pattern_list(&pl);
 
-	return 0;
+	върни 0;
 }
 
 static void clean_tracked_sparse_directories(struct repository *r)
 {
-	int i, was_full = 0;
+	цяло i, was_full = 0;
 	struct strbuf path = STRBUF_INIT;
 	size_t pathlen;
 	struct string_list_item *item;
@@ -124,11 +124,11 @@ static void clean_tracked_sparse_directories(struct repository *r)
 	 * If we are not using cone mode patterns, then we cannot
 	 * delete directories outside of the sparse cone.
 	 */
-	if (!r || !r->index || !r->worktree)
-		return;
-	if (init_sparse_checkout_patterns(r->index) ||
+	ако (!r || !r->index || !r->worktree)
+		върни;
+	ако (init_sparse_checkout_patterns(r->index) ||
 	    !r->index->sparse_checkout_patterns->use_cone_patterns)
-		return;
+		върни;
 
 	/*
 	 * Use the sparse index as a data structure to assist finding
@@ -136,14 +136,14 @@ static void clean_tracked_sparse_directories(struct repository *r)
 	 * sparse index will not delete directories that contain
 	 * conflicted entries or submodules.
 	 */
-	if (r->index->sparse_index == INDEX_EXPANDED) {
+	ако (r->index->sparse_index == INDEX_EXPANDED) {
 		/*
 		 * If something, such as a merge conflict or other concern,
 		 * prevents us from converting to a sparse index, then do
 		 * not try deleting files.
 		 */
-		if (convert_to_sparse(r->index, SPARSE_INDEX_MEMORY_ONLY))
-			return;
+		ако (convert_to_sparse(r->index, SPARSE_INDEX_MEMORY_ONLY))
+			върни;
 		was_full = 1;
 	}
 
@@ -157,10 +157,10 @@ static void clean_tracked_sparse_directories(struct repository *r)
 	 * store the entries in a list before exploring, since that might
 	 * expand the sparse-index again.
 	 */
-	for (i = 0; i < r->index->cache_nr; i++) {
+	за (i = 0; i < r->index->cache_nr; i++) {
 		struct cache_entry *ce = r->index->cache[i];
 
-		if (S_ISSPARSEDIR(ce->ce_mode) &&
+		ако (S_ISSPARSEDIR(ce->ce_mode) &&
 		    repo_file_exists(r, ce->name))
 			string_list_append(&sparse_dirs, ce->name);
 	}
@@ -181,11 +181,11 @@ static void clean_tracked_sparse_directories(struct repository *r)
 		parse_pathspec(&p, PATHSPEC_GLOB, 0, NULL, s.v);
 		fill_directory(&dir, r->index, &p);
 
-		if (dir.nr) {
+		ако (dir.nr) {
 			warning(_("directory '%s' contains untracked files,"
 				  " but is not in the sparse-checkout cone"),
 				item->string);
-		} else if (remove_dir_recursively(&path, 0)) {
+		} иначе ако (remove_dir_recursively(&path, 0)) {
 			/*
 			 * Removal is "best effort". If something blocks
 			 * the deletion, then continue with a warning.
@@ -202,11 +202,11 @@ static void clean_tracked_sparse_directories(struct repository *r)
 	string_list_clear(&sparse_dirs, 0);
 	strbuf_release(&path);
 
-	if (was_full)
+	ако (was_full)
 		ensure_full_index(r->index);
 }
 
-static int update_working_directory(struct repository *r,
+static цяло update_working_directory(struct repository *r,
 				    struct pattern_list *pl)
 {
 	enum update_sparsity_result result;
@@ -215,8 +215,8 @@ static int update_working_directory(struct repository *r,
 	struct pattern_list *old_pl;
 
 	/* If no branch has been checked out, there are no updates to make. */
-	if (is_index_unborn(r->index))
-		return UPDATE_SPARSITY_SUCCESS;
+	ако (is_index_unborn(r->index))
+		върни UPDATE_SPARSITY_SUCCESS;
 
 	old_pl = r->index->sparse_checkout_patterns;
 	r->index->sparse_checkout_patterns = pl;
@@ -237,26 +237,26 @@ static int update_working_directory(struct repository *r,
 	result = update_sparsity(&o, pl);
 	clear_unpack_trees_porcelain(&o);
 
-	if (result == UPDATE_SPARSITY_WARNINGS)
+	ако (result == UPDATE_SPARSITY_WARNINGS)
 		/*
 		 * We don't do any special handling of warnings from untracked
 		 * files in the way or dirty entries that can't be removed.
 		 */
 		result = UPDATE_SPARSITY_SUCCESS;
-	if (result == UPDATE_SPARSITY_SUCCESS)
+	ако (result == UPDATE_SPARSITY_SUCCESS)
 		write_locked_index(r->index, &lock_file, COMMIT_LOCK);
-	else
+	иначе
 		rollback_lock_file(&lock_file);
 
 	clean_tracked_sparse_directories(r);
 
-	if (r->index->sparse_checkout_patterns != pl) {
+	ако (r->index->sparse_checkout_patterns != pl) {
 		clear_pattern_list(r->index->sparse_checkout_patterns);
 		FREE_AND_NULL(r->index->sparse_checkout_patterns);
 	}
 	r->index->sparse_checkout_patterns = old_pl;
 
-	return result;
+	върни result;
 }
 
 static char *escaped_pattern(char *pattern)
@@ -264,30 +264,30 @@ static char *escaped_pattern(char *pattern)
 	char *p = pattern;
 	struct strbuf final = STRBUF_INIT;
 
-	while (*p) {
-		if (is_glob_special(*p))
+	докато (*p) {
+		ако (is_glob_special(*p))
 			strbuf_addch(&final, '\\');
 
 		strbuf_addch(&final, *p);
 		p++;
 	}
 
-	return strbuf_detach(&final, NULL);
+	върни strbuf_detach(&final, NULL);
 }
 
 static void write_cone_to_file(FILE *fp, struct pattern_list *pl)
 {
-	int i;
+	цяло i;
 	struct pattern_entry *pe;
 	struct hashmap_iter iter;
 	struct string_list sl = STRING_LIST_INIT_DUP;
 	struct strbuf parent_pattern = STRBUF_INIT;
 
 	hashmap_for_each_entry(&pl->parent_hashmap, &iter, pe, ent) {
-		if (hashmap_get_entry(&pl->recursive_hashmap, pe, ent, NULL))
+		ако (hashmap_get_entry(&pl->recursive_hashmap, pe, ent, NULL))
 			continue;
 
-		if (!hashmap_contains_parent(&pl->recursive_hashmap,
+		ако (!hashmap_contains_parent(&pl->recursive_hashmap,
 					     pe->pattern,
 					     &parent_pattern))
 			string_list_append(&sl, pe->pattern);
@@ -297,10 +297,10 @@ static void write_cone_to_file(FILE *fp, struct pattern_list *pl)
 
 	fprintf(fp, "/*\n!/*/\n");
 
-	for (i = 0; i < sl.nr; i++) {
+	за (i = 0; i < sl.nr; i++) {
 		char *pattern = escaped_pattern(sl.items[i].string);
 
-		if (strlen(pattern))
+		ако (strlen(pattern))
 			fprintf(fp, "%s/\n!%s/*/\n", pattern, pattern);
 		free(pattern);
 	}
@@ -308,7 +308,7 @@ static void write_cone_to_file(FILE *fp, struct pattern_list *pl)
 	string_list_clear(&sl, 0);
 
 	hashmap_for_each_entry(&pl->recursive_hashmap, &iter, pe, ent) {
-		if (!hashmap_contains_parent(&pl->recursive_hashmap,
+		ако (!hashmap_contains_parent(&pl->recursive_hashmap,
 					     pe->pattern,
 					     &parent_pattern))
 			string_list_append(&sl, pe->pattern);
@@ -318,7 +318,7 @@ static void write_cone_to_file(FILE *fp, struct pattern_list *pl)
 
 	string_list_sort_u(&sl, 0);
 
-	for (i = 0; i < sl.nr; i++) {
+	за (i = 0; i < sl.nr; i++) {
 		char *pattern = escaped_pattern(sl.items[i].string);
 		fprintf(fp, "%s/\n", pattern);
 		free(pattern);
@@ -327,46 +327,46 @@ static void write_cone_to_file(FILE *fp, struct pattern_list *pl)
 	string_list_clear(&sl, 0);
 }
 
-static int write_patterns_and_update(struct repository *repo,
+static цяло write_patterns_and_update(struct repository *repo,
 				     struct pattern_list *pl)
 {
 	char *sparse_filename;
 	FILE *fp;
 	struct lock_file lk = LOCK_INIT;
-	int result;
+	цяло result;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
 	sparse_filename = get_sparse_checkout_filename();
 
-	if (safe_create_leading_directories(repo, sparse_filename))
+	ако (safe_create_leading_directories(repo, sparse_filename))
 		die(_("failed to create directory for sparse-checkout file"));
 
 	repo_hold_lock_file_for_update(repo, &lk, sparse_filename,
 				       LOCK_DIE_ON_ERROR);
 
 	result = update_working_directory(repo, pl);
-	if (result) {
+	ако (result) {
 		rollback_lock_file(&lk);
 		update_working_directory(repo, NULL);
 		goto out;
 	}
 
 	fp = fdopen_lock_file(&lk, "w");
-	if (!fp)
+	ако (!fp)
 		die_errno(_("unable to fdopen %s"), get_lock_file_path(&lk));
 
-	if (cfg->core_sparse_checkout_cone)
+	ако (cfg->core_sparse_checkout_cone)
 		write_cone_to_file(fp, pl);
-	else
+	иначе
 		write_patterns_to_file(fp, pl);
 
-	if (commit_lock_file(&lk))
+	ако (commit_lock_file(&lk))
 		die_errno(_("unable to write %s"), sparse_filename);
 
 out:
 	clear_pattern_list(pl);
 	free(sparse_filename);
-	return result;
+	върни result;
 }
 
 enum sparse_checkout_mode {
@@ -375,73 +375,73 @@ enum sparse_checkout_mode {
 	MODE_CONE_PATTERNS = 2,
 };
 
-static int set_config(struct repository *repo,
+static цяло set_config(struct repository *repo,
 		      enum sparse_checkout_mode mode)
 {
 	/* Update to use worktree config, if not already. */
-	if (init_worktree_config(repo)) {
+	ако (init_worktree_config(repo)) {
 		error(_("failed to initialize worktree config"));
-		return 1;
+		върни 1;
 	}
 
-	if (repo_config_set_worktree_gently(repo,
+	ако (repo_config_set_worktree_gently(repo,
 					    "core.sparseCheckout",
 					    mode ? "true" : "false") ||
 	    repo_config_set_worktree_gently(repo,
 					    "core.sparseCheckoutCone",
 					    mode == MODE_CONE_PATTERNS ?
 						"true" : "false"))
-		return 1;
+		върни 1;
 
-	if (mode == MODE_NO_PATTERNS)
-		return set_sparse_index_config(repo, 0);
+	ако (mode == MODE_NO_PATTERNS)
+		върни set_sparse_index_config(repo, 0);
 
-	return 0;
+	върни 0;
 }
 
-static enum sparse_checkout_mode update_cone_mode(int *cone_mode) {
+static enum sparse_checkout_mode update_cone_mode(цяло *cone_mode) {
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
 	/* If not specified, use previous definition of cone mode */
-	if (*cone_mode == -1 && cfg->apply_sparse_checkout)
+	ако (*cone_mode == -1 && cfg->apply_sparse_checkout)
 		*cone_mode = cfg->core_sparse_checkout_cone;
 
 	/* Set cone/non-cone mode appropriately */
 	cfg->apply_sparse_checkout = 1;
-	if (*cone_mode == 1 || *cone_mode == -1) {
+	ако (*cone_mode == 1 || *cone_mode == -1) {
 		cfg->core_sparse_checkout_cone = 1;
-		return MODE_CONE_PATTERNS;
+		върни MODE_CONE_PATTERNS;
 	}
 	cfg->core_sparse_checkout_cone = 0;
-	return MODE_ALL_PATTERNS;
+	върни MODE_ALL_PATTERNS;
 }
 
-static int update_modes(struct repository *repo, int *cone_mode, int *sparse_index)
+static цяло update_modes(struct repository *repo, цяло *cone_mode, цяло *sparse_index)
 {
-	int mode, record_mode;
+	цяло mode, record_mode;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
 	/* Determine if we need to record the mode; ensure sparse checkout on */
 	record_mode = (*cone_mode != -1) || !cfg->apply_sparse_checkout;
 
 	mode = update_cone_mode(cone_mode);
-	if (record_mode && set_config(repo, mode))
-		return 1;
+	ако (record_mode && set_config(repo, mode))
+		върни 1;
 
 	/* Set sparse-index/non-sparse-index mode if specified */
-	if (*sparse_index >= 0) {
-		if (set_sparse_index_config(repo, *sparse_index) < 0)
+	ако (*sparse_index >= 0) {
+		ако (set_sparse_index_config(repo, *sparse_index) < 0)
 			die(_("failed to modify sparse-index config"));
 
 		/* force an index rewrite */
 		repo_read_index(repo);
 		repo->index->updated_workdir = 1;
 
-		if (!*sparse_index)
+		ако (!*sparse_index)
 			ensure_full_index(repo->index);
 	}
 
-	return 0;
+	върни 0;
 }
 
 static char const * const builtin_sparse_checkout_init_usage[] = {
@@ -450,16 +450,16 @@ static char const * const builtin_sparse_checkout_init_usage[] = {
 };
 
 static struct sparse_checkout_init_opts {
-	int cone_mode;
-	int sparse_index;
+	цяло cone_mode;
+	цяло sparse_index;
 } init_opts;
 
-static int sparse_checkout_init(int argc, const char **argv, const char *prefix,
+static цяло sparse_checkout_init(цяло argc, const char **argv, const char *prefix,
 				struct repository *repo)
 {
 	struct pattern_list pl;
 	char *sparse_filename;
-	int res;
+	цяло res;
 	struct object_id oid;
 
 	static struct option builtin_sparse_checkout_init_options[] = {
@@ -480,8 +480,8 @@ static int sparse_checkout_init(int argc, const char **argv, const char *prefix,
 			     builtin_sparse_checkout_init_options,
 			     builtin_sparse_checkout_init_usage, 0);
 
-	if (update_modes(repo, &init_opts.cone_mode, &init_opts.sparse_index))
-		return 1;
+	ако (update_modes(repo, &init_opts.cone_mode, &init_opts.sparse_index))
+		върни 1;
 
 	memset(&pl, 0, sizeof(pl));
 
@@ -489,27 +489,27 @@ static int sparse_checkout_init(int argc, const char **argv, const char *prefix,
 	res = add_patterns_from_file_to_list(sparse_filename, "", 0, &pl, NULL, 0);
 
 	/* If we already have a sparse-checkout file, use it. */
-	if (res >= 0) {
+	ако (res >= 0) {
 		free(sparse_filename);
 		clear_pattern_list(&pl);
-		return update_working_directory(repo, NULL);
+		върни update_working_directory(repo, NULL);
 	}
 
-	if (repo_get_oid(repo, "HEAD", &oid)) {
+	ако (repo_get_oid(repo, "HEAD", &oid)) {
 		FILE *fp;
 
 		/* assume we are in a fresh repo, but update the sparse-checkout file */
-		if (safe_create_leading_directories(repo, sparse_filename))
+		ако (safe_create_leading_directories(repo, sparse_filename))
 			die(_("unable to create leading directories of %s"),
 			    sparse_filename);
 		fp = xfopen(sparse_filename, "w");
-		if (!fp)
+		ако (!fp)
 			die(_("failed to open '%s'"), sparse_filename);
 
 		free(sparse_filename);
 		fprintf(fp, "/*\n!/*/\n");
 		fclose(fp);
-		return 0;
+		върни 0;
 	}
 
 	free(sparse_filename);
@@ -518,7 +518,7 @@ static int sparse_checkout_init(int argc, const char **argv, const char *prefix,
 	add_pattern("!/*/", empty_base, 0, &pl, 0);
 	pl.use_cone_patterns = init_opts.cone_mode;
 
-	return write_patterns_and_update(repo, &pl);
+	върни write_patterns_and_update(repo, &pl);
 }
 
 static void insert_recursive_pattern(struct pattern_list *pl, struct strbuf *path)
@@ -530,13 +530,13 @@ static void insert_recursive_pattern(struct pattern_list *pl, struct strbuf *pat
 
 	hashmap_add(&pl->recursive_hashmap, &e->ent);
 
-	while (e->patternlen) {
+	докато (e->patternlen) {
 		char *slash = strrchr(e->pattern, '/');
 		char *oldpattern = e->pattern;
 		size_t newlen;
 		struct pattern_entry *dup;
 
-		if (!slash || slash == e->pattern)
+		ако (!slash || slash == e->pattern)
 			break;
 
 		newlen = slash - e->pattern;
@@ -546,9 +546,9 @@ static void insert_recursive_pattern(struct pattern_list *pl, struct strbuf *pat
 		hashmap_entry_init(&e->ent, fspathhash(e->pattern));
 
 		dup = hashmap_get_entry(&pl->parent_hashmap, e, ent, NULL);
-		if (!dup) {
+		ако (!dup) {
 			hashmap_add(&pl->parent_hashmap, &e->ent);
-		} else {
+		} иначе {
 			free(e->pattern);
 			free(e);
 			e = dup;
@@ -562,38 +562,38 @@ static void strbuf_to_cone_pattern(struct strbuf *line, struct pattern_list *pl)
 
 	strbuf_trim_trailing_dir_sep(line);
 
-	if (strbuf_normalize_path(line))
+	ако (strbuf_normalize_path(line))
 		die(_("could not normalize path %s"), line->buf);
 
-	if (!line->len)
-		return;
+	ако (!line->len)
+		върни;
 
-	if (line->buf[0] != '/')
+	ако (line->buf[0] != '/')
 		strbuf_insertstr(line, 0, "/");
 
 	insert_recursive_pattern(pl, line);
 }
 
 static void add_patterns_from_input(struct pattern_list *pl,
-				    int argc, const char **argv,
+				    цяло argc, const char **argv,
 				    FILE *file)
 {
-	int i;
+	цяло i;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
-	if (cfg->core_sparse_checkout_cone) {
+	ако (cfg->core_sparse_checkout_cone) {
 		struct strbuf line = STRBUF_INIT;
 
 		hashmap_init(&pl->recursive_hashmap, pl_hashmap_cmp, NULL, 0);
 		hashmap_init(&pl->parent_hashmap, pl_hashmap_cmp, NULL, 0);
 		pl->use_cone_patterns = 1;
 
-		if (file) {
+		ако (file) {
 			struct strbuf unquoted = STRBUF_INIT;
-			while (!strbuf_getline(&line, file)) {
-				if (line.buf[0] == '"') {
+			докато (!strbuf_getline(&line, file)) {
+				ако (line.buf[0] == '"') {
 					strbuf_reset(&unquoted);
-					if (unquote_c_style(&unquoted, line.buf, NULL))
+					ако (unquote_c_style(&unquoted, line.buf, NULL))
 						die(_("unable to unquote C-style string '%s'"),
 						line.buf);
 
@@ -604,24 +604,24 @@ static void add_patterns_from_input(struct pattern_list *pl,
 			}
 
 			strbuf_release(&unquoted);
-		} else {
-			for (i = 0; i < argc; i++) {
+		} иначе {
+			за (i = 0; i < argc; i++) {
 				strbuf_setlen(&line, 0);
 				strbuf_addstr(&line, argv[i]);
 				strbuf_to_cone_pattern(&line, pl);
 			}
 		}
 		strbuf_release(&line);
-	} else {
-		if (file) {
+	} иначе {
+		ако (file) {
 			struct strbuf line = STRBUF_INIT;
 
-			while (!strbuf_getline(&line, file))
+			докато (!strbuf_getline(&line, file))
 				add_pattern(line.buf, empty_base, 0, pl, 0);
 
 			strbuf_release(&line);
-		} else {
-			for (i = 0; i < argc; i++)
+		} иначе {
+			за (i = 0; i < argc; i++)
 				add_pattern(argv[i], empty_base, 0, pl, 0);
 		}
 	}
@@ -632,9 +632,9 @@ enum modify_type {
 	ADD,
 };
 
-static void add_patterns_cone_mode(int argc, const char **argv,
+static void add_patterns_cone_mode(цяло argc, const char **argv,
 				   struct pattern_list *pl,
-				   int use_stdin)
+				   цяло use_stdin)
 {
 	struct strbuf buffer = STRBUF_INIT;
 	struct pattern_entry *pe;
@@ -649,16 +649,16 @@ static void add_patterns_cone_mode(int argc, const char **argv,
 	memset(&existing, 0, sizeof(existing));
 	existing.use_cone_patterns = cfg->core_sparse_checkout_cone;
 
-	if (add_patterns_from_file_to_list(sparse_filename, "", 0,
+	ако (add_patterns_from_file_to_list(sparse_filename, "", 0,
 					   &existing, NULL, 0))
 		die(_("unable to load existing sparse-checkout patterns"));
 	free(sparse_filename);
 
-	if (!existing.use_cone_patterns)
+	ако (!existing.use_cone_patterns)
 		die(_("existing sparse-checkout patterns do not use cone mode"));
 
 	hashmap_for_each_entry(&existing.recursive_hashmap, &iter, pe, ent) {
-		if (!hashmap_contains_parent(&pl->recursive_hashmap,
+		ако (!hashmap_contains_parent(&pl->recursive_hashmap,
 					pe->pattern, &buffer) ||
 		    !hashmap_contains_parent(&pl->parent_hashmap,
 					pe->pattern, &buffer)) {
@@ -672,32 +672,32 @@ static void add_patterns_cone_mode(int argc, const char **argv,
 	strbuf_release(&buffer);
 }
 
-static void add_patterns_literal(int argc, const char **argv,
+static void add_patterns_literal(цяло argc, const char **argv,
 				 struct pattern_list *pl,
-				 int use_stdin)
+				 цяло use_stdin)
 {
 	char *sparse_filename = get_sparse_checkout_filename();
-	if (add_patterns_from_file_to_list(sparse_filename, "", 0,
+	ако (add_patterns_from_file_to_list(sparse_filename, "", 0,
 					   pl, NULL, 0))
 		die(_("unable to load existing sparse-checkout patterns"));
 	free(sparse_filename);
 	add_patterns_from_input(pl, argc, argv, use_stdin ? stdin : NULL);
 }
 
-static int modify_pattern_list(struct repository *repo,
-			       struct strvec *args, int use_stdin,
+static цяло modify_pattern_list(struct repository *repo,
+			       struct strvec *args, цяло use_stdin,
 			       enum modify_type m)
 {
-	int result;
-	int changed_config = 0;
+	цяло result;
+	цяло changed_config = 0;
 	struct pattern_list *pl = xcalloc(1, sizeof(*pl));
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
 	switch (m) {
 	case ADD:
-		if (cfg->core_sparse_checkout_cone)
+		ако (cfg->core_sparse_checkout_cone)
 			add_patterns_cone_mode(args->nr, args->v, pl, use_stdin);
-		else
+		иначе
 			add_patterns_literal(args->nr, args->v, pl, use_stdin);
 		break;
 
@@ -707,7 +707,7 @@ static int modify_pattern_list(struct repository *repo,
 		break;
 	}
 
-	if (!cfg->apply_sparse_checkout) {
+	ако (!cfg->apply_sparse_checkout) {
 		set_config(repo, MODE_ALL_PATTERNS);
 		cfg->apply_sparse_checkout = 1;
 		changed_config = 1;
@@ -715,32 +715,32 @@ static int modify_pattern_list(struct repository *repo,
 
 	result = write_patterns_and_update(repo, pl);
 
-	if (result && changed_config)
+	ако (result && changed_config)
 		set_config(repo, MODE_NO_PATTERNS);
 
 	clear_pattern_list(pl);
 	free(pl);
-	return result;
+	върни result;
 }
 
 static void sanitize_paths(struct repository *repo,
 			   struct strvec *args,
-			   const char *prefix, int skip_checks)
+			   const char *prefix, цяло skip_checks)
 {
-	int i;
+	цяло i;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
-	if (!args->nr)
-		return;
+	ако (!args->nr)
+		върни;
 
-	if (prefix && *prefix && cfg->core_sparse_checkout_cone) {
+	ако (prefix && *prefix && cfg->core_sparse_checkout_cone) {
 		/*
 		 * The args are not pathspecs, so unfortunately we
 		 * cannot imitate how cmd_add() uses parse_pathspec().
 		 */
-		int prefix_len = strlen(prefix);
+		цяло prefix_len = strlen(prefix);
 
-		for (i = 0; i < args->nr; i++) {
+		за (i = 0; i < args->nr; i++) {
 			char *prefixed_path = prefix_path(the_repository, prefix,
 							  prefix_len, args->v[i]);
 			strvec_replace(args, i, prefixed_path);
@@ -748,37 +748,37 @@ static void sanitize_paths(struct repository *repo,
 		}
 	}
 
-	if (skip_checks)
-		return;
+	ако (skip_checks)
+		върни;
 
-	if (prefix && *prefix && !cfg->core_sparse_checkout_cone)
+	ако (prefix && *prefix && !cfg->core_sparse_checkout_cone)
 		die(_("please run from the toplevel directory in non-cone mode"));
 
-	if (cfg->core_sparse_checkout_cone) {
-		for (i = 0; i < args->nr; i++) {
-			if (args->v[i][0] == '/')
+	ако (cfg->core_sparse_checkout_cone) {
+		за (i = 0; i < args->nr; i++) {
+			ако (args->v[i][0] == '/')
 				die(_("specify directories rather than patterns (no leading slash)"));
-			if (args->v[i][0] == '!')
+			ако (args->v[i][0] == '!')
 				die(_("specify directories rather than patterns.  If your directory starts with a '!', pass --skip-checks"));
-			if (strpbrk(args->v[i], "*?[]"))
+			ако (strpbrk(args->v[i], "*?[]"))
 				die(_("specify directories rather than patterns.  If your directory really has any of '*?[]\\' in it, pass --skip-checks"));
 		}
 	}
 
-	for (i = 0; i < args->nr; i++) {
+	за (i = 0; i < args->nr; i++) {
 		struct cache_entry *ce;
 		struct index_state *index = repo->index;
-		int pos = index_name_pos(index, args->v[i], strlen(args->v[i]));
+		цяло pos = index_name_pos(index, args->v[i], strlen(args->v[i]));
 
-		if (pos < 0)
+		ако (pos < 0)
 			continue;
 		ce = index->cache[pos];
-		if (S_ISSPARSEDIR(ce->ce_mode))
+		ако (S_ISSPARSEDIR(ce->ce_mode))
 			continue;
 
-		if (cfg->core_sparse_checkout_cone)
+		ако (cfg->core_sparse_checkout_cone)
 			die(_("'%s' is not a directory; to treat it as a directory anyway, rerun with --skip-checks"), args->v[i]);
-		else
+		иначе
 			warning(_("pass a leading slash before paths such as '%s' if you want a single file (see NON-CONE PROBLEMS in the git-sparse-checkout manual)."), args->v[i]);
 	}
 }
@@ -789,11 +789,11 @@ static char const * const builtin_sparse_checkout_add_usage[] = {
 };
 
 static struct sparse_checkout_add_opts {
-	int skip_checks;
-	int use_stdin;
+	цяло skip_checks;
+	цяло use_stdin;
 } add_opts;
 
-static int sparse_checkout_add(int argc, const char **argv, const char *prefix,
+static цяло sparse_checkout_add(цяло argc, const char **argv, const char *prefix,
 			       struct repository *repo)
 {
 	static struct option builtin_sparse_checkout_add_options[] = {
@@ -805,11 +805,11 @@ static int sparse_checkout_add(int argc, const char **argv, const char *prefix,
 		OPT_END(),
 	};
 	struct strvec patterns = STRVEC_INIT;
-	int ret;
+	цяло ret;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
 	setup_work_tree(the_repository);
-	if (!cfg->apply_sparse_checkout)
+	ако (!cfg->apply_sparse_checkout)
 		die(_("no sparse-checkout to add to"));
 
 	repo_read_index(repo);
@@ -818,14 +818,14 @@ static int sparse_checkout_add(int argc, const char **argv, const char *prefix,
 			     builtin_sparse_checkout_add_options,
 			     builtin_sparse_checkout_add_usage, 0);
 
-	for (int i = 0; i < argc; i++)
+	за (цяло i = 0; i < argc; i++)
 		strvec_push(&patterns, argv[i]);
 	sanitize_paths(repo, &patterns, prefix, add_opts.skip_checks);
 
 	ret = modify_pattern_list(repo, &patterns, add_opts.use_stdin, ADD);
 
 	strvec_clear(&patterns);
-	return ret;
+	върни ret;
 }
 
 static char const * const builtin_sparse_checkout_set_usage[] = {
@@ -834,17 +834,17 @@ static char const * const builtin_sparse_checkout_set_usage[] = {
 };
 
 static struct sparse_checkout_set_opts {
-	int cone_mode;
-	int sparse_index;
-	int skip_checks;
-	int use_stdin;
+	цяло cone_mode;
+	цяло sparse_index;
+	цяло skip_checks;
+	цяло use_stdin;
 } set_opts;
 
-static int sparse_checkout_set(int argc, const char **argv, const char *prefix,
+static цяло sparse_checkout_set(цяло argc, const char **argv, const char *prefix,
 			       struct repository *repo)
 {
 	struct repo_config_values *cfg = repo_config_values(the_repository);
-	int default_patterns_nr = 2;
+	цяло default_patterns_nr = 2;
 	const char *default_patterns[] = {"/*", "!/*/", NULL};
 
 	static struct option builtin_sparse_checkout_set_options[] = {
@@ -861,7 +861,7 @@ static int sparse_checkout_set(int argc, const char **argv, const char *prefix,
 		OPT_END(),
 	};
 	struct strvec patterns = STRVEC_INIT;
-	int ret;
+	цяло ret;
 
 	setup_work_tree(the_repository);
 	repo_read_index(repo);
@@ -873,19 +873,19 @@ static int sparse_checkout_set(int argc, const char **argv, const char *prefix,
 			     builtin_sparse_checkout_set_options,
 			     builtin_sparse_checkout_set_usage, 0);
 
-	if (update_modes(repo, &set_opts.cone_mode, &set_opts.sparse_index))
-		return 1;
+	ако (update_modes(repo, &set_opts.cone_mode, &set_opts.sparse_index))
+		върни 1;
 
 	/*
 	 * Cone mode automatically specifies the toplevel directory.  For
 	 * non-cone mode, if nothing is specified, manually select just the
 	 * top-level directory (much as 'init' would do).
 	 */
-	if (!cfg->core_sparse_checkout_cone && !set_opts.use_stdin && argc == 0) {
-		for (int i = 0; i < default_patterns_nr; i++)
+	ако (!cfg->core_sparse_checkout_cone && !set_opts.use_stdin && argc == 0) {
+		за (цяло i = 0; i < default_patterns_nr; i++)
 			strvec_push(&patterns, default_patterns[i]);
-	} else {
-		for (int i = 0; i < argc; i++)
+	} иначе {
+		за (цяло i = 0; i < argc; i++)
 			strvec_push(&patterns, argv[i]);
 		sanitize_paths(repo, &patterns, prefix, set_opts.skip_checks);
 	}
@@ -893,7 +893,7 @@ static int sparse_checkout_set(int argc, const char **argv, const char *prefix,
 	ret = modify_pattern_list(repo, &patterns, set_opts.use_stdin, REPLACE);
 
 	strvec_clear(&patterns);
-	return ret;
+	върни ret;
 }
 
 static char const * const builtin_sparse_checkout_reapply_usage[] = {
@@ -902,11 +902,11 @@ static char const * const builtin_sparse_checkout_reapply_usage[] = {
 };
 
 static struct sparse_checkout_reapply_opts {
-	int cone_mode;
-	int sparse_index;
+	цяло cone_mode;
+	цяло sparse_index;
 } reapply_opts;
 
-static int sparse_checkout_reapply(int argc, const char **argv,
+static цяло sparse_checkout_reapply(цяло argc, const char **argv,
 				   const char *prefix,
 				   struct repository *repo)
 {
@@ -920,7 +920,7 @@ static int sparse_checkout_reapply(int argc, const char **argv,
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
 	setup_work_tree(the_repository);
-	if (!cfg->apply_sparse_checkout)
+	ако (!cfg->apply_sparse_checkout)
 		die(_("must be in a sparse-checkout to reapply sparsity patterns"));
 
 	reapply_opts.cone_mode = -1;
@@ -932,10 +932,10 @@ static int sparse_checkout_reapply(int argc, const char **argv,
 
 	repo_read_index(repo);
 
-	if (update_modes(repo, &reapply_opts.cone_mode, &reapply_opts.sparse_index))
-		return 1;
+	ако (update_modes(repo, &reapply_opts.cone_mode, &reapply_opts.sparse_index))
+		върни 1;
 
-	return update_working_directory(repo, NULL);
+	върни update_working_directory(repo, NULL);
 }
 
 static char const * const builtin_sparse_checkout_clean_usage[] = {
@@ -943,12 +943,12 @@ static char const * const builtin_sparse_checkout_clean_usage[] = {
 	NULL
 };
 
-static int list_file_iterator(const char *path, const void *data)
+static цяло list_file_iterator(const char *path, const void *data)
 {
 	const char *msg = data;
 
 	printf(msg, path);
-	return 0;
+	върни 0;
 }
 
 static void list_every_file_in_dir(const char *msg,
@@ -964,15 +964,15 @@ static void list_every_file_in_dir(const char *msg,
 static const char *msg_remove = N_("Removing %s\n");
 static const char *msg_would_remove = N_("Would remove %s\n");
 
-static int sparse_checkout_clean(int argc, const char **argv,
+static цяло sparse_checkout_clean(цяло argc, const char **argv,
 				   const char *prefix,
 				   struct repository *repo)
 {
 	struct strbuf full_path = STRBUF_INIT;
 	const char *msg = msg_remove;
 	size_t worktree_len;
-	int force = 0, dry_run = 0, verbose = 0;
-	int require_force = 1;
+	цяло force = 0, dry_run = 0, verbose = 0;
+	цяло require_force = 1;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
 	struct option builtin_sparse_checkout_clean_options[] = {
@@ -983,9 +983,9 @@ static int sparse_checkout_clean(int argc, const char **argv,
 	};
 
 	setup_work_tree(the_repository);
-	if (!cfg->apply_sparse_checkout)
+	ако (!cfg->apply_sparse_checkout)
 		die(_("must be in a sparse-checkout to clean directories"));
-	if (!cfg->core_sparse_checkout_cone)
+	ако (!cfg->core_sparse_checkout_cone)
 		die(_("must be in a cone-mode sparse-checkout to clean directories"));
 
 	argc = parse_options(argc, argv, prefix,
@@ -993,16 +993,16 @@ static int sparse_checkout_clean(int argc, const char **argv,
 			     builtin_sparse_checkout_clean_usage, 0);
 
 	repo_config_get_bool(repo, "clean.requireforce", &require_force);
-	if (require_force && !force && !dry_run)
+	ако (require_force && !force && !dry_run)
 		die(_("for safety, refusing to clean without one of --force or --dry-run"));
 
-	if (dry_run)
+	ако (dry_run)
 		msg = msg_would_remove;
 
-	if (repo_read_index(repo) < 0)
+	ако (repo_read_index(repo) < 0)
 		die(_("failed to read index"));
 
-	if (convert_to_sparse(repo->index, SPARSE_INDEX_MEMORY_ONLY) ||
+	ако (convert_to_sparse(repo->index, SPARSE_INDEX_MEMORY_ONLY) ||
 	    repo->index->sparse_index == INDEX_EXPANDED)
 		die(_("failed to convert index to a sparse index; resolve merge conflicts and try again"));
 
@@ -1010,28 +1010,28 @@ static int sparse_checkout_clean(int argc, const char **argv,
 	strbuf_addch(&full_path, '/');
 	worktree_len = full_path.len;
 
-	for (size_t i = 0; i < repo->index->cache_nr; i++) {
+	за (size_t i = 0; i < repo->index->cache_nr; i++) {
 		struct cache_entry *ce = repo->index->cache[i];
-		if (!S_ISSPARSEDIR(ce->ce_mode))
+		ако (!S_ISSPARSEDIR(ce->ce_mode))
 			continue;
 		strbuf_setlen(&full_path, worktree_len);
 		strbuf_add(&full_path, ce->name, ce->ce_namelen);
 
-		if (!is_directory(full_path.buf))
+		ако (!is_directory(full_path.buf))
 			continue;
 
-		if (verbose)
+		ако (verbose)
 			list_every_file_in_dir(msg, ce->name);
-		else
+		иначе
 			printf(msg, ce->name);
 
-		if (dry_run <= 0 &&
+		ако (dry_run <= 0 &&
 		    remove_dir_recursively(&full_path, 0))
 			warning_errno(_("failed to remove '%s'"), ce->name);
 	}
 
 	strbuf_release(&full_path);
-	return 0;
+	върни 0;
 }
 
 static char const * const builtin_sparse_checkout_disable_usage[] = {
@@ -1039,7 +1039,7 @@ static char const * const builtin_sparse_checkout_disable_usage[] = {
 	NULL
 };
 
-static int sparse_checkout_disable(int argc, const char **argv,
+static цяло sparse_checkout_disable(цяло argc, const char **argv,
 				   const char *prefix,
 				   struct repository *repo)
 {
@@ -1083,11 +1083,11 @@ static int sparse_checkout_disable(int argc, const char **argv,
 	prepare_repo_settings(the_repository);
 	repo->settings.sparse_index = 0;
 
-	if (update_working_directory(repo, &pl))
+	ако (update_working_directory(repo, &pl))
 		die(_("error while refreshing working directory"));
 
 	clear_pattern_list(&pl);
-	return set_config(repo, MODE_NO_PATTERNS);
+	върни set_config(repo, MODE_NO_PATTERNS);
 }
 
 static char const * const builtin_sparse_checkout_check_rules_usage[] = {
@@ -1097,43 +1097,43 @@ static char const * const builtin_sparse_checkout_check_rules_usage[] = {
 };
 
 static struct sparse_checkout_check_rules_opts {
-	int cone_mode;
-	int null_termination;
+	цяло cone_mode;
+	цяло null_termination;
 	char *rules_file;
 } check_rules_opts;
 
-static int check_rules(struct repository *repo,
+static цяло check_rules(struct repository *repo,
 		       struct pattern_list *pl,
-		       int null_terminated)
+		       цяло null_terminated)
 {
 	struct strbuf line = STRBUF_INIT;
 	struct strbuf unquoted = STRBUF_INIT;
 	char *path;
-	int line_terminator = null_terminated ? 0 : '\n';
+	цяло line_terminator = null_terminated ? 0 : '\n';
 	strbuf_getline_fn getline_fn = null_terminated ? strbuf_getline_nul
 		: strbuf_getline;
 	repo->index->sparse_checkout_patterns = pl;
-	while (!getline_fn(&line, stdin)) {
+	докато (!getline_fn(&line, stdin)) {
 		path = line.buf;
-		if (!null_terminated && line.buf[0] == '"') {
+		ако (!null_terminated && line.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, line.buf, NULL))
+			ако (unquote_c_style(&unquoted, line.buf, NULL))
 				die(_("unable to unquote C-style string '%s'"),
 					line.buf);
 
 			path = unquoted.buf;
 		}
 
-		if (path_in_sparse_checkout(path, repo->index))
+		ако (path_in_sparse_checkout(path, repo->index))
 			write_name_quoted(path, stdout, line_terminator);
 	}
 	strbuf_release(&line);
 	strbuf_release(&unquoted);
 
-	return 0;
+	върни 0;
 }
 
-static int sparse_checkout_check_rules(int argc, const char **argv, const char *prefix,
+static цяло sparse_checkout_check_rules(цяло argc, const char **argv, const char *prefix,
 				       struct repository *repo)
 {
 	static struct option builtin_sparse_checkout_check_rules_options[] = {
@@ -1147,7 +1147,7 @@ static int sparse_checkout_check_rules(int argc, const char **argv, const char *
 	};
 
 	FILE *fp;
-	int ret;
+	цяло ret;
 	struct pattern_list pl = {0};
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 	char *sparse_filename;
@@ -1157,18 +1157,18 @@ static int sparse_checkout_check_rules(int argc, const char **argv, const char *
 			     builtin_sparse_checkout_check_rules_options,
 			     builtin_sparse_checkout_check_rules_usage, 0);
 
-	if (check_rules_opts.rules_file && check_rules_opts.cone_mode < 0)
+	ако (check_rules_opts.rules_file && check_rules_opts.cone_mode < 0)
 		check_rules_opts.cone_mode = 1;
 
 	update_cone_mode(&check_rules_opts.cone_mode);
 	pl.use_cone_patterns = cfg->core_sparse_checkout_cone;
-	if (check_rules_opts.rules_file) {
+	ако (check_rules_opts.rules_file) {
 		fp = xfopen(check_rules_opts.rules_file, "r");
 		add_patterns_from_input(&pl, argc, argv, fp);
 		fclose(fp);
-	} else {
+	} иначе {
 		sparse_filename = get_sparse_checkout_filename();
-		if (add_patterns_from_file_to_list(sparse_filename, "", 0, &pl,
+		ако (add_patterns_from_file_to_list(sparse_filename, "", 0, &pl,
 						   NULL, 0))
 			die(_("unable to load existing sparse-checkout patterns"));
 		free(sparse_filename);
@@ -1177,10 +1177,10 @@ static int sparse_checkout_check_rules(int argc, const char **argv, const char *
 	ret = check_rules(repo, &pl, check_rules_opts.null_termination);
 	clear_pattern_list(&pl);
 	free(check_rules_opts.rules_file);
-	return ret;
+	върни ret;
 }
 
-int cmd_sparse_checkout(int argc,
+цяло cmd_sparse_checkout(цяло argc,
 			const char **argv,
 			const char *prefix,
 			struct repository *repo)
@@ -1207,5 +1207,5 @@ int cmd_sparse_checkout(int argc,
 	prepare_repo_settings(repo);
 	repo->settings.command_requires_full_index = 0;
 
-	return fn(argc, argv, prefix, repo);
+	върни fn(argc, argv, prefix, repo);
 }

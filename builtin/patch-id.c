@@ -12,7 +12,7 @@
 
 static void flush_current_id(size_t patchlen, struct object_id *id, struct object_id *result)
 {
-	if (patchlen)
+	ако (patchlen)
 		printf("%s %s\n", oid_to_hex(result), oid_to_hex(id));
 }
 
@@ -22,86 +22,86 @@ static size_t remove_space(char *line)
 	char *dst = line;
 	unsigned char c;
 
-	while ((c = *src++) != '\0') {
-		if (!isspace(c))
+	докато ((c = *src++) != '\0') {
+		ако (!isspace(c))
 			*dst++ = c;
 	}
-	return dst - line;
+	върни dst - line;
 }
 
-static int scan_hunk_header(const char *p, int *p_before, int *p_after)
+static цяло scan_hunk_header(const char *p, цяло *p_before, цяло *p_after)
 {
 	static const char digits[] = "0123456789";
 	const char *q, *r;
-	int n;
+	цяло n;
 
 	q = p + 4;
 	n = strspn(q, digits);
-	if (q[n] == ',') {
+	ако (q[n] == ',') {
 		q += n + 1;
 		*p_before = atoi(q);
 		n = strspn(q, digits);
-	} else {
+	} иначе {
 		*p_before = 1;
 	}
 
-	if (n == 0 || q[n] != ' ' || q[n+1] != '+')
-		return 0;
+	ако (n == 0 || q[n] != ' ' || q[n+1] != '+')
+		върни 0;
 
 	r = q + n + 2;
 	n = strspn(r, digits);
-	if (r[n] == ',') {
+	ако (r[n] == ',') {
 		r += n + 1;
 		*p_after = atoi(r);
 		n = strspn(r, digits);
-	} else {
+	} иначе {
 		*p_after = 1;
 	}
-	if (n == 0)
-		return 0;
+	ако (n == 0)
+		върни 0;
 
-	return 1;
+	върни 1;
 }
 
 static size_t get_one_patchid(struct object_id *next_oid, struct object_id *result,
-			      struct strbuf *line_buf, int stable, int verbatim)
+			      struct strbuf *line_buf, цяло stable, цяло verbatim)
 {
 	size_t patchlen = 0;
-	int found_next = 0;
-	int before = -1, after = -1;
-	int diff_is_binary = 0;
+	цяло found_next = 0;
+	цяло before = -1, after = -1;
+	цяло diff_is_binary = 0;
 	char pre_oid_str[GIT_MAX_HEXSZ + 1], post_oid_str[GIT_MAX_HEXSZ + 1];
 	struct git_hash_ctx ctx;
 
 	git_hash_init(&ctx, the_hash_algo);
 	oidclr(result, the_repository->hash_algo);
 
-	while (strbuf_getwholeline(line_buf, stdin, '\n') != EOF) {
+	докато (strbuf_getwholeline(line_buf, stdin, '\n') != EOF) {
 		char *line = line_buf->buf;
 		const char *p = line;
 		size_t len;
 
 		/* Possibly skip over the prefix added by "log" or "format-patch" */
-		if (!skip_prefix(line, "commit ", &p) &&
+		ако (!skip_prefix(line, "commit ", &p) &&
 		    !skip_prefix(line, "From ", &p) &&
 		    starts_with(line, "\\ ") && 12 < strlen(line)) {
-			if (verbatim)
+			ако (verbatim)
 				git_hash_update(&ctx, line, strlen(line));
 			continue;
 		}
 
-		if (!get_oid_hex(p, next_oid)) {
+		ако (!get_oid_hex(p, next_oid)) {
 			found_next = 1;
 			break;
 		}
 
 		/* Ignore commit comments */
-		if (!patchlen && !starts_with(line, "diff "))
+		ако (!patchlen && !starts_with(line, "diff "))
 			continue;
 
 		/* Parsing diff header?  */
-		if (before == -1) {
-			if (starts_with(line, "GIT binary patch") ||
+		ако (before == -1) {
+			ако (starts_with(line, "GIT binary patch") ||
 			    starts_with(line, "Binary files")) {
 				diff_is_binary = 1;
 				before = 0;
@@ -109,30 +109,30 @@ static size_t get_one_patchid(struct object_id *next_oid, struct object_id *resu
 						strlen(pre_oid_str));
 				git_hash_update(&ctx, post_oid_str,
 						strlen(post_oid_str));
-				if (stable)
+				ако (stable)
 					flush_one_hunk(result, &ctx);
 				continue;
-			} else if (skip_prefix(line, "index ", &p)) {
+			} иначе ако (skip_prefix(line, "index ", &p)) {
 				char *oid1_end = strstr(line, "..");
 				char *oid2_end = NULL;
-				if (oid1_end)
+				ако (oid1_end)
 					oid2_end = strstr(oid1_end, " ");
-				if (!oid2_end)
+				ако (!oid2_end)
 					oid2_end = line + strlen(line) - 1;
-				if (oid1_end != NULL && oid2_end != NULL) {
+				ако (oid1_end != NULL && oid2_end != NULL) {
 					*oid1_end = *oid2_end = '\0';
 					strlcpy(pre_oid_str, p, GIT_MAX_HEXSZ + 1);
 					strlcpy(post_oid_str, oid1_end + 2, GIT_MAX_HEXSZ + 1);
 				}
 				continue;
-			} else if (starts_with(line, "--- "))
+			} иначе ако (starts_with(line, "--- "))
 				before = after = 1;
-			else if (!isalpha(line[0]))
+			иначе ако (!isalpha(line[0]))
 				break;
 		}
 
-		if (diff_is_binary) {
-			if (starts_with(line, "diff ")) {
+		ако (diff_is_binary) {
+			ако (starts_with(line, "diff ")) {
 				diff_is_binary = 0;
 				before = -1;
 			}
@@ -140,27 +140,27 @@ static size_t get_one_patchid(struct object_id *next_oid, struct object_id *resu
 		}
 
 		/* Looking for a valid hunk header?  */
-		if (before == 0 && after == 0) {
-			if (starts_with(line, "@@ -")) {
+		ако (before == 0 && after == 0) {
+			ако (starts_with(line, "@@ -")) {
 				/* Parse next hunk, but ignore line numbers.  */
 				scan_hunk_header(line, &before, &after);
 				continue;
 			}
 
 			/* Split at the end of the patch.  */
-			if (!starts_with(line, "diff "))
+			ако (!starts_with(line, "diff "))
 				break;
 
 			/* Else we're parsing another header.  */
-			if (stable)
+			ако (stable)
 				flush_one_hunk(result, &ctx);
 			before = after = -1;
 		}
 
 		/* If we get here, we're inside a hunk.  */
-		if (line[0] == '-' || line[0] == ' ')
+		ако (line[0] == '-' || line[0] == ' ')
 			before--;
-		if (line[0] == '+' || line[0] == ' ')
+		ако (line[0] == '+' || line[0] == ' ')
 			after--;
 
 		/* Add line to hash algo (possibly removing whitespace) */
@@ -169,23 +169,23 @@ static size_t get_one_patchid(struct object_id *next_oid, struct object_id *resu
 		git_hash_update(&ctx, line, len);
 	}
 
-	if (!found_next)
+	ако (!found_next)
 		oidclr(next_oid, the_repository->hash_algo);
 
 	flush_one_hunk(result, &ctx);
 	git_hash_discard(&ctx);
 
-	return patchlen;
+	върни patchlen;
 }
 
-static void generate_id_list(int stable, int verbatim)
+static void generate_id_list(цяло stable, цяло verbatim)
 {
 	struct object_id oid, n, result;
 	size_t patchlen;
 	struct strbuf line_buf = STRBUF_INIT;
 
 	oidclr(&oid, the_repository->hash_algo);
-	while (!feof(stdin)) {
+	докато (!feof(stdin)) {
 		patchlen = get_one_patchid(&n, &result, &line_buf, stable, verbatim);
 		flush_current_id(patchlen, &oid, &result);
 		oidcpy(&oid, &n);
@@ -198,35 +198,35 @@ static const char *const patch_id_usage[] = {
 };
 
 struct patch_id_opts {
-	int stable;
-	int verbatim;
+	цяло stable;
+	цяло verbatim;
 };
 
-static int git_patch_id_config(const char *var, const char *value,
+static цяло git_patch_id_config(const char *var, const char *value,
 			       const struct config_context *ctx, void *cb)
 {
 	struct patch_id_opts *opts = cb;
 
-	if (!strcmp(var, "patchid.stable")) {
+	ако (!strcmp(var, "patchid.stable")) {
 		opts->stable = git_config_bool(var, value);
-		return 0;
+		върни 0;
 	}
-	if (!strcmp(var, "patchid.verbatim")) {
+	ако (!strcmp(var, "patchid.verbatim")) {
 		opts->verbatim = git_config_bool(var, value);
-		return 0;
+		върни 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	върни git_default_config(var, value, ctx, cb);
 }
 
-int cmd_patch_id(int argc,
+цяло cmd_patch_id(цяло argc,
 		 const char **argv,
 		 const char *prefix,
 		 struct repository *repo UNUSED)
 {
 	/* if nothing is set, default to unstable */
 	struct patch_id_opts config = {0, 0};
-	int opts = 0;
+	цяло opts = 0;
 	struct option builtin_patch_id_options[] = {
 		OPT_CMDMODE(0, "unstable", &opts,
 		    N_("use the unstable patch ID algorithm"), 1),
@@ -240,7 +240,7 @@ int cmd_patch_id(int argc,
 	repo_config(the_repository, git_patch_id_config, &config);
 
 	/* verbatim implies stable */
-	if (config.verbatim)
+	ако (config.verbatim)
 		config.stable = 1;
 
 	argc = parse_options(argc, argv, prefix, builtin_patch_id_options,
@@ -255,10 +255,10 @@ int cmd_patch_id(int argc,
 	 * NEEDSWORK: This hack should be removed in favor of converting
 	 * the code that computes patch IDs to always use SHA1.
 	 */
-	if (!the_hash_algo)
+	ако (!the_hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	generate_id_list(opts ? opts > 1 : config.stable,
 			 opts ? opts == 3 : config.verbatim);
-	return 0;
+	върни 0;
 }

@@ -117,48 +117,48 @@ static const char * const git_worktree_unlock_usage[] = {
 };
 
 struct add_opts {
-	int force;
-	int detach;
-	int quiet;
-	int checkout;
-	int orphan;
-	int relative_paths;
+	цяло force;
+	цяло detach;
+	цяло quiet;
+	цяло checkout;
+	цяло orphan;
+	цяло relative_paths;
 	const char *keep_locked;
 };
 
-static int show_only;
-static int verbose;
-static int guess_remote;
-static int use_relative_paths;
+static цяло show_only;
+static цяло verbose;
+static цяло guess_remote;
+static цяло use_relative_paths;
 static timestamp_t expire;
 
-static int git_worktree_config(const char *var, const char *value,
+static цяло git_worktree_config(const char *var, const char *value,
 			       const struct config_context *ctx, void *cb)
 {
-	if (!strcmp(var, "worktree.guessremote")) {
+	ако (!strcmp(var, "worktree.guessremote")) {
 		guess_remote = git_config_bool(var, value);
-		return 0;
-	} else if (!strcmp(var, "worktree.userelativepaths")) {
+		върни 0;
+	} иначе ако (!strcmp(var, "worktree.userelativepaths")) {
 		use_relative_paths = git_config_bool(var, value);
-		return 0;
+		върни 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	върни git_default_config(var, value, ctx, cb);
 }
 
-static int delete_git_dir(const char *id)
+static цяло delete_git_dir(const char *id)
 {
 	struct strbuf sb = STRBUF_INIT;
-	int ret;
+	цяло ret;
 
 	repo_common_path_append(the_repository, &sb, "worktrees/%s", id);
 	ret = remove_dir_recursively(&sb, 0);
-	if (ret < 0 && errno == ENOTDIR)
+	ако (ret < 0 && errno == ENOTDIR)
 		ret = unlink(sb.buf);
-	if (ret)
+	ако (ret)
 		error_errno(_("failed to delete '%s'"), sb.buf);
 	strbuf_release(&sb);
-	return ret;
+	върни ret;
 }
 
 static void delete_worktrees_dir_if_empty(void)
@@ -170,41 +170,41 @@ static void delete_worktrees_dir_if_empty(void)
 
 static void prune_worktree(const char *id, const char *reason)
 {
-	if (show_only || verbose)
+	ако (show_only || verbose)
 		fprintf_ln(stderr, _("Removing %s/%s: %s"), "worktrees", id, reason);
-	if (!show_only)
+	ако (!show_only)
 		delete_git_dir(id);
 }
 
-static int prune_cmp(const void *a, const void *b)
+static цяло prune_cmp(const void *a, const void *b)
 {
 	const struct string_list_item *x = a;
 	const struct string_list_item *y = b;
-	int c;
+	цяло c;
 
-	if ((c = fspathcmp(x->string, y->string)))
-	    return c;
+	ако ((c = fspathcmp(x->string, y->string)))
+	    върни c;
 	/*
 	 * paths same; prune_dupes() removes all but the first worktree entry
 	 * having the same path, so sort main worktree ('util' is NULL) above
 	 * linked worktrees ('util' not NULL) since main worktree can't be
 	 * removed
 	 */
-	if (!x->util)
-		return -1;
-	if (!y->util)
-		return 1;
+	ако (!x->util)
+		върни -1;
+	ако (!y->util)
+		върни 1;
 	/* paths same; sort by .git/worktrees/<id> */
-	return strcmp(x->util, y->util);
+	върни strcmp(x->util, y->util);
 }
 
 static void prune_dups(struct string_list *l)
 {
-	int i;
+	цяло i;
 
 	QSORT(l->items, l->nr, prune_cmp);
-	for (i = 1; i < l->nr; i++) {
-		if (!fspathcmp(l->items[i].string, l->items[i - 1].string))
+	за (i = 1; i < l->nr; i++) {
+		ако (!fspathcmp(l->items[i].string, l->items[i - 1].string))
 			prune_worktree(l->items[i].util, "duplicate entry");
 	}
 }
@@ -221,14 +221,14 @@ static void prune_worktrees(void)
 	path = repo_git_path(the_repository, "worktrees");
 	dir = opendir(path);
 	free(path);
-	if (!dir)
-		return;
-	while ((d = readdir_skip_dot_and_dotdot(dir)) != NULL) {
+	ако (!dir)
+		върни;
+	докато ((d = readdir_skip_dot_and_dotdot(dir)) != NULL) {
 		char *path;
 		strbuf_reset(&reason);
-		if (should_prune_worktree(the_repository, d->d_name, &reason, &path, expire))
+		ако (should_prune_worktree(the_repository, d->d_name, &reason, &path, expire))
 			prune_worktree(d->d_name, reason.buf);
-		else if (path)
+		иначе ако (path)
 			string_list_append_nodup(&kept, path)->util = xstrdup(d->d_name);
 	}
 	closedir(dir);
@@ -240,12 +240,12 @@ static void prune_worktrees(void)
 	prune_dups(&kept);
 	string_list_clear(&kept, 1);
 
-	if (!show_only)
+	ако (!show_only)
 		delete_worktrees_dir_if_empty();
 	strbuf_release(&reason);
 }
 
-static int prune(int ac, const char **av, const char *prefix,
+static цяло prune(цяло ac, const char **av, const char *prefix,
 		 struct repository *repo UNUSED)
 {
 	struct option options[] = {
@@ -259,35 +259,35 @@ static int prune(int ac, const char **av, const char *prefix,
 	expire = TIME_MAX;
 	ac = parse_options(ac, av, prefix, options, git_worktree_prune_usage,
 			   0);
-	if (ac)
+	ако (ac)
 		usage_with_options(git_worktree_prune_usage, options);
 	prune_worktrees();
-	return 0;
+	върни 0;
 }
 
 static char *junk_work_tree;
 static char *junk_git_dir;
-static int is_junk;
+static цяло is_junk;
 static pid_t junk_pid;
 
 static void remove_junk(void)
 {
 	struct strbuf sb = STRBUF_INIT;
-	if (!is_junk || getpid() != junk_pid)
-		return;
-	if (junk_git_dir) {
+	ако (!is_junk || getpid() != junk_pid)
+		върни;
+	ако (junk_git_dir) {
 		strbuf_addstr(&sb, junk_git_dir);
 		remove_dir_recursively(&sb, 0);
 		strbuf_reset(&sb);
 	}
-	if (junk_work_tree) {
+	ако (junk_work_tree) {
 		strbuf_addstr(&sb, junk_work_tree);
 		remove_dir_recursively(&sb, 0);
 	}
 	strbuf_release(&sb);
 }
 
-static void remove_junk_on_signal(int signo)
+static void remove_junk_on_signal(цяло signo)
 {
 	remove_junk();
 	sigchain_pop(signo);
@@ -297,45 +297,45 @@ static void remove_junk_on_signal(int signo)
 static char *worktree_basename_dup(const char *path)
 {
 	const char *name;
-	int len;
+	цяло len;
 
 	len = strlen(path);
-	while (len && is_dir_sep(path[len - 1]))
+	докато (len && is_dir_sep(path[len - 1]))
 		len--;
 
 	name = path + len;
-	while (name > path && !is_dir_sep(name[-1]))
+	докато (name > path && !is_dir_sep(name[-1]))
 		name--;
 
-	return xmemdupz(name, path + len - name);
+	върни xmemdupz(name, path + len - name);
 }
 
 /* check that path is viable location for worktree */
 static void check_candidate_path(const char *path,
-				 int force,
+				 цяло force,
 				 struct worktree **worktrees,
 				 const char *cmd)
 {
 	struct worktree *wt;
-	int locked;
+	цяло locked;
 
-	if (file_exists(path) && !is_empty_dir(path))
+	ако (file_exists(path) && !is_empty_dir(path))
 		die(_("'%s' already exists"), path);
 
 	wt = find_worktree_by_path(worktrees, path);
-	if (!wt)
-		return;
+	ако (!wt)
+		върни;
 
 	locked = !!worktree_lock_reason(wt);
-	if ((!locked && force) || (locked && force > 1)) {
-		if (delete_git_dir(wt->id))
+	ако ((!locked && force) || (locked && force > 1)) {
+		ако (delete_git_dir(wt->id))
 		    die(_("unusable worktree destination '%s'"), path);
-		return;
+		върни;
 	}
 
-	if (locked)
+	ако (locked)
 		die(_("'%s' is a missing but locked worktree;\nuse '%s -f -f' to override, or 'unlock' and 'prune' or 'remove' to clear"), path, cmd);
-	else
+	иначе
 		die(_("'%s' is a missing but already registered worktree;\nuse '%s -f' to override, or 'prune' or 'remove' to clear"), path, cmd);
 }
 
@@ -344,8 +344,8 @@ static void copy_sparse_checkout(const char *worktree_git_dir)
 	char *from_file = repo_git_path(the_repository, "info/sparse-checkout");
 	char *to_file = xstrfmt("%s/info/sparse-checkout", worktree_git_dir);
 
-	if (file_exists(from_file)) {
-		if (safe_create_leading_directories(the_repository, to_file) ||
+	ако (file_exists(from_file)) {
+		ако (safe_create_leading_directories(the_repository, to_file) ||
 			copy_file(the_repository, to_file, from_file, 0666))
 			error(_("failed to copy '%s' to '%s'; sparse-checkout may not work correctly"),
 				from_file, to_file);
@@ -360,11 +360,11 @@ static void copy_filtered_worktree_config(const char *worktree_git_dir)
 	char *from_file = repo_git_path(the_repository, "config.worktree");
 	char *to_file = xstrfmt("%s/config.worktree", worktree_git_dir);
 
-	if (file_exists(from_file)) {
+	ако (file_exists(from_file)) {
 		struct config_set cs = { { 0 } };
-		int bare;
+		цяло bare;
 
-		if (safe_create_leading_directories(the_repository, to_file) ||
+		ако (safe_create_leading_directories(the_repository, to_file) ||
 			copy_file(the_repository, to_file, from_file, 0666)) {
 			error(_("failed to copy worktree config from '%s' to '%s'"),
 				from_file, to_file);
@@ -374,13 +374,13 @@ static void copy_filtered_worktree_config(const char *worktree_git_dir)
 		git_configset_init(&cs);
 		git_configset_add_file(&cs, from_file);
 
-		if (!git_configset_get_bool(&cs, "core.bare", &bare) &&
+		ако (!git_configset_get_bool(&cs, "core.bare", &bare) &&
 			bare &&
 			repo_config_set_multivar_in_file_gently(the_repository,
 				to_file, "core.bare", NULL, "true", NULL, 0))
 			error(_("failed to unset '%s' in '%s'"),
 				"core.bare", to_file);
-		if (!git_configset_get(&cs, "core.worktree") &&
+		ако (!git_configset_get(&cs, "core.worktree") &&
 			repo_config_set_in_file_gently(the_repository, to_file,
 						       "core.worktree", NULL, NULL))
 			error(_("failed to unset '%s' in '%s'"),
@@ -394,19 +394,19 @@ worktree_copy_cleanup:
 	free(to_file);
 }
 
-static int checkout_worktree(const struct add_opts *opts,
+static цяло checkout_worktree(const struct add_opts *opts,
 			     struct strvec *child_env)
 {
 	struct child_process cp = CHILD_PROCESS_INIT;
 	cp.git_cmd = 1;
 	strvec_pushl(&cp.args, "reset", "--hard", "--no-recurse-submodules", NULL);
-	if (opts->quiet)
+	ако (opts->quiet)
 		strvec_push(&cp.args, "--quiet");
 	strvec_pushv(&cp.env, child_env->v);
-	return run_command(&cp);
+	върни run_command(&cp);
 }
 
-static int make_worktree_orphan(const char * ref, const struct add_opts *opts,
+static цяло make_worktree_orphan(const char * ref, const struct add_opts *opts,
 				struct strvec *child_env)
 {
 	struct strbuf symref = STRBUF_INIT;
@@ -414,12 +414,12 @@ static int make_worktree_orphan(const char * ref, const struct add_opts *opts,
 
 	validate_new_branchname(ref, &symref, 0);
 	strvec_pushl(&cp.args, "symbolic-ref", "HEAD", symref.buf, NULL);
-	if (opts->quiet)
+	ако (opts->quiet)
 		strvec_push(&cp.args, "--quiet");
 	strvec_pushv(&cp.env, child_env->v);
 	strbuf_release(&symref);
 	cp.git_cmd = 1;
-	return run_command(&cp);
+	върни run_command(&cp);
 }
 
 /*
@@ -436,10 +436,10 @@ static void setup_alternate_ref_dir(struct worktree *wt, const char *wt_git_path
 	char *path;
 
 	path = wt->repo->ref_storage_payload;
-	if (!path)
-		return;
+	ако (!path)
+		върни;
 
-	if (!is_absolute_path(path))
+	ако (!is_absolute_path(path))
 		strbuf_addf(&sb, "%s/", wt->repo->commondir);
 
 	strbuf_addf(&sb, "%s/worktrees", path);
@@ -455,7 +455,7 @@ static void setup_alternate_ref_dir(struct worktree *wt, const char *wt_git_path
 	strbuf_release(&sb);
 }
 
-static int add_worktree(const char *path, const char *refname,
+static цяло add_worktree(const char *path, const char *refname,
 			const struct add_opts *opts)
 {
 	struct strbuf sb_git = STRBUF_INIT, sb_repo = STRBUF_INIT;
@@ -463,11 +463,11 @@ static int add_worktree(const char *path, const char *refname,
 	const char *name;
 	char *name_to_free = NULL;
 	struct strvec child_env = STRVEC_INIT;
-	unsigned int counter = 0;
-	int len, ret;
+	unsigned цяло counter = 0;
+	цяло len, ret;
 	struct strbuf symref = STRBUF_INIT;
 	struct commit *commit = NULL;
-	int is_branch = 0;
+	цяло is_branch = 0;
 	struct strbuf sb_name = STRBUF_INIT;
 	struct worktree **worktrees, *wt = NULL;
 	struct ref_store *wt_refs;
@@ -479,32 +479,32 @@ static int add_worktree(const char *path, const char *refname,
 	worktrees = NULL;
 
 	/* is 'refname' a branch or commit? */
-	if (!opts->detach && !check_branch_ref(the_repository, &symref, refname) &&
+	ако (!opts->detach && !check_branch_ref(the_repository, &symref, refname) &&
 	    refs_ref_exists(get_main_ref_store(the_repository), symref.buf)) {
 		is_branch = 1;
-		if (!opts->force)
+		ако (!opts->force)
 			die_if_checked_out(symref.buf, 0);
 	}
 	commit = lookup_commit_reference_by_name(refname);
-	if (!commit && !opts->orphan)
+	ако (!commit && !opts->orphan)
 		die(_("invalid reference: %s"), refname);
 
 	name = name_to_free = worktree_basename_dup(path);
-	if (!*name)
+	ако (!*name)
 		die(_("invalid path '%s'"), path);
 	sanitize_refname_component(name, &sb_name);
-	if (!sb_name.len)
+	ако (!sb_name.len)
 		BUG("How come '%s' becomes empty after sanitization?", name);
 	name = sb_name.buf;
 	repo_git_path_replace(the_repository, &sb_repo, "worktrees/%s", name);
 	len = sb_repo.len;
-	if (safe_create_leading_directories_const(the_repository, sb_repo.buf))
+	ако (safe_create_leading_directories_const(the_repository, sb_repo.buf))
 		die_errno(_("could not create leading directories of '%s'"),
 			  sb_repo.buf);
 
-	while (mkdir(sb_repo.buf, 0777)) {
+	докато (mkdir(sb_repo.buf, 0777)) {
 		counter++;
-		if ((errno != EEXIST) || !counter /* overflow */)
+		ако ((errno != EEXIST) || !counter /* overflow */)
 			die_errno(_("could not create directory of '%s'"),
 				  sb_repo.buf);
 		strbuf_setlen(&sb_repo, len);
@@ -524,13 +524,13 @@ static int add_worktree(const char *path, const char *refname,
 	 * after the preparation is over.
 	 */
 	strbuf_addf(&sb, "%s/locked", sb_repo.buf);
-	if (opts->keep_locked)
+	ако (opts->keep_locked)
 		write_file(sb.buf, "%s", opts->keep_locked);
-	else
+	иначе
 		write_file(sb.buf, _("initializing"));
 
 	strbuf_addf(&sb_git, "%s/.git", path);
-	if (safe_create_leading_directories_const(the_repository, sb_git.buf))
+	ако (safe_create_leading_directories_const(the_repository, sb_git.buf))
 		die_errno(_("could not create leading directories of '%s'"),
 			  sb_git.buf);
 	junk_work_tree = xstrdup(path);
@@ -547,7 +547,7 @@ static int add_worktree(const char *path, const char *refname,
 	 * Set up the ref store of the worktree and create the HEAD reference.
 	 */
 	wt = get_linked_worktree(the_repository, name, 1);
-	if (!wt) {
+	ако (!wt) {
 		ret = error(_("could not find created worktree '%s'"), name);
 		goto done;
 	}
@@ -555,22 +555,22 @@ static int add_worktree(const char *path, const char *refname,
 	wt_refs = get_worktree_ref_store(wt);
 
 	ret = ref_store_create_on_disk(wt_refs, REF_STORE_CREATE_ON_DISK_IS_WORKTREE, &sb);
-	if (ret)
+	ако (ret)
 		goto done;
 
-	if (!is_branch && commit)
+	ако (!is_branch && commit)
 		ret = refs_update_ref(wt_refs, NULL, "HEAD", &commit->object.oid,
 				      NULL, 0, UPDATE_REFS_MSG_ON_ERR);
-	else
+	иначе
 		ret = refs_update_symref(wt_refs, "HEAD", symref.buf, NULL);
-	if (ret)
+	ако (ret)
 		goto done;
 
 	/*
 	 * If the current worktree has sparse-checkout enabled, then copy
 	 * the sparse-checkout patterns from the current worktree.
 	 */
-	if (cfg->apply_sparse_checkout)
+	ако (cfg->apply_sparse_checkout)
 		copy_sparse_checkout(sb_repo.buf);
 
 	/*
@@ -578,17 +578,17 @@ static int add_worktree(const char *path, const char *refname,
 	 * values from the current worktree into the new one, that way the
 	 * new worktree behaves the same as this one.
 	 */
-	if (the_repository->repository_format_worktree_config)
+	ако (the_repository->repository_format_worktree_config)
 		copy_filtered_worktree_config(sb_repo.buf);
 
 	strvec_pushf(&child_env, "%s=%s", GIT_DIR_ENVIRONMENT, sb_git.buf);
 	strvec_pushf(&child_env, "%s=%s", GIT_WORK_TREE_ENVIRONMENT, path);
 
-	if (opts->orphan &&
+	ако (opts->orphan &&
 	    (ret = make_worktree_orphan(refname, opts, &child_env)))
 		goto done;
 
-	if (opts->checkout &&
+	ако (opts->checkout &&
 	    (ret = checkout_worktree(opts, &child_env)))
 		goto done;
 
@@ -597,7 +597,7 @@ static int add_worktree(const char *path, const char *refname,
 	FREE_AND_NULL(junk_git_dir);
 
 done:
-	if (ret || !opts->keep_locked) {
+	ако (ret || !opts->keep_locked) {
 		strbuf_reset(&sb);
 		strbuf_addf(&sb, "%s/locked", sb_repo.buf);
 		unlink_or_warn(sb.buf);
@@ -607,7 +607,7 @@ done:
 	 * Hook failure does not warrant worktree deletion, so run hook after
 	 * is_junk is cleared, but do return appropriate code when hook fails.
 	 */
-	if (!ret && opts->checkout && !opts->orphan) {
+	ако (!ret && opts->checkout && !opts->orphan) {
 		struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT_FORCE_SERIAL;
 
 		strvec_pushl(&opt.env, "GIT_DIR", "GIT_WORK_TREE", NULL);
@@ -629,33 +629,33 @@ done:
 	strbuf_release(&sb_name);
 	free_worktree(wt);
 	free(name_to_free);
-	return ret;
+	върни ret;
 }
 
-static void print_preparing_worktree_line(int detach,
+static void print_preparing_worktree_line(цяло detach,
 					  const char *branch,
 					  const char *new_branch,
-					  int force_new_branch)
+					  цяло force_new_branch)
 {
-	if (force_new_branch) {
+	ако (force_new_branch) {
 		struct commit *commit = lookup_commit_reference_by_name(new_branch);
-		if (!commit)
+		ако (!commit)
 			fprintf_ln(stderr, _("Preparing worktree (new branch '%s')"), new_branch);
-		else
+		иначе
 			fprintf_ln(stderr, _("Preparing worktree (resetting branch '%s'; was at %s)"),
 				  new_branch,
 				  repo_find_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV));
-	} else if (new_branch) {
+	} иначе ако (new_branch) {
 		fprintf_ln(stderr, _("Preparing worktree (new branch '%s')"), new_branch);
-	} else {
+	} иначе {
 		struct strbuf s = STRBUF_INIT;
-		if (!detach && !check_branch_ref(the_repository, &s, branch) &&
+		ако (!detach && !check_branch_ref(the_repository, &s, branch) &&
 		    refs_ref_exists(get_main_ref_store(the_repository), s.buf))
 			fprintf_ln(stderr, _("Preparing worktree (checking out '%s')"),
 				  branch);
-		else {
+		иначе {
 			struct commit *commit = lookup_commit_reference_by_name(branch);
-			if (!commit)
+			ако (!commit)
 				BUG("unreachable: invalid reference: %s", branch);
 			fprintf_ln(stderr, _("Preparing worktree (detached HEAD %s)"),
 				  repo_find_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV));
@@ -670,9 +670,9 @@ static void print_preparing_worktree_line(int detach,
  *
  * Returns 0 on failure and non-zero on success.
  */
-static int first_valid_ref(const struct reference *ref UNUSED, void *cb_data UNUSED)
+static цяло first_valid_ref(const struct reference *ref UNUSED, void *cb_data UNUSED)
 {
-	return 1;
+	върни 1;
 }
 
 /**
@@ -687,16 +687,16 @@ static int first_valid_ref(const struct reference *ref UNUSED, void *cb_data UNU
  *
  * Returns 1 if any of the previous checks are true, otherwise returns 0.
  */
-static int can_use_local_refs(const struct add_opts *opts)
+static цяло can_use_local_refs(const struct add_opts *opts)
 {
-	if (refs_head_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
-		return 1;
-	} else if (refs_for_each_branch_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
-		if (!opts->quiet)
+	ако (refs_head_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
+		върни 1;
+	} иначе ако (refs_for_each_branch_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
+		ако (!opts->quiet)
 			warning(_("HEAD points to an invalid (or orphaned) reference.\n"));
-		return 1;
+		върни 1;
 	}
-	return 0;
+	върни 0;
 }
 
 /**
@@ -712,17 +712,17 @@ static int can_use_local_refs(const struct add_opts *opts)
  *
  * Returns 1 if checks 1. and 2. are true, otherwise 0.
  */
-static int can_use_remote_refs(const struct add_opts *opts)
+static цяло can_use_remote_refs(const struct add_opts *opts)
 {
-	if (!guess_remote) {
-		return 0;
-	} else if (refs_for_each_remote_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
-		return 1;
-	} else if (!opts->force && remote_get(NULL)) {
+	ако (!guess_remote) {
+		върни 0;
+	} иначе ако (refs_for_each_remote_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
+		върни 1;
+	} иначе ако (!opts->force && remote_get(NULL)) {
 		die(_("No local or remote refs exist despite at least one remote\n"
 		      "present, stopping; use 'add -f' to override or fetch a remote first"));
 	}
-	return 0;
+	върни 0;
 }
 
 /**
@@ -743,24 +743,24 @@ static int can_use_remote_refs(const struct add_opts *opts)
  * checked and the repo is in a state that looks like the user added a remote
  * but forgot to fetch (and did not override the warning with -f).
  */
-static int dwim_orphan(const struct add_opts *opts, int opt_track, int remote)
+static цяло dwim_orphan(const struct add_opts *opts, цяло opt_track, цяло remote)
 {
-	if (can_use_local_refs(opts)) {
-		return 0;
-	} else if (remote && can_use_remote_refs(opts)) {
-		return 0;
-	} else if (!opts->quiet) {
+	ако (can_use_local_refs(opts)) {
+		върни 0;
+	} иначе ако (remote && can_use_remote_refs(opts)) {
+		върни 0;
+	} иначе ако (!opts->quiet) {
 		fprintf_ln(stderr, WORKTREE_ADD_DWIM_ORPHAN_INFER_TEXT);
 	}
 
-	if (opt_track) {
+	ако (opt_track) {
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--track");
-	} else if (!opts->checkout) {
+	} иначе ако (!opts->checkout) {
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--no-checkout");
 	}
-	return 1;
+	върни 1;
 }
 
 static void advise_disambiguating_remotes(const char *path, const char *branch,
@@ -784,7 +784,7 @@ static void advise_disambiguating_remotes(const char *path, const char *branch,
 
 static char *dwim_branch(const struct add_opts *opts, const char *path, char **new_branch)
 {
-	int branch_exists;
+	цяло branch_exists;
 	char *branchname = worktree_basename_dup(path);
 	struct strbuf ref = STRBUF_INIT;
 
@@ -792,20 +792,20 @@ static char *dwim_branch(const struct add_opts *opts, const char *path, char **n
 			refs_ref_exists(get_main_ref_store(the_repository),
 					ref.buf);
 	strbuf_release(&ref);
-	if (branch_exists)
-		return branchname;
+	ако (branch_exists)
+		върни branchname;
 
 	*new_branch = branchname;
-	if (guess_remote) {
+	ако (guess_remote) {
 		struct object_id oid;
 		char *remote;
-		int num_matches = 0;
+		цяло num_matches = 0;
 		struct string_list matched_remote_names = STRING_LIST_INIT_DUP;
 
 		remote = unique_tracking_name(*new_branch, &oid, &num_matches,
 					      &matched_remote_names);
-		if (!remote && num_matches > 1) {
-			if (!opts->quiet &&
+		ако (!remote && num_matches > 1) {
+			ако (!opts->quiet &&
 			    advice_enabled(ADVICE_CHECKOUT_AMBIGUOUS_REMOTE_BRANCH_NAME))
 				advise_disambiguating_remotes(path, *new_branch,
 							      &matched_remote_names);
@@ -813,12 +813,12 @@ static char *dwim_branch(const struct add_opts *opts, const char *path, char **n
 			    *new_branch, num_matches);
 		}
 		string_list_clear(&matched_remote_names, 0);
-		return remote;
+		върни remote;
 	}
-	return NULL;
+	върни NULL;
 }
 
-static int add(int ac, const char **av, const char *prefix,
+static цяло add(цяло ac, const char **av, const char *prefix,
 	       struct repository *repo UNUSED)
 {
 	struct add_opts opts;
@@ -830,8 +830,8 @@ static int add(int ac, const char **av, const char *prefix,
 	const char *new_branch = NULL;
 	char *opt_track = NULL;
 	const char *lock_reason = NULL;
-	int keep_locked = 0;
-	int used_new_branch_options;
+	цяло keep_locked = 0;
+	цяло used_new_branch_options;
 	struct option options[] = {
 		OPT__FORCE(&opts.force,
 			   N_("checkout <branch> even if already checked out in other worktree"),
@@ -856,95 +856,95 @@ static int add(int ac, const char **av, const char *prefix,
 			 N_("use relative paths for worktrees")),
 		OPT_END()
 	};
-	int ret;
+	цяло ret;
 
 	memset(&opts, 0, sizeof(opts));
 	opts.checkout = 1;
 	opts.relative_paths = use_relative_paths;
 	ac = parse_options(ac, av, prefix, options, git_worktree_add_usage, 0);
-	if (!!opts.detach + !!new_branch + !!new_branch_force > 1)
+	ако (!!opts.detach + !!new_branch + !!new_branch_force > 1)
 		die(_("options '%s', '%s', and '%s' cannot be used together"), "-b", "-B", "--detach");
-	if (opts.detach && opts.orphan)
+	ако (opts.detach && opts.orphan)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--detach");
-	if (opts.orphan && opt_track)
+	ако (opts.orphan && opt_track)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--track");
-	if (opts.orphan && !opts.checkout)
+	ако (opts.orphan && !opts.checkout)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--no-checkout");
-	if (opts.orphan && ac == 2)
+	ако (opts.orphan && ac == 2)
 		die(_("option '%s' and commit-ish cannot be used together"),
 		    "--orphan");
-	if (lock_reason && !keep_locked)
+	ако (lock_reason && !keep_locked)
 		die(_("the option '%s' requires '%s'"), "--reason", "--lock");
-	if (lock_reason)
+	ако (lock_reason)
 		opts.keep_locked = lock_reason;
-	else if (keep_locked)
+	иначе ако (keep_locked)
 		opts.keep_locked = _("added with --lock");
 
-	if (ac < 1 || ac > 2)
+	ако (ac < 1 || ac > 2)
 		usage_with_options(git_worktree_add_usage, options);
 
 	path = prefix_filename(prefix, av[0]);
 	branch = ac < 2 ? "HEAD" : av[1];
 	used_new_branch_options = new_branch || new_branch_force;
 
-	if (!strcmp(branch, "-"))
+	ако (!strcmp(branch, "-"))
 		branch = "@{-1}";
 
-	if (new_branch_force) {
+	ако (new_branch_force) {
 		struct strbuf symref = STRBUF_INIT;
 
 		new_branch = new_branch_force;
 
-		if (!opts.force &&
+		ако (!opts.force &&
 		    !check_branch_ref(the_repository, &symref, new_branch) &&
 		    refs_ref_exists(get_main_ref_store(the_repository), symref.buf))
 			die_if_checked_out(symref.buf, 0);
 		strbuf_release(&symref);
 	}
 
-	if (opts.orphan && !new_branch) {
+	ако (opts.orphan && !new_branch) {
 		new_branch = new_branch_to_free = worktree_basename_dup(path);
-	} else if (opts.orphan) {
+	} иначе ако (opts.orphan) {
 		; /* no-op */
-	} else if (opts.detach) {
+	} иначе ако (opts.detach) {
 		/* Check HEAD */
-		if (!strcmp(branch, "HEAD"))
+		ако (!strcmp(branch, "HEAD"))
 			can_use_local_refs(&opts);
-	} else if (ac < 2 && new_branch) {
+	} иначе ако (ac < 2 && new_branch) {
 		/* DWIM: Infer --orphan when repo has no refs. */
 		opts.orphan = dwim_orphan(&opts, !!opt_track, 0);
-	} else if (ac < 2) {
+	} иначе ако (ac < 2) {
 		/* DWIM: Guess branch name from path. */
 		char *s = dwim_branch(&opts, path, &new_branch_to_free);
-		if (s)
+		ако (s)
 			branch = branch_to_free = s;
 		new_branch = new_branch_to_free;
 
 		/* DWIM: Infer --orphan when repo has no refs. */
 		opts.orphan = (!s) && dwim_orphan(&opts, !!opt_track, 1);
-	} else if (ac == 2 && new_branch) {
-		if (!strcmp(branch, "HEAD"))
+	} иначе ако (ac == 2 && new_branch) {
+		ако (!strcmp(branch, "HEAD"))
 			can_use_local_refs(&opts);
-	} else if (ac == 2) {
+	} иначе ако (ac == 2) {
 		struct commit *commit;
 
 		commit = lookup_commit_reference_by_name(branch);
-		if (!commit) {
+		ако (!commit) {
 			struct object_id oid;
 			char *remote;
-			int num_matches = 0;
+			цяло num_matches = 0;
 			struct string_list matched_remote_names = STRING_LIST_INIT_DUP;
 
 			remote = unique_tracking_name(branch, &oid, &num_matches,
 						      &matched_remote_names);
-			if (remote) {
+			ако (remote) {
 				new_branch = branch;
 				branch = new_branch_to_free = remote;
-			} else if (num_matches > 1) {
-				if (!opts.quiet &&
+			} иначе ако (num_matches > 1) {
+				ако (!opts.quiet &&
 				    advice_enabled(ADVICE_CHECKOUT_AMBIGUOUS_REMOTE_BRANCH_NAME))
 					advise_disambiguating_remotes(path, branch,
 								      &matched_remote_names);
@@ -954,47 +954,47 @@ static int add(int ac, const char **av, const char *prefix,
 			string_list_clear(&matched_remote_names, 0);
 		}
 
-		if (!strcmp(branch, "HEAD"))
+		ако (!strcmp(branch, "HEAD"))
 			can_use_local_refs(&opts);
 
 	}
 
-	if (!opts.orphan && !lookup_commit_reference_by_name(branch)) {
-		int attempt_hint = !opts.quiet && (ac < 2);
-		if (attempt_hint && used_new_branch_options) {
+	ако (!opts.orphan && !lookup_commit_reference_by_name(branch)) {
+		цяло attempt_hint = !opts.quiet && (ac < 2);
+		ако (attempt_hint && used_new_branch_options) {
 			advise_if_enabled(ADVICE_WORKTREE_ADD_ORPHAN,
 				WORKTREE_ADD_ORPHAN_WITH_DASH_B_HINT_TEXT,
 				new_branch, path);
-		} else if (attempt_hint) {
+		} иначе ако (attempt_hint) {
 			advise_if_enabled(ADVICE_WORKTREE_ADD_ORPHAN,
 				WORKTREE_ADD_ORPHAN_NO_DASH_B_HINT_TEXT, path);
 		}
 		die(_("invalid reference: %s"), branch);
 	}
 
-	if (!opts.quiet)
+	ако (!opts.quiet)
 		print_preparing_worktree_line(opts.detach, branch, new_branch, !!new_branch_force);
 
-	if (opts.orphan) {
+	ако (opts.orphan) {
 		branch = new_branch;
-	} else if (new_branch) {
+	} иначе ако (new_branch) {
 		struct child_process cp = CHILD_PROCESS_INIT;
 		cp.git_cmd = 1;
 		strvec_push(&cp.args, "branch");
-		if (new_branch_force)
+		ако (new_branch_force)
 			strvec_push(&cp.args, "--force");
-		if (opts.quiet)
+		ако (opts.quiet)
 			strvec_push(&cp.args, "--quiet");
 		strvec_push(&cp.args, new_branch);
 		strvec_push(&cp.args, branch);
-		if (opt_track)
+		ако (opt_track)
 			strvec_push(&cp.args, opt_track);
-		if (run_command(&cp)) {
+		ако (run_command(&cp)) {
 			ret = -1;
 			goto cleanup;
 		}
 		branch = new_branch;
-	} else if (opt_track) {
+	} иначе ако (opt_track) {
 		die(_("--[no-]track can only be used if a new branch is created"));
 	}
 
@@ -1004,37 +1004,37 @@ cleanup:
 	free(opt_track);
 	free(branch_to_free);
 	free(new_branch_to_free);
-	return ret;
+	върни ret;
 }
 
-static void show_worktree_porcelain(struct worktree *wt, int line_terminator)
+static void show_worktree_porcelain(struct worktree *wt, цяло line_terminator)
 {
 	const char *reason;
 
 	printf("worktree %s%c", wt->path, line_terminator);
-	if (wt->is_bare)
+	ако (wt->is_bare)
 		printf("bare%c", line_terminator);
-	else {
+	иначе {
 		printf("HEAD %s%c", oid_to_hex(&wt->head_oid), line_terminator);
-		if (wt->is_detached)
+		ако (wt->is_detached)
 			printf("detached%c", line_terminator);
-		else if (wt->head_ref)
+		иначе ако (wt->head_ref)
 			printf("branch %s%c", wt->head_ref, line_terminator);
 	}
 
 	reason = worktree_lock_reason(wt);
-	if (reason) {
+	ако (reason) {
 		fputs("locked", stdout);
-		if (*reason) {
+		ако (*reason) {
 			fputc(' ', stdout);
 			write_name_quoted(reason, stdout, line_terminator);
-		} else {
+		} иначе {
 			fputc(line_terminator, stdout);
 		}
 	}
 
 	reason = worktree_prune_reason(wt, expire);
-	if (reason)
+	ако (reason)
 		printf("prunable %s%c", reason, line_terminator);
 
 	fputc(line_terminator, stdout);
@@ -1042,94 +1042,94 @@ static void show_worktree_porcelain(struct worktree *wt, int line_terminator)
 
 struct worktree_display {
 	char *path;
-	int width;
+	цяло width;
 };
 
 static void show_worktree(struct worktree *wt, struct worktree_display *display,
-			  int path_maxwidth, int abbrev_len)
+			  цяло path_maxwidth, цяло abbrev_len)
 {
 	struct strbuf sb = STRBUF_INIT;
 	const char *reason;
 
 	strbuf_addf(&sb, "%s%*s", display->path, 1 + path_maxwidth - display->width, "");
-	if (wt->is_bare)
+	ако (wt->is_bare)
 		strbuf_addstr(&sb, "(bare)");
-	else {
+	иначе {
 		strbuf_addf(&sb, "%-*s ", abbrev_len,
 				repo_find_unique_abbrev(the_repository, &wt->head_oid, DEFAULT_ABBREV));
-		if (wt->is_detached)
+		ако (wt->is_detached)
 			strbuf_addstr(&sb, "(detached HEAD)");
-		else if (wt->head_ref) {
+		иначе ако (wt->head_ref) {
 			char *ref = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
 								 wt->head_ref,
 								 0);
 			strbuf_addf(&sb, "[%s]", ref);
 			free(ref);
-		} else
+		} иначе
 			strbuf_addstr(&sb, "(error)");
 	}
 
 	reason = worktree_lock_reason(wt);
-	if (verbose && reason && *reason)
+	ако (verbose && reason && *reason)
 		strbuf_addf(&sb, "\n\tlocked: %s", reason);
-	else if (reason)
+	иначе ако (reason)
 		strbuf_addstr(&sb, " locked");
 
 	reason = worktree_prune_reason(wt, expire);
-	if (verbose && reason)
+	ако (verbose && reason)
 		strbuf_addf(&sb, "\n\tprunable: %s", reason);
-	else if (reason)
+	иначе ако (reason)
 		strbuf_addstr(&sb, " prunable");
 
 	printf("%s\n", sb.buf);
 	strbuf_release(&sb);
 }
 
-static void measure_widths(struct worktree **wt, int *abbrev,
-			   struct worktree_display **d, int *maxwidth)
+static void measure_widths(struct worktree **wt, цяло *abbrev,
+			   struct worktree_display **d, цяло *maxwidth)
 {
-	int i, display_alloc = 0;
+	цяло i, display_alloc = 0;
 	struct worktree_display *display = NULL;
 	struct strbuf buf = STRBUF_INIT;
 
-	for (i = 0; wt[i]; i++) {
-		int sha1_len;
+	за (i = 0; wt[i]; i++) {
+		цяло sha1_len;
 		ALLOC_GROW(display, i + 1, display_alloc);
 		quote_path(wt[i]->path, NULL, &buf, 0);
 		display[i].width = utf8_strwidth(buf.buf);
 		display[i].path = strbuf_detach(&buf, NULL);
 
-		if (display[i].width > *maxwidth)
+		ако (display[i].width > *maxwidth)
 			*maxwidth = display[i].width;
 		sha1_len = strlen(repo_find_unique_abbrev(the_repository, &wt[i]->head_oid, *abbrev));
-		if (sha1_len > *abbrev)
+		ако (sha1_len > *abbrev)
 			*abbrev = sha1_len;
 	}
 	*d = display;
 }
 
-static int pathcmp(const void *a_, const void *b_)
+static цяло pathcmp(const void *a_, const void *b_)
 {
 	const struct worktree *const *a = a_;
 	const struct worktree *const *b = b_;
-	return fspathcmp((*a)->path, (*b)->path);
+	върни fspathcmp((*a)->path, (*b)->path);
 }
 
 static void pathsort(struct worktree **wt)
 {
-	int n = 0;
+	цяло n = 0;
 	struct worktree **p = wt;
 
-	while (*p++)
+	докато (*p++)
 		n++;
 	QSORT(wt, n, pathcmp);
 }
 
-static int list(int ac, const char **av, const char *prefix,
+static цяло list(цяло ac, const char **av, const char *prefix,
 		struct repository *repo UNUSED)
 {
-	int porcelain = 0;
-	int line_terminator = '\n';
+	цяло porcelain = 0;
+	цяло line_terminator = '\n';
 
 	struct option options[] = {
 		OPT_BOOL(0, "porcelain", &porcelain, N_("machine-readable output")),
@@ -1143,41 +1143,41 @@ static int list(int ac, const char **av, const char *prefix,
 
 	expire = TIME_MAX;
 	ac = parse_options(ac, av, prefix, options, git_worktree_list_usage, 0);
-	if (ac)
+	ако (ac)
 		usage_with_options(git_worktree_list_usage, options);
-	else if (verbose && porcelain)
+	иначе ако (verbose && porcelain)
 		die(_("options '%s' and '%s' cannot be used together"), "--verbose", "--porcelain");
-	else if (!line_terminator && !porcelain)
+	иначе ако (!line_terminator && !porcelain)
 		die(_("the option '%s' requires '%s'"), "-z", "--porcelain");
-	else {
+	иначе {
 		struct worktree **worktrees = get_worktrees(the_repository);
-		int path_maxwidth = 0, abbrev = DEFAULT_ABBREV, i;
+		цяло path_maxwidth = 0, abbrev = DEFAULT_ABBREV, i;
 		struct worktree_display *display = NULL;
 
 		/* sort worktrees by path but keep main worktree at top */
 		pathsort(worktrees + 1);
 
-		if (!porcelain)
+		ако (!porcelain)
 			measure_widths(worktrees, &abbrev,
 				       &display, &path_maxwidth);
 
-		for (i = 0; worktrees[i]; i++) {
-			if (porcelain)
+		за (i = 0; worktrees[i]; i++) {
+			ако (porcelain)
 				show_worktree_porcelain(worktrees[i],
 							line_terminator);
-			else
+			иначе
 				show_worktree(worktrees[i],
 					      &display[i], path_maxwidth, abbrev);
 		}
-		for (i = 0; display && worktrees[i]; i++)
+		за (i = 0; display && worktrees[i]; i++)
 			free(display[i].path);
 		free(display);
 		free_worktrees(worktrees);
 	}
-	return 0;
+	върни 0;
 }
 
-static int lock_worktree(int ac, const char **av, const char *prefix,
+static цяло lock_worktree(цяло ac, const char **av, const char *prefix,
 			 struct repository *repo UNUSED)
 {
 	const char *reason = "", *old_reason;
@@ -1190,19 +1190,19 @@ static int lock_worktree(int ac, const char **av, const char *prefix,
 	char *path;
 
 	ac = parse_options(ac, av, prefix, options, git_worktree_lock_usage, 0);
-	if (ac != 1)
+	ако (ac != 1)
 		usage_with_options(git_worktree_lock_usage, options);
 
 	worktrees = get_worktrees(the_repository);
 	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	ако (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	ако (is_main_worktree(wt))
 		die(_("The main working tree cannot be locked or unlocked"));
 
 	old_reason = worktree_lock_reason(wt);
-	if (old_reason) {
-		if (*old_reason)
+	ако (old_reason) {
+		ако (*old_reason)
 			die(_("'%s' is already locked, reason: %s"),
 			    av[0], old_reason);
 		die(_("'%s' is already locked"), av[0]);
@@ -1213,10 +1213,10 @@ static int lock_worktree(int ac, const char **av, const char *prefix,
 
 	free_worktrees(worktrees);
 	free(path);
-	return 0;
+	върни 0;
 }
 
-static int unlock_worktree(int ac, const char **av, const char *prefix,
+static цяло unlock_worktree(цяло ac, const char **av, const char *prefix,
 			   struct repository *repo UNUSED)
 {
 	struct option options[] = {
@@ -1224,19 +1224,19 @@ static int unlock_worktree(int ac, const char **av, const char *prefix,
 	};
 	struct worktree **worktrees, *wt;
 	char *path;
-	int ret;
+	цяло ret;
 
 	ac = parse_options(ac, av, prefix, options, git_worktree_unlock_usage, 0);
-	if (ac != 1)
+	ако (ac != 1)
 		usage_with_options(git_worktree_unlock_usage, options);
 
 	worktrees = get_worktrees(the_repository);
 	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	ако (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	ако (is_main_worktree(wt))
 		die(_("The main working tree cannot be locked or unlocked"));
-	if (!worktree_lock_reason(wt))
+	ако (!worktree_lock_reason(wt))
 		die(_("'%s' is not locked"), av[0]);
 
 	path = repo_common_path(the_repository, "worktrees/%s/locked", wt->id);
@@ -1244,37 +1244,37 @@ static int unlock_worktree(int ac, const char **av, const char *prefix,
 
 	free_worktrees(worktrees);
 	free(path);
-	return ret;
+	върни ret;
 }
 
 static void validate_no_submodules(const struct worktree *wt)
 {
 	struct index_state istate = INDEX_STATE_INIT(the_repository);
 	struct strbuf path = STRBUF_INIT;
-	int i, found_submodules = 0;
+	цяло i, found_submodules = 0;
 	char *wt_gitdir;
 
 	wt_gitdir = get_worktree_git_dir(wt);
 
-	if (is_directory(worktree_git_path(wt, "modules"))) {
+	ако (is_directory(worktree_git_path(wt, "modules"))) {
 		/*
 		 * There could be false positives, e.g. the "modules"
 		 * directory exists but is empty. But it's a rare case and
 		 * this simpler check is probably good enough for now.
 		 */
 		found_submodules = 1;
-	} else if (read_index_from(&istate, worktree_git_path(wt, "index"),
+	} иначе ако (read_index_from(&istate, worktree_git_path(wt, "index"),
 				   wt_gitdir) > 0) {
-		for (i = 0; i < istate.cache_nr; i++) {
+		за (i = 0; i < istate.cache_nr; i++) {
 			struct cache_entry *ce = istate.cache[i];
-			int err;
+			цяло err;
 
-			if (!S_ISGITLINK(ce->ce_mode))
+			ако (!S_ISGITLINK(ce->ce_mode))
 				continue;
 
 			strbuf_reset(&path);
 			strbuf_addf(&path, "%s/%s", wt->path, ce->name);
-			if (!is_submodule_populated_gently(path.buf, &err))
+			ако (!is_submodule_populated_gently(path.buf, &err))
 				continue;
 
 			found_submodules = 1;
@@ -1285,14 +1285,14 @@ static void validate_no_submodules(const struct worktree *wt)
 	strbuf_release(&path);
 	free(wt_gitdir);
 
-	if (found_submodules)
+	ако (found_submodules)
 		die(_("working trees containing submodules cannot be moved or removed"));
 }
 
-static int move_worktree(int ac, const char **av, const char *prefix,
+static цяло move_worktree(цяло ac, const char **av, const char *prefix,
 			 struct repository *repo UNUSED)
 {
-	int force = 0;
+	цяло force = 0;
 	struct option options[] = {
 		OPT__FORCE(&force,
 			 N_("force move even if worktree is dirty or locked"),
@@ -1309,7 +1309,7 @@ static int move_worktree(int ac, const char **av, const char *prefix,
 
 	ac = parse_options(ac, av, prefix, options, git_worktree_move_usage,
 			   0);
-	if (ac != 2)
+	ако (ac != 2)
 		usage_with_options(git_worktree_move_usage, options);
 
 	path = prefix_filename(prefix, av[1]);
@@ -1318,14 +1318,14 @@ static int move_worktree(int ac, const char **av, const char *prefix,
 
 	worktrees = get_worktrees(the_repository);
 	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	ако (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	ако (is_main_worktree(wt))
 		die(_("'%s' is a main working tree"), av[0]);
-	if (is_directory(dst.buf)) {
+	ако (is_directory(dst.buf)) {
 		const char *sep = find_last_dir_sep(wt->path);
 
-		if (!sep)
+		ако (!sep)
 			die(_("could not figure out destination name from '%s'"),
 			    wt->path);
 		strbuf_trim_trailing_dir_sep(&dst);
@@ -1335,27 +1335,27 @@ static int move_worktree(int ac, const char **av, const char *prefix,
 
 	validate_no_submodules(wt);
 
-	if (force < 2)
+	ако (force < 2)
 		reason = worktree_lock_reason(wt);
-	if (reason) {
-		if (*reason)
+	ако (reason) {
+		ако (*reason)
 			die(_("cannot move a locked working tree, lock reason: %s\nuse 'move -f -f' to override or unlock first"),
 			    reason);
 		die(_("cannot move a locked working tree;\nuse 'move -f -f' to override or unlock first"));
 	}
-	if (validate_worktree(wt, &errmsg, 0))
+	ако (validate_worktree(wt, &errmsg, 0))
 		die(_("validation failed, cannot move working tree: %s"),
 		    errmsg.buf);
 	strbuf_release(&errmsg);
 
-	if (rename(wt->path, dst.buf) == -1)
+	ако (rename(wt->path, dst.buf) == -1)
 		die_errno(_("failed to move '%s' to '%s'"), wt->path, dst.buf);
 
 	update_worktree_location(wt, dst.buf, use_relative_paths);
 
 	strbuf_release(&dst);
 	free_worktrees(worktrees);
-	return 0;
+	върни 0;
 }
 
 /*
@@ -1374,7 +1374,7 @@ static void check_clean_worktree(struct worktree *wt,
 {
 	struct child_process cp;
 	char buf[1];
-	int ret;
+	цяло ret;
 
 	/*
 	 * Until we sort this out, all submodules are "dirty" and
@@ -1394,38 +1394,38 @@ static void check_clean_worktree(struct worktree *wt,
 	cp.dir = wt->path;
 	cp.out = -1;
 	ret = start_command(&cp);
-	if (ret)
+	ако (ret)
 		die_errno(_("failed to run 'git status' on '%s'"),
 			  original_path);
 	ret = xread(cp.out, buf, sizeof(buf));
-	if (ret)
+	ако (ret)
 		die(_("'%s' contains modified or untracked files, use --force to delete it"),
 		    original_path);
 	close(cp.out);
 	ret = finish_command(&cp);
-	if (ret)
+	ако (ret)
 		die_errno(_("failed to run 'git status' on '%s', code %d"),
 			  original_path, ret);
 }
 
-static int delete_git_work_tree(struct worktree *wt)
+static цяло delete_git_work_tree(struct worktree *wt)
 {
 	struct strbuf sb = STRBUF_INIT;
-	int ret = 0;
+	цяло ret = 0;
 
 	strbuf_addstr(&sb, wt->path);
-	if (remove_dir_recursively(&sb, 0)) {
+	ако (remove_dir_recursively(&sb, 0)) {
 		error_errno(_("failed to delete '%s'"), sb.buf);
 		ret = -1;
 	}
 	strbuf_release(&sb);
-	return ret;
+	върни ret;
 }
 
-static int remove_worktree(int ac, const char **av, const char *prefix,
+static цяло remove_worktree(цяло ac, const char **av, const char *prefix,
 			   struct repository *repo UNUSED)
 {
-	int force = 0;
+	цяло force = 0;
 	struct option options[] = {
 		OPT__FORCE(&force,
 			 N_("force removal even if worktree is dirty or locked"),
@@ -1435,33 +1435,33 @@ static int remove_worktree(int ac, const char **av, const char *prefix,
 	struct worktree **worktrees, *wt;
 	struct strbuf errmsg = STRBUF_INIT;
 	const char *reason = NULL;
-	int ret = 0;
+	цяло ret = 0;
 
 	ac = parse_options(ac, av, prefix, options, git_worktree_remove_usage, 0);
-	if (ac != 1)
+	ако (ac != 1)
 		usage_with_options(git_worktree_remove_usage, options);
 
 	worktrees = get_worktrees(the_repository);
 	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	ако (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	ако (is_main_worktree(wt))
 		die(_("'%s' is a main working tree"), av[0]);
-	if (force < 2)
+	ако (force < 2)
 		reason = worktree_lock_reason(wt);
-	if (reason) {
-		if (*reason)
+	ако (reason) {
+		ако (*reason)
 			die(_("cannot remove a locked working tree, lock reason: %s\nuse 'remove -f -f' to override or unlock first"),
 			    reason);
 		die(_("cannot remove a locked working tree;\nuse 'remove -f -f' to override or unlock first"));
 	}
-	if (validate_worktree(wt, &errmsg, WT_VALIDATE_WORKTREE_MISSING_OK))
+	ако (validate_worktree(wt, &errmsg, WT_VALIDATE_WORKTREE_MISSING_OK))
 		die(_("validation failed, cannot remove working tree: %s"),
 		    errmsg.buf);
 	strbuf_release(&errmsg);
 
-	if (file_exists(wt->path)) {
-		if (!force)
+	ако (file_exists(wt->path)) {
+		ако (!force)
 			check_clean_worktree(wt, av[0]);
 
 		ret |= delete_git_work_tree(wt);
@@ -1474,21 +1474,21 @@ static int remove_worktree(int ac, const char **av, const char *prefix,
 	delete_worktrees_dir_if_empty();
 
 	free_worktrees(worktrees);
-	return ret;
+	върни ret;
 }
 
-static void report_repair(int iserr, const char *path, const char *msg, void *cb_data)
+static void report_repair(цяло iserr, const char *path, const char *msg, void *cb_data)
 {
-	if (!iserr) {
+	ако (!iserr) {
 		fprintf_ln(stderr, _("repair: %s: %s"), msg, path);
-	} else {
-		int *exit_status = (int *)cb_data;
+	} иначе {
+		цяло *exit_status = (цяло *)cb_data;
 		fprintf_ln(stderr, _("error: %s: %s"), msg, path);
 		*exit_status = 1;
 	}
 }
 
-static int repair(int ac, const char **av, const char *prefix,
+static цяло repair(цяло ac, const char **av, const char *prefix,
 		  struct repository *repo UNUSED)
 {
 	const char **p;
@@ -1498,18 +1498,18 @@ static int repair(int ac, const char **av, const char *prefix,
 			 N_("use relative paths for worktrees")),
 		OPT_END()
 	};
-	int rc = 0;
+	цяло rc = 0;
 
 	ac = parse_options(ac, av, prefix, options, git_worktree_repair_usage, 0);
 	p = ac > 0 ? av : self;
-	for (; *p; p++)
+	за (; *p; p++)
 		repair_worktree_at_path(the_repository, *p, report_repair,
 					&rc, use_relative_paths);
 	repair_worktrees(the_repository, report_repair, &rc, use_relative_paths);
-	return rc;
+	върни rc;
 }
 
-int cmd_worktree(int ac,
+цяло cmd_worktree(цяло ac,
 		 const char **av,
 		 const char *prefix,
 		 struct repository *repo)
@@ -1529,7 +1529,7 @@ int cmd_worktree(int ac,
 
 	repo_config(the_repository, git_worktree_config, NULL);
 
-	if (!prefix)
+	ако (!prefix)
 		prefix = "";
 
 	ac = parse_options(ac, av, prefix, options, git_worktree_usage, 0);
@@ -1537,5 +1537,5 @@ int cmd_worktree(int ac,
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	return fn(ac, av, prefix, repo);
+	върни fn(ac, av, prefix, repo);
 }

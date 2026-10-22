@@ -25,25 +25,25 @@ static enum trailer_where where;
 static enum trailer_if_exists if_exists;
 static enum trailer_if_missing if_missing;
 
-static int option_parse_where(const struct option *opt,
-			      const char *arg, int unset UNUSED)
+static цяло option_parse_where(const struct option *opt,
+			      const char *arg, цяло unset UNUSED)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_where(opt->value, arg);
+	върни trailer_set_where(opt->value, arg);
 }
 
-static int option_parse_if_exists(const struct option *opt,
-				  const char *arg, int unset UNUSED)
+static цяло option_parse_if_exists(const struct option *opt,
+				  const char *arg, цяло unset UNUSED)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_if_exists(opt->value, arg);
+	върни trailer_set_if_exists(opt->value, arg);
 }
 
-static int option_parse_if_missing(const struct option *opt,
-				   const char *arg, int unset UNUSED)
+static цяло option_parse_if_missing(const struct option *opt,
+				   const char *arg, цяло unset UNUSED)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_if_missing(opt->value, arg);
+	върни trailer_set_if_missing(opt->value, arg);
 }
 
 static void new_trailers_clear(struct list_head *trailers)
@@ -58,19 +58,19 @@ static void new_trailers_clear(struct list_head *trailers)
 	}
 }
 
-static int option_parse_trailer(const struct option *opt,
-				   const char *arg, int unset)
+static цяло option_parse_trailer(const struct option *opt,
+				   const char *arg, цяло unset)
 {
 	struct list_head *trailers = opt->value;
 	struct new_trailer_item *item;
 
-	if (unset) {
+	ако (unset) {
 		new_trailers_clear(trailers);
-		return 0;
+		върни 0;
 	}
 
-	if (!arg)
-		return -1;
+	ако (!arg)
+		върни -1;
 
 	item = xmalloc(sizeof(*item));
 	item->text = arg;
@@ -78,11 +78,11 @@ static int option_parse_trailer(const struct option *opt,
 	item->if_exists = if_exists;
 	item->if_missing = if_missing;
 	list_add_tail(&item->list, trailers);
-	return 0;
+	върни 0;
 }
 
-static int parse_opt_parse(const struct option *opt, const char *arg,
-			   int unset)
+static цяло parse_opt_parse(const struct option *opt, const char *arg,
+			   цяло unset)
 {
 	struct process_trailer_options *v = opt->value;
 	v->only_trailers = 1;
@@ -90,16 +90,16 @@ static int parse_opt_parse(const struct option *opt, const char *arg,
 	v->unfold = 1;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return 0;
+	върни 0;
 }
 
 static void read_input_file(struct strbuf *sb, const char *file)
 {
-	if (file) {
-		if (strbuf_read_file(sb, file, 0) < 0)
+	ако (file) {
+		ако (strbuf_read_file(sb, file, 0) < 0)
 			die_errno(_("could not read input file '%s'"), file);
-	} else {
-		if (strbuf_read(sb, fileno(stdin), 0) < 0)
+	} иначе {
+		ако (strbuf_read(sb, fileno(stdin), 0) < 0)
 			die_errno(_("could not read from stdin"));
 	}
 	strbuf_complete_line(sb);
@@ -112,31 +112,31 @@ static void interpret_trailers(const struct process_trailer_options *opts,
 	struct strbuf input = STRBUF_INIT;
 	struct strbuf out = STRBUF_INIT;
 	struct tempfile *tempfile = NULL;
-	int fd = 1;
+	цяло fd = 1;
 
 	trailer_config_init();
 
 	read_input_file(&input, file);
 
-	if (opts->in_place) {
+	ако (opts->in_place) {
 		tempfile = trailer_create_in_place_tempfile(file);
-		if (!tempfile)
+		ако (!tempfile)
 			die(NULL);
 		fd = tempfile->fd;
 	}
 	process_trailers(opts, new_trailer_head, &input, &out);
 
-	if (write_in_full(fd, out.buf, out.len) < 0)
+	ако (write_in_full(fd, out.buf, out.len) < 0)
 		die_errno(_("could not write to temporary file '%s'"), file);
-	if (opts->in_place)
-		if (rename_tempfile(&tempfile, file))
+	ако (opts->in_place)
+		ако (rename_tempfile(&tempfile, file))
 			die_errno(_("could not rename temporary file to %s"), file);
 
 	strbuf_release(&input);
 	strbuf_release(&out);
 }
 
-int cmd_interpret_trailers(int argc,
+цяло cmd_interpret_trailers(цяло argc,
 			   const char **argv,
 			   const char *prefix,
 			   struct repository *repo UNUSED)
@@ -171,23 +171,23 @@ int cmd_interpret_trailers(int argc,
 	argc = parse_options(argc, argv, prefix, options,
 			     git_interpret_trailers_usage, 0);
 
-	if (opts.only_input && !list_empty(&trailers))
+	ако (opts.only_input && !list_empty(&trailers))
 		usage_msg_opt(
 			_("--trailer with --only-input does not make sense"),
 			git_interpret_trailers_usage,
 			options);
 
-	if (argc) {
-		int i;
-		for (i = 0; i < argc; i++)
+	ако (argc) {
+		цяло i;
+		за (i = 0; i < argc; i++)
 			interpret_trailers(&opts, &trailers, argv[i]);
-	} else {
-		if (opts.in_place)
+	} иначе {
+		ако (opts.in_place)
 			die(_("no input file given for in-place editing"));
 		interpret_trailers(&opts, &trailers, NULL);
 	}
 
 	new_trailers_clear(&trailers);
 
-	return 0;
+	върни 0;
 }

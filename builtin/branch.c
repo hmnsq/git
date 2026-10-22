@@ -46,8 +46,8 @@ static const char * const builtin_branch_usage[] = {
 
 static const char *head;
 static struct object_id head_oid;
-static int recurse_submodules = 0;
-static int submodule_propagate_branches = 0;
+static цяло recurse_submodules = 0;
+static цяло submodule_propagate_branches = 0;
 
 static enum git_colorbool branch_use_color = GIT_COLOR_UNKNOWN;
 static char branch_colors[][COLOR_MAXLEN] = {
@@ -80,59 +80,59 @@ static const char *color_branch_slots[] = {
 };
 
 static struct string_list output = STRING_LIST_INIT_DUP;
-static unsigned int colopts;
+static unsigned цяло colopts;
 
 define_list_config_array(color_branch_slots);
 
-static int git_branch_config(const char *var, const char *value,
+static цяло git_branch_config(const char *var, const char *value,
 			     const struct config_context *ctx, void *cb)
 {
 	const char *slot_name;
 
-	if (!strcmp(var, "branch.sort")) {
-		if (!value)
-			return config_error_nonbool(var);
+	ако (!strcmp(var, "branch.sort")) {
+		ако (!value)
+			върни config_error_nonbool(var);
 		string_list_append(cb, value);
-		return 0;
+		върни 0;
 	}
 
-	if (starts_with(var, "column."))
-		return git_column_config(var, value, "branch", &colopts);
-	if (!strcmp(var, "color.branch")) {
+	ако (starts_with(var, "column."))
+		върни git_column_config(var, value, "branch", &colopts);
+	ако (!strcmp(var, "color.branch")) {
 		branch_use_color = git_config_colorbool(var, value);
-		return 0;
+		върни 0;
 	}
-	if (skip_prefix(var, "color.branch.", &slot_name)) {
-		int slot = LOOKUP_CONFIG(color_branch_slots, slot_name);
-		if (slot < 0)
-			return 0;
-		if (!value)
-			return config_error_nonbool(var);
-		return color_parse(value, branch_colors[slot]);
+	ако (skip_prefix(var, "color.branch.", &slot_name)) {
+		цяло slot = LOOKUP_CONFIG(color_branch_slots, slot_name);
+		ако (slot < 0)
+			върни 0;
+		ако (!value)
+			върни config_error_nonbool(var);
+		върни color_parse(value, branch_colors[slot]);
 	}
-	if (!strcmp(var, "submodule.recurse")) {
+	ако (!strcmp(var, "submodule.recurse")) {
 		recurse_submodules = git_config_bool(var, value);
-		return 0;
+		върни 0;
 	}
-	if (!strcasecmp(var, "submodule.propagateBranches")) {
+	ако (!strcasecmp(var, "submodule.propagateBranches")) {
 		submodule_propagate_branches = git_config_bool(var, value);
-		return 0;
+		върни 0;
 	}
 
-	if (git_color_config(var, value, cb) < 0)
-		return -1;
+	ако (git_color_config(var, value, cb) < 0)
+		върни -1;
 
-	return git_default_config(var, value, ctx, cb);
+	върни git_default_config(var, value, ctx, cb);
 }
 
 static const char *branch_get_color(enum color_branch ix)
 {
-	if (want_color(branch_use_color))
-		return branch_colors[ix];
-	return "";
+	ако (want_color(branch_use_color))
+		върни branch_colors[ix];
+	върни "";
 }
 
-static int branch_merged(int kind, const char *name,
+static цяло branch_merged(цяло kind, const char *name,
 			 struct commit *rev, struct commit *head_rev)
 {
 	/*
@@ -144,26 +144,26 @@ static int branch_merged(int kind, const char *name,
 	struct commit *reference_rev = NULL;
 	const char *reference_name = NULL;
 	void *reference_name_to_free = NULL;
-	int merged;
+	цяло merged;
 
-	if (kind == FILTER_REFS_BRANCHES) {
+	ако (kind == FILTER_REFS_BRANCHES) {
 		struct branch *branch = branch_get(name);
 		const char *upstream = branch_get_upstream(branch, NULL);
 		struct object_id oid;
 
-		if (upstream &&
+		ако (upstream &&
 		    (reference_name = reference_name_to_free =
 		     refs_resolve_refdup(get_main_ref_store(the_repository), upstream, RESOLVE_REF_READING,
 					 &oid, NULL)) != NULL)
 			reference_rev = lookup_commit_reference(the_repository,
 								&oid);
 	}
-	if (!reference_rev)
+	ако (!reference_rev)
 		reference_rev = head_rev;
 
 	merged = reference_rev ? repo_in_merge_bases(the_repository, rev,
 						     reference_rev) : 0;
-	if (merged < 0)
+	ако (merged < 0)
 		exit(128);
 
 	/*
@@ -176,23 +176,23 @@ static int branch_merged(int kind, const char *name,
 	 * the reminder either: they have already established that the
 	 * branch has an upstream, so HEAD is irrelevant to the decision.
 	 */
-	if (head_rev && head_rev != reference_rev) {
-		int expect = repo_in_merge_bases(the_repository, rev, head_rev);
-		if (expect < 0)
+	ако (head_rev && head_rev != reference_rev) {
+		цяло expect = repo_in_merge_bases(the_repository, rev, head_rev);
+		ако (expect < 0)
 			exit(128);
-		if (expect == merged)
+		ако (expect == merged)
 			; /* okay */
-		else if (merged)
+		иначе ако (merged)
 			warning(_("deleting branch '%s' that has been merged to\n"
 				"         '%s', but not yet merged to HEAD"),
 				name, reference_name);
-		else
+		иначе
 			warning(_("not deleting branch '%s' that is not yet merged to\n"
 				"         '%s', even though it is merged to HEAD"),
 				name, reference_name);
 	}
 	free(reference_name_to_free);
-	return merged;
+	върни merged;
 }
 
 enum delete_branch_flags {
@@ -203,53 +203,53 @@ enum delete_branch_flags {
 	DELETE_BRANCH_DRY_RUN = (1 << 4),
 };
 
-static int check_branch_commit(const char *branchname, const char *refname,
+static цяло check_branch_commit(const char *branchname, const char *refname,
 			       const struct object_id *oid, struct commit *head_rev,
-			       int kinds, unsigned int flags)
+			       цяло kinds, unsigned цяло flags)
 {
 	struct commit *rev = lookup_commit_reference(the_repository, oid);
-	if (!(flags & DELETE_BRANCH_FORCE) && !rev) {
+	ако (!(flags & DELETE_BRANCH_FORCE) && !rev) {
 		error(_("couldn't look up commit object for '%s'"), refname);
-		return -1;
+		върни -1;
 	}
-	if (!(flags & DELETE_BRANCH_FORCE) &&
+	ако (!(flags & DELETE_BRANCH_FORCE) &&
 	    !branch_merged(kinds, branchname, rev, head_rev)) {
-		if (!(flags & DELETE_BRANCH_SKIP_UNMERGED)) {
+		ако (!(flags & DELETE_BRANCH_SKIP_UNMERGED)) {
 			error(_("the branch '%s' is not fully merged"),
 			      branchname);
 			advise_if_enabled(ADVICE_FORCE_DELETE_BRANCH,
 					  _("If you are sure you want to delete it, "
 					  "run 'git branch -D %s'"), branchname);
 		}
-		return -1;
+		върни -1;
 	}
-	return 0;
+	върни 0;
 }
 
 static void delete_branch_config(const char *branchname)
 {
 	struct strbuf buf = STRBUF_INIT;
 	strbuf_addf(&buf, "branch.%s", branchname);
-	if (repo_config_rename_section(the_repository, buf.buf, NULL) < 0)
+	ако (repo_config_rename_section(the_repository, buf.buf, NULL) < 0)
 		warning(_("update of config-file failed"));
 	strbuf_release(&buf);
 }
 
-static int delete_branches(int argc, const char **argv, int kinds,
-			   unsigned int flags)
+static цяло delete_branches(цяло argc, const char **argv, цяло kinds,
+			   unsigned цяло flags)
 {
 	struct commit *head_rev = NULL;
 	struct object_id oid;
 	char *name = NULL;
 	const char *fmt;
-	int i;
-	int ret = 0;
-	int remote_branch = 0;
+	цяло i;
+	цяло ret = 0;
+	цяло remote_branch = 0;
 	struct strbuf bname = STRBUF_INIT;
 	enum interpret_branch_kind allowed_interpret;
 	struct string_list refs_to_delete = STRING_LIST_INIT_DUP;
 	struct string_list_item *item;
-	int branch_name_pos;
+	цяло branch_name_pos;
 	const char *fmt_remotes = "refs/remotes/%s";
 
 	switch (kinds) {
@@ -270,29 +270,29 @@ static int delete_branches(int argc, const char **argv, int kinds,
 	}
 	branch_name_pos = strcspn(fmt, "%");
 
-	if (!(flags & DELETE_BRANCH_FORCE) &&
+	ако (!(flags & DELETE_BRANCH_FORCE) &&
 	    !(flags & DELETE_BRANCH_NO_HEAD_FALLBACK))
 		head_rev = lookup_commit_reference(the_repository, &head_oid);
 
-	for (i = 0; i < argc; i++, strbuf_reset(&bname)) {
+	за (i = 0; i < argc; i++, strbuf_reset(&bname)) {
 		char *target = NULL;
-		int ref_flags = 0;
+		цяло ref_flags = 0;
 
 		copy_branchname(the_repository, &bname,
 				argv[i], allowed_interpret);
 		free(name);
 		name = mkpathdup(fmt, bname.buf);
 
-		if (kinds == FILTER_REFS_BRANCHES) {
+		ако (kinds == FILTER_REFS_BRANCHES) {
 			const char *path;
-			if ((path = branch_bisecting(name))) {
+			ако ((path = branch_bisecting(name))) {
 				error(_("cannot delete branch '%s' "
 					"used by worktree at '%s' for bisect"),
 					      bname.buf, path);
 				ret = 1;
 				continue;
 			}
-			if ((path = branch_checked_out(name))) {
+			ако ((path = branch_checked_out(name))) {
 				error(_("cannot delete branch '%s' "
 					"used by worktree at '%s'"),
 				      bname.buf, path);
@@ -307,10 +307,10 @@ static int delete_branches(int argc, const char **argv, int kinds,
 					     | RESOLVE_REF_NO_RECURSE
 					     | RESOLVE_REF_ALLOW_BAD_NAME,
 					     &oid, &ref_flags);
-		if (!target) {
-			if (remote_branch) {
+		ако (!target) {
+			ако (remote_branch) {
 				error(_("remote-tracking branch '%s' not found"), bname.buf);
-			} else {
+			} иначе {
 				char *virtual_name = mkpathdup(fmt_remotes, bname.buf);
 				char *virtual_target = refs_resolve_refdup(get_main_ref_store(the_repository),
 									   virtual_name,
@@ -321,11 +321,11 @@ static int delete_branches(int argc, const char **argv, int kinds,
 									   &ref_flags);
 				FREE_AND_NULL(virtual_name);
 
-				if (virtual_target)
+				ако (virtual_target)
 					error(_("branch '%s' not found.\n"
 						"Did you forget --remote?"),
 						bname.buf);
-				else
+				иначе
 					error(_("branch '%s' not found"), bname.buf);
 				FREE_AND_NULL(virtual_target);
 			}
@@ -333,10 +333,10 @@ static int delete_branches(int argc, const char **argv, int kinds,
 			continue;
 		}
 
-		if (!(ref_flags & (REF_ISSYMREF|REF_ISBROKEN)) &&
+		ако (!(ref_flags & (REF_ISSYMREF|REF_ISBROKEN)) &&
 		    check_branch_commit(bname.buf, name, &oid, head_rev, kinds,
 					flags)) {
-			if (!(flags & DELETE_BRANCH_SKIP_UNMERGED))
+			ако (!(flags & DELETE_BRANCH_SKIP_UNMERGED))
 				ret = 1;
 			goto next;
 		}
@@ -350,22 +350,22 @@ static int delete_branches(int argc, const char **argv, int kinds,
 		free(target);
 	}
 
-	if (!(flags & DELETE_BRANCH_DRY_RUN) &&
+	ако (!(flags & DELETE_BRANCH_DRY_RUN) &&
 	    refs_delete_refs(get_main_ref_store(the_repository), NULL, &refs_to_delete, REF_NO_DEREF))
 		ret = 1;
 
 	for_each_string_list_item(item, &refs_to_delete) {
 		char *describe_ref = item->util;
 		char *name = item->string;
-		if (flags & DELETE_BRANCH_DRY_RUN) {
-			if (!(flags & DELETE_BRANCH_QUIET))
+		ако (flags & DELETE_BRANCH_DRY_RUN) {
+			ако (!(flags & DELETE_BRANCH_QUIET))
 				printf(remote_branch
 					? _("Would delete remote-tracking branch %s (was %s).\n")
 					: _("Would delete branch %s (was %s).\n"),
 					name + branch_name_pos, describe_ref);
-		} else if (!refs_ref_exists(get_main_ref_store(the_repository), name)) {
+		} иначе ако (!refs_ref_exists(get_main_ref_store(the_repository), name)) {
 			char *refname = name + branch_name_pos;
-			if (!(flags & DELETE_BRANCH_QUIET))
+			ако (!(flags & DELETE_BRANCH_QUIET))
 				printf(remote_branch
 					? _("Deleted remote-tracking branch %s (was %s).\n")
 					: _("Deleted branch %s (was %s).\n"),
@@ -380,32 +380,32 @@ static int delete_branches(int argc, const char **argv, int kinds,
 	free(name);
 	strbuf_release(&bname);
 
-	return ret;
+	върни ret;
 }
 
-static int calc_maxwidth(struct ref_array *refs, int remote_bonus)
+static цяло calc_maxwidth(struct ref_array *refs, цяло remote_bonus)
 {
-	int i, max = 0;
-	for (i = 0; i < refs->nr; i++) {
+	цяло i, max = 0;
+	за (i = 0; i < refs->nr; i++) {
 		struct ref_array_item *it = refs->items[i];
 		const char *desc = it->refname;
-		int w;
+		цяло w;
 
 		skip_prefix(it->refname, "refs/heads/", &desc);
 		skip_prefix(it->refname, "refs/remotes/", &desc);
-		if (it->kind == FILTER_REFS_DETACHED_HEAD) {
+		ако (it->kind == FILTER_REFS_DETACHED_HEAD) {
 			char *head_desc = get_head_description();
 			w = utf8_strwidth(head_desc);
 			free(head_desc);
-		} else
+		} иначе
 			w = utf8_strwidth(desc);
 
-		if (it->kind == FILTER_REFS_REMOTES)
+		ако (it->kind == FILTER_REFS_REMOTES)
 			w += remote_bonus;
-		if (w > max)
+		ако (w > max)
 			max = w;
 	}
-	return max;
+	върни max;
 }
 
 static const char *quote_literal_for_format(const char *s)
@@ -413,12 +413,12 @@ static const char *quote_literal_for_format(const char *s)
 	static struct strbuf buf = STRBUF_INIT;
 
 	strbuf_reset(&buf);
-	while (strbuf_expand_step(&buf, &s))
+	докато (strbuf_expand_step(&buf, &s))
 		strbuf_addstr(&buf, "%%");
-	return buf.buf;
+	върни buf.buf;
 }
 
-static char *build_format(struct ref_filter *filter, int maxwidth, const char *remote_prefix)
+static char *build_format(struct ref_filter *filter, цяло maxwidth, const char *remote_prefix)
 {
 	struct strbuf fmt = STRBUF_INIT;
 	struct strbuf local = STRBUF_INIT;
@@ -431,21 +431,21 @@ static char *build_format(struct ref_filter *filter, int maxwidth, const char *r
 	strbuf_addf(&remote, "  %s",
 		    branch_get_color(BRANCH_COLOR_REMOTE));
 
-	if (filter->verbose) {
+	ако (filter->verbose) {
 		struct strbuf obname = STRBUF_INIT;
 
-		if (filter->abbrev < 0)
+		ако (filter->abbrev < 0)
 			strbuf_addf(&obname, "%%(objectname:short)");
-		else if (!filter->abbrev)
+		иначе ако (!filter->abbrev)
 			strbuf_addf(&obname, "%%(objectname)");
-		else
+		иначе
 			strbuf_addf(&obname, "%%(objectname:short=%d)", filter->abbrev);
 
 		strbuf_addf(&local, "%%(align:%d,left)%%(refname:lstrip=2)%%(end)", maxwidth);
 		strbuf_addstr(&local, branch_get_color(BRANCH_COLOR_RESET));
 		strbuf_addf(&local, " %s ", obname.buf);
 
-		if (filter->verbose > 1)
+		ако (filter->verbose > 1)
 		{
 			strbuf_addf(&local, "%%(if:notequals=*)%%(HEAD)%%(then)%%(if)%%(worktreepath)%%(then)(%s%%(worktreepath)%s) %%(end)%%(end)",
 				    branch_get_color(BRANCH_COLOR_WORKTREE), branch_get_color(BRANCH_COLOR_RESET));
@@ -453,7 +453,7 @@ static char *build_format(struct ref_filter *filter, int maxwidth, const char *r
 				    "%%(then): %%(upstream:track,nobracket)%%(end)] %%(end)%%(contents:subject)",
 				    branch_get_color(BRANCH_COLOR_UPSTREAM), branch_get_color(BRANCH_COLOR_RESET));
 		}
-		else
+		иначе
 			strbuf_addf(&local, "%%(if)%%(upstream:track)%%(then)%%(upstream:track) %%(end)%%(contents:subject)");
 
 		strbuf_addf(&remote, "%%(align:%d,left)%s%%(refname:lstrip=2)%%(end)%s"
@@ -462,7 +462,7 @@ static char *build_format(struct ref_filter *filter, int maxwidth, const char *r
 			    maxwidth, quote_literal_for_format(remote_prefix),
 			    branch_get_color(BRANCH_COLOR_RESET), obname.buf);
 		strbuf_release(&obname);
-	} else {
+	} иначе {
 		strbuf_addf(&local, "%%(refname:lstrip=2)%s%%(if)%%(symref)%%(then) -> %%(symref:short)%%(end)",
 			    branch_get_color(BRANCH_COLOR_RESET));
 		strbuf_addf(&remote, "%s%%(refname:lstrip=2)%s%%(if)%%(symref)%%(then) -> %%(symref:short)%%(end)",
@@ -474,15 +474,15 @@ static char *build_format(struct ref_filter *filter, int maxwidth, const char *r
 
 	strbuf_release(&local);
 	strbuf_release(&remote);
-	return strbuf_detach(&fmt, NULL);
+	върни strbuf_detach(&fmt, NULL);
 }
 
 static void print_ref_list(struct ref_filter *filter, struct ref_sorting *sorting,
 			   struct ref_format *format, struct string_list *output)
 {
-	int i;
+	цяло i;
 	struct ref_array array;
-	int maxwidth = 0;
+	цяло maxwidth = 0;
 	const char *remote_prefix = "";
 	char *to_free = NULL;
 
@@ -491,35 +491,35 @@ static void print_ref_list(struct ref_filter *filter, struct ref_sorting *sortin
 	 * then remote branches will have a "remotes/" prefix.
 	 * We need to account for this in the width.
 	 */
-	if (filter->kind != FILTER_REFS_REMOTES)
+	ако (filter->kind != FILTER_REFS_REMOTES)
 		remote_prefix = "remotes/";
 
 	memset(&array, 0, sizeof(array));
 
 	filter_refs(&array, filter, filter->kind);
 
-	if (filter->verbose)
+	ако (filter->verbose)
 		maxwidth = calc_maxwidth(&array, strlen(remote_prefix));
 
-	if (!format->format)
+	ако (!format->format)
 		format->format = to_free = build_format(filter, maxwidth, remote_prefix);
 	format->use_color = branch_use_color;
 
-	if (verify_ref_format(format))
+	ако (verify_ref_format(format))
 		die(_("unable to parse format string"));
 
 	filter_ahead_behind(the_repository, &array);
 	ref_array_sort(sorting, &array);
 
-	if (column_active(colopts)) {
+	ако (column_active(colopts)) {
 		struct strbuf out = STRBUF_INIT, err = STRBUF_INIT;
 
 		assert(!filter->verbose && "--column and --verbose are incompatible");
 
-		for (i = 0; i < array.nr; i++) {
+		за (i = 0; i < array.nr; i++) {
 			strbuf_reset(&err);
 			strbuf_reset(&out);
-			if (format_ref_array_item(array.items[i], format, &out, &err))
+			ако (format_ref_array_item(array.items[i], format, &out, &err))
 				die("%s", err.buf);
 
 			/* format to a string_list to let print_columns() do its job */
@@ -528,7 +528,7 @@ static void print_ref_list(struct ref_filter *filter, struct ref_sorting *sortin
 
 		strbuf_release(&err);
 		strbuf_release(&out);
-	} else {
+	} иначе {
 		print_formatted_ref_array(&array, format);
 	}
 
@@ -538,36 +538,36 @@ static void print_ref_list(struct ref_filter *filter, struct ref_sorting *sortin
 
 static void print_current_branch_name(void)
 {
-	int flags;
+	цяло flags;
 	const char *refname = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
 						      "HEAD", 0, NULL, &flags);
 	const char *shortname;
-	if (!refname)
+	ако (!refname)
 		die(_("could not resolve HEAD"));
-	else if (!(flags & REF_ISSYMREF))
-		return;
-	else if (skip_prefix(refname, "refs/heads/", &shortname))
+	иначе ако (!(flags & REF_ISSYMREF))
+		върни;
+	иначе ако (skip_prefix(refname, "refs/heads/", &shortname))
 		puts(shortname);
-	else
+	иначе
 		die(_("HEAD (%s) points outside of refs/heads/"), refname);
 }
 
 static void reject_rebase_or_bisect_branch(struct worktree **worktrees,
 					   const char *target)
 {
-	int i;
+	цяло i;
 
-	for (i = 0; worktrees[i]; i++) {
+	за (i = 0; worktrees[i]; i++) {
 		struct worktree *wt = worktrees[i];
 
-		if (!wt->is_detached)
+		ако (!wt->is_detached)
 			continue;
 
-		if (is_worktree_being_rebased(wt, target))
+		ако (is_worktree_being_rebased(wt, target))
 			die(_("branch %s is being rebased at %s"),
 			    target, wt->path);
 
-		if (is_worktree_being_bisected(wt, target))
+		ако (is_worktree_being_bisected(wt, target))
 			die(_("branch %s is being bisected at %s"),
 			    target, wt->path);
 	}
@@ -578,74 +578,74 @@ static void reject_rebase_or_bisect_branch(struct worktree **worktrees,
  * This will be used when renaming a branch. Returns 0 if successful, non-zero
  * otherwise.
  */
-static int replace_each_worktree_head_symref(struct worktree **worktrees,
+static цяло replace_each_worktree_head_symref(struct worktree **worktrees,
 					     const char *oldref, const char *newref,
 					     const char *logmsg)
 {
-	int ret = 0;
-	int i;
+	цяло ret = 0;
+	цяло i;
 
-	for (i = 0; worktrees[i]; i++) {
+	за (i = 0; worktrees[i]; i++) {
 		struct ref_store *refs;
 
-		if (worktrees[i]->is_detached)
+		ако (worktrees[i]->is_detached)
 			continue;
-		if (!worktrees[i]->head_ref)
+		ако (!worktrees[i]->head_ref)
 			continue;
-		if (strcmp(oldref, worktrees[i]->head_ref))
+		ако (strcmp(oldref, worktrees[i]->head_ref))
 			continue;
 
 		refs = get_worktree_ref_store(worktrees[i]);
-		if (refs_update_symref(refs, "HEAD", newref, logmsg))
+		ако (refs_update_symref(refs, "HEAD", newref, logmsg))
 			ret = error(_("HEAD of working tree %s is not updated"),
 				    worktrees[i]->path);
 	}
 
-	return ret;
+	върни ret;
 }
 
 #define IS_HEAD 1
 #define IS_ORPHAN 2
 
-static void copy_or_rename_branch(const char *oldname, const char *newname, int copy, int force)
+static void copy_or_rename_branch(const char *oldname, const char *newname, цяло copy, цяло force)
 {
 	struct strbuf oldref = STRBUF_INIT, newref = STRBUF_INIT, logmsg = STRBUF_INIT;
 	struct strbuf oldsection = STRBUF_INIT, newsection = STRBUF_INIT;
 	const char *interpreted_oldname = NULL;
 	const char *interpreted_newname = NULL;
-	int recovery = 0, oldref_usage = 0;
+	цяло recovery = 0, oldref_usage = 0;
 	struct worktree **worktrees = get_worktrees(the_repository);
 
-	if (check_branch_ref(the_repository, &oldref, oldname)) {
+	ако (check_branch_ref(the_repository, &oldref, oldname)) {
 		/*
 		 * Bad name --- this could be an attempt to rename a
 		 * ref that we used to allow to be created by accident.
 		 */
-		if (refs_ref_exists(get_main_ref_store(the_repository), oldref.buf))
+		ако (refs_ref_exists(get_main_ref_store(the_repository), oldref.buf))
 			recovery = 1;
-		else {
-			int code = die_message(_("invalid branch name: '%s'"), oldname);
+		иначе {
+			цяло code = die_message(_("invalid branch name: '%s'"), oldname);
 			advise_if_enabled(ADVICE_REF_SYNTAX,
 					  _("See 'git help check-ref-format'"));
 			exit(code);
 		}
 	}
 
-	for (int i = 0; worktrees[i]; i++) {
+	за (цяло i = 0; worktrees[i]; i++) {
 		struct worktree *wt = worktrees[i];
 
-		if (wt->head_ref && !strcmp(oldref.buf, wt->head_ref)) {
+		ако (wt->head_ref && !strcmp(oldref.buf, wt->head_ref)) {
 			oldref_usage |= IS_HEAD;
-			if (is_null_oid(&wt->head_oid))
+			ако (is_null_oid(&wt->head_oid))
 				oldref_usage |= IS_ORPHAN;
 			break;
 		}
 	}
 
-	if ((copy || !(oldref_usage & IS_HEAD)) && !refs_ref_exists(get_main_ref_store(the_repository), oldref.buf)) {
-		if (oldref_usage & IS_HEAD)
+	ако ((copy || !(oldref_usage & IS_HEAD)) && !refs_ref_exists(get_main_ref_store(the_repository), oldref.buf)) {
+		ако (oldref_usage & IS_HEAD)
 			die(_("no commit on branch '%s' yet"), oldname);
-		else
+		иначе
 			die(_("no branch named '%s'"), oldname);
 	}
 
@@ -653,41 +653,41 @@ static void copy_or_rename_branch(const char *oldname, const char *newname, int 
 	 * A command like "git branch -M currentbranch currentbranch" cannot
 	 * cause the worktree to become inconsistent with HEAD, so allow it.
 	 */
-	if (!strcmp(oldname, newname))
+	ако (!strcmp(oldname, newname))
 		validate_branchname(newname, &newref);
-	else
+	иначе
 		validate_new_branchname(newname, &newref, force);
 
 	reject_rebase_or_bisect_branch(worktrees, oldref.buf);
 
-	if (!skip_prefix(oldref.buf, "refs/heads/", &interpreted_oldname) ||
+	ако (!skip_prefix(oldref.buf, "refs/heads/", &interpreted_oldname) ||
 	    !skip_prefix(newref.buf, "refs/heads/", &interpreted_newname)) {
 		BUG("expected prefix missing for refs");
 	}
 
-	if (copy)
+	ако (copy)
 		strbuf_addf(&logmsg, "Branch: copied %s to %s",
 			    oldref.buf, newref.buf);
-	else
+	иначе
 		strbuf_addf(&logmsg, "Branch: renamed %s to %s",
 			    oldref.buf, newref.buf);
 
-	if (!copy && !(oldref_usage & IS_ORPHAN) &&
+	ако (!copy && !(oldref_usage & IS_ORPHAN) &&
 	    refs_rename_ref(get_main_ref_store(the_repository), oldref.buf, newref.buf, logmsg.buf))
 		die(_("branch rename failed"));
-	if (copy && refs_copy_existing_ref(get_main_ref_store(the_repository), oldref.buf, newref.buf, logmsg.buf))
+	ако (copy && refs_copy_existing_ref(get_main_ref_store(the_repository), oldref.buf, newref.buf, logmsg.buf))
 		die(_("branch copy failed"));
 
-	if (recovery) {
-		if (copy)
+	ако (recovery) {
+		ако (copy)
 			warning(_("created a copy of a misnamed branch '%s'"),
 				interpreted_oldname);
-		else
+		иначе
 			warning(_("renamed a misnamed branch '%s' away"),
 				interpreted_oldname);
 	}
 
-	if (!copy && (oldref_usage & IS_HEAD) &&
+	ако (!copy && (oldref_usage & IS_HEAD) &&
 	    replace_each_worktree_head_symref(worktrees, oldref.buf, newref.buf,
 					      logmsg.buf))
 		die(_("branch renamed to %s, but HEAD is not updated"), newname);
@@ -696,9 +696,9 @@ static void copy_or_rename_branch(const char *oldname, const char *newname, int 
 
 	strbuf_addf(&oldsection, "branch.%s", interpreted_oldname);
 	strbuf_addf(&newsection, "branch.%s", interpreted_newname);
-	if (!copy && repo_config_rename_section(the_repository, oldsection.buf, newsection.buf) < 0)
+	ако (!copy && repo_config_rename_section(the_repository, oldsection.buf, newsection.buf) < 0)
 		die(_("branch is renamed, but update of config-file failed"));
-	if (copy && strcmp(interpreted_oldname, interpreted_newname) &&
+	ако (copy && strcmp(interpreted_oldname, interpreted_newname) &&
 	    repo_config_copy_section(the_repository, oldsection.buf, newsection.buf) < 0)
 		die(_("branch is copied, but update of config-file failed"));
 	strbuf_release(&oldref);
@@ -708,14 +708,14 @@ static void copy_or_rename_branch(const char *oldname, const char *newname, int 
 	free_worktrees(worktrees);
 }
 
-static int parse_opt_forked(const struct option *opt, const char *arg, int unset)
+static цяло parse_opt_forked(const struct option *opt, const char *arg, цяло unset)
 {
 	struct ref_filter *filter = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
-	if (ref_filter_forked_add(filter, arg) < 0)
+	ако (ref_filter_forked_add(filter, arg) < 0)
 		die(_("'%s' is not a valid branch or pattern"), arg);
-	return 0;
+	върни 0;
 }
 
 struct stacked_branch_data {
@@ -723,7 +723,7 @@ struct stacked_branch_data {
 	struct strset *protected_branch_names;
 };
 
-static int collect_stacked_branch_base(const struct reference *ref,
+static цяло collect_stacked_branch_base(const struct reference *ref,
 				       void *cb_data)
 {
 	struct stacked_branch_data *data = cb_data;
@@ -732,22 +732,22 @@ static int collect_stacked_branch_base(const struct reference *ref,
 	const char *upstream_refname;
 	const char *upstream_branch_name;
 
-	if (!skip_prefix(ref->name, "refs/heads/", &branch_name))
+	ако (!skip_prefix(ref->name, "refs/heads/", &branch_name))
 		BUG("expected local branch ref, got '%s'", ref->name);
-	if (strset_contains(data->deletable_branch_names, branch_name))
-		return 0;
+	ако (strset_contains(data->deletable_branch_names, branch_name))
+		върни 0;
 
 	branch = branch_get(branch_name);
 	upstream_refname = branch_get_upstream(branch, NULL);
-	if (!upstream_refname ||
+	ако (!upstream_refname ||
 	    !skip_prefix(upstream_refname, "refs/heads/",
 			 &upstream_branch_name) ||
 	    !strset_contains(data->deletable_branch_names,
 			    upstream_branch_name))
-		return 0;
+		върни 0;
 
 	strset_add(data->protected_branch_names, upstream_branch_name);
-	return 0;
+	върни 0;
 }
 
 static void protect_stacked_branch_bases(struct ref_store *refs,
@@ -782,7 +782,7 @@ static void clear_deleted_upstreams(struct strset *protected_branch_names,
 		const char *upstream_refname = branch_get_upstream(branch, NULL);
 		const char *upstream_branch_name;
 
-		if (!upstream_refname ||
+		ако (!upstream_refname ||
 		    !skip_prefix(upstream_refname, "refs/heads/",
 				 &upstream_branch_name) ||
 		    !strset_contains(deletable_branch_names,
@@ -800,32 +800,32 @@ static void clear_deleted_upstreams(struct strset *protected_branch_names,
 	strbuf_release(&key);
 }
 
-static int branch_pushes_to_upstream(struct branch *branch,
+static цяло branch_pushes_to_upstream(struct branch *branch,
 				     const char *upstream)
 {
 	struct remote *remote = remote_get(remote_for_branch(branch, NULL));
 	char *push_refname = NULL;
 	char *tracking = NULL;
-	int ret = 0;
+	цяло ret = 0;
 
-	if (!remote)
-		return 0;
-	if (remote->push.nr)
+	ако (!remote)
+		върни 0;
+	ако (remote->push.nr)
 		push_refname = apply_refspecs(&remote->push, branch->refname);
-	else
+	иначе
 		push_refname = xstrdup(branch->refname);
-	if (push_refname)
+	ако (push_refname)
 		tracking = apply_refspecs(&remote->fetch, push_refname);
-	if (tracking && !strcmp(tracking, upstream))
+	ако (tracking && !strcmp(tracking, upstream))
 		ret = 1;
 
 	free(push_refname);
 	free(tracking);
-	return ret;
+	върни ret;
 }
 
-static int delete_merged_branches(const struct strvec *upstreams,
-				 const char **argv, unsigned int flags)
+static цяло delete_merged_branches(const struct strvec *upstreams,
+				 const char **argv, unsigned цяло flags)
 {
 	struct ref_store *refs = get_main_ref_store(the_repository);
 	struct ref_filter filter = REF_FILTER_INIT;
@@ -836,10 +836,10 @@ static int delete_merged_branches(const struct strvec *upstreams,
 	struct strbuf key = STRBUF_INIT;
 	struct hashmap_iter iter;
 	struct strmap_entry *entry;
-	int ret = 0;
+	цяло ret = 0;
 
-	for (size_t i = 0; i < upstreams->nr; i++)
-		if (ref_filter_forked_add(&filter, upstreams->v[i]) < 0)
+	за (size_t i = 0; i < upstreams->nr; i++)
+		ако (ref_filter_forked_add(&filter, upstreams->v[i]) < 0)
 			die(_("'%s' is not a valid branch or pattern"),
 			    upstreams->v[i]);
 
@@ -847,34 +847,34 @@ static int delete_merged_branches(const struct strvec *upstreams,
 	filter.name_patterns = argv;
 	filter_refs(&candidates, &filter, filter.kind);
 
-	for (int i = 0; i < candidates.nr; i++) {
+	за (цяло i = 0; i < candidates.nr; i++) {
 		const char *branch_refname = candidates.items[i]->refname;
 		const char *branch_name;
 		struct branch *branch;
 		const char *upstream_refname;
-		int opt_out;
+		цяло opt_out;
 
-		if (!skip_prefix(branch_refname, "refs/heads/", &branch_name))
+		ако (!skip_prefix(branch_refname, "refs/heads/", &branch_name))
 			BUG("filter returned non-branch ref '%s'", branch_refname);
-		if (branch_checked_out(branch_refname))
+		ако (branch_checked_out(branch_refname))
 			continue;
 
 		branch = branch_get(branch_name);
 		upstream_refname = branch_get_upstream(branch, NULL);
-		if (!upstream_refname || !refs_ref_exists(refs, upstream_refname))
+		ако (!upstream_refname || !refs_ref_exists(refs, upstream_refname))
 			continue;
-		if (branch_pushes_to_upstream(branch, upstream_refname))
+		ако (branch_pushes_to_upstream(branch, upstream_refname))
 			continue;
-		if (check_branch_commit(branch_name, branch_name,
+		ако (check_branch_commit(branch_name, branch_name,
 					&candidates.items[i]->objectname, NULL,
 					FILTER_REFS_BRANCHES, DELETE_BRANCH_SKIP_UNMERGED))
 			continue;
 
 		strbuf_reset(&key);
 		strbuf_addf(&key, "branch.%s.deletemerged", branch_name);
-		if (!repo_config_get_bool(the_repository, key.buf, &opt_out) &&
+		ако (!repo_config_get_bool(the_repository, key.buf, &opt_out) &&
 		    !opt_out) {
-			if (!(flags & DELETE_BRANCH_QUIET))
+			ако (!(flags & DELETE_BRANCH_QUIET))
 				fprintf(stderr,
 					_("Skipping '%s' (branch.%s.deleteMerged is false)\n"),
 					branch_name, branch_name);
@@ -890,14 +890,14 @@ static int delete_merged_branches(const struct strvec *upstreams,
 	strset_for_each_entry(&deletable_branch_names, &iter, entry)
 		strvec_push(&branches_to_delete, entry->key);
 
-	if (branches_to_delete.nr)
+	ако (branches_to_delete.nr)
 		ret = delete_branches(branches_to_delete.nr, branches_to_delete.v,
 				      FILTER_REFS_BRANCHES,
 				      DELETE_BRANCH_SKIP_UNMERGED |
 				      DELETE_BRANCH_NO_HEAD_FALLBACK |
 				      flags);
 
-	if (!ret && !(flags & DELETE_BRANCH_DRY_RUN))
+	ако (!ret && !(flags & DELETE_BRANCH_DRY_RUN))
 		clear_deleted_upstreams(&protected_branch_names,
 					&deletable_branch_names);
 
@@ -907,19 +907,19 @@ static int delete_merged_branches(const struct strvec *upstreams,
 	strset_clear(&deletable_branch_names);
 	ref_array_clear(&candidates);
 	ref_filter_clear(&filter);
-	return ret;
+	върни ret;
 }
 
 static GIT_PATH_FUNC(edit_description, "EDIT_DESCRIPTION")
 
-static int edit_branch_description(const char *branch_name)
+static цяло edit_branch_description(const char *branch_name)
 {
-	int exists;
+	цяло exists;
 	struct strbuf buf = STRBUF_INIT;
 	struct strbuf name = STRBUF_INIT;
 
 	exists = !read_branch_desc(&buf, branch_name);
-	if (!buf.len || buf.buf[buf.len-1] != '\n')
+	ако (!buf.len || buf.buf[buf.len-1] != '\n')
 		strbuf_addch(&buf, '\n');
 	strbuf_commented_addf(&buf, comment_line_str,
 		    _("Please edit the description for the branch\n"
@@ -928,34 +928,34 @@ static int edit_branch_description(const char *branch_name)
 		    branch_name, comment_line_str);
 	write_file_buf(edit_description(), buf.buf, buf.len);
 	strbuf_reset(&buf);
-	if (launch_editor(edit_description(), &buf, NULL)) {
+	ако (launch_editor(edit_description(), &buf, NULL)) {
 		strbuf_release(&buf);
-		return -1;
+		върни -1;
 	}
 	strbuf_stripspace(&buf, comment_line_str);
 
 	strbuf_addf(&name, "branch.%s.description", branch_name);
-	if (buf.len || exists)
+	ако (buf.len || exists)
 		repo_config_set(the_repository, name.buf, buf.len ? buf.buf : NULL);
 	strbuf_release(&name);
 	strbuf_release(&buf);
 
-	return 0;
+	върни 0;
 }
 
 static void die_if_upstream_looks_like_remote(const char *new_upstream, const char *branch_name)
 {
 	struct strbuf remote_ref = STRBUF_INIT;
-	int code;
+	цяло code;
 
-	if (strchr(new_upstream, '/') ||
+	ако (strchr(new_upstream, '/') ||
 	    !remote_is_configured(remote_get(new_upstream), 0))
-		return;
+		върни;
 
 	strbuf_addf(&remote_ref, "refs/remotes/%s/%s", new_upstream, branch_name);
-	if (!refs_ref_exists(get_main_ref_store(the_repository), remote_ref.buf)) {
+	ако (!refs_ref_exists(get_main_ref_store(the_repository), remote_ref.buf)) {
 		strbuf_release(&remote_ref);
-		return;
+		върни;
 	}
 
 	code = die_message(_("--set-upstream-to takes a single <remote>/<branch> argument"));
@@ -966,20 +966,20 @@ static void die_if_upstream_looks_like_remote(const char *new_upstream, const ch
 	exit(code);
 }
 
-int cmd_branch(int argc,
+цяло cmd_branch(цяло argc,
 	       const char **argv,
 	       const char *prefix,
 	       struct repository *repo UNUSED)
 {
 	/* possible actions */
-	int delete = 0, rename = 0, copy = 0, list = 0,
+	цяло delete = 0, rename = 0, copy = 0, list = 0,
 	    unset_upstream = 0, show_current = 0, edit_description = 0;
 	struct strvec delete_merged = STRVEC_INIT;
-	int dry_run = 0;
+	цяло dry_run = 0;
 	const char *new_upstream = NULL;
-	int noncreate_actions = 0;
+	цяло noncreate_actions = 0;
 	/* possible options */
-	int reflog = 0, quiet = 0, icase = 0, force = 0,
+	цяло reflog = 0, quiet = 0, icase = 0, force = 0,
 	    recurse_submodules_explicit = 0;
 	enum branch_track track;
 	struct ref_filter filter = REF_FILTER_INIT;
@@ -987,7 +987,7 @@ int cmd_branch(int argc,
 	struct string_list sorting_options = STRING_LIST_INIT_DUP;
 	struct ref_format format = REF_FORMAT_INIT;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
-	int ret;
+	цяло ret;
 
 	struct option options[] = {
 		OPT_GROUP(N_("Generic options")),
@@ -1063,29 +1063,29 @@ int cmd_branch(int argc,
 	 * fall back on default (refname) sorting.
 	 */
 	repo_config(the_repository, git_branch_config, &sorting_options);
-	if (!sorting_options.nr)
+	ако (!sorting_options.nr)
 		string_list_append(&sorting_options, "refname");
 
 	track = cfg->branch_track;
 
 	head = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
 				   0, &head_oid, NULL);
-	if (!head)
+	ако (!head)
 		die(_("failed to resolve HEAD as a valid ref"));
-	if (!strcmp(head, "HEAD"))
+	ако (!strcmp(head, "HEAD"))
 		filter.detached = 1;
-	else if (!skip_prefix(head, "refs/heads/", &head))
+	иначе ако (!skip_prefix(head, "refs/heads/", &head))
 		die(_("HEAD not found below refs/heads!"));
 
 	argc = parse_options(argc, argv, prefix, options, builtin_branch_usage,
 			     0);
 
-	if (!delete && !rename && !copy && !edit_description && !new_upstream &&
+	ако (!delete && !rename && !copy && !edit_description && !new_upstream &&
 	    !show_current && !unset_upstream && !delete_merged.nr &&
 	    argc == 0)
 		list = 1;
 
-	if (filter.with_commit || filter.no_commit ||
+	ако (filter.with_commit || filter.no_commit ||
 	    filter.reachable_from || filter.unreachable_from ||
 	    filter.points_at.nr || filter.forked.nr)
 		list = 1;
@@ -1093,16 +1093,16 @@ int cmd_branch(int argc,
 	noncreate_actions = !!delete + !!rename + !!copy + !!new_upstream +
 			    !!show_current + !!list + !!edit_description +
 			    !!unset_upstream + !!delete_merged.nr;
-	if (noncreate_actions > 1)
+	ако (noncreate_actions > 1)
 		usage_with_options(builtin_branch_usage, options);
 
-	if (dry_run && !delete_merged.nr)
+	ако (dry_run && !delete_merged.nr)
 		die(_("--dry-run requires --delete-merged"));
 
-	if (recurse_submodules_explicit) {
-		if (!submodule_propagate_branches)
+	ако (recurse_submodules_explicit) {
+		ако (!submodule_propagate_branches)
 			die(_("branch with --recurse-submodules can only be used if submodule.propagateBranches is enabled"));
-		if (noncreate_actions)
+		ако (noncreate_actions)
 			die(_("--recurse-submodules can only be used to create branches"));
 	}
 
@@ -1110,45 +1110,45 @@ int cmd_branch(int argc,
 		(recurse_submodules || recurse_submodules_explicit) &&
 		submodule_propagate_branches;
 
-	if (filter.abbrev == -1)
+	ако (filter.abbrev == -1)
 		filter.abbrev = DEFAULT_ABBREV;
 	filter.ignore_case = icase;
 
 	finalize_colopts(&colopts, -1);
-	if (filter.verbose) {
-		if (explicitly_enable_column(colopts))
+	ако (filter.verbose) {
+		ако (explicitly_enable_column(colopts))
 			die(_("options '%s' and '%s' cannot be used together"), "--column", "--verbose");
 		colopts = 0;
 	}
 
-	if (force) {
+	ако (force) {
 		delete *= 2;
 		rename *= 2;
 		copy *= 2;
 	}
 
-	if (list)
+	ако (list)
 		setup_auto_pager("branch", 1);
 
-	if (delete) {
-		if (!argc)
+	ако (delete) {
+		ако (!argc)
 			die(_("branch name required"));
 		ret = delete_branches(argc, argv, filter.kind,
 				      (delete > 1 ? DELETE_BRANCH_FORCE : 0) |
 				      (quiet ? DELETE_BRANCH_QUIET : 0));
 		goto out;
-	} else if (delete_merged.nr) {
+	} иначе ако (delete_merged.nr) {
 		ret = delete_merged_branches(&delete_merged, argv,
 					     (quiet ? DELETE_BRANCH_QUIET : 0) |
 					     (dry_run ? DELETE_BRANCH_DRY_RUN : 0));
 		goto out;
-	} else if (show_current) {
+	} иначе ако (show_current) {
 		print_current_branch_name();
 		ret = 0;
 		goto out;
-	} else if (list) {
+	} иначе ако (list) {
 		/*  git branch --list also shows HEAD when it is detached */
-		if ((filter.kind & FILTER_REFS_BRANCHES) && filter.detached)
+		ако ((filter.kind & FILTER_REFS_BRANCHES) && filter.detached)
 			filter.kind |= FILTER_REFS_DETACHED_HEAD;
 		filter.name_patterns = argv;
 		/*
@@ -1170,33 +1170,33 @@ int cmd_branch(int argc,
 
 		ret = 0;
 		goto out;
-	} else if (edit_description) {
+	} иначе ако (edit_description) {
 		const char *branch_name;
 		struct strbuf branch_ref = STRBUF_INIT;
 		struct strbuf buf = STRBUF_INIT;
 
-		if (!argc) {
-			if (filter.detached)
+		ако (!argc) {
+			ако (filter.detached)
 				die(_("cannot give description to detached HEAD"));
 			branch_name = head;
-		} else if (argc == 1) {
+		} иначе ако (argc == 1) {
 			copy_branchname(the_repository, &buf, argv[0],
 					INTERPRET_BRANCH_LOCAL);
 			branch_name = buf.buf;
-		} else {
+		} иначе {
 			die(_("cannot edit description of more than one branch"));
 		}
 
 		strbuf_addf(&branch_ref, "refs/heads/%s", branch_name);
-		if (!refs_ref_exists(get_main_ref_store(the_repository), branch_ref.buf)) {
+		ако (!refs_ref_exists(get_main_ref_store(the_repository), branch_ref.buf)) {
 			error((!argc || branch_checked_out(branch_ref.buf))
 			      ? _("no commit on branch '%s' yet")
 			      : _("no branch named '%s'"),
 			      branch_name);
 			ret = 1;
-		} else if (!edit_branch_description(branch_name)) {
+		} иначе ако (!edit_branch_description(branch_name)) {
 			ret = 0; /* happy */
-		} else {
+		} иначе {
 			ret = 1;
 		}
 
@@ -1204,42 +1204,42 @@ int cmd_branch(int argc,
 		strbuf_release(&buf);
 
 		goto out;
-	} else if (copy || rename) {
-		if (!argc)
+	} иначе ако (copy || rename) {
+		ако (!argc)
 			die(_("branch name required"));
-		else if ((argc == 1) && filter.detached)
+		иначе ако ((argc == 1) && filter.detached)
 			die(copy? _("cannot copy the current branch while not on any")
 				: _("cannot rename the current branch while not on any"));
-		else if (argc == 1)
+		иначе ако (argc == 1)
 			copy_or_rename_branch(head, argv[0], copy, copy + rename > 1);
-		else if (argc == 2)
+		иначе ако (argc == 2)
 			copy_or_rename_branch(argv[0], argv[1], copy, copy + rename > 1);
-		else
+		иначе
 			die(copy? _("too many branches for a copy operation")
 				: _("too many arguments for a rename operation"));
-	} else if (new_upstream) {
+	} иначе ако (new_upstream) {
 		struct branch *branch;
 		struct strbuf buf = STRBUF_INIT;
 
-		if (!argc)
+		ако (!argc)
 			branch = branch_get(NULL);
-		else if (argc == 1) {
+		иначе ако (argc == 1) {
 			copy_branchname(the_repository, &buf, argv[0],
 					INTERPRET_BRANCH_LOCAL);
 			branch = branch_get(buf.buf);
-		} else
+		} иначе
 			die(_("too many arguments to set new upstream"));
 
-		if (!branch) {
-			if (!argc || !strcmp(argv[0], "HEAD"))
+		ако (!branch) {
+			ако (!argc || !strcmp(argv[0], "HEAD"))
 				die(_("could not set upstream of HEAD to %s when "
 				      "it does not point to any branch"),
 				    new_upstream);
 			die(_("no such branch '%s'"), argv[0]);
 		}
 
-		if (!refs_ref_exists(get_main_ref_store(the_repository), branch->refname)) {
-			if (!argc || branch_checked_out(branch->refname))
+		ако (!refs_ref_exists(get_main_ref_store(the_repository), branch->refname)) {
+			ако (!argc || branch_checked_out(branch->refname))
 				die(_("no commit on branch '%s' yet"), branch->name);
 			/*
 			 * Check the advice up front to avoid the ref
@@ -1247,7 +1247,7 @@ int cmd_branch(int argc,
 			 * calls advise_if_enabled() so the hint carries the
 			 * standard "disable this message" instructions.
 			 */
-			if (argc == 1 &&
+			ако (argc == 1 &&
 			    advice_enabled(ADVICE_SET_UPSTREAM_FAILURE))
 				die_if_upstream_looks_like_remote(new_upstream, argv[0]);
 			die(_("branch '%s' does not exist"), branch->name);
@@ -1257,27 +1257,27 @@ int cmd_branch(int argc,
 					new_upstream, BRANCH_TRACK_OVERRIDE,
 					quiet);
 		strbuf_release(&buf);
-	} else if (unset_upstream) {
+	} иначе ако (unset_upstream) {
 		struct branch *branch;
 		struct strbuf buf = STRBUF_INIT;
 
-		if (!argc)
+		ако (!argc)
 			branch = branch_get(NULL);
-		else if (argc == 1) {
+		иначе ако (argc == 1) {
 			copy_branchname(the_repository, &buf, argv[0],
 					INTERPRET_BRANCH_LOCAL);
 			branch = branch_get(buf.buf);
-		} else
+		} иначе
 			die(_("too many arguments to unset upstream"));
 
-		if (!branch) {
-			if (!argc || !strcmp(argv[0], "HEAD"))
+		ако (!branch) {
+			ако (!argc || !strcmp(argv[0], "HEAD"))
 				die(_("could not unset upstream of HEAD when "
 				      "it does not point to any branch"));
 			die(_("no such branch '%s'"), argv[0]);
 		}
 
-		if (!branch_has_merge_config(branch))
+		ако (!branch_has_merge_config(branch))
 			die(_("branch '%s' has no upstream information"), branch->name);
 
 		strbuf_reset(&buf);
@@ -1287,18 +1287,18 @@ int cmd_branch(int argc,
 		strbuf_addf(&buf, "branch.%s.merge", branch->name);
 		repo_config_set_multivar(the_repository, buf.buf, NULL, NULL, CONFIG_FLAGS_MULTI_REPLACE);
 		strbuf_release(&buf);
-	} else if (!noncreate_actions && argc > 0 && argc <= 2) {
+	} иначе ако (!noncreate_actions && argc > 0 && argc <= 2) {
 		const char *branch_name = argv[0];
 		const char *start_name = argc == 2 ? argv[1] : head;
 
-		if (filter.kind != FILTER_REFS_BRANCHES)
+		ако (filter.kind != FILTER_REFS_BRANCHES)
 			die(_("the -a, and -r, options to 'git branch' do not take a branch name.\n"
 				  "Did you mean to use: -a|-r --list <pattern>?"));
 
-		if (track == BRANCH_TRACK_OVERRIDE)
+		ако (track == BRANCH_TRACK_OVERRIDE)
 			die(_("the '--set-upstream' option is no longer supported. Please use '--track' or '--set-upstream-to' instead"));
 
-		if (recurse_submodules) {
+		ако (recurse_submodules) {
 			create_branches_recursively(the_repository, branch_name,
 						    start_name, NULL, force,
 						    reflog, quiet, track, 0);
@@ -1307,7 +1307,7 @@ int cmd_branch(int argc,
 		}
 		create_branch(the_repository, branch_name, start_name, force, 0,
 			      reflog, quiet, track, 0);
-	} else
+	} иначе
 		usage_with_options(builtin_branch_usage, options);
 
 	ret = 0;
@@ -1315,5 +1315,5 @@ int cmd_branch(int argc,
 out:
 	strvec_clear(&delete_merged);
 	string_list_clear(&sorting_options, 0);
-	return ret;
+	върни ret;
 }

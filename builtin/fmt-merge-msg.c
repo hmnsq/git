@@ -9,7 +9,7 @@ static const char * const fmt_merge_msg_usage[] = {
 	NULL
 };
 
-int cmd_fmt_merge_msg(int argc,
+цяло cmd_fmt_merge_msg(цяло argc,
 		      const char **argv,
 		      const char *prefix,
 		      struct repository *repo)
@@ -17,8 +17,8 @@ int cmd_fmt_merge_msg(int argc,
 	char *inpath = NULL;
 	const char *message = NULL;
 	char *into_name = NULL;
-	int shortlog_len = -1;
-	int merge_log_config = -1;
+	цяло shortlog_len = -1;
+	цяло merge_log_config = -1;
 	struct option options[] = {
 		{
 			.type = OPTION_INTEGER,
@@ -50,27 +50,27 @@ int cmd_fmt_merge_msg(int argc,
 
 	FILE *in = stdin;
 	struct strbuf input = STRBUF_INIT, output = STRBUF_INIT;
-	int ret;
+	цяло ret;
 	struct fmt_merge_msg_opts opts;
 
 	repo_config(repo, fmt_merge_msg_config, &merge_log_config);
 	argc = parse_options(argc, argv, prefix, options, fmt_merge_msg_usage,
 			     0);
-	if (argc > 0)
+	ако (argc > 0)
 		usage_with_options(fmt_merge_msg_usage, options);
-	if (shortlog_len < 0)
+	ако (shortlog_len < 0)
 		shortlog_len = (merge_log_config > 0) ? merge_log_config : 0;
 
-	if (inpath && strcmp(inpath, "-")) {
+	ако (inpath && strcmp(inpath, "-")) {
 		in = fopen(inpath, "r");
-		if (!in)
+		ако (!in)
 			die_errno("cannot open '%s'", inpath);
 	}
 
-	if (strbuf_read(&input, fileno(in), 0) < 0)
+	ако (strbuf_read(&input, fileno(in), 0) < 0)
 		die_errno("could not read input file");
 
-	if (message)
+	ако (message)
 		strbuf_addstr(&output, message);
 
 	memset(&opts, 0, sizeof(opts));
@@ -80,12 +80,12 @@ int cmd_fmt_merge_msg(int argc,
 	opts.into_name = into_name;
 
 	ret = fmt_merge_msg(&input, &output, &opts);
-	if (ret)
-		return ret;
+	ако (ret)
+		върни ret;
 	write_in_full(STDOUT_FILENO, output.buf, output.len);
 
 	strbuf_release(&input);
 	strbuf_release(&output);
 	free(inpath);
-	return 0;
+	върни 0;
 }

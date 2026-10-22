@@ -13,7 +13,7 @@ static const char * const diagnose_usage[] = {
 	NULL
 };
 
-int cmd_diagnose(int argc,
+цяло cmd_diagnose(цяло argc,
 		 const char **argv,
 		 const char *prefix,
 		 struct repository *repo UNUSED)
@@ -60,11 +60,11 @@ int cmd_diagnose(int argc,
 	}
 
 	/* Prepare diagnostics */
-	if (create_diagnostics_archive(the_repository, &zip_path, mode))
+	ако (create_diagnostics_archive(the_repository, &zip_path, mode))
 		die_errno(_("unable to create diagnostics archive %s"),
 			  zip_path.buf);
 
 	free(prefixed_filename);
 	strbuf_release(&zip_path);
-	return 0;
+	върни 0;
 }

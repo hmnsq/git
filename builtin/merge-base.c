@@ -9,29 +9,29 @@
 #include "parse-options.h"
 #include "commit-reach.h"
 
-static int show_merge_base(struct commit **rev, size_t rev_nr, int show_all)
+static цяло show_merge_base(struct commit **rev, size_t rev_nr, цяло show_all)
 {
 	enum merge_base_flags flags = show_all ? MERGE_BASE_FIND_ALL : 0;
 	struct commit_list *result = NULL, *r;
 
-	if (repo_get_merge_bases_many_dirty(the_repository, rev[0],
+	ако (repo_get_merge_bases_many_dirty(the_repository, rev[0],
 					    rev_nr - 1, rev + 1,
 					    flags, &result) < 0) {
 		commit_list_free(result);
-		return -1;
+		върни -1;
 	}
 
-	if (!result)
-		return 1;
+	ако (!result)
+		върни 1;
 
-	for (r = result; r; r = r->next) {
+	за (r = result; r; r = r->next) {
 		printf("%s\n", oid_to_hex(&r->item->object.oid));
-		if (!show_all)
+		ако (!show_all)
 			break;
 	}
 
 	commit_list_free(result);
-	return 0;
+	върни 0;
 }
 
 static const char * const merge_base_usage[] = {
@@ -48,114 +48,114 @@ static struct commit *get_commit_reference(const char *arg)
 	struct object_id revkey;
 	struct commit *r;
 
-	if (repo_get_oid(the_repository, arg, &revkey))
+	ако (repo_get_oid(the_repository, arg, &revkey))
 		die("Not a valid object name %s", arg);
 	r = lookup_commit_reference(the_repository, &revkey);
-	if (!r)
+	ако (!r)
 		die("Not a valid commit name %s", arg);
 
-	return r;
+	върни r;
 }
 
-static int handle_independent(int count, const char **args)
+static цяло handle_independent(цяло count, const char **args)
 {
 	struct commit_list *revs = NULL, *rev;
-	int i;
+	цяло i;
 
-	for (i = count - 1; i >= 0; i--)
+	за (i = count - 1; i >= 0; i--)
 		commit_list_insert(get_commit_reference(args[i]), &revs);
 
 	reduce_heads_replace(&revs);
 
-	if (!revs)
-		return 1;
+	ако (!revs)
+		върни 1;
 
-	for (rev = revs; rev; rev = rev->next)
+	за (rev = revs; rev; rev = rev->next)
 		printf("%s\n", oid_to_hex(&rev->item->object.oid));
 
 	commit_list_free(revs);
-	return 0;
+	върни 0;
 }
 
-static int handle_octopus(int count, const char **args, int show_all)
+static цяло handle_octopus(цяло count, const char **args, цяло show_all)
 {
 	struct commit_list *revs = NULL;
 	struct commit_list *result = NULL, *rev;
-	int i;
+	цяло i;
 
-	for (i = count - 1; i >= 0; i--)
+	за (i = count - 1; i >= 0; i--)
 		commit_list_insert(get_commit_reference(args[i]), &revs);
 
-	if (get_octopus_merge_bases(revs, &result) < 0) {
+	ако (get_octopus_merge_bases(revs, &result) < 0) {
 		commit_list_free(revs);
 		commit_list_free(result);
-		return 128;
+		върни 128;
 	}
 	commit_list_free(revs);
 	reduce_heads_replace(&result);
 
-	if (!result)
-		return 1;
+	ако (!result)
+		върни 1;
 
-	for (rev = result; rev; rev = rev->next) {
+	за (rev = result; rev; rev = rev->next) {
 		printf("%s\n", oid_to_hex(&rev->item->object.oid));
-		if (!show_all)
+		ако (!show_all)
 			break;
 	}
 
 	commit_list_free(result);
-	return 0;
+	върни 0;
 }
 
-static int handle_is_ancestor(int argc, const char **argv)
+static цяло handle_is_ancestor(цяло argc, const char **argv)
 {
 	struct commit *one, *two;
-	int ret;
+	цяло ret;
 
-	if (argc != 2)
+	ако (argc != 2)
 		die("--is-ancestor takes exactly two commits");
 	one = get_commit_reference(argv[0]);
 	two = get_commit_reference(argv[1]);
 	ret = repo_in_merge_bases(the_repository, one, two);
-	if (ret < 0)
+	ако (ret < 0)
 		exit(128);
-	if (ret)
-		return 0;
-	else
-		return 1;
+	ако (ret)
+		върни 0;
+	иначе
+		върни 1;
 }
 
-static int handle_fork_point(int argc, const char **argv)
+static цяло handle_fork_point(цяло argc, const char **argv)
 {
 	struct object_id oid;
 	struct commit *derived, *fork_point;
 	const char *commitname;
 
 	commitname = (argc == 2) ? argv[1] : "HEAD";
-	if (repo_get_oid(the_repository, commitname, &oid))
+	ако (repo_get_oid(the_repository, commitname, &oid))
 		die("Not a valid object name: '%s'", commitname);
 
 	derived = lookup_commit_reference(the_repository, &oid);
 
 	fork_point = get_fork_point(argv[0], derived);
 
-	if (!fork_point)
-		return 1;
+	ако (!fork_point)
+		върни 1;
 
 	printf("%s\n", oid_to_hex(&fork_point->object.oid));
-	return 0;
+	върни 0;
 }
 
-int cmd_merge_base(int argc,
+цяло cmd_merge_base(цяло argc,
 		   const char **argv,
 		   const char *prefix,
 		   struct repository *repo UNUSED)
 {
 	struct commit **rev;
 	size_t rev_nr = 0;
-	int show_all = 0;
-	int cmdmode = 0;
-	int ret;
+	цяло show_all = 0;
+	цяло cmdmode = 0;
+	цяло ret;
 
 	struct option options[] = {
 		OPT_BOOL('a', "all", &show_all, N_("output all common ancestors")),
@@ -173,38 +173,38 @@ int cmd_merge_base(int argc,
 	repo_config(the_repository, git_default_config, NULL);
 	argc = parse_options(argc, argv, prefix, options, merge_base_usage, 0);
 
-	if (cmdmode == 'a') {
-		if (argc < 2)
+	ако (cmdmode == 'a') {
+		ако (argc < 2)
 			usage_with_options(merge_base_usage, options);
-		if (show_all)
+		ако (show_all)
 			die(_("options '%s' and '%s' cannot be used together"),
 			    "--is-ancestor", "--all");
-		return handle_is_ancestor(argc, argv);
+		върни handle_is_ancestor(argc, argv);
 	}
 
-	if (cmdmode == 'r' && show_all)
+	ако (cmdmode == 'r' && show_all)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--independent", "--all");
 
-	if (cmdmode == 'o')
-		return handle_octopus(argc, argv, show_all);
+	ако (cmdmode == 'o')
+		върни handle_octopus(argc, argv, show_all);
 
-	if (cmdmode == 'r')
-		return handle_independent(argc, argv);
+	ако (cmdmode == 'r')
+		върни handle_independent(argc, argv);
 
-	if (cmdmode == 'f') {
-		if (argc < 1 || 2 < argc)
+	ако (cmdmode == 'f') {
+		ако (argc < 1 || 2 < argc)
 			usage_with_options(merge_base_usage, options);
-		return handle_fork_point(argc, argv);
+		върни handle_fork_point(argc, argv);
 	}
 
-	if (argc < 2)
+	ако (argc < 2)
 		usage_with_options(merge_base_usage, options);
 
 	ALLOC_ARRAY(rev, argc);
-	while (argc-- > 0)
+	докато (argc-- > 0)
 		rev[rev_nr++] = get_commit_reference(*argv++);
 	ret = show_merge_base(rev, rev_nr, show_all);
 	free(rev);
-	return ret;
+	върни ret;
 }
