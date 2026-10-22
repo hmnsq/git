@@ -1,92 +1,92 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "diff.h"
-#include "commit.h"
-#include "gettext.h"
-#include "hex.h"
-#include "log-tree.h"
-#include "read-cache-ll.h"
-#include "revision.h"
-#include "tmp-objdir.h"
-#include "tree.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "diff.h"
+#अन्तर्भाव "commit.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "hex.h"
+#अन्तर्भाव "log-tree.h"
+#अन्तर्भाव "read-cache-ll.h"
+#अन्तर्भाव "revision.h"
+#अन्तर्भाव "tmp-objdir.h"
+#अन्तर्भाव "tree.h"
 
-static struct rev_info log_tree_opt;
+स्थिर संरचना rev_info log_रूख_opt;
 
-static int diff_tree_commit_oid(const struct object_id *oid)
+स्थिर पूर्णाङ्क diff_रूख_commit_oid(अचर संरचना object_id *oid)
 {
-	struct commit *commit = lookup_commit_reference(the_repository, oid);
-	if (!commit)
-		return -1;
-	return log_tree_commit(&log_tree_opt, commit);
+	संरचना commit *commit = lookup_commit_reference(the_repository, oid);
+	यदि (!commit)
+		फर्काऊ -1;
+	फर्काऊ log_रूख_commit(&log_रूख_opt, commit);
 }
 
 /* Diff one or more commits. */
-static int stdin_diff_commit(struct commit *commit, const char *p)
+स्थिर पूर्णाङ्क stdin_diff_commit(संरचना commit *commit, अचर वर्ण *p)
 {
-	struct object_id oid;
-	struct commit_list **pptr = NULL;
+	संरचना object_id oid;
+	संरचना commit_list **pptr = रिक्त;
 
 	/* Graft the fake parents locally to the commit */
-	while (isspace(*p++) && !parse_oid_hex(p, &oid, &p)) {
-		struct commit *parent = lookup_commit(the_repository, &oid);
-		if (!pptr) {
+	जबसम्म (है_खाली(*p++) && !parse_oid_hex(p, &oid, &p)) {
+		संरचना commit *parent = lookup_commit(the_repository, &oid);
+		यदि (!pptr) {
 			/* Free the real parent list */
 			commit_list_free(commit->parents);
-			commit->parents = NULL;
+			commit->parents = रिक्त;
 			pptr = &(commit->parents);
 		}
-		if (parent) {
-			pptr = &commit_list_insert(parent, pptr)->next;
+		यदि (parent) {
+			pptr = &commit_list_घुसाउ(parent, pptr)->next;
 		}
 	}
-	return log_tree_commit(&log_tree_opt, commit);
+	फर्काऊ log_रूख_commit(&log_रूख_opt, commit);
 }
 
 /* Diff two trees. */
-static int stdin_diff_trees(struct tree *tree1, const char *p)
+स्थिर पूर्णाङ्क stdin_diff_trees(संरचना रूख *tree1, अचर वर्ण *p)
 {
-	struct object_id oid;
-	struct tree *tree2;
-	if (!isspace(*p++) || parse_oid_hex(p, &oid, &p) || *p)
-		return error("Need exactly two trees, separated by a space");
-	tree2 = lookup_tree(the_repository, &oid);
-	if (!tree2 || repo_parse_tree(the_repository, tree2))
-		return -1;
-	printf("%s %s\n", oid_to_hex(&tree1->object.oid),
+	संरचना object_id oid;
+	संरचना रूख *tree2;
+	यदि (!है_खाली(*p++) || parse_oid_hex(p, &oid, &p) || *p)
+		फर्काऊ error("Need exactly two trees, separated by a space");
+	tree2 = lookup_रूख(the_repository, &oid);
+	यदि (!tree2 || repo_parse_रूख(the_repository, tree2))
+		फर्काऊ -1;
+	म_लिखो("%s %s\n", oid_to_hex(&tree1->object.oid),
 			  oid_to_hex(&tree2->object.oid));
-	diff_tree_oid(&tree1->object.oid, &tree2->object.oid,
-		      "", &log_tree_opt.diffopt);
-	log_tree_diff_flush(&log_tree_opt);
-	return 0;
+	diff_रूख_oid(&tree1->object.oid, &tree2->object.oid,
+		      "", &log_रूख_opt.diffopt);
+	log_रूख_diff_flush(&log_रूख_opt);
+	फर्काऊ 0;
 }
 
-static int diff_tree_stdin(char *line)
+स्थिर पूर्णाङ्क diff_रूख_stdin(वर्ण *पङ्क्ति)
 {
-	int len = strlen(line);
-	struct object_id oid;
-	struct object *obj;
-	const char *p;
+	पूर्णाङ्क len = म_माप(पङ्क्ति);
+	संरचना object_id oid;
+	संरचना object *obj;
+	अचर वर्ण *p;
 
-	if (!len || line[len-1] != '\n')
-		return -1;
-	line[len-1] = 0;
-	if (parse_oid_hex(line, &oid, &p))
-		return -1;
+	यदि (!len || पङ्क्ति[len-1] != '\n')
+		फर्काऊ -1;
+	पङ्क्ति[len-1] = 0;
+	यदि (parse_oid_hex(पङ्क्ति, &oid, &p))
+		फर्काऊ -1;
 	obj = parse_object(the_repository, &oid);
-	if (!obj)
-		return -1;
-	if (obj->type == OBJ_COMMIT)
-		return stdin_diff_commit((struct commit *)obj, p);
-	if (obj->type == OBJ_TREE)
-		return stdin_diff_trees((struct tree *)obj, p);
+	यदि (!obj)
+		फर्काऊ -1;
+	यदि (obj->type == OBJ_COMMIT)
+		फर्काऊ stdin_diff_commit((संरचना commit *)obj, p);
+	यदि (obj->type == OBJ_रूख)
+		फर्काऊ stdin_diff_trees((संरचना रूख *)obj, p);
 	error("Object %s is a %s, not a commit or tree",
 	      oid_to_hex(&oid), type_name(obj->type));
-	return -1;
+	फर्काऊ -1;
 }
 
-static const char diff_tree_usage[] =
+स्थिर अचर वर्ण diff_रूख_usage[] =
 "git diff-tree [--stdin] [-m] [-s] [-v] [--no-commit-id] [--pretty]\n"
 "              [-t] [-r] [-c | --cc] [--combined-all-paths] [--root] [--merge-base]\n"
 "              [<common-diff-options>] <tree-ish> [<tree-ish>] [<path>...]\n"
@@ -99,73 +99,73 @@ static const char diff_tree_usage[] =
 "  --root        include the initial commit as diff against /dev/null\n"
 COMMON_DIFF_OPTIONS_HELP;
 
-static void diff_tree_tweak_rev(struct rev_info *rev)
+स्थिर शून्य diff_रूख_tweak_rev(संरचना rev_info *rev)
 {
-	if (!rev->diffopt.output_format) {
-		if (rev->dense_combined_merges)
+	यदि (!rev->diffopt.output_format) {
+		यदि (rev->dense_combined_merges)
 			rev->diffopt.output_format = DIFF_FORMAT_PATCH;
-		else
+		अन्यथा
 			rev->diffopt.output_format = DIFF_FORMAT_RAW;
 	}
 }
 
-int cmd_diff_tree(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+पूर्णाङ्क cmd_diff_रूख(पूर्णाङ्क argc,
+		  अचर वर्ण **argv,
+		  अचर वर्ण *prefix,
+		  संरचना repository *repo UNUSED)
 {
-	char line[1000];
-	struct object *tree1, *tree2;
-	static struct rev_info *opt = &log_tree_opt;
-	struct setup_revision_opt s_r_opt;
-	struct userformat_want w;
-	int read_stdin = 0;
-	int merge_base = 0;
+	वर्ण पङ्क्ति[1000];
+	संरचना object *tree1, *tree2;
+	स्थिर संरचना rev_info *opt = &log_रूख_opt;
+	संरचना setup_revision_opt s_r_opt;
+	संरचना userformat_want w;
+	पूर्णाङ्क read_stdin = 0;
+	पूर्णाङ्क merge_base = 0;
 
-	show_usage_if_asked(argc, argv, diff_tree_usage);
+	show_usage_if_asked(argc, argv, diff_रूख_usage);
 
-	repo_config(the_repository, git_diff_basic_config, NULL); /* no "diff" UI options */
+	repo_config(the_repository, git_diff_basic_config, रिक्त); /* no "diff" UI options */
 
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
 	repo_init_revisions(the_repository, opt, prefix);
-	if (repo_read_index(the_repository) < 0)
+	यदि (repo_read_index(the_repository) < 0)
 		die(_("index file corrupt"));
 	opt->abbrev = 0;
 	opt->diff = 1;
 	opt->disable_stdin = 1;
-	memset(&s_r_opt, 0, sizeof(s_r_opt));
-	s_r_opt.tweak = diff_tree_tweak_rev;
+	स_रखो(&s_r_opt, 0, परिमाण(s_r_opt));
+	s_r_opt.tweak = diff_रूख_tweak_rev;
 
 	prefix = precompose_argv_prefix(argc, argv, prefix);
 	argc = setup_revisions(argc, argv, opt, &s_r_opt);
 
-	memset(&w, 0, sizeof(w));
-	userformat_find_requirements(NULL, &w);
+	स_रखो(&w, 0, परिमाण(w));
+	userformat_find_requirements(रिक्त, &w);
 
-	if (!opt->show_notes_given && w.notes)
+	यदि (!opt->show_notes_given && w.notes)
 		opt->show_notes = 1;
-	if (opt->show_notes)
+	यदि (opt->show_notes)
 		load_display_notes(&opt->notes_opt);
 
-	while (--argc > 0) {
-		const char *arg = *++argv;
+	जबसम्म (--argc > 0) {
+		अचर वर्ण *arg = *++argv;
 
-		if (!strcmp(arg, "--stdin")) {
+		यदि (!म_भेद(arg, "--stdin")) {
 			read_stdin = 1;
-			continue;
+			जारी;
 		}
-		if (!strcmp(arg, "--merge-base")) {
+		यदि (!म_भेद(arg, "--merge-base")) {
 			merge_base = 1;
-			continue;
+			जारी;
 		}
-		usage(diff_tree_usage);
+		usage(diff_रूख_usage);
 	}
 
-	if (read_stdin && merge_base)
+	यदि (read_stdin && merge_base)
 		die(_("options '%s' and '%s' cannot be used together"), "--stdin", "--merge-base");
-	if (merge_base && opt->pending.nr != 2)
+	यदि (merge_base && opt->pending.nr != 2)
 		die(_("--merge-base only works with two commits"));
 
 	opt->diffopt.rotate_to_strict = 1;
@@ -177,54 +177,54 @@ int cmd_diff_tree(int argc,
 	 * second one is marked UNINTERESTING, we recover the original
 	 * order the user gave, i.e. "a..b", by swapping the trees.
 	 */
-	switch (opt->pending.nr) {
-	case 0:
-		if (!read_stdin)
-			usage(diff_tree_usage);
-		break;
-	case 1:
+	विकल्प (opt->pending.nr) {
+	पक्ष 0:
+		यदि (!read_stdin)
+			usage(diff_रूख_usage);
+		रोक;
+	पक्ष 1:
 		tree1 = opt->pending.objects[0].item;
-		diff_tree_commit_oid(&tree1->oid);
-		break;
-	case 2:
+		diff_रूख_commit_oid(&tree1->oid);
+		रोक;
+	पक्ष 2:
 		tree1 = opt->pending.objects[0].item;
 		tree2 = opt->pending.objects[1].item;
-		if (merge_base) {
-			struct object_id oid;
+		यदि (merge_base) {
+			संरचना object_id oid;
 
 			diff_get_merge_base(opt, &oid);
 			tree1 = lookup_object(the_repository, &oid);
-		} else if (tree2->flags & UNINTERESTING) {
+		} अन्यथा यदि (tree2->flags & UNINTERESTING) {
 			SWAP(tree2, tree1);
 		}
-		diff_tree_oid(&tree1->oid, &tree2->oid, "", &opt->diffopt);
-		log_tree_diff_flush(opt);
-		break;
+		diff_रूख_oid(&tree1->oid, &tree2->oid, "", &opt->diffopt);
+		log_रूख_diff_flush(opt);
+		रोक;
 	}
 
-	if (read_stdin) {
-		int saved_nrl = 0;
-		int saved_dcctc = 0;
+	यदि (read_stdin) {
+		पूर्णाङ्क saved_nrl = 0;
+		पूर्णाङ्क saved_dcctc = 0;
 
 		opt->diffopt.rotate_to_strict = 0;
 		opt->diffopt.no_free = 1;
-		if (opt->diffopt.detect_rename) {
-			if (the_repository->index->cache)
+		यदि (opt->diffopt.detect_rename) {
+			यदि (the_repository->index->cache)
 				repo_read_index(the_repository);
 			opt->diffopt.setup |= DIFF_SETUP_USE_SIZE_CACHE;
 		}
-		while (fgets(line, sizeof(line), stdin)) {
-			struct object_id oid;
+		जबसम्म (ख_माला_लो(पङ्क्ति, परिमाण(पङ्क्ति), मानक_निवेश)) {
+			संरचना object_id oid;
 
-			if (get_oid_hex(line, &oid)) {
-				fputs(line, stdout);
-				fflush(stdout);
+			यदि (get_oid_hex(पङ्क्ति, &oid)) {
+				ख_माला_दो(पङ्क्ति, मानक_निकास);
+				ख_साफ(मानक_निकास);
 			}
-			else {
-				diff_tree_stdin(line);
-				if (saved_nrl < opt->diffopt.needed_rename_limit)
+			अन्यथा {
+				diff_रूख_stdin(पङ्क्ति);
+				यदि (saved_nrl < opt->diffopt.needed_rename_limit)
 					saved_nrl = opt->diffopt.needed_rename_limit;
-				if (opt->diffopt.degraded_cc_to_c)
+				यदि (opt->diffopt.degraded_cc_to_c)
 					saved_dcctc = 1;
 			}
 		}
@@ -234,5 +234,5 @@ int cmd_diff_tree(int argc,
 		diff_free(&opt->diffopt);
 	}
 
-	return diff_result_code(opt);
+	फर्काऊ diff_result_code(opt);
 }
