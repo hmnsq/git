@@ -6,47 +6,47 @@
 #include "environment.h"
 #include "config.h"
 
-static const char usage_msg[] =
+static const var_na usage_msg[] =
 	"git credential (fill|approve|reject)";
 
-int cmd_credential(int argc,
-		   const char **argv,
-		   const char *prefix UNUSED,
-		   struct repository *repo UNUSED)
+ཧྲིལ cmd_credential(ཧྲིལ argc,
+		   const var_na **argv,
+		   const var_na *prefix UNUSED,
+		   sa_nracanaa repository *repo UNUSED)
 {
-	const char *op;
-	struct credential c = CREDENTIAL_INIT;
+	const var_na *op;
+	sa_nracanaa credential c = CREDENTIAL_INIT;
 
 	repo_config(the_repository, git_default_config, NULL);
 
 	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 2)
+	གལ་ཏེ (argc != 2)
 		usage(usage_msg);
 	op = argv[1];
 
-	if (!strcmp(op, "capability")) {
+	གལ་ཏེ (!strcmp(op, "capability")) {
 		credential_set_all_capabilities(&c, CREDENTIAL_OP_INITIAL);
 		credential_announce_capabilities(&c, stdout);
-		return 0;
+		ཕྱིར 0;
 	}
 
-	if (credential_read(&c, stdin, CREDENTIAL_OP_INITIAL) < 0)
+	གལ་ཏེ (credential_read(&c, stdin, CREDENTIAL_OP_INITIAL) < 0)
 		die("unable to read credential from stdin");
 
-	if (!strcmp(op, "fill")) {
+	གལ་ཏེ (!strcmp(op, "fill")) {
 		credential_fill(the_repository, &c, 0);
 		credential_next_state(&c);
 		credential_write(&c, stdout, CREDENTIAL_OP_RESPONSE);
-	} else if (!strcmp(op, "approve")) {
+	} དེ་མིན གལ་ཏེ (!strcmp(op, "approve")) {
 		credential_set_all_capabilities(&c, CREDENTIAL_OP_HELPER);
 		credential_approve(the_repository, &c);
-	} else if (!strcmp(op, "reject")) {
+	} དེ་མིན གལ་ཏེ (!strcmp(op, "reject")) {
 		credential_set_all_capabilities(&c, CREDENTIAL_OP_HELPER);
 		credential_reject(the_repository, &c);
-	} else {
+	} དེ་མིན {
 		usage(usage_msg);
 	}
 
 	credential_clear(&c);
-	return 0;
+	ཕྱིར 0;
 }

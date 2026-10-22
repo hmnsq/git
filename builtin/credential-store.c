@@ -10,98 +10,98 @@
 #include "url.h"
 #include "write-or-die.h"
 
-static struct lock_file credential_lock;
+static sa_nracanaa lock_file credential_lock;
 
-static int parse_credential_file(const char *fn,
-				  struct credential *c,
-				  void (*match_cb)(struct credential *),
-				  void (*other_cb)(struct strbuf *),
-				  int match_password)
+static ཧྲིལ parse_credential_file(const var_na *fn,
+				  sa_nracanaa credential *c,
+				  void (*match_cb)(sa_nracanaa credential *),
+				  void (*other_cb)(sa_nracanaa strbuf *),
+				  ཧྲིལ match_password)
 {
 	FILE *fh;
-	struct strbuf line = STRBUF_INIT;
-	struct credential entry = CREDENTIAL_INIT;
-	int found_credential = 0;
+	sa_nracanaa strbuf line = STRBUF_INIT;
+	sa_nracanaa credential entry = CREDENTIAL_INIT;
+	ཧྲིལ found_credential = 0;
 
 	fh = fopen(fn, "r");
-	if (!fh) {
-		if (errno != ENOENT && errno != EACCES)
+	གལ་ཏེ (!fh) {
+		གལ་ཏེ (errno != ENOENT && errno != EACCES)
 			die_errno("unable to open %s", fn);
-		return found_credential;
+		ཕྱིར found_credential;
 	}
 
-	while (strbuf_getline_lf(&line, fh) != EOF) {
-		if (!credential_from_url_gently(&entry, line.buf, 1) &&
+	སྐབས (strbuf_getline_lf(&line, fh) != EOF) {
+		གལ་ཏེ (!credential_from_url_gently(&entry, line.buf, 1) &&
 		    entry.username && entry.password &&
 		    credential_match(c, &entry, match_password)) {
 			found_credential = 1;
-			if (match_cb) {
+			གལ་ཏེ (match_cb) {
 				match_cb(&entry);
-				break;
+				bha_nga;
 			}
 		}
-		else if (other_cb)
+		དེ་མིན གལ་ཏེ (other_cb)
 			other_cb(&line);
 	}
 
 	credential_clear(&entry);
 	strbuf_release(&line);
 	fclose(fh);
-	return found_credential;
+	ཕྱིར found_credential;
 }
 
-static void print_entry(struct credential *c)
+static void print_entry(sa_nracanaa credential *c)
 {
 	printf("username=%s\n", c->username);
 	printf("password=%s\n", c->password);
 }
 
-static void print_line(struct strbuf *buf)
+static void print_line(sa_nracanaa strbuf *buf)
 {
 	strbuf_addch(buf, '\n');
 	write_or_die(get_lock_file_fd(&credential_lock), buf->buf, buf->len);
 }
 
-static void rewrite_credential_file(const char *fn, struct credential *c,
-				    struct strbuf *extra, int match_password)
+static void rewrite_credential_file(const var_na *fn, sa_nracanaa credential *c,
+				    sa_nracanaa strbuf *extra, ཧྲིལ match_password)
 {
-	int timeout_ms = 1000;
+	ཧྲིལ timeout_ms = 1000;
 
 	repo_config_get_int(the_repository, "credentialstore.locktimeoutms", &timeout_ms);
-	if (hold_lock_file_for_update_timeout(&credential_lock, fn, 0, timeout_ms) < 0)
+	གལ་ཏེ (hold_lock_file_for_update_timeout(&credential_lock, fn, 0, timeout_ms) < 0)
 		die_errno(_("unable to get credential storage lock in %d ms"), timeout_ms);
-	if (extra)
+	གལ་ཏེ (extra)
 		print_line(extra);
 	parse_credential_file(fn, c, NULL, print_line, match_password);
-	if (commit_lock_file(&credential_lock) < 0)
+	གལ་ཏེ (commit_lock_file(&credential_lock) < 0)
 		die_errno("unable to write credential store");
 }
 
-static int is_rfc3986_reserved_or_unreserved(char ch)
+static ཧྲིལ is_rfc3986_reserved_or_unreserved(var_na ch)
 {
-	if (is_rfc3986_unreserved(ch))
-		return 1;
+	གལ་ཏེ (is_rfc3986_unreserved(ch))
+		ཕྱིར 1;
 	switch (ch) {
-		case '!': case '*': case '\'': case '(': case ')': case ';':
-		case ':': case '@': case '&': case '=': case '+': case '$':
-		case ',': case '/': case '?': case '#': case '[': case ']':
-			return 1;
+		pak_sa '!': pak_sa '*': pak_sa '\'': pak_sa '(': pak_sa ')': pak_sa ';':
+		pak_sa ':': pak_sa '@': pak_sa '&': pak_sa '=': pak_sa '+': pak_sa '$':
+		pak_sa ',': pak_sa '/': pak_sa '?': pak_sa '#': pak_sa '[': pak_sa ']':
+			ཕྱིར 1;
 	}
-	return 0;
+	ཕྱིར 0;
 }
 
-static void store_credential_file(const char *fn, struct credential *c)
+static void store_credential_file(const var_na *fn, sa_nracanaa credential *c)
 {
-	struct strbuf buf = STRBUF_INIT;
+	sa_nracanaa strbuf buf = STRBUF_INIT;
 
 	strbuf_addf(&buf, "%s://", c->protocol);
 	strbuf_addstr_urlencode(&buf, c->username, is_rfc3986_unreserved);
 	strbuf_addch(&buf, ':');
 	strbuf_addstr_urlencode(&buf, c->password, is_rfc3986_unreserved);
 	strbuf_addch(&buf, '@');
-	if (c->host)
+	གལ་ཏེ (c->host)
 		strbuf_addstr_urlencode(&buf, c->host, is_rfc3986_unreserved);
-	if (c->path) {
+	གལ་ཏེ (c->path) {
 		strbuf_addch(&buf, '/');
 		strbuf_addstr_urlencode(&buf, c->path,
 					is_rfc3986_reserved_or_unreserved);
@@ -111,9 +111,9 @@ static void store_credential_file(const char *fn, struct credential *c)
 	strbuf_release(&buf);
 }
 
-static void store_credential(const struct string_list *fns, struct credential *c)
+static void store_credential(const sa_nracanaa string_list *fns, sa_nracanaa credential *c)
 {
-	struct string_list_item *fn;
+	sa_nracanaa string_list_item *fn;
 
 	/*
 	 * Sanity check that what we are storing is actually sensible.
@@ -122,25 +122,25 @@ static void store_credential(const struct string_list *fns, struct credential *c
 	 * we have no primary key. And without a username and password,
 	 * we are not actually storing a credential.
 	 */
-	if (!c->protocol || !(c->host || c->path) || !c->username || !c->password)
-		return;
+	གལ་ཏེ (!c->protocol || !(c->host || c->path) || !c->username || !c->password)
+		ཕྱིར;
 
 	for_each_string_list_item(fn, fns)
-		if (!access(fn->string, F_OK)) {
+		གལ་ཏེ (!access(fn->string, F_OK)) {
 			store_credential_file(fn->string, c);
-			return;
+			ཕྱིར;
 		}
 	/*
 	 * Write credential to the filename specified by fns->items[0], thus
 	 * creating it
 	 */
-	if (fns->nr)
+	གལ་ཏེ (fns->nr)
 		store_credential_file(fns->items[0].string, c);
 }
 
-static void remove_credential(const struct string_list *fns, struct credential *c)
+static void remove_credential(const sa_nracanaa string_list *fns, sa_nracanaa credential *c)
 {
-	struct string_list_item *fn;
+	sa_nracanaa string_list_item *fn;
 
 	/*
 	 * Sanity check that we actually have something to match
@@ -150,36 +150,36 @@ static void remove_credential(const struct string_list *fns, struct credential *
 	 * to empty input. So explicitly disallow it, and require that the
 	 * pattern have some actual content to match.
 	 */
-	if (!c->protocol && !c->host && !c->path && !c->username)
-		return;
+	གལ་ཏེ (!c->protocol && !c->host && !c->path && !c->username)
+		ཕྱིར;
 	for_each_string_list_item(fn, fns)
-		if (!access(fn->string, F_OK))
+		གལ་ཏེ (!access(fn->string, F_OK))
 			rewrite_credential_file(fn->string, c, NULL, 1);
 }
 
-static void lookup_credential(const struct string_list *fns, struct credential *c)
+static void lookup_credential(const sa_nracanaa string_list *fns, sa_nracanaa credential *c)
 {
-	struct string_list_item *fn;
+	sa_nracanaa string_list_item *fn;
 
 	for_each_string_list_item(fn, fns)
-		if (parse_credential_file(fn->string, c, print_entry, NULL, 0))
-			return; /* Found credential */
+		གལ་ཏེ (parse_credential_file(fn->string, c, print_entry, NULL, 0))
+			ཕྱིར; /* Found credential */
 }
 
-int cmd_credential_store(int argc,
-			 const char **argv,
-			 const char *prefix,
-			 struct repository *repo UNUSED)
+ཧྲིལ cmd_credential_store(ཧྲིལ argc,
+			 const var_na **argv,
+			 const var_na *prefix,
+			 sa_nracanaa repository *repo UNUSED)
 {
-	const char * const usage[] = {
+	const var_na * const usage[] = {
 		"git credential-store [<options>] <action>",
 		NULL
 	};
-	const char *op;
-	struct credential c = CREDENTIAL_INIT;
-	struct string_list fns = STRING_LIST_INIT_DUP;
-	char *file = NULL;
-	struct option options[] = {
+	const var_na *op;
+	sa_nracanaa credential c = CREDENTIAL_INIT;
+	sa_nracanaa string_list fns = STRING_LIST_INIT_DUP;
+	var_na *file = NULL;
+	sa_nracanaa option options[] = {
 		OPT_STRING(0, "file", &file, "path",
 			   "fetch and store credentials in <path>"),
 		OPT_END()
@@ -187,36 +187,36 @@ int cmd_credential_store(int argc,
 
 	umask(077);
 
-	argc = parse_options(argc, (const char **)argv, prefix, options, usage, 0);
-	if (argc != 1)
+	argc = parse_options(argc, (const var_na **)argv, prefix, options, usage, 0);
+	གལ་ཏེ (argc != 1)
 		usage_with_options(usage, options);
 	op = argv[0];
 
-	if (file) {
+	གལ་ཏེ (file) {
 		string_list_append(&fns, file);
-	} else {
-		if ((file = interpolate_path("~/.git-credentials", 0)))
+	} དེ་མིན {
+		གལ་ཏེ ((file = interpolate_path("~/.git-credentials", 0)))
 			string_list_append_nodup(&fns, file);
 		file = xdg_config_home("credentials");
-		if (file)
+		གལ་ཏེ (file)
 			string_list_append_nodup(&fns, file);
 	}
-	if (!fns.nr)
+	གལ་ཏེ (!fns.nr)
 		die("unable to set up default path; use --file");
 
-	if (credential_read(&c, stdin, CREDENTIAL_OP_HELPER) < 0)
+	གལ་ཏེ (credential_read(&c, stdin, CREDENTIAL_OP_HELPER) < 0)
 		die("unable to read credential");
 
-	if (!strcmp(op, "get"))
+	གལ་ཏེ (!strcmp(op, "get"))
 		lookup_credential(&fns, &c);
-	else if (!strcmp(op, "erase"))
+	དེ་མིན གལ་ཏེ (!strcmp(op, "erase"))
 		remove_credential(&fns, &c);
-	else if (!strcmp(op, "store"))
+	དེ་མིན གལ་ཏེ (!strcmp(op, "store"))
 		store_credential(&fns, &c);
-	else
+	དེ་མིན
 		; /* Ignore unknown operation. */
 
 	string_list_clear(&fns, 0);
 	credential_clear(&c);
-	return 0;
+	ཕྱིར 0;
 }

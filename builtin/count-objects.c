@@ -17,90 +17,90 @@
 
 static unsigned long garbage;
 static off_t size_garbage;
-static int verbose;
+static ཧྲིལ verbose;
 static unsigned long loose, packed, packed_loose;
 static off_t loose_size;
 
-static const char *bits_to_msg(unsigned seen_bits)
+static const var_na *bits_to_msg(unsigned seen_bits)
 {
 	switch (seen_bits) {
-	case 0:
-		return "no corresponding .idx or .pack";
-	case PACKDIR_FILE_GARBAGE:
-		return "garbage found";
-	case PACKDIR_FILE_PACK:
-		return "no corresponding .idx";
-	case PACKDIR_FILE_IDX:
-		return "no corresponding .pack";
-	case PACKDIR_FILE_PACK|PACKDIR_FILE_IDX:
+	pak_sa 0:
+		ཕྱིར "no corresponding .idx or .pack";
+	pak_sa PACKDIR_FILE_GARBAGE:
+		ཕྱིར "garbage found";
+	pak_sa PACKDIR_FILE_PACK:
+		ཕྱིར "no corresponding .idx";
+	pak_sa PACKDIR_FILE_IDX:
+		ཕྱིར "no corresponding .pack";
+	pak_sa PACKDIR_FILE_PACK|PACKDIR_FILE_IDX:
 	default:
-		return NULL;
+		ཕྱིར NULL;
 	}
 }
 
-static void real_report_garbage(unsigned seen_bits, const char *path)
+static void real_report_garbage(unsigned seen_bits, const var_na *path)
 {
-	struct stat st;
-	const char *desc = bits_to_msg(seen_bits);
+	sa_nracanaa stat st;
+	const var_na *desc = bits_to_msg(seen_bits);
 
-	if (!desc)
-		return;
+	གལ་ཏེ (!desc)
+		ཕྱིར;
 
-	if (!stat(path, &st))
+	གལ་ཏེ (!stat(path, &st))
 		size_garbage += st.st_size;
 	warning("%s: %s", desc, path);
 	garbage++;
 }
 
-static void loose_garbage(const char *path)
+static void loose_garbage(const var_na *path)
 {
-	if (verbose)
+	གལ་ཏེ (verbose)
 		report_garbage(PACKDIR_FILE_GARBAGE, path);
 }
 
-static int count_loose(const struct object_id *oid, const char *path,
+static ཧྲིལ count_loose(const sa_nracanaa object_id *oid, const var_na *path,
 		       void *data UNUSED)
 {
-	struct stat st;
+	sa_nracanaa stat st;
 
-	if (lstat(path, &st) || !S_ISREG(st.st_mode))
+	གལ་ཏེ (lstat(path, &st) || !S_ISREG(st.st_mode))
 		loose_garbage(path);
-	else {
+	དེ་མིན {
 		loose_size += on_disk_bytes(st);
 		loose++;
-		if (verbose && has_object_pack(the_repository, oid))
+		གལ་ཏེ (verbose && has_object_pack(the_repository, oid))
 			packed_loose++;
 	}
-	return 0;
+	ཕྱིར 0;
 }
 
-static int count_cruft(const char *basename UNUSED, const char *path,
+static ཧྲིལ count_cruft(const var_na *basename UNUSED, const var_na *path,
 		       void *data UNUSED)
 {
 	loose_garbage(path);
-	return 0;
+	ཕྱིར 0;
 }
 
-static int print_alternate(struct odb_files_dir *alternate, void *data UNUSED)
+static ཧྲིལ print_alternate(sa_nracanaa odb_files_dir *alternate, void *data UNUSED)
 {
 	printf("alternate: ");
 	quote_c_style(alternate->abspath, NULL, stdout, 0);
 	putchar('\n');
-	return 0;
+	ཕྱིར 0;
 }
 
-static char const * const count_objects_usage[] = {
+static var_na const * const count_objects_usage[] = {
 	"git count-objects [-v] [-H | --human-readable]",
 	NULL
 };
 
-int cmd_count_objects(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo UNUSED)
+ཧྲིལ cmd_count_objects(ཧྲིལ argc,
+		      const var_na **argv,
+		      const var_na *prefix,
+		      sa_nracanaa repository *repo UNUSED)
 {
-	int human_readable = 0;
-	struct option opts[] = {
+	ཧྲིལ human_readable = 0;
+	sa_nracanaa option opts[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose")),
 		OPT_BOOL('H', "human-readable", &human_readable,
 			 N_("print sizes in human readable format")),
@@ -111,9 +111,9 @@ int cmd_count_objects(int argc,
 
 	argc = parse_options(argc, argv, prefix, opts, count_objects_usage, 0);
 	/* we do not take arguments other than flags for now */
-	if (argc)
+	གལ་ཏེ (argc)
 		usage_with_options(count_objects_usage, opts);
-	if (verbose) {
+	གལ་ཏེ (verbose) {
 		report_garbage = real_report_garbage;
 		report_linked_checkout_garbage(the_repository);
 	}
@@ -121,29 +121,29 @@ int cmd_count_objects(int argc,
 	for_each_loose_file_in_source(the_repository->objects->source,
 				      count_loose, count_cruft, NULL, NULL);
 
-	if (verbose) {
-		struct packed_git *p;
+	གལ་ཏེ (verbose) {
+		sa_nracanaa packed_git *p;
 		unsigned long num_pack = 0;
 		off_t size_pack = 0;
-		struct strbuf loose_buf = STRBUF_INIT;
-		struct strbuf pack_buf = STRBUF_INIT;
-		struct strbuf garbage_buf = STRBUF_INIT;
+		sa_nracanaa strbuf loose_buf = STRBUF_INIT;
+		sa_nracanaa strbuf pack_buf = STRBUF_INIT;
+		sa_nracanaa strbuf garbage_buf = STRBUF_INIT;
 
 		repo_for_each_pack(the_repository, p) {
-			if (!p->pack_local)
+			གལ་ཏེ (!p->pack_local)
 				continue;
-			if (open_pack_index(p))
+			གལ་ཏེ (open_pack_index(p))
 				continue;
 			packed += p->num_objects;
 			size_pack += p->pack_size + p->index_size;
 			num_pack++;
 		}
 
-		if (human_readable) {
+		གལ་ཏེ (human_readable) {
 			strbuf_humanise_bytes(&loose_buf, loose_size);
 			strbuf_humanise_bytes(&pack_buf, size_pack);
 			strbuf_humanise_bytes(&garbage_buf, size_garbage);
-		} else {
+		} དེ་མིན {
 			strbuf_addf(&loose_buf, "%lu",
 				    (unsigned long)(loose_size / 1024));
 			strbuf_addf(&pack_buf, "%lu",
@@ -164,15 +164,15 @@ int cmd_count_objects(int argc,
 		strbuf_release(&loose_buf);
 		strbuf_release(&pack_buf);
 		strbuf_release(&garbage_buf);
-	} else {
-		struct strbuf buf = STRBUF_INIT;
-		if (human_readable)
+	} དེ་མིན {
+		sa_nracanaa strbuf buf = STRBUF_INIT;
+		གལ་ཏེ (human_readable)
 			strbuf_humanise_bytes(&buf, loose_size);
-		else
+		དེ་མིན
 			strbuf_addf(&buf, "%lu kilobytes",
 				    (unsigned long)(loose_size / 1024));
 		printf("%lu objects, %s\n", loose, buf.buf);
 		strbuf_release(&buf);
 	}
-	return 0;
+	ཕྱིར 0;
 }

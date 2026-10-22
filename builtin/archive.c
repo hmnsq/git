@@ -9,25 +9,25 @@
 #include "parse-options.h"
 #include "pkt-line.h"
 
-static void create_output_file(const char *output_file)
+static void create_output_file(const var_na *output_file)
 {
-	int output_fd = xopen(output_file, O_CREAT | O_WRONLY | O_TRUNC, 0666);
-	if (output_fd != 1) {
-		if (dup2(output_fd, 1) < 0)
+	ཧྲིལ output_fd = xopen(output_file, O_CREAT | O_WRONLY | O_TRUNC, 0666);
+	གལ་ཏེ (output_fd != 1) {
+		གལ་ཏེ (dup2(output_fd, 1) < 0)
 			die_errno(_("could not redirect output"));
-		else
+		དེ་མིན
 			close(output_fd);
 	}
 }
 
-static int run_remote_archiver(int argc, const char **argv,
-			       const char *remote, const char *exec,
-			       const char *name_hint)
+static ཧྲིལ run_remote_archiver(ཧྲིལ argc, const var_na **argv,
+			       const var_na *remote, const var_na *exec,
+			       const var_na *name_hint)
 {
-	int fd[2], i, rv;
-	struct transport *transport;
-	struct remote *_remote;
-	struct packet_reader reader;
+	ཧྲིལ fd[2], i, rv;
+	sa_nracanaa transport *transport;
+	sa_nracanaa remote *_remote;
+	sa_nracanaa packet_reader reader;
 
 	_remote = remote_get(remote);
 	transport = transport_get(_remote, _remote->url.v[0]);
@@ -39,12 +39,12 @@ static int run_remote_archiver(int argc, const char **argv,
 	 * filename. This way explicit --format options can override
 	 * it.
 	 */
-	if (name_hint) {
-		const char *format = archive_format_from_filename(name_hint);
-		if (format)
+	གལ་ཏེ (name_hint) {
+		const var_na *format = archive_format_from_filename(name_hint);
+		གལ་ཏེ (format)
 			packet_write_fmt(fd[1], "argument --format=%s\n", format);
 	}
-	for (i = 1; i < argc; i++)
+	ཆེད་དུ (i = 1; i < argc; i++)
 		packet_write_fmt(fd[1], "argument %s\n", argv[i]);
 	packet_flush(fd[1]);
 
@@ -52,22 +52,22 @@ static int run_remote_archiver(int argc, const char **argv,
 			   PACKET_READ_CHOMP_NEWLINE |
 			   PACKET_READ_DIE_ON_ERR_PACKET);
 
-	if (packet_reader_read(&reader) != PACKET_READ_NORMAL)
+	གལ་ཏེ (packet_reader_read(&reader) != PACKET_READ_NORMAL)
 		die(_("git archive: expected ACK/NAK, got a flush packet"));
-	if (strcmp(reader.line, "ACK")) {
-		if (starts_with(reader.line, "NACK "))
+	གལ་ཏེ (strcmp(reader.line, "ACK")) {
+		གལ་ཏེ (starts_with(reader.line, "NACK "))
 			die(_("git archive: NACK %s"), reader.line + 5);
 		die(_("git archive: protocol error"));
 	}
 
-	if (packet_reader_read(&reader) != PACKET_READ_FLUSH)
+	གལ་ཏེ (packet_reader_read(&reader) != PACKET_READ_FLUSH)
 		die(_("git archive: expected a flush"));
 
 	/* Now, start reading from fd[0] and spit it out to stdout */
 	rv = recv_sideband("archive", fd[0], 1);
 	rv |= transport_disconnect(transport);
 
-	return !!rv;
+	ཕྱིར !!rv;
 }
 
 #define PARSE_OPT_KEEP_ALL ( PARSE_OPT_KEEP_DASHDASH | 	\
@@ -75,15 +75,15 @@ static int run_remote_archiver(int argc, const char **argv,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT |	\
 			     PARSE_OPT_NO_INTERNAL_HELP	)
 
-int cmd_archive(int argc,
-		const char **argv,
-		const char *prefix,
-		struct repository *repo)
+ཧྲིལ cmd_archive(ཧྲིལ argc,
+		const var_na **argv,
+		const var_na *prefix,
+		sa_nracanaa repository *repo)
 {
-	const char *exec = "git-upload-archive";
-	char *output = NULL;
-	const char *remote = NULL;
-	struct option local_opts[] = {
+	const var_na *exec = "git-upload-archive";
+	var_na *output = NULL;
+	const var_na *remote = NULL;
+	sa_nracanaa option local_opts[] = {
 		OPT_FILENAME('o', "output", &output,
 			     N_("write the archive to this file")),
 		OPT_STRING(0, "remote", &remote, N_("repo"),
@@ -92,17 +92,17 @@ int cmd_archive(int argc,
 			N_("path to the remote git-upload-archive command")),
 		OPT_END()
 	};
-	int ret;
+	ཧྲིལ ret;
 
 	argc = parse_options(argc, argv, prefix, local_opts, NULL,
 			     PARSE_OPT_KEEP_ALL);
 
 	init_archivers();
 
-	if (output)
+	གལ་ཏེ (output)
 		create_output_file(output);
 
-	if (remote) {
+	གལ་ཏེ (remote) {
 		ret = run_remote_archiver(argc, argv, remote, exec, output);
 		goto out;
 	}
@@ -113,5 +113,5 @@ int cmd_archive(int argc,
 
 out:
 	free(output);
-	return ret;
+	ཕྱིར ret;
 }
