@@ -9,44 +9,44 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "path.h"
-#include "read-cache-ll.h"
-#include "setup.h"
-#include "string-list.h"
-#include "quote.h"
-#include "column.h"
-#include "color.h"
-#include "pathspec.h"
-#include "help.h"
-#include "prompt.h"
+#ضمن "builtin.h"
+#ضمن "abspath.h"
+#ضمن "config.h"
+#ضمن "dir.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "parse-options.h"
+#ضمن "path.h"
+#ضمن "read-cache-ll.h"
+#ضمن "setup.h"
+#ضمن "string-list.h"
+#ضمن "quote.h"
+#ضمن "column.h"
+#ضمن "color.h"
+#ضمن "pathspec.h"
+#ضمن "help.h"
+#ضمن "prompt.h"
 
-static int require_force = -1; /* unset */
-static int interactive;
-static struct string_list del_list = STRING_LIST_INIT_DUP;
-static unsigned int colopts;
+ساكن صحيح require_force = -1; /* unset */
+ساكن صحيح interactive;
+ساكن بنية string_list del_list = STRING_LIST_INIT_DUP;
+ساكن unsigned صحيح colopts;
 
-static const char *const builtin_clean_usage[] = {
+ساكن ثابت حرف *ثابت builtin_clean_usage[] = {
 	N_("git clean [-d] [-f] [-i] [-n] [-q] [-e <pattern>] [-x | -X] [--] [<pathspec>...]"),
-	NULL
+	عدم
 };
 
-static const char *msg_remove = N_("Removing %s\n");
-static const char *msg_would_remove = N_("Would remove %s\n");
-static const char *msg_skip_git_dir = N_("Skipping repository %s\n");
-static const char *msg_would_skip_git_dir = N_("Would skip repository %s\n");
-static const char *msg_warn_remove_failed = N_("failed to remove %s");
-static const char *msg_warn_lstat_failed = N_("could not lstat %s\n");
-static const char *msg_skip_cwd = N_("Refusing to remove current working directory\n");
-static const char *msg_would_skip_cwd = N_("Would refuse to remove current working directory\n");
+ساكن ثابت حرف *سكو_remove = N_("Removing %s\n");
+ساكن ثابت حرف *سكو_would_remove = N_("Would remove %s\n");
+ساكن ثابت حرف *سكو_skip_git_dir = N_("Skipping repository %s\n");
+ساكن ثابت حرف *سكو_would_skip_git_dir = N_("Would skip repository %s\n");
+ساكن ثابت حرف *سكو_warn_remove_failed = N_("failed to remove %s");
+ساكن ثابت حرف *سكو_warn_lstat_failed = N_("could not lstat %s\n");
+ساكن ثابت حرف *سكو_skip_cwd = N_("Refusing to remove current working directory\n");
+ساكن ثابت حرف *سكو_would_skip_cwd = N_("Would refuse to remove current working directory\n");
 
-enum color_clean {
+تعداد color_clean {
 	CLEAN_COLOR_RESET = 0,
 	CLEAN_COLOR_PLAIN = 1,
 	CLEAN_COLOR_PROMPT = 2,
@@ -55,7 +55,7 @@ enum color_clean {
 	CLEAN_COLOR_ERROR = 5
 };
 
-static const char *color_interactive_slots[] = {
+ساكن ثابت حرف *color_interactive_slots[] = {
 	[CLEAN_COLOR_ERROR]  = "error",
 	[CLEAN_COLOR_HEADER] = "header",
 	[CLEAN_COLOR_HELP]   = "help",
@@ -64,8 +64,8 @@ static const char *color_interactive_slots[] = {
 	[CLEAN_COLOR_RESET]  = "reset",
 };
 
-static enum git_colorbool clean_use_color = GIT_COLOR_UNKNOWN;
-static char clean_colors[][COLOR_MAXLEN] = {
+ساكن تعداد git_colorbool clean_use_color = GIT_COLOR_UNKNOWN;
+ساكن حرف clean_colors[][COLOR_MAXLEN] = {
 	[CLEAN_COLOR_ERROR] = GIT_COLOR_BOLD_RED,
 	[CLEAN_COLOR_HEADER] = GIT_COLOR_BOLD,
 	[CLEAN_COLOR_HELP] = GIT_COLOR_BOLD_RED,
@@ -78,173 +78,173 @@ static char clean_colors[][COLOR_MAXLEN] = {
 #define MENU_OPTS_IMMEDIATE		02
 #define MENU_OPTS_LIST_ONLY		04
 
-struct menu_opts {
-	const char *header;
-	const char *prompt;
-	int flags;
+بنية menu_opts {
+	ثابت حرف *header;
+	ثابت حرف *prompt;
+	صحيح flags;
 };
 
 #define MENU_RETURN_NO_LOOP		10
 
-struct menu_item {
-	char hotkey;
-	const char *title;
-	int selected;
-	int (*fn)(void);
+بنية menu_item {
+	حرف hotkey;
+	ثابت حرف *title;
+	صحيح selected;
+	صحيح (*fn)(فراغ);
 };
 
-enum menu_stuff_type {
+تعداد menu_stuff_type {
 	MENU_STUFF_TYPE_STRING_LIST = 1,
 	MENU_STUFF_TYPE_MENU_ITEM
 };
 
-struct menu_stuff {
-	enum menu_stuff_type type;
-	int nr;
-	void *stuff;
+بنية menu_stuff {
+	تعداد menu_stuff_type type;
+	صحيح nr;
+	فراغ *stuff;
 };
 
 define_list_config_array(color_interactive_slots);
 
-static int git_clean_config(const char *var, const char *value,
-			    const struct config_context *ctx, void *cb)
+ساكن صحيح git_clean_config(ثابت حرف *var, ثابت حرف *درج,
+			    ثابت بنية config_context *ctx, فراغ *cb)
 {
-	const char *slot_name;
+	ثابت حرف *slot_name;
 
-	if (starts_with(var, "column."))
-		return git_column_config(var, value, "clean", &colopts);
+	إذا (starts_with(var, "column."))
+		أرجع git_column_config(var, درج, "clean", &colopts);
 
 	/* honors the color.interactive* config variables which also
 	   applied in git-add--interactive and git-stash */
-	if (!strcmp(var, "color.interactive")) {
-		clean_use_color = git_config_colorbool(var, value);
-		return 0;
+	إذا (!strcmp(var, "color.interactive")) {
+		clean_use_color = git_config_colorbool(var, درج);
+		أرجع 0;
 	}
-	if (skip_prefix(var, "color.interactive.", &slot_name)) {
-		int slot = LOOKUP_CONFIG(color_interactive_slots, slot_name);
-		if (slot < 0)
-			return 0;
-		if (!value)
-			return config_error_nonbool(var);
-		return color_parse(value, clean_colors[slot]);
-	}
-
-	if (!strcmp(var, "clean.requireforce")) {
-		require_force = git_config_bool(var, value);
-		return 0;
+	إذا (skip_prefix(var, "color.interactive.", &slot_name)) {
+		صحيح slot = LOOKUP_CONFIG(color_interactive_slots, slot_name);
+		إذا (slot < 0)
+			أرجع 0;
+		إذا (!درج)
+			أرجع config_error_nonbool(var);
+		أرجع color_parse(درج, clean_colors[slot]);
 	}
 
-	if (git_color_config(var, value, cb) < 0)
-		return -1;
+	إذا (!strcmp(var, "clean.requireforce")) {
+		require_force = git_config_bool(var, درج);
+		أرجع 0;
+	}
 
-	return git_default_config(var, value, ctx, cb);
+	إذا (git_color_config(var, درج, cb) < 0)
+		أرجع -1;
+
+	أرجع git_default_config(var, درج, ctx, cb);
 }
 
-static const char *clean_get_color(enum color_clean ix)
+ساكن ثابت حرف *clean_get_color(تعداد color_clean ix)
 {
-	if (want_color(clean_use_color))
-		return clean_colors[ix];
-	return "";
+	إذا (want_color(clean_use_color))
+		أرجع clean_colors[ix];
+	أرجع "";
 }
 
-static void clean_print_color(enum color_clean ix)
+ساكن فراغ clean_بغ_color(تعداد color_clean ix)
 {
 	printf("%s", clean_get_color(ix));
 }
 
-static int exclude_cb(const struct option *opt, const char *arg, int unset)
+ساكن صحيح exclude_cb(ثابت بنية option *opt, ثابت حرف *arg, صحيح unset)
 {
-	struct string_list *exclude_list = opt->value;
+	بنية string_list *exclude_list = opt->درج;
 	BUG_ON_OPT_NEG(unset);
 	string_list_append(exclude_list, arg);
-	return 0;
+	أرجع 0;
 }
 
-static int remove_dirs(struct strbuf *path, const char *prefix, int force_flag,
-		int dry_run, int quiet, int *dir_gone)
+ساكن صحيح remove_dirs(بنية strbuf *path, ثابت حرف *prefix, صحيح force_flag,
+		صحيح dry_run, صحيح quiet, صحيح *dir_gone)
 {
 	DIR *dir;
-	struct strbuf quoted = STRBUF_INIT;
-	struct strbuf realpath = STRBUF_INIT;
-	struct strbuf real_ocwd = STRBUF_INIT;
-	struct dirent *e;
-	int res = 0, ret = 0, gone = 1, original_len = path->len, len;
-	struct string_list dels = STRING_LIST_INIT_DUP;
+	بنية strbuf quoted = STRBUF_INIT;
+	بنية strbuf realpath = STRBUF_INIT;
+	بنية strbuf real_ocwd = STRBUF_INIT;
+	بنية dirent *e;
+	صحيح res = 0, ret = 0, gone = 1, original_len = path->len, len;
+	بنية string_list dels = STRING_LIST_INIT_DUP;
 
 	*dir_gone = 1;
 
-	if ((force_flag & REMOVE_DIR_KEEP_NESTED_GIT) &&
+	إذا ((force_flag & REMOVE_DIR_KEEP_NESTED_GIT) &&
 	    is_nonbare_repository_dir(path)) {
-		if (!quiet) {
+		إذا (!quiet) {
 			quote_path(path->buf, prefix, &quoted, 0);
-			printf(dry_run ?  _(msg_would_skip_git_dir) : _(msg_skip_git_dir),
+			printf(dry_run ?  _(سكو_would_skip_git_dir) : _(سكو_skip_git_dir),
 					quoted.buf);
 		}
 
 		*dir_gone = 0;
-		goto out;
+		اذهب out;
 	}
 
 	dir = opendir(path->buf);
-	if (!dir) {
+	إذا (!dir) {
 		/* an empty dir could be removed even if it is unreadble */
 		res = dry_run ? 0 : rmdir(path->buf);
-		if (res) {
-			int saved_errno = errno;
+		إذا (res) {
+			صحيح saved_errno = errno;
 			quote_path(path->buf, prefix, &quoted, 0);
 			errno = saved_errno;
-			warning_errno(_(msg_warn_remove_failed), quoted.buf);
+			warning_errno(_(سكو_warn_remove_failed), quoted.buf);
 			*dir_gone = 0;
 		}
 		ret = res;
-		goto out;
+		اذهب out;
 	}
 
 	strbuf_complete(path, '/');
 
 	len = path->len;
-	while ((e = readdir_skip_dot_and_dotdot(dir)) != NULL) {
-		struct stat st;
+	طالما ((e = readdir_skip_dot_and_dotdot(dir)) != عدم) {
+		بنية stat st;
 
 		strbuf_setlen(path, len);
 		strbuf_addstr(path, e->d_name);
-		if (lstat(path->buf, &st))
-			warning_errno(_(msg_warn_lstat_failed), path->buf);
-		else if (S_ISDIR(st.st_mode)) {
-			if (remove_dirs(path, prefix, force_flag, dry_run, quiet, &gone))
+		إذا (lstat(path->buf, &st))
+			warning_errno(_(سكو_warn_lstat_failed), path->buf);
+		وإلا إذا (S_ISDIR(st.st_mode)) {
+			إذا (remove_dirs(path, prefix, force_flag, dry_run, quiet, &gone))
 				ret = 1;
-			if (gone) {
+			إذا (gone) {
 				quote_path(path->buf, prefix, &quoted, 0);
 				string_list_append(&dels, quoted.buf);
-			} else
+			} وإلا
 				*dir_gone = 0;
-			continue;
-		} else {
+			استمر;
+		} وإلا {
 			res = dry_run ? 0 : unlink(path->buf);
-			if (!res) {
+			إذا (!res) {
 				quote_path(path->buf, prefix, &quoted, 0);
 				string_list_append(&dels, quoted.buf);
-			} else {
-				int saved_errno = errno;
+			} وإلا {
+				صحيح saved_errno = errno;
 				quote_path(path->buf, prefix, &quoted, 0);
 				errno = saved_errno;
-				warning_errno(_(msg_warn_remove_failed), quoted.buf);
+				warning_errno(_(سكو_warn_remove_failed), quoted.buf);
 				*dir_gone = 0;
 				ret = 1;
 			}
-			continue;
+			استمر;
 		}
 
 		/* path too long, stat fails, or non-directory still exists */
 		*dir_gone = 0;
 		ret = 1;
-		break;
+		اكسر;
 	}
 	closedir(dir);
 
 	strbuf_setlen(path, original_len);
 
-	if (*dir_gone) {
+	إذا (*dir_gone) {
 		/*
 		 * Normalize path components in path->buf, e.g. change '\' to
 		 * '/' on Windows.
@@ -256,51 +256,51 @@ static int remove_dirs(struct strbuf *path, const char *prefix, int force_flag,
 		 * like to transform startup_info->original_cwd to an absolute
 		 * path too.
 		 */
-		 if (startup_info->original_cwd)
+		 إذا (startup_info->original_cwd)
 			 strbuf_realpath(&real_ocwd,
 					 startup_info->original_cwd, 1);
 
-		if (!strbuf_cmp(&realpath, &real_ocwd)) {
-			printf("%s", dry_run ? _(msg_would_skip_cwd) : _(msg_skip_cwd));
+		إذا (!strbuf_cmp(&realpath, &real_ocwd)) {
+			printf("%s", dry_run ? _(سكو_would_skip_cwd) : _(سكو_skip_cwd));
 			*dir_gone = 0;
-		} else {
+		} وإلا {
 			res = dry_run ? 0 : rmdir(path->buf);
-			if (!res)
+			إذا (!res)
 				*dir_gone = 1;
-			else {
-				int saved_errno = errno;
+			وإلا {
+				صحيح saved_errno = errno;
 				quote_path(path->buf, prefix, &quoted, 0);
 				errno = saved_errno;
-				warning_errno(_(msg_warn_remove_failed), quoted.buf);
+				warning_errno(_(سكو_warn_remove_failed), quoted.buf);
 				*dir_gone = 0;
 				ret = 1;
 			}
 		}
 	}
 
-	if (!*dir_gone && !quiet) {
-		int i;
-		for (i = 0; i < dels.nr; i++)
-			printf(dry_run ?  _(msg_would_remove) : _(msg_remove), dels.items[i].string);
+	إذا (!*dir_gone && !quiet) {
+		صحيح i;
+		لكل (i = 0; i < dels.nr; i++)
+			printf(dry_run ?  _(سكو_would_remove) : _(سكو_remove), dels.ابوبو[i].string);
 	}
 out:
 	strbuf_release(&realpath);
 	strbuf_release(&real_ocwd);
 	strbuf_release(&quoted);
 	string_list_clear(&dels, 0);
-	return ret;
+	أرجع ret;
 }
 
-static void pretty_print_dels(void)
+ساكن فراغ pretty_بغ_dels(فراغ)
 {
-	struct string_list list = STRING_LIST_INIT_DUP;
-	struct string_list_item *item;
-	struct strbuf buf = STRBUF_INIT;
-	const char *qname;
-	struct column_options copts;
+	بنية string_list list = STRING_LIST_INIT_DUP;
+	بنية string_list_item *item;
+	بنية strbuf buf = STRBUF_INIT;
+	ثابت حرف *qname;
+	بنية column_options copts;
 
 	for_each_string_list_item(item, &del_list) {
-		qname = quote_path(item->string, NULL, &buf, 0);
+		qname = quote_path(item->string, عدم, &buf, 0);
 		string_list_append(&list, qname);
 	}
 
@@ -309,29 +309,29 @@ static void pretty_print_dels(void)
 	 * about layout strategy and stuff
 	 */
 	colopts = (colopts & ~COL_ENABLE_MASK) | COL_ENABLED;
-	memset(&copts, 0, sizeof(copts));
+	memset(&copts, 0, حجم(copts));
 	copts.indent = "  ";
 	copts.padding = 2;
-	print_columns(&list, colopts, &copts);
+	بغ_columns(&list, colopts, &copts);
 	strbuf_release(&buf);
 	string_list_clear(&list, 0);
 }
 
-static void pretty_print_menus(struct string_list *menu_list)
+ساكن فراغ pretty_بغ_menus(بنية string_list *menu_list)
 {
-	unsigned int local_colopts = 0;
-	struct column_options copts;
+	unsigned صحيح local_colopts = 0;
+	بنية column_options copts;
 
 	local_colopts = COL_ENABLED | COL_ROW;
-	memset(&copts, 0, sizeof(copts));
+	memset(&copts, 0, حجم(copts));
 	copts.indent = "  ";
 	copts.padding = 2;
-	print_columns(menu_list, local_colopts, &copts);
+	بغ_columns(menu_list, local_colopts, &copts);
 }
 
-static void prompt_help_cmd(int singleton)
+ساكن فراغ prompt_help_cmd(صحيح singleton)
 {
-	clean_print_color(CLEAN_COLOR_HELP);
+	clean_بغ_color(CLEAN_COLOR_HELP);
 	printf(singleton ?
 		  _("Prompt help:\n"
 		    "1          - select a numbered item\n"
@@ -345,51 +345,51 @@ static void prompt_help_cmd(int singleton)
 		    "-...       - unselect specified items\n"
 		    "*          - choose all items\n"
 		    "           - (empty) finish selecting\n"));
-	clean_print_color(CLEAN_COLOR_RESET);
+	clean_بغ_color(CLEAN_COLOR_RESET);
 }
 
 /*
  * display menu stuff with number prefix and hotkey highlight
  */
-static void print_highlight_menu_stuff(struct menu_stuff *stuff, int **chosen)
+ساكن فراغ بغ_highlight_menu_stuff(بنية menu_stuff *stuff, صحيح **chosen)
 {
-	struct string_list menu_list = STRING_LIST_INIT_DUP;
-	struct strbuf menu = STRBUF_INIT;
-	struct menu_item *menu_item;
-	struct string_list_item *string_list_item;
-	int i;
+	بنية string_list menu_list = STRING_LIST_INIT_DUP;
+	بنية strbuf menu = STRBUF_INIT;
+	بنية menu_item *menu_item;
+	بنية string_list_item *string_list_item;
+	صحيح i;
 
-	switch (stuff->type) {
-	default:
+	بدل (stuff->type) {
+	افتراضي:
 		die("Bad type of menu_stuff when print menu");
-	case MENU_STUFF_TYPE_MENU_ITEM:
-		menu_item = (struct menu_item *)stuff->stuff;
-		for (i = 0; i < stuff->nr; i++, menu_item++) {
-			const char *p;
-			int highlighted = 0;
+	حالة MENU_STUFF_TYPE_MENU_ITEM:
+		menu_item = (بنية menu_item *)stuff->stuff;
+		لكل (i = 0; i < stuff->nr; i++, menu_item++) {
+			ثابت حرف *p;
+			صحيح highlighted = 0;
 
 			p = menu_item->title;
-			if ((*chosen)[i] < 0)
+			إذا ((*chosen)[i] < 0)
 				(*chosen)[i] = menu_item->selected ? 1 : 0;
 			strbuf_addf(&menu, "%s%2d: ", (*chosen)[i] ? "*" : " ", i+1);
-			for (; *p; p++) {
-				if (!highlighted && *p == menu_item->hotkey) {
+			لكل (; *p; p++) {
+				إذا (!highlighted && *p == menu_item->hotkey) {
 					strbuf_addstr(&menu, clean_get_color(CLEAN_COLOR_PROMPT));
 					strbuf_addch(&menu, *p);
 					strbuf_addstr(&menu, clean_get_color(CLEAN_COLOR_RESET));
 					highlighted = 1;
-				} else {
+				} وإلا {
 					strbuf_addch(&menu, *p);
 				}
 			}
 			string_list_append(&menu_list, menu.buf);
 			strbuf_reset(&menu);
 		}
-		break;
-	case MENU_STUFF_TYPE_STRING_LIST:
+		اكسر;
+	حالة MENU_STUFF_TYPE_STRING_LIST:
 		i = 0;
-		for_each_string_list_item(string_list_item, (struct string_list *)stuff->stuff) {
-			if ((*chosen)[i] < 0)
+		for_each_string_list_item(string_list_item, (بنية string_list *)stuff->stuff) {
+			إذا ((*chosen)[i] < 0)
 				(*chosen)[i] = 0;
 			strbuf_addf(&menu, "%s%2d: %s",
 				    (*chosen)[i] ? "*" : " ", i+1, string_list_item->string);
@@ -397,62 +397,62 @@ static void print_highlight_menu_stuff(struct menu_stuff *stuff, int **chosen)
 			strbuf_reset(&menu);
 			i++;
 		}
-		break;
+		اكسر;
 	}
 
-	pretty_print_menus(&menu_list);
+	pretty_بغ_menus(&menu_list);
 
 	strbuf_release(&menu);
 	string_list_clear(&menu_list, 0);
 }
 
-static int find_unique(const char *choice, struct menu_stuff *menu_stuff)
+ساكن صحيح find_unique(ثابت حرف *choice, بنية menu_stuff *menu_stuff)
 {
-	struct menu_item *menu_item;
-	struct string_list_item *string_list_item;
-	int i, len, found = 0;
+	بنية menu_item *menu_item;
+	بنية string_list_item *string_list_item;
+	صحيح i, len, found = 0;
 
 	len = strlen(choice);
-	switch (menu_stuff->type) {
-	default:
+	بدل (menu_stuff->type) {
+	افتراضي:
 		die("Bad type of menu_stuff when parse choice");
-	case MENU_STUFF_TYPE_MENU_ITEM:
+	حالة MENU_STUFF_TYPE_MENU_ITEM:
 
-		menu_item = (struct menu_item *)menu_stuff->stuff;
-		for (i = 0; i < menu_stuff->nr; i++, menu_item++) {
-			if (len == 1 && *choice == menu_item->hotkey) {
+		menu_item = (بنية menu_item *)menu_stuff->stuff;
+		لكل (i = 0; i < menu_stuff->nr; i++, menu_item++) {
+			إذا (len == 1 && *choice == menu_item->hotkey) {
 				found = i + 1;
-				break;
+				اكسر;
 			}
-			if (!strncasecmp(choice, menu_item->title, len)) {
-				if (found) {
-					if (len == 1) {
+			إذا (!strncasecmp(choice, menu_item->title, len)) {
+				إذا (found) {
+					إذا (len == 1) {
 						/* continue for hotkey matching */
 						found = -1;
-					} else {
+					} وإلا {
 						found = 0;
-						break;
+						اكسر;
 					}
-				} else {
+				} وإلا {
 					found = i + 1;
 				}
 			}
 		}
-		break;
-	case MENU_STUFF_TYPE_STRING_LIST:
-		string_list_item = ((struct string_list *)menu_stuff->stuff)->items;
-		for (i = 0; i < menu_stuff->nr; i++, string_list_item++) {
-			if (!strncasecmp(choice, string_list_item->string, len)) {
-				if (found) {
+		اكسر;
+	حالة MENU_STUFF_TYPE_STRING_LIST:
+		string_list_item = ((بنية string_list *)menu_stuff->stuff)->ابوبو;
+		لكل (i = 0; i < menu_stuff->nr; i++, string_list_item++) {
+			إذا (!strncasecmp(choice, string_list_item->string, len)) {
+				إذا (found) {
 					found = 0;
-					break;
+					اكسر;
 				}
 				found = i + 1;
 			}
 		}
-		break;
+		اكسر;
 	}
-	return found;
+	أرجع found;
 }
 
 /*
@@ -476,92 +476,92 @@ static int find_unique(const char *choice, struct menu_stuff *menu_stuff)
  * The parse result will be saved in array **chosen, and
  * return number of total selections.
  */
-static int parse_choice(struct menu_stuff *menu_stuff,
-			int is_single,
-			char *input,
-			int **chosen)
+ساكن صحيح parse_choice(بنية menu_stuff *menu_stuff,
+			صحيح is_single,
+			حرف *شغرو,
+			صحيح **chosen)
 {
-	struct string_list choice = STRING_LIST_INIT_NODUP;
-	struct string_list_item *item;
-	int nr = 0;
-	int i;
+	بنية string_list choice = STRING_LIST_INIT_NODUP;
+	بنية string_list_item *item;
+	صحيح nr = 0;
+	صحيح i;
 
-	string_list_split_in_place_f(&choice, input,
+	string_list_split_in_place_f(&choice, شغرو,
 				     is_single ? "\n" : ", ", -1,
 				     STRING_LIST_SPLIT_TRIM);
 
 	for_each_string_list_item(item, &choice) {
-		const char *string;
-		int choose;
-		int bottom = 0, top = 0;
-		int is_range, is_number;
+		ثابت حرف *string;
+		صحيح choose;
+		صحيح bottom = 0, كولي = 0;
+		صحيح is_range, is_لمب;
 
 		string = item->string;
-		if (!*string)
-			continue;
+		إذا (!*string)
+			استمر;
 
 		/* Input that begins with '-'; unchoose */
-		if (string[0] == '-') {
+		إذا (string[0] == '-') {
 			choose = 0;
 			string++;
-		} else {
+		} وإلا {
 			choose = 1;
 		}
 
 		is_range = 0;
-		is_number = 1;
-		for (const char *p = string; *p; p++) {
-			if ('-' == *p) {
-				if (!is_range) {
+		is_لمب = 1;
+		لكل (ثابت حرف *p = string; *p; p++) {
+			إذا ('-' == *p) {
+				إذا (!is_range) {
 					is_range = 1;
-					is_number = 0;
-				} else {
-					is_number = 0;
+					is_لمب = 0;
+				} وإلا {
+					is_لمب = 0;
 					is_range = 0;
-					break;
+					اكسر;
 				}
-			} else if (!isdigit(*p)) {
-				is_number = 0;
+			} وإلا إذا (!isdigit(*p)) {
+				is_لمب = 0;
 				is_range = 0;
-				break;
+				اكسر;
 			}
 		}
 
-		if (is_number) {
+		إذا (is_لمب) {
 			bottom = atoi(string);
-			top = bottom;
-		} else if (is_range) {
+			كولي = bottom;
+		} وإلا إذا (is_range) {
 			bottom = atoi(string);
 			/* a range can be specified like 5-7 or 5- */
-			if (!*(strchr(string, '-') + 1))
-				top = menu_stuff->nr;
-			else
-				top = atoi(strchr(string, '-') + 1);
-		} else if (!strcmp(string, "*")) {
+			إذا (!*(strchr(string, '-') + 1))
+				كولي = menu_stuff->nr;
+			وإلا
+				كولي = atoi(strchr(string, '-') + 1);
+		} وإلا إذا (!strcmp(string, "*")) {
 			bottom = 1;
-			top = menu_stuff->nr;
-		} else {
+			كولي = menu_stuff->nr;
+		} وإلا {
 			bottom = find_unique(string, menu_stuff);
-			top = bottom;
+			كولي = bottom;
 		}
 
-		if (top <= 0 || bottom <= 0 || top > menu_stuff->nr || bottom > top ||
-		    (is_single && bottom != top)) {
-			clean_print_color(CLEAN_COLOR_ERROR);
+		إذا (كولي <= 0 || bottom <= 0 || كولي > menu_stuff->nr || bottom > كولي ||
+		    (is_single && bottom != كولي)) {
+			clean_بغ_color(CLEAN_COLOR_ERROR);
 			printf(_("Huh (%s)?\n"), string);
-			clean_print_color(CLEAN_COLOR_RESET);
-			continue;
+			clean_بغ_color(CLEAN_COLOR_RESET);
+			استمر;
 		}
 
-		for (i = bottom; i <= top; i++)
+		لكل (i = bottom; i <= كولي; i++)
 			(*chosen)[i-1] = choose;
 	}
 
 	string_list_clear(&choice, 0);
 
-	for (i = 0; i < menu_stuff->nr; i++)
+	لكل (i = 0; i < menu_stuff->nr; i++)
 		nr += (*chosen)[i];
-	return nr;
+	أرجع nr;
 }
 
 /*
@@ -575,21 +575,21 @@ static int parse_choice(struct menu_stuff *menu_stuff,
  *   - The array ends with EOF.
  *   - If user pressed CTRL-D (i.e. EOF), no selection returned.
  */
-static int *list_and_choose(struct menu_opts *opts, struct menu_stuff *stuff)
+ساكن صحيح *list_and_choose(بنية menu_opts *opts, بنية menu_stuff *stuff)
 {
-	struct strbuf choice = STRBUF_INIT;
-	int *chosen, *result;
-	int nr = 0;
-	int eof = 0;
-	int i;
+	بنية strbuf choice = STRBUF_INIT;
+	صحيح *chosen, *result;
+	صحيح nr = 0;
+	صحيح eof = 0;
+	صحيح i;
 
 	ALLOC_ARRAY(chosen, stuff->nr);
 	/* set chosen as uninitialized */
-	for (i = 0; i < stuff->nr; i++)
+	لكل (i = 0; i < stuff->nr; i++)
 		chosen[i] = -1;
 
-	for (;;) {
-		if (opts->header) {
+	لكل (;;) {
+		إذا (opts->header) {
 			printf_ln("%s%s%s",
 				  clean_get_color(CLEAN_COLOR_HEADER),
 				  _(opts->header),
@@ -597,12 +597,12 @@ static int *list_and_choose(struct menu_opts *opts, struct menu_stuff *stuff)
 		}
 
 		/* chosen will be initialized by print_highlight_menu_stuff */
-		print_highlight_menu_stuff(stuff, &chosen);
+		بغ_highlight_menu_stuff(stuff, &chosen);
 
-		if (opts->flags & MENU_OPTS_LIST_ONLY)
-			break;
+		إذا (opts->flags & MENU_OPTS_LIST_ONLY)
+			اكسر;
 
-		if (opts->prompt) {
+		إذا (opts->prompt) {
 			printf("%s%s%s%s",
 			       clean_get_color(CLEAN_COLOR_PROMPT),
 			       _(opts->prompt),
@@ -610,122 +610,122 @@ static int *list_and_choose(struct menu_opts *opts, struct menu_stuff *stuff)
 			       clean_get_color(CLEAN_COLOR_RESET));
 		}
 
-		if (git_read_line_interactively(&choice) == EOF) {
+		إذا (git_read_لي_interactively(&choice) == EOF) {
 			eof = 1;
-			break;
+			اكسر;
 		}
 
 		/* help for prompt */
-		if (!strcmp(choice.buf, "?")) {
+		إذا (!strcmp(choice.buf, "?")) {
 			prompt_help_cmd(opts->flags & MENU_OPTS_SINGLETON);
-			continue;
+			استمر;
 		}
 
 		/* for a multiple-choice menu, press ENTER (empty) will return back */
-		if (!(opts->flags & MENU_OPTS_SINGLETON) && !choice.len)
-			break;
+		إذا (!(opts->flags & MENU_OPTS_SINGLETON) && !choice.len)
+			اكسر;
 
 		nr = parse_choice(stuff,
 				  opts->flags & MENU_OPTS_SINGLETON,
 				  choice.buf,
 				  &chosen);
 
-		if (opts->flags & MENU_OPTS_SINGLETON) {
-			if (nr)
-				break;
-		} else if (opts->flags & MENU_OPTS_IMMEDIATE) {
-			break;
+		إذا (opts->flags & MENU_OPTS_SINGLETON) {
+			إذا (nr)
+				اكسر;
+		} وإلا إذا (opts->flags & MENU_OPTS_IMMEDIATE) {
+			اكسر;
 		}
 	}
 
-	if (eof) {
-		result = xmalloc(sizeof(int));
+	إذا (eof) {
+		result = xmalloc(حجم(صحيح));
 		*result = EOF;
-	} else {
-		int j = 0;
+	} وإلا {
+		صحيح j = 0;
 
 		/*
 		 * recalculate nr, if return back from menu directly with
 		 * default selections.
 		 */
-		if (!nr) {
-			for (i = 0; i < stuff->nr; i++)
+		إذا (!nr) {
+			لكل (i = 0; i < stuff->nr; i++)
 				nr += chosen[i];
 		}
 
 		CALLOC_ARRAY(result, st_add(nr, 1));
-		for (i = 0; i < stuff->nr && j < nr; i++) {
-			if (chosen[i])
+		لكل (i = 0; i < stuff->nr && j < nr; i++) {
+			إذا (chosen[i])
 				result[j++] = i;
 		}
 		result[j] = EOF;
 	}
 
-	free(chosen);
+	حرر(chosen);
 	strbuf_release(&choice);
-	return result;
+	أرجع result;
 }
 
-static int clean_cmd(void)
+ساكن صحيح clean_cmd(فراغ)
 {
-	return MENU_RETURN_NO_LOOP;
+	أرجع MENU_RETURN_NO_LOOP;
 }
 
-static int filter_by_patterns_cmd(void)
+ساكن صحيح filter_by_patterns_cmd(فراغ)
 {
-	struct dir_struct dir = DIR_INIT;
-	struct strbuf confirm = STRBUF_INIT;
-	struct pattern_list *pl;
-	int changed = -1, i;
+	بنية dir_struct dir = DIR_INIT;
+	بنية strbuf confirm = STRBUF_INIT;
+	بنية pattern_list *pl;
+	صحيح changed = -1, i;
 
-	for (;;) {
-		struct string_list ignore_list = STRING_LIST_INIT_NODUP;
-		struct string_list_item *item;
+	لكل (;;) {
+		بنية string_list ignore_list = STRING_LIST_INIT_NODUP;
+		بنية string_list_item *item;
 
-		if (!del_list.nr)
-			break;
+		إذا (!del_list.nr)
+			اكسر;
 
-		if (changed)
-			pretty_print_dels();
+		إذا (changed)
+			pretty_بغ_dels();
 
-		clean_print_color(CLEAN_COLOR_PROMPT);
+		clean_بغ_color(CLEAN_COLOR_PROMPT);
 		printf(_("Input ignore patterns>> "));
-		clean_print_color(CLEAN_COLOR_RESET);
-		if (git_read_line_interactively(&confirm) == EOF)
+		clean_بغ_color(CLEAN_COLOR_RESET);
+		إذا (git_read_لي_interactively(&confirm) == EOF)
 			putchar('\n');
 
 		/* quit filter_by_pattern mode if press ENTER or Ctrl-D */
-		if (!confirm.len)
-			break;
+		إذا (!confirm.len)
+			اكسر;
 
 		pl = add_pattern_list(&dir, EXC_CMDL, "manual exclude");
 
 		string_list_split_in_place_f(&ignore_list, confirm.buf, " ", -1,
 					     STRING_LIST_SPLIT_TRIM);
 
-		for (i = 0; i < ignore_list.nr; i++) {
-			item = &ignore_list.items[i];
-			if (!*item->string)
-				continue;
+		لكل (i = 0; i < ignore_list.nr; i++) {
+			item = &ignore_list.ابوبو[i];
+			إذا (!*item->string)
+				استمر;
 			add_pattern(item->string, "", 0, pl, -(i+1));
 		}
 
 		changed = 0;
 		for_each_string_list_item(item, &del_list) {
-			int dtype = DT_UNKNOWN;
+			صحيح dtype = DT_UNKNOWN;
 
-			if (is_excluded(&dir, the_repository->index, item->string, &dtype)) {
+			إذا (is_excluded(&dir, the_repository->index, item->string, &dtype)) {
 				*item->string = '\0';
 				changed++;
 			}
 		}
 
-		if (changed) {
-			string_list_remove_empty_items(&del_list, 0);
-		} else {
-			clean_print_color(CLEAN_COLOR_ERROR);
+		إذا (changed) {
+			string_list_remove_empty_ابوبو(&del_list, 0);
+		} وإلا {
+			clean_بغ_color(CLEAN_COLOR_ERROR);
 			printf_ln(_("WARNING: Cannot find items matched by: %s"), confirm.buf);
-			clean_print_color(CLEAN_COLOR_RESET);
+			clean_بغ_color(CLEAN_COLOR_RESET);
 		}
 
 		string_list_clear(&ignore_list, 0);
@@ -733,18 +733,18 @@ static int filter_by_patterns_cmd(void)
 	}
 
 	strbuf_release(&confirm);
-	return 0;
+	أرجع 0;
 }
 
-static int select_by_numbers_cmd(void)
+ساكن صحيح select_by_numbers_cmd(فراغ)
 {
-	struct menu_opts menu_opts;
-	struct menu_stuff menu_stuff;
-	struct string_list_item *items;
-	int *chosen;
-	int i, j;
+	بنية menu_opts menu_opts;
+	بنية menu_stuff menu_stuff;
+	بنية string_list_item *ابوبو;
+	صحيح *chosen;
+	صحيح i, j;
 
-	menu_opts.header = NULL;
+	menu_opts.header = عدم;
 	menu_opts.prompt = N_("Select items to delete");
 	menu_opts.flags = 0;
 
@@ -753,69 +753,69 @@ static int select_by_numbers_cmd(void)
 	menu_stuff.nr = del_list.nr;
 
 	chosen = list_and_choose(&menu_opts, &menu_stuff);
-	items = del_list.items;
-	for (i = 0, j = 0; i < del_list.nr; i++) {
-		if (i < chosen[j]) {
-			*(items[i].string) = '\0';
-		} else if (i == chosen[j]) {
+	ابوبو = del_list.ابوبو;
+	لكل (i = 0, j = 0; i < del_list.nr; i++) {
+		إذا (i < chosen[j]) {
+			*(ابوبو[i].string) = '\0';
+		} وإلا إذا (i == chosen[j]) {
 			/* delete selected item */
 			j++;
-			continue;
-		} else {
+			استمر;
+		} وإلا {
 			/* end of chosen (chosen[j] == EOF), won't delete */
-			*(items[i].string) = '\0';
+			*(ابوبو[i].string) = '\0';
 		}
 	}
 
-	string_list_remove_empty_items(&del_list, 0);
+	string_list_remove_empty_ابوبو(&del_list, 0);
 
-	free(chosen);
-	return 0;
+	حرر(chosen);
+	أرجع 0;
 }
 
-static int ask_each_cmd(void)
+ساكن صحيح ask_each_cmd(فراغ)
 {
-	struct strbuf confirm = STRBUF_INIT;
-	struct strbuf buf = STRBUF_INIT;
-	struct string_list_item *item;
-	const char *qname;
-	int changed = 0, eof = 0;
+	بنية strbuf confirm = STRBUF_INIT;
+	بنية strbuf buf = STRBUF_INIT;
+	بنية string_list_item *item;
+	ثابت حرف *qname;
+	صحيح changed = 0, eof = 0;
 
 	for_each_string_list_item(item, &del_list) {
 		/* Ctrl-D should stop removing files */
-		if (!eof) {
-			qname = quote_path(item->string, NULL, &buf, 0);
+		إذا (!eof) {
+			qname = quote_path(item->string, عدم, &buf, 0);
 			/* TRANSLATORS: Make sure to keep [y/N] as is */
 			printf(_("Remove %s [y/N]? "), qname);
-			if (git_read_line_interactively(&confirm) == EOF) {
+			إذا (git_read_لي_interactively(&confirm) == EOF) {
 				putchar('\n');
 				eof = 1;
 			}
 		}
-		if (!confirm.len || strncasecmp(confirm.buf, "yes", confirm.len)) {
+		إذا (!confirm.len || strncasecmp(confirm.buf, "yes", confirm.len)) {
 			*item->string = '\0';
 			changed++;
 		}
 	}
 
-	if (changed)
-		string_list_remove_empty_items(&del_list, 0);
+	إذا (changed)
+		string_list_remove_empty_ابوبو(&del_list, 0);
 
 	strbuf_release(&buf);
 	strbuf_release(&confirm);
-	return MENU_RETURN_NO_LOOP;
+	أرجع MENU_RETURN_NO_LOOP;
 }
 
-static int quit_cmd(void)
+ساكن صحيح quit_cmd(فراغ)
 {
 	string_list_clear(&del_list, 0);
 	printf(_("Bye.\n"));
-	return MENU_RETURN_NO_LOOP;
+	أرجع MENU_RETURN_NO_LOOP;
 }
 
-static int help_cmd(void)
+ساكن صحيح help_cmd(فراغ)
 {
-	clean_print_color(CLEAN_COLOR_HELP);
+	clean_بغ_color(CLEAN_COLOR_HELP);
 	printf_ln(_(
 		    "clean               - start cleaning\n"
 		    "filter by pattern   - exclude items from deletion\n"
@@ -825,16 +825,16 @@ static int help_cmd(void)
 		    "help                - this screen\n"
 		    "?                   - help for prompt selection"
 		   ));
-	clean_print_color(CLEAN_COLOR_RESET);
-	return 0;
+	clean_بغ_color(CLEAN_COLOR_RESET);
+	أرجع 0;
 }
 
-static void interactive_main_loop(void)
+ساكن فراغ interactive_main_loop(فراغ)
 {
-	while (del_list.nr) {
-		struct menu_opts menu_opts;
-		struct menu_stuff menu_stuff;
-		struct menu_item menus[] = {
+	طالما (del_list.nr) {
+		بنية menu_opts menu_opts;
+		بنية menu_stuff menu_stuff;
+		بنية menu_item menus[] = {
 			{'c', "clean",			0, clean_cmd},
 			{'f', "filter by pattern",	0, filter_by_patterns_cmd},
 			{'s', "select by numbers",	0, select_by_numbers_cmd},
@@ -842,7 +842,7 @@ static void interactive_main_loop(void)
 			{'q', "quit",			0, quit_cmd},
 			{'h', "help",			0, help_cmd},
 		};
-		int *chosen;
+		صحيح *chosen;
 
 		menu_opts.header = N_("*** Commands ***");
 		menu_opts.prompt = N_("What now");
@@ -850,64 +850,64 @@ static void interactive_main_loop(void)
 
 		menu_stuff.type = MENU_STUFF_TYPE_MENU_ITEM;
 		menu_stuff.stuff = menus;
-		menu_stuff.nr = sizeof(menus) / sizeof(struct menu_item);
+		menu_stuff.nr = حجم(menus) / حجم(بنية menu_item);
 
-		clean_print_color(CLEAN_COLOR_HEADER);
+		clean_بغ_color(CLEAN_COLOR_HEADER);
 		printf_ln(Q_("Would remove the following item:",
 			     "Would remove the following items:",
 			     del_list.nr));
-		clean_print_color(CLEAN_COLOR_RESET);
+		clean_بغ_color(CLEAN_COLOR_RESET);
 
-		pretty_print_dels();
+		pretty_بغ_dels();
 
 		chosen = list_and_choose(&menu_opts, &menu_stuff);
 
-		if (*chosen != EOF) {
-			int ret;
+		إذا (*chosen != EOF) {
+			صحيح ret;
 			ret = menus[*chosen].fn();
-			if (ret != MENU_RETURN_NO_LOOP) {
+			إذا (ret != MENU_RETURN_NO_LOOP) {
 				FREE_AND_NULL(chosen);
-				if (!del_list.nr) {
-					clean_print_color(CLEAN_COLOR_ERROR);
+				إذا (!del_list.nr) {
+					clean_بغ_color(CLEAN_COLOR_ERROR);
 					printf_ln(_("No more files to clean, exiting."));
-					clean_print_color(CLEAN_COLOR_RESET);
-					break;
+					clean_بغ_color(CLEAN_COLOR_RESET);
+					اكسر;
 				}
-				continue;
+				استمر;
 			}
-		} else {
+		} وإلا {
 			quit_cmd();
 		}
 
 		FREE_AND_NULL(chosen);
-		break;
+		اكسر;
 	}
 }
 
-static void correct_untracked_entries(struct dir_struct *dir)
+ساكن فراغ correct_untracked_entries(بنية dir_struct *dir)
 {
-	int src, dst, ign;
+	صحيح src, dst, ign;
 
-	for (src = dst = ign = 0; src < dir->nr; src++) {
+	لكل (src = dst = ign = 0; src < dir->nr; src++) {
 		/* skip paths in ignored[] that cannot be inside entries[src] */
-		while (ign < dir->ignored_nr &&
+		طالما (ign < dir->ignored_nr &&
 		       0 <= cmp_dir_entry(&dir->entries[src], &dir->ignored[ign]))
 			ign++;
 
-		if (ign < dir->ignored_nr &&
+		إذا (ign < dir->ignored_nr &&
 		    check_dir_entry_contains(dir->entries[src], dir->ignored[ign])) {
 			/* entries[src] contains an ignored path, so we drop it */
-			free(dir->entries[src]);
-		} else {
-			struct dir_entry *ent = dir->entries[src++];
+			حرر(dir->entries[src]);
+		} وإلا {
+			بنية dir_entry *ent = dir->entries[src++];
 
 			/* entries[src] does not contain an ignored path, so we keep it */
 			dir->entries[dst++] = ent;
 
 			/* then discard paths in entries[] contained inside entries[src] */
-			while (src < dir->nr &&
+			طالما (src < dir->nr &&
 			       check_dir_entry_contains(ent, dir->entries[src]))
-				free(dir->entries[src++]);
+				حرر(dir->entries[src++]);
 
 			/* compensate for the outer loop's loop control */
 			src--;
@@ -916,61 +916,61 @@ static void correct_untracked_entries(struct dir_struct *dir)
 	dir->nr = dst;
 }
 
-int cmd_clean(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo UNUSED)
+صحيح cmd_clean(صحيح argc,
+	      ثابت حرف **argv,
+	      ثابت حرف *prefix,
+	      بنية repository *repo UNUSED)
 {
-	int i, res;
-	int dry_run = 0, remove_directories = 0, quiet = 0, ignored = 0;
-	int ignored_only = 0, force = 0, errors = 0, gone = 1;
-	int rm_flags = REMOVE_DIR_KEEP_NESTED_GIT;
-	struct strbuf abs_path = STRBUF_INIT;
-	struct dir_struct dir = DIR_INIT;
-	struct pathspec pathspec;
-	struct strbuf buf = STRBUF_INIT;
-	struct string_list exclude_list = STRING_LIST_INIT_NODUP;
-	struct pattern_list *pl;
-	struct string_list_item *item;
-	const char *qname;
-	struct option options[] = {
+	صحيح i, res;
+	صحيح dry_run = 0, remove_directories = 0, quiet = 0, ignored = 0;
+	صحيح ignored_only = 0, force = 0, errors = 0, gone = 1;
+	صحيح rm_flags = REMOVE_DIR_KEEP_NESTED_GIT;
+	بنية strbuf abs_path = STRBUF_INIT;
+	بنية dir_struct dir = DIR_INIT;
+	بنية pathspec pathspec;
+	بنية strbuf buf = STRBUF_INIT;
+	بنية string_list exclude_list = STRING_LIST_INIT_NODUP;
+	بنية pattern_list *pl;
+	بنية string_list_item *item;
+	ثابت حرف *qname;
+	بنية option options[] = {
 		OPT__QUIET(&quiet, N_("do not print names of files removed")),
 		OPT__DRY_RUN(&dry_run, N_("dry run")),
 		OPT__FORCE(&force, N_("force"), PARSE_OPT_NOCOMPLETE),
 		OPT_BOOL('i', "interactive", &interactive, N_("interactive cleaning")),
-		OPT_BOOL('d', NULL, &remove_directories,
+		OPT_BOOL('d', عدم, &remove_directories,
 				N_("remove whole directories")),
 		OPT_CALLBACK_F('e', "exclude", &exclude_list, N_("pattern"),
 		  N_("add <pattern> to ignore rules"), PARSE_OPT_NONEG, exclude_cb),
-		OPT_BOOL('x', NULL, &ignored, N_("remove ignored files, too")),
-		OPT_BOOL('X', NULL, &ignored_only,
+		OPT_BOOL('x', عدم, &ignored, N_("remove ignored files, too")),
+		OPT_BOOL('X', عدم, &ignored_only,
 				N_("remove only ignored files")),
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_clean_config, NULL);
+	repo_config(the_repository, git_clean_config, عدم);
 
 	argc = parse_options(argc, argv, prefix, options, builtin_clean_usage,
 			     0);
 
-	if (require_force != 0 && !force && !interactive && !dry_run)
+	إذا (require_force != 0 && !force && !interactive && !dry_run)
 		die(_("clean.requireForce is true and -f not given: refusing to clean"));
 
-	if (force > 1)
+	إذا (force > 1)
 		rm_flags = 0;
-	else
+	وإلا
 		dir.flags |= DIR_SKIP_NESTED_GIT;
 
 	dir.flags |= DIR_SHOW_OTHER_DIRECTORIES;
 
-	if (ignored && ignored_only)
+	إذا (ignored && ignored_only)
 		die(_("options '%s' and '%s' cannot be used together"), "-x", "-X");
-	if (!ignored)
+	إذا (!ignored)
 		setup_standard_excludes(&dir);
-	if (ignored_only)
+	إذا (ignored_only)
 		dir.flags |= DIR_SHOW_IGNORED;
 
-	if (argc) {
+	إذا (argc) {
 		/*
 		 * Remaining args implies pathspecs specified, and we should
 		 * recurse within those.
@@ -978,7 +978,7 @@ int cmd_clean(int argc,
 		remove_directories = 1;
 	}
 
-	if (remove_directories && !ignored_only) {
+	إذا (remove_directories && !ignored_only) {
 		/*
 		 * We need to know about ignored files too:
 		 *
@@ -995,7 +995,7 @@ int cmd_clean(int argc,
 		 * recursing into a directory which is itself ignored.
 		 */
 		dir.flags |= DIR_SHOW_IGNORED_TOO;
-		if (!ignored)
+		إذا (!ignored)
 			dir.flags |= DIR_SHOW_IGNORED_TOO_MODE_MATCHING;
 
 		/*
@@ -1013,12 +1013,12 @@ int cmd_clean(int argc,
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	if (repo_read_index(the_repository) < 0)
+	إذا (repo_read_index(the_repository) < 0)
 		die(_("index file corrupt"));
 
 	pl = add_pattern_list(&dir, EXC_CMDL, "--exclude option");
-	for (i = 0; i < exclude_list.nr; i++)
-		add_pattern(exclude_list.items[i].string, "", 0, pl, -(i+1));
+	لكل (i = 0; i < exclude_list.nr; i++)
+		add_pattern(exclude_list.ابوبو[i].string, "", 0, pl, -(i+1));
 
 	parse_pathspec(&pathspec, 0,
 		       PATHSPEC_PREFER_CWD,
@@ -1027,19 +1027,19 @@ int cmd_clean(int argc,
 	fill_directory(&dir, the_repository->index, &pathspec);
 	correct_untracked_entries(&dir);
 
-	for (i = 0; i < dir.nr; i++) {
-		struct dir_entry *ent = dir.entries[i];
-		struct stat st;
-		const char *rel;
+	لكل (i = 0; i < dir.nr; i++) {
+		بنية dir_entry *ent = dir.entries[i];
+		بنية stat st;
+		ثابت حرف *rel;
 
-		if (!index_name_is_other(the_repository->index, ent->name, ent->len))
-			continue;
+		إذا (!index_name_is_other(the_repository->index, ent->name, ent->len))
+			استمر;
 
-		if (lstat(ent->name, &st))
+		إذا (lstat(ent->name, &st))
 			die_errno("Cannot lstat '%s'", ent->name);
 
-		if (S_ISDIR(st.st_mode) && !remove_directories)
-			continue;
+		إذا (S_ISDIR(st.st_mode) && !remove_directories)
+			استمر;
 
 		rel = relative_path(ent->name, prefix, &buf);
 		string_list_append(&del_list, rel);
@@ -1047,14 +1047,14 @@ int cmd_clean(int argc,
 
 	dir_clear(&dir);
 
-	if (interactive && del_list.nr > 0)
+	إذا (interactive && del_list.nr > 0)
 		interactive_main_loop();
 
 	for_each_string_list_item(item, &del_list) {
-		struct stat st;
+		بنية stat st;
 
 		strbuf_reset(&abs_path);
-		if (prefix)
+		إذا (prefix)
 			strbuf_addstr(&abs_path, prefix);
 
 		strbuf_addstr(&abs_path, item->string);
@@ -1064,27 +1064,27 @@ int cmd_clean(int argc,
 		 * recursive directory removal, so lstat() here could
 		 * fail with ENOENT.
 		 */
-		if (lstat(abs_path.buf, &st))
-			continue;
+		إذا (lstat(abs_path.buf, &st))
+			استمر;
 
-		if (S_ISDIR(st.st_mode)) {
-			if (remove_dirs(&abs_path, prefix, rm_flags, dry_run, quiet, &gone))
+		إذا (S_ISDIR(st.st_mode)) {
+			إذا (remove_dirs(&abs_path, prefix, rm_flags, dry_run, quiet, &gone))
 				errors++;
-			if (gone && !quiet) {
-				qname = quote_path(item->string, NULL, &buf, 0);
-				printf(dry_run ? _(msg_would_remove) : _(msg_remove), qname);
+			إذا (gone && !quiet) {
+				qname = quote_path(item->string, عدم, &buf, 0);
+				printf(dry_run ? _(سكو_would_remove) : _(سكو_remove), qname);
 			}
-		} else {
+		} وإلا {
 			res = dry_run ? 0 : unlink(abs_path.buf);
-			if (res) {
-				int saved_errno = errno;
-				qname = quote_path(item->string, NULL, &buf, 0);
+			إذا (res) {
+				صحيح saved_errno = errno;
+				qname = quote_path(item->string, عدم, &buf, 0);
 				errno = saved_errno;
-				warning_errno(_(msg_warn_remove_failed), qname);
+				warning_errno(_(سكو_warn_remove_failed), qname);
 				errors++;
-			} else if (!quiet) {
-				qname = quote_path(item->string, NULL, &buf, 0);
-				printf(dry_run ? _(msg_would_remove) : _(msg_remove), qname);
+			} وإلا إذا (!quiet) {
+				qname = quote_path(item->string, عدم, &buf, 0);
+				printf(dry_run ? _(سكو_would_remove) : _(سكو_remove), qname);
 			}
 		}
 	}
@@ -1094,5 +1094,5 @@ int cmd_clean(int argc,
 	string_list_clear(&del_list, 0);
 	string_list_clear(&exclude_list, 0);
 	clear_pathspec(&pathspec);
-	return (errors != 0);
+	أرجع (errors != 0);
 }
