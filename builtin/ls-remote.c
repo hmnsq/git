@@ -20,40 +20,40 @@ static const char * const ls_remote_usage[] = {
  * Is there one among the list of patterns that match the tail part
  * of the path?
  */
-static int tail_match(const struct strvec *pattern, const char *path)
+static цео tail_match(const struct strvec *pattern, const char *path)
 {
 	char *pathbuf;
 
-	if (!pattern->nr)
-		return 1; /* no restriction */
+	ако (!pattern->nr)
+		врати 1; /* no restriction */
 
 	pathbuf = xstrfmt("/%s", path);
-	for (size_t i = 0; i < pattern->nr; i++) {
-		if (!wildmatch(pattern->v[i], pathbuf, 0)) {
+	за (size_t i = 0; i < pattern->nr; i++) {
+		ако (!wildmatch(pattern->v[i], pathbuf, 0)) {
 			free(pathbuf);
-			return 1;
+			врати 1;
 		}
 	}
 	free(pathbuf);
-	return 0;
+	врати 0;
 }
 
-int cmd_ls_remote(int argc,
+цео cmd_ls_remote(цео argc,
 		  const char **argv,
 		  const char *prefix,
 		  struct repository *repo UNUSED)
 {
 	const char *dest = NULL;
 	unsigned flags = 0;
-	int get_url = 0;
-	int quiet = 0;
-	int status = 0;
-	int show_symref_target = 0;
+	цео get_url = 0;
+	цео quiet = 0;
+	цео status = 0;
+	цео show_symref_target = 0;
 	const char *uploadpack = NULL;
 	struct strvec pattern = STRVEC_INIT;
 	struct transport_ls_refs_options transport_options =
 		TRANSPORT_LS_REFS_OPTIONS_INIT;
-	int i;
+	цео i;
 	struct string_list server_options = STRING_LIST_INIT_DUP;
 
 	struct remote *remote;
@@ -111,50 +111,50 @@ int cmd_ls_remote(int argc,
 	 * remote's object format. Otherwise, we may end up misparsing refspecs
 	 * depending on what object hash the remote uses.
 	 */
-	if (!the_repository->hash_algo)
+	ако (!the_repository->hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	packet_trace_identity("ls-remote");
 
-	for (int i = 1; i < argc; i++)
+	за (цео i = 1; i < argc; i++)
 		strvec_pushf(&pattern, "*/%s", argv[i]);
 
-	if (flags & REF_TAGS)
+	ако (flags & REF_TAGS)
 		strvec_push(&transport_options.ref_prefixes, "refs/tags/");
-	if (flags & REF_BRANCHES)
+	ако (flags & REF_BRANCHES)
 		strvec_push(&transport_options.ref_prefixes, "refs/heads/");
 
 	remote = remote_get(dest);
-	if (!remote) {
-		if (dest)
+	ако (!remote) {
+		ако (dest)
 			die("bad repository '%s'", dest);
 		die("No remote configured to list refs from.");
 	}
 
-	if (get_url) {
+	ако (get_url) {
 		printf("%s\n", remote->url.v[0]);
-		return 0;
+		врати 0;
 	}
 
 	transport = transport_get(remote, NULL);
-	if (uploadpack)
+	ако (uploadpack)
 		transport_set_option(transport, TRANS_OPT_UPLOADPACK, uploadpack);
-	if (server_options.nr)
+	ако (server_options.nr)
 		transport->server_options = &server_options;
 
 	ref = transport_get_remote_refs(transport, &transport_options);
-	if (ref) {
-		int hash_algo = hash_algo_by_ptr(transport_get_hash_algo(transport));
+	ако (ref) {
+		цео hash_algo = hash_algo_by_ptr(transport_get_hash_algo(transport));
 		repo_set_hash_algo(the_repository, hash_algo);
 	}
 
-	if (!dest && !quiet)
+	ако (!dest && !quiet)
 		fprintf(stderr, "From %s\n", remote->url.v[0]);
-	for ( ; ref; ref = ref->next) {
+	за ( ; ref; ref = ref->next) {
 		struct ref_array_item *item;
-		if (!check_ref_type(ref, flags))
+		ако (!check_ref_type(ref, flags))
 			continue;
-		if (!tail_match(&pattern, ref->name))
+		ако (!tail_match(&pattern, ref->name))
 			continue;
 		item = ref_array_push(&ref_array, ref->name, &ref->old_oid, NULL);
 		item->symref = xstrdup_or_null(ref->symref);
@@ -163,9 +163,9 @@ int cmd_ls_remote(int argc,
 	sorting = ref_sorting_options(&sorting_options);
 	ref_array_sort(sorting, &ref_array);
 
-	for (i = 0; i < ref_array.nr; i++) {
+	за (i = 0; i < ref_array.nr; i++) {
 		const struct ref_array_item *ref = ref_array.items[i];
-		if (show_symref_target && ref->symref)
+		ако (show_symref_target && ref->symref)
 			printf("ref: %s\t%s\n", ref->symref, ref->refname);
 		printf("%s\t%s\n", oid_to_hex(&ref->objectname), ref->refname);
 		status = 0; /* we found something */
@@ -174,11 +174,11 @@ int cmd_ls_remote(int argc,
 	string_list_clear(&server_options, 0);
 	ref_sorting_release(sorting);
 	ref_array_clear(&ref_array);
-	if (transport_disconnect(transport))
+	ако (transport_disconnect(transport))
 		status = 1;
 	transport_ls_refs_options_release(&transport_options);
 
 	strvec_clear(&pattern);
 	string_list_clear(&server_options, 0);
-	return status;
+	врати status;
 }

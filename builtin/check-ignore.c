@@ -10,14 +10,14 @@
 #include "submodule.h"
 #include "write-or-die.h"
 
-static int quiet, verbose, stdin_paths, show_non_matching, no_index;
+static цео quiet, verbose, stdin_paths, show_non_matching, no_index;
 static const char * const check_ignore_usage[] = {
 "git check-ignore [<options>] <pathname>...",
 "git check-ignore [<options>] --stdin",
 NULL
 };
 
-static int nul_term_line;
+static цео nul_term_line;
 
 static const struct option check_ignore_options[] = {
 	OPT__QUIET(&quiet, N_("suppress progress reporting")),
@@ -38,51 +38,51 @@ static void output_pattern(const char *path, struct path_pattern *pattern)
 {
 	const char *bang  = (pattern && pattern->flags & PATTERN_FLAG_NEGATIVE)  ? "!" : "";
 	const char *slash = (pattern && pattern->flags & PATTERN_FLAG_MUSTBEDIR) ? "/" : "";
-	if (!nul_term_line) {
-		if (!verbose) {
+	ако (!nul_term_line) {
+		ако (!verbose) {
 			write_name_quoted(path, stdout, '\n');
-		} else {
-			if (pattern) {
+		} инако {
+			ако (pattern) {
 				quote_c_style(pattern->pl->src, NULL, stdout, 0);
 				printf(":%d:%s%s%s\t",
 				       pattern->srcpos,
 				       bang, pattern->pattern, slash);
 			}
-			else {
+			инако {
 				printf("::\t");
 			}
 			quote_c_style(path, NULL, stdout, 0);
 			fputc('\n', stdout);
 		}
-	} else {
-		if (!verbose) {
+	} инако {
+		ако (!verbose) {
 			printf("%s%c", path, '\0');
-		} else {
-			if (pattern)
+		} инако {
+			ако (pattern)
 				printf("%s%c%d%c%s%s%s%c%s%c",
 				       pattern->pl->src, '\0',
 				       pattern->srcpos, '\0',
 				       bang, pattern->pattern, slash, '\0',
 				       path, '\0');
-			else
+			инако
 				printf("%c%c%c%s%c", '\0', '\0', '\0', path, '\0');
 		}
 	}
 }
 
-static int check_ignore(struct dir_struct *dir,
-			const char *prefix, int argc, const char **argv)
+static цео check_ignore(struct dir_struct *dir,
+			const char *prefix, цео argc, const char **argv)
 {
 	const char *full_path;
 	char *seen;
-	int num_ignored = 0, i;
+	цео num_ignored = 0, i;
 	struct path_pattern *pattern;
 	struct pathspec pathspec;
 
-	if (!argc) {
-		if (!quiet)
+	ако (!argc) {
+		ако (!quiet)
 			fprintf(stderr, "no pathspec given.\n");
-		return 0;
+		врати 0;
 	}
 
 	/*
@@ -104,41 +104,41 @@ static int check_ignore(struct dir_struct *dir,
 	 */
 	seen = find_pathspecs_matching_against_index(&pathspec, the_repository->index,
 						     PS_HEED_SKIP_WORKTREE);
-	for (i = 0; i < pathspec.nr; i++) {
+	за (i = 0; i < pathspec.nr; i++) {
 		full_path = pathspec.items[i].match;
 		pattern = NULL;
-		if (!seen[i]) {
-			int dtype = DT_UNKNOWN;
+		ако (!seen[i]) {
+			цео dtype = DT_UNKNOWN;
 			pattern = last_matching_pattern(dir, the_repository->index,
 							full_path, &dtype);
-			if (!verbose && pattern &&
+			ако (!verbose && pattern &&
 			    pattern->flags & PATTERN_FLAG_NEGATIVE)
 				pattern = NULL;
 		}
-		if (!quiet && (pattern || show_non_matching))
+		ако (!quiet && (pattern || show_non_matching))
 			output_pattern(pathspec.items[i].original, pattern);
-		if (pattern)
+		ако (pattern)
 			num_ignored++;
 	}
 	free(seen);
 	clear_pathspec(&pathspec);
 
-	return num_ignored;
+	врати num_ignored;
 }
 
-static int check_ignore_stdin_paths(struct dir_struct *dir, const char *prefix)
+static цео check_ignore_stdin_paths(struct dir_struct *dir, const char *prefix)
 {
 	struct strbuf buf = STRBUF_INIT;
 	struct strbuf unquoted = STRBUF_INIT;
 	char *pathspec[2] = { NULL, NULL };
 	strbuf_getline_fn getline_fn;
-	int num_ignored = 0;
+	цео num_ignored = 0;
 
 	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	while (getline_fn(&buf, stdin) != EOF) {
-		if (!nul_term_line && buf.buf[0] == '"') {
+	док (getline_fn(&buf, stdin) != EOF) {
+		ако (!nul_term_line && buf.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, buf.buf, NULL))
+			ако (unquote_c_style(&unquoted, buf.buf, NULL))
 				die("line is badly quoted");
 			strbuf_swap(&buf, &unquoted);
 		}
@@ -149,15 +149,15 @@ static int check_ignore_stdin_paths(struct dir_struct *dir, const char *prefix)
 	}
 	strbuf_release(&buf);
 	strbuf_release(&unquoted);
-	return num_ignored;
+	врати num_ignored;
 }
 
-int cmd_check_ignore(int argc,
+цео cmd_check_ignore(цео argc,
 		     const char **argv,
 		     const char *prefix,
 		     struct repository *repo UNUSED)
 {
-	int num_ignored;
+	цео num_ignored;
 	struct dir_struct dir = DIR_INIT;
 
 	repo_config(the_repository, git_default_config, NULL);
@@ -165,38 +165,38 @@ int cmd_check_ignore(int argc,
 	argc = parse_options(argc, argv, prefix, check_ignore_options,
 			     check_ignore_usage, 0);
 
-	if (stdin_paths) {
-		if (argc > 0)
+	ако (stdin_paths) {
+		ако (argc > 0)
 			die(_("cannot specify pathnames with --stdin"));
-	} else {
-		if (nul_term_line)
+	} инако {
+		ако (nul_term_line)
 			die(_("-z only makes sense with --stdin"));
-		if (argc == 0)
+		ако (argc == 0)
 			die(_("no path specified"));
 	}
-	if (quiet) {
-		if (argc > 1)
+	ако (quiet) {
+		ако (argc > 1)
 			die(_("--quiet is only valid with a single pathname"));
-		if (verbose)
+		ако (verbose)
 			die(_("cannot have both --quiet and --verbose"));
 	}
-	if (show_non_matching && !verbose)
+	ако (show_non_matching && !verbose)
 		die(_("--non-matching is only valid with --verbose"));
 
 	/* read_cache() is only necessary so we can watch out for submodules. */
-	if (!no_index && repo_read_index(the_repository) < 0)
+	ако (!no_index && repo_read_index(the_repository) < 0)
 		die(_("index file corrupt"));
 
 	setup_standard_excludes(&dir);
 
-	if (stdin_paths) {
+	ако (stdin_paths) {
 		num_ignored = check_ignore_stdin_paths(&dir, prefix);
-	} else {
+	} инако {
 		num_ignored = check_ignore(&dir, prefix, argc, argv);
 		maybe_flush_or_die(stdout, "ignore to stdout");
 	}
 
 	dir_clear(&dir);
 
-	return !num_ignored;
+	врати !num_ignored;
 }

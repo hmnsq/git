@@ -20,10 +20,10 @@ enum ref_action_mode {
 
 static enum ref_action_mode parse_ref_action_mode(const char *ref_action, const char *source)
 {
-	if (!ref_action || !strcmp(ref_action, "update"))
-		return REF_ACTION_UPDATE;
-	if (!strcmp(ref_action, "print"))
-		return REF_ACTION_PRINT;
+	ако (!ref_action || !strcmp(ref_action, "update"))
+		врати REF_ACTION_UPDATE;
+	ако (!strcmp(ref_action, "print"))
+		врати REF_ACTION_PRINT;
 	die(_("invalid %s value: '%s'"), source, ref_action);
 }
 
@@ -32,18 +32,18 @@ static enum ref_action_mode get_ref_action_mode(struct repository *repo, const c
 	const char *config_value = NULL;
 
 	/* Command line option takes precedence */
-	if (ref_action)
-		return parse_ref_action_mode(ref_action, "--ref-action");
+	ако (ref_action)
+		врати parse_ref_action_mode(ref_action, "--ref-action");
 
 	/* Check config value */
-	if (!repo_config_get_string_tmp(repo, "replay.refAction", &config_value))
-		return parse_ref_action_mode(config_value, "replay.refAction");
+	ако (!repo_config_get_string_tmp(repo, "replay.refAction", &config_value))
+		врати parse_ref_action_mode(config_value, "replay.refAction");
 
 	/* Default to update mode */
-	return REF_ACTION_UPDATE;
+	врати REF_ACTION_UPDATE;
 }
 
-static int handle_ref_update(enum ref_action_mode mode,
+static цео handle_ref_update(enum ref_action_mode mode,
 			     struct ref_transaction *transaction,
 			     const char *refname,
 			     const struct object_id *new_oid,
@@ -57,16 +57,16 @@ static int handle_ref_update(enum ref_action_mode mode,
 		       refname,
 		       oid_to_hex(new_oid),
 		       oid_to_hex(old_oid));
-		return 0;
+		врати 0;
 	case REF_ACTION_UPDATE:
-		return ref_transaction_update(transaction, refname, new_oid, old_oid,
+		врати ref_transaction_update(transaction, refname, new_oid, old_oid,
 					      NULL, NULL, 0, reflog_msg, err);
 	default:
 		BUG("unknown ref_action_mode %d", mode);
 	}
 }
 
-int cmd_replay(int argc,
+цео cmd_replay(цео argc,
 	       const char **argv,
 	       const char *prefix,
 	       struct repository *repo)
@@ -79,8 +79,8 @@ int cmd_replay(int argc,
 	struct ref_transaction *transaction = NULL;
 	struct strbuf transaction_err = STRBUF_INIT;
 	struct strbuf reflog_msg = STRBUF_INIT;
-	int desired_reverse;
-	int ret = 0;
+	цео desired_reverse;
+	цео ret = 0;
 
 	const char *const replay_usage[] = {
 		N_("(EXPERIMENTAL!) git replay "
@@ -120,7 +120,7 @@ int cmd_replay(int argc,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT);
 
 	/* Exactly one mode must be specified */
-	if (!opts.onto && !opts.advance && !opts.revert) {
+	ако (!opts.onto && !opts.advance && !opts.revert) {
 		error(_("exactly one of --onto, --advance, or --revert is required"));
 		usage_with_options(replay_usage, replay_options);
 	}
@@ -165,7 +165,7 @@ int cmd_replay(int argc,
 	revs.simplify_history = 0;
 
 	argc = setup_revisions(argc, argv, &revs, NULL);
-	if (argc > 1) {
+	ако (argc > 1) {
 		ret = error(_("unrecognized argument: %s"), argv[1]);
 		goto cleanup;
 	}
@@ -174,25 +174,25 @@ int cmd_replay(int argc,
 	 * Detect and warn if we override some user specified rev
 	 * walking options.
 	 */
-	if (revs.reverse != desired_reverse) {
+	ако (revs.reverse != desired_reverse) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"reverse");
 		revs.reverse = desired_reverse;
 	}
-	if (revs.sort_order != REV_SORT_IN_GRAPH_ORDER) {
+	ако (revs.sort_order != REV_SORT_IN_GRAPH_ORDER) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"sort_order");
 		revs.sort_order = REV_SORT_IN_GRAPH_ORDER;
 	}
-	if (revs.topo_order != 1) {
+	ако (revs.topo_order != 1) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"topo_order");
 		revs.topo_order = 1;
 	}
-	if (revs.simplify_history != 0) {
+	ако (revs.simplify_history != 0) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"simplify_history");
@@ -200,37 +200,37 @@ int cmd_replay(int argc,
 	}
 
 	ret = replay_revisions(&revs, &opts, &result);
-	if (ret)
+	ако (ret)
 		goto cleanup;
 
 	/* Build reflog message */
-	if (opts.revert) {
+	ако (opts.revert) {
 		strbuf_addf(&reflog_msg, "replay --revert %s", opts.revert);
-	} else if (opts.advance) {
+	} инако ако (opts.advance) {
 		strbuf_addf(&reflog_msg, "replay --advance %s", opts.advance);
-	} else {
+	} инако {
 		struct object_id oid;
-		if (repo_get_oid_committish(repo, opts.onto, &oid))
+		ако (repo_get_oid_committish(repo, opts.onto, &oid))
 			BUG("--onto commit should have been resolved beforehand already");
 		strbuf_addf(&reflog_msg, "replay --onto %s", oid_to_hex(&oid));
 	}
 
 	/* Initialize ref transaction if using update mode */
-	if (ref_mode == REF_ACTION_UPDATE) {
+	ако (ref_mode == REF_ACTION_UPDATE) {
 		transaction = ref_store_transaction_begin(get_main_ref_store(repo),
 							  0, &transaction_err);
-		if (!transaction) {
+		ако (!transaction) {
 			ret = error(_("failed to begin ref transaction: %s"),
 				    transaction_err.buf);
 			goto cleanup;
 		}
 	}
 
-	for (size_t i = 0; i < result.updates_nr; i++) {
+	за (size_t i = 0; i < result.updates_nr; i++) {
 		ret = handle_ref_update(ref_mode, transaction, result.updates[i].refname,
 					&result.updates[i].new_oid, &result.updates[i].old_oid,
 					reflog_msg.buf, &transaction_err);
-		if (ret) {
+		ако (ret) {
 			ret = error(_("failed to update ref '%s': %s"),
 				    result.updates[i].refname, transaction_err.buf);
 			goto cleanup;
@@ -238,8 +238,8 @@ int cmd_replay(int argc,
 	}
 
 	/* Commit the ref transaction if we have one */
-	if (transaction) {
-		if (ref_transaction_commit(transaction, &transaction_err)) {
+	ако (transaction) {
+		ако (ref_transaction_commit(transaction, &transaction_err)) {
 			ret = error(_("failed to commit ref transaction: %s"),
 				    transaction_err.buf);
 			goto cleanup;
@@ -249,7 +249,7 @@ int cmd_replay(int argc,
 	ret = 0;
 
 cleanup:
-	if (transaction)
+	ако (transaction)
 		ref_transaction_free(transaction);
 	replay_result_release(&result);
 	strbuf_release(&transaction_err);
@@ -257,7 +257,7 @@ cleanup:
 	release_revisions(&revs);
 
 	/* Return */
-	if (ret < 0)
+	ако (ret < 0)
 		exit(128);
-	return ret;
+	врати ret;
 }

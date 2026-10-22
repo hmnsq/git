@@ -8,17 +8,17 @@
 #include "builtin.h"
 #include "strvec.h"
 
-int cmd_annotate(int argc,
+цео cmd_annotate(цео argc,
 		 const char **argv,
 		 const char *prefix,
 		 struct repository *repo)
 {
 	struct strvec args = STRVEC_INIT;
 	const char **args_copy;
-	int ret;
+	цео ret;
 
 	strvec_pushl(&args, "annotate", "-c", NULL);
-	for (int i = 1; i < argc; i++)
+	за (цео i = 1; i < argc; i++)
 		strvec_push(&args, argv[i]);
 
 	/*
@@ -32,5 +32,5 @@ int cmd_annotate(int argc,
 
 	strvec_clear(&args);
 	free(args_copy);
-	return ret;
+	врати ret;
 }

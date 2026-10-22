@@ -14,44 +14,44 @@
 #include "setup.h"
 #include "strbuf.h"
 
-static int guess_repository_type(const char *git_dir)
+static цео guess_repository_type(const char *git_dir)
 {
 	const char *slash;
 	char *cwd;
-	int cwd_is_git_dir;
+	цео cwd_is_git_dir;
 
 	/*
 	 * "GIT_DIR=. git init" is always bare.
 	 * "GIT_DIR=`pwd` git init" too.
 	 */
-	if (!strcmp(".", git_dir))
-		return 1;
+	ако (!strcmp(".", git_dir))
+		врати 1;
 	cwd = xgetcwd();
 	cwd_is_git_dir = !strcmp(git_dir, cwd);
 	free(cwd);
-	if (cwd_is_git_dir)
-		return 1;
+	ако (cwd_is_git_dir)
+		врати 1;
 	/*
 	 * "GIT_DIR=.git or GIT_DIR=something/.git is usually not.
 	 */
-	if (!strcmp(git_dir, ".git"))
-		return 0;
+	ако (!strcmp(git_dir, ".git"))
+		врати 0;
 	slash = strrchr(git_dir, '/');
-	if (slash && !strcmp(slash, "/.git"))
-		return 0;
+	ако (slash && !strcmp(slash, "/.git"))
+		врати 0;
 
 	/*
 	 * Otherwise it is often bare.  At this point
 	 * we are just guessing.
 	 */
-	return 1;
+	врати 1;
 }
 
-static int shared_callback(const struct option *opt, const char *arg, int unset)
+static цео shared_callback(const struct option *opt, const char *arg, цео unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	*((int *) opt->value) = (arg) ? git_config_perm("arg", arg) : PERM_GROUP;
-	return 0;
+	*((цео *) opt->value) = (arg) ? git_config_perm("arg", arg) : PERM_GROUP;
+	врати 0;
 }
 
 static const char *const init_db_usage[] = {
@@ -69,7 +69,7 @@ static const char *const init_db_usage[] = {
  * On the other hand, it might just make lookup slower and messier. You
  * be the judge.  The default case is to have one DB per managed directory.
  */
-int cmd_init_db(int argc,
+цео cmd_init_db(цео argc,
 		const char **argv,
 		const char *prefix,
 		struct repository *repo UNUSED)
@@ -80,13 +80,13 @@ int cmd_init_db(int argc,
 	char *work_tree = NULL;
 	const char *template_dir = NULL;
 	char *template_dir_to_free = NULL;
-	int quiet = 0;
-	int bare = startup_info->force_bare_repository ? 1 : -1;
+	цео quiet = 0;
+	цео bare = startup_info->force_bare_repository ? 1 : -1;
 	const char *object_format = NULL;
 	const char *ref_storage_format_uri = NULL;
 	const char *initial_branch = NULL;
-	int hash_algo = GIT_HASH_UNKNOWN;
-	int init_shared_repository = -1;
+	цео hash_algo = GIT_HASH_UNKNOWN;
+	цео init_shared_repository = -1;
 	const struct option init_db_options[] = {
 		OPT_STRING(0, "template", &template_dir, N_("template-directory"),
 				N_("directory from which templates will be used")),
@@ -113,25 +113,25 @@ int cmd_init_db(int argc,
 		OPT_ALIAS_F(0, "ref-format", "ref-storage-format", PARSE_OPT_HIDDEN),
 		OPT_END()
 	};
-	int reinit;
+	цео reinit;
 
 	argc = parse_options(argc, argv, prefix, init_db_options, init_db_usage, 0);
 
-	if (real_git_dir && bare == 1)
+	ако (real_git_dir && bare == 1)
 		die(_("options '%s' and '%s' cannot be used together"), "--separate-git-dir", "--bare");
 
-	if (real_git_dir && !is_absolute_path(real_git_dir))
+	ако (real_git_dir && !is_absolute_path(real_git_dir))
 		real_git_dir = real_git_dir_to_free = real_pathdup(real_git_dir, 1);
 
-	if (template_dir && *template_dir && !is_absolute_path(template_dir))
+	ако (template_dir && *template_dir && !is_absolute_path(template_dir))
 		template_dir = template_dir_to_free = absolute_pathdup(template_dir);
 
-	if (argc == 1) {
-		int mkdir_tried = 0;
+	ако (argc == 1) {
+		цео mkdir_tried = 0;
 	retry:
-		if (chdir(argv[0]) < 0) {
-			if (!mkdir_tried) {
-				int saved;
+		ако (chdir(argv[0]) < 0) {
+			ако (!mkdir_tried) {
+				цео saved;
 				/*
 				 * At this point we haven't read any configuration,
 				 * and we know shared_repository should always be 0;
@@ -151,29 +151,29 @@ int cmd_init_db(int argc,
 					break;
 				}
 				repo_settings_set_shared_repository(the_repository, saved);
-				if (mkdir(argv[0], 0777) < 0)
+				ако (mkdir(argv[0], 0777) < 0)
 					die_errno(_("cannot mkdir %s"), argv[0]);
 				mkdir_tried = 1;
 				goto retry;
 			}
 			die_errno(_("cannot chdir to %s"), argv[0]);
 		}
-	} else if (0 < argc) {
+	} инако ако (0 < argc) {
 		usage(init_db_usage[0]);
 	}
-	if (bare == 1) {
+	ако (bare == 1) {
 		char *cwd = xgetcwd();
 		setenv(GIT_DIR_ENVIRONMENT, cwd, argc > 0);
 		free(cwd);
 	}
 
-	if (object_format) {
+	ако (object_format) {
 		hash_algo = hash_algo_by_name(object_format);
-		if (hash_algo == GIT_HASH_UNKNOWN)
+		ако (hash_algo == GIT_HASH_UNKNOWN)
 			die(_("unknown hash algorithm '%s'"), object_format);
 	}
 
-	if (init_shared_repository != -1)
+	ако (init_shared_repository != -1)
 		repo_settings_set_shared_repository(the_repository, init_shared_repository);
 
 	/*
@@ -182,7 +182,7 @@ int cmd_init_db(int argc,
 	 */
 	git_dir = xstrdup_or_null(getenv(GIT_DIR_ENVIRONMENT));
 	work_tree = xstrdup_or_null(getenv(GIT_WORK_TREE_ENVIRONMENT));
-	if ((!git_dir || bare == 1) && work_tree)
+	ако ((!git_dir || bare == 1) && work_tree)
 		die(_("%s (or --work-tree=<directory>) not allowed without "
 			  "specifying %s (or --git-dir=<directory>)"),
 		    GIT_WORK_TREE_ENVIRONMENT,
@@ -191,7 +191,7 @@ int cmd_init_db(int argc,
 	/*
 	 * Set up the default .git directory contents
 	 */
-	if (!git_dir)
+	ако (!git_dir)
 		git_dir = xstrdup(DEFAULT_GIT_DIR_ENVIRONMENT);
 
 	/*
@@ -199,18 +199,18 @@ int cmd_init_db(int argc,
 	 * care to ensure that the common .git/ directory is relocated, not
 	 * the worktree-specific .git/worktrees/<id>/ directory.
 	 */
-	if (real_git_dir) {
-		int err;
+	ако (real_git_dir) {
+		цео err;
 		const char *p;
 		struct strbuf sb = STRBUF_INIT;
 
 		p = read_gitfile_gently(git_dir, &err);
-		if (p && get_common_dir(&sb, p)) {
+		ако (p && get_common_dir(&sb, p)) {
 			struct strbuf mainwt = STRBUF_INIT;
 
 			strbuf_addbuf(&mainwt, &sb);
 			strbuf_strip_suffix(&mainwt, "/.git");
-			if (chdir(mainwt.buf) < 0)
+			ако (chdir(mainwt.buf) < 0)
 				die_errno(_("cannot chdir to %s"), mainwt.buf);
 			strbuf_release(&mainwt);
 			free(git_dir);
@@ -219,25 +219,25 @@ int cmd_init_db(int argc,
 		strbuf_release(&sb);
 	}
 
-	if (bare < 0)
+	ако (bare < 0)
 		bare = guess_repository_type(git_dir);
 
-	if (!bare) {
+	ако (!bare) {
 		const char *git_dir_parent = strrchr(git_dir, '/');
 
-		if (!work_tree) {
-			if (git_dir_parent) {
+		ако (!work_tree) {
+			ако (git_dir_parent) {
 				char *rel = xstrndup(git_dir, git_dir_parent - git_dir);
 				work_tree = real_pathdup(rel, 1);
 				free(rel);
-			} else {
+			} инако {
 				work_tree = xgetcwd();
 			}
 		}
 
-		if (access(work_tree, X_OK))
+		ако (access(work_tree, X_OK))
 			die_errno (_("Cannot access work tree '%s'"), work_tree);
-	} else if (real_git_dir) {
+	} инако ако (real_git_dir) {
 		die(_("--separate-git-dir incompatible with bare repository"));
 	}
 
@@ -247,15 +247,15 @@ int cmd_init_db(int argc,
 	create_reference_database(the_repository, initial_branch, quiet);
 	create_object_database(the_repository, NULL);
 
-	if (!quiet) {
-		int len = strlen(git_dir);
+	ако (!quiet) {
+		цео len = strlen(git_dir);
 
-		if (reinit)
+		ако (reinit)
 			printf(repo_settings_get_shared_repository(the_repository)
 			       ? _("Reinitialized existing shared Git repository in %s%s\n")
 			       : _("Reinitialized existing Git repository in %s%s\n"),
 			       git_dir, len && git_dir[len-1] != '/' ? "/" : "");
-		else
+		инако
 			printf(repo_settings_get_shared_repository(the_repository)
 			       ? _("Initialized empty shared Git repository in %s%s\n")
 			       : _("Initialized empty Git repository in %s%s\n"),
@@ -266,5 +266,5 @@ int cmd_init_db(int argc,
 	free(real_git_dir_to_free);
 	free(work_tree);
 	free(git_dir);
-	return 0;
+	врати 0;
 }

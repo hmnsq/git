@@ -10,12 +10,12 @@ static const char * const update_server_info_usage[] = {
 	NULL
 };
 
-int cmd_update_server_info(int argc,
+цео cmd_update_server_info(цео argc,
 			   const char **argv,
 			   const char *prefix,
 			   struct repository *repo)
 {
-	int force = 0;
+	цео force = 0;
 	struct option options[] = {
 		OPT__FORCE(&force, N_("update the info files from scratch"), 0),
 		OPT_END()
@@ -25,8 +25,8 @@ int cmd_update_server_info(int argc,
 
 	argc = parse_options(argc, argv, prefix, options,
 			     update_server_info_usage, 0);
-	if (argc > 0)
+	ако (argc > 0)
 		usage_with_options(update_server_info_usage, options);
 
-	return !!update_server_info(repo, force);
+	врати !!update_server_info(repo, force);
 }

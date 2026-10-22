@@ -58,11 +58,11 @@ static enum help_action {
 } cmd_mode;
 
 static char *html_path;
-static int verbose = 1;
+static цео verbose = 1;
 static enum help_format help_format = HELP_FORMAT_NONE;
-static int exclude_guides;
-static int show_external_commands = -1;
-static int show_aliases = -1;
+static цео exclude_guides;
+static цео show_external_commands = -1;
+static цео show_aliases = -1;
 static struct option builtin_help_options[] = {
 	OPT_CMDMODE('a', "all", &cmd_mode, N_("print all available commands"),
 		    HELP_ACTION_ALL),
@@ -111,7 +111,7 @@ struct slot_expansion {
 	const char *prefix;
 	const char *placeholder;
 	void (*fn)(struct string_list *list, const char *prefix);
-	int found;
+	цео found;
 };
 
 static void set_config_vars(struct string_list *keys_uniq, struct string_list_item *var)
@@ -122,15 +122,15 @@ static void set_config_vars(struct string_list *keys_uniq, struct string_list_it
 	const char *tag = strchr(str, '<');
 	const char *cut;
 
-	if (wildcard && tag)
+	ако (wildcard && tag)
 		cut = wildcard < tag ? wildcard : tag;
-	else if (wildcard)
+	инако ако (wildcard)
 		cut = wildcard;
-	else if (tag)
+	инако ако (tag)
 		cut = tag;
-	else {
+	инако {
 		string_list_append(keys_uniq, str);
-		return;
+		врати;
 	}
 
 	strbuf_add(&sb, str, cut - str);
@@ -145,11 +145,11 @@ static void set_config_sections(struct string_list *keys_uniq, struct string_lis
 	const char *dot = strchr(str, '.');
 	const char *cut;
 
-	if (dot)
+	ако (dot)
 		cut = dot;
-	else {
+	инако {
 		set_config_vars(keys_uniq, var);
-		return;
+		врати;
 	}
 
 	strbuf_add(&sb, str, cut - str);
@@ -179,31 +179,31 @@ static void list_config_help(enum show_config_type type)
 	struct string_list_item *item;
 	struct strbuf sb = STRBUF_INIT;
 
-	for (p = config_name_list; *p; p++) {
+	за (p = config_name_list; *p; p++) {
 		const char *var = *p;
 
-		for (e = slot_expansions; e->prefix; e++) {
+		за (e = slot_expansions; e->prefix; e++) {
 			strbuf_reset(&sb);
 			strbuf_addf(&sb, "%s.%s", e->prefix, e->placeholder);
-			if (!strcasecmp(var, sb.buf)) {
+			ако (!strcasecmp(var, sb.buf)) {
 				e->fn(&keys, e->prefix);
 				e->found++;
 				break;
 			}
 		}
 
-		if (!e->prefix)
+		ако (!e->prefix)
 			string_list_append(&keys, var);
 	}
 
 	strbuf_release(&sb);
 
-	for (e = slot_expansions; e->prefix; e++)
-		if (!e->found)
+	за (e = slot_expansions; e->prefix; e++)
+		ако (!e->found)
 			BUG("slot_expansion %s.%s is not used",
 			    e->prefix, e->placeholder);
 
-	for (size_t i = 0; i < keys.nr; i++) {
+	за (size_t i = 0; i < keys.nr; i++) {
 		switch (type) {
 		case SHOW_CONFIG_HUMAN:
 			string_list_append(&keys_uniq, keys.items[i].string);
@@ -228,12 +228,12 @@ static void list_config_help(enum show_config_type type)
 
 static enum help_format parse_help_format(const char *format)
 {
-	if (!strcmp(format, "man"))
-		return HELP_FORMAT_MAN;
-	if (!strcmp(format, "info"))
-		return HELP_FORMAT_INFO;
-	if (!strcmp(format, "web") || !strcmp(format, "html"))
-		return HELP_FORMAT_WEB;
+	ако (!strcmp(format, "man"))
+		врати HELP_FORMAT_MAN;
+	ако (!strcmp(format, "info"))
+		врати HELP_FORMAT_INFO;
+	ако (!strcmp(format, "web") || !strcmp(format, "html"))
+		врати HELP_FORMAT_WEB;
 	/*
 	 * Please update _repo_config() in git-completion.bash when you
 	 * add new help formats.
@@ -245,26 +245,26 @@ static const char *get_man_viewer_info(const char *name)
 {
 	struct man_viewer_info_list *viewer;
 
-	for (viewer = man_viewer_info_list; viewer; viewer = viewer->next)
+	за (viewer = man_viewer_info_list; viewer; viewer = viewer->next)
 	{
-		if (!strcasecmp(name, viewer->name))
-			return viewer->info;
+		ако (!strcasecmp(name, viewer->name))
+			врати viewer->info;
 	}
-	return NULL;
+	врати NULL;
 }
 
-static int check_emacsclient_version(void)
+static цео check_emacsclient_version(void)
 {
 	struct strbuf buffer = STRBUF_INIT;
 	struct child_process ec_process = CHILD_PROCESS_INIT;
-	int version;
+	цео version;
 
 	/* emacsclient prints its version number on stderr */
 	strvec_pushl(&ec_process.args, "emacsclient", "--version", NULL);
 	ec_process.err = -1;
 	ec_process.stdout_to_stderr = 1;
-	if (start_command(&ec_process))
-		return error(_("Failed to start emacsclient."));
+	ако (start_command(&ec_process))
+		врати error(_("Failed to start emacsclient."));
 
 	strbuf_read(&buffer, ec_process.err, 20);
 	close(ec_process.err);
@@ -275,31 +275,31 @@ static int check_emacsclient_version(void)
 	 */
 	finish_command(&ec_process);
 
-	if (!starts_with(buffer.buf, "emacsclient")) {
+	ако (!starts_with(buffer.buf, "emacsclient")) {
 		strbuf_release(&buffer);
-		return error(_("Failed to parse emacsclient version."));
+		врати error(_("Failed to parse emacsclient version."));
 	}
 
 	strbuf_remove(&buffer, 0, strlen("emacsclient"));
 	version = atoi(buffer.buf);
 
-	if (version < 22) {
+	ако (version < 22) {
 		strbuf_release(&buffer);
-		return error(_("emacsclient version '%d' too old (< 22)."),
+		врати error(_("emacsclient version '%d' too old (< 22)."),
 			version);
 	}
 
 	strbuf_release(&buffer);
-	return 0;
+	врати 0;
 }
 
 static void exec_woman_emacs(const char *path, const char *page)
 {
-	if (!check_emacsclient_version()) {
+	ако (!check_emacsclient_version()) {
 		/* This works only with emacsclient version >= 22. */
 		struct strbuf man_page = STRBUF_INIT;
 
-		if (!path)
+		ако (!path)
 			path = "emacsclient";
 		strbuf_addf(&man_page, "(woman \"%s\")", page);
 		execlp(path, "emacsclient", "-e", man_page.buf, (char *)NULL);
@@ -311,17 +311,17 @@ static void exec_woman_emacs(const char *path, const char *page)
 static void exec_man_konqueror(const char *path, const char *page)
 {
 	const char *display = getenv("DISPLAY");
-	if (display && *display) {
+	ако (display && *display) {
 		struct strbuf man_page = STRBUF_INIT;
 		const char *filename = "kfmclient";
 
 		/* It's simpler to launch konqueror using kfmclient. */
-		if (path) {
+		ако (path) {
 			size_t len;
-			if (strip_suffix(path, "/konqueror", &len))
-				path = xstrfmt("%.*s/kfmclient", (int)len, path);
+			ако (strip_suffix(path, "/konqueror", &len))
+				path = xstrfmt("%.*s/kfmclient", (цео)len, path);
 			filename = basename((char *)path);
-		} else
+		} инако
 			path = "kfmclient";
 		strbuf_addf(&man_page, "man:%s(1)", page);
 		execlp(path, filename, "newTab", man_page.buf, (char *)NULL);
@@ -332,7 +332,7 @@ static void exec_man_konqueror(const char *path, const char *page)
 
 static void exec_man_man(const char *path, const char *page)
 {
-	if (!path)
+	ако (!path)
 		path = "man";
 	execlp(path, "man", page, (char *)NULL);
 	warning_errno(_("failed to exec '%s'"), path);
@@ -351,14 +351,14 @@ static void add_man_viewer(const char *name)
 {
 	struct man_viewer_list **p = &man_viewer_list;
 
-	while (*p)
+	док (*p)
 		p = &((*p)->next);
 	FLEX_ALLOC_STR(*p, name, name);
 }
 
-static int supported_man_viewer(const char *name, size_t len)
+static цео supported_man_viewer(const char *name, size_t len)
 {
-	return (!strncasecmp("man", name, len) ||
+	врати (!strncasecmp("man", name, len) ||
 		!strncasecmp("woman", name, len) ||
 		!strncasecmp("konqueror", name, len));
 }
@@ -374,108 +374,108 @@ static void do_add_man_viewer_info(const char *name,
 	man_viewer_info_list = new_man_viewer;
 }
 
-static int add_man_viewer_path(const char *name,
+static цео add_man_viewer_path(const char *name,
 			       size_t len,
 			       const char *value)
 {
-	if (supported_man_viewer(name, len))
+	ако (supported_man_viewer(name, len))
 		do_add_man_viewer_info(name, len, value);
-	else
+	инако
 		warning(_("'%s': path for unsupported man viewer.\n"
 			  "Please consider using 'man.<tool>.cmd' instead."),
 			name);
 
-	return 0;
+	врати 0;
 }
 
-static int add_man_viewer_cmd(const char *name,
+static цео add_man_viewer_cmd(const char *name,
 			      size_t len,
 			      const char *value)
 {
-	if (supported_man_viewer(name, len))
+	ако (supported_man_viewer(name, len))
 		warning(_("'%s': cmd for supported man viewer.\n"
 			  "Please consider using 'man.<tool>.path' instead."),
 			name);
-	else
+	инако
 		do_add_man_viewer_info(name, len, value);
 
-	return 0;
+	врати 0;
 }
 
-static int add_man_viewer_info(const char *var, const char *value)
+static цео add_man_viewer_info(const char *var, const char *value)
 {
 	const char *name, *subkey;
 	size_t namelen;
 
-	if (parse_config_key(var, "man", &name, &namelen, &subkey) < 0 || !name)
-		return 0;
+	ако (parse_config_key(var, "man", &name, &namelen, &subkey) < 0 || !name)
+		врати 0;
 
-	if (!strcmp(subkey, "path")) {
-		if (!value)
-			return config_error_nonbool(var);
-		return add_man_viewer_path(name, namelen, value);
+	ако (!strcmp(subkey, "path")) {
+		ако (!value)
+			врати config_error_nonbool(var);
+		врати add_man_viewer_path(name, namelen, value);
 	}
-	if (!strcmp(subkey, "cmd")) {
-		if (!value)
-			return config_error_nonbool(var);
-		return add_man_viewer_cmd(name, namelen, value);
+	ако (!strcmp(subkey, "cmd")) {
+		ако (!value)
+			врати config_error_nonbool(var);
+		врати add_man_viewer_cmd(name, namelen, value);
 	}
 
-	return 0;
+	врати 0;
 }
 
-static int git_help_config(const char *var, const char *value,
+static цео git_help_config(const char *var, const char *value,
 			   const struct config_context *ctx, void *cb)
 {
-	if (!strcmp(var, "help.format")) {
-		if (!value)
-			return config_error_nonbool(var);
+	ако (!strcmp(var, "help.format")) {
+		ако (!value)
+			врати config_error_nonbool(var);
 		help_format = parse_help_format(value);
-		return 0;
+		врати 0;
 	}
-	if (!strcmp(var, "help.htmlpath")) {
-		if (!value)
-			return config_error_nonbool(var);
+	ако (!strcmp(var, "help.htmlpath")) {
+		ако (!value)
+			врати config_error_nonbool(var);
 		free(html_path);
 		html_path = xstrdup(value);
-		return 0;
+		врати 0;
 	}
-	if (!strcmp(var, "man.viewer")) {
-		if (!value)
-			return config_error_nonbool(var);
+	ако (!strcmp(var, "man.viewer")) {
+		ако (!value)
+			врати config_error_nonbool(var);
 		add_man_viewer(value);
-		return 0;
+		врати 0;
 	}
-	if (starts_with(var, "man."))
-		return add_man_viewer_info(var, value);
+	ако (starts_with(var, "man."))
+		врати add_man_viewer_info(var, value);
 
-	return git_default_config(var, value, ctx, cb);
+	врати git_default_config(var, value, ctx, cb);
 }
 
 static struct cmdnames main_cmds, other_cmds;
 
-static int is_git_command(const char *s)
+static цео is_git_command(const char *s)
 {
-	if (is_builtin(s))
-		return 1;
+	ако (is_builtin(s))
+		врати 1;
 
 	load_command_list("git-", &main_cmds, &other_cmds);
-	return is_in_cmdlist(&main_cmds, s) ||
+	врати is_in_cmdlist(&main_cmds, s) ||
 		is_in_cmdlist(&other_cmds, s);
 }
 
 static const char *cmd_to_page(const char *git_cmd)
 {
-	if (!git_cmd)
-		return "git";
-	else if (starts_with(git_cmd, "git"))
-		return git_cmd;
-	else if (is_git_command(git_cmd))
-		return xstrfmt("git-%s", git_cmd);
-	else if (!strcmp("scalar", git_cmd))
-		return xstrdup(git_cmd);
-	else
-		return xstrfmt("git%s", git_cmd);
+	ако (!git_cmd)
+		врати "git";
+	инако ако (starts_with(git_cmd, "git"))
+		врати git_cmd;
+	инако ако (is_git_command(git_cmd))
+		врати xstrfmt("git-%s", git_cmd);
+	инако ако (!strcmp("scalar", git_cmd))
+		врати xstrdup(git_cmd);
+	инако
+		врати xstrfmt("git%s", git_cmd);
 }
 
 static void setup_man_path(void)
@@ -490,7 +490,7 @@ static void setup_man_path(void)
 	 * there is old_path, we need ':' as delimiter. */
 	strbuf_addstr(&new_path, git_man_path);
 	strbuf_addch(&new_path, ':');
-	if (old_path)
+	ако (old_path)
 		strbuf_addstr(&new_path, old_path);
 
 	free(git_man_path);
@@ -503,15 +503,15 @@ static void exec_viewer(const char *name, const char *page)
 {
 	const char *info = get_man_viewer_info(name);
 
-	if (!strcasecmp(name, "man"))
+	ако (!strcasecmp(name, "man"))
 		exec_man_man(info, page);
-	else if (!strcasecmp(name, "woman"))
+	инако ако (!strcasecmp(name, "woman"))
 		exec_woman_emacs(info, page);
-	else if (!strcasecmp(name, "konqueror"))
+	инако ако (!strcasecmp(name, "konqueror"))
 		exec_man_konqueror(info, page);
-	else if (info)
+	инако ако (info)
 		exec_man_cmd(info, page);
-	else
+	инако
 		warning(_("'%s': unknown man viewer."), name);
 }
 
@@ -521,11 +521,11 @@ static void show_man_page(const char *page)
 	const char *fallback = getenv("GIT_MAN_VIEWER");
 
 	setup_man_path();
-	for (viewer = man_viewer_list; viewer; viewer = viewer->next)
+	за (viewer = man_viewer_list; viewer; viewer = viewer->next)
 	{
 		exec_viewer(viewer->name, page); /* will return when unable */
 	}
-	if (fallback)
+	ако (fallback)
 		exec_viewer(fallback, page);
 	exec_viewer("man", page);
 	die(_("no man viewer handled the request"));
@@ -544,14 +544,14 @@ static void get_html_page_path(struct strbuf *page_path, const char *page)
 	const char *path = html_path;
 	char *to_free = NULL;
 
-	if (!path)
+	ако (!path)
 		path = to_free = system_path(GIT_HTML_PATH);
 
 	/*
 	 * Check that the page we're looking for exists.
 	 */
-	if (!strstr(path, "://")) {
-		if (stat(mkpath("%s/%s.html", path, page), &st)
+	ако (!strstr(path, "://")) {
+		ако (stat(mkpath("%s/%s.html", path, page), &st)
 		    || !S_ISREG(st.st_mode))
 			die("'%s/%s.html': documentation file not found.",
 				path, page);
@@ -580,13 +580,13 @@ static char *check_git_cmd(const char *cmd)
 {
 	char *alias;
 
-	if (is_git_command(cmd))
-		return xstrdup(cmd);
+	ако (is_git_command(cmd))
+		врати xstrdup(cmd);
 
 	alias = alias_lookup(cmd);
-	if (alias) {
+	ако (alias) {
 		const char **argv;
-		int count;
+		цео count;
 
 		/*
 		 * handle_builtin() in git.c rewrites "git cmd --help"
@@ -596,7 +596,7 @@ static char *check_git_cmd(const char *cmd)
 		 * alias for a shell command, just print the alias
 		 * definition.
 		 */
-		if (!exclude_guides || alias[0] == '!') {
+		ако (!exclude_guides || alias[0] == '!') {
 			printf_ln(_("'%s' is aliased to '%s'"), cmd, alias);
 			free(alias);
 			exit(0);
@@ -610,17 +610,17 @@ static char *check_git_cmd(const char *cmd)
 		 */
 		fprintf_ln(stderr, _("'%s' is aliased to '%s'"), cmd, alias);
 		count = split_cmdline(alias, &argv);
-		if (count < 0)
+		ако (count < 0)
 			die(_("bad alias.%s string: %s"), cmd,
 			    split_cmdline_strerror(count));
 		free(argv);
-		return alias;
+		врати alias;
 	}
 
-	if (exclude_guides)
-		return help_unknown_cmd(cmd);
+	ако (exclude_guides)
+		врати help_unknown_cmd(cmd);
 
-	return xstrdup(cmd);
+	врати xstrdup(cmd);
 }
 
 static void no_help_format(const char *opt_mode, enum help_format fmt)
@@ -629,7 +629,7 @@ static void no_help_format(const char *opt_mode, enum help_format fmt)
 
 	switch (fmt) {
 	case HELP_FORMAT_NONE:
-		return;
+		врати;
 	case HELP_FORMAT_MAN:
 		opt_fmt = "--man";
 		break;
@@ -648,10 +648,10 @@ static void no_help_format(const char *opt_mode, enum help_format fmt)
 		       opt_fmt);
 }
 
-static void opt_mode_usage(int argc, const char *opt_mode,
+static void opt_mode_usage(цео argc, const char *opt_mode,
 			   enum help_format fmt)
 {
-	if (argc)
+	ако (argc)
 		usage_msg_optf(_("the '%s' option doesn't take any non-option arguments"),
 			       builtin_help_usage, builtin_help_options,
 			       opt_mode);
@@ -659,12 +659,12 @@ static void opt_mode_usage(int argc, const char *opt_mode,
 	no_help_format(opt_mode, fmt);
 }
 
-int cmd_help(int argc,
+цео cmd_help(цео argc,
 	     const char **argv,
 	     const char *prefix,
 	     struct repository *repo UNUSED)
 {
-	int nongit;
+	цео nongit;
 	enum help_format parsed_help_format;
 	char *command = NULL;
 	const char *page;
@@ -673,7 +673,7 @@ int cmd_help(int argc,
 			builtin_help_usage, 0);
 	parsed_help_format = help_format;
 
-	if (cmd_mode != HELP_ACTION_ALL &&
+	ако (cmd_mode != HELP_ACTION_ALL &&
 	    (show_external_commands >= 0 ||
 	     show_aliases >= 0))
 		usage_msg_opt(_("the '--no-[external-commands|aliases]' options can only be used with '--all'"),
@@ -682,11 +682,11 @@ int cmd_help(int argc,
 	switch (cmd_mode) {
 	case HELP_ACTION_ALL:
 		opt_mode_usage(argc, "--all", help_format);
-		if (verbose) {
+		ако (verbose) {
 			setup_pager(the_repository);
 			list_all_cmds_help(show_external_commands,
 					   show_aliases);
-			return 0;
+			врати 0;
 		}
 		printf(_("usage: %s%s"), _(git_usage_string), "\n\n");
 		load_command_list("git-", &main_cmds, &other_cmds);
@@ -697,55 +697,55 @@ int cmd_help(int argc,
 		opt_mode_usage(argc, "--guides", help_format);
 		list_guides_help();
 		printf("%s\n", _(git_more_info_string));
-		return 0;
+		врати 0;
 	case HELP_ACTION_CONFIG_FOR_COMPLETION:
 		opt_mode_usage(argc, "--config-for-completion", help_format);
 		list_config_help(SHOW_CONFIG_VARS);
-		return 0;
+		врати 0;
 	case HELP_ACTION_USER_INTERFACES:
 		opt_mode_usage(argc, "--user-interfaces", help_format);
 		list_user_interfaces_help();
-		return 0;
+		врати 0;
 	case HELP_ACTION_DEVELOPER_INTERFACES:
 		opt_mode_usage(argc, "--developer-interfaces", help_format);
 		list_developer_interfaces_help();
-		return 0;
+		врати 0;
 	case HELP_ACTION_CONFIG_SECTIONS_FOR_COMPLETION:
 		opt_mode_usage(argc, "--config-sections-for-completion",
 			       help_format);
 		list_config_help(SHOW_CONFIG_SECTIONS);
-		return 0;
+		врати 0;
 	case HELP_ACTION_ALIASES_FOR_COMPLETION: {
 		struct string_list alias_list = STRING_LIST_INIT_DUP;
 		opt_mode_usage(argc, "--aliases-for-completion", help_format);
 		list_aliases(&alias_list);
-		for (size_t i = 0; i < alias_list.nr; i++)
+		за (size_t i = 0; i < alias_list.nr; i++)
 			printf("%s%c%s%c", alias_list.items[i].string, '\n',
 			       (char *)alias_list.items[i].util, '\0');
 		string_list_clear(&alias_list, 1);
-		return 0;
+		врати 0;
 	}
 	case HELP_ACTION_CONFIG:
 		opt_mode_usage(argc, "--config", help_format);
 		setup_pager(the_repository);
 		list_config_help(SHOW_CONFIG_HUMAN);
 		printf("\n%s\n", _("'git help config' for more information"));
-		return 0;
+		врати 0;
 	}
 
-	if (!argv[0]) {
+	ако (!argv[0]) {
 		printf(_("usage: %s%s"), _(git_usage_string), "\n\n");
 		list_common_cmds_help();
 		printf("\n%s\n", _(git_more_info_string));
-		return 0;
+		врати 0;
 	}
 
 	setup_git_directory_gently(the_repository, &nongit);
 	repo_config(the_repository, git_help_config, NULL);
 
-	if (parsed_help_format != HELP_FORMAT_NONE)
+	ако (parsed_help_format != HELP_FORMAT_NONE)
 		help_format = parsed_help_format;
-	if (help_format == HELP_FORMAT_NONE)
+	ако (help_format == HELP_FORMAT_NONE)
 		help_format = parse_help_format(DEFAULT_HELP_FORMAT);
 
 	command = check_git_cmd(argv[0]);
@@ -765,5 +765,5 @@ int cmd_help(int argc,
 	}
 
 	free(command);
-	return 0;
+	врати 0;
 }

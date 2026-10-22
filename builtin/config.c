@@ -77,11 +77,11 @@ struct config_location_options {
 	struct git_config_source source;
 	struct config_options options;
 	char *file_to_free;
-	int use_global_config;
-	int use_system_config;
-	int use_local_config;
-	int use_worktree_config;
-	int respect_includes_opt;
+	цео use_global_config;
+	цео use_system_config;
+	цео use_local_config;
+	цео use_worktree_config;
+	цео respect_includes_opt;
 };
 #define CONFIG_LOCATION_OPTIONS_INIT { \
 	.respect_includes_opt = -1, \
@@ -118,17 +118,17 @@ enum config_type {
 	CONFIG_TYPE_OPTIONS(opts.type)
 
 struct config_display_options {
-	int end_nul;
-	int omit_values;
-	int show_origin;
-	int show_scope;
-	int show_keys;
+	цео end_nul;
+	цео omit_values;
+	цео show_origin;
+	цео show_scope;
+	цео show_keys;
 	enum config_type type;
 	char *default_value;
 	/* Populated via `display_options_init()`. */
-	int term;
-	int delim;
-	int key_delim;
+	цео term;
+	цео delim;
+	цео key_delim;
 };
 #define CONFIG_DISPLAY_OPTIONS_INIT { \
 	.term = '\n', \
@@ -148,14 +148,14 @@ struct config_display_options {
 	.defval = (i), \
 }
 
-static int option_parse_type(const struct option *opt, const char *arg,
-			     int unset)
+static цео option_parse_type(const struct option *opt, const char *arg,
+			     цео unset)
 {
-	int new_type, *to_type;
+	цео new_type, *to_type;
 
-	if (unset) {
-		*((int *) opt->value) = 0;
-		return 0;
+	ако (unset) {
+		*((цео *) opt->value) = 0;
+		врати 0;
 	}
 
 	/*
@@ -163,27 +163,27 @@ static int option_parse_type(const struct option *opt, const char *arg,
 	 * opt->defval.
 	 */
 	new_type = opt->defval;
-	if (!new_type) {
-		if (!strcmp(arg, "bool"))
+	ако (!new_type) {
+		ако (!strcmp(arg, "bool"))
 			new_type = TYPE_BOOL;
-		else if (!strcmp(arg, "int"))
+		инако ако (!strcmp(arg, "int"))
 			new_type = TYPE_INT;
-		else if (!strcmp(arg, "bool-or-int"))
+		инако ако (!strcmp(arg, "bool-or-int"))
 			new_type = TYPE_BOOL_OR_INT;
-		else if (!strcmp(arg, "bool-or-str"))
+		инако ако (!strcmp(arg, "bool-or-str"))
 			new_type = TYPE_BOOL_OR_STR;
-		else if (!strcmp(arg, "path"))
+		инако ако (!strcmp(arg, "path"))
 			new_type = TYPE_PATH;
-		else if (!strcmp(arg, "expiry-date"))
+		инако ако (!strcmp(arg, "expiry-date"))
 			new_type = TYPE_EXPIRY_DATE;
-		else if (!strcmp(arg, "color"))
+		инако ако (!strcmp(arg, "color"))
 			new_type = TYPE_COLOR;
-		else
+		инако
 			die(_("unrecognized --type argument, %s"), arg);
 	}
 
 	to_type = opt->value;
-	if (*to_type && *to_type != new_type) {
+	ако (*to_type && *to_type != new_type) {
 		/*
 		 * Complain when there is a new type not equal to the old type.
 		 * This allows for combinations like '--int --type=int' and
@@ -196,16 +196,16 @@ static int option_parse_type(const struct option *opt, const char *arg,
 	}
 	*to_type = new_type;
 
-	return 0;
+	врати 0;
 }
 
-static void check_argc(int argc, int min, int max)
+static void check_argc(цео argc, цео min, цео max)
 {
-	if (argc >= min && argc <= max)
-		return;
-	if (min == max)
+	ако (argc >= min && argc <= max)
+		врати;
+	ако (min == max)
 		error(_("wrong number of arguments, should be %d"), min);
-	else
+	инако
 		error(_("wrong number of arguments, should be from %d to %d"),
 		      min, max);
 	exit(129);
@@ -217,13 +217,13 @@ static NORETURN void die_missing_set_value(const char *arg)
 	const char *eq = last_dot ? strchr(last_dot + 1, '=') : NULL;
 	char *prefix = eq ? xstrndup(arg, eq - arg) : NULL;
 
-	if (prefix && git_config_key_is_valid(prefix)) {
+	ако (prefix && git_config_key_is_valid(prefix)) {
 		error(_("missing value to set to the variable '%s'"), arg);
 		advise(_("did you mean \"git config set %s %s\"?"),
 		       prefix, eq + 1);
-	} else if (git_config_key_is_valid(arg)) {
+	} инако ако (git_config_key_is_valid(arg)) {
 		error(_("missing value to set to the variable '%s'"), arg);
-	} else {
+	} инако {
 		error(_("missing value to set to a variable with an invalid name '%s'"),
 		      arg);
 	}
@@ -239,9 +239,9 @@ static void show_config_origin(const struct config_display_options *opts,
 
 	strbuf_addstr(buf, config_origin_type_name(kvi->origin_type));
 	strbuf_addch(buf, ':');
-	if (opts->end_nul)
+	ако (opts->end_nul)
 		strbuf_addstr(buf, kvi->filename ? kvi->filename : "");
-	else
+	инако
 		quote_c_style(kvi->filename ? kvi->filename : "", buf, NULL, 0);
 	strbuf_addch(buf, term);
 }
@@ -259,139 +259,139 @@ static void show_config_scope(const struct config_display_options *opts,
 
 struct strbuf_list {
 	struct strbuf *items;
-	int nr;
-	int alloc;
+	цео nr;
+	цео alloc;
 };
 
-static int format_config_int64(struct strbuf *buf,
+static цео format_config_int64(struct strbuf *buf,
 			       const char *key_,
 			       const char *value_,
 			       const struct key_value_info *kvi,
-			       int gently)
+			       цео gently)
 {
 	int64_t v = 0;
-	if (gently) {
-		if (!git_parse_int64(value_, &v))
-			return -1;
-	} else {
+	ако (gently) {
+		ако (!git_parse_int64(value_, &v))
+			врати -1;
+	} инако {
 		/* may die() */
 		v = git_config_int64(key_, value_ ? value_ : "", kvi);
 	}
 
 	strbuf_addf(buf, "%"PRId64, v);
-	return 0;
+	врати 0;
 }
 
-static int format_config_bool(struct strbuf *buf,
+static цео format_config_bool(struct strbuf *buf,
 			      const char *key_,
 			      const char *value_,
-			      int gently)
+			      цео gently)
 {
-	int v = 0;
-	if (gently) {
-		if ((v = git_parse_maybe_bool(value_)) < 0)
-			return -1;
-	} else {
+	цео v = 0;
+	ако (gently) {
+		ако ((v = git_parse_maybe_bool(value_)) < 0)
+			врати -1;
+	} инако {
 		/* may die() */
 		v = git_config_bool(key_, value_);
 	}
 
 	strbuf_addstr(buf, v ? "true" : "false");
-	return 0;
+	врати 0;
 }
 
-static int format_config_bool_or_int(struct strbuf *buf,
+static цео format_config_bool_or_int(struct strbuf *buf,
 				     const char *key_,
 				     const char *value_,
 				     const struct key_value_info *kvi,
-				     int gently)
+				     цео gently)
 {
-	int v, is_bool = 0;
+	цео v, is_bool = 0;
 
-	if (gently) {
+	ако (gently) {
 		v = git_parse_maybe_bool_text(value_);
 
-		if (v >= 0)
+		ако (v >= 0)
 			is_bool = 1;
-		else if (!git_parse_int(value_, &v))
-			return -1;
-	} else {
+		инако ако (!git_parse_int(value_, &v))
+			врати -1;
+	} инако {
 		v = git_config_bool_or_int(key_, value_, kvi,
 					   &is_bool);
 	}
 
-	if (is_bool)
+	ако (is_bool)
 		strbuf_addstr(buf, v ? "true" : "false");
-	else
+	инако
 		strbuf_addf(buf, "%d", v);
 
-	return 0;
+	врати 0;
 }
 
 /* This mode is always gentle. */
-static int format_config_bool_or_str(struct strbuf *buf,
+static цео format_config_bool_or_str(struct strbuf *buf,
 				     const char *value_)
 {
-	int v = git_parse_maybe_bool(value_);
-	if (v < 0)
+	цео v = git_parse_maybe_bool(value_);
+	ако (v < 0)
 		strbuf_addstr(buf, value_);
-	else
+	инако
 		strbuf_addstr(buf, v ? "true" : "false");
-	return 0;
+	врати 0;
 }
 
-static int format_config_path(struct strbuf *buf,
+static цео format_config_path(struct strbuf *buf,
 			      const char *key_,
 			      const char *value_,
-			      int gently)
+			      цео gently)
 {
 	char *v;
 
-	if (git_config_pathname(&v, key_, value_) < 0)
-		return -1;
+	ако (git_config_pathname(&v, key_, value_) < 0)
+		врати -1;
 
-	if (v)
+	ако (v)
 		strbuf_addstr(buf, v);
-	else
-		return gently ? -1 : 1; /* :(optional)no-such-file */
+	инако
+		врати gently ? -1 : 1; /* :(optional)no-such-file */
 
 	free(v);
-	return 0;
+	врати 0;
 }
 
-static int format_config_expiry_date(struct strbuf *buf,
+static цео format_config_expiry_date(struct strbuf *buf,
 				     const char *key_,
 				     const char *value_,
-				     int quietly)
+				     цео quietly)
 {
 	timestamp_t t;
-	if (quietly) {
-		if (parse_expiry_date(value_, &t))
-			return -1;
-	} else if (git_config_expiry_date(&t, key_, value_) < 0) {
-		return -1;
+	ако (quietly) {
+		ако (parse_expiry_date(value_, &t))
+			врати -1;
+	} инако ако (git_config_expiry_date(&t, key_, value_) < 0) {
+		врати -1;
 	}
 
 	strbuf_addf(buf, "%"PRItime, t);
-	return 0;
+	врати 0;
 }
 
-static int format_config_color(struct strbuf *buf,
+static цео format_config_color(struct strbuf *buf,
 			       const char *key_,
 			       const char *value_,
-			       int gently)
+			       цео gently)
 {
 	char v[COLOR_MAXLEN];
 
-	if (gently) {
-		if (color_parse_quietly(value_, v) < 0)
-			return -1;
-	} else if (git_config_color(v, key_, value_) < 0) {
-		return -1;
+	ако (gently) {
+		ако (color_parse_quietly(value_, v) < 0)
+			врати -1;
+	} инако ако (git_config_color(v, key_, value_) < 0) {
+		врати -1;
 	}
 
 	strbuf_addstr(buf, v);
-	return 0;
+	врати 0;
 }
 
 /*
@@ -403,23 +403,23 @@ static int format_config_color(struct strbuf *buf,
  * Note: 'gently' is currently ignored, but will be implemented in
  * a future change.
  */
-static int format_config(const struct config_display_options *opts,
+static цео format_config(const struct config_display_options *opts,
 			 struct strbuf *buf, const char *key_,
 			 const char *value_, const struct key_value_info *kvi,
-			 int gently)
+			 цео gently)
 {
-	int res = 0;
-	if (opts->show_scope)
+	цео res = 0;
+	ако (opts->show_scope)
 		show_config_scope(opts, kvi, buf);
-	if (opts->show_origin)
+	ако (opts->show_origin)
 		show_config_origin(opts, kvi, buf);
-	if (opts->show_keys)
+	ако (opts->show_keys)
 		strbuf_addstr(buf, key_);
 
-	if (opts->omit_values)
+	ако (opts->omit_values)
 		goto terminator;
 
-	if (opts->show_keys)
+	ако (opts->show_keys)
 		strbuf_addch(buf, opts->key_delim);
 
 	switch (opts->type) {
@@ -452,11 +452,11 @@ static int format_config(const struct config_display_options *opts,
 		break;
 
 	case TYPE_NONE:
-		if (value_) {
+		ако (value_) {
 			strbuf_addstr(buf, value_);
-		} else {
+		} инако {
 			/* Just show the key name; back out delimiter */
-			if (opts->show_keys)
+			ако (opts->show_keys)
 				strbuf_setlen(buf, buf->len - 1);
 		}
 		break;
@@ -467,10 +467,10 @@ static int format_config(const struct config_display_options *opts,
 
 terminator:
 	strbuf_addch(buf, opts->term);
-	return res;
+	врати res;
 }
 
-static int show_all_config(const char *key_, const char *value_,
+static цео show_all_config(const char *key_, const char *value_,
 			   const struct config_context *ctx,
 			   void *cb)
 {
@@ -478,11 +478,11 @@ static int show_all_config(const char *key_, const char *value_,
 	const struct key_value_info *kvi = ctx->kvi;
 	struct strbuf formatted = STRBUF_INIT;
 
-	if (format_config(opts, &formatted, key_, value_, kvi, 1) >= 0)
+	ако (format_config(opts, &formatted, key_, value_, kvi, 1) >= 0)
 		fwrite(formatted.buf, 1, formatted.len, stdout);
 
 	strbuf_release(&formatted);
-	return 0;
+	врати 0;
 }
 
 #define GET_VALUE_ALL        (1 << 0)
@@ -495,52 +495,52 @@ struct collect_config_data {
 	const char *key;
 	regex_t *regexp;
 	regex_t *key_regexp;
-	int do_not_match;
+	цео do_not_match;
 	unsigned get_value_flags;
 	unsigned flags;
 };
 
-static int collect_config(const char *key_, const char *value_,
+static цео collect_config(const char *key_, const char *value_,
 			  const struct config_context *ctx, void *cb)
 {
 	struct collect_config_data *data = cb;
 	struct strbuf_list *values = data->values;
 	const struct key_value_info *kvi = ctx->kvi;
-	int status;
+	цео status;
 
-	if (!(data->get_value_flags & GET_VALUE_KEY_REGEXP) &&
+	ако (!(data->get_value_flags & GET_VALUE_KEY_REGEXP) &&
 	    strcmp(key_, data->key))
-		return 0;
-	if ((data->get_value_flags & GET_VALUE_KEY_REGEXP) &&
+		врати 0;
+	ако ((data->get_value_flags & GET_VALUE_KEY_REGEXP) &&
 	    regexec(data->key_regexp, key_, 0, NULL, 0))
-		return 0;
-	if ((data->flags & CONFIG_FLAGS_FIXED_VALUE) &&
+		врати 0;
+	ако ((data->flags & CONFIG_FLAGS_FIXED_VALUE) &&
 	    strcmp(data->value_pattern, (value_?value_:"")))
-		return 0;
-	if (data->regexp &&
+		врати 0;
+	ако (data->regexp &&
 	    (data->do_not_match ^ !!regexec(data->regexp, (value_?value_:""), 0, NULL, 0)))
-		return 0;
+		врати 0;
 
 	ALLOC_GROW(values->items, values->nr + 1, values->alloc);
 	strbuf_init(&values->items[values->nr], 0);
 
 	status = format_config(data->display_opts, &values->items[values->nr++],
 			       key_, value_, kvi, 0);
-	if (status < 0)
-		return status;
-	if (status) {
+	ако (status < 0)
+		врати status;
+	ако (status) {
 		strbuf_release(&values->items[--values->nr]);
 		status = 0;
 	}
-	return status;
+	врати status;
 }
 
-static int get_value(const struct config_location_options *opts,
+static цео get_value(const struct config_location_options *opts,
 		     const struct config_display_options *display_opts,
 		     const char *key_, const char *regex_,
 		     unsigned get_value_flags, unsigned flags)
 {
-	int ret = CONFIG_GENERIC_ERROR;
+	цео ret = CONFIG_GENERIC_ERROR;
 	struct strbuf_list values = {NULL};
 	struct collect_config_data data = {
 		.display_opts = display_opts,
@@ -549,9 +549,9 @@ static int get_value(const struct config_location_options *opts,
 		.flags = flags,
 	};
 	char *key = NULL;
-	int i;
+	цео i;
 
-	if (get_value_flags & GET_VALUE_KEY_REGEXP) {
+	ако (get_value_flags & GET_VALUE_KEY_REGEXP) {
 		char *tl;
 
 		/*
@@ -561,22 +561,22 @@ static int get_value(const struct config_location_options *opts,
 		 */
 
 		key = xstrdup(key_);
-		for (tl = key + strlen(key) - 1;
+		за (tl = key + strlen(key) - 1;
 		     tl >= key && *tl != '.';
 		     tl--)
 			*tl = tolower(*tl);
-		for (tl = key; *tl && *tl != '.'; tl++)
+		за (tl = key; *tl && *tl != '.'; tl++)
 			*tl = tolower(*tl);
 
 		data.key_regexp = (regex_t*)xmalloc(sizeof(regex_t));
-		if (regcomp(data.key_regexp, key, REG_EXTENDED)) {
+		ако (regcomp(data.key_regexp, key, REG_EXTENDED)) {
 			error(_("invalid key pattern: %s"), key_);
 			FREE_AND_NULL(data.key_regexp);
 			ret = CONFIG_INVALID_PATTERN;
 			goto free_strings;
 		}
-	} else {
-		if (git_config_parse_key(key_, &key, NULL)) {
+	} инако {
+		ако (git_config_parse_key(key_, &key, NULL)) {
 			ret = CONFIG_INVALID_KEY;
 			goto free_strings;
 		}
@@ -584,16 +584,16 @@ static int get_value(const struct config_location_options *opts,
 		data.key = key;
 	}
 
-	if (regex_ && (flags & CONFIG_FLAGS_FIXED_VALUE))
+	ако (regex_ && (flags & CONFIG_FLAGS_FIXED_VALUE))
 		data.value_pattern = regex_;
-	else if (regex_) {
-		if (regex_[0] == '!') {
+	инако ако (regex_) {
+		ако (regex_[0] == '!') {
 			data.do_not_match = 1;
 			regex_++;
 		}
 
 		data.regexp = (regex_t*)xmalloc(sizeof(regex_t));
-		if (regcomp(data.regexp, regex_, REG_EXTENDED)) {
+		ако (regcomp(data.regexp, regex_, REG_EXTENDED)) {
 			error(_("invalid pattern: %s"), regex_);
 			FREE_AND_NULL(data.regexp);
 			ret = CONFIG_INVALID_PATTERN;
@@ -605,10 +605,10 @@ static int get_value(const struct config_location_options *opts,
 			    &opts->source, the_repository,
 			    &opts->options);
 
-	if (!values.nr && display_opts->default_value) {
+	ако (!values.nr && display_opts->default_value) {
 		struct key_value_info kvi = KVI_INIT;
 		struct strbuf *item;
-		int status;
+		цео status;
 
 		kvi_from_param(&kvi);
 		ALLOC_GROW(values.items, values.nr + 1, values.alloc);
@@ -617,10 +617,10 @@ static int get_value(const struct config_location_options *opts,
 
 		status = format_config(display_opts, item, key_,
 				       display_opts->default_value, &kvi, 0);
-		if (status < 0)
+		ако (status < 0)
 			die(_("failed to format default config value: %s"),
 			    display_opts->default_value);
-		if (status) {
+		ако (status) {
 			/* default was a missing optional value */
 			values.nr--;
 			strbuf_release(item);
@@ -629,9 +629,9 @@ static int get_value(const struct config_location_options *opts,
 
 	ret = !values.nr;
 
-	for (i = 0; i < values.nr; i++) {
+	за (i = 0; i < values.nr; i++) {
 		struct strbuf *buf = values.items + i;
-		if ((get_value_flags & GET_VALUE_ALL) || i == values.nr - 1)
+		ако ((get_value_flags & GET_VALUE_ALL) || i == values.nr - 1)
 			fwrite(buf->buf, 1, buf->len, stdout);
 		strbuf_release(buf);
 	}
@@ -639,25 +639,25 @@ static int get_value(const struct config_location_options *opts,
 
 free_strings:
 	free(key);
-	if (data.key_regexp) {
+	ако (data.key_regexp) {
 		regfree(data.key_regexp);
 		free(data.key_regexp);
 	}
-	if (data.regexp) {
+	ако (data.regexp) {
 		regfree(data.regexp);
 		free(data.regexp);
 	}
 
-	return ret;
+	врати ret;
 }
 
 static char *normalize_value(const char *key, const char *value,
-			     int type, struct key_value_info *kvi)
+			     цео type, struct key_value_info *kvi)
 {
-	if (!value)
-		return NULL;
+	ако (!value)
+		врати NULL;
 
-	if (type == 0 || type == TYPE_PATH || type == TYPE_EXPIRY_DATE)
+	ако (type == 0 || type == TYPE_PATH || type == TYPE_EXPIRY_DATE)
 		/*
 		 * We don't do normalization for TYPE_PATH here: If
 		 * the path is like ~/foobar/, we prefer to store
@@ -665,29 +665,29 @@ static char *normalize_value(const char *key, const char *value,
 		 * when retrieving the value.
 		 * Also don't do normalization for expiry dates.
 		 */
-		return xstrdup(value);
-	if (type == TYPE_INT)
-		return xstrfmt("%"PRId64, git_config_int64(key, value, kvi));
-	if (type == TYPE_BOOL)
-		return xstrdup(git_config_bool(key, value) ?  "true" : "false");
-	if (type == TYPE_BOOL_OR_INT) {
-		int is_bool, v;
+		врати xstrdup(value);
+	ако (type == TYPE_INT)
+		врати xstrfmt("%"PRId64, git_config_int64(key, value, kvi));
+	ако (type == TYPE_BOOL)
+		врати xstrdup(git_config_bool(key, value) ?  "true" : "false");
+	ако (type == TYPE_BOOL_OR_INT) {
+		цео is_bool, v;
 		v = git_config_bool_or_int(key, value, kvi, &is_bool);
-		if (!is_bool)
-			return xstrfmt("%d", v);
-		else
-			return xstrdup(v ? "true" : "false");
+		ако (!is_bool)
+			врати xstrfmt("%d", v);
+		инако
+			врати xstrdup(v ? "true" : "false");
 	}
-	if (type == TYPE_BOOL_OR_STR) {
-		int v = git_parse_maybe_bool(value);
-		if (v < 0)
-			return xstrdup(value);
-		else
-			return xstrdup(v ? "true" : "false");
+	ако (type == TYPE_BOOL_OR_STR) {
+		цео v = git_parse_maybe_bool(value);
+		ако (v < 0)
+			врати xstrdup(value);
+		инако
+			врати xstrdup(v ? "true" : "false");
 	}
-	if (type == TYPE_COLOR) {
+	ако (type == TYPE_COLOR) {
 		char v[COLOR_MAXLEN];
-		if (git_config_color(v, key, value))
+		ако (git_config_color(v, key, value))
 			die(_("cannot parse color '%s'"), value);
 
 		/*
@@ -697,49 +697,49 @@ static char *normalize_value(const char *key, const char *value,
 		 * "sanity-check", and return the given value, which we
 		 * know is representable as valid color code.
 		 */
-		return xstrdup(value);
+		врати xstrdup(value);
 	}
 
 	BUG("cannot normalize type %d", type);
 }
 
 struct get_color_config_data {
-	int get_color_found;
+	цео get_color_found;
 	const char *get_color_slot;
 	char parsed_color[COLOR_MAXLEN];
 };
 
-static int git_get_color_config(const char *var, const char *value,
+static цео git_get_color_config(const char *var, const char *value,
 				const struct config_context *ctx UNUSED,
 				void *cb)
 {
 	struct get_color_config_data *data = cb;
 
-	if (!strcmp(var, data->get_color_slot)) {
-		if (!value)
+	ако (!strcmp(var, data->get_color_slot)) {
+		ако (!value)
 			config_error_nonbool(var);
-		if (color_parse(value, data->parsed_color) < 0)
-			return -1;
+		ако (color_parse(value, data->parsed_color) < 0)
+			врати -1;
 		data->get_color_found = 1;
 	}
-	return 0;
+	врати 0;
 }
 
-static int get_color(const struct config_location_options *opts,
+static цео get_color(const struct config_location_options *opts,
 		      const char *var, const char *def_color)
 {
 	struct get_color_config_data data = {
 		.get_color_slot = var,
 		.parsed_color[0] = '\0',
 	};
-	int ret;
+	цео ret;
 
 	config_with_options(git_get_color_config, &data,
 			    &opts->source, the_repository,
 			    &opts->options);
 
-	if (!data.get_color_found && def_color) {
-		if (color_parse(def_color, data.parsed_color) < 0) {
+	ако (!data.get_color_found && def_color) {
+		ако (color_parse(def_color, data.parsed_color) < 0) {
 			ret = error(_("unable to parse default color value"));
 			goto out;
 		}
@@ -749,7 +749,7 @@ static int get_color(const struct config_location_options *opts,
 
 out:
 	fputs(data.parsed_color, stdout);
-	return ret;
+	врати ret;
 }
 
 struct get_colorbool_config_data {
@@ -759,23 +759,23 @@ struct get_colorbool_config_data {
 	const char *get_colorbool_slot;
 };
 
-static int git_get_colorbool_config(const char *var, const char *value,
+static цео git_get_colorbool_config(const char *var, const char *value,
 				    const struct config_context *ctx UNUSED,
 				    void *cb)
 {
 	struct get_colorbool_config_data *data = cb;
 
-	if (!strcmp(var, data->get_colorbool_slot))
+	ако (!strcmp(var, data->get_colorbool_slot))
 		data->get_colorbool_found = git_config_colorbool(var, value);
-	else if (!strcmp(var, "diff.color"))
+	инако ако (!strcmp(var, "diff.color"))
 		data->get_diff_color_found = git_config_colorbool(var, value);
-	else if (!strcmp(var, "color.ui"))
+	инако ако (!strcmp(var, "color.ui"))
 		data->get_color_ui_found = git_config_colorbool(var, value);
-	return 0;
+	врати 0;
 }
 
-static int get_colorbool(const struct config_location_options *opts,
-			 const char *var, int print)
+static цео get_colorbool(const struct config_location_options *opts,
+			 const char *var, цео print)
 {
 	struct get_colorbool_config_data data = {
 		.get_colorbool_slot = var,
@@ -789,35 +789,35 @@ static int get_colorbool(const struct config_location_options *opts,
 			    &opts->source, the_repository,
 			    &opts->options);
 
-	if (data.get_colorbool_found == GIT_COLOR_UNKNOWN) {
-		if (!strcmp(data.get_colorbool_slot, "color.diff"))
+	ако (data.get_colorbool_found == GIT_COLOR_UNKNOWN) {
+		ако (!strcmp(data.get_colorbool_slot, "color.diff"))
 			data.get_colorbool_found = data.get_diff_color_found;
-		if (data.get_colorbool_found == GIT_COLOR_UNKNOWN)
+		ако (data.get_colorbool_found == GIT_COLOR_UNKNOWN)
 			data.get_colorbool_found = data.get_color_ui_found;
 	}
 
-	if (data.get_colorbool_found == GIT_COLOR_UNKNOWN)
+	ако (data.get_colorbool_found == GIT_COLOR_UNKNOWN)
 		/* default value if none found in config */
 		data.get_colorbool_found = GIT_COLOR_AUTO;
 
 	result = want_color(data.get_colorbool_found);
 
-	if (print) {
+	ако (print) {
 		printf("%s\n", result ? "true" : "false");
-		return 0;
-	} else
-		return result ? 0 : 1;
+		врати 0;
+	} инако
+		врати result ? 0 : 1;
 }
 
 static void check_write(const struct git_config_source *source)
 {
-	if (!source->file && !startup_info->have_repository)
+	ако (!source->file && !startup_info->have_repository)
 		die(_("not in a git directory"));
 
-	if (source->use_stdin)
+	ако (source->use_stdin)
 		die(_("writing to stdin is not supported"));
 
-	if (source->blob)
+	ако (source->blob)
 		die(_("writing config blobs is not supported"));
 }
 
@@ -827,7 +827,7 @@ struct urlmatch_current_candidate_value {
 	struct key_value_info kvi;
 };
 
-static int urlmatch_collect_fn(const char *var, const char *value,
+static цео urlmatch_collect_fn(const char *var, const char *value,
 			       const struct config_context *ctx,
 			       void *cb)
 {
@@ -836,29 +836,29 @@ static int urlmatch_collect_fn(const char *var, const char *value,
 	struct urlmatch_current_candidate_value *matched = item->util;
 	const struct key_value_info *kvi = ctx->kvi;
 
-	if (!matched) {
+	ако (!matched) {
 		matched = xmalloc(sizeof(*matched));
 		strbuf_init(&matched->value, 0);
 		item->util = matched;
-	} else {
+	} инако {
 		strbuf_reset(&matched->value);
 	}
 	matched->kvi = *kvi;
 
-	if (value) {
+	ако (value) {
 		strbuf_addstr(&matched->value, value);
 		matched->value_is_null = 0;
-	} else {
+	} инако {
 		matched->value_is_null = 1;
 	}
-	return 0;
+	врати 0;
 }
 
-static int get_urlmatch(const struct config_location_options *opts,
+static цео get_urlmatch(const struct config_location_options *opts,
 			const struct config_display_options *_display_opts,
 			const char *var, const char *url)
 {
-	int ret;
+	цео ret;
 	char *section;
 	char *section_tail;
 	struct config_display_options display_opts = *_display_opts;
@@ -870,16 +870,16 @@ static int get_urlmatch(const struct config_location_options *opts,
 	config.cascade_fn = NULL;
 	config.cb = &values;
 
-	if (!url_normalize(url, &config.url))
+	ако (!url_normalize(url, &config.url))
 		die("%s", config.url.err);
 
 	config.section = section = xstrdup_tolower(var);
 	section_tail = strchr(section, '.');
-	if (section_tail) {
+	ако (section_tail) {
 		*section_tail = '\0';
 		config.key = section_tail + 1;
 		display_opts.show_keys = 0;
-	} else {
+	} инако {
 		config.key = NULL;
 		display_opts.show_keys = 1;
 	}
@@ -893,12 +893,12 @@ static int get_urlmatch(const struct config_location_options *opts,
 	for_each_string_list_item(item, &values) {
 		struct urlmatch_current_candidate_value *matched = item->util;
 		struct strbuf buf = STRBUF_INIT;
-		int status;
+		цео status;
 
 		status = format_config(&display_opts, &buf, item->string,
 				       matched->value_is_null ? NULL : matched->value.buf,
 				       &matched->kvi, 0);
-		if (!status)
+		ако (!status)
 			fwrite(buf.buf, 1, buf.len, stdout);
 		strbuf_release(&buf);
 
@@ -909,7 +909,7 @@ static int get_urlmatch(const struct config_location_options *opts,
 	free(config.url.url);
 
 	free(section);
-	return ret;
+	врати ret;
 }
 
 static char *default_user_config(void)
@@ -923,42 +923,42 @@ static char *default_user_config(void)
 		      "#	email = %s\n"),
 		    ident_default_name(),
 		    ident_default_email());
-	return strbuf_detach(&buf, NULL);
+	врати strbuf_detach(&buf, NULL);
 }
 
 static void location_options_init(struct config_location_options *opts,
 				  const char *prefix)
 {
-	if (!opts->source.file)
+	ако (!opts->source.file)
 		opts->source.file = opts->file_to_free =
 			xstrdup_or_null(getenv(CONFIG_ENVIRONMENT));
 
-	if (opts->use_global_config + opts->use_system_config +
+	ако (opts->use_global_config + opts->use_system_config +
 	    opts->use_local_config + opts->use_worktree_config +
 	    !!opts->source.file + !!opts->source.blob > 1) {
 		error(_("only one config file at a time"));
 		exit(129);
 	}
 
-	if (!startup_info->have_repository) {
-		if (opts->use_local_config)
+	ако (!startup_info->have_repository) {
+		ако (opts->use_local_config)
 			die(_("--local can only be used inside a git repository"));
-		if (opts->source.blob)
+		ако (opts->source.blob)
 			die(_("--blob can only be used inside a git repository"));
-		if (opts->use_worktree_config)
+		ако (opts->use_worktree_config)
 			die(_("--worktree can only be used inside a git repository"));
 	}
 
-	if (opts->source.file &&
+	ако (opts->source.file &&
 			!strcmp(opts->source.file, "-")) {
 		opts->source.file = NULL;
 		opts->source.use_stdin = 1;
 		opts->source.scope = CONFIG_SCOPE_COMMAND;
 	}
 
-	if (opts->use_global_config) {
+	ако (opts->use_global_config) {
 		opts->source.file = opts->file_to_free = git_global_config();
-		if (!opts->source.file)
+		ако (!opts->source.file)
 			/*
 			 * It is unknown if HOME/.gitconfig exists, so
 			 * we do not know if we should write to XDG
@@ -967,42 +967,42 @@ static void location_options_init(struct config_location_options *opts,
 			 */
 			die(_("$HOME not set"));
 		opts->source.scope = CONFIG_SCOPE_GLOBAL;
-	} else if (opts->use_system_config) {
+	} инако ако (opts->use_system_config) {
 		opts->source.file = opts->file_to_free = git_system_config();
 		opts->source.scope = CONFIG_SCOPE_SYSTEM;
-	} else if (opts->use_local_config) {
+	} инако ако (opts->use_local_config) {
 		opts->source.file = opts->file_to_free = repo_git_path(the_repository, "config");
 		opts->source.scope = CONFIG_SCOPE_LOCAL;
-	} else if (opts->use_worktree_config) {
+	} инако ако (opts->use_worktree_config) {
 		struct worktree **worktrees = get_worktrees(the_repository);
-		if (the_repository->repository_format_worktree_config)
+		ако (the_repository->repository_format_worktree_config)
 			opts->source.file = opts->file_to_free =
 				repo_git_path(the_repository, "config.worktree");
-		else if (worktrees[0] && worktrees[1])
+		инако ако (worktrees[0] && worktrees[1])
 			die(_("--worktree cannot be used with multiple "
 			      "working trees unless the config\n"
 			      "extension worktreeConfig is enabled. "
 			      "Please read \"CONFIGURATION FILE\"\n"
 			      "section in \"git help worktree\" for details"));
-		else
+		инако
 			opts->source.file = opts->file_to_free =
 				repo_git_path(the_repository, "config");
 		opts->source.scope = CONFIG_SCOPE_LOCAL;
 		free_worktrees(worktrees);
-	} else if (opts->source.file) {
-		if (!is_absolute_path(opts->source.file) && prefix)
+	} инако ако (opts->source.file) {
+		ако (!is_absolute_path(opts->source.file) && prefix)
 			opts->source.file = opts->file_to_free =
 				prefix_filename(prefix, opts->source.file);
 		opts->source.scope = CONFIG_SCOPE_COMMAND;
-	} else if (opts->source.blob) {
+	} инако ако (opts->source.blob) {
 		opts->source.scope = CONFIG_SCOPE_COMMAND;
 	}
 
-	if (opts->respect_includes_opt == -1)
+	ако (opts->respect_includes_opt == -1)
 		opts->options.respect_includes = !opts->source.file;
-	else
+	инако
 		opts->options.respect_includes = opts->respect_includes_opt;
-	if (startup_info->have_repository) {
+	ако (startup_info->have_repository) {
 		opts->options.commondir = repo_get_common_dir(the_repository);
 		opts->options.git_dir = repo_get_git_dir(the_repository);
 	}
@@ -1015,7 +1015,7 @@ static void location_options_release(struct config_location_options *opts)
 
 static void display_options_init(struct config_display_options *opts)
 {
-	if (opts->end_nul) {
+	ако (opts->end_nul) {
 		opts->term = '\0';
 		opts->delim = '\n';
 		opts->key_delim = '\n';
@@ -1026,16 +1026,16 @@ static void display_options_init_list(struct config_display_options *opts)
 {
 	opts->show_keys = 1;
 
-	if (opts->end_nul) {
+	ако (opts->end_nul) {
 		display_options_init(opts);
-	} else {
+	} инако {
 		opts->term = '\n';
 		opts->delim = ' ';
 		opts->key_delim = '=';
 	}
 }
 
-static int cmd_config_list(int argc, const char **argv, const char *prefix,
+static цео cmd_config_list(цео argc, const char **argv, const char *prefix,
 			   struct repository *repo UNUSED)
 {
 	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
@@ -1057,27 +1057,27 @@ static int cmd_config_list(int argc, const char **argv, const char *prefix,
 
 	setup_auto_pager("config", 1);
 
-	if (config_with_options(show_all_config, &display_opts,
+	ако (config_with_options(show_all_config, &display_opts,
 				&location_opts.source, the_repository,
 				&location_opts.options) < 0) {
-		if (location_opts.source.file)
+		ако (location_opts.source.file)
 			die_errno(_("unable to read config file '%s'"),
 				  location_opts.source.file);
-		else
+		инако
 			die(_("error processing config file(s)"));
 	}
 
 	location_options_release(&location_opts);
-	return 0;
+	врати 0;
 }
 
-static int cmd_config_get(int argc, const char **argv, const char *prefix,
+static цео cmd_config_get(цео argc, const char **argv, const char *prefix,
 			  struct repository *repo UNUSED)
 {
 	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
 	struct config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
 	const char *value_pattern = NULL, *url = NULL;
-	int flags = 0;
+	цео flags = 0;
 	unsigned get_value_flags = 0;
 	struct option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
@@ -1095,18 +1095,18 @@ static int cmd_config_get(int argc, const char **argv, const char *prefix,
 			   N_("value"), N_("use default value when missing entry")),
 		OPT_END(),
 	};
-	int ret;
+	цео ret;
 
 	argc = parse_options(argc, argv, prefix, opts, builtin_config_get_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 	check_argc(argc, 1, 1);
 
-	if ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
+	ако ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
 		die(_("--fixed-value only applies with 'value-pattern'"));
-	if (display_opts.default_value &&
+	ако (display_opts.default_value &&
 	    ((get_value_flags & GET_VALUE_ALL) || url))
 		die(_("--default= cannot be used with --all or --url="));
-	if (url && ((get_value_flags & GET_VALUE_ALL) ||
+	ако (url && ((get_value_flags & GET_VALUE_ALL) ||
 		    (get_value_flags & GET_VALUE_KEY_REGEXP) ||
 		    value_pattern))
 		die(_("--url= cannot be used with --all, --regexp or --value"));
@@ -1114,28 +1114,28 @@ static int cmd_config_get(int argc, const char **argv, const char *prefix,
 	location_options_init(&location_opts, prefix);
 	display_options_init(&display_opts);
 
-	if (display_opts.type != TYPE_COLOR)
+	ако (display_opts.type != TYPE_COLOR)
 		setup_auto_pager("config", 1);
 
-	if (url)
+	ако (url)
 		ret = get_urlmatch(&location_opts, &display_opts, argv[0], url);
-	else if (display_opts.type == TYPE_COLOR && !strlen(argv[0]) && display_opts.default_value)
+	инако ако (display_opts.type == TYPE_COLOR && !strlen(argv[0]) && display_opts.default_value)
 		ret = get_color(&location_opts, "", display_opts.default_value);
-	else
+	инако
 		ret = get_value(&location_opts, &display_opts, argv[0], value_pattern,
 				get_value_flags, flags);
 
 	location_options_release(&location_opts);
-	return ret;
+	врати ret;
 }
 
-static int cmd_config_set(int argc, const char **argv, const char *prefix,
+static цео cmd_config_set(цео argc, const char **argv, const char *prefix,
 			  struct repository *repo UNUSED)
 {
 	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
 	const char *value_pattern = NULL, *comment_arg = NULL;
 	char *comment = NULL;
-	int flags = 0, append = 0, type = 0;
+	цео flags = 0, append = 0, type = 0;
 	struct option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		CONFIG_TYPE_OPTIONS(type),
@@ -1150,19 +1150,19 @@ static int cmd_config_set(int argc, const char **argv, const char *prefix,
 	};
 	struct key_value_info default_kvi = KVI_INIT;
 	char *value;
-	int ret;
+	цео ret;
 
 	argc = parse_options(argc, argv, prefix, opts, builtin_config_set_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
-	if (argc == 1)
+	ако (argc == 1)
 		die_missing_set_value(argv[0]);
 	check_argc(argc, 2, 2);
 
-	if ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
+	ако ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
 		die(_("--fixed-value only applies with --value=<pattern>"));
-	if (append && value_pattern)
+	ако (append && value_pattern)
 		die(_("--append cannot be used with --value=<pattern>"));
-	if (append)
+	ако (append)
 		value_pattern = CONFIG_REGEX_NONE;
 
 	comment = git_config_prepare_comment_string(comment_arg);
@@ -1172,14 +1172,14 @@ static int cmd_config_set(int argc, const char **argv, const char *prefix,
 
 	value = normalize_value(argv[0], argv[1], type, &default_kvi);
 
-	if ((flags & CONFIG_FLAGS_MULTI_REPLACE) || value_pattern) {
+	ако ((flags & CONFIG_FLAGS_MULTI_REPLACE) || value_pattern) {
 		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
 							      argv[0], value, value_pattern,
 							      comment, flags);
-	} else {
+	} инако {
 		ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file,
 						     argv[0], comment, value);
-		if (ret == CONFIG_NOTHING_SET)
+		ако (ret == CONFIG_NOTHING_SET)
 			error(_("cannot overwrite multiple values with a single value\n"
 			"       Use --value=<pattern>, --append or --all to change %s."), argv[0]);
 	}
@@ -1187,15 +1187,15 @@ static int cmd_config_set(int argc, const char **argv, const char *prefix,
 	location_options_release(&location_opts);
 	free(comment);
 	free(value);
-	return ret;
+	врати ret;
 }
 
-static int cmd_config_unset(int argc, const char **argv, const char *prefix,
+static цео cmd_config_unset(цео argc, const char **argv, const char *prefix,
 			    struct repository *repo UNUSED)
 {
 	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
 	const char *value_pattern = NULL;
-	int flags = 0;
+	цео flags = 0;
 	struct option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		OPT_GROUP(N_("Filter")),
@@ -1204,31 +1204,31 @@ static int cmd_config_unset(int argc, const char **argv, const char *prefix,
 		OPT_BIT(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_VALUE),
 		OPT_END(),
 	};
-	int ret;
+	цео ret;
 
 	argc = parse_options(argc, argv, prefix, opts, builtin_config_unset_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 	check_argc(argc, 1, 1);
 
-	if ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
+	ако ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
 		die(_("--fixed-value only applies with 'value-pattern'"));
 
 	location_options_init(&location_opts, prefix);
 	check_write(&location_opts.source);
 
-	if ((flags & CONFIG_FLAGS_MULTI_REPLACE) || value_pattern)
+	ако ((flags & CONFIG_FLAGS_MULTI_REPLACE) || value_pattern)
 		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
 							      argv[0], NULL, value_pattern,
 							      NULL, flags);
-	else
+	инако
 		ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file, argv[0],
 						     NULL, NULL);
 
 	location_options_release(&location_opts);
-	return ret;
+	врати ret;
 }
 
-static int cmd_config_rename_section(int argc, const char **argv, const char *prefix,
+static цео cmd_config_rename_section(цео argc, const char **argv, const char *prefix,
 				     struct repository *repo UNUSED)
 {
 	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
@@ -1236,7 +1236,7 @@ static int cmd_config_rename_section(int argc, const char **argv, const char *pr
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		OPT_END(),
 	};
-	int ret;
+	цео ret;
 
 	argc = parse_options(argc, argv, prefix, opts, builtin_config_rename_section_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
@@ -1247,18 +1247,18 @@ static int cmd_config_rename_section(int argc, const char **argv, const char *pr
 
 	ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
 						 argv[0], argv[1]);
-	if (ret < 0)
+	ако (ret < 0)
 		goto out;
-	else if (!ret)
+	инако ако (!ret)
 		die(_("no such section: %s"), argv[0]);
 	ret = 0;
 
 out:
 	location_options_release(&location_opts);
-	return ret;
+	врати ret;
 }
 
-static int cmd_config_remove_section(int argc, const char **argv, const char *prefix,
+static цео cmd_config_remove_section(цео argc, const char **argv, const char *prefix,
 				     struct repository *repo UNUSED)
 {
 	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
@@ -1266,7 +1266,7 @@ static int cmd_config_remove_section(int argc, const char **argv, const char *pr
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		OPT_END(),
 	};
-	int ret;
+	цео ret;
 
 	argc = parse_options(argc, argv, prefix, opts, builtin_config_remove_section_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
@@ -1277,52 +1277,52 @@ static int cmd_config_remove_section(int argc, const char **argv, const char *pr
 
 	ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
 						 argv[0], NULL);
-	if (ret < 0)
+	ако (ret < 0)
 		goto out;
-	else if (!ret)
+	инако ако (!ret)
 		die(_("no such section: %s"), argv[0]);
 	ret = 0;
 
 out:
 	location_options_release(&location_opts);
-	return ret;
+	врати ret;
 }
 
-static int show_editor(struct config_location_options *opts)
+static цео show_editor(struct config_location_options *opts)
 {
 	char *config_file;
 
-	if (!opts->source.file && !startup_info->have_repository)
+	ако (!opts->source.file && !startup_info->have_repository)
 		die(_("not in a git directory"));
-	if (opts->source.use_stdin)
+	ако (opts->source.use_stdin)
 		die(_("editing stdin is not supported"));
-	if (opts->source.blob)
+	ако (opts->source.blob)
 		die(_("editing blobs is not supported"));
 	repo_config(the_repository, git_default_config, NULL);
 	config_file = opts->source.file ?
 			xstrdup(opts->source.file) :
 			repo_git_path(the_repository, "config");
-	if (opts->use_global_config) {
-		int fd = open(config_file, O_CREAT | O_EXCL | O_WRONLY, 0666);
-		if (fd >= 0) {
+	ако (opts->use_global_config) {
+		цео fd = open(config_file, O_CREAT | O_EXCL | O_WRONLY, 0666);
+		ако (fd >= 0) {
 			char *content = default_user_config();
 			write_str_in_full(fd, content);
 			free(content);
 			close(fd);
 		}
-		else if (errno != EEXIST)
+		инако ако (errno != EEXIST)
 			die_errno(_("cannot create configuration file %s"), config_file);
 	}
-	if (launch_editor(config_file, NULL, NULL)) {
+	ако (launch_editor(config_file, NULL, NULL)) {
 		free(config_file);
-		return -1;
+		врати -1;
 	}
 	free(config_file);
 
-	return 0;
+	врати 0;
 }
 
-static int cmd_config_edit(int argc, const char **argv, const char *prefix,
+static цео cmd_config_edit(цео argc, const char **argv, const char *prefix,
 			   struct repository *repo UNUSED)
 {
 	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
@@ -1330,7 +1330,7 @@ static int cmd_config_edit(int argc, const char **argv, const char *prefix,
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		OPT_END(),
 	};
-	int ret;
+	цео ret;
 
 	argc = parse_options(argc, argv, prefix, opts, builtin_config_edit_usage, 0);
 	check_argc(argc, 0, 0);
@@ -1340,10 +1340,10 @@ static int cmd_config_edit(int argc, const char **argv, const char *prefix,
 
 	ret = show_editor(&location_opts);
 	location_options_release(&location_opts);
-	return ret;
+	врати ret;
 }
 
-static int cmd_config_actions(int argc, const char **argv, const char *prefix)
+static цео cmd_config_actions(цео argc, const char **argv, const char *prefix)
 {
 	enum {
 		ACTION_GET = (1<<0),
@@ -1366,7 +1366,7 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
 	struct config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
 	const char *comment_arg = NULL;
-	int actions = 0;
+	цео actions = 0;
 	unsigned flags = 0;
 	struct option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
@@ -1396,8 +1396,8 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 		OPT_END(),
 	};
 	char *value = NULL, *comment = NULL;
-	int ret = 0;
-	int actions_implicit;
+	цео ret = 0;
+	цео actions_implicit;
 	struct key_value_info default_kvi = KVI_INIT;
 
 	argc = parse_options(argc, argv, prefix, opts,
@@ -1407,13 +1407,13 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 	location_options_init(&location_opts, prefix);
 	display_options_init(&display_opts);
 
-	if ((actions & (ACTION_GET_COLOR|ACTION_GET_COLORBOOL)) && display_opts.type) {
+	ако ((actions & (ACTION_GET_COLOR|ACTION_GET_COLORBOOL)) && display_opts.type) {
 		error(_("--get-color and variable type are incoherent"));
 		exit(129);
 	}
 
 	actions_implicit = (actions == 0);
-	if (actions_implicit)
+	ако (actions_implicit)
 		switch (argc) {
 		case 1: actions = ACTION_GET; break;
 		case 2: actions = ACTION_SET; break;
@@ -1422,38 +1422,38 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 			error(_("no action specified"));
 			exit(129);
 		}
-	if (actions_implicit && argc == 1) {
+	ако (actions_implicit && argc == 1) {
 		const char *last_dot = strrchr(argv[0], '.');
-		if (last_dot && strchr(last_dot + 1, '='))
+		ако (last_dot && strchr(last_dot + 1, '='))
 			die_missing_set_value(argv[0]);
 	}
-	if (display_opts.omit_values &&
+	ако (display_opts.omit_values &&
 	    !(actions == ACTION_LIST || actions == ACTION_GET_REGEXP)) {
 		error(_("--name-only is only applicable to --list or --get-regexp"));
 		exit(129);
 	}
 
-	if (display_opts.show_origin && !(actions &
+	ако (display_opts.show_origin && !(actions &
 		(ACTION_GET|ACTION_GET_ALL|ACTION_GET_REGEXP|ACTION_LIST))) {
 		error(_("--show-origin is only applicable to --get, --get-all, "
 			"--get-regexp, and --list"));
 		exit(129);
 	}
 
-	if (display_opts.default_value && !(actions & ACTION_GET)) {
+	ако (display_opts.default_value && !(actions & ACTION_GET)) {
 		error(_("--default is only applicable to --get"));
 		exit(129);
 	}
 
-	if (comment_arg &&
+	ако (comment_arg &&
 	    !(actions & (ACTION_ADD|ACTION_SET|ACTION_SET_ALL|ACTION_REPLACE_ALL))) {
 		error(_("--comment is only applicable to add/set/replace operations"));
 		exit(129);
 	}
 
 	/* check usage of --fixed-value */
-	if (flags & CONFIG_FLAGS_FIXED_VALUE) {
-		int allowed_usage = 0;
+	ако (flags & CONFIG_FLAGS_FIXED_VALUE) {
+		цео allowed_usage = 0;
 
 		switch (actions) {
 		/* git config --get <name> <value-pattern> */
@@ -1479,7 +1479,7 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 		/* other options don't allow --fixed-value */
 		}
 
-		if (!allowed_usage) {
+		ако (!allowed_usage) {
 			error(_("--fixed-value only applies with 'value-pattern'"));
 			exit(129);
 		}
@@ -1491,35 +1491,35 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 	 * The following actions may produce more than one line of output and
 	 * should therefore be paged.
 	 */
-	if (actions & (ACTION_LIST | ACTION_GET_ALL | ACTION_GET_REGEXP | ACTION_GET_URLMATCH))
+	ако (actions & (ACTION_LIST | ACTION_GET_ALL | ACTION_GET_REGEXP | ACTION_GET_URLMATCH))
 		setup_auto_pager("config", 1);
 
-	if (actions == ACTION_LIST) {
+	ако (actions == ACTION_LIST) {
 		check_argc(argc, 0, 0);
 		display_options_init_list(&display_opts);
-		if (config_with_options(show_all_config, &display_opts,
+		ако (config_with_options(show_all_config, &display_opts,
 					&location_opts.source, the_repository,
 					&location_opts.options) < 0) {
-			if (location_opts.source.file)
+			ако (location_opts.source.file)
 				die_errno(_("unable to read config file '%s'"),
 					  location_opts.source.file);
-			else
+			инако
 				die(_("error processing config file(s)"));
 		}
 	}
-	else if (actions == ACTION_EDIT) {
+	инако ако (actions == ACTION_EDIT) {
 		ret = show_editor(&location_opts);
 	}
-	else if (actions == ACTION_SET) {
+	инако ако (actions == ACTION_SET) {
 		check_write(&location_opts.source);
 		check_argc(argc, 2, 2);
 		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
 		ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file, argv[0], comment, value);
-		if (ret == CONFIG_NOTHING_SET)
+		ако (ret == CONFIG_NOTHING_SET)
 			error(_("cannot overwrite multiple values with a single value\n"
 			"       Use a regexp, --add or --replace-all to change %s."), argv[0]);
 	}
-	else if (actions == ACTION_SET_ALL) {
+	инако ако (actions == ACTION_SET_ALL) {
 		check_write(&location_opts.source);
 		check_argc(argc, 2, 3);
 		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
@@ -1527,7 +1527,7 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 							      argv[0], value, argv[2],
 							      comment, flags);
 	}
-	else if (actions == ACTION_ADD) {
+	инако ако (actions == ACTION_ADD) {
 		check_write(&location_opts.source);
 		check_argc(argc, 2, 2);
 		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
@@ -1536,7 +1536,7 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 							      CONFIG_REGEX_NONE,
 							      comment, flags);
 	}
-	else if (actions == ACTION_REPLACE_ALL) {
+	инако ако (actions == ACTION_REPLACE_ALL) {
 		check_write(&location_opts.source);
 		check_argc(argc, 2, 3);
 		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
@@ -1544,75 +1544,75 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 							      argv[0], value, argv[2],
 							      comment, flags | CONFIG_FLAGS_MULTI_REPLACE);
 	}
-	else if (actions == ACTION_GET) {
+	инако ако (actions == ACTION_GET) {
 		check_argc(argc, 1, 2);
 		ret = get_value(&location_opts, &display_opts, argv[0], argv[1],
 				0, flags);
 	}
-	else if (actions == ACTION_GET_ALL) {
+	инако ако (actions == ACTION_GET_ALL) {
 		check_argc(argc, 1, 2);
 		ret = get_value(&location_opts, &display_opts, argv[0], argv[1],
 				GET_VALUE_ALL, flags);
 	}
-	else if (actions == ACTION_GET_REGEXP) {
+	инако ако (actions == ACTION_GET_REGEXP) {
 		display_opts.show_keys = 1;
 		check_argc(argc, 1, 2);
 		ret = get_value(&location_opts, &display_opts, argv[0], argv[1],
 				GET_VALUE_ALL|GET_VALUE_KEY_REGEXP, flags);
 	}
-	else if (actions == ACTION_GET_URLMATCH) {
+	инако ако (actions == ACTION_GET_URLMATCH) {
 		check_argc(argc, 2, 2);
 		ret = get_urlmatch(&location_opts, &display_opts, argv[0], argv[1]);
 	}
-	else if (actions == ACTION_UNSET) {
+	инако ако (actions == ACTION_UNSET) {
 		check_write(&location_opts.source);
 		check_argc(argc, 1, 2);
-		if (argc == 2)
+		ако (argc == 2)
 			ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
 								      argv[0], NULL, argv[1],
 								      NULL, flags);
-		else
+		инако
 			ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file,
 							     argv[0], NULL, NULL);
 	}
-	else if (actions == ACTION_UNSET_ALL) {
+	инако ако (actions == ACTION_UNSET_ALL) {
 		check_write(&location_opts.source);
 		check_argc(argc, 1, 2);
 		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
 							      argv[0], NULL, argv[1],
 							      NULL, flags | CONFIG_FLAGS_MULTI_REPLACE);
 	}
-	else if (actions == ACTION_RENAME_SECTION) {
+	инако ако (actions == ACTION_RENAME_SECTION) {
 		check_write(&location_opts.source);
 		check_argc(argc, 2, 2);
 		ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
 							 argv[0], argv[1]);
-		if (ret < 0)
+		ако (ret < 0)
 			goto out;
-		else if (!ret)
+		инако ако (!ret)
 			die(_("no such section: %s"), argv[0]);
-		else
+		инако
 			ret = 0;
 	}
-	else if (actions == ACTION_REMOVE_SECTION) {
+	инако ако (actions == ACTION_REMOVE_SECTION) {
 		check_write(&location_opts.source);
 		check_argc(argc, 1, 1);
 		ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
 							 argv[0], NULL);
-		if (ret < 0)
+		ако (ret < 0)
 			goto out;
-		else if (!ret)
+		инако ако (!ret)
 			die(_("no such section: %s"), argv[0]);
-		else
+		инако
 			ret = 0;
 	}
-	else if (actions == ACTION_GET_COLOR) {
+	инако ако (actions == ACTION_GET_COLOR) {
 		check_argc(argc, 1, 2);
 		ret = get_color(&location_opts, argv[0], argv[1]);
 	}
-	else if (actions == ACTION_GET_COLORBOOL) {
+	инако ако (actions == ACTION_GET_COLORBOOL) {
 		check_argc(argc, 1, 2);
-		if (argc == 2)
+		ако (argc == 2)
 			color_stdout_is_tty = git_config_bool("command line", argv[1]);
 		ret = get_colorbool(&location_opts, argv[0], argc == 2);
 	}
@@ -1621,10 +1621,10 @@ out:
 	location_options_release(&location_opts);
 	free(comment);
 	free(value);
-	return ret;
+	врати ret;
 }
 
-int cmd_config(int argc,
+цео cmd_config(цео argc,
 	       const char **argv,
 	       const char *prefix,
 	       struct repository *repo)
@@ -1651,11 +1651,11 @@ int cmd_config(int argc,
 	 */
 	argc = parse_options(argc, argv, prefix, subcommand_opts, builtin_config_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL|PARSE_OPT_KEEP_ARGV0|PARSE_OPT_KEEP_UNKNOWN_OPT);
-	if (subcommand) {
+	ако (subcommand) {
 		argc = parse_options(argc, argv, prefix, subcommand_opts, builtin_config_usage,
 		       PARSE_OPT_SUBCOMMAND_OPTIONAL|PARSE_OPT_KEEP_UNKNOWN_OPT);
-		return subcommand(argc, argv, prefix, repo);
+		врати subcommand(argc, argv, prefix, repo);
 	}
 
-	return cmd_config_actions(argc, argv, prefix);
+	врати cmd_config_actions(argc, argv, prefix);
 }

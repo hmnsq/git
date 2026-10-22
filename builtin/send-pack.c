@@ -31,10 +31,10 @@ static void print_helper_status(struct ref *ref)
 	struct strbuf buf = STRBUF_INIT;
 	struct ref_push_report *report;
 
-	for (; ref; ref = ref->next) {
+	за (; ref; ref = ref->next) {
 		const char *msg = NULL;
 		const char *res;
-		int count = 0;
+		цео count = 0;
 
 		switch(ref->status) {
 		case REF_STATUS_NONE:
@@ -97,28 +97,28 @@ static void print_helper_status(struct ref *ref)
 
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "%s %s", res, ref->name);
-		if (ref->remote_status)
+		ако (ref->remote_status)
 			msg = ref->remote_status;
-		if (msg) {
+		ако (msg) {
 			strbuf_addch(&buf, ' ');
 			quote_two_c_style(&buf, "", msg, 0);
 		}
 		strbuf_addch(&buf, '\n');
 
-		if (ref->status == REF_STATUS_OK) {
-			for (report = ref->report; report; report = report->next) {
-				if (count++ > 0)
+		ако (ref->status == REF_STATUS_OK) {
+			за (report = ref->report; report; report = report->next) {
+				ако (count++ > 0)
 					strbuf_addf(&buf, "ok %s\n", ref->name);
-				if (report->ref_name)
+				ако (report->ref_name)
 					strbuf_addf(&buf, "option refname %s\n",
 						report->ref_name);
-				if (report->old_oid)
+				ако (report->old_oid)
 					strbuf_addf(&buf, "option old-oid %s\n",
 						oid_to_hex(report->old_oid));
-				if (report->new_oid)
+				ако (report->new_oid)
 					strbuf_addf(&buf, "option new-oid %s\n",
 						oid_to_hex(report->new_oid));
-				if (report->forced_update)
+				ако (report->forced_update)
 					strbuf_addstr(&buf, "option forced-update\n");
 			}
 		}
@@ -127,10 +127,10 @@ static void print_helper_status(struct ref *ref)
 	strbuf_release(&buf);
 }
 
-static int send_pack_config(const char *k, const char *v,
+static цео send_pack_config(const char *k, const char *v,
 			    const struct config_context *ctx, void *cb)
 {
-	if (!strcmp(k, "push.gpgsign")) {
+	ако (!strcmp(k, "push.gpgsign")) {
 		switch (git_parse_maybe_bool(v)) {
 		case 0:
 			args.push_cert = SEND_PACK_PUSH_CERT_NEVER;
@@ -139,16 +139,16 @@ static int send_pack_config(const char *k, const char *v,
 			args.push_cert = SEND_PACK_PUSH_CERT_ALWAYS;
 			break;
 		default:
-			if (!strcasecmp(v, "if-asked"))
+			ако (!strcasecmp(v, "if-asked"))
 				args.push_cert = SEND_PACK_PUSH_CERT_IF_ASKED;
-			else
-				return error(_("invalid value for '%s'"), k);
+			инако
+				врати error(_("invalid value for '%s'"), k);
 		}
 	}
-	return git_default_config(k, v, ctx, cb);
+	врати git_default_config(k, v, ctx, cb);
 }
 
-int cmd_send_pack(int argc,
+цео cmd_send_pack(цео argc,
 		  const char **argv,
 		  const char *prefix,
 		  struct repository *repo)
@@ -157,31 +157,31 @@ int cmd_send_pack(int argc,
 	const char *remote_name = NULL;
 	struct remote *remote = NULL;
 	const char *dest = NULL;
-	int fd[2];
+	цео fd[2];
 	struct child_process *conn;
 	struct oid_array extra_have = OID_ARRAY_INIT;
 	struct oid_array shallow = OID_ARRAY_INIT;
 	struct ref *remote_refs, *local_refs;
-	int ret;
-	int helper_status = 0;
-	int send_all = 0;
-	int verbose = 0;
+	цео ret;
+	цео helper_status = 0;
+	цео send_all = 0;
+	цео verbose = 0;
 	const char *receivepack = "git-receive-pack";
 	unsigned dry_run = 0;
 	unsigned send_mirror = 0;
 	unsigned force_update = 0;
 	unsigned quiet = 0;
-	int push_cert = 0;
+	цео push_cert = 0;
 	struct string_list push_options = STRING_LIST_INIT_NODUP;
 	unsigned use_thin_pack = 0;
 	unsigned atomic = 0;
 	unsigned stateless_rpc = 0;
-	int flags;
-	unsigned int reject_reasons;
-	int progress = -1;
-	int from_stdin = 0;
+	цео flags;
+	unsigned цео reject_reasons;
+	цео progress = -1;
+	цео from_stdin = 0;
 	struct push_cas_option cas = {0};
-	int force_if_includes = 0;
+	цео force_if_includes = 0;
 	struct packet_reader reader;
 
 	struct option options[] = {
@@ -217,12 +217,12 @@ int cmd_send_pack(int argc,
 
 	refspec_init_push(&rs, repo->hash_algo);
 
-	if (argc > 0) {
+	ако (argc > 0) {
 		dest = argv[0];
 		refspec_appendn(&rs, argv + 1, argc - 1);
 	}
 
-	if (!dest)
+	ако (!dest)
 		usage_with_options(send_pack_usage, options);
 
 	args.verbose = verbose;
@@ -238,14 +238,14 @@ int cmd_send_pack(int argc,
 	args.push_options = push_options.nr ? &push_options : NULL;
 	args.url = dest;
 
-	if (from_stdin) {
-		if (args.stateless_rpc) {
+	ако (from_stdin) {
+		ако (args.stateless_rpc) {
 			const char *buf;
-			while ((buf = packet_read_line(0, NULL)))
+			док ((buf = packet_read_line(0, NULL)))
 				refspec_append(&rs, buf);
-		} else {
+		} инако {
 			struct strbuf line = STRBUF_INIT;
-			while (strbuf_getline(&line, stdin) != EOF)
+			док (strbuf_getline(&line, stdin) != EOF)
 				refspec_append(&rs, line.buf);
 			strbuf_release(&line);
 		}
@@ -255,27 +255,27 @@ int cmd_send_pack(int argc,
 	 * --all and --mirror are incompatible; neither makes sense
 	 * with any refspecs.
 	 */
-	if ((rs.nr > 0 && (send_all || args.send_mirror)) ||
+	ако ((rs.nr > 0 && (send_all || args.send_mirror)) ||
 	    (send_all && args.send_mirror))
 		usage_with_options(send_pack_usage, options);
 
-	if (remote_name) {
+	ако (remote_name) {
 		remote = remote_get(remote_name);
-		if (!remote_has_url(remote, dest)) {
+		ако (!remote_has_url(remote, dest)) {
 			die("Destination %s is not a uri for %s",
 			    dest, remote_name);
 		}
 	}
 
-	if (progress == -1)
+	ако (progress == -1)
 		progress = !args.quiet && isatty(2);
 	args.progress = progress;
 
-	if (args.stateless_rpc) {
+	ако (args.stateless_rpc) {
 		conn = NULL;
 		fd[0] = 0;
 		fd[1] = 1;
-	} else {
+	} инако {
 		conn = git_connect(fd, dest, GIT_CONNECT_RECEIVE_PACK,
 				   receivepack,
 				   args.verbose ? CONNECT_VERBOSE : 0);
@@ -303,20 +303,20 @@ int cmd_send_pack(int argc,
 
 	flags = MATCH_REFS_NONE;
 
-	if (send_all)
+	ако (send_all)
 		flags |= MATCH_REFS_ALL;
-	if (args.send_mirror)
+	ако (args.send_mirror)
 		flags |= MATCH_REFS_MIRROR;
 
 	/* match them up */
-	if (match_push_refs(local_refs, &remote_refs, &rs, flags)) {
+	ако (match_push_refs(local_refs, &remote_refs, &rs, flags)) {
 		ret = -1;
 		goto cleanup;
 	}
-	if (!is_empty_cas(&cas))
+	ако (!is_empty_cas(&cas))
 		apply_push_cas(&cas, remote, remote_refs);
 
-	if (!is_empty_cas(&cas) && force_if_includes)
+	ако (!is_empty_cas(&cas) && force_if_includes)
 		cas.use_force_if_includes = 1;
 
 	set_ref_status_for_push(remote_refs, args.send_mirror,
@@ -324,7 +324,7 @@ int cmd_send_pack(int argc,
 
 	ret = send_pack(repo, &args, fd, conn, remote_refs, &extra_have);
 
-	if (helper_status)
+	ако (helper_status)
 		print_helper_status(remote_refs);
 
 	close(fd[1]);
@@ -332,16 +332,16 @@ int cmd_send_pack(int argc,
 
 	ret |= finish_connect(conn);
 
-	if (!helper_status)
+	ако (!helper_status)
 		transport_print_push_status(dest, remote_refs, args.verbose, 0, &reject_reasons);
 
-	if (!args.dry_run && remote) {
+	ако (!args.dry_run && remote) {
 		struct ref *ref;
-		for (ref = remote_refs; ref; ref = ref->next)
+		за (ref = remote_refs; ref; ref = ref->next)
 			transport_update_tracking_ref(remote, ref, args.verbose);
 	}
 
-	if (!ret && !transport_refs_pushed(remote_refs))
+	ако (!ret && !transport_refs_pushed(remote_refs))
 		/* stable plumbing output; do not modify or localize */
 		fprintf(stderr, "Everything up-to-date\n");
 
@@ -353,5 +353,5 @@ cleanup:
 	oid_array_clear(&extra_have);
 	oid_array_clear(&shallow);
 	clear_cas_option(&cas);
-	return ret;
+	врати ret;
 }

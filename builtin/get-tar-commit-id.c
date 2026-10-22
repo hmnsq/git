@@ -12,7 +12,7 @@ static const char builtin_get_tar_commit_id_usage[] =
 #define RECORDSIZE	(512)
 #define HEADERSIZE (2 * RECORDSIZE)
 
-int cmd_get_tar_commit_id(int argc,
+цео cmd_get_tar_commit_id(цео argc,
 			  const char **argv,
 			  const char *prefix,
 			  struct repository *repo UNUSED)
@@ -29,30 +29,30 @@ int cmd_get_tar_commit_id(int argc,
 
 	show_usage_if_asked(argc, argv, builtin_get_tar_commit_id_usage);
 
-	if (argc != 1)
+	ако (argc != 1)
 		usage(builtin_get_tar_commit_id_usage);
 
 	n = read_in_full(0, buffer, HEADERSIZE);
-	if (n < 0)
+	ако (n < 0)
 		die_errno("git get-tar-commit-id: read error");
-	if (n != HEADERSIZE)
+	ако (n != HEADERSIZE)
 		die_errno("git get-tar-commit-id: EOF before reading tar header");
-	if (header->typeflag[0] != TYPEFLAG_GLOBAL_HEADER)
-		return 1;
+	ако (header->typeflag[0] != TYPEFLAG_GLOBAL_HEADER)
+		врати 1;
 
 	errno = 0;
 	len = strtol(content, &end, 10);
-	if (errno == ERANGE || end == content || len < 0)
-		return 1;
-	if (!skip_prefix(end, " comment=", &comment))
-		return 1;
+	ако (errno == ERANGE || end == content || len < 0)
+		врати 1;
+	ако (!skip_prefix(end, " comment=", &comment))
+		врати 1;
 	len -= comment - content;
-	if (len < 1 || !(len % 2) ||
+	ако (len < 1 || !(len % 2) ||
 	    hash_algo_by_length((len - 1) / 2) == GIT_HASH_UNKNOWN)
-		return 1;
+		врати 1;
 
-	if (write_in_full(1, comment, len) < 0)
+	ако (write_in_full(1, comment, len) < 0)
 		die_errno("git get-tar-commit-id: write error");
 
-	return 0;
+	врати 0;
 }
