@@ -1,34 +1,34 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "entry.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parallel-checkout.h"
-#include "parse-options.h"
-#include "pkt-line.h"
-#include "read-cache-ll.h"
+#ଅନ୍ତର୍ଭାଵ "builtin.h"
+#ଅନ୍ତର୍ଭାଵ "config.h"
+#ଅନ୍ତର୍ଭାଵ "entry.h"
+#ଅନ୍ତର୍ଭାଵ "environment.h"
+#ଅନ୍ତର୍ଭାଵ "gettext.h"
+#ଅନ୍ତର୍ଭାଵ "parallel-checkout.h"
+#ଅନ୍ତର୍ଭାଵ "parse-options.h"
+#ଅନ୍ତର୍ଭାଵ "pkt-line.h"
+#ଅନ୍ତର୍ଭାଵ "read-cache-ll.h"
 
-static void packet_to_pc_item(const char *buffer, int len,
-			      struct parallel_checkout_item *pc_item)
+ସ୍ଥିର ଶୂନ୍ୟ packet_to_pc_item(ଅଚଳ ଅକ୍ଷର *buffer, ପୂର୍ଣ୍ଣସଂଖ୍ୟା len,
+			      ସଂରଚନା parallel_checkout_item *pc_item)
 {
-	const struct pc_item_fixed_portion *fixed_portion;
-	const char *variant;
-	char *encoding;
+	ଅଚଳ ସଂରଚନା pc_item_fixed_portion *fixed_portion;
+	ଅଚଳ ଅକ୍ଷର *variant;
+	ଅକ୍ଷର *encoding;
 
-	if (len < sizeof(struct pc_item_fixed_portion))
+	ଯଦି (len < ଆକାର(ସଂରଚନା pc_item_fixed_portion))
 		BUG("checkout worker received too short item (got %dB, exp %dB)",
-		    len, (int)sizeof(struct pc_item_fixed_portion));
+		    len, (ପୂର୍ଣ୍ଣସଂଖ୍ୟା)ଆକାର(ସଂରଚନା pc_item_fixed_portion));
 
-	fixed_portion = (struct pc_item_fixed_portion *)buffer;
+	fixed_portion = (ସଂରଚନା pc_item_fixed_portion *)buffer;
 
-	if (len - sizeof(struct pc_item_fixed_portion) !=
-		fixed_portion->name_len + fixed_portion->working_tree_encoding_len)
+	ଯଦି (len - ଆକାର(ସଂରଚନା pc_item_fixed_portion) !=
+		fixed_portion->name_len + fixed_portion->working_ବୃକ୍ଷ_encoding_len)
 		BUG("checkout worker received corrupted item");
 
-	variant = buffer + sizeof(struct pc_item_fixed_portion);
+	variant = buffer + ଆକାର(ସଂରଚନା pc_item_fixed_portion);
 
 	/*
 	 * Note: the main process uses zero length to communicate that the
@@ -36,16 +36,16 @@ static void packet_to_pc_item(const char *buffer, int len,
 	 * actual empty string, since convert_attrs() never sets
 	 * ca.working_tree_enconding to "".
 	 */
-	if (fixed_portion->working_tree_encoding_len) {
+	ଯଦି (fixed_portion->working_ବୃକ୍ଷ_encoding_len) {
 		encoding = xmemdupz(variant,
-				    fixed_portion->working_tree_encoding_len);
-		variant += fixed_portion->working_tree_encoding_len;
-	} else {
-		encoding = NULL;
+				    fixed_portion->working_ବୃକ୍ଷ_encoding_len);
+		variant += fixed_portion->working_ବୃକ୍ଷ_encoding_len;
+	} ଅନ୍ୟଥା {
+		encoding = ଖାଲି;
 	}
 
-	memset(pc_item, 0, sizeof(*pc_item));
-	pc_item->ce = make_empty_transient_cache_entry(fixed_portion->name_len, NULL);
+	memset(pc_item, 0, ଆକାର(*pc_item));
+	pc_item->ce = make_empty_transient_cache_entry(fixed_portion->name_len, ଖାଲି);
 	pc_item->ce->ce_namelen = fixed_portion->name_len;
 	pc_item->ce->ce_mode = fixed_portion->ce_mode;
 	memcpy(pc_item->ce->name, variant, pc_item->ce->ce_namelen);
@@ -54,54 +54,54 @@ static void packet_to_pc_item(const char *buffer, int len,
 	pc_item->id = fixed_portion->id;
 	pc_item->ca.crlf_action = fixed_portion->crlf_action;
 	pc_item->ca.ident = fixed_portion->ident;
-	pc_item->ca.working_tree_encoding = encoding;
+	pc_item->ca.working_ବୃକ୍ଷ_encoding = encoding;
 }
 
-static void report_result(struct parallel_checkout_item *pc_item)
+ସ୍ଥିର ଶୂନ୍ୟ report_result(ସଂରଚନା parallel_checkout_item *pc_item)
 {
-	struct pc_item_result res = { 0 };
+	ସଂରଚନା pc_item_result res = { 0 };
 	size_t size;
 
 	res.id = pc_item->id;
 	res.status = pc_item->status;
 
-	if (pc_item->status == PC_ITEM_WRITTEN) {
+	ଯଦି (pc_item->status == PC_ITEM_WRITTEN) {
 		res.st = pc_item->st;
-		size = sizeof(res);
-	} else {
+		size = ଆକାର(res);
+	} ଅନ୍ୟଥା {
 		size = PC_ITEM_RESULT_BASE_SIZE;
 	}
 
-	packet_write(1, (const char *)&res, size);
+	packet_write(1, (ଅଚଳ ଅକ୍ଷର *)&res, size);
 }
 
 /* Free the worker-side malloced data, but not pc_item itself. */
-static void release_pc_item_data(struct parallel_checkout_item *pc_item)
+ସ୍ଥିର ଶୂନ୍ୟ release_pc_item_data(ସଂରଚନା parallel_checkout_item *pc_item)
 {
-	free((char *)pc_item->ca.working_tree_encoding);
+	ମୁକ୍ତ((ଅକ୍ଷର *)pc_item->ca.working_ବୃକ୍ଷ_encoding);
 	discard_cache_entry(pc_item->ce);
 }
 
-static void worker_loop(struct checkout *state)
+ସ୍ଥିର ଶୂନ୍ୟ worker_loop(ସଂରଚନା checkout *state)
 {
-	struct parallel_checkout_item *items = NULL;
+	ସଂରଚନା parallel_checkout_item *ବସ୍ତୁଗୁଡ଼ିକ = ଖାଲି;
 	size_t i, nr = 0, alloc = 0;
 
-	while (1) {
-		int len = packet_read(0, packet_buffer, sizeof(packet_buffer),
+	ଯେତେବେଳେ (1) {
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା len = packet_read(0, packet_buffer, ଆକାର(packet_buffer),
 				      0);
 
-		if (len < 0)
+		ଯଦି (len < 0)
 			BUG("packet_read() returned negative value");
-		else if (!len)
-			break;
+		ଅନ୍ୟଥା ଯଦି (!len)
+			ଭାଙ୍ଗ;
 
-		ALLOC_GROW(items, nr + 1, alloc);
-		packet_to_pc_item(packet_buffer, len, &items[nr++]);
+		ALLOC_GROW(ବସ୍ତୁଗୁଡ଼ିକ, nr + 1, alloc);
+		packet_to_pc_item(packet_buffer, len, &ବସ୍ତୁଗୁଡ଼ିକ[nr++]);
 	}
 
-	for (i = 0; i < nr; i++) {
-		struct parallel_checkout_item *pc_item = &items[i];
+	ପାଇଁ (i = 0; i < nr; i++) {
+		ସଂରଚନା parallel_checkout_item *pc_item = &ବସ୍ତୁଗୁଡ଼ିକ[i];
 		write_pc_item(pc_item, state);
 		report_result(pc_item);
 		release_pc_item_data(pc_item);
@@ -109,21 +109,21 @@ static void worker_loop(struct checkout *state)
 
 	packet_flush(1);
 
-	free(items);
+	ମୁକ୍ତ(ବସ୍ତୁଗୁଡ଼ିକ);
 }
 
-static const char * const checkout_worker_usage[] = {
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର * ଅଚଳ checkout_worker_usage[] = {
 	N_("git checkout--worker [<options>]"),
-	NULL
+	ଖାଲି
 };
 
-int cmd_checkout__worker(int argc,
-			 const char **argv,
-			 const char *prefix,
-			 struct repository *repo UNUSED)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_checkout__worker(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc,
+			 ଅଚଳ ଅକ୍ଷର **argv,
+			 ଅଚଳ ଅକ୍ଷର *prefix,
+			 ସଂରଚନା repository *repo UNUSED)
 {
-	struct checkout state = CHECKOUT_INIT;
-	struct option checkout_worker_options[] = {
+	ସଂରଚନା checkout state = CHECKOUT_INIT;
+	ସଂରଚନା option checkout_worker_options[] = {
 		OPT_STRING(0, "prefix", &state.base_dir, N_("string"),
 			N_("when creating files, prepend <string>")),
 		OPT_END()
@@ -133,13 +133,13 @@ int cmd_checkout__worker(int argc,
 					 checkout_worker_usage,
 					 checkout_worker_options);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ଖାଲି);
 	argc = parse_options(argc, argv, prefix, checkout_worker_options,
 			     checkout_worker_usage, 0);
-	if (argc > 0)
+	ଯଦି (argc > 0)
 		usage_with_options(checkout_worker_usage, checkout_worker_options);
 
-	if (state.base_dir)
+	ଯଦି (state.base_dir)
 		state.base_dir_len = strlen(state.base_dir);
 
 	/*
@@ -150,5 +150,5 @@ int cmd_checkout__worker(int argc,
 	state.refresh_cache = 1;
 
 	worker_loop(&state);
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }

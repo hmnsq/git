@@ -1,38 +1,38 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "pretty.h"
-#include "refs.h"
-#include "color.h"
-#include "strvec.h"
-#include "object-name.h"
-#include "parse-options.h"
+#ଅନ୍ତର୍ଭାଵ "builtin.h"
+#ଅନ୍ତର୍ଭାଵ "config.h"
+#ଅନ୍ତର୍ଭାଵ "environment.h"
+#ଅନ୍ତର୍ଭାଵ "gettext.h"
+#ଅନ୍ତର୍ଭାଵ "hash.h"
+#ଅନ୍ତର୍ଭାଵ "hex.h"
+#ଅନ୍ତର୍ଭାଵ "pretty.h"
+#ଅନ୍ତର୍ଭାଵ "refs.h"
+#ଅନ୍ତର୍ଭାଵ "color.h"
+#ଅନ୍ତର୍ଭାଵ "strvec.h"
+#ଅନ୍ତର୍ଭାଵ "object-name.h"
+#ଅନ୍ତର୍ଭାଵ "parse-options.h"
 
-#include "dir.h"
-#include "commit-slab.h"
-#include "date.h"
-#include "wildmatch.h"
-#include "prio-queue.h"
+#ଅନ୍ତର୍ଭାଵ "dir.h"
+#ଅନ୍ତର୍ଭାଵ "commit-slab.h"
+#ଅନ୍ତର୍ଭାଵ "date.h"
+#ଅନ୍ତର୍ଭାଵ "wildmatch.h"
+#ଅନ୍ତର୍ଭାଵ "prio-queue.h"
 
-static const char*const show_branch_usage[] = {
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର*ଅଚଳ show_branch_usage[] = {
     N_("git show-branch [-a | --all] [-r | --remotes] [--topo-order | --date-order]\n"
        "                [--current] [--color[=<when>] | --no-color] [--sparse]\n"
        "                [--more=<n> | --list | --independent | --merge-base]\n"
        "                [--no-name | --sha1-name] [--topics]\n"
        "                [(<rev> | <glob>)...]"),
     N_("git show-branch (-g | --reflog)[=<n>[,<base>]] [--list] [<ref>]"),
-    NULL
+    ଖାଲି
 };
 
-static enum git_colorbool showbranch_use_color = GIT_COLOR_UNKNOWN;
+ସ୍ଥିର ଗଣନା git_colorbool showbranch_use_color = GIT_COLOR_UNKNOWN;
 
-static struct strvec default_args = STRVEC_INIT;
+ସ୍ଥିର ସଂରଚନା strvec default_args = STRVEC_INIT;
 
 /*
  * TODO: convert this use of commit->object.flags to commit-slab
@@ -46,54 +46,54 @@ static struct strvec default_args = STRVEC_INIT;
 
 #define DEFAULT_REFLOG	4
 
-static const char *get_color_code(int idx)
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *get_color_code(ପୂର୍ଣ୍ଣସଂଖ୍ୟା idx)
 {
-	if (want_color(showbranch_use_color))
-		return column_colors_ansi[idx % column_colors_ansi_max];
-	return "";
+	ଯଦି (want_color(showbranch_use_color))
+		ଫେରନ୍ତୁ column_colors_ansi[idx % column_colors_ansi_max];
+	ଫେରନ୍ତୁ "";
 }
 
-static const char *get_color_reset_code(void)
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *get_color_reset_code(ଶୂନ୍ୟ)
 {
-	if (want_color(showbranch_use_color))
-		return GIT_COLOR_RESET;
-	return "";
+	ଯଦି (want_color(showbranch_use_color))
+		ଫେରନ୍ତୁ GIT_COLOR_RESET;
+	ଫେରନ୍ତୁ "";
 }
 
-static struct commit *interesting(struct prio_queue *queue)
+ସ୍ଥିର ସଂରଚନା commit *interesting(ସଂରଚନା prio_queue *queue)
 {
-	struct commit *commit;
+	ସଂରଚନା commit *commit;
 	prio_queue_for_each(queue, commit) {
-		if (!(commit->object.flags & UNINTERESTING))
-			return commit;
+		ଯଦି (!(commit->object.flags & UNINTERESTING))
+			ଫେରନ୍ତୁ commit;
 	}
-	return NULL;
+	ଫେରନ୍ତୁ ଖାଲି;
 }
 
-struct commit_name {
-	const char *head_name; /* which head's ancestor? */
-	int generation; /* how many parents away from head_name */
+ସଂରଚନା commit_name {
+	ଅଚଳ ଅକ୍ଷର *head_name; /* which head's ancestor? */
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା generation; /* how many parents away from head_name */
 };
 
-define_commit_slab(commit_name_slab, struct commit_name *);
-static struct commit_name_slab name_slab;
+define_commit_slab(commit_name_slab, ସଂରଚନା commit_name *);
+ସ୍ଥିର ସଂରଚନା commit_name_slab name_slab;
 
-static struct commit_name *commit_to_name(struct commit *commit)
+ସ୍ଥିର ସଂରଚନା commit_name *commit_to_name(ସଂରଚନା commit *commit)
 {
-	return *commit_name_slab_at(&name_slab, commit);
+	ଫେରନ୍ତୁ *commit_name_slab_at(&name_slab, commit);
 }
 
 
 /* Name the commit as nth generation ancestor of head_name;
  * we count only the first-parent relationship for naming purposes.
  */
-static void name_commit(struct commit *commit, const char *head_name, int nth)
+ସ୍ଥିର ଶୂନ୍ୟ name_commit(ସଂରଚନା commit *commit, ଅଚଳ ଅକ୍ଷର *head_name, ପୂର୍ଣ୍ଣସଂଖ୍ୟା nth)
 {
-	struct commit_name *name;
+	ସଂରଚନା commit_name *name;
 
 	name = *commit_name_slab_at(&name_slab, commit);
-	if (!name) {
-		name = xmalloc(sizeof(*name));
+	ଯଦି (!name) {
+		name = xmalloc(ଆକାର(*name));
 		*commit_name_slab_at(&name_slab, commit) = name;
 	}
 	name->head_name = head_name;
@@ -105,153 +105,153 @@ static void name_commit(struct commit *commit, const char *head_name, int nth)
  * commit is nth generation ancestor of, if that generation
  * number is better than the name it already has.
  */
-static void name_parent(struct commit *commit, struct commit *parent)
+ସ୍ଥିର ଶୂନ୍ୟ name_parent(ସଂରଚନା commit *commit, ସଂରଚନା commit *parent)
 {
-	struct commit_name *commit_name = commit_to_name(commit);
-	struct commit_name *parent_name = commit_to_name(parent);
-	if (!commit_name)
-		return;
-	if (!parent_name ||
+	ସଂରଚନା commit_name *commit_name = commit_to_name(commit);
+	ସଂରଚନା commit_name *parent_name = commit_to_name(parent);
+	ଯଦି (!commit_name)
+		ଫେରନ୍ତୁ;
+	ଯଦି (!parent_name ||
 	    commit_name->generation + 1 < parent_name->generation)
 		name_commit(parent, commit_name->head_name,
 			    commit_name->generation + 1);
 }
 
-static int name_first_parent_chain(struct commit *c)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା name_first_parent_chain(ସଂରଚନା commit *c)
 {
-	int i = 0;
-	while (c) {
-		struct commit *p;
-		if (!commit_to_name(c))
-			break;
-		if (!c->parents)
-			break;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା i = 0;
+	ଯେତେବେଳେ (c) {
+		ସଂରଚନା commit *p;
+		ଯଦି (!commit_to_name(c))
+			ଭାଙ୍ଗ;
+		ଯଦି (!c->parents)
+			ଭାଙ୍ଗ;
 		p = c->parents->item;
-		if (!commit_to_name(p)) {
+		ଯଦି (!commit_to_name(p)) {
 			name_parent(c, p);
 			i++;
 		}
-		else
-			break;
+		ଅନ୍ୟଥା
+			ଭାଙ୍ଗ;
 		c = p;
 	}
-	return i;
+	ଫେରନ୍ତୁ i;
 }
 
-static void name_commits(struct commit_list *list,
-			 struct commit **rev,
-			 char **ref_name,
-			 int num_rev)
+ସ୍ଥିର ଶୂନ୍ୟ name_commits(ସଂରଚନା commit_list *list,
+			 ସଂରଚନା commit **rev,
+			 ଅକ୍ଷର **ref_name,
+			 ପୂର୍ଣ୍ଣସଂଖ୍ୟା ଅଙ୍କ_rev)
 {
-	struct commit_list *cl;
-	struct commit *c;
-	int i;
+	ସଂରଚନା commit_list *cl;
+	ସଂରଚନା commit *c;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
 
 	/* First give names to the given heads */
-	for (cl = list; cl; cl = cl->next) {
+	ପାଇଁ (cl = list; cl; cl = cl->next) {
 		c = cl->item;
-		if (commit_to_name(c))
-			continue;
-		for (i = 0; i < num_rev; i++) {
-			if (rev[i] == c) {
+		ଯଦି (commit_to_name(c))
+			ଜାରି;
+		ପାଇଁ (i = 0; i < ଅଙ୍କ_rev; i++) {
+			ଯଦି (rev[i] == c) {
 				name_commit(c, ref_name[i], 0);
-				break;
+				ଭାଙ୍ଗ;
 			}
 		}
 	}
 
 	/* Then commits on the first parent ancestry chain */
-	do {
+	କର {
 		i = 0;
-		for (cl = list; cl; cl = cl->next) {
+		ପାଇଁ (cl = list; cl; cl = cl->next) {
 			i += name_first_parent_chain(cl->item);
 		}
-	} while (i);
+	} ଯେତେବେଳେ (i);
 
 	/* Finally, any unnamed commits */
-	do {
+	କର {
 		i = 0;
-		for (cl = list; cl; cl = cl->next) {
-			struct commit_list *parents;
-			struct commit_name *n;
-			int nth;
+		ପାଇଁ (cl = list; cl; cl = cl->next) {
+			ସଂରଚନା commit_list *parents;
+			ସଂରଚନା commit_name *n;
+			ପୂର୍ଣ୍ଣସଂଖ୍ୟା nth;
 			c = cl->item;
-			if (!commit_to_name(c))
-				continue;
+			ଯଦି (!commit_to_name(c))
+				ଜାରି;
 			n = commit_to_name(c);
 			parents = c->parents;
 			nth = 0;
-			while (parents) {
-				struct commit *p = parents->item;
-				struct strbuf newname = STRBUF_INIT;
+			ଯେତେବେଳେ (parents) {
+				ସଂରଚନା commit *p = parents->item;
+				ସଂରଚନା strbuf newname = STRBUF_INIT;
 				parents = parents->next;
 				nth++;
-				if (commit_to_name(p))
-					continue;
-				switch (n->generation) {
-				case 0:
+				ଯଦି (commit_to_name(p))
+					ଜାରି;
+				ବାଛ (n->generation) {
+				ସ୍ଥିତି 0:
 					strbuf_addstr(&newname, n->head_name);
-					break;
-				case 1:
+					ଭାଙ୍ଗ;
+				ସ୍ଥିତି 1:
 					strbuf_addf(&newname, "%s^", n->head_name);
-					break;
-				default:
+					ଭାଙ୍ଗ;
+				ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
 					strbuf_addf(&newname, "%s~%d",
 						    n->head_name, n->generation);
-					break;
+					ଭାଙ୍ଗ;
 				}
-				if (nth == 1)
+				ଯଦି (nth == 1)
 					strbuf_addch(&newname, '^');
-				else
+				ଅନ୍ୟଥା
 					strbuf_addf(&newname, "^%d", nth);
-				name_commit(p, strbuf_detach(&newname, NULL), 0);
+				name_commit(p, strbuf_detach(&newname, ଖାଲି), 0);
 				i++;
 				name_first_parent_chain(p);
 			}
 		}
-	} while (i);
+	} ଯେତେବେଳେ (i);
 }
 
-static int mark_seen(struct commit *commit, struct commit_list **seen_p)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା mark_seen(ସଂରଚନା commit *commit, ସଂରଚନା commit_list **seen_p)
 {
-	if (!commit->object.flags) {
-		commit_list_insert(commit, seen_p);
-		return 1;
+	ଯଦି (!commit->object.flags) {
+		commit_list_ଭର୍ତ୍ତି(commit, seen_p);
+		ଫେରନ୍ତୁ 1;
 	}
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static void join_revs(struct prio_queue *queue,
-		      struct commit_list **seen_p,
-		      int num_rev, int extra)
+ସ୍ଥିର ଶୂନ୍ୟ join_revs(ସଂରଚନା prio_queue *queue,
+		      ସଂରଚନା commit_list **seen_p,
+		      ପୂର୍ଣ୍ଣସଂଖ୍ୟା ଅଙ୍କ_rev, ପୂର୍ଣ୍ଣସଂଖ୍ୟା extra)
 {
-	int all_mask = ((1u << (REV_SHIFT + num_rev)) - 1);
-	int all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
-	struct commit *commit;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା all_mask = ((1u << (REV_SHIFT + ଅଙ୍କ_rev)) - 1);
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
+	ସଂରଚନା commit *commit;
 
-	while ((commit = prio_queue_peek(queue))) {
-		struct commit_list *parents;
-		int still_interesting = !!interesting(queue);
-		int flags = commit->object.flags & all_mask;
+	ଯେତେବେଳେ ((commit = prio_queue_peek(queue))) {
+		ସଂରଚନା commit_list *parents;
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା still_interesting = !!interesting(queue);
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags = commit->object.flags & all_mask;
 
-		if (!still_interesting && extra <= 0)
-			break;
+		ଯଦି (!still_interesting && extra <= 0)
+			ଭାଙ୍ଗ;
 
 		prio_queue_get(queue);
 
 		mark_seen(commit, seen_p);
-		if ((flags & all_revs) == all_revs)
+		ଯଦି ((flags & all_revs) == all_revs)
 			flags |= UNINTERESTING;
 		parents = commit->parents;
 
-		while (parents) {
-			struct commit *p = parents->item;
-			int this_flag = p->object.flags;
+		ଯେତେବେଳେ (parents) {
+			ସଂରଚନା commit *p = parents->item;
+			ପୂର୍ଣ୍ଣସଂଖ୍ୟା this_flag = p->object.flags;
 			parents = parents->next;
-			if ((this_flag & flags) == flags)
-				continue;
+			ଯଦି ((this_flag & flags) == flags)
+				ଜାରି;
 			repo_parse_commit(the_repository, p);
-			if (mark_seen(p, seen_p) && !still_interesting)
+			ଯଦି (mark_seen(p, seen_p) && !still_interesting)
 				extra--;
 			p->object.flags |= flags;
 			prio_queue_put(queue, p);
@@ -265,16 +265,16 @@ static void join_revs(struct prio_queue *queue,
 	 * seen_p list.  Mark anything that can be reached from
 	 * uninteresting commits not interesting.
 	 */
-	for (;;) {
-		int changed = 0;
-		struct commit_list *s;
-		for (s = *seen_p; s; s = s->next) {
-			struct commit *c = s->item;
-			struct commit_list *parents;
+	ପାଇଁ (;;) {
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା changed = 0;
+		ସଂରଚନା commit_list *s;
+		ପାଇଁ (s = *seen_p; s; s = s->next) {
+			ସଂରଚନା commit *c = s->item;
+			ସଂରଚନା commit_list *parents;
 
-			if (((c->object.flags & all_revs) != all_revs) &&
+			ଯଦି (((c->object.flags & all_revs) != all_revs) &&
 			    !(c->object.flags & UNINTERESTING))
-				continue;
+				ଜାରି;
 
 			/* The current commit is either a merge base or
 			 * already uninteresting one.  Mark its parents
@@ -283,44 +283,44 @@ static void join_revs(struct prio_queue *queue,
 			 * here.
 			 */
 			parents = c->parents;
-			while (parents) {
-				struct commit *p = parents->item;
+			ଯେତେବେଳେ (parents) {
+				ସଂରଚନା commit *p = parents->item;
 				parents = parents->next;
-				if (!(p->object.flags & UNINTERESTING)) {
+				ଯଦି (!(p->object.flags & UNINTERESTING)) {
 					p->object.flags |= UNINTERESTING;
 					changed = 1;
 				}
 			}
 		}
-		if (!changed)
-			break;
+		ଯଦି (!changed)
+			ଭାଙ୍ଗ;
 	}
 }
 
-static void show_one_commit(struct commit *commit, int no_name)
+ସ୍ଥିର ଶୂନ୍ୟ show_one_commit(ସଂରଚନା commit *commit, ପୂର୍ଣ୍ଣସଂଖ୍ୟା no_name)
 {
-	struct strbuf pretty = STRBUF_INIT;
-	const char *pretty_str = "(unavailable)";
-	struct commit_name *name = commit_to_name(commit);
+	ସଂରଚନା strbuf pretty = STRBUF_INIT;
+	ଅଚଳ ଅକ୍ଷର *pretty_str = "(unavailable)";
+	ସଂରଚନା commit_name *name = commit_to_name(commit);
 
-	if (commit->object.parsed) {
+	ଯଦି (commit->object.parsed) {
 		pp_commit_easy(CMIT_FMT_ONELINE, commit, &pretty);
 		pretty_str = pretty.buf;
 	}
 	skip_prefix(pretty_str, "[PATCH] ", &pretty_str);
 
-	if (!no_name) {
-		if (name && name->head_name) {
+	ଯଦି (!no_name) {
+		ଯଦି (name && name->head_name) {
 			printf("[%s", name->head_name);
-			if (name->generation) {
-				if (name->generation == 1)
+			ଯଦି (name->generation) {
+				ଯଦି (name->generation == 1)
 					printf("^");
-				else
+				ଅନ୍ୟଥା
 					printf("~%d", name->generation);
 			}
 			printf("] ");
 		}
-		else
+		ଅନ୍ୟଥା
 			printf("[%s] ",
 			       repo_find_unique_abbrev(the_repository, &commit->object.oid,
 						       DEFAULT_ABBREV));
@@ -329,337 +329,337 @@ static void show_one_commit(struct commit *commit, int no_name)
 	strbuf_release(&pretty);
 }
 
-static char *ref_name[MAX_REVS + 1];
-static int ref_name_cnt;
+ସ୍ଥିର ଅକ୍ଷର *ref_name[MAX_REVS + 1];
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା ref_name_cnt;
 
-static const char *find_digit_prefix(const char *s, int *v)
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *find_digit_prefix(ଅଚଳ ଅକ୍ଷର *s, ପୂର୍ଣ୍ଣସଂଖ୍ୟା *v)
 {
-	const char *p;
-	int ver;
-	char ch;
+	ଅଚଳ ଅକ୍ଷର *p;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ver;
+	ଅକ୍ଷର ch;
 
-	for (p = s, ver = 0;
+	ପାଇଁ (p = s, ver = 0;
 	     '0' <= (ch = *p) && ch <= '9';
 	     p++)
 		ver = ver * 10 + ch - '0';
 	*v = ver;
-	return p;
+	ଫେରନ୍ତୁ p;
 }
 
 
-static int version_cmp(const char *a, const char *b)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା version_cmp(ଅଚଳ ଅକ୍ଷର *a, ଅଚଳ ଅକ୍ଷର *b)
 {
-	while (1) {
-		int va, vb;
+	ଯେତେବେଳେ (1) {
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା va, vb;
 
 		a = find_digit_prefix(a, &va);
 		b = find_digit_prefix(b, &vb);
-		if (va != vb)
-			return va - vb;
+		ଯଦି (va != vb)
+			ଫେରନ୍ତୁ va - vb;
 
-		while (1) {
-			int ca = *a;
-			int cb = *b;
-			if ('0' <= ca && ca <= '9')
+		ଯେତେବେଳେ (1) {
+			ପୂର୍ଣ୍ଣସଂଖ୍ୟା ca = *a;
+			ପୂର୍ଣ୍ଣସଂଖ୍ୟା cb = *b;
+			ଯଦି ('0' <= ca && ca <= '9')
 				ca = 0;
-			if ('0' <= cb && cb <= '9')
+			ଯଦି ('0' <= cb && cb <= '9')
 				cb = 0;
-			if (ca != cb)
-				return ca - cb;
-			if (!ca)
-				break;
+			ଯଦି (ca != cb)
+				ଫେରନ୍ତୁ ca - cb;
+			ଯଦି (!ca)
+				ଭାଙ୍ଗ;
 			a++;
 			b++;
 		}
-		if (!*a && !*b)
-			return 0;
+		ଯଦି (!*a && !*b)
+			ଫେରନ୍ତୁ 0;
 	}
 }
 
-static int compare_ref_name(const void *a_, const void *b_)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା compare_ref_name(ଅଚଳ ଶୂନ୍ୟ *a_, ଅଚଳ ଶୂନ୍ୟ *b_)
 {
-	const char * const*a = a_, * const*b = b_;
-	return version_cmp(*a, *b);
+	ଅଚଳ ଅକ୍ଷର * ଅଚଳ*a = a_, * ଅଚଳ*b = b_;
+	ଫେରନ୍ତୁ version_cmp(*a, *b);
 }
 
-static void sort_ref_range(int bottom, int top)
+ସ୍ଥିର ଶୂନ୍ୟ sort_ref_range(ପୂର୍ଣ୍ଣସଂଖ୍ୟା bottom, ପୂର୍ଣ୍ଣସଂଖ୍ୟା ଶୀର୍ଷ)
 {
-	QSORT(ref_name + bottom, top - bottom, compare_ref_name);
+	QSORT(ref_name + bottom, ଶୀର୍ଷ - bottom, compare_ref_name);
 }
 
-static int append_ref(const char *refname, const struct object_id *oid,
-		      int allow_dups)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା append_ref(ଅଚଳ ଅକ୍ଷର *refname, ଅଚଳ ସଂରଚନା object_id *oid,
+		      ପୂର୍ଣ୍ଣସଂଖ୍ୟା allow_dups)
 {
-	struct commit *commit = lookup_commit_reference_gently(the_repository,
+	ସଂରଚନା commit *commit = lookup_commit_reference_gently(the_repository,
 							       oid, 1);
-	int i;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
 
-	if (!commit)
-		return 0;
+	ଯଦି (!commit)
+		ଫେରନ୍ତୁ 0;
 
-	if (!allow_dups) {
+	ଯଦି (!allow_dups) {
 		/* Avoid adding the same thing twice */
-		for (i = 0; i < ref_name_cnt; i++)
-			if (!strcmp(refname, ref_name[i]))
-				return 0;
+		ପାଇଁ (i = 0; i < ref_name_cnt; i++)
+			ଯଦି (!strcmp(refname, ref_name[i]))
+				ଫେରନ୍ତୁ 0;
 	}
-	if (MAX_REVS <= ref_name_cnt) {
+	ଯଦି (MAX_REVS <= ref_name_cnt) {
 		warning(Q_("ignoring %s; cannot handle more than %d ref",
 			   "ignoring %s; cannot handle more than %d refs",
 			   MAX_REVS), refname, MAX_REVS);
-		return 0;
+		ଫେରନ୍ତୁ 0;
 	}
 	ref_name[ref_name_cnt++] = xstrdup(refname);
-	ref_name[ref_name_cnt] = NULL;
-	return 0;
+	ref_name[ref_name_cnt] = ଖାଲି;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int append_head_ref(const struct reference *ref, void *cb_data UNUSED)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା append_head_ref(ଅଚଳ ସଂରଚନା reference *ref, ଶୂନ୍ୟ *cb_data UNUSED)
 {
-	struct object_id tmp;
-	int ofs = 11;
-	if (!starts_with(ref->name, "refs/heads/"))
-		return 0;
+	ସଂରଚନା object_id tmp;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ofs = 11;
+	ଯଦି (!starts_with(ref->name, "refs/heads/"))
+		ଫେରନ୍ତୁ 0;
 	/* If both heads/foo and tags/foo exists, get_sha1 would
 	 * get confused.
 	 */
-	if (repo_get_oid(the_repository, ref->name + ofs, &tmp) || !oideq(&tmp, ref->oid))
+	ଯଦି (repo_get_oid(the_repository, ref->name + ofs, &tmp) || !oideq(&tmp, ref->oid))
 		ofs = 5;
-	return append_ref(ref->name + ofs, ref->oid, 0);
+	ଫେରନ୍ତୁ append_ref(ref->name + ofs, ref->oid, 0);
 }
 
-static int append_remote_ref(const struct reference *ref, void *cb_data UNUSED)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା append_remote_ref(ଅଚଳ ସଂରଚନା reference *ref, ଶୂନ୍ୟ *cb_data UNUSED)
 {
-	struct object_id tmp;
-	int ofs = 13;
-	if (!starts_with(ref->name, "refs/remotes/"))
-		return 0;
+	ସଂରଚନା object_id tmp;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ofs = 13;
+	ଯଦି (!starts_with(ref->name, "refs/remotes/"))
+		ଫେରନ୍ତୁ 0;
 	/* If both heads/foo and tags/foo exists, get_sha1 would
 	 * get confused.
 	 */
-	if (repo_get_oid(the_repository, ref->name + ofs, &tmp) || !oideq(&tmp, ref->oid))
+	ଯଦି (repo_get_oid(the_repository, ref->name + ofs, &tmp) || !oideq(&tmp, ref->oid))
 		ofs = 5;
-	return append_ref(ref->name + ofs, ref->oid, 0);
+	ଫେରନ୍ତୁ append_ref(ref->name + ofs, ref->oid, 0);
 }
 
-static int append_tag_ref(const char *refname, const struct object_id *oid,
-			  int flag UNUSED, void *cb_data UNUSED)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା append_tag_ref(ଅଚଳ ଅକ୍ଷର *refname, ଅଚଳ ସଂରଚନା object_id *oid,
+			  ପୂର୍ଣ୍ଣସଂଖ୍ୟା flag UNUSED, ଶୂନ୍ୟ *cb_data UNUSED)
 {
-	if (!starts_with(refname, "refs/tags/"))
-		return 0;
-	return append_ref(refname + 5, oid, 0);
+	ଯଦି (!starts_with(refname, "refs/tags/"))
+		ଫେରନ୍ତୁ 0;
+	ଫେରନ୍ତୁ append_ref(refname + 5, oid, 0);
 }
 
-static const char *match_ref_pattern = NULL;
-static int match_ref_slash = 0;
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *match_ref_pattern = ଖାଲି;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା match_ref_slash = 0;
 
-static int append_matching_ref(const struct reference *ref, void *cb_data)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା append_matching_ref(ଅଚଳ ସଂରଚନା reference *ref, ଶୂନ୍ୟ *cb_data)
 {
 	/* we want to allow pattern hold/<asterisk> to show all
 	 * branches under refs/heads/hold/, and v0.99.9? to show
 	 * refs/tags/v0.99.9a and friends.
 	 */
-	const char *tail;
-	int slash = count_slashes(ref->name);
-	for (tail = ref->name; *tail && match_ref_slash < slash; )
-		if (*tail++ == '/')
+	ଅଚଳ ଅକ୍ଷର *tail;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା slash = ଗଣନା_slashes(ref->name);
+	ପାଇଁ (tail = ref->name; *tail && match_ref_slash < slash; )
+		ଯଦି (*tail++ == '/')
 			slash--;
-	if (!*tail)
-		return 0;
-	if (wildmatch(match_ref_pattern, tail, 0))
-		return 0;
-	if (starts_with(ref->name, "refs/heads/"))
-		return append_head_ref(ref, cb_data);
-	if (starts_with(ref->name, "refs/tags/"))
-		return append_tag_ref(ref->name, ref->oid, ref->flags, cb_data);
-	return append_ref(ref->name, ref->oid, 0);
+	ଯଦି (!*tail)
+		ଫେରନ୍ତୁ 0;
+	ଯଦି (wildmatch(match_ref_pattern, tail, 0))
+		ଫେରନ୍ତୁ 0;
+	ଯଦି (starts_with(ref->name, "refs/heads/"))
+		ଫେରନ୍ତୁ append_head_ref(ref, cb_data);
+	ଯଦି (starts_with(ref->name, "refs/tags/"))
+		ଫେରନ୍ତୁ append_tag_ref(ref->name, ref->oid, ref->flags, cb_data);
+	ଫେରନ୍ତୁ append_ref(ref->name, ref->oid, 0);
 }
 
-static void snarf_refs(int head, int remotes)
+ସ୍ଥିର ଶୂନ୍ୟ snarf_refs(ପୂର୍ଣ୍ଣସଂଖ୍ୟା head, ପୂର୍ଣ୍ଣସଂଖ୍ୟା remotes)
 {
-	if (head) {
-		int orig_cnt = ref_name_cnt;
+	ଯଦି (head) {
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା orig_cnt = ref_name_cnt;
 
 		refs_for_each_ref(get_main_ref_store(the_repository),
-				  append_head_ref, NULL);
+				  append_head_ref, ଖାଲି);
 		sort_ref_range(orig_cnt, ref_name_cnt);
 	}
-	if (remotes) {
-		int orig_cnt = ref_name_cnt;
+	ଯଦି (remotes) {
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା orig_cnt = ref_name_cnt;
 
 		refs_for_each_ref(get_main_ref_store(the_repository),
-				  append_remote_ref, NULL);
+				  append_remote_ref, ଖାଲି);
 		sort_ref_range(orig_cnt, ref_name_cnt);
 	}
 }
 
-static int rev_is_head(const char *head, const char *name)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା rev_is_head(ଅଚଳ ଅକ୍ଷର *head, ଅଚଳ ଅକ୍ଷର *name)
 {
-	if (!head)
-		return 0;
+	ଯଦି (!head)
+		ଫେରନ୍ତୁ 0;
 	skip_prefix(head, "refs/heads/", &head);
-	if (!skip_prefix(name, "refs/heads/", &name))
+	ଯଦି (!skip_prefix(name, "refs/heads/", &name))
 		skip_prefix(name, "heads/", &name);
-	return !strcmp(head, name);
+	ଫେରନ୍ତୁ !strcmp(head, name);
 }
 
-static int show_merge_base(const struct commit_list *seen, int num_rev)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_merge_base(ଅଚଳ ସଂରଚନା commit_list *seen, ପୂର୍ଣ୍ଣସଂଖ୍ୟା ଅଙ୍କ_rev)
 {
-	int all_mask = ((1u << (REV_SHIFT + num_rev)) - 1);
-	int all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
-	int exit_status = 1;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା all_mask = ((1u << (REV_SHIFT + ଅଙ୍କ_rev)) - 1);
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା exit_status = 1;
 
-	for (const struct commit_list *s = seen; s; s = s->next) {
-		struct commit *commit = s->item;
-		int flags = commit->object.flags & all_mask;
-		if (!(flags & UNINTERESTING) &&
+	ପାଇଁ (ଅଚଳ ସଂରଚନା commit_list *s = seen; s; s = s->next) {
+		ସଂରଚନା commit *commit = s->item;
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags = commit->object.flags & all_mask;
+		ଯଦି (!(flags & UNINTERESTING) &&
 		    ((flags & all_revs) == all_revs)) {
 			puts(oid_to_hex(&commit->object.oid));
 			exit_status = 0;
 			commit->object.flags |= UNINTERESTING;
 		}
 	}
-	return exit_status;
+	ଫେରନ୍ତୁ exit_status;
 }
 
-static int show_independent(struct commit **rev,
-			    int num_rev,
-			    unsigned int *rev_mask)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_independent(ସଂରଚନା commit **rev,
+			    ପୂର୍ଣ୍ଣସଂଖ୍ୟା ଅଙ୍କ_rev,
+			    unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା *rev_mask)
 {
-	int i;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
 
-	for (i = 0; i < num_rev; i++) {
-		struct commit *commit = rev[i];
-		unsigned int flag = rev_mask[i];
+	ପାଇଁ (i = 0; i < ଅଙ୍କ_rev; i++) {
+		ସଂରଚନା commit *commit = rev[i];
+		unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା flag = rev_mask[i];
 
-		if (commit->object.flags == flag)
+		ଯଦି (commit->object.flags == flag)
 			puts(oid_to_hex(&commit->object.oid));
 		commit->object.flags |= UNINTERESTING;
 	}
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static void append_one_rev(const char *av)
+ସ୍ଥିର ଶୂନ୍ୟ append_one_rev(ଅଚଳ ଅକ୍ଷର *av)
 {
-	struct object_id revkey;
-	if (!repo_get_oid(the_repository, av, &revkey)) {
+	ସଂରଚନା object_id revkey;
+	ଯଦି (!repo_get_oid(the_repository, av, &revkey)) {
 		append_ref(av, &revkey, 0);
-		return;
+		ଫେରନ୍ତୁ;
 	}
-	if (strpbrk(av, "*?[")) {
+	ଯଦି (strpbrk(av, "*?[")) {
 		/* glob style match */
-		int saved_matches = ref_name_cnt;
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା saved_matches = ref_name_cnt;
 
 		match_ref_pattern = av;
-		match_ref_slash = count_slashes(av);
+		match_ref_slash = ଗଣନା_slashes(av);
 		refs_for_each_ref(get_main_ref_store(the_repository),
-				  append_matching_ref, NULL);
-		if (saved_matches == ref_name_cnt &&
+				  append_matching_ref, ଖାଲି);
+		ଯଦି (saved_matches == ref_name_cnt &&
 		    ref_name_cnt < MAX_REVS)
 			error(_("no matching refs with %s"), av);
 		sort_ref_range(saved_matches, ref_name_cnt);
-		return;
+		ଫେରନ୍ତୁ;
 	}
 	die("bad sha1 reference %s", av);
 }
 
-static int git_show_branch_config(const char *var, const char *value,
-				  const struct config_context *ctx, void *cb)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା git_show_branch_config(ଅଚଳ ଅକ୍ଷର *var, ଅଚଳ ଅକ୍ଷର *ମୂଲ୍ୟ,
+				  ଅଚଳ ସଂରଚନା config_context *ctx, ଶୂନ୍ୟ *cb)
 {
-	if (!strcmp(var, "showbranch.default")) {
-		if (!value)
-			return config_error_nonbool(var);
+	ଯଦି (!strcmp(var, "showbranch.default")) {
+		ଯଦି (!ମୂଲ୍ୟ)
+			ଫେରନ୍ତୁ config_error_nonbool(var);
 		/*
 		 * default_arg is now passed to parse_options(), so we need to
 		 * mimic the real argv a bit better.
 		 */
-		if (!default_args.nr)
-			strvec_push(&default_args, "show-branch");
-		strvec_push(&default_args, value);
-		return 0;
+		ଯଦି (!default_args.nr)
+			strvec_ଠେଲ(&default_args, "show-branch");
+		strvec_ଠେଲ(&default_args, ମୂଲ୍ୟ);
+		ଫେରନ୍ତୁ 0;
 	}
 
-	if (!strcmp(var, "color.showbranch")) {
-		showbranch_use_color = git_config_colorbool(var, value);
-		return 0;
+	ଯଦି (!strcmp(var, "color.showbranch")) {
+		showbranch_use_color = git_config_colorbool(var, ମୂଲ୍ୟ);
+		ଫେରନ୍ତୁ 0;
 	}
 
-	if (git_color_config(var, value, cb) < 0)
-		return -1;
+	ଯଦି (git_color_config(var, ମୂଲ୍ୟ, cb) < 0)
+		ଫେରନ୍ତୁ -1;
 
-	return git_default_config(var, value, ctx, cb);
+	ଫେରନ୍ତୁ git_default_config(var, ମୂଲ୍ୟ, ctx, cb);
 }
 
-static int omit_in_dense(struct commit *commit, struct commit **rev, int n)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା omit_in_dense(ସଂରଚନା commit *commit, ସଂରଚନା commit **rev, ପୂର୍ଣ୍ଣସଂଖ୍ୟା n)
 {
 	/* If the commit is tip of the named branches, do not
 	 * omit it.
 	 * Otherwise, if it is a merge that is reachable from only one
 	 * tip, it is not that interesting.
 	 */
-	int i, flag, count;
-	for (i = 0; i < n; i++)
-		if (rev[i] == commit)
-			return 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା i, flag, ଗଣନା_2;
+	ପାଇଁ (i = 0; i < n; i++)
+		ଯଦି (rev[i] == commit)
+			ଫେରନ୍ତୁ 0;
 	flag = commit->object.flags;
-	for (i = count = 0; i < n; i++) {
-		if (flag & (1u << (i + REV_SHIFT)))
-			count++;
+	ପାଇଁ (i = ଗଣନା_2 = 0; i < n; i++) {
+		ଯଦି (flag & (1u << (i + REV_SHIFT)))
+			ଗଣନା_2++;
 	}
-	if (count == 1)
-		return 1;
-	return 0;
+	ଯଦି (ଗଣନା_2 == 1)
+		ଫେରନ୍ତୁ 1;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int reflog = 0;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା reflog = 0;
 
-static int parse_reflog_param(const struct option *opt, const char *arg,
-			      int unset)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା parse_reflog_param(ଅଚଳ ସଂରଚନା option *opt, ଅଚଳ ଅକ୍ଷର *arg,
+			      ପୂର୍ଣ୍ଣସଂଖ୍ୟା unset)
 {
-	char *ep;
-	const char **base = (const char **)opt->value;
+	ଅକ୍ଷର *ep;
+	ଅଚଳ ଅକ୍ଷର **base = (ଅଚଳ ଅକ୍ଷର **)opt->ମୂଲ୍ୟ;
 	BUG_ON_OPT_NEG(unset);
-	if (!arg)
+	ଯଦି (!arg)
 		arg = "";
 	reflog = strtoul(arg, &ep, 10);
-	if (*ep == ',')
+	ଯଦି (*ep == ',')
 		*base = ep + 1;
-	else if (*ep)
-		return error("unrecognized reflog param '%s'", arg);
-	else
-		*base = NULL;
-	if (reflog <= 0)
+	ଅନ୍ୟଥା ଯଦି (*ep)
+		ଫେରନ୍ତୁ error("unrecognized reflog param '%s'", arg);
+	ଅନ୍ୟଥା
+		*base = ଖାଲି;
+	ଯଦି (reflog <= 0)
 		reflog = DEFAULT_REFLOG;
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-int cmd_show_branch(int ac,
-		const char **av,
-		const char *prefix,
-		struct repository *repo UNUSED)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_show_branch(ପୂର୍ଣ୍ଣସଂଖ୍ୟା ac,
+		ଅଚଳ ଅକ୍ଷର **av,
+		ଅଚଳ ଅକ୍ଷର *prefix,
+		ସଂରଚନା repository *repo UNUSED)
 {
-	struct commit *rev[MAX_REVS], *commit;
-	char *reflog_msg[MAX_REVS] = {0};
-	struct commit_list *seen = NULL;
-	struct prio_queue queue = { compare_commits_by_commit_date };
-	unsigned int rev_mask[MAX_REVS];
-	int num_rev, i, extra = 0;
-	int all_heads = 0, all_remotes = 0;
-	int all_mask, all_revs;
-	enum rev_sort_order sort_order = REV_SORT_IN_GRAPH_ORDER;
-	char *head;
-	struct object_id head_oid;
-	int merge_base = 0;
-	int independent = 0;
-	int no_name = 0;
-	int sha1_name = 0;
-	int shown_merge_point = 0;
-	int with_current_branch = 0;
-	int head_at = -1;
-	int topics = 0;
-	int sparse = 0;
-	const char *reflog_base = NULL;
-	struct option builtin_show_branch_options[] = {
+	ସଂରଚନା commit *rev[MAX_REVS], *commit;
+	ଅକ୍ଷର *reflog_ସନ୍ଦେଶ[MAX_REVS] = {0};
+	ସଂରଚନା commit_list *seen = ଖାଲି;
+	ସଂରଚନା prio_queue queue = { compare_commits_by_commit_date };
+	unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା rev_mask[MAX_REVS];
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ଅଙ୍କ_rev, i, extra = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା all_heads = 0, all_remotes = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା all_mask, all_revs;
+	ଗଣନା rev_sort_order sort_order = REV_SORT_IN_GRAPH_ORDER;
+	ଅକ୍ଷର *head;
+	ସଂରଚନା object_id head_oid;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା merge_base = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା independent = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା no_name = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା sha1_name = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା shown_merge_point = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା with_current_branch = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା head_at = -1;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା topics = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା sparse = 0;
+	ଅଚଳ ଅକ୍ଷର *reflog_base = ଖାଲି;
+	ସଂରଚନା option builtin_show_branch_options[] = {
 		OPT_BOOL('a', "all", &all_heads,
 			 N_("show remote-tracking and local branches")),
 		OPT_BOOL('r', "remotes", &all_remotes,
@@ -669,8 +669,8 @@ int cmd_show_branch(int ac,
 		{
 			.type = OPTION_INTEGER,
 			.long_name = "more",
-			.value = &extra,
-			.precision = sizeof(extra),
+			.ମୂଲ୍ୟ = &extra,
+			.precision = ଆକାର(extra),
 			.argh = N_("n"),
 			.help = N_("show <n> more commits after the common ancestor"),
 			.flags = PARSE_OPT_OPTARG,
@@ -704,15 +704,15 @@ int cmd_show_branch(int ac,
 			    parse_reflog_param),
 		OPT_END()
 	};
-	const char **args_copy = NULL;
-	int ret;
+	ଅଚଳ ଅକ୍ଷର **args_copy = ଖାଲି;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret;
 
 	init_commit_name_slab(&name_slab);
 
-	repo_config(the_repository, git_show_branch_config, NULL);
+	repo_config(the_repository, git_show_branch_config, ଖାଲି);
 
 	/* If nothing is specified, try the default first */
-	if (ac == 1 && default_args.nr) {
+	ଯଦି (ac == 1 && default_args.nr) {
 		DUP_ARRAY(args_copy, default_args.v, default_args.nr);
 		ac = default_args.nr;
 		av = args_copy;
@@ -720,17 +720,17 @@ int cmd_show_branch(int ac,
 
 	ac = parse_options(ac, av, prefix, builtin_show_branch_options,
 			   show_branch_usage, PARSE_OPT_STOP_AT_NON_OPTION);
-	if (all_heads)
+	ଯଦି (all_heads)
 		all_remotes = 1;
 
-	if (extra || reflog) {
+	ଯଦି (extra || reflog) {
 		/* "listing" mode is incompatible with
 		 * independent nor merge-base modes.
 		 */
-		if (independent || merge_base)
+		ଯଦି (independent || merge_base)
 			usage_with_options(show_branch_usage,
 					   builtin_show_branch_options);
-		if (reflog && ((0 < extra) || all_heads || all_remotes))
+		ଯଦି (reflog && ((0 < extra) || all_heads || all_remotes))
 			/*
 			 * Asking for --more in reflog mode does not
 			 * make sense.  --list is Ok.
@@ -741,141 +741,141 @@ int cmd_show_branch(int ac,
 				"--all/--remotes/--independent/--merge-base");
 	}
 
-	if (with_current_branch && reflog)
+	ଯଦି (with_current_branch && reflog)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--reflog", "--current");
 
 	/* If nothing is specified, show all branches by default */
-	if (ac <= topics && all_heads + all_remotes == 0)
+	ଯଦି (ac <= topics && all_heads + all_remotes == 0)
 		all_heads = 1;
 
-	if (reflog) {
-		struct object_id oid;
-		char *ref;
-		int base = 0;
-		unsigned int flags = 0;
+	ଯଦି (reflog) {
+		ସଂରଚନା object_id oid;
+		ଅକ୍ଷର *ref;
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା base = 0;
+		unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags = 0;
 
-		if (ac == 0) {
-			static const char *fake_av[2];
+		ଯଦି (ac == 0) {
+			ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *fake_av[2];
 
 			fake_av[0] = refs_resolve_refdup(get_main_ref_store(the_repository),
 							 "HEAD",
 							 RESOLVE_REF_READING,
 							 &oid,
-							 NULL);
-			fake_av[1] = NULL;
+							 ଖାଲି);
+			fake_av[1] = ଖାଲି;
 			av = fake_av;
 			ac = 1;
-			if (!*av)
+			ଯଦି (!*av)
 				die(_("no branches given, and HEAD is not valid"));
 		}
-		if (ac != 1)
+		ଯଦି (ac != 1)
 			die(_("--reflog option needs one branch name"));
 
-		if (MAX_REVS < reflog)
+		ଯଦି (MAX_REVS < reflog)
 			die(Q_("only %d entry can be shown at one time.",
 			       "only %d entries can be shown at one time.",
 			       MAX_REVS), MAX_REVS);
-		if (!repo_dwim_ref(the_repository, *av, strlen(*av), &oid,
+		ଯଦି (!repo_dwim_ref(the_repository, *av, strlen(*av), &oid,
 				   &ref, 0))
 			die(_("no such ref %s"), *av);
 
 		/* Has the base been specified? */
-		if (reflog_base) {
-			char *ep;
+		ଯଦି (reflog_base) {
+			ଅକ୍ଷର *ep;
 			base = strtoul(reflog_base, &ep, 10);
-			if (*ep) {
+			ଯଦି (*ep) {
 				/* Ah, that is a date spec... */
 				timestamp_t at;
 				at = approxidate(reflog_base);
 				read_ref_at(get_main_ref_store(the_repository),
-					    ref, flags, at, -1, &oid, NULL,
-					    NULL, NULL, &base);
+					    ref, flags, at, -1, &oid, ଖାଲି,
+					    ଖାଲି, ଖାଲି, &base);
 			}
 		}
 
-		for (i = 0; i < reflog; i++) {
-			char *logmsg = NULL;
-			char *nth_desc;
-			const char *msg;
-			char *end;
+		ପାଇଁ (i = 0; i < reflog; i++) {
+			ଅକ୍ଷର *logmsg = ଖାଲି;
+			ଅକ୍ଷର *nth_desc;
+			ଅଚଳ ଅକ୍ଷର *ସନ୍ଦେଶ;
+			ଅକ୍ଷର *end;
 			timestamp_t timestamp;
-			int tz;
+			ପୂର୍ଣ୍ଣସଂଖ୍ୟା tz;
 
-			if (read_ref_at(get_main_ref_store(the_repository),
+			ଯଦି (read_ref_at(get_main_ref_store(the_repository),
 					ref, flags, 0, base + i, &oid, &logmsg,
-					&timestamp, &tz, NULL)) {
-				free(logmsg);
+					&timestamp, &tz, ଖାଲି)) {
+				ମୁକ୍ତ(logmsg);
 				reflog = i;
-				break;
+				ଭାଙ୍ଗ;
 			}
 
 			end = strchr(logmsg, '\n');
-			if (end)
+			ଯଦି (end)
 				*end = '\0';
 
-			msg = (*logmsg == '\0') ? "(none)" : logmsg;
-			reflog_msg[i] = xstrfmt("(%s) %s",
+			ସନ୍ଦେଶ = (*logmsg == '\0') ? "(none)" : logmsg;
+			reflog_ସନ୍ଦେଶ[i] = xstrfmt("(%s) %s",
 						show_date(timestamp, tz,
 							  DATE_MODE(RELATIVE)),
-						msg);
-			free(logmsg);
+						ସନ୍ଦେଶ);
+			ମୁକ୍ତ(logmsg);
 
 			nth_desc = xstrfmt("%s@{%d}", *av, base+i);
 			append_ref(nth_desc, &oid, 1);
-			free(nth_desc);
+			ମୁକ୍ତ(nth_desc);
 		}
-		free(ref);
+		ମୁକ୍ତ(ref);
 	}
-	else {
-		while (0 < ac) {
+	ଅନ୍ୟଥା {
+		ଯେତେବେଳେ (0 < ac) {
 			append_one_rev(*av);
 			ac--; av++;
 		}
-		if (all_heads + all_remotes)
+		ଯଦି (all_heads + all_remotes)
 			snarf_refs(all_heads, all_remotes);
 	}
 
 	head = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
 				   RESOLVE_REF_READING,
-				   &head_oid, NULL);
+				   &head_oid, ଖାଲି);
 
-	if (with_current_branch && head) {
-		int has_head = 0;
-		for (i = 0; !has_head && i < ref_name_cnt; i++) {
+	ଯଦି (with_current_branch && head) {
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା has_head = 0;
+		ପାଇଁ (i = 0; !has_head && i < ref_name_cnt; i++) {
 			/* We are only interested in adding the branch
 			 * HEAD points at.
 			 */
-			if (rev_is_head(head, ref_name[i]))
+			ଯଦି (rev_is_head(head, ref_name[i]))
 				has_head++;
 		}
-		if (!has_head) {
-			const char *name = head;
+		ଯଦି (!has_head) {
+			ଅଚଳ ଅକ୍ଷର *name = head;
 			skip_prefix(name, "refs/heads/", &name);
 			append_one_rev(name);
 		}
 	}
 
-	if (!ref_name_cnt) {
+	ଯଦି (!ref_name_cnt) {
 		fprintf(stderr, "No revs to be shown.\n");
 		ret = 0;
-		goto out;
+		ଯାଅ out;
 	}
 
-	for (num_rev = 0; ref_name[num_rev]; num_rev++) {
-		struct object_id revkey;
-		unsigned int flag = 1u << (num_rev + REV_SHIFT);
+	ପାଇଁ (ଅଙ୍କ_rev = 0; ref_name[ଅଙ୍କ_rev]; ଅଙ୍କ_rev++) {
+		ସଂରଚନା object_id revkey;
+		unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା flag = 1u << (ଅଙ୍କ_rev + REV_SHIFT);
 
-		if (MAX_REVS <= num_rev)
+		ଯଦି (MAX_REVS <= ଅଙ୍କ_rev)
 			die(Q_("cannot handle more than %d rev.",
 			       "cannot handle more than %d revs.",
 			       MAX_REVS), MAX_REVS);
-		if (repo_get_oid(the_repository, ref_name[num_rev], &revkey))
-			die(_("'%s' is not a valid ref."), ref_name[num_rev]);
+		ଯଦି (repo_get_oid(the_repository, ref_name[ଅଙ୍କ_rev], &revkey))
+			die(_("'%s' is not a valid ref."), ref_name[ଅଙ୍କ_rev]);
 		commit = lookup_commit_reference(the_repository, &revkey);
-		if (!commit)
+		ଯଦି (!commit)
 			die(_("cannot find commit %s (%s)"),
-			    ref_name[num_rev], oid_to_hex(&revkey));
+			    ref_name[ଅଙ୍କ_rev], oid_to_hex(&revkey));
 		repo_parse_commit(the_repository, commit);
 		mark_seen(commit, &seen);
 
@@ -884,39 +884,39 @@ int cmd_show_branch(int ac,
 		 * internal bookkeeping.
 		 */
 		commit->object.flags |= flag;
-		if (commit->object.flags == flag)
+		ଯଦି (commit->object.flags == flag)
 			prio_queue_put(&queue, commit);
-		rev[num_rev] = commit;
+		rev[ଅଙ୍କ_rev] = commit;
 	}
-	for (i = 0; i < num_rev; i++)
+	ପାଇଁ (i = 0; i < ଅଙ୍କ_rev; i++)
 		rev_mask[i] = rev[i]->object.flags;
 
-	if (0 <= extra)
-		join_revs(&queue, &seen, num_rev, extra);
+	ଯଦି (0 <= extra)
+		join_revs(&queue, &seen, ଅଙ୍କ_rev, extra);
 
 	commit_list_sort_by_date(&seen);
 
-	if (merge_base) {
-		ret = show_merge_base(seen, num_rev);
-		goto out;
+	ଯଦି (merge_base) {
+		ret = show_merge_base(seen, ଅଙ୍କ_rev);
+		ଯାଅ out;
 	}
 
-	if (independent) {
-		ret = show_independent(rev, num_rev, rev_mask);
-		goto out;
+	ଯଦି (independent) {
+		ret = show_independent(rev, ଅଙ୍କ_rev, rev_mask);
+		ଯାଅ out;
 	}
 
 	/* Show list; --more=-1 means list-only */
-	if (1 < num_rev || extra < 0) {
-		for (i = 0; i < num_rev; i++) {
-			int j;
-			int is_head = rev_is_head(head, ref_name[i]) &&
+	ଯଦି (1 < ଅଙ୍କ_rev || extra < 0) {
+		ପାଇଁ (i = 0; i < ଅଙ୍କ_rev; i++) {
+			ପୂର୍ଣ୍ଣସଂଖ୍ୟା j;
+			ପୂର୍ଣ୍ଣସଂଖ୍ୟା is_head = rev_is_head(head, ref_name[i]) &&
 				      oideq(&head_oid, &rev[i]->object.oid);
-			if (extra < 0)
+			ଯଦି (extra < 0)
 				printf("%c [%s] ",
 				       is_head ? '*' : ' ', ref_name[i]);
-			else {
-				for (j = 0; j < i; j++)
+			ଅନ୍ୟଥା {
+				ପାଇଁ (j = 0; j < i; j++)
 					putchar(' ');
 				printf("%s%c%s [%s] ",
 				       get_color_code(i),
@@ -924,67 +924,67 @@ int cmd_show_branch(int ac,
 				       get_color_reset_code(), ref_name[i]);
 			}
 
-			if (!reflog) {
+			ଯଦି (!reflog) {
 				/* header lines never need name */
 				show_one_commit(rev[i], 1);
 			}
-			else
-				puts(reflog_msg[i]);
+			ଅନ୍ୟଥା
+				puts(reflog_ସନ୍ଦେଶ[i]);
 
-			if (is_head)
+			ଯଦି (is_head)
 				head_at = i;
 		}
-		if (0 <= extra) {
-			for (i = 0; i < num_rev; i++)
+		ଯଦି (0 <= extra) {
+			ପାଇଁ (i = 0; i < ଅଙ୍କ_rev; i++)
 				putchar('-');
 			putchar('\n');
 		}
 	}
-	if (extra < 0) {
+	ଯଦି (extra < 0) {
 		ret = 0;
-		goto out;
+		ଯାଅ out;
 	}
 
 	/* Sort topologically */
 	sort_in_topological_order(&seen, sort_order);
 
 	/* Give names to commits */
-	if (!sha1_name && !no_name)
-		name_commits(seen, rev, ref_name, num_rev);
+	ଯଦି (!sha1_name && !no_name)
+		name_commits(seen, rev, ref_name, ଅଙ୍କ_rev);
 
-	all_mask = ((1u << (REV_SHIFT + num_rev)) - 1);
+	all_mask = ((1u << (REV_SHIFT + ଅଙ୍କ_rev)) - 1);
 	all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
 
-	for (struct commit_list *l = seen; l; l = l->next) {
-		struct commit *commit = l->item;
-		int this_flag = commit->object.flags;
-		int is_merge_point = ((this_flag & all_revs) == all_revs);
+	ପାଇଁ (ସଂରଚନା commit_list *l = seen; l; l = l->next) {
+		ସଂରଚନା commit *commit = l->item;
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା this_flag = commit->object.flags;
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା is_merge_point = ((this_flag & all_revs) == all_revs);
 
 		shown_merge_point |= is_merge_point;
 
-		if (1 < num_rev) {
-			int is_merge = !!(commit->parents &&
+		ଯଦି (1 < ଅଙ୍କ_rev) {
+			ପୂର୍ଣ୍ଣସଂଖ୍ୟା is_merge = !!(commit->parents &&
 					  commit->parents->next);
-			if (topics &&
+			ଯଦି (topics &&
 			    !is_merge_point &&
 			    (this_flag & (1u << REV_SHIFT)))
-				continue;
-			if (!sparse && is_merge &&
-			    omit_in_dense(commit, rev, num_rev))
-				continue;
-			for (i = 0; i < num_rev; i++) {
-				int mark;
-				if (!(this_flag & (1u << (i + REV_SHIFT))))
+				ଜାରି;
+			ଯଦି (!sparse && is_merge &&
+			    omit_in_dense(commit, rev, ଅଙ୍କ_rev))
+				ଜାରି;
+			ପାଇଁ (i = 0; i < ଅଙ୍କ_rev; i++) {
+				ପୂର୍ଣ୍ଣସଂଖ୍ୟା mark;
+				ଯଦି (!(this_flag & (1u << (i + REV_SHIFT))))
 					mark = ' ';
-				else if (is_merge)
+				ଅନ୍ୟଥା ଯଦି (is_merge)
 					mark = '-';
-				else if (i == head_at)
+				ଅନ୍ୟଥା ଯଦି (i == head_at)
 					mark = '*';
-				else
+				ଅନ୍ୟଥା
 					mark = '+';
-				if (mark == ' ')
+				ଯଦି (mark == ' ')
 					putchar(mark);
-				else
+				ଅନ୍ୟଥା
 					printf("%s%c%s",
 					       get_color_code(i),
 					       mark, get_color_reset_code());
@@ -993,18 +993,18 @@ int cmd_show_branch(int ac,
 		}
 		show_one_commit(commit, no_name);
 
-		if (shown_merge_point && --extra < 0)
-			break;
+		ଯଦି (shown_merge_point && --extra < 0)
+			ଭାଙ୍ଗ;
 	}
 
 	ret = 0;
 
 out:
-	for (size_t i = 0; i < ARRAY_SIZE(reflog_msg); i++)
-		free(reflog_msg[i]);
+	ପାଇଁ (size_t i = 0; i < ARRAY_SIZE(reflog_ସନ୍ଦେଶ); i++)
+		ମୁକ୍ତ(reflog_ସନ୍ଦେଶ[i]);
 	commit_list_free(seen);
 	clear_prio_queue(&queue);
-	free(args_copy);
-	free(head);
-	return ret;
+	ମୁକ୍ତ(args_copy);
+	ମୁକ୍ତ(head);
+	ଫେରନ୍ତୁ ret;
 }

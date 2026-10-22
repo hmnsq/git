@@ -1,17 +1,17 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refs/refs-internal.h"
-#include "object-name.h"
-#include "odb.h"
-#include "object.h"
-#include "string-list.h"
-#include "parse-options.h"
+#ଅନ୍ତର୍ଭାଵ "builtin.h"
+#ଅନ୍ତର୍ଭାଵ "config.h"
+#ଅନ୍ତର୍ଭାଵ "environment.h"
+#ଅନ୍ତର୍ଭାଵ "gettext.h"
+#ଅନ୍ତର୍ଭାଵ "hex.h"
+#ଅନ୍ତର୍ଭାଵ "refs/refs-internal.h"
+#ଅନ୍ତର୍ଭାଵ "object-name.h"
+#ଅନ୍ତର୍ଭାଵ "odb.h"
+#ଅନ୍ତର୍ଭାଵ "object.h"
+#ଅନ୍ତର୍ଭାଵ "string-list.h"
+#ଅନ୍ତର୍ଭାଵ "parse-options.h"
 
-static const char * const show_ref_usage[] = {
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର * ଅଚଳ show_ref_usage[] = {
 	N_("git show-ref [--head] [-d | --dereference]\n"
 	   "             [-s | --hash[=<n>]] [--abbrev[=<n>]] [--branches] [--tags]\n"
 	   "             [--] [<pattern>...]"),
@@ -20,74 +20,74 @@ static const char * const show_ref_usage[] = {
 	   "             [--] [<ref>...]"),
 	N_("git show-ref --exclude-existing[=<pattern>]"),
 	N_("git show-ref --exists <ref>"),
-	NULL
+	ଖାଲି
 };
 
-struct show_one_options {
-	int quiet;
-	int hash_only;
-	int abbrev;
-	int deref_tags;
+ସଂରଚନା show_one_options {
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା quiet;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା hash_only;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା abbrev;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା deref_tags;
 };
 
-static void show_one(const struct show_one_options *opts,
-		     const struct reference *ref)
+ସ୍ଥିର ଶୂନ୍ୟ show_one(ଅଚଳ ସଂରଚନା show_one_options *opts,
+		     ଅଚଳ ସଂରଚନା reference *ref)
 {
-	const char *hex;
-	struct object_id peeled;
+	ଅଚଳ ଅକ୍ଷର *hex;
+	ସଂରଚନା object_id peeled;
 
-	if (!odb_has_object(the_repository->objects, ref->oid,
+	ଯଦି (!odb_has_object(the_repository->objects, ref->oid,
 			    ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR))
 		die("git show-ref: bad ref %s (%s)", ref->name,
 		    oid_to_hex(ref->oid));
 
-	if (opts->quiet)
-		return;
+	ଯଦି (opts->quiet)
+		ଫେରନ୍ତୁ;
 
 	hex = repo_find_unique_abbrev(the_repository, ref->oid, opts->abbrev);
-	if (opts->hash_only)
+	ଯଦି (opts->hash_only)
 		printf("%s\n", hex);
-	else
+	ଅନ୍ୟଥା
 		printf("%s %s\n", hex, ref->name);
 
-	if (!opts->deref_tags)
-		return;
+	ଯଦି (!opts->deref_tags)
+		ଫେରନ୍ତୁ;
 
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
+	ଯଦି (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
 		hex = repo_find_unique_abbrev(the_repository, &peeled, opts->abbrev);
 		printf("%s %s^{}\n", hex, ref->name);
 	}
 }
 
-struct show_ref_data {
-	const struct show_one_options *show_one_opts;
-	const char **patterns;
-	int found_match;
-	int show_head;
+ସଂରଚନା show_ref_data {
+	ଅଚଳ ସଂରଚନା show_one_options *show_one_opts;
+	ଅଚଳ ଅକ୍ଷର **patterns;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା found_match;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_head;
 };
 
-static int show_ref(const struct reference *ref, void *cbdata)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_ref(ଅଚଳ ସଂରଚନା reference *ref, ଶୂନ୍ୟ *cbdata)
 {
-	struct show_ref_data *data = cbdata;
+	ସଂରଚନା show_ref_data *data = cbdata;
 
-	if (data->show_head && !strcmp(ref->name, "HEAD"))
-		goto match;
+	ଯଦି (data->show_head && !strcmp(ref->name, "HEAD"))
+		ଯାଅ match;
 
-	if (data->patterns) {
-		int reflen = strlen(ref->name);
-		const char **p = data->patterns, *m;
-		while ((m = *p++) != NULL) {
-			int len = strlen(m);
-			if (len > reflen)
-				continue;
-			if (memcmp(m, ref->name + reflen - len, len))
-				continue;
-			if (len == reflen)
-				goto match;
-			if (ref->name[reflen - len - 1] == '/')
-				goto match;
+	ଯଦି (data->patterns) {
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା reflen = strlen(ref->name);
+		ଅଚଳ ଅକ୍ଷର **p = data->patterns, *m;
+		ଯେତେବେଳେ ((m = *p++) != ଖାଲି) {
+			ପୂର୍ଣ୍ଣସଂଖ୍ୟା len = strlen(m);
+			ଯଦି (len > reflen)
+				ଜାରି;
+			ଯଦି (memcmp(m, ref->name + reflen - len, len))
+				ଜାରି;
+			ଯଦି (len == reflen)
+				ଯାଅ match;
+			ଯଦି (ref->name[reflen - len - 1] == '/')
+				ଯାଅ match;
 		}
-		return 0;
+		ଫେରନ୍ତୁ 0;
 	}
 
 match:
@@ -95,23 +95,23 @@ match:
 
 	show_one(data->show_one_opts, ref);
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int add_existing(const struct reference *ref, void *cbdata)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା add_existing(ଅଚଳ ସଂରଚନା reference *ref, ଶୂନ୍ୟ *cbdata)
 {
-	struct string_list *list = (struct string_list *)cbdata;
-	string_list_insert(list, ref->name);
-	return 0;
+	ସଂରଚନା string_list *list = (ସଂରଚନା string_list *)cbdata;
+	string_list_ଭର୍ତ୍ତି(list, ref->name);
+	ଫେରନ୍ତୁ 0;
 }
 
-struct exclude_existing_options {
+ସଂରଚନା exclude_existing_options {
 	/*
 	 * We need an explicit `enabled` field because it is perfectly valid
 	 * for `pattern` to be `NULL` even if `--exclude-existing` was given.
 	 */
-	int enabled;
-	const char *pattern;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା enabled;
+	ଅଚଳ ଅକ୍ଷର *pattern;
 };
 
 /*
@@ -123,190 +123,190 @@ struct exclude_existing_options {
  * (4) ignore if refname is a ref that exists in the local repository;
  * (5) otherwise output the line.
  */
-static int cmd_show_ref__exclude_existing(const struct exclude_existing_options *opts)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_show_ref__exclude_existing(ଅଚଳ ସଂରଚନା exclude_existing_options *opts)
 {
-	struct string_list existing_refs = STRING_LIST_INIT_DUP;
-	char buf[1024];
-	int patternlen = opts->pattern ? strlen(opts->pattern) : 0;
+	ସଂରଚନା string_list existing_refs = STRING_LIST_INIT_DUP;
+	ଅକ୍ଷର buf[1024];
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା patternlen = opts->pattern ? strlen(opts->pattern) : 0;
 
 	refs_for_each_ref(get_main_ref_store(the_repository), add_existing,
 			  &existing_refs);
-	while (fgets(buf, sizeof(buf), stdin)) {
-		char *ref;
-		int len = strlen(buf);
+	ଯେତେବେଳେ (fgets(buf, ଆକାର(buf), stdin)) {
+		ଅକ୍ଷର *ref;
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା len = strlen(buf);
 
-		if (len > 0 && buf[len - 1] == '\n')
+		ଯଦି (len > 0 && buf[len - 1] == '\n')
 			buf[--len] = '\0';
-		if (3 <= len && !strcmp(buf + len - 3, "^{}")) {
+		ଯଦି (3 <= len && !strcmp(buf + len - 3, "^{}")) {
 			len -= 3;
 			buf[len] = '\0';
 		}
-		for (ref = buf + len; buf < ref; ref--)
-			if (isspace(ref[-1]))
-				break;
-		if (opts->pattern) {
-			int reflen = buf + len - ref;
-			if (reflen < patternlen)
-				continue;
-			if (strncmp(ref, opts->pattern, patternlen))
-				continue;
+		ପାଇଁ (ref = buf + len; buf < ref; ref--)
+			ଯଦି (isspace(ref[-1]))
+				ଭାଙ୍ଗ;
+		ଯଦି (opts->pattern) {
+			ପୂର୍ଣ୍ଣସଂଖ୍ୟା reflen = buf + len - ref;
+			ଯଦି (reflen < patternlen)
+				ଜାରି;
+			ଯଦି (strncmp(ref, opts->pattern, patternlen))
+				ଜାରି;
 		}
-		if (check_refname_format(ref, 0)) {
+		ଯଦି (check_refname_format(ref, 0)) {
 			warning("ref '%s' ignored", ref);
-			continue;
+			ଜାରି;
 		}
-		if (!string_list_has_string(&existing_refs, ref)) {
+		ଯଦି (!string_list_has_string(&existing_refs, ref)) {
 			printf("%s\n", buf);
 		}
 	}
 
 	string_list_clear(&existing_refs, 0);
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int cmd_show_ref__verify(const struct show_one_options *show_one_opts,
-				const char **refs)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_show_ref__verify(ଅଚଳ ସଂରଚନା show_one_options *show_one_opts,
+				ଅଚଳ ଅକ୍ଷର **refs)
 {
-	if (!refs || !*refs)
+	ଯଦି (!refs || !*refs)
 		die("--verify requires a reference");
 
-	while (*refs) {
-		struct object_id oid;
+	ଯେତେବେଳେ (*refs) {
+		ସଂରଚନା object_id oid;
 
-		if ((starts_with(*refs, "refs/") || refname_is_safe(*refs)) &&
+		ଯଦି ((starts_with(*refs, "refs/") || refname_is_safe(*refs)) &&
 		    !refs_read_ref(get_main_ref_store(the_repository), *refs, &oid)) {
-			struct reference ref = {
+			ସଂରଚନା reference ref = {
 				.name = *refs,
 				.oid = &oid,
 			};
 
 			show_one(show_one_opts, &ref);
-		} else if (!show_one_opts->quiet) {
+		} ଅନ୍ୟଥା ଯଦି (!show_one_opts->quiet) {
 			die("'%s' - not a valid ref", *refs);
-		} else {
-			return 1;
+		} ଅନ୍ୟଥା {
+			ଫେରନ୍ତୁ 1;
 		}
 
 		refs++;
 	}
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-struct patterns_options {
-	int show_head;
-	int branches_only;
-	int tags_only;
+ସଂରଚନା patterns_options {
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_head;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା branches_only;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା tags_only;
 };
 
-static int cmd_show_ref__patterns(const struct patterns_options *opts,
-				  const struct show_one_options *show_one_opts,
-				  const char **patterns)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_show_ref__patterns(ଅଚଳ ସଂରଚନା patterns_options *opts,
+				  ଅଚଳ ସଂରଚନା show_one_options *show_one_opts,
+				  ଅଚଳ ଅକ୍ଷର **patterns)
 {
-	struct show_ref_data show_ref_data = {
+	ସଂରଚନା show_ref_data show_ref_data = {
 		.show_one_opts = show_one_opts,
 		.show_head = opts->show_head,
 	};
 
-	if (patterns && *patterns)
+	ଯଦି (patterns && *patterns)
 		show_ref_data.patterns = patterns;
 
-	if (opts->show_head)
+	ଯଦି (opts->show_head)
 		refs_head_ref(get_main_ref_store(the_repository), show_ref,
 			      &show_ref_data);
-	if (opts->branches_only || opts->tags_only) {
-		struct refs_for_each_ref_options for_each_ref_opts = { 0 };
+	ଯଦି (opts->branches_only || opts->tags_only) {
+		ସଂରଚନା refs_for_each_ref_options for_each_ref_opts = { 0 };
 
-		if (opts->branches_only) {
+		ଯଦି (opts->branches_only) {
 			for_each_ref_opts.prefix = "refs/heads/";
 			refs_for_each_ref_ext(get_main_ref_store(the_repository),
 					      show_ref, &show_ref_data, &for_each_ref_opts);
 		}
 
-		if (opts->tags_only) {
+		ଯଦି (opts->tags_only) {
 			for_each_ref_opts.prefix = "refs/tags/";
 			refs_for_each_ref_ext(get_main_ref_store(the_repository),
 					      show_ref, &show_ref_data, &for_each_ref_opts);
 		}
-	} else {
+	} ଅନ୍ୟଥା {
 		refs_for_each_ref(get_main_ref_store(the_repository),
 				  show_ref, &show_ref_data);
 	}
-	if (!show_ref_data.found_match)
-		return 1;
+	ଯଦି (!show_ref_data.found_match)
+		ଫେରନ୍ତୁ 1;
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int cmd_show_ref__exists(const char **refs)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_show_ref__exists(ଅଚଳ ଅକ୍ଷର **refs)
 {
-	struct strbuf unused_referent = STRBUF_INIT;
-	struct object_id unused_oid;
-	unsigned int unused_type;
-	int failure_errno = 0;
-	const char *ref;
-	int ret = 0;
+	ସଂରଚନା strbuf unused_referent = STRBUF_INIT;
+	ସଂରଚନା object_id unused_oid;
+	unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା unused_type;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା failure_errno = 0;
+	ଅଚଳ ଅକ୍ଷର *ref;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret = 0;
 
-	if (!refs || !*refs)
+	ଯଦି (!refs || !*refs)
 		die("--exists requires a reference");
 	ref = *refs++;
-	if (*refs)
+	ଯଦି (*refs)
 		die("--exists requires exactly one reference");
 
-	if (refs_read_raw_ref(get_main_ref_store(the_repository), ref,
+	ଯଦି (refs_read_raw_ref(get_main_ref_store(the_repository), ref,
 			      &unused_oid, &unused_referent, &unused_type,
 			      &failure_errno)) {
-		if (failure_errno == ENOENT || failure_errno == EISDIR) {
+		ଯଦି (failure_errno == ENOENT || failure_errno == EISDIR) {
 			error(_("reference does not exist"));
 			ret = 2;
-		} else {
+		} ଅନ୍ୟଥା {
 			errno = failure_errno;
 			error_errno(_("failed to look up reference"));
 			ret = 1;
 		}
 
-		goto out;
+		ଯାଅ out;
 	}
 
 out:
 	strbuf_release(&unused_referent);
-	return ret;
+	ଫେରନ୍ତୁ ret;
 }
 
-static int hash_callback(const struct option *opt, const char *arg, int unset)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା hash_callback(ଅଚଳ ସଂରଚନା option *opt, ଅଚଳ ଅକ୍ଷର *arg, ପୂର୍ଣ୍ଣସଂଖ୍ୟା unset)
 {
-	struct show_one_options *opts = opt->value;
-	struct option abbrev_opt = *opt;
+	ସଂରଚନା show_one_options *opts = opt->ମୂଲ୍ୟ;
+	ସଂରଚନା option abbrev_opt = *opt;
 
 	opts->hash_only = 1;
 	/* Use full length SHA1 if no argument */
-	if (!arg)
-		return 0;
+	ଯଦି (!arg)
+		ଫେରନ୍ତୁ 0;
 
-	abbrev_opt.value = &opts->abbrev;
-	return parse_opt_abbrev_cb(&abbrev_opt, arg, unset);
+	abbrev_opt.ମୂଲ୍ୟ = &opts->abbrev;
+	ଫେରନ୍ତୁ parse_opt_abbrev_cb(&abbrev_opt, arg, unset);
 }
 
-static int exclude_existing_callback(const struct option *opt, const char *arg,
-				     int unset)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା exclude_existing_callback(ଅଚଳ ସଂରଚନା option *opt, ଅଚଳ ଅକ୍ଷର *arg,
+				     ପୂର୍ଣ୍ଣସଂଖ୍ୟା unset)
 {
-	struct exclude_existing_options *opts = opt->value;
+	ସଂରଚନା exclude_existing_options *opts = opt->ମୂଲ୍ୟ;
 	BUG_ON_OPT_NEG(unset);
 	opts->enabled = 1;
 	opts->pattern = arg;
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-int cmd_show_ref(int argc,
-const char **argv,
-const char *prefix,
-struct repository *repo UNUSED)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_show_ref(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc,
+ଅଚଳ ଅକ୍ଷର **argv,
+ଅଚଳ ଅକ୍ଷର *prefix,
+ସଂରଚନା repository *repo UNUSED)
 {
-	struct exclude_existing_options exclude_existing_opts = {0};
-	struct patterns_options patterns_opts = {0};
-	struct show_one_options show_one_opts = {0};
-	int verify = 0, exists = 0;
-	const struct option show_ref_options[] = {
+	ସଂରଚନା exclude_existing_options exclude_existing_opts = {0};
+	ସଂରଚନା patterns_options patterns_opts = {0};
+	ସଂରଚନା show_one_options show_one_opts = {0};
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା verify = 0, exists = 0;
+	ଅଚଳ ସଂରଚନା option show_ref_options[] = {
 		OPT_BOOL(0, "tags", &patterns_opts.tags_only, N_("only show tags (can be combined with --branches)")),
 		OPT_BOOL(0, "branches", &patterns_opts.branches_only, N_("only show branches (can be combined with --tags)")),
 		OPT_HIDDEN_BOOL(0, "heads", &patterns_opts.branches_only,
@@ -314,7 +314,7 @@ struct repository *repo UNUSED)
 		OPT_BOOL(0, "exists", &exists, N_("check for reference existence without resolving")),
 		OPT_BOOL(0, "verify", &verify, N_("stricter reference checking, "
 			    "requires exact ref path")),
-		OPT_HIDDEN_BOOL('h', NULL, &patterns_opts.show_head,
+		OPT_HIDDEN_BOOL('h', ଖାଲି, &patterns_opts.show_head,
 				N_("show the HEAD reference, even if it would be filtered out")),
 		OPT_BOOL(0, "head", &patterns_opts.show_head,
 		  N_("show the HEAD reference, even if it would be filtered out")),
@@ -332,7 +332,7 @@ struct repository *repo UNUSED)
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ଖାଲି);
 
 	argc = parse_options(argc, argv, prefix, show_ref_options,
 			     show_ref_usage, 0);
@@ -341,12 +341,12 @@ struct repository *repo UNUSED)
 				  verify, "--verify",
 				  exists, "--exists");
 
-	if (exclude_existing_opts.enabled)
-		return cmd_show_ref__exclude_existing(&exclude_existing_opts);
-	else if (verify)
-		return cmd_show_ref__verify(&show_one_opts, argv);
-	else if (exists)
-		return cmd_show_ref__exists(argv);
-	else
-		return cmd_show_ref__patterns(&patterns_opts, &show_one_opts, argv);
+	ଯଦି (exclude_existing_opts.enabled)
+		ଫେରନ୍ତୁ cmd_show_ref__exclude_existing(&exclude_existing_opts);
+	ଅନ୍ୟଥା ଯଦି (verify)
+		ଫେରନ୍ତୁ cmd_show_ref__verify(&show_one_opts, argv);
+	ଅନ୍ୟଥା ଯଦି (exists)
+		ଫେରନ୍ତୁ cmd_show_ref__exists(argv);
+	ଅନ୍ୟଥା
+		ଫେରନ୍ତୁ cmd_show_ref__patterns(&patterns_opts, &show_one_opts, argv);
 }

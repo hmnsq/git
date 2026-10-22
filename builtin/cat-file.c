@@ -7,31 +7,31 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "convert.h"
-#include "diff.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "ident.h"
-#include "list-objects-filter-options.h"
-#include "parse-options.h"
-#include "userdiff.h"
-#include "oid-array.h"
-#include "packfile.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
-#include "odb/streaming.h"
-#include "replace-object.h"
-#include "promisor-remote.h"
-#include "mailmap.h"
-#include "write-or-die.h"
-#include "alias.h"
-#include "remote.h"
-#include "transport.h"
-#include "fetch-object-info.h"
+#ଅନ୍ତର୍ଭାଵ "builtin.h"
+#ଅନ୍ତର୍ଭାଵ "config.h"
+#ଅନ୍ତର୍ଭାଵ "convert.h"
+#ଅନ୍ତର୍ଭାଵ "diff.h"
+#ଅନ୍ତର୍ଭାଵ "environment.h"
+#ଅନ୍ତର୍ଭାଵ "gettext.h"
+#ଅନ୍ତର୍ଭାଵ "hex.h"
+#ଅନ୍ତର୍ଭାଵ "ident.h"
+#ଅନ୍ତର୍ଭାଵ "list-objects-filter-options.h"
+#ଅନ୍ତର୍ଭାଵ "parse-options.h"
+#ଅନ୍ତର୍ଭାଵ "userdiff.h"
+#ଅନ୍ତର୍ଭାଵ "oid-array.h"
+#ଅନ୍ତର୍ଭାଵ "packfile.h"
+#ଅନ୍ତର୍ଭାଵ "object-file.h"
+#ଅନ୍ତର୍ଭାଵ "object-name.h"
+#ଅନ୍ତର୍ଭାଵ "odb.h"
+#ଅନ୍ତର୍ଭାଵ "odb/streaming.h"
+#ଅନ୍ତର୍ଭାଵ "replace-object.h"
+#ଅନ୍ତର୍ଭାଵ "promisor-remote.h"
+#ଅନ୍ତର୍ଭାଵ "mailmap.h"
+#ଅନ୍ତର୍ଭାଵ "write-or-die.h"
+#ଅନ୍ତର୍ଭାଵ "alias.h"
+#ଅନ୍ତର୍ଭାଵ "remote.h"
+#ଅନ୍ତର୍ଭାଵ "transport.h"
+#ଅନ୍ତର୍ଭାଵ "fetch-object-info.h"
 
 /*
  * Maximum length for a remote URL. While no universal standard exists,
@@ -43,35 +43,35 @@
 #define MAX_ALLOWED_OBJ_LIMIT 10000
 
 /* Maximum input size permitted for the remote-object-info command. */
-#define MAX_REMOTE_OBJ_INFO_LINE \
+#define MAX_REMOTE_OBJ_INFO_ଧାଡ଼ି \
 	(MAX_REMOTE_URL_LEN + MAX_ALLOWED_OBJ_LIMIT * (GIT_MAX_HEXSZ + 1))
 
-enum batch_mode {
+ଗଣନା batch_mode {
 	BATCH_MODE_CONTENTS,
 	BATCH_MODE_INFO,
 	BATCH_MODE_QUEUE_AND_DISPATCH,
 };
 
-struct batch_options {
-	struct list_objects_filter_options objects_filter;
-	int enabled;
-	int follow_symlinks;
-	enum batch_mode batch_mode;
-	int buffer_output;
-	int all_objects;
-	int unordered;
-	int transform_mode; /* may be 'w' or 'c' for --filters or --textconv */
-	char input_delim;
-	char output_delim;
-	const char *format;
+ସଂରଚନା batch_options {
+	ସଂରଚନା list_objects_filter_options objects_filter;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା enabled;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା follow_symlinks;
+	ଗଣନା batch_mode batch_mode;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା buffer_output;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା all_objects;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା unordered;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା transform_mode; /* may be 'w' or 'c' for --filters or --textconv */
+	ଅକ୍ଷର ନିବେଶ_delim;
+	ଅକ୍ଷର output_delim;
+	ଅଚଳ ଅକ୍ଷର *format;
 };
 
-static const char *force_path;
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *force_path;
 
-static struct string_list mailmap = STRING_LIST_INIT_NODUP;
-static int use_mailmap;
+ସ୍ଥିର ସଂରଚନା string_list mailmap = STRING_LIST_INIT_NODUP;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା use_mailmap;
 
-static char *replace_idents_using_mailmap(char *, size_t *);
+ସ୍ଥିର ଅକ୍ଷର *replace_idents_using_mailmap(ଅକ୍ଷର *, size_t *);
 
 /*
  * The mailmap is initialized with .strdup_strings set to 0,
@@ -79,195 +79,195 @@ static char *replace_idents_using_mailmap(char *, size_t *);
  * not a single mailmap entry is read), so it can be used for
  * lazy loading.
  */
-static void load_mailmap(void)
+ସ୍ଥିର ଶୂନ୍ୟ load_mailmap(ଶୂନ୍ୟ)
 {
-	if (mailmap.strdup_strings)
-		return;
+	ଯଦି (mailmap.strdup_strings)
+		ଫେରନ୍ତୁ;
 
 	read_mailmap(the_repository, &mailmap);
 }
 
-static char *replace_idents_using_mailmap(char *object_buf, size_t *size)
+ସ୍ଥିର ଅକ୍ଷର *replace_idents_using_mailmap(ଅକ୍ଷର *object_buf, size_t *size)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *headers[] = { "author ", "committer ", "tagger ", NULL };
+	ସଂରଚନା strbuf sb = STRBUF_INIT;
+	ଅଚଳ ଅକ୍ଷର *headers[] = { "author ", "committer ", "tagger ", ଖାଲି };
 
 	strbuf_attach(&sb, object_buf, *size, *size + 1);
 	apply_mailmap_to_header(&sb, headers, &mailmap);
 	*size = sb.len;
-	return strbuf_detach(&sb, NULL);
+	ଫେରନ୍ତୁ strbuf_detach(&sb, ଖାଲି);
 }
 
-static int filter_object(const char *path, unsigned mode,
-			 const struct object_id *oid,
-			 char **buf, size_t *size)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା filter_object(ଅଚଳ ଅକ୍ଷର *path, unsigned mode,
+			 ଅଚଳ ସଂରଚନା object_id *oid,
+			 ଅକ୍ଷର **buf, size_t *size)
 {
-	enum object_type type;
+	ଗଣନା object_type type;
 
 	*buf = odb_read_object(the_repository->objects, oid, &type, size);
-	if (!*buf)
-		return error(_("cannot read object %s '%s'"),
+	ଯଦି (!*buf)
+		ଫେରନ୍ତୁ error(_("cannot read object %s '%s'"),
 			     oid_to_hex(oid), path);
-	if ((type == OBJ_BLOB) && S_ISREG(mode)) {
-		struct strbuf strbuf = STRBUF_INIT;
-		struct checkout_metadata meta;
+	ଯଦି ((type == OBJ_BLOB) && S_ISREG(mode)) {
+		ସଂରଚନା strbuf strbuf = STRBUF_INIT;
+		ସଂରଚନା checkout_metadata meta;
 
-		init_checkout_metadata(&meta, NULL, NULL, oid);
-		if (convert_to_working_tree(the_repository->index, path, *buf, *size, &strbuf, &meta)) {
-			free(*buf);
+		init_checkout_metadata(&meta, ଖାଲି, ଖାଲି, oid);
+		ଯଦି (convert_to_working_ବୃକ୍ଷ(the_repository->index, path, *buf, *size, &strbuf, &meta)) {
+			ମୁକ୍ତ(*buf);
 			*size = strbuf.len;
-			*buf = strbuf_detach(&strbuf, NULL);
+			*buf = strbuf_detach(&strbuf, ଖାଲି);
 		}
 	}
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int stream_blob(const struct object_id *oid)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା stream_blob(ଅଚଳ ସଂରଚନା object_id *oid)
 {
-	if (odb_stream_blob_to_fd(the_repository->objects, 1, oid, NULL, 0))
+	ଯଦି (odb_stream_blob_to_fd(the_repository->objects, 1, oid, ଖାଲି, 0))
 		die("unable to stream %s to stdout", oid_to_hex(oid));
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା cat_one_file(ପୂର୍ଣ୍ଣସଂଖ୍ୟା opt, ଅଚଳ ଅକ୍ଷର *exp_type, ଅଚଳ ଅକ୍ଷର *obj_name)
 {
-	int ret;
-	struct object_id oid;
-	enum object_type type;
-	char *buf;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret;
+	ସଂରଚନା object_id oid;
+	ଗଣନା object_type type;
+	ଅକ୍ଷର *buf;
 	size_t size;
-	struct object_context obj_context = {0};
-	struct object_info oi = OBJECT_INFO_INIT;
+	ସଂରଚନା object_context obj_context = {0};
+	ସଂରଚନା object_info oi = OBJECT_INFO_INIT;
 	unsigned flags = OBJECT_INFO_LOOKUP_REPLACE;
 	unsigned get_oid_flags =
 		GET_OID_RECORD_PATH |
 		GET_OID_ONLY_TO_DIE |
 		GET_OID_HASH_ANY;
-	const char *path = force_path;
-	const int opt_cw = (opt == 'c' || opt == 'w');
-	if (!path && opt_cw)
+	ଅଚଳ ଅକ୍ଷର *path = force_path;
+	ଅଚଳ ପୂର୍ଣ୍ଣସଂଖ୍ୟା opt_cw = (opt == 'c' || opt == 'w');
+	ଯଦି (!path && opt_cw)
 		get_oid_flags |= GET_OID_REQUIRE_PATH;
 
-	if (get_oid_with_context(the_repository, obj_name, get_oid_flags, &oid,
+	ଯଦି (get_oid_with_context(the_repository, obj_name, get_oid_flags, &oid,
 				 &obj_context))
 		die("Not a valid object name %s", obj_name);
 
-	if (!path)
+	ଯଦି (!path)
 		path = obj_context.path;
-	if (obj_context.mode == S_IFINVALID)
+	ଯଦି (obj_context.mode == S_IFINVALID)
 		obj_context.mode = 0100644;
 
-	buf = NULL;
-	switch (opt) {
-	case 't':
+	buf = ଖାଲି;
+	ବାଛ (opt) {
+	ସ୍ଥିତି 't':
 		oi.typep = &type;
-		if (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
+		ଯଦି (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
 			die("git cat-file: could not get object info");
 		printf("%s\n", type_name(type));
 		ret = 0;
-		goto cleanup;
+		ଯାଅ cleanup;
 
-	case 's':
+	ସ୍ଥିତି 's':
 		oi.sizep = &size;
 
-		if (use_mailmap) {
+		ଯଦି (use_mailmap) {
 			oi.typep = &type;
-			oi.contentp = (void**)&buf;
+			oi.contentp = (ଶୂନ୍ୟ**)&buf;
 		}
 
-		if (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
+		ଯଦି (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
 			die("git cat-file: could not get object info");
 
-		if (use_mailmap && (type == OBJ_COMMIT || type == OBJ_TAG))
+		ଯଦି (use_mailmap && (type == OBJ_COMMIT || type == OBJ_TAG))
 			buf = replace_idents_using_mailmap(buf, &size);
 
 		printf("%"PRIuMAX"\n", (uintmax_t)size);
 		ret = 0;
-		goto cleanup;
+		ଯାଅ cleanup;
 
-	case 'e':
+	ସ୍ଥିତି 'e':
 		ret = !odb_has_object(the_repository->objects, &oid,
 				      ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR);
-		goto cleanup;
+		ଯାଅ cleanup;
 
-	case 'w':
+	ସ୍ଥିତି 'w':
 
-		if (filter_object(path, obj_context.mode,
+		ଯଦି (filter_object(path, obj_context.mode,
 				  &oid, &buf, &size)) {
 			ret = -1;
-			goto cleanup;
+			ଯାଅ cleanup;
 		}
-		break;
+		ଭାଙ୍ଗ;
 
-	case 'c':
+	ସ୍ଥିତି 'c':
 	{
 		unsigned long size_ul = 0;
-		int textconv_ret = textconv_object(the_repository, path,
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା textconv_ret = textconv_object(the_repository, path,
 						   obj_context.mode, &oid, 1,
 						   &buf, &size_ul);
 		size = size_ul;
-		if (textconv_ret)
-			break;
+		ଯଦି (textconv_ret)
+			ଭାଙ୍ଗ;
 	}
 		/* else fallthrough */
 
-	case 'p':
-		type = odb_read_object_info(the_repository->objects, &oid, NULL);
-		if (type < 0)
+	ସ୍ଥିତି 'p':
+		type = odb_read_object_info(the_repository->objects, &oid, ଖାଲି);
+		ଯଦି (type < 0)
 			die("Not a valid object name %s", obj_name);
 
 		/* custom pretty-print here */
-		if (type == OBJ_TREE) {
-			const char *ls_args[3] = { NULL };
+		ଯଦି (type == OBJ_ବୃକ୍ଷ) {
+			ଅଚଳ ଅକ୍ଷର *ls_args[3] = { ଖାଲି };
 			ls_args[0] =  "ls-tree";
 			ls_args[1] =  obj_name;
-			ret = cmd_ls_tree(2, ls_args, NULL, the_repository);
-			goto cleanup;
+			ret = cmd_ls_ବୃକ୍ଷ(2, ls_args, ଖାଲି, the_repository);
+			ଯାଅ cleanup;
 		}
 
-		if (type == OBJ_BLOB) {
+		ଯଦି (type == OBJ_BLOB) {
 			ret = stream_blob(&oid);
-			goto cleanup;
+			ଯାଅ cleanup;
 		}
 		buf = odb_read_object(the_repository->objects, &oid,
 				      &type, &size);
-		if (!buf)
+		ଯଦି (!buf)
 			die("Cannot read object %s", obj_name);
 
-		if (use_mailmap)
+		ଯଦି (use_mailmap)
 			buf = replace_idents_using_mailmap(buf, &size);
 
 		/* otherwise just spit out the data */
-		break;
+		ଭାଙ୍ଗ;
 
-	case 0:
+	ସ୍ଥିତି 0:
 	{
-		enum object_type exp_type_id = type_from_string(exp_type);
+		ଗଣନା object_type exp_type_id = type_from_string(exp_type);
 
-		if (exp_type_id == OBJ_BLOB) {
-			struct object_id blob_oid;
-			if (odb_read_object_info(the_repository->objects,
-						 &oid, NULL) == OBJ_TAG) {
-				char *buffer = odb_read_object(the_repository->objects,
+		ଯଦି (exp_type_id == OBJ_BLOB) {
+			ସଂରଚନା object_id blob_oid;
+			ଯଦି (odb_read_object_info(the_repository->objects,
+						 &oid, ଖାଲି) == OBJ_TAG) {
+				ଅକ୍ଷର *buffer = odb_read_object(the_repository->objects,
 							       &oid, &type, &size);
-				const char *target;
+				ଅଚଳ ଅକ୍ଷର *target;
 
-				if (!buffer)
+				ଯଦି (!buffer)
 					die(_("unable to read %s"), oid_to_hex(&oid));
 
-				if (!skip_prefix(buffer, "object ", &target) ||
+				ଯଦି (!skip_prefix(buffer, "object ", &target) ||
 				    get_oid_hex_algop(target, &blob_oid,
 						      &hash_algos[oid.algo]))
 					die("%s not a valid tag", oid_to_hex(&oid));
-				free(buffer);
-			} else
+				ମୁକ୍ତ(buffer);
+			} ଅନ୍ୟଥା
 				oidcpy(&blob_oid, &oid);
 
-			if (odb_read_object_info(the_repository->objects,
-						 &blob_oid, NULL) == OBJ_BLOB) {
+			ଯଦି (odb_read_object_info(the_repository->objects,
+						 &blob_oid, ଖାଲି) == OBJ_BLOB) {
 				ret = stream_blob(&blob_oid);
-				goto cleanup;
+				ଯାଅ cleanup;
 			}
 			/*
 			 * we attempted to dereference a tag to a blob
@@ -277,55 +277,55 @@ static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
 			 */
 		}
 		buf = odb_read_object_peeled(the_repository->objects, &oid,
-					     exp_type_id, &size, NULL);
+					     exp_type_id, &size, ଖାଲି);
 
-		if (use_mailmap)
+		ଯଦି (use_mailmap)
 			buf = replace_idents_using_mailmap(buf, &size);
-		break;
+		ଭାଙ୍ଗ;
 	}
-	default:
+	ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
 		die("git cat-file: unknown option: %s", exp_type);
 	}
 
-	if (!buf)
+	ଯଦି (!buf)
 		die("git cat-file %s: bad file", obj_name);
 
 	write_or_die(1, buf, size);
 	ret = 0;
 cleanup:
-	free(buf);
+	ମୁକ୍ତ(buf);
 	object_context_release(&obj_context);
-	return ret;
+	ଫେରନ୍ତୁ ret;
 }
 
-struct expand_data {
-	struct object_id oid;
-	enum object_type type;
+ସଂରଚନା expand_data {
+	ସଂରଚନା object_id oid;
+	ଗଣନା object_type type;
 	size_t size;
 	unsigned short mode;
 	off_t disk_size;
-	const char *rest;
-	struct object_id delta_base_oid;
+	ଅଚଳ ଅକ୍ଷର *rest;
+	ସଂରଚନା object_id delta_base_oid;
 
 	/*
 	 * If mark_query is true, we do not expand anything, but rather
 	 * just mark the object_info with items we wish to query.
 	 */
-	int mark_query;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା mark_query;
 
 	/*
 	 * Whether to split the input on whitespace before feeding it to
 	 * get_sha1; this is decided during the mark_query phase based on
 	 * whether we have a %(rest) token in our format.
 	 */
-	int split_on_whitespace;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା split_on_whitespace;
 
 	/*
 	 * After a mark_query run, this object_info is set up to be
 	 * passed to odb_read_object_info_extended. It will point to the data
 	 * elements above, so you can retrieve the response from there.
 	 */
-	struct object_info info;
+	ସଂରଚନା object_info info;
 
 	/*
 	 * This flag will be true if the requested batch format and options
@@ -343,7 +343,7 @@ struct expand_data {
 	 * List of atoms (i.e. "objectsize") that the server supports. Built
 	 * from the server's object-info advertised capabilities.
 	 */
-	struct string_list remote_allowed_atoms;
+	ସଂରଚନା string_list remote_allowed_atoms;
 };
 
 #define EXPAND_DATA_INIT  {  \
@@ -352,155 +352,155 @@ struct expand_data {
 	.remote_allowed_atoms = STRING_LIST_INIT_NODUP, \
 }
 
-static int is_atom(const char *atom, const char *s, int slen)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା is_atom(ଅଚଳ ଅକ୍ଷର *atom, ଅଚଳ ଅକ୍ଷର *s, ପୂର୍ଣ୍ଣସଂଖ୍ୟା slen)
 {
-	int alen = strlen(atom);
-	return alen == slen && !memcmp(atom, s, alen);
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା alen = strlen(atom);
+	ଫେରନ୍ତୁ alen == slen && !memcmp(atom, s, alen);
 }
 
-static int expand_atom(struct strbuf *sb, const char *atom, int len,
-		       struct expand_data *data)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା expand_atom(ସଂରଚନା strbuf *sb, ଅଚଳ ଅକ୍ଷର *atom, ପୂର୍ଣ୍ଣସଂଖ୍ୟା len,
+		       ସଂରଚନା expand_data *data)
 {
-	if (data->is_remote) {
+	ଯଦି (data->is_remote) {
 		size_t i;
-		for (i = 0; i < data->remote_allowed_atoms.nr; i++)
-			if (is_atom(data->remote_allowed_atoms.items[i].string,
+		ପାଇଁ (i = 0; i < data->remote_allowed_atoms.nr; i++)
+			ଯଦି (is_atom(data->remote_allowed_atoms.ବସ୍ତୁଗୁଡ଼ିକ[i].string,
 				    atom, len))
-				break;
-		if (i == data->remote_allowed_atoms.nr)
-			return 1;
+				ଭାଙ୍ଗ;
+		ଯଦି (i == data->remote_allowed_atoms.nr)
+			ଫେରନ୍ତୁ 1;
 	}
 
-	if (is_atom("objectname", atom, len)) {
-		if (!data->mark_query)
+	ଯଦି (is_atom("objectname", atom, len)) {
+		ଯଦି (!data->mark_query)
 			strbuf_add_oid_hex(sb, &data->oid);
-	} else if (is_atom("objecttype", atom, len)) {
-		if (data->mark_query) {
+	} ଅନ୍ୟଥା ଯଦି (is_atom("objecttype", atom, len)) {
+		ଯଦି (data->mark_query) {
 			data->info.typep = &data->type;
-		} else {
-			const char *t = type_name(data->type);
+		} ଅନ୍ୟଥା {
+			ଅଚଳ ଅକ୍ଷର *t = type_name(data->type);
 			strbuf_addstr(sb, t ? t : "");
 		}
-	} else if (is_atom("objectsize", atom, len)) {
-		if (data->mark_query)
+	} ଅନ୍ୟଥା ଯଦି (is_atom("objectsize", atom, len)) {
+		ଯଦି (data->mark_query)
 			data->info.sizep = &data->size;
-		else
+		ଅନ୍ୟଥା
 			strbuf_add_uint(sb, data->size);
-	} else if (is_atom("objectsize:disk", atom, len)) {
-		if (data->mark_query)
+	} ଅନ୍ୟଥା ଯଦି (is_atom("objectsize:disk", atom, len)) {
+		ଯଦି (data->mark_query)
 			data->info.disk_sizep = &data->disk_size;
-		else
+		ଅନ୍ୟଥା
 			strbuf_add_uint(sb, data->disk_size);
-	} else if (is_atom("rest", atom, len)) {
-		if (data->mark_query)
+	} ଅନ୍ୟଥା ଯଦି (is_atom("rest", atom, len)) {
+		ଯଦି (data->mark_query)
 			data->split_on_whitespace = 1;
-		else if (data->rest)
+		ଅନ୍ୟଥା ଯଦି (data->rest)
 			strbuf_addstr(sb, data->rest);
-	} else if (is_atom("deltabase", atom, len)) {
-		if (data->mark_query)
+	} ଅନ୍ୟଥା ଯଦି (is_atom("deltabase", atom, len)) {
+		ଯଦି (data->mark_query)
 			data->info.delta_base_oid = &data->delta_base_oid;
-		else
+		ଅନ୍ୟଥା
 			strbuf_add_oid_hex(sb, &data->delta_base_oid);
-	} else if (is_atom("objectmode", atom, len)) {
-		if (!data->mark_query && !(S_IFINVALID == data->mode))
+	} ଅନ୍ୟଥା ଯଦି (is_atom("objectmode", atom, len)) {
+		ଯଦି (!data->mark_query && !(S_IFINVALID == data->mode))
 			strbuf_addf(sb, "%06o", data->mode);
-	} else
-		return 0;
-	return 1;
+	} ଅନ୍ୟଥା
+		ଫେରନ୍ତୁ 0;
+	ଫେରନ୍ତୁ 1;
 }
 
-static void expand_format(struct strbuf *sb, const char *start,
-			  struct expand_data *data)
+ସ୍ଥିର ଶୂନ୍ୟ expand_format(ସଂରଚନା strbuf *sb, ଅଚଳ ଅକ୍ଷର *start,
+			  ସଂରଚନା expand_data *data)
 {
-	while (strbuf_expand_step(sb, &start)) {
-		const char *end;
+	ଯେତେବେଳେ (strbuf_expand_step(sb, &start)) {
+		ଅଚଳ ଅକ୍ଷର *end;
 
-		if (skip_prefix(start, "%", &start) || *start != '(')
+		ଯଦି (skip_prefix(start, "%", &start) || *start != '(')
 			strbuf_addch(sb, '%');
-		else if ((end = strchr(start + 1, ')')) &&
+		ଅନ୍ୟଥା ଯଦି ((end = strchr(start + 1, ')')) &&
 			 expand_atom(sb, start + 1, end - start - 1, data))
 			start = end + 1;
-		else
+		ଅନ୍ୟଥା
 			strbuf_expand_bad_format(start, "cat-file");
 	}
 }
 
-static void batch_write(struct batch_options *opt, const void *data, int len)
+ସ୍ଥିର ଶୂନ୍ୟ batch_write(ସଂରଚନା batch_options *opt, ଅଚଳ ଶୂନ୍ୟ *data, ପୂର୍ଣ୍ଣସଂଖ୍ୟା len)
 {
-	if (opt->buffer_output) {
-		if (fwrite(data, 1, len, stdout) != len)
+	ଯଦି (opt->buffer_output) {
+		ଯଦି (fwrite(data, 1, len, stdout) != len)
 			die_errno("unable to write to stdout");
-	} else
+	} ଅନ୍ୟଥା
 		write_or_die(1, data, len);
 }
 
-static void print_object_or_die(struct batch_options *opt, struct expand_data *data)
+ସ୍ଥିର ଶୂନ୍ୟ print_object_or_die(ସଂରଚନା batch_options *opt, ସଂରଚନା expand_data *data)
 {
-	const struct object_id *oid = &data->oid;
+	ଅଚଳ ସଂରଚନା object_id *oid = &data->oid;
 
-	assert(data->info.typep);
+	ପ୍ରତିଜ୍ଞା(data->info.typep);
 
-	if (data->type == OBJ_BLOB) {
-		if (opt->buffer_output)
+	ଯଦି (data->type == OBJ_BLOB) {
+		ଯଦି (opt->buffer_output)
 			fflush(stdout);
-		if (opt->transform_mode) {
-			char *contents;
+		ଯଦି (opt->transform_mode) {
+			ଅକ୍ଷର *contents;
 			size_t size;
 
-			if (!data->rest)
+			ଯଦି (!data->rest)
 				die("missing path for '%s'", oid_to_hex(oid));
 
-			if (opt->transform_mode == 'w') {
-				if (filter_object(data->rest, 0100644, oid,
+			ଯଦି (opt->transform_mode == 'w') {
+				ଯଦି (filter_object(data->rest, 0100644, oid,
 						  &contents, &size))
 					die("could not convert '%s' %s",
 					    oid_to_hex(oid), data->rest);
-			} else if (opt->transform_mode == 'c') {
-				enum object_type type;
+			} ଅନ୍ୟଥା ଯଦି (opt->transform_mode == 'c') {
+				ଗଣନା object_type type;
 				unsigned long size_ul = 0;
-				if (textconv_object(the_repository,
+				ଯଦି (textconv_object(the_repository,
 						    data->rest, 0100644, oid,
 						    1, &contents, &size_ul))
 					size = size_ul;
-				else
+				ଅନ୍ୟଥା
 					contents = odb_read_object(the_repository->objects,
 								   oid, &type, &size);
-				if (!contents)
+				ଯଦି (!contents)
 					die("could not convert '%s' %s",
 					    oid_to_hex(oid), data->rest);
-			} else
+			} ଅନ୍ୟଥା
 				BUG("invalid transform_mode: %c", opt->transform_mode);
 			batch_write(opt, contents, size);
-			free(contents);
-		} else {
+			ମୁକ୍ତ(contents);
+		} ଅନ୍ୟଥା {
 			stream_blob(oid);
 		}
 	}
-	else {
-		enum object_type type;
+	ଅନ୍ୟଥା {
+		ଗଣନା object_type type;
 		size_t size;
-		void *contents;
+		ଶୂନ୍ୟ *contents;
 
 		contents = odb_read_object(the_repository->objects, oid,
 					   &type, &size);
-		if (!contents)
+		ଯଦି (!contents)
 			die("object %s disappeared", oid_to_hex(oid));
 
-		if (use_mailmap)
+		ଯଦି (use_mailmap)
 			contents = replace_idents_using_mailmap(contents, &size);
 
-		if (type != data->type)
+		ଯଦି (type != data->type)
 			die("object %s changed type!?", oid_to_hex(oid));
-		if (data->info.sizep && size != data->size && !use_mailmap)
+		ଯଦି (data->info.sizep && size != data->size && !use_mailmap)
 			die("object %s changed size!?", oid_to_hex(oid));
 
 		batch_write(opt, contents, size);
-		free(contents);
+		ମୁକ୍ତ(contents);
 	}
 }
 
-static void print_default_format(struct strbuf *scratch, struct expand_data *data,
-				 struct batch_options *opt)
+ସ୍ଥିର ଶୂନ୍ୟ print_default_format(ସଂରଚନା strbuf *scratch, ସଂରଚନା expand_data *data,
+				 ସଂରଚନା batch_options *opt)
 {
 	strbuf_add_oid_hex(scratch, &data->oid);
 	strbuf_addch(scratch, ' ');
@@ -510,10 +510,10 @@ static void print_default_format(struct strbuf *scratch, struct expand_data *dat
 	strbuf_addch(scratch, opt->output_delim);
 }
 
-static void report_object_status(struct batch_options *opt,
-				 const char *obj_name,
-				 const struct object_id *oid,
-				 const char *status)
+ସ୍ଥିର ଶୂନ୍ୟ report_object_status(ସଂରଚନା batch_options *opt,
+				 ଅଚଳ ଅକ୍ଷର *obj_name,
+				 ଅଚଳ ସଂରଚନା object_id *oid,
+				 ଅଚଳ ଅକ୍ଷର *status)
 {
 	printf("%s %s%c", obj_name ? obj_name : oid_to_hex(oid),
 	       status, opt->output_delim);
@@ -525,456 +525,456 @@ static void report_object_status(struct batch_options *opt,
  * which the object may be accessed (though note that we may also rely on
  * data->oid, too). If "pack" is NULL, then offset is ignored.
  */
-static void batch_object_write(const char *obj_name,
-			       struct strbuf *scratch,
-			       struct batch_options *opt,
-			       struct expand_data *data,
-			       struct packed_git *pack,
+ସ୍ଥିର ଶୂନ୍ୟ batch_object_write(ଅଚଳ ଅକ୍ଷର *obj_name,
+			       ସଂରଚନା strbuf *scratch,
+			       ସଂରଚନା batch_options *opt,
+			       ସଂରଚନା expand_data *data,
+			       ସଂରଚନା packed_git *pack,
 			       off_t offset)
 {
-	if (!data->skip_object_info) {
-		int ret;
+	ଯଦି (!data->skip_object_info) {
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret;
 
-		if (use_mailmap ||
+		ଯଦି (use_mailmap ||
 		    opt->objects_filter.choice == LOFC_BLOB_NONE ||
 		    opt->objects_filter.choice == LOFC_BLOB_LIMIT ||
 		    opt->objects_filter.choice == LOFC_OBJECT_TYPE)
 			data->info.typep = &data->type;
-		if (opt->objects_filter.choice == LOFC_BLOB_LIMIT)
+		ଯଦି (opt->objects_filter.choice == LOFC_BLOB_LIMIT)
 			data->info.sizep = &data->size;
 
-		if (pack)
-			ret = packed_object_info(NULL, pack, offset, &data->info);
-		else
+		ଯଦି (pack)
+			ret = packed_object_info(ଖାଲି, pack, offset, &data->info);
+		ଅନ୍ୟଥା
 			ret = odb_read_object_info_extended(the_repository->objects,
 							    &data->oid, &data->info,
 							    OBJECT_INFO_LOOKUP_REPLACE);
-		if (ret < 0) {
-			if (data->mode == S_IFGITLINK)
-				report_object_status(opt, NULL, &data->oid, "submodule");
-			else
+		ଯଦି (ret < 0) {
+			ଯଦି (data->mode == S_IFGITLINK)
+				report_object_status(opt, ଖାଲି, &data->oid, "submodule");
+			ଅନ୍ୟଥା
 				report_object_status(opt, obj_name, &data->oid, "missing");
-			return;
+			ଫେରନ୍ତୁ;
 		}
 
-		switch (opt->objects_filter.choice) {
-		case LOFC_DISABLED:
-			break;
-		case LOFC_BLOB_NONE:
-			if (data->type == OBJ_BLOB) {
-				if (!opt->all_objects)
+		ବାଛ (opt->objects_filter.choice) {
+		ସ୍ଥିତି LOFC_DISABLED:
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି LOFC_BLOB_NONE:
+			ଯଦି (data->type == OBJ_BLOB) {
+				ଯଦି (!opt->all_objects)
 					report_object_status(opt, obj_name,
 							     &data->oid, "excluded");
-				return;
+				ଫେରନ୍ତୁ;
 			}
-			break;
-		case LOFC_BLOB_LIMIT:
-			if (data->type == OBJ_BLOB &&
-			    data->size >= opt->objects_filter.blob_limit_value) {
-				if (!opt->all_objects)
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି LOFC_BLOB_LIMIT:
+			ଯଦି (data->type == OBJ_BLOB &&
+			    data->size >= opt->objects_filter.blob_limit_ମୂଲ୍ୟ) {
+				ଯଦି (!opt->all_objects)
 					report_object_status(opt, obj_name,
 							     &data->oid, "excluded");
-				return;
+				ଫେରନ୍ତୁ;
 			}
-			break;
-		case LOFC_OBJECT_TYPE:
-			if (data->type != opt->objects_filter.object_type) {
-				if (!opt->all_objects)
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି LOFC_OBJECT_TYPE:
+			ଯଦି (data->type != opt->objects_filter.object_type) {
+				ଯଦି (!opt->all_objects)
 					report_object_status(opt, obj_name,
 							     &data->oid, "excluded");
-				return;
+				ଫେରନ୍ତୁ;
 			}
-			break;
-		default:
+			ଭାଙ୍ଗ;
+		ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
 			BUG("unsupported objects filter");
 		}
 
-		if (use_mailmap && (data->type == OBJ_COMMIT || data->type == OBJ_TAG)) {
-			char *buf = NULL;
+		ଯଦି (use_mailmap && (data->type == OBJ_COMMIT || data->type == OBJ_TAG)) {
+			ଅକ୍ଷର *buf = ଖାଲି;
 
 			buf = odb_read_object(the_repository->objects, &data->oid,
 					      &data->type, &data->size);
-			if (!buf)
+			ଯଦି (!buf)
 				die(_("unable to read %s"), oid_to_hex(&data->oid));
 			buf = replace_idents_using_mailmap(buf, &data->size);
 
-			free(buf);
+			ମୁକ୍ତ(buf);
 		}
 	}
 
 	strbuf_reset(scratch);
 
-	if (!opt->format) {
+	ଯଦି (!opt->format) {
 		print_default_format(scratch, data, opt);
-	} else {
+	} ଅନ୍ୟଥା {
 		expand_format(scratch, opt->format, data);
 		strbuf_addch(scratch, opt->output_delim);
 	}
 
 	batch_write(opt, scratch->buf, scratch->len);
 
-	if (opt->batch_mode == BATCH_MODE_CONTENTS) {
+	ଯଦି (opt->batch_mode == BATCH_MODE_CONTENTS) {
 		print_object_or_die(opt, data);
 		batch_write(opt, &opt->output_delim, 1);
 	}
 }
 
-static void batch_one_object(const char *obj_name,
-			     struct strbuf *scratch,
-			     struct batch_options *opt,
-			     struct expand_data *data)
+ସ୍ଥିର ଶୂନ୍ୟ batch_one_object(ଅଚଳ ଅକ୍ଷର *obj_name,
+			     ସଂରଚନା strbuf *scratch,
+			     ସଂରଚନା batch_options *opt,
+			     ସଂରଚନା expand_data *data)
 {
-	struct object_context ctx = {0};
-	int flags =
+	ସଂରଚନା object_context ctx = {0};
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags =
 		GET_OID_HASH_ANY |
 		(opt->follow_symlinks ? GET_OID_FOLLOW_SYMLINKS : 0);
-	enum get_oid_result result;
+	ଗଣନା get_oid_result result;
 
 	result = get_oid_with_context(the_repository, obj_name,
 				      flags, &data->oid, &ctx);
-	if (result != FOUND) {
-		switch (result) {
-		case MISSING_OBJECT:
+	ଯଦି (result != FOUND) {
+		ବାଛ (result) {
+		ସ୍ଥିତି MISSING_OBJECT:
 			report_object_status(opt, obj_name, &data->oid, "missing");
-			break;
-		case SHORT_NAME_AMBIGUOUS:
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି SHORT_NAME_AMBIGUOUS:
 			report_object_status(opt, obj_name, &data->oid, "ambiguous");
-			break;
-		case DANGLING_SYMLINK:
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି DANGLING_SYMLINK:
 			printf("dangling %"PRIuMAX"%c%s%c",
 			       (uintmax_t)strlen(obj_name),
 			       opt->output_delim, obj_name, opt->output_delim);
-			break;
-		case SYMLINK_LOOP:
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି SYMLINK_LOOP:
 			printf("loop %"PRIuMAX"%c%s%c",
 			       (uintmax_t)strlen(obj_name),
 			       opt->output_delim, obj_name, opt->output_delim);
-			break;
-		case NOT_DIR:
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି NOT_DIR:
 			printf("notdir %"PRIuMAX"%c%s%c",
 			       (uintmax_t)strlen(obj_name),
 			       opt->output_delim, obj_name, opt->output_delim);
-			break;
-		default:
+			ଭାଙ୍ଗ;
+		ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
 			BUG("unknown get_sha1_with_context result %d\n",
 			       result);
-			break;
+			ଭାଙ୍ଗ;
 		}
 		fflush(stdout);
 
-		goto out;
+		ଯାଅ out;
 	}
 
-	if (ctx.mode == 0) {
+	ଯଦି (ctx.mode == 0) {
 		printf("symlink %"PRIuMAX"%c%s%c",
 		       (uintmax_t)ctx.symlink_path.len,
 		       opt->output_delim, ctx.symlink_path.buf, opt->output_delim);
 		fflush(stdout);
-		goto out;
+		ଯାଅ out;
 	}
 
 	data->mode = ctx.mode;
-	batch_object_write(obj_name, scratch, opt, data, NULL, 0);
+	batch_object_write(obj_name, scratch, opt, data, ଖାଲି, 0);
 
 out:
 	object_context_release(&ctx);
 }
 
-static int get_remote_info(int argc,
-			   const char **argv,
-			   struct fetch_object_info_results *results,
-			   struct oid_array *object_info_oids)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା get_remote_info(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc,
+			   ଅଚଳ ଅକ୍ଷର **argv,
+			   ସଂରଚନା fetch_object_info_results *results,
+			   ସଂରଚନା oid_array *object_info_oids)
 {
-	int retval = 0;
-	struct remote *remote = NULL;
-	struct object_id oid;
-	struct transport *gtransport;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା retval = 0;
+	ସଂରଚନା remote *remote = ଖାଲି;
+	ସଂରଚନା object_id oid;
+	ସଂରଚନା transport *gtransport;
 
 	remote = remote_get(argv[0]);
-	if (!remote)
+	ଯଦି (!remote)
 		die(_("must supply valid remote when using remote-object-info"));
 
 	oid_array_clear(object_info_oids);
-	for (size_t i = 1; i < argc; i++) {
-		if (get_oid_hex(argv[i], &oid)) {
+	ପାଇଁ (size_t i = 1; i < argc; i++) {
+		ଯଦି (get_oid_hex(argv[i], &oid)) {
 			size_t len = strlen(argv[i]);
 
-			if (len < the_hash_algo->hexsz && len >= 4) {
+			ଯଦି (len < the_hash_algo->hexsz && len >= 4) {
 				size_t j;
-				for (j = 0; j < len; j++)
-					if (!isxdigit(argv[i][j]))
-						break;
-				if (j == len)
+				ପାଇଁ (j = 0; j < len; j++)
+					ଯଦି (!isxdigit(argv[i][j]))
+						ଭାଙ୍ଗ;
+				ଯଦି (j == len)
 					die(_("remote-object-info does not support "
 					      "short oids, %d characters required"),
-					    (int)the_hash_algo->hexsz);
+					    (ପୂର୍ଣ୍ଣସଂଖ୍ୟା)the_hash_algo->hexsz);
 			}
 			die(_("not a valid object name '%s'"), argv[i]);
 		}
 		oid_array_append(object_info_oids, &oid);
 	}
 
-	if (!object_info_oids->nr)
+	ଯଦି (!object_info_oids->nr)
 		die(_("remote-object-info requires objects"));
 
-	gtransport = transport_get(remote, NULL);
+	gtransport = transport_get(remote, ଖାଲି);
 
-	if (!gtransport->smart_options) {
+	ଯଦି (!gtransport->smart_options) {
 		retval = -1;
-		goto cleanup;
+		ଯାଅ cleanup;
 	}
 
 	retval = transport_fetch_object_info(gtransport, object_info_oids,
 					     results);
 cleanup:
 	transport_disconnect(gtransport);
-	return retval;
+	ଫେରନ୍ତୁ retval;
 }
 
-struct object_cb_data {
-	struct batch_options *opt;
-	struct expand_data *expand;
-	struct oidset *seen;
-	struct strbuf *scratch;
+ସଂରଚନା object_cb_data {
+	ସଂରଚନା batch_options *opt;
+	ସଂରଚନା expand_data *expand;
+	ସଂରଚନା oidset *seen;
+	ସଂରଚନା strbuf *scratch;
 };
 
-static int batch_object_cb(const struct object_id *oid, void *vdata)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା batch_object_cb(ଅଚଳ ସଂରଚନା object_id *oid, ଶୂନ୍ୟ *vdata)
 {
-	struct object_cb_data *data = vdata;
+	ସଂରଚନା object_cb_data *data = vdata;
 	oidcpy(&data->expand->oid, oid);
-	batch_object_write(NULL, data->scratch, data->opt, data->expand,
-			   NULL, 0);
-	return 0;
+	batch_object_write(ଖାଲି, data->scratch, data->opt, data->expand,
+			   ଖାଲି, 0);
+	ଫେରନ୍ତୁ 0;
 }
 
-static int collect_object(const struct object_id *oid,
-			  struct packed_git *pack UNUSED,
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା collect_object(ଅଚଳ ସଂରଚନା object_id *oid,
+			  ସଂରଚନା packed_git *pack UNUSED,
 			  off_t offset UNUSED,
-			  void *data)
+			  ଶୂନ୍ୟ *data)
 {
 	oid_array_append(data, oid);
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int batch_unordered_object(const struct object_id *oid,
-				  struct packed_git *pack,
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା batch_unordered_object(ଅଚଳ ସଂରଚନା object_id *oid,
+				  ସଂରଚନା packed_git *pack,
 				  off_t offset,
-				  void *vdata)
+				  ଶୂନ୍ୟ *vdata)
 {
-	struct object_cb_data *data = vdata;
+	ସଂରଚନା object_cb_data *data = vdata;
 
-	if (oidset_insert(data->seen, oid))
-		return 0;
+	ଯଦି (oidset_ଭର୍ତ୍ତି(data->seen, oid))
+		ଫେରନ୍ତୁ 0;
 
 	oidcpy(&data->expand->oid, oid);
-	batch_object_write(NULL, data->scratch, data->opt, data->expand,
+	batch_object_write(ଖାଲି, data->scratch, data->opt, data->expand,
 			   pack, offset);
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-typedef void (*parse_cmd_fn_t)(struct batch_options *, const char *,
-			       struct strbuf *, struct expand_data *);
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ଶୂନ୍ୟ (*parse_cmd_fn_t)(ସଂରଚନା batch_options *, ଅଚଳ ଅକ୍ଷର *,
+			       ସଂରଚନା strbuf *, ସଂରଚନା expand_data *);
 
-struct queued_cmd {
+ସଂରଚନା queued_cmd {
 	parse_cmd_fn_t fn;
-	char *line;
+	ଅକ୍ଷର *ଧାଡ଼ି;
 };
 
-static void parse_cmd_contents(struct batch_options *opt,
-			     const char *line,
-			     struct strbuf *output,
-			     struct expand_data *data)
+ସ୍ଥିର ଶୂନ୍ୟ parse_cmd_contents(ସଂରଚନା batch_options *opt,
+			     ଅଚଳ ଅକ୍ଷର *ଧାଡ଼ି,
+			     ସଂରଚନା strbuf *output,
+			     ସଂରଚନା expand_data *data)
 {
-	enum object_type *saved_typep = data->info.typep;
+	ଗଣନା object_type *saved_typep = data->info.typep;
 	data->info.typep = &data->type;
 	opt->batch_mode = BATCH_MODE_CONTENTS;
-	batch_one_object(line, output, opt, data);
+	batch_one_object(ଧାଡ଼ି, output, opt, data);
 	data->info.typep = saved_typep;
 }
 
-static void parse_cmd_info(struct batch_options *opt,
-			   const char *line,
-			   struct strbuf *output,
-			   struct expand_data *data)
+ସ୍ଥିର ଶୂନ୍ୟ parse_cmd_info(ସଂରଚନା batch_options *opt,
+			   ଅଚଳ ଅକ୍ଷର *ଧାଡ଼ି,
+			   ସଂରଚନା strbuf *output,
+			   ସଂରଚନା expand_data *data)
 {
 	opt->batch_mode = BATCH_MODE_INFO;
-	batch_one_object(line, output, opt, data);
+	batch_one_object(ଧାଡ଼ି, output, opt, data);
 }
 
-static void parse_cmd_mailmap(struct batch_options *opt UNUSED,
-			      const char *line,
-			      struct strbuf *output UNUSED,
-			      struct expand_data *data UNUSED)
+ସ୍ଥିର ଶୂନ୍ୟ parse_cmd_mailmap(ସଂରଚନା batch_options *opt UNUSED,
+			      ଅଚଳ ଅକ୍ଷର *ଧାଡ଼ି,
+			      ସଂରଚନା strbuf *output UNUSED,
+			      ସଂରଚନା expand_data *data UNUSED)
 {
-	use_mailmap = git_parse_maybe_bool(line);
+	use_mailmap = git_parse_maybe_bool(ଧାଡ଼ି);
 
-	if (use_mailmap < 0)
-		die(_("mailmap: invalid boolean '%s'"), line);
+	ଯଦି (use_mailmap < 0)
+		die(_("mailmap: invalid boolean '%s'"), ଧାଡ଼ି);
 
-	if (use_mailmap)
+	ଯଦି (use_mailmap)
 		load_mailmap();
 }
 
-static void parse_cmd_remote_object_info(struct batch_options *opt,
-					 const char *line, struct strbuf *output,
-					 struct expand_data *data)
+ସ୍ଥିର ଶୂନ୍ୟ parse_cmd_remote_object_info(ସଂରଚନା batch_options *opt,
+					 ଅଚଳ ଅକ୍ଷର *ଧାଡ଼ି, ସଂରଚନା strbuf *output,
+					 ସଂରଚନା expand_data *data)
 {
-	int count;
-	const char **argv;
-	char *line_to_split;
-	struct fetch_object_info_results results = FETCH_OBJECT_INFO_RESULTS_INIT;
-	struct oid_array object_info_oids = OID_ARRAY_INIT;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ଗଣନା_2;
+	ଅଚଳ ଅକ୍ଷର **argv;
+	ଅକ୍ଷର *ଧାଡ଼ି_to_split;
+	ସଂରଚନା fetch_object_info_results results = FETCH_OBJECT_INFO_RESULTS_INIT;
+	ସଂରଚନା oid_array object_info_oids = OID_ARRAY_INIT;
 
-	if (strlen(line) >= MAX_REMOTE_OBJ_INFO_LINE)
+	ଯଦି (strlen(ଧାଡ଼ି) >= MAX_REMOTE_OBJ_INFO_ଧାଡ଼ି)
 		die(_("remote-object-info command too long"));
 
-	line_to_split = xstrdup(line);
-	count = split_cmdline(line_to_split, &argv);
-	if (count < 0)
+	ଧାଡ଼ି_to_split = xstrdup(ଧାଡ଼ି);
+	ଗଣନା_2 = split_cmdline(ଧାଡ଼ି_to_split, &argv);
+	ଯଦି (ଗଣନା_2 < 0)
 		die(_("remote-object-info: failed to parse command line: %s"),
-		    split_cmdline_strerror(count));
-	if (count - 1 > MAX_ALLOWED_OBJ_LIMIT)
+		    split_cmdline_strerror(ଗଣନା_2));
+	ଯଦି (ଗଣନା_2 - 1 > MAX_ALLOWED_OBJ_LIMIT)
 		die(_("remote-object-info supports at most %d objects"),
 		    MAX_ALLOWED_OBJ_LIMIT);
 
-	if (data->info.sizep)
+	ଯଦି (data->info.sizep)
 		results.wants_size = 1;
-	if (data->info.typep)
+	ଯଦି (data->info.typep)
 		results.wants_type = 1;
 
-	if (get_remote_info(count, argv, &results, &object_info_oids))
+	ଯଦି (get_remote_info(ଗଣନା_2, argv, &results, &object_info_oids))
 		die(_("failed to get object info from the remote: %s"), argv[0]);
 
 	string_list_clear(&data->remote_allowed_atoms, 0);
 	string_list_append(&data->remote_allowed_atoms, "objectname");
-	if (results.sizes)
+	ଯଦି (results.sizes)
 		string_list_append(&data->remote_allowed_atoms, "objectsize");
-	if (results.types)
+	ଯଦି (results.types)
 		string_list_append(&data->remote_allowed_atoms, "objecttype");
 
 	data->skip_object_info = 1;
-	for (size_t i = 0; i < results.nr; i++) {
+	ପାଇଁ (size_t i = 0; i < results.nr; i++) {
 		data->oid = object_info_oids.oid[i];
 
-		if (results.unrecognized[i]) {
+		ଯଦି (results.unrecognized[i]) {
 			report_object_status(opt, oid_to_hex(&data->oid),
 					     &data->oid, "missing");
-			continue;
+			ଜାରି;
 		}
 
 		/*
 		 * When reaching here, it means remote-object-info can retrieve
 		 * information from server without downloading them.
 		 */
-		if (results.sizes)
+		ଯଦି (results.sizes)
 			data->size = results.sizes[i];
 
-		if (results.types)
+		ଯଦି (results.types)
 			data->type = results.types[i];
 
 		opt->batch_mode = BATCH_MODE_INFO;
 		data->is_remote = 1;
-		batch_object_write(argv[i + 1], output, opt, data, NULL, 0);
+		batch_object_write(argv[i + 1], output, opt, data, ଖାଲି, 0);
 		data->is_remote = 0;
 	}
 	data->skip_object_info = 0;
 
 	free_fetch_object_info_results(&results);
-	free(line_to_split);
-	free(argv);
+	ମୁକ୍ତ(ଧାଡ଼ି_to_split);
+	ମୁକ୍ତ(argv);
 	oid_array_clear(&object_info_oids);
 }
 
-static void dispatch_calls(struct batch_options *opt,
-		struct strbuf *output,
-		struct expand_data *data,
-		struct queued_cmd *cmd,
+ସ୍ଥିର ଶୂନ୍ୟ dispatch_calls(ସଂରଚନା batch_options *opt,
+		ସଂରଚନା strbuf *output,
+		ସଂରଚନା expand_data *data,
+		ସଂରଚନା queued_cmd *cmd,
 		size_t nr)
 {
-	if (!opt->buffer_output)
+	ଯଦି (!opt->buffer_output)
 		die(_("flush is only for --buffer mode"));
 
-	for (size_t i = 0; i < nr; i++)
-		cmd[i].fn(opt, cmd[i].line, output, data);
+	ପାଇଁ (size_t i = 0; i < nr; i++)
+		cmd[i].fn(opt, cmd[i].ଧାଡ଼ି, output, data);
 
 	fflush(stdout);
 }
 
-static void free_cmds(struct queued_cmd *cmd, size_t *nr)
+ସ୍ଥିର ଶୂନ୍ୟ free_cmds(ସଂରଚନା queued_cmd *cmd, size_t *nr)
 {
-	for (size_t i = 0; i < *nr; i++)
-		FREE_AND_NULL(cmd[i].line);
+	ପାଇଁ (size_t i = 0; i < *nr; i++)
+		FREE_AND_NULL(cmd[i].ଧାଡ଼ି);
 
 	*nr = 0;
 }
 
 
-static const struct parse_cmd {
-	const char *name;
+ସ୍ଥିର ଅଚଳ ସଂରଚନା parse_cmd {
+	ଅଚଳ ଅକ୍ଷର *name;
 	parse_cmd_fn_t fn;
 	unsigned takes_args;
 } commands[] = {
 	{ "contents", parse_cmd_contents, 1 },
-	{ "flush", NULL, 0 },
+	{ "flush", ଖାଲି, 0 },
 	{ "info", parse_cmd_info, 1 },
 	{ "mailmap", parse_cmd_mailmap, 1 },
 	{ "remote-object-info", parse_cmd_remote_object_info, 1 },
 };
 
-static void batch_objects_command(struct batch_options *opt,
-				    struct strbuf *output,
-				    struct expand_data *data)
+ସ୍ଥିର ଶୂନ୍ୟ batch_objects_command(ସଂରଚନା batch_options *opt,
+				    ସଂରଚନା strbuf *output,
+				    ସଂରଚନା expand_data *data)
 {
-	struct strbuf input = STRBUF_INIT;
-	struct queued_cmd *queued_cmd = NULL;
+	ସଂରଚନା strbuf ନିବେଶ = STRBUF_INIT;
+	ସଂରଚନା queued_cmd *queued_cmd = ଖାଲି;
 	size_t alloc = 0, nr = 0;
 
-	while (strbuf_getdelim_strip_crlf(&input, stdin, opt->input_delim) != EOF) {
-		const struct parse_cmd *cmd = NULL;
-		const char *p = NULL, *cmd_end;
-		struct queued_cmd call = {0};
+	ଯେତେବେଳେ (strbuf_getdelim_strip_crlf(&ନିବେଶ, stdin, opt->ନିବେଶ_delim) != EOF) {
+		ଅଚଳ ସଂରଚନା parse_cmd *cmd = ଖାଲି;
+		ଅଚଳ ଅକ୍ଷର *p = ଖାଲି, *cmd_end;
+		ସଂରଚନା queued_cmd call = {0};
 
-		if (!input.len)
+		ଯଦି (!ନିବେଶ.len)
 			die(_("empty command in input"));
-		if (isspace(*input.buf))
-			die(_("whitespace before command: '%s'"), input.buf);
+		ଯଦି (isspace(*ନିବେଶ.buf))
+			die(_("whitespace before command: '%s'"), ନିବେଶ.buf);
 
-		for (size_t i = 0; i < ARRAY_SIZE(commands); i++) {
-			if (!skip_prefix(input.buf, commands[i].name, &cmd_end))
-				continue;
+		ପାଇଁ (size_t i = 0; i < ARRAY_SIZE(commands); i++) {
+			ଯଦି (!skip_prefix(ନିବେଶ.buf, commands[i].name, &cmd_end))
+				ଜାରି;
 
 			cmd = &commands[i];
-			if (cmd->takes_args) {
-				if (*cmd_end != ' ')
+			ଯଦି (cmd->takes_args) {
+				ଯଦି (*cmd_end != ' ')
 					die(_("%s requires arguments"),
 					    commands[i].name);
 
 				p = cmd_end + 1;
-			} else if (*cmd_end) {
+			} ଅନ୍ୟଥା ଯଦି (*cmd_end) {
 				die(_("%s takes no arguments"),
 				    commands[i].name);
 			}
 
-			break;
+			ଭାଙ୍ଗ;
 		}
 
-		if (!cmd)
-			die(_("unknown command: '%s'"), input.buf);
+		ଯଦି (!cmd)
+			die(_("unknown command: '%s'"), ନିବେଶ.buf);
 
-		if (!strcmp(cmd->name, "flush")) {
+		ଯଦି (!strcmp(cmd->name, "flush")) {
 			dispatch_calls(opt, output, data, queued_cmd, nr);
 			free_cmds(queued_cmd, &nr);
-		} else if (!opt->buffer_output) {
+		} ଅନ୍ୟଥା ଯଦି (!opt->buffer_output) {
 			cmd->fn(opt, p, output, data);
-		} else {
+		} ଅନ୍ୟଥା {
 			ALLOC_GROW(queued_cmd, nr + 1, alloc);
 			call.fn = cmd->fn;
-			call.line = xstrdup_or_null(p);
+			call.ଧାଡ଼ି = xstrdup_or_null(p);
 			queued_cmd[nr++] = call;
 		}
 	}
 
-	if (opt->buffer_output &&
+	ଯଦି (opt->buffer_output &&
 	    nr &&
 	    !git_env_bool("GIT_TEST_CAT_FILE_NO_FLUSH_ON_EXIT", 0)) {
 		dispatch_calls(opt, output, data, queued_cmd, nr);
@@ -982,46 +982,46 @@ static void batch_objects_command(struct batch_options *opt,
 	}
 
 	free_cmds(queued_cmd, &nr);
-	free(queued_cmd);
-	strbuf_release(&input);
+	ମୁକ୍ତ(queued_cmd);
+	strbuf_release(&ନିବେଶ);
 }
 
 #define DEFAULT_FORMAT "%(objectname) %(objecttype) %(objectsize)"
 
-typedef int (*for_each_object_fn)(const struct object_id *oid, struct packed_git *pack,
-				  off_t offset, void *data);
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ପୂର୍ଣ୍ଣସଂଖ୍ୟା (*for_each_object_fn)(ଅଚଳ ସଂରଚନା object_id *oid, ସଂରଚନା packed_git *pack,
+				  off_t offset, ଶୂନ୍ୟ *data);
 
-struct for_each_object_payload {
+ସଂରଚନା for_each_object_payload {
 	for_each_object_fn callback;
-	void *payload;
+	ଶୂନ୍ୟ *payload;
 };
 
-static int batch_one_object_oi(const struct object_id *oid,
-			       struct object_info *oi,
-			       void *_payload)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା batch_one_object_oi(ଅଚଳ ସଂରଚନା object_id *oid,
+			       ସଂରଚନା object_info *oi,
+			       ଶୂନ୍ୟ *_payload)
 {
-	struct for_each_object_payload *payload = _payload;
-	if (oi && oi->source_infop->source->type == ODB_SOURCE_PACKED)
-		return payload->callback(oid, oi->source_infop->u.packed.pack,
+	ସଂରଚନା for_each_object_payload *payload = _payload;
+	ଯଦି (oi && oi->source_infop->source->type == ODB_SOURCE_PACKED)
+		ଫେରନ୍ତୁ payload->callback(oid, oi->source_infop->u.packed.pack,
 					 oi->source_infop->u.packed.offset,
 					 payload->payload);
-	return payload->callback(oid, NULL, 0, payload->payload);
+	ଫେରନ୍ତୁ payload->callback(oid, ଖାଲି, 0, payload->payload);
 }
 
-static void batch_each_object(struct batch_options *opt,
+ସ୍ଥିର ଶୂନ୍ୟ batch_each_object(ସଂରଚନା batch_options *opt,
 			      for_each_object_fn callback,
 			      unsigned flags,
-			      void *_payload)
+			      ଶୂନ୍ୟ *_payload)
 {
-	struct for_each_object_payload payload = {
+	ସଂରଚନା for_each_object_payload payload = {
 		.callback = callback,
 		.payload = _payload,
 	};
-	struct odb_source_info source_info;
-	struct object_info oi = {
+	ସଂରଚନା odb_source_info source_info;
+	ସଂରଚନା object_info oi = {
 		.source_infop = &source_info,
 	};
-	struct odb_for_each_object_options opts = {
+	ସଂରଚନା odb_for_each_object_options opts = {
 		.flags = flags,
 		.filter = &opt->objects_filter,
 	};
@@ -1030,14 +1030,14 @@ static void batch_each_object(struct batch_options *opt,
 				batch_one_object_oi, &payload, &opts);
 }
 
-static int batch_objects(struct batch_options *opt)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା batch_objects(ସଂରଚନା batch_options *opt)
 {
-	struct strbuf input = STRBUF_INIT;
-	struct strbuf output = STRBUF_INIT;
-	struct expand_data data = EXPAND_DATA_INIT;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
-	int save_warning;
-	int retval = 0;
+	ସଂରଚନା strbuf ନିବେଶ = STRBUF_INIT;
+	ସଂରଚନା strbuf output = STRBUF_INIT;
+	ସଂରଚନା expand_data data = EXPAND_DATA_INIT;
+	ସଂରଚନା repo_config_ମୂଲ୍ୟଗୁଡ଼ିକ *cfg = repo_config_ମୂଲ୍ୟଗୁଡ଼ିକ(the_repository);
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା save_warning;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା retval = 0;
 
 	/*
 	 * Expand once with our special mark_query flag, which will prime the
@@ -1050,27 +1050,27 @@ static int batch_objects(struct batch_options *opt)
 		      &data);
 	data.mark_query = 0;
 	strbuf_release(&output);
-	if (opt->transform_mode)
+	ଯଦି (opt->transform_mode)
 		data.split_on_whitespace = 1;
 
-	if (opt->format && !strcmp(opt->format, DEFAULT_FORMAT))
-		opt->format = NULL;
+	ଯଦି (opt->format && !strcmp(opt->format, DEFAULT_FORMAT))
+		opt->format = ଖାଲି;
 	/*
 	 * If we are printing out the object, then always fill in the type,
 	 * since we will want to decide whether or not to stream.
 	 */
-	if (opt->batch_mode == BATCH_MODE_CONTENTS)
+	ଯଦି (opt->batch_mode == BATCH_MODE_CONTENTS)
 		data.info.typep = &data.type;
 
-	if (opt->all_objects) {
-		struct object_cb_data cb;
-		struct object_info empty = OBJECT_INFO_INIT;
+	ଯଦି (opt->all_objects) {
+		ସଂରଚନା object_cb_data cb;
+		ସଂରଚନା object_info empty = OBJECT_INFO_INIT;
 
-		if (!memcmp(&data.info, &empty, sizeof(empty)) &&
+		ଯଦି (!memcmp(&data.info, &empty, ଆକାର(empty)) &&
 		    opt->objects_filter.choice == LOFC_DISABLED)
 			data.skip_object_info = 1;
 
-		if (repo_has_promisor_remote(the_repository))
+		ଯଦି (repo_has_promisor_remote(the_repository))
 			warning("This repository uses promisor remotes. Some objects may not be loaded.");
 
 		disable_replace_refs();
@@ -1079,8 +1079,8 @@ static int batch_objects(struct batch_options *opt)
 		cb.expand = &data;
 		cb.scratch = &output;
 
-		if (opt->unordered) {
-			struct oidset seen = OIDSET_INIT;
+		ଯଦି (opt->unordered) {
+			ସଂରଚନା oidset seen = OIDSET_INIT;
 
 			cb.seen = &seen;
 
@@ -1088,8 +1088,8 @@ static int batch_objects(struct batch_options *opt)
 					  ODB_FOR_EACH_OBJECT_PACK_ORDER, &cb);
 
 			oidset_clear(&seen);
-		} else {
-			struct oid_array sa = OID_ARRAY_INIT;
+		} ଅନ୍ୟଥା {
+			ସଂରଚନା oid_array sa = OID_ARRAY_INIT;
 
 			batch_each_object(opt, collect_object, 0, &sa);
 			oid_array_for_each_unique(&sa, batch_object_cb, &cb);
@@ -1098,7 +1098,7 @@ static int batch_objects(struct batch_options *opt)
 		}
 
 		strbuf_release(&output);
-		return 0;
+		ଫେରନ୍ତୁ 0;
 	}
 
 	/*
@@ -1111,92 +1111,92 @@ static int batch_objects(struct batch_options *opt)
 	save_warning = cfg->warn_on_object_refname_ambiguity;
 	cfg->warn_on_object_refname_ambiguity = 0;
 
-	if (opt->batch_mode == BATCH_MODE_QUEUE_AND_DISPATCH) {
+	ଯଦି (opt->batch_mode == BATCH_MODE_QUEUE_AND_DISPATCH) {
 		batch_objects_command(opt, &output, &data);
-		goto cleanup;
+		ଯାଅ cleanup;
 	}
 
-	while (strbuf_getdelim_strip_crlf(&input, stdin, opt->input_delim) != EOF) {
-		if (data.split_on_whitespace) {
+	ଯେତେବେଳେ (strbuf_getdelim_strip_crlf(&ନିବେଶ, stdin, opt->ନିବେଶ_delim) != EOF) {
+		ଯଦି (data.split_on_whitespace) {
 			/*
 			 * Split at first whitespace, tying off the beginning
 			 * of the string and saving the remainder (or NULL) in
 			 * data.rest.
 			 */
-			char *p = strpbrk(input.buf, " \t");
-			if (p) {
-				while (*p && strchr(" \t", *p))
+			ଅକ୍ଷର *p = strpbrk(ନିବେଶ.buf, " \t");
+			ଯଦି (p) {
+				ଯେତେବେଳେ (*p && strchr(" \t", *p))
 					*p++ = '\0';
 			}
 			data.rest = p;
 		}
 
-		batch_one_object(input.buf, &output, opt, &data);
+		batch_one_object(ନିବେଶ.buf, &output, opt, &data);
 	}
 
  cleanup:
-	strbuf_release(&input);
+	strbuf_release(&ନିବେଶ);
 	strbuf_release(&output);
 	string_list_clear(&data.remote_allowed_atoms, 0);
 	cfg->warn_on_object_refname_ambiguity = save_warning;
-	return retval;
+	ଫେରନ୍ତୁ retval;
 }
 
-static int git_cat_file_config(const char *var, const char *value,
-			       const struct config_context *ctx, void *cb)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା git_cat_file_config(ଅଚଳ ଅକ୍ଷର *var, ଅଚଳ ଅକ୍ଷର *ମୂଲ୍ୟ,
+			       ଅଚଳ ସଂରଚନା config_context *ctx, ଶୂନ୍ୟ *cb)
 {
-	if (userdiff_config(var, value) < 0)
-		return -1;
+	ଯଦି (userdiff_config(var, ମୂଲ୍ୟ) < 0)
+		ଫେରନ୍ତୁ -1;
 
-	return git_default_config(var, value, ctx, cb);
+	ଫେରନ୍ତୁ git_default_config(var, ମୂଲ୍ୟ, ctx, cb);
 }
 
-static int batch_option_callback(const struct option *opt,
-				 const char *arg,
-				 int unset)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା batch_option_callback(ଅଚଳ ସଂରଚନା option *opt,
+				 ଅଚଳ ଅକ୍ଷର *arg,
+				 ପୂର୍ଣ୍ଣସଂଖ୍ୟା unset)
 {
-	struct batch_options *bo = opt->value;
+	ସଂରଚନା batch_options *bo = opt->ମୂଲ୍ୟ;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (bo->enabled) {
-		return error(_("only one batch option may be specified"));
+	ଯଦି (bo->enabled) {
+		ଫେରନ୍ତୁ error(_("only one batch option may be specified"));
 	}
 
 	bo->enabled = 1;
 
-	if (!strcmp(opt->long_name, "batch"))
+	ଯଦି (!strcmp(opt->long_name, "batch"))
 		bo->batch_mode = BATCH_MODE_CONTENTS;
-	else if (!strcmp(opt->long_name, "batch-check"))
+	ଅନ୍ୟଥା ଯଦି (!strcmp(opt->long_name, "batch-check"))
 		bo->batch_mode = BATCH_MODE_INFO;
-	else if (!strcmp(opt->long_name, "batch-command"))
+	ଅନ୍ୟଥା ଯଦି (!strcmp(opt->long_name, "batch-command"))
 		bo->batch_mode = BATCH_MODE_QUEUE_AND_DISPATCH;
-	else
+	ଅନ୍ୟଥା
 		BUG("%s given to batch-option-callback", opt->long_name);
 
 	bo->format = arg;
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-int cmd_cat_file(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_cat_file(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc,
+		 ଅଚଳ ଅକ୍ଷର **argv,
+		 ଅଚଳ ଅକ୍ଷର *prefix,
+		 ସଂରଚନା repository *repo UNUSED)
 {
-	int opt = 0;
-	int opt_cw = 0;
-	int opt_epts = 0;
-	const char *exp_type = NULL, *obj_name = NULL;
-	struct batch_options batch = {
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା opt = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା opt_cw = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା opt_epts = 0;
+	ଅଚଳ ଅକ୍ଷର *exp_type = ଖାଲି, *obj_name = ଖାଲି;
+	ସଂରଚନା batch_options batch = {
 		.objects_filter = LIST_OBJECTS_FILTER_INIT,
 	};
-	int unknown_type = 0;
-	int input_nul_terminated = 0;
-	int nul_terminated = 0;
-	int ret;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା unknown_type = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ନିବେଶ_nul_terminated = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା nul_terminated = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret;
 
-	const char * const builtin_catfile_usage[] = {
+	ଅଚଳ ଅକ୍ଷର * ଅଚଳ builtin_catfile_usage[] = {
 		N_("git cat-file <type> <object>"),
 		N_("git cat-file (-e | -p | -t | -s) <object>"),
 		N_("git cat-file (--textconv | --filters)\n"
@@ -1204,18 +1204,18 @@ int cmd_cat_file(int argc,
 		N_("git cat-file (--batch | --batch-check | --batch-command) [--batch-all-objects]\n"
 		   "             [--buffer] [--follow-symlinks] [--unordered]\n"
 		   "             [--textconv | --filters] [-Z]"),
-		NULL
+		ଖାଲି
 	};
-	const struct option options[] = {
+	ଅଚଳ ସଂରଚନା option options[] = {
 		/* Simple queries */
 		OPT_GROUP(N_("Check object existence or emit object contents")),
-		OPT_CMDMODE('e', NULL, &opt,
+		OPT_CMDMODE('e', ଖାଲି, &opt,
 			    N_("check if <object> exists"), 'e'),
-		OPT_CMDMODE('p', NULL, &opt, N_("pretty-print <object> content"), 'p'),
+		OPT_CMDMODE('p', ଖାଲି, &opt, N_("pretty-print <object> content"), 'p'),
 
 		OPT_GROUP(N_("Emit [broken] object attributes")),
-		OPT_CMDMODE('t', NULL, &opt, N_("show object type (one of 'blob', 'tree', 'commit', 'tag', ...)"), 't'),
-		OPT_CMDMODE('s', NULL, &opt, N_("show object size"), 's'),
+		OPT_CMDMODE('t', ଖାଲି, &opt, N_("show object type (one of 'blob', 'tree', 'commit', 'tag', ...)"), 't'),
+		OPT_CMDMODE('s', ଖାଲି, &opt, N_("show object size"), 's'),
 		OPT_HIDDEN_BOOL(0, "allow-unknown-type", &unknown_type,
 			  N_("historical option -- no-op")),
 		OPT_BOOL(0, "use-mailmap", &use_mailmap, N_("use mail map file")),
@@ -1230,9 +1230,9 @@ int cmd_cat_file(int argc,
 			N_("like --batch, but don't emit <contents>"),
 			PARSE_OPT_OPTARG | PARSE_OPT_NONEG,
 			batch_option_callback),
-		OPT_BOOL_F('z', NULL, &input_nul_terminated, N_("stdin is NUL-terminated"),
+		OPT_BOOL_F('z', ଖାଲି, &ନିବେଶ_nul_terminated, N_("stdin is NUL-terminated"),
 			PARSE_OPT_HIDDEN),
-		OPT_BOOL('Z', NULL, &nul_terminated, N_("stdin and stdout is NUL-terminated")),
+		OPT_BOOL('Z', ଖାଲି, &nul_terminated, N_("stdin and stdout is NUL-terminated")),
 		OPT_CALLBACK_F(0, "batch-command", &batch, N_("format"),
 			N_("read commands from stdin"),
 			PARSE_OPT_OPTARG | PARSE_OPT_NONEG,
@@ -1258,7 +1258,7 @@ int cmd_cat_file(int argc,
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_cat_file_config, NULL);
+	repo_config(the_repository, git_cat_file_config, ଖାଲି);
 
 	batch.buffer_output = -1;
 
@@ -1266,104 +1266,104 @@ int cmd_cat_file(int argc,
 	opt_cw = (opt == 'c' || opt == 'w');
 	opt_epts = (opt == 'e' || opt == 'p' || opt == 't' || opt == 's');
 
-	if (use_mailmap)
+	ଯଦି (use_mailmap)
 		load_mailmap();
 
-	switch (batch.objects_filter.choice) {
-	case LOFC_DISABLED:
-		break;
-	case LOFC_BLOB_NONE:
-	case LOFC_BLOB_LIMIT:
-	case LOFC_OBJECT_TYPE:
-		if (!batch.enabled)
+	ବାଛ (batch.objects_filter.choice) {
+	ସ୍ଥିତି LOFC_DISABLED:
+		ଭାଙ୍ଗ;
+	ସ୍ଥିତି LOFC_BLOB_NONE:
+	ସ୍ଥିତି LOFC_BLOB_LIMIT:
+	ସ୍ଥିତି LOFC_OBJECT_TYPE:
+		ଯଦି (!batch.enabled)
 			usage(_("objects filter only supported in batch mode"));
-		break;
-	default:
+		ଭାଙ୍ଗ;
+	ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
 		usagef(_("objects filter not supported: '%s'"),
 		       list_object_filter_config_name(batch.objects_filter.choice));
 	}
 
 	/* --batch-all-objects? */
-	if (opt == 'b')
+	ଯଦି (opt == 'b')
 		batch.all_objects = 1;
 
 	/* Option compatibility */
-	if (force_path && !opt_cw)
-		usage_msg_optf(_("'%s=<%s>' needs '%s' or '%s'"),
+	ଯଦି (force_path && !opt_cw)
+		usage_ସନ୍ଦେଶ_optf(_("'%s=<%s>' needs '%s' or '%s'"),
 			       builtin_catfile_usage, options,
 			       "--path", _("path|tree-ish"), "--filters",
 			       "--textconv");
 
 	/* Option compatibility with batch mode */
-	if (batch.enabled)
+	ଯଦି (batch.enabled)
 		;
-	else if (batch.follow_symlinks)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+	ଅନ୍ୟଥା ଯଦି (batch.follow_symlinks)
+		usage_ସନ୍ଦେଶ_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "--follow-symlinks");
-	else if (batch.buffer_output >= 0)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+	ଅନ୍ୟଥା ଯଦି (batch.buffer_output >= 0)
+		usage_ସନ୍ଦେଶ_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "--buffer");
-	else if (batch.all_objects)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+	ଅନ୍ୟଥା ଯଦି (batch.all_objects)
+		usage_ସନ୍ଦେଶ_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "--batch-all-objects");
-	else if (input_nul_terminated)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+	ଅନ୍ୟଥା ଯଦି (ନିବେଶ_nul_terminated)
+		usage_ସନ୍ଦେଶ_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "-z");
-	else if (nul_terminated)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+	ଅନ୍ୟଥା ଯଦି (nul_terminated)
+		usage_ସନ୍ଦେଶ_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "-Z");
 
-	batch.input_delim = batch.output_delim = '\n';
-	if (input_nul_terminated)
-		batch.input_delim = '\0';
-	if (nul_terminated)
-		batch.input_delim = batch.output_delim = '\0';
+	batch.ନିବେଶ_delim = batch.output_delim = '\n';
+	ଯଦି (ନିବେଶ_nul_terminated)
+		batch.ନିବେଶ_delim = '\0';
+	ଯଦି (nul_terminated)
+		batch.ନିବେଶ_delim = batch.output_delim = '\0';
 
 	/* Batch defaults */
-	if (batch.buffer_output < 0)
+	ଯଦି (batch.buffer_output < 0)
 		batch.buffer_output = batch.all_objects;
 
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
 	/* Return early if we're in batch mode? */
-	if (batch.enabled) {
-		if (opt_cw)
+	ଯଦି (batch.enabled) {
+		ଯଦି (opt_cw)
 			batch.transform_mode = opt;
-		else if (opt && opt != 'b')
-			usage_msg_optf(_("'-%c' is incompatible with batch mode"),
+		ଅନ୍ୟଥା ଯଦି (opt && opt != 'b')
+			usage_ସନ୍ଦେଶ_optf(_("'-%c' is incompatible with batch mode"),
 				       builtin_catfile_usage, options, opt);
-		else if (argc)
-			usage_msg_opt(_("batch modes take no arguments"),
+		ଅନ୍ୟଥା ଯଦି (argc)
+			usage_ସନ୍ଦେଶ_opt(_("batch modes take no arguments"),
 				      builtin_catfile_usage, options);
 
 		ret = batch_objects(&batch);
-		goto out;
+		ଯାଅ out;
 	}
 
-	if (opt) {
-		if (!argc && opt == 'c')
-			usage_msg_optf(_("<rev> required with '%s'"),
+	ଯଦି (opt) {
+		ଯଦି (!argc && opt == 'c')
+			usage_ସନ୍ଦେଶ_optf(_("<rev> required with '%s'"),
 				       builtin_catfile_usage, options,
 				       "--textconv");
-		else if (!argc && opt == 'w')
-			usage_msg_optf(_("<rev> required with '%s'"),
+		ଅନ୍ୟଥା ଯଦି (!argc && opt == 'w')
+			usage_ସନ୍ଦେଶ_optf(_("<rev> required with '%s'"),
 				       builtin_catfile_usage, options,
 				       "--filters");
-		else if (!argc && opt_epts)
-			usage_msg_optf(_("<object> required with '-%c'"),
+		ଅନ୍ୟଥା ଯଦି (!argc && opt_epts)
+			usage_ସନ୍ଦେଶ_optf(_("<object> required with '-%c'"),
 				       builtin_catfile_usage, options, opt);
-		else if (argc == 1)
+		ଅନ୍ୟଥା ଯଦି (argc == 1)
 			obj_name = argv[0];
-		else
-			usage_msg_opt(_("too many arguments"), builtin_catfile_usage,
+		ଅନ୍ୟଥା
+			usage_ସନ୍ଦେଶ_opt(_("too many arguments"), builtin_catfile_usage,
 				      options);
-	} else if (!argc) {
+	} ଅନ୍ୟଥା ଯଦି (!argc) {
 		usage_with_options(builtin_catfile_usage, options);
-	} else if (argc != 2) {
-		usage_msg_optf(_("only two arguments allowed in <type> <object> mode, not %d"),
+	} ଅନ୍ୟଥା ଯଦି (argc != 2) {
+		usage_ସନ୍ଦେଶ_optf(_("only two arguments allowed in <type> <object> mode, not %d"),
 			      builtin_catfile_usage, options, argc);
-	} else if (argc) {
+	} ଅନ୍ୟଥା ଯଦି (argc) {
 		exp_type = argv[0];
 		obj_name = argv[1];
 	}
@@ -1372,5 +1372,5 @@ int cmd_cat_file(int argc,
 
 out:
 	list_objects_filter_release(&batch.objects_filter);
-	return ret;
+	ଫେରନ୍ତୁ ret;
 }

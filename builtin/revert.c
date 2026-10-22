@@ -1,16 +1,16 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "git-compat-util.h"
-#include "builtin.h"
-#include "parse-options.h"
-#include "diff.h"
-#include "environment.h"
-#include "gettext.h"
-#include "revision.h"
-#include "rerere.h"
-#include "run-command.h"
-#include "sequencer.h"
-#include "branch.h"
+#ଅନ୍ତର୍ଭାଵ "git-compat-util.h"
+#ଅନ୍ତର୍ଭାଵ "builtin.h"
+#ଅନ୍ତର୍ଭାଵ "parse-options.h"
+#ଅନ୍ତର୍ଭାଵ "diff.h"
+#ଅନ୍ତର୍ଭାଵ "environment.h"
+#ଅନ୍ତର୍ଭାଵ "gettext.h"
+#ଅନ୍ତର୍ଭାଵ "revision.h"
+#ଅନ୍ତର୍ଭାଵ "rerere.h"
+#ଅନ୍ତର୍ଭାଵ "run-command.h"
+#ଅନ୍ତର୍ଭାଵ "sequencer.h"
+#ଅନ୍ତର୍ଭାଵ "branch.h"
 
 /*
  * This implements the builtins revert and cherry-pick.
@@ -23,102 +23,102 @@
  * Copyright (c) 2005 Junio C Hamano
  */
 
-static const char * const revert_usage[] = {
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର * ଅଚଳ revert_usage[] = {
 	N_("git revert [--[no-]edit] [-n] [-m <parent-number>] [-s] [-S[<keyid>]] <commit>..."),
 	N_("git revert (--continue | --skip | --abort | --quit)"),
-	NULL
+	ଖାଲି
 };
 
-static const char * const cherry_pick_usage[] = {
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର * ଅଚଳ cherry_pick_usage[] = {
 	N_("git cherry-pick [--edit] [-n] [-m <parent-number>] [-s] [-x] [--ff]\n"
 	   "                [-S[<keyid>]] <commit>..."),
 	N_("git cherry-pick (--continue | --skip | --abort | --quit)"),
-	NULL
+	ଖାଲି
 };
 
-static const char *action_name(const struct replay_opts *opts)
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *action_name(ଅଚଳ ସଂରଚନା replay_opts *opts)
 {
-	return opts->action == REPLAY_REVERT ? "revert" : "cherry-pick";
+	ଫେରନ୍ତୁ opts->action == REPLAY_REVERT ? "revert" : "cherry-pick";
 }
 
-static const char * const *revert_or_cherry_pick_usage(struct replay_opts *opts)
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର * ଅଚଳ *revert_or_cherry_pick_usage(ସଂରଚନା replay_opts *opts)
 {
-	return opts->action == REPLAY_REVERT ? revert_usage : cherry_pick_usage;
+	ଫେରନ୍ତୁ opts->action == REPLAY_REVERT ? revert_usage : cherry_pick_usage;
 }
 
-enum empty_action {
+ଗଣନା empty_action {
 	EMPTY_COMMIT_UNSPECIFIED = -1,
 	STOP_ON_EMPTY_COMMIT,      /* output errors and stop in the middle of a cherry-pick */
 	DROP_EMPTY_COMMIT,         /* skip with a notice message */
 	KEEP_EMPTY_COMMIT,         /* keep recording as empty commits */
 };
 
-static int parse_opt_empty(const struct option *opt, const char *arg, int unset)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା parse_opt_empty(ଅଚଳ ସଂରଚନା option *opt, ଅଚଳ ଅକ୍ଷର *arg, ପୂର୍ଣ୍ଣସଂଖ୍ୟା unset)
 {
-	int *opt_value = opt->value;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା *opt_ମୂଲ୍ୟ = opt->ମୂଲ୍ୟ;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!strcmp(arg, "stop"))
-		*opt_value = STOP_ON_EMPTY_COMMIT;
-	else if (!strcmp(arg, "drop"))
-		*opt_value = DROP_EMPTY_COMMIT;
-	else if (!strcmp(arg, "keep"))
-		*opt_value = KEEP_EMPTY_COMMIT;
-	else
-		return error(_("invalid value for '%s': '%s'"), "--empty", arg);
+	ଯଦି (!strcmp(arg, "stop"))
+		*opt_ମୂଲ୍ୟ = STOP_ON_EMPTY_COMMIT;
+	ଅନ୍ୟଥା ଯଦି (!strcmp(arg, "drop"))
+		*opt_ମୂଲ୍ୟ = DROP_EMPTY_COMMIT;
+	ଅନ୍ୟଥା ଯଦି (!strcmp(arg, "keep"))
+		*opt_ମୂଲ୍ୟ = KEEP_EMPTY_COMMIT;
+	ଅନ୍ୟଥା
+		ଫେରନ୍ତୁ error(_("invalid value for '%s': '%s'"), "--empty", arg);
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int option_parse_m(const struct option *opt,
-			  const char *arg, int unset)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା option_parse_m(ଅଚଳ ସଂରଚନା option *opt,
+			  ଅଚଳ ଅକ୍ଷର *arg, ପୂର୍ଣ୍ଣସଂଖ୍ୟା unset)
 {
-	struct replay_opts *replay = opt->value;
-	char *end;
+	ସଂରଚନା replay_opts *replay = opt->ମୂଲ୍ୟ;
+	ଅକ୍ଷର *end;
 
-	if (unset) {
+	ଯଦି (unset) {
 		replay->mainline = 0;
-		return 0;
+		ଫେରନ୍ତୁ 0;
 	}
 
 	replay->mainline = strtol(arg, &end, 10);
-	if (*end || replay->mainline <= 0)
-		return error(_("option `%s' expects a number greater than zero"),
+	ଯଦି (*end || replay->mainline <= 0)
+		ଫେରନ୍ତୁ error(_("option `%s' expects a number greater than zero"),
 			     opt->long_name);
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
 LAST_ARG_MUST_BE_NULL
-static void verify_opt_compatible(const char *me, const char *base_opt, ...)
+ସ୍ଥିର ଶୂନ୍ୟ verify_opt_compatible(ଅଚଳ ଅକ୍ଷର *me, ଅଚଳ ଅକ୍ଷର *base_opt, ...)
 {
-	const char *this_opt;
+	ଅଚଳ ଅକ୍ଷର *this_opt;
 	va_list ap;
 
 	va_start(ap, base_opt);
-	while ((this_opt = va_arg(ap, const char *))) {
-		if (va_arg(ap, int))
-			break;
+	ଯେତେବେଳେ ((this_opt = va_arg(ap, ଅଚଳ ଅକ୍ଷର *))) {
+		ଯଦି (va_arg(ap, ପୂର୍ଣ୍ଣସଂଖ୍ୟା))
+			ଭାଙ୍ଗ;
 	}
 	va_end(ap);
 
-	if (this_opt)
+	ଯଦି (this_opt)
 		die(_("%s: %s cannot be used with %s"), me, this_opt, base_opt);
 }
 
-static int run_sequencer(int argc, const char **argv, const char *prefix,
-			 struct replay_opts *opts)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା run_sequencer(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc, ଅଚଳ ଅକ୍ଷର **argv, ଅଚଳ ଅକ୍ଷର *prefix,
+			 ସଂରଚନା replay_opts *opts)
 {
-	const char * const * usage_str = revert_or_cherry_pick_usage(opts);
-	const char *me = action_name(opts);
-	const char *cleanup_arg = NULL;
-	const char sentinel_value = 0; /* value not important */
-	const char *strategy = &sentinel_value;
-	const char *gpg_sign = &sentinel_value;
-	enum empty_action empty_opt = EMPTY_COMMIT_UNSPECIFIED;
-	int cmd = 0, ret;
-	struct option base_options[] = {
+	ଅଚଳ ଅକ୍ଷର * ଅଚଳ * usage_str = revert_or_cherry_pick_usage(opts);
+	ଅଚଳ ଅକ୍ଷର *me = action_name(opts);
+	ଅଚଳ ଅକ୍ଷର *cleanup_arg = ଖାଲି;
+	ଅଚଳ ଅକ୍ଷର sentinel_ମୂଲ୍ୟ = 0; /* value not important */
+	ଅଚଳ ଅକ୍ଷର *strategy = &sentinel_ମୂଲ୍ୟ;
+	ଅଚଳ ଅକ୍ଷର *gpg_sign = &sentinel_ମୂଲ୍ୟ;
+	ଗଣନା empty_action empty_opt = EMPTY_COMMIT_UNSPECIFIED;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd = 0, ret;
+	ସଂରଚନା option base_options[] = {
 		OPT_CMDMODE(0, "quit", &cmd, N_("end revert or cherry-pick sequence"), 'q'),
 		OPT_CMDMODE(0, "continue", &cmd, N_("resume revert or cherry-pick sequence"), 'c'),
 		OPT_CMDMODE(0, "abort", &cmd, N_("cancel revert or cherry-pick sequence"), 'a'),
@@ -126,7 +126,7 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 		OPT_CLEANUP(&cleanup_arg),
 		OPT_BOOL('n', "no-commit", &opts->no_commit, N_("don't automatically commit")),
 		OPT_BOOL('e', "edit", &opts->edit, N_("edit the commit message")),
-		OPT_NOOP_NOARG('r', NULL),
+		OPT_NOOP_NOARG('r', ଖାଲି),
 		OPT_BOOL('s', "signoff", &opts->signoff, N_("add a Signed-off-by trailer")),
 		OPT_CALLBACK('m', "mainline", opts, N_("parent-number"),
 			     N_("select mainline parent"), option_parse_m),
@@ -138,7 +138,7 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 			.type = OPTION_STRING,
 			.short_name = 'S',
 			.long_name = "gpg-sign",
-			.value = &gpg_sign,
+			.ମୂଲ୍ୟ = &gpg_sign,
 			.argh = N_("key-id"),
 			.help = N_("GPG sign commit"),
 			.flags = PARSE_OPT_OPTARG,
@@ -146,11 +146,11 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 		},
 		OPT_END()
 	};
-	struct option *options = base_options;
+	ସଂରଚନା option *options = base_options;
 
-	if (opts->action == REPLAY_PICK) {
-		struct option cp_extra[] = {
-			OPT_BOOL('x', NULL, &opts->record_origin, N_("append commit name")),
+	ଯଦି (opts->action == REPLAY_PICK) {
+		ସଂରଚନା option cp_extra[] = {
+			OPT_BOOL('x', ଖାଲି, &opts->record_origin, N_("append commit name")),
 			OPT_BOOL(0, "ff", &opts->allow_ff, N_("allow fast-forward")),
 			OPT_BOOL(0, "allow-empty", &opts->allow_empty, N_("preserve initially empty commits")),
 			OPT_BOOL(0, "allow-empty-message", &opts->allow_empty_message, N_("allow commits with empty messages")),
@@ -161,8 +161,8 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 			OPT_END(),
 		};
 		options = parse_options_concat(options, cp_extra);
-	} else if (opts->action == REPLAY_REVERT) {
-		struct option cp_extra[] = {
+	} ଅନ୍ୟଥା ଯଦି (opts->action == REPLAY_REVERT) {
+		ସଂରଚନା option cp_extra[] = {
 			OPT_BOOL(0, "reference", &opts->commit_use_reference,
 				 N_("use the 'reference' format to refer to commits")),
 			OPT_END(),
@@ -177,31 +177,31 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	if (opts->action == REPLAY_PICK) {
+	ଯଦି (opts->action == REPLAY_PICK) {
 		opts->drop_redundant_commits = (empty_opt == DROP_EMPTY_COMMIT);
 		opts->keep_redundant_commits = opts->keep_redundant_commits || (empty_opt == KEEP_EMPTY_COMMIT);
 	}
 
 	/* implies allow_empty */
-	if (opts->keep_redundant_commits)
+	ଯଦି (opts->keep_redundant_commits)
 		opts->allow_empty = 1;
 
-	if (cleanup_arg) {
-		opts->default_msg_cleanup = get_cleanup_mode(cleanup_arg, 1);
+	ଯଦି (cleanup_arg) {
+		opts->default_ସନ୍ଦେଶ_cleanup = get_cleanup_mode(cleanup_arg, 1);
 		opts->explicit_cleanup = 1;
 	}
 
 	/* Check for incompatible command line arguments */
-	if (cmd) {
-		const char *this_operation;
-		if (cmd == 'q')
+	ଯଦି (cmd) {
+		ଅଚଳ ଅକ୍ଷର *this_operation;
+		ଯଦି (cmd == 'q')
 			this_operation = "--quit";
-		else if (cmd == 'c')
+		ଅନ୍ୟଥା ଯଦି (cmd == 'c')
 			this_operation = "--continue";
-		else if (cmd == 's')
+		ଅନ୍ୟଥା ଯଦି (cmd == 's')
 			this_operation = "--skip";
-		else {
-			assert(cmd == 'a');
+		ଅନ୍ୟଥା {
+			ପ୍ରତିଜ୍ଞା(cmd == 'a');
 			this_operation = "--abort";
 		}
 
@@ -217,79 +217,79 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 				"--no-rerere-autoupdate", opts->allow_rerere_auto == RERERE_NOAUTOUPDATE,
 				"--keep-redundant-commits", opts->keep_redundant_commits,
 				"--empty", empty_opt != EMPTY_COMMIT_UNSPECIFIED,
-				NULL);
+				ଖାଲି);
 	}
 
-	if (!opts->strategy && opts->default_strategy) {
+	ଯଦି (!opts->strategy && opts->default_strategy) {
 		opts->strategy = opts->default_strategy;
-		opts->default_strategy = NULL;
+		opts->default_strategy = ଖାଲି;
 	}
 
-	if (opts->allow_ff)
+	ଯଦି (opts->allow_ff)
 		verify_opt_compatible(me, "--ff",
 				"--signoff", opts->signoff,
 				"--no-commit", opts->no_commit,
 				"-x", opts->record_origin,
 				"--edit", opts->edit > 0,
-				NULL);
+				ଖାଲି);
 
-	if (cmd) {
-		opts->revs = NULL;
-	} else {
-		struct setup_revision_opt s_r_opt;
-		opts->revs = xmalloc(sizeof(*opts->revs));
-		repo_init_revisions(the_repository, opts->revs, NULL);
+	ଯଦି (cmd) {
+		opts->revs = ଖାଲି;
+	} ଅନ୍ୟଥା {
+		ସଂରଚନା setup_revision_opt s_r_opt;
+		opts->revs = xmalloc(ଆକାର(*opts->revs));
+		repo_init_revisions(the_repository, opts->revs, ଖାଲି);
 		opts->revs->no_walk = 1;
-		opts->revs->unsorted_input = 1;
-		if (argc < 2)
+		opts->revs->unsorted_ନିବେଶ = 1;
+		ଯଦି (argc < 2)
 			usage_with_options(usage_str, options);
-		if (!strcmp(argv[1], "-"))
+		ଯଦି (!strcmp(argv[1], "-"))
 			argv[1] = "@{-1}";
-		memset(&s_r_opt, 0, sizeof(s_r_opt));
+		memset(&s_r_opt, 0, ଆକାର(s_r_opt));
 		s_r_opt.assume_dashdash = 1;
 		argc = setup_revisions(argc, argv, opts->revs, &s_r_opt);
 	}
 
-	if (argc > 1)
+	ଯଦି (argc > 1)
 		usage_with_options(usage_str, options);
 
 	/* These option values will be free()d */
-	if (gpg_sign != &sentinel_value) {
-		free(opts->gpg_sign);
+	ଯଦି (gpg_sign != &sentinel_ମୂଲ୍ୟ) {
+		ମୁକ୍ତ(opts->gpg_sign);
 		opts->gpg_sign = xstrdup_or_null(gpg_sign);
 	}
-	if (strategy != &sentinel_value) {
-		free(opts->strategy);
+	ଯଦି (strategy != &sentinel_ମୂଲ୍ୟ) {
+		ମୁକ୍ତ(opts->strategy);
 		opts->strategy = xstrdup_or_null(strategy);
 	}
-	free(options);
+	ମୁକ୍ତ(options);
 
-	if (cmd == 'q') {
+	ଯଦି (cmd == 'q') {
 		ret = sequencer_remove_state(opts);
-		if (!ret)
+		ଯଦି (!ret)
 			remove_branch_state(the_repository, 0);
-		return ret;
+		ଫେରନ୍ତୁ ret;
 	}
-	if (cmd == 'a')
-		return sequencer_rollback(the_repository, opts);
-	if (cmd == 'c')
+	ଯଦି (cmd == 'a')
+		ଫେରନ୍ତୁ sequencer_rollback(the_repository, opts);
+	ଯଦି (cmd == 'c')
 		ret = sequencer_continue(the_repository, opts);
-	else if (cmd == 's')
+	ଅନ୍ୟଥା ଯଦି (cmd == 's')
 		ret = sequencer_skip(the_repository, opts);
-	else
+	ଅନ୍ୟଥା
 		ret = sequencer_pick_revisions(the_repository, opts);
-	if (!ret)
+	ଯଦି (!ret)
 		run_auto_maintenance(the_repository, opts->quiet);
-	return ret;
+	ଫେରନ୍ତୁ ret;
 }
 
-int cmd_revert(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_revert(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc,
+	       ଅଚଳ ଅକ୍ଷର **argv,
+	       ଅଚଳ ଅକ୍ଷର *prefix,
+	       ସଂରଚନା repository *repo UNUSED)
 {
-	struct replay_opts opts = REPLAY_OPTS_INIT;
-	int res;
+	ସଂରଚନା replay_opts opts = REPLAY_OPTS_INIT;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା res;
 
 #ifndef WITH_BREAKING_CHANGES
 	warn_on_auto_comment_char = true;
@@ -297,19 +297,19 @@ int cmd_revert(int argc,
 	opts.action = REPLAY_REVERT;
 	sequencer_init_config(&opts);
 	res = run_sequencer(argc, argv, prefix, &opts);
-	if (res < 0)
+	ଯଦି (res < 0)
 		die(_("revert failed"));
 	replay_opts_release(&opts);
-	return res;
+	ଫେରନ୍ତୁ res;
 }
 
-int cmd_cherry_pick(int argc,
-const char **argv,
-const char *prefix,
-struct repository *repo UNUSED)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_cherry_pick(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc,
+ଅଚଳ ଅକ୍ଷର **argv,
+ଅଚଳ ଅକ୍ଷର *prefix,
+ସଂରଚନା repository *repo UNUSED)
 {
-	struct replay_opts opts = REPLAY_OPTS_INIT;
-	int res;
+	ସଂରଚନା replay_opts opts = REPLAY_OPTS_INIT;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା res;
 
 #ifndef WITH_BREAKING_CHANGES
 	warn_on_auto_comment_char = true;
@@ -317,8 +317,8 @@ struct repository *repo UNUSED)
 	opts.action = REPLAY_PICK;
 	sequencer_init_config(&opts);
 	res = run_sequencer(argc, argv, prefix, &opts);
-	if (res < 0)
+	ଯଦି (res < 0)
 		die(_("cherry-pick failed"));
 	replay_opts_release(&opts);
-	return res;
+	ଫେରନ୍ତୁ res;
 }

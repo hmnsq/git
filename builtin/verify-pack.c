@@ -1,34 +1,34 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "run-command.h"
-#include "parse-options.h"
-#include "strbuf.h"
+#ଅନ୍ତର୍ଭାଵ "builtin.h"
+#ଅନ୍ତର୍ଭାଵ "config.h"
+#ଅନ୍ତର୍ଭାଵ "environment.h"
+#ଅନ୍ତର୍ଭାଵ "gettext.h"
+#ଅନ୍ତର୍ଭାଵ "run-command.h"
+#ଅନ୍ତର୍ଭାଵ "parse-options.h"
+#ଅନ୍ତର୍ଭାଵ "strbuf.h"
 
 #define VERIFY_PACK_VERBOSE 01
 #define VERIFY_PACK_STAT_ONLY 02
 
-static int verify_one_pack(const char *path, unsigned int flags, const char *hash_algo)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା verify_one_pack(ଅଚଳ ଅକ୍ଷର *path, unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags, ଅଚଳ ଅକ୍ଷର *hash_algo)
 {
-	struct child_process index_pack = CHILD_PROCESS_INIT;
-	struct strvec *argv = &index_pack.args;
-	struct strbuf arg = STRBUF_INIT;
-	int verbose = flags & VERIFY_PACK_VERBOSE;
-	int stat_only = flags & VERIFY_PACK_STAT_ONLY;
-	int err;
+	ସଂରଚନା child_process index_pack = CHILD_PROCESS_INIT;
+	ସଂରଚନା strvec *argv = &index_pack.args;
+	ସଂରଚନା strbuf arg = STRBUF_INIT;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା verbose = flags & VERIFY_PACK_VERBOSE;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା stat_only = flags & VERIFY_PACK_STAT_ONLY;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା err;
 
-	strvec_push(argv, "index-pack");
+	strvec_ଠେଲ(argv, "index-pack");
 
-	if (stat_only)
-		strvec_push(argv, "--verify-stat-only");
-	else if (verbose)
-		strvec_push(argv, "--verify-stat");
-	else
-		strvec_push(argv, "--verify");
+	ଯଦି (stat_only)
+		strvec_ଠେଲ(argv, "--verify-stat-only");
+	ଅନ୍ୟଥା ଯଦି (verbose)
+		strvec_ଠେଲ(argv, "--verify-stat");
+	ଅନ୍ୟଥା
+		strvec_ଠେଲ(argv, "--verify");
 
-	if (hash_algo)
+	ଯଦି (hash_algo)
 		strvec_pushf(argv, "--object-format=%s", hash_algo);
 
 	/*
@@ -36,43 +36,43 @@ static int verify_one_pack(const char *path, unsigned int flags, const char *has
 	 * normalize these forms to "foo.pack" for "index-pack --verify".
 	 */
 	strbuf_addstr(&arg, path);
-	if (strbuf_strip_suffix(&arg, ".idx") ||
+	ଯଦି (strbuf_strip_suffix(&arg, ".idx") ||
 	    !ends_with(arg.buf, ".pack"))
 		strbuf_addstr(&arg, ".pack");
-	strvec_push(argv, arg.buf);
+	strvec_ଠେଲ(argv, arg.buf);
 
 	index_pack.git_cmd = 1;
 
 	err = run_command(&index_pack);
 
-	if (verbose || stat_only) {
-		if (err)
+	ଯଦି (verbose || stat_only) {
+		ଯଦି (err)
 			printf("%s: bad\n", arg.buf);
-		else {
-			if (!stat_only)
+		ଅନ୍ୟଥା {
+			ଯଦି (!stat_only)
 				printf("%s: ok\n", arg.buf);
 		}
 	}
 	strbuf_release(&arg);
 
-	return err;
+	ଫେରନ୍ତୁ err;
 }
 
-static const char * const verify_pack_usage[] = {
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର * ଅଚଳ verify_pack_usage[] = {
 	N_("git verify-pack [-v | --verbose] [-s | --stat-only] [--] <pack>.idx..."),
-	NULL
+	ଖାଲି
 };
 
-int cmd_verify_pack(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_verify_pack(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc,
+		    ଅଚଳ ଅକ୍ଷର **argv,
+		    ଅଚଳ ଅକ୍ଷର *prefix,
+		    ସଂରଚନା repository *repo UNUSED)
 {
-	int err = 0;
-	unsigned int flags = 0;
-	const char *object_format = NULL;
-	int i;
-	const struct option verify_pack_options[] = {
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା err = 0;
+	unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags = 0;
+	ଅଚଳ ଅକ୍ଷର *object_format = ଖାଲି;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
+	ଅଚଳ ସଂରଚନା option verify_pack_options[] = {
 		OPT_BIT('v', "verbose", &flags, N_("verbose"),
 			VERIFY_PACK_VERBOSE),
 		OPT_BIT('s', "stat-only", &flags, N_("show statistics only"),
@@ -82,15 +82,15 @@ int cmd_verify_pack(int argc,
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ଖାଲି);
 	argc = parse_options(argc, argv, prefix, verify_pack_options,
 			     verify_pack_usage, 0);
-	if (argc < 1)
+	ଯଦି (argc < 1)
 		usage_with_options(verify_pack_usage, verify_pack_options);
-	for (i = 0; i < argc; i++) {
-		if (verify_one_pack(argv[i], flags, object_format))
+	ପାଇଁ (i = 0; i < argc; i++) {
+		ଯଦି (verify_one_pack(argv[i], flags, object_format))
 			err = 1;
 	}
 
-	return err;
+	ଫେରନ୍ତୁ err;
 }

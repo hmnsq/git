@@ -4,22 +4,22 @@
  * Copyright (C) 2006 Ryan Anderson
  */
 
-#include "git-compat-util.h"
-#include "builtin.h"
-#include "strvec.h"
+#ଅନ୍ତର୍ଭାଵ "git-compat-util.h"
+#ଅନ୍ତର୍ଭାଵ "builtin.h"
+#ଅନ୍ତର୍ଭାଵ "strvec.h"
 
-int cmd_annotate(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_annotate(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc,
+		 ଅଚଳ ଅକ୍ଷର **argv,
+		 ଅଚଳ ଅକ୍ଷର *prefix,
+		 ସଂରଚନା repository *repo)
 {
-	struct strvec args = STRVEC_INIT;
-	const char **args_copy;
-	int ret;
+	ସଂରଚନା strvec args = STRVEC_INIT;
+	ଅଚଳ ଅକ୍ଷର **args_copy;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret;
 
-	strvec_pushl(&args, "annotate", "-c", NULL);
-	for (int i = 1; i < argc; i++)
-		strvec_push(&args, argv[i]);
+	strvec_pushl(&args, "annotate", "-c", ଖାଲି);
+	ପାଇଁ (ପୂର୍ଣ୍ଣସଂଖ୍ୟା i = 1; i < argc; i++)
+		strvec_ଠେଲ(&args, argv[i]);
 
 	/*
 	 * `cmd_blame()` ends up modifying the array, which causes memory leaks
@@ -31,6 +31,6 @@ int cmd_annotate(int argc,
 	ret = cmd_blame(args.nr, args_copy, prefix, repo);
 
 	strvec_clear(&args);
-	free(args_copy);
-	return ret;
+	ମୁକ୍ତ(args_copy);
+	ଫେରନ୍ତୁ ret;
 }

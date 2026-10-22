@@ -7,59 +7,59 @@
 
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "gettext.h"
-#include "string-list.h"
-#include "strbuf.h"
+#ଅନ୍ତର୍ଭାଵ "builtin.h"
+#ଅନ୍ତର୍ଭାଵ "gettext.h"
+#ଅନ୍ତର୍ଭାଵ "string-list.h"
+#ଅନ୍ତର୍ଭାଵ "strbuf.h"
 
-static const char git_mailsplit_usage[] =
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର git_mailsplit_usage[] =
 "git mailsplit [-d<prec>] [-f<n>] [-b] [--keep-cr] -o<directory> [(<mbox>|<Maildir>)...]";
 
-static int is_from_line(const char *line, int len)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା is_from_ଧାଡ଼ି(ଅଚଳ ଅକ୍ଷର *ଧାଡ଼ି, ପୂର୍ଣ୍ଣସଂଖ୍ୟା len)
 {
-	const char *colon;
+	ଅଚଳ ଅକ୍ଷର *colon;
 
-	if (len < 20 || memcmp("From ", line, 5))
-		return 0;
+	ଯଦି (len < 20 || memcmp("From ", ଧାଡ଼ି, 5))
+		ଫେରନ୍ତୁ 0;
 
-	colon = line + len - 2;
-	line += 5;
-	for (;;) {
-		if (colon < line)
-			return 0;
-		if (*--colon == ':')
-			break;
+	colon = ଧାଡ଼ି + len - 2;
+	ଧାଡ଼ି += 5;
+	ପାଇଁ (;;) {
+		ଯଦି (colon < ଧାଡ଼ି)
+			ଫେରନ୍ତୁ 0;
+		ଯଦି (*--colon == ':')
+			ଭାଙ୍ଗ;
 	}
 
-	if (!isdigit(colon[-4]) ||
+	ଯଦି (!isdigit(colon[-4]) ||
 	    !isdigit(colon[-2]) ||
 	    !isdigit(colon[-1]) ||
 	    !isdigit(colon[ 1]) ||
 	    !isdigit(colon[ 2]))
-		return 0;
+		ଫେରନ୍ତୁ 0;
 
 	/* year */
-	if (strtol(colon+3, NULL, 10) <= 90)
-		return 0;
+	ଯଦି (strtol(colon+3, ଖାଲି, 10) <= 90)
+		ଫେରନ୍ତୁ 0;
 
 	/* Ok, close enough */
-	return 1;
+	ଫେରନ୍ତୁ 1;
 }
 
-static struct strbuf buf = STRBUF_INIT;
-static int keep_cr;
-static int mboxrd;
+ସ୍ଥିର ସଂରଚନା strbuf buf = STRBUF_INIT;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା keep_cr;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା mboxrd;
 
-static int is_gtfrom(const struct strbuf *buf)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା is_gtfrom(ଅଚଳ ସଂରଚନା strbuf *buf)
 {
 	size_t min = strlen(">From ");
 	size_t ngt;
 
-	if (buf->len < min)
-		return 0;
+	ଯଦି (buf->len < min)
+		ଫେରନ୍ତୁ 0;
 
 	ngt = strspn(buf->buf, ">");
-	return ngt && starts_with(buf->buf + ngt, "From ");
+	ଫେରନ୍ତୁ ngt && starts_with(buf->buf + ngt, "From ");
 }
 
 /* Called with the first line (potentially partial)
@@ -67,14 +67,14 @@ static int is_gtfrom(const struct strbuf *buf)
  * the Unix "From " line.  Write it into the specified
  * file.
  */
-static int split_one(FILE *mbox, const char *name, int allow_bare)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା split_one(FILE *mbox, ଅଚଳ ଅକ୍ଷର *name, ପୂର୍ଣ୍ଣସଂଖ୍ୟା allow_bare)
 {
 	FILE *output;
-	int fd;
-	int status = 0;
-	int is_bare = !is_from_line(buf.buf, buf.len);
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା fd;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା status = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା is_bare = !is_from_ଧାଡ଼ି(buf.buf, buf.len);
 
-	if (is_bare && !allow_bare) {
+	ଯଦି (is_bare && !allow_bare) {
 		fprintf(stderr, "corrupt mailbox\n");
 		exit(1);
 	}
@@ -84,58 +84,58 @@ static int split_one(FILE *mbox, const char *name, int allow_bare)
 	/* Copy it out, while searching for a line that begins with
 	 * "From " and having something that looks like a date format.
 	 */
-	for (;;) {
-		if (!keep_cr && buf.len > 1 && buf.buf[buf.len-1] == '\n' &&
+	ପାଇଁ (;;) {
+		ଯଦି (!keep_cr && buf.len > 1 && buf.buf[buf.len-1] == '\n' &&
 			buf.buf[buf.len-2] == '\r') {
 			strbuf_setlen(&buf, buf.len-2);
 			strbuf_addch(&buf, '\n');
 		}
 
-		if (mboxrd && is_gtfrom(&buf))
+		ଯଦି (mboxrd && is_gtfrom(&buf))
 			strbuf_remove(&buf, 0, 1);
 
-		if (fwrite(buf.buf, 1, buf.len, output) != buf.len)
+		ଯଦି (fwrite(buf.buf, 1, buf.len, output) != buf.len)
 			die_errno("cannot write output");
 
-		if (strbuf_getwholeline(&buf, mbox, '\n')) {
-			if (feof(mbox)) {
+		ଯଦି (strbuf_getwholeline(&buf, mbox, '\n')) {
+			ଯଦି (feof(mbox)) {
 				status = 1;
-				break;
+				ଭାଙ୍ଗ;
 			}
 			die_errno("cannot read mbox");
 		}
-		if (!is_bare && is_from_line(buf.buf, buf.len))
-			break; /* done with one message */
+		ଯଦି (!is_bare && is_from_ଧାଡ଼ି(buf.buf, buf.len))
+			ଭାଙ୍ଗ; /* done with one message */
 	}
 	fclose(output);
-	return status;
+	ଫେରନ୍ତୁ status;
 }
 
-static int populate_maildir_list(struct string_list *list, const char *path)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା populate_maildir_list(ସଂରଚନା string_list *list, ଅଚଳ ଅକ୍ଷର *path)
 {
 	DIR *dir;
-	struct dirent *dent;
-	char *name = NULL;
-	const char *subs[] = { "cur", "new", NULL };
-	const char **sub;
-	int ret = -1;
+	ସଂରଚନା dirent *dent;
+	ଅକ୍ଷର *name = ଖାଲି;
+	ଅଚଳ ଅକ୍ଷର *subs[] = { "cur", "new", ଖାଲି };
+	ଅଚଳ ଅକ୍ଷର **sub;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret = -1;
 
-	for (sub = subs; *sub; ++sub) {
-		free(name);
+	ପାଇଁ (sub = subs; *sub; ++sub) {
+		ମୁକ୍ତ(name);
 		name = xstrfmt("%s/%s", path, *sub);
-		if (!(dir = opendir(name))) {
-			if (errno == ENOENT)
-				continue;
+		ଯଦି (!(dir = opendir(name))) {
+			ଯଦି (errno == ENOENT)
+				ଜାରି;
 			error_errno("cannot opendir %s", name);
-			goto out;
+			ଯାଅ out;
 		}
 
-		while ((dent = readdir(dir)) != NULL) {
-			if (dent->d_name[0] == '.')
-				continue;
-			free(name);
+		ଯେତେବେଳେ ((dent = readdir(dir)) != ଖାଲି) {
+			ଯଦି (dent->d_name[0] == '.')
+				ଜାରି;
+			ମୁକ୍ତ(name);
 			name = xstrfmt("%s/%s", *sub, dent->d_name);
-			string_list_insert(list, name);
+			string_list_ଭର୍ତ୍ତି(list, name);
 		}
 
 		closedir(dir);
@@ -144,234 +144,234 @@ static int populate_maildir_list(struct string_list *list, const char *path)
 	ret = 0;
 
 out:
-	free(name);
-	return ret;
+	ମୁକ୍ତ(name);
+	ଫେରନ୍ତୁ ret;
 }
 
-static int maildir_filename_cmp(const char *a, const char *b)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା maildir_filename_cmp(ଅଚଳ ଅକ୍ଷର *a, ଅଚଳ ଅକ୍ଷର *b)
 {
-	while (*a && *b) {
-		if (isdigit(*a) && isdigit(*b)) {
-			long int na, nb;
-			na = strtol(a, (char **)&a, 10);
-			nb = strtol(b, (char **)&b, 10);
-			if (na != nb)
-				return na - nb;
+	ଯେତେବେଳେ (*a && *b) {
+		ଯଦି (isdigit(*a) && isdigit(*b)) {
+			long ପୂର୍ଣ୍ଣସଂଖ୍ୟା na, nb;
+			na = strtol(a, (ଅକ୍ଷର **)&a, 10);
+			nb = strtol(b, (ଅକ୍ଷର **)&b, 10);
+			ଯଦି (na != nb)
+				ଫେରନ୍ତୁ na - nb;
 			/* strtol advanced our pointers */
 		}
-		else {
-			if (*a != *b)
-				return (unsigned char)*a - (unsigned char)*b;
+		ଅନ୍ୟଥା {
+			ଯଦି (*a != *b)
+				ଫେରନ୍ତୁ (unsigned ଅକ୍ଷର)*a - (unsigned ଅକ୍ଷର)*b;
 			a++;
 			b++;
 		}
 	}
-	return (unsigned char)*a - (unsigned char)*b;
+	ଫେରନ୍ତୁ (unsigned ଅକ୍ଷର)*a - (unsigned ଅକ୍ଷର)*b;
 }
 
-static int split_maildir(const char *maildir, const char *dir,
-	int nr_prec, int skip)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା split_maildir(ଅଚଳ ଅକ୍ଷର *maildir, ଅଚଳ ଅକ୍ଷର *dir,
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା nr_prec, ପୂର୍ଣ୍ଣସଂଖ୍ୟା skip)
 {
-	char *file = NULL;
-	FILE *f = NULL;
-	int ret = -1;
-	struct string_list list = STRING_LIST_INIT_DUP;
+	ଅକ୍ଷର *file = ଖାଲି;
+	FILE *f = ଖାଲି;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret = -1;
+	ସଂରଚନା string_list list = STRING_LIST_INIT_DUP;
 
 	list.cmp = maildir_filename_cmp;
 
-	if (populate_maildir_list(&list, maildir) < 0)
-		goto out;
+	ଯଦି (populate_maildir_list(&list, maildir) < 0)
+		ଯାଅ out;
 
-	for (size_t i = 0; i < list.nr; i++) {
-		char *name;
+	ପାଇଁ (size_t i = 0; i < list.nr; i++) {
+		ଅକ୍ଷର *name;
 
-		free(file);
-		file = xstrfmt("%s/%s", maildir, list.items[i].string);
+		ମୁକ୍ତ(file);
+		file = xstrfmt("%s/%s", maildir, list.ବସ୍ତୁଗୁଡ଼ିକ[i].string);
 
 		f = fopen(file, "r");
-		if (!f) {
+		ଯଦି (!f) {
 			error_errno("cannot open mail %s", file);
-			goto out;
+			ଯାଅ out;
 		}
 
-		if (strbuf_getwholeline(&buf, f, '\n')) {
+		ଯଦି (strbuf_getwholeline(&buf, f, '\n')) {
 			error_errno("cannot read mail %s", file);
-			goto out;
+			ଯାଅ out;
 		}
 
 		name = xstrfmt("%s/%0*d", dir, nr_prec, ++skip);
 		split_one(f, name, 1);
-		free(name);
+		ମୁକ୍ତ(name);
 
 		fclose(f);
-		f = NULL;
+		f = ଖାଲି;
 	}
 
 	ret = skip;
 out:
-	if (f)
+	ଯଦି (f)
 		fclose(f);
-	free(file);
+	ମୁକ୍ତ(file);
 	string_list_clear(&list, 1);
-	return ret;
+	ଫେରନ୍ତୁ ret;
 }
 
-static int split_mbox(const char *file, const char *dir, int allow_bare,
-		      int nr_prec, int skip)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା split_mbox(ଅଚଳ ଅକ୍ଷର *file, ଅଚଳ ଅକ୍ଷର *dir, ପୂର୍ଣ୍ଣସଂଖ୍ୟା allow_bare,
+		      ପୂର୍ଣ୍ଣସଂଖ୍ୟା nr_prec, ପୂର୍ଣ୍ଣସଂଖ୍ୟା skip)
 {
-	int ret = -1;
-	int peek;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret = -1;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା peek;
 
 	FILE *f = !strcmp(file, "-") ? stdin : fopen(file, "r");
-	int file_done = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା file_done = 0;
 
-	if (!f) {
+	ଯଦି (!f) {
 		error_errno("cannot open mbox %s", file);
-		goto out;
+		ଯାଅ out;
 	}
 
-	if (isatty(fileno(f)))
+	ଯଦି (isatty(fileno(f)))
 		warning(_("reading patches from stdin/tty..."));
 
-	do {
+	କର {
 		peek = fgetc(f);
-		if (peek == EOF) {
-			if (f == stdin)
+		ଯଦି (peek == EOF) {
+			ଯଦି (f == stdin)
 				/* empty stdin is OK */
 				ret = skip;
-			else {
+			ଅନ୍ୟଥା {
 				fclose(f);
 				error(_("empty mbox: '%s'"), file);
 			}
-			goto out;
+			ଯାଅ out;
 		}
-	} while (isspace(peek));
+	} ଯେତେବେଳେ (isspace(peek));
 	ungetc(peek, f);
 
-	if (strbuf_getwholeline(&buf, f, '\n')) {
+	ଯଦି (strbuf_getwholeline(&buf, f, '\n')) {
 		/* empty stdin is OK */
-		if (f != stdin) {
+		ଯଦି (f != stdin) {
 			error("cannot read mbox %s", file);
-			goto out;
+			ଯାଅ out;
 		}
 		file_done = 1;
 	}
 
-	while (!file_done) {
-		char *name = xstrfmt("%s/%0*d", dir, nr_prec, ++skip);
+	ଯେତେବେଳେ (!file_done) {
+		ଅକ୍ଷର *name = xstrfmt("%s/%0*d", dir, nr_prec, ++skip);
 		file_done = split_one(f, name, allow_bare);
-		free(name);
+		ମୁକ୍ତ(name);
 	}
 
-	if (f != stdin)
+	ଯଦି (f != stdin)
 		fclose(f);
 
 	ret = skip;
 out:
-	return ret;
+	ଫେରନ୍ତୁ ret;
 }
 
-int cmd_mailsplit(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_mailsplit(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc,
+		  ଅଚଳ ଅକ୍ଷର **argv,
+		  ଅଚଳ ଅକ୍ଷର *prefix,
+		  ସଂରଚନା repository *repo UNUSED)
 {
-	int nr = 0, nr_prec = 4, num = 0;
-	int allow_bare = 0;
-	const char *dir = NULL;
-	const char **argp;
-	static const char *stdin_only[] = { "-", NULL };
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା nr = 0, nr_prec = 4, ଅଙ୍କ = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା allow_bare = 0;
+	ଅଚଳ ଅକ୍ଷର *dir = ଖାଲି;
+	ଅଚଳ ଅକ୍ଷର **argp;
+	ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *stdin_only[] = { "-", ଖାଲି };
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
 	show_usage_if_asked(argc, argv, git_mailsplit_usage);
 
-	for (argp = argv+1; *argp; argp++) {
-		const char *arg = *argp;
+	ପାଇଁ (argp = argv+1; *argp; argp++) {
+		ଅଚଳ ଅକ୍ଷର *arg = *argp;
 
-		if (arg[0] != '-')
-			break;
+		ଯଦି (arg[0] != '-')
+			ଭାଙ୍ଗ;
 		/* do flags here */
-		if ( arg[1] == 'd' ) {
-			nr_prec = strtol(arg+2, NULL, 10);
-			if (nr_prec < 3 || 10 <= nr_prec)
+		ଯଦି ( arg[1] == 'd' ) {
+			nr_prec = strtol(arg+2, ଖାଲି, 10);
+			ଯଦି (nr_prec < 3 || 10 <= nr_prec)
 				usage(git_mailsplit_usage);
-			continue;
-		} else if ( arg[1] == 'f' ) {
-			nr = strtol(arg+2, NULL, 10);
-		} else if ( arg[1] == 'b' && !arg[2] ) {
+			ଜାରି;
+		} ଅନ୍ୟଥା ଯଦି ( arg[1] == 'f' ) {
+			nr = strtol(arg+2, ଖାଲି, 10);
+		} ଅନ୍ୟଥା ଯଦି ( arg[1] == 'b' && !arg[2] ) {
 			allow_bare = 1;
-		} else if (!strcmp(arg, "--keep-cr")) {
+		} ଅନ୍ୟଥା ଯଦି (!strcmp(arg, "--keep-cr")) {
 			keep_cr = 1;
-		} else if ( arg[1] == 'o' && arg[2] ) {
+		} ଅନ୍ୟଥା ଯଦି ( arg[1] == 'o' && arg[2] ) {
 			dir = arg+2;
-		} else if (!strcmp(arg, "--mboxrd")) {
+		} ଅନ୍ୟଥା ଯଦି (!strcmp(arg, "--mboxrd")) {
 			mboxrd = 1;
-		} else if ( arg[1] == '-' && !arg[2] ) {
+		} ଅନ୍ୟଥା ଯଦି ( arg[1] == '-' && !arg[2] ) {
 			argp++;	/* -- marks end of options */
-			break;
-		} else {
+			ଭାଙ୍ଗ;
+		} ଅନ୍ୟଥା {
 			die("unknown option: %s", arg);
 		}
 	}
 
-	if ( !dir ) {
+	ଯଦି ( !dir ) {
 		/* Backwards compatibility: if no -o specified, accept
 		   <mbox> <dir> or just <dir> */
-		switch (argc - (argp-argv)) {
-		case 1:
+		ବାଛ (argc - (argp-argv)) {
+		ସ୍ଥିତି 1:
 			dir = argp[0];
 			argp = stdin_only;
-			break;
-		case 2:
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 2:
 			stdin_only[0] = argp[0];
 			dir = argp[1];
 			argp = stdin_only;
-			break;
-		default:
+			ଭାଙ୍ଗ;
+		ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
 			usage(git_mailsplit_usage);
 		}
-	} else {
+	} ଅନ୍ୟଥା {
 		/* New usage: if no more argument, parse stdin */
-		if ( !*argp )
+		ଯଦି ( !*argp )
 			argp = stdin_only;
 	}
 
-	while (*argp) {
-		const char *arg = *argp++;
-		struct stat argstat;
-		int ret = 0;
+	ଯେତେବେଳେ (*argp) {
+		ଅଚଳ ଅକ୍ଷର *arg = *argp++;
+		ସଂରଚନା stat argstat;
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret = 0;
 
-		if (arg[0] == '-' && arg[1] == 0) {
+		ଯଦି (arg[0] == '-' && arg[1] == 0) {
 			ret = split_mbox(arg, dir, allow_bare, nr_prec, nr);
-			if (ret < 0) {
+			ଯଦି (ret < 0) {
 				error("cannot split patches from stdin");
-				return 1;
+				ଫେରନ୍ତୁ 1;
 			}
-			num += (ret - nr);
+			ଅଙ୍କ += (ret - nr);
 			nr = ret;
-			continue;
+			ଜାରି;
 		}
 
-		if (stat(arg, &argstat) == -1) {
+		ଯଦି (stat(arg, &argstat) == -1) {
 			error_errno("cannot stat %s", arg);
-			return 1;
+			ଫେରନ୍ତୁ 1;
 		}
 
-		if (S_ISDIR(argstat.st_mode))
+		ଯଦି (S_ISDIR(argstat.st_mode))
 			ret = split_maildir(arg, dir, nr_prec, nr);
-		else
+		ଅନ୍ୟଥା
 			ret = split_mbox(arg, dir, allow_bare, nr_prec, nr);
 
-		if (ret < 0) {
+		ଯଦି (ret < 0) {
 			error("cannot split patches from %s", arg);
-			return 1;
+			ଫେରନ୍ତୁ 1;
 		}
-		num += (ret - nr);
+		ଅଙ୍କ += (ret - nr);
 		nr = ret;
 	}
 
-	printf("%d\n", num);
+	printf("%d\n", ଅଙ୍କ);
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }

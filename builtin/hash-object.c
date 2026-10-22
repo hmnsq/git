@@ -5,27 +5,27 @@
  * Copyright (C) Junio C Hamano, 2005
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-file.h"
-#include "odb.h"
-#include "blob.h"
-#include "quote.h"
-#include "parse-options.h"
-#include "setup.h"
-#include "strbuf.h"
-#include "write-or-die.h"
+#ଅନ୍ତର୍ଭାଵ "builtin.h"
+#ଅନ୍ତର୍ଭାଵ "abspath.h"
+#ଅନ୍ତର୍ଭାଵ "config.h"
+#ଅନ୍ତର୍ଭାଵ "environment.h"
+#ଅନ୍ତର୍ଭାଵ "gettext.h"
+#ଅନ୍ତର୍ଭାଵ "hex.h"
+#ଅନ୍ତର୍ଭାଵ "object-file.h"
+#ଅନ୍ତର୍ଭାଵ "odb.h"
+#ଅନ୍ତର୍ଭାଵ "blob.h"
+#ଅନ୍ତର୍ଭାଵ "quote.h"
+#ଅନ୍ତର୍ଭାଵ "parse-options.h"
+#ଅନ୍ତର୍ଭାଵ "setup.h"
+#ଅନ୍ତର୍ଭାଵ "strbuf.h"
+#ଅନ୍ତର୍ଭାଵ "write-or-die.h"
 
-static void hash_fd(int fd, const char *type, const char *path, unsigned flags)
+ସ୍ଥିର ଶୂନ୍ୟ hash_fd(ପୂର୍ଣ୍ଣସଂଖ୍ୟା fd, ଅଚଳ ଅକ୍ଷର *type, ଅଚଳ ଅକ୍ଷର *path, unsigned flags)
 {
-	struct stat st;
-	struct object_id oid;
+	ସଂରଚନା stat st;
+	ସଂରଚନା object_id oid;
 
-	if (fstat(fd, &st) < 0 ||
+	ଯଦି (fstat(fd, &st) < 0 ||
 	    index_fd(the_repository->index, &oid, fd, &st,
 		     type_from_string(type), path, flags))
 		die((flags & INDEX_WRITE_OBJECT)
@@ -35,54 +35,54 @@ static void hash_fd(int fd, const char *type, const char *path, unsigned flags)
 	maybe_flush_or_die(stdout, "hash to stdout");
 }
 
-static void hash_object(const char *path, const char *type, const char *vpath,
+ସ୍ଥିର ଶୂନ୍ୟ hash_object(ଅଚଳ ଅକ୍ଷର *path, ଅଚଳ ଅକ୍ଷର *type, ଅଚଳ ଅକ୍ଷର *vpath,
 			unsigned flags)
 {
-	int fd;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା fd;
 	fd = xopen(path, O_RDONLY);
 	hash_fd(fd, type, vpath, flags);
 }
 
-static void hash_stdin_paths(const char *type, int no_filters, unsigned flags)
+ସ୍ଥିର ଶୂନ୍ୟ hash_stdin_paths(ଅଚଳ ଅକ୍ଷର *type, ପୂର୍ଣ୍ଣସଂଖ୍ୟା no_filters, unsigned flags)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf unquoted = STRBUF_INIT;
+	ସଂରଚନା strbuf buf = STRBUF_INIT;
+	ସଂରଚନା strbuf unquoted = STRBUF_INIT;
 
-	while (strbuf_getline(&buf, stdin) != EOF) {
-		if (buf.buf[0] == '"') {
+	ଯେତେବେଳେ (strbuf_getline(&buf, stdin) != EOF) {
+		ଯଦି (buf.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, buf.buf, NULL))
+			ଯଦି (unquote_c_style(&unquoted, buf.buf, ଖାଲି))
 				die("line is badly quoted");
 			strbuf_swap(&buf, &unquoted);
 		}
-		hash_object(buf.buf, type, no_filters ? NULL : buf.buf, flags);
+		hash_object(buf.buf, type, no_filters ? ଖାଲି : buf.buf, flags);
 	}
 	strbuf_release(&buf);
 	strbuf_release(&unquoted);
 }
 
-int cmd_hash_object(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_hash_object(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc,
+		    ଅଚଳ ଅକ୍ଷର **argv,
+		    ଅଚଳ ଅକ୍ଷର *prefix,
+		    ସଂରଚନା repository *repo UNUSED)
 {
-	static const char * const hash_object_usage[] = {
+	ସ୍ଥିର ଅଚଳ ଅକ୍ଷର * ଅଚଳ hash_object_usage[] = {
 		N_("git hash-object [-t <type>] [-w] [--path=<file> | --no-filters]\n"
 		   "                [--stdin [--literally]] [--] <file>..."),
 		N_("git hash-object [-t <type>] [-w] --stdin-paths [--no-filters]"),
-		NULL
+		ଖାଲି
 	};
-	const char *type = blob_type;
-	int hashstdin = 0;
-	int stdin_paths = 0;
-	int no_filters = 0;
-	int nongit = 0;
+	ଅଚଳ ଅକ୍ଷର *type = blob_type;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା hashstdin = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା stdin_paths = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା no_filters = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା nongit = 0;
 	unsigned flags = INDEX_FORMAT_CHECK;
-	const char *vpath = NULL;
-	char *vpath_free = NULL;
-	const struct option hash_object_options[] = {
-		OPT_STRING('t', NULL, &type, N_("type"), N_("object type")),
-		OPT_BIT('w', NULL, &flags, N_("write the object into the object database"),
+	ଅଚଳ ଅକ୍ଷର *vpath = ଖାଲି;
+	ଅକ୍ଷର *vpath_free = ଖାଲି;
+	ଅଚଳ ସଂରଚନା option hash_object_options[] = {
+		OPT_STRING('t', ଖାଲି, &type, N_("type"), N_("object type")),
+		OPT_BIT('w', ଖାଲି, &flags, N_("write the object into the object database"),
 			INDEX_WRITE_OBJECT),
 		OPT_COUNTUP( 0 , "stdin", &hashstdin, N_("read the object from stdin")),
 		OPT_BOOL( 0 , "stdin-paths", &stdin_paths, N_("read file names from stdin")),
@@ -93,65 +93,65 @@ int cmd_hash_object(int argc,
 		OPT_STRING( 0 , "path", &vpath, N_("file"), N_("process file as it were from this path")),
 		OPT_END()
 	};
-	int i;
-	const char *errstr = NULL;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
+	ଅଚଳ ଅକ୍ଷର *errstr = ଖାଲି;
 
 	argc = parse_options(argc, argv, prefix, hash_object_options,
 			     hash_object_usage, 0);
 
-	if (flags & INDEX_WRITE_OBJECT)
+	ଯଦି (flags & INDEX_WRITE_OBJECT)
 		prefix = setup_git_directory(the_repository);
-	else
+	ଅନ୍ୟଥା
 		prefix = setup_git_directory_gently(the_repository, &nongit);
 
-	if (nongit && !the_hash_algo)
+	ଯଦି (nongit && !the_hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
-	if (vpath && prefix) {
+	ଯଦି (vpath && prefix) {
 		vpath_free = prefix_filename(prefix, vpath);
 		vpath = vpath_free;
 	}
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ଖାଲି);
 
-	if (stdin_paths) {
-		if (hashstdin)
+	ଯଦି (stdin_paths) {
+		ଯଦି (hashstdin)
 			errstr = "Can't use --stdin-paths with --stdin";
-		else if (argc)
+		ଅନ୍ୟଥା ଯଦି (argc)
 			errstr = "Can't specify files with --stdin-paths";
-		else if (vpath)
+		ଅନ୍ୟଥା ଯଦି (vpath)
 			errstr = "Can't use --stdin-paths with --path";
 	}
-	else {
-		if (hashstdin > 1)
+	ଅନ୍ୟଥା {
+		ଯଦି (hashstdin > 1)
 			errstr = "Multiple --stdin arguments are not supported";
-		if (vpath && no_filters)
+		ଯଦି (vpath && no_filters)
 			errstr = "Can't use --path with --no-filters";
 	}
 
-	if (errstr) {
+	ଯଦି (errstr) {
 		error("%s", errstr);
 		usage_with_options(hash_object_usage, hash_object_options);
 	}
 
-	if (hashstdin)
+	ଯଦି (hashstdin)
 		hash_fd(0, type, vpath, flags);
 
-	for (i = 0 ; i < argc; i++) {
-		const char *arg = argv[i];
-		char *to_free = NULL;
+	ପାଇଁ (i = 0 ; i < argc; i++) {
+		ଅଚଳ ଅକ୍ଷର *arg = argv[i];
+		ଅକ୍ଷର *to_free = ଖାଲି;
 
-		if (prefix)
+		ଯଦି (prefix)
 			arg = to_free = prefix_filename(prefix, arg);
-		hash_object(arg, type, no_filters ? NULL : vpath ? vpath : arg,
+		hash_object(arg, type, no_filters ? ଖାଲି : vpath ? vpath : arg,
 			    flags);
-		free(to_free);
+		ମୁକ୍ତ(to_free);
 	}
 
-	if (stdin_paths)
+	ଯଦି (stdin_paths)
 		hash_stdin_paths(type, no_filters, flags);
 
-	free(vpath_free);
+	ମୁକ୍ତ(vpath_free);
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }

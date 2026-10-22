@@ -8,119 +8,119 @@
 
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "convert.h"
-#include "environment.h"
-#include "quote.h"
-#include "dir.h"
-#include "gettext.h"
-#include "object-name.h"
-#include "strbuf.h"
-#include "parse-options.h"
-#include "resolve-undo.h"
-#include "string-list.h"
-#include "path.h"
-#include "pathspec.h"
-#include "read-cache.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "submodule.h"
-#include "odb.h"
-#include "hex.h"
+#ଅନ୍ତର୍ଭାଵ "builtin.h"
+#ଅନ୍ତର୍ଭାଵ "config.h"
+#ଅନ୍ତର୍ଭାଵ "convert.h"
+#ଅନ୍ତର୍ଭାଵ "environment.h"
+#ଅନ୍ତର୍ଭାଵ "quote.h"
+#ଅନ୍ତର୍ଭାଵ "dir.h"
+#ଅନ୍ତର୍ଭାଵ "gettext.h"
+#ଅନ୍ତର୍ଭାଵ "object-name.h"
+#ଅନ୍ତର୍ଭାଵ "strbuf.h"
+#ଅନ୍ତର୍ଭାଵ "parse-options.h"
+#ଅନ୍ତର୍ଭାଵ "resolve-undo.h"
+#ଅନ୍ତର୍ଭାଵ "string-list.h"
+#ଅନ୍ତର୍ଭାଵ "path.h"
+#ଅନ୍ତର୍ଭାଵ "pathspec.h"
+#ଅନ୍ତର୍ଭାଵ "read-cache.h"
+#ଅନ୍ତର୍ଭାଵ "setup.h"
+#ଅନ୍ତର୍ଭାଵ "sparse-index.h"
+#ଅନ୍ତର୍ଭାଵ "submodule.h"
+#ଅନ୍ତର୍ଭାଵ "odb.h"
+#ଅନ୍ତର୍ଭାଵ "hex.h"
 
 
-static int abbrev;
-static int show_deleted;
-static int show_cached;
-static int show_others;
-static int show_stage;
-static int show_unmerged;
-static int show_resolve_undo;
-static int show_modified;
-static int show_killed;
-static int show_valid_bit;
-static int show_fsmonitor_bit;
-static int line_terminator = '\n';
-static int debug_mode;
-static int show_eol;
-static int recurse_submodules;
-static int skipping_duplicates;
-static int show_sparse_dirs;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା abbrev;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_deleted;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_cached;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_others;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_stage;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_unmerged;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_resolve_undo;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_modified;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_killed;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_valid_bit;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_fsmonitor_bit;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା ଧାଡ଼ି_terminator = '\n';
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା debug_mode;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_eol;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା recurse_submodules;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା skipping_duplicates;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_sparse_dirs;
 
-static const char *prefix;
-static int max_prefix_len;
-static int prefix_len;
-static struct pathspec pathspec;
-static int error_unmatch;
-static char *ps_matched;
-static const char *with_tree;
-static int exc_given;
-static int exclude_args;
-static const char *format;
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *prefix;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା max_prefix_len;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା prefix_len;
+ସ୍ଥିର ସଂରଚନା pathspec pathspec;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା error_unmatch;
+ସ୍ଥିର ଅକ୍ଷର *ps_matched;
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *with_ବୃକ୍ଷ;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା exc_given;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା exclude_args;
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *format;
 
-static const char *tag_cached = "";
-static const char *tag_unmerged = "";
-static const char *tag_removed = "";
-static const char *tag_other = "";
-static const char *tag_killed = "";
-static const char *tag_modified = "";
-static const char *tag_skip_worktree = "";
-static const char *tag_resolve_undo = "";
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *tag_cached = "";
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *tag_unmerged = "";
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *tag_removed = "";
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *tag_other = "";
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *tag_killed = "";
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *tag_modified = "";
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *tag_skip_worktree = "";
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *tag_resolve_undo = "";
 
-static void write_eolinfo(struct index_state *istate,
-			  const struct cache_entry *ce, const char *path)
+ସ୍ଥିର ଶୂନ୍ୟ write_eolinfo(ସଂରଚନା index_state *istate,
+			  ଅଚଳ ସଂରଚନା cache_entry *ce, ଅଚଳ ଅକ୍ଷର *path)
 {
-	if (show_eol) {
-		struct stat st;
-		const char *i_txt = "";
-		const char *w_txt = "";
-		const char *a_txt = get_convert_attr_ascii(istate, path);
-		if (ce && S_ISREG(ce->ce_mode))
+	ଯଦି (show_eol) {
+		ସଂରଚନା stat st;
+		ଅଚଳ ଅକ୍ଷର *i_txt = "";
+		ଅଚଳ ଅକ୍ଷର *w_txt = "";
+		ଅଚଳ ଅକ୍ଷର *a_txt = get_convert_attr_ascii(istate, path);
+		ଯଦି (ce && S_ISREG(ce->ce_mode))
 			i_txt = get_cached_convert_stats_ascii(istate,
 							       ce->name);
-		if (!lstat(path, &st) && S_ISREG(st.st_mode))
+		ଯଦି (!lstat(path, &st) && S_ISREG(st.st_mode))
 			w_txt = get_wt_convert_stats_ascii(path);
 		printf("i/%-5s w/%-5s attr/%-17s\t", i_txt, w_txt, a_txt);
 	}
 }
 
-static void write_name(const char *name)
+ସ୍ଥିର ଶୂନ୍ୟ write_name(ଅଚଳ ଅକ୍ଷର *name)
 {
 	/*
 	 * With "--full-name", prefix_len=0; this caller needs to pass
 	 * an empty string in that case (a NULL is good for "").
 	 */
-	write_name_quoted_relative(name, prefix_len ? prefix : NULL,
-				   stdout, line_terminator);
+	write_name_quoted_relative(name, prefix_len ? prefix : ଖାଲି,
+				   stdout, ଧାଡ଼ି_terminator);
 }
 
-static void write_name_to_buf(struct strbuf *sb, const char *name)
+ସ୍ଥିର ଶୂନ୍ୟ write_name_to_buf(ସଂରଚନା strbuf *sb, ଅଚଳ ଅକ୍ଷର *name)
 {
-	struct strbuf buf = STRBUF_INIT;
-	const char *rel = relative_path(name, prefix_len ? prefix : NULL, &buf);
+	ସଂରଚନା strbuf buf = STRBUF_INIT;
+	ଅଚଳ ଅକ୍ଷର *rel = relative_path(name, prefix_len ? prefix : ଖାଲି, &buf);
 
-	if (line_terminator)
-		quote_c_style(rel, sb, NULL, 0);
-	else
+	ଯଦି (ଧାଡ଼ି_terminator)
+		quote_c_style(rel, sb, ଖାଲି, 0);
+	ଅନ୍ୟଥା
 		strbuf_addstr(sb, rel);
 
 	strbuf_release(&buf);
 }
 
-static const char *get_tag(const struct cache_entry *ce, const char *tag)
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *get_tag(ଅଚଳ ସଂରଚନା cache_entry *ce, ଅଚଳ ଅକ୍ଷର *tag)
 {
-	static char alttag[4];
+	ସ୍ଥିର ଅକ୍ଷର alttag[4];
 
-	if (tag && *tag && ((show_valid_bit && (ce->ce_flags & CE_VALID)) ||
+	ଯଦି (tag && *tag && ((show_valid_bit && (ce->ce_flags & CE_VALID)) ||
 		(show_fsmonitor_bit && (ce->ce_flags & CE_FSMONITOR_VALID)))) {
 		memcpy(alttag, tag, 3);
 
-		if (isalpha(tag[0])) {
+		ଯଦି (isalpha(tag[0])) {
 			alttag[0] = tolower(tag[0]);
-		} else if (tag[0] == '?') {
+		} ଅନ୍ୟଥା ଯଦି (tag[0] == '?') {
 			alttag[0] = '!';
-		} else {
+		} ଅନ୍ୟଥା {
 			alttag[0] = 'v';
 			alttag[1] = tag[0];
 			alttag[2] = ' ';
@@ -130,13 +130,13 @@ static const char *get_tag(const struct cache_entry *ce, const char *tag)
 		tag = alttag;
 	}
 
-	return tag;
+	ଫେରନ୍ତୁ tag;
 }
 
-static void print_debug(const struct cache_entry *ce)
+ସ୍ଥିର ଶୂନ୍ୟ print_debug(ଅଚଳ ସଂରଚନା cache_entry *ce)
 {
-	if (debug_mode) {
-		const struct stat_data *sd = &ce->ce_stat_data;
+	ଯଦି (debug_mode) {
+		ଅଚଳ ସଂରଚନା stat_data *sd = &ce->ce_stat_data;
 
 		printf("  ctime: %u:%u\n", sd->sd_ctime.sec, sd->sd_ctime.nsec);
 		printf("  mtime: %u:%u\n", sd->sd_mtime.sec, sd->sd_mtime.nsec);
@@ -146,99 +146,99 @@ static void print_debug(const struct cache_entry *ce)
 	}
 }
 
-static void show_dir_entry(struct index_state *istate,
-			   const char *tag, struct dir_entry *ent)
+ସ୍ଥିର ଶୂନ୍ୟ show_dir_entry(ସଂରଚନା index_state *istate,
+			   ଅଚଳ ଅକ୍ଷର *tag, ସଂରଚନା dir_entry *ent)
 {
-	int len = max_prefix_len;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା len = max_prefix_len;
 
-	if (len > ent->len)
+	ଯଦି (len > ent->len)
 		die("git ls-files: internal error - directory entry not superset of prefix");
 
 	/* If ps_matches is non-NULL, figure out which pathspec(s) match. */
-	if (ps_matched)
+	ଯଦି (ps_matched)
 		dir_path_match(istate, ent, &pathspec, len, ps_matched);
 
 	fputs(tag, stdout);
-	write_eolinfo(istate, NULL, ent->name);
+	write_eolinfo(istate, ଖାଲି, ent->name);
 	write_name(ent->name);
 }
 
-static void show_other_files(struct index_state *istate,
-			     const struct dir_struct *dir)
+ସ୍ଥିର ଶୂନ୍ୟ show_other_files(ସଂରଚନା index_state *istate,
+			     ଅଚଳ ସଂରଚନା dir_struct *dir)
 {
-	int i;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
 
-	for (i = 0; i < dir->nr; i++) {
-		struct dir_entry *ent = dir->entries[i];
-		if (!index_name_is_other(istate, ent->name, ent->len))
-			continue;
+	ପାଇଁ (i = 0; i < dir->nr; i++) {
+		ସଂରଚନା dir_entry *ent = dir->entries[i];
+		ଯଦି (!index_name_is_other(istate, ent->name, ent->len))
+			ଜାରି;
 		show_dir_entry(istate, tag_other, ent);
 	}
 }
 
-static void show_killed_files(struct index_state *istate,
-			      const struct dir_struct *dir)
+ସ୍ଥିର ଶୂନ୍ୟ show_killed_files(ସଂରଚନା index_state *istate,
+			      ଅଚଳ ସଂରଚନା dir_struct *dir)
 {
-	int i;
-	for (i = 0; i < dir->nr; i++) {
-		struct dir_entry *ent = dir->entries[i];
-		char *cp, *sp;
-		int pos, len, killed = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
+	ପାଇଁ (i = 0; i < dir->nr; i++) {
+		ସଂରଚନା dir_entry *ent = dir->entries[i];
+		ଅକ୍ଷର *cp, *sp;
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା pos, len, killed = 0;
 
-		for (cp = ent->name; cp - ent->name < ent->len; cp = sp + 1) {
+		ପାଇଁ (cp = ent->name; cp - ent->name < ent->len; cp = sp + 1) {
 			sp = strchr(cp, '/');
-			if (!sp) {
+			ଯଦି (!sp) {
 				/* If ent->name is prefix of an entry in the
 				 * cache, it will be killed.
 				 */
 				pos = index_name_pos(istate, ent->name, ent->len);
-				if (0 <= pos)
+				ଯଦି (0 <= pos)
 					BUG("killed-file %.*s not found",
 						ent->len, ent->name);
 				pos = -pos - 1;
-				while (pos < istate->cache_nr &&
+				ଯେତେବେଳେ (pos < istate->cache_nr &&
 				       ce_stage(istate->cache[pos]))
 					pos++; /* skip unmerged */
-				if (istate->cache_nr <= pos)
-					break;
+				ଯଦି (istate->cache_nr <= pos)
+					ଭାଙ୍ଗ;
 				/* pos points at a name immediately after
 				 * ent->name in the cache.  Does it expect
 				 * ent->name to be a directory?
 				 */
 				len = ce_namelen(istate->cache[pos]);
-				if ((ent->len < len) &&
+				ଯଦି ((ent->len < len) &&
 				    !strncmp(istate->cache[pos]->name,
 					     ent->name, ent->len) &&
 				    istate->cache[pos]->name[ent->len] == '/')
 					killed = 1;
-				break;
+				ଭାଙ୍ଗ;
 			}
-			if (0 <= index_name_pos(istate, ent->name, sp - ent->name)) {
+			ଯଦି (0 <= index_name_pos(istate, ent->name, sp - ent->name)) {
 				/* If any of the leading directories in
 				 * ent->name is registered in the cache,
 				 * ent->name will be killed.
 				 */
 				killed = 1;
-				break;
+				ଭାଙ୍ଗ;
 			}
 		}
-		if (killed)
+		ଯଦି (killed)
 			show_dir_entry(istate, tag_killed, dir->entries[i]);
 	}
 }
 
-static void show_files(struct repository *repo, struct dir_struct *dir);
+ସ୍ଥିର ଶୂନ୍ୟ show_files(ସଂରଚନା repository *repo, ସଂରଚନା dir_struct *dir);
 
-static void show_submodule(struct repository *superproject,
-			   struct dir_struct *dir, const char *path)
+ସ୍ଥିର ଶୂନ୍ୟ show_submodule(ସଂରଚନା repository *superproject,
+			   ସଂରଚନା dir_struct *dir, ଅଚଳ ଅକ୍ଷର *path)
 {
-	struct repository subrepo;
+	ସଂରଚନା repository subrepo;
 
-	if (repo_submodule_init(&subrepo, superproject, path,
+	ଯଦି (repo_submodule_init(&subrepo, superproject, path,
 				null_oid(superproject->hash_algo)))
-		return;
+		ଫେରନ୍ତୁ;
 
-	if (repo_read_index(&subrepo) < 0)
+	ଯଦି (repo_read_index(&subrepo) < 0)
 		die("index file corrupt");
 
 	show_files(&subrepo, dir);
@@ -246,101 +246,101 @@ static void show_submodule(struct repository *superproject,
 	repo_clear(&subrepo);
 }
 
-static void expand_objectsize(struct repository *repo, struct strbuf *line,
-			      const struct object_id *oid,
-			      const enum object_type type, unsigned int padded)
+ସ୍ଥିର ଶୂନ୍ୟ expand_objectsize(ସଂରଚନା repository *repo, ସଂରଚନା strbuf *ଧାଡ଼ି,
+			      ଅଚଳ ସଂରଚନା object_id *oid,
+			      ଅଚଳ ଗଣନା object_type type, unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା padded)
 {
-	static const char padding[] = "       ";
+	ସ୍ଥିର ଅଚଳ ଅକ୍ଷର padding[] = "       ";
 	size_t min_len = padded ? strlen(padding) : 0;
-	size_t orig_len = line->len;
+	size_t orig_len = ଧାଡ଼ି->len;
 	size_t len;
 
-	if (type == OBJ_BLOB) {
+	ଯଦି (type == OBJ_BLOB) {
 		size_t size;
-		if (odb_read_object_info(repo->objects, oid, &size) < 0)
+		ଯଦି (odb_read_object_info(repo->objects, oid, &size) < 0)
 			die(_("could not get object info about '%s'"),
 			    oid_to_hex(oid));
-		strbuf_add_uint(line, size);
-	} else {
-		strbuf_addstr(line, "-");
+		strbuf_add_uint(ଧାଡ଼ି, size);
+	} ଅନ୍ୟଥା {
+		strbuf_addstr(ଧାଡ଼ି, "-");
 	}
-	len = line->len - orig_len;
-	if (len < min_len)
-		strbuf_insert(line, orig_len, padding, min_len - len);
+	len = ଧାଡ଼ି->len - orig_len;
+	ଯଦି (len < min_len)
+		strbuf_ଭର୍ତ୍ତି(ଧାଡ଼ି, orig_len, padding, min_len - len);
 }
 
-static void show_ce_fmt(struct repository *repo, const struct cache_entry *ce,
-			const char *format, const char *fullname) {
-	struct strbuf sb = STRBUF_INIT;
+ସ୍ଥିର ଶୂନ୍ୟ show_ce_fmt(ସଂରଚନା repository *repo, ଅଚଳ ସଂରଚନା cache_entry *ce,
+			ଅଚଳ ଅକ୍ଷର *format, ଅଚଳ ଅକ୍ଷର *fullname) {
+	ସଂରଚନା strbuf sb = STRBUF_INIT;
 
-	while (strbuf_expand_step(&sb, &format)) {
+	ଯେତେବେଳେ (strbuf_expand_step(&sb, &format)) {
 		size_t len;
-		struct stat st;
+		ସଂରଚନା stat st;
 
-		if (skip_prefix(format, "%", &format))
+		ଯଦି (skip_prefix(format, "%", &format))
 			strbuf_addch(&sb, '%');
-		else if ((len = strbuf_expand_literal(&sb, format)))
+		ଅନ୍ୟଥା ଯଦି ((len = strbuf_expand_literal(&sb, format)))
 			format += len;
-		else if (skip_prefix(format, "(objectmode)", &format))
+		ଅନ୍ୟଥା ଯଦି (skip_prefix(format, "(objectmode)", &format))
 			strbuf_addf(&sb, "%06o", ce->ce_mode);
-		else if (skip_prefix(format, "(objectname)", &format))
+		ଅନ୍ୟଥା ଯଦି (skip_prefix(format, "(objectname)", &format))
 			strbuf_add_unique_abbrev(&sb, &ce->oid, abbrev);
-		else if (skip_prefix(format, "(objecttype)", &format))
+		ଅନ୍ୟଥା ଯଦି (skip_prefix(format, "(objecttype)", &format))
 			strbuf_addstr(&sb, type_name(object_type(ce->ce_mode)));
-		else if (skip_prefix(format, "(objectsize:padded)", &format))
+		ଅନ୍ୟଥା ଯଦି (skip_prefix(format, "(objectsize:padded)", &format))
 			expand_objectsize(repo, &sb, &ce->oid,
 					  object_type(ce->ce_mode), 1);
-		else if (skip_prefix(format, "(objectsize)", &format))
+		ଅନ୍ୟଥା ଯଦି (skip_prefix(format, "(objectsize)", &format))
 			expand_objectsize(repo, &sb, &ce->oid,
 					  object_type(ce->ce_mode), 0);
-		else if (skip_prefix(format, "(stage)", &format))
+		ଅନ୍ୟଥା ଯଦି (skip_prefix(format, "(stage)", &format))
 			strbuf_addf(&sb, "%d", ce_stage(ce));
-		else if (skip_prefix(format, "(eolinfo:index)", &format))
+		ଅନ୍ୟଥା ଯଦି (skip_prefix(format, "(eolinfo:index)", &format))
 			strbuf_addstr(&sb, S_ISREG(ce->ce_mode) ?
 				      get_cached_convert_stats_ascii(repo->index,
 				      ce->name) : "");
-		else if (skip_prefix(format, "(eolinfo:worktree)", &format))
+		ଅନ୍ୟଥା ଯଦି (skip_prefix(format, "(eolinfo:worktree)", &format))
 			strbuf_addstr(&sb, !lstat(fullname, &st) &&
 				      S_ISREG(st.st_mode) ?
 				      get_wt_convert_stats_ascii(fullname) : "");
-		else if (skip_prefix(format, "(eolattr)", &format))
+		ଅନ୍ୟଥା ଯଦି (skip_prefix(format, "(eolattr)", &format))
 			strbuf_addstr(&sb, get_convert_attr_ascii(repo->index,
 								 fullname));
-		else if (skip_prefix(format, "(path)", &format))
+		ଅନ୍ୟଥା ଯଦି (skip_prefix(format, "(path)", &format))
 			write_name_to_buf(&sb, fullname);
-		else
+		ଅନ୍ୟଥା
 			strbuf_expand_bad_format(format, "ls-files");
 	}
-	strbuf_addch(&sb, line_terminator);
+	strbuf_addch(&sb, ଧାଡ଼ି_terminator);
 	fwrite(sb.buf, sb.len, 1, stdout);
 	strbuf_release(&sb);
 }
 
-static void show_ce(struct repository *repo, struct dir_struct *dir,
-		    const struct cache_entry *ce, const char *fullname,
-		    const char *tag)
+ସ୍ଥିର ଶୂନ୍ୟ show_ce(ସଂରଚନା repository *repo, ସଂରଚନା dir_struct *dir,
+		    ଅଚଳ ସଂରଚନା cache_entry *ce, ଅଚଳ ଅକ୍ଷର *fullname,
+		    ଅଚଳ ଅକ୍ଷର *tag)
 {
-	if (max_prefix_len > strlen(fullname))
+	ଯଦି (max_prefix_len > strlen(fullname))
 		die("git ls-files: internal error - cache entry not superset of prefix");
 
-	if (recurse_submodules && S_ISGITLINK(ce->ce_mode) &&
+	ଯଦି (recurse_submodules && S_ISGITLINK(ce->ce_mode) &&
 	    is_submodule_active(repo, ce->name)) {
 		show_submodule(repo, dir, ce->name);
-	} else if (match_pathspec(repo->index, &pathspec, fullname, strlen(fullname),
+	} ଅନ୍ୟଥା ଯଦି (match_pathspec(repo->index, &pathspec, fullname, strlen(fullname),
 				  max_prefix_len, ps_matched,
 				  S_ISDIR(ce->ce_mode) ||
 				  S_ISGITLINK(ce->ce_mode))) {
-		if (format) {
+		ଯଦି (format) {
 			show_ce_fmt(repo, ce, format, fullname);
 			print_debug(ce);
-			return;
+			ଫେରନ୍ତୁ;
 		}
 
 		tag = get_tag(ce, tag);
 
-		if (!show_stage) {
+		ଯଦି (!show_stage) {
 			fputs(tag, stdout);
-		} else {
+		} ଅନ୍ୟଥା {
 			printf("%s%06o %s %d\t",
 			       tag,
 			       ce->ce_mode,
@@ -353,27 +353,27 @@ static void show_ce(struct repository *repo, struct dir_struct *dir,
 	}
 }
 
-static void show_ru_info(struct repository *repo, struct index_state *istate)
+ସ୍ଥିର ଶୂନ୍ୟ show_ru_info(ସଂରଚନା repository *repo, ସଂରଚନା index_state *istate)
 {
-	struct string_list_item *item;
+	ସଂରଚନା string_list_item *item;
 
-	if (!istate->resolve_undo)
-		return;
+	ଯଦି (!istate->resolve_undo)
+		ଫେରନ୍ତୁ;
 
 	for_each_string_list_item(item, istate->resolve_undo) {
-		const char *path = item->string;
-		struct resolve_undo_info *ui = item->util;
-		int i, len;
+		ଅଚଳ ଅକ୍ଷର *path = item->string;
+		ସଂରଚନା resolve_undo_info *ui = item->util;
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା i, len;
 
 		len = strlen(path);
-		if (len < max_prefix_len)
-			continue; /* outside of the prefix */
-		if (!match_pathspec(istate, &pathspec, path, len,
+		ଯଦି (len < max_prefix_len)
+			ଜାରି; /* outside of the prefix */
+		ଯଦି (!match_pathspec(istate, &pathspec, path, len,
 				    max_prefix_len, ps_matched, 0))
-			continue; /* uninterested */
-		for (i = 0; i < 3; i++) {
-			if (!ui->mode[i])
-				continue;
+			ଜାରି; /* uninterested */
+		ପାଇଁ (i = 0; i < 3; i++) {
+			ଯଦି (!ui->mode[i])
+				ଜାରି;
 			printf("%s%06o %s %d\t", tag_resolve_undo, ui->mode[i],
 			       repo_find_unique_abbrev(repo, &ui->oid[i], abbrev),
 			       i + 1);
@@ -382,47 +382,47 @@ static void show_ru_info(struct repository *repo, struct index_state *istate)
 	}
 }
 
-static int ce_excluded(struct dir_struct *dir, struct index_state *istate,
-		       const char *fullname, const struct cache_entry *ce)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା ce_excluded(ସଂରଚନା dir_struct *dir, ସଂରଚନା index_state *istate,
+		       ଅଚଳ ଅକ୍ଷର *fullname, ଅଚଳ ସଂରଚନା cache_entry *ce)
 {
-	int dtype = ce_to_dtype(ce);
-	return is_excluded(dir, istate, fullname, &dtype);
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା dtype = ce_to_dtype(ce);
+	ଫେରନ୍ତୁ is_excluded(dir, istate, fullname, &dtype);
 }
 
-static void construct_fullname(struct strbuf *out, const struct repository *repo,
-			       const struct cache_entry *ce)
+ସ୍ଥିର ଶୂନ୍ୟ construct_fullname(ସଂରଚନା strbuf *out, ଅଚଳ ସଂରଚନା repository *repo,
+			       ଅଚଳ ସଂରଚନା cache_entry *ce)
 {
 	strbuf_reset(out);
-	if (repo->submodule_prefix)
+	ଯଦି (repo->submodule_prefix)
 		strbuf_addstr(out, repo->submodule_prefix);
 	strbuf_addstr(out, ce->name);
 }
 
-static void show_files(struct repository *repo, struct dir_struct *dir)
+ସ୍ଥିର ଶୂନ୍ୟ show_files(ସଂରଚନା repository *repo, ସଂରଚନା dir_struct *dir)
 {
-	int i;
-	struct strbuf fullname = STRBUF_INIT;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
+	ସଂରଚନା strbuf fullname = STRBUF_INIT;
 
 	/* For cached/deleted files we don't need to even do the readdir */
-	if (show_others || show_killed) {
-		if (!show_others)
+	ଯଦି (show_others || show_killed) {
+		ଯଦି (!show_others)
 			dir->flags |= DIR_COLLECT_KILLED_ONLY;
 		fill_directory(dir, repo->index, &pathspec);
-		if (show_others)
+		ଯଦି (show_others)
 			show_other_files(repo->index, dir);
-		if (show_killed)
+		ଯଦି (show_killed)
 			show_killed_files(repo->index, dir);
 	}
 
-	if (!(show_cached || show_stage || show_deleted || show_modified))
-		return;
+	ଯଦି (!(show_cached || show_stage || show_deleted || show_modified))
+		ଫେରନ୍ତୁ;
 
-	for (i = 0; i < repo->index->cache_nr; i++) {
-		const struct cache_entry *ce = repo->index->cache[i];
-		struct stat st;
-		int stat_err;
+	ପାଇଁ (i = 0; i < repo->index->cache_nr; i++) {
+		ଅଚଳ ସଂରଚନା cache_entry *ce = repo->index->cache[i];
+		ସଂରଚନା stat st;
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା stat_err;
 
-		if (S_ISSPARSEDIR(ce->ce_mode) && !show_sparse_dirs) {
+		ଯଦି (S_ISSPARSEDIR(ce->ce_mode) && !show_sparse_dirs) {
 			/*
 			 * This is the first time we've hit a sparse dir,
 			 * so expansion will leave the first 'i' entries
@@ -434,59 +434,59 @@ static void show_files(struct repository *repo, struct dir_struct *dir)
 
 		construct_fullname(&fullname, repo, ce);
 
-		if ((dir->flags & DIR_SHOW_IGNORED) &&
+		ଯଦି ((dir->flags & DIR_SHOW_IGNORED) &&
 			!ce_excluded(dir, repo->index, fullname.buf, ce))
-			continue;
-		if (ce->ce_flags & CE_UPDATE)
-			continue;
-		if ((show_cached || show_stage) &&
+			ଜାରି;
+		ଯଦି (ce->ce_flags & CE_UPDATE)
+			ଜାରି;
+		ଯଦି ((show_cached || show_stage) &&
 		    (!show_unmerged || ce_stage(ce))) {
 			show_ce(repo, dir, ce, fullname.buf,
 				ce_stage(ce) ? tag_unmerged :
 				(ce_skip_worktree(ce) ? tag_skip_worktree :
 				 tag_cached));
-			if (skipping_duplicates)
-				goto skip_to_next_name;
+			ଯଦି (skipping_duplicates)
+				ଯାଅ skip_to_next_name;
 		}
 
-		if (!(show_deleted || show_modified))
-			continue;
-		if (ce_skip_worktree(ce))
-			continue;
+		ଯଦି (!(show_deleted || show_modified))
+			ଜାରି;
+		ଯଦି (ce_skip_worktree(ce))
+			ଜାରି;
 		/*
 		 * match_pathspec() is linear in pathspec.nr, so prefilter only
 		 * the single-pathspec case. Only entries shown by show_ce()
 		 * satisfy --error-unmatch.
 		 */
-		if (pathspec.nr == 1 &&
+		ଯଦି (pathspec.nr == 1 &&
 		    !match_pathspec(repo->index, &pathspec, fullname.buf,
-				    fullname.len, max_prefix_len, NULL,
+				    fullname.len, max_prefix_len, ଖାଲି,
 				    S_ISDIR(ce->ce_mode) ||
 				    S_ISGITLINK(ce->ce_mode)))
-			continue;
+			ଜାରି;
 		stat_err = lstat(fullname.buf, &st);
-		if (stat_err && (errno != ENOENT && errno != ENOTDIR))
+		ଯଦି (stat_err && (errno != ENOENT && errno != ENOTDIR))
 			error_errno("cannot lstat '%s'", fullname.buf);
-		if (stat_err && show_deleted) {
+		ଯଦି (stat_err && show_deleted) {
 			show_ce(repo, dir, ce, fullname.buf, tag_removed);
-			if (skipping_duplicates)
-				goto skip_to_next_name;
+			ଯଦି (skipping_duplicates)
+				ଯାଅ skip_to_next_name;
 		}
-		if (show_modified &&
+		ଯଦି (show_modified &&
 		    (stat_err || ie_modified(repo->index, ce, &st, 0))) {
 			show_ce(repo, dir, ce, fullname.buf, tag_modified);
-			if (skipping_duplicates)
-				goto skip_to_next_name;
+			ଯଦି (skipping_duplicates)
+				ଯାଅ skip_to_next_name;
 		}
-		continue;
+		ଜାରି;
 
 skip_to_next_name:
 		{
-			int j;
-			struct cache_entry **cache = repo->index->cache;
-			for (j = i + 1; j < repo->index->cache_nr; j++)
-				if (strcmp(ce->name, cache[j]->name))
-					break;
+			ପୂର୍ଣ୍ଣସଂଖ୍ୟା j;
+			ସଂରଚନା cache_entry **cache = repo->index->cache;
+			ପାଇଁ (j = i + 1; j < repo->index->cache_nr; j++)
+				ଯଦି (strcmp(ce->name, cache[j]->name))
+					ଭାଙ୍ଗ;
 			i = j - 1; /* compensate for the for loop */
 		}
 	}
@@ -497,25 +497,25 @@ skip_to_next_name:
 /*
  * Prune the index to only contain stuff starting with "prefix"
  */
-static void prune_index(struct index_state *istate,
-			const char *prefix, size_t prefixlen)
+ସ୍ଥିର ଶୂନ୍ୟ prune_index(ସଂରଚନା index_state *istate,
+			ଅଚଳ ଅକ୍ଷର *prefix, size_t prefixlen)
 {
-	int pos;
-	unsigned int first, last;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା pos;
+	unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା first, last;
 
-	if (!prefix || !istate->cache_nr)
-		return;
+	ଯଦି (!prefix || !istate->cache_nr)
+		ଫେରନ୍ତୁ;
 	pos = index_name_pos(istate, prefix, prefixlen);
-	if (pos < 0)
+	ଯଦି (pos < 0)
 		pos = -pos-1;
 	first = pos;
 	last = istate->cache_nr;
-	while (last > first) {
-		int next = first + ((last - first) >> 1);
-		const struct cache_entry *ce = istate->cache[next];
-		if (!strncmp(ce->name, prefix, prefixlen)) {
+	ଯେତେବେଳେ (last > first) {
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା next = first + ((last - first) >> 1);
+		ଅଚଳ ସଂରଚନା cache_entry *ce = istate->cache[next];
+		ଯଦି (!strncmp(ce->name, prefix, prefixlen)) {
 			first = next+1;
-			continue;
+			ଜାରି;
 		}
 		last = next;
 	}
@@ -523,12 +523,12 @@ static void prune_index(struct index_state *istate,
 	istate->cache_nr = last - pos;
 }
 
-static int get_common_prefix_len(const char *common_prefix)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା get_common_prefix_len(ଅଚଳ ଅକ୍ଷର *common_prefix)
 {
-	int common_prefix_len;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା common_prefix_len;
 
-	if (!common_prefix)
-		return 0;
+	ଯଦି (!common_prefix)
+		ଫେରନ୍ତୁ 0;
 
 	common_prefix_len = strlen(common_prefix);
 
@@ -536,47 +536,47 @@ static int get_common_prefix_len(const char *common_prefix)
 	 * If the prefix has a trailing slash, strip it so that submodules won't
 	 * be pruned from the index.
 	 */
-	if (common_prefix[common_prefix_len - 1] == '/')
+	ଯଦି (common_prefix[common_prefix_len - 1] == '/')
 		common_prefix_len--;
 
-	return common_prefix_len;
+	ଫେରନ୍ତୁ common_prefix_len;
 }
 
-static const char * const ls_files_usage[] = {
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର * ଅଚଳ ls_files_usage[] = {
 	N_("git ls-files [<options>] [<file>...]"),
-	NULL
+	ଖାଲି
 };
 
-static int option_parse_exclude(const struct option *opt,
-				const char *arg, int unset)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା option_parse_exclude(ଅଚଳ ସଂରଚନା option *opt,
+				ଅଚଳ ଅକ୍ଷର *arg, ପୂର୍ଣ୍ଣସଂଖ୍ୟା unset)
 {
-	struct string_list *exclude_list = opt->value;
+	ସଂରଚନା string_list *exclude_list = opt->ମୂଲ୍ୟ;
 
 	BUG_ON_OPT_NEG(unset);
 
 	exc_given = 1;
 	string_list_append(exclude_list, arg);
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int option_parse_exclude_from(const struct option *opt,
-				     const char *arg, int unset)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା option_parse_exclude_from(ଅଚଳ ସଂରଚନା option *opt,
+				     ଅଚଳ ଅକ୍ଷର *arg, ପୂର୍ଣ୍ଣସଂଖ୍ୟା unset)
 {
-	struct dir_struct *dir = opt->value;
+	ସଂରଚନା dir_struct *dir = opt->ମୂଲ୍ୟ;
 
 	BUG_ON_OPT_NEG(unset);
 
 	exc_given = 1;
 	add_patterns_from_file(dir, arg);
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int option_parse_exclude_standard(const struct option *opt,
-					 const char *arg, int unset)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା option_parse_exclude_standard(ଅଚଳ ସଂରଚନା option *opt,
+					 ଅଚଳ ଅକ୍ଷର *arg, ପୂର୍ଣ୍ଣସଂଖ୍ୟା unset)
 {
-	struct dir_struct *dir = opt->value;
+	ସଂରଚନା dir_struct *dir = opt->ମୂଲ୍ୟ;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
@@ -584,28 +584,28 @@ static int option_parse_exclude_standard(const struct option *opt,
 	exc_given = 1;
 	setup_standard_excludes(dir);
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-int cmd_ls_files(int argc,
-		 const char **argv,
-		 const char *cmd_prefix,
-		 struct repository *repo)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_ls_files(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc,
+		 ଅଚଳ ଅକ୍ଷର **argv,
+		 ଅଚଳ ଅକ୍ଷର *cmd_prefix,
+		 ସଂରଚନା repository *repo)
 {
-	int require_work_tree = 0, show_tag = 0, i;
-	char *max_prefix;
-	struct dir_struct dir = DIR_INIT;
-	struct pattern_list *pl;
-	struct string_list exclude_list = STRING_LIST_INIT_NODUP;
-	struct option builtin_ls_files_options[] = {
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା require_work_ବୃକ୍ଷ = 0, show_tag = 0, i;
+	ଅକ୍ଷର *max_prefix;
+	ସଂରଚନା dir_struct dir = DIR_INIT;
+	ସଂରଚନା pattern_list *pl;
+	ସଂରଚନା string_list exclude_list = STRING_LIST_INIT_NODUP;
+	ସଂରଚନା option builtin_ls_files_options[] = {
 		/* Think twice before adding "--nul" synonym to this */
-		OPT_SET_INT('z', NULL, &line_terminator,
+		OPT_SET_INT('z', ଖାଲି, &ଧାଡ଼ି_terminator,
 			N_("separate paths with the NUL character"), '\0'),
-		OPT_BOOL('t', NULL, &show_tag,
+		OPT_BOOL('t', ଖାଲି, &show_tag,
 			N_("identify the file status with tags")),
-		OPT_BOOL('v', NULL, &show_valid_bit,
+		OPT_BOOL('v', ଖାଲି, &show_valid_bit,
 			N_("use lowercase letters for 'assume unchanged' files")),
-		OPT_BOOL('f', NULL, &show_fsmonitor_bit,
+		OPT_BOOL('f', ଖାଲି, &show_fsmonitor_bit,
 			N_("use lowercase letters for 'fsmonitor clean' files")),
 		OPT_BOOL('c', "cached", &show_cached,
 			N_("show cached files in the output (default)")),
@@ -641,7 +641,7 @@ int cmd_ls_files(int argc,
 			PARSE_OPT_NONEG, option_parse_exclude_from),
 		OPT_STRING(0, "exclude-per-directory", &dir.exclude_per_dir, N_("file"),
 			N_("read additional per-directory exclude patterns in <file>")),
-		OPT_CALLBACK_F(0, "exclude-standard", &dir, NULL,
+		OPT_CALLBACK_F(0, "exclude-standard", &dir, ଖାଲି,
 			N_("add the standard git exclusions"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			option_parse_exclude_standard),
@@ -652,7 +652,7 @@ int cmd_ls_files(int argc,
 			N_("recurse through submodules")),
 		OPT_BOOL(0, "error-unmatch", &error_unmatch,
 			N_("if any <file> is not in the index, treat this as an error")),
-		OPT_STRING(0, "with-tree", &with_tree, N_("tree-ish"),
+		OPT_STRING(0, "with-tree", &with_ବୃକ୍ଷ, N_("tree-ish"),
 			N_("pretend that paths removed since <tree-ish> are still present")),
 		OPT__ABBREV(&abbrev),
 		OPT_BOOL(0, "debug", &debug_mode, N_("show debugging data")),
@@ -665,7 +665,7 @@ int cmd_ls_files(int argc,
 			     PARSE_OPT_NONEG),
 		OPT_END()
 	};
-	int ret = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret = 0;
 
 	show_usage_with_options_if_asked(argc, argv,
 					 ls_files_usage, builtin_ls_files_options);
@@ -674,27 +674,27 @@ int cmd_ls_files(int argc,
 	repo->settings.command_requires_full_index = 0;
 
 	prefix = cmd_prefix;
-	if (prefix)
+	ଯଦି (prefix)
 		prefix_len = strlen(prefix);
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ଖାଲି);
 
-	if (repo_read_index(repo) < 0)
+	ଯଦି (repo_read_index(repo) < 0)
 		die("index file corrupt");
 
 	argc = parse_options(argc, argv, prefix, builtin_ls_files_options,
 			ls_files_usage, 0);
 	pl = add_pattern_list(&dir, EXC_CMDL, "--exclude option");
-	for (i = 0; i < exclude_list.nr; i++) {
-		add_pattern(exclude_list.items[i].string, "", 0, pl, --exclude_args);
+	ପାଇଁ (i = 0; i < exclude_list.nr; i++) {
+		add_pattern(exclude_list.ବସ୍ତୁଗୁଡ଼ିକ[i].string, "", 0, pl, --exclude_args);
 	}
 
-	if (format && (show_stage || show_others || show_killed ||
+	ଯଦି (format && (show_stage || show_others || show_killed ||
 		show_resolve_undo || skipping_duplicates || show_eol || show_tag))
-			usage_msg_opt(_("--format cannot be used with -s, -o, -k, -t, "
+			usage_ସନ୍ଦେଶ_opt(_("--format cannot be used with -s, -o, -k, -t, "
 				      "--resolve-undo, --deduplicate, --eol"),
 				      ls_files_usage, builtin_ls_files_options);
 
-	if (show_tag || show_valid_bit || show_fsmonitor_bit) {
+	ଯଦି (show_tag || show_valid_bit || show_fsmonitor_bit) {
 		tag_cached = "H ";
 		tag_unmerged = "M ";
 		tag_removed = "R ";
@@ -704,28 +704,28 @@ int cmd_ls_files(int argc,
 		tag_skip_worktree = "S ";
 		tag_resolve_undo = "U ";
 	}
-	if (show_modified || show_others || show_deleted || (dir.flags & DIR_SHOW_IGNORED) || show_killed)
-		require_work_tree = 1;
-	if (show_unmerged)
+	ଯଦି (show_modified || show_others || show_deleted || (dir.flags & DIR_SHOW_IGNORED) || show_killed)
+		require_work_ବୃକ୍ଷ = 1;
+	ଯଦି (show_unmerged)
 		/*
 		 * There's no point in showing unmerged unless
 		 * you also show the stage information.
 		 */
 		show_stage = 1;
-	if (show_tag || show_stage)
+	ଯଦି (show_tag || show_stage)
 		skipping_duplicates = 0;
-	if (dir.exclude_per_dir)
+	ଯଦି (dir.exclude_per_dir)
 		exc_given = 1;
 
-	if (require_work_tree && !is_inside_work_tree(repo))
-		setup_work_tree(repo);
+	ଯଦି (require_work_ବୃକ୍ଷ && !is_inside_work_ବୃକ୍ଷ(repo))
+		setup_work_ବୃକ୍ଷ(repo);
 
-	if (recurse_submodules &&
+	ଯଦି (recurse_submodules &&
 	    (show_deleted || show_others || show_unmerged ||
-	     show_killed || show_modified || show_resolve_undo || with_tree))
+	     show_killed || show_modified || show_resolve_undo || with_ବୃକ୍ଷ))
 		die("ls-files --recurse-submodules unsupported mode");
 
-	if (recurse_submodules && error_unmatch)
+	ଯଦି (recurse_submodules && error_unmatch)
 		die("ls-files --recurse-submodules does not support "
 		    "--error-unmatch");
 
@@ -741,51 +741,51 @@ int cmd_ls_files(int argc,
 	 * submodule entry because the pathspec may match something inside the
 	 * submodule.
 	 */
-	if (recurse_submodules)
-		max_prefix = NULL;
-	else
+	ଯଦି (recurse_submodules)
+		max_prefix = ଖାଲି;
+	ଅନ୍ୟଥା
 		max_prefix = common_prefix(&pathspec);
 	max_prefix_len = get_common_prefix_len(max_prefix);
 
 	prune_index(repo->index, max_prefix, max_prefix_len);
 
 	/* Treat unmatching pathspec elements as errors */
-	if (pathspec.nr && error_unmatch)
+	ଯଦି (pathspec.nr && error_unmatch)
 		ps_matched = xcalloc(pathspec.nr, 1);
 
-	if ((dir.flags & DIR_SHOW_IGNORED) && !show_others && !show_cached)
+	ଯଦି ((dir.flags & DIR_SHOW_IGNORED) && !show_others && !show_cached)
 		die("ls-files -i must be used with either -o or -c");
 
-	if ((dir.flags & DIR_SHOW_IGNORED) && !exc_given)
+	ଯଦି ((dir.flags & DIR_SHOW_IGNORED) && !exc_given)
 		die("ls-files --ignored needs some exclude pattern");
 
 	/* With no flags, we default to showing the cached files */
-	if (!(show_stage || show_deleted || show_others || show_unmerged ||
+	ଯଦି (!(show_stage || show_deleted || show_others || show_unmerged ||
 	      show_killed || show_modified || show_resolve_undo))
 		show_cached = 1;
 
-	if (with_tree) {
+	ଯଦି (with_ବୃକ୍ଷ) {
 		/*
 		 * Basic sanity check; show-stages and show-unmerged
 		 * would not make any sense with this option.
 		 */
-		if (show_stage || show_unmerged)
+		ଯଦି (show_stage || show_unmerged)
 			die(_("options '%s' and '%s' cannot be used together"), "ls-files --with-tree", "-s/-u");
-		overlay_tree_on_index(repo->index, with_tree, max_prefix);
+		overlay_ବୃକ୍ଷ_on_index(repo->index, with_ବୃକ୍ଷ, max_prefix);
 	}
 
 	show_files(repo, &dir);
 
-	if (show_resolve_undo)
+	ଯଦି (show_resolve_undo)
 		show_ru_info(repo, repo->index);
 
-	if (ps_matched && report_path_error(ps_matched, &pathspec)) {
+	ଯଦି (ps_matched && report_path_error(ps_matched, &pathspec)) {
 		fprintf(stderr, "Did you forget to 'git add'?\n");
 		ret = 1;
 	}
 
 	string_list_clear(&exclude_list, 0);
 	dir_clear(&dir);
-	free(max_prefix);
-	return ret;
+	ମୁକ୍ତ(max_prefix);
+	ଫେରନ୍ତୁ ret;
 }

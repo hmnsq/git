@@ -1,163 +1,163 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "commit.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "commit-reach.h"
+#ଅନ୍ତର୍ଭାଵ "builtin.h"
+#ଅନ୍ତର୍ଭାଵ "config.h"
+#ଅନ୍ତର୍ଭାଵ "commit.h"
+#ଅନ୍ତର୍ଭାଵ "environment.h"
+#ଅନ୍ତର୍ଭାଵ "gettext.h"
+#ଅନ୍ତର୍ଭାଵ "hex.h"
+#ଅନ୍ତର୍ଭାଵ "object-name.h"
+#ଅନ୍ତର୍ଭାଵ "parse-options.h"
+#ଅନ୍ତର୍ଭାଵ "commit-reach.h"
 
-static int show_merge_base(struct commit **rev, size_t rev_nr, int show_all)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_merge_base(ସଂରଚନା commit **rev, size_t rev_nr, ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_all)
 {
-	enum merge_base_flags flags = show_all ? MERGE_BASE_FIND_ALL : 0;
-	struct commit_list *result = NULL, *r;
+	ଗଣନା merge_base_flags flags = show_all ? MERGE_BASE_FIND_ALL : 0;
+	ସଂରଚନା commit_list *result = ଖାଲି, *r;
 
-	if (repo_get_merge_bases_many_dirty(the_repository, rev[0],
+	ଯଦି (repo_get_merge_bases_many_dirty(the_repository, rev[0],
 					    rev_nr - 1, rev + 1,
 					    flags, &result) < 0) {
 		commit_list_free(result);
-		return -1;
+		ଫେରନ୍ତୁ -1;
 	}
 
-	if (!result)
-		return 1;
+	ଯଦି (!result)
+		ଫେରନ୍ତୁ 1;
 
-	for (r = result; r; r = r->next) {
+	ପାଇଁ (r = result; r; r = r->next) {
 		printf("%s\n", oid_to_hex(&r->item->object.oid));
-		if (!show_all)
-			break;
+		ଯଦି (!show_all)
+			ଭାଙ୍ଗ;
 	}
 
 	commit_list_free(result);
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static const char * const merge_base_usage[] = {
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର * ଅଚଳ merge_base_usage[] = {
 	N_("git merge-base [-a | --all] <commit> <commit>..."),
 	N_("git merge-base [-a | --all] --octopus <commit>..."),
 	N_("git merge-base --is-ancestor <commit> <commit>"),
 	N_("git merge-base --independent <commit>..."),
 	N_("git merge-base --fork-point <ref> [<commit>]"),
-	NULL
+	ଖାଲି
 };
 
-static struct commit *get_commit_reference(const char *arg)
+ସ୍ଥିର ସଂରଚନା commit *get_commit_reference(ଅଚଳ ଅକ୍ଷର *arg)
 {
-	struct object_id revkey;
-	struct commit *r;
+	ସଂରଚନା object_id revkey;
+	ସଂରଚନା commit *r;
 
-	if (repo_get_oid(the_repository, arg, &revkey))
+	ଯଦି (repo_get_oid(the_repository, arg, &revkey))
 		die("Not a valid object name %s", arg);
 	r = lookup_commit_reference(the_repository, &revkey);
-	if (!r)
+	ଯଦି (!r)
 		die("Not a valid commit name %s", arg);
 
-	return r;
+	ଫେରନ୍ତୁ r;
 }
 
-static int handle_independent(int count, const char **args)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା handle_independent(ପୂର୍ଣ୍ଣସଂଖ୍ୟା ଗଣନା_2, ଅଚଳ ଅକ୍ଷର **args)
 {
-	struct commit_list *revs = NULL, *rev;
-	int i;
+	ସଂରଚନା commit_list *revs = ଖାଲି, *rev;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
 
-	for (i = count - 1; i >= 0; i--)
-		commit_list_insert(get_commit_reference(args[i]), &revs);
+	ପାଇଁ (i = ଗଣନା_2 - 1; i >= 0; i--)
+		commit_list_ଭର୍ତ୍ତି(get_commit_reference(args[i]), &revs);
 
 	reduce_heads_replace(&revs);
 
-	if (!revs)
-		return 1;
+	ଯଦି (!revs)
+		ଫେରନ୍ତୁ 1;
 
-	for (rev = revs; rev; rev = rev->next)
+	ପାଇଁ (rev = revs; rev; rev = rev->next)
 		printf("%s\n", oid_to_hex(&rev->item->object.oid));
 
 	commit_list_free(revs);
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int handle_octopus(int count, const char **args, int show_all)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା handle_octopus(ପୂର୍ଣ୍ଣସଂଖ୍ୟା ଗଣନା_2, ଅଚଳ ଅକ୍ଷର **args, ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_all)
 {
-	struct commit_list *revs = NULL;
-	struct commit_list *result = NULL, *rev;
-	int i;
+	ସଂରଚନା commit_list *revs = ଖାଲି;
+	ସଂରଚନା commit_list *result = ଖାଲି, *rev;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
 
-	for (i = count - 1; i >= 0; i--)
-		commit_list_insert(get_commit_reference(args[i]), &revs);
+	ପାଇଁ (i = ଗଣନା_2 - 1; i >= 0; i--)
+		commit_list_ଭର୍ତ୍ତି(get_commit_reference(args[i]), &revs);
 
-	if (get_octopus_merge_bases(revs, &result) < 0) {
+	ଯଦି (get_octopus_merge_bases(revs, &result) < 0) {
 		commit_list_free(revs);
 		commit_list_free(result);
-		return 128;
+		ଫେରନ୍ତୁ 128;
 	}
 	commit_list_free(revs);
 	reduce_heads_replace(&result);
 
-	if (!result)
-		return 1;
+	ଯଦି (!result)
+		ଫେରନ୍ତୁ 1;
 
-	for (rev = result; rev; rev = rev->next) {
+	ପାଇଁ (rev = result; rev; rev = rev->next) {
 		printf("%s\n", oid_to_hex(&rev->item->object.oid));
-		if (!show_all)
-			break;
+		ଯଦି (!show_all)
+			ଭାଙ୍ଗ;
 	}
 
 	commit_list_free(result);
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int handle_is_ancestor(int argc, const char **argv)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା handle_is_ancestor(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc, ଅଚଳ ଅକ୍ଷର **argv)
 {
-	struct commit *one, *two;
-	int ret;
+	ସଂରଚନା commit *one, *two;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret;
 
-	if (argc != 2)
+	ଯଦି (argc != 2)
 		die("--is-ancestor takes exactly two commits");
 	one = get_commit_reference(argv[0]);
 	two = get_commit_reference(argv[1]);
 	ret = repo_in_merge_bases(the_repository, one, two);
-	if (ret < 0)
+	ଯଦି (ret < 0)
 		exit(128);
-	if (ret)
-		return 0;
-	else
-		return 1;
+	ଯଦି (ret)
+		ଫେରନ୍ତୁ 0;
+	ଅନ୍ୟଥା
+		ଫେରନ୍ତୁ 1;
 }
 
-static int handle_fork_point(int argc, const char **argv)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା handle_fork_point(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc, ଅଚଳ ଅକ୍ଷର **argv)
 {
-	struct object_id oid;
-	struct commit *derived, *fork_point;
-	const char *commitname;
+	ସଂରଚନା object_id oid;
+	ସଂରଚନା commit *derived, *fork_point;
+	ଅଚଳ ଅକ୍ଷର *commitname;
 
 	commitname = (argc == 2) ? argv[1] : "HEAD";
-	if (repo_get_oid(the_repository, commitname, &oid))
+	ଯଦି (repo_get_oid(the_repository, commitname, &oid))
 		die("Not a valid object name: '%s'", commitname);
 
 	derived = lookup_commit_reference(the_repository, &oid);
 
 	fork_point = get_fork_point(argv[0], derived);
 
-	if (!fork_point)
-		return 1;
+	ଯଦି (!fork_point)
+		ଫେରନ୍ତୁ 1;
 
 	printf("%s\n", oid_to_hex(&fork_point->object.oid));
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-int cmd_merge_base(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_merge_base(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc,
+		   ଅଚଳ ଅକ୍ଷର **argv,
+		   ଅଚଳ ଅକ୍ଷର *prefix,
+		   ସଂରଚନା repository *repo UNUSED)
 {
-	struct commit **rev;
+	ସଂରଚନା commit **rev;
 	size_t rev_nr = 0;
-	int show_all = 0;
-	int cmdmode = 0;
-	int ret;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_all = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmdmode = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret;
 
-	struct option options[] = {
+	ସଂରଚନା option options[] = {
 		OPT_BOOL('a', "all", &show_all, N_("output all common ancestors")),
 		OPT_CMDMODE(0, "octopus", &cmdmode,
 			    N_("find ancestors for a single n-way merge"), 'o'),
@@ -170,41 +170,41 @@ int cmd_merge_base(int argc,
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ଖାଲି);
 	argc = parse_options(argc, argv, prefix, options, merge_base_usage, 0);
 
-	if (cmdmode == 'a') {
-		if (argc < 2)
+	ଯଦି (cmdmode == 'a') {
+		ଯଦି (argc < 2)
 			usage_with_options(merge_base_usage, options);
-		if (show_all)
+		ଯଦି (show_all)
 			die(_("options '%s' and '%s' cannot be used together"),
 			    "--is-ancestor", "--all");
-		return handle_is_ancestor(argc, argv);
+		ଫେରନ୍ତୁ handle_is_ancestor(argc, argv);
 	}
 
-	if (cmdmode == 'r' && show_all)
+	ଯଦି (cmdmode == 'r' && show_all)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--independent", "--all");
 
-	if (cmdmode == 'o')
-		return handle_octopus(argc, argv, show_all);
+	ଯଦି (cmdmode == 'o')
+		ଫେରନ୍ତୁ handle_octopus(argc, argv, show_all);
 
-	if (cmdmode == 'r')
-		return handle_independent(argc, argv);
+	ଯଦି (cmdmode == 'r')
+		ଫେରନ୍ତୁ handle_independent(argc, argv);
 
-	if (cmdmode == 'f') {
-		if (argc < 1 || 2 < argc)
+	ଯଦି (cmdmode == 'f') {
+		ଯଦି (argc < 1 || 2 < argc)
 			usage_with_options(merge_base_usage, options);
-		return handle_fork_point(argc, argv);
+		ଫେରନ୍ତୁ handle_fork_point(argc, argv);
 	}
 
-	if (argc < 2)
+	ଯଦି (argc < 2)
 		usage_with_options(merge_base_usage, options);
 
 	ALLOC_ARRAY(rev, argc);
-	while (argc-- > 0)
+	ଯେତେବେଳେ (argc-- > 0)
 		rev[rev_nr++] = get_commit_reference(*argv++);
 	ret = show_merge_base(rev, rev_nr, show_all);
-	free(rev);
-	return ret;
+	ମୁକ୍ତ(rev);
+	ଫେରନ୍ତୁ ret;
 }

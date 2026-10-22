@@ -1,68 +1,68 @@
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "commit.h"
-#include "diff.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "revision.h"
-#include "reachable.h"
-#include "parse-options.h"
-#include "path.h"
-#include "progress.h"
-#include "prune-packed.h"
-#include "replace-object.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
-#include "shallow.h"
+#ଅନ୍ତର୍ଭାଵ "builtin.h"
+#ଅନ୍ତର୍ଭାଵ "commit.h"
+#ଅନ୍ତର୍ଭାଵ "diff.h"
+#ଅନ୍ତର୍ଭାଵ "dir.h"
+#ଅନ୍ତର୍ଭାଵ "environment.h"
+#ଅନ୍ତର୍ଭାଵ "gettext.h"
+#ଅନ୍ତର୍ଭାଵ "hex.h"
+#ଅନ୍ତର୍ଭାଵ "revision.h"
+#ଅନ୍ତର୍ଭାଵ "reachable.h"
+#ଅନ୍ତର୍ଭାଵ "parse-options.h"
+#ଅନ୍ତର୍ଭାଵ "path.h"
+#ଅନ୍ତର୍ଭାଵ "progress.h"
+#ଅନ୍ତର୍ଭାଵ "prune-packed.h"
+#ଅନ୍ତର୍ଭାଵ "replace-object.h"
+#ଅନ୍ତର୍ଭାଵ "object-file.h"
+#ଅନ୍ତର୍ଭାଵ "object-name.h"
+#ଅନ୍ତର୍ଭାଵ "odb.h"
+#ଅନ୍ତର୍ଭାଵ "shallow.h"
 
-static const char * const prune_usage[] = {
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର * ଅଚଳ prune_usage[] = {
 	N_("git prune [-n] [-v] [--progress] [--expire <time>] [--] [<head>...]"),
-	NULL
+	ଖାଲି
 };
-static int show_only;
-static int verbose;
-static timestamp_t expire;
-static int show_progress = -1;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_only;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା verbose;
+ସ୍ଥିର timestamp_t expire;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା show_progress = -1;
 
-static int prune_tmp_file(const char *fullpath)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା prune_tmp_file(ଅଚଳ ଅକ୍ଷର *fullpath)
 {
-	struct stat st;
-	if (lstat(fullpath, &st))
-		return error("Could not stat '%s'", fullpath);
-	if (st.st_mtime > expire)
-		return 0;
-	if (S_ISDIR(st.st_mode)) {
-		if (show_only || verbose)
+	ସଂରଚନା stat st;
+	ଯଦି (lstat(fullpath, &st))
+		ଫେରନ୍ତୁ error("Could not stat '%s'", fullpath);
+	ଯଦି (st.st_mtime > expire)
+		ଫେରନ୍ତୁ 0;
+	ଯଦି (S_ISDIR(st.st_mode)) {
+		ଯଦି (show_only || verbose)
 			printf("Removing stale temporary directory %s\n", fullpath);
-		if (!show_only) {
-			struct strbuf remove_dir_buf = STRBUF_INIT;
+		ଯଦି (!show_only) {
+			ସଂରଚନା strbuf remove_dir_buf = STRBUF_INIT;
 
 			strbuf_addstr(&remove_dir_buf, fullpath);
 			remove_dir_recursively(&remove_dir_buf, 0);
 			strbuf_release(&remove_dir_buf);
 		}
-	} else {
-		if (show_only || verbose)
+	} ଅନ୍ୟଥା {
+		ଯଦି (show_only || verbose)
 			printf("Removing stale temporary file %s\n", fullpath);
-		if (!show_only)
+		ଯଦି (!show_only)
 			unlink_or_warn(fullpath);
 	}
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static void perform_reachability_traversal(struct rev_info *revs)
+ସ୍ଥିର ଶୂନ୍ୟ perform_reachability_traversal(ସଂରଚନା rev_info *revs)
 {
-	static int initialized;
-	struct progress *progress = NULL;
+	ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା initialized;
+	ସଂରଚନା progress *progress = ଖାଲି;
 
-	if (initialized)
-		return;
+	ଯଦି (initialized)
+		ଫେରନ୍ତୁ;
 
-	if (show_progress)
+	ଯଦି (show_progress)
 		progress = start_delayed_progress(revs->repo,
 						  _("Checking connectivity"), 0);
 	mark_reachable_objects(revs, 1, expire, progress);
@@ -70,60 +70,60 @@ static void perform_reachability_traversal(struct rev_info *revs)
 	initialized = 1;
 }
 
-static int is_object_reachable(const struct object_id *oid,
-			       struct rev_info *revs)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା is_object_reachable(ଅଚଳ ସଂରଚନା object_id *oid,
+			       ସଂରଚନା rev_info *revs)
 {
-	struct object *obj;
+	ସଂରଚନା object *obj;
 
 	perform_reachability_traversal(revs);
 
 	obj = lookup_object(revs->repo, oid);
-	return obj && (obj->flags & SEEN);
+	ଫେରନ୍ତୁ obj && (obj->flags & SEEN);
 }
 
-static int prune_object(const struct object_id *oid, const char *fullpath,
-			void *data)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା prune_object(ଅଚଳ ସଂରଚନା object_id *oid, ଅଚଳ ଅକ୍ଷର *fullpath,
+			ଶୂନ୍ୟ *data)
 {
-	struct rev_info *revs = data;
-	struct stat st;
+	ସଂରଚନା rev_info *revs = data;
+	ସଂରଚନା stat st;
 
-	if (is_object_reachable(oid, revs))
-		return 0;
+	ଯଦି (is_object_reachable(oid, revs))
+		ଫେରନ୍ତୁ 0;
 
-	if (lstat(fullpath, &st)) {
+	ଯଦି (lstat(fullpath, &st)) {
 		/* report errors, but do not stop pruning */
 		error("Could not stat '%s'", fullpath);
-		return 0;
+		ଫେରନ୍ତୁ 0;
 	}
-	if (st.st_mtime > expire)
-		return 0;
-	if (show_only || verbose) {
-		enum object_type type =
-			odb_read_object_info(revs->repo->objects, oid, NULL);
+	ଯଦି (st.st_mtime > expire)
+		ଫେରନ୍ତୁ 0;
+	ଯଦି (show_only || verbose) {
+		ଗଣନା object_type type =
+			odb_read_object_info(revs->repo->objects, oid, ଖାଲି);
 		printf("%s %s\n", oid_to_hex(oid),
 		       (type > 0) ? type_name(type) : "unknown");
 	}
-	if (!show_only)
+	ଯଦି (!show_only)
 		unlink_or_warn(fullpath);
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int prune_cruft(const char *basename, const char *path,
-		       void *data UNUSED)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା prune_cruft(ଅଚଳ ଅକ୍ଷର *basename, ଅଚଳ ଅକ୍ଷର *path,
+		       ଶୂନ୍ୟ *data UNUSED)
 {
-	if (starts_with(basename, "tmp_obj_"))
+	ଯଦି (starts_with(basename, "tmp_obj_"))
 		prune_tmp_file(path);
-	else
+	ଅନ୍ୟଥା
 		fprintf(stderr, "bad sha1 file: %s\n", path);
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int prune_subdir(unsigned int nr UNUSED, const char *path,
-			void *data UNUSED)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା prune_subdir(unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା nr UNUSED, ଅଚଳ ଅକ୍ଷର *path,
+			ଶୂନ୍ୟ *data UNUSED)
 {
-	if (!show_only)
+	ଯଦି (!show_only)
 		rmdir(path);
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
 /*
@@ -132,32 +132,32 @@ static int prune_subdir(unsigned int nr UNUSED, const char *path,
  * files beginning with "tmp_") accumulating in the object
  * and the pack directories.
  */
-static void remove_temporary_files(const char *path)
+ସ୍ଥିର ଶୂନ୍ୟ remove_temporary_files(ଅଚଳ ଅକ୍ଷର *path)
 {
 	DIR *dir;
-	struct dirent *de;
+	ସଂରଚନା dirent *de;
 
 	dir = opendir(path);
-	if (!dir) {
-		if (errno != ENOENT)
+	ଯଦି (!dir) {
+		ଯଦି (errno != ENOENT)
 			fprintf(stderr, "Unable to open directory %s: %s\n",
 				path, strerror(errno));
-		return;
+		ଫେରନ୍ତୁ;
 	}
-	while ((de = readdir(dir)) != NULL)
-		if (starts_with(de->d_name, "tmp_"))
+	ଯେତେବେଳେ ((de = readdir(dir)) != ଖାଲି)
+		ଯଦି (starts_with(de->d_name, "tmp_"))
 			prune_tmp_file(mkpath("%s/%s", path, de->d_name));
 	closedir(dir);
 }
 
-int cmd_prune(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_prune(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc,
+	      ଅଚଳ ଅକ୍ଷର **argv,
+	      ଅଚଳ ଅକ୍ଷର *prefix,
+	      ସଂରଚନା repository *repo)
 {
-	struct rev_info revs;
-	int exclude_promisor_objects = 0;
-	const struct option options[] = {
+	ସଂରଚନା rev_info revs;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା exclude_promisor_objects = 0;
+	ଅଚଳ ସଂରଚନା option options[] = {
 		OPT__DRY_RUN(&show_only, N_("do not remove, show only")),
 		OPT__VERBOSE(&verbose, N_("report pruned objects")),
 		OPT_BOOL(0, "progress", &show_progress, N_("show progress")),
@@ -167,7 +167,7 @@ int cmd_prune(int argc,
 			 N_("limit traversal to objects outside promisor packfiles")),
 		OPT_END()
 	};
-	char *s;
+	ଅକ୍ଷର *s;
 
 	expire = TIME_MAX;
 	save_commit_buffer = 0;
@@ -176,24 +176,24 @@ int cmd_prune(int argc,
 	argc = parse_options(argc, argv, prefix, options, prune_usage, 0);
 
 	repo_init_revisions(repo, &revs, prefix);
-	if (repo->repository_format_precious_objects)
+	ଯଦି (repo->repository_format_precious_objects)
 		die(_("cannot prune in a precious-objects repo"));
 
-	while (argc--) {
-		struct object_id oid;
-		const char *name = *argv++;
+	ଯେତେବେଳେ (argc--) {
+		ସଂରଚନା object_id oid;
+		ଅଚଳ ଅକ୍ଷର *name = *argv++;
 
-		if (!repo_get_oid(repo, name, &oid)) {
-			struct object *object = parse_object_or_die(repo, &oid, name);
+		ଯଦି (!repo_get_oid(repo, name, &oid)) {
+			ସଂରଚନା object *object = parse_object_or_die(repo, &oid, name);
 			add_pending_object(&revs, object, "");
 		}
-		else
+		ଅନ୍ୟଥା
 			die("unrecognized argument: %s", name);
 	}
 
-	if (show_progress == -1)
+	ଯଦି (show_progress == -1)
 		show_progress = isatty(2);
-	if (exclude_promisor_objects) {
+	ଯଦି (exclude_promisor_objects) {
 		repo->fetch_if_missing = 0;
 		revs.exclude_promisor_objects = 1;
 	}
@@ -205,13 +205,13 @@ int cmd_prune(int argc,
 	remove_temporary_files(repo_get_object_directory(repo));
 	s = mkpathdup("%s/pack", repo_get_object_directory(repo));
 	remove_temporary_files(s);
-	free(s);
+	ମୁକ୍ତ(s);
 
-	if (is_repository_shallow(repo)) {
+	ଯଦି (is_repository_shallow(repo)) {
 		perform_reachability_traversal(&revs);
 		prune_shallow(show_only ? PRUNE_SHOW_ONLY : 0);
 	}
 
 	release_revisions(&revs);
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }

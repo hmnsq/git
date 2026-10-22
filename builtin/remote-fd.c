@@ -1,7 +1,7 @@
-#include "builtin.h"
-#include "transport.h"
+#ଅନ୍ତର୍ଭାଵ "builtin.h"
+#ଅନ୍ତର୍ଭାଵ "transport.h"
 
-static const char usage_msg[] =
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର usage_ସନ୍ଦେଶ[] =
 	"git remote-fd <remote> <url>";
 
 /*
@@ -21,68 +21,68 @@ static const char usage_msg[] =
 
 #define MAXCOMMAND 4096
 
-static void command_loop(int input_fd, int output_fd)
+ସ୍ଥିର ଶୂନ୍ୟ command_loop(ପୂର୍ଣ୍ଣସଂଖ୍ୟା ନିବେଶ_fd, ପୂର୍ଣ୍ଣସଂଖ୍ୟା output_fd)
 {
-	char buffer[MAXCOMMAND];
+	ଅକ୍ଷର buffer[MAXCOMMAND];
 
-	while (1) {
+	ଯେତେବେଳେ (1) {
 		size_t i;
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+		ଯଦି (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
+			ଯଦି (ferror(stdin))
 				die("Input error");
-			return;
+			ଫେରନ୍ତୁ;
 		}
 		/* Strip end of line characters. */
 		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
+		ଯେତେବେଳେ (i > 0 && isspace(buffer[i - 1]))
 			buffer[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
+		ଯଦି (!strcmp(buffer, "capabilities")) {
 			printf("*connect\n\n");
 			fflush(stdout);
-		} else if (starts_with(buffer, "connect ")) {
+		} ଅନ୍ୟଥା ଯଦି (starts_with(buffer, "connect ")) {
 			printf("\n");
 			fflush(stdout);
-			if (bidirectional_transfer_loop(input_fd,
+			ଯଦି (bidirectional_transfer_loop(ନିବେଶ_fd,
 				output_fd))
 				die("Copying data between file descriptors failed");
-			return;
-		} else {
+			ଫେରନ୍ତୁ;
+		} ଅନ୍ୟଥା {
 			die("Bad command: %s", buffer);
 		}
 	}
 }
 
-int cmd_remote_fd(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_remote_fd(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc,
+		  ଅଚଳ ଅକ୍ଷର **argv,
+		  ଅଚଳ ଅକ୍ଷର *prefix,
+		  ସଂରଚନା repository *repo UNUSED)
 {
-	int input_fd = -1;
-	int output_fd = -1;
-	char *end;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ନିବେଶ_fd = -1;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା output_fd = -1;
+	ଅକ୍ଷର *end;
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
-	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 3)
-		usage(usage_msg);
+	show_usage_if_asked(argc, argv, usage_ସନ୍ଦେଶ);
+	ଯଦି (argc != 3)
+		usage(usage_ସନ୍ଦେଶ);
 
-	input_fd = (int)strtoul(argv[2], &end, 10);
+	ନିବେଶ_fd = (ପୂର୍ଣ୍ଣସଂଖ୍ୟା)strtoul(argv[2], &end, 10);
 
-	if ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
+	ଯଦି ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
 		die("Bad URL syntax");
 
-	if (*end == '/' || !*end) {
-		output_fd = input_fd;
-	} else {
-		char *end2;
-		output_fd = (int)strtoul(end + 1, &end2, 10);
+	ଯଦି (*end == '/' || !*end) {
+		output_fd = ନିବେଶ_fd;
+	} ଅନ୍ୟଥା {
+		ଅକ୍ଷର *end2;
+		output_fd = (ପୂର୍ଣ୍ଣସଂଖ୍ୟା)strtoul(end + 1, &end2, 10);
 
-		if ((end2 == end + 1) || (*end2 != '/' && *end2))
+		ଯଦି ((end2 == end + 1) || (*end2 != '/' && *end2))
 			die("Bad URL syntax");
 	}
 
-	command_loop(input_fd, output_fd);
-	return 0;
+	command_loop(ନିବେଶ_fd, output_fd);
+	ଫେରନ୍ତୁ 0;
 }

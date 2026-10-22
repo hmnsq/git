@@ -1,53 +1,53 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "gettext.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "range-diff.h"
-#include "config.h"
-#include "parse.h"
-#include "color.h"
+#ଅନ୍ତର୍ଭାଵ "builtin.h"
+#ଅନ୍ତର୍ଭାଵ "gettext.h"
+#ଅନ୍ତର୍ଭାଵ "object-name.h"
+#ଅନ୍ତର୍ଭାଵ "parse-options.h"
+#ଅନ୍ତର୍ଭାଵ "range-diff.h"
+#ଅନ୍ତର୍ଭାଵ "config.h"
+#ଅନ୍ତର୍ଭାଵ "parse.h"
+#ଅନ୍ତର୍ଭାଵ "color.h"
 
 
-static const char * const builtin_range_diff_usage[] = {
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର * ଅଚଳ builtin_range_diff_usage[] = {
 N_("git range-diff [<options>] <old-base>..<old-tip> <new-base>..<new-tip>"),
 N_("git range-diff [<options>] <old-tip>...<new-tip>"),
 N_("git range-diff [<options>] <base> <old-tip> <new-tip>"),
-NULL
+ଖାଲି
 };
 
-static int parse_max_memory(const struct option *opt, const char *arg, int unset)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା parse_max_memory(ଅଚଳ ସଂରଚନା option *opt, ଅଚଳ ଅକ୍ଷର *arg, ପୂର୍ଣ୍ଣସଂଖ୍ୟା unset)
 {
-	size_t *max_memory = opt->value;
+	size_t *max_memory = opt->ମୂଲ୍ୟ;
 	uintmax_t val;
 
-	if (unset)
-		return 0;
+	ଯଦି (unset)
+		ଫେରନ୍ତୁ 0;
 
-	if (!git_parse_unsigned(arg, &val, SIZE_MAX))
-		return error(_("invalid max-memory value: %s"), arg);
+	ଯଦି (!git_parse_unsigned(arg, &val, SIZE_MAX))
+		ଫେରନ୍ତୁ error(_("invalid max-memory value: %s"), arg);
 
 	*max_memory = (size_t)val;
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-int cmd_range_diff(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_range_diff(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc,
+		   ଅଚଳ ଅକ୍ଷର **argv,
+		   ଅଚଳ ଅକ୍ଷର *prefix,
+		   ସଂରଚନା repository *repo UNUSED)
 {
-	struct diff_options diffopt = { NULL };
-	struct strvec log_arg = STRVEC_INIT;
-	struct strvec diff_merges_arg = STRVEC_INIT;
-	struct range_diff_options range_diff_opts = {
+	ସଂରଚନା diff_options diffopt = { ଖାଲି };
+	ସଂରଚନା strvec log_arg = STRVEC_INIT;
+	ସଂରଚନା strvec diff_merges_arg = STRVEC_INIT;
+	ସଂରଚନା range_diff_options range_diff_opts = {
 		.creation_factor = RANGE_DIFF_CREATION_FACTOR_DEFAULT,
 		.max_memory = RANGE_DIFF_MAX_MEMORY_DEFAULT,
 		.diffopt = &diffopt,
 		.log_arg = &log_arg
 	};
-	int simple_color = -1, left_only = 0, right_only = 0;
-	struct option range_diff_options[] = {
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା simple_color = -1, ବାମ_only = 0, ଡାହାଣ_only = 0;
+	ସଂରଚନା option range_diff_options[] = {
 		OPT_INTEGER(0, "creation-factor",
 			    &range_diff_opts.creation_factor,
 			    N_("percentage by which creation is weighted")),
@@ -62,21 +62,21 @@ int cmd_range_diff(int argc,
 			     N_("size"),
 			     N_("maximum memory for cost matrix (default 4G)"),
 			     parse_max_memory),
-		OPT_PASSTHRU_ARGV(0, "remerge-diff", &diff_merges_arg, NULL,
+		OPT_PASSTHRU_ARGV(0, "remerge-diff", &diff_merges_arg, ଖାଲି,
 				  N_("passed to 'git log'"), PARSE_OPT_NOARG),
-		OPT_BOOL(0, "left-only", &left_only,
+		OPT_BOOL(0, "left-only", &ବାମ_only,
 			 N_("only emit output related to the first range")),
-		OPT_BOOL(0, "right-only", &right_only,
+		OPT_BOOL(0, "right-only", &ଡାହାଣ_only,
 			 N_("only emit output related to the second range")),
 		OPT_END()
 	};
-	struct option *options;
-	int i, dash_dash = -1, res = 0;
-	struct strbuf range1 = STRBUF_INIT, range2 = STRBUF_INIT;
-	struct object_id oid;
-	const char *three_dots = NULL;
+	ସଂରଚନା option *options;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା i, dash_dash = -1, res = 0;
+	ସଂରଚନା strbuf range1 = STRBUF_INIT, range2 = STRBUF_INIT;
+	ସଂରଚନା object_id oid;
+	ଅଚଳ ଅକ୍ଷର *three_dots = ଖାଲି;
 
-	repo_config(the_repository, git_diff_ui_config, NULL);
+	repo_config(the_repository, git_diff_ui_config, ଖାଲି);
 
 	repo_diff_setup(the_repository, &diffopt);
 
@@ -87,38 +87,38 @@ int cmd_range_diff(int argc,
 	diff_setup_done(&diffopt);
 
 	/* force color when --dual-color was used */
-	if (!simple_color)
+	ଯଦି (!simple_color)
 		diffopt.use_color = GIT_COLOR_ALWAYS;
 
 	/* If `--diff-merges` was specified, imply `--merges` */
-	if (diff_merges_arg.nr) {
+	ଯଦି (diff_merges_arg.nr) {
 		range_diff_opts.include_merges = 1;
 		strvec_pushv(&log_arg, diff_merges_arg.v);
 	}
 
-	for (i = 0; i < argc; i++)
-		if (!strcmp(argv[i], "--")) {
+	ପାଇଁ (i = 0; i < argc; i++)
+		ଯଦି (!strcmp(argv[i], "--")) {
 			dash_dash = i;
-			break;
+			ଭାଙ୍ଗ;
 		}
 
-	if (dash_dash == 3 ||
+	ଯଦି (dash_dash == 3 ||
 	    (dash_dash < 0 && argc > 2 &&
 	     !repo_get_oid_committish(the_repository, argv[0], &oid) &&
 	     !repo_get_oid_committish(the_repository, argv[1], &oid) &&
 	     !repo_get_oid_committish(the_repository, argv[2], &oid))) {
-		if (dash_dash < 0)
+		ଯଦି (dash_dash < 0)
 			; /* already validated arguments */
-		else if (repo_get_oid_committish(the_repository, argv[0], &oid))
-			usage_msg_optf(_("not a revision: '%s'"),
+		ଅନ୍ୟଥା ଯଦି (repo_get_oid_committish(the_repository, argv[0], &oid))
+			usage_ସନ୍ଦେଶ_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[0]);
-		else if (repo_get_oid_committish(the_repository, argv[1], &oid))
-			usage_msg_optf(_("not a revision: '%s'"),
+		ଅନ୍ୟଥା ଯଦି (repo_get_oid_committish(the_repository, argv[1], &oid))
+			usage_ସନ୍ଦେଶ_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[1]);
-		else if (repo_get_oid_committish(the_repository, argv[2], &oid))
-			usage_msg_optf(_("not a revision: '%s'"),
+		ଅନ୍ୟଥା ଯଦି (repo_get_oid_committish(the_repository, argv[2], &oid))
+			usage_ସନ୍ଦେଶ_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[2]);
 
@@ -127,18 +127,18 @@ int cmd_range_diff(int argc,
 
 		strvec_pushv(&log_arg, argv +
 			     (dash_dash < 0 ? 3 : dash_dash));
-	} else if (dash_dash == 2 ||
+	} ଅନ୍ୟଥା ଯଦି (dash_dash == 2 ||
 		   (dash_dash < 0 && argc > 1 &&
 		    is_range_diff_range(argv[0]) &&
 		    is_range_diff_range(argv[1]))) {
-		if (dash_dash < 0)
+		ଯଦି (dash_dash < 0)
 			; /* already validated arguments */
-		else if (!is_range_diff_range(argv[0]))
-			usage_msg_optf(_("not a commit range: '%s'"),
+		ଅନ୍ୟଥା ଯଦି (!is_range_diff_range(argv[0]))
+			usage_ସନ୍ଦେଶ_optf(_("not a commit range: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[0]);
-		else if (!is_range_diff_range(argv[1]))
-			usage_msg_optf(_("not a commit range: '%s'"),
+		ଅନ୍ୟଥା ଯଦି (!is_range_diff_range(argv[1]))
+			usage_ସନ୍ଦେଶ_optf(_("not a commit range: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[1]);
 
@@ -147,30 +147,30 @@ int cmd_range_diff(int argc,
 
 		strvec_pushv(&log_arg, argv +
 			     (dash_dash < 0 ? 2 : dash_dash));
-	} else if (dash_dash == 1 ||
+	} ଅନ୍ୟଥା ଯଦି (dash_dash == 1 ||
 		   (dash_dash < 0 && argc > 0 &&
 		    (three_dots = strstr(argv[0], "...")))) {
-		const char *a, *b;
-		int a_len;
+		ଅଚଳ ଅକ୍ଷର *a, *b;
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା a_len;
 
-		if (dash_dash < 0)
+		ଯଦି (dash_dash < 0)
 			; /* already validated arguments */
-		else if (!(three_dots = strstr(argv[0], "...")))
-			usage_msg_optf(_("not a symmetric range: '%s'"),
+		ଅନ୍ୟଥା ଯଦି (!(three_dots = strstr(argv[0], "...")))
+			usage_ସନ୍ଦେଶ_optf(_("not a symmetric range: '%s'"),
 					 builtin_range_diff_usage, options,
 					 argv[0]);
 
-		if (three_dots == argv[0]) {
+		ଯଦି (three_dots == argv[0]) {
 			a = "HEAD";
 			a_len = strlen(a);
-		} else {
+		} ଅନ୍ୟଥା {
 			a = argv[0];
-			a_len = (int)(three_dots - a);
+			a_len = (ପୂର୍ଣ୍ଣସଂଖ୍ୟା)(three_dots - a);
 		}
 
-		if (three_dots[3])
+		ଯଦି (three_dots[3])
 			b = three_dots + 3;
-		else
+		ଅନ୍ୟଥା
 			b = "HEAD";
 
 		strbuf_addf(&range1, "%s..%.*s", b, a_len, a);
@@ -178,14 +178,14 @@ int cmd_range_diff(int argc,
 
 		strvec_pushv(&log_arg, argv +
 			     (dash_dash < 0 ? 1 : dash_dash));
-	} else
-		usage_msg_opt(_("need two commit ranges"),
+	} ଅନ୍ୟଥା
+		usage_ସନ୍ଦେଶ_opt(_("need two commit ranges"),
 			      builtin_range_diff_usage, options);
 	FREE_AND_NULL(options);
 
 	range_diff_opts.dual_color = simple_color < 1;
-	range_diff_opts.left_only = left_only;
-	range_diff_opts.right_only = right_only;
+	range_diff_opts.ବାମ_only = ବାମ_only;
+	range_diff_opts.ଡାହାଣ_only = ଡାହାଣ_only;
 	res = show_range_diff(range1.buf, range2.buf, &range_diff_opts);
 
 	strvec_clear(&log_arg);
@@ -193,5 +193,5 @@ int cmd_range_diff(int argc,
 	strbuf_release(&range1);
 	strbuf_release(&range2);
 
-	return res;
+	ଫେରନ୍ତୁ res;
 }

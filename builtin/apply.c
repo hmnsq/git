@@ -1,25 +1,25 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "gettext.h"
-#include "hash.h"
-#include "apply.h"
+#ଅନ୍ତର୍ଭାଵ "builtin.h"
+#ଅନ୍ତର୍ଭାଵ "gettext.h"
+#ଅନ୍ତର୍ଭାଵ "hash.h"
+#ଅନ୍ତର୍ଭାଵ "apply.h"
 
-static const char * const apply_usage[] = {
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର * ଅଚଳ apply_usage[] = {
 	N_("git apply [<options>] [<patch>...]"),
-	NULL
+	ଖାଲି
 };
 
-int cmd_apply(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_apply(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc,
+	      ଅଚଳ ଅକ୍ଷର **argv,
+	      ଅଚଳ ଅକ୍ଷର *prefix,
+	      ସଂରଚନା repository *repo)
 {
-	int force_apply = 0;
-	int options = 0;
-	int ret;
-	struct apply_state state;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା force_apply = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା options = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret;
+	ସଂରଚନା apply_state state;
 
-	if (init_apply_state(&state, the_repository, prefix))
+	ଯଦି (init_apply_state(&state, the_repository, prefix))
 		exit(128);
 
 	/*
@@ -28,24 +28,24 @@ int cmd_apply(int argc,
 	 * is worth the effort.
 	 * cf. https://lore.kernel.org/git/xmqqcypfcmn4.fsf@gitster.g/
 	 */
-	if (!the_hash_algo)
+	ଯଦି (!the_hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	argc = apply_parse_options(argc, argv,
 				   &state, &force_apply, &options,
 				   apply_usage);
 
-	if (repo) {
+	ଯଦି (repo) {
 		prepare_repo_settings(repo);
 		repo->settings.command_requires_full_index = 0;
 	}
 
-	if (check_apply_state(&state, force_apply))
+	ଯଦି (check_apply_state(&state, force_apply))
 		exit(128);
 
 	ret = apply_all_patches(&state, argc, argv, options);
 
 	clear_apply_state(&state);
 
-	return ret;
+	ଫେରନ୍ତୁ ret;
 }

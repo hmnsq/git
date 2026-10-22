@@ -2,32 +2,32 @@
  * Copyright (c) 2006 Franck Bui-Huu
  * Copyright (c) 2006 Rene Scharfe
  */
-#include "builtin.h"
-#include "archive.h"
-#include "gettext.h"
-#include "transport.h"
-#include "parse-options.h"
-#include "pkt-line.h"
+#ଅନ୍ତର୍ଭାଵ "builtin.h"
+#ଅନ୍ତର୍ଭାଵ "archive.h"
+#ଅନ୍ତର୍ଭାଵ "gettext.h"
+#ଅନ୍ତର୍ଭାଵ "transport.h"
+#ଅନ୍ତର୍ଭାଵ "parse-options.h"
+#ଅନ୍ତର୍ଭାଵ "pkt-line.h"
 
-static void create_output_file(const char *output_file)
+ସ୍ଥିର ଶୂନ୍ୟ create_output_file(ଅଚଳ ଅକ୍ଷର *output_file)
 {
-	int output_fd = xopen(output_file, O_CREAT | O_WRONLY | O_TRUNC, 0666);
-	if (output_fd != 1) {
-		if (dup2(output_fd, 1) < 0)
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା output_fd = xopen(output_file, O_CREAT | O_WRONLY | O_TRUNC, 0666);
+	ଯଦି (output_fd != 1) {
+		ଯଦି (dup2(output_fd, 1) < 0)
 			die_errno(_("could not redirect output"));
-		else
+		ଅନ୍ୟଥା
 			close(output_fd);
 	}
 }
 
-static int run_remote_archiver(int argc, const char **argv,
-			       const char *remote, const char *exec,
-			       const char *name_hint)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା run_remote_archiver(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc, ଅଚଳ ଅକ୍ଷର **argv,
+			       ଅଚଳ ଅକ୍ଷର *remote, ଅଚଳ ଅକ୍ଷର *exec,
+			       ଅଚଳ ଅକ୍ଷର *name_hint)
 {
-	int fd[2], i, rv;
-	struct transport *transport;
-	struct remote *_remote;
-	struct packet_reader reader;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା fd[2], i, rv;
+	ସଂରଚନା transport *transport;
+	ସଂରଚନା remote *_remote;
+	ସଂରଚନା packet_reader reader;
 
 	_remote = remote_get(remote);
 	transport = transport_get(_remote, _remote->url.v[0]);
@@ -39,35 +39,35 @@ static int run_remote_archiver(int argc, const char **argv,
 	 * filename. This way explicit --format options can override
 	 * it.
 	 */
-	if (name_hint) {
-		const char *format = archive_format_from_filename(name_hint);
-		if (format)
+	ଯଦି (name_hint) {
+		ଅଚଳ ଅକ୍ଷର *format = archive_format_from_filename(name_hint);
+		ଯଦି (format)
 			packet_write_fmt(fd[1], "argument --format=%s\n", format);
 	}
-	for (i = 1; i < argc; i++)
+	ପାଇଁ (i = 1; i < argc; i++)
 		packet_write_fmt(fd[1], "argument %s\n", argv[i]);
 	packet_flush(fd[1]);
 
-	packet_reader_init(&reader, fd[0], NULL, 0,
+	packet_reader_init(&reader, fd[0], ଖାଲି, 0,
 			   PACKET_READ_CHOMP_NEWLINE |
 			   PACKET_READ_DIE_ON_ERR_PACKET);
 
-	if (packet_reader_read(&reader) != PACKET_READ_NORMAL)
+	ଯଦି (packet_reader_read(&reader) != PACKET_READ_NORMAL)
 		die(_("git archive: expected ACK/NAK, got a flush packet"));
-	if (strcmp(reader.line, "ACK")) {
-		if (starts_with(reader.line, "NACK "))
-			die(_("git archive: NACK %s"), reader.line + 5);
+	ଯଦି (strcmp(reader.ଧାଡ଼ି, "ACK")) {
+		ଯଦି (starts_with(reader.ଧାଡ଼ି, "NACK "))
+			die(_("git archive: NACK %s"), reader.ଧାଡ଼ି + 5);
 		die(_("git archive: protocol error"));
 	}
 
-	if (packet_reader_read(&reader) != PACKET_READ_FLUSH)
+	ଯଦି (packet_reader_read(&reader) != PACKET_READ_FLUSH)
 		die(_("git archive: expected a flush"));
 
 	/* Now, start reading from fd[0] and spit it out to stdout */
 	rv = recv_sideband("archive", fd[0], 1);
 	rv |= transport_disconnect(transport);
 
-	return !!rv;
+	ଫେରନ୍ତୁ !!rv;
 }
 
 #define PARSE_OPT_KEEP_ALL ( PARSE_OPT_KEEP_DASHDASH | 	\
@@ -75,15 +75,15 @@ static int run_remote_archiver(int argc, const char **argv,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT |	\
 			     PARSE_OPT_NO_INTERNAL_HELP	)
 
-int cmd_archive(int argc,
-		const char **argv,
-		const char *prefix,
-		struct repository *repo)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_archive(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc,
+		ଅଚଳ ଅକ୍ଷର **argv,
+		ଅଚଳ ଅକ୍ଷର *prefix,
+		ସଂରଚନା repository *repo)
 {
-	const char *exec = "git-upload-archive";
-	char *output = NULL;
-	const char *remote = NULL;
-	struct option local_opts[] = {
+	ଅଚଳ ଅକ୍ଷର *exec = "git-upload-archive";
+	ଅକ୍ଷର *output = ଖାଲି;
+	ଅଚଳ ଅକ୍ଷର *remote = ଖାଲି;
+	ସଂରଚନା option local_opts[] = {
 		OPT_FILENAME('o', "output", &output,
 			     N_("write the archive to this file")),
 		OPT_STRING(0, "remote", &remote, N_("repo"),
@@ -92,26 +92,26 @@ int cmd_archive(int argc,
 			N_("path to the remote git-upload-archive command")),
 		OPT_END()
 	};
-	int ret;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret;
 
-	argc = parse_options(argc, argv, prefix, local_opts, NULL,
+	argc = parse_options(argc, argv, prefix, local_opts, ଖାଲି,
 			     PARSE_OPT_KEEP_ALL);
 
 	init_archivers();
 
-	if (output)
+	ଯଦି (output)
 		create_output_file(output);
 
-	if (remote) {
+	ଯଦି (remote) {
 		ret = run_remote_archiver(argc, argv, remote, exec, output);
-		goto out;
+		ଯାଅ out;
 	}
 
-	setvbuf(stderr, NULL, _IOLBF, BUFSIZ);
+	setvbuf(stderr, ଖାଲି, _IOLBF, BUFSIZ);
 
 	ret = write_archive(argc, argv, prefix, repo, output, 0);
 
 out:
-	free(output);
-	return ret;
+	ମୁକ୍ତ(output);
+	ଫେରନ୍ତୁ ret;
 }

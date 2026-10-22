@@ -4,146 +4,146 @@
  * Copyright (c) 2006 Junio C Hamano
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "path.h"
-#include "parse-options.h"
-#include "quote.h"
-#include "packfile.h"
-#include "object-file.h"
+#ଅନ୍ତର୍ଭାଵ "builtin.h"
+#ଅନ୍ତର୍ଭାଵ "config.h"
+#ଅନ୍ତର୍ଭାଵ "dir.h"
+#ଅନ୍ତର୍ଭାଵ "environment.h"
+#ଅନ୍ତର୍ଭାଵ "gettext.h"
+#ଅନ୍ତର୍ଭାଵ "path.h"
+#ଅନ୍ତର୍ଭାଵ "parse-options.h"
+#ଅନ୍ତର୍ଭାଵ "quote.h"
+#ଅନ୍ତର୍ଭାଵ "packfile.h"
+#ଅନ୍ତର୍ଭାଵ "object-file.h"
 
-static unsigned long garbage;
-static off_t size_garbage;
-static int verbose;
-static unsigned long loose, packed, packed_loose;
-static off_t loose_size;
+ସ୍ଥିର unsigned long garbage;
+ସ୍ଥିର off_t size_garbage;
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା verbose;
+ସ୍ଥିର unsigned long loose, packed, packed_loose;
+ସ୍ଥିର off_t loose_size;
 
-static const char *bits_to_msg(unsigned seen_bits)
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *bits_to_ସନ୍ଦେଶ(unsigned seen_bits)
 {
-	switch (seen_bits) {
-	case 0:
-		return "no corresponding .idx or .pack";
-	case PACKDIR_FILE_GARBAGE:
-		return "garbage found";
-	case PACKDIR_FILE_PACK:
-		return "no corresponding .idx";
-	case PACKDIR_FILE_IDX:
-		return "no corresponding .pack";
-	case PACKDIR_FILE_PACK|PACKDIR_FILE_IDX:
-	default:
-		return NULL;
+	ବାଛ (seen_bits) {
+	ସ୍ଥିତି 0:
+		ଫେରନ୍ତୁ "no corresponding .idx or .pack";
+	ସ୍ଥିତି PACKDIR_FILE_GARBAGE:
+		ଫେରନ୍ତୁ "garbage found";
+	ସ୍ଥିତି PACKDIR_FILE_PACK:
+		ଫେରନ୍ତୁ "no corresponding .idx";
+	ସ୍ଥିତି PACKDIR_FILE_IDX:
+		ଫେରନ୍ତୁ "no corresponding .pack";
+	ସ୍ଥିତି PACKDIR_FILE_PACK|PACKDIR_FILE_IDX:
+	ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
+		ଫେରନ୍ତୁ ଖାଲି;
 	}
 }
 
-static void real_report_garbage(unsigned seen_bits, const char *path)
+ସ୍ଥିର ଶୂନ୍ୟ real_report_garbage(unsigned seen_bits, ଅଚଳ ଅକ୍ଷର *path)
 {
-	struct stat st;
-	const char *desc = bits_to_msg(seen_bits);
+	ସଂରଚନା stat st;
+	ଅଚଳ ଅକ୍ଷର *desc = bits_to_ସନ୍ଦେଶ(seen_bits);
 
-	if (!desc)
-		return;
+	ଯଦି (!desc)
+		ଫେରନ୍ତୁ;
 
-	if (!stat(path, &st))
+	ଯଦି (!stat(path, &st))
 		size_garbage += st.st_size;
 	warning("%s: %s", desc, path);
 	garbage++;
 }
 
-static void loose_garbage(const char *path)
+ସ୍ଥିର ଶୂନ୍ୟ loose_garbage(ଅଚଳ ଅକ୍ଷର *path)
 {
-	if (verbose)
+	ଯଦି (verbose)
 		report_garbage(PACKDIR_FILE_GARBAGE, path);
 }
 
-static int count_loose(const struct object_id *oid, const char *path,
-		       void *data UNUSED)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା ଗଣନା_loose(ଅଚଳ ସଂରଚନା object_id *oid, ଅଚଳ ଅକ୍ଷର *path,
+		       ଶୂନ୍ୟ *data UNUSED)
 {
-	struct stat st;
+	ସଂରଚନା stat st;
 
-	if (lstat(path, &st) || !S_ISREG(st.st_mode))
+	ଯଦି (lstat(path, &st) || !S_ISREG(st.st_mode))
 		loose_garbage(path);
-	else {
+	ଅନ୍ୟଥା {
 		loose_size += on_disk_bytes(st);
 		loose++;
-		if (verbose && has_object_pack(the_repository, oid))
+		ଯଦି (verbose && has_object_pack(the_repository, oid))
 			packed_loose++;
 	}
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int count_cruft(const char *basename UNUSED, const char *path,
-		       void *data UNUSED)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା ଗଣନା_cruft(ଅଚଳ ଅକ୍ଷର *basename UNUSED, ଅଚଳ ଅକ୍ଷର *path,
+		       ଶୂନ୍ୟ *data UNUSED)
 {
 	loose_garbage(path);
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int print_alternate(struct odb_files_dir *alternate, void *data UNUSED)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା print_alternate(ସଂରଚନା odb_files_dir *alternate, ଶୂନ୍ୟ *data UNUSED)
 {
 	printf("alternate: ");
-	quote_c_style(alternate->abspath, NULL, stdout, 0);
+	quote_c_style(alternate->abspath, ଖାଲି, stdout, 0);
 	putchar('\n');
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static char const * const count_objects_usage[] = {
+ସ୍ଥିର ଅକ୍ଷର ଅଚଳ * ଅଚଳ ଗଣନା_objects_usage[] = {
 	"git count-objects [-v] [-H | --human-readable]",
-	NULL
+	ଖାଲି
 };
 
-int cmd_count_objects(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo UNUSED)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd_ଗଣନା_objects(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc,
+		      ଅଚଳ ଅକ୍ଷର **argv,
+		      ଅଚଳ ଅକ୍ଷର *prefix,
+		      ସଂରଚନା repository *repo UNUSED)
 {
-	int human_readable = 0;
-	struct option opts[] = {
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା human_readable = 0;
+	ସଂରଚନା option opts[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose")),
 		OPT_BOOL('H', "human-readable", &human_readable,
 			 N_("print sizes in human readable format")),
 		OPT_END(),
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ଖାଲି);
 
-	argc = parse_options(argc, argv, prefix, opts, count_objects_usage, 0);
+	argc = parse_options(argc, argv, prefix, opts, ଗଣନା_objects_usage, 0);
 	/* we do not take arguments other than flags for now */
-	if (argc)
-		usage_with_options(count_objects_usage, opts);
-	if (verbose) {
+	ଯଦି (argc)
+		usage_with_options(ଗଣନା_objects_usage, opts);
+	ଯଦି (verbose) {
 		report_garbage = real_report_garbage;
 		report_linked_checkout_garbage(the_repository);
 	}
 
 	for_each_loose_file_in_source(the_repository->objects->source,
-				      count_loose, count_cruft, NULL, NULL);
+				      ଗଣନା_loose, ଗଣନା_cruft, ଖାଲି, ଖାଲି);
 
-	if (verbose) {
-		struct packed_git *p;
-		unsigned long num_pack = 0;
+	ଯଦି (verbose) {
+		ସଂରଚନା packed_git *p;
+		unsigned long ଅଙ୍କ_pack = 0;
 		off_t size_pack = 0;
-		struct strbuf loose_buf = STRBUF_INIT;
-		struct strbuf pack_buf = STRBUF_INIT;
-		struct strbuf garbage_buf = STRBUF_INIT;
+		ସଂରଚନା strbuf loose_buf = STRBUF_INIT;
+		ସଂରଚନା strbuf pack_buf = STRBUF_INIT;
+		ସଂରଚନା strbuf garbage_buf = STRBUF_INIT;
 
 		repo_for_each_pack(the_repository, p) {
-			if (!p->pack_local)
-				continue;
-			if (open_pack_index(p))
-				continue;
-			packed += p->num_objects;
+			ଯଦି (!p->pack_local)
+				ଜାରି;
+			ଯଦି (open_pack_index(p))
+				ଜାରି;
+			packed += p->ଅଙ୍କ_objects;
 			size_pack += p->pack_size + p->index_size;
-			num_pack++;
+			ଅଙ୍କ_pack++;
 		}
 
-		if (human_readable) {
+		ଯଦି (human_readable) {
 			strbuf_humanise_bytes(&loose_buf, loose_size);
 			strbuf_humanise_bytes(&pack_buf, size_pack);
 			strbuf_humanise_bytes(&garbage_buf, size_garbage);
-		} else {
+		} ଅନ୍ୟଥା {
 			strbuf_addf(&loose_buf, "%lu",
 				    (unsigned long)(loose_size / 1024));
 			strbuf_addf(&pack_buf, "%lu",
@@ -155,24 +155,24 @@ int cmd_count_objects(int argc,
 		printf("count: %lu\n", loose);
 		printf("size: %s\n", loose_buf.buf);
 		printf("in-pack: %lu\n", packed);
-		printf("packs: %lu\n", num_pack);
+		printf("packs: %lu\n", ଅଙ୍କ_pack);
 		printf("size-pack: %s\n", pack_buf.buf);
 		printf("prune-packable: %lu\n", packed_loose);
 		printf("garbage: %lu\n", garbage);
 		printf("size-garbage: %s\n", garbage_buf.buf);
-		odb_for_each_alternate(the_repository->objects, print_alternate, NULL);
+		odb_for_each_alternate(the_repository->objects, print_alternate, ଖାଲି);
 		strbuf_release(&loose_buf);
 		strbuf_release(&pack_buf);
 		strbuf_release(&garbage_buf);
-	} else {
-		struct strbuf buf = STRBUF_INIT;
-		if (human_readable)
+	} ଅନ୍ୟଥା {
+		ସଂରଚନା strbuf buf = STRBUF_INIT;
+		ଯଦି (human_readable)
 			strbuf_humanise_bytes(&buf, loose_size);
-		else
+		ଅନ୍ୟଥା
 			strbuf_addf(&buf, "%lu kilobytes",
 				    (unsigned long)(loose_size / 1024));
 		printf("%lu objects, %s\n", loose, buf.buf);
 		strbuf_release(&buf);
 	}
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
