@@ -7,29 +7,29 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "ewah/ewok.h"
-#include "lockfile.h"
-#include "color.h"
-#include "commit.h"
-#include "gettext.h"
-#include "tag.h"
-#include "diff.h"
-#include "diff-merges.h"
-#include "diffcore.h"
-#include "preload-index.h"
-#include "read-cache-ll.h"
-#include "revision.h"
-#include "log-tree.h"
-#include "setup.h"
-#include "oid-array.h"
-#include "tree.h"
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "ewah/ewok.h"
+#ضمن "lockfile.h"
+#ضمن "color.h"
+#ضمن "commit.h"
+#ضمن "gettext.h"
+#ضمن "tag.h"
+#ضمن "diff.h"
+#ضمن "diff-merges.h"
+#ضمن "diffcore.h"
+#ضمن "preload-index.h"
+#ضمن "read-cache-ll.h"
+#ضمن "revision.h"
+#ضمن "log-tree.h"
+#ضمن "setup.h"
+#ضمن "oid-array.h"
+#ضمن "tree.h"
 
 #define DIFF_NO_INDEX_EXPLICIT 1
 #define DIFF_NO_INDEX_IMPLICIT 2
 
-static const char builtin_diff_usage[] =
+ساكن ثابت حرف builtin_diff_usage[] =
 "git diff [<options>] [<commit>] [--] [<path>...]\n"
 "   or: git diff [<options>] --cached [--merge-base] [<commit>] [--] [<path>...]\n"
 "   or: git diff [<options>] [--merge-base] <commit> [<commit>...] <commit> [--] [<path>...]\n"
@@ -39,36 +39,36 @@ static const char builtin_diff_usage[] =
 "\n"
 COMMON_DIFF_OPTIONS_HELP;
 
-static const char *blob_path(struct object_array_entry *entry)
+ساكن ثابت حرف *blob_path(بنية object_array_entry *entry)
 {
-	return entry->path ? entry->path : entry->name;
+	أرجع entry->path ? entry->path : entry->name;
 }
 
-static void stuff_change(struct diff_options *opt,
+ساكن فراغ stuff_change(بنية diff_options *opt,
 			 unsigned old_mode, unsigned new_mode,
-			 const struct object_id *old_oid,
-			 const struct object_id *new_oid,
-			 int old_oid_valid,
-			 int new_oid_valid,
-			 const char *old_path,
-			 const char *new_path)
+			 ثابت بنية object_id *old_oid,
+			 ثابت بنية object_id *new_oid,
+			 صحيح old_oid_valid,
+			 صحيح new_oid_valid,
+			 ثابت حرف *old_path,
+			 ثابت حرف *new_path)
 {
-	struct diff_filespec *one, *two;
+	بنية diff_filespec *one, *two;
 
-	if (!is_null_oid(old_oid) && !is_null_oid(new_oid) &&
+	إذا (!is_null_oid(old_oid) && !is_null_oid(new_oid) &&
 	    oideq(old_oid, new_oid) && (old_mode == new_mode))
-		return;
+		أرجع;
 
-	if (opt->flags.reverse_diff) {
+	إذا (opt->flags.reverse_diff) {
 		SWAP(old_mode, new_mode);
 		SWAP(old_oid, new_oid);
 		SWAP(old_path, new_path);
 	}
 
-	if (opt->prefix &&
+	إذا (opt->prefix &&
 	    (strncmp(old_path, opt->prefix, opt->prefix_length) ||
 	     strncmp(new_path, opt->prefix, opt->prefix_length)))
-		return;
+		أرجع;
 
 	one = alloc_filespec(old_path);
 	two = alloc_filespec(new_path);
@@ -78,28 +78,28 @@ static void stuff_change(struct diff_options *opt,
 	diff_queue(&diff_queued_diff, one, two);
 }
 
-static void builtin_diff_b_f(struct rev_info *revs,
-			     int argc, const char **argv UNUSED,
-			     struct object_array_entry **blob)
+ساكن فراغ builtin_diff_b_f(بنية rev_info *revs,
+			     صحيح argc, ثابت حرف **argv UNUSED,
+			     بنية object_array_entry **blob)
 {
 	/* Blob vs file in the working tree*/
-	struct stat st;
-	const char *path;
+	بنية stat st;
+	ثابت حرف *path;
 
-	if (argc > 1)
+	إذا (argc > 1)
 		usage(builtin_diff_usage);
 
 	GUARD_PATHSPEC(&revs->prune_data, PATHSPEC_FROMTOP | PATHSPEC_LITERAL);
-	path = revs->prune_data.items[0].match;
+	path = revs->prune_data.عناصر[0].match;
 
-	if (lstat(path, &st))
+	إذا (lstat(path, &st))
 		die_errno(_("failed to stat '%s'"), path);
-	if (!(S_ISREG(st.st_mode) || S_ISLNK(st.st_mode)))
+	إذا (!(S_ISREG(st.st_mode) || S_ISLNK(st.st_mode)))
 		die(_("'%s': not a regular file or symlink"), path);
 
 	diff_set_mnemonic_prefix(&revs->diffopt, "o/", "w/");
 
-	if (blob[0]->mode == S_IFINVALID)
+	إذا (blob[0]->mode == S_IFINVALID)
 		blob[0]->mode = canon_mode(st.st_mode);
 
 	stuff_change(&revs->diffopt,
@@ -112,19 +112,19 @@ static void builtin_diff_b_f(struct rev_info *revs,
 	diff_flush(&revs->diffopt);
 }
 
-static void builtin_diff_blobs(struct rev_info *revs,
-			       int argc, const char **argv UNUSED,
-			       struct object_array_entry **blob)
+ساكن فراغ builtin_diff_blobs(بنية rev_info *revs,
+			       صحيح argc, ثابت حرف **argv UNUSED,
+			       بنية object_array_entry **blob)
 {
-	const unsigned mode = canon_mode(S_IFREG | 0644);
+	ثابت unsigned mode = canon_mode(S_IFREG | 0644);
 
-	if (argc > 1)
+	إذا (argc > 1)
 		usage(builtin_diff_usage);
 
-	if (blob[0]->mode == S_IFINVALID)
+	إذا (blob[0]->mode == S_IFINVALID)
 		blob[0]->mode = mode;
 
-	if (blob[1]->mode == S_IFINVALID)
+	إذا (blob[1]->mode == S_IFINVALID)
 		blob[1]->mode = mode;
 
 	stuff_change(&revs->diffopt,
@@ -136,17 +136,17 @@ static void builtin_diff_blobs(struct rev_info *revs,
 	diff_flush(&revs->diffopt);
 }
 
-static void builtin_diff_index(struct rev_info *revs,
-			       int argc, const char **argv)
+ساكن فراغ builtin_diff_index(بنية rev_info *revs,
+			       صحيح argc, ثابت حرف **argv)
 {
-	unsigned int option = 0;
-	while (1 < argc) {
-		const char *arg = argv[1];
-		if (!strcmp(arg, "--cached") || !strcmp(arg, "--staged"))
+	unsigned صحيح option = 0;
+	طالما (1 < argc) {
+		ثابت حرف *arg = argv[1];
+		إذا (!strcmp(arg, "--cached") || !strcmp(arg, "--staged"))
 			option |= DIFF_INDEX_CACHED;
-		else if (!strcmp(arg, "--merge-base"))
+		وإلا إذا (!strcmp(arg, "--merge-base"))
 			option |= DIFF_INDEX_MERGE_BASE;
-		else
+		وإلا
 			usage(builtin_diff_usage);
 		argv++; argc--;
 	}
@@ -154,117 +154,117 @@ static void builtin_diff_index(struct rev_info *revs,
 	 * Make sure there is one revision (i.e. pending object),
 	 * and there is no revision filtering parameters.
 	 */
-	if (revs->pending.nr != 1 ||
-	    revs->max_count != -1 || revs->min_age != -1 ||
+	إذا (revs->pending.nr != 1 ||
+	    revs->max_عدد != -1 || revs->min_age != -1 ||
 	    revs->max_age != -1)
 		usage(builtin_diff_usage);
-	if (!(option & DIFF_INDEX_CACHED)) {
-		setup_work_tree(the_repository);
-		if (repo_read_index_preload(the_repository,
+	إذا (!(option & DIFF_INDEX_CACHED)) {
+		setup_work_شجرة(the_repository);
+		إذا (repo_read_index_preload(the_repository,
 					    &revs->diffopt.pathspec, 0) < 0) {
 			die_errno("repo_read_index_preload");
 		}
-	} else if (repo_read_index(the_repository) < 0) {
+	} وإلا إذا (repo_read_index(the_repository) < 0) {
 		die_errno("repo_read_cache");
 	}
 	run_diff_index(revs, option);
 }
 
-static void builtin_diff_tree(struct rev_info *revs,
-			      int argc, const char **argv,
-			      struct object_array_entry *ent0,
-			      struct object_array_entry *ent1)
+ساكن فراغ builtin_diff_شجرة(بنية rev_info *revs,
+			      صحيح argc, ثابت حرف **argv,
+			      بنية object_array_entry *ent0,
+			      بنية object_array_entry *ent1)
 {
-	const struct object_id *(oid[2]);
-	struct object_id mb_oid;
-	int merge_base = 0;
+	ثابت بنية object_id *(oid[2]);
+	بنية object_id mb_oid;
+	صحيح merge_base = 0;
 
-	while (1 < argc) {
-		const char *arg = argv[1];
-		if (!strcmp(arg, "--merge-base"))
+	طالما (1 < argc) {
+		ثابت حرف *arg = argv[1];
+		إذا (!strcmp(arg, "--merge-base"))
 			merge_base = 1;
-		else
+		وإلا
 			usage(builtin_diff_usage);
 		argv++; argc--;
 	}
 
-	if (merge_base) {
+	إذا (merge_base) {
 		diff_get_merge_base(revs, &mb_oid);
 		oid[0] = &mb_oid;
 		oid[1] = &revs->pending.objects[1].item->oid;
-	} else {
-		int swap = 0;
+	} وإلا {
+		صحيح swap = 0;
 
 		/*
 		 * We saw two trees, ent0 and ent1.  If ent1 is uninteresting,
 		 * swap them.
 		 */
-		if (ent1->item->flags & UNINTERESTING)
+		إذا (ent1->item->flags & UNINTERESTING)
 			swap = 1;
 		oid[swap] = &ent0->item->oid;
 		oid[1 - swap] = &ent1->item->oid;
 	}
-	diff_tree_oid(oid[0], oid[1], "", &revs->diffopt);
-	log_tree_diff_flush(revs);
+	diff_شجرة_oid(oid[0], oid[1], "", &revs->diffopt);
+	log_شجرة_diff_flush(revs);
 }
 
-static void builtin_diff_combined(struct rev_info *revs,
-				  int argc, const char **argv UNUSED,
-				  struct object_array_entry *ent,
-				  int ents, int first_non_parent)
+ساكن فراغ builtin_diff_combined(بنية rev_info *revs,
+				  صحيح argc, ثابت حرف **argv UNUSED,
+				  بنية object_array_entry *ent,
+				  صحيح ents, صحيح first_non_parent)
 {
-	struct oid_array parents = OID_ARRAY_INIT;
-	int i;
+	بنية oid_array parents = OID_ARRAY_INIT;
+	صحيح i;
 
-	if (argc > 1)
+	إذا (argc > 1)
 		usage(builtin_diff_usage);
 
-	if (first_non_parent < 0)
+	إذا (first_non_parent < 0)
 		die(_("no merge given, only parents."));
-	if (first_non_parent >= ents)
+	إذا (first_non_parent >= ents)
 		BUG("first_non_parent out of range: %d", first_non_parent);
 
 	diff_merges_set_dense_combined_if_unset(revs);
 
-	for (i = 0; i < ents; i++) {
-		if (i != first_non_parent)
+	لكل (i = 0; i < ents; i++) {
+		إذا (i != first_non_parent)
 			oid_array_append(&parents, &ent[i].item->oid);
 	}
-	diff_tree_combined(&ent[first_non_parent].item->oid, &parents, revs);
+	diff_شجرة_combined(&ent[first_non_parent].item->oid, &parents, revs);
 	oid_array_clear(&parents);
 }
 
-static void refresh_index_quietly(void)
+ساكن فراغ refresh_index_quietly(فراغ)
 {
-	struct lock_file lock_file = LOCK_INIT;
-	int fd;
+	بنية lock_file lock_file = LOCK_INIT;
+	صحيح fd;
 
 	fd = repo_hold_locked_index(the_repository, &lock_file, 0);
-	if (fd < 0)
-		return;
+	إذا (fd < 0)
+		أرجع;
 	discard_index(the_repository->index);
 	repo_read_index(the_repository);
-	refresh_index(the_repository->index, REFRESH_QUIET|REFRESH_UNMERGED, NULL, NULL,
-		      NULL);
+	refresh_index(the_repository->index, REFRESH_QUIET|REFRESH_UNMERGED, عدم, عدم,
+		      عدم);
 	repo_update_index_if_able(the_repository, &lock_file);
 }
 
-static void builtin_diff_files(struct rev_info *revs, int argc, const char **argv)
+ساكن فراغ builtin_diff_files(بنية rev_info *revs, صحيح argc, ثابت حرف **argv)
 {
-	unsigned int options = 0;
+	unsigned صحيح options = 0;
 
-	while (1 < argc && argv[1][0] == '-') {
-		if (!strcmp(argv[1], "--base"))
-			revs->max_count = 1;
-		else if (!strcmp(argv[1], "--ours"))
-			revs->max_count = 2;
-		else if (!strcmp(argv[1], "--theirs"))
-			revs->max_count = 3;
-		else if (!strcmp(argv[1], "-q"))
+	طالما (1 < argc && argv[1][0] == '-') {
+		إذا (!strcmp(argv[1], "--base"))
+			revs->max_عدد = 1;
+		وإلا إذا (!strcmp(argv[1], "--ours"))
+			revs->max_عدد = 2;
+		وإلا إذا (!strcmp(argv[1], "--theirs"))
+			revs->max_عدد = 3;
+		وإلا إذا (!strcmp(argv[1], "-q"))
 			options |= DIFF_SILENT_ON_REMOVED;
-		else if (!strcmp(argv[1], "-h"))
+		وإلا إذا (!strcmp(argv[1], "-h"))
 			usage(builtin_diff_usage);
-		else {
+		وإلا {
 			error(_("invalid option: %s"), argv[1]);
 			usage(builtin_diff_usage);
 		}
@@ -277,22 +277,22 @@ static void builtin_diff_files(struct rev_info *revs, int argc, const char **arg
 	 * dense one, --cc can be explicitly asked for, or just rely
 	 * on the default).
 	 */
-	if (revs->max_count == -1 &&
+	إذا (revs->max_عدد == -1 &&
 	    (revs->diffopt.output_format & DIFF_FORMAT_PATCH))
 		diff_merges_set_dense_combined_if_unset(revs);
 
-	setup_work_tree(the_repository);
-	if (repo_read_index_preload(the_repository, &revs->diffopt.pathspec,
+	setup_work_شجرة(the_repository);
+	إذا (repo_read_index_preload(the_repository, &revs->diffopt.pathspec,
 				    0) < 0) {
 		die_errno("repo_read_index_preload");
 	}
 	run_diff_files(revs, options);
 }
 
-struct symdiff {
-	struct bitmap *skip;
-	int warn;
-	const char *base, *left, *right;
+بنية symdiff {
+	بنية bitmap *skip;
+	صحيح warn;
+	ثابت حرف *base, *يسار, *يمين;
 };
 
 /*
@@ -314,11 +314,11 @@ struct symdiff {
  * If there is no symmetric diff argument, sym->skip is NULL and
  * sym->warn is cleared.  The remaining fields are not set.
  */
-static void symdiff_prepare(struct rev_info *rev, struct symdiff *sym)
+ساكن فراغ symdiff_prepare(بنية rev_info *rev, بنية symdiff *sym)
 {
-	int i, is_symdiff = 0, basecount = 0, othercount = 0;
-	int lpos = -1, rpos = -1, basepos = -1;
-	struct bitmap *map = NULL;
+	صحيح i, is_symdiff = 0, basecount = 0, othercount = 0;
+	صحيح lpos = -1, rpos = -1, basepos = -1;
+	بنية bitmap *map = عدم;
 
 	/*
 	 * Use the whence fields to find merge bases and left and
@@ -335,35 +335,35 @@ static void symdiff_prepare(struct rev_info *rev, struct symdiff *sym)
 	 * so we must check for SYMMETRIC_LEFT too.  The two arrays
 	 * rev->pending.objects and rev->cmdline.rev are parallel.
 	 */
-	for (i = 0; i < rev->cmdline.nr; i++) {
-		struct object *obj = rev->pending.objects[i].item;
-		switch (rev->cmdline.rev[i].whence) {
-		case REV_CMD_MERGE_BASE:
-			if (basepos < 0)
+	لكل (i = 0; i < rev->cmdline.nr; i++) {
+		بنية object *obj = rev->pending.objects[i].item;
+		بدل (rev->cmdline.rev[i].whence) {
+		حالة REV_CMD_MERGE_BASE:
+			إذا (basepos < 0)
 				basepos = i;
 			basecount++;
-			break;		/* do mark all bases */
-		case REV_CMD_LEFT:
-			if (lpos >= 0)
+			اكسر;		/* do mark all bases */
+		حالة REV_CMD_يسار:
+			إذا (lpos >= 0)
 				usage(builtin_diff_usage);
 			lpos = i;
-			if (obj->flags & SYMMETRIC_LEFT) {
+			إذا (obj->flags & SYMMETRIC_يسار) {
 				is_symdiff = 1;
-				break;	/* do mark A */
+				اكسر;	/* do mark A */
 			}
-			continue;
-		case REV_CMD_RIGHT:
-			if (rpos >= 0)
+			استمر;
+		حالة REV_CMD_يمين:
+			إذا (rpos >= 0)
 				usage(builtin_diff_usage);
 			rpos = i;
-			continue;	/* don't mark B */
-		case REV_CMD_PARENTS_ONLY:
-		case REV_CMD_REF:
-		case REV_CMD_REV:
+			استمر;	/* don't mark B */
+		حالة REV_CMD_PARENTS_ONLY:
+		حالة REV_CMD_REF:
+		حالة REV_CMD_REV:
 			othercount++;
-			continue;
+			استمر;
 		}
-		if (!map)
+		إذا (!map)
 			map = bitmap_new();
 		bitmap_set(map, i);
 	}
@@ -371,45 +371,45 @@ static void symdiff_prepare(struct rev_info *rev, struct symdiff *sym)
 	/*
 	 * Forbid any additional revs for both A...B and A..B.
 	 */
-	if (lpos >= 0 && othercount > 0)
+	إذا (lpos >= 0 && othercount > 0)
 		usage(builtin_diff_usage);
 
-	if (!is_symdiff) {
+	إذا (!is_symdiff) {
 		bitmap_free(map);
 		sym->warn = 0;
-		sym->skip = NULL;
-		return;
+		sym->skip = عدم;
+		أرجع;
 	}
 
-	sym->left = rev->pending.objects[lpos].name;
-	sym->right = rev->pending.objects[rpos].name;
-	if (basecount == 0)
-		die(_("%s...%s: no merge base"), sym->left, sym->right);
+	sym->يسار = rev->pending.objects[lpos].name;
+	sym->يمين = rev->pending.objects[rpos].name;
+	إذا (basecount == 0)
+		die(_("%s...%s: no merge base"), sym->يسار, sym->يمين);
 	sym->base = rev->pending.objects[basepos].name;
 	bitmap_unset(map, basepos);	/* unmark the base we want */
 	sym->warn = basecount > 1;
 	sym->skip = map;
 }
 
-static void symdiff_release(struct symdiff *sdiff)
+ساكن فراغ symdiff_release(بنية symdiff *sdiff)
 {
 	bitmap_free(sdiff->skip);
 }
 
-int cmd_diff(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo UNUSED)
+صحيح cmd_diff(صحيح argc,
+	     ثابت حرف **argv,
+	     ثابت حرف *prefix,
+	     بنية repository *repo UNUSED)
 {
-	int i;
-	struct rev_info rev;
-	struct object_array ent = OBJECT_ARRAY_INIT;
-	int first_non_parent = -1;
-	int blobs = 0, paths = 0;
-	struct object_array_entry *blob[2];
-	int nongit = 0, no_index = 0;
-	int result;
-	struct symdiff sdiff;
+	صحيح i;
+	بنية rev_info rev;
+	بنية object_array ent = OBJECT_ARRAY_INIT;
+	صحيح first_non_parent = -1;
+	صحيح blobs = 0, paths = 0;
+	بنية object_array_entry *blob[2];
+	صحيح nongit = 0, no_index = 0;
+	صحيح result;
+	بنية symdiff sdiff;
 
 	/*
 	 * We could get N tree-ish in the rev.pending_objects list.
@@ -444,25 +444,25 @@ int cmd_diff(int argc,
 	 */
 
 	/* Were we asked to do --no-index explicitly? */
-	for (i = 1; i < argc; i++) {
-		if (!strcmp(argv[i], "--")) {
+	لكل (i = 1; i < argc; i++) {
+		إذا (!strcmp(argv[i], "--")) {
 			i++;
-			break;
+			اكسر;
 		}
-		if (!strcmp(argv[i], "--no-index"))
+		إذا (!strcmp(argv[i], "--no-index"))
 			no_index = DIFF_NO_INDEX_EXPLICIT;
-		if (argv[i][0] != '-')
-			break;
+		إذا (argv[i][0] != '-')
+			اكسر;
 	}
 
 	prefix = setup_git_directory_gently(the_repository, &nongit);
 
-	if (!nongit) {
+	إذا (!nongit) {
 		prepare_repo_settings(the_repository);
 		the_repository->settings.command_requires_full_index = 0;
 	}
 
-	if (!no_index) {
+	إذا (!no_index) {
 		/*
 		 * Treat git diff with at least one path outside of the
 		 * repo the same as if the command would have been executed
@@ -470,7 +470,7 @@ int cmd_diff(int argc,
 		 * the same way as "git diff --no-index <a> <b>", which acts
 		 * as a colourful "diff" replacement.
 		 */
-		if (nongit || ((argc == i + 2) &&
+		إذا (nongit || ((argc == i + 2) &&
 			       (!path_inside_repo(the_repository, prefix, argv[i]) ||
 				!path_inside_repo(the_repository, prefix, argv[i + 1]))))
 			no_index = DIFF_NO_INDEX_IMPLICIT;
@@ -482,11 +482,11 @@ int cmd_diff(int argc,
 	 * default to SHA1 here, but may eventually want to change this to be
 	 * configurable via a command line option.
 	 */
-	if (nongit)
+	إذا (nongit)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	init_diff_ui_defaults();
-	repo_config(the_repository, git_diff_ui_config, NULL);
+	repo_config(the_repository, git_diff_ui_config, عدم);
 
 	/*
 	 * If we are ignoring the fact that our current directory may
@@ -496,10 +496,10 @@ int cmd_diff(int argc,
 	 * the working tree.  Where we came from is recorded in the
 	 * prefix.
 	 */
-	if (no_index && prefix) {
-		if (chdir(prefix))
+	إذا (no_index && prefix) {
+		إذا (chdir(prefix))
 			die(_("cannot come back to cwd"));
-		prefix = NULL;
+		prefix = عدم;
 	}
 
 	prefix = precompose_argv_prefix(argc, argv, prefix);
@@ -512,7 +512,7 @@ int cmd_diff(int argc,
 	rev.diffopt.flags.allow_textconv = 1;
 
 	/* If this is a no-index diff, just run it and exit there. */
-	if (no_index)
+	إذا (no_index)
 		exit(diff_no_index(&rev, the_repository->hash_algo,
 				   no_index == DIFF_NO_INDEX_IMPLICIT,
 				   argc, argv));
@@ -531,10 +531,10 @@ int cmd_diff(int argc,
 	 */
 	rev.diffopt.ita_invisible_in_index = 1;
 
-	if (nongit)
+	إذا (nongit)
 		die(_("Not a git repository"));
-	argc = setup_revisions(argc, argv, &rev, NULL);
-	if (!rev.diffopt.output_format) {
+	argc = setup_revisions(argc, argv, &rev, عدم);
+	إذا (!rev.diffopt.output_format) {
 		rev.diffopt.output_format = DIFF_FORMAT_PATCH;
 		diff_setup_done(&rev.diffopt);
 	}
@@ -548,108 +548,108 @@ int cmd_diff(int argc,
 	 * Do we have --cached and not have a pending object, then
 	 * default to HEAD by hand.  Eek.
 	 */
-	if (!rev.pending.nr) {
-		int i;
-		for (i = 1; i < argc; i++) {
-			const char *arg = argv[i];
-			if (!strcmp(arg, "--"))
-				break;
-			else if (!strcmp(arg, "--cached") ||
+	إذا (!rev.pending.nr) {
+		صحيح i;
+		لكل (i = 1; i < argc; i++) {
+			ثابت حرف *arg = argv[i];
+			إذا (!strcmp(arg, "--"))
+				اكسر;
+			وإلا إذا (!strcmp(arg, "--cached") ||
 				 !strcmp(arg, "--staged")) {
 				add_head_to_pending(&rev);
-				if (!rev.pending.nr) {
-					struct tree *tree;
-					tree = lookup_tree(the_repository,
-							   the_repository->hash_algo->empty_tree);
-					add_pending_object(&rev, &tree->object, "HEAD");
+				إذا (!rev.pending.nr) {
+					بنية شجرة *شجرة;
+					شجرة = lookup_شجرة(the_repository,
+							   the_repository->hash_algo->empty_شجرة);
+					add_pending_object(&rev, &شجرة->object, "HEAD");
 				}
-				break;
+				اكسر;
 			}
 		}
 	}
 
 	symdiff_prepare(&rev, &sdiff);
-	for (i = 0; i < rev.pending.nr; i++) {
-		struct object_array_entry *entry = &rev.pending.objects[i];
-		struct object *obj = entry->item;
-		const char *name = entry->name;
-		int flags = (obj->flags & UNINTERESTING);
-		if (!obj->parsed)
+	لكل (i = 0; i < rev.pending.nr; i++) {
+		بنية object_array_entry *entry = &rev.pending.objects[i];
+		بنية object *obj = entry->item;
+		ثابت حرف *name = entry->name;
+		صحيح flags = (obj->flags & UNINTERESTING);
+		إذا (!obj->parsed)
 			obj = parse_object(the_repository, &obj->oid);
-		obj = deref_tag(the_repository, obj, NULL, 0);
-		if (!obj)
+		obj = deref_tag(the_repository, obj, عدم, 0);
+		إذا (!obj)
 			die(_("invalid object '%s' given."), name);
-		if (obj->type == OBJ_COMMIT) {
-			struct tree *tree = repo_get_commit_tree(
-				the_repository, (struct commit *)obj);
-			if (!tree)
+		إذا (obj->type == OBJ_COMMIT) {
+			بنية شجرة *شجرة = repo_get_commit_شجرة(
+				the_repository, (بنية commit *)obj);
+			إذا (!شجرة)
 				die(_("unable to read tree object for commit '%s'"), name);
-			obj = &tree->object;
+			obj = &شجرة->object;
 		}
 
-		if (obj->type == OBJ_TREE) {
-			if (sdiff.skip && bitmap_get(sdiff.skip, i))
-				continue;
+		إذا (obj->type == OBJ_شجرة) {
+			إذا (sdiff.skip && bitmap_get(sdiff.skip, i))
+				استمر;
 			obj->flags |= flags;
 			add_object_array(obj, name, &ent);
-			if (first_non_parent < 0 &&
+			إذا (first_non_parent < 0 &&
 			    (i >= rev.cmdline.nr || /* HEAD by hand. */
 			     rev.cmdline.rev[i].whence != REV_CMD_PARENTS_ONLY))
 				first_non_parent = ent.nr - 1;
-		} else if (obj->type == OBJ_BLOB) {
-			if (2 <= blobs)
+		} وإلا إذا (obj->type == OBJ_BLOB) {
+			إذا (2 <= blobs)
 				die(_("more than two blobs given: '%s'"), name);
 			blob[blobs] = entry;
 			blobs++;
 
-		} else {
+		} وإلا {
 			die(_("unhandled object '%s' given."), name);
 		}
 	}
-	if (rev.prune_data.nr)
+	إذا (rev.prune_data.nr)
 		paths += rev.prune_data.nr;
 
 	/*
 	 * Now, do the arguments look reasonable?
 	 */
-	if (!ent.nr) {
-		switch (blobs) {
-		case 0:
+	إذا (!ent.nr) {
+		بدل (blobs) {
+		حالة 0:
 			builtin_diff_files(&rev, argc, argv);
-			break;
-		case 1:
-			if (paths != 1)
+			اكسر;
+		حالة 1:
+			إذا (paths != 1)
 				usage(builtin_diff_usage);
 			builtin_diff_b_f(&rev, argc, argv, blob);
-			break;
-		case 2:
-			if (paths)
+			اكسر;
+		حالة 2:
+			إذا (paths)
 				usage(builtin_diff_usage);
 			builtin_diff_blobs(&rev, argc, argv, blob);
-			break;
-		default:
+			اكسر;
+		افتراضي:
 			usage(builtin_diff_usage);
 		}
 	}
-	else if (blobs)
+	وإلا إذا (blobs)
 		usage(builtin_diff_usage);
-	else if (ent.nr == 1)
+	وإلا إذا (ent.nr == 1)
 		builtin_diff_index(&rev, argc, argv);
-	else if (ent.nr == 2) {
-		if (sdiff.warn)
+	وإلا إذا (ent.nr == 2) {
+		إذا (sdiff.warn)
 			warning(_("%s...%s: multiple merge bases, using %s"),
-				sdiff.left, sdiff.right, sdiff.base);
-		builtin_diff_tree(&rev, argc, argv,
+				sdiff.يسار, sdiff.يمين, sdiff.base);
+		builtin_diff_شجرة(&rev, argc, argv,
 				  &ent.objects[0], &ent.objects[1]);
-	} else
+	} وإلا
 		builtin_diff_combined(&rev, argc, argv,
 				      ent.objects, ent.nr,
 				      first_non_parent);
 	result = diff_result_code(&rev);
-	if (1 < rev.diffopt.skip_stat_unmatch)
+	إذا (1 < rev.diffopt.skip_stat_unmatch)
 		refresh_index_quietly();
 	release_revisions(&rev);
 	object_array_clear(&ent);
 	symdiff_release(&sdiff);
-	return result;
+	أرجع result;
 }
