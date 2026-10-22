@@ -1,35 +1,35 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "exec-cmd.h"
-#include "gettext.h"
-#include "pkt-line.h"
-#include "parse-options.h"
-#include "protocol.h"
-#include "replace-object.h"
-#include "upload-pack.h"
-#include "serve.h"
-#include "setup.h"
-#include "commit.h"
-#include "environment.h"
+#ضمن "builtin.h"
+#ضمن "exec-cmd.h"
+#ضمن "gettext.h"
+#ضمن "pkt-line.h"
+#ضمن "parse-options.h"
+#ضمن "protocol.h"
+#ضمن "replace-object.h"
+#ضمن "upload-pack.h"
+#ضمن "serve.h"
+#ضمن "setup.h"
+#ضمن "commit.h"
+#ضمن "environment.h"
 
-static const char * const upload_pack_usage[] = {
+ساكن ثابت حرف * ثابت upload_pack_usage[] = {
 	N_("git-upload-pack [--[no-]strict] [--timeout=<n>] [--stateless-rpc]\n"
 	   "                [--advertise-refs] <directory>"),
-	NULL
+	عدم
 };
 
-int cmd_upload_pack(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+صحيح cmd_upload_pack(صحيح argc,
+		    ثابت حرف **argv,
+		    ثابت حرف *prefix,
+		    بنية repository *repo UNUSED)
 {
-	const char *dir;
-	int strict = 0;
-	int advertise_refs = 0;
-	int stateless_rpc = 0;
-	int timeout = 0;
-	struct option options[] = {
+	ثابت حرف *dir;
+	صحيح strict = 0;
+	صحيح advertise_refs = 0;
+	صحيح stateless_rpc = 0;
+	صحيح timeout = 0;
+	بنية option options[] = {
 		OPT_BOOL(0, "stateless-rpc", &stateless_rpc,
 			 N_("quit after a single request/response exchange")),
 		OPT_HIDDEN_BOOL(0, "http-backend-info-refs", &advertise_refs,
@@ -50,40 +50,40 @@ int cmd_upload_pack(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, upload_pack_usage, 0);
 
-	if (argc != 1)
+	إذا (argc != 1)
 		usage_with_options(upload_pack_usage, options);
 
 	setup_path();
 
 	dir = argv[0];
 
-	if (strict)
+	إذا (strict)
 		enter_repo_flags |= ENTER_REPO_STRICT;
-	if (!enter_repo(the_repository, dir, enter_repo_flags))
+	إذا (!enter_repo(the_repository, dir, enter_repo_flags))
 		die("'%s' does not appear to be a git repository", dir);
 
-	switch (determine_protocol_version_server()) {
-	case protocol_v2:
-		if (advertise_refs)
+	بدل (determine_protocol_version_server()) {
+	حالة protocol_v2:
+		إذا (advertise_refs)
 			protocol_v2_advertise_capabilities(the_repository);
-		else
+		وإلا
 			protocol_v2_serve_loop(the_repository, stateless_rpc);
-		break;
-	case protocol_v1:
+		اكسر;
+	حالة protocol_v1:
 		/*
 		 * v1 is just the original protocol with a version string,
 		 * so just fall through after writing the version string.
 		 */
-		if (advertise_refs || !stateless_rpc)
+		إذا (advertise_refs || !stateless_rpc)
 			packet_write_fmt(1, "version 1\n");
 
 		/* fallthrough */
-	case protocol_v0:
+	حالة protocol_v0:
 		upload_pack(advertise_refs, stateless_rpc, timeout);
-		break;
-	case protocol_unknown_version:
+		اكسر;
+	حالة protocol_unknown_version:
 		BUG("unknown protocol version");
 	}
 
-	return 0;
+	أرجع 0;
 }
