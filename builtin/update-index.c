@@ -7,31 +7,31 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "lockfile.h"
-#include "quote.h"
-#include "cache-tree.h"
-#include "tree-walk.h"
-#include "object-file.h"
-#include "odb.h"
-#include "odb/transaction.h"
-#include "refs.h"
-#include "resolve-undo.h"
-#include "parse-options.h"
-#include "pathspec.h"
-#include "dir.h"
-#include "read-cache.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "split-index.h"
-#include "symlinks.h"
-#include "fsmonitor.h"
-#include "write-or-die.h"
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "hash.h"
+#ضمن "hex.h"
+#ضمن "lockfile.h"
+#ضمن "quote.h"
+#ضمن "cache-tree.h"
+#ضمن "tree-walk.h"
+#ضمن "object-file.h"
+#ضمن "odb.h"
+#ضمن "odb/transaction.h"
+#ضمن "refs.h"
+#ضمن "resolve-undo.h"
+#ضمن "parse-options.h"
+#ضمن "pathspec.h"
+#ضمن "dir.h"
+#ضمن "read-cache.h"
+#ضمن "setup.h"
+#ضمن "sparse-index.h"
+#ضمن "split-index.h"
+#ضمن "symlinks.h"
+#ضمن "fsmonitor.h"
+#ضمن "write-or-die.h"
 
 /*
  * Default to not allowing changes to the list of files. The
@@ -40,22 +40,22 @@
  * like "git update-index *" and suddenly having all the object
  * files be revision controlled.
  */
-static int allow_add;
-static int allow_remove;
-static int allow_replace;
-static int info_only;
-static int force_remove;
-static int verbose;
-static int mark_valid_only;
-static int mark_skip_worktree_only;
-static int mark_fsmonitor_only;
-static int ignore_skip_worktree_entries;
+ساكن صحيح allow_add;
+ساكن صحيح allow_remove;
+ساكن صحيح allow_replace;
+ساكن صحيح info_only;
+ساكن صحيح force_remove;
+ساكن صحيح verbose;
+ساكن صحيح mark_valid_only;
+ساكن صحيح mark_skip_worktree_only;
+ساكن صحيح mark_fsmonitor_only;
+ساكن صحيح ignore_skip_worktree_entries;
 #define MARK_FLAG 1
 #define UNMARK_FLAG 2
-static struct strbuf mtime_dir = STRBUF_INIT;
+ساكن بنية strbuf mtime_dir = STRBUF_INIT;
 
 /* Untracked cache mode */
-enum uc_mode {
+تعداد uc_mode {
 	UC_UNSPECIFIED = -1,
 	UC_DISABLE = 0,
 	UC_ENABLE,
@@ -64,12 +64,12 @@ enum uc_mode {
 };
 
 __attribute__((format (printf, 1, 2)))
-static void report(const char *fmt, ...)
+ساكن فراغ report(ثابت حرف *fmt, ...)
 {
 	va_list vp;
 
-	if (!verbose)
-		return;
+	ܐܢ (!verbose)
+		ܦܢܐ;
 
 	va_start(vp, fmt);
 	vprintf(fmt, vp);
@@ -77,57 +77,57 @@ static void report(const char *fmt, ...)
 	va_end(vp);
 }
 
-static void remove_test_directory(void)
+ساكن فراغ remove_test_directory(فراغ)
 {
-	if (mtime_dir.len)
+	ܐܢ (mtime_dir.len)
 		remove_dir_recursively(&mtime_dir, 0);
 }
 
-static const char *get_mtime_path(const char *path)
+ساكن ثابت حرف *get_mtime_path(ثابت حرف *path)
 {
-	static struct strbuf sb = STRBUF_INIT;
+	ساكن بنية strbuf sb = STRBUF_INIT;
 	strbuf_reset(&sb);
 	strbuf_addf(&sb, "%s/%s", mtime_dir.buf, path);
-	return sb.buf;
+	ܦܢܐ sb.buf;
 }
 
-static void xmkdir(const char *path)
+ساكن فراغ xmkdir(ثابت حرف *path)
 {
 	path = get_mtime_path(path);
-	if (mkdir(path, 0700))
+	ܐܢ (mkdir(path, 0700))
 		die_errno(_("failed to create directory %s"), path);
 }
 
-static int xstat_mtime_dir(struct stat *st)
+ساكن صحيح xstat_mtime_dir(بنية stat *st)
 {
-	if (stat(mtime_dir.buf, st))
+	ܐܢ (stat(mtime_dir.buf, st))
 		die_errno(_("failed to stat %s"), mtime_dir.buf);
-	return 0;
+	ܦܢܐ 0;
 }
 
-static int create_file(const char *path)
+ساكن صحيح create_file(ثابت حرف *path)
 {
-	int fd;
+	صحيح fd;
 	path = get_mtime_path(path);
 	fd = xopen(path, O_CREAT | O_RDWR, 0644);
-	return fd;
+	ܦܢܐ fd;
 }
 
-static void xunlink(const char *path)
+ساكن فراغ xunlink(ثابت حرف *path)
 {
 	path = get_mtime_path(path);
-	if (unlink(path))
+	ܐܢ (unlink(path))
 		die_errno(_("failed to delete file %s"), path);
 }
 
-static void xrmdir(const char *path)
+ساكن فراغ xrmdir(ثابت حرف *path)
 {
 	path = get_mtime_path(path);
-	if (rmdir(path))
+	ܐܢ (rmdir(path))
 		die_errno(_("failed to delete directory %s"), path);
 }
 
-static void avoid_racy(void)
+ساكن فراغ avoid_racy(فراغ)
 {
 	/*
 	 * not use if we could usleep(10) if core.useNanosec is enabled. The
@@ -137,20 +137,20 @@ static void avoid_racy(void)
 	sleep(1);
 }
 
-static int test_if_untracked_cache_is_supported(void)
+ساكن صحيح test_if_untracked_cache_is_supported(فراغ)
 {
-	struct stat st;
-	struct stat_data base;
-	int fd, ret = 0;
-	char *cwd;
+	بنية stat st;
+	بنية stat_data base;
+	صحيح fd, ret = 0;
+	حرف *cwd;
 
 	strbuf_addstr(&mtime_dir, "mtime-test-XXXXXX");
-	if (!mkdtemp(mtime_dir.buf))
+	ܐܢ (!mkdtemp(mtime_dir.buf))
 		die_errno("Could not make temporary directory");
 
 	cwd = xgetcwd();
 	fprintf(stderr, _("Testing mtime in '%s' "), cwd);
-	free(cwd);
+	حرر(cwd);
 
 	atexit(remove_test_directory);
 	xstat_mtime_dir(&st);
@@ -160,12 +160,12 @@ static int test_if_untracked_cache_is_supported(void)
 	avoid_racy();
 	fd = create_file("newfile");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	ܐܢ (!match_stat_data(&base, &st)) {
 		close(fd);
 		fputc('\n', stderr);
 		fprintf_ln(stderr,_("directory stat info does not "
 				    "change after adding a new file"));
-		goto done;
+		اذهب done;
 	}
 	fill_stat_data(&base, &st);
 	fputc('.', stderr);
@@ -173,12 +173,12 @@ static int test_if_untracked_cache_is_supported(void)
 	avoid_racy();
 	xmkdir("new-dir");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	ܐܢ (!match_stat_data(&base, &st)) {
 		close(fd);
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info does not change "
 				     "after adding a new directory"));
-		goto done;
+		اذهب done;
 	}
 	fill_stat_data(&base, &st);
 	fputc('.', stderr);
@@ -187,33 +187,33 @@ static int test_if_untracked_cache_is_supported(void)
 	write_or_die(fd, "data", 4);
 	close(fd);
 	xstat_mtime_dir(&st);
-	if (match_stat_data(&base, &st)) {
+	ܐܢ (match_stat_data(&base, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info changes "
 				     "after updating a file"));
-		goto done;
+		اذهب done;
 	}
 	fputc('.', stderr);
 
 	avoid_racy();
 	close(create_file("new-dir/new"));
 	xstat_mtime_dir(&st);
-	if (match_stat_data(&base, &st)) {
+	ܐܢ (match_stat_data(&base, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info changes after "
 				     "adding a file inside subdirectory"));
-		goto done;
+		اذهب done;
 	}
 	fputc('.', stderr);
 
 	avoid_racy();
 	xunlink("newfile");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	ܐܢ (!match_stat_data(&base, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info does not "
 				     "change after deleting a file"));
-		goto done;
+		اذهب done;
 	}
 	fill_stat_data(&base, &st);
 	fputc('.', stderr);
@@ -222,48 +222,48 @@ static int test_if_untracked_cache_is_supported(void)
 	xunlink("new-dir/new");
 	xrmdir("new-dir");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	ܐܢ (!match_stat_data(&base, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info does not "
 				     "change after deleting a directory"));
-		goto done;
+		اذهب done;
 	}
 
-	if (rmdir(mtime_dir.buf))
+	ܐܢ (rmdir(mtime_dir.buf))
 		die_errno(_("failed to delete directory %s"), mtime_dir.buf);
 	fprintf_ln(stderr, _(" OK"));
 	ret = 1;
 
 done:
 	strbuf_release(&mtime_dir);
-	return ret;
+	ܦܢܐ ret;
 }
 
-static int mark_ce_flags(const char *path, int flag, int mark)
+ساكن صحيح mark_ce_flags(ثابت حرف *path, صحيح flag, صحيح mark)
 {
-	int namelen = strlen(path);
-	int pos = index_name_pos(the_repository->index, path, namelen);
-	if (0 <= pos) {
+	صحيح namelen = strlen(path);
+	صحيح pos = index_name_pos(the_repository->index, path, namelen);
+	ܐܢ (0 <= pos) {
 		mark_fsmonitor_invalid(the_repository->index, the_repository->index->cache[pos]);
-		if (mark)
+		ܐܢ (mark)
 			the_repository->index->cache[pos]->ce_flags |= flag;
-		else
+		ܐܚܪܢܐ
 			the_repository->index->cache[pos]->ce_flags &= ~flag;
 		the_repository->index->cache[pos]->ce_flags |= CE_UPDATE_IN_BASE;
 		cache_tree_invalidate_path(the_repository->index, path);
 		the_repository->index->cache_changed |= CE_ENTRY_CHANGED;
-		return 0;
+		ܦܢܐ 0;
 	}
-	return -1;
+	ܦܢܐ -1;
 }
 
-static int remove_one_path(const char *path)
+ساكن صحيح remove_one_path(ثابت حرف *path)
 {
-	if (!allow_remove)
-		return error("%s: does not exist and --remove not passed", path);
-	if (remove_file_from_index(the_repository->index, path))
-		return error("%s: cannot remove from the index", path);
-	return 0;
+	ܐܢ (!allow_remove)
+		ܦܢܐ error("%s: does not exist and --remove not passed", path);
+	ܐܢ (remove_file_from_index(the_repository->index, path))
+		ܦܢܐ error("%s: cannot remove from the index", path);
+	ܦܢܐ 0;
 }
 
 /*
@@ -273,21 +273,21 @@ static int remove_one_path(const char *path)
  *    succeeds.
  *  - permission error. That's never ok.
  */
-static int process_lstat_error(const char *path, int err)
+ساكن صحيح process_lstat_error(ثابت حرف *path, صحيح err)
 {
-	if (is_missing_file_error(err))
-		return remove_one_path(path);
-	return error("lstat(\"%s\"): %s", path, strerror(err));
+	ܐܢ (is_missing_file_error(err))
+		ܦܢܐ remove_one_path(path);
+	ܦܢܐ error("lstat(\"%s\"): %s", path, strerror(err));
 }
 
-static int add_one_path(const struct cache_entry *old, const char *path, int len, struct stat *st)
+ساكن صحيح add_one_path(ثابت بنية cache_entry *old, ثابت حرف *path, صحيح len, بنية stat *st)
 {
-	int option;
-	struct cache_entry *ce;
+	صحيح option;
+	بنية cache_entry *ce;
 
 	/* Was the old index entry already up-to-date? */
-	if (old && !ce_stage(old) && !ie_match_stat(the_repository->index, old, st, 0))
-		return 0;
+	ܐܢ (old && !ce_stage(old) && !ie_match_stat(the_repository->index, old, st, 0))
+		ܦܢܐ 0;
 
 	ce = make_empty_cache_entry(the_repository->index, len);
 	memcpy(ce->name, path, len);
@@ -296,18 +296,18 @@ static int add_one_path(const struct cache_entry *old, const char *path, int len
 	fill_stat_cache_info(the_repository->index, ce, st);
 	ce->ce_mode = ce_mode_from_stat(the_repository, old, st->st_mode);
 
-	if (index_path(the_repository->index, &ce->oid, path, st,
+	ܐܢ (index_path(the_repository->index, &ce->oid, path, st,
 		       info_only ? 0 : INDEX_WRITE_OBJECT)) {
 		discard_cache_entry(ce);
-		return -1;
+		ܦܢܐ -1;
 	}
 	option = allow_add ? ADD_CACHE_OK_TO_ADD : 0;
 	option |= allow_replace ? ADD_CACHE_OK_TO_REPLACE : 0;
-	if (add_index_entry(the_repository->index, ce, option)) {
+	ܐܢ (add_index_entry(the_repository->index, ce, option)) {
 		discard_cache_entry(ce);
-		return error("%s: cannot add to the index - missing --add option?", path);
+		ܦܢܐ error("%s: cannot add to the index - missing --add option?", path);
 	}
-	return 0;
+	ܦܢܐ 0;
 }
 
 /*
@@ -333,95 +333,95 @@ static int add_one_path(const struct cache_entry *old, const char *path, int len
  *  - it doesn't exist at all in the index, but it is a valid
  *    git directory, and it should be *added* as a gitlink.
  */
-static int process_directory(const char *path, int len, struct stat *st)
+ساكن صحيح process_directory(ثابت حرف *path, صحيح len, بنية stat *st)
 {
-	struct object_id oid;
-	int pos = index_name_pos(the_repository->index, path, len);
+	بنية object_id oid;
+	صحيح pos = index_name_pos(the_repository->index, path, len);
 
 	/* Exact match: file or existing gitlink */
-	if (pos >= 0) {
-		const struct cache_entry *ce = the_repository->index->cache[pos];
-		if (S_ISGITLINK(ce->ce_mode)) {
+	ܐܢ (pos >= 0) {
+		ثابت بنية cache_entry *ce = the_repository->index->cache[pos];
+		ܐܢ (S_ISGITLINK(ce->ce_mode)) {
 
 			/* Do nothing to the index if there is no HEAD! */
-			if (repo_resolve_gitlink_ref(the_repository, path,
+			ܐܢ (repo_resolve_gitlink_ref(the_repository, path,
 						     "HEAD", &oid) < 0)
-				return 0;
+				ܦܢܐ 0;
 
-			return add_one_path(ce, path, len, st);
+			ܦܢܐ add_one_path(ce, path, len, st);
 		}
 		/* Should this be an unconditional error? */
-		return remove_one_path(path);
+		ܦܢܐ remove_one_path(path);
 	}
 
 	/* Inexact match: is there perhaps a subdirectory match? */
 	pos = -pos-1;
-	while (pos < the_repository->index->cache_nr) {
-		const struct cache_entry *ce = the_repository->index->cache[pos++];
+	ܟܡܐ (pos < the_repository->index->cache_nr) {
+		ثابت بنية cache_entry *ce = the_repository->index->cache[pos++];
 
-		if (strncmp(ce->name, path, len))
-			break;
-		if (ce->name[len] > '/')
-			break;
-		if (ce->name[len] < '/')
-			continue;
+		ܐܢ (strncmp(ce->name, path, len))
+			اكسر;
+		ܐܢ (ce->name[len] > '/')
+			اكسر;
+		ܐܢ (ce->name[len] < '/')
+			استمر;
 
 		/* Subdirectory match - error out */
-		return error("%s: is a directory - add individual files instead", path);
+		ܦܢܐ error("%s: is a directory - add individual files instead", path);
 	}
 
 	/* No match - should we add it as a gitlink? */
-	if (!repo_resolve_gitlink_ref(the_repository, path, "HEAD", &oid))
-		return add_one_path(NULL, path, len, st);
+	ܐܢ (!repo_resolve_gitlink_ref(the_repository, path, "HEAD", &oid))
+		ܦܢܐ add_one_path(عدم, path, len, st);
 
 	/* Error out. */
-	return error("%s: is a directory - add files inside instead", path);
+	ܦܢܐ error("%s: is a directory - add files inside instead", path);
 }
 
-static int process_path(const char *path, struct stat *st, int stat_errno)
+ساكن صحيح process_path(ثابت حرف *path, بنية stat *st, صحيح stat_errno)
 {
-	int pos, len;
-	const struct cache_entry *ce;
+	صحيح pos, len;
+	ثابت بنية cache_entry *ce;
 
 	len = strlen(path);
-	if (has_symlink_leading_path(path, len))
-		return error("'%s' is beyond a symbolic link", path);
+	ܐܢ (has_symlink_leading_path(path, len))
+		ܦܢܐ error("'%s' is beyond a symbolic link", path);
 
 	pos = index_name_pos(the_repository->index, path, len);
-	ce = pos < 0 ? NULL : the_repository->index->cache[pos];
-	if (ce && ce_skip_worktree(ce)) {
+	ce = pos < 0 ? عدم : the_repository->index->cache[pos];
+	ܐܢ (ce && ce_skip_worktree(ce)) {
 		/*
 		 * working directory version is assumed "good"
 		 * so updating it does not make sense.
 		 * On the other hand, removing it from index should work
 		 */
-		if (!ignore_skip_worktree_entries && allow_remove &&
+		ܐܢ (!ignore_skip_worktree_entries && allow_remove &&
 		    remove_file_from_index(the_repository->index, path))
-			return error("%s: cannot remove from the index", path);
-		return 0;
+			ܦܢܐ error("%s: cannot remove from the index", path);
+		ܦܢܐ 0;
 	}
 
 	/*
 	 * First things first: get the stat information, to decide
 	 * what to do about the pathname!
 	 */
-	if (stat_errno)
-		return process_lstat_error(path, stat_errno);
+	ܐܢ (stat_errno)
+		ܦܢܐ process_lstat_error(path, stat_errno);
 
-	if (S_ISDIR(st->st_mode))
-		return process_directory(path, len, st);
+	ܐܢ (S_ISDIR(st->st_mode))
+		ܦܢܐ process_directory(path, len, st);
 
-	return add_one_path(ce, path, len, st);
+	ܦܢܐ add_one_path(ce, path, len, st);
 }
 
-static int add_cacheinfo(unsigned int mode, const struct object_id *oid,
-			 const char *path, int stage)
+ساكن صحيح add_cacheinfo(unsigned صحيح mode, ثابت بنية object_id *oid,
+			 ثابت حرف *path, صحيح stage)
 {
-	int len, option;
-	struct cache_entry *ce;
+	صحيح len, option;
+	بنية cache_entry *ce;
 
-	if (!verify_path(path, mode))
-		return error("Invalid path '%s'", path);
+	ܐܢ (!verify_path(path, mode))
+		ܦܢܐ error("Invalid path '%s'", path);
 
 	len = strlen(path);
 	ce = make_empty_cache_entry(the_repository->index, len);
@@ -431,94 +431,94 @@ static int add_cacheinfo(unsigned int mode, const struct object_id *oid,
 	ce->ce_flags = create_ce_flags(stage);
 	ce->ce_namelen = len;
 	ce->ce_mode = create_ce_mode(mode);
-	if (assume_unchanged)
+	ܐܢ (assume_unchanged)
 		ce->ce_flags |= CE_VALID;
 	option = allow_add ? ADD_CACHE_OK_TO_ADD : 0;
 	option |= allow_replace ? ADD_CACHE_OK_TO_REPLACE : 0;
-	if (add_index_entry(the_repository->index, ce, option))
-		return error("%s: cannot add to the index - missing --add option?",
+	ܐܢ (add_index_entry(the_repository->index, ce, option))
+		ܦܢܐ error("%s: cannot add to the index - missing --add option?",
 			     path);
 	report("add '%s'", path);
-	return 0;
+	ܦܢܐ 0;
 }
 
-static void chmod_path(char flip, const char *path)
+ساكن فراغ chmod_path(حرف flip, ثابت حرف *path)
 {
-	int pos;
-	struct cache_entry *ce;
+	صحيح pos;
+	بنية cache_entry *ce;
 
 	pos = index_name_pos(the_repository->index, path, strlen(path));
-	if (pos < 0)
-		goto fail;
+	ܐܢ (pos < 0)
+		اذهب fail;
 	ce = the_repository->index->cache[pos];
-	if (chmod_index_entry(the_repository->index, ce, flip) < 0)
-		goto fail;
+	ܐܢ (chmod_index_entry(the_repository->index, ce, flip) < 0)
+		اذهب fail;
 
 	report("chmod %cx '%s'", flip, path);
-	return;
+	ܦܢܐ;
  fail:
 	die("git update-index: cannot chmod %cx '%s'", flip, path);
 }
 
-static void update_one(const char *path)
+ساكن فراغ update_one(ثابت حرف *path)
 {
-	int stat_errno = 0;
-	struct stat st;
+	صحيح stat_errno = 0;
+	بنية stat st;
 
-	if (mark_valid_only || mark_skip_worktree_only || force_remove ||
+	ܐܢ (mark_valid_only || mark_skip_worktree_only || force_remove ||
 	    mark_fsmonitor_only)
 		st.st_mode = 0;
-	else if (lstat(path, &st) < 0) {
+	ܐܚܪܢܐ ܐܢ (lstat(path, &st) < 0) {
 		st.st_mode = 0;
 		stat_errno = errno;
 	} /* else stat is valid */
 
-	if (!verify_path(path, st.st_mode)) {
+	ܐܢ (!verify_path(path, st.st_mode)) {
 		fprintf(stderr, "Ignoring path %s\n", path);
-		return;
+		ܦܢܐ;
 	}
-	if (mark_valid_only) {
-		if (mark_ce_flags(path, CE_VALID, mark_valid_only == MARK_FLAG))
+	ܐܢ (mark_valid_only) {
+		ܐܢ (mark_ce_flags(path, CE_VALID, mark_valid_only == MARK_FLAG))
 			die("Unable to mark file %s", path);
-		return;
+		ܦܢܐ;
 	}
-	if (mark_skip_worktree_only) {
-		if (mark_ce_flags(path, CE_SKIP_WORKTREE, mark_skip_worktree_only == MARK_FLAG))
+	ܐܢ (mark_skip_worktree_only) {
+		ܐܢ (mark_ce_flags(path, CE_SKIP_WORKTREE, mark_skip_worktree_only == MARK_FLAG))
 			die("Unable to mark file %s", path);
-		return;
+		ܦܢܐ;
 	}
-	if (mark_fsmonitor_only) {
-		if (mark_ce_flags(path, CE_FSMONITOR_VALID, mark_fsmonitor_only == MARK_FLAG))
+	ܐܢ (mark_fsmonitor_only) {
+		ܐܢ (mark_ce_flags(path, CE_FSMONITOR_VALID, mark_fsmonitor_only == MARK_FLAG))
 			die("Unable to mark file %s", path);
-		return;
+		ܦܢܐ;
 	}
 
-	if (force_remove) {
-		if (remove_file_from_index(the_repository->index, path))
+	ܐܢ (force_remove) {
+		ܐܢ (remove_file_from_index(the_repository->index, path))
 			die("git update-index: unable to remove %s", path);
 		report("remove '%s'", path);
-		return;
+		ܦܢܐ;
 	}
-	if (process_path(path, &st, stat_errno))
+	ܐܢ (process_path(path, &st, stat_errno))
 		die("Unable to process path %s", path);
 	report("add '%s'", path);
 }
 
-static void read_index_info(int nul_term_line)
+ساكن فراغ read_index_info(صحيح nul_term_line)
 {
-	const int hexsz = the_hash_algo->hexsz;
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf uq = STRBUF_INIT;
+	ثابت صحيح hexsz = the_hash_algo->hexsz;
+	بنية strbuf buf = STRBUF_INIT;
+	بنية strbuf uq = STRBUF_INIT;
 	strbuf_getline_fn getline_fn;
 
 	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	while (getline_fn(&buf, stdin) != EOF) {
-		char *ptr, *tab;
-		char *path_name;
-		struct object_id oid;
-		unsigned int mode;
+	ܟܡܐ (getline_fn(&buf, stdin) != EOF) {
+		حرف *ptr, *tab;
+		حرف *path_name;
+		بنية object_id oid;
+		unsigned صحيح mode;
 		unsigned long ul;
-		int stage;
+		صحيح stage;
 
 		/* This reads lines formatted in one of three formats:
 		 *
@@ -538,60 +538,60 @@ static void read_index_info(int nul_term_line)
 		 */
 		errno = 0;
 		ul = strtoul(buf.buf, &ptr, 8);
-		if (ptr == buf.buf || *ptr != ' '
-		    || errno || (unsigned int) ul != ul)
-			goto bad_line;
+		ܐܢ (ptr == buf.buf || *ptr != ' '
+		    || errno || (unsigned صحيح) ul != ul)
+			اذهب bad_line;
 		mode = ul;
 
 		tab = strchr(ptr, '\t');
-		if (!tab || tab - ptr < hexsz + 1)
-			goto bad_line;
+		ܐܢ (!tab || tab - ptr < hexsz + 1)
+			اذهب bad_line;
 
-		if (tab[-2] == ' ' && '0' <= tab[-1] && tab[-1] <= '3') {
+		ܐܢ (tab[-2] == ' ' && '0' <= tab[-1] && tab[-1] <= '3') {
 			stage = tab[-1] - '0';
 			ptr = tab + 1; /* point at the head of path */
 			tab = tab - 2; /* point at tail of sha1 */
 		}
-		else {
+		ܐܚܪܢܐ {
 			stage = 0;
 			ptr = tab + 1; /* point at the head of path */
 		}
 
-		if (get_oid_hex(tab - hexsz, &oid) ||
+		ܐܢ (get_oid_hex(tab - hexsz, &oid) ||
 			tab[-(hexsz + 1)] != ' ')
-			goto bad_line;
+			اذهب bad_line;
 
 		path_name = ptr;
-		if (!nul_term_line && path_name[0] == '"') {
+		ܐܢ (!nul_term_line && path_name[0] == '"') {
 			strbuf_reset(&uq);
-			if (unquote_c_style(&uq, path_name, NULL)) {
+			ܐܢ (unquote_c_style(&uq, path_name, عدم)) {
 				die("git update-index: bad quoting of path name");
 			}
 			path_name = uq.buf;
 		}
 
-		if (!verify_path(path_name, mode)) {
+		ܐܢ (!verify_path(path_name, mode)) {
 			fprintf(stderr, "Ignoring path %s\n", path_name);
-			continue;
+			استمر;
 		}
 
-		if (!mode) {
+		ܐܢ (!mode) {
 			/* mode == 0 means there is no such path -- remove */
-			if (remove_file_from_index(the_repository->index, path_name))
+			ܐܢ (remove_file_from_index(the_repository->index, path_name))
 				die("git update-index: unable to remove %s",
 				    ptr);
 		}
-		else {
+		ܐܚܪܢܐ {
 			/* mode ' ' sha1 '\t' name
 			 * ptr[-1] points at tab,
 			 * ptr[-41] is at the beginning of sha1
 			 */
 			ptr[-(hexsz + 2)] = ptr[-1] = 0;
-			if (add_cacheinfo(mode, &oid, path_name, stage))
+			ܐܢ (add_cacheinfo(mode, &oid, path_name, stage))
 				die("git update-index: unable to update %s",
 				    path_name);
 		}
-		continue;
+		استمر;
 
 	bad_line:
 		die("malformed index info %s", buf.buf);
@@ -600,28 +600,28 @@ static void read_index_info(int nul_term_line)
 	strbuf_release(&uq);
 }
 
-static const char * const update_index_usage[] = {
+ساكن ثابت حرف * ثابت update_index_usage[] = {
 	N_("git update-index [<options>] [--] [<file>...]"),
-	NULL
+	عدم
 };
 
-static struct cache_entry *read_one_ent(const char *which,
-					struct object_id *ent, const char *path,
-					int namelen, int stage)
+ساكن بنية cache_entry *read_one_ent(ثابت حرف *which,
+					بنية object_id *ent, ثابت حرف *path,
+					صحيح namelen, صحيح stage)
 {
 	unsigned short mode;
-	struct object_id oid;
-	struct cache_entry *ce;
+	بنية object_id oid;
+	بنية cache_entry *ce;
 
-	if (get_tree_entry(the_repository, ent, path, &oid, &mode)) {
-		if (which)
+	ܐܢ (get_tree_entry(the_repository, ent, path, &oid, &mode)) {
+		ܐܢ (which)
 			error("%s: not in %s branch.", path, which);
-		return NULL;
+		ܦܢܐ عدم;
 	}
-	if (!the_repository->index->sparse_index && mode == S_IFDIR) {
-		if (which)
+	ܐܢ (!the_repository->index->sparse_index && mode == S_IFDIR) {
+		ܐܢ (which)
 			error("%s: not a blob in %s branch.", path, which);
-		return NULL;
+		ܦܢܐ عدم;
 	}
 	ce = make_empty_cache_entry(the_repository->index, namelen);
 
@@ -630,84 +630,84 @@ static struct cache_entry *read_one_ent(const char *which,
 	ce->ce_flags = create_ce_flags(stage);
 	ce->ce_namelen = namelen;
 	ce->ce_mode = create_ce_mode(mode);
-	return ce;
+	ܦܢܐ ce;
 }
 
-static int unresolve_one(const char *path)
+ساكن صحيح unresolve_one(ثابت حرف *path)
 {
-	struct string_list_item *item;
-	int res = 0;
+	بنية string_list_item *item;
+	صحيح res = 0;
 
-	if (!the_repository->index->resolve_undo)
-		return res;
+	ܐܢ (!the_repository->index->resolve_undo)
+		ܦܢܐ res;
 	item = string_list_lookup(the_repository->index->resolve_undo, path);
-	if (!item)
-		return res; /* no resolve-undo record for the path */
+	ܐܢ (!item)
+		ܦܢܐ res; /* no resolve-undo record for the path */
 	res = unmerge_index_entry(the_repository->index, path, item->util, 0);
 	FREE_AND_NULL(item->util);
-	return res;
+	ܦܢܐ res;
 }
 
-static int do_unresolve(int ac, const char **av,
-			const char *prefix, int prefix_length)
+ساكن صحيح do_unresolve(صحيح ac, ثابت حرف **av,
+			ثابت حرف *prefix, صحيح prefix_length)
 {
-	int i;
-	int err = 0;
+	صحيح i;
+	صحيح err = 0;
 
-	for (i = 1; i < ac; i++) {
-		const char *arg = av[i];
-		char *p = prefix_path(the_repository, prefix, prefix_length, arg);
+	لكل (i = 1; i < ac; i++) {
+		ثابت حرف *arg = av[i];
+		حرف *p = prefix_path(the_repository, prefix, prefix_length, arg);
 		err |= unresolve_one(p);
-		free(p);
+		حرر(p);
 	}
-	return err;
+	ܦܢܐ err;
 }
 
-static int do_reupdate(const char **paths,
-		       const char *prefix)
+ساكن صحيح do_reupdate(ثابت حرف **paths,
+		       ثابت حرف *prefix)
 {
 	/* Read HEAD and run update-index on paths that are
 	 * merged and already different between index and HEAD.
 	 */
-	int pos;
-	int has_head = 1;
-	struct pathspec pathspec;
-	struct object_id head_oid;
+	صحيح pos;
+	صحيح has_head = 1;
+	بنية pathspec pathspec;
+	بنية object_id head_oid;
 
 	parse_pathspec(&pathspec, 0,
 		       PATHSPEC_PREFER_CWD,
 		       prefix, paths);
 
-	if (refs_read_ref(get_main_ref_store(the_repository), "HEAD", &head_oid))
+	ܐܢ (refs_read_ref(get_main_ref_store(the_repository), "HEAD", &head_oid))
 		/* If there is no HEAD, that means it is an initial
 		 * commit.  Update everything in the index.
 		 */
 		has_head = 0;
  redo:
-	for (pos = 0; pos < the_repository->index->cache_nr; pos++) {
-		const struct cache_entry *ce = the_repository->index->cache[pos];
-		struct cache_entry *old = NULL;
-		int save_nr;
-		char *path;
+	لكل (pos = 0; pos < the_repository->index->cache_nr; pos++) {
+		ثابت بنية cache_entry *ce = the_repository->index->cache[pos];
+		بنية cache_entry *old = عدم;
+		صحيح save_nr;
+		حرف *path;
 
-		if (ce_stage(ce) || !ce_path_match(the_repository->index, ce, &pathspec, NULL))
-			continue;
-		if (has_head)
-			old = read_one_ent(NULL, &head_oid,
+		ܐܢ (ce_stage(ce) || !ce_path_match(the_repository->index, ce, &pathspec, عدم))
+			استمر;
+		ܐܢ (has_head)
+			old = read_one_ent(عدم, &head_oid,
 					   ce->name, ce_namelen(ce), 0);
-		if (old && ce->ce_mode == old->ce_mode &&
+		ܐܢ (old && ce->ce_mode == old->ce_mode &&
 		    oideq(&ce->oid, &old->oid)) {
 			discard_cache_entry(old);
-			continue; /* unchanged */
+			استمر; /* unchanged */
 		}
 
 		/* At this point, we know the contents of the sparse directory are
 		 * modified with respect to HEAD, so we expand the index and restart
 		 * to process each path individually
 		 */
-		if (S_ISSPARSEDIR(ce->ce_mode)) {
+		ܐܢ (S_ISSPARSEDIR(ce->ce_mode)) {
 			ensure_full_index(the_repository->index);
-			goto redo;
+			اذهب redo;
 		}
 
 		/* Be careful.  The working tree may not have the
@@ -717,27 +717,27 @@ static int do_reupdate(const char **paths,
 		save_nr = the_repository->index->cache_nr;
 		path = xstrdup(ce->name);
 		update_one(path);
-		free(path);
+		حرر(path);
 		discard_cache_entry(old);
-		if (save_nr != the_repository->index->cache_nr)
-			goto redo;
+		ܐܢ (save_nr != the_repository->index->cache_nr)
+			اذهب redo;
 	}
 	clear_pathspec(&pathspec);
-	return 0;
+	ܦܢܐ 0;
 }
 
-struct refresh_params {
-	unsigned int flags;
-	int *has_errors;
+بنية refresh_params {
+	unsigned صحيح flags;
+	صحيح *has_errors;
 };
 
-static int refresh(struct refresh_params *o, unsigned int flag)
+ساكن صحيح refresh(بنية refresh_params *o, unsigned صحيح flag)
 {
 	setup_work_tree(the_repository);
 	repo_read_index(the_repository);
-	*o->has_errors |= refresh_index(the_repository->index, o->flags | flag, NULL,
-					NULL, NULL);
-	if (has_racy_timestamp(the_repository->index)) {
+	*o->has_errors |= refresh_index(the_repository->index, o->flags | flag, عدم,
+					عدم, عدم);
+	ܐܢ (has_racy_timestamp(the_repository->index)) {
 		/*
 		 * Even if nothing else has changed, updating the file
 		 * increases the chance that racy timestamps become
@@ -748,134 +748,134 @@ static int refresh(struct refresh_params *o, unsigned int flag)
 		 */
 		the_repository->index->cache_changed |= SOMETHING_CHANGED;
 	}
-	return 0;
+	ܦܢܐ 0;
 }
 
-static int refresh_callback(const struct option *opt,
-				const char *arg, int unset)
+ساكن صحيح refresh_callback(ثابت بنية option *opt,
+				ثابت حرف *arg, صحيح unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return refresh(opt->value, 0);
+	ܦܢܐ refresh(opt->value, 0);
 }
 
-static int really_refresh_callback(const struct option *opt,
-				const char *arg, int unset)
+ساكن صحيح really_refresh_callback(ثابت بنية option *opt,
+				ثابت حرف *arg, صحيح unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return refresh(opt->value, REFRESH_REALLY);
+	ܦܢܐ refresh(opt->value, REFRESH_REALLY);
 }
 
-static int chmod_callback(const struct option *opt,
-				const char *arg, int unset)
+ساكن صحيح chmod_callback(ثابت بنية option *opt,
+				ثابت حرف *arg, صحيح unset)
 {
-	char *flip = opt->value;
+	حرف *flip = opt->value;
 	BUG_ON_OPT_NEG(unset);
-	if ((arg[0] != '-' && arg[0] != '+') || arg[1] != 'x' || arg[2])
-		return error("option 'chmod' expects \"+x\" or \"-x\"");
+	ܐܢ ((arg[0] != '-' && arg[0] != '+') || arg[1] != 'x' || arg[2])
+		ܦܢܐ error("option 'chmod' expects \"+x\" or \"-x\"");
 	*flip = arg[0];
-	return 0;
+	ܦܢܐ 0;
 }
 
-static int resolve_undo_clear_callback(const struct option *opt UNUSED,
-				const char *arg, int unset)
+ساكن صحيح resolve_undo_clear_callback(ثابت بنية option *opt UNUSED,
+				ثابت حرف *arg, صحيح unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 	resolve_undo_clear_index(the_repository->index);
-	return 0;
+	ܦܢܐ 0;
 }
 
-static int parse_new_style_cacheinfo(const char *arg,
-				     unsigned int *mode,
-				     struct object_id *oid,
-				     const char **path)
+ساكن صحيح parse_new_style_cacheinfo(ثابت حرف *arg,
+				     unsigned صحيح *mode,
+				     بنية object_id *oid,
+				     ثابت حرف **path)
 {
 	unsigned long ul;
-	char *endp;
-	const char *p;
+	حرف *endp;
+	ثابت حرف *p;
 
-	if (!arg)
-		return -1;
+	ܐܢ (!arg)
+		ܦܢܐ -1;
 
 	errno = 0;
 	ul = strtoul(arg, &endp, 8);
-	if (errno || endp == arg || *endp != ',' || (unsigned int) ul != ul)
-		return -1; /* not a new-style cacheinfo */
+	ܐܢ (errno || endp == arg || *endp != ',' || (unsigned صحيح) ul != ul)
+		ܦܢܐ -1; /* not a new-style cacheinfo */
 	*mode = ul;
 	endp++;
-	if (parse_oid_hex(endp, oid, &p) || *p != ',')
-		return -1;
+	ܐܢ (parse_oid_hex(endp, oid, &p) || *p != ',')
+		ܦܢܐ -1;
 	*path = p + 1;
-	return 0;
+	ܦܢܐ 0;
 }
 
-static enum parse_opt_result cacheinfo_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt UNUSED,
-	const char *arg, int unset)
+ساكن تعداد parse_opt_result cacheinfo_callback(
+	بنية parse_opt_ctx_t *ctx, ثابت بنية option *opt UNUSED,
+	ثابت حرف *arg, صحيح unset)
 {
-	struct object_id oid;
-	unsigned int mode;
-	const char *path;
+	بنية object_id oid;
+	unsigned صحيح mode;
+	ثابت حرف *path;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
-	if (!parse_new_style_cacheinfo(ctx->argv[1], &mode, &oid, &path)) {
-		if (add_cacheinfo(mode, &oid, path, 0))
+	ܐܢ (!parse_new_style_cacheinfo(ctx->argv[1], &mode, &oid, &path)) {
+		ܐܢ (add_cacheinfo(mode, &oid, path, 0))
 			die("git update-index: --cacheinfo cannot add %s", path);
 		ctx->argv++;
 		ctx->argc--;
-		return 0;
+		ܦܢܐ 0;
 	}
-	if (ctx->argc <= 3)
-		return error("option 'cacheinfo' expects <mode>,<sha1>,<path>");
-	if (strtoul_ui(*++ctx->argv, 8, &mode) ||
+	ܐܢ (ctx->argc <= 3)
+		ܦܢܐ error("option 'cacheinfo' expects <mode>,<sha1>,<path>");
+	ܐܢ (strtoul_ui(*++ctx->argv, 8, &mode) ||
 	    get_oid_hex(*++ctx->argv, &oid) ||
 	    add_cacheinfo(mode, &oid, *++ctx->argv, 0))
 		die("git update-index: --cacheinfo cannot add %s", *ctx->argv);
 	ctx->argc -= 3;
-	return 0;
+	ܦܢܐ 0;
 }
 
-static enum parse_opt_result stdin_cacheinfo_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+ساكن تعداد parse_opt_result stdin_cacheinfo_callback(
+	بنية parse_opt_ctx_t *ctx, ثابت بنية option *opt,
+	ثابت حرف *arg, صحيح unset)
 {
-	int *nul_term_line = opt->value;
+	صحيح *nul_term_line = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
-	if (ctx->argc != 1)
-		return error("option '%s' must be the last argument", opt->long_name);
+	ܐܢ (ctx->argc != 1)
+		ܦܢܐ error("option '%s' must be the last argument", opt->long_name);
 	allow_add = allow_replace = allow_remove = 1;
 	read_index_info(*nul_term_line);
-	return 0;
+	ܦܢܐ 0;
 }
 
-static enum parse_opt_result stdin_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+ساكن تعداد parse_opt_result stdin_callback(
+	بنية parse_opt_ctx_t *ctx, ثابت بنية option *opt,
+	ثابت حرف *arg, صحيح unset)
 {
-	int *read_from_stdin = opt->value;
+	صحيح *read_from_stdin = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
-	if (ctx->argc != 1)
-		return error("option '%s' must be the last argument", opt->long_name);
+	ܐܢ (ctx->argc != 1)
+		ܦܢܐ error("option '%s' must be the last argument", opt->long_name);
 	*read_from_stdin = 1;
-	return 0;
+	ܦܢܐ 0;
 }
 
-static enum parse_opt_result unresolve_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+ساكن تعداد parse_opt_result unresolve_callback(
+	بنية parse_opt_ctx_t *ctx, ثابت بنية option *opt,
+	ثابت حرف *arg, صحيح unset)
 {
-	int *has_errors = opt->value;
-	const char *prefix = the_repository->prefix;
+	صحيح *has_errors = opt->value;
+	ثابت حرف *prefix = the_repository->prefix;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
@@ -883,20 +883,20 @@ static enum parse_opt_result unresolve_callback(
 	/* consume remaining arguments. */
 	*has_errors = do_unresolve(ctx->argc, ctx->argv,
 				prefix, prefix ? strlen(prefix) : 0);
-	if (*has_errors)
+	ܐܢ (*has_errors)
 		the_repository->index->cache_changed = 0;
 
 	ctx->argv += ctx->argc - 1;
 	ctx->argc = 1;
-	return 0;
+	ܦܢܐ 0;
 }
 
-static enum parse_opt_result reupdate_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+ساكن تعداد parse_opt_result reupdate_callback(
+	بنية parse_opt_ctx_t *ctx, ثابت بنية option *opt,
+	ثابت حرف *arg, صحيح unset)
 {
-	int *has_errors = opt->value;
-	const char *prefix = the_repository->prefix;
+	صحيح *has_errors = opt->value;
+	ثابت حرف *prefix = the_repository->prefix;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
@@ -904,38 +904,38 @@ static enum parse_opt_result reupdate_callback(
 	/* consume remaining arguments. */
 	setup_work_tree(the_repository);
 	*has_errors = do_reupdate(ctx->argv + 1, prefix);
-	if (*has_errors)
+	ܐܢ (*has_errors)
 		the_repository->index->cache_changed = 0;
 
 	ctx->argv += ctx->argc - 1;
 	ctx->argc = 1;
-	return 0;
+	ܦܢܐ 0;
 }
 
-int cmd_update_index(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo UNUSED)
+صحيح cmd_update_index(صحيح argc,
+		     ثابت حرف **argv,
+		     ثابت حرف *prefix,
+		     بنية repository *repo UNUSED)
 {
-	int newfd, entries, has_errors = 0, nul_term_line = 0;
-	enum uc_mode untracked_cache = UC_UNSPECIFIED;
-	int read_from_stdin = 0;
-	int prefix_length = prefix ? strlen(prefix) : 0;
-	int preferred_index_format = 0;
-	char set_executable_bit = 0;
-	struct refresh_params refresh_args = {0, &has_errors};
-	int lock_error = 0;
-	int split_index = -1;
-	int force_write = 0;
-	int fsmonitor = -1;
-	struct lock_file lock_file = LOCK_INIT;
-	struct parse_opt_ctx_t ctx;
+	صحيح newfd, entries, has_errors = 0, nul_term_line = 0;
+	تعداد uc_mode untracked_cache = UC_UNSPECIFIED;
+	صحيح read_from_stdin = 0;
+	صحيح prefix_length = prefix ? strlen(prefix) : 0;
+	صحيح preferred_index_format = 0;
+	حرف set_executable_bit = 0;
+	بنية refresh_params refresh_args = {0, &has_errors};
+	صحيح lock_error = 0;
+	صحيح split_index = -1;
+	صحيح force_write = 0;
+	صحيح fsmonitor = -1;
+	بنية lock_file lock_file = LOCK_INIT;
+	بنية parse_opt_ctx_t ctx;
 	strbuf_getline_fn getline_fn;
-	int parseopt_state = PARSE_OPT_UNKNOWN;
-	struct repository *r = the_repository;
-	struct odb_transaction *transaction;
-	struct option options[] = {
-		OPT_BIT('q', NULL, &refresh_args.flags,
+	صحيح parseopt_state = PARSE_OPT_UNKNOWN;
+	بنية repository *r = the_repository;
+	بنية odb_transaction *transaction;
+	بنية option options[] = {
+		OPT_BIT('q', عدم, &refresh_args.flags,
 			N_("continue refresh even when index needs update"),
 			REFRESH_QUIET),
 		OPT_BIT(0, "ignore-submodules", &refresh_args.flags,
@@ -950,11 +950,11 @@ int cmd_update_index(int argc,
 		OPT_BIT(0, "unmerged", &refresh_args.flags,
 			N_("refresh even if index contains unmerged entries"),
 			REFRESH_UNMERGED),
-		OPT_CALLBACK_F(0, "refresh", &refresh_args, NULL,
+		OPT_CALLBACK_F(0, "refresh", &refresh_args, عدم,
 			N_("refresh stat information"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			refresh_callback),
-		OPT_CALLBACK_F(0, "really-refresh", &refresh_args, NULL,
+		OPT_CALLBACK_F(0, "really-refresh", &refresh_args, عدم,
 			N_("like --refresh, but ignore assume-unchanged setting"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			really_refresh_callback),
@@ -975,7 +975,7 @@ int cmd_update_index(int argc,
 			.type = OPTION_SET_INT,
 			.long_name = "assume-unchanged",
 			.value = &mark_valid_only,
-			.precision = sizeof(mark_valid_only),
+			.precision = حجم(mark_valid_only),
 			.help = N_("mark files as \"not changing\""),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = MARK_FLAG,
@@ -984,7 +984,7 @@ int cmd_update_index(int argc,
 			.type = OPTION_SET_INT,
 			.long_name = "no-assume-unchanged",
 			.value = &mark_valid_only,
-			.precision = sizeof(mark_valid_only),
+			.precision = حجم(mark_valid_only),
 			.help = N_("clear assumed-unchanged bit"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = UNMARK_FLAG,
@@ -993,7 +993,7 @@ int cmd_update_index(int argc,
 			.type = OPTION_SET_INT,
 			.long_name = "skip-worktree",
 			.value = &mark_skip_worktree_only,
-			.precision = sizeof(mark_skip_worktree_only),
+			.precision = حجم(mark_skip_worktree_only),
 			.help = N_("mark files as \"index-only\""),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = MARK_FLAG,
@@ -1002,7 +1002,7 @@ int cmd_update_index(int argc,
 			.type = OPTION_SET_INT,
 			.long_name = "no-skip-worktree",
 			.value = &mark_skip_worktree_only,
-			.precision = sizeof(mark_skip_worktree_only),
+			.precision = حجم(mark_skip_worktree_only),
 			.help = N_("clear skip-worktree bit"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = UNMARK_FLAG,
@@ -1013,7 +1013,7 @@ int cmd_update_index(int argc,
 			N_("add to index only; do not add content to object database"), 1),
 		OPT_SET_INT(0, "force-remove", &force_remove,
 			N_("remove named paths even if present in worktree"), 1),
-		OPT_BOOL('z', NULL, &nul_term_line,
+		OPT_BOOL('z', عدم, &nul_term_line,
 			 N_("with --stdin: input lines are terminated by null bytes")),
 		{
 			.type = OPTION_LOWLEVEL_CALLBACK,
@@ -1053,7 +1053,7 @@ int cmd_update_index(int argc,
 			REFRESH_IGNORE_MISSING),
 		OPT_SET_INT(0, "verbose", &verbose,
 			N_("report actions to standard output"), 1),
-		OPT_CALLBACK_F(0, "clear-resolve-undo", NULL, NULL,
+		OPT_CALLBACK_F(0, "clear-resolve-undo", عدم, عدم,
 			N_("(for porcelains) forget saved unresolved conflicts"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			resolve_undo_clear_callback),
@@ -1077,7 +1077,7 @@ int cmd_update_index(int argc,
 			.type = OPTION_SET_INT,
 			.long_name = "fsmonitor-valid",
 			.value = &mark_fsmonitor_only,
-			.precision = sizeof(mark_fsmonitor_only),
+			.precision = حجم(mark_fsmonitor_only),
 			.help = N_("mark files as fsmonitor valid"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = MARK_FLAG,
@@ -1086,7 +1086,7 @@ int cmd_update_index(int argc,
 			.type = OPTION_SET_INT,
 			.long_name = "no-fsmonitor-valid",
 			.value = &mark_fsmonitor_only,
-			.precision = sizeof(mark_fsmonitor_only),
+			.precision = حجم(mark_fsmonitor_only),
 			.help = N_("clear fsmonitor valid bit"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = UNMARK_FLAG,
@@ -1097,18 +1097,18 @@ int cmd_update_index(int argc,
 	show_usage_with_options_if_asked(argc, argv,
 					 update_index_usage, options);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, عدم);
 
 	prepare_repo_settings(r);
 	the_repository->settings.command_requires_full_index = 0;
 
 	/* we will diagnose later if it turns out that we need to update it */
 	newfd = repo_hold_locked_index(the_repository, &lock_file, 0);
-	if (newfd < 0)
+	ܐܢ (newfd < 0)
 		lock_error = errno;
 
 	entries = repo_read_index(the_repository);
-	if (entries < 0)
+	ܐܢ (entries < 0)
 		die("cache corrupted");
 
 	the_repository->index->updated_skipworktree = 1;
@@ -1125,25 +1125,25 @@ int cmd_update_index(int argc,
 	 * a batch.
 	 */
 	odb_transaction_begin_or_die(the_repository->objects, &transaction, 0);
-	while (ctx.argc) {
-		if (parseopt_state != PARSE_OPT_DONE)
+	ܟܡܐ (ctx.argc) {
+		ܐܢ (parseopt_state != PARSE_OPT_DONE)
 			parseopt_state = parse_options_step(&ctx, options,
 							    update_index_usage);
-		if (!ctx.argc)
-			break;
-		switch (parseopt_state) {
-		case PARSE_OPT_HELP:
+		ܐܢ (!ctx.argc)
+			اكسر;
+		بدل (parseopt_state) {
+		حالة PARSE_OPT_HELP:
 			exit(0);
-		case PARSE_OPT_HELP_ERROR:
-		case PARSE_OPT_ERROR:
+		حالة PARSE_OPT_HELP_ERROR:
+		حالة PARSE_OPT_ERROR:
 			exit(129);
-		case PARSE_OPT_COMPLETE:
+		حالة PARSE_OPT_COMPLETE:
 			exit(0);
-		case PARSE_OPT_NON_OPTION:
-		case PARSE_OPT_DONE:
+		حالة PARSE_OPT_NON_OPTION:
+		حالة PARSE_OPT_DONE:
 		{
-			const char *path = ctx.argv[0];
-			char *p;
+			ثابت حرف *path = ctx.argv[0];
+			حرف *p;
 
 			/*
 			 * It is possible, though unlikely, that a caller could
@@ -1155,25 +1155,25 @@ int cmd_update_index(int argc,
 			 * update. All further updates are performed outside of
 			 * a transaction.
 			 */
-			if (transaction && verbose) {
+			ܐܢ (transaction && verbose) {
 				odb_transaction_commit_and_finalize_or_die(transaction);
-				transaction = NULL;
+				transaction = عدم;
 			}
 
 			setup_work_tree(the_repository);
 			p = prefix_path(the_repository, prefix, prefix_length, path);
 			update_one(p);
-			if (set_executable_bit)
+			ܐܢ (set_executable_bit)
 				chmod_path(set_executable_bit, p);
-			free(p);
+			حرر(p);
 			ctx.argc--;
 			ctx.argv++;
-			break;
+			اكسر;
 		}
-		case PARSE_OPT_UNKNOWN:
-			if (ctx.argv[0][1] == '-')
+		حالة PARSE_OPT_UNKNOWN:
+			ܐܢ (ctx.argv[0][1] == '-')
 				error("unknown option '%s'", ctx.argv[0] + 2);
-			else
+			ܐܚܪܢܐ
 				error("unknown switch '%c'", *ctx.opt);
 			usage_with_options(update_index_usage, options);
 		}
@@ -1181,16 +1181,16 @@ int cmd_update_index(int argc,
 	argc = parse_options_end(&ctx);
 
 	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	if (preferred_index_format) {
-		if (preferred_index_format < 0) {
+	ܐܢ (preferred_index_format) {
+		ܐܢ (preferred_index_format < 0) {
 			printf(_("%d\n"), the_repository->index->version);
-		} else if (preferred_index_format < INDEX_FORMAT_LB ||
+		} ܐܚܪܢܐ ܐܢ (preferred_index_format < INDEX_FORMAT_LB ||
 			   INDEX_FORMAT_UB < preferred_index_format) {
 			die("index-version %d not in range: %d..%d",
 			    preferred_index_format,
 			    INDEX_FORMAT_LB, INDEX_FORMAT_UB);
-		} else {
-			if (the_repository->index->version != preferred_index_format)
+		} ܐܚܪܢܐ {
+			ܐܢ (the_repository->index->version != preferred_index_format)
 				the_repository->index->cache_changed |= SOMETHING_CHANGED;
 			report(_("index-version: was %d, set to %d"),
 			       the_repository->index->version, preferred_index_format);
@@ -1198,24 +1198,24 @@ int cmd_update_index(int argc,
 		}
 	}
 
-	if (read_from_stdin) {
-		struct strbuf buf = STRBUF_INIT;
-		struct strbuf unquoted = STRBUF_INIT;
+	ܐܢ (read_from_stdin) {
+		بنية strbuf buf = STRBUF_INIT;
+		بنية strbuf unquoted = STRBUF_INIT;
 
 		setup_work_tree(the_repository);
-		while (getline_fn(&buf, stdin) != EOF) {
-			char *p;
-			if (!nul_term_line && buf.buf[0] == '"') {
+		ܟܡܐ (getline_fn(&buf, stdin) != EOF) {
+			حرف *p;
+			ܐܢ (!nul_term_line && buf.buf[0] == '"') {
 				strbuf_reset(&unquoted);
-				if (unquote_c_style(&unquoted, buf.buf, NULL))
+				ܐܢ (unquote_c_style(&unquoted, buf.buf, عدم))
 					die("line is badly quoted");
 				strbuf_swap(&buf, &unquoted);
 			}
 			p = prefix_path(the_repository, prefix, prefix_length, buf.buf);
 			update_one(p);
-			if (set_executable_bit)
+			ܐܢ (set_executable_bit)
 				chmod_path(set_executable_bit, p);
-			free(p);
+			حرر(p);
 		}
 		strbuf_release(&unquoted);
 		strbuf_release(&buf);
@@ -1226,17 +1226,17 @@ int cmd_update_index(int argc,
 	 */
 	odb_transaction_commit_and_finalize_or_die(transaction);
 
-	if (split_index > 0) {
-		if (repo_config_get_split_index(the_repository) == 0)
+	ܐܢ (split_index > 0) {
+		ܐܢ (repo_config_get_split_index(the_repository) == 0)
 			warning(_("core.splitIndex is set to false; "
 				  "remove or change it, if you really want to "
 				  "enable split index"));
-		if (the_repository->index->split_index)
+		ܐܢ (the_repository->index->split_index)
 			the_repository->index->cache_changed |= SPLIT_INDEX_ORDERED;
-		else
+		ܐܚܪܢܐ
 			add_split_index(the_repository->index);
-	} else if (!split_index) {
-		if (repo_config_get_split_index(the_repository) == 1)
+	} ܐܚܪܢܐ ܐܢ (!split_index) {
+		ܐܢ (repo_config_get_split_index(the_repository) == 1)
 			warning(_("core.splitIndex is set to true; "
 				  "remove or change it, if you really want to "
 				  "disable split index"));
@@ -1244,36 +1244,36 @@ int cmd_update_index(int argc,
 	}
 
 	prepare_repo_settings(r);
-	switch (untracked_cache) {
-	case UC_UNSPECIFIED:
-		break;
-	case UC_DISABLE:
-		if (r->settings.core_untracked_cache == UNTRACKED_CACHE_WRITE)
+	بدل (untracked_cache) {
+	حالة UC_UNSPECIFIED:
+		اكسر;
+	حالة UC_DISABLE:
+		ܐܢ (r->settings.core_untracked_cache == UNTRACKED_CACHE_WRITE)
 			warning(_("core.untrackedCache is set to true; "
 				  "remove or change it, if you really want to "
 				  "disable the untracked cache"));
 		remove_untracked_cache(the_repository->index);
 		report(_("Untracked cache disabled"));
-		break;
-	case UC_TEST:
+		اكسر;
+	حالة UC_TEST:
 		setup_work_tree(the_repository);
-		return !test_if_untracked_cache_is_supported();
-	case UC_ENABLE:
-	case UC_FORCE:
-		if (r->settings.core_untracked_cache == UNTRACKED_CACHE_REMOVE)
+		ܦܢܐ !test_if_untracked_cache_is_supported();
+	حالة UC_ENABLE:
+	حالة UC_FORCE:
+		ܐܢ (r->settings.core_untracked_cache == UNTRACKED_CACHE_REMOVE)
 			warning(_("core.untrackedCache is set to false; "
 				  "remove or change it, if you really want to "
 				  "enable the untracked cache"));
 		add_untracked_cache(the_repository->index);
 		report(_("Untracked cache enabled for '%s'"), repo_get_work_tree(the_repository));
-		break;
-	default:
+		اكسر;
+	افتراضي:
 		BUG("bad untracked_cache value: %d", untracked_cache);
 	}
 
-	if (fsmonitor > 0) {
-		enum fsmonitor_mode fsm_mode = fsm_settings__get_mode(r);
-		enum fsmonitor_reason reason = fsm_settings__get_reason(r);
+	ܐܢ (fsmonitor > 0) {
+		تعداد fsmonitor_mode fsm_mode = fsm_settings__get_mode(r);
+		تعداد fsmonitor_reason reason = fsm_settings__get_reason(r);
 
 		/*
 		 * The user wants to turn on FSMonitor using the command
@@ -1285,20 +1285,20 @@ int cmd_update_index(int argc,
 		 * whether the file system is compatible so that we can stop
 		 * here with a nice error message.
 		 */
-		if (reason > FSMONITOR_REASON_OK)
+		ܐܢ (reason > FSMONITOR_REASON_OK)
 			die("%s",
 			    fsm_settings__get_incompatible_msg(r, reason));
 
-		if (fsm_mode == FSMONITOR_MODE_DISABLED) {
+		ܐܢ (fsm_mode == FSMONITOR_MODE_DISABLED) {
 			warning(_("core.fsmonitor is unset; "
 				"set it if you really want to "
 				"enable fsmonitor"));
 		}
 		add_fsmonitor(the_repository->index);
 		report(_("fsmonitor enabled"));
-	} else if (!fsmonitor) {
-		enum fsmonitor_mode fsm_mode = fsm_settings__get_mode(r);
-		if (fsm_mode > FSMONITOR_MODE_DISABLED)
+	} ܐܚܪܢܐ ܐܢ (!fsmonitor) {
+		تعداد fsmonitor_mode fsm_mode = fsm_settings__get_mode(r);
+		ܐܢ (fsm_mode > FSMONITOR_MODE_DISABLED)
 			warning(_("core.fsmonitor is set; "
 				"remove it if you really want to "
 				"disable fsmonitor"));
@@ -1306,17 +1306,17 @@ int cmd_update_index(int argc,
 		report(_("fsmonitor disabled"));
 	}
 
-	if (the_repository->index->cache_changed || force_write) {
-		if (newfd < 0) {
-			if (refresh_args.flags & REFRESH_QUIET)
+	ܐܢ (the_repository->index->cache_changed || force_write) {
+		ܐܢ (newfd < 0) {
+			ܐܢ (refresh_args.flags & REFRESH_QUIET)
 				exit(128);
 			unable_to_lock_die(repo_get_index_file(the_repository), lock_error);
 		}
-		if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+		ܐܢ (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
 			die("Unable to write new index file");
 	}
 
 	rollback_lock_file(&lock_file);
 
-	return has_errors ? 1 : 0;
+	ܦܢܐ has_errors ? 1 : 0;
 }

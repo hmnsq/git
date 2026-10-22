@@ -4,30 +4,30 @@
  * Copyright (C) Linus Torvalds, 2005
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "tree.h"
-#include "cache-tree.h"
-#include "parse-options.h"
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "hex.h"
+#ضمن "tree.h"
+#ضمن "cache-tree.h"
+#ضمن "parse-options.h"
 
-static const char * const write_tree_usage[] = {
+ساكن ثابت حرف * ثابت write_tree_usage[] = {
 	N_("git write-tree [--missing-ok] [--prefix=<prefix>/]"),
-	NULL
+	عدم
 };
 
-int cmd_write_tree(int argc,
-		   const char **argv,
-		   const char *cmd_prefix,
-		   struct repository *repo UNUSED)
+صحيح cmd_write_tree(صحيح argc,
+		   ثابت حرف **argv,
+		   ثابت حرف *cmd_prefix,
+		   بنية repository *repo UNUSED)
 {
-	int flags = 0, ret;
-	const char *tree_prefix = NULL;
-	struct object_id oid;
-	const char *me = "git-write-tree";
-	struct option write_tree_options[] = {
+	صحيح flags = 0, ret;
+	ثابت حرف *tree_prefix = عدم;
+	بنية object_id oid;
+	ثابت حرف *me = "git-write-tree";
+	بنية option write_tree_options[] = {
 		OPT_BIT(0, "missing-ok", &flags, N_("allow missing objects"),
 			WRITE_TREE_MISSING_OK),
 		OPT_STRING(0, "prefix", &tree_prefix, N_("<prefix>/"),
@@ -36,7 +36,7 @@ int cmd_write_tree(int argc,
 			.type = OPTION_BIT,
 			.long_name = "ignore-cache-tree",
 			.value = &flags,
-			.precision = sizeof(flags),
+			.precision = حجم(flags),
 			.help = N_("only useful for debugging"),
 			.flags = PARSE_OPT_HIDDEN | PARSE_OPT_NOARG,
 			.defval = WRITE_TREE_IGNORE_CACHE_TREE,
@@ -44,7 +44,7 @@ int cmd_write_tree(int argc,
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, عدم);
 	argc = parse_options(argc, argv, cmd_prefix, write_tree_options,
 			     write_tree_usage, 0);
 
@@ -54,19 +54,19 @@ int cmd_write_tree(int argc,
 	ret = write_index_as_tree(&oid, the_repository->index,
 				  repo_get_index_file(the_repository),
 				  flags, tree_prefix);
-	switch (ret) {
-	case 0:
+	بدل (ret) {
+	حالة 0:
 		printf("%s\n", oid_to_hex(&oid));
-		break;
-	case WRITE_TREE_UNREADABLE_INDEX:
+		اكسر;
+	حالة WRITE_TREE_UNREADABLE_INDEX:
 		die("%s: error reading the index", me);
-		break;
-	case WRITE_TREE_UNMERGED_INDEX:
+		اكسر;
+	حالة WRITE_TREE_UNMERGED_INDEX:
 		die("%s: error building trees", me);
-		break;
-	case WRITE_TREE_PREFIX_ERROR:
+		اكسر;
+	حالة WRITE_TREE_PREFIX_ERROR:
 		die("%s: prefix %s not found", me, tree_prefix);
-		break;
+		اكسر;
 	}
-	return ret;
+	ܦܢܐ ret;
 }
