@@ -1,30 +1,30 @@
-#include "builtin.h"
-#include "config.h"
-#include "fmt-merge-msg.h"
-#include "gettext.h"
-#include "parse-options.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "config.h"
+#অন্তর্ভাব "fmt-merge-msg.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "parse-options.h"
 
-static const char * const fmt_merge_msg_usage[] = {
+স্থির ধ্রুব বর্ণ * ধ্রুব fmt_merge_বার্তা_usage[] = {
 	N_("git fmt-merge-msg [-m <message>] [--log[=<n>] | --no-log] [--file <file>]"),
-	NULL
+	রিক্ত
 };
 
-int cmd_fmt_merge_msg(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo)
+পূর্ণাঙ্ক cmd_fmt_merge_বার্তা(পূর্ণাঙ্ক argc,
+		      ধ্রুব বর্ণ **argv,
+		      ধ্রুব বর্ণ *prefix,
+		      সংরচনা repository *repo)
 {
-	char *inpath = NULL;
-	const char *message = NULL;
-	char *into_name = NULL;
-	int shortlog_len = -1;
-	int merge_log_config = -1;
-	struct option options[] = {
+	বর্ণ *inpath = রিক্ত;
+	ধ্রুব বর্ণ *message = রিক্ত;
+	বর্ণ *into_name = রিক্ত;
+	পূর্ণাঙ্ক shortlog_len = -1;
+	পূর্ণাঙ্ক merge_log_config = -1;
+	সংরচনা option options[] = {
 		{
 			.type = OPTION_INTEGER,
 			.long_name = "log",
-			.value = &shortlog_len,
-			.precision = sizeof(shortlog_len),
+			.মান = &shortlog_len,
+			.precision = পরিমাণ(shortlog_len),
 			.argh = N_("n"),
 			.help = N_("populate log with at most <n> entries from shortlog"),
 			.flags = PARSE_OPT_OPTARG,
@@ -33,8 +33,8 @@ int cmd_fmt_merge_msg(int argc,
 		{
 			.type = OPTION_INTEGER,
 			.long_name = "summary",
-			.value = &shortlog_len,
-			.precision = sizeof(shortlog_len),
+			.মান = &shortlog_len,
+			.precision = পরিমাণ(shortlog_len),
 			.argh = N_("n"),
 			.help = N_("alias for --log (deprecated)"),
 			.flags = PARSE_OPT_OPTARG | PARSE_OPT_HIDDEN,
@@ -49,43 +49,43 @@ int cmd_fmt_merge_msg(int argc,
 	};
 
 	FILE *in = stdin;
-	struct strbuf input = STRBUF_INIT, output = STRBUF_INIT;
-	int ret;
-	struct fmt_merge_msg_opts opts;
+	সংরচনা strbuf প্রবেশ = STRBUF_INIT, output = STRBUF_INIT;
+	পূর্ণাঙ্ক ret;
+	সংরচনা fmt_merge_বার্তা_opts opts;
 
-	repo_config(repo, fmt_merge_msg_config, &merge_log_config);
-	argc = parse_options(argc, argv, prefix, options, fmt_merge_msg_usage,
+	repo_config(repo, fmt_merge_বার্তা_config, &merge_log_config);
+	argc = parse_options(argc, argv, prefix, options, fmt_merge_বার্তা_usage,
 			     0);
-	if (argc > 0)
-		usage_with_options(fmt_merge_msg_usage, options);
-	if (shortlog_len < 0)
+	যদি (argc > 0)
+		usage_with_options(fmt_merge_বার্তা_usage, options);
+	যদি (shortlog_len < 0)
 		shortlog_len = (merge_log_config > 0) ? merge_log_config : 0;
 
-	if (inpath && strcmp(inpath, "-")) {
+	যদি (inpath && strcmp(inpath, "-")) {
 		in = fopen(inpath, "r");
-		if (!in)
+		যদি (!in)
 			die_errno("cannot open '%s'", inpath);
 	}
 
-	if (strbuf_read(&input, fileno(in), 0) < 0)
+	যদি (strbuf_read(&প্রবেশ, fileno(in), 0) < 0)
 		die_errno("could not read input file");
 
-	if (message)
+	যদি (message)
 		strbuf_addstr(&output, message);
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, পরিমাণ(opts));
 	opts.add_title = !message;
 	opts.credit_people = 1;
 	opts.shortlog_len = shortlog_len;
 	opts.into_name = into_name;
 
-	ret = fmt_merge_msg(&input, &output, &opts);
-	if (ret)
-		return ret;
+	ret = fmt_merge_বার্তা(&প্রবেশ, &output, &opts);
+	যদি (ret)
+		প্রত্যাগম ret;
 	write_in_full(STDOUT_FILENO, output.buf, output.len);
 
-	strbuf_release(&input);
+	strbuf_release(&প্রবেশ);
 	strbuf_release(&output);
-	free(inpath);
-	return 0;
+	মুক্ত(inpath);
+	প্রত্যাগম 0;
 }

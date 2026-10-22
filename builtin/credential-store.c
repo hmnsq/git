@@ -1,107 +1,107 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "gettext.h"
-#include "lockfile.h"
-#include "credential.h"
-#include "path.h"
-#include "string-list.h"
-#include "parse-options.h"
-#include "url.h"
-#include "write-or-die.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "config.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "lockfile.h"
+#অন্তর্ভাব "credential.h"
+#অন্তর্ভাব "path.h"
+#অন্তর্ভাব "string-list.h"
+#অন্তর্ভাব "parse-options.h"
+#অন্তর্ভাব "url.h"
+#অন্তর্ভাব "write-or-die.h"
 
-static struct lock_file credential_lock;
+স্থির সংরচনা lock_file credential_lock;
 
-static int parse_credential_file(const char *fn,
-				  struct credential *c,
-				  void (*match_cb)(struct credential *),
-				  void (*other_cb)(struct strbuf *),
-				  int match_password)
+স্থির পূর্ণাঙ্ক parse_credential_file(ধ্রুব বর্ণ *fn,
+				  সংরচনা credential *c,
+				  শূন্য (*match_cb)(সংরচনা credential *),
+				  শূন্য (*other_cb)(সংরচনা strbuf *),
+				  পূর্ণাঙ্ক match_password)
 {
 	FILE *fh;
-	struct strbuf line = STRBUF_INIT;
-	struct credential entry = CREDENTIAL_INIT;
-	int found_credential = 0;
+	সংরচনা strbuf সারি = STRBUF_INIT;
+	সংরচনা credential entry = CREDENTIAL_INIT;
+	পূর্ণাঙ্ক found_credential = 0;
 
 	fh = fopen(fn, "r");
-	if (!fh) {
-		if (errno != ENOENT && errno != EACCES)
+	যদি (!fh) {
+		যদি (errno != ENOENT && errno != EACCES)
 			die_errno("unable to open %s", fn);
-		return found_credential;
+		প্রত্যাগম found_credential;
 	}
 
-	while (strbuf_getline_lf(&line, fh) != EOF) {
-		if (!credential_from_url_gently(&entry, line.buf, 1) &&
+	যাবত্ (strbuf_getline_lf(&সারি, fh) != EOF) {
+		যদি (!credential_from_url_gently(&entry, সারি.buf, 1) &&
 		    entry.username && entry.password &&
 		    credential_match(c, &entry, match_password)) {
 			found_credential = 1;
-			if (match_cb) {
+			যদি (match_cb) {
 				match_cb(&entry);
-				break;
+				ভঙ্গ;
 			}
 		}
-		else if (other_cb)
-			other_cb(&line);
+		অন্যথা যদি (other_cb)
+			other_cb(&সারি);
 	}
 
 	credential_clear(&entry);
-	strbuf_release(&line);
+	strbuf_release(&সারি);
 	fclose(fh);
-	return found_credential;
+	প্রত্যাগম found_credential;
 }
 
-static void print_entry(struct credential *c)
+স্থির শূন্য print_entry(সংরচনা credential *c)
 {
 	printf("username=%s\n", c->username);
 	printf("password=%s\n", c->password);
 }
 
-static void print_line(struct strbuf *buf)
+স্থির শূন্য print_সারি(সংরচনা strbuf *buf)
 {
 	strbuf_addch(buf, '\n');
 	write_or_die(get_lock_file_fd(&credential_lock), buf->buf, buf->len);
 }
 
-static void rewrite_credential_file(const char *fn, struct credential *c,
-				    struct strbuf *extra, int match_password)
+স্থির শূন্য rewrite_credential_file(ধ্রুব বর্ণ *fn, সংরচনা credential *c,
+				    সংরচনা strbuf *extra, পূর্ণাঙ্ক match_password)
 {
-	int timeout_ms = 1000;
+	পূর্ণাঙ্ক timeout_ms = 1000;
 
 	repo_config_get_int(the_repository, "credentialstore.locktimeoutms", &timeout_ms);
-	if (hold_lock_file_for_update_timeout(&credential_lock, fn, 0, timeout_ms) < 0)
+	যদি (hold_lock_file_for_update_timeout(&credential_lock, fn, 0, timeout_ms) < 0)
 		die_errno(_("unable to get credential storage lock in %d ms"), timeout_ms);
-	if (extra)
-		print_line(extra);
-	parse_credential_file(fn, c, NULL, print_line, match_password);
-	if (commit_lock_file(&credential_lock) < 0)
+	যদি (extra)
+		print_সারি(extra);
+	parse_credential_file(fn, c, রিক্ত, print_সারি, match_password);
+	যদি (commit_lock_file(&credential_lock) < 0)
 		die_errno("unable to write credential store");
 }
 
-static int is_rfc3986_reserved_or_unreserved(char ch)
+স্থির পূর্ণাঙ্ক is_rfc3986_reserved_or_unreserved(বর্ণ ch)
 {
-	if (is_rfc3986_unreserved(ch))
-		return 1;
-	switch (ch) {
-		case '!': case '*': case '\'': case '(': case ')': case ';':
-		case ':': case '@': case '&': case '=': case '+': case '$':
-		case ',': case '/': case '?': case '#': case '[': case ']':
-			return 1;
+	যদি (is_rfc3986_unreserved(ch))
+		প্রত্যাগম 1;
+	বিকল্প (ch) {
+		পক্ষ '!': পক্ষ '*': পক্ষ '\'': পক্ষ '(': পক্ষ ')': পক্ষ ';':
+		পক্ষ ':': পক্ষ '@': পক্ষ '&': পক্ষ '=': পক্ষ '+': পক্ষ '$':
+		পক্ষ ',': পক্ষ '/': পক্ষ '?': পক্ষ '#': পক্ষ '[': পক্ষ ']':
+			প্রত্যাগম 1;
 	}
-	return 0;
+	প্রত্যাগম 0;
 }
 
-static void store_credential_file(const char *fn, struct credential *c)
+স্থির শূন্য store_credential_file(ধ্রুব বর্ণ *fn, সংরচনা credential *c)
 {
-	struct strbuf buf = STRBUF_INIT;
+	সংরচনা strbuf buf = STRBUF_INIT;
 
 	strbuf_addf(&buf, "%s://", c->protocol);
 	strbuf_addstr_urlencode(&buf, c->username, is_rfc3986_unreserved);
 	strbuf_addch(&buf, ':');
 	strbuf_addstr_urlencode(&buf, c->password, is_rfc3986_unreserved);
 	strbuf_addch(&buf, '@');
-	if (c->host)
+	যদি (c->host)
 		strbuf_addstr_urlencode(&buf, c->host, is_rfc3986_unreserved);
-	if (c->path) {
+	যদি (c->path) {
 		strbuf_addch(&buf, '/');
 		strbuf_addstr_urlencode(&buf, c->path,
 					is_rfc3986_reserved_or_unreserved);
@@ -111,9 +111,9 @@ static void store_credential_file(const char *fn, struct credential *c)
 	strbuf_release(&buf);
 }
 
-static void store_credential(const struct string_list *fns, struct credential *c)
+স্থির শূন্য store_credential(ধ্রুব সংরচনা string_list *fns, সংরচনা credential *c)
 {
-	struct string_list_item *fn;
+	সংরচনা string_list_item *fn;
 
 	/*
 	 * Sanity check that what we are storing is actually sensible.
@@ -122,25 +122,25 @@ static void store_credential(const struct string_list *fns, struct credential *c
 	 * we have no primary key. And without a username and password,
 	 * we are not actually storing a credential.
 	 */
-	if (!c->protocol || !(c->host || c->path) || !c->username || !c->password)
-		return;
+	যদি (!c->protocol || !(c->host || c->path) || !c->username || !c->password)
+		প্রত্যাগম;
 
 	for_each_string_list_item(fn, fns)
-		if (!access(fn->string, F_OK)) {
+		যদি (!access(fn->string, F_OK)) {
 			store_credential_file(fn->string, c);
-			return;
+			প্রত্যাগম;
 		}
 	/*
 	 * Write credential to the filename specified by fns->items[0], thus
 	 * creating it
 	 */
-	if (fns->nr)
-		store_credential_file(fns->items[0].string, c);
+	যদি (fns->nr)
+		store_credential_file(fns->বস্তুসমূহ[0].string, c);
 }
 
-static void remove_credential(const struct string_list *fns, struct credential *c)
+স্থির শূন্য remove_credential(ধ্রুব সংরচনা string_list *fns, সংরচনা credential *c)
 {
-	struct string_list_item *fn;
+	সংরচনা string_list_item *fn;
 
 	/*
 	 * Sanity check that we actually have something to match
@@ -150,36 +150,36 @@ static void remove_credential(const struct string_list *fns, struct credential *
 	 * to empty input. So explicitly disallow it, and require that the
 	 * pattern have some actual content to match.
 	 */
-	if (!c->protocol && !c->host && !c->path && !c->username)
-		return;
+	যদি (!c->protocol && !c->host && !c->path && !c->username)
+		প্রত্যাগম;
 	for_each_string_list_item(fn, fns)
-		if (!access(fn->string, F_OK))
-			rewrite_credential_file(fn->string, c, NULL, 1);
+		যদি (!access(fn->string, F_OK))
+			rewrite_credential_file(fn->string, c, রিক্ত, 1);
 }
 
-static void lookup_credential(const struct string_list *fns, struct credential *c)
+স্থির শূন্য lookup_credential(ধ্রুব সংরচনা string_list *fns, সংরচনা credential *c)
 {
-	struct string_list_item *fn;
+	সংরচনা string_list_item *fn;
 
 	for_each_string_list_item(fn, fns)
-		if (parse_credential_file(fn->string, c, print_entry, NULL, 0))
-			return; /* Found credential */
+		যদি (parse_credential_file(fn->string, c, print_entry, রিক্ত, 0))
+			প্রত্যাগম; /* Found credential */
 }
 
-int cmd_credential_store(int argc,
-			 const char **argv,
-			 const char *prefix,
-			 struct repository *repo UNUSED)
+পূর্ণাঙ্ক cmd_credential_store(পূর্ণাঙ্ক argc,
+			 ধ্রুব বর্ণ **argv,
+			 ধ্রুব বর্ণ *prefix,
+			 সংরচনা repository *repo UNUSED)
 {
-	const char * const usage[] = {
+	ধ্রুব বর্ণ * ধ্রুব usage[] = {
 		"git credential-store [<options>] <action>",
-		NULL
+		রিক্ত
 	};
-	const char *op;
-	struct credential c = CREDENTIAL_INIT;
-	struct string_list fns = STRING_LIST_INIT_DUP;
-	char *file = NULL;
-	struct option options[] = {
+	ধ্রুব বর্ণ *op;
+	সংরচনা credential c = CREDENTIAL_INIT;
+	সংরচনা string_list fns = STRING_LIST_INIT_DUP;
+	বর্ণ *file = রিক্ত;
+	সংরচনা option options[] = {
 		OPT_STRING(0, "file", &file, "path",
 			   "fetch and store credentials in <path>"),
 		OPT_END()
@@ -187,36 +187,36 @@ int cmd_credential_store(int argc,
 
 	umask(077);
 
-	argc = parse_options(argc, (const char **)argv, prefix, options, usage, 0);
-	if (argc != 1)
+	argc = parse_options(argc, (ধ্রুব বর্ণ **)argv, prefix, options, usage, 0);
+	যদি (argc != 1)
 		usage_with_options(usage, options);
 	op = argv[0];
 
-	if (file) {
+	যদি (file) {
 		string_list_append(&fns, file);
-	} else {
-		if ((file = interpolate_path("~/.git-credentials", 0)))
+	} অন্যথা {
+		যদি ((file = interpolate_path("~/.git-credentials", 0)))
 			string_list_append_nodup(&fns, file);
 		file = xdg_config_home("credentials");
-		if (file)
+		যদি (file)
 			string_list_append_nodup(&fns, file);
 	}
-	if (!fns.nr)
+	যদি (!fns.nr)
 		die("unable to set up default path; use --file");
 
-	if (credential_read(&c, stdin, CREDENTIAL_OP_HELPER) < 0)
+	যদি (credential_read(&c, stdin, CREDENTIAL_OP_HELPER) < 0)
 		die("unable to read credential");
 
-	if (!strcmp(op, "get"))
+	যদি (!strcmp(op, "get"))
 		lookup_credential(&fns, &c);
-	else if (!strcmp(op, "erase"))
+	অন্যথা যদি (!strcmp(op, "erase"))
 		remove_credential(&fns, &c);
-	else if (!strcmp(op, "store"))
+	অন্যথা যদি (!strcmp(op, "store"))
 		store_credential(&fns, &c);
-	else
+	অন্যথা
 		; /* Ignore unknown operation. */
 
 	string_list_clear(&fns, 0);
 	credential_clear(&c);
-	return 0;
+	প্রত্যাগম 0;
 }

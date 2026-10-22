@@ -2,66 +2,66 @@
  * Copyright (c) 2006 Franck Bui-Huu
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "archive.h"
-#include "pkt-line.h"
-#include "setup.h"
-#include "sideband.h"
-#include "run-command.h"
-#include "strvec.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "archive.h"
+#অন্তর্ভাব "pkt-line.h"
+#অন্তর্ভাব "setup.h"
+#অন্তর্ভাব "sideband.h"
+#অন্তর্ভাব "run-command.h"
+#অন্তর্ভাব "strvec.h"
 
-static const char upload_archive_usage[] =
+স্থির ধ্রুব বর্ণ upload_archive_usage[] =
 	"git upload-archive <repository>";
 
-static const char deadchild[] =
+স্থির ধ্রুব বর্ণ deadchild[] =
 "git upload-archive: archiver died with error";
 
 #define MAX_ARGS (64)
 
-int cmd_upload_archive_writer(int argc,
-			      const char **argv,
-			      const char *prefix,
-			      struct repository *repo UNUSED)
+পূর্ণাঙ্ক cmd_upload_archive_writer(পূর্ণাঙ্ক argc,
+			      ধ্রুব বর্ণ **argv,
+			      ধ্রুব বর্ণ *prefix,
+			      সংরচনা repository *repo UNUSED)
 {
-	struct strvec sent_argv = STRVEC_INIT;
-	const char *arg_cmd = "argument ";
-	int ret;
+	সংরচনা strvec sent_argv = STRVEC_INIT;
+	ধ্রুব বর্ণ *arg_cmd = "argument ";
+	পূর্ণাঙ্ক ret;
 
 	show_usage_if_asked(argc, argv, upload_archive_usage);
-	if (argc != 2)
+	যদি (argc != 2)
 		usage(upload_archive_usage);
 
-	if (!enter_repo(the_repository, argv[1], 0))
+	যদি (!enter_repo(the_repository, argv[1], 0))
 		die("'%s' does not appear to be a git repository", argv[1]);
 
 	init_archivers();
 
 	/* put received options in sent_argv[] */
-	strvec_push(&sent_argv, "git-upload-archive");
-	for (;;) {
-		char *buf = packet_read_line(0, NULL);
-		if (!buf)
-			break;	/* got a flush */
-		if (sent_argv.nr > MAX_ARGS)
+	strvec_ঠেলো(&sent_argv, "git-upload-archive");
+	প্রতি (;;) {
+		বর্ণ *buf = packet_read_সারি(0, রিক্ত);
+		যদি (!buf)
+			ভঙ্গ;	/* got a flush */
+		যদি (sent_argv.nr > MAX_ARGS)
 			die("Too many options (>%d)", MAX_ARGS - 1);
 
-		if (!starts_with(buf, arg_cmd))
+		যদি (!starts_with(buf, arg_cmd))
 			die("'argument' token or flush expected");
-		strvec_push(&sent_argv, buf + strlen(arg_cmd));
+		strvec_ঠেলো(&sent_argv, buf + strlen(arg_cmd));
 	}
 
 	/* parse all options sent by the client */
 	ret = write_archive(sent_argv.nr, sent_argv.v, prefix,
-			    the_repository, NULL, 1);
+			    the_repository, রিক্ত, 1);
 
 	strvec_clear(&sent_argv);
-	return ret;
+	প্রত্যাগম ret;
 }
 
 __attribute__((format (printf, 1, 2)))
-static void error_clnt(const char *fmt, ...)
+স্থির শূন্য error_clnt(ধ্রুব বর্ণ *fmt, ...)
 {
-	struct strbuf buf = STRBUF_INIT;
+	সংরচনা strbuf buf = STRBUF_INIT;
 	va_list params;
 
 	va_start(params, fmt);
@@ -71,25 +71,25 @@ static void error_clnt(const char *fmt, ...)
 	die("sent error to the client: %s", buf.buf);
 }
 
-static ssize_t process_input(int child_fd, int band)
+স্থির ssize_t process_প্রবেশ(পূর্ণাঙ্ক child_fd, পূর্ণাঙ্ক band)
 {
-	char buf[16384];
-	ssize_t sz = read(child_fd, buf, sizeof(buf));
-	if (sz < 0) {
-		if (errno != EAGAIN && errno != EINTR)
+	বর্ণ buf[16384];
+	ssize_t sz = পঠ(child_fd, buf, পরিমাণ(buf));
+	যদি (sz < 0) {
+		যদি (errno != EAGAIN && errno != EINTR)
 			error_clnt("read error: %s\n", strerror(errno));
-		return sz;
+		প্রত্যাগম sz;
 	}
 	send_sideband(1, band, buf, sz, LARGE_PACKET_MAX);
-	return sz;
+	প্রত্যাগম sz;
 }
 
-int cmd_upload_archive(int argc,
-const char **argv,
-const char *prefix,
-struct repository *repo UNUSED)
+পূর্ণাঙ্ক cmd_upload_archive(পূর্ণাঙ্ক argc,
+ধ্রুব বর্ণ **argv,
+ধ্রুব বর্ণ *prefix,
+সংরচনা repository *repo UNUSED)
 {
-	struct child_process writer = CHILD_PROCESS_INIT;
+	সংরচনা child_process writer = CHILD_PROCESS_INIT;
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
@@ -104,10 +104,10 @@ struct repository *repo UNUSED)
 	 */
 	writer.out = writer.err = -1;
 	writer.git_cmd = 1;
-	strvec_push(&writer.args, "upload-archive--writer");
+	strvec_ঠেলো(&writer.args, "upload-archive--writer");
 	strvec_pushv(&writer.args, argv + 1);
-	if (start_command(&writer)) {
-		int err = errno;
+	যদি (start_command(&writer)) {
+		পূর্ণাঙ্ক err = errno;
 		packet_write_fmt(1, "NACK unable to spawn subprocess\n");
 		die("upload-archive: %s", strerror(err));
 	}
@@ -115,33 +115,33 @@ struct repository *repo UNUSED)
 	packet_write_fmt(1, "ACK\n");
 	packet_flush(1);
 
-	while (1) {
-		struct pollfd pfd[2];
+	যাবত্ (1) {
+		সংরচনা pollfd pfd[2];
 
 		pfd[0].fd = writer.out;
 		pfd[0].events = POLLIN;
 		pfd[1].fd = writer.err;
 		pfd[1].events = POLLIN;
-		if (poll(pfd, 2, -1) < 0) {
-			if (errno != EINTR) {
+		যদি (poll(pfd, 2, -1) < 0) {
+			যদি (errno != EINTR) {
 				error_errno("poll failed resuming");
 				sleep(1);
 			}
-			continue;
+			অনুবর্ত;
 		}
-		if (pfd[1].revents & POLLIN)
+		যদি (pfd[1].revents & POLLIN)
 			/* Status stream ready */
-			if (process_input(pfd[1].fd, 2))
-				continue;
-		if (pfd[0].revents & POLLIN)
+			যদি (process_প্রবেশ(pfd[1].fd, 2))
+				অনুবর্ত;
+		যদি (pfd[0].revents & POLLIN)
 			/* Data stream ready */
-			if (process_input(pfd[0].fd, 1))
-				continue;
+			যদি (process_প্রবেশ(pfd[0].fd, 1))
+				অনুবর্ত;
 
-		if (finish_command(&writer))
+		যদি (finish_command(&writer))
 			error_clnt("%s", deadchild);
 		packet_flush(1);
-		break;
+		ভঙ্গ;
 	}
-	return 0;
+	প্রত্যাগম 0;
 }

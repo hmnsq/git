@@ -1,35 +1,35 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "exec-cmd.h"
-#include "gettext.h"
-#include "pkt-line.h"
-#include "parse-options.h"
-#include "protocol.h"
-#include "replace-object.h"
-#include "upload-pack.h"
-#include "serve.h"
-#include "setup.h"
-#include "commit.h"
-#include "environment.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "exec-cmd.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "pkt-line.h"
+#অন্তর্ভাব "parse-options.h"
+#অন্তর্ভাব "protocol.h"
+#অন্তর্ভাব "replace-object.h"
+#অন্তর্ভাব "upload-pack.h"
+#অন্তর্ভাব "serve.h"
+#অন্তর্ভাব "setup.h"
+#অন্তর্ভাব "commit.h"
+#অন্তর্ভাব "environment.h"
 
-static const char * const upload_pack_usage[] = {
+স্থির ধ্রুব বর্ণ * ধ্রুব upload_pack_usage[] = {
 	N_("git-upload-pack [--[no-]strict] [--timeout=<n>] [--stateless-rpc]\n"
 	   "                [--advertise-refs] <directory>"),
-	NULL
+	রিক্ত
 };
 
-int cmd_upload_pack(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+পূর্ণাঙ্ক cmd_upload_pack(পূর্ণাঙ্ক argc,
+		    ধ্রুব বর্ণ **argv,
+		    ধ্রুব বর্ণ *prefix,
+		    সংরচনা repository *repo UNUSED)
 {
-	const char *dir;
-	int strict = 0;
-	int advertise_refs = 0;
-	int stateless_rpc = 0;
-	int timeout = 0;
-	struct option options[] = {
+	ধ্রুব বর্ণ *dir;
+	পূর্ণাঙ্ক strict = 0;
+	পূর্ণাঙ্ক advertise_refs = 0;
+	পূর্ণাঙ্ক stateless_rpc = 0;
+	পূর্ণাঙ্ক timeout = 0;
+	সংরচনা option options[] = {
 		OPT_BOOL(0, "stateless-rpc", &stateless_rpc,
 			 N_("quit after a single request/response exchange")),
 		OPT_HIDDEN_BOOL(0, "http-backend-info-refs", &advertise_refs,
@@ -50,40 +50,40 @@ int cmd_upload_pack(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, upload_pack_usage, 0);
 
-	if (argc != 1)
+	যদি (argc != 1)
 		usage_with_options(upload_pack_usage, options);
 
 	setup_path();
 
 	dir = argv[0];
 
-	if (strict)
+	যদি (strict)
 		enter_repo_flags |= ENTER_REPO_STRICT;
-	if (!enter_repo(the_repository, dir, enter_repo_flags))
+	যদি (!enter_repo(the_repository, dir, enter_repo_flags))
 		die("'%s' does not appear to be a git repository", dir);
 
-	switch (determine_protocol_version_server()) {
-	case protocol_v2:
-		if (advertise_refs)
+	বিকল্প (determine_protocol_version_server()) {
+	পক্ষ protocol_v2:
+		যদি (advertise_refs)
 			protocol_v2_advertise_capabilities(the_repository);
-		else
+		অন্যথা
 			protocol_v2_serve_loop(the_repository, stateless_rpc);
-		break;
-	case protocol_v1:
+		ভঙ্গ;
+	পক্ষ protocol_v1:
 		/*
 		 * v1 is just the original protocol with a version string,
 		 * so just fall through after writing the version string.
 		 */
-		if (advertise_refs || !stateless_rpc)
+		যদি (advertise_refs || !stateless_rpc)
 			packet_write_fmt(1, "version 1\n");
 
 		/* fallthrough */
-	case protocol_v0:
+	পক্ষ protocol_v0:
 		upload_pack(advertise_refs, stateless_rpc, timeout);
-		break;
-	case protocol_unknown_version:
+		ভঙ্গ;
+	পক্ষ protocol_unknown_version:
 		BUG("unknown protocol version");
 	}
 
-	return 0;
+	প্রত্যাগম 0;
 }

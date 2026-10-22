@@ -4,146 +4,146 @@
  * Copyright (c) 2006 Junio C Hamano
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "path.h"
-#include "parse-options.h"
-#include "quote.h"
-#include "packfile.h"
-#include "object-file.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "config.h"
+#অন্তর্ভাব "dir.h"
+#অন্তর্ভাব "environment.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "path.h"
+#অন্তর্ভাব "parse-options.h"
+#অন্তর্ভাব "quote.h"
+#অন্তর্ভাব "packfile.h"
+#অন্তর্ভাব "object-file.h"
 
-static unsigned long garbage;
-static off_t size_garbage;
-static int verbose;
-static unsigned long loose, packed, packed_loose;
-static off_t loose_size;
+স্থির unsigned long garbage;
+স্থির off_t size_garbage;
+স্থির পূর্ণাঙ্ক verbose;
+স্থির unsigned long loose, packed, packed_loose;
+স্থির off_t loose_size;
 
-static const char *bits_to_msg(unsigned seen_bits)
+স্থির ধ্রুব বর্ণ *bits_to_বার্তা(unsigned seen_bits)
 {
-	switch (seen_bits) {
-	case 0:
-		return "no corresponding .idx or .pack";
-	case PACKDIR_FILE_GARBAGE:
-		return "garbage found";
-	case PACKDIR_FILE_PACK:
-		return "no corresponding .idx";
-	case PACKDIR_FILE_IDX:
-		return "no corresponding .pack";
-	case PACKDIR_FILE_PACK|PACKDIR_FILE_IDX:
-	default:
-		return NULL;
+	বিকল্প (seen_bits) {
+	পক্ষ 0:
+		প্রত্যাগম "no corresponding .idx or .pack";
+	পক্ষ PACKDIR_FILE_GARBAGE:
+		প্রত্যাগম "garbage found";
+	পক্ষ PACKDIR_FILE_PACK:
+		প্রত্যাগম "no corresponding .idx";
+	পক্ষ PACKDIR_FILE_IDX:
+		প্রত্যাগম "no corresponding .pack";
+	পক্ষ PACKDIR_FILE_PACK|PACKDIR_FILE_IDX:
+	স্বভাব:
+		প্রত্যাগম রিক্ত;
 	}
 }
 
-static void real_report_garbage(unsigned seen_bits, const char *path)
+স্থির শূন্য real_report_garbage(unsigned seen_bits, ধ্রুব বর্ণ *path)
 {
-	struct stat st;
-	const char *desc = bits_to_msg(seen_bits);
+	সংরচনা stat st;
+	ধ্রুব বর্ণ *desc = bits_to_বার্তা(seen_bits);
 
-	if (!desc)
-		return;
+	যদি (!desc)
+		প্রত্যাগম;
 
-	if (!stat(path, &st))
+	যদি (!stat(path, &st))
 		size_garbage += st.st_size;
 	warning("%s: %s", desc, path);
 	garbage++;
 }
 
-static void loose_garbage(const char *path)
+স্থির শূন্য loose_garbage(ধ্রুব বর্ণ *path)
 {
-	if (verbose)
+	যদি (verbose)
 		report_garbage(PACKDIR_FILE_GARBAGE, path);
 }
 
-static int count_loose(const struct object_id *oid, const char *path,
-		       void *data UNUSED)
+স্থির পূর্ণাঙ্ক গুনতি_loose(ধ্রুব সংরচনা object_id *oid, ধ্রুব বর্ণ *path,
+		       শূন্য *data UNUSED)
 {
-	struct stat st;
+	সংরচনা stat st;
 
-	if (lstat(path, &st) || !S_ISREG(st.st_mode))
+	যদি (lstat(path, &st) || !S_ISREG(st.st_mode))
 		loose_garbage(path);
-	else {
+	অন্যথা {
 		loose_size += on_disk_bytes(st);
 		loose++;
-		if (verbose && has_object_pack(the_repository, oid))
+		যদি (verbose && has_object_pack(the_repository, oid))
 			packed_loose++;
 	}
-	return 0;
+	প্রত্যাগম 0;
 }
 
-static int count_cruft(const char *basename UNUSED, const char *path,
-		       void *data UNUSED)
+স্থির পূর্ণাঙ্ক গুনতি_cruft(ধ্রুব বর্ণ *basename UNUSED, ধ্রুব বর্ণ *path,
+		       শূন্য *data UNUSED)
 {
 	loose_garbage(path);
-	return 0;
+	প্রত্যাগম 0;
 }
 
-static int print_alternate(struct odb_files_dir *alternate, void *data UNUSED)
+স্থির পূর্ণাঙ্ক print_alternate(সংরচনা odb_files_dir *alternate, শূন্য *data UNUSED)
 {
 	printf("alternate: ");
-	quote_c_style(alternate->abspath, NULL, stdout, 0);
+	quote_c_style(alternate->abspath, রিক্ত, stdout, 0);
 	putchar('\n');
-	return 0;
+	প্রত্যাগম 0;
 }
 
-static char const * const count_objects_usage[] = {
+স্থির বর্ণ ধ্রুব * ধ্রুব গুনতি_objects_usage[] = {
 	"git count-objects [-v] [-H | --human-readable]",
-	NULL
+	রিক্ত
 };
 
-int cmd_count_objects(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo UNUSED)
+পূর্ণাঙ্ক cmd_গুনতি_objects(পূর্ণাঙ্ক argc,
+		      ধ্রুব বর্ণ **argv,
+		      ধ্রুব বর্ণ *prefix,
+		      সংরচনা repository *repo UNUSED)
 {
-	int human_readable = 0;
-	struct option opts[] = {
+	পূর্ণাঙ্ক human_readable = 0;
+	সংরচনা option opts[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose")),
 		OPT_BOOL('H', "human-readable", &human_readable,
 			 N_("print sizes in human readable format")),
 		OPT_END(),
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, রিক্ত);
 
-	argc = parse_options(argc, argv, prefix, opts, count_objects_usage, 0);
+	argc = parse_options(argc, argv, prefix, opts, গুনতি_objects_usage, 0);
 	/* we do not take arguments other than flags for now */
-	if (argc)
-		usage_with_options(count_objects_usage, opts);
-	if (verbose) {
+	যদি (argc)
+		usage_with_options(গুনতি_objects_usage, opts);
+	যদি (verbose) {
 		report_garbage = real_report_garbage;
 		report_linked_checkout_garbage(the_repository);
 	}
 
 	for_each_loose_file_in_source(the_repository->objects->source,
-				      count_loose, count_cruft, NULL, NULL);
+				      গুনতি_loose, গুনতি_cruft, রিক্ত, রিক্ত);
 
-	if (verbose) {
-		struct packed_git *p;
-		unsigned long num_pack = 0;
+	যদি (verbose) {
+		সংরচনা packed_git *p;
+		unsigned long অঙ্ক_pack = 0;
 		off_t size_pack = 0;
-		struct strbuf loose_buf = STRBUF_INIT;
-		struct strbuf pack_buf = STRBUF_INIT;
-		struct strbuf garbage_buf = STRBUF_INIT;
+		সংরচনা strbuf loose_buf = STRBUF_INIT;
+		সংরচনা strbuf pack_buf = STRBUF_INIT;
+		সংরচনা strbuf garbage_buf = STRBUF_INIT;
 
 		repo_for_each_pack(the_repository, p) {
-			if (!p->pack_local)
-				continue;
-			if (open_pack_index(p))
-				continue;
-			packed += p->num_objects;
+			যদি (!p->pack_local)
+				অনুবর্ত;
+			যদি (open_pack_index(p))
+				অনুবর্ত;
+			packed += p->অঙ্ক_objects;
 			size_pack += p->pack_size + p->index_size;
-			num_pack++;
+			অঙ্ক_pack++;
 		}
 
-		if (human_readable) {
+		যদি (human_readable) {
 			strbuf_humanise_bytes(&loose_buf, loose_size);
 			strbuf_humanise_bytes(&pack_buf, size_pack);
 			strbuf_humanise_bytes(&garbage_buf, size_garbage);
-		} else {
+		} অন্যথা {
 			strbuf_addf(&loose_buf, "%lu",
 				    (unsigned long)(loose_size / 1024));
 			strbuf_addf(&pack_buf, "%lu",
@@ -155,24 +155,24 @@ int cmd_count_objects(int argc,
 		printf("count: %lu\n", loose);
 		printf("size: %s\n", loose_buf.buf);
 		printf("in-pack: %lu\n", packed);
-		printf("packs: %lu\n", num_pack);
+		printf("packs: %lu\n", অঙ্ক_pack);
 		printf("size-pack: %s\n", pack_buf.buf);
 		printf("prune-packable: %lu\n", packed_loose);
 		printf("garbage: %lu\n", garbage);
 		printf("size-garbage: %s\n", garbage_buf.buf);
-		odb_for_each_alternate(the_repository->objects, print_alternate, NULL);
+		odb_for_each_alternate(the_repository->objects, print_alternate, রিক্ত);
 		strbuf_release(&loose_buf);
 		strbuf_release(&pack_buf);
 		strbuf_release(&garbage_buf);
-	} else {
-		struct strbuf buf = STRBUF_INIT;
-		if (human_readable)
+	} অন্যথা {
+		সংরচনা strbuf buf = STRBUF_INIT;
+		যদি (human_readable)
 			strbuf_humanise_bytes(&buf, loose_size);
-		else
+		অন্যথা
 			strbuf_addf(&buf, "%lu kilobytes",
 				    (unsigned long)(loose_size / 1024));
 		printf("%lu objects, %s\n", loose, buf.buf);
 		strbuf_release(&buf);
 	}
-	return 0;
+	প্রত্যাগম 0;
 }

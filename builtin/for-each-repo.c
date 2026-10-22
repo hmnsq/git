@@ -1,48 +1,48 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "path.h"
-#include "run-command.h"
-#include "string-list.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "config.h"
+#অন্তর্ভাব "environment.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "parse-options.h"
+#অন্তর্ভাব "path.h"
+#অন্তর্ভাব "run-command.h"
+#অন্তর্ভাব "string-list.h"
 
-static const char * const for_each_repo_usage[] = {
+স্থির ধ্রুব বর্ণ * ধ্রুব for_each_repo_usage[] = {
 	N_("git for-each-repo --config=<config> [--] <arguments>"),
-	NULL
+	রিক্ত
 };
 
-static int run_command_on_repo(const char *path, const char **argv)
+স্থির পূর্ণাঙ্ক run_command_on_repo(ধ্রুব বর্ণ *path, ধ্রুব বর্ণ **argv)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
-	char *abspath = interpolate_path(path, 0);
+	সংরচনা child_process child = CHILD_PROCESS_INIT;
+	বর্ণ *abspath = interpolate_path(path, 0);
 
 	sanitize_repo_env(&child.env);
 
 	child.git_cmd = 1;
-	strvec_pushl(&child.args, "-C", abspath, NULL);
+	strvec_pushl(&child.args, "-C", abspath, রিক্ত);
 	strvec_pushv(&child.args, argv);
 
-	free(abspath);
+	মুক্ত(abspath);
 
-	return run_command(&child);
+	প্রত্যাগম run_command(&child);
 }
 
-int cmd_for_each_repo(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo UNUSED)
+পূর্ণাঙ্ক cmd_for_each_repo(পূর্ণাঙ্ক argc,
+		      ধ্রুব বর্ণ **argv,
+		      ধ্রুব বর্ণ *prefix,
+		      সংরচনা repository *repo UNUSED)
 {
-	static const char *config_key = NULL;
-	int keep_going = 0;
-	int result = 0;
-	const struct string_list *values;
-	int err;
+	স্থির ধ্রুব বর্ণ *config_চাবি = রিক্ত;
+	পূর্ণাঙ্ক keep_going = 0;
+	পূর্ণাঙ্ক result = 0;
+	ধ্রুব সংরচনা string_list *মানসমূহ;
+	পূর্ণাঙ্ক err;
 
-	const struct option options[] = {
-		OPT_STRING(0, "config", &config_key, N_("config"),
+	ধ্রুব সংরচনা option options[] = {
+		OPT_STRING(0, "config", &config_চাবি, N_("config"),
 			   N_("config key storing a list of repository paths")),
 		OPT_BOOL(0, "keep-going", &keep_going,
 			 N_("keep going even if command fails in a repository")),
@@ -52,24 +52,24 @@ int cmd_for_each_repo(int argc,
 	argc = parse_options(argc, argv, prefix, options, for_each_repo_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (!config_key)
+	যদি (!config_চাবি)
 		die(_("missing --config=<config>"));
 
-	err = repo_config_get_string_multi(the_repository, config_key, &values);
-	if (err < 0)
-		usage_msg_optf(_("got bad config --config=%s"),
-			       for_each_repo_usage, options, config_key);
-	else if (err)
-		return 0;
+	err = repo_config_get_string_multi(the_repository, config_চাবি, &মানসমূহ);
+	যদি (err < 0)
+		usage_বার্তা_optf(_("got bad config --config=%s"),
+			       for_each_repo_usage, options, config_চাবি);
+	অন্যথা যদি (err)
+		প্রত্যাগম 0;
 
-	for (size_t i = 0; i < values->nr; i++) {
-		int ret = run_command_on_repo(values->items[i].string, argv);
-		if (ret) {
-			if (!keep_going)
-					return ret;
+	প্রতি (size_t i = 0; i < মানসমূহ->nr; i++) {
+		পূর্ণাঙ্ক ret = run_command_on_repo(মানসমূহ->বস্তুসমূহ[i].string, argv);
+		যদি (ret) {
+			যদি (!keep_going)
+					প্রত্যাগম ret;
 			result = 1;
 		}
 	}
 
-	return result;
+	প্রত্যাগম result;
 }

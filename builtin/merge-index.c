@@ -1,98 +1,98 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "hex.h"
-#include "read-cache-ll.h"
-#include "run-command.h"
-#include "sparse-index.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "hex.h"
+#অন্তর্ভাব "read-cache-ll.h"
+#অন্তর্ভাব "run-command.h"
+#অন্তর্ভাব "sparse-index.h"
 
-static const char *pgm;
-static int one_shot, quiet;
-static int err;
+স্থির ধ্রুব বর্ণ *pgm;
+স্থির পূর্ণাঙ্ক one_shot, quiet;
+স্থির পূর্ণাঙ্ক err;
 
-static int merge_entry(int pos, const char *path)
+স্থির পূর্ণাঙ্ক merge_entry(পূর্ণাঙ্ক pos, ধ্রুব বর্ণ *path)
 {
-	int found;
-	const char *arguments[] = { pgm, "", "", "", path, "", "", "", NULL };
-	char hexbuf[4][GIT_MAX_HEXSZ + 1];
-	char ownbuf[4][60];
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	পূর্ণাঙ্ক found;
+	ধ্রুব বর্ণ *arguments[] = { pgm, "", "", "", path, "", "", "", রিক্ত };
+	বর্ণ hexbuf[4][GIT_MAX_HEXSZ + 1];
+	বর্ণ ownbuf[4][60];
+	সংরচনা child_process cmd = CHILD_PROCESS_INIT;
 
-	if (pos >= the_repository->index->cache_nr)
+	যদি (pos >= the_repository->index->cache_nr)
 		die("git merge-index: %s not in the cache", path);
 	found = 0;
-	do {
-		const struct cache_entry *ce = the_repository->index->cache[pos];
-		int stage = ce_stage(ce);
+	কুরু {
+		ধ্রুব সংরচনা cache_entry *ce = the_repository->index->cache[pos];
+		পূর্ণাঙ্ক stage = ce_stage(ce);
 
-		if (strcmp(ce->name, path))
-			break;
+		যদি (strcmp(ce->name, path))
+			ভঙ্গ;
 		found++;
 		oid_to_hex_r(hexbuf[stage], &ce->oid);
-		xsnprintf(ownbuf[stage], sizeof(ownbuf[stage]), "%o", ce->ce_mode);
+		xsnprintf(ownbuf[stage], পরিমাণ(ownbuf[stage]), "%o", ce->ce_mode);
 		arguments[stage] = hexbuf[stage];
 		arguments[stage + 4] = ownbuf[stage];
-	} while (++pos < the_repository->index->cache_nr);
-	if (!found)
+	} যাবত্ (++pos < the_repository->index->cache_nr);
+	যদি (!found)
 		die("git merge-index: %s not in the cache", path);
 
 	strvec_pushv(&cmd.args, arguments);
-	if (run_command(&cmd)) {
-		if (one_shot)
+	যদি (run_command(&cmd)) {
+		যদি (one_shot)
 			err++;
-		else {
-			if (!quiet)
+		অন্যথা {
+			যদি (!quiet)
 				die("merge program failed");
 			exit(1);
 		}
 	}
-	return found;
+	প্রত্যাগম found;
 }
 
-static void merge_one_path(const char *path)
+স্থির শূন্য merge_one_path(ধ্রুব বর্ণ *path)
 {
-	int pos = index_name_pos(the_repository->index, path, strlen(path));
+	পূর্ণাঙ্ক pos = index_name_pos(the_repository->index, path, strlen(path));
 
 	/*
 	 * If it already exists in the cache as stage0, it's
 	 * already merged and there is nothing to do.
 	 */
-	if (pos < 0)
+	যদি (pos < 0)
 		merge_entry(-pos-1, path);
 }
 
-static void merge_all(void)
+স্থির শূন্য merge_all(শূন্য)
 {
-	int i;
+	পূর্ণাঙ্ক i;
 	/* TODO: audit for interaction with sparse-index. */
 	ensure_full_index(the_repository->index);
-	for (i = 0; i < the_repository->index->cache_nr; i++) {
-		const struct cache_entry *ce = the_repository->index->cache[i];
-		if (!ce_stage(ce))
-			continue;
+	প্রতি (i = 0; i < the_repository->index->cache_nr; i++) {
+		ধ্রুব সংরচনা cache_entry *ce = the_repository->index->cache[i];
+		যদি (!ce_stage(ce))
+			অনুবর্ত;
 		i += merge_entry(i, ce->name)-1;
 	}
 }
 
-static const char usage_string[] =
+স্থির ধ্রুব বর্ণ usage_string[] =
 "git merge-index [-o] [-q] <merge-program> (-a | [--] [<filename>...])";
 
-int cmd_merge_index(int argc,
-		    const char **argv,
-		    const char *prefix UNUSED,
-		    struct repository *repo UNUSED)
+পূর্ণাঙ্ক cmd_merge_index(পূর্ণাঙ্ক argc,
+		    ধ্রুব বর্ণ **argv,
+		    ধ্রুব বর্ণ *prefix UNUSED,
+		    সংরচনা repository *repo UNUSED)
 {
-	int i, force_file = 0;
+	পূর্ণাঙ্ক i, force_file = 0;
 
 	/* Without this we cannot rely on waitpid() to tell
 	 * what happened to our children.
 	 */
-	signal(SIGCHLD, SIG_DFL);
+	সঙ্কেত(SIGCHLD, SIG_DFL);
 
 	show_usage_if_asked(argc, argv, usage_string);
 
-	if (argc < 3)
+	যদি (argc < 3)
 		usage(usage_string);
 
 	repo_read_index(the_repository);
@@ -101,31 +101,31 @@ int cmd_merge_index(int argc,
 	ensure_full_index(the_repository->index);
 
 	i = 1;
-	if (!strcmp(argv[i], "-o")) {
+	যদি (!strcmp(argv[i], "-o")) {
 		one_shot = 1;
 		i++;
 	}
-	if (!strcmp(argv[i], "-q")) {
+	যদি (!strcmp(argv[i], "-q")) {
 		quiet = 1;
 		i++;
 	}
 	pgm = argv[i++];
-	for (; i < argc; i++) {
-		const char *arg = argv[i];
-		if (!force_file && *arg == '-') {
-			if (!strcmp(arg, "--")) {
+	প্রতি (; i < argc; i++) {
+		ধ্রুব বর্ণ *arg = argv[i];
+		যদি (!force_file && *arg == '-') {
+			যদি (!strcmp(arg, "--")) {
 				force_file = 1;
-				continue;
+				অনুবর্ত;
 			}
-			if (!strcmp(arg, "-a")) {
+			যদি (!strcmp(arg, "-a")) {
 				merge_all();
-				continue;
+				অনুবর্ত;
 			}
 			die("git merge-index: unknown option %s", arg);
 		}
 		merge_one_path(arg);
 	}
-	if (err && !quiet)
+	যদি (err && !quiet)
 		die("merge program failed");
-	return err;
+	প্রত্যাগম err;
 }
