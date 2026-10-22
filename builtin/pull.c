@@ -8,29 +8,29 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "merge.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "run-command.h"
-#include "oid-array.h"
-#include "remote.h"
-#include "dir.h"
-#include "path.h"
-#include "read-cache-ll.h"
-#include "rebase.h"
-#include "refs.h"
-#include "refspec.h"
-#include "submodule.h"
-#include "submodule-config.h"
-#include "wt-status.h"
-#include "commit-reach.h"
-#include "sequencer.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "advice.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "hex.h"
+#அந்தர்பாவ "merge.h"
+#அந்தர்பாவ "object-name.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "run-command.h"
+#அந்தர்பாவ "oid-array.h"
+#அந்தர்பாவ "remote.h"
+#அந்தர்பாவ "dir.h"
+#அந்தர்பாவ "path.h"
+#அந்தர்பாவ "read-cache-ll.h"
+#அந்தர்பாவ "rebase.h"
+#அந்தர்பாவ "refs.h"
+#அந்தர்பாவ "refspec.h"
+#அந்தர்பாவ "submodule.h"
+#அந்தர்பாவ "submodule-config.h"
+#அந்தர்பாவ "wt-status.h"
+#அந்தர்பாவ "commit-reach.h"
+#அந்தர்பாவ "sequencer.h"
 
 /**
  * Parses the value of --rebase. If value is a false value, returns
@@ -38,128 +38,128 @@
  * "merges", returns REBASE_MERGES. If value is a invalid value, dies with
  * a fatal error if fatal is true, otherwise returns REBASE_INVALID.
  */
-static enum rebase_type parse_config_rebase(const char *key, const char *value,
-		int fatal)
+நிலையான எண்ணிக்கை rebase_type parse_config_rebase(மாறிலி எழுத்து *சாவி, மாறிலி எழுத்து *மதிப்பு,
+		முழு fatal)
 {
-	enum rebase_type v = rebase_parse_value(value);
-	if (v != REBASE_INVALID)
-		return v;
+	எண்ணிக்கை rebase_type v = rebase_parse_மதிப்பு(மதிப்பு);
+	எனில் (v != REBASE_INVALID)
+		திரும்பு v;
 
-	if (fatal)
-		die(_("invalid value for '%s': '%s'"), key, value);
-	else
-		error(_("invalid value for '%s': '%s'"), key, value);
+	எனில் (fatal)
+		die(_("invalid value for '%s': '%s'"), சாவி, மதிப்பு);
+	இல்லையெனில்
+		error(_("invalid value for '%s': '%s'"), சாவி, மதிப்பு);
 
-	return REBASE_INVALID;
+	திரும்பு REBASE_INVALID;
 }
 
 /**
  * Callback for --rebase, which parses arg with parse_config_rebase().
  */
-static int parse_opt_rebase(const struct option *opt, const char *arg, int unset)
+நிலையான முழு parse_opt_rebase(மாறிலி கட்டமைப்பு option *opt, மாறிலி எழுத்து *arg, முழு unset)
 {
-	enum rebase_type *value = opt->value;
+	எண்ணிக்கை rebase_type *மதிப்பு = opt->மதிப்பு;
 
-	if (arg)
-		*value = parse_config_rebase("--rebase", arg, 0);
-	else
-		*value = unset ? REBASE_FALSE : REBASE_TRUE;
-	return *value == REBASE_INVALID ? -1 : 0;
+	எனில் (arg)
+		*மதிப்பு = parse_config_rebase("--rebase", arg, 0);
+	இல்லையெனில்
+		*மதிப்பு = unset ? REBASE_FALSE : REBASE_TRUE;
+	திரும்பு *மதிப்பு == REBASE_INVALID ? -1 : 0;
 }
 
-static const char * const pull_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி pull_usage[] = {
 	N_("git pull [<options>] [<repository> [<refspec>...]]"),
-	NULL
+	வெற்று
 };
 
 /* Shared options */
-static int opt_verbosity;
-static const char *opt_progress;
-static int recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
-static int recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
+நிலையான முழு opt_verbosity;
+நிலையான மாறிலி எழுத்து *opt_progress;
+நிலையான முழு recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
+நிலையான முழு recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
 
 /* Options passed to git-merge or git-rebase */
-static enum rebase_type opt_rebase = -1;
-static const char *opt_diffstat;
-static const char *opt_log;
-static const char *opt_signoff;
-static const char *opt_squash;
-static const char *opt_commit;
-static const char *opt_edit;
-static const char *cleanup_arg;
-static char *opt_ff;
-static const char *opt_verify_signatures;
-static const char *opt_verify;
-static int opt_autostash = -1;
-static int config_rebase_autostash;
-static int config_pull_autostash = -1;
-static int check_trust_level = 1;
-static struct strvec opt_strategies = STRVEC_INIT;
-static struct strvec opt_strategy_opts = STRVEC_INIT;
-static const char *opt_gpg_sign;
-static int opt_allow_unrelated_histories;
+நிலையான எண்ணிக்கை rebase_type opt_rebase = -1;
+நிலையான மாறிலி எழுத்து *opt_diffstat;
+நிலையான மாறிலி எழுத்து *opt_log;
+நிலையான மாறிலி எழுத்து *opt_signoff;
+நிலையான மாறிலி எழுத்து *opt_squash;
+நிலையான மாறிலி எழுத்து *opt_commit;
+நிலையான மாறிலி எழுத்து *opt_edit;
+நிலையான மாறிலி எழுத்து *cleanup_arg;
+நிலையான எழுத்து *opt_ff;
+நிலையான மாறிலி எழுத்து *opt_verify_signatures;
+நிலையான மாறிலி எழுத்து *opt_verify;
+நிலையான முழு opt_autostash = -1;
+நிலையான முழு config_rebase_autostash;
+நிலையான முழு config_pull_autostash = -1;
+நிலையான முழு check_trust_level = 1;
+நிலையான கட்டமைப்பு strvec opt_strategies = STRVEC_INIT;
+நிலையான கட்டமைப்பு strvec opt_strategy_opts = STRVEC_INIT;
+நிலையான மாறிலி எழுத்து *opt_gpg_sign;
+நிலையான முழு opt_allow_unrelated_histories;
 
 /* Options passed to git-fetch */
-static const char *opt_all;
-static const char *opt_append;
-static const char *opt_upload_pack;
-static int opt_force;
-static const char *opt_tags;
-static const char *opt_prune;
-static const char *max_children;
-static int opt_dry_run;
-static const char *opt_keep;
-static const char *opt_depth;
-static const char *opt_unshallow;
-static const char *opt_update_shallow;
-static const char *opt_refmap;
-static const char *opt_ipv4;
-static const char *opt_ipv6;
-static int opt_show_forced_updates = -1;
-static const char *set_upstream;
-static struct strvec opt_fetch = STRVEC_INIT;
+நிலையான மாறிலி எழுத்து *opt_all;
+நிலையான மாறிலி எழுத்து *opt_append;
+நிலையான மாறிலி எழுத்து *opt_upload_pack;
+நிலையான முழு opt_force;
+நிலையான மாறிலி எழுத்து *opt_tags;
+நிலையான மாறிலி எழுத்து *opt_prune;
+நிலையான மாறிலி எழுத்து *max_children;
+நிலையான முழு opt_dry_run;
+நிலையான மாறிலி எழுத்து *opt_keep;
+நிலையான மாறிலி எழுத்து *opt_depth;
+நிலையான மாறிலி எழுத்து *opt_unshallow;
+நிலையான மாறிலி எழுத்து *opt_update_shallow;
+நிலையான மாறிலி எழுத்து *opt_refmap;
+நிலையான மாறிலி எழுத்து *opt_ipv4;
+நிலையான மாறிலி எழுத்து *opt_ipv6;
+நிலையான முழு opt_show_forced_updates = -1;
+நிலையான மாறிலி எழுத்து *set_upstream;
+நிலையான கட்டமைப்பு strvec opt_fetch = STRVEC_INIT;
 
 /**
  * Pushes "-q" or "-v" switches into arr to match the opt_verbosity level.
  */
-static void argv_push_verbosity(struct strvec *arr)
+நிலையான வெறுமை argv_தள்ளு_verbosity(கட்டமைப்பு strvec *arr)
 {
-	int verbosity;
+	முழு verbosity;
 
-	for (verbosity = opt_verbosity; verbosity > 0; verbosity--)
-		strvec_push(arr, "-v");
+	க்கு (verbosity = opt_verbosity; verbosity > 0; verbosity--)
+		strvec_தள்ளு(arr, "-v");
 
-	for (verbosity = opt_verbosity; verbosity < 0; verbosity++)
-		strvec_push(arr, "-q");
+	க்கு (verbosity = opt_verbosity; verbosity < 0; verbosity++)
+		strvec_தள்ளு(arr, "-q");
 }
 
 /**
  * Pushes "-f" switches into arr to match the opt_force level.
  */
-static void argv_push_force(struct strvec *arr)
+நிலையான வெறுமை argv_தள்ளு_force(கட்டமைப்பு strvec *arr)
 {
-	int force = opt_force;
-	while (force-- > 0)
-		strvec_push(arr, "-f");
+	முழு force = opt_force;
+	போது (force-- > 0)
+		strvec_தள்ளு(arr, "-f");
 }
 
 /**
  * Sets the GIT_REFLOG_ACTION environment variable to the concatenation of argv
  */
-static void set_reflog_message(int argc, const char **argv)
+நிலையான வெறுமை set_reflog_message(முழு argc, மாறிலி எழுத்து **argv)
 {
-	int i;
-	struct strbuf msg = STRBUF_INIT;
+	முழு i;
+	கட்டமைப்பு strbuf செய்தி = STRBUF_INIT;
 
-	for (i = 0; i < argc; i++) {
-		if (i)
-			strbuf_addch(&msg, ' ');
-		strbuf_addstr(&msg, argv[i]);
+	க்கு (i = 0; i < argc; i++) {
+		எனில் (i)
+			strbuf_addch(&செய்தி, ' ');
+		strbuf_addstr(&செய்தி, argv[i]);
 	}
 
-	setenv("GIT_REFLOG_ACTION", msg.buf, 0);
+	setenv("GIT_REFLOG_ACTION", செய்தி.buf, 0);
 
-	strbuf_release(&msg);
+	strbuf_release(&செய்தி);
 }
 
 /**
@@ -168,24 +168,24 @@ static void set_reflog_message(int argc, const char **argv)
  * "--ff-only". Otherwise, if pull.ff is set to an invalid value, die with an
  * error.
  */
-static const char *config_get_ff(void)
+நிலையான மாறிலி எழுத்து *config_get_ff(வெறுமை)
 {
-	const char *value;
+	மாறிலி எழுத்து *மதிப்பு;
 
-	if (repo_config_get_value(the_repository, "pull.ff", &value))
-		return NULL;
+	எனில் (repo_config_get_மதிப்பு(the_repository, "pull.ff", &மதிப்பு))
+		திரும்பு வெற்று;
 
-	switch (git_parse_maybe_bool(value)) {
-	case 0:
-		return "--no-ff";
-	case 1:
-		return "--ff";
+	தேர்வு (git_parse_maybe_bool(மதிப்பு)) {
+	நிலை 0:
+		திரும்பு "--no-ff";
+	நிலை 1:
+		திரும்பு "--ff";
 	}
 
-	if (!strcmp(value, "only"))
-		return "--ff-only";
+	எனில் (!strcmp(மதிப்பு, "only"))
+		திரும்பு "--ff-only";
 
-	die(_("invalid value for '%s': '%s'"), "pull.ff", value);
+	die(_("invalid value for '%s': '%s'"), "pull.ff", மதிப்பு);
 }
 
 /**
@@ -195,38 +195,38 @@ static const char *config_get_ff(void)
  * looks for the value of "pull.rebase". If both configuration keys do not
  * exist, returns REBASE_FALSE.
  */
-static enum rebase_type config_get_rebase(int *rebase_unspecified)
+நிலையான எண்ணிக்கை rebase_type config_get_rebase(முழு *rebase_unspecified)
 {
-	struct branch *curr_branch = branch_get("HEAD");
-	const char *value;
+	கட்டமைப்பு branch *curr_branch = branch_get("HEAD");
+	மாறிலி எழுத்து *மதிப்பு;
 
-	if (curr_branch) {
-		char *key = xstrfmt("branch.%s.rebase", curr_branch->name);
+	எனில் (curr_branch) {
+		எழுத்து *சாவி = xstrfmt("branch.%s.rebase", curr_branch->name);
 
-		if (!repo_config_get_value(the_repository, key, &value)) {
-			enum rebase_type ret = parse_config_rebase(key, value, 1);
-			free(key);
-			return ret;
+		எனில் (!repo_config_get_மதிப்பு(the_repository, சாவி, &மதிப்பு)) {
+			எண்ணிக்கை rebase_type ret = parse_config_rebase(சாவி, மதிப்பு, 1);
+			விடுவி(சாவி);
+			திரும்பு ret;
 		}
 
-		free(key);
+		விடுவி(சாவி);
 	}
 
-	if (!repo_config_get_value(the_repository, "pull.rebase", &value))
-		return parse_config_rebase("pull.rebase", value, 1);
+	எனில் (!repo_config_get_மதிப்பு(the_repository, "pull.rebase", &மதிப்பு))
+		திரும்பு parse_config_rebase("pull.rebase", மதிப்பு, 1);
 
 	*rebase_unspecified = 1;
 
-	return REBASE_FALSE;
+	திரும்பு REBASE_FALSE;
 }
 
 /**
  * Read config variables.
  */
-static int git_pull_config(const char *var, const char *value,
-			   const struct config_context *ctx, void *cb)
+நிலையான முழு git_pull_config(மாறிலி எழுத்து *var, மாறிலி எழுத்து *மதிப்பு,
+			   மாறிலி கட்டமைப்பு config_context *ctx, வெறுமை *cb)
 {
-	if (!strcmp(var, "rebase.autostash")) {
+	எனில் (!strcmp(var, "rebase.autostash")) {
 		/*
 		 * run_rebase() also reads this option. The reason we handle it here is
 		 * that when pull.rebase is true, a fast-forward may occur without
@@ -235,40 +235,40 @@ static int git_pull_config(const char *var, const char *value,
 		 *
 		 * run_merge() handles merge.autostash, so we don't handle it here.
 		 */
-		config_rebase_autostash = git_config_bool(var, value);
-		return 0;
-	} else if (!strcmp(var, "pull.autostash")) {
-		config_pull_autostash = git_config_bool(var, value);
-		return 0;
-	} else if (!strcmp(var, "submodule.recurse")) {
-		recurse_submodules = git_config_bool(var, value) ?
+		config_rebase_autostash = git_config_bool(var, மதிப்பு);
+		திரும்பு 0;
+	} இல்லையெனில் எனில் (!strcmp(var, "pull.autostash")) {
+		config_pull_autostash = git_config_bool(var, மதிப்பு);
+		திரும்பு 0;
+	} இல்லையெனில் எனில் (!strcmp(var, "submodule.recurse")) {
+		recurse_submodules = git_config_bool(var, மதிப்பு) ?
 			RECURSE_SUBMODULES_ON : RECURSE_SUBMODULES_OFF;
-		return 0;
-	} else if (!strcmp(var, "gpg.mintrustlevel")) {
+		திரும்பு 0;
+	} இல்லையெனில் எனில் (!strcmp(var, "gpg.mintrustlevel")) {
 		check_trust_level = 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	திரும்பு git_default_config(var, மதிப்பு, ctx, cb);
 }
 
 /**
  * Appends merge candidates from FETCH_HEAD that are not marked not-for-merge
  * into merge_heads.
  */
-static void get_merge_heads(struct oid_array *merge_heads)
+நிலையான வெறுமை get_merge_heads(கட்டமைப்பு oid_array *merge_heads)
 {
-	const char *filename = git_path_fetch_head(the_repository);
+	மாறிலி எழுத்து *filename = git_path_fetch_head(the_repository);
 	FILE *fp;
-	struct strbuf sb = STRBUF_INIT;
-	struct object_id oid;
+	கட்டமைப்பு strbuf sb = STRBUF_INIT;
+	கட்டமைப்பு object_id oid;
 
 	fp = xfopen(filename, "r");
-	while (strbuf_getline_lf(&sb, fp) != EOF) {
-		const char *p;
-		if (parse_oid_hex(sb.buf, &oid, &p))
-			continue;  /* invalid line: does not start with object ID */
-		if (starts_with(p, "\tnot-for-merge\t"))
-			continue;  /* ref is not-for-merge */
+	போது (strbuf_getline_lf(&sb, fp) != EOF) {
+		மாறிலி எழுத்து *p;
+		எனில் (parse_oid_hex(sb.buf, &oid, &p))
+			தொடர்;  /* invalid line: does not start with object ID */
+		எனில் (starts_with(p, "\tnot-for-merge\t"))
+			தொடர்;  /* ref is not-for-merge */
 		oid_array_append(merge_heads, &oid);
 	}
 	fclose(fp);
@@ -279,15 +279,15 @@ static void get_merge_heads(struct oid_array *merge_heads)
  * Used by die_no_merge_candidates() as a for_each_remote() callback to
  * retrieve the name of the remote if the repository only has one remote.
  */
-static int get_only_remote(struct remote *remote, void *cb_data)
+நிலையான முழு get_only_remote(கட்டமைப்பு remote *remote, வெறுமை *cb_data)
 {
-	const char **remote_name = cb_data;
+	மாறிலி எழுத்து **remote_name = cb_data;
 
-	if (*remote_name)
-		return -1;
+	எனில் (*remote_name)
+		திரும்பு -1;
 
 	*remote_name = remote->name;
-	return 0;
+	திரும்பு 0;
 }
 
 /**
@@ -312,43 +312,43 @@ static int get_only_remote(struct remote *remote, void *cb_data)
  *    branch to merge didn't get fetched. (Either it doesn't exist, or wasn't
  *    part of the configured fetch refspec.)
  */
-static void NORETURN die_no_merge_candidates(const char *repo, const char **refspecs)
+நிலையான வெறுமை NORETURN die_no_merge_candidates(மாறிலி எழுத்து *repo, மாறிலி எழுத்து **refspecs)
 {
-	struct branch *curr_branch = branch_get("HEAD");
-	const char *remote = curr_branch ? curr_branch->remote_name : NULL;
+	கட்டமைப்பு branch *curr_branch = branch_get("HEAD");
+	மாறிலி எழுத்து *remote = curr_branch ? curr_branch->remote_name : வெற்று;
 
-	if (*refspecs) {
-		if (opt_rebase)
+	எனில் (*refspecs) {
+		எனில் (opt_rebase)
 			fprintf_ln(stderr, _("There is no candidate for rebasing against among the refs that you just fetched."));
-		else
+		இல்லையெனில்
 			fprintf_ln(stderr, _("There are no candidates for merging among the refs that you just fetched."));
 		fprintf_ln(stderr, _("Generally this means that you provided a wildcard refspec which had no\n"
 					"matches on the remote end."));
-	} else if (repo && curr_branch && (!remote || strcmp(repo, remote))) {
+	} இல்லையெனில் எனில் (repo && curr_branch && (!remote || strcmp(repo, remote))) {
 		fprintf_ln(stderr, _("You asked to pull from the remote '%s', but did not specify\n"
 			"a branch. Because this is not the default configured remote\n"
 			"for your current branch, you must specify a branch on the command line."),
 			repo);
-	} else if (!curr_branch) {
+	} இல்லையெனில் எனில் (!curr_branch) {
 		fprintf_ln(stderr, _("You are not currently on a branch."));
-		if (opt_rebase)
+		எனில் (opt_rebase)
 			fprintf_ln(stderr, _("Please specify which branch you want to rebase against."));
-		else
+		இல்லையெனில்
 			fprintf_ln(stderr, _("Please specify which branch you want to merge with."));
 		fprintf_ln(stderr, _("See git-pull(1) for details."));
 		fprintf(stderr, "\n");
 		fprintf_ln(stderr, "    git pull %s %s", _("<remote>"), _("<branch>"));
 		fprintf(stderr, "\n");
-	} else if (!curr_branch->merge_nr) {
-		const char *remote_name = NULL;
+	} இல்லையெனில் எனில் (!curr_branch->merge_nr) {
+		மாறிலி எழுத்து *remote_name = வெற்று;
 
-		if (for_each_remote(get_only_remote, &remote_name) || !remote_name)
+		எனில் (for_each_remote(get_only_remote, &remote_name) || !remote_name)
 			remote_name = _("<remote>");
 
 		fprintf_ln(stderr, _("There is no tracking information for the current branch."));
-		if (opt_rebase)
+		எனில் (opt_rebase)
 			fprintf_ln(stderr, _("Please specify which branch you want to rebase against."));
-		else
+		இல்லையெனில்
 			fprintf_ln(stderr, _("Please specify which branch you want to merge with."));
 		fprintf_ln(stderr, _("See git-pull(1) for details."));
 		fprintf(stderr, "\n");
@@ -358,7 +358,7 @@ static void NORETURN die_no_merge_candidates(const char *repo, const char **refs
 		fprintf(stderr, "\n");
 		fprintf_ln(stderr, "    git branch --set-upstream-to=%s/%s %s\n",
 				remote_name, _("<branch>"), curr_branch->name);
-	} else
+	} இல்லையெனில்
 		fprintf_ln(stderr, _("Your configuration specifies to merge with the ref '%s'\n"
 			"from the remote, but no such ref was fetched."),
 			curr_branch->merge[0]->src);
@@ -370,14 +370,14 @@ static void NORETURN die_no_merge_candidates(const char *repo, const char **refs
  * as a string and `refspecs` as a null-terminated array of strings. If `repo`
  * is not provided in argv, it is set to NULL.
  */
-static void parse_repo_refspecs(int argc, const char **argv, const char **repo,
-		const char ***refspecs)
+நிலையான வெறுமை parse_repo_refspecs(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து **repo,
+		மாறிலி எழுத்து ***refspecs)
 {
-	if (argc > 0) {
+	எனில் (argc > 0) {
 		*repo = *argv++;
 		argc--;
-	} else
-		*repo = NULL;
+	} இல்லையெனில்
+		*repo = வெற்று;
 	*refspecs = argv;
 }
 
@@ -385,90 +385,90 @@ static void parse_repo_refspecs(int argc, const char **argv, const char **repo,
  * Runs git-fetch, returning its exit status. `repo` and `refspecs` are the
  * repository and refspecs to fetch, or NULL if they are not provided.
  */
-static int run_fetch(const char *repo, const char **refspecs)
+நிலையான முழு run_fetch(மாறிலி எழுத்து *repo, மாறிலி எழுத்து **refspecs)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	கட்டமைப்பு child_process cmd = CHILD_PROCESS_INIT;
 
-	strvec_pushl(&cmd.args, "fetch", "--update-head-ok", NULL);
+	strvec_pushl(&cmd.args, "fetch", "--update-head-ok", வெற்று);
 
 	/* Shared options */
-	argv_push_verbosity(&cmd.args);
-	if (opt_progress)
-		strvec_push(&cmd.args, opt_progress);
+	argv_தள்ளு_verbosity(&cmd.args);
+	எனில் (opt_progress)
+		strvec_தள்ளு(&cmd.args, opt_progress);
 
 	/* Options passed to git-fetch */
-	if (opt_all)
-		strvec_push(&cmd.args, opt_all);
-	if (opt_append)
-		strvec_push(&cmd.args, opt_append);
-	if (opt_upload_pack)
-		strvec_push(&cmd.args, opt_upload_pack);
-	argv_push_force(&cmd.args);
-	if (opt_tags)
-		strvec_push(&cmd.args, opt_tags);
-	if (opt_prune)
-		strvec_push(&cmd.args, opt_prune);
-	if (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
-		switch (recurse_submodules_cli) {
-		case RECURSE_SUBMODULES_ON:
-			strvec_push(&cmd.args, "--recurse-submodules=on");
-			break;
-		case RECURSE_SUBMODULES_OFF:
-			strvec_push(&cmd.args, "--recurse-submodules=no");
-			break;
-		case RECURSE_SUBMODULES_ON_DEMAND:
-			strvec_push(&cmd.args, "--recurse-submodules=on-demand");
-			break;
-		default:
+	எனில் (opt_all)
+		strvec_தள்ளு(&cmd.args, opt_all);
+	எனில் (opt_append)
+		strvec_தள்ளு(&cmd.args, opt_append);
+	எனில் (opt_upload_pack)
+		strvec_தள்ளு(&cmd.args, opt_upload_pack);
+	argv_தள்ளு_force(&cmd.args);
+	எனில் (opt_tags)
+		strvec_தள்ளு(&cmd.args, opt_tags);
+	எனில் (opt_prune)
+		strvec_தள்ளு(&cmd.args, opt_prune);
+	எனில் (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
+		தேர்வு (recurse_submodules_cli) {
+		நிலை RECURSE_SUBMODULES_ON:
+			strvec_தள்ளு(&cmd.args, "--recurse-submodules=on");
+			நிறுத்து;
+		நிலை RECURSE_SUBMODULES_OFF:
+			strvec_தள்ளு(&cmd.args, "--recurse-submodules=no");
+			நிறுத்து;
+		நிலை RECURSE_SUBMODULES_ON_DEMAND:
+			strvec_தள்ளு(&cmd.args, "--recurse-submodules=on-demand");
+			நிறுத்து;
+		இயல்பு:
 			BUG("submodule recursion option not understood");
 		}
-	if (max_children)
-		strvec_push(&cmd.args, max_children);
-	if (opt_dry_run)
-		strvec_push(&cmd.args, "--dry-run");
-	if (opt_keep)
-		strvec_push(&cmd.args, opt_keep);
-	if (opt_depth)
-		strvec_push(&cmd.args, opt_depth);
-	if (opt_unshallow)
-		strvec_push(&cmd.args, opt_unshallow);
-	if (opt_update_shallow)
-		strvec_push(&cmd.args, opt_update_shallow);
-	if (opt_refmap)
-		strvec_push(&cmd.args, opt_refmap);
-	if (opt_ipv4)
-		strvec_push(&cmd.args, opt_ipv4);
-	if (opt_ipv6)
-		strvec_push(&cmd.args, opt_ipv6);
-	if (opt_show_forced_updates > 0)
-		strvec_push(&cmd.args, "--show-forced-updates");
-	else if (opt_show_forced_updates == 0)
-		strvec_push(&cmd.args, "--no-show-forced-updates");
-	if (set_upstream)
-		strvec_push(&cmd.args, set_upstream);
+	எனில் (max_children)
+		strvec_தள்ளு(&cmd.args, max_children);
+	எனில் (opt_dry_run)
+		strvec_தள்ளு(&cmd.args, "--dry-run");
+	எனில் (opt_keep)
+		strvec_தள்ளு(&cmd.args, opt_keep);
+	எனில் (opt_depth)
+		strvec_தள்ளு(&cmd.args, opt_depth);
+	எனில் (opt_unshallow)
+		strvec_தள்ளு(&cmd.args, opt_unshallow);
+	எனில் (opt_update_shallow)
+		strvec_தள்ளு(&cmd.args, opt_update_shallow);
+	எனில் (opt_refmap)
+		strvec_தள்ளு(&cmd.args, opt_refmap);
+	எனில் (opt_ipv4)
+		strvec_தள்ளு(&cmd.args, opt_ipv4);
+	எனில் (opt_ipv6)
+		strvec_தள்ளு(&cmd.args, opt_ipv6);
+	எனில் (opt_show_forced_updates > 0)
+		strvec_தள்ளு(&cmd.args, "--show-forced-updates");
+	இல்லையெனில் எனில் (opt_show_forced_updates == 0)
+		strvec_தள்ளு(&cmd.args, "--no-show-forced-updates");
+	எனில் (set_upstream)
+		strvec_தள்ளு(&cmd.args, set_upstream);
 	strvec_pushv(&cmd.args, opt_fetch.v);
 
-	if (repo) {
-		strvec_push(&cmd.args, repo);
+	எனில் (repo) {
+		strvec_தள்ளு(&cmd.args, repo);
 		strvec_pushv(&cmd.args, refspecs);
-	} else if (*refspecs)
+	} இல்லையெனில் எனில் (*refspecs)
 		BUG("refspecs without repo?");
 	cmd.git_cmd = 1;
 	cmd.odb_to_close = the_repository->objects;
-	return run_command(&cmd);
+	திரும்பு run_command(&cmd);
 }
 
 /**
  * "Pulls into void" by branching off merge_head.
  */
-static int pull_into_void(const struct object_id *merge_head,
-		const struct object_id *curr_head)
+நிலையான முழு pull_into_void(மாறிலி கட்டமைப்பு object_id *merge_head,
+		மாறிலி கட்டமைப்பு object_id *curr_head)
 {
-	if (opt_verify_signatures) {
-		struct commit *commit;
+	எனில் (opt_verify_signatures) {
+		கட்டமைப்பு commit *commit;
 
 		commit = lookup_commit(the_repository, merge_head);
-		if (!commit)
+		எனில் (!commit)
 			die(_("unable to access commit %s"),
 			    oid_to_hex(merge_head));
 
@@ -482,92 +482,92 @@ static int pull_into_void(const struct object_id *merge_head,
 	 * index/worktree changes that the user already made on the unborn
 	 * branch.
 	 */
-	if (checkout_fast_forward(the_repository,
-				  the_hash_algo->empty_tree,
+	எனில் (checkout_fast_forward(the_repository,
+				  the_hash_algo->empty_மரம்,
 				  merge_head, 0))
-		return 1;
+		திரும்பு 1;
 
-	if (refs_update_ref(get_main_ref_store(the_repository), "initial pull", "HEAD", merge_head, curr_head, 0, UPDATE_REFS_DIE_ON_ERR))
-		return 1;
+	எனில் (refs_update_ref(get_main_ref_store(the_repository), "initial pull", "HEAD", merge_head, curr_head, 0, UPDATE_REFS_DIE_ON_ERR))
+		திரும்பு 1;
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int rebase_submodules(void)
+நிலையான முழு rebase_submodules(வெறுமை)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
+	கட்டமைப்பு child_process cp = CHILD_PROCESS_INIT;
 
 	cp.git_cmd = 1;
 	cp.no_stdin = 1;
 	strvec_pushl(&cp.args, "submodule", "update",
-		     "--recursive", "--rebase", NULL);
-	argv_push_verbosity(&cp.args);
+		     "--recursive", "--rebase", வெற்று);
+	argv_தள்ளு_verbosity(&cp.args);
 
-	return run_command(&cp);
+	திரும்பு run_command(&cp);
 }
 
-static int update_submodules(void)
+நிலையான முழு update_submodules(வெறுமை)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
+	கட்டமைப்பு child_process cp = CHILD_PROCESS_INIT;
 
 	cp.git_cmd = 1;
 	cp.no_stdin = 1;
 	strvec_pushl(&cp.args, "submodule", "update",
-		     "--recursive", "--checkout", NULL);
-	argv_push_verbosity(&cp.args);
+		     "--recursive", "--checkout", வெற்று);
+	argv_தள்ளு_verbosity(&cp.args);
 
-	return run_command(&cp);
+	திரும்பு run_command(&cp);
 }
 
 /**
  * Runs git-merge, returning its exit status.
  */
-static int run_merge(void)
+நிலையான முழு run_merge(வெறுமை)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	கட்டமைப்பு child_process cmd = CHILD_PROCESS_INIT;
 
-	strvec_pushl(&cmd.args, "merge", NULL);
+	strvec_pushl(&cmd.args, "merge", வெற்று);
 
 	/* Shared options */
-	argv_push_verbosity(&cmd.args);
-	if (opt_progress)
-		strvec_push(&cmd.args, opt_progress);
+	argv_தள்ளு_verbosity(&cmd.args);
+	எனில் (opt_progress)
+		strvec_தள்ளு(&cmd.args, opt_progress);
 
 	/* Options passed to git-merge */
-	if (opt_diffstat)
-		strvec_push(&cmd.args, opt_diffstat);
-	if (opt_log)
-		strvec_push(&cmd.args, opt_log);
-	if (opt_signoff)
-		strvec_push(&cmd.args, opt_signoff);
-	if (opt_squash)
-		strvec_push(&cmd.args, opt_squash);
-	if (opt_commit)
-		strvec_push(&cmd.args, opt_commit);
-	if (opt_edit)
-		strvec_push(&cmd.args, opt_edit);
-	if (cleanup_arg)
+	எனில் (opt_diffstat)
+		strvec_தள்ளு(&cmd.args, opt_diffstat);
+	எனில் (opt_log)
+		strvec_தள்ளு(&cmd.args, opt_log);
+	எனில் (opt_signoff)
+		strvec_தள்ளு(&cmd.args, opt_signoff);
+	எனில் (opt_squash)
+		strvec_தள்ளு(&cmd.args, opt_squash);
+	எனில் (opt_commit)
+		strvec_தள்ளு(&cmd.args, opt_commit);
+	எனில் (opt_edit)
+		strvec_தள்ளு(&cmd.args, opt_edit);
+	எனில் (cleanup_arg)
 		strvec_pushf(&cmd.args, "--cleanup=%s", cleanup_arg);
-	if (opt_ff)
-		strvec_push(&cmd.args, opt_ff);
-	if (opt_verify)
-		strvec_push(&cmd.args, opt_verify);
-	if (opt_verify_signatures)
-		strvec_push(&cmd.args, opt_verify_signatures);
+	எனில் (opt_ff)
+		strvec_தள்ளு(&cmd.args, opt_ff);
+	எனில் (opt_verify)
+		strvec_தள்ளு(&cmd.args, opt_verify);
+	எனில் (opt_verify_signatures)
+		strvec_தள்ளு(&cmd.args, opt_verify_signatures);
 	strvec_pushv(&cmd.args, opt_strategies.v);
 	strvec_pushv(&cmd.args, opt_strategy_opts.v);
-	if (opt_gpg_sign)
-		strvec_push(&cmd.args, opt_gpg_sign);
-	if (opt_autostash == 0)
-		strvec_push(&cmd.args, "--no-autostash");
-	else if (opt_autostash == 1)
-		strvec_push(&cmd.args, "--autostash");
-	if (opt_allow_unrelated_histories > 0)
-		strvec_push(&cmd.args, "--allow-unrelated-histories");
+	எனில் (opt_gpg_sign)
+		strvec_தள்ளு(&cmd.args, opt_gpg_sign);
+	எனில் (opt_autostash == 0)
+		strvec_தள்ளு(&cmd.args, "--no-autostash");
+	இல்லையெனில் எனில் (opt_autostash == 1)
+		strvec_தள்ளு(&cmd.args, "--autostash");
+	எனில் (opt_allow_unrelated_histories > 0)
+		strvec_தள்ளு(&cmd.args, "--allow-unrelated-histories");
 
-	strvec_push(&cmd.args, "FETCH_HEAD");
+	strvec_தள்ளு(&cmd.args, "FETCH_HEAD");
 	cmd.git_cmd = 1;
-	return run_command(&cmd);
+	திரும்பு run_command(&cmd);
 }
 
 /**
@@ -577,27 +577,27 @@ static int run_merge(void)
  * remote is not the branch's configured remote or the branch does not have any
  * configured upstream branch.
  */
-static const char *get_upstream_branch(const char *remote)
+நிலையான மாறிலி எழுத்து *get_upstream_branch(மாறிலி எழுத்து *remote)
 {
-	struct remote *rm;
-	struct branch *curr_branch;
-	const char *curr_branch_remote;
+	கட்டமைப்பு remote *rm;
+	கட்டமைப்பு branch *curr_branch;
+	மாறிலி எழுத்து *curr_branch_remote;
 
 	rm = remote_get(remote);
-	if (!rm)
-		return NULL;
+	எனில் (!rm)
+		திரும்பு வெற்று;
 
 	curr_branch = branch_get("HEAD");
-	if (!curr_branch)
-		return NULL;
+	எனில் (!curr_branch)
+		திரும்பு வெற்று;
 
-	curr_branch_remote = remote_for_branch(curr_branch, NULL);
-	assert(curr_branch_remote);
+	curr_branch_remote = remote_for_branch(curr_branch, வெற்று);
+	ப்ரதிஜ்ஞா(curr_branch_remote);
 
-	if (strcmp(curr_branch_remote, rm->name))
-		return NULL;
+	எனில் (strcmp(curr_branch_remote, rm->name))
+		திரும்பு வெற்று;
 
-	return branch_get_upstream(curr_branch, NULL);
+	திரும்பு branch_get_upstream(curr_branch, வெற்று);
 }
 
 /**
@@ -606,36 +606,36 @@ static const char *get_upstream_branch(const char *remote)
  * FIXME: The current implementation assumes the default mapping of
  * refs/heads/<branch_name> to refs/remotes/<remote_name>/<branch_name>.
  */
-static const char *get_tracking_branch(const char *remote, const char *refspec)
+நிலையான மாறிலி எழுத்து *get_tracking_branch(மாறிலி எழுத்து *remote, மாறிலி எழுத்து *refspec)
 {
-	struct refspec_item spec;
-	const char *spec_src;
-	const char *merge_branch;
+	கட்டமைப்பு refspec_item spec;
+	மாறிலி எழுத்து *spec_src;
+	மாறிலி எழுத்து *merge_branch;
 
-	if (!refspec_item_init_fetch(&spec, refspec, the_hash_algo))
+	எனில் (!refspec_item_init_fetch(&spec, refspec, the_hash_algo))
 		die(_("invalid refspec '%s'"), refspec);
 	spec_src = spec.src;
-	if (!*spec_src || !strcmp(spec_src, "HEAD"))
+	எனில் (!*spec_src || !strcmp(spec_src, "HEAD"))
 		spec_src = "HEAD";
-	else if (skip_prefix(spec_src, "heads/", &spec_src))
+	இல்லையெனில் எனில் (skip_prefix(spec_src, "heads/", &spec_src))
 		;
-	else if (skip_prefix(spec_src, "refs/heads/", &spec_src))
+	இல்லையெனில் எனில் (skip_prefix(spec_src, "refs/heads/", &spec_src))
 		;
-	else if (starts_with(spec_src, "refs/") ||
+	இல்லையெனில் எனில் (starts_with(spec_src, "refs/") ||
 		starts_with(spec_src, "tags/") ||
 		starts_with(spec_src, "remotes/"))
 		spec_src = "";
 
-	if (*spec_src) {
-		if (!strcmp(remote, "."))
+	எனில் (*spec_src) {
+		எனில் (!strcmp(remote, "."))
 			merge_branch = mkpath("refs/heads/%s", spec_src);
-		else
+		இல்லையெனில்
 			merge_branch = mkpath("refs/remotes/%s/%s", remote, spec_src);
-	} else
-		merge_branch = NULL;
+	} இல்லையெனில்
+		merge_branch = வெற்று;
 
 	refspec_item_clear(&spec);
-	return merge_branch;
+	திரும்பு merge_branch;
 }
 
 /**
@@ -643,76 +643,76 @@ static const char *get_tracking_branch(const char *remote, const char *refspec)
  * current branch forked from its remote-tracking branch. Returns 0 on success,
  * -1 on failure.
  */
-static int get_rebase_fork_point(struct object_id *fork_point, const char *repo,
-		const char *refspec)
+நிலையான முழு get_rebase_fork_point(கட்டமைப்பு object_id *fork_point, மாறிலி எழுத்து *repo,
+		மாறிலி எழுத்து *refspec)
 {
-	int ret;
-	struct branch *curr_branch;
-	const char *remote_branch;
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct strbuf sb = STRBUF_INIT;
+	முழு ret;
+	கட்டமைப்பு branch *curr_branch;
+	மாறிலி எழுத்து *remote_branch;
+	கட்டமைப்பு child_process cp = CHILD_PROCESS_INIT;
+	கட்டமைப்பு strbuf sb = STRBUF_INIT;
 
 	curr_branch = branch_get("HEAD");
-	if (!curr_branch)
-		return -1;
+	எனில் (!curr_branch)
+		திரும்பு -1;
 
-	if (refspec)
+	எனில் (refspec)
 		remote_branch = get_tracking_branch(repo, refspec);
-	else
+	இல்லையெனில்
 		remote_branch = get_upstream_branch(repo);
 
-	if (!remote_branch)
-		return -1;
+	எனில் (!remote_branch)
+		திரும்பு -1;
 
 	strvec_pushl(&cp.args, "merge-base", "--fork-point",
-		     remote_branch, curr_branch->name, NULL);
+		     remote_branch, curr_branch->name, வெற்று);
 	cp.no_stdin = 1;
 	cp.no_stderr = 1;
 	cp.git_cmd = 1;
 
 	ret = capture_command(&cp, &sb, GIT_MAX_HEXSZ);
-	if (ret)
-		goto cleanup;
+	எனில் (ret)
+		செல் cleanup;
 
 	ret = get_oid_hex(sb.buf, fork_point);
-	if (ret)
-		goto cleanup;
+	எனில் (ret)
+		செல் cleanup;
 
 cleanup:
 	strbuf_release(&sb);
-	return ret ? -1 : 0;
+	திரும்பு ret ? -1 : 0;
 }
 
 /**
  * Sets merge_base to the octopus merge base of curr_head, merge_head and
  * fork_point. Returns 0 if a merge base is found, 1 otherwise.
  */
-static int get_octopus_merge_base(struct object_id *merge_base,
-		const struct object_id *curr_head,
-		const struct object_id *merge_head,
-		const struct object_id *fork_point)
+நிலையான முழு get_octopus_merge_base(கட்டமைப்பு object_id *merge_base,
+		மாறிலி கட்டமைப்பு object_id *curr_head,
+		மாறிலி கட்டமைப்பு object_id *merge_head,
+		மாறிலி கட்டமைப்பு object_id *fork_point)
 {
-	struct commit_list *revs = NULL, *result = NULL;
+	கட்டமைப்பு commit_list *revs = வெற்று, *result = வெற்று;
 
-	commit_list_insert(lookup_commit_reference(the_repository, curr_head),
+	commit_list_செருகு(lookup_commit_reference(the_repository, curr_head),
 			   &revs);
-	commit_list_insert(lookup_commit_reference(the_repository, merge_head),
+	commit_list_செருகு(lookup_commit_reference(the_repository, merge_head),
 			   &revs);
-	if (!is_null_oid(fork_point))
-		commit_list_insert(lookup_commit_reference(the_repository, fork_point),
+	எனில் (!is_null_oid(fork_point))
+		commit_list_செருகு(lookup_commit_reference(the_repository, fork_point),
 				   &revs);
 
-	if (get_octopus_merge_bases(revs, &result) < 0)
+	எனில் (get_octopus_merge_bases(revs, &result) < 0)
 		exit(128);
 	commit_list_free(revs);
 	reduce_heads_replace(&result);
 
-	if (!result)
-		return 1;
+	எனில் (!result)
+		திரும்பு 1;
 
 	oidcpy(merge_base, &result->item->object.oid);
 	commit_list_free(result);
-	return 0;
+	திரும்பு 0;
 }
 
 /**
@@ -720,26 +720,26 @@ static int get_octopus_merge_base(struct object_id *merge_base,
  * fork point calculated by get_rebase_fork_point(), compute the <newbase> and
  * <upstream> arguments to use for the upcoming git-rebase invocation.
  */
-static int get_rebase_newbase_and_upstream(struct object_id *newbase,
-		struct object_id *upstream,
-		const struct object_id *curr_head,
-		const struct object_id *merge_head,
-		const struct object_id *fork_point)
+நிலையான முழு get_rebase_newbase_and_upstream(கட்டமைப்பு object_id *newbase,
+		கட்டமைப்பு object_id *upstream,
+		மாறிலி கட்டமைப்பு object_id *curr_head,
+		மாறிலி கட்டமைப்பு object_id *merge_head,
+		மாறிலி கட்டமைப்பு object_id *fork_point)
 {
-	struct object_id oct_merge_base;
+	கட்டமைப்பு object_id oct_merge_base;
 
-	if (!get_octopus_merge_base(&oct_merge_base, curr_head, merge_head, fork_point))
-		if (!is_null_oid(fork_point) && oideq(&oct_merge_base, fork_point))
-			fork_point = NULL;
+	எனில் (!get_octopus_merge_base(&oct_merge_base, curr_head, merge_head, fork_point))
+		எனில் (!is_null_oid(fork_point) && oideq(&oct_merge_base, fork_point))
+			fork_point = வெற்று;
 
-	if (fork_point && !is_null_oid(fork_point))
+	எனில் (fork_point && !is_null_oid(fork_point))
 		oidcpy(upstream, fork_point);
-	else
+	இல்லையெனில்
 		oidcpy(upstream, merge_head);
 
 	oidcpy(newbase, merge_head);
 
-	return 0;
+	திரும்பு 0;
 }
 
 /**
@@ -747,70 +747,70 @@ static int get_rebase_newbase_and_upstream(struct object_id *newbase,
  * get_rebase_newbase_and_upstream(), runs git-rebase with the
  * appropriate arguments and returns its exit status.
  */
-static int run_rebase(const struct object_id *newbase,
-		const struct object_id *upstream)
+நிலையான முழு run_rebase(மாறிலி கட்டமைப்பு object_id *newbase,
+		மாறிலி கட்டமைப்பு object_id *upstream)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	கட்டமைப்பு child_process cmd = CHILD_PROCESS_INIT;
 
-	strvec_push(&cmd.args, "rebase");
+	strvec_தள்ளு(&cmd.args, "rebase");
 
 	/* Shared options */
-	argv_push_verbosity(&cmd.args);
+	argv_தள்ளு_verbosity(&cmd.args);
 
 	/* Options passed to git-rebase */
-	if (opt_rebase == REBASE_MERGES)
-		strvec_push(&cmd.args, "--rebase-merges");
-	else if (opt_rebase == REBASE_INTERACTIVE)
-		strvec_push(&cmd.args, "--interactive");
-	if (opt_diffstat)
-		strvec_push(&cmd.args, opt_diffstat);
+	எனில் (opt_rebase == REBASE_MERGES)
+		strvec_தள்ளு(&cmd.args, "--rebase-merges");
+	இல்லையெனில் எனில் (opt_rebase == REBASE_INTERACTIVE)
+		strvec_தள்ளு(&cmd.args, "--interactive");
+	எனில் (opt_diffstat)
+		strvec_தள்ளு(&cmd.args, opt_diffstat);
 	strvec_pushv(&cmd.args, opt_strategies.v);
 	strvec_pushv(&cmd.args, opt_strategy_opts.v);
-	if (opt_gpg_sign)
-		strvec_push(&cmd.args, opt_gpg_sign);
-	if (opt_signoff)
-		strvec_push(&cmd.args, opt_signoff);
-	if (opt_autostash == 0)
-		strvec_push(&cmd.args, "--no-autostash");
-	else if (opt_autostash == 1)
-		strvec_push(&cmd.args, "--autostash");
-	if (opt_verify_signatures &&
+	எனில் (opt_gpg_sign)
+		strvec_தள்ளு(&cmd.args, opt_gpg_sign);
+	எனில் (opt_signoff)
+		strvec_தள்ளு(&cmd.args, opt_signoff);
+	எனில் (opt_autostash == 0)
+		strvec_தள்ளு(&cmd.args, "--no-autostash");
+	இல்லையெனில் எனில் (opt_autostash == 1)
+		strvec_தள்ளு(&cmd.args, "--autostash");
+	எனில் (opt_verify_signatures &&
 	    !strcmp(opt_verify_signatures, "--verify-signatures"))
 		warning(_("ignoring --verify-signatures for rebase"));
 
-	strvec_push(&cmd.args, "--onto");
-	strvec_push(&cmd.args, oid_to_hex(newbase));
+	strvec_தள்ளு(&cmd.args, "--onto");
+	strvec_தள்ளு(&cmd.args, oid_to_hex(newbase));
 
-	strvec_push(&cmd.args, oid_to_hex(upstream));
+	strvec_தள்ளு(&cmd.args, oid_to_hex(upstream));
 
 	cmd.git_cmd = 1;
-	return run_command(&cmd);
+	திரும்பு run_command(&cmd);
 }
 
-static int get_can_ff(struct object_id *orig_head,
-		      struct oid_array *merge_heads)
+நிலையான முழு get_can_ff(கட்டமைப்பு object_id *orig_head,
+		      கட்டமைப்பு oid_array *merge_heads)
 {
-	int ret;
-	struct commit_list *list = NULL;
-	struct commit *merge_head, *head;
-	struct object_id *orig_merge_head;
+	முழு ret;
+	கட்டமைப்பு commit_list *list = வெற்று;
+	கட்டமைப்பு commit *merge_head, *head;
+	கட்டமைப்பு object_id *orig_merge_head;
 
-	if (merge_heads->nr > 1)
-		return 0;
+	எனில் (merge_heads->nr > 1)
+		திரும்பு 0;
 
 	orig_merge_head = &merge_heads->oid[0];
 	head = lookup_commit_reference(the_repository, orig_head);
-	if (!head)
-		return 0;
+	எனில் (!head)
+		திரும்பு 0;
 	merge_head = lookup_commit_reference(the_repository, orig_merge_head);
-	if (!merge_head)
-		return 0;
-	commit_list_insert(head, &list);
+	எனில் (!merge_head)
+		திரும்பு 0;
+	commit_list_செருகு(head, &list);
 	ret = repo_is_descendant_of(the_repository, merge_head, list);
 	commit_list_free(list);
-	if (ret < 0)
+	எனில் (ret < 0)
 		exit(128);
-	return ret;
+	திரும்பு ret;
 }
 
 /*
@@ -818,34 +818,34 @@ static int get_can_ff(struct object_id *orig_head,
  * Unfortunately is_descendant_of() cannot be used as it asks
  * if orig_head is a descendant of at least one of them.
  */
-static int already_up_to_date(struct object_id *orig_head,
-			      struct oid_array *merge_heads)
+நிலையான முழு already_up_to_date(கட்டமைப்பு object_id *orig_head,
+			      கட்டமைப்பு oid_array *merge_heads)
 {
-	struct commit *ours;
+	கட்டமைப்பு commit *ours;
 
 	ours = lookup_commit_reference(the_repository, orig_head);
-	if (!ours)
-		return 0;
-	for (size_t i = 0; i < merge_heads->nr; i++) {
-		struct commit_list *list = NULL;
-		struct commit *theirs;
-		int ok;
+	எனில் (!ours)
+		திரும்பு 0;
+	க்கு (size_t i = 0; i < merge_heads->nr; i++) {
+		கட்டமைப்பு commit_list *list = வெற்று;
+		கட்டமைப்பு commit *theirs;
+		முழு ok;
 
 		theirs = lookup_commit_reference(the_repository, &merge_heads->oid[i]);
-		if (!theirs)
-			return 0;
-		commit_list_insert(theirs, &list);
+		எனில் (!theirs)
+			திரும்பு 0;
+		commit_list_செருகு(theirs, &list);
 		ok = repo_is_descendant_of(the_repository, ours, list);
 		commit_list_free(list);
-		if (ok < 0)
+		எனில் (ok < 0)
 			exit(128);
-		if (!ok)
-			return 0;
+		எனில் (!ok)
+			திரும்பு 0;
 	}
-	return 1;
+	திரும்பு 1;
 }
 
-static void show_advice_pull_non_ff(void)
+நிலையான வெறுமை show_advice_pull_non_ff(வெறுமை)
 {
 	advise(_("You have divergent branches and need to specify how to reconcile them.\n"
 		 "You can do so by running one of the following commands sometime before\n"
@@ -861,23 +861,23 @@ static void show_advice_pull_non_ff(void)
 		 "invocation.\n"));
 }
 
-int cmd_pull(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repository UNUSED)
+முழு cmd_pull(முழு argc,
+	     மாறிலி எழுத்து **argv,
+	     மாறிலி எழுத்து *prefix,
+	     கட்டமைப்பு repository *repository UNUSED)
 {
-	const char *repo, **refspecs;
-	struct oid_array merge_heads = OID_ARRAY_INIT;
-	struct object_id orig_head, curr_head;
-	struct object_id rebase_fork_point;
-	int rebase_unspecified = 0;
-	int can_ff;
-	int divergent;
-	int ret;
-	static struct option pull_options[] = {
+	மாறிலி எழுத்து *repo, **refspecs;
+	கட்டமைப்பு oid_array merge_heads = OID_ARRAY_INIT;
+	கட்டமைப்பு object_id orig_head, curr_head;
+	கட்டமைப்பு object_id rebase_fork_point;
+	முழு rebase_unspecified = 0;
+	முழு can_ff;
+	முழு divergent;
+	முழு ret;
+	நிலையான கட்டமைப்பு option pull_options[] = {
 		/* Shared options */
 		OPT__VERBOSITY(&opt_verbosity),
-		OPT_PASSTHRU(0, "progress", &opt_progress, NULL,
+		OPT_PASSTHRU(0, "progress", &opt_progress, வெற்று,
 			N_("force progress reporting"),
 			PARSE_OPT_NOARG),
 		OPT_CALLBACK_F(0, "recurse-submodules",
@@ -891,44 +891,44 @@ int cmd_pull(int argc,
 			"(false|true|merges|interactive)",
 			N_("incorporate changes by rebasing rather than merging"),
 			PARSE_OPT_OPTARG, parse_opt_rebase),
-		OPT_PASSTHRU('n', NULL, &opt_diffstat, NULL,
+		OPT_PASSTHRU('n', வெற்று, &opt_diffstat, வெற்று,
 			N_("do not show a diffstat at the end of the merge"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG),
-		OPT_PASSTHRU(0, "stat", &opt_diffstat, NULL,
+		OPT_PASSTHRU(0, "stat", &opt_diffstat, வெற்று,
 			N_("show a diffstat at the end of the merge"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "summary", &opt_diffstat, NULL,
+		OPT_PASSTHRU(0, "summary", &opt_diffstat, வெற்று,
 			N_("(synonym to --stat)"),
 			PARSE_OPT_NOARG | PARSE_OPT_HIDDEN),
-		OPT_PASSTHRU(0, "compact-summary", &opt_diffstat, NULL,
+		OPT_PASSTHRU(0, "compact-summary", &opt_diffstat, வெற்று,
 			N_("show a compact-summary at the end of the merge"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU(0, "log", &opt_log, N_("n"),
 			N_("add (at most <n>) entries from shortlog to merge commit message"),
 			PARSE_OPT_OPTARG),
-		OPT_PASSTHRU(0, "signoff", &opt_signoff, NULL,
+		OPT_PASSTHRU(0, "signoff", &opt_signoff, வெற்று,
 			N_("add a Signed-off-by trailer"),
 			PARSE_OPT_OPTARG),
-		OPT_PASSTHRU(0, "squash", &opt_squash, NULL,
+		OPT_PASSTHRU(0, "squash", &opt_squash, வெற்று,
 			N_("create a single commit instead of doing a merge"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "commit", &opt_commit, NULL,
+		OPT_PASSTHRU(0, "commit", &opt_commit, வெற்று,
 			N_("perform a commit if the merge succeeds (default)"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "edit", &opt_edit, NULL,
+		OPT_PASSTHRU(0, "edit", &opt_edit, வெற்று,
 			N_("edit message before committing"),
 			PARSE_OPT_NOARG),
 		OPT_CLEANUP(&cleanup_arg),
-		OPT_PASSTHRU(0, "ff", &opt_ff, NULL,
+		OPT_PASSTHRU(0, "ff", &opt_ff, வெற்று,
 			N_("allow fast-forward"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "ff-only", &opt_ff, NULL,
+		OPT_PASSTHRU(0, "ff-only", &opt_ff, வெற்று,
 			N_("abort if fast-forward is not possible"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG),
-		OPT_PASSTHRU(0, "verify", &opt_verify, NULL,
+		OPT_PASSTHRU(0, "verify", &opt_verify, வெற்று,
 			N_("control use of pre-merge-commit and commit-msg hooks"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "verify-signatures", &opt_verify_signatures, NULL,
+		OPT_PASSTHRU(0, "verify-signatures", &opt_verify_signatures, வெற்று,
 			N_("verify that the named commit has a valid GPG signature"),
 			PARSE_OPT_NOARG),
 		OPT_BOOL(0, "autostash", &opt_autostash,
@@ -949,20 +949,20 @@ int cmd_pull(int argc,
 
 		/* Options passed to git-fetch */
 		OPT_GROUP(N_("Options related to fetching")),
-		OPT_PASSTHRU(0, "all", &opt_all, NULL,
+		OPT_PASSTHRU(0, "all", &opt_all, வெற்று,
 			N_("fetch from all remotes"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU('a', "append", &opt_append, NULL,
+		OPT_PASSTHRU('a', "append", &opt_append, வெற்று,
 			N_("append to .git/FETCH_HEAD instead of overwriting"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU(0, "upload-pack", &opt_upload_pack, N_("path"),
 			N_("path to upload pack on remote end"),
 			0),
 		OPT__FORCE(&opt_force, N_("force overwrite of local branch"), 0),
-		OPT_PASSTHRU('t', "tags", &opt_tags, NULL,
+		OPT_PASSTHRU('t', "tags", &opt_tags, வெற்று,
 			N_("fetch all tags and associated objects"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU('p', "prune", &opt_prune, NULL,
+		OPT_PASSTHRU('p', "prune", &opt_prune, வெற்று,
 			N_("prune remote-tracking branches no longer on remote"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU('j', "jobs", &max_children, N_("n"),
@@ -970,7 +970,7 @@ int cmd_pull(int argc,
 			PARSE_OPT_OPTARG),
 		OPT_BOOL(0, "dry-run", &opt_dry_run,
 			N_("dry run")),
-		OPT_PASSTHRU('k', "keep", &opt_keep, NULL,
+		OPT_PASSTHRU('k', "keep", &opt_keep, வெற்று,
 			N_("keep downloaded pack"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU(0, "depth", &opt_depth, N_("depth"),
@@ -985,10 +985,10 @@ int cmd_pull(int argc,
 		OPT_PASSTHRU_ARGV(0, "deepen", &opt_fetch, N_("n"),
 			N_("deepen history of shallow clone"),
 			0),
-		OPT_PASSTHRU(0, "unshallow", &opt_unshallow, NULL,
+		OPT_PASSTHRU(0, "unshallow", &opt_unshallow, வெற்று,
 			N_("convert to a complete repository"),
 			PARSE_OPT_NONEG | PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "update-shallow", &opt_update_shallow, NULL,
+		OPT_PASSTHRU(0, "update-shallow", &opt_update_shallow, வெற்று,
 			N_("accept refs that update .git/shallow"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU(0, "refmap", &opt_refmap, N_("refmap"),
@@ -998,10 +998,10 @@ int cmd_pull(int argc,
 			N_("server-specific"),
 			N_("option to transmit"),
 			0),
-		OPT_PASSTHRU('4',  "ipv4", &opt_ipv4, NULL,
+		OPT_PASSTHRU('4',  "ipv4", &opt_ipv4, வெற்று,
 			N_("use IPv4 addresses only"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU('6',  "ipv6", &opt_ipv6, NULL,
+		OPT_PASSTHRU('6',  "ipv6", &opt_ipv6, வெற்று,
 			N_("use IPv6 addresses only"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU_ARGV(0, "negotiation-restrict", &opt_fetch, N_("revision"),
@@ -1013,30 +1013,30 @@ int cmd_pull(int argc,
 			0),
 		OPT_BOOL(0, "show-forced-updates", &opt_show_forced_updates,
 			 N_("check for forced-updates on all updated branches")),
-		OPT_PASSTHRU(0, "set-upstream", &set_upstream, NULL,
+		OPT_PASSTHRU(0, "set-upstream", &set_upstream, வெற்று,
 			N_("set upstream for git pull/fetch"),
 			PARSE_OPT_NOARG),
 
 		OPT_END()
 	};
 
-	if (!getenv("GIT_REFLOG_ACTION"))
+	எனில் (!getenv("GIT_REFLOG_ACTION"))
 		set_reflog_message(argc, argv);
 
-	repo_config(the_repository, git_pull_config, NULL);
-	if (the_repository->gitdir) {
+	repo_config(the_repository, git_pull_config, வெற்று);
+	எனில் (the_repository->gitdir) {
 		prepare_repo_settings(the_repository);
 		the_repository->settings.command_requires_full_index = 0;
 	}
 
 	argc = parse_options(argc, argv, prefix, pull_options, pull_usage, 0);
-	if (opt_autostash == -1)
+	எனில் (opt_autostash == -1)
 		opt_autostash = config_pull_autostash;
 
-	if (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
+	எனில் (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
 		recurse_submodules = recurse_submodules_cli;
 
-	if (cleanup_arg)
+	எனில் (cleanup_arg)
 		/*
 		 * this only checks the validity of cleanup_arg; we don't need
 		 * a valid value for use_editor
@@ -1045,7 +1045,7 @@ int cmd_pull(int argc,
 
 	parse_repo_refspecs(argc, argv, &repo, &refspecs);
 
-	if (!opt_ff) {
+	எனில் (!opt_ff) {
 		opt_ff = xstrdup_or_null(config_get_ff());
 		/*
 		 * A subtle point: opt_ff was set on the line above via
@@ -1058,50 +1058,50 @@ int cmd_pull(int argc,
 		 * "--rebase" can override a config setting of
 		 * pull.ff=only.
 		 */
-		if (opt_rebase >= 0 && opt_ff && !strcmp(opt_ff, "--ff-only")) {
-			free(opt_ff);
+		எனில் (opt_rebase >= 0 && opt_ff && !strcmp(opt_ff, "--ff-only")) {
+			விடுவி(opt_ff);
 			opt_ff = xstrdup("--ff");
 		}
 	}
 
-	if (opt_rebase < 0)
+	எனில் (opt_rebase < 0)
 		opt_rebase = config_get_rebase(&rebase_unspecified);
 
-	if (repo_read_index_unmerged(the_repository))
+	எனில் (repo_read_index_unmerged(the_repository))
 		die_resolve_conflict("pull");
 
-	if (file_exists(git_path_merge_head(the_repository)))
+	எனில் (file_exists(git_path_merge_head(the_repository)))
 		die_conclude_merge();
 
-	if (repo_get_oid(the_repository, "HEAD", &orig_head))
+	எனில் (repo_get_oid(the_repository, "HEAD", &orig_head))
 		oidclr(&orig_head, the_repository->hash_algo);
 
-	if (opt_rebase) {
-		if (opt_autostash == -1)
+	எனில் (opt_rebase) {
+		எனில் (opt_autostash == -1)
 			opt_autostash = config_rebase_autostash;
 
-		if (is_null_oid(&orig_head) && !is_index_unborn(the_repository->index))
+		எனில் (is_null_oid(&orig_head) && !is_index_unborn(the_repository->index))
 			die(_("Updating an unborn branch with changes added to the index."));
 
-		if (!opt_autostash)
-			require_clean_work_tree(the_repository,
+		எனில் (!opt_autostash)
+			require_clean_work_மரம்(the_repository,
 				N_("pull with rebase"),
 				_("Please commit or stash them."), 1, 0);
 
-		if (get_rebase_fork_point(&rebase_fork_point, repo, *refspecs))
+		எனில் (get_rebase_fork_point(&rebase_fork_point, repo, *refspecs))
 			oidclr(&rebase_fork_point, the_repository->hash_algo);
 	}
 
-	if (run_fetch(repo, refspecs))
-		return 1;
+	எனில் (run_fetch(repo, refspecs))
+		திரும்பு 1;
 
-	if (opt_dry_run)
-		return 0;
+	எனில் (opt_dry_run)
+		திரும்பு 0;
 
-	if (repo_get_oid(the_repository, "HEAD", &curr_head))
+	எனில் (repo_get_oid(the_repository, "HEAD", &curr_head))
 		oidclr(&curr_head, the_repository->hash_algo);
 
-	if (!is_null_oid(&orig_head) && !is_null_oid(&curr_head) &&
+	எனில் (!is_null_oid(&orig_head) && !is_null_oid(&curr_head) &&
 			!oideq(&orig_head, &curr_head)) {
 		/*
 		 * The fetch involved updating the current branch.
@@ -1115,7 +1115,7 @@ int cmd_pull(int argc,
 			"fast-forwarding your working tree from\n"
 			"commit %s."), oid_to_hex(&orig_head));
 
-		if (checkout_fast_forward(the_repository, &orig_head,
+		எனில் (checkout_fast_forward(the_repository, &orig_head,
 					  &curr_head, 0))
 			die(_("Cannot fast-forward your working tree.\n"
 				"After making sure that you saved anything precious from\n"
@@ -1127,19 +1127,19 @@ int cmd_pull(int argc,
 
 	get_merge_heads(&merge_heads);
 
-	if (!merge_heads.nr)
+	எனில் (!merge_heads.nr)
 		die_no_merge_candidates(repo, refspecs);
 
-	if (is_null_oid(&orig_head)) {
-		if (merge_heads.nr > 1)
+	எனில் (is_null_oid(&orig_head)) {
+		எனில் (merge_heads.nr > 1)
 			die(_("Cannot merge multiple branches into empty head."));
 		ret = pull_into_void(merge_heads.oid, &curr_head);
-		goto cleanup;
+		செல் cleanup;
 	}
-	if (merge_heads.nr > 1) {
-		if (opt_rebase)
+	எனில் (merge_heads.nr > 1) {
+		எனில் (opt_rebase)
 			die(_("Cannot rebase onto multiple branches."));
-		if (opt_ff && !strcmp(opt_ff, "--ff-only"))
+		எனில் (opt_ff && !strcmp(opt_ff, "--ff-only"))
 			die(_("Cannot fast-forward to multiple branches."));
 	}
 
@@ -1147,51 +1147,51 @@ int cmd_pull(int argc,
 	divergent = !can_ff && !already_up_to_date(&orig_head, &merge_heads);
 
 	/* ff-only takes precedence over rebase */
-	if (opt_ff && !strcmp(opt_ff, "--ff-only")) {
-		if (divergent)
+	எனில் (opt_ff && !strcmp(opt_ff, "--ff-only")) {
+		எனில் (divergent)
 			die_ff_impossible();
 		opt_rebase = REBASE_FALSE;
 	}
 	/* If no action specified and we can't fast forward, then warn. */
-	if (!opt_ff && rebase_unspecified && divergent) {
+	எனில் (!opt_ff && rebase_unspecified && divergent) {
 		show_advice_pull_non_ff();
 		die(_("Need to specify how to reconcile divergent branches."));
 	}
 
-	if (opt_rebase) {
-		struct object_id newbase;
-		struct object_id upstream;
+	எனில் (opt_rebase) {
+		கட்டமைப்பு object_id newbase;
+		கட்டமைப்பு object_id upstream;
 		get_rebase_newbase_and_upstream(&newbase, &upstream, &curr_head,
 						merge_heads.oid, &rebase_fork_point);
 
-		if ((recurse_submodules == RECURSE_SUBMODULES_ON ||
+		எனில் ((recurse_submodules == RECURSE_SUBMODULES_ON ||
 		     recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND) &&
 		    submodule_touches_in_range(the_repository, &upstream, &curr_head))
 			die(_("cannot rebase with locally recorded submodule modifications"));
 
-		if (can_ff) {
+		எனில் (can_ff) {
 			/* we can fast-forward this without invoking rebase */
-			free(opt_ff);
+			விடுவி(opt_ff);
 			opt_ff = xstrdup("--ff-only");
 			ret = run_merge();
-		} else {
+		} இல்லையெனில் {
 			ret = run_rebase(&newbase, &upstream);
 		}
 
-		if (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
+		எனில் (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
 			     recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND))
 			ret = rebase_submodules();
 
-		goto cleanup;
-	} else {
+		செல் cleanup;
+	} இல்லையெனில் {
 		ret = run_merge();
-		if (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
+		எனில் (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
 			     recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND))
 			ret = update_submodules();
-		goto cleanup;
+		செல் cleanup;
 	}
 
 cleanup:
 	oid_array_clear(&merge_heads);
-	return ret;
+	திரும்பு ret;
 }

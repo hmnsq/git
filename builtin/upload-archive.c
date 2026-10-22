@@ -2,66 +2,66 @@
  * Copyright (c) 2006 Franck Bui-Huu
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "archive.h"
-#include "pkt-line.h"
-#include "setup.h"
-#include "sideband.h"
-#include "run-command.h"
-#include "strvec.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "archive.h"
+#அந்தர்பாவ "pkt-line.h"
+#அந்தர்பாவ "setup.h"
+#அந்தர்பாவ "sideband.h"
+#அந்தர்பாவ "run-command.h"
+#அந்தர்பாவ "strvec.h"
 
-static const char upload_archive_usage[] =
+நிலையான மாறிலி எழுத்து upload_archive_usage[] =
 	"git upload-archive <repository>";
 
-static const char deadchild[] =
+நிலையான மாறிலி எழுத்து deadchild[] =
 "git upload-archive: archiver died with error";
 
 #define MAX_ARGS (64)
 
-int cmd_upload_archive_writer(int argc,
-			      const char **argv,
-			      const char *prefix,
-			      struct repository *repo UNUSED)
+முழு cmd_upload_archive_writer(முழு argc,
+			      மாறிலி எழுத்து **argv,
+			      மாறிலி எழுத்து *prefix,
+			      கட்டமைப்பு repository *repo UNUSED)
 {
-	struct strvec sent_argv = STRVEC_INIT;
-	const char *arg_cmd = "argument ";
-	int ret;
+	கட்டமைப்பு strvec sent_argv = STRVEC_INIT;
+	மாறிலி எழுத்து *arg_cmd = "argument ";
+	முழு ret;
 
 	show_usage_if_asked(argc, argv, upload_archive_usage);
-	if (argc != 2)
+	எனில் (argc != 2)
 		usage(upload_archive_usage);
 
-	if (!enter_repo(the_repository, argv[1], 0))
+	எனில் (!enter_repo(the_repository, argv[1], 0))
 		die("'%s' does not appear to be a git repository", argv[1]);
 
 	init_archivers();
 
 	/* put received options in sent_argv[] */
-	strvec_push(&sent_argv, "git-upload-archive");
-	for (;;) {
-		char *buf = packet_read_line(0, NULL);
-		if (!buf)
-			break;	/* got a flush */
-		if (sent_argv.nr > MAX_ARGS)
+	strvec_தள்ளு(&sent_argv, "git-upload-archive");
+	க்கு (;;) {
+		எழுத்து *buf = packet_read_வரி(0, வெற்று);
+		எனில் (!buf)
+			நிறுத்து;	/* got a flush */
+		எனில் (sent_argv.nr > MAX_ARGS)
 			die("Too many options (>%d)", MAX_ARGS - 1);
 
-		if (!starts_with(buf, arg_cmd))
+		எனில் (!starts_with(buf, arg_cmd))
 			die("'argument' token or flush expected");
-		strvec_push(&sent_argv, buf + strlen(arg_cmd));
+		strvec_தள்ளு(&sent_argv, buf + strlen(arg_cmd));
 	}
 
 	/* parse all options sent by the client */
 	ret = write_archive(sent_argv.nr, sent_argv.v, prefix,
-			    the_repository, NULL, 1);
+			    the_repository, வெற்று, 1);
 
 	strvec_clear(&sent_argv);
-	return ret;
+	திரும்பு ret;
 }
 
 __attribute__((format (printf, 1, 2)))
-static void error_clnt(const char *fmt, ...)
+நிலையான வெறுமை error_clnt(மாறிலி எழுத்து *fmt, ...)
 {
-	struct strbuf buf = STRBUF_INIT;
+	கட்டமைப்பு strbuf buf = STRBUF_INIT;
 	va_list params;
 
 	va_start(params, fmt);
@@ -71,25 +71,25 @@ static void error_clnt(const char *fmt, ...)
 	die("sent error to the client: %s", buf.buf);
 }
 
-static ssize_t process_input(int child_fd, int band)
+நிலையான ssize_t process_உள்ளீடு(முழு child_fd, முழு band)
 {
-	char buf[16384];
-	ssize_t sz = read(child_fd, buf, sizeof(buf));
-	if (sz < 0) {
-		if (errno != EAGAIN && errno != EINTR)
+	எழுத்து buf[16384];
+	ssize_t sz = பட(child_fd, buf, அளவு(buf));
+	எனில் (sz < 0) {
+		எனில் (errno != EAGAIN && errno != EINTR)
 			error_clnt("read error: %s\n", strerror(errno));
-		return sz;
+		திரும்பு sz;
 	}
 	send_sideband(1, band, buf, sz, LARGE_PACKET_MAX);
-	return sz;
+	திரும்பு sz;
 }
 
-int cmd_upload_archive(int argc,
-const char **argv,
-const char *prefix,
-struct repository *repo UNUSED)
+முழு cmd_upload_archive(முழு argc,
+மாறிலி எழுத்து **argv,
+மாறிலி எழுத்து *prefix,
+கட்டமைப்பு repository *repo UNUSED)
 {
-	struct child_process writer = CHILD_PROCESS_INIT;
+	கட்டமைப்பு child_process writer = CHILD_PROCESS_INIT;
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
@@ -104,10 +104,10 @@ struct repository *repo UNUSED)
 	 */
 	writer.out = writer.err = -1;
 	writer.git_cmd = 1;
-	strvec_push(&writer.args, "upload-archive--writer");
+	strvec_தள்ளு(&writer.args, "upload-archive--writer");
 	strvec_pushv(&writer.args, argv + 1);
-	if (start_command(&writer)) {
-		int err = errno;
+	எனில் (start_command(&writer)) {
+		முழு err = errno;
 		packet_write_fmt(1, "NACK unable to spawn subprocess\n");
 		die("upload-archive: %s", strerror(err));
 	}
@@ -115,33 +115,33 @@ struct repository *repo UNUSED)
 	packet_write_fmt(1, "ACK\n");
 	packet_flush(1);
 
-	while (1) {
-		struct pollfd pfd[2];
+	போது (1) {
+		கட்டமைப்பு pollfd pfd[2];
 
 		pfd[0].fd = writer.out;
 		pfd[0].events = POLLIN;
 		pfd[1].fd = writer.err;
 		pfd[1].events = POLLIN;
-		if (poll(pfd, 2, -1) < 0) {
-			if (errno != EINTR) {
+		எனில் (poll(pfd, 2, -1) < 0) {
+			எனில் (errno != EINTR) {
 				error_errno("poll failed resuming");
 				sleep(1);
 			}
-			continue;
+			தொடர்;
 		}
-		if (pfd[1].revents & POLLIN)
+		எனில் (pfd[1].revents & POLLIN)
 			/* Status stream ready */
-			if (process_input(pfd[1].fd, 2))
-				continue;
-		if (pfd[0].revents & POLLIN)
+			எனில் (process_உள்ளீடு(pfd[1].fd, 2))
+				தொடர்;
+		எனில் (pfd[0].revents & POLLIN)
 			/* Data stream ready */
-			if (process_input(pfd[0].fd, 1))
-				continue;
+			எனில் (process_உள்ளீடு(pfd[0].fd, 1))
+				தொடர்;
 
-		if (finish_command(&writer))
+		எனில் (finish_command(&writer))
 			error_clnt("%s", deadchild);
 		packet_flush(1);
-		break;
+		நிறுத்து;
 	}
-	return 0;
+	திரும்பு 0;
 }

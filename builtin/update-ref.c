@@ -1,31 +1,31 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "refs.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "quote.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "hash.h"
+#அந்தர்பாவ "hex.h"
+#அந்தர்பாவ "refs.h"
+#அந்தர்பாவ "object-name.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "quote.h"
 
-static const char * const git_update_ref_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி git_update_ref_usage[] = {
 	N_("git update-ref [<options>] -d <refname> [<old-oid>]"),
 	N_("git update-ref [<options>]    <refname> <new-oid> [<old-oid>]"),
 	N_("git update-ref [<options>] --stdin [-z] [--batch-updates]"),
-	NULL
+	வெற்று
 };
 
-static char line_termination = '\n';
-static unsigned int update_flags;
-static unsigned int default_flags;
-static unsigned create_reflog_flag;
-static const char *msg;
+நிலையான எழுத்து வரி_termination = '\n';
+நிலையான unsigned முழு update_flags;
+நிலையான unsigned முழு default_flags;
+நிலையான unsigned create_reflog_flag;
+நிலையான மாறிலி எழுத்து *செய்தி;
 
-struct command_options {
+கட்டமைப்பு command_options {
 	/*
 	 * Individual updates are allowed to fail without causing
 	 * update-ref to exit. This is set when using the
@@ -40,21 +40,21 @@ struct command_options {
  * Die if there is an error in how the argument is C-quoted.  This
  * function is only used if not -z.
  */
-static const char *parse_arg(const char *next, struct strbuf *arg)
+நிலையான மாறிலி எழுத்து *parse_arg(மாறிலி எழுத்து *next, கட்டமைப்பு strbuf *arg)
 {
-	if (*next == '"') {
-		const char *orig = next;
+	எனில் (*next == '"') {
+		மாறிலி எழுத்து *orig = next;
 
-		if (unquote_c_style(arg, next, &next))
+		எனில் (unquote_c_style(arg, next, &next))
 			die("badly quoted argument: %s", orig);
-		if (*next && !isspace(*next))
+		எனில் (*next && !isspace(*next))
 			die("unexpected character after quoted argument: %s", orig);
-	} else {
-		while (*next && !isspace(*next))
+	} இல்லையெனில் {
+		போது (*next && !isspace(*next))
 			strbuf_addch(arg, *next++);
 	}
 
-	return next;
+	திரும்பு next;
 }
 
 /*
@@ -65,87 +65,87 @@ static const char *parse_arg(const char *next, struct strbuf *arg)
  * the argument.  Die if C-quoting is malformed or the reference name
  * is invalid.
  */
-static char *parse_refname(const char **next)
+நிலையான எழுத்து *parse_refname(மாறிலி எழுத்து **next)
 {
-	struct strbuf ref = STRBUF_INIT;
+	கட்டமைப்பு strbuf ref = STRBUF_INIT;
 
-	if (line_termination) {
+	எனில் (வரி_termination) {
 		/* Without -z, use the next argument */
 		*next = parse_arg(*next, &ref);
-	} else {
+	} இல்லையெனில் {
 		/* With -z, use everything up to the next NUL */
 		strbuf_addstr(&ref, *next);
 		*next += ref.len;
 	}
 
-	if (!ref.len) {
+	எனில் (!ref.len) {
 		strbuf_release(&ref);
-		return NULL;
+		திரும்பு வெற்று;
 	}
 
-	if (check_refname_format(ref.buf, REFNAME_ALLOW_ONELEVEL))
+	எனில் (check_refname_format(ref.buf, REFNAME_ALLOW_ONELEVEL))
 		die("invalid ref format: %s", ref.buf);
 
-	return strbuf_detach(&ref, NULL);
+	திரும்பு strbuf_detach(&ref, வெற்று);
 }
 
 /*
  * Wrapper around parse_refname which skips the next delimiter.
  */
-static char *parse_next_refname(const char **next)
+நிலையான எழுத்து *parse_next_refname(மாறிலி எழுத்து **next)
 {
-	if (line_termination) {
+	எனில் (வரி_termination) {
 		/* Without -z, consume SP and use next argument */
-		if (!**next || **next == line_termination)
-			return NULL;
-		if (**next != ' ')
+		எனில் (!**next || **next == வரி_termination)
+			திரும்பு வெற்று;
+		எனில் (**next != ' ')
 			die("expected SP but got: %s", *next);
-	} else {
+	} இல்லையெனில் {
 		/* With -z, read the next NUL-terminated line */
-		if (**next)
-			return NULL;
+		எனில் (**next)
+			திரும்பு வெற்று;
 	}
 	/* Skip the delimiter */
 	(*next)++;
 
-	return parse_refname(next);
+	திரும்பு parse_refname(next);
 }
 
 /*
  * Wrapper around parse_arg which skips the next delimiter.
  */
-static char *parse_next_arg(const char **next)
+நிலையான எழுத்து *parse_next_arg(மாறிலி எழுத்து **next)
 {
-	struct strbuf arg = STRBUF_INIT;
+	கட்டமைப்பு strbuf arg = STRBUF_INIT;
 
-	if (line_termination) {
+	எனில் (வரி_termination) {
 		/* Without -z, consume SP and use next argument */
-		if (!**next || **next == line_termination)
-			return NULL;
-		if (**next != ' ')
+		எனில் (!**next || **next == வரி_termination)
+			திரும்பு வெற்று;
+		எனில் (**next != ' ')
 			die("expected SP but got: %s", *next);
-	} else {
+	} இல்லையெனில் {
 		/* With -z, read the next NUL-terminated line */
-		if (**next)
-			return NULL;
+		எனில் (**next)
+			திரும்பு வெற்று;
 	}
 	/* Skip the delimiter */
 	(*next)++;
 
-	if (line_termination) {
+	எனில் (வரி_termination) {
 		/* Without -z, use the next argument */
 		*next = parse_arg(*next, &arg);
-	} else {
+	} இல்லையெனில் {
 		/* With -z, use everything up to the next NUL */
 		strbuf_addstr(&arg, *next);
 		*next += arg.len;
 	}
 
-	if (arg.len)
-		return strbuf_detach(&arg, NULL);
+	எனில் (arg.len)
+		திரும்பு strbuf_detach(&arg, வெற்று);
 
 	strbuf_release(&arg);
-	return NULL;
+	திரும்பு வெற்று;
 }
 
 /*
@@ -169,55 +169,55 @@ static char *parse_next_arg(const char **next)
  * provided but cannot be converted to a SHA-1, die.  flags can
  * include PARSE_SHA1_OLD and/or PARSE_SHA1_ALLOW_EMPTY.
  */
-static int parse_next_oid(const char **next, const char *end,
-			  struct object_id *oid,
-			  const char *command, const char *refname,
-			  int flags)
+நிலையான முழு parse_next_oid(மாறிலி எழுத்து **next, மாறிலி எழுத்து *end,
+			  கட்டமைப்பு object_id *oid,
+			  மாறிலி எழுத்து *command, மாறிலி எழுத்து *refname,
+			  முழு flags)
 {
-	struct strbuf arg = STRBUF_INIT;
-	int ret = 0;
+	கட்டமைப்பு strbuf arg = STRBUF_INIT;
+	முழு ret = 0;
 
-	if (*next == end)
-		goto eof;
+	எனில் (*next == end)
+		செல் eof;
 
-	if (line_termination) {
+	எனில் (வரி_termination) {
 		/* Without -z, consume SP and use next argument */
-		if (!**next || **next == line_termination)
-			return 1;
-		if (**next != ' ')
+		எனில் (!**next || **next == வரி_termination)
+			திரும்பு 1;
+		எனில் (**next != ' ')
 			die("%s %s: expected SP but got: %s",
 			    command, refname, *next);
 		(*next)++;
 		*next = parse_arg(*next, &arg);
-		if (arg.len) {
-			if (repo_get_oid_with_flags(the_repository, arg.buf, oid,
+		எனில் (arg.len) {
+			எனில் (repo_get_oid_with_flags(the_repository, arg.buf, oid,
 						    GET_OID_SKIP_AMBIGUITY_CHECK))
-				goto invalid;
-		} else {
+				செல் invalid;
+		} இல்லையெனில் {
 			/* Without -z, an empty value means all zeros: */
 			oidclr(oid, the_repository->hash_algo);
 		}
-	} else {
+	} இல்லையெனில் {
 		/* With -z, read the next NUL-terminated line */
-		if (**next)
+		எனில் (**next)
 			die("%s %s: expected NUL but got: %s",
 			    command, refname, *next);
 		(*next)++;
-		if (*next == end)
-			goto eof;
+		எனில் (*next == end)
+			செல் eof;
 		strbuf_addstr(&arg, *next);
 		*next += arg.len;
 
-		if (arg.len) {
-			if (repo_get_oid_with_flags(the_repository, arg.buf, oid,
+		எனில் (arg.len) {
+			எனில் (repo_get_oid_with_flags(the_repository, arg.buf, oid,
 						    GET_OID_SKIP_AMBIGUITY_CHECK))
-				goto invalid;
-		} else if (flags & PARSE_SHA1_ALLOW_EMPTY) {
+				செல் invalid;
+		} இல்லையெனில் எனில் (flags & PARSE_SHA1_ALLOW_EMPTY) {
 			/* With -z, treat an empty value as all zeros: */
 			warning("%s %s: missing <new-oid>, treating as zero",
 				command, refname);
 			oidclr(oid, the_repository->hash_algo);
-		} else {
+		} இல்லையெனில் {
 			/*
 			 * With -z, an empty non-required value means
 			 * unspecified:
@@ -228,7 +228,7 @@ static int parse_next_oid(const char **next, const char *end,
 
 	strbuf_release(&arg);
 
-	return ret;
+	திரும்பு ret;
 
  invalid:
 	die(flags & PARSE_SHA1_OLD ?
@@ -243,24 +243,24 @@ static int parse_next_oid(const char **next, const char *end,
 	    command, refname);
 }
 
-static void print_rejected_refs(const char *refname,
-				const struct object_id *old_oid,
-				const struct object_id *new_oid,
-				const char *old_target,
-				const char *new_target,
-				enum ref_transaction_error err,
-				const char *details,
-				void *cb_data UNUSED)
+நிலையான வெறுமை print_rejected_refs(மாறிலி எழுத்து *refname,
+				மாறிலி கட்டமைப்பு object_id *old_oid,
+				மாறிலி கட்டமைப்பு object_id *new_oid,
+				மாறிலி எழுத்து *old_target,
+				மாறிலி எழுத்து *new_target,
+				எண்ணிக்கை ref_transaction_error err,
+				மாறிலி எழுத்து *details,
+				வெறுமை *cb_data UNUSED)
 {
-	struct strbuf sb = STRBUF_INIT;
+	கட்டமைப்பு strbuf sb = STRBUF_INIT;
 
-	if (details && *details)
+	எனில் (details && *details)
 		error("%s", details);
 
 	strbuf_addf(&sb, "rejected %s %s %s %s\n", refname,
 		    new_oid ? oid_to_hex(new_oid) : new_target,
 		    old_oid ? oid_to_hex(old_oid) : old_target,
-		    ref_transaction_error_msg(err));
+		    ref_transaction_error_செய்தி(err));
 
 	fwrite(sb.buf, sb.len, 1, stdout);
 	strbuf_release(&sb);
@@ -270,22 +270,22 @@ static void print_rejected_refs(const char *refname,
  * Handle transaction errors. If we're using batches updates, we want to only
  * die for generic errors and print the remaining to the user.
  */
-static void handle_ref_transaction_error(const char *refname,
-					 struct object_id *new_oid,
-					 struct object_id *old_oid,
-					 const char *new_target,
-					 const char *old_target,
-					 enum ref_transaction_error tx_err,
-					 struct strbuf *err,
-					 struct command_options *opts)
+நிலையான வெறுமை handle_ref_transaction_error(மாறிலி எழுத்து *refname,
+					 கட்டமைப்பு object_id *new_oid,
+					 கட்டமைப்பு object_id *old_oid,
+					 மாறிலி எழுத்து *new_target,
+					 மாறிலி எழுத்து *old_target,
+					 எண்ணிக்கை ref_transaction_error tx_err,
+					 கட்டமைப்பு strbuf *err,
+					 கட்டமைப்பு command_options *opts)
 {
-	if (!tx_err)
-		return;
+	எனில் (!tx_err)
+		திரும்பு;
 
-	if (tx_err != REF_TRANSACTION_ERROR_GENERIC && opts->allow_update_failures) {
+	எனில் (tx_err != REF_TRANSACTION_ERROR_GENERIC && opts->allow_update_failures) {
 		print_rejected_refs(refname, old_oid, new_oid, old_target,
-				    new_target, tx_err, err->buf, NULL);
-		return;
+				    new_target, tx_err, err->buf, வெற்று);
+		திரும்பு;
 	}
 
 	die("%s", err->buf);
@@ -301,273 +301,273 @@ static void handle_ref_transaction_error(const char *refname,
  * depending on how line_termination is set.
  */
 
-static void parse_cmd_update(struct ref_transaction *transaction,
-			     const char *next, const char *end,
-			     struct command_options *opts)
+நிலையான வெறுமை parse_cmd_update(கட்டமைப்பு ref_transaction *transaction,
+			     மாறிலி எழுத்து *next, மாறிலி எழுத்து *end,
+			     கட்டமைப்பு command_options *opts)
 {
-	struct strbuf err = STRBUF_INIT;
-	char *refname;
-	struct object_id new_oid, old_oid;
-	enum ref_transaction_error tx_err;
-	int have_old;
+	கட்டமைப்பு strbuf err = STRBUF_INIT;
+	எழுத்து *refname;
+	கட்டமைப்பு object_id new_oid, old_oid;
+	எண்ணிக்கை ref_transaction_error tx_err;
+	முழு have_old;
 
 	refname = parse_refname(&next);
-	if (!refname)
+	எனில் (!refname)
 		die("update: missing <ref>");
 
-	if (parse_next_oid(&next, end, &new_oid, "update", refname,
+	எனில் (parse_next_oid(&next, end, &new_oid, "update", refname,
 			   PARSE_SHA1_ALLOW_EMPTY))
 		die("update %s: missing <new-oid>", refname);
 
 	have_old = !parse_next_oid(&next, end, &old_oid, "update", refname,
 				   PARSE_SHA1_OLD);
 
-	if (*next != line_termination)
+	எனில் (*next != வரி_termination)
 		die("update %s: extra input: %s", refname, next);
 
 	tx_err = ref_transaction_update(transaction, refname,
-					&new_oid, have_old ? &old_oid : NULL,
-					NULL, NULL,
+					&new_oid, have_old ? &old_oid : வெற்று,
+					வெற்று, வெற்று,
 					update_flags | create_reflog_flag,
-					msg, &err);
-	handle_ref_transaction_error(refname, &new_oid, have_old ? &old_oid : NULL,
-				     NULL, NULL, tx_err, &err, opts);
+					செய்தி, &err);
+	handle_ref_transaction_error(refname, &new_oid, have_old ? &old_oid : வெற்று,
+				     வெற்று, வெற்று, tx_err, &err, opts);
 
 
 	update_flags = default_flags;
-	free(refname);
+	விடுவி(refname);
 	strbuf_release(&err);
 }
 
-static void parse_cmd_symref_update(struct ref_transaction *transaction,
-				    const char *next, const char *end UNUSED,
-				    struct command_options *opts)
+நிலையான வெறுமை parse_cmd_symref_update(கட்டமைப்பு ref_transaction *transaction,
+				    மாறிலி எழுத்து *next, மாறிலி எழுத்து *end UNUSED,
+				    கட்டமைப்பு command_options *opts)
 {
-	char *refname, *new_target, *old_arg;
-	enum ref_transaction_error tx_err;
-	char *old_target = NULL;
-	struct strbuf err = STRBUF_INIT;
-	struct object_id old_oid;
-	int have_old_oid = 0;
+	எழுத்து *refname, *new_target, *old_arg;
+	எண்ணிக்கை ref_transaction_error tx_err;
+	எழுத்து *old_target = வெற்று;
+	கட்டமைப்பு strbuf err = STRBUF_INIT;
+	கட்டமைப்பு object_id old_oid;
+	முழு have_old_oid = 0;
 
 	refname = parse_refname(&next);
-	if (!refname)
+	எனில் (!refname)
 		die("symref-update: missing <ref>");
 
 	new_target = parse_next_refname(&next);
-	if (!new_target)
+	எனில் (!new_target)
 		die("symref-update %s: missing <new-target>", refname);
 
 	old_arg = parse_next_arg(&next);
-	if (old_arg) {
+	எனில் (old_arg) {
 		old_target = parse_next_arg(&next);
-		if (!old_target)
+		எனில் (!old_target)
 			die("symref-update %s: expected old value", refname);
 
-		if (!strcmp(old_arg, "oid")) {
-			if (repo_get_oid_with_flags(the_repository, old_target, &old_oid,
+		எனில் (!strcmp(old_arg, "oid")) {
+			எனில் (repo_get_oid_with_flags(the_repository, old_target, &old_oid,
 						    GET_OID_SKIP_AMBIGUITY_CHECK))
 				die("symref-update %s: invalid oid: %s", refname, old_target);
 
 			have_old_oid = 1;
-		} else if (!strcmp(old_arg, "ref")) {
-			if (check_refname_format(old_target, REFNAME_ALLOW_ONELEVEL))
+		} இல்லையெனில் எனில் (!strcmp(old_arg, "ref")) {
+			எனில் (check_refname_format(old_target, REFNAME_ALLOW_ONELEVEL))
 				die("symref-update %s: invalid ref: %s", refname, old_target);
-		} else {
+		} இல்லையெனில் {
 			die("symref-update %s: invalid arg '%s' for old value", refname, old_arg);
 		}
 	}
 
-	if (*next != line_termination)
+	எனில் (*next != வரி_termination)
 		die("symref-update %s: extra input: %s", refname, next);
 
-	tx_err = ref_transaction_update(transaction, refname, NULL,
-					have_old_oid ? &old_oid : NULL,
+	tx_err = ref_transaction_update(transaction, refname, வெற்று,
+					have_old_oid ? &old_oid : வெற்று,
 					new_target,
-					have_old_oid ? NULL : old_target,
+					have_old_oid ? வெற்று : old_target,
 					update_flags | create_reflog_flag,
-					msg, &err);
-	handle_ref_transaction_error(refname, NULL, have_old_oid ? &old_oid : NULL,
-				     new_target, have_old_oid ? NULL : old_target,
+					செய்தி, &err);
+	handle_ref_transaction_error(refname, வெற்று, have_old_oid ? &old_oid : வெற்று,
+				     new_target, have_old_oid ? வெற்று : old_target,
 				     tx_err, &err, opts);
 
 	update_flags = default_flags;
-	free(refname);
-	free(old_arg);
-	free(old_target);
-	free(new_target);
+	விடுவி(refname);
+	விடுவி(old_arg);
+	விடுவி(old_target);
+	விடுவி(new_target);
 	strbuf_release(&err);
 }
 
-static void parse_cmd_create(struct ref_transaction *transaction,
-			     const char *next, const char *end,
-			     struct command_options *opts)
+நிலையான வெறுமை parse_cmd_create(கட்டமைப்பு ref_transaction *transaction,
+			     மாறிலி எழுத்து *next, மாறிலி எழுத்து *end,
+			     கட்டமைப்பு command_options *opts)
 {
-	struct strbuf err = STRBUF_INIT;
-	char *refname;
-	struct object_id new_oid;
-	enum ref_transaction_error tx_err;
+	கட்டமைப்பு strbuf err = STRBUF_INIT;
+	எழுத்து *refname;
+	கட்டமைப்பு object_id new_oid;
+	எண்ணிக்கை ref_transaction_error tx_err;
 
 	refname = parse_refname(&next);
-	if (!refname)
+	எனில் (!refname)
 		die("create: missing <ref>");
 
-	if (parse_next_oid(&next, end, &new_oid, "create", refname, 0))
+	எனில் (parse_next_oid(&next, end, &new_oid, "create", refname, 0))
 		die("create %s: missing <new-oid>", refname);
 
-	if (is_null_oid(&new_oid))
+	எனில் (is_null_oid(&new_oid))
 		die("create %s: zero <new-oid>", refname);
 
-	if (*next != line_termination)
+	எனில் (*next != வரி_termination)
 		die("create %s: extra input: %s", refname, next);
 
-	tx_err = ref_transaction_create(transaction, refname, &new_oid, NULL,
+	tx_err = ref_transaction_create(transaction, refname, &new_oid, வெற்று,
 					update_flags | create_reflog_flag,
-					msg, &err);
-	handle_ref_transaction_error(refname, &new_oid, NULL, NULL, NULL, tx_err,
+					செய்தி, &err);
+	handle_ref_transaction_error(refname, &new_oid, வெற்று, வெற்று, வெற்று, tx_err,
 				     &err, opts);
 
 	update_flags = default_flags;
-	free(refname);
+	விடுவி(refname);
 	strbuf_release(&err);
 }
 
-static void parse_cmd_symref_create(struct ref_transaction *transaction,
-				    const char *next, const char *end UNUSED,
-				    struct command_options *opts)
+நிலையான வெறுமை parse_cmd_symref_create(கட்டமைப்பு ref_transaction *transaction,
+				    மாறிலி எழுத்து *next, மாறிலி எழுத்து *end UNUSED,
+				    கட்டமைப்பு command_options *opts)
 {
-	struct strbuf err = STRBUF_INIT;
-	char *refname, *new_target;
-	enum ref_transaction_error tx_err;
+	கட்டமைப்பு strbuf err = STRBUF_INIT;
+	எழுத்து *refname, *new_target;
+	எண்ணிக்கை ref_transaction_error tx_err;
 
 	refname = parse_refname(&next);
-	if (!refname)
+	எனில் (!refname)
 		die("symref-create: missing <ref>");
 
 	new_target = parse_next_refname(&next);
-	if (!new_target)
+	எனில் (!new_target)
 		die("symref-create %s: missing <new-target>", refname);
 
-	if (*next != line_termination)
+	எனில் (*next != வரி_termination)
 		die("symref-create %s: extra input: %s", refname, next);
 
-	tx_err = ref_transaction_create(transaction, refname, NULL, new_target,
+	tx_err = ref_transaction_create(transaction, refname, வெற்று, new_target,
 					update_flags | create_reflog_flag,
-					msg, &err);
-	handle_ref_transaction_error(refname, NULL, NULL, new_target, NULL,
+					செய்தி, &err);
+	handle_ref_transaction_error(refname, வெற்று, வெற்று, new_target, வெற்று,
 				     tx_err, &err, opts);
 
 	update_flags = default_flags;
-	free(refname);
-	free(new_target);
+	விடுவி(refname);
+	விடுவி(new_target);
 	strbuf_release(&err);
 }
 
-static void parse_cmd_delete(struct ref_transaction *transaction,
-			     const char *next, const char *end,
-			     struct command_options *opts UNUSED)
+நிலையான வெறுமை parse_cmd_delete(கட்டமைப்பு ref_transaction *transaction,
+			     மாறிலி எழுத்து *next, மாறிலி எழுத்து *end,
+			     கட்டமைப்பு command_options *opts UNUSED)
 {
-	struct strbuf err = STRBUF_INIT;
-	char *refname;
-	struct object_id old_oid;
-	int have_old;
+	கட்டமைப்பு strbuf err = STRBUF_INIT;
+	எழுத்து *refname;
+	கட்டமைப்பு object_id old_oid;
+	முழு have_old;
 
 	refname = parse_refname(&next);
-	if (!refname)
+	எனில் (!refname)
 		die("delete: missing <ref>");
 
-	if (parse_next_oid(&next, end, &old_oid, "delete", refname,
+	எனில் (parse_next_oid(&next, end, &old_oid, "delete", refname,
 			   PARSE_SHA1_OLD)) {
 		have_old = 0;
-	} else {
-		if (is_null_oid(&old_oid))
+	} இல்லையெனில் {
+		எனில் (is_null_oid(&old_oid))
 			die("delete %s: zero <old-oid>", refname);
 		have_old = 1;
 	}
 
-	if (*next != line_termination)
+	எனில் (*next != வரி_termination)
 		die("delete %s: extra input: %s", refname, next);
 
-	if (ref_transaction_delete(transaction, refname,
-				   have_old ? &old_oid : NULL,
-				   NULL, update_flags, msg, &err))
+	எனில் (ref_transaction_delete(transaction, refname,
+				   have_old ? &old_oid : வெற்று,
+				   வெற்று, update_flags, செய்தி, &err))
 		die("%s", err.buf);
 
 	update_flags = default_flags;
-	free(refname);
+	விடுவி(refname);
 	strbuf_release(&err);
 }
 
-static void parse_cmd_symref_delete(struct ref_transaction *transaction,
-				    const char *next, const char *end UNUSED,
-				    struct command_options *opts UNUSED)
+நிலையான வெறுமை parse_cmd_symref_delete(கட்டமைப்பு ref_transaction *transaction,
+				    மாறிலி எழுத்து *next, மாறிலி எழுத்து *end UNUSED,
+				    கட்டமைப்பு command_options *opts UNUSED)
 {
-	struct strbuf err = STRBUF_INIT;
-	char *refname, *old_target;
+	கட்டமைப்பு strbuf err = STRBUF_INIT;
+	எழுத்து *refname, *old_target;
 
-	if (!(update_flags & REF_NO_DEREF))
+	எனில் (!(update_flags & REF_NO_DEREF))
 		die("symref-delete: cannot operate with deref mode");
 
 	refname = parse_refname(&next);
-	if (!refname)
+	எனில் (!refname)
 		die("symref-delete: missing <ref>");
 
 	old_target = parse_next_refname(&next);
 
-	if (*next != line_termination)
+	எனில் (*next != வரி_termination)
 		die("symref-delete %s: extra input: %s", refname, next);
 
-	if (ref_transaction_delete(transaction, refname, NULL,
-				   old_target, update_flags, msg, &err))
+	எனில் (ref_transaction_delete(transaction, refname, வெற்று,
+				   old_target, update_flags, செய்தி, &err))
 		die("%s", err.buf);
 
 	update_flags = default_flags;
-	free(refname);
-	free(old_target);
+	விடுவி(refname);
+	விடுவி(old_target);
 	strbuf_release(&err);
 }
 
-static void parse_cmd_verify(struct ref_transaction *transaction,
-			     const char *next, const char *end,
-			     struct command_options *opts UNUSED)
+நிலையான வெறுமை parse_cmd_verify(கட்டமைப்பு ref_transaction *transaction,
+			     மாறிலி எழுத்து *next, மாறிலி எழுத்து *end,
+			     கட்டமைப்பு command_options *opts UNUSED)
 {
-	struct strbuf err = STRBUF_INIT;
-	char *refname;
-	struct object_id old_oid;
+	கட்டமைப்பு strbuf err = STRBUF_INIT;
+	எழுத்து *refname;
+	கட்டமைப்பு object_id old_oid;
 
 	refname = parse_refname(&next);
-	if (!refname)
+	எனில் (!refname)
 		die("verify: missing <ref>");
 
-	if (parse_next_oid(&next, end, &old_oid, "verify", refname,
+	எனில் (parse_next_oid(&next, end, &old_oid, "verify", refname,
 			   PARSE_SHA1_OLD))
 		oidclr(&old_oid, the_repository->hash_algo);
 
-	if (*next != line_termination)
+	எனில் (*next != வரி_termination)
 		die("verify %s: extra input: %s", refname, next);
 
-	if (ref_transaction_verify(transaction, refname, &old_oid,
-				   NULL, update_flags, &err))
+	எனில் (ref_transaction_verify(transaction, refname, &old_oid,
+				   வெற்று, update_flags, &err))
 		die("%s", err.buf);
 
 	update_flags = default_flags;
-	free(refname);
+	விடுவி(refname);
 	strbuf_release(&err);
 }
 
-static void parse_cmd_symref_verify(struct ref_transaction *transaction,
-				    const char *next, const char *end UNUSED,
-				    struct command_options *opts UNUSED)
+நிலையான வெறுமை parse_cmd_symref_verify(கட்டமைப்பு ref_transaction *transaction,
+				    மாறிலி எழுத்து *next, மாறிலி எழுத்து *end UNUSED,
+				    கட்டமைப்பு command_options *opts UNUSED)
 {
-	struct strbuf err = STRBUF_INIT;
-	struct object_id old_oid;
-	char *refname, *old_target;
+	கட்டமைப்பு strbuf err = STRBUF_INIT;
+	கட்டமைப்பு object_id old_oid;
+	எழுத்து *refname, *old_target;
 
-	if (!(update_flags & REF_NO_DEREF))
+	எனில் (!(update_flags & REF_NO_DEREF))
 		die("symref-verify: cannot operate with deref mode");
 
 	refname = parse_refname(&next);
-	if (!refname)
+	எனில் (!refname)
 		die("symref-verify: missing <ref>");
 
 	/*
@@ -575,91 +575,91 @@ static void parse_cmd_symref_verify(struct ref_transaction *transaction,
 	 * ref doesn't exist.
 	 */
 	old_target = parse_next_refname(&next);
-	if (!old_target)
+	எனில் (!old_target)
 		oidcpy(&old_oid, null_oid(the_hash_algo));
 
-	if (*next != line_termination)
+	எனில் (*next != வரி_termination)
 		die("symref-verify %s: extra input: %s", refname, next);
 
-	if (ref_transaction_verify(transaction, refname,
-				   old_target ? NULL : &old_oid,
+	எனில் (ref_transaction_verify(transaction, refname,
+				   old_target ? வெற்று : &old_oid,
 				   old_target, update_flags, &err))
 		die("%s", err.buf);
 
 	update_flags = default_flags;
-	free(refname);
-	free(old_target);
+	விடுவி(refname);
+	விடுவி(old_target);
 	strbuf_release(&err);
 }
 
-static void report_ok(const char *command)
+நிலையான வெறுமை report_ok(மாறிலி எழுத்து *command)
 {
 	fprintf(stdout, "%s: ok\n", command);
 	fflush(stdout);
 }
 
-static void parse_cmd_option(struct ref_transaction *transaction UNUSED,
-			     const char *next, const char *end UNUSED,
-			     struct command_options *opts UNUSED)
+நிலையான வெறுமை parse_cmd_option(கட்டமைப்பு ref_transaction *transaction UNUSED,
+			     மாறிலி எழுத்து *next, மாறிலி எழுத்து *end UNUSED,
+			     கட்டமைப்பு command_options *opts UNUSED)
 {
-	const char *rest;
-	if (skip_prefix(next, "no-deref", &rest) && *rest == line_termination)
+	மாறிலி எழுத்து *rest;
+	எனில் (skip_prefix(next, "no-deref", &rest) && *rest == வரி_termination)
 		update_flags |= REF_NO_DEREF;
-	else
+	இல்லையெனில்
 		die("option unknown: %s", next);
 }
 
-static void parse_cmd_start(struct ref_transaction *transaction UNUSED,
-			    const char *next, const char *end UNUSED,
-			    struct command_options *opts UNUSED)
+நிலையான வெறுமை parse_cmd_start(கட்டமைப்பு ref_transaction *transaction UNUSED,
+			    மாறிலி எழுத்து *next, மாறிலி எழுத்து *end UNUSED,
+			    கட்டமைப்பு command_options *opts UNUSED)
 {
-	if (*next != line_termination)
+	எனில் (*next != வரி_termination)
 		die("start: extra input: %s", next);
 	report_ok("start");
 }
 
-static void parse_cmd_prepare(struct ref_transaction *transaction,
-			      const char *next, const char *end UNUSED,
-			      struct command_options *opts UNUSED)
+நிலையான வெறுமை parse_cmd_prepare(கட்டமைப்பு ref_transaction *transaction,
+			      மாறிலி எழுத்து *next, மாறிலி எழுத்து *end UNUSED,
+			      கட்டமைப்பு command_options *opts UNUSED)
 {
-	struct strbuf error = STRBUF_INIT;
-	if (*next != line_termination)
+	கட்டமைப்பு strbuf error = STRBUF_INIT;
+	எனில் (*next != வரி_termination)
 		die("prepare: extra input: %s", next);
-	if (ref_transaction_prepare(transaction, &error))
+	எனில் (ref_transaction_prepare(transaction, &error))
 		die("prepare: %s", error.buf);
 	report_ok("prepare");
 }
 
-static void parse_cmd_abort(struct ref_transaction *transaction,
-			    const char *next, const char *end UNUSED,
-			    struct command_options *opts UNUSED)
+நிலையான வெறுமை parse_cmd_abort(கட்டமைப்பு ref_transaction *transaction,
+			    மாறிலி எழுத்து *next, மாறிலி எழுத்து *end UNUSED,
+			    கட்டமைப்பு command_options *opts UNUSED)
 {
-	struct strbuf error = STRBUF_INIT;
-	if (*next != line_termination)
+	கட்டமைப்பு strbuf error = STRBUF_INIT;
+	எனில் (*next != வரி_termination)
 		die("abort: extra input: %s", next);
-	if (ref_transaction_abort(transaction, &error))
+	எனில் (ref_transaction_abort(transaction, &error))
 		die("abort: %s", error.buf);
 	report_ok("abort");
 }
 
-static void parse_cmd_commit(struct ref_transaction *transaction,
-			     const char *next, const char *end UNUSED,
-			     struct command_options *opts UNUSED)
+நிலையான வெறுமை parse_cmd_commit(கட்டமைப்பு ref_transaction *transaction,
+			     மாறிலி எழுத்து *next, மாறிலி எழுத்து *end UNUSED,
+			     கட்டமைப்பு command_options *opts UNUSED)
 {
-	struct strbuf error = STRBUF_INIT;
-	if (*next != line_termination)
+	கட்டமைப்பு strbuf error = STRBUF_INIT;
+	எனில் (*next != வரி_termination)
 		die("commit: extra input: %s", next);
-	if (ref_transaction_commit(transaction, &error))
+	எனில் (ref_transaction_commit(transaction, &error))
 		die("commit: %s", error.buf);
 
 	ref_transaction_for_each_rejected_update(transaction,
-						 print_rejected_refs, NULL);
+						 print_rejected_refs, வெற்று);
 
 	report_ok("commit");
 	ref_transaction_free(transaction);
 }
 
-enum update_refs_state {
+எண்ணிக்கை update_refs_state {
 	/* Non-transactional state open for updates. */
 	UPDATE_REFS_OPEN,
 	/* A transaction has been started. */
@@ -670,12 +670,12 @@ enum update_refs_state {
 	UPDATE_REFS_CLOSED,
 };
 
-static const struct parse_cmd {
-	const char *prefix;
-	void (*fn)(struct ref_transaction *, const char *, const char *,
-		   struct command_options *);
+நிலையான மாறிலி கட்டமைப்பு parse_cmd {
+	மாறிலி எழுத்து *prefix;
+	வெறுமை (*fn)(கட்டமைப்பு ref_transaction *, மாறிலி எழுத்து *, மாறிலி எழுத்து *,
+		   கட்டமைப்பு command_options *);
 	unsigned args;
-	enum update_refs_state state;
+	எண்ணிக்கை update_refs_state state;
 } command[] = {
 	{ "update",        parse_cmd_update,        3, UPDATE_REFS_OPEN },
 	{ "create",        parse_cmd_create,        2, UPDATE_REFS_OPEN },
@@ -692,78 +692,78 @@ static const struct parse_cmd {
 	{ "commit",        parse_cmd_commit,        0, UPDATE_REFS_CLOSED },
 };
 
-static void update_refs_stdin(unsigned int flags)
+நிலையான வெறுமை update_refs_stdin(unsigned முழு flags)
 {
-	struct strbuf input = STRBUF_INIT, err = STRBUF_INIT;
-	enum update_refs_state state = UPDATE_REFS_OPEN;
-	struct ref_transaction *transaction;
-	int i, j;
+	கட்டமைப்பு strbuf உள்ளீடு = STRBUF_INIT, err = STRBUF_INIT;
+	எண்ணிக்கை update_refs_state state = UPDATE_REFS_OPEN;
+	கட்டமைப்பு ref_transaction *transaction;
+	முழு i, j;
 
-	struct command_options opts = {
+	கட்டமைப்பு command_options opts = {
 		.allow_update_failures = flags & REF_TRANSACTION_ALLOW_FAILURE,
 	};
 
 	transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 						  flags, &err);
-	if (!transaction)
+	எனில் (!transaction)
 		die("%s", err.buf);
 
 	/* Read each line dispatch its command */
-	while (!strbuf_getwholeline(&input, stdin, line_termination)) {
-		const struct parse_cmd *cmd = NULL;
+	போது (!strbuf_getwholeline(&உள்ளீடு, stdin, வரி_termination)) {
+		மாறிலி கட்டமைப்பு parse_cmd *cmd = வெற்று;
 
-		if (*input.buf == line_termination)
+		எனில் (*உள்ளீடு.buf == வரி_termination)
 			die("empty command in input");
-		else if (isspace(*input.buf))
-			die("whitespace before command: %s", input.buf);
+		இல்லையெனில் எனில் (isspace(*உள்ளீடு.buf))
+			die("whitespace before command: %s", உள்ளீடு.buf);
 
-		for (i = 0; i < ARRAY_SIZE(command); i++) {
-			const char *prefix = command[i].prefix;
-			char c;
+		க்கு (i = 0; i < ARRAY_SIZE(command); i++) {
+			மாறிலி எழுத்து *prefix = command[i].prefix;
+			எழுத்து c;
 
-			if (!starts_with(input.buf, prefix))
-				continue;
+			எனில் (!starts_with(உள்ளீடு.buf, prefix))
+				தொடர்;
 
 			/*
 			 * If the command has arguments, verify that it's
 			 * followed by a space. Otherwise, it shall be followed
 			 * by a line terminator.
 			 */
-			c = command[i].args ? ' ' : line_termination;
-			if (input.buf[strlen(prefix)] != c)
-				continue;
+			c = command[i].args ? ' ' : வரி_termination;
+			எனில் (உள்ளீடு.buf[strlen(prefix)] != c)
+				தொடர்;
 
 			cmd = &command[i];
-			break;
+			நிறுத்து;
 		}
-		if (!cmd)
-			die("unknown command: %s", input.buf);
+		எனில் (!cmd)
+			die("unknown command: %s", உள்ளீடு.buf);
 
 		/*
 		 * Read additional arguments if NUL-terminated. Do not raise an
 		 * error in case there is an early EOF to let the command
 		 * handle missing arguments with a proper error message.
 		 */
-		for (j = 1; line_termination == '\0' && j < cmd->args; j++)
-			if (strbuf_appendwholeline(&input, stdin, line_termination))
-				break;
+		க்கு (j = 1; வரி_termination == '\0' && j < cmd->args; j++)
+			எனில் (strbuf_appendwholeline(&உள்ளீடு, stdin, வரி_termination))
+				நிறுத்து;
 
-		switch (state) {
-		case UPDATE_REFS_OPEN:
-		case UPDATE_REFS_STARTED:
-			if (state == UPDATE_REFS_STARTED && cmd->state == UPDATE_REFS_STARTED)
+		தேர்வு (state) {
+		நிலை UPDATE_REFS_OPEN:
+		நிலை UPDATE_REFS_STARTED:
+			எனில் (state == UPDATE_REFS_STARTED && cmd->state == UPDATE_REFS_STARTED)
 				die("cannot restart ongoing transaction");
 			/* Do not downgrade a transaction to a non-transaction. */
-			if (cmd->state >= state)
+			எனில் (cmd->state >= state)
 				state = cmd->state;
-			break;
-		case UPDATE_REFS_PREPARED:
-			if (cmd->state != UPDATE_REFS_CLOSED)
+			நிறுத்து;
+		நிலை UPDATE_REFS_PREPARED:
+			எனில் (cmd->state != UPDATE_REFS_CLOSED)
 				die("prepared transactions can only be closed");
 			state = cmd->state;
-			break;
-		case UPDATE_REFS_CLOSED:
-			if (cmd->state != UPDATE_REFS_STARTED)
+			நிறுத்து;
+		நிலை UPDATE_REFS_CLOSED:
+			எனில் (cmd->state != UPDATE_REFS_STARTED)
 				die("transaction is closed");
 
 			/*
@@ -773,57 +773,57 @@ static void update_refs_stdin(unsigned int flags)
 			state = cmd->state;
 			transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 								  flags, &err);
-			if (!transaction)
+			எனில் (!transaction)
 				die("%s", err.buf);
 
-			break;
+			நிறுத்து;
 		}
 
-		cmd->fn(transaction, input.buf + strlen(cmd->prefix) + !!cmd->args,
-			input.buf + input.len, &opts);
+		cmd->fn(transaction, உள்ளீடு.buf + strlen(cmd->prefix) + !!cmd->args,
+			உள்ளீடு.buf + உள்ளீடு.len, &opts);
 	}
 
-	switch (state) {
-	case UPDATE_REFS_OPEN:
+	தேர்வு (state) {
+	நிலை UPDATE_REFS_OPEN:
 		/* Commit by default if no transaction was requested. */
-		if (ref_transaction_commit(transaction, &err))
+		எனில் (ref_transaction_commit(transaction, &err))
 			die("%s", err.buf);
 		ref_transaction_for_each_rejected_update(transaction,
-						 print_rejected_refs, NULL);
+						 print_rejected_refs, வெற்று);
 		ref_transaction_free(transaction);
-		break;
-	case UPDATE_REFS_STARTED:
-	case UPDATE_REFS_PREPARED:
+		நிறுத்து;
+	நிலை UPDATE_REFS_STARTED:
+	நிலை UPDATE_REFS_PREPARED:
 		/* If using a transaction, we want to abort it. */
-		if (ref_transaction_abort(transaction, &err))
+		எனில் (ref_transaction_abort(transaction, &err))
 			die("%s", err.buf);
-		break;
-	case UPDATE_REFS_CLOSED:
+		நிறுத்து;
+	நிலை UPDATE_REFS_CLOSED:
 		/* Otherwise no need to do anything, the transaction was closed already. */
-		break;
+		நிறுத்து;
 	}
 
 	strbuf_release(&err);
-	strbuf_release(&input);
+	strbuf_release(&உள்ளீடு);
 }
 
-int cmd_update_ref(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+முழு cmd_update_ref(முழு argc,
+		   மாறிலி எழுத்து **argv,
+		   மாறிலி எழுத்து *prefix,
+		   கட்டமைப்பு repository *repo UNUSED)
 {
-	const char *refname, *oldval;
-	struct object_id oid, oldoid;
-	int delete = 0, no_deref = 0, read_stdin = 0, end_null = 0;
-	int create_reflog = 0;
-	unsigned int flags = 0;
+	மாறிலி எழுத்து *refname, *oldval;
+	கட்டமைப்பு object_id oid, oldoid;
+	முழு delete = 0, no_deref = 0, read_stdin = 0, end_null = 0;
+	முழு create_reflog = 0;
+	unsigned முழு flags = 0;
 
-	struct option options[] = {
-		OPT_STRING( 'm', NULL, &msg, N_("reason"), N_("reason of the update")),
-		OPT_BOOL('d', NULL, &delete, N_("delete the reference")),
+	கட்டமைப்பு option options[] = {
+		OPT_STRING( 'm', வெற்று, &செய்தி, N_("reason"), N_("reason of the update")),
+		OPT_BOOL('d', வெற்று, &delete, N_("delete the reference")),
 		OPT_BOOL( 0 , "no-deref", &no_deref,
 					N_("update <refname> not the one it points to")),
-		OPT_BOOL('z', NULL, &end_null, N_("stdin has NUL-terminated arguments")),
+		OPT_BOOL('z', வெற்று, &end_null, N_("stdin has NUL-terminated arguments")),
 		OPT_BOOL( 0 , "stdin", &read_stdin, N_("read updates from stdin")),
 		OPT_BOOL( 0 , "create-reflog", &create_reflog, N_("create a reflog")),
 		OPT_BIT('0', "batch-updates", &flags, N_("batch reference updates"),
@@ -831,75 +831,75 @@ int cmd_update_ref(int argc,
 		OPT_END(),
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, வெற்று);
 	argc = parse_options(argc, argv, prefix, options, git_update_ref_usage,
 			     0);
-	if (msg && !*msg)
+	எனில் (செய்தி && !*செய்தி)
 		die("Refusing to perform update with empty message.");
 
 	create_reflog_flag = create_reflog ? REF_FORCE_CREATE_REFLOG : 0;
 
-	if (no_deref) {
+	எனில் (no_deref) {
 		default_flags = REF_NO_DEREF;
 		update_flags = default_flags;
 	}
 
-	if (read_stdin) {
-		if (delete || argc > 0)
+	எனில் (read_stdin) {
+		எனில் (delete || argc > 0)
 			usage_with_options(git_update_ref_usage, options);
-		if (end_null)
-			line_termination = '\0';
+		எனில் (end_null)
+			வரி_termination = '\0';
 		update_refs_stdin(flags);
-		return 0;
-	} else if (flags & REF_TRANSACTION_ALLOW_FAILURE) {
+		திரும்பு 0;
+	} இல்லையெனில் எனில் (flags & REF_TRANSACTION_ALLOW_FAILURE) {
 		die("--batch-updates can only be used with --stdin");
 	}
 
-	if (end_null)
+	எனில் (end_null)
 		usage_with_options(git_update_ref_usage, options);
 
-	if (delete) {
-		if (argc < 1 || argc > 2)
+	எனில் (delete) {
+		எனில் (argc < 1 || argc > 2)
 			usage_with_options(git_update_ref_usage, options);
 		refname = argv[0];
 		oldval = argv[1];
-	} else {
-		const char *value;
-		if (argc < 2 || argc > 3)
+	} இல்லையெனில் {
+		மாறிலி எழுத்து *மதிப்பு;
+		எனில் (argc < 2 || argc > 3)
 			usage_with_options(git_update_ref_usage, options);
 		refname = argv[0];
-		value = argv[1];
+		மதிப்பு = argv[1];
 		oldval = argv[2];
-		if (repo_get_oid_with_flags(the_repository, value, &oid,
+		எனில் (repo_get_oid_with_flags(the_repository, மதிப்பு, &oid,
 					    GET_OID_SKIP_AMBIGUITY_CHECK))
-			die("%s: not a valid SHA1", value);
+			die("%s: not a valid SHA1", மதிப்பு);
 	}
 
-	if (oldval) {
-		if (!*oldval)
+	எனில் (oldval) {
+		எனில் (!*oldval)
 			/*
 			 * The empty string implies that the reference
 			 * must not already exist:
 			 */
 			oidclr(&oldoid, the_repository->hash_algo);
-		else if (repo_get_oid_with_flags(the_repository, oldval, &oldoid,
+		இல்லையெனில் எனில் (repo_get_oid_with_flags(the_repository, oldval, &oldoid,
 						 GET_OID_SKIP_AMBIGUITY_CHECK))
 			die("%s: not a valid old SHA1", oldval);
 	}
 
-	if (delete)
+	எனில் (delete)
 		/*
 		 * For purposes of backwards compatibility, we treat
 		 * NULL_SHA1 as "don't care" here:
 		 */
-		return refs_delete_ref(get_main_ref_store(the_repository),
-				       msg, refname,
-				       (oldval && !is_null_oid(&oldoid)) ? &oldoid : NULL,
+		திரும்பு refs_delete_ref(get_main_ref_store(the_repository),
+				       செய்தி, refname,
+				       (oldval && !is_null_oid(&oldoid)) ? &oldoid : வெற்று,
 				       default_flags);
-	else
-		return refs_update_ref(get_main_ref_store(the_repository),
-				       msg, refname, &oid,
-				       oldval ? &oldoid : NULL,
+	இல்லையெனில்
+		திரும்பு refs_update_ref(get_main_ref_store(the_repository),
+				       செய்தி, refname, &oid,
+				       oldval ? &oldoid : வெற்று,
 				       default_flags | create_reflog_flag,
 				       UPDATE_REFS_DIE_ON_ERR);
 }

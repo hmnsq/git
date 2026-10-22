@@ -4,69 +4,69 @@
  * Copyright (C) Linus Torvalds, 2005
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "tree.h"
-#include "cache-tree.h"
-#include "parse-options.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "hex.h"
+#அந்தர்பாவ "tree.h"
+#அந்தர்பாவ "cache-tree.h"
+#அந்தர்பாவ "parse-options.h"
 
-static const char * const write_tree_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி write_மரம்_usage[] = {
 	N_("git write-tree [--missing-ok] [--prefix=<prefix>/]"),
-	NULL
+	வெற்று
 };
 
-int cmd_write_tree(int argc,
-		   const char **argv,
-		   const char *cmd_prefix,
-		   struct repository *repo UNUSED)
+முழு cmd_write_மரம்(முழு argc,
+		   மாறிலி எழுத்து **argv,
+		   மாறிலி எழுத்து *cmd_prefix,
+		   கட்டமைப்பு repository *repo UNUSED)
 {
-	int flags = 0, ret;
-	const char *tree_prefix = NULL;
-	struct object_id oid;
-	const char *me = "git-write-tree";
-	struct option write_tree_options[] = {
+	முழு flags = 0, ret;
+	மாறிலி எழுத்து *மரம்_prefix = வெற்று;
+	கட்டமைப்பு object_id oid;
+	மாறிலி எழுத்து *me = "git-write-tree";
+	கட்டமைப்பு option write_மரம்_options[] = {
 		OPT_BIT(0, "missing-ok", &flags, N_("allow missing objects"),
-			WRITE_TREE_MISSING_OK),
-		OPT_STRING(0, "prefix", &tree_prefix, N_("<prefix>/"),
+			WRITE_மரம்_MISSING_OK),
+		OPT_STRING(0, "prefix", &மரம்_prefix, N_("<prefix>/"),
 			   N_("write tree object for a subdirectory <prefix>")),
 		{
 			.type = OPTION_BIT,
 			.long_name = "ignore-cache-tree",
-			.value = &flags,
-			.precision = sizeof(flags),
+			.மதிப்பு = &flags,
+			.precision = அளவு(flags),
 			.help = N_("only useful for debugging"),
 			.flags = PARSE_OPT_HIDDEN | PARSE_OPT_NOARG,
-			.defval = WRITE_TREE_IGNORE_CACHE_TREE,
+			.defval = WRITE_மரம்_IGNORE_CACHE_மரம்,
 		},
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
-	argc = parse_options(argc, argv, cmd_prefix, write_tree_options,
-			     write_tree_usage, 0);
+	repo_config(the_repository, git_default_config, வெற்று);
+	argc = parse_options(argc, argv, cmd_prefix, write_மரம்_options,
+			     write_மரம்_usage, 0);
 
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	ret = write_index_as_tree(&oid, the_repository->index,
+	ret = write_index_as_மரம்(&oid, the_repository->index,
 				  repo_get_index_file(the_repository),
-				  flags, tree_prefix);
-	switch (ret) {
-	case 0:
+				  flags, மரம்_prefix);
+	தேர்வு (ret) {
+	நிலை 0:
 		printf("%s\n", oid_to_hex(&oid));
-		break;
-	case WRITE_TREE_UNREADABLE_INDEX:
+		நிறுத்து;
+	நிலை WRITE_மரம்_UNREADABLE_INDEX:
 		die("%s: error reading the index", me);
-		break;
-	case WRITE_TREE_UNMERGED_INDEX:
+		நிறுத்து;
+	நிலை WRITE_மரம்_UNMERGED_INDEX:
 		die("%s: error building trees", me);
-		break;
-	case WRITE_TREE_PREFIX_ERROR:
-		die("%s: prefix %s not found", me, tree_prefix);
-		break;
+		நிறுத்து;
+	நிலை WRITE_மரம்_PREFIX_ERROR:
+		die("%s: prefix %s not found", me, மரம்_prefix);
+		நிறுத்து;
 	}
-	return ret;
+	திரும்பு ret;
 }

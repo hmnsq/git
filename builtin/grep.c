@@ -7,56 +7,56 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "config.h"
-#include "tag.h"
-#include "tree-walk.h"
-#include "parse-options.h"
-#include "string-list.h"
-#include "run-command.h"
-#include "grep.h"
-#include "quote.h"
-#include "dir.h"
-#include "pathspec.h"
-#include "setup.h"
-#include "submodule.h"
-#include "submodule-config.h"
-#include "object-name.h"
-#include "odb.h"
-#include "odb/source.h"
-#include "oid-array.h"
-#include "oidset.h"
-#include "pager.h"
-#include "path.h"
-#include "promisor-remote.h"
-#include "read-cache-ll.h"
-#include "write-or-die.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "abspath.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "hex.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "tag.h"
+#அந்தர்பாவ "tree-walk.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "string-list.h"
+#அந்தர்பாவ "run-command.h"
+#அந்தர்பாவ "grep.h"
+#அந்தர்பாவ "quote.h"
+#அந்தர்பாவ "dir.h"
+#அந்தர்பாவ "pathspec.h"
+#அந்தர்பாவ "setup.h"
+#அந்தர்பாவ "submodule.h"
+#அந்தர்பாவ "submodule-config.h"
+#அந்தர்பாவ "object-name.h"
+#அந்தர்பாவ "odb.h"
+#அந்தர்பாவ "odb/source.h"
+#அந்தர்பாவ "oid-array.h"
+#அந்தர்பாவ "oidset.h"
+#அந்தர்பாவ "pager.h"
+#அந்தர்பாவ "path.h"
+#அந்தர்பாவ "promisor-remote.h"
+#அந்தர்பாவ "read-cache-ll.h"
+#அந்தர்பாவ "write-or-die.h"
 
-static const char *grep_prefix;
+நிலையான மாறிலி எழுத்து *grep_prefix;
 
-static char const * const grep_usage[] = {
+நிலையான எழுத்து மாறிலி * மாறிலி grep_usage[] = {
 	N_("git grep [<options>] [-e] <pattern> [<rev>...] [[--] <path>...]"),
-	NULL
+	வெற்று
 };
 
-static int recurse_submodules;
+நிலையான முழு recurse_submodules;
 
-static int num_threads;
+நிலையான முழு இலக்கம்_threads;
 
-static pthread_t *threads;
+நிலையான pthread_t *threads;
 
 /* We use one producer thread and THREADS consumer
  * threads. The producer adds struct work_items to 'todo' and the
  * consumers pick work items from the same array.
  */
-struct work_item {
-	struct grep_source source;
-	char done;
-	struct strbuf out;
+கட்டமைப்பு work_item {
+	கட்டமைப்பு grep_source source;
+	எழுத்து done;
+	கட்டமைப்பு strbuf out;
 };
 
 /* In the range [todo_done, todo_start) in 'todo' we have work_items
@@ -69,51 +69,51 @@ struct work_item {
  * The ranges are modulo TODO_SIZE.
  */
 #define TODO_SIZE 128
-static struct work_item todo[TODO_SIZE];
-static int todo_start;
-static int todo_end;
-static int todo_done;
+நிலையான கட்டமைப்பு work_item todo[TODO_SIZE];
+நிலையான முழு todo_start;
+நிலையான முழு todo_end;
+நிலையான முழு todo_done;
 
 /* Has all work items been added? */
-static int all_work_added;
+நிலையான முழு all_work_added;
 
-static struct repository **repos_to_free;
-static size_t repos_to_free_nr, repos_to_free_alloc;
+நிலையான கட்டமைப்பு repository **repos_to_free;
+நிலையான size_t repos_to_free_nr, repos_to_free_alloc;
 
 /* This lock protects all the variables above. */
-static pthread_mutex_t grep_mutex;
+நிலையான pthread_mutex_t grep_mutex;
 
-static inline void grep_lock(void)
+நிலையான உள்வரி வெறுமை grep_lock(வெறுமை)
 {
 	pthread_mutex_lock(&grep_mutex);
 }
 
-static inline void grep_unlock(void)
+நிலையான உள்வரி வெறுமை grep_unlock(வெறுமை)
 {
 	pthread_mutex_unlock(&grep_mutex);
 }
 
 /* Signalled when a new work_item is added to todo. */
-static pthread_cond_t cond_add;
+நிலையான pthread_cond_t cond_add;
 
 /* Signalled when the result from one work_item is written to
  * stdout.
  */
-static pthread_cond_t cond_write;
+நிலையான pthread_cond_t cond_write;
 
 /* Signalled when we are finished with everything. */
-static pthread_cond_t cond_result;
+நிலையான pthread_cond_t cond_result;
 
-static int skip_first_line;
+நிலையான முழு skip_first_வரி;
 
-static void add_work(struct grep_opt *opt, struct grep_source *gs)
+நிலையான வெறுமை add_work(கட்டமைப்பு grep_opt *opt, கட்டமைப்பு grep_source *gs)
 {
-	if (opt->binary != GREP_BINARY_TEXT)
+	எனில் (opt->இருமம் != GREP_இருமம்_TEXT)
 		grep_source_load_driver(gs, opt->repo->index);
 
 	grep_lock();
 
-	while ((todo_end+1) % ARRAY_SIZE(todo) == todo_done) {
+	போது ((todo_end+1) % ARRAY_SIZE(todo) == todo_done) {
 		pthread_cond_wait(&cond_write, &grep_mutex);
 	}
 
@@ -126,47 +126,47 @@ static void add_work(struct grep_opt *opt, struct grep_source *gs)
 	grep_unlock();
 }
 
-static struct work_item *get_work(void)
+நிலையான கட்டமைப்பு work_item *get_work(வெறுமை)
 {
-	struct work_item *ret;
+	கட்டமைப்பு work_item *ret;
 
 	grep_lock();
-	while (todo_start == todo_end && !all_work_added) {
+	போது (todo_start == todo_end && !all_work_added) {
 		pthread_cond_wait(&cond_add, &grep_mutex);
 	}
 
-	if (todo_start == todo_end && all_work_added) {
-		ret = NULL;
-	} else {
+	எனில் (todo_start == todo_end && all_work_added) {
+		ret = வெற்று;
+	} இல்லையெனில் {
 		ret = &todo[todo_start];
 		todo_start = (todo_start + 1) % ARRAY_SIZE(todo);
 	}
 	grep_unlock();
-	return ret;
+	திரும்பு ret;
 }
 
-static void work_done(struct work_item *w)
+நிலையான வெறுமை work_done(கட்டமைப்பு work_item *w)
 {
-	int old_done;
+	முழு old_done;
 
 	grep_lock();
 	w->done = 1;
 	old_done = todo_done;
-	for(; todo[todo_done].done && todo_done != todo_start;
+	க்கு(; todo[todo_done].done && todo_done != todo_start;
 	    todo_done = (todo_done+1) % ARRAY_SIZE(todo)) {
 		w = &todo[todo_done];
-		if (w->out.len) {
-			const char *p = w->out.buf;
+		எனில் (w->out.len) {
+			மாறிலி எழுத்து *p = w->out.buf;
 			size_t len = w->out.len;
 
 			/* Skip the leading hunk mark of the first file. */
-			if (skip_first_line) {
-				while (len) {
+			எனில் (skip_first_வரி) {
+				போது (len) {
 					len--;
-					if (*p++ == '\n')
-						break;
+					எனில் (*p++ == '\n')
+						நிறுத்து;
 				}
-				skip_first_line = 0;
+				skip_first_வரி = 0;
 			}
 
 			write_or_die(1, p, len);
@@ -174,37 +174,37 @@ static void work_done(struct work_item *w)
 		grep_source_clear(&w->source);
 	}
 
-	if (old_done != todo_done)
+	எனில் (old_done != todo_done)
 		pthread_cond_signal(&cond_write);
 
-	if (all_work_added && todo_done == todo_end)
+	எனில் (all_work_added && todo_done == todo_end)
 		pthread_cond_signal(&cond_result);
 
 	grep_unlock();
 }
 
-static void free_repos(void)
+நிலையான வெறுமை free_repos(வெறுமை)
 {
-	int i;
+	முழு i;
 
-	for (i = 0; i < repos_to_free_nr; i++) {
+	க்கு (i = 0; i < repos_to_free_nr; i++) {
 		repo_clear(repos_to_free[i]);
-		free(repos_to_free[i]);
+		விடுவி(repos_to_free[i]);
 	}
 	FREE_AND_NULL(repos_to_free);
 	repos_to_free_nr = 0;
 	repos_to_free_alloc = 0;
 }
 
-static void *run(void *arg)
+நிலையான வெறுமை *run(வெறுமை *arg)
 {
-	int hit = 0;
-	struct grep_opt *opt = arg;
+	முழு hit = 0;
+	கட்டமைப்பு grep_opt *opt = arg;
 
-	while (1) {
-		struct work_item *w = get_work();
-		if (!w)
-			break;
+	போது (1) {
+		கட்டமைப்பு work_item *w = get_work();
+		எனில் (!w)
+			நிறுத்து;
 
 		opt->output_priv = w;
 		hit |= grep_source(opt, &w->source);
@@ -212,60 +212,60 @@ static void *run(void *arg)
 		work_done(w);
 	}
 	free_grep_patterns(opt);
-	free(opt);
+	விடுவி(opt);
 
-	return (void*) (intptr_t) hit;
+	திரும்பு (வெறுமை*) (intptr_t) hit;
 }
 
-static void strbuf_out(struct grep_opt *opt, const void *buf, size_t size)
+நிலையான வெறுமை strbuf_out(கட்டமைப்பு grep_opt *opt, மாறிலி வெறுமை *buf, size_t size)
 {
-	struct work_item *w = opt->output_priv;
+	கட்டமைப்பு work_item *w = opt->output_priv;
 	strbuf_add(&w->out, buf, size);
 }
 
-static void start_threads(struct grep_opt *opt)
+நிலையான வெறுமை start_threads(கட்டமைப்பு grep_opt *opt)
 {
-	int i;
+	முழு i;
 
-	pthread_mutex_init(&grep_mutex, NULL);
-	pthread_mutex_init(&grep_attr_mutex, NULL);
-	pthread_cond_init(&cond_add, NULL);
-	pthread_cond_init(&cond_write, NULL);
-	pthread_cond_init(&cond_result, NULL);
+	pthread_mutex_init(&grep_mutex, வெற்று);
+	pthread_mutex_init(&grep_attr_mutex, வெற்று);
+	pthread_cond_init(&cond_add, வெற்று);
+	pthread_cond_init(&cond_write, வெற்று);
+	pthread_cond_init(&cond_result, வெற்று);
 	grep_use_locks = 1;
 	enable_obj_read_lock();
 
-	for (i = 0; i < ARRAY_SIZE(todo); i++) {
+	க்கு (i = 0; i < ARRAY_SIZE(todo); i++) {
 		strbuf_init(&todo[i].out, 0);
 	}
 
-	CALLOC_ARRAY(threads, num_threads);
-	for (i = 0; i < num_threads; i++) {
-		int err;
-		struct grep_opt *o = grep_opt_dup(opt);
+	CALLOC_ARRAY(threads, இலக்கம்_threads);
+	க்கு (i = 0; i < இலக்கம்_threads; i++) {
+		முழு err;
+		கட்டமைப்பு grep_opt *o = grep_opt_dup(opt);
 		o->output = strbuf_out;
 		compile_grep_patterns(o);
-		err = pthread_create(&threads[i], NULL, run, o);
+		err = pthread_create(&threads[i], வெற்று, run, o);
 
-		if (err)
+		எனில் (err)
 			die(_("grep: failed to create thread: %s"),
 			    strerror(err));
 	}
 }
 
-static int wait_all(void)
+நிலையான முழு wait_all(வெறுமை)
 {
-	int hit = 0;
-	int i;
+	முழு hit = 0;
+	முழு i;
 
-	if (!HAVE_THREADS)
+	எனில் (!HAVE_THREADS)
 		BUG("Never call this function unless you have started threads");
 
 	grep_lock();
 	all_work_added = 1;
 
 	/* Wait until all work is done. */
-	while (todo_done != todo_end)
+	போது (todo_done != todo_end)
 		pthread_cond_wait(&cond_result, &grep_mutex);
 
 	/* Wake up all the consumer threads so they can see that there
@@ -274,13 +274,13 @@ static int wait_all(void)
 	pthread_cond_broadcast(&cond_add);
 	grep_unlock();
 
-	for (i = 0; i < num_threads; i++) {
-		void *h;
+	க்கு (i = 0; i < இலக்கம்_threads; i++) {
+		வெறுமை *h;
 		pthread_join(threads[i], &h);
-		hit |= (int) (intptr_t) h;
+		hit |= (முழு) (intptr_t) h;
 	}
 
-	free(threads);
+	விடுவி(threads);
 
 	pthread_mutex_destroy(&grep_mutex);
 	pthread_mutex_destroy(&grep_attr_mutex);
@@ -290,175 +290,175 @@ static int wait_all(void)
 	grep_use_locks = 0;
 	disable_obj_read_lock();
 
-	return hit;
+	திரும்பு hit;
 }
 
-static int grep_cmd_config(const char *var, const char *value,
-			   const struct config_context *ctx, void *cb)
+நிலையான முழு grep_cmd_config(மாறிலி எழுத்து *var, மாறிலி எழுத்து *மதிப்பு,
+			   மாறிலி கட்டமைப்பு config_context *ctx, வெறுமை *cb)
 {
-	int st = grep_config(var, value, ctx, cb);
+	முழு st = grep_config(var, மதிப்பு, ctx, cb);
 
-	if (git_color_config(var, value, cb) < 0)
+	எனில் (git_color_config(var, மதிப்பு, cb) < 0)
 		st = -1;
-	else if (git_default_config(var, value, ctx, cb) < 0)
+	இல்லையெனில் எனில் (git_default_config(var, மதிப்பு, ctx, cb) < 0)
 		st = -1;
 
-	if (!strcmp(var, "grep.threads")) {
-		num_threads = git_config_int(var, value, ctx->kvi);
-		if (num_threads < 0)
+	எனில் (!strcmp(var, "grep.threads")) {
+		இலக்கம்_threads = git_config_int(var, மதிப்பு, ctx->kvi);
+		எனில் (இலக்கம்_threads < 0)
 			die(_("invalid number of threads specified (%d) for %s"),
-			    num_threads, var);
-		else if (!HAVE_THREADS && num_threads > 1) {
+			    இலக்கம்_threads, var);
+		இல்லையெனில் எனில் (!HAVE_THREADS && இலக்கம்_threads > 1) {
 			/*
 			 * TRANSLATORS: %s is the configuration
 			 * variable for tweaking threads, currently
 			 * grep.threads
 			 */
 			warning(_("no threads support, ignoring %s"), var);
-			num_threads = 1;
+			இலக்கம்_threads = 1;
 		}
 	}
 
-	if (!strcmp(var, "submodule.recurse"))
-		recurse_submodules = git_config_bool(var, value);
+	எனில் (!strcmp(var, "submodule.recurse"))
+		recurse_submodules = git_config_bool(var, மதிப்பு);
 
-	return st;
+	திரும்பு st;
 }
 
-static void grep_source_name(struct grep_opt *opt, const char *filename,
-			     int tree_name_len, struct strbuf *out)
+நிலையான வெறுமை grep_source_name(கட்டமைப்பு grep_opt *opt, மாறிலி எழுத்து *filename,
+			     முழு மரம்_name_len, கட்டமைப்பு strbuf *out)
 {
 	strbuf_reset(out);
 
-	if (opt->null_following_name) {
-		if (opt->relative && grep_prefix) {
-			struct strbuf rel_buf = STRBUF_INIT;
-			const char *rel_name =
-				relative_path(filename + tree_name_len,
+	எனில் (opt->null_following_name) {
+		எனில் (opt->relative && grep_prefix) {
+			கட்டமைப்பு strbuf rel_buf = STRBUF_INIT;
+			மாறிலி எழுத்து *rel_name =
+				relative_path(filename + மரம்_name_len,
 					      grep_prefix, &rel_buf);
 
-			if (tree_name_len)
-				strbuf_add(out, filename, tree_name_len);
+			எனில் (மரம்_name_len)
+				strbuf_add(out, filename, மரம்_name_len);
 
 			strbuf_addstr(out, rel_name);
 			strbuf_release(&rel_buf);
-		} else {
+		} இல்லையெனில் {
 			strbuf_addstr(out, filename);
 		}
-		return;
+		திரும்பு;
 	}
 
-	if (opt->relative && grep_prefix)
-		quote_path(filename + tree_name_len, grep_prefix, out, 0);
-	else
-		quote_c_style(filename + tree_name_len, out, NULL, 0);
+	எனில் (opt->relative && grep_prefix)
+		quote_path(filename + மரம்_name_len, grep_prefix, out, 0);
+	இல்லையெனில்
+		quote_c_style(filename + மரம்_name_len, out, வெற்று, 0);
 
-	if (tree_name_len)
-		strbuf_insert(out, 0, filename, tree_name_len);
+	எனில் (மரம்_name_len)
+		strbuf_செருகு(out, 0, filename, மரம்_name_len);
 }
 
-static int grep_oid(struct grep_opt *opt, const struct object_id *oid,
-		     const char *filename, int tree_name_len,
-		     const char *path)
+நிலையான முழு grep_oid(கட்டமைப்பு grep_opt *opt, மாறிலி கட்டமைப்பு object_id *oid,
+		     மாறிலி எழுத்து *filename, முழு மரம்_name_len,
+		     மாறிலி எழுத்து *path)
 {
-	struct strbuf pathbuf = STRBUF_INIT;
-	struct grep_source gs;
+	கட்டமைப்பு strbuf pathbuf = STRBUF_INIT;
+	கட்டமைப்பு grep_source gs;
 
-	grep_source_name(opt, filename, tree_name_len, &pathbuf);
+	grep_source_name(opt, filename, மரம்_name_len, &pathbuf);
 	grep_source_init_oid(&gs, pathbuf.buf, path, oid, opt->repo);
 	strbuf_release(&pathbuf);
 
-	if (num_threads > 1) {
+	எனில் (இலக்கம்_threads > 1) {
 		/*
 		 * add_work() copies gs and thus assumes ownership of
 		 * its fields, so do not call grep_source_clear()
 		 */
 		add_work(opt, &gs);
-		return 0;
-	} else {
-		int hit;
+		திரும்பு 0;
+	} இல்லையெனில் {
+		முழு hit;
 
 		hit = grep_source(opt, &gs);
 
 		grep_source_clear(&gs);
-		return hit;
+		திரும்பு hit;
 	}
 }
 
-static int grep_file(struct grep_opt *opt, const char *filename)
+நிலையான முழு grep_file(கட்டமைப்பு grep_opt *opt, மாறிலி எழுத்து *filename)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct grep_source gs;
+	கட்டமைப்பு strbuf buf = STRBUF_INIT;
+	கட்டமைப்பு grep_source gs;
 
 	grep_source_name(opt, filename, 0, &buf);
 	grep_source_init_file(&gs, buf.buf, filename);
 	strbuf_release(&buf);
 
-	if (num_threads > 1) {
+	எனில் (இலக்கம்_threads > 1) {
 		/*
 		 * add_work() copies gs and thus assumes ownership of
 		 * its fields, so do not call grep_source_clear()
 		 */
 		add_work(opt, &gs);
-		return 0;
-	} else {
-		int hit;
+		திரும்பு 0;
+	} இல்லையெனில் {
+		முழு hit;
 
 		hit = grep_source(opt, &gs);
 
 		grep_source_clear(&gs);
-		return hit;
+		திரும்பு hit;
 	}
 }
 
-static void append_path(struct grep_opt *opt, const void *data, size_t len)
+நிலையான வெறுமை append_path(கட்டமைப்பு grep_opt *opt, மாறிலி வெறுமை *data, size_t len)
 {
-	struct string_list *path_list = opt->output_priv;
+	கட்டமைப்பு string_list *path_list = opt->output_priv;
 
-	if (len == 1 && *(const char *)data == '\0')
-		return;
+	எனில் (len == 1 && *(மாறிலி எழுத்து *)data == '\0')
+		திரும்பு;
 	string_list_append_nodup(path_list, xstrndup(data, len));
 }
 
-static void run_pager(struct grep_opt *opt, const char *prefix)
+நிலையான வெறுமை run_pager(கட்டமைப்பு grep_opt *opt, மாறிலி எழுத்து *prefix)
 {
-	struct string_list *path_list = opt->output_priv;
-	struct child_process child = CHILD_PROCESS_INIT;
-	int i, status;
+	கட்டமைப்பு string_list *path_list = opt->output_priv;
+	கட்டமைப்பு child_process child = CHILD_PROCESS_INIT;
+	முழு i, status;
 
-	for (i = 0; i < path_list->nr; i++)
-		strvec_push(&child.args, path_list->items[i].string);
+	க்கு (i = 0; i < path_list->nr; i++)
+		strvec_தள்ளு(&child.args, path_list->பொருட்கள்[i].string);
 	child.dir = prefix;
 	child.use_shell = 1;
 
 	status = run_command(&child);
-	if (status)
+	எனில் (status)
 		exit(status);
 }
 
-static int grep_cache(struct grep_opt *opt,
-		      const struct pathspec *pathspec, int cached);
-static int grep_tree(struct grep_opt *opt, const struct pathspec *pathspec,
-		     struct tree_desc *tree, struct strbuf *base, int tn_len,
-		     int check_attr);
+நிலையான முழு grep_cache(கட்டமைப்பு grep_opt *opt,
+		      மாறிலி கட்டமைப்பு pathspec *pathspec, முழு cached);
+நிலையான முழு grep_மரம்(கட்டமைப்பு grep_opt *opt, மாறிலி கட்டமைப்பு pathspec *pathspec,
+		     கட்டமைப்பு மரம்_desc *மரம், கட்டமைப்பு strbuf *base, முழு tn_len,
+		     முழு check_attr);
 
-static int grep_submodule(struct grep_opt *opt,
-			  const struct pathspec *pathspec,
-			  const struct object_id *oid,
-			  const char *filename, const char *path, int cached)
+நிலையான முழு grep_submodule(கட்டமைப்பு grep_opt *opt,
+			  மாறிலி கட்டமைப்பு pathspec *pathspec,
+			  மாறிலி கட்டமைப்பு object_id *oid,
+			  மாறிலி எழுத்து *filename, மாறிலி எழுத்து *path, முழு cached)
 {
-	struct repository *subrepo;
-	struct repository *superproject = opt->repo;
-	struct grep_opt subopt;
-	int hit = 0;
+	கட்டமைப்பு repository *subrepo;
+	கட்டமைப்பு repository *superproject = opt->repo;
+	கட்டமைப்பு grep_opt subopt;
+	முழு hit = 0;
 
-	if (!is_submodule_active(superproject, path))
-		return 0;
+	எனில் (!is_submodule_active(superproject, path))
+		திரும்பு 0;
 
-	subrepo = xmalloc(sizeof(*subrepo));
-	if (repo_submodule_init(subrepo, superproject, path, null_oid(opt->repo->hash_algo))) {
-		free(subrepo);
-		return 0;
+	subrepo = xmalloc(அளவு(*subrepo));
+	எனில் (repo_submodule_init(subrepo, superproject, path, null_oid(opt->repo->hash_algo))) {
+		விடுவி(subrepo);
+		திரும்பு 0;
 	}
 	ALLOC_GROW(repos_to_free, repos_to_free_nr + 1, repos_to_free_alloc);
 	repos_to_free[repos_to_free_nr++] = subrepo;
@@ -498,80 +498,80 @@ static int grep_submodule(struct grep_opt *opt,
 	repo_read_gitmodules(subrepo, 0);
 	obj_read_unlock();
 
-	memcpy(&subopt, opt, sizeof(subopt));
+	memcpy(&subopt, opt, அளவு(subopt));
 	subopt.repo = subrepo;
 
-	if (oid) {
-		enum object_type object_type;
-		struct tree_desc tree;
-		void *data;
+	எனில் (oid) {
+		எண்ணிக்கை object_type object_type;
+		கட்டமைப்பு மரம்_desc மரம்;
+		வெறுமை *data;
 		size_t size;
-		struct strbuf base = STRBUF_INIT;
+		கட்டமைப்பு strbuf base = STRBUF_INIT;
 
 		obj_read_lock();
-		object_type = odb_read_object_info(subrepo->objects, oid, NULL);
+		object_type = odb_read_object_info(subrepo->objects, oid, வெற்று);
 		obj_read_unlock();
-		data = odb_read_object_peeled(subrepo->objects, oid, OBJ_TREE, &size, NULL);
-		if (!data)
+		data = odb_read_object_peeled(subrepo->objects, oid, OBJ_மரம், &size, வெற்று);
+		எனில் (!data)
 			die(_("unable to read tree (%s)"), oid_to_hex(oid));
 
 		strbuf_addstr(&base, filename);
 		strbuf_addch(&base, '/');
 
-		init_tree_desc(&tree, oid, data, size);
-		hit = grep_tree(&subopt, pathspec, &tree, &base, base.len,
+		init_மரம்_desc(&மரம், oid, data, size);
+		hit = grep_மரம்(&subopt, pathspec, &மரம், &base, base.len,
 				object_type == OBJ_COMMIT);
 		strbuf_release(&base);
-		free(data);
-	} else {
+		விடுவி(data);
+	} இல்லையெனில் {
 		hit = grep_cache(&subopt, pathspec, cached);
 	}
 
-	return hit;
+	திரும்பு hit;
 }
 
-static int grep_cache(struct grep_opt *opt,
-		      const struct pathspec *pathspec, int cached)
+நிலையான முழு grep_cache(கட்டமைப்பு grep_opt *opt,
+		      மாறிலி கட்டமைப்பு pathspec *pathspec, முழு cached)
 {
-	struct repository *repo = opt->repo;
-	int hit = 0;
-	int nr;
-	struct strbuf name = STRBUF_INIT;
-	int name_base_len = 0;
-	if (repo->submodule_prefix) {
+	கட்டமைப்பு repository *repo = opt->repo;
+	முழு hit = 0;
+	முழு nr;
+	கட்டமைப்பு strbuf name = STRBUF_INIT;
+	முழு name_base_len = 0;
+	எனில் (repo->submodule_prefix) {
 		name_base_len = strlen(repo->submodule_prefix);
 		strbuf_addstr(&name, repo->submodule_prefix);
 	}
 
-	if (repo_read_index(repo) < 0)
+	எனில் (repo_read_index(repo) < 0)
 		die(_("index file corrupt"));
 
-	for (nr = 0; nr < repo->index->cache_nr; nr++) {
-		const struct cache_entry *ce = repo->index->cache[nr];
+	க்கு (nr = 0; nr < repo->index->cache_nr; nr++) {
+		மாறிலி கட்டமைப்பு cache_entry *ce = repo->index->cache[nr];
 
-		if (!cached && ce_skip_worktree(ce))
-			continue;
+		எனில் (!cached && ce_skip_worktree(ce))
+			தொடர்;
 
 		strbuf_setlen(&name, name_base_len);
 		strbuf_addstr(&name, ce->name);
-		if (S_ISSPARSEDIR(ce->ce_mode)) {
-			enum object_type type;
-			struct tree_desc tree;
-			void *data;
+		எனில் (S_ISSPARSEDIR(ce->ce_mode)) {
+			எண்ணிக்கை object_type type;
+			கட்டமைப்பு மரம்_desc மரம்;
+			வெறுமை *data;
 			size_t size;
 
 			data = odb_read_object(the_repository->objects, &ce->oid,
 					       &type, &size);
-			if (!data)
+			எனில் (!data)
 				die(_("unable to read tree %s"), oid_to_hex(&ce->oid));
-			init_tree_desc(&tree, &ce->oid, data, size);
+			init_மரம்_desc(&மரம், &ce->oid, data, size);
 
-			hit |= grep_tree(opt, pathspec, &tree, &name, 0, 0);
+			hit |= grep_மரம்(opt, pathspec, &மரம், &name, 0, 0);
 			strbuf_setlen(&name, name_base_len);
 			strbuf_addstr(&name, ce->name);
-			free(data);
-		} else if (S_ISREG(ce->ce_mode) &&
-		    match_pathspec(repo->index, pathspec, name.buf, name.len, 0, NULL,
+			விடுவி(data);
+		} இல்லையெனில் எனில் (S_ISREG(ce->ce_mode) &&
+		    match_pathspec(repo->index, pathspec, name.buf, name.len, 0, வெற்று,
 				   S_ISDIR(ce->ce_mode) ||
 				   S_ISGITLINK(ce->ce_mode))) {
 			/*
@@ -579,92 +579,92 @@ static int grep_cache(struct grep_opt *opt,
 			 * cache entry are identical, even if worktree file has
 			 * been modified, so use cache version instead
 			 */
-			if (cached || (ce->ce_flags & CE_VALID)) {
-				if (ce_stage(ce) || ce_intent_to_add(ce))
-					continue;
+			எனில் (cached || (ce->ce_flags & CE_VALID)) {
+				எனில் (ce_stage(ce) || ce_intent_to_add(ce))
+					தொடர்;
 				hit |= grep_oid(opt, &ce->oid, name.buf,
 						 0, name.buf);
-			} else {
+			} இல்லையெனில் {
 				hit |= grep_file(opt, name.buf);
 			}
-		} else if (recurse_submodules && S_ISGITLINK(ce->ce_mode) &&
-			   submodule_path_match(repo->index, pathspec, name.buf, NULL)) {
-			hit |= grep_submodule(opt, pathspec, NULL, ce->name,
+		} இல்லையெனில் எனில் (recurse_submodules && S_ISGITLINK(ce->ce_mode) &&
+			   submodule_path_match(repo->index, pathspec, name.buf, வெற்று)) {
+			hit |= grep_submodule(opt, pathspec, வெற்று, ce->name,
 					      ce->name, cached);
-		} else {
-			continue;
+		} இல்லையெனில் {
+			தொடர்;
 		}
 
-		if (ce_stage(ce)) {
-			do {
+		எனில் (ce_stage(ce)) {
+			செய் {
 				nr++;
-			} while (nr < repo->index->cache_nr &&
+			} போது (nr < repo->index->cache_nr &&
 				 !strcmp(ce->name, repo->index->cache[nr]->name));
 			nr--; /* compensate for loop control */
 		}
-		if (hit && opt->status_only)
-			break;
+		எனில் (hit && opt->status_only)
+			நிறுத்து;
 	}
 
 	strbuf_release(&name);
-	return hit;
+	திரும்பு hit;
 }
 
-static int grep_tree(struct grep_opt *opt, const struct pathspec *pathspec,
-		     struct tree_desc *tree, struct strbuf *base, int tn_len,
-		     int check_attr)
+நிலையான முழு grep_மரம்(கட்டமைப்பு grep_opt *opt, மாறிலி கட்டமைப்பு pathspec *pathspec,
+		     கட்டமைப்பு மரம்_desc *மரம், கட்டமைப்பு strbuf *base, முழு tn_len,
+		     முழு check_attr)
 {
-	struct repository *repo = opt->repo;
-	int hit = 0;
-	enum interesting match = entry_not_interesting;
-	struct name_entry entry;
-	int old_baselen = base->len;
-	struct strbuf name = STRBUF_INIT;
-	int name_base_len = 0;
-	if (repo->submodule_prefix) {
+	கட்டமைப்பு repository *repo = opt->repo;
+	முழு hit = 0;
+	எண்ணிக்கை interesting match = entry_not_interesting;
+	கட்டமைப்பு name_entry entry;
+	முழு old_baselen = base->len;
+	கட்டமைப்பு strbuf name = STRBUF_INIT;
+	முழு name_base_len = 0;
+	எனில் (repo->submodule_prefix) {
 		strbuf_addstr(&name, repo->submodule_prefix);
 		name_base_len = name.len;
 	}
 
-	while (tree_entry(tree, &entry)) {
-		int te_len = tree_entry_len(&entry);
+	போது (மரம்_entry(மரம், &entry)) {
+		முழு te_len = மரம்_entry_len(&entry);
 
-		if (match != all_entries_interesting) {
+		எனில் (match != all_entries_interesting) {
 			strbuf_addstr(&name, base->buf + tn_len);
-			match = tree_entry_interesting(repo->index,
+			match = மரம்_entry_interesting(repo->index,
 						       &entry, &name,
 						       pathspec);
 			strbuf_setlen(&name, name_base_len);
 
-			if (match == all_entries_not_interesting)
-				break;
-			if (match == entry_not_interesting)
-				continue;
+			எனில் (match == all_entries_not_interesting)
+				நிறுத்து;
+			எனில் (match == entry_not_interesting)
+				தொடர்;
 		}
 
 		strbuf_add(base, entry.path, te_len);
 
-		if (S_ISREG(entry.mode)) {
+		எனில் (S_ISREG(entry.mode)) {
 			hit |= grep_oid(opt, &entry.oid, base->buf, tn_len,
-					 check_attr ? base->buf + tn_len : NULL);
-		} else if (S_ISDIR(entry.mode)) {
-			enum object_type type;
-			struct tree_desc sub;
-			void *data;
+					 check_attr ? base->buf + tn_len : வெற்று);
+		} இல்லையெனில் எனில் (S_ISDIR(entry.mode)) {
+			எண்ணிக்கை object_type type;
+			கட்டமைப்பு மரம்_desc sub;
+			வெறுமை *data;
 			size_t size;
 
 			data = odb_read_object(the_repository->objects,
 					       &entry.oid, &type, &size);
-			if (!data)
+			எனில் (!data)
 				die(_("unable to read tree (%s)"),
 				    oid_to_hex(&entry.oid));
 
 			strbuf_addch(base, '/');
-			init_tree_desc(&sub, &entry.oid, data, size);
-			hit |= grep_tree(opt, pathspec, &sub, base, tn_len,
+			init_மரம்_desc(&sub, &entry.oid, data, size);
+			hit |= grep_மரம்(opt, pathspec, &sub, base, tn_len,
 					 check_attr);
-			free(data);
-		} else if (recurse_submodules && S_ISGITLINK(entry.mode)) {
+			விடுவி(data);
+		} இல்லையெனில் எனில் (recurse_submodules && S_ISGITLINK(entry.mode)) {
 			hit |= grep_submodule(opt, pathspec, &entry.oid,
 					      base->buf, base->buf + tn_len,
 					      1); /* ignored */
@@ -672,62 +672,62 @@ static int grep_tree(struct grep_opt *opt, const struct pathspec *pathspec,
 
 		strbuf_setlen(base, old_baselen);
 
-		if (hit && opt->status_only)
-			break;
+		எனில் (hit && opt->status_only)
+			நிறுத்து;
 	}
 
 	strbuf_release(&name);
-	return hit;
+	திரும்பு hit;
 }
 
-static void collect_blob_oids_for_tree(struct repository *repo,
-				       const struct pathspec *pathspec,
-				       struct tree_desc *tree,
-				       struct strbuf *base,
-				       int tn_len,
-				       struct oidset *blob_oids)
+நிலையான வெறுமை collect_blob_oids_for_மரம்(கட்டமைப்பு repository *repo,
+				       மாறிலி கட்டமைப்பு pathspec *pathspec,
+				       கட்டமைப்பு மரம்_desc *மரம்,
+				       கட்டமைப்பு strbuf *base,
+				       முழு tn_len,
+				       கட்டமைப்பு oidset *blob_oids)
 {
-	struct name_entry entry;
-	int old_baselen = base->len;
-	struct strbuf name = STRBUF_INIT;
-	enum interesting match = entry_not_interesting;
+	கட்டமைப்பு name_entry entry;
+	முழு old_baselen = base->len;
+	கட்டமைப்பு strbuf name = STRBUF_INIT;
+	எண்ணிக்கை interesting match = entry_not_interesting;
 
-	while (tree_entry(tree, &entry)) {
-		if (match != all_entries_interesting) {
+	போது (மரம்_entry(மரம், &entry)) {
+		எனில் (match != all_entries_interesting) {
 			strbuf_addstr(&name, base->buf + tn_len);
-			match = tree_entry_interesting(repo->index,
+			match = மரம்_entry_interesting(repo->index,
 						       &entry, &name,
 						       pathspec);
 			strbuf_reset(&name);
 
-			if (match == all_entries_not_interesting)
-				break;
-			if (match == entry_not_interesting)
-				continue;
+			எனில் (match == all_entries_not_interesting)
+				நிறுத்து;
+			எனில் (match == entry_not_interesting)
+				தொடர்;
 		}
 
-		strbuf_add(base, entry.path, tree_entry_len(&entry));
+		strbuf_add(base, entry.path, மரம்_entry_len(&entry));
 
-		if (S_ISREG(entry.mode)) {
-			if (!odb_has_object(repo->objects, &entry.oid, 0))
-				oidset_insert(blob_oids, &entry.oid);
-		} else if (S_ISDIR(entry.mode)) {
-			enum object_type type;
-			struct tree_desc sub_tree;
-			void *data;
+		எனில் (S_ISREG(entry.mode)) {
+			எனில் (!odb_has_object(repo->objects, &entry.oid, 0))
+				oidset_செருகு(blob_oids, &entry.oid);
+		} இல்லையெனில் எனில் (S_ISDIR(entry.mode)) {
+			எண்ணிக்கை object_type type;
+			கட்டமைப்பு மரம்_desc sub_மரம்;
+			வெறுமை *data;
 			size_t size;
 
 			data = odb_read_object(repo->objects, &entry.oid,
 					       &type, &size);
-			if (!data)
+			எனில் (!data)
 				die(_("unable to read tree (%s)"),
 				    oid_to_hex(&entry.oid));
 
 			strbuf_addch(base, '/');
-			init_tree_desc(&sub_tree, &entry.oid, data, size);
-			collect_blob_oids_for_tree(repo, pathspec, &sub_tree,
+			init_மரம்_desc(&sub_மரம், &entry.oid, data, size);
+			collect_blob_oids_for_மரம்(repo, pathspec, &sub_மரம்,
 						   base, tn_len, blob_oids);
-			free(data);
+			விடுவி(data);
 		}
 		/*
 		 * ...no else clause for S_ISGITLINK: submodules have their
@@ -741,60 +741,60 @@ static void collect_blob_oids_for_tree(struct repository *repo,
 	strbuf_release(&name);
 }
 
-static void collect_blob_oids_for_treeish(struct grep_opt *opt,
-					  const struct pathspec *pathspec,
-					  const struct object_id *tree_ish_oid,
-					  const char *name,
-					  struct oidset *blob_oids)
+நிலையான வெறுமை collect_blob_oids_for_treeish(கட்டமைப்பு grep_opt *opt,
+					  மாறிலி கட்டமைப்பு pathspec *pathspec,
+					  மாறிலி கட்டமைப்பு object_id *மரம்_ish_oid,
+					  மாறிலி எழுத்து *name,
+					  கட்டமைப்பு oidset *blob_oids)
 {
-	struct tree_desc tree;
-	void *data;
+	கட்டமைப்பு மரம்_desc மரம்;
+	வெறுமை *data;
 	size_t size;
-	struct strbuf base = STRBUF_INIT;
-	int len;
+	கட்டமைப்பு strbuf base = STRBUF_INIT;
+	முழு len;
 
-	data = odb_read_object_peeled(opt->repo->objects, tree_ish_oid,
-				      OBJ_TREE, &size, NULL);
+	data = odb_read_object_peeled(opt->repo->objects, மரம்_ish_oid,
+				      OBJ_மரம், &size, வெற்று);
 
-	if (!data)
-		return;
+	எனில் (!data)
+		திரும்பு;
 
 	len = name ? strlen(name) : 0;
-	if (len) {
+	எனில் (len) {
 		strbuf_add(&base, name, len);
 		strbuf_addch(&base, ':');
 	}
-	init_tree_desc(&tree, tree_ish_oid, data, size);
+	init_மரம்_desc(&மரம், மரம்_ish_oid, data, size);
 
-	collect_blob_oids_for_tree(opt->repo, pathspec, &tree,
+	collect_blob_oids_for_மரம்(opt->repo, pathspec, &மரம்,
 				   &base, base.len, blob_oids);
 
 	strbuf_release(&base);
-	free(data);
+	விடுவி(data);
 }
 
-static void prefetch_grep_blobs(struct grep_opt *opt,
-				const struct pathspec *pathspec,
-				const struct object_array *list)
+நிலையான வெறுமை prefetch_grep_blobs(கட்டமைப்பு grep_opt *opt,
+				மாறிலி கட்டமைப்பு pathspec *pathspec,
+				மாறிலி கட்டமைப்பு object_array *list)
 {
-	struct oidset blob_oids = OIDSET_INIT;
+	கட்டமைப்பு oidset blob_oids = OIDSET_INIT;
 
 	/* Exit if we're not in a partial clone */
-	if (!repo_has_promisor_remote(opt->repo))
-		return;
+	எனில் (!repo_has_promisor_remote(opt->repo))
+		திரும்பு;
 
 	/* For each tree, gather the blobs in it */
-	for (int i = 0; i < list->nr; i++) {
-		struct object *real_obj;
+	க்கு (முழு i = 0; i < list->nr; i++) {
+		கட்டமைப்பு object *real_obj;
 
 		obj_read_lock();
 		real_obj = deref_tag(opt->repo, list->objects[i].item,
-				     NULL, 0);
+				     வெற்று, 0);
 		obj_read_unlock();
 
-		if (real_obj &&
+		எனில் (real_obj &&
 		    (real_obj->type == OBJ_COMMIT ||
-		     real_obj->type == OBJ_TREE))
+		     real_obj->type == OBJ_மரம்))
 			collect_blob_oids_for_treeish(opt, pathspec,
 						      &real_obj->oid,
 						      list->objects[i].name,
@@ -802,13 +802,13 @@ static void prefetch_grep_blobs(struct grep_opt *opt,
 	}
 
 	/* Prefetch the blobs we found */
-	if (oidset_size(&blob_oids)) {
-		struct oid_array to_fetch = OID_ARRAY_INIT;
-		struct oidset_iter iter;
-		const struct object_id *oid;
+	எனில் (oidset_size(&blob_oids)) {
+		கட்டமைப்பு oid_array to_fetch = OID_ARRAY_INIT;
+		கட்டமைப்பு oidset_iter iter;
+		மாறிலி கட்டமைப்பு object_id *oid;
 
 		oidset_iter_init(&blob_oids, &iter);
-		while ((oid = oidset_iter_next(&iter)))
+		போது ((oid = oidset_iter_next(&iter)))
 			oid_array_append(&to_fetch, oid);
 
 		promisor_remote_get_direct(opt->repo, to_fetch.oid, to_fetch.nr);
@@ -818,61 +818,61 @@ static void prefetch_grep_blobs(struct grep_opt *opt,
 	oidset_clear(&blob_oids);
 }
 
-static int grep_object(struct grep_opt *opt, const struct pathspec *pathspec,
-		       struct object *obj, const char *name, const char *path)
+நிலையான முழு grep_object(கட்டமைப்பு grep_opt *opt, மாறிலி கட்டமைப்பு pathspec *pathspec,
+		       கட்டமைப்பு object *obj, மாறிலி எழுத்து *name, மாறிலி எழுத்து *path)
 {
-	if (obj->type == OBJ_BLOB)
-		return grep_oid(opt, &obj->oid, name, 0, path);
-	if (obj->type == OBJ_COMMIT || obj->type == OBJ_TREE) {
-		struct tree_desc tree;
-		void *data;
+	எனில் (obj->type == OBJ_BLOB)
+		திரும்பு grep_oid(opt, &obj->oid, name, 0, path);
+	எனில் (obj->type == OBJ_COMMIT || obj->type == OBJ_மரம்) {
+		கட்டமைப்பு மரம்_desc மரம்;
+		வெறுமை *data;
 		size_t size;
-		struct strbuf base;
-		int hit, len;
+		கட்டமைப்பு strbuf base;
+		முழு hit, len;
 
 		data = odb_read_object_peeled(opt->repo->objects, &obj->oid,
-					      OBJ_TREE, &size, NULL);
-		if (!data)
+					      OBJ_மரம், &size, வெற்று);
+		எனில் (!data)
 			die(_("unable to read tree (%s)"), oid_to_hex(&obj->oid));
 
 		len = name ? strlen(name) : 0;
 		strbuf_init(&base, PATH_MAX + len + 1);
-		if (len) {
+		எனில் (len) {
 			strbuf_add(&base, name, len);
 			strbuf_addch(&base, ':');
 		}
-		init_tree_desc(&tree, &obj->oid, data, size);
-		hit = grep_tree(opt, pathspec, &tree, &base, base.len,
+		init_மரம்_desc(&மரம், &obj->oid, data, size);
+		hit = grep_மரம்(opt, pathspec, &மரம், &base, base.len,
 				obj->type == OBJ_COMMIT);
 		strbuf_release(&base);
-		free(data);
-		return hit;
+		விடுவி(data);
+		திரும்பு hit;
 	}
 	die(_("unable to grep from object of type %s"), type_name(obj->type));
 }
 
-static int grep_objects(struct grep_opt *opt, const struct pathspec *pathspec,
-			const struct object_array *list)
+நிலையான முழு grep_objects(கட்டமைப்பு grep_opt *opt, மாறிலி கட்டமைப்பு pathspec *pathspec,
+			மாறிலி கட்டமைப்பு object_array *list)
 {
-	unsigned int i;
-	int hit = 0;
-	const unsigned int nr = list->nr;
+	unsigned முழு i;
+	முழு hit = 0;
+	மாறிலி unsigned முழு nr = list->nr;
 
 	prefetch_grep_blobs(opt, pathspec, list);
 
-	for (i = 0; i < nr; i++) {
-		struct object *real_obj;
+	க்கு (i = 0; i < nr; i++) {
+		கட்டமைப்பு object *real_obj;
 
 		obj_read_lock();
 		real_obj = deref_tag(opt->repo, list->objects[i].item,
-				     NULL, 0);
+				     வெற்று, 0);
 		obj_read_unlock();
 
-		if (!real_obj) {
-			char hex[GIT_MAX_HEXSZ + 1];
-			const char *name = list->objects[i].name;
+		எனில் (!real_obj) {
+			எழுத்து hex[GIT_MAX_HEXSZ + 1];
+			மாறிலி எழுத்து *name = list->objects[i].name;
 
-			if (!name) {
+			எனில் (!name) {
 				oid_to_hex_r(hex, &list->objects[i].item->oid);
 				name = hex;
 			}
@@ -880,165 +880,165 @@ static int grep_objects(struct grep_opt *opt, const struct pathspec *pathspec,
 		}
 
 		/* load the gitmodules file for this rev */
-		if (recurse_submodules) {
+		எனில் (recurse_submodules) {
 			submodule_free(opt->repo);
 			obj_read_lock();
 			gitmodules_config_oid(the_repository, &real_obj->oid);
 			obj_read_unlock();
 		}
-		if (grep_object(opt, pathspec, real_obj, list->objects[i].name,
+		எனில் (grep_object(opt, pathspec, real_obj, list->objects[i].name,
 				list->objects[i].path)) {
 			hit = 1;
-			if (opt->status_only)
-				break;
+			எனில் (opt->status_only)
+				நிறுத்து;
 		}
 	}
-	return hit;
+	திரும்பு hit;
 }
 
-static int grep_directory(struct grep_opt *opt, const struct pathspec *pathspec,
-			  int exc_std, int use_index)
+நிலையான முழு grep_directory(கட்டமைப்பு grep_opt *opt, மாறிலி கட்டமைப்பு pathspec *pathspec,
+			  முழு exc_std, முழு use_index)
 {
-	struct dir_struct dir = DIR_INIT;
-	int i, hit = 0;
+	கட்டமைப்பு dir_struct dir = DIR_INIT;
+	முழு i, hit = 0;
 
-	if (!use_index)
+	எனில் (!use_index)
 		dir.flags |= DIR_NO_GITLINKS;
-	if (exc_std)
+	எனில் (exc_std)
 		setup_standard_excludes(&dir);
 
 	fill_directory(&dir, opt->repo->index, pathspec);
-	for (i = 0; i < dir.nr; i++) {
+	க்கு (i = 0; i < dir.nr; i++) {
 		hit |= grep_file(opt, dir.entries[i]->name);
-		if (hit && opt->status_only)
-			break;
+		எனில் (hit && opt->status_only)
+			நிறுத்து;
 	}
 	dir_clear(&dir);
-	return hit;
+	திரும்பு hit;
 }
 
-static int context_callback(const struct option *opt, const char *arg,
-			    int unset)
+நிலையான முழு context_callback(மாறிலி கட்டமைப்பு option *opt, மாறிலி எழுத்து *arg,
+			    முழு unset)
 {
-	struct grep_opt *grep_opt = opt->value;
-	int value;
-	const char *endp;
+	கட்டமைப்பு grep_opt *grep_opt = opt->மதிப்பு;
+	முழு மதிப்பு;
+	மாறிலி எழுத்து *endp;
 
-	if (unset) {
+	எனில் (unset) {
 		grep_opt->pre_context = grep_opt->post_context = 0;
-		return 0;
+		திரும்பு 0;
 	}
-	value = strtol(arg, (char **)&endp, 10);
-	if (*endp) {
-		return error(_("switch `%c' expects a numerical value"),
+	மதிப்பு = strtol(arg, (எழுத்து **)&endp, 10);
+	எனில் (*endp) {
+		திரும்பு error(_("switch `%c' expects a numerical value"),
 			     opt->short_name);
 	}
-	grep_opt->pre_context = grep_opt->post_context = value;
-	return 0;
+	grep_opt->pre_context = grep_opt->post_context = மதிப்பு;
+	திரும்பு 0;
 }
 
-static int file_callback(const struct option *opt, const char *arg, int unset)
+நிலையான முழு file_callback(மாறிலி கட்டமைப்பு option *opt, மாறிலி எழுத்து *arg, முழு unset)
 {
-	struct grep_opt *grep_opt = opt->value;
-	int from_stdin;
-	const char *filename = arg;
+	கட்டமைப்பு grep_opt *grep_opt = opt->மதிப்பு;
+	முழு from_stdin;
+	மாறிலி எழுத்து *filename = arg;
 	FILE *patterns;
-	int lno = 0;
-	struct strbuf sb = STRBUF_INIT;
+	முழு lno = 0;
+	கட்டமைப்பு strbuf sb = STRBUF_INIT;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!*filename)
+	எனில் (!*filename)
 		; /* leave it as-is */
-	else
+	இல்லையெனில்
 		filename = prefix_filename_except_for_dash(grep_prefix, filename);
 
 	from_stdin = !strcmp(filename, "-");
 	patterns = from_stdin ? stdin : fopen(filename, "r");
-	if (!patterns)
+	எனில் (!patterns)
 		die_errno(_("cannot open '%s'"), arg);
-	while (strbuf_getline(&sb, patterns) == 0) {
+	போது (strbuf_getline(&sb, patterns) == 0) {
 		/* ignore empty line like grep does */
-		if (sb.len == 0)
-			continue;
+		எனில் (sb.len == 0)
+			தொடர்;
 
 		append_grep_pat(grep_opt, sb.buf, sb.len, arg, ++lno,
 				GREP_PATTERN);
 	}
-	if (!from_stdin)
+	எனில் (!from_stdin)
 		fclose(patterns);
 	strbuf_release(&sb);
-	if (filename != arg)
-		free((void *)filename);
-	return 0;
+	எனில் (filename != arg)
+		விடுவி((வெறுமை *)filename);
+	திரும்பு 0;
 }
 
-static int not_callback(const struct option *opt, const char *arg, int unset)
+நிலையான முழு not_callback(மாறிலி கட்டமைப்பு option *opt, மாறிலி எழுத்து *arg, முழு unset)
 {
-	struct grep_opt *grep_opt = opt->value;
+	கட்டமைப்பு grep_opt *grep_opt = opt->மதிப்பு;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 	append_grep_pattern(grep_opt, "--not", "command line", 0, GREP_NOT);
-	return 0;
+	திரும்பு 0;
 }
 
-static int and_callback(const struct option *opt, const char *arg, int unset)
+நிலையான முழு and_callback(மாறிலி கட்டமைப்பு option *opt, மாறிலி எழுத்து *arg, முழு unset)
 {
-	struct grep_opt *grep_opt = opt->value;
+	கட்டமைப்பு grep_opt *grep_opt = opt->மதிப்பு;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 	append_grep_pattern(grep_opt, "--and", "command line", 0, GREP_AND);
-	return 0;
+	திரும்பு 0;
 }
 
-static int open_callback(const struct option *opt, const char *arg, int unset)
+நிலையான முழு open_callback(மாறிலி கட்டமைப்பு option *opt, மாறிலி எழுத்து *arg, முழு unset)
 {
-	struct grep_opt *grep_opt = opt->value;
+	கட்டமைப்பு grep_opt *grep_opt = opt->மதிப்பு;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 	append_grep_pattern(grep_opt, "(", "command line", 0, GREP_OPEN_PAREN);
-	return 0;
+	திரும்பு 0;
 }
 
-static int close_callback(const struct option *opt, const char *arg, int unset)
+நிலையான முழு close_callback(மாறிலி கட்டமைப்பு option *opt, மாறிலி எழுத்து *arg, முழு unset)
 {
-	struct grep_opt *grep_opt = opt->value;
+	கட்டமைப்பு grep_opt *grep_opt = opt->மதிப்பு;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 	append_grep_pattern(grep_opt, ")", "command line", 0, GREP_CLOSE_PAREN);
-	return 0;
+	திரும்பு 0;
 }
 
-static int pattern_callback(const struct option *opt, const char *arg,
-			    int unset)
+நிலையான முழு pattern_callback(மாறிலி கட்டமைப்பு option *opt, மாறிலி எழுத்து *arg,
+			    முழு unset)
 {
-	struct grep_opt *grep_opt = opt->value;
+	கட்டமைப்பு grep_opt *grep_opt = opt->மதிப்பு;
 	BUG_ON_OPT_NEG(unset);
 	append_grep_pattern(grep_opt, arg, "-e option", 0, GREP_PATTERN);
-	return 0;
+	திரும்பு 0;
 }
 
-int cmd_grep(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo UNUSED)
+முழு cmd_grep(முழு argc,
+	     மாறிலி எழுத்து **argv,
+	     மாறிலி எழுத்து *prefix,
+	     கட்டமைப்பு repository *repo UNUSED)
 {
-	int hit = 0;
-	int cached = 0, untracked = 0, opt_exclude = -1;
-	int seen_dashdash = 0;
-	int external_grep_allowed__ignored;
-	const char *show_in_pager = NULL, *default_pager = "dummy";
-	struct grep_opt opt;
-	struct object_array list = OBJECT_ARRAY_INIT;
-	struct pathspec pathspec;
-	struct string_list path_list = STRING_LIST_INIT_DUP;
-	int i;
-	int dummy;
-	int use_index = 1;
-	int allow_revs;
-	int ret;
+	முழு hit = 0;
+	முழு cached = 0, untracked = 0, opt_exclude = -1;
+	முழு seen_dashdash = 0;
+	முழு external_grep_allowed__ignored;
+	மாறிலி எழுத்து *show_in_pager = வெற்று, *default_pager = "dummy";
+	கட்டமைப்பு grep_opt opt;
+	கட்டமைப்பு object_array list = OBJECT_ARRAY_INIT;
+	கட்டமைப்பு pathspec pathspec;
+	கட்டமைப்பு string_list path_list = STRING_LIST_INIT_DUP;
+	முழு i;
+	முழு dummy;
+	முழு use_index = 1;
+	முழு allow_revs;
+	முழு ret;
 
-	struct option options[] = {
+	கட்டமைப்பு option options[] = {
 		OPT_BOOL(0, "cached", &cached,
 			N_("search in index instead of in the work tree")),
 		OPT_NEGBIT(0, "no-index", &use_index,
@@ -1056,11 +1056,11 @@ int cmd_grep(int argc,
 			N_("case insensitive matching")),
 		OPT_BOOL('w', "word-regexp", &opt.word_regexp,
 			N_("match patterns only at word boundaries")),
-		OPT_SET_INT('a', "text", &opt.binary,
-			N_("process binary files as text"), GREP_BINARY_TEXT),
-		OPT_SET_INT('I', NULL, &opt.binary,
+		OPT_SET_INT('a', "text", &opt.இருமம்,
+			N_("process binary files as text"), GREP_இருமம்_TEXT),
+		OPT_SET_INT('I', வெற்று, &opt.இருமம்,
 			N_("don't match patterns in binary files"),
-			GREP_BINARY_NOMATCH),
+			GREP_இருமம்_NOMATCH),
 		OPT_BOOL(0, "textconv", &opt.allow_textconv,
 			 N_("process binary files with textconv filters")),
 		OPT_SET_INT('r', "recursive", &opt.max_depth,
@@ -1083,8 +1083,8 @@ int cmd_grep(int argc,
 		OPT_GROUP(""),
 		OPT_BOOL('n', "line-number", &opt.linenum, N_("show line numbers")),
 		OPT_BOOL(0, "column", &opt.columnnum, N_("show column number of first match")),
-		OPT_NEGBIT('h', NULL, &opt.pathname, N_("don't show filenames"), 1),
-		OPT_BIT('H', NULL, &opt.pathname, N_("show filenames"), 1),
+		OPT_NEGBIT('h', வெற்று, &opt.pathname, N_("don't show filenames"), 1),
+		OPT_BIT('H', வெற்று, &opt.pathname, N_("show filenames"), 1),
 		OPT_NEGBIT(0, "full-name", &opt.relative,
 			N_("show filenames relative to top directory"), 1),
 		OPT_BOOL('l', "files-with-matches", &opt.name_only,
@@ -1099,7 +1099,7 @@ int cmd_grep(int argc,
 			   PARSE_OPT_NOCOMPLETE),
 		OPT_BOOL('o', "only-matching", &opt.only_matching,
 			N_("show only matching parts of a line")),
-		OPT_BOOL('c', "count", &opt.count,
+		OPT_BOOL('c', "count", &opt.மொத்தம்,
 			N_("show the number of matches instead of matching lines")),
 		OPT__COLOR(&opt.color, N_("highlight matches")),
 		OPT_BOOL(0, "break", &opt.file_break,
@@ -1114,29 +1114,29 @@ int cmd_grep(int argc,
 			N_("show <n> context lines before matches")),
 		OPT_UNSIGNED('A', "after-context", &opt.post_context,
 			N_("show <n> context lines after matches")),
-		OPT_INTEGER(0, "threads", &num_threads,
+		OPT_INTEGER(0, "threads", &இலக்கம்_threads,
 			N_("use <n> worker threads")),
-		OPT_NUMBER_CALLBACK(&opt, N_("shortcut for -C NUM"),
+		OPT_எண்_CALLBACK(&opt, N_("shortcut for -C NUM"),
 			context_callback),
 		OPT_BOOL('p', "show-function", &opt.funcname,
 			N_("show a line with the function name before matches")),
 		OPT_BOOL('W', "function-context", &opt.funcbody,
 			N_("show the surrounding function")),
 		OPT_GROUP(""),
-		OPT_CALLBACK('f', NULL, &opt, N_("file"),
+		OPT_CALLBACK('f', வெற்று, &opt, N_("file"),
 			N_("read patterns from file"), file_callback),
-		OPT_CALLBACK_F('e', NULL, &opt, N_("pattern"),
+		OPT_CALLBACK_F('e', வெற்று, &opt, N_("pattern"),
 			N_("match <pattern>"), PARSE_OPT_NONEG, pattern_callback),
-		OPT_CALLBACK_F(0, "and", &opt, NULL,
+		OPT_CALLBACK_F(0, "and", &opt, வெற்று,
 			N_("combine patterns specified with -e"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG, and_callback),
 		OPT_BOOL_F(0, "or", &dummy, "", PARSE_OPT_NONEG),
-		OPT_CALLBACK_F(0, "not", &opt, NULL, "",
+		OPT_CALLBACK_F(0, "not", &opt, வெற்று, "",
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG, not_callback),
-		OPT_CALLBACK_F('(', NULL, &opt, NULL, "",
+		OPT_CALLBACK_F('(', வெற்று, &opt, வெற்று, "",
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG | PARSE_OPT_NODASH,
 			open_callback),
-		OPT_CALLBACK_F(')', NULL, &opt, NULL, "",
+		OPT_CALLBACK_F(')', வெற்று, &opt, வெற்று, "",
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG | PARSE_OPT_NODASH,
 			close_callback),
 		OPT__QUIET(&opt.status_only,
@@ -1148,7 +1148,7 @@ int cmd_grep(int argc,
 			.type = OPTION_STRING,
 			.short_name = 'O',
 			.long_name = "open-files-in-pager",
-			.value = &show_in_pager,
+			.மதிப்பு = &show_in_pager,
 			.argh = N_("pager"),
 			.help = N_("show matching files in the pager"),
 			.flags = PARSE_OPT_OPTARG | PARSE_OPT_NOCOMPLETE,
@@ -1157,7 +1157,7 @@ int cmd_grep(int argc,
 		OPT_BOOL_F(0, "ext-grep", &external_grep_allowed__ignored,
 			   N_("allow calling of grep(1) (ignored by this build)"),
 			   PARSE_OPT_NOCOMPLETE),
-		OPT_INTEGER('m', "max-count", &opt.max_count,
+		OPT_INTEGER('m', "max-count", &opt.max_மொத்தம்,
 			N_("maximum number of results per file")),
 		OPT_END()
 	};
@@ -1180,22 +1180,22 @@ int cmd_grep(int argc,
 			     PARSE_OPT_KEEP_DASHDASH |
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (the_repository->gitdir) {
+	எனில் (the_repository->gitdir) {
 		prepare_repo_settings(the_repository);
 		the_repository->settings.command_requires_full_index = 0;
 	}
 
-	if (use_index && !startup_info->have_repository) {
-		int fallback = 0;
+	எனில் (use_index && !startup_info->have_repository) {
+		முழு fallback = 0;
 		repo_config_get_bool(the_repository, "grep.fallbacktonoindex", &fallback);
-		if (fallback)
+		எனில் (fallback)
 			use_index = 0;
-		else
+		இல்லையெனில்
 			/* die the same way as if we did it at the beginning */
 			setup_git_directory(the_repository);
 	}
 	/* Ignore --recurse-submodules if --no-index is given or implied */
-	if (!use_index)
+	எனில் (!use_index)
 		recurse_submodules = 0;
 
 	/*
@@ -1203,22 +1203,22 @@ int cmd_grep(int argc,
 	 * separating revisions from pathnames if
 	 * we haven't even had any patterns yet
 	 */
-	if (argc > 0 && !opt.pattern_list && !strcmp(argv[0], "--")) {
+	எனில் (argc > 0 && !opt.pattern_list && !strcmp(argv[0], "--")) {
 		argv++;
 		argc--;
 	}
 
 	/* First unrecognized non-option token */
-	if (argc > 0 && !opt.pattern_list) {
+	எனில் (argc > 0 && !opt.pattern_list) {
 		append_grep_pattern(&opt, argv[0], "command line", 0,
 				    GREP_PATTERN);
 		argv++;
 		argc--;
 	}
 
-	if (show_in_pager == default_pager)
+	எனில் (show_in_pager == default_pager)
 		show_in_pager = git_pager(the_repository, 1);
-	if (show_in_pager) {
+	எனில் (show_in_pager) {
 		opt.color = GIT_COLOR_NEVER;
 		opt.name_only = 1;
 		opt.null_following_name = 1;
@@ -1227,21 +1227,21 @@ int cmd_grep(int argc,
 		string_list_append(&path_list, show_in_pager);
 	}
 
-	if (!opt.pattern_list)
+	எனில் (!opt.pattern_list)
 		die(_("no pattern given"));
 
 	/* --only-matching has no effect with --invert. */
-	if (opt.invert)
+	எனில் (opt.invert)
 		opt.only_matching = 0;
 
 	/*
 	 * We have to find "--" in a separate pass, because its presence
 	 * influences how we will parse arguments that come before it.
 	 */
-	for (i = 0; i < argc; i++) {
-		if (!strcmp(argv[i], "--")) {
+	க்கு (i = 0; i < argc; i++) {
+		எனில் (!strcmp(argv[i], "--")) {
 			seen_dashdash = 1;
-			break;
+			நிறுத்து;
 		}
 	}
 
@@ -1251,34 +1251,34 @@ int cmd_grep(int argc,
 	 * non-rev and assume everything else is a path.
 	 */
 	allow_revs = use_index && !untracked;
-	for (i = 0; i < argc; i++) {
-		const char *arg = argv[i];
-		struct object_id oid;
-		struct object_context oc = {0};
-		struct object *object;
+	க்கு (i = 0; i < argc; i++) {
+		மாறிலி எழுத்து *arg = argv[i];
+		கட்டமைப்பு object_id oid;
+		கட்டமைப்பு object_context oc = {0};
+		கட்டமைப்பு object *object;
 
-		if (!strcmp(arg, "--")) {
+		எனில் (!strcmp(arg, "--")) {
 			i++;
-			break;
+			நிறுத்து;
 		}
 
-		if (!allow_revs) {
-			if (seen_dashdash)
+		எனில் (!allow_revs) {
+			எனில் (seen_dashdash)
 				die(_("--no-index or --untracked cannot be used with revs"));
-			break;
+			நிறுத்து;
 		}
 
-		if (get_oid_with_context(the_repository, arg,
+		எனில் (get_oid_with_context(the_repository, arg,
 					 GET_OID_RECORD_PATH,
 					 &oid, &oc)) {
-			if (seen_dashdash)
+			எனில் (seen_dashdash)
 				die(_("unable to resolve revision: %s"), arg);
 			object_context_release(&oc);
-			break;
+			நிறுத்து;
 		}
 
 		object = parse_object_or_die(the_repository, &oid, arg);
-		if (!seen_dashdash)
+		எனில் (!seen_dashdash)
 			verify_non_filename(the_repository, prefix, arg);
 		add_object_array_with_path(object, arg, &list, oc.mode, oc.path);
 		object_context_release(&oc);
@@ -1288,9 +1288,9 @@ int cmd_grep(int argc,
 	 * Anything left over is presumed to be a path. But in the non-dashdash
 	 * "do what I mean" case, we verify and complain when that isn't true.
 	 */
-	if (!seen_dashdash) {
-		int j;
-		for (j = i; j < argc; j++)
+	எனில் (!seen_dashdash) {
+		முழு j;
+		க்கு (j = i; j < argc; j++)
 			verify_filename(the_repository, prefix, argv[j], j == i && allow_revs);
 	}
 
@@ -1302,51 +1302,51 @@ int cmd_grep(int argc,
 	pathspec.recursive = 1;
 	pathspec.recurse_submodules = !!recurse_submodules;
 
-	if (recurse_submodules && untracked)
+	எனில் (recurse_submodules && untracked)
 		die(_("--untracked not supported with --recurse-submodules"));
 
 	/*
 	 * Optimize out the case where the amount of matches is limited to zero.
 	 * We do this to keep results consistent with GNU grep(1).
 	 */
-	if (opt.max_count == 0) {
+	எனில் (opt.max_மொத்தம் == 0) {
 		ret = 1;
-		goto out;
+		செல் out;
 	}
 
-	if (show_in_pager) {
-		if (num_threads > 1)
+	எனில் (show_in_pager) {
+		எனில் (இலக்கம்_threads > 1)
 			warning(_("invalid option combination, ignoring --threads"));
-		num_threads = 1;
-	} else if (!HAVE_THREADS && num_threads > 1) {
+		இலக்கம்_threads = 1;
+	} இல்லையெனில் எனில் (!HAVE_THREADS && இலக்கம்_threads > 1) {
 		warning(_("no threads support, ignoring --threads"));
-		num_threads = 1;
-	} else if (num_threads < 0)
-		die(_("invalid number of threads specified (%d)"), num_threads);
-	else if (num_threads == 0)
-		num_threads = HAVE_THREADS ? online_cpus() : 1;
+		இலக்கம்_threads = 1;
+	} இல்லையெனில் எனில் (இலக்கம்_threads < 0)
+		die(_("invalid number of threads specified (%d)"), இலக்கம்_threads);
+	இல்லையெனில் எனில் (இலக்கம்_threads == 0)
+		இலக்கம்_threads = HAVE_THREADS ? online_cpus() : 1;
 
-	if (num_threads > 1) {
-		if (!HAVE_THREADS)
+	எனில் (இலக்கம்_threads > 1) {
+		எனில் (!HAVE_THREADS)
 			BUG("Somebody got num_threads calculation wrong!");
-		if (!(opt.name_only || opt.unmatch_name_only || opt.count)
+		எனில் (!(opt.name_only || opt.unmatch_name_only || opt.மொத்தம்)
 		    && (opt.pre_context || opt.post_context ||
 			opt.file_break || opt.funcbody))
-			skip_first_line = 1;
+			skip_first_வரி = 1;
 
 		/*
 		 * Pre-read gitmodules (if not read already) and force eager
 		 * initialization of packed_git to prevent racy lazy
 		 * reading/initialization once worker threads are started.
 		 */
-		if (recurse_submodules)
+		எனில் (recurse_submodules)
 			repo_read_gitmodules(the_repository, 1);
 
-		if (startup_info->have_repository)
+		எனில் (startup_info->have_repository)
 			odb_prepare(the_repository->objects, 0);
 
 		start_threads(&opt);
-	} else {
+	} இல்லையெனில் {
 		/*
 		 * The compiled patterns on the main path are only
 		 * used when not using threading. Otherwise
@@ -1356,56 +1356,56 @@ int cmd_grep(int argc,
 		compile_grep_patterns(&opt);
 	}
 
-	if (show_in_pager && (cached || list.nr))
+	எனில் (show_in_pager && (cached || list.nr))
 		die(_("--open-files-in-pager only works on the worktree"));
 
-	if (show_in_pager && opt.pattern_list && !opt.pattern_list->next) {
-		const char *pager = path_list.items[0].string;
-		int len = strlen(pager);
+	எனில் (show_in_pager && opt.pattern_list && !opt.pattern_list->next) {
+		மாறிலி எழுத்து *pager = path_list.பொருட்கள்[0].string;
+		முழு len = strlen(pager);
 
-		if (len > 4 && is_dir_sep(pager[len - 5]))
+		எனில் (len > 4 && is_dir_sep(pager[len - 5]))
 			pager += len - 4;
 
-		if (opt.ignore_case && !strcmp("less", pager))
+		எனில் (opt.ignore_case && !strcmp("less", pager))
 			string_list_append(&path_list, "-I");
 
-		if (!strcmp("less", pager) || !strcmp("vi", pager)) {
-			struct strbuf buf = STRBUF_INIT;
+		எனில் (!strcmp("less", pager) || !strcmp("vi", pager)) {
+			கட்டமைப்பு strbuf buf = STRBUF_INIT;
 			strbuf_addf(&buf, "+/%s%s",
 					strcmp("less", pager) ? "" : "*",
 					opt.pattern_list->pattern);
 			string_list_append_nodup(&path_list,
-						 strbuf_detach(&buf, NULL));
+						 strbuf_detach(&buf, வெற்று));
 		}
 	}
 
-	if (!show_in_pager && !opt.status_only)
+	எனில் (!show_in_pager && !opt.status_only)
 		setup_pager(the_repository);
 
 	die_for_incompatible_opt3(!use_index, "--no-index",
 				  untracked, "--untracked",
 				  cached, "--cached");
 
-	if (!use_index || untracked) {
-		int use_exclude = (opt_exclude < 0) ? use_index : !!opt_exclude;
+	எனில் (!use_index || untracked) {
+		முழு use_exclude = (opt_exclude < 0) ? use_index : !!opt_exclude;
 		hit = grep_directory(&opt, &pathspec, use_exclude, use_index);
-	} else if (0 <= opt_exclude) {
+	} இல்லையெனில் எனில் (0 <= opt_exclude) {
 		die(_("--[no-]exclude-standard cannot be used for tracked contents"));
-	} else if (!list.nr) {
-		if (!cached)
-			setup_work_tree(the_repository);
+	} இல்லையெனில் எனில் (!list.nr) {
+		எனில் (!cached)
+			setup_work_மரம்(the_repository);
 
 		hit = grep_cache(&opt, &pathspec, cached);
-	} else {
-		if (cached)
+	} இல்லையெனில் {
+		எனில் (cached)
 			die(_("both --cached and trees are given"));
 
 		hit = grep_objects(&opt, &pathspec, &list);
 	}
 
-	if (num_threads > 1)
+	எனில் (இலக்கம்_threads > 1)
 		hit |= wait_all();
-	if (hit && show_in_pager)
+	எனில் (hit && show_in_pager)
 		run_pager(&opt, prefix);
 
 	ret = !hit;
@@ -1416,5 +1416,5 @@ out:
 	free_grep_patterns(&opt);
 	object_array_clear(&list);
 	free_repos();
-	return ret;
+	திரும்பு ret;
 }

@@ -6,248 +6,248 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
+#அந்தர்பாவ "builtin.h"
 
-#include "attr.h"
-#include "config.h"
-#include "editor.h"
-#include "environment.h"
-#include "ident.h"
-#include "pager.h"
-#include "parse-options.h"
-#include "path.h"
-#include "refs.h"
-#include "run-command.h"
-#include "strbuf.h"
-#include "string-list.h"
+#அந்தர்பாவ "attr.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "editor.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "ident.h"
+#அந்தர்பாவ "pager.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "path.h"
+#அந்தர்பாவ "refs.h"
+#அந்தர்பாவ "run-command.h"
+#அந்தர்பாவ "strbuf.h"
+#அந்தர்பாவ "string-list.h"
 
-static const char * const var_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி var_usage[] = {
 	N_("git var [-z] -l"),
 	N_("git var [-z] <variable>..."),
-	NULL
+	வெற்று
 };
 
-enum ident_part {
+எண்ணிக்கை ident_part {
 	IDENT_NAME,
 	IDENT_MAIL,
 	IDENT_DATE,
 };
 
-static char *ident_part(const char *ident, enum ident_part part)
+நிலையான எழுத்து *ident_part(மாறிலி எழுத்து *ident, எண்ணிக்கை ident_part part)
 {
-	struct ident_split split;
+	கட்டமைப்பு ident_split split;
 
-	if (!ident)
-		return NULL;
-	if (split_ident_line(&split, ident, strlen(ident)))
-		return NULL;
+	எனில் (!ident)
+		திரும்பு வெற்று;
+	எனில் (split_ident_வரி(&split, ident, strlen(ident)))
+		திரும்பு வெற்று;
 
-	switch (part) {
-	case IDENT_NAME:
-		if (!split.name_begin || !split.name_end)
+	தேர்வு (part) {
+	நிலை IDENT_NAME:
+		எனில் (!split.name_begin || !split.name_end)
 			BUG("split_ident_line() gave NULL names???");
-		return xmemdupz(split.name_begin,
+		திரும்பு xmemdupz(split.name_begin,
 				split.name_end - split.name_begin);
-	case IDENT_MAIL:
-		if (!split.mail_begin || !split.mail_end)
+	நிலை IDENT_MAIL:
+		எனில் (!split.mail_begin || !split.mail_end)
 			BUG("split_ident_line() gave NULL mail???");
-		return xmemdupz(split.mail_begin,
+		திரும்பு xmemdupz(split.mail_begin,
 				split.mail_end - split.mail_begin);
-	case IDENT_DATE:
-		if (!split.date_begin || !split.tz_end)
+	நிலை IDENT_DATE:
+		எனில் (!split.date_begin || !split.tz_end)
 			BUG("split_ident_line() gave NULL date/tz???");
-		return xmemdupz(split.date_begin,
+		திரும்பு xmemdupz(split.date_begin,
 				split.tz_end - split.date_begin);
-	default:
+	இயல்பு:
 		BUG("unknown ident_part %d", part);
 	}
 }
 
-static char *committer(int ident_flag)
+நிலையான எழுத்து *committer(முழு ident_flag)
 {
-	return xstrdup_or_null(git_committer_info(ident_flag));
+	திரும்பு xstrdup_or_null(git_committer_info(ident_flag));
 }
 
-static char *committer_name(int ident_flag)
+நிலையான எழுத்து *committer_name(முழு ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_NAME);
+	திரும்பு ident_part(git_committer_info(ident_flag), IDENT_NAME);
 }
 
-static char *committer_email(int ident_flag)
+நிலையான எழுத்து *committer_email(முழு ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_MAIL);
+	திரும்பு ident_part(git_committer_info(ident_flag), IDENT_MAIL);
 }
 
-static char *committer_date(int ident_flag)
+நிலையான எழுத்து *committer_date(முழு ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_DATE);
+	திரும்பு ident_part(git_committer_info(ident_flag), IDENT_DATE);
 }
 
-static char *author(int ident_flag)
+நிலையான எழுத்து *author(முழு ident_flag)
 {
-	return xstrdup_or_null(git_author_info(ident_flag));
+	திரும்பு xstrdup_or_null(git_author_info(ident_flag));
 }
 
-static char *author_name(int ident_flag)
+நிலையான எழுத்து *author_name(முழு ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_NAME);
+	திரும்பு ident_part(git_author_info(ident_flag), IDENT_NAME);
 }
 
-static char *author_email(int ident_flag)
+நிலையான எழுத்து *author_email(முழு ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_MAIL);
+	திரும்பு ident_part(git_author_info(ident_flag), IDENT_MAIL);
 }
 
-static char *author_date(int ident_flag)
+நிலையான எழுத்து *author_date(முழு ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_DATE);
+	திரும்பு ident_part(git_author_info(ident_flag), IDENT_DATE);
 }
 
-static char *editor(int ident_flag UNUSED)
+நிலையான எழுத்து *editor(முழு ident_flag UNUSED)
 {
-	return xstrdup_or_null(git_editor());
+	திரும்பு xstrdup_or_null(git_editor());
 }
 
-static char *sequence_editor(int ident_flag UNUSED)
+நிலையான எழுத்து *sequence_editor(முழு ident_flag UNUSED)
 {
-	return xstrdup_or_null(git_sequence_editor());
+	திரும்பு xstrdup_or_null(git_sequence_editor());
 }
 
-static char *pager(int ident_flag UNUSED)
+நிலையான எழுத்து *pager(முழு ident_flag UNUSED)
 {
-	const char *pgm = git_pager(the_repository, 1);
+	மாறிலி எழுத்து *pgm = git_pager(the_repository, 1);
 
-	if (!pgm)
+	எனில் (!pgm)
 		pgm = "cat";
-	return xstrdup(pgm);
+	திரும்பு xstrdup(pgm);
 }
 
-static char *default_branch(int ident_flag UNUSED)
+நிலையான எழுத்து *default_branch(முழு ident_flag UNUSED)
 {
-	return repo_default_branch_name(the_repository, 1);
+	திரும்பு repo_default_branch_name(the_repository, 1);
 }
 
-static char *shell_path(int ident_flag UNUSED)
+நிலையான எழுத்து *shell_path(முழு ident_flag UNUSED)
 {
-	return git_shell_path();
+	திரும்பு git_shell_path();
 }
 
-static char *git_attr_val_system(int ident_flag UNUSED)
+நிலையான எழுத்து *git_attr_val_system(முழு ident_flag UNUSED)
 {
-	if (git_attr_system_is_enabled()) {
-		char *file = xstrdup(git_attr_system_file());
+	எனில் (git_attr_system_is_enabled()) {
+		எழுத்து *file = xstrdup(git_attr_system_file());
 		normalize_path_copy(file, file);
-		return file;
+		திரும்பு file;
 	}
-	return NULL;
+	திரும்பு வெற்று;
 }
 
-static char *git_attr_val_global(int ident_flag UNUSED)
+நிலையான எழுத்து *git_attr_val_global(முழு ident_flag UNUSED)
 {
-	char *file = xstrdup_or_null(git_attr_global_file());
-	if (file) {
+	எழுத்து *file = xstrdup_or_null(git_attr_global_file());
+	எனில் (file) {
 		normalize_path_copy(file, file);
-		return file;
+		திரும்பு file;
 	}
-	return NULL;
+	திரும்பு வெற்று;
 }
 
-static char *git_config_val_system(int ident_flag UNUSED)
+நிலையான எழுத்து *git_config_val_system(முழு ident_flag UNUSED)
 {
-	if (git_config_system()) {
-		char *file = git_system_config();
+	எனில் (git_config_system()) {
+		எழுத்து *file = git_system_config();
 		normalize_path_copy(file, file);
-		return file;
+		திரும்பு file;
 	}
-	return NULL;
+	திரும்பு வெற்று;
 }
 
-static void git_config_val_global(struct string_list *list)
+நிலையான வெறுமை git_config_val_global(கட்டமைப்பு string_list *list)
 {
-	char *user, *xdg;
+	எழுத்து *user, *xdg;
 
 	git_global_config_paths(&user, &xdg);
-	if (xdg && *xdg) {
+	எனில் (xdg && *xdg) {
 		normalize_path_copy(xdg, xdg);
 		string_list_append(list, xdg);
 	}
-	if (user && *user) {
+	எனில் (user && *user) {
 		normalize_path_copy(user, user);
 		string_list_append(list, user);
 	}
-	free(xdg);
-	free(user);
+	விடுவி(xdg);
+	விடுவி(user);
 }
 
-struct git_var {
-	const char *name;
-	char *(*read)(int);
-	void (*multiread)(struct string_list *);
+கட்டமைப்பு git_var {
+	மாறிலி எழுத்து *name;
+	எழுத்து *(*பட)(முழு);
+	வெறுமை (*multiread)(கட்டமைப்பு string_list *);
 };
-static struct git_var git_vars[] = {
+நிலையான கட்டமைப்பு git_var git_vars[] = {
 	{
 		.name = "GIT_COMMITTER_IDENT",
-		.read = committer,
+		.பட = committer,
 	},
 	{
 		.name = "GIT_COMMITTER_NAME",
-		.read = committer_name,
+		.பட = committer_name,
 	},
 	{
 		.name = "GIT_COMMITTER_EMAIL",
-		.read = committer_email,
+		.பட = committer_email,
 	},
 	{
 		.name = "GIT_COMMITTER_DATE",
-		.read = committer_date,
+		.பட = committer_date,
 	},
 	{
 		.name = "GIT_AUTHOR_IDENT",
-		.read = author,
+		.பட = author,
 	},
 	{
 		.name = "GIT_AUTHOR_NAME",
-		.read = author_name,
+		.பட = author_name,
 	},
 	{
 		.name = "GIT_AUTHOR_EMAIL",
-		.read = author_email,
+		.பட = author_email,
 	},
 	{
 		.name = "GIT_AUTHOR_DATE",
-		.read = author_date,
+		.பட = author_date,
 	},
 	{
 		.name = "GIT_EDITOR",
-		.read = editor,
+		.பட = editor,
 	},
 	{
 		.name = "GIT_SEQUENCE_EDITOR",
-		.read = sequence_editor,
+		.பட = sequence_editor,
 	},
 	{
 		.name = "GIT_PAGER",
-		.read = pager,
+		.பட = pager,
 	},
 	{
 		.name = "GIT_DEFAULT_BRANCH",
-		.read = default_branch,
+		.பட = default_branch,
 	},
 	{
 		.name = "GIT_SHELL_PATH",
-		.read = shell_path,
+		.பட = shell_path,
 	},
 	{
 		.name = "GIT_ATTR_SYSTEM",
-		.read = git_attr_val_system,
+		.பட = git_attr_val_system,
 	},
 	{
 		.name = "GIT_ATTR_GLOBAL",
-		.read = git_attr_val_global,
+		.பட = git_attr_val_global,
 	},
 	{
 		.name = "GIT_CONFIG_SYSTEM",
-		.read = git_config_val_system,
+		.பட = git_config_val_system,
 	},
 	{
 		.name = "GIT_CONFIG_GLOBAL",
@@ -255,74 +255,74 @@ static struct git_var git_vars[] = {
 	},
 	{
 		.name = "",
-		.read = NULL,
+		.பட = வெற்று,
 	},
 };
 
-static void list_vars(int nul_term)
+நிலையான வெறுமை list_vars(முழு nul_term)
 {
-	struct git_var *ptr;
-	char delim = nul_term ? '\n' : '=';
-	char term = nul_term ? '\0' : '\n';
+	கட்டமைப்பு git_var *ptr;
+	எழுத்து delim = nul_term ? '\n' : '=';
+	எழுத்து term = nul_term ? '\0' : '\n';
 
-	for (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
-		if (ptr->read) {
-			char *val = ptr->read(0);
+	க்கு (ptr = git_vars; ptr->பட || ptr->multiread; ptr++) {
+		எனில் (ptr->பட) {
+			எழுத்து *val = ptr->பட(0);
 
-			if (val) {
+			எனில் (val) {
 				printf("%s%c%s%c", ptr->name, delim, val, term);
-				free(val);
+				விடுவி(val);
 			}
-		} else {
-			struct string_list list = STRING_LIST_INIT_DUP;
+		} இல்லையெனில் {
+			கட்டமைப்பு string_list list = STRING_LIST_INIT_DUP;
 
 			ptr->multiread(&list);
-			for (size_t i = 0; i < list.nr; i++)
+			க்கு (size_t i = 0; i < list.nr; i++)
 				printf("%s%c%s%c", ptr->name, delim,
-				       list.items[i].string, term);
+				       list.பொருட்கள்[i].string, term);
 			string_list_clear(&list, 0);
 		}
 	}
 }
 
-static const struct git_var *get_git_var(const char *var)
+நிலையான மாறிலி கட்டமைப்பு git_var *get_git_var(மாறிலி எழுத்து *var)
 {
-	struct git_var *ptr;
-	for (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
-		if (strcmp(var, ptr->name) == 0) {
-			return ptr;
+	கட்டமைப்பு git_var *ptr;
+	க்கு (ptr = git_vars; ptr->பட || ptr->multiread; ptr++) {
+		எனில் (strcmp(var, ptr->name) == 0) {
+			திரும்பு ptr;
 		}
 	}
-	return NULL;
+	திரும்பு வெற்று;
 }
 
-static int show_config(const char *var, const char *value,
-		       const struct config_context *ctx, void *cb)
+நிலையான முழு show_config(மாறிலி எழுத்து *var, மாறிலி எழுத்து *மதிப்பு,
+		       மாறிலி கட்டமைப்பு config_context *ctx, வெறுமை *cb)
 {
-	int *nul_term = cb;
-	char delim = *nul_term ? '\n' : '=';
-	char term = *nul_term ? '\0' : '\n';
+	முழு *nul_term = cb;
+	எழுத்து delim = *nul_term ? '\n' : '=';
+	எழுத்து term = *nul_term ? '\0' : '\n';
 
-	if (value)
-		printf("%s%c%s%c", var, delim, value, term);
-	else
+	எனில் (மதிப்பு)
+		printf("%s%c%s%c", var, delim, மதிப்பு, term);
+	இல்லையெனில்
 		printf("%s%c", var, term);
-	return git_default_config(var, value, ctx, cb);
+	திரும்பு git_default_config(var, மதிப்பு, ctx, cb);
 }
 
-int cmd_var(int argc,
-	    const char **argv,
-	    const char *prefix,
-	    struct repository *repo UNUSED)
+முழு cmd_var(முழு argc,
+	    மாறிலி எழுத்து **argv,
+	    மாறிலி எழுத்து *prefix,
+	    கட்டமைப்பு repository *repo UNUSED)
 {
-	int list = 0;
-	int nul_term = 0;
-	char delim;
-	char term;
-	struct option options[] = {
-		OPT_BOOL('l', NULL, &list,
+	முழு list = 0;
+	முழு nul_term = 0;
+	எழுத்து delim;
+	எழுத்து term;
+	கட்டமைப்பு option options[] = {
+		OPT_BOOL('l', வெற்று, &list,
 			 N_("list all variables")),
-		OPT_BOOL('z', NULL, &nul_term,
+		OPT_BOOL('z', வெற்று, &nul_term,
 			 N_("terminate entries with NUL")),
 		OPT_END(),
 	};
@@ -330,61 +330,61 @@ int cmd_var(int argc,
 	argc = parse_options(argc, argv, prefix, options,
 			     var_usage, PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (list) {
-		if (argc)
+	எனில் (list) {
+		எனில் (argc)
 			usage_with_options(var_usage, options);
 		repo_config(the_repository, show_config, &nul_term);
 		list_vars(nul_term);
-		return 0;
+		திரும்பு 0;
 	}
 
-	if (!argc)
+	எனில் (!argc)
 		usage_with_options(var_usage, options);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, வெற்று);
 
 	delim = nul_term ? '\n' : '=';
 	term = nul_term ? '\0' : '\n';
 
-	for (int i = 0; i < argc; i++) {
-		const struct git_var *git_var = get_git_var(argv[i]);
+	க்கு (முழு i = 0; i < argc; i++) {
+		மாறிலி கட்டமைப்பு git_var *git_var = get_git_var(argv[i]);
 
-		if (!git_var)
+		எனில் (!git_var)
 			usage_with_options(var_usage, options);
 
-		if (git_var->read) {
-			char *val = git_var->read(IDENT_STRICT);
+		எனில் (git_var->பட) {
+			எழுத்து *val = git_var->பட(IDENT_STRICT);
 
-			if (!val) {
-				if (argc == 1)
-					return 1;
-				continue;
+			எனில் (!val) {
+				எனில் (argc == 1)
+					திரும்பு 1;
+				தொடர்;
 			}
-			if (argc == 1)
+			எனில் (argc == 1)
 				printf("%s%c", val, term);
-			else
+			இல்லையெனில்
 				printf("%s%c%s%c", git_var->name, delim,
 				       val, term);
-			free(val);
-		} else {
-			struct string_list list = STRING_LIST_INIT_DUP;
+			விடுவி(val);
+		} இல்லையெனில் {
+			கட்டமைப்பு string_list list = STRING_LIST_INIT_DUP;
 
 			git_var->multiread(&list);
-			if (argc == 1 && !list.nr) {
+			எனில் (argc == 1 && !list.nr) {
 				string_list_clear(&list, 0);
-				return 1;
+				திரும்பு 1;
 			}
-			for (size_t j = 0; j < list.nr; j++) {
-				if (argc == 1)
-					printf("%s%c", list.items[j].string,
+			க்கு (size_t j = 0; j < list.nr; j++) {
+				எனில் (argc == 1)
+					printf("%s%c", list.பொருட்கள்[j].string,
 					       term);
-				else
+				இல்லையெனில்
 					printf("%s%c%s%c", git_var->name, delim,
-					       list.items[j].string, term);
+					       list.பொருட்கள்[j].string, term);
 			}
 			string_list_clear(&list, 0);
 		}
 	}
 
-	return 0;
+	திரும்பு 0;
 }

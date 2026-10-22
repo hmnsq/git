@@ -1,166 +1,166 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "environment.h"
-#include "tree-walk.h"
-#include "xdiff-interface.h"
-#include "help.h"
-#include "gettext.h"
-#include "hex.h"
-#include "commit.h"
-#include "commit-reach.h"
-#include "merge-ort.h"
-#include "object-name.h"
-#include "odb.h"
-#include "parse-options.h"
-#include "blob.h"
-#include "merge-blobs.h"
-#include "quote.h"
-#include "tree.h"
-#include "config.h"
-#include "strvec.h"
-#include "write-or-die.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "tree-walk.h"
+#அந்தர்பாவ "xdiff-interface.h"
+#அந்தர்பாவ "help.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "hex.h"
+#அந்தர்பாவ "commit.h"
+#அந்தர்பாவ "commit-reach.h"
+#அந்தர்பாவ "merge-ort.h"
+#அந்தர்பாவ "object-name.h"
+#அந்தர்பாவ "odb.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "blob.h"
+#அந்தர்பாவ "merge-blobs.h"
+#அந்தர்பாவ "quote.h"
+#அந்தர்பாவ "tree.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "strvec.h"
+#அந்தர்பாவ "write-or-die.h"
 
-static int line_termination = '\n';
+நிலையான முழு வரி_termination = '\n';
 
-struct merge_list {
-	struct merge_list *next;
-	struct merge_list *link;	/* other stages for this object */
+கட்டமைப்பு merge_list {
+	கட்டமைப்பு merge_list *next;
+	கட்டமைப்பு merge_list *link;	/* other stages for this object */
 
-	unsigned int stage : 2;
-	unsigned int mode;
-	const char *path;
-	struct blob *blob;
+	unsigned முழு stage : 2;
+	unsigned முழு mode;
+	மாறிலி எழுத்து *path;
+	கட்டமைப்பு blob *blob;
 };
 
-static struct merge_list *merge_result, **merge_result_end = &merge_result;
+நிலையான கட்டமைப்பு merge_list *merge_result, **merge_result_end = &merge_result;
 
-static void add_merge_entry(struct merge_list *entry)
+நிலையான வெறுமை add_merge_entry(கட்டமைப்பு merge_list *entry)
 {
 	*merge_result_end = entry;
 	merge_result_end = &entry->next;
 }
 
-static void trivial_merge_trees(struct tree_desc t[3], const char *base);
+நிலையான வெறுமை trivial_merge_trees(கட்டமைப்பு மரம்_desc t[3], மாறிலி எழுத்து *base);
 
-static const char *explanation(struct merge_list *entry)
+நிலையான மாறிலி எழுத்து *explanation(கட்டமைப்பு merge_list *entry)
 {
-	switch (entry->stage) {
-	case 0:
-		return "merged";
-	case 3:
-		return "added in remote";
-	case 2:
-		if (entry->link)
-			return "added in both";
-		return "added in local";
+	தேர்வு (entry->stage) {
+	நிலை 0:
+		திரும்பு "merged";
+	நிலை 3:
+		திரும்பு "added in remote";
+	நிலை 2:
+		எனில் (entry->link)
+			திரும்பு "added in both";
+		திரும்பு "added in local";
 	}
 
 	/* Existed in base */
 	entry = entry->link;
-	if (!entry)
-		return "removed in both";
+	எனில் (!entry)
+		திரும்பு "removed in both";
 
-	if (entry->link)
-		return "changed in both";
+	எனில் (entry->link)
+		திரும்பு "changed in both";
 
-	if (entry->stage == 3)
-		return "removed in local";
-	return "removed in remote";
+	எனில் (entry->stage == 3)
+		திரும்பு "removed in local";
+	திரும்பு "removed in remote";
 }
 
-static void *result(struct merge_list *entry, size_t *size)
+நிலையான வெறுமை *result(கட்டமைப்பு merge_list *entry, size_t *size)
 {
-	enum object_type type;
-	struct blob *base, *our, *their;
-	const char *path = entry->path;
+	எண்ணிக்கை object_type type;
+	கட்டமைப்பு blob *base, *our, *their;
+	மாறிலி எழுத்து *path = entry->path;
 
-	if (!entry->stage)
-		return odb_read_object(the_repository->objects,
+	எனில் (!entry->stage)
+		திரும்பு odb_read_object(the_repository->objects,
 				       &entry->blob->object.oid, &type,
 				       size);
-	base = NULL;
-	if (entry->stage == 1) {
+	base = வெற்று;
+	எனில் (entry->stage == 1) {
 		base = entry->blob;
 		entry = entry->link;
 	}
-	our = NULL;
-	if (entry && entry->stage == 2) {
+	our = வெற்று;
+	எனில் (entry && entry->stage == 2) {
 		our = entry->blob;
 		entry = entry->link;
 	}
-	their = NULL;
-	if (entry)
+	their = வெற்று;
+	எனில் (entry)
 		their = entry->blob;
-	return merge_blobs(the_repository->index, path,
+	திரும்பு merge_blobs(the_repository->index, path,
 			   base, our, their, size);
 }
 
-static void *origin(struct merge_list *entry, size_t *size)
+நிலையான வெறுமை *origin(கட்டமைப்பு merge_list *entry, size_t *size)
 {
-	enum object_type type;
-	while (entry) {
-		if (entry->stage == 2)
-			return odb_read_object(the_repository->objects,
+	எண்ணிக்கை object_type type;
+	போது (entry) {
+		எனில் (entry->stage == 2)
+			திரும்பு odb_read_object(the_repository->objects,
 					       &entry->blob->object.oid,
 					       &type, size);
 		entry = entry->link;
 	}
-	return NULL;
+	திரும்பு வெற்று;
 }
 
-static int show_outf(void *priv UNUSED, mmfile_t *mb, int nbuf)
+நிலையான முழு show_outf(வெறுமை *priv UNUSED, mmfile_t *mb, முழு nbuf)
 {
-	int i;
-	for (i = 0; i < nbuf; i++)
-		printf("%.*s", (int) mb[i].size, mb[i].ptr);
-	return 0;
+	முழு i;
+	க்கு (i = 0; i < nbuf; i++)
+		printf("%.*s", (முழு) mb[i].size, mb[i].ptr);
+	திரும்பு 0;
 }
 
-static void show_diff(struct merge_list *entry)
+நிலையான வெறுமை show_diff(கட்டமைப்பு merge_list *entry)
 {
 	size_t size;
 	mmfile_t src, dst;
 	xpparam_t xpp;
 	xdemitconf_t xecfg;
-	xdemitcb_t ecb = { .out_line = show_outf };
+	xdemitcb_t ecb = { .out_வரி = show_outf };
 
-	memset(&xpp, 0, sizeof(xpp));
+	memset(&xpp, 0, அளவு(xpp));
 	xpp.flags = 0;
-	memset(&xecfg, 0, sizeof(xecfg));
+	memset(&xecfg, 0, அளவு(xecfg));
 	xecfg.ctxlen = 3;
 
 	src.ptr = origin(entry, &size);
-	if (!src.ptr)
+	எனில் (!src.ptr)
 		size = 0;
 	src.size = size;
 	dst.ptr = result(entry, &size);
-	if (!dst.ptr)
+	எனில் (!dst.ptr)
 		size = 0;
 	dst.size = size;
-	if (xdi_diff(&src, &dst, &xpp, &xecfg, &ecb))
+	எனில் (xdi_diff(&src, &dst, &xpp, &xecfg, &ecb))
 		die("unable to generate diff");
-	free(src.ptr);
-	free(dst.ptr);
+	விடுவி(src.ptr);
+	விடுவி(dst.ptr);
 }
 
-static void show_result_list(struct merge_list *entry)
+நிலையான வெறுமை show_result_list(கட்டமைப்பு merge_list *entry)
 {
 	printf("%s\n", explanation(entry));
-	do {
-		struct merge_list *link = entry->link;
-		static const char *desc[4] = { "result", "base", "our", "their" };
+	செய் {
+		கட்டமைப்பு merge_list *link = entry->link;
+		நிலையான மாறிலி எழுத்து *desc[4] = { "result", "base", "our", "their" };
 		printf("  %-6s %o %s %s\n", desc[entry->stage], entry->mode, oid_to_hex(&entry->blob->object.oid), entry->path);
 		entry = link;
-	} while (entry);
+	} போது (entry);
 }
 
-static void show_result(void)
+நிலையான வெறுமை show_result(வெறுமை)
 {
-	struct merge_list *walk;
+	கட்டமைப்பு merge_list *walk;
 
 	walk = merge_result;
-	while (walk) {
+	போது (walk) {
 		show_result_list(walk);
 		show_diff(walk);
 		walk = walk->next;
@@ -168,45 +168,45 @@ static void show_result(void)
 }
 
 /* An empty entry never compares same, not even to another empty entry */
-static int same_entry(struct name_entry *a, struct name_entry *b)
+நிலையான முழு same_entry(கட்டமைப்பு name_entry *a, கட்டமைப்பு name_entry *b)
 {
-	return	!is_null_oid(&a->oid) &&
+	திரும்பு	!is_null_oid(&a->oid) &&
 		!is_null_oid(&b->oid) &&
 		oideq(&a->oid, &b->oid) &&
 		a->mode == b->mode;
 }
 
-static int both_empty(struct name_entry *a, struct name_entry *b)
+நிலையான முழு both_empty(கட்டமைப்பு name_entry *a, கட்டமைப்பு name_entry *b)
 {
-	return is_null_oid(&a->oid) && is_null_oid(&b->oid);
+	திரும்பு is_null_oid(&a->oid) && is_null_oid(&b->oid);
 }
 
-static struct merge_list *create_entry(unsigned stage, unsigned mode, const struct object_id *oid, const char *path)
+நிலையான கட்டமைப்பு merge_list *create_entry(unsigned stage, unsigned mode, மாறிலி கட்டமைப்பு object_id *oid, மாறிலி எழுத்து *path)
 {
-	struct merge_list *res = xcalloc(1, sizeof(*res));
+	கட்டமைப்பு merge_list *res = xcalloc(1, அளவு(*res));
 
 	res->stage = stage;
 	res->path = path;
 	res->mode = mode;
 	res->blob = lookup_blob(the_repository, oid);
-	return res;
+	திரும்பு res;
 }
 
-static char *traverse_path(const struct traverse_info *info, const struct name_entry *n)
+நிலையான எழுத்து *traverse_path(மாறிலி கட்டமைப்பு traverse_info *info, மாறிலி கட்டமைப்பு name_entry *n)
 {
-	struct strbuf buf = STRBUF_INIT;
+	கட்டமைப்பு strbuf buf = STRBUF_INIT;
 	strbuf_make_traverse_path(&buf, info, n->path, n->pathlen);
-	return strbuf_detach(&buf, NULL);
+	திரும்பு strbuf_detach(&buf, வெற்று);
 }
 
-static void resolve(const struct traverse_info *info, struct name_entry *ours, struct name_entry *result)
+நிலையான வெறுமை resolve(மாறிலி கட்டமைப்பு traverse_info *info, கட்டமைப்பு name_entry *ours, கட்டமைப்பு name_entry *result)
 {
-	struct merge_list *orig, *final;
-	const char *path;
+	கட்டமைப்பு merge_list *orig, *final;
+	மாறிலி எழுத்து *path;
 
 	/* If it's already ours, don't bother showing it */
-	if (!ours)
-		return;
+	எனில் (!ours)
+		திரும்பு;
 
 	path = traverse_path(info, result);
 	orig = create_entry(2, ours->mode, &ours->oid, path);
@@ -217,81 +217,81 @@ static void resolve(const struct traverse_info *info, struct name_entry *ours, s
 	add_merge_entry(final);
 }
 
-static void unresolved_directory(const struct traverse_info *info,
-				 struct name_entry n[3])
+நிலையான வெறுமை unresolved_directory(மாறிலி கட்டமைப்பு traverse_info *info,
+				 கட்டமைப்பு name_entry n[3])
 {
-	struct repository *r = the_repository;
-	char *newbase;
-	struct name_entry *p;
-	struct tree_desc t[3];
-	void *buf0, *buf1, *buf2;
+	கட்டமைப்பு repository *r = the_repository;
+	எழுத்து *newbase;
+	கட்டமைப்பு name_entry *p;
+	கட்டமைப்பு மரம்_desc t[3];
+	வெறுமை *buf0, *buf1, *buf2;
 
-	for (p = n; p < n + 3; p++) {
-		if (p->mode && S_ISDIR(p->mode))
-			break;
+	க்கு (p = n; p < n + 3; p++) {
+		எனில் (p->mode && S_ISDIR(p->mode))
+			நிறுத்து;
 	}
-	if (n + 3 <= p)
-		return; /* there is no tree here */
+	எனில் (n + 3 <= p)
+		திரும்பு; /* there is no tree here */
 
 	newbase = traverse_path(info, p);
 
-#define ENTRY_OID(e) (((e)->mode && S_ISDIR((e)->mode)) ? &(e)->oid : NULL)
-	buf0 = fill_tree_descriptor(r, t + 0, ENTRY_OID(n + 0));
-	buf1 = fill_tree_descriptor(r, t + 1, ENTRY_OID(n + 1));
-	buf2 = fill_tree_descriptor(r, t + 2, ENTRY_OID(n + 2));
+#define ENTRY_OID(e) (((e)->mode && S_ISDIR((e)->mode)) ? &(e)->oid : வெற்று)
+	buf0 = fill_மரம்_descriptor(r, t + 0, ENTRY_OID(n + 0));
+	buf1 = fill_மரம்_descriptor(r, t + 1, ENTRY_OID(n + 1));
+	buf2 = fill_மரம்_descriptor(r, t + 2, ENTRY_OID(n + 2));
 #undef ENTRY_OID
 
 	trivial_merge_trees(t, newbase);
 
-	free(buf0);
-	free(buf1);
-	free(buf2);
-	free(newbase);
+	விடுவி(buf0);
+	விடுவி(buf1);
+	விடுவி(buf2);
+	விடுவி(newbase);
 }
 
 
-static struct merge_list *link_entry(unsigned stage, const struct traverse_info *info, struct name_entry *n, struct merge_list *entry)
+நிலையான கட்டமைப்பு merge_list *link_entry(unsigned stage, மாறிலி கட்டமைப்பு traverse_info *info, கட்டமைப்பு name_entry *n, கட்டமைப்பு merge_list *entry)
 {
-	const char *path;
-	struct merge_list *link;
+	மாறிலி எழுத்து *path;
+	கட்டமைப்பு merge_list *link;
 
-	if (!n->mode)
-		return entry;
-	if (entry)
+	எனில் (!n->mode)
+		திரும்பு entry;
+	எனில் (entry)
 		path = entry->path;
-	else
+	இல்லையெனில்
 		path = traverse_path(info, n);
 	link = create_entry(stage, n->mode, &n->oid, path);
 	link->link = entry;
-	return link;
+	திரும்பு link;
 }
 
-static void unresolved(const struct traverse_info *info, struct name_entry n[3])
+நிலையான வெறுமை unresolved(மாறிலி கட்டமைப்பு traverse_info *info, கட்டமைப்பு name_entry n[3])
 {
-	struct merge_list *entry = NULL;
-	int i;
+	கட்டமைப்பு merge_list *entry = வெற்று;
+	முழு i;
 	unsigned dirmask = 0, mask = 0;
 
-	for (i = 0; i < 3; i++) {
+	க்கு (i = 0; i < 3; i++) {
 		mask |= (1 << i);
 		/*
 		 * Treat missing entries as directories so that we return
 		 * after unresolved_directory has handled this.
 		 */
-		if (!n[i].mode || S_ISDIR(n[i].mode))
+		எனில் (!n[i].mode || S_ISDIR(n[i].mode))
 			dirmask |= (1 << i);
 	}
 
 	unresolved_directory(info, n);
 
-	if (dirmask == mask)
-		return;
+	எனில் (dirmask == mask)
+		திரும்பு;
 
-	if (n[2].mode && !S_ISDIR(n[2].mode))
+	எனில் (n[2].mode && !S_ISDIR(n[2].mode))
 		entry = link_entry(3, info, n + 2, entry);
-	if (n[1].mode && !S_ISDIR(n[1].mode))
+	எனில் (n[1].mode && !S_ISDIR(n[1].mode))
 		entry = link_entry(2, info, n + 1, entry);
-	if (n[0].mode && !S_ISDIR(n[0].mode))
+	எனில் (n[0].mode && !S_ISDIR(n[0].mode))
 		entry = link_entry(1, info, n + 0, entry);
 
 	add_merge_entry(entry);
@@ -326,22 +326,22 @@ static void unresolved(const struct traverse_info *info, struct name_entry n[3])
  * The successful merge rules are the same as for the three-way merge
  * in git-read-tree.
  */
-static int threeway_callback(int n UNUSED, unsigned long mask,
+நிலையான முழு threeway_callback(முழு n UNUSED, unsigned long mask,
 			     unsigned long dirmask UNUSED,
-			     struct name_entry *entry, struct traverse_info *info)
+			     கட்டமைப்பு name_entry *entry, கட்டமைப்பு traverse_info *info)
 {
 	/* Same in both? */
-	if (same_entry(entry+1, entry+2) || both_empty(entry+1, entry+2)) {
+	எனில் (same_entry(entry+1, entry+2) || both_empty(entry+1, entry+2)) {
 		/* Modified, added or removed identically */
-		resolve(info, NULL, entry+1);
-		return mask;
+		resolve(info, வெற்று, entry+1);
+		திரும்பு mask;
 	}
 
-	if (same_entry(entry+0, entry+1)) {
-		if (!is_null_oid(&entry[2].oid) && !S_ISDIR(entry[2].mode)) {
+	எனில் (same_entry(entry+0, entry+1)) {
+		எனில் (!is_null_oid(&entry[2].oid) && !S_ISDIR(entry[2].mode)) {
 			/* We did not touch, they modified -- take theirs */
 			resolve(info, entry+1, entry+2);
-			return mask;
+			திரும்பு mask;
 		}
 		/*
 		 * If we did not touch a directory but they made it
@@ -350,85 +350,85 @@ static int threeway_callback(int n UNUSED, unsigned long mask,
 		 */
 	}
 
-	if (same_entry(entry+0, entry+2) || both_empty(entry+0, entry+2)) {
+	எனில் (same_entry(entry+0, entry+2) || both_empty(entry+0, entry+2)) {
 		/* We added, modified or removed, they did not touch -- take ours */
-		resolve(info, NULL, entry+1);
-		return mask;
+		resolve(info, வெற்று, entry+1);
+		திரும்பு mask;
 	}
 
 	unresolved(info, entry);
-	return mask;
+	திரும்பு mask;
 }
 
-static void trivial_merge_trees(struct tree_desc t[3], const char *base)
+நிலையான வெறுமை trivial_merge_trees(கட்டமைப்பு மரம்_desc t[3], மாறிலி எழுத்து *base)
 {
-	struct traverse_info info;
+	கட்டமைப்பு traverse_info info;
 
 	setup_traverse_info(&info, base);
 	info.fn = threeway_callback;
 	traverse_trees(the_repository->index, 3, t, &info);
 }
 
-static void *get_tree_descriptor(struct repository *r,
-				 struct tree_desc *desc,
-				 const char *rev)
+நிலையான வெறுமை *get_மரம்_descriptor(கட்டமைப்பு repository *r,
+				 கட்டமைப்பு மரம்_desc *desc,
+				 மாறிலி எழுத்து *rev)
 {
-	struct object_id oid;
-	void *buf;
+	கட்டமைப்பு object_id oid;
+	வெறுமை *buf;
 
-	if (repo_get_oid(r, rev, &oid))
+	எனில் (repo_get_oid(r, rev, &oid))
 		die("unknown rev %s", rev);
-	buf = fill_tree_descriptor(r, desc, &oid);
-	if (!buf)
+	buf = fill_மரம்_descriptor(r, desc, &oid);
+	எனில் (!buf)
 		die("%s is not a tree", rev);
-	return buf;
+	திரும்பு buf;
 }
 
-static int trivial_merge(const char *base,
-			 const char *branch1,
-			 const char *branch2)
+நிலையான முழு trivial_merge(மாறிலி எழுத்து *base,
+			 மாறிலி எழுத்து *branch1,
+			 மாறிலி எழுத்து *branch2)
 {
-	struct repository *r = the_repository;
-	struct tree_desc t[3];
-	void *buf1, *buf2, *buf3;
+	கட்டமைப்பு repository *r = the_repository;
+	கட்டமைப்பு மரம்_desc t[3];
+	வெறுமை *buf1, *buf2, *buf3;
 
-	buf1 = get_tree_descriptor(r, t+0, base);
-	buf2 = get_tree_descriptor(r, t+1, branch1);
-	buf3 = get_tree_descriptor(r, t+2, branch2);
+	buf1 = get_மரம்_descriptor(r, t+0, base);
+	buf2 = get_மரம்_descriptor(r, t+1, branch1);
+	buf3 = get_மரம்_descriptor(r, t+2, branch2);
 	trivial_merge_trees(t, "");
-	free(buf1);
-	free(buf2);
-	free(buf3);
+	விடுவி(buf1);
+	விடுவி(buf2);
+	விடுவி(buf3);
 
 	show_result();
-	return 0;
+	திரும்பு 0;
 }
 
-enum mode {
+எண்ணிக்கை mode {
 	MODE_UNKNOWN,
 	MODE_TRIVIAL,
 	MODE_REAL,
 };
 
-struct merge_tree_options {
-	int mode;
-	int allow_unrelated_histories;
-	int show_messages;
-	int name_only;
-	int use_stdin;
-	struct merge_options merge_options;
+கட்டமைப்பு merge_மரம்_options {
+	முழு mode;
+	முழு allow_unrelated_histories;
+	முழு show_messages;
+	முழு name_only;
+	முழு use_stdin;
+	கட்டமைப்பு merge_options merge_options;
 };
 
-static int real_merge(struct merge_tree_options *o,
-		      const char *merge_base,
-		      const char *branch1, const char *branch2,
-		      const char *prefix)
+நிலையான முழு real_merge(கட்டமைப்பு merge_மரம்_options *o,
+		      மாறிலி எழுத்து *merge_base,
+		      மாறிலி எழுத்து *branch1, மாறிலி எழுத்து *branch2,
+		      மாறிலி எழுத்து *prefix)
 {
-	struct commit *parent1, *parent2;
-	struct commit_list *merge_bases = NULL;
-	struct merge_result result = { 0 };
-	int show_messages = o->show_messages;
-	struct merge_options opt;
+	கட்டமைப்பு commit *parent1, *parent2;
+	கட்டமைப்பு commit_list *merge_bases = வெற்று;
+	கட்டமைப்பு merge_result result = { 0 };
+	முழு show_messages = o->show_messages;
+	கட்டமைப்பு merge_options opt;
 
 	copy_merge_options(&opt, &o->merge_options);
 	opt.show_rename_progress = 0;
@@ -436,44 +436,44 @@ static int real_merge(struct merge_tree_options *o,
 	opt.branch1 = branch1;
 	opt.branch2 = branch2;
 
-	if (merge_base) {
-		struct tree *base_tree, *parent1_tree, *parent2_tree;
+	எனில் (merge_base) {
+		கட்டமைப்பு மரம் *base_மரம், *parent1_மரம், *parent2_மரம்;
 
 		/*
 		 * We actually only need the trees because we already
 		 * have a merge base.
 		 */
-		struct object_id base_oid, head_oid, merge_oid;
+		கட்டமைப்பு object_id base_oid, head_oid, merge_oid;
 
-		if (repo_get_oid_treeish(the_repository, merge_base, &base_oid))
+		எனில் (repo_get_oid_treeish(the_repository, merge_base, &base_oid))
 			die(_("could not parse as tree '%s'"), merge_base);
-		base_tree = repo_parse_tree_indirect(the_repository,
+		base_மரம் = repo_parse_மரம்_indirect(the_repository,
 						     &base_oid);
-		if (!base_tree)
+		எனில் (!base_மரம்)
 			die(_("unable to read tree (%s)"), oid_to_hex(&base_oid));
-		if (repo_get_oid_treeish(the_repository, branch1, &head_oid))
+		எனில் (repo_get_oid_treeish(the_repository, branch1, &head_oid))
 			die(_("could not parse as tree '%s'"), branch1);
-		parent1_tree = repo_parse_tree_indirect(the_repository,
+		parent1_மரம் = repo_parse_மரம்_indirect(the_repository,
 							&head_oid);
-		if (!parent1_tree)
+		எனில் (!parent1_மரம்)
 			die(_("unable to read tree (%s)"), oid_to_hex(&head_oid));
-		if (repo_get_oid_treeish(the_repository, branch2, &merge_oid))
+		எனில் (repo_get_oid_treeish(the_repository, branch2, &merge_oid))
 			die(_("could not parse as tree '%s'"), branch2);
-		parent2_tree = repo_parse_tree_indirect(the_repository,
+		parent2_மரம் = repo_parse_மரம்_indirect(the_repository,
 							&merge_oid);
-		if (!parent2_tree)
+		எனில் (!parent2_மரம்)
 			die(_("unable to read tree (%s)"), oid_to_hex(&merge_oid));
 
 		opt.ancestor = merge_base;
-		merge_incore_nonrecursive(&opt, base_tree, parent1_tree, parent2_tree, &result);
-	} else {
+		merge_incore_nonrecursive(&opt, base_மரம், parent1_மரம், parent2_மரம், &result);
+	} இல்லையெனில் {
 		parent1 = get_merge_parent(branch1);
-		if (!parent1)
+		எனில் (!parent1)
 			help_unknown_ref(branch1, "merge-tree",
 					 _("not something we can merge"));
 
 		parent2 = get_merge_parent(branch2);
-		if (!parent2)
+		எனில் (!parent2)
 			help_unknown_ref(branch2, "merge-tree",
 					 _("not something we can merge"));
 
@@ -481,80 +481,80 @@ static int real_merge(struct merge_tree_options *o,
 		 * Get the merge bases, in reverse order; see comment above
 		 * merge_incore_recursive in merge-ort.h
 		 */
-		if (repo_get_merge_bases(the_repository, parent1,
+		எனில் (repo_get_merge_bases(the_repository, parent1,
 					 parent2, &merge_bases) < 0)
 			exit(128);
-		if (!merge_bases && !o->allow_unrelated_histories)
+		எனில் (!merge_bases && !o->allow_unrelated_histories)
 			die(_("refusing to merge unrelated histories"));
 		merge_bases = commit_list_reverse(merge_bases);
 		merge_incore_recursive(&opt, merge_bases, parent1, parent2, &result);
 		commit_list_free(merge_bases);
 	}
 
-	if (result.clean < 0)
+	எனில் (result.clean < 0)
 		die(_("failure to merge"));
 
-	if (o->merge_options.mergeability_only)
-		goto cleanup;
+	எனில் (o->merge_options.mergeability_only)
+		செல் cleanup;
 
-	if (show_messages == -1)
+	எனில் (show_messages == -1)
 		show_messages = !result.clean;
 
-	if (o->use_stdin)
-		printf("%d%c", result.clean, line_termination);
-	printf("%s%c", oid_to_hex(&result.tree->object.oid), line_termination);
-	if (!result.clean) {
-		struct string_list conflicted_files = STRING_LIST_INIT_NODUP;
-		const char *last = NULL;
+	எனில் (o->use_stdin)
+		printf("%d%c", result.clean, வரி_termination);
+	printf("%s%c", oid_to_hex(&result.மரம்->object.oid), வரி_termination);
+	எனில் (!result.clean) {
+		கட்டமைப்பு string_list conflicted_files = STRING_LIST_INIT_NODUP;
+		மாறிலி எழுத்து *last = வெற்று;
 
 		merge_get_conflicted_files(&result, &conflicted_files);
-		for (size_t i = 0; i < conflicted_files.nr; i++) {
-			const char *name = conflicted_files.items[i].string;
-			struct stage_info *c = conflicted_files.items[i].util;
-			if (!o->name_only)
+		க்கு (size_t i = 0; i < conflicted_files.nr; i++) {
+			மாறிலி எழுத்து *name = conflicted_files.பொருட்கள்[i].string;
+			கட்டமைப்பு stage_info *c = conflicted_files.பொருட்கள்[i].util;
+			எனில் (!o->name_only)
 				printf("%06o %s %d\t",
 				       c->mode, oid_to_hex(&c->oid), c->stage);
-			else if (last && !strcmp(last, name))
-				continue;
+			இல்லையெனில் எனில் (last && !strcmp(last, name))
+				தொடர்;
 			write_name_quoted_relative(
-				name, prefix, stdout, line_termination);
+				name, prefix, stdout, வரி_termination);
 			last = name;
 		}
 		string_list_clear(&conflicted_files, 1);
 	}
-	if (show_messages) {
-		putchar(line_termination);
-		merge_display_update_messages(&opt, line_termination == '\0',
+	எனில் (show_messages) {
+		putchar(வரி_termination);
+		merge_display_update_messages(&opt, வரி_termination == '\0',
 					      &result);
 	}
-	if (o->use_stdin)
-		putchar(line_termination);
+	எனில் (o->use_stdin)
+		putchar(வரி_termination);
 
 cleanup:
 	merge_finalize(&opt, &result);
 	clear_merge_options(&opt);
-	return !result.clean; /* result.clean < 0 handled above */
+	திரும்பு !result.clean; /* result.clean < 0 handled above */
 }
 
-int cmd_merge_tree(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+முழு cmd_merge_மரம்(முழு argc,
+		   மாறிலி எழுத்து **argv,
+		   மாறிலி எழுத்து *prefix,
+		   கட்டமைப்பு repository *repo UNUSED)
 {
-	struct merge_tree_options o = { .show_messages = -1 };
-	struct strvec xopts = STRVEC_INIT;
-	int expected_remaining_argc;
-	int original_argc;
-	const char *merge_base = NULL;
-	int ret;
-	int quiet = 0;
+	கட்டமைப்பு merge_மரம்_options o = { .show_messages = -1 };
+	கட்டமைப்பு strvec xopts = STRVEC_INIT;
+	முழு expected_remaining_argc;
+	முழு original_argc;
+	மாறிலி எழுத்து *merge_base = வெற்று;
+	முழு ret;
+	முழு quiet = 0;
 
-	const char * const merge_tree_usage[] = {
+	மாறிலி எழுத்து * மாறிலி merge_மரம்_usage[] = {
 		N_("git merge-tree [--write-tree] [<options>] <branch1> <branch2>"),
 		N_("git merge-tree [--trivial-merge] <base-tree> <branch1> <branch2>"),
-		NULL
+		வெற்று
 	};
-	struct option mt_options[] = {
+	கட்டமைப்பு option mt_options[] = {
 		OPT_CMDMODE(0, "write-tree", &o.mode,
 			    N_("do a real merge instead of a trivial merge"),
 			    MODE_REAL),
@@ -566,7 +566,7 @@ int cmd_merge_tree(int argc,
 			   &quiet,
 			   N_("suppress all output; only exit status wanted"),
 			   PARSE_OPT_NONEG),
-		OPT_SET_INT('z', NULL, &line_termination,
+		OPT_SET_INT('z', வெற்று, &வரி_termination,
 			    N_("separate paths with the NUL character"), '\0'),
 		OPT_BOOL_F(0, "name-only",
 			   &o.name_only,
@@ -595,56 +595,56 @@ int cmd_merge_tree(int argc,
 	/* Parse arguments */
 	original_argc = argc - 1; /* ignoring argv[0] */
 	argc = parse_options(argc, argv, prefix, mt_options,
-			     merge_tree_usage, PARSE_OPT_STOP_AT_NON_OPTION);
+			     merge_மரம்_usage, PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (quiet && o.show_messages == -1)
+	எனில் (quiet && o.show_messages == -1)
 		o.show_messages = 0;
 	o.merge_options.mergeability_only = quiet;
 	die_for_incompatible_opt2(quiet, "--quiet", o.show_messages, "--messages");
 	die_for_incompatible_opt2(quiet, "--quiet", o.name_only, "--name-only");
 	die_for_incompatible_opt2(quiet, "--quiet", o.use_stdin, "--stdin");
-	die_for_incompatible_opt2(quiet, "--quiet", !line_termination, "-z");
+	die_for_incompatible_opt2(quiet, "--quiet", !வரி_termination, "-z");
 
-	if (xopts.nr && o.mode == MODE_TRIVIAL)
+	எனில் (xopts.nr && o.mode == MODE_TRIVIAL)
 		die(_("--trivial-merge is incompatible with all other options"));
-	for (size_t x = 0; x < xopts.nr; x++)
-		if (parse_merge_opt(&o.merge_options, xopts.v[x]))
+	க்கு (size_t x = 0; x < xopts.nr; x++)
+		எனில் (parse_merge_opt(&o.merge_options, xopts.v[x]))
 			die(_("unknown strategy option: -X%s"), xopts.v[x]);
 
 	/* Handle --stdin */
-	if (o.use_stdin) {
-		struct strbuf buf = STRBUF_INIT;
+	எனில் (o.use_stdin) {
+		கட்டமைப்பு strbuf buf = STRBUF_INIT;
 
-		if (o.mode == MODE_TRIVIAL)
+		எனில் (o.mode == MODE_TRIVIAL)
 			die(_("--trivial-merge is incompatible with all other options"));
-		if (merge_base)
+		எனில் (merge_base)
 			die(_("options '%s' and '%s' cannot be used together"),
 			    "--merge-base", "--stdin");
-		line_termination = '\0';
-		while (strbuf_getline_lf(&buf, stdin) != EOF) {
-			struct string_list split = STRING_LIST_INIT_NODUP;
-			const char *input_merge_base = NULL;
+		வரி_termination = '\0';
+		போது (strbuf_getline_lf(&buf, stdin) != EOF) {
+			கட்டமைப்பு string_list split = STRING_LIST_INIT_NODUP;
+			மாறிலி எழுத்து *உள்ளீடு_merge_base = வெற்று;
 
 			string_list_split_in_place_f(&split, buf.buf, " ", -1,
 						     STRING_LIST_SPLIT_TRIM);
 
-			if (split.nr < 2)
+			எனில் (split.nr < 2)
 				die(_("malformed input line: '%s'."), buf.buf);
 
 			/* parse the merge-base */
-			if (!strcmp(split.items[1].string, "--")) {
-				input_merge_base = split.items[0].string;
+			எனில் (!strcmp(split.பொருட்கள்[1].string, "--")) {
+				உள்ளீடு_merge_base = split.பொருட்கள்[0].string;
 			}
 
-			if (input_merge_base && split.nr == 4) {
-				real_merge(&o, input_merge_base,
-					   split.items[2].string, split.items[3].string,
+			எனில் (உள்ளீடு_merge_base && split.nr == 4) {
+				real_merge(&o, உள்ளீடு_merge_base,
+					   split.பொருட்கள்[2].string, split.பொருட்கள்[3].string,
 					   prefix);
-			} else if (!input_merge_base && split.nr == 2) {
-				real_merge(&o, NULL,
-					   split.items[0].string, split.items[1].string,
+			} இல்லையெனில் எனில் (!உள்ளீடு_merge_base && split.nr == 2) {
+				real_merge(&o, வெற்று,
+					   split.பொருட்கள்[0].string, split.பொருட்கள்[1].string,
 					   prefix);
-			} else {
+			} இல்லையெனில் {
 				die(_("malformed input line: '%s'."), buf.buf);
 			}
 			maybe_flush_or_die(stdout, "stdout");
@@ -654,50 +654,50 @@ int cmd_merge_tree(int argc,
 		strbuf_release(&buf);
 
 		ret = 0;
-		goto out;
+		செல் out;
 	}
 
 	/* Figure out which mode to use */
-	switch (o.mode) {
-	default:
+	தேர்வு (o.mode) {
+	இயல்பு:
 		BUG("unexpected command mode %d", o.mode);
-	case MODE_UNKNOWN:
-		switch (argc) {
-		default:
-			usage_with_options(merge_tree_usage, mt_options);
-		case 2:
+	நிலை MODE_UNKNOWN:
+		தேர்வு (argc) {
+		இயல்பு:
+			usage_with_options(merge_மரம்_usage, mt_options);
+		நிலை 2:
 			o.mode = MODE_REAL;
-			break;
-		case 3:
+			நிறுத்து;
+		நிலை 3:
 			o.mode = MODE_TRIVIAL;
-			break;
+			நிறுத்து;
 		}
 		expected_remaining_argc = argc;
-		break;
-	case MODE_REAL:
+		நிறுத்து;
+	நிலை MODE_REAL:
 		expected_remaining_argc = 2;
-		break;
-	case MODE_TRIVIAL:
+		நிறுத்து;
+	நிலை MODE_TRIVIAL:
 		expected_remaining_argc = 3;
 		/* Removal of `--trivial-merge` is expected */
 		original_argc--;
-		break;
+		நிறுத்து;
 	}
-	if (o.mode == MODE_TRIVIAL && argc < original_argc)
+	எனில் (o.mode == MODE_TRIVIAL && argc < original_argc)
 		die(_("--trivial-merge is incompatible with all other options"));
 
-	if (argc != expected_remaining_argc)
-		usage_with_options(merge_tree_usage, mt_options);
+	எனில் (argc != expected_remaining_argc)
+		usage_with_options(merge_மரம்_usage, mt_options);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, வெற்று);
 
 	/* Do the relevant type of merge */
-	if (o.mode == MODE_REAL)
+	எனில் (o.mode == MODE_REAL)
 		ret = real_merge(&o, merge_base, argv[0], argv[1], prefix);
-	else
+	இல்லையெனில்
 		ret = trivial_merge(argv[0], argv[1], argv[2]);
 
 out:
 	strvec_clear(&xopts);
-	return ret;
+	திரும்பு ret;
 }

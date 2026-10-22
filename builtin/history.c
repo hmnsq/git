@@ -1,33 +1,33 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "cache-tree.h"
-#include "commit.h"
-#include "commit-reach.h"
-#include "config.h"
-#include "editor.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "lockfile.h"
-#include "merge-ort.h"
-#include "oidmap.h"
-#include "parse-options.h"
-#include "path.h"
-#include "read-cache.h"
-#include "refs.h"
-#include "ref-filter.h"
-#include "replay.h"
-#include "reset.h"
-#include "revision.h"
-#include "sequencer.h"
-#include "string-list.h"
-#include "strvec.h"
-#include "tree.h"
-#include "tree-walk.h"
-#include "unpack-trees.h"
-#include "wt-status.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "advice.h"
+#அந்தர்பாவ "cache-tree.h"
+#அந்தர்பாவ "commit.h"
+#அந்தர்பாவ "commit-reach.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "editor.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "hex.h"
+#அந்தர்பாவ "lockfile.h"
+#அந்தர்பாவ "merge-ort.h"
+#அந்தர்பாவ "oidmap.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "path.h"
+#அந்தர்பாவ "read-cache.h"
+#அந்தர்பாவ "refs.h"
+#அந்தர்பாவ "ref-filter.h"
+#அந்தர்பாவ "replay.h"
+#அந்தர்பாவ "reset.h"
+#அந்தர்பாவ "revision.h"
+#அந்தர்பாவ "sequencer.h"
+#அந்தர்பாவ "string-list.h"
+#அந்தர்பாவ "strvec.h"
+#அந்தர்பாவ "tree.h"
+#அந்தர்பாவ "tree-walk.h"
+#அந்தர்பாவ "unpack-trees.h"
+#அந்தர்பாவ "wt-status.h"
 
 #define GIT_HISTORY_DROP_USAGE \
 	N_("git history drop <commit> [--dry-run] [--update-refs=(branches|head)] [--empty=(drop|keep|abort)]")
@@ -40,26 +40,26 @@
 #define GIT_HISTORY_SQUASH_USAGE \
 	N_("git history squash [--dry-run] [--update-refs=(branches|head)] [--[no-]edit] <revision-range>")
 
-static void change_data_free(void *util, const char *str UNUSED)
+நிலையான வெறுமை change_data_free(வெறுமை *util, மாறிலி எழுத்து *str UNUSED)
 {
-	struct wt_status_change_data *d = util;
-	free(d->rename_source);
-	free(d);
+	கட்டமைப்பு wt_status_change_data *d = util;
+	விடுவி(d->rename_source);
+	விடுவி(d);
 }
 
-static int fill_commit_message(struct repository *repo,
-			       const struct object_id *old_tree,
-			       const struct object_id *new_tree,
-			       const char *default_message,
-			       const char *action,
-			       struct strbuf *out)
+நிலையான முழு fill_commit_message(கட்டமைப்பு repository *repo,
+			       மாறிலி கட்டமைப்பு object_id *old_மரம்,
+			       மாறிலி கட்டமைப்பு object_id *new_மரம்,
+			       மாறிலி எழுத்து *default_message,
+			       மாறிலி எழுத்து *action,
+			       கட்டமைப்பு strbuf *out)
 {
-	const char *path = git_path_commit_editmsg();
-	const char *hint =
+	மாறிலி எழுத்து *path = git_path_commit_editmsg();
+	மாறிலி எழுத்து *hint =
 		_("Please enter the commit message for the %s changes."
 		  " Lines starting\nwith '%s' will be ignored, and an"
 		  " empty message aborts the commit.\n");
-	struct wt_status s;
+	கட்டமைப்பு wt_status s;
 
 	wt_status_prepare(repo, &s);
 	FREE_AND_NULL(s.branch);
@@ -73,190 +73,190 @@ static int fill_commit_message(struct repository *repo,
 	s.committable = 1;
 
 	s.fp = fopen(path, "w");
-	if (!s.fp)
-		return error_errno(_("could not open '%s'"), path);
+	எனில் (!s.fp)
+		திரும்பு error_errno(_("could not open '%s'"), path);
 
 	strbuf_addstr(out, default_message);
 	strbuf_addch(out, '\n');
-	strbuf_commented_addf(out, comment_line_str, hint, action, comment_line_str);
-	if (fwrite(out->buf, 1, out->len, s.fp) != out->len)
+	strbuf_commented_addf(out, comment_வரி_str, hint, action, comment_வரி_str);
+	எனில் (fwrite(out->buf, 1, out->len, s.fp) != out->len)
 		die_errno(_("could not write to '%s'"), path);
 
-	wt_status_collect_changes_trees(&s, old_tree, new_tree);
+	wt_status_collect_changes_trees(&s, old_மரம், new_மரம்);
 	wt_status_print(&s);
 	wt_status_collect_free_buffers(&s);
 	string_list_clear_func(&s.change, change_data_free);
-	if (fclose(s.fp))
+	எனில் (fclose(s.fp))
 		die_errno(_("could not write to '%s'"), path);
 
 	strbuf_reset(out);
-	if (launch_editor(path, out, NULL)) {
+	எனில் (launch_editor(path, out, வெற்று)) {
 		fprintf(stderr, _("Aborting commit as launching the editor failed.\n"));
-		return -1;
+		திரும்பு -1;
 	}
-	strbuf_stripspace(out, comment_line_str);
+	strbuf_stripspace(out, comment_வரி_str);
 
-	cleanup_message(out, COMMIT_MSG_CLEANUP_ALL, 0);
+	cleanup_message(out, COMMIT_செய்தி_CLEANUP_ALL, 0);
 
-	if (!out->len) {
+	எனில் (!out->len) {
 		fprintf(stderr, _("Aborting commit due to empty commit message.\n"));
-		return -1;
+		திரும்பு -1;
 	}
 
-	return 0;
+	திரும்பு 0;
 }
 
-enum commit_tree_flags {
-	COMMIT_TREE_EDIT_MESSAGE = (1 << 0),
+எண்ணிக்கை commit_மரம்_flags {
+	COMMIT_மரம்_EDIT_MESSAGE = (1 << 0),
 };
 
-static int commit_tree_ext(struct repository *repo,
-			   const char *action,
-			   struct commit *commit_with_message,
-			   const char *message_template,
-			   const struct commit_list *parents,
-			   const struct object_id *old_tree,
-			   const struct object_id *new_tree,
-			   struct commit **out,
-			   enum commit_tree_flags flags)
+நிலையான முழு commit_மரம்_ext(கட்டமைப்பு repository *repo,
+			   மாறிலி எழுத்து *action,
+			   கட்டமைப்பு commit *commit_with_message,
+			   மாறிலி எழுத்து *message_template,
+			   மாறிலி கட்டமைப்பு commit_list *parents,
+			   மாறிலி கட்டமைப்பு object_id *old_மரம்,
+			   மாறிலி கட்டமைப்பு object_id *new_மரம்,
+			   கட்டமைப்பு commit **out,
+			   எண்ணிக்கை commit_மரம்_flags flags)
 {
-	const char *exclude_gpgsig[] = {
+	மாறிலி எழுத்து *exclude_gpgsig[] = {
 		/* We reencode the message, so the encoding needs to be stripped. */
 		"encoding",
 		/* We need to strip signatures as those will become invalid. */
 		"gpgsig",
 		"gpgsig-sha256",
-		NULL,
+		வெற்று,
 	};
-	const char *original_message, *original_body, *ptr;
-	struct commit_extra_header *original_extra_headers = NULL;
-	struct strbuf commit_message = STRBUF_INIT;
-	struct object_id rewritten_commit_oid;
-	char *original_author = NULL;
+	மாறிலி எழுத்து *original_message, *original_body, *ptr;
+	கட்டமைப்பு commit_extra_header *original_extra_headers = வெற்று;
+	கட்டமைப்பு strbuf commit_message = STRBUF_INIT;
+	கட்டமைப்பு object_id rewritten_commit_oid;
+	எழுத்து *original_author = வெற்று;
 	size_t len;
-	int ret;
+	முழு ret;
 
 	/* We retain authorship of the original commit. */
-	original_message = repo_logmsg_reencode(repo, commit_with_message, NULL, NULL);
+	original_message = repo_logmsg_reencode(repo, commit_with_message, வெற்று, வெற்று);
 	ptr = find_commit_header(original_message, "author", &len);
-	if (ptr)
+	எனில் (ptr)
 		original_author = xmemdupz(ptr, len);
 	find_commit_subject(original_message, &original_body);
 
-	if (!message_template)
+	எனில் (!message_template)
 		message_template = original_body;
 
-	if (flags & COMMIT_TREE_EDIT_MESSAGE) {
-		ret = fill_commit_message(repo, old_tree, new_tree,
+	எனில் (flags & COMMIT_மரம்_EDIT_MESSAGE) {
+		ret = fill_commit_message(repo, old_மரம், new_மரம்,
 					  message_template, action, &commit_message);
-		if (ret < 0)
-			goto out;
-	} else {
+		எனில் (ret < 0)
+			செல் out;
+	} இல்லையெனில் {
 		strbuf_addstr(&commit_message, message_template);
 	}
 
 	original_extra_headers = read_commit_extra_headers(commit_with_message,
 							   exclude_gpgsig);
 
-	ret = commit_tree_extended(commit_message.buf, commit_message.len, new_tree,
+	ret = commit_மரம்_extended(commit_message.buf, commit_message.len, new_மரம்,
 				   parents, &rewritten_commit_oid, original_author,
-				   NULL, NULL, original_extra_headers);
-	if (ret < 0)
-		goto out;
+				   வெற்று, வெற்று, original_extra_headers);
+	எனில் (ret < 0)
+		செல் out;
 
 	*out = lookup_commit_or_die(&rewritten_commit_oid, "rewritten commit");
 
 out:
 	free_commit_extra_headers(original_extra_headers);
 	strbuf_release(&commit_message);
-	free(original_author);
+	விடுவி(original_author);
 	repo_unuse_commit_buffer(repo, commit_with_message, original_message);
-	return ret;
+	திரும்பு ret;
 }
 
-static int first_parent_tree_oid(struct repository *repo,
-				 struct commit *commit,
-				 struct object_id *out)
+நிலையான முழு first_parent_மரம்_oid(கட்டமைப்பு repository *repo,
+				 கட்டமைப்பு commit *commit,
+				 கட்டமைப்பு object_id *out)
 {
-	struct commit *parent = commit->parents ? commit->parents->item : NULL;
+	கட்டமைப்பு commit *parent = commit->parents ? commit->parents->item : வெற்று;
 
-	if (!parent) {
-		oidcpy(out, repo->hash_algo->empty_tree);
-		return 0;
+	எனில் (!parent) {
+		oidcpy(out, repo->hash_algo->empty_மரம்);
+		திரும்பு 0;
 	}
 
-	if (repo_parse_commit(repo, parent))
-		return error(_("unable to parse parent commit %s"),
+	எனில் (repo_parse_commit(repo, parent))
+		திரும்பு error(_("unable to parse parent commit %s"),
 			     oid_to_hex(&parent->object.oid));
 
-	oidcpy(out, &repo_get_commit_tree(repo, parent)->object.oid);
-	return 0;
+	oidcpy(out, &repo_get_commit_மரம்(repo, parent)->object.oid);
+	திரும்பு 0;
 }
 
-static int commit_tree_with_edited_message(struct repository *repo,
-					   const char *action,
-					   struct commit *original,
-					   struct commit **out)
+நிலையான முழு commit_மரம்_with_edited_message(கட்டமைப்பு repository *repo,
+					   மாறிலி எழுத்து *action,
+					   கட்டமைப்பு commit *original,
+					   கட்டமைப்பு commit **out)
 {
-	struct object_id parent_tree_oid;
-	const struct object_id *tree_oid;
+	கட்டமைப்பு object_id parent_மரம்_oid;
+	மாறிலி கட்டமைப்பு object_id *மரம்_oid;
 
-	tree_oid = &repo_get_commit_tree(repo, original)->object.oid;
+	மரம்_oid = &repo_get_commit_மரம்(repo, original)->object.oid;
 
-	if (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0)
-		return -1;
+	எனில் (first_parent_மரம்_oid(repo, original, &parent_மரம்_oid) < 0)
+		திரும்பு -1;
 
-	return commit_tree_ext(repo, action, original, NULL, original->parents,
-			       &parent_tree_oid, tree_oid, out, COMMIT_TREE_EDIT_MESSAGE);
+	திரும்பு commit_மரம்_ext(repo, action, original, வெற்று, original->parents,
+			       &parent_மரம்_oid, மரம்_oid, out, COMMIT_மரம்_EDIT_MESSAGE);
 }
 
-enum ref_action {
+எண்ணிக்கை ref_action {
 	REF_ACTION_DEFAULT,
 	REF_ACTION_BRANCHES,
 	REF_ACTION_HEAD,
 };
 
-static int parse_ref_action(const struct option *opt, const char *value, int unset)
+நிலையான முழு parse_ref_action(மாறிலி கட்டமைப்பு option *opt, மாறிலி எழுத்து *மதிப்பு, முழு unset)
 {
-	enum ref_action *action = opt->value;
+	எண்ணிக்கை ref_action *action = opt->மதிப்பு;
 
-	BUG_ON_OPT_NEG_NOARG(unset, value);
-	if (!strcmp(value, "branches")) {
+	BUG_ON_OPT_NEG_NOARG(unset, மதிப்பு);
+	எனில் (!strcmp(மதிப்பு, "branches")) {
 		*action = REF_ACTION_BRANCHES;
-	} else if (!strcmp(value, "head")) {
+	} இல்லையெனில் எனில் (!strcmp(மதிப்பு, "head")) {
 		*action = REF_ACTION_HEAD;
-	} else {
-		return error(_("%s expects one of 'branches' or 'head'"),
+	} இல்லையெனில் {
+		திரும்பு error(_("%s expects one of 'branches' or 'head'"),
 			     opt->long_name);
 	}
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int revwalk_contains_merges(struct repository *repo,
-				   const struct strvec *revwalk_args)
+நிலையான முழு revwalk_contains_merges(கட்டமைப்பு repository *repo,
+				   மாறிலி கட்டமைப்பு strvec *revwalk_args)
 {
-	struct strvec args = STRVEC_INIT;
-	struct rev_info revs;
-	int ret;
+	கட்டமைப்பு strvec args = STRVEC_INIT;
+	கட்டமைப்பு rev_info revs;
+	முழு ret;
 
 	strvec_pushv(&args, revwalk_args->v);
-	strvec_push(&args, "--min-parents=2");
+	strvec_தள்ளு(&args, "--min-parents=2");
 
-	repo_init_revisions(repo, &revs, NULL);
+	repo_init_revisions(repo, &revs, வெற்று);
 
-	setup_revisions_from_strvec(&args, &revs, NULL);
-	if (args.nr != 1)
+	setup_revisions_from_strvec(&args, &revs, வெற்று);
+	எனில் (args.nr != 1)
 		BUG("revisions were set up with invalid argument");
 
-	if (prepare_revision_walk(&revs) < 0) {
+	எனில் (prepare_revision_walk(&revs) < 0) {
 		ret = error(_("error preparing revisions"));
-		goto out;
+		செல் out;
 	}
 
-	if (get_revision(&revs)) {
+	எனில் (get_revision(&revs)) {
 		ret = error(_("replaying merge commits is not supported yet!"));
-		goto out;
+		செல் out;
 	}
 
 	reset_revision_walk();
@@ -265,22 +265,22 @@ static int revwalk_contains_merges(struct repository *repo,
 out:
 	release_revisions(&revs);
 	strvec_clear(&args);
-	return ret;
+	திரும்பு ret;
 }
 
-static int setup_revwalk(struct repository *repo,
-			 enum ref_action action,
-			 struct commit *original,
-			 struct rev_info *revs)
+நிலையான முழு setup_revwalk(கட்டமைப்பு repository *repo,
+			 எண்ணிக்கை ref_action action,
+			 கட்டமைப்பு commit *original,
+			 கட்டமைப்பு rev_info *revs)
 {
-	struct strvec args = STRVEC_INIT;
-	int ret;
+	கட்டமைப்பு strvec args = STRVEC_INIT;
+	முழு ret;
 
-	repo_init_revisions(repo, revs, NULL);
-	strvec_push(&args, "ignored");
-	strvec_push(&args, "--reverse");
-	strvec_push(&args, "--topo-order");
-	strvec_push(&args, "--full-history");
+	repo_init_revisions(repo, revs, வெற்று);
+	strvec_தள்ளு(&args, "ignored");
+	strvec_தள்ளு(&args, "--reverse");
+	strvec_தள்ளு(&args, "--topo-order");
+	strvec_தள்ளு(&args, "--full-history");
 
 	/* We only want to see commits that are descendants of the old commit. */
 	strvec_pushf(&args, "--ancestry-path=%s",
@@ -298,94 +298,94 @@ static int setup_revwalk(struct repository *repo,
 	 * update it. Otherwise we'll update (or print) all descendant
 	 * branches.
 	 */
-	if (action == REF_ACTION_HEAD) {
-		struct commit_list *from_list = NULL;
-		struct commit *head;
+	எனில் (action == REF_ACTION_HEAD) {
+		கட்டமைப்பு commit_list *from_list = வெற்று;
+		கட்டமைப்பு commit *head;
 
 		head = lookup_commit_reference_by_name("HEAD");
-		if (!head) {
+		எனில் (!head) {
 			ret = error(_("cannot look up HEAD"));
-			goto out;
+			செல் out;
 		}
 
-		commit_list_insert(original, &from_list);
+		commit_list_செருகு(original, &from_list);
 		ret = repo_is_descendant_of(repo, head, from_list);
 		commit_list_free(from_list);
 
-		if (ret < 0) {
+		எனில் (ret < 0) {
 			ret = error(_("cannot determine descendance"));
-			goto out;
-		} else if (!ret) {
+			செல் out;
+		} இல்லையெனில் எனில் (!ret) {
 			ret = error(_("rewritten commit must be an ancestor "
 				      "of HEAD when using --update-refs=head"));
-			goto out;
+			செல் out;
 		}
 
-		strvec_push(&args, "HEAD");
-	} else {
-		strvec_push(&args, "--branches");
-		strvec_push(&args, "HEAD");
+		strvec_தள்ளு(&args, "HEAD");
+	} இல்லையெனில் {
+		strvec_தள்ளு(&args, "--branches");
+		strvec_தள்ளு(&args, "HEAD");
 	}
 
 	ret = revwalk_contains_merges(repo, &args);
-	if (ret < 0)
-		goto out;
+	எனில் (ret < 0)
+		செல் out;
 
-	setup_revisions_from_strvec(&args, revs, NULL);
-	if (args.nr != 1)
+	setup_revisions_from_strvec(&args, revs, வெற்று);
+	எனில் (args.nr != 1)
 		BUG("revisions were set up with invalid argument");
 
 	ret = 0;
 
 out:
 	strvec_clear(&args);
-	return ret;
+	திரும்பு ret;
 }
 
-static int handle_ref_update(struct ref_transaction *transaction,
-			     const char *refname,
-			     const struct object_id *new_oid,
-			     const struct object_id *old_oid,
-			     const char *reflog_msg,
-			     struct strbuf *err)
+நிலையான முழு handle_ref_update(கட்டமைப்பு ref_transaction *transaction,
+			     மாறிலி எழுத்து *refname,
+			     மாறிலி கட்டமைப்பு object_id *new_oid,
+			     மாறிலி கட்டமைப்பு object_id *old_oid,
+			     மாறிலி எழுத்து *reflog_செய்தி,
+			     கட்டமைப்பு strbuf *err)
 {
-	if (!transaction) {
+	எனில் (!transaction) {
 		printf("update %s %s %s\n",
 		       refname, oid_to_hex(new_oid), oid_to_hex(old_oid));
-		return 0;
+		திரும்பு 0;
 	}
 
-	return ref_transaction_update(transaction, refname, new_oid, old_oid,
-				      NULL, NULL, 0, reflog_msg, err);
+	திரும்பு ref_transaction_update(transaction, refname, new_oid, old_oid,
+				      வெற்று, வெற்று, 0, reflog_செய்தி, err);
 }
 
-static int compute_pending_ref_updates(struct rev_info *revs,
-				       enum ref_action action,
-				       struct commit *original,
-				       struct commit *rewritten,
-				       enum replay_empty_commit_action empty,
-				       struct replay_result *result)
+நிலையான முழு compute_pending_ref_updates(கட்டமைப்பு rev_info *revs,
+				       எண்ணிக்கை ref_action action,
+				       கட்டமைப்பு commit *original,
+				       கட்டமைப்பு commit *rewritten,
+				       எண்ணிக்கை replay_empty_commit_action empty,
+				       கட்டமைப்பு replay_result *result)
 {
-	const struct name_decoration *decoration;
-	struct replay_revisions_options opts = {
+	மாறிலி கட்டமைப்பு name_decoration *decoration;
+	கட்டமைப்பு replay_revisions_options opts = {
 		.empty = empty,
 	};
-	char hex[GIT_MAX_HEXSZ + 1];
+	எழுத்து hex[GIT_MAX_HEXSZ + 1];
 	bool detached_head;
-	int head_flags = 0;
-	int ret;
+	முழு head_flags = 0;
+	முழு ret;
 
 	refs_read_ref_full(get_main_ref_store(revs->repo), "HEAD",
-			   RESOLVE_REF_NO_RECURSE, NULL, &head_flags);
+			   RESOLVE_REF_NO_RECURSE, வெற்று, &head_flags);
 	detached_head = !(head_flags & REF_ISSYMREF);
 
 	opts.onto = oid_to_hex_r(hex, &rewritten->object.oid);
 
 	ret = replay_revisions(revs, &opts, result);
-	if (ret)
-		return ret;
+	எனில் (ret)
+		திரும்பு ret;
 
-	if (action != REF_ACTION_BRANCHES && action != REF_ACTION_HEAD)
+	எனில் (action != REF_ACTION_BRANCHES && action != REF_ACTION_HEAD)
 		BUG("unsupported ref action %d", action);
 
 	/*
@@ -393,70 +393,70 @@ static int compute_pending_ref_updates(struct rev_info *revs,
 	 * ancestors of `rewritten`, so we need to manually
 	 * handle updating references that point to `original`.
 	 */
-	for (decoration = get_name_decoration(&original->object);
+	க்கு (decoration = get_name_decoration(&original->object);
 	     decoration;
 	     decoration = decoration->next)
 	{
-		if (decoration->type != DECORATION_REF_LOCAL &&
+		எனில் (decoration->type != DECORATION_REF_LOCAL &&
 		    decoration->type != DECORATION_REF_HEAD)
-			continue;
+			தொடர்;
 
-		if (action == REF_ACTION_HEAD &&
+		எனில் (action == REF_ACTION_HEAD &&
 		    decoration->type != DECORATION_REF_HEAD)
-			continue;
+			தொடர்;
 
 		/*
 		 * We only need to update HEAD separately in case it's
 		 * detached. If it's not we'd already update the branch
 		 * it is pointing to.
 		 */
-		if (action == REF_ACTION_BRANCHES &&
+		எனில் (action == REF_ACTION_BRANCHES &&
 		    decoration->type == DECORATION_REF_HEAD &&
 		    !detached_head)
-			continue;
+			தொடர்;
 
 		replay_result_queue_update(result, decoration->name,
 					   &original->object.oid,
 					   &rewritten->object.oid);
 	}
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int apply_pending_ref_updates(struct repository *repo,
-				     const struct replay_result *result,
-				     const char *reflog_msg,
-				     int dry_run)
+நிலையான முழு apply_pending_ref_updates(கட்டமைப்பு repository *repo,
+				     மாறிலி கட்டமைப்பு replay_result *result,
+				     மாறிலி எழுத்து *reflog_செய்தி,
+				     முழு dry_run)
 {
-	struct ref_transaction *transaction = NULL;
-	struct strbuf err = STRBUF_INIT;
-	int ret;
+	கட்டமைப்பு ref_transaction *transaction = வெற்று;
+	கட்டமைப்பு strbuf err = STRBUF_INIT;
+	முழு ret;
 
-	if (!dry_run) {
+	எனில் (!dry_run) {
 		transaction = ref_store_transaction_begin(get_main_ref_store(repo),
 							  0, &err);
-		if (!transaction) {
+		எனில் (!transaction) {
 			ret = error(_("failed to begin ref transaction: %s"), err.buf);
-			goto out;
+			செல் out;
 		}
 	}
 
-	for (size_t i = 0; i < result->updates_nr; i++) {
+	க்கு (size_t i = 0; i < result->updates_nr; i++) {
 		ret = handle_ref_update(transaction,
 					result->updates[i].refname,
 					&result->updates[i].new_oid,
 					&result->updates[i].old_oid,
-					reflog_msg, &err);
-		if (ret) {
+					reflog_செய்தி, &err);
+		எனில் (ret) {
 			ret = error(_("failed to update ref '%s': %s"),
 				    result->updates[i].refname, err.buf);
-			goto out;
+			செல் out;
 		}
 	}
 
-	if (transaction && ref_transaction_commit(transaction, &err)) {
+	எனில் (transaction && ref_transaction_commit(transaction, &err)) {
 		ret = error(_("failed to commit ref transaction: %s"), err.buf);
-		goto out;
+		செல் out;
 	}
 
 	ret = 0;
@@ -464,77 +464,77 @@ static int apply_pending_ref_updates(struct repository *repo,
 out:
 	ref_transaction_free(transaction);
 	strbuf_release(&err);
-	return ret;
+	திரும்பு ret;
 }
 
-static int handle_reference_updates(struct rev_info *revs,
-				    enum ref_action action,
-				    struct commit *original,
-				    struct commit *rewritten,
-				    const char *reflog_msg,
-				    int dry_run,
-				    enum replay_empty_commit_action empty)
+நிலையான முழு handle_reference_updates(கட்டமைப்பு rev_info *revs,
+				    எண்ணிக்கை ref_action action,
+				    கட்டமைப்பு commit *original,
+				    கட்டமைப்பு commit *rewritten,
+				    மாறிலி எழுத்து *reflog_செய்தி,
+				    முழு dry_run,
+				    எண்ணிக்கை replay_empty_commit_action empty)
 {
-	struct replay_result result = { 0 };
-	int ret;
+	கட்டமைப்பு replay_result result = { 0 };
+	முழு ret;
 
 	ret = compute_pending_ref_updates(revs, action, original, rewritten,
 					  empty, &result);
-	if (ret)
-		goto out;
+	எனில் (ret)
+		செல் out;
 
-	ret = apply_pending_ref_updates(revs->repo, &result, reflog_msg, dry_run);
+	ret = apply_pending_ref_updates(revs->repo, &result, reflog_செய்தி, dry_run);
 
 out:
 	replay_result_release(&result);
-	return ret;
+	திரும்பு ret;
 }
 
-static int commit_became_empty(struct repository *repo,
-			       struct commit *original,
-			       struct tree *result)
+நிலையான முழு commit_became_empty(கட்டமைப்பு repository *repo,
+			       கட்டமைப்பு commit *original,
+			       கட்டமைப்பு மரம் *result)
 {
-	struct object_id parent_tree_oid;
+	கட்டமைப்பு object_id parent_மரம்_oid;
 
-	if (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0)
-		return -1;
+	எனில் (first_parent_மரம்_oid(repo, original, &parent_மரம்_oid) < 0)
+		திரும்பு -1;
 
-	return oideq(&result->object.oid, &parent_tree_oid);
+	திரும்பு oideq(&result->object.oid, &parent_மரம்_oid);
 }
 
-static int parse_opt_empty(const struct option *opt, const char *arg, int unset)
+நிலையான முழு parse_opt_empty(மாறிலி கட்டமைப்பு option *opt, மாறிலி எழுத்து *arg, முழு unset)
 {
-	enum replay_empty_commit_action *value = opt->value;
+	எண்ணிக்கை replay_empty_commit_action *மதிப்பு = opt->மதிப்பு;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!strcmp(arg, "drop"))
-		*value = REPLAY_EMPTY_COMMIT_DROP;
-	else if (!strcmp(arg, "keep"))
-		*value = REPLAY_EMPTY_COMMIT_KEEP;
-	else if (!strcmp(arg, "abort"))
-		*value = REPLAY_EMPTY_COMMIT_ABORT;
-	else
+	எனில் (!strcmp(arg, "drop"))
+		*மதிப்பு = REPLAY_EMPTY_COMMIT_DROP;
+	இல்லையெனில் எனில் (!strcmp(arg, "keep"))
+		*மதிப்பு = REPLAY_EMPTY_COMMIT_KEEP;
+	இல்லையெனில் எனில் (!strcmp(arg, "abort"))
+		*மதிப்பு = REPLAY_EMPTY_COMMIT_ABORT;
+	இல்லையெனில்
 		die(_("unrecognized '--empty=' action '%s'; "
 		      "valid values are \"drop\", \"keep\", and \"abort\"."), arg);
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int cmd_history_fixup(int argc,
-			     const char **argv,
-			     const char *prefix,
-			     struct repository *repo)
+நிலையான முழு cmd_history_fixup(முழு argc,
+			     மாறிலி எழுத்து **argv,
+			     மாறிலி எழுத்து *prefix,
+			     கட்டமைப்பு repository *repo)
 {
-	const char * const usage[] = {
+	மாறிலி எழுத்து * மாறிலி usage[] = {
 		GIT_HISTORY_FIXUP_USAGE,
-		NULL,
+		வெற்று,
 	};
-	enum replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
-	enum ref_action action = REF_ACTION_DEFAULT;
-	enum commit_tree_flags flags = 0;
-	int dry_run = 0;
-	struct option options[] = {
+	எண்ணிக்கை replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
+	எண்ணிக்கை ref_action action = REF_ACTION_DEFAULT;
+	எண்ணிக்கை commit_மரம்_flags flags = 0;
+	முழு dry_run = 0;
+	கட்டமைப்பு option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -542,41 +542,41 @@ static int cmd_history_fixup(int argc,
 			 N_("perform a dry-run without updating any refs")),
 		OPT_BIT(0, "reedit-message", &flags,
 			N_("open an editor to modify the commit message"),
-			COMMIT_TREE_EDIT_MESSAGE),
+			COMMIT_மரம்_EDIT_MESSAGE),
 		OPT_CALLBACK_F(0, "empty", &empty, "(drop|keep|abort)",
 			       N_("how to handle commits that become empty"),
 			       PARSE_OPT_NONEG, parse_opt_empty),
 		OPT_END(),
 	};
-	struct merge_result merge_result = { 0 };
-	struct merge_options merge_opts = { 0 };
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *head_commit, *original, *rewritten;
-	struct tree *head_tree, *original_tree, *index_tree;
-	struct rev_info revs = { 0 };
+	கட்டமைப்பு merge_result merge_result = { 0 };
+	கட்டமைப்பு merge_options merge_opts = { 0 };
+	கட்டமைப்பு strbuf reflog_செய்தி = STRBUF_INIT;
+	கட்டமைப்பு commit *head_commit, *original, *rewritten;
+	கட்டமைப்பு மரம் *head_மரம், *original_மரம், *index_மரம்;
+	கட்டமைப்பு rev_info revs = { 0 };
 	bool skip_commit = false;
-	int ret;
+	முழு ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1) {
+	எனில் (argc != 1) {
 		ret = error(_("command expects a single revision"));
-		goto out;
+		செல் out;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, வெற்று);
 
-	if (action == REF_ACTION_DEFAULT)
+	எனில் (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
-	if (is_bare_repository(repo)) {
+	எனில் (is_bare_repository(repo)) {
 		ret = error(_("cannot run fixup in a bare repository"));
-		goto out;
+		செல் out;
 	}
 
 	/* Resolve the original commit, which is the one we want to fix up. */
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	எனில் (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
-		goto out;
+		செல் out;
 	}
 
 	/*
@@ -584,41 +584,41 @@ static int cmd_history_fixup(int argc,
 	 * changes are expressed as a diff from HEAD's tree to the index tree.
 	 */
 	head_commit = lookup_commit_reference_by_name("HEAD");
-	if (!head_commit) {
+	எனில் (!head_commit) {
 		ret = error(_("cannot look up HEAD"));
-		goto out;
+		செல் out;
 	}
 
-	head_tree = repo_get_commit_tree(repo, head_commit);
-	if (!head_tree) {
+	head_மரம் = repo_get_commit_மரம்(repo, head_commit);
+	எனில் (!head_மரம்) {
 		ret = error(_("cannot get tree for HEAD"));
-		goto out;
+		செல் out;
 	}
 
-	if (repo_read_index(repo) < 0) {
+	எனில் (repo_read_index(repo) < 0) {
 		ret = error(_("unable to read index"));
-		goto out;
+		செல் out;
 	}
 
-	if (!repo_index_has_changes(repo, head_tree, NULL)) {
+	எனில் (!repo_index_has_changes(repo, head_மரம், வெற்று)) {
 		ret = error(_("nothing to fixup: no staged changes"));
-		goto out;
+		செல் out;
 	}
 
 	/*
 	 * Write the index as a tree object. This is the "theirs" side of the
 	 * three-way merge: it is HEAD's tree with the staged changes applied.
 	 */
-	index_tree = write_in_core_index_as_tree(repo, repo->index);
-	if (!index_tree) {
+	index_மரம் = write_in_core_index_as_மரம்(repo, repo->index);
+	எனில் (!index_மரம்) {
 		ret = error(_("unable to write index as a tree"));
-		goto out;
+		செல் out;
 	}
 
-	original_tree = repo_get_commit_tree(repo, original);
-	if (!original_tree) {
+	original_மரம் = repo_get_commit_மரம்(repo, original);
+	எனில் (!original_மரம்) {
 		ret = error(_("cannot get tree for commit %s"), argv[0]);
-		goto out;
+		செல் out;
 	}
 
 	/*
@@ -631,30 +631,30 @@ static int cmd_history_fixup(int argc,
 	merge_opts.ancestor = "HEAD";
 	merge_opts.branch1 = argv[0];
 	merge_opts.branch2 = "staged";
-	merge_incore_nonrecursive(&merge_opts, head_tree,
-				  original_tree, index_tree, &merge_result);
+	merge_incore_nonrecursive(&merge_opts, head_மரம்,
+				  original_மரம், index_மரம், &merge_result);
 
-	if (merge_result.clean < 0) {
+	எனில் (merge_result.clean < 0) {
 		ret = error(_("merge failed while applying fixup"));
-		goto out;
+		செல் out;
 	}
 
-	if (!merge_result.clean) {
+	எனில் (!merge_result.clean) {
 		ret = error(_("fixup would produce conflicts; aborting"));
-		goto out;
+		செல் out;
 	}
 
-	ret = commit_became_empty(repo, original, merge_result.tree);
-	if (ret < 0)
-		goto out;
-	if (ret > 0) {
-		switch (empty) {
-		case REPLAY_EMPTY_COMMIT_DROP:
+	ret = commit_became_empty(repo, original, merge_result.மரம்);
+	எனில் (ret < 0)
+		செல் out;
+	எனில் (ret > 0) {
+		தேர்வு (empty) {
+		நிலை REPLAY_EMPTY_COMMIT_DROP:
 			/*
 			 * Drop the target commit by replaying its descendants
 			 * directly onto its parent.
 			 */
-			rewritten = original->parents ? original->parents->item : NULL;
+			rewritten = original->parents ? original->parents->item : வெற்று;
 
 			/*
 			 * TODO: we don't yet have the ability to drop root
@@ -662,68 +662,68 @@ static int cmd_history_fixup(int argc,
 			 * this restriction to exist other than a technical
 			 * limitation.
 			 */
-			if (!rewritten) {
+			எனில் (!rewritten) {
 				ret = error(_("cannot drop root commit %s: "
 					      "it has no parent to replay onto"),
 					    argv[0]);
-				goto out;
+				செல் out;
 			}
 
 			skip_commit = true;
-			break;
-		case REPLAY_EMPTY_COMMIT_KEEP:
+			நிறுத்து;
+		நிலை REPLAY_EMPTY_COMMIT_KEEP:
 			/* Proceed and record the empty commit. */
-			break;
-		case REPLAY_EMPTY_COMMIT_ABORT:
+			நிறுத்து;
+		நிலை REPLAY_EMPTY_COMMIT_ABORT:
 			ret = error(_("fixup makes commit %s empty"), argv[0]);
-			goto out;
+			செல் out;
 		}
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret)
-		goto out;
+	எனில் (ret)
+		செல் out;
 
-	if (!skip_commit) {
-		ret = commit_tree_ext(repo, "fixup", original, NULL, original->parents,
-				      &original_tree->object.oid, &merge_result.tree->object.oid,
+	எனில் (!skip_commit) {
+		ret = commit_மரம்_ext(repo, "fixup", original, வெற்று, original->parents,
+				      &original_மரம்->object.oid, &merge_result.மரம்->object.oid,
 				      &rewritten, flags);
-		if (ret < 0) {
+		எனில் (ret < 0) {
 			ret = error(_("failed writing fixed-up commit"));
-			goto out;
+			செல் out;
 		}
 	}
 
-	strbuf_addf(&reflog_msg, "fixup: updating %s", argv[0]);
+	strbuf_addf(&reflog_செய்தி, "fixup: updating %s", argv[0]);
 
 	ret = handle_reference_updates(&revs, action, original, rewritten,
-				       reflog_msg.buf, dry_run, empty);
-	if (ret < 0) {
+				       reflog_செய்தி.buf, dry_run, empty);
+	எனில் (ret < 0) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		செல் out;
 	}
 
 	ret = 0;
 
 out:
 	merge_finalize(&merge_opts, &merge_result);
-	strbuf_release(&reflog_msg);
+	strbuf_release(&reflog_செய்தி);
 	release_revisions(&revs);
-	return ret;
+	திரும்பு ret;
 }
 
-static int cmd_history_reword(int argc,
-			      const char **argv,
-			      const char *prefix,
-			      struct repository *repo)
+நிலையான முழு cmd_history_reword(முழு argc,
+			      மாறிலி எழுத்து **argv,
+			      மாறிலி எழுத்து *prefix,
+			      கட்டமைப்பு repository *repo)
 {
-	const char * const usage[] = {
+	மாறிலி எழுத்து * மாறிலி usage[] = {
 		GIT_HISTORY_REWORD_USAGE,
-		NULL,
+		வெற்று,
 	};
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	struct option options[] = {
+	எண்ணிக்கை ref_action action = REF_ACTION_DEFAULT;
+	முழு dry_run = 0;
+	கட்டமைப்பு option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -731,64 +731,64 @@ static int cmd_history_reword(int argc,
 			 N_("perform a dry-run without updating any refs")),
 		OPT_END(),
 	};
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *original, *rewritten;
-	struct rev_info revs = { 0 };
-	int ret;
+	கட்டமைப்பு strbuf reflog_செய்தி = STRBUF_INIT;
+	கட்டமைப்பு commit *original, *rewritten;
+	கட்டமைப்பு rev_info revs = { 0 };
+	முழு ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1) {
+	எனில் (argc != 1) {
 		ret = error(_("command expects a single revision"));
-		goto out;
+		செல் out;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, வெற்று);
 
-	if (action == REF_ACTION_DEFAULT)
+	எனில் (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	எனில் (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
-		goto out;
+		செல் out;
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret)
-		goto out;
+	எனில் (ret)
+		செல் out;
 
-	ret = commit_tree_with_edited_message(repo, "reworded", original, &rewritten);
-	if (ret < 0) {
+	ret = commit_மரம்_with_edited_message(repo, "reworded", original, &rewritten);
+	எனில் (ret < 0) {
 		ret = error(_("failed writing reworded commit"));
-		goto out;
+		செல் out;
 	}
 
-	strbuf_addf(&reflog_msg, "reword: updating %s", argv[0]);
+	strbuf_addf(&reflog_செய்தி, "reword: updating %s", argv[0]);
 
 	ret = handle_reference_updates(&revs, action, original, rewritten,
-				       reflog_msg.buf, dry_run, REPLAY_EMPTY_COMMIT_ABORT);
-	if (ret < 0) {
+				       reflog_செய்தி.buf, dry_run, REPLAY_EMPTY_COMMIT_ABORT);
+	எனில் (ret < 0) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		செல் out;
 	}
 
 	ret = 0;
 
 out:
-	strbuf_release(&reflog_msg);
+	strbuf_release(&reflog_செய்தி);
 	release_revisions(&revs);
-	return ret;
+	திரும்பு ret;
 }
 
-static int write_ondisk_index(struct repository *repo,
-			      struct object_id *oid,
-			      const char *path)
+நிலையான முழு write_ondisk_index(கட்டமைப்பு repository *repo,
+			      கட்டமைப்பு object_id *oid,
+			      மாறிலி எழுத்து *path)
 {
-	struct unpack_trees_options opts = { 0 };
-	struct lock_file lock = LOCK_INIT;
-	struct tree_desc tree_desc;
-	struct index_state index;
-	struct tree *tree;
-	int ret;
+	கட்டமைப்பு unpack_trees_options opts = { 0 };
+	கட்டமைப்பு lock_file lock = LOCK_INIT;
+	கட்டமைப்பு மரம்_desc மரம்_desc;
+	கட்டமைப்பு index_state index;
+	கட்டமைப்பு மரம் *மரம்;
+	முழு ret;
 
 	index_state_init(&index, repo);
 
@@ -796,28 +796,28 @@ static int write_ondisk_index(struct repository *repo,
 	opts.src_index = &index;
 	opts.dst_index = &index;
 
-	tree = repo_parse_tree_indirect(repo, oid);
-	if (!tree) {
+	மரம் = repo_parse_மரம்_indirect(repo, oid);
+	எனில் (!மரம்) {
 		ret = error(_("unable to parse tree %s"), oid_to_hex(oid));
-		goto out;
+		செல் out;
 	}
-	init_tree_desc(&tree_desc, &tree->object.oid, tree->buffer, tree->size);
+	init_மரம்_desc(&மரம்_desc, &மரம்->object.oid, மரம்->buffer, மரம்->size);
 
-	if (unpack_trees(1, &tree_desc, &opts)) {
+	எனில் (unpack_trees(1, &மரம்_desc, &opts)) {
 		ret = error(_("unable to populate index with tree"));
-		goto out;
+		செல் out;
 	}
 
-	prime_cache_tree(repo, &index, tree);
+	பகாஎண்_cache_மரம்(repo, &index, மரம்);
 
-	if (repo_hold_lock_file_for_update(repo, &lock, path, 0) < 0) {
+	எனில் (repo_hold_lock_file_for_update(repo, &lock, path, 0) < 0) {
 		ret = error_errno(_("unable to acquire index lock"));
-		goto out;
+		செல் out;
 	}
 
-	if (write_locked_index(&index, &lock, COMMIT_LOCK)) {
+	எனில் (write_locked_index(&index, &lock, COMMIT_LOCK)) {
 		ret = error(_("unable to write new index file"));
-		goto out;
+		செல் out;
 	}
 
 	ret = 0;
@@ -825,31 +825,31 @@ static int write_ondisk_index(struct repository *repo,
 out:
 	rollback_lock_file(&lock);
 	release_index(&index);
-	return ret;
+	திரும்பு ret;
 }
 
-static int split_commit(struct repository *repo,
-			struct commit *original,
-			struct pathspec *pathspec,
-			struct commit **out)
+நிலையான முழு split_commit(கட்டமைப்பு repository *repo,
+			கட்டமைப்பு commit *original,
+			கட்டமைப்பு pathspec *pathspec,
+			கட்டமைப்பு commit **out)
 {
-	struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-	struct strbuf index_file = STRBUF_INIT;
-	struct index_state index = INDEX_STATE_INIT(repo);
-	const struct object_id *original_commit_tree_oid;
-	const struct object_id *old_tree_oid, *new_tree_oid;
-	struct object_id parent_tree_oid;
-	char original_commit_oid[GIT_MAX_HEXSZ + 1];
-	struct commit *first_commit, *second_commit;
-	struct commit_list *parents = NULL;
-	struct tree *split_tree;
-	int ret;
+	கட்டமைப்பு interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+	கட்டமைப்பு strbuf index_file = STRBUF_INIT;
+	கட்டமைப்பு index_state index = INDEX_STATE_INIT(repo);
+	மாறிலி கட்டமைப்பு object_id *original_commit_மரம்_oid;
+	மாறிலி கட்டமைப்பு object_id *old_மரம்_oid, *new_மரம்_oid;
+	கட்டமைப்பு object_id parent_மரம்_oid;
+	எழுத்து original_commit_oid[GIT_MAX_HEXSZ + 1];
+	கட்டமைப்பு commit *first_commit, *second_commit;
+	கட்டமைப்பு commit_list *parents = வெற்று;
+	கட்டமைப்பு மரம் *split_மரம்;
+	முழு ret;
 
-	if (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0) {
+	எனில் (first_parent_மரம்_oid(repo, original, &parent_மரம்_oid) < 0) {
 		ret = -1;
-		goto out;
+		செல் out;
 	}
-	original_commit_tree_oid = get_commit_tree_oid(original);
+	original_commit_மரம்_oid = get_commit_மரம்_oid(original);
 
 	/*
 	 * Construct the first commit. This is done by taking the original
@@ -858,26 +858,26 @@ static int split_commit(struct repository *repo,
 	 */
 	repo_git_path_replace(repo, &index_file, "%s", "history-split.index");
 
-	ret = write_ondisk_index(repo, &parent_tree_oid, index_file.buf);
-	if (ret < 0)
-		goto out;
+	ret = write_ondisk_index(repo, &parent_மரம்_oid, index_file.buf);
+	எனில் (ret < 0)
+		செல் out;
 
 	ret = read_index_from(&index, index_file.buf, repo->gitdir);
-	if (ret < 0) {
+	எனில் (ret < 0) {
 		ret = error(_("failed reading temporary index"));
-		goto out;
+		செல் out;
 	}
 
 	oid_to_hex_r(original_commit_oid, &original->object.oid);
 	ret = run_add_p_index(repo, &index, index_file.buf, &interactive_opts,
 			      original_commit_oid, pathspec, ADD_P_DISALLOW_EDIT);
-	if (ret < 0)
-		goto out;
+	எனில் (ret < 0)
+		செல் out;
 
-	split_tree = write_in_core_index_as_tree(repo, &index);
-	if (!split_tree) {
+	split_மரம் = write_in_core_index_as_மரம்(repo, &index);
+	எனில் (!split_மரம்) {
 		ret = error(_("failed split tree"));
-		goto out;
+		செல் out;
 	}
 
 	unlink(index_file.buf);
@@ -888,23 +888,23 @@ static int split_commit(struct repository *repo,
 	 * original commit would become empty. Consequently, if we see that the
 	 * new tree ID matches either of those trees we abort.
 	 */
-	if (oideq(&split_tree->object.oid, &parent_tree_oid)) {
+	எனில் (oideq(&split_மரம்->object.oid, &parent_மரம்_oid)) {
 		ret = error(_("split commit is empty"));
-		goto out;
-	} else if (oideq(&split_tree->object.oid, original_commit_tree_oid)) {
+		செல் out;
+	} இல்லையெனில் எனில் (oideq(&split_மரம்->object.oid, original_commit_மரம்_oid)) {
 		ret = error(_("split commit tree matches original commit"));
-		goto out;
+		செல் out;
 	}
 
 	/*
 	 * The first commit is constructed from the split-out tree. The base
 	 * that shall be diffed against is the parent of the original commit.
 	 */
-	ret = commit_tree_ext(repo, "split-out", original, NULL, original->parents, &parent_tree_oid,
-			      &split_tree->object.oid, &first_commit, COMMIT_TREE_EDIT_MESSAGE);
-	if (ret < 0) {
+	ret = commit_மரம்_ext(repo, "split-out", original, வெற்று, original->parents, &parent_மரம்_oid,
+			      &split_மரம்->object.oid, &first_commit, COMMIT_மரம்_EDIT_MESSAGE);
+	எனில் (ret < 0) {
 		ret = error(_("failed writing first commit"));
-		goto out;
+		செல் out;
 	}
 
 	/*
@@ -914,40 +914,40 @@ static int split_commit(struct repository *repo,
 	 */
 	commit_list_append(first_commit, &parents);
 
-	old_tree_oid = &repo_get_commit_tree(repo, first_commit)->object.oid;
-	new_tree_oid = &repo_get_commit_tree(repo, original)->object.oid;
+	old_மரம்_oid = &repo_get_commit_மரம்(repo, first_commit)->object.oid;
+	new_மரம்_oid = &repo_get_commit_மரம்(repo, original)->object.oid;
 
-	ret = commit_tree_ext(repo, "split-out", original, NULL, parents, old_tree_oid,
-			      new_tree_oid, &second_commit, COMMIT_TREE_EDIT_MESSAGE);
-	if (ret < 0) {
+	ret = commit_மரம்_ext(repo, "split-out", original, வெற்று, parents, old_மரம்_oid,
+			      new_மரம்_oid, &second_commit, COMMIT_மரம்_EDIT_MESSAGE);
+	எனில் (ret < 0) {
 		ret = error(_("failed writing second commit"));
-		goto out;
+		செல் out;
 	}
 
 	*out = second_commit;
 	ret = 0;
 
 out:
-	if (index_file.len)
+	எனில் (index_file.len)
 		unlink(index_file.buf);
 	strbuf_release(&index_file);
 	commit_list_free(parents);
 	release_index(&index);
-	return ret;
+	திரும்பு ret;
 }
 
-static int cmd_history_split(int argc,
-			     const char **argv,
-			     const char *prefix,
-			     struct repository *repo)
+நிலையான முழு cmd_history_split(முழு argc,
+			     மாறிலி எழுத்து **argv,
+			     மாறிலி எழுத்து *prefix,
+			     கட்டமைப்பு repository *repo)
 {
-	const char * const usage[] = {
+	மாறிலி எழுத்து * மாறிலி usage[] = {
 		GIT_HISTORY_SPLIT_USAGE,
-		NULL,
+		வெற்று,
 	};
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	struct option options[] = {
+	எண்ணிக்கை ref_action action = REF_ACTION_DEFAULT;
+	முழு dry_run = 0;
+	கட்டமைப்பு option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control ref update behavior"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -955,20 +955,20 @@ static int cmd_history_split(int argc,
 			 N_("perform a dry-run without updating any refs")),
 		OPT_END(),
 	};
-	struct commit *original, *rewritten = NULL;
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct pathspec pathspec = { 0 };
-	struct rev_info revs = { 0 };
-	int ret;
+	கட்டமைப்பு commit *original, *rewritten = வெற்று;
+	கட்டமைப்பு strbuf reflog_செய்தி = STRBUF_INIT;
+	கட்டமைப்பு pathspec pathspec = { 0 };
+	கட்டமைப்பு rev_info revs = { 0 };
+	முழு ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc < 1) {
+	எனில் (argc < 1) {
 		ret = error(_("command expects a committish"));
-		goto out;
+		செல் out;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, வெற்று);
 
-	if (action == REF_ACTION_DEFAULT)
+	எனில் (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	parse_pathspec(&pathspec, 0,
@@ -978,76 +978,76 @@ static int cmd_history_split(int argc,
 		       prefix, argv + 1);
 
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	எனில் (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
-		goto out;
+		செல் out;
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret < 0)
-		goto out;
+	எனில் (ret < 0)
+		செல் out;
 
-	if (original->parents && original->parents->next) {
+	எனில் (original->parents && original->parents->next) {
 		ret = error(_("cannot split up merge commit"));
-		goto out;
+		செல் out;
 	}
 
 	ret = split_commit(repo, original, &pathspec, &rewritten);
-	if (ret < 0)
-		goto out;
+	எனில் (ret < 0)
+		செல் out;
 
-	strbuf_addf(&reflog_msg, "split: updating %s", argv[0]);
+	strbuf_addf(&reflog_செய்தி, "split: updating %s", argv[0]);
 
 	ret = handle_reference_updates(&revs, action, original, rewritten,
-				       reflog_msg.buf, dry_run, REPLAY_EMPTY_COMMIT_ABORT);
-	if (ret < 0) {
+				       reflog_செய்தி.buf, dry_run, REPLAY_EMPTY_COMMIT_ABORT);
+	எனில் (ret < 0) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		செல் out;
 	}
 
 	ret = 0;
 
 out:
-	strbuf_release(&reflog_msg);
+	strbuf_release(&reflog_செய்தி);
 	clear_pathspec(&pathspec);
 	release_revisions(&revs);
-	return ret;
+	திரும்பு ret;
 }
 
 #define SQUASH_SEEN (1u << 11)
 #define SQUASH_TIP (1u << 12)
 #define SQUASH_AMEND_TARGET (1u << 13)
 
-static bool is_autosquash_subject(const char *s)
+நிலையான bool is_autosquash_subject(மாறிலி எழுத்து *s)
 {
-	return starts_with(s, "amend!") || starts_with(s, "fixup!") ||
+	திரும்பு starts_with(s, "amend!") || starts_with(s, "fixup!") ||
 		starts_with(s, "squash!");
 }
 
-static bool skip_one_autosquash_prefix(const char *s, const char **out)
+நிலையான bool skip_one_autosquash_prefix(மாறிலி எழுத்து *s, மாறிலி எழுத்து **out)
 {
-	if (skip_prefix(s, "amend!", out) || skip_prefix(s, "fixup!", out) ||
+	எனில் (skip_prefix(s, "amend!", out) || skip_prefix(s, "fixup!", out) ||
 	    skip_prefix(s, "squash!", out)) {
-		while (**out == ' ')
+		போது (**out == ' ')
 			(*out)++;
-		return true;
+		திரும்பு true;
 	}
-	return false;
+	திரும்பு false;
 }
 
-static void truncate_message_to_subject(struct strbuf *msg)
+நிலையான வெறுமை truncate_message_to_subject(கட்டமைப்பு strbuf *செய்தி)
 {
-	const char *eos = strstr(msg->buf, "\n\n");
+	மாறிலி எழுத்து *eos = strstr(செய்தி->buf, "\n\n");
 
-	if (eos)
-		strbuf_setlen(msg, eos - msg->buf + 1);
+	எனில் (eos)
+		strbuf_setlen(செய்தி, eos - செய்தி->buf + 1);
 }
 
-struct subject_data {
-	struct strintmap subjects;
-	struct strbuf subject;
-	struct strbuf squash_message;
-	const char *message;
+கட்டமைப்பு subject_data {
+	கட்டமைப்பு strintmap subjects;
+	கட்டமைப்பு strbuf subject;
+	கட்டமைப்பு strbuf squash_message;
+	மாறிலி எழுத்து *message;
 	bool edit_message;
 };
 
@@ -1057,85 +1057,85 @@ struct subject_data {
 	.squash_message = STRBUF_INIT,	\
 }
 
-static void subject_data_clear(struct subject_data *data)
+நிலையான வெறுமை subject_data_clear(கட்டமைப்பு subject_data *data)
 {
 	strintmap_clear(&data->subjects);
 	strbuf_release(&data->subject);
 	strbuf_release(&data->squash_message);
 }
 
-static int squash_amend_message(struct repository *repo,
-				struct commit *commit,
-				struct subject_data *data,
+நிலையான முழு squash_amend_message(கட்டமைப்பு repository *repo,
+				கட்டமைப்பு commit *commit,
+				கட்டமைப்பு subject_data *data,
 				unsigned flags)
 {
-	const char *body = data->message + data->subject.len;
+	மாறிலி எழுத்து *body = data->message + data->subject.len;
 
-	while (isspace(*body))
+	போது (isspace(*body))
 		body++;
 
-	if (!*body) {
+	எனில் (!*body) {
 		warning(_("ignoring %s (%s): message body is empty"),
 			repo_find_unique_abbrev(repo, &commit->object.oid,
 						DEFAULT_ABBREV),
 			data->subject.buf);
-		return 0;
+		திரும்பு 0;
 	}
 
-	if (data->edit_message) {
-		return 0;
-	} else if (flags & SQUASH_AMEND_TARGET) {
-		if (starts_with(data->squash_message.buf, "squash!"))
-			return error(_("squashing %s (%s) would overwrite "
+	எனில் (data->edit_message) {
+		திரும்பு 0;
+	} இல்லையெனில் எனில் (flags & SQUASH_AMEND_TARGET) {
+		எனில் (starts_with(data->squash_message.buf, "squash!"))
+			திரும்பு error(_("squashing %s (%s) would overwrite "
 				       "'squash!' message, please combine them "
 				       "using '--edit'"),
 				     repo_find_unique_abbrev(repo,
 							     &commit->object.oid,
 							     DEFAULT_ABBREV),
 				     data->subject.buf);
-		if (starts_with(data->squash_message.buf, "fixup!"))
+		எனில் (starts_with(data->squash_message.buf, "fixup!"))
 			strbuf_splice(&data->squash_message, 0, 5, "amend!", 5);
-		if (starts_with(data->squash_message.buf, "amend!")) {
+		எனில் (starts_with(data->squash_message.buf, "amend!")) {
 			truncate_message_to_subject(&data->squash_message);
 			strbuf_addch(&data->squash_message, '\n');
-		} else {
+		} இல்லையெனில் {
 			strbuf_reset(&data->squash_message);
 		}
 		strbuf_addstr(&data->squash_message, body);
-		strbuf_complete_line(&data->squash_message);
-	} else {
-		return error(_("cannot squash %s (%s) that does not target "
+		strbuf_complete_வரி(&data->squash_message);
+	} இல்லையெனில் {
+		திரும்பு error(_("cannot squash %s (%s) that does not target "
 			       "base commit without '--edit'"),
 			     repo_find_unique_abbrev(repo, &commit->object.oid,
 						     DEFAULT_ABBREV),
 			     data->subject.buf);
 	}
-	return 0;
+	திரும்பு 0;
 }
 
-static int squash_squash_message(struct repository *repo,
-				struct commit *commit,
-				struct subject_data *data,
+நிலையான முழு squash_squash_message(கட்டமைப்பு repository *repo,
+				கட்டமைப்பு commit *commit,
+				கட்டமைப்பு subject_data *data,
 				unsigned flags)
 {
-	const char *body = data->message + data->subject.len;
+	மாறிலி எழுத்து *body = data->message + data->subject.len;
 
-	while (isspace(*body))
+	போது (isspace(*body))
 		body++;
 
-	if (data->edit_message) {
-		return 0;
-	} else if (flags & SQUASH_AMEND_TARGET) {
-		if (starts_with(data->squash_message.buf, "fixup!")) {
+	எனில் (data->edit_message) {
+		திரும்பு 0;
+	} இல்லையெனில் எனில் (flags & SQUASH_AMEND_TARGET) {
+		எனில் (starts_with(data->squash_message.buf, "fixup!")) {
 			truncate_message_to_subject(&data->squash_message);
 			strbuf_splice(&data->squash_message, 0, 5, "squash", 6);
 		}
-		if (starts_with(data->squash_message.buf, "squash!")) {
+		எனில் (starts_with(data->squash_message.buf, "squash!")) {
 			strbuf_addch(&data->squash_message, '\n');
 			strbuf_addstr(&data->squash_message, body);
-			strbuf_complete_line(&data->squash_message);
-		} else {
-			return error(_("squashing %s (%s) would discard its "
+			strbuf_complete_வரி(&data->squash_message);
+		} இல்லையெனில் {
+			திரும்பு error(_("squashing %s (%s) would discard its "
 				       "message, please combine them using "
 				       "'--edit'"),
 				     repo_find_unique_abbrev(repo,
@@ -1143,38 +1143,38 @@ static int squash_squash_message(struct repository *repo,
 							     DEFAULT_ABBREV),
 				     data->subject.buf);
 		}
-	} else {
-		return error(_("cannot squash %s (%s) that does not target "
+	} இல்லையெனில் {
+		திரும்பு error(_("cannot squash %s (%s) that does not target "
 			       "base commit without '--edit'"),
 			      repo_find_unique_abbrev(repo, &commit->object.oid,
 						      DEFAULT_ABBREV),
 			      data->subject.buf);
 	}
-	return 0;
+	திரும்பு 0;
 }
 
-static int squash_check_can_autosquash(struct repository *repo,
-				       struct commit *commit,
-				       struct subject_data *data,
+நிலையான முழு squash_check_can_autosquash(கட்டமைப்பு repository *repo,
+				       கட்டமைப்பு commit *commit,
+				       கட்டமைப்பு subject_data *data,
 				       unsigned flags)
 {
 	commit->object.flags |= flags & SQUASH_AMEND_TARGET;
-	if (starts_with(data->subject.buf, "amend!"))
-		return squash_amend_message(repo, commit, data, flags);
-	else if (starts_with(data->subject.buf, "squash!"))
-		return squash_squash_message(repo, commit, data, flags);
+	எனில் (starts_with(data->subject.buf, "amend!"))
+		திரும்பு squash_amend_message(repo, commit, data, flags);
+	இல்லையெனில் எனில் (starts_with(data->subject.buf, "squash!"))
+		திரும்பு squash_squash_message(repo, commit, data, flags);
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int squash_check_autosquash_subject(struct repository *repo,
-					   struct commit *commit,
-					   struct subject_data *data)
+நிலையான முழு squash_check_autosquash_subject(கட்டமைப்பு repository *repo,
+					   கட்டமைப்பு commit *commit,
+					   கட்டமைப்பு subject_data *data)
 {
-	const char* s = data->subject.buf;
-	struct commit *target;
-	struct hashmap_iter iter;
-	struct strmap_entry *entry;
+	மாறிலி எழுத்து* s = data->subject.buf;
+	கட்டமைப்பு commit *target;
+	கட்டமைப்பு hashmap_iter iter;
+	கட்டமைப்பு strmap_entry *entry;
 	/* Try skipping autosquash prefixes one at a time to allow
 	 * squashing
 	 *     a commit
@@ -1187,10 +1187,10 @@ static int squash_check_autosquash_subject(struct repository *repo,
 	 *
 	 * and squashed the first fixup separately from the second
 	 */
-	while (skip_one_autosquash_prefix(s, &s)) {
+	போது (skip_one_autosquash_prefix(s, &s)) {
 		unsigned flags = strintmap_get(&data->subjects, s);
-		if (flags)
-			return squash_check_can_autosquash(repo, commit, data, flags);
+		எனில் (flags)
+			திரும்பு squash_check_can_autosquash(repo, commit, data, flags);
 	}
 	/*
 	 * Allow "fixup! <hex object id>", but not "fixup! HEAD^" or
@@ -1199,60 +1199,60 @@ static int squash_check_autosquash_subject(struct repository *repo,
 	 * squashed together.
 	 */
 	target = lookup_commit_reference_by_name(s);
-	if (target && starts_with(oid_to_hex(&target->object.oid), s)) {
+	எனில் (target && starts_with(oid_to_hex(&target->object.oid), s)) {
 		unsigned flags =
 			target->object.flags & (SQUASH_SEEN | SQUASH_AMEND_TARGET);
-		if (!flags) {
-			const char *subject_start;
-			const char *buffer = repo_logmsg_reencode(repo, target,
-								  NULL, NULL);
+		எனில் (!flags) {
+			மாறிலி எழுத்து *subject_start;
+			மாறிலி எழுத்து *buffer = repo_logmsg_reencode(repo, target,
+								  வெற்று, வெற்று);
 			size_t subject_len = find_commit_subject(buffer,
 								 &subject_start);
-			char *subject = xmemdupz(subject_start, subject_len);
+			எழுத்து *subject = xmemdupz(subject_start, subject_len);
 
 			flags = strintmap_get(&data->subjects, subject);
-			free(subject);
+			விடுவி(subject);
 			repo_unuse_commit_buffer(repo, target, buffer);
 		}
-		if (flags)
-			return squash_check_can_autosquash(repo, commit,
+		எனில் (flags)
+			திரும்பு squash_check_can_autosquash(repo, commit,
 							   data, flags);
 	}
 	/* Try subject prefix matches */
 	strintmap_for_each_entry(&data->subjects, &iter, entry) {
 		s = data->subject.buf;
-		while(skip_one_autosquash_prefix(s, &s)) {
-			if (starts_with(entry->key, s)) {
-				unsigned value = (intptr_t)entry->value;
+		போது(skip_one_autosquash_prefix(s, &s)) {
+			எனில் (starts_with(entry->சாவி, s)) {
+				unsigned மதிப்பு = (intptr_t)entry->மதிப்பு;
 
-				return squash_check_can_autosquash(repo, commit,
-								   data, value);
+				திரும்பு squash_check_can_autosquash(repo, commit,
+								   data, மதிப்பு);
 			}
 		}
 	}
-	return error(_("cannot squash %s (%s): its target is not being "
+	திரும்பு error(_("cannot squash %s (%s): its target is not being "
 		       "squashed"),
 		       repo_find_unique_abbrev(repo, &commit->object.oid,
 					       DEFAULT_ABBREV),
 		       data->subject.buf);
 }
 
-static int squash_check_subject(struct repository *repo,
-				struct commit *commit,
-				struct subject_data *data)
+நிலையான முழு squash_check_subject(கட்டமைப்பு repository *repo,
+				கட்டமைப்பு commit *commit,
+				கட்டமைப்பு subject_data *data)
 {
-	int ret = 0;
-	const char *buf = repo_logmsg_reencode(repo, commit, NULL, NULL);
+	முழு ret = 0;
+	மாறிலி எழுத்து *buf = repo_logmsg_reencode(repo, commit, வெற்று, வெற்று);
 	size_t subject_len = find_commit_subject(buf, &data->message);
 
 	strbuf_reset(&data->subject);
 	strbuf_add(&data->subject, data->message, subject_len);
 
-	if (!strintmap_get_size(&data->subjects)) {
-		const char *s;
+	எனில் (!strintmap_get_size(&data->subjects)) {
+		மாறிலி எழுத்து *s;
 
 		strbuf_addstr(&data->squash_message, data->message);
-		strbuf_complete_line(&data->squash_message);
+		strbuf_complete_வரி(&data->squash_message);
 		/*
 		 * Strip a single autosquash prefix to allow squashing
 		 *     fixup! base
@@ -1262,24 +1262,24 @@ static int squash_check_subject(struct repository *repo,
 		skip_one_autosquash_prefix(s, &s);
 		strintmap_set(&data->subjects, s, SQUASH_AMEND_TARGET | SQUASH_SEEN);
 		commit->object.flags |= SQUASH_AMEND_TARGET;
-	} else if (is_autosquash_subject(data->subject.buf)) {
+	} இல்லையெனில் எனில் (is_autosquash_subject(data->subject.buf)) {
 		ret = squash_check_autosquash_subject(repo, commit, data);
-	} else {
+	} இல்லையெனில் {
 		strintmap_set(&data->subjects, data->subject.buf, SQUASH_SEEN);
 	}
 	repo_unuse_commit_buffer(repo, commit, buf);
-	return ret;
+	திரும்பு ret;
 }
 
-static int build_squash_message(struct repository *repo,
-				const struct strbuf *todo_buf,
-				struct strbuf *out);
+நிலையான முழு build_squash_message(கட்டமைப்பு repository *repo,
+				மாறிலி கட்டமைப்பு strbuf *todo_buf,
+				கட்டமைப்பு strbuf *out);
 
-static int setup_squash_revisions(struct repository *repo,
-				  int argc, const char **argv,
-				  struct rev_info *revs)
+நிலையான முழு setup_squash_revisions(கட்டமைப்பு repository *repo,
+				  முழு argc, மாறிலி எழுத்து **argv,
+				  கட்டமைப்பு rev_info *revs)
 {
-	repo_init_revisions(repo, revs, NULL);
+	repo_init_revisions(repo, revs, வெற்று);
 	revs->reverse = 1;
 	revs->topo_order = 1;
 	revs->sort_order = REV_SORT_IN_GRAPH_ORDER;
@@ -1288,11 +1288,11 @@ static int setup_squash_revisions(struct repository *repo,
 	revs->limited = 1;
 	revs->ancestry_path_implicit_bottoms = 1;
 
-	argc = setup_revisions(argc, argv, revs, NULL);
-	if (argc > 1)
-		return error(_("unrecognized argument: %s"), argv[1]);
+	argc = setup_revisions(argc, argv, revs, வெற்று);
+	எனில் (argc > 1)
+		திரும்பு error(_("unrecognized argument: %s"), argv[1]);
 
-	if (revs->reverse != 1 || revs->topo_order != 1 ||
+	எனில் (revs->reverse != 1 || revs->topo_order != 1 ||
 	    revs->sort_order != REV_SORT_IN_GRAPH_ORDER ||
 	    revs->simplify_history != 0 || revs->boundary == 1 ||
 	    revs->ancestry_path != 1 || revs->limited != 1 ||
@@ -1314,11 +1314,11 @@ static int setup_squash_revisions(struct repository *repo,
 	 * something, as in "<base>..<tip>". A revision range with no such
 	 * bottom commit cannot be squashed.
 	 */
-	for (size_t i = 0; i < revs->cmdline.nr; i++)
-		if (revs->cmdline.rev[i].flags & BOTTOM)
-			return 0;
+	க்கு (size_t i = 0; i < revs->cmdline.nr; i++)
+		எனில் (revs->cmdline.rev[i].flags & BOTTOM)
+			திரும்பு 0;
 
-	return error(_("not a '<base>..<tip>' revision range"));
+	திரும்பு error(_("not a '<base>..<tip>' revision range"));
 }
 
 /*
@@ -1326,52 +1326,52 @@ static int setup_squash_revisions(struct repository *repo,
  * parent after the oldest commit must either be selected or also be a parent
  * of the oldest commit.
  */
-static int resolve_squash_range(struct repository *repo,
+நிலையான முழு resolve_squash_range(கட்டமைப்பு repository *repo,
 				bool update_branches,
 				bool edit_message,
-				int argc, const char **argv,
-				struct commit **oldest_out,
-				struct commit **tip_out,
-				char **message_out)
+				முழு argc, மாறிலி எழுத்து **argv,
+				கட்டமைப்பு commit **oldest_out,
+				கட்டமைப்பு commit **tip_out,
+				எழுத்து **message_out)
 {
-	struct rev_info revs;
-	struct subject_data subject_data = SUBJECT_DATA_INIT;
-	struct commit *commit, *oldest = NULL, *tip = NULL;
-	struct strbuf todo_buf = STRBUF_INIT;
-	int ret, tip_count = 0;
+	கட்டமைப்பு rev_info revs;
+	கட்டமைப்பு subject_data subject_data = SUBJECT_DATA_INIT;
+	கட்டமைப்பு commit *commit, *oldest = வெற்று, *tip = வெற்று;
+	கட்டமைப்பு strbuf todo_buf = STRBUF_INIT;
+	முழு ret, tip_மொத்தம் = 0;
 	bool walk_started = false;
-	struct ref_filter filter = REF_FILTER_INIT;
-	struct ref_array refs = { 0 };
+	கட்டமைப்பு ref_filter filter = REF_FILTER_INIT;
+	கட்டமைப்பு ref_array refs = { 0 };
 
 	subject_data.edit_message = edit_message;
 	ret = setup_squash_revisions(repo, argc, argv, &revs);
-	if (ret < 0)
-		goto out;
+	எனில் (ret < 0)
+		செல் out;
 
-	if (prepare_revision_walk(&revs) < 0) {
+	எனில் (prepare_revision_walk(&revs) < 0) {
 		ret = error(_("error preparing revisions"));
-		goto out;
+		செல் out;
 	}
 	walk_started = true;
-	while ((commit = get_revision(&revs))) {
-		struct commit_list *p;
+	போது ((commit = get_revision(&revs))) {
+		கட்டமைப்பு commit_list *p;
 
-		if (edit_message)
+		எனில் (edit_message)
 			strbuf_addf(&todo_buf, "pick %s\n",
 				    oid_to_hex(&commit->object.oid));
 
-		if (!commit->parents) {
+		எனில் (!commit->parents) {
 			ret = error(_("cannot squash down to root commit"));
-			goto out;
+			செல் out;
 		}
-		for (p = commit->parents; oldest && p; p = p->next) {
-			struct commit_list *q;
-			struct object *o;
+		க்கு (p = commit->parents; oldest && p; p = p->next) {
+			கட்டமைப்பு commit_list *q;
+			கட்டமைப்பு object *o;
 			bool seen;
 
-			if (repo_parse_commit(repo, p->item)) {
+			எனில் (repo_parse_commit(repo, p->item)) {
 				ret = error(_("cannot parse commit"));
-				goto out;
+				செல் out;
 			}
 			o = &p->item->object;
 			seen = o->flags & SQUASH_SEEN;
@@ -1379,13 +1379,13 @@ static int resolve_squash_range(struct repository *repo,
 			 * Allow parents that match the parents of the
 			 * squashed commit.
 			 */
-			for (q = oldest->parents; !seen && q; q = q->next) {
-				if (p->item == q->item) {
+			க்கு (q = oldest->parents; !seen && q; q = q->next) {
+				எனில் (p->item == q->item) {
 					seen = true;
-					commit_list_insert(commit, &filter.with_commit);
+					commit_list_செருகு(commit, &filter.with_commit);
 				}
 			}
-			if (!seen) {
+			எனில் (!seen) {
 				ret = error(_("parent %s of commit %s is "
 					      "outside the revision range"),
 					    repo_find_unique_abbrev(repo, &o->oid,
@@ -1393,68 +1393,68 @@ static int resolve_squash_range(struct repository *repo,
 					    repo_find_unique_abbrev(repo,
 								    &commit->object.oid,
 								    DEFAULT_ABBREV));
-				goto out;
+				செல் out;
 			}
-			if (o->flags & SQUASH_TIP) {
-				tip_count--;
+			எனில் (o->flags & SQUASH_TIP) {
+				tip_மொத்தம்--;
 				o->flags &= ~SQUASH_TIP;
 			}
 		}
-		if (!oldest) {
-			commit_list_insert(commit, &filter.with_commit);
+		எனில் (!oldest) {
+			commit_list_செருகு(commit, &filter.with_commit);
 			oldest = commit;
 		}
-		if (squash_check_subject(repo, commit, &subject_data)) {
+		எனில் (squash_check_subject(repo, commit, &subject_data)) {
 			ret = -1;
-			goto out;
+			செல் out;
 		}
 		tip = commit;
 		tip->object.flags |= SQUASH_SEEN | SQUASH_TIP;
-		tip_count++;
+		tip_மொத்தம்++;
 	}
 	clear_object_flags(repo, SQUASH_SEEN | SQUASH_TIP);
 	reset_revision_walk();
 	walk_started = false;
 
-	if (!tip_count) {
+	எனில் (!tip_மொத்தம்) {
 		ret = error(_("the revision range is empty"));
-		goto out;
-	} else if (tip_count != 1) {
+		செல் out;
+	} இல்லையெனில் எனில் (tip_மொத்தம் != 1) {
 		ret = error(_("the revision range contains more than one tip "
 			      "commit"));
-		goto out;
-	} else if (oldest == tip) {
+		செல் out;
+	} இல்லையெனில் எனில் (oldest == tip) {
 		ret = error(_("the revision range holds a single commit; "
 			      "nothing to squash"));
-		goto out;
-	} else if (!oldest->parents) {
+		செல் out;
+	} இல்லையெனில் எனில் (!oldest->parents) {
 		BUG("an in-range commit must have a parent");
 	}
 
-	commit_list_insert(tip, &filter.no_commit);
+	commit_list_செருகு(tip, &filter.no_commit);
 	filter.kind = FILTER_REFS_BRANCHES;
-	if (update_branches &&
+	எனில் (update_branches &&
 	    filter_refs(&refs, &filter, filter.kind)) {
 		ret = error(_("could not filter refs"));
-		goto out;
+		செல் out;
 	}
-	if (refs.nr) {
-		struct ref_format format = REF_FORMAT_INIT;
-		struct ref_sorting *sorting;
-		struct string_list sorting_options = STRING_LIST_INIT_DUP;
-		struct strbuf branches = STRBUF_INIT;
-		struct strbuf err = STRBUF_INIT;
+	எனில் (refs.nr) {
+		கட்டமைப்பு ref_format format = REF_FORMAT_INIT;
+		கட்டமைப்பு ref_sorting *sorting;
+		கட்டமைப்பு string_list sorting_options = STRING_LIST_INIT_DUP;
+		கட்டமைப்பு strbuf branches = STRBUF_INIT;
+		கட்டமைப்பு strbuf err = STRBUF_INIT;
 
 		format.format = "%(refname:short)";
-		if (verify_ref_format(&format))
+		எனில் (verify_ref_format(&format))
 			BUG("invalid branch format");
 		string_list_append(&sorting_options, "refname");
 		sorting = ref_sorting_options(&sorting_options);
 		ref_array_sort(sorting, &refs);
-		for (int i = 0; i < refs.nr; i++) {
+		க்கு (முழு i = 0; i < refs.nr; i++) {
 			strbuf_reset(&err);
 			strbuf_addstr(&branches, "\n  ");
-			if (format_ref_array_item(refs.items[i], &format,
+			எனில் (format_ref_array_item(refs.பொருட்கள்[i], &format,
 						  &branches, &err))
 				BUG("could not format branch name: %s", err.buf);
 		}
@@ -1471,92 +1471,92 @@ static int resolve_squash_range(struct repository *repo,
 		strbuf_release(&branches);
 		ref_sorting_release(sorting);
 		string_list_clear(&sorting_options, 0);
-		goto out;
+		செல் out;
 	}
-	if (edit_message) {
+	எனில் (edit_message) {
 		strbuf_reset(&subject_data.squash_message);
 		ret = build_squash_message(repo, &todo_buf,
 					   &subject_data.squash_message);
-		if (ret < 0)
-			goto out;
+		எனில் (ret < 0)
+			செல் out;
 	}
 
 	*oldest_out = oldest;
 	*tip_out = tip;
-	*message_out = strbuf_detach(&subject_data.squash_message, NULL);
+	*message_out = strbuf_detach(&subject_data.squash_message, வெற்று);
 	ret = 0;
 
 out:
 	strbuf_release(&todo_buf);
 	clear_object_flags(repo, SQUASH_SEEN | SQUASH_TIP |
 			   SQUASH_AMEND_TARGET);
-	if (walk_started)
+	எனில் (walk_started)
 		reset_revision_walk();
 	subject_data_clear(&subject_data);
 	release_revisions(&revs);
 	ref_filter_clear(&filter);
 	ref_array_clear(&refs);
-	return ret;
+	திரும்பு ret;
 }
 
-static bool amend_replaces_target(struct todo_list *todo, int target)
+நிலையான bool amend_replaces_target(கட்டமைப்பு todo_list *todo, முழு target)
 {
-	for (int i = target + 1; i < todo->nr &&
-				 todo->items[i].command != TODO_PICK; i++) {
-		if (todo->items[i].command == TODO_SQUASH)
-			return false;
-		if (todo->items[i].flags & TODO_REPLACE_FIXUP_MSG)
-			return true;
+	க்கு (முழு i = target + 1; i < todo->nr &&
+				 todo->பொருட்கள்[i].command != TODO_PICK; i++) {
+		எனில் (todo->பொருட்கள்[i].command == TODO_SQUASH)
+			திரும்பு false;
+		எனில் (todo->பொருட்கள்[i].flags & TODO_REPLACE_FIXUP_செய்தி)
+			திரும்பு true;
 	}
-	return false;
+	திரும்பு false;
 }
 
-static int build_squash_message(struct repository *repo,
-				const struct strbuf *todo_buf,
-				struct strbuf *out)
+நிலையான முழு build_squash_message(கட்டமைப்பு repository *repo,
+				மாறிலி கட்டமைப்பு strbuf *todo_buf,
+				கட்டமைப்பு strbuf *out)
 {
-	struct todo_list todo = TODO_LIST_INIT;
-	struct replay_opts opts = REPLAY_OPTS_INIT;
-	int nr_commits, ret;
+	கட்டமைப்பு todo_list todo = TODO_LIST_INIT;
+	கட்டமைப்பு replay_opts opts = REPLAY_OPTS_INIT;
+	முழு nr_commits, ret;
 
-	if (todo_list_parse_insn_buffer(repo, &opts, todo_buf->buf, &todo) < 0 ||
+	எனில் (todo_list_parse_insn_buffer(repo, &opts, todo_buf->buf, &todo) < 0 ||
 	    todo_list_rearrange_squash(&todo) < 0) {
 		ret = error(_("could not prepare the squash message"));
-		goto out;
+		செல் out;
 	}
 
 	nr_commits = todo.nr;
-	for (int i = 0; i < nr_commits; i++) {
-		struct todo_item *item = &todo.items[i];
-		const char *message, *body;
+	க்கு (முழு i = 0; i < nr_commits; i++) {
+		கட்டமைப்பு todo_item *item = &todo.பொருட்கள்[i];
+		மாறிலி எழுத்து *message, *body;
 		size_t commented_len;
 		bool skip, squashing;
 
 		squashing = item->command == TODO_SQUASH ||
-			    (item->flags & TODO_REPLACE_FIXUP_MSG);
-		if (item->command == TODO_PICK)
+			    (item->flags & TODO_REPLACE_FIXUP_செய்தி);
+		எனில் (item->command == TODO_PICK)
 			skip = amend_replaces_target(&todo, i);
-		else
+		இல்லையெனில்
 			skip = !squashing;
 
-		message = repo_logmsg_reencode(repo, item->commit, NULL, NULL);
+		message = repo_logmsg_reencode(repo, item->commit, வெற்று, வெற்று);
 		find_commit_subject(message, &body);
 
-		if (skip)
+		எனில் (skip)
 			commented_len = strlen(body);
-		else if (squashing)
+		இல்லையெனில் எனில் (squashing)
 			commented_len = squash_subject_comment_len(body, 1);
-		else
+		இல்லையெனில்
 			commented_len = 0;
 
-		if (!i)
+		எனில் (!i)
 			add_squash_combination_header(out, nr_commits);
 		strbuf_addch(out, '\n');
 		add_squash_message_header(out, i + 1, skip);
 		strbuf_addstr(out, "\n\n");
-		strbuf_add_commented_lines(out, body, commented_len, comment_line_str);
+		strbuf_add_commented_வரிகள்(out, body, commented_len, comment_வரி_str);
 		strbuf_addstr(out, body + commented_len);
-		strbuf_complete_line(out);
+		strbuf_complete_வரி(out);
 
 		repo_unuse_commit_buffer(repo, item->commit, message);
 	}
@@ -1566,22 +1566,22 @@ static int build_squash_message(struct repository *repo,
 out:
 	todo_list_release(&todo);
 	replay_opts_release(&opts);
-	return ret;
+	திரும்பு ret;
 }
 
-static int cmd_history_squash(int argc,
-			      const char **argv,
-			      const char *prefix,
-			      struct repository *repo)
+நிலையான முழு cmd_history_squash(முழு argc,
+			      மாறிலி எழுத்து **argv,
+			      மாறிலி எழுத்து *prefix,
+			      கட்டமைப்பு repository *repo)
 {
-	const char * const usage[] = {
+	மாறிலி எழுத்து * மாறிலி usage[] = {
 		GIT_HISTORY_SQUASH_USAGE,
-		NULL,
+		வெற்று,
 	};
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	int edit = 1;
-	struct option options[] = {
+	எண்ணிக்கை ref_action action = REF_ACTION_DEFAULT;
+	முழு dry_run = 0;
+	முழு edit = 1;
+	கட்டமைப்பு option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -1591,145 +1591,145 @@ static int cmd_history_squash(int argc,
 			 N_("edit the commit message")),
 		OPT_END(),
 	};
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *oldest, *tip, *rewritten;
-	const struct object_id *base_tree_oid, *tip_tree_oid;
-	char *message_template = NULL;
-	struct rev_info revs = { 0 };
-	int ret;
+	கட்டமைப்பு strbuf reflog_செய்தி = STRBUF_INIT;
+	கட்டமைப்பு commit *oldest, *tip, *rewritten;
+	மாறிலி கட்டமைப்பு object_id *base_மரம்_oid, *tip_மரம்_oid;
+	எழுத்து *message_template = வெற்று;
+	கட்டமைப்பு rev_info revs = { 0 };
+	முழு ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT | PARSE_OPT_KEEP_ARGV0);
-	if (argc < 2) {
+	எனில் (argc < 2) {
 		ret = error(_("command expects a revision range"));
-		goto out;
+		செல் out;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, வெற்று);
 
-	if (action == REF_ACTION_DEFAULT)
+	எனில் (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
-	strbuf_addstr(&reflog_msg, "squash: updating ");
-	strbuf_join_argv(&reflog_msg, argc - 1, argv + 1, ' ');
+	strbuf_addstr(&reflog_செய்தி, "squash: updating ");
+	strbuf_join_argv(&reflog_செய்தி, argc - 1, argv + 1, ' ');
 
 	ret = resolve_squash_range(repo, action == REF_ACTION_BRANCHES,
 				   edit,
 				   argc, argv, &oldest, &tip,
 				   &message_template);
-	if (ret < 0)
-		goto out;
+	எனில் (ret < 0)
+		செல் out;
 
 	ret = setup_revwalk(repo, action, tip, &revs);
-	if (ret < 0)
-		goto out;
+	எனில் (ret < 0)
+		செல் out;
 
-	base_tree_oid = &repo_get_commit_tree(repo,
+	base_மரம்_oid = &repo_get_commit_மரம்(repo,
 					oldest->parents->item)->object.oid;
-	tip_tree_oid = &repo_get_commit_tree(repo, tip)->object.oid;
+	tip_மரம்_oid = &repo_get_commit_மரம்(repo, tip)->object.oid;
 
-	ret = commit_tree_ext(repo, "squash", oldest, message_template,
-			      oldest->parents, base_tree_oid, tip_tree_oid,
+	ret = commit_மரம்_ext(repo, "squash", oldest, message_template,
+			      oldest->parents, base_மரம்_oid, tip_மரம்_oid,
 			      &rewritten,
-			      edit ? COMMIT_TREE_EDIT_MESSAGE : 0);
-	if (ret < 0) {
+			      edit ? COMMIT_மரம்_EDIT_MESSAGE : 0);
+	எனில் (ret < 0) {
 		ret = error(_("failed writing squashed commit"));
-		goto out;
+		செல் out;
 	}
 
 	ret = handle_reference_updates(&revs, action, tip, rewritten,
-				       reflog_msg.buf, dry_run,
+				       reflog_செய்தி.buf, dry_run,
 				       REPLAY_EMPTY_COMMIT_ABORT);
-	if (ret < 0) {
+	எனில் (ret < 0) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		செல் out;
 	}
 
 	ret = 0;
 
 out:
-	strbuf_release(&reflog_msg);
+	strbuf_release(&reflog_செய்தி);
 	release_revisions(&revs);
-	free(message_template);
-	return ret;
+	விடுவி(message_template);
+	திரும்பு ret;
 }
 
-static int update_worktree(struct repository *repo,
-			   const struct commit *old_head,
-			   const struct commit *new_head,
+நிலையான முழு update_worktree(கட்டமைப்பு repository *repo,
+			   மாறிலி கட்டமைப்பு commit *old_head,
+			   மாறிலி கட்டமைப்பு commit *new_head,
 			   bool dry_run)
 {
-	struct reset_working_tree_options opts = {
+	கட்டமைப்பு reset_working_மரம்_options opts = {
 		.oid_from = &old_head->object.oid,
 		.oid = &new_head->object.oid,
 	};
-	if (dry_run)
-		opts.flags |= RESET_WORKING_TREE_DRY_RUN;
-	return reset_working_tree(repo, &opts);
+	எனில் (dry_run)
+		opts.flags |= RESET_WORKING_மரம்_DRY_RUN;
+	திரும்பு reset_working_மரம்(repo, &opts);
 }
 
-static int find_head_tree_change(struct repository *repo,
-				 const struct replay_result *result,
-				 struct commit **old_head,
-				 struct commit **new_head,
+நிலையான முழு find_head_மரம்_change(கட்டமைப்பு repository *repo,
+				 மாறிலி கட்டமைப்பு replay_result *result,
+				 கட்டமைப்பு commit **old_head,
+				 கட்டமைப்பு commit **new_head,
 				 bool *changed)
 {
-	const struct replay_ref_update *head_update = NULL;
-	struct commit *old_head_commit, *new_head_commit;
-	struct tree *old_head_tree, *new_head_tree;
-	const char *head_target;
-	int head_flags;
+	மாறிலி கட்டமைப்பு replay_ref_update *head_update = வெற்று;
+	கட்டமைப்பு commit *old_head_commit, *new_head_commit;
+	கட்டமைப்பு மரம் *old_head_மரம், *new_head_மரம்;
+	மாறிலி எழுத்து *head_target;
+	முழு head_flags;
 
 	*changed = false;
 
 	head_target = refs_resolve_ref_unsafe(get_main_ref_store(repo), "HEAD",
 					      RESOLVE_REF_NO_RECURSE | RESOLVE_REF_READING,
-					      NULL, &head_flags);
-	if (!head_target)
-		return error(_("cannot look up HEAD"));
+					      வெற்று, &head_flags);
+	எனில் (!head_target)
+		திரும்பு error(_("cannot look up HEAD"));
 
-	for (size_t i = 0; i < result->updates_nr; i++) {
-		if (!strcmp(result->updates[i].refname, head_target)) {
+	க்கு (size_t i = 0; i < result->updates_nr; i++) {
+		எனில் (!strcmp(result->updates[i].refname, head_target)) {
 			head_update = &result->updates[i];
-			break;
+			நிறுத்து;
 		}
 	}
 
-	if (!head_update)
-		return 0;
+	எனில் (!head_update)
+		திரும்பு 0;
 
 	old_head_commit = lookup_commit_reference(repo, &head_update->old_oid);
 	new_head_commit = lookup_commit_reference(repo, &head_update->new_oid);
-	if (!old_head_commit || !new_head_commit)
-		return error(_("cannot resolve HEAD commit"));
+	எனில் (!old_head_commit || !new_head_commit)
+		திரும்பு error(_("cannot resolve HEAD commit"));
 
-	old_head_tree = repo_get_commit_tree(repo, old_head_commit);
-	new_head_tree = repo_get_commit_tree(repo, new_head_commit);
-	if (!old_head_tree || !new_head_tree)
-		return error(_("cannot resolve tree for HEAD"));
+	old_head_மரம் = repo_get_commit_மரம்(repo, old_head_commit);
+	new_head_மரம் = repo_get_commit_மரம்(repo, new_head_commit);
+	எனில் (!old_head_மரம் || !new_head_மரம்)
+		திரும்பு error(_("cannot resolve tree for HEAD"));
 
-	if (oideq(&old_head_tree->object.oid, &new_head_tree->object.oid))
-		return 0;
+	எனில் (oideq(&old_head_மரம்->object.oid, &new_head_மரம்->object.oid))
+		திரும்பு 0;
 
 	*old_head = old_head_commit;
 	*new_head = new_head_commit;
 	*changed = true;
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int cmd_history_drop(int argc,
-			    const char **argv,
-			    const char *prefix,
-			    struct repository *repo)
+நிலையான முழு cmd_history_drop(முழு argc,
+			    மாறிலி எழுத்து **argv,
+			    மாறிலி எழுத்து *prefix,
+			    கட்டமைப்பு repository *repo)
 {
-	const char * const usage[] = {
+	மாறிலி எழுத்து * மாறிலி usage[] = {
 		GIT_HISTORY_DROP_USAGE,
-		NULL,
+		வெற்று,
 	};
-	enum replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	struct option options[] = {
+	எண்ணிக்கை replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
+	எண்ணிக்கை ref_action action = REF_ACTION_DEFAULT;
+	முழு dry_run = 0;
+	கட்டமைப்பு option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -1740,51 +1740,51 @@ static int cmd_history_drop(int argc,
 			       PARSE_OPT_NONEG, parse_opt_empty),
 		OPT_END(),
 	};
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *original, *rewritten;
-	struct rev_info revs = { 0 };
-	struct replay_result result = { 0 };
-	struct commit *old_head, *new_head;
+	கட்டமைப்பு strbuf reflog_செய்தி = STRBUF_INIT;
+	கட்டமைப்பு commit *original, *rewritten;
+	கட்டமைப்பு rev_info revs = { 0 };
+	கட்டமைப்பு replay_result result = { 0 };
+	கட்டமைப்பு commit *old_head, *new_head;
 	bool head_moves = false;
-	int ret;
+	முழு ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1) {
+	எனில் (argc != 1) {
 		ret = error(_("command expects a single revision"));
-		goto out;
+		செல் out;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, வெற்று);
 
-	if (action == REF_ACTION_DEFAULT)
+	எனில் (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	எனில் (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
-		goto out;
+		செல் out;
 	}
 
-	if (!original->parents) {
+	எனில் (!original->parents) {
 		ret = error(_("cannot drop root commit %s: "
 			      "it has no parent to replay onto"),
 			    argv[0]);
-		goto out;
-	} else if (original->parents->next) {
+		செல் out;
+	} இல்லையெனில் எனில் (original->parents->next) {
 		ret = error(_("cannot drop merge commit: %s"), argv[0]);
-		goto out;
+		செல் out;
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret)
-		goto out;
+	எனில் (ret)
+		செல் out;
 
 	rewritten = original->parents->item;
 
 	ret = compute_pending_ref_updates(&revs, action, original, rewritten,
 					  empty, &result);
-	if (ret) {
+	எனில் (ret) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		செல் out;
 	}
 
 	/*
@@ -1796,56 +1796,56 @@ static int cmd_history_drop(int argc,
 	 * inconsistent repository state. So we first perform a dry-run merge
 	 * here before updating refs.
 	 */
-	if (!is_bare_repository(repo)) {
-		ret = find_head_tree_change(repo, &result, &old_head,
+	எனில் (!is_bare_repository(repo)) {
+		ret = find_head_மரம்_change(repo, &result, &old_head,
 					    &new_head, &head_moves);
-		if (ret < 0)
-			goto out;
+		எனில் (ret < 0)
+			செல் out;
 
-		if (head_moves && update_worktree(repo, old_head, new_head, true) < 0) {
+		எனில் (head_moves && update_worktree(repo, old_head, new_head, true) < 0) {
 			ret = error(_("dropping this commit would "
 				      "overwrite local changes; aborting"));
-			goto out;
+			செல் out;
 		}
 	}
 
-	strbuf_addf(&reflog_msg, "drop: dropping %s", argv[0]);
-	ret = apply_pending_ref_updates(repo, &result, reflog_msg.buf, dry_run);
-	if (ret < 0) {
+	strbuf_addf(&reflog_செய்தி, "drop: dropping %s", argv[0]);
+	ret = apply_pending_ref_updates(repo, &result, reflog_செய்தி.buf, dry_run);
+	எனில் (ret < 0) {
 		ret = error(_("failed to update references"));
-		goto out;
+		செல் out;
 	}
 
-	if (!dry_run && head_moves && update_worktree(repo, old_head, new_head, false) < 0) {
+	எனில் (!dry_run && head_moves && update_worktree(repo, old_head, new_head, false) < 0) {
 		ret = error(_("could not update working tree to new commit %s"),
 			    oid_to_hex(&new_head->object.oid));
-		goto out;
+		செல் out;
 	}
 
 	ret = 0;
 
 out:
 	replay_result_release(&result);
-	strbuf_release(&reflog_msg);
+	strbuf_release(&reflog_செய்தி);
 	release_revisions(&revs);
-	return ret;
+	திரும்பு ret;
 }
 
-int cmd_history(int argc,
-		const char **argv,
-		const char *prefix,
-		struct repository *repo)
+முழு cmd_history(முழு argc,
+		மாறிலி எழுத்து **argv,
+		மாறிலி எழுத்து *prefix,
+		கட்டமைப்பு repository *repo)
 {
-	const char * const usage[] = {
+	மாறிலி எழுத்து * மாறிலி usage[] = {
 		GIT_HISTORY_DROP_USAGE,
 		GIT_HISTORY_FIXUP_USAGE,
 		GIT_HISTORY_REWORD_USAGE,
 		GIT_HISTORY_SPLIT_USAGE,
 		GIT_HISTORY_SQUASH_USAGE,
-		NULL,
+		வெற்று,
 	};
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	parse_opt_subcommand_fn *fn = வெற்று;
+	கட்டமைப்பு option options[] = {
 		OPT_SUBCOMMAND("drop", &fn, cmd_history_drop),
 		OPT_SUBCOMMAND("fixup", &fn, cmd_history_fixup),
 		OPT_SUBCOMMAND("reword", &fn, cmd_history_reword),
@@ -1855,5 +1855,5 @@ int cmd_history(int argc,
 	};
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	return fn(argc, argv, prefix, repo);
+	திரும்பு fn(argc, argv, prefix, repo);
 }

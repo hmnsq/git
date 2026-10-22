@@ -1,68 +1,68 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "rerere.h"
-#include "strbuf.h"
-#include "string-list.h"
-#include "xdiff/xdiff.h"
-#include "xdiff-interface.h"
-#include "pathspec.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "rerere.h"
+#அந்தர்பாவ "strbuf.h"
+#அந்தர்பாவ "string-list.h"
+#அந்தர்பாவ "xdiff/xdiff.h"
+#அந்தர்பாவ "xdiff-interface.h"
+#அந்தர்பாவ "pathspec.h"
 
-static const char * const rerere_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி rerere_usage[] = {
 	N_("git rerere [clear | forget <pathspec>... | diff | status | remaining | gc]"),
-	NULL,
+	வெற்று,
 };
 
-static int outf(void *dummy UNUSED, mmfile_t *ptr, int nbuf)
+நிலையான முழு outf(வெறுமை *dummy UNUSED, mmfile_t *ptr, முழு nbuf)
 {
-	int i;
-	for (i = 0; i < nbuf; i++)
-		if (write_in_full(1, ptr[i].ptr, ptr[i].size) < 0)
-			return -1;
-	return 0;
+	முழு i;
+	க்கு (i = 0; i < nbuf; i++)
+		எனில் (write_in_full(1, ptr[i].ptr, ptr[i].size) < 0)
+			திரும்பு -1;
+	திரும்பு 0;
 }
 
-static int diff_two(const char *file1, const char *label1,
-		const char *file2, const char *label2)
+நிலையான முழு diff_two(மாறிலி எழுத்து *file1, மாறிலி எழுத்து *label1,
+		மாறிலி எழுத்து *file2, மாறிலி எழுத்து *label2)
 {
 	xpparam_t xpp;
 	xdemitconf_t xecfg;
-	xdemitcb_t ecb = { .out_line = outf };
+	xdemitcb_t ecb = { .out_வரி = outf };
 	mmfile_t minus, plus;
-	int ret;
+	முழு ret;
 
-	if (read_mmfile(&minus, file1))
-		return -1;
-	if (read_mmfile(&plus, file2)) {
-		free(minus.ptr);
-		return -1;
+	எனில் (read_mmfile(&minus, file1))
+		திரும்பு -1;
+	எனில் (read_mmfile(&plus, file2)) {
+		விடுவி(minus.ptr);
+		திரும்பு -1;
 	}
 
 	printf("--- a/%s\n+++ b/%s\n", label1, label2);
 	fflush(stdout);
-	memset(&xpp, 0, sizeof(xpp));
+	memset(&xpp, 0, அளவு(xpp));
 	xpp.flags = 0;
-	memset(&xecfg, 0, sizeof(xecfg));
+	memset(&xecfg, 0, அளவு(xecfg));
 	xecfg.ctxlen = 3;
 	ret = xdi_diff(&minus, &plus, &xpp, &xecfg, &ecb);
 
-	free(minus.ptr);
-	free(plus.ptr);
-	return ret;
+	விடுவி(minus.ptr);
+	விடுவி(plus.ptr);
+	திரும்பு ret;
 }
 
-int cmd_rerere(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+முழு cmd_rerere(முழு argc,
+	       மாறிலி எழுத்து **argv,
+	       மாறிலி எழுத்து *prefix,
+	       கட்டமைப்பு repository *repo UNUSED)
 {
-	struct string_list merge_rr = STRING_LIST_INIT_DUP;
-	int autoupdate = -1, flags = 0;
+	கட்டமைப்பு string_list merge_rr = STRING_LIST_INIT_DUP;
+	முழு autoupdate = -1, flags = 0;
 
-	struct option options[] = {
+	கட்டமைப்பு option options[] = {
 		OPT_SET_INT(0, "rerere-autoupdate", &autoupdate,
 			N_("register clean resolutions in index"), 1),
 		OPT_END(),
@@ -70,21 +70,21 @@ int cmd_rerere(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, rerere_usage, 0);
 
-	repo_config(the_repository, git_xmerge_config, NULL);
+	repo_config(the_repository, git_xmerge_config, வெற்று);
 
-	if (autoupdate == 1)
+	எனில் (autoupdate == 1)
 		flags = RERERE_AUTOUPDATE;
-	if (autoupdate == 0)
+	எனில் (autoupdate == 0)
 		flags = RERERE_NOAUTOUPDATE;
 
-	if (argc < 1)
-		return repo_rerere(the_repository, flags);
+	எனில் (argc < 1)
+		திரும்பு repo_rerere(the_repository, flags);
 
-	if (!strcmp(argv[0], "forget")) {
-		struct pathspec pathspec;
-		int ret;
+	எனில் (!strcmp(argv[0], "forget")) {
+		கட்டமைப்பு pathspec pathspec;
+		முழு ret;
 
-		if (argc < 2)
+		எனில் (argc < 2)
 			warning(_("'git rerere forget' without paths is deprecated"));
 		parse_pathspec(&pathspec, 0, PATHSPEC_PREFER_CWD,
 			       prefix, argv + 1);
@@ -92,45 +92,45 @@ int cmd_rerere(int argc,
 		ret = rerere_forget(the_repository, &pathspec);
 
 		clear_pathspec(&pathspec);
-		return ret;
+		திரும்பு ret;
 	}
 
-	if (!strcmp(argv[0], "clear")) {
+	எனில் (!strcmp(argv[0], "clear")) {
 		rerere_clear(the_repository, &merge_rr);
-	} else if (!strcmp(argv[0], "gc"))
+	} இல்லையெனில் எனில் (!strcmp(argv[0], "gc"))
 		rerere_gc(the_repository, &merge_rr);
-	else if (!strcmp(argv[0], "status")) {
-		if (setup_rerere(the_repository, &merge_rr,
+	இல்லையெனில் எனில் (!strcmp(argv[0], "status")) {
+		எனில் (setup_rerere(the_repository, &merge_rr,
 				 flags | RERERE_READONLY) < 0)
-			return 0;
-		for (size_t i = 0; i < merge_rr.nr; i++)
-			printf("%s\n", merge_rr.items[i].string);
-	} else if (!strcmp(argv[0], "remaining")) {
+			திரும்பு 0;
+		க்கு (size_t i = 0; i < merge_rr.nr; i++)
+			printf("%s\n", merge_rr.பொருட்கள்[i].string);
+	} இல்லையெனில் எனில் (!strcmp(argv[0], "remaining")) {
 		rerere_remaining(the_repository, &merge_rr);
-		for (size_t i = 0; i < merge_rr.nr; i++) {
-			if (merge_rr.items[i].util != RERERE_RESOLVED)
-				printf("%s\n", merge_rr.items[i].string);
-			else
+		க்கு (size_t i = 0; i < merge_rr.nr; i++) {
+			எனில் (merge_rr.பொருட்கள்[i].util != RERERE_RESOLVED)
+				printf("%s\n", merge_rr.பொருட்கள்[i].string);
+			இல்லையெனில்
 				/* prepare for later call to
 				 * string_list_clear() */
-				merge_rr.items[i].util = NULL;
+				merge_rr.பொருட்கள்[i].util = வெற்று;
 		}
-	} else if (!strcmp(argv[0], "diff")) {
-		struct strbuf buf = STRBUF_INIT;
-		if (setup_rerere(the_repository, &merge_rr,
+	} இல்லையெனில் எனில் (!strcmp(argv[0], "diff")) {
+		கட்டமைப்பு strbuf buf = STRBUF_INIT;
+		எனில் (setup_rerere(the_repository, &merge_rr,
 				 flags | RERERE_READONLY) < 0)
-			return 0;
-		for (size_t i = 0; i < merge_rr.nr; i++) {
-			const char *path = merge_rr.items[i].string;
-			const struct rerere_id *id = merge_rr.items[i].util;
-			if (diff_two(rerere_path(&buf, id, "preimage"), path, path, path))
-				die(_("unable to generate diff for '%s'"), rerere_path(&buf, id, NULL));
+			திரும்பு 0;
+		க்கு (size_t i = 0; i < merge_rr.nr; i++) {
+			மாறிலி எழுத்து *path = merge_rr.பொருட்கள்[i].string;
+			மாறிலி கட்டமைப்பு rerere_id *id = merge_rr.பொருட்கள்[i].util;
+			எனில் (diff_two(rerere_path(&buf, id, "preimage"), path, path, path))
+				die(_("unable to generate diff for '%s'"), rerere_path(&buf, id, வெற்று));
 		}
 
 		strbuf_release(&buf);
-	} else
+	} இல்லையெனில்
 		usage_with_options(rerere_usage, options);
 
 	string_list_clear(&merge_rr, 1);
-	return 0;
+	திரும்பு 0;
 }

@@ -1,35 +1,35 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "exec-cmd.h"
-#include "gettext.h"
-#include "pkt-line.h"
-#include "parse-options.h"
-#include "protocol.h"
-#include "replace-object.h"
-#include "upload-pack.h"
-#include "serve.h"
-#include "setup.h"
-#include "commit.h"
-#include "environment.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "exec-cmd.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "pkt-line.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "protocol.h"
+#அந்தர்பாவ "replace-object.h"
+#அந்தர்பாவ "upload-pack.h"
+#அந்தர்பாவ "serve.h"
+#அந்தர்பாவ "setup.h"
+#அந்தர்பாவ "commit.h"
+#அந்தர்பாவ "environment.h"
 
-static const char * const upload_pack_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி upload_pack_usage[] = {
 	N_("git-upload-pack [--[no-]strict] [--timeout=<n>] [--stateless-rpc]\n"
 	   "                [--advertise-refs] <directory>"),
-	NULL
+	வெற்று
 };
 
-int cmd_upload_pack(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+முழு cmd_upload_pack(முழு argc,
+		    மாறிலி எழுத்து **argv,
+		    மாறிலி எழுத்து *prefix,
+		    கட்டமைப்பு repository *repo UNUSED)
 {
-	const char *dir;
-	int strict = 0;
-	int advertise_refs = 0;
-	int stateless_rpc = 0;
-	int timeout = 0;
-	struct option options[] = {
+	மாறிலி எழுத்து *dir;
+	முழு strict = 0;
+	முழு advertise_refs = 0;
+	முழு stateless_rpc = 0;
+	முழு timeout = 0;
+	கட்டமைப்பு option options[] = {
 		OPT_BOOL(0, "stateless-rpc", &stateless_rpc,
 			 N_("quit after a single request/response exchange")),
 		OPT_HIDDEN_BOOL(0, "http-backend-info-refs", &advertise_refs,
@@ -50,40 +50,40 @@ int cmd_upload_pack(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, upload_pack_usage, 0);
 
-	if (argc != 1)
+	எனில் (argc != 1)
 		usage_with_options(upload_pack_usage, options);
 
 	setup_path();
 
 	dir = argv[0];
 
-	if (strict)
+	எனில் (strict)
 		enter_repo_flags |= ENTER_REPO_STRICT;
-	if (!enter_repo(the_repository, dir, enter_repo_flags))
+	எனில் (!enter_repo(the_repository, dir, enter_repo_flags))
 		die("'%s' does not appear to be a git repository", dir);
 
-	switch (determine_protocol_version_server()) {
-	case protocol_v2:
-		if (advertise_refs)
+	தேர்வு (determine_protocol_version_server()) {
+	நிலை protocol_v2:
+		எனில் (advertise_refs)
 			protocol_v2_advertise_capabilities(the_repository);
-		else
+		இல்லையெனில்
 			protocol_v2_serve_loop(the_repository, stateless_rpc);
-		break;
-	case protocol_v1:
+		நிறுத்து;
+	நிலை protocol_v1:
 		/*
 		 * v1 is just the original protocol with a version string,
 		 * so just fall through after writing the version string.
 		 */
-		if (advertise_refs || !stateless_rpc)
+		எனில் (advertise_refs || !stateless_rpc)
 			packet_write_fmt(1, "version 1\n");
 
 		/* fallthrough */
-	case protocol_v0:
+	நிலை protocol_v0:
 		upload_pack(advertise_refs, stateless_rpc, timeout);
-		break;
-	case protocol_unknown_version:
+		நிறுத்து;
+	நிலை protocol_unknown_version:
 		BUG("unknown protocol version");
 	}
 
-	return 0;
+	திரும்பு 0;
 }

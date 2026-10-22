@@ -1,124 +1,124 @@
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "hex.h"
-#include "pkt-line.h"
-#include "run-command.h"
-#include "remote.h"
-#include "connect.h"
-#include "send-pack.h"
-#include "quote.h"
-#include "transport.h"
-#include "oid-array.h"
-#include "gettext.h"
-#include "protocol.h"
-#include "parse-options.h"
-#include "write-or-die.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "hex.h"
+#அந்தர்பாவ "pkt-line.h"
+#அந்தர்பாவ "run-command.h"
+#அந்தர்பாவ "remote.h"
+#அந்தர்பாவ "connect.h"
+#அந்தர்பாவ "send-pack.h"
+#அந்தர்பாவ "quote.h"
+#அந்தர்பாவ "transport.h"
+#அந்தர்பாவ "oid-array.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "protocol.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "write-or-die.h"
 
-static const char * const send_pack_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி send_pack_usage[] = {
 	N_("git send-pack [--mirror] [--dry-run] [--force]\n"
 	   "              [--receive-pack=<git-receive-pack>]\n"
 	   "              [--verbose] [--thin] [--atomic]\n"
 	   "              [--[no-]signed | --signed=(true|false|if-asked)]\n"
 	   "              [<host>:]<directory> (--all | <ref>...)"),
-	NULL,
+	வெற்று,
 };
 
-static struct send_pack_args args;
+நிலையான கட்டமைப்பு send_pack_args args;
 
-static void print_helper_status(struct ref *ref)
+நிலையான வெறுமை print_helper_status(கட்டமைப்பு ref *ref)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct ref_push_report *report;
+	கட்டமைப்பு strbuf buf = STRBUF_INIT;
+	கட்டமைப்பு ref_தள்ளு_report *report;
 
-	for (; ref; ref = ref->next) {
-		const char *msg = NULL;
-		const char *res;
-		int count = 0;
+	க்கு (; ref; ref = ref->next) {
+		மாறிலி எழுத்து *செய்தி = வெற்று;
+		மாறிலி எழுத்து *res;
+		முழு மொத்தம் = 0;
 
-		switch(ref->status) {
-		case REF_STATUS_NONE:
+		தேர்வு(ref->status) {
+		நிலை REF_STATUS_NONE:
 			res = "error";
-			msg = "no match";
-			break;
+			செய்தி = "no match";
+			நிறுத்து;
 
-		case REF_STATUS_OK:
+		நிலை REF_STATUS_OK:
 			res = "ok";
-			break;
+			நிறுத்து;
 
-		case REF_STATUS_UPTODATE:
+		நிலை REF_STATUS_UPTODATE:
 			res = "ok";
-			msg = "up to date";
-			break;
+			செய்தி = "up to date";
+			நிறுத்து;
 
-		case REF_STATUS_REJECT_NONFASTFORWARD:
+		நிலை REF_STATUS_REJECT_NONFASTFORWARD:
 			res = "error";
-			msg = "non-fast forward";
-			break;
+			செய்தி = "non-fast forward";
+			நிறுத்து;
 
-		case REF_STATUS_REJECT_FETCH_FIRST:
+		நிலை REF_STATUS_REJECT_FETCH_FIRST:
 			res = "error";
-			msg = "fetch first";
-			break;
+			செய்தி = "fetch first";
+			நிறுத்து;
 
-		case REF_STATUS_REJECT_NEEDS_FORCE:
+		நிலை REF_STATUS_REJECT_NEEDS_FORCE:
 			res = "error";
-			msg = "needs force";
-			break;
+			செய்தி = "needs force";
+			நிறுத்து;
 
-		case REF_STATUS_REJECT_STALE:
+		நிலை REF_STATUS_REJECT_STALE:
 			res = "error";
-			msg = "stale info";
-			break;
+			செய்தி = "stale info";
+			நிறுத்து;
 
-		case REF_STATUS_REJECT_REMOTE_UPDATED:
+		நிலை REF_STATUS_REJECT_REMOTE_UPDATED:
 			res = "error";
-			msg = "remote ref updated since checkout";
-			break;
+			செய்தி = "remote ref updated since checkout";
+			நிறுத்து;
 
-		case REF_STATUS_REJECT_ALREADY_EXISTS:
+		நிலை REF_STATUS_REJECT_ALREADY_EXISTS:
 			res = "error";
-			msg = "already exists";
-			break;
+			செய்தி = "already exists";
+			நிறுத்து;
 
-		case REF_STATUS_REJECT_NODELETE:
-		case REF_STATUS_REMOTE_REJECT:
+		நிலை REF_STATUS_REJECT_NODELETE:
+		நிலை REF_STATUS_REMOTE_REJECT:
 			res = "error";
-			break;
+			நிறுத்து;
 
-		case REF_STATUS_EXPECTING_REPORT:
+		நிலை REF_STATUS_EXPECTING_REPORT:
 			res = "error";
-			msg = "expecting report";
-			break;
+			செய்தி = "expecting report";
+			நிறுத்து;
 
-		default:
-			continue;
+		இயல்பு:
+			தொடர்;
 		}
 
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "%s %s", res, ref->name);
-		if (ref->remote_status)
-			msg = ref->remote_status;
-		if (msg) {
+		எனில் (ref->remote_status)
+			செய்தி = ref->remote_status;
+		எனில் (செய்தி) {
 			strbuf_addch(&buf, ' ');
-			quote_two_c_style(&buf, "", msg, 0);
+			quote_two_c_style(&buf, "", செய்தி, 0);
 		}
 		strbuf_addch(&buf, '\n');
 
-		if (ref->status == REF_STATUS_OK) {
-			for (report = ref->report; report; report = report->next) {
-				if (count++ > 0)
+		எனில் (ref->status == REF_STATUS_OK) {
+			க்கு (report = ref->report; report; report = report->next) {
+				எனில் (மொத்தம்++ > 0)
 					strbuf_addf(&buf, "ok %s\n", ref->name);
-				if (report->ref_name)
+				எனில் (report->ref_name)
 					strbuf_addf(&buf, "option refname %s\n",
 						report->ref_name);
-				if (report->old_oid)
+				எனில் (report->old_oid)
 					strbuf_addf(&buf, "option old-oid %s\n",
 						oid_to_hex(report->old_oid));
-				if (report->new_oid)
+				எனில் (report->new_oid)
 					strbuf_addf(&buf, "option new-oid %s\n",
 						oid_to_hex(report->new_oid));
-				if (report->forced_update)
+				எனில் (report->forced_update)
 					strbuf_addstr(&buf, "option forced-update\n");
 			}
 		}
@@ -127,64 +127,64 @@ static void print_helper_status(struct ref *ref)
 	strbuf_release(&buf);
 }
 
-static int send_pack_config(const char *k, const char *v,
-			    const struct config_context *ctx, void *cb)
+நிலையான முழு send_pack_config(மாறிலி எழுத்து *k, மாறிலி எழுத்து *v,
+			    மாறிலி கட்டமைப்பு config_context *ctx, வெறுமை *cb)
 {
-	if (!strcmp(k, "push.gpgsign")) {
-		switch (git_parse_maybe_bool(v)) {
-		case 0:
-			args.push_cert = SEND_PACK_PUSH_CERT_NEVER;
-			break;
-		case 1:
-			args.push_cert = SEND_PACK_PUSH_CERT_ALWAYS;
-			break;
-		default:
-			if (!strcasecmp(v, "if-asked"))
-				args.push_cert = SEND_PACK_PUSH_CERT_IF_ASKED;
-			else
-				return error(_("invalid value for '%s'"), k);
+	எனில் (!strcmp(k, "push.gpgsign")) {
+		தேர்வு (git_parse_maybe_bool(v)) {
+		நிலை 0:
+			args.தள்ளு_cert = SEND_PACK_தள்ளு_CERT_NEVER;
+			நிறுத்து;
+		நிலை 1:
+			args.தள்ளு_cert = SEND_PACK_தள்ளு_CERT_ALWAYS;
+			நிறுத்து;
+		இயல்பு:
+			எனில் (!strcasecmp(v, "if-asked"))
+				args.தள்ளு_cert = SEND_PACK_தள்ளு_CERT_IF_ASKED;
+			இல்லையெனில்
+				திரும்பு error(_("invalid value for '%s'"), k);
 		}
 	}
-	return git_default_config(k, v, ctx, cb);
+	திரும்பு git_default_config(k, v, ctx, cb);
 }
 
-int cmd_send_pack(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo)
+முழு cmd_send_pack(முழு argc,
+		  மாறிலி எழுத்து **argv,
+		  மாறிலி எழுத்து *prefix,
+		  கட்டமைப்பு repository *repo)
 {
-	struct refspec rs;
-	const char *remote_name = NULL;
-	struct remote *remote = NULL;
-	const char *dest = NULL;
-	int fd[2];
-	struct child_process *conn;
-	struct oid_array extra_have = OID_ARRAY_INIT;
-	struct oid_array shallow = OID_ARRAY_INIT;
-	struct ref *remote_refs, *local_refs;
-	int ret;
-	int helper_status = 0;
-	int send_all = 0;
-	int verbose = 0;
-	const char *receivepack = "git-receive-pack";
+	கட்டமைப்பு refspec rs;
+	மாறிலி எழுத்து *remote_name = வெற்று;
+	கட்டமைப்பு remote *remote = வெற்று;
+	மாறிலி எழுத்து *dest = வெற்று;
+	முழு fd[2];
+	கட்டமைப்பு child_process *conn;
+	கட்டமைப்பு oid_array extra_have = OID_ARRAY_INIT;
+	கட்டமைப்பு oid_array shallow = OID_ARRAY_INIT;
+	கட்டமைப்பு ref *remote_refs, *local_refs;
+	முழு ret;
+	முழு helper_status = 0;
+	முழு send_all = 0;
+	முழு verbose = 0;
+	மாறிலி எழுத்து *receivepack = "git-receive-pack";
 	unsigned dry_run = 0;
 	unsigned send_mirror = 0;
 	unsigned force_update = 0;
 	unsigned quiet = 0;
-	int push_cert = 0;
-	struct string_list push_options = STRING_LIST_INIT_NODUP;
+	முழு தள்ளு_cert = 0;
+	கட்டமைப்பு string_list தள்ளு_options = STRING_LIST_INIT_NODUP;
 	unsigned use_thin_pack = 0;
 	unsigned atomic = 0;
 	unsigned stateless_rpc = 0;
-	int flags;
-	unsigned int reject_reasons;
-	int progress = -1;
-	int from_stdin = 0;
-	struct push_cas_option cas = {0};
-	int force_if_includes = 0;
-	struct packet_reader reader;
+	முழு flags;
+	unsigned முழு reject_reasons;
+	முழு progress = -1;
+	முழு from_stdin = 0;
+	கட்டமைப்பு தள்ளு_cas_option cas = {0};
+	முழு force_if_includes = 0;
+	கட்டமைப்பு packet_reader reader;
 
-	struct option options[] = {
+	கட்டமைப்பு option options[] = {
 		OPT__VERBOSITY(&verbose),
 		OPT_STRING(0, "receive-pack", &receivepack, "receive-pack", N_("receive pack program")),
 		OPT_STRING(0, "exec", &receivepack, "receive-pack", N_("receive pack program")),
@@ -193,9 +193,9 @@ int cmd_send_pack(int argc,
 		OPT_BOOL('n' , "dry-run", &dry_run, N_("dry run")),
 		OPT_BOOL(0, "mirror", &send_mirror, N_("mirror all refs")),
 		OPT_BOOL('f', "force", &force_update, N_("force updates")),
-		OPT_CALLBACK_F(0, "signed", &push_cert, "(yes|no|if-asked)", N_("GPG sign the push"),
-		  PARSE_OPT_OPTARG, option_parse_push_signed),
-		OPT_STRING_LIST(0, "push-option", &push_options,
+		OPT_CALLBACK_F(0, "signed", &தள்ளு_cert, "(yes|no|if-asked)", N_("GPG sign the push"),
+		  PARSE_OPT_OPTARG, option_parse_தள்ளு_signed),
+		OPT_STRING_LIST(0, "push-option", &தள்ளு_options,
 				N_("server-specific"),
 				N_("option to transmit")),
 		OPT_BOOL(0, "progress", &progress, N_("force progress reporting")),
@@ -206,23 +206,23 @@ int cmd_send_pack(int argc,
 		OPT_BOOL(0, "helper-status", &helper_status, N_("print status from remote helper")),
 		OPT_CALLBACK_F(0, "force-with-lease", &cas, N_("<refname>:<expect>"),
 		  N_("require old value of ref to be at this value"),
-		  PARSE_OPT_OPTARG, parseopt_push_cas_option),
+		  PARSE_OPT_OPTARG, parseopt_தள்ளு_cas_option),
 		OPT_BOOL(0, TRANS_OPT_FORCE_IF_INCLUDES, &force_if_includes,
 			 N_("require remote updates to be integrated locally")),
 		OPT_END()
 	};
 
-	repo_config(repo, send_pack_config, NULL);
+	repo_config(repo, send_pack_config, வெற்று);
 	argc = parse_options(argc, argv, prefix, options, send_pack_usage, 0);
 
-	refspec_init_push(&rs, repo->hash_algo);
+	refspec_init_தள்ளு(&rs, repo->hash_algo);
 
-	if (argc > 0) {
+	எனில் (argc > 0) {
 		dest = argv[0];
 		refspec_appendn(&rs, argv + 1, argc - 1);
 	}
 
-	if (!dest)
+	எனில் (!dest)
 		usage_with_options(send_pack_usage, options);
 
 	args.verbose = verbose;
@@ -230,24 +230,24 @@ int cmd_send_pack(int argc,
 	args.send_mirror = send_mirror;
 	args.force_update = force_update;
 	args.quiet = quiet;
-	args.push_cert = push_cert;
+	args.தள்ளு_cert = தள்ளு_cert;
 	args.progress = progress;
 	args.use_thin_pack = use_thin_pack;
 	args.atomic = atomic;
 	args.stateless_rpc = stateless_rpc;
-	args.push_options = push_options.nr ? &push_options : NULL;
+	args.தள்ளு_options = தள்ளு_options.nr ? &தள்ளு_options : வெற்று;
 	args.url = dest;
 
-	if (from_stdin) {
-		if (args.stateless_rpc) {
-			const char *buf;
-			while ((buf = packet_read_line(0, NULL)))
+	எனில் (from_stdin) {
+		எனில் (args.stateless_rpc) {
+			மாறிலி எழுத்து *buf;
+			போது ((buf = packet_read_வரி(0, வெற்று)))
 				refspec_append(&rs, buf);
-		} else {
-			struct strbuf line = STRBUF_INIT;
-			while (strbuf_getline(&line, stdin) != EOF)
-				refspec_append(&rs, line.buf);
-			strbuf_release(&line);
+		} இல்லையெனில் {
+			கட்டமைப்பு strbuf வரி = STRBUF_INIT;
+			போது (strbuf_getline(&வரி, stdin) != EOF)
+				refspec_append(&rs, வரி.buf);
+			strbuf_release(&வரி);
 		}
 	}
 
@@ -255,47 +255,47 @@ int cmd_send_pack(int argc,
 	 * --all and --mirror are incompatible; neither makes sense
 	 * with any refspecs.
 	 */
-	if ((rs.nr > 0 && (send_all || args.send_mirror)) ||
+	எனில் ((rs.nr > 0 && (send_all || args.send_mirror)) ||
 	    (send_all && args.send_mirror))
 		usage_with_options(send_pack_usage, options);
 
-	if (remote_name) {
+	எனில் (remote_name) {
 		remote = remote_get(remote_name);
-		if (!remote_has_url(remote, dest)) {
+		எனில் (!remote_has_url(remote, dest)) {
 			die("Destination %s is not a uri for %s",
 			    dest, remote_name);
 		}
 	}
 
-	if (progress == -1)
+	எனில் (progress == -1)
 		progress = !args.quiet && isatty(2);
 	args.progress = progress;
 
-	if (args.stateless_rpc) {
-		conn = NULL;
+	எனில் (args.stateless_rpc) {
+		conn = வெற்று;
 		fd[0] = 0;
 		fd[1] = 1;
-	} else {
+	} இல்லையெனில் {
 		conn = git_connect(fd, dest, GIT_CONNECT_RECEIVE_PACK,
 				   receivepack,
 				   args.verbose ? CONNECT_VERBOSE : 0);
 	}
 
-	packet_reader_init(&reader, fd[0], NULL, 0,
+	packet_reader_init(&reader, fd[0], வெற்று, 0,
 			   PACKET_READ_CHOMP_NEWLINE |
 			   PACKET_READ_GENTLE_ON_EOF |
 			   PACKET_READ_DIE_ON_ERR_PACKET);
 
-	switch (discover_version(&reader)) {
-	case protocol_v2:
+	தேர்வு (discover_version(&reader)) {
+	நிலை protocol_v2:
 		die("support for protocol v2 not implemented yet");
-		break;
-	case protocol_v1:
-	case protocol_v0:
+		நிறுத்து;
+	நிலை protocol_v1:
+	நிலை protocol_v0:
 		get_remote_heads(&reader, &remote_refs, REF_NORMAL,
 				 &extra_have, &shallow);
-		break;
-	case protocol_unknown_version:
+		நிறுத்து;
+	நிலை protocol_unknown_version:
 		BUG("unknown protocol version");
 	}
 
@@ -303,28 +303,28 @@ int cmd_send_pack(int argc,
 
 	flags = MATCH_REFS_NONE;
 
-	if (send_all)
+	எனில் (send_all)
 		flags |= MATCH_REFS_ALL;
-	if (args.send_mirror)
+	எனில் (args.send_mirror)
 		flags |= MATCH_REFS_MIRROR;
 
 	/* match them up */
-	if (match_push_refs(local_refs, &remote_refs, &rs, flags)) {
+	எனில் (match_தள்ளு_refs(local_refs, &remote_refs, &rs, flags)) {
 		ret = -1;
-		goto cleanup;
+		செல் cleanup;
 	}
-	if (!is_empty_cas(&cas))
-		apply_push_cas(&cas, remote, remote_refs);
+	எனில் (!is_empty_cas(&cas))
+		apply_தள்ளு_cas(&cas, remote, remote_refs);
 
-	if (!is_empty_cas(&cas) && force_if_includes)
+	எனில் (!is_empty_cas(&cas) && force_if_includes)
 		cas.use_force_if_includes = 1;
 
-	set_ref_status_for_push(remote_refs, args.send_mirror,
+	set_ref_status_for_தள்ளு(remote_refs, args.send_mirror,
 		args.force_update);
 
 	ret = send_pack(repo, &args, fd, conn, remote_refs, &extra_have);
 
-	if (helper_status)
+	எனில் (helper_status)
 		print_helper_status(remote_refs);
 
 	close(fd[1]);
@@ -332,26 +332,26 @@ int cmd_send_pack(int argc,
 
 	ret |= finish_connect(conn);
 
-	if (!helper_status)
-		transport_print_push_status(dest, remote_refs, args.verbose, 0, &reject_reasons);
+	எனில் (!helper_status)
+		transport_print_தள்ளு_status(dest, remote_refs, args.verbose, 0, &reject_reasons);
 
-	if (!args.dry_run && remote) {
-		struct ref *ref;
-		for (ref = remote_refs; ref; ref = ref->next)
+	எனில் (!args.dry_run && remote) {
+		கட்டமைப்பு ref *ref;
+		க்கு (ref = remote_refs; ref; ref = ref->next)
 			transport_update_tracking_ref(remote, ref, args.verbose);
 	}
 
-	if (!ret && !transport_refs_pushed(remote_refs))
+	எனில் (!ret && !transport_refs_pushed(remote_refs))
 		/* stable plumbing output; do not modify or localize */
 		fprintf(stderr, "Everything up-to-date\n");
 
 cleanup:
-	string_list_clear(&push_options, 0);
+	string_list_clear(&தள்ளு_options, 0);
 	free_refs(remote_refs);
 	free_refs(local_refs);
 	refspec_clear(&rs);
 	oid_array_clear(&extra_have);
 	oid_array_clear(&shallow);
 	clear_cas_option(&cas);
-	return ret;
+	திரும்பு ret;
 }

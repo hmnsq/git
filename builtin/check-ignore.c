@@ -1,31 +1,31 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "quote.h"
-#include "pathspec.h"
-#include "parse-options.h"
-#include "submodule.h"
-#include "write-or-die.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "dir.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "quote.h"
+#அந்தர்பாவ "pathspec.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "submodule.h"
+#அந்தர்பாவ "write-or-die.h"
 
-static int quiet, verbose, stdin_paths, show_non_matching, no_index;
-static const char * const check_ignore_usage[] = {
+நிலையான முழு quiet, verbose, stdin_paths, show_non_matching, no_index;
+நிலையான மாறிலி எழுத்து * மாறிலி check_ignore_usage[] = {
 "git check-ignore [<options>] <pathname>...",
 "git check-ignore [<options>] --stdin",
-NULL
+வெற்று
 };
 
-static int nul_term_line;
+நிலையான முழு nul_term_வரி;
 
-static const struct option check_ignore_options[] = {
+நிலையான மாறிலி கட்டமைப்பு option check_ignore_options[] = {
 	OPT__QUIET(&quiet, N_("suppress progress reporting")),
 	OPT__VERBOSE(&verbose, N_("be verbose")),
 	OPT_GROUP(""),
 	OPT_BOOL(0, "stdin", &stdin_paths,
 		 N_("read file names from stdin")),
-	OPT_BOOL('z', NULL, &nul_term_line,
+	OPT_BOOL('z', வெற்று, &nul_term_வரி,
 		 N_("terminate input and output records by a NUL character")),
 	OPT_BOOL('n', "non-matching", &show_non_matching,
 		 N_("show non-matching input paths")),
@@ -34,55 +34,55 @@ static const struct option check_ignore_options[] = {
 	OPT_END()
 };
 
-static void output_pattern(const char *path, struct path_pattern *pattern)
+நிலையான வெறுமை output_pattern(மாறிலி எழுத்து *path, கட்டமைப்பு path_pattern *pattern)
 {
-	const char *bang  = (pattern && pattern->flags & PATTERN_FLAG_NEGATIVE)  ? "!" : "";
-	const char *slash = (pattern && pattern->flags & PATTERN_FLAG_MUSTBEDIR) ? "/" : "";
-	if (!nul_term_line) {
-		if (!verbose) {
+	மாறிலி எழுத்து *bang  = (pattern && pattern->flags & PATTERN_FLAG_NEGATIVE)  ? "!" : "";
+	மாறிலி எழுத்து *slash = (pattern && pattern->flags & PATTERN_FLAG_MUSTBEDIR) ? "/" : "";
+	எனில் (!nul_term_வரி) {
+		எனில் (!verbose) {
 			write_name_quoted(path, stdout, '\n');
-		} else {
-			if (pattern) {
-				quote_c_style(pattern->pl->src, NULL, stdout, 0);
+		} இல்லையெனில் {
+			எனில் (pattern) {
+				quote_c_style(pattern->pl->src, வெற்று, stdout, 0);
 				printf(":%d:%s%s%s\t",
 				       pattern->srcpos,
 				       bang, pattern->pattern, slash);
 			}
-			else {
+			இல்லையெனில் {
 				printf("::\t");
 			}
-			quote_c_style(path, NULL, stdout, 0);
+			quote_c_style(path, வெற்று, stdout, 0);
 			fputc('\n', stdout);
 		}
-	} else {
-		if (!verbose) {
+	} இல்லையெனில் {
+		எனில் (!verbose) {
 			printf("%s%c", path, '\0');
-		} else {
-			if (pattern)
+		} இல்லையெனில் {
+			எனில் (pattern)
 				printf("%s%c%d%c%s%s%s%c%s%c",
 				       pattern->pl->src, '\0',
 				       pattern->srcpos, '\0',
 				       bang, pattern->pattern, slash, '\0',
 				       path, '\0');
-			else
+			இல்லையெனில்
 				printf("%c%c%c%s%c", '\0', '\0', '\0', path, '\0');
 		}
 	}
 }
 
-static int check_ignore(struct dir_struct *dir,
-			const char *prefix, int argc, const char **argv)
+நிலையான முழு check_ignore(கட்டமைப்பு dir_struct *dir,
+			மாறிலி எழுத்து *prefix, முழு argc, மாறிலி எழுத்து **argv)
 {
-	const char *full_path;
-	char *seen;
-	int num_ignored = 0, i;
-	struct path_pattern *pattern;
-	struct pathspec pathspec;
+	மாறிலி எழுத்து *full_path;
+	எழுத்து *seen;
+	முழு இலக்கம்_ignored = 0, i;
+	கட்டமைப்பு path_pattern *pattern;
+	கட்டமைப்பு pathspec pathspec;
 
-	if (!argc) {
-		if (!quiet)
+	எனில் (!argc) {
+		எனில் (!quiet)
 			fprintf(stderr, "no pathspec given.\n");
-		return 0;
+		திரும்பு 0;
 	}
 
 	/*
@@ -104,99 +104,99 @@ static int check_ignore(struct dir_struct *dir,
 	 */
 	seen = find_pathspecs_matching_against_index(&pathspec, the_repository->index,
 						     PS_HEED_SKIP_WORKTREE);
-	for (i = 0; i < pathspec.nr; i++) {
-		full_path = pathspec.items[i].match;
-		pattern = NULL;
-		if (!seen[i]) {
-			int dtype = DT_UNKNOWN;
+	க்கு (i = 0; i < pathspec.nr; i++) {
+		full_path = pathspec.பொருட்கள்[i].match;
+		pattern = வெற்று;
+		எனில் (!seen[i]) {
+			முழு dtype = DT_UNKNOWN;
 			pattern = last_matching_pattern(dir, the_repository->index,
 							full_path, &dtype);
-			if (!verbose && pattern &&
+			எனில் (!verbose && pattern &&
 			    pattern->flags & PATTERN_FLAG_NEGATIVE)
-				pattern = NULL;
+				pattern = வெற்று;
 		}
-		if (!quiet && (pattern || show_non_matching))
-			output_pattern(pathspec.items[i].original, pattern);
-		if (pattern)
-			num_ignored++;
+		எனில் (!quiet && (pattern || show_non_matching))
+			output_pattern(pathspec.பொருட்கள்[i].original, pattern);
+		எனில் (pattern)
+			இலக்கம்_ignored++;
 	}
-	free(seen);
+	விடுவி(seen);
 	clear_pathspec(&pathspec);
 
-	return num_ignored;
+	திரும்பு இலக்கம்_ignored;
 }
 
-static int check_ignore_stdin_paths(struct dir_struct *dir, const char *prefix)
+நிலையான முழு check_ignore_stdin_paths(கட்டமைப்பு dir_struct *dir, மாறிலி எழுத்து *prefix)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf unquoted = STRBUF_INIT;
-	char *pathspec[2] = { NULL, NULL };
+	கட்டமைப்பு strbuf buf = STRBUF_INIT;
+	கட்டமைப்பு strbuf unquoted = STRBUF_INIT;
+	எழுத்து *pathspec[2] = { வெற்று, வெற்று };
 	strbuf_getline_fn getline_fn;
-	int num_ignored = 0;
+	முழு இலக்கம்_ignored = 0;
 
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	while (getline_fn(&buf, stdin) != EOF) {
-		if (!nul_term_line && buf.buf[0] == '"') {
+	getline_fn = nul_term_வரி ? strbuf_getline_nul : strbuf_getline_lf;
+	போது (getline_fn(&buf, stdin) != EOF) {
+		எனில் (!nul_term_வரி && buf.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, buf.buf, NULL))
+			எனில் (unquote_c_style(&unquoted, buf.buf, வெற்று))
 				die("line is badly quoted");
 			strbuf_swap(&buf, &unquoted);
 		}
 		pathspec[0] = buf.buf;
-		num_ignored += check_ignore(dir, prefix,
-					    1, (const char **)pathspec);
+		இலக்கம்_ignored += check_ignore(dir, prefix,
+					    1, (மாறிலி எழுத்து **)pathspec);
 		maybe_flush_or_die(stdout, "check-ignore to stdout");
 	}
 	strbuf_release(&buf);
 	strbuf_release(&unquoted);
-	return num_ignored;
+	திரும்பு இலக்கம்_ignored;
 }
 
-int cmd_check_ignore(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo UNUSED)
+முழு cmd_check_ignore(முழு argc,
+		     மாறிலி எழுத்து **argv,
+		     மாறிலி எழுத்து *prefix,
+		     கட்டமைப்பு repository *repo UNUSED)
 {
-	int num_ignored;
-	struct dir_struct dir = DIR_INIT;
+	முழு இலக்கம்_ignored;
+	கட்டமைப்பு dir_struct dir = DIR_INIT;
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, வெற்று);
 
 	argc = parse_options(argc, argv, prefix, check_ignore_options,
 			     check_ignore_usage, 0);
 
-	if (stdin_paths) {
-		if (argc > 0)
+	எனில் (stdin_paths) {
+		எனில் (argc > 0)
 			die(_("cannot specify pathnames with --stdin"));
-	} else {
-		if (nul_term_line)
+	} இல்லையெனில் {
+		எனில் (nul_term_வரி)
 			die(_("-z only makes sense with --stdin"));
-		if (argc == 0)
+		எனில் (argc == 0)
 			die(_("no path specified"));
 	}
-	if (quiet) {
-		if (argc > 1)
+	எனில் (quiet) {
+		எனில் (argc > 1)
 			die(_("--quiet is only valid with a single pathname"));
-		if (verbose)
+		எனில் (verbose)
 			die(_("cannot have both --quiet and --verbose"));
 	}
-	if (show_non_matching && !verbose)
+	எனில் (show_non_matching && !verbose)
 		die(_("--non-matching is only valid with --verbose"));
 
 	/* read_cache() is only necessary so we can watch out for submodules. */
-	if (!no_index && repo_read_index(the_repository) < 0)
+	எனில் (!no_index && repo_read_index(the_repository) < 0)
 		die(_("index file corrupt"));
 
 	setup_standard_excludes(&dir);
 
-	if (stdin_paths) {
-		num_ignored = check_ignore_stdin_paths(&dir, prefix);
-	} else {
-		num_ignored = check_ignore(&dir, prefix, argc, argv);
+	எனில் (stdin_paths) {
+		இலக்கம்_ignored = check_ignore_stdin_paths(&dir, prefix);
+	} இல்லையெனில் {
+		இலக்கம்_ignored = check_ignore(&dir, prefix, argc, argv);
 		maybe_flush_or_die(stdout, "ignore to stdout");
 	}
 
 	dir_clear(&dir);
 
-	return !num_ignored;
+	திரும்பு !இலக்கம்_ignored;
 }

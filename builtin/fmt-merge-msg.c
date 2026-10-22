@@ -1,30 +1,30 @@
-#include "builtin.h"
-#include "config.h"
-#include "fmt-merge-msg.h"
-#include "gettext.h"
-#include "parse-options.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "fmt-merge-msg.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "parse-options.h"
 
-static const char * const fmt_merge_msg_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி fmt_merge_செய்தி_usage[] = {
 	N_("git fmt-merge-msg [-m <message>] [--log[=<n>] | --no-log] [--file <file>]"),
-	NULL
+	வெற்று
 };
 
-int cmd_fmt_merge_msg(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo)
+முழு cmd_fmt_merge_செய்தி(முழு argc,
+		      மாறிலி எழுத்து **argv,
+		      மாறிலி எழுத்து *prefix,
+		      கட்டமைப்பு repository *repo)
 {
-	char *inpath = NULL;
-	const char *message = NULL;
-	char *into_name = NULL;
-	int shortlog_len = -1;
-	int merge_log_config = -1;
-	struct option options[] = {
+	எழுத்து *inpath = வெற்று;
+	மாறிலி எழுத்து *message = வெற்று;
+	எழுத்து *into_name = வெற்று;
+	முழு shortlog_len = -1;
+	முழு merge_log_config = -1;
+	கட்டமைப்பு option options[] = {
 		{
 			.type = OPTION_INTEGER,
 			.long_name = "log",
-			.value = &shortlog_len,
-			.precision = sizeof(shortlog_len),
+			.மதிப்பு = &shortlog_len,
+			.precision = அளவு(shortlog_len),
 			.argh = N_("n"),
 			.help = N_("populate log with at most <n> entries from shortlog"),
 			.flags = PARSE_OPT_OPTARG,
@@ -33,8 +33,8 @@ int cmd_fmt_merge_msg(int argc,
 		{
 			.type = OPTION_INTEGER,
 			.long_name = "summary",
-			.value = &shortlog_len,
-			.precision = sizeof(shortlog_len),
+			.மதிப்பு = &shortlog_len,
+			.precision = அளவு(shortlog_len),
 			.argh = N_("n"),
 			.help = N_("alias for --log (deprecated)"),
 			.flags = PARSE_OPT_OPTARG | PARSE_OPT_HIDDEN,
@@ -49,43 +49,43 @@ int cmd_fmt_merge_msg(int argc,
 	};
 
 	FILE *in = stdin;
-	struct strbuf input = STRBUF_INIT, output = STRBUF_INIT;
-	int ret;
-	struct fmt_merge_msg_opts opts;
+	கட்டமைப்பு strbuf உள்ளீடு = STRBUF_INIT, output = STRBUF_INIT;
+	முழு ret;
+	கட்டமைப்பு fmt_merge_செய்தி_opts opts;
 
-	repo_config(repo, fmt_merge_msg_config, &merge_log_config);
-	argc = parse_options(argc, argv, prefix, options, fmt_merge_msg_usage,
+	repo_config(repo, fmt_merge_செய்தி_config, &merge_log_config);
+	argc = parse_options(argc, argv, prefix, options, fmt_merge_செய்தி_usage,
 			     0);
-	if (argc > 0)
-		usage_with_options(fmt_merge_msg_usage, options);
-	if (shortlog_len < 0)
+	எனில் (argc > 0)
+		usage_with_options(fmt_merge_செய்தி_usage, options);
+	எனில் (shortlog_len < 0)
 		shortlog_len = (merge_log_config > 0) ? merge_log_config : 0;
 
-	if (inpath && strcmp(inpath, "-")) {
+	எனில் (inpath && strcmp(inpath, "-")) {
 		in = fopen(inpath, "r");
-		if (!in)
+		எனில் (!in)
 			die_errno("cannot open '%s'", inpath);
 	}
 
-	if (strbuf_read(&input, fileno(in), 0) < 0)
+	எனில் (strbuf_read(&உள்ளீடு, fileno(in), 0) < 0)
 		die_errno("could not read input file");
 
-	if (message)
+	எனில் (message)
 		strbuf_addstr(&output, message);
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, அளவு(opts));
 	opts.add_title = !message;
 	opts.credit_people = 1;
 	opts.shortlog_len = shortlog_len;
 	opts.into_name = into_name;
 
-	ret = fmt_merge_msg(&input, &output, &opts);
-	if (ret)
-		return ret;
+	ret = fmt_merge_செய்தி(&உள்ளீடு, &output, &opts);
+	எனில் (ret)
+		திரும்பு ret;
 	write_in_full(STDOUT_FILENO, output.buf, output.len);
 
-	strbuf_release(&input);
+	strbuf_release(&உள்ளீடு);
 	strbuf_release(&output);
-	free(inpath);
-	return 0;
+	விடுவி(inpath);
+	திரும்பு 0;
 }

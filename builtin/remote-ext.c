@@ -1,9 +1,9 @@
-#include "builtin.h"
-#include "transport.h"
-#include "run-command.h"
-#include "pkt-line.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "transport.h"
+#அந்தர்பாவ "run-command.h"
+#அந்தர்பாவ "pkt-line.h"
 
-static const char usage_msg[] =
+நிலையான மாறிலி எழுத்து usage_செய்தி[] =
 	"git remote-ext <remote> <url>";
 
 /*
@@ -25,17 +25,17 @@ static const char usage_msg[] =
  *		not activate sending git:// style request).
  */
 
-static char *git_req;
-static char *git_req_vhost;
+நிலையான எழுத்து *git_req;
+நிலையான எழுத்து *git_req_vhost;
 
-static char *strip_escapes(const char *str, const char *service,
-	const char **next)
+நிலையான எழுத்து *strip_escapes(மாறிலி எழுத்து *str, மாறிலி எழுத்து *service,
+	மாறிலி எழுத்து **next)
 {
 	size_t rpos = 0;
-	int escape = 0;
-	char special = 0;
-	const char *service_noprefix = service;
-	struct strbuf ret = STRBUF_INIT;
+	முழு escape = 0;
+	எழுத்து special = 0;
+	மாறிலி எழுத்து *service_noprefix = service;
+	கட்டமைப்பு strbuf ret = STRBUF_INIT;
 
 	skip_prefix(service_noprefix, "git-", &service_noprefix);
 
@@ -44,33 +44,33 @@ static char *strip_escapes(const char *str, const char *service,
 	setenv("GIT_EXT_SERVICE_NOPREFIX", service_noprefix, 1);
 
 	/* Scan the length of argument. */
-	while (str[rpos] && (escape || str[rpos] != ' ')) {
-		if (escape) {
-			switch (str[rpos]) {
-			case ' ':
-			case '%':
-			case 's':
-			case 'S':
-				break;
-			case 'G':
-			case 'V':
+	போது (str[rpos] && (escape || str[rpos] != ' ')) {
+		எனில் (escape) {
+			தேர்வு (str[rpos]) {
+			நிலை ' ':
+			நிலை '%':
+			நிலை 's':
+			நிலை 'S':
+				நிறுத்து;
+			நிலை 'G':
+			நிலை 'V':
 				special = str[rpos];
-				if (rpos == 1)
-					break;
+				எனில் (rpos == 1)
+					நிறுத்து;
 				/* fallthrough */
-			default:
+			இயல்பு:
 				die("Bad remote-ext placeholder '%%%c'.",
 					str[rpos]);
 			}
 			escape = 0;
-		} else
+		} இல்லையெனில்
 			escape = (str[rpos] == '%');
 		rpos++;
 	}
-	if (escape && !str[rpos])
+	எனில் (escape && !str[rpos])
 		die("remote-ext command has incomplete placeholder");
 	*next = str + rpos;
-	if (**next == ' ')
+	எனில் (**next == ' ')
 		++*next;	/* Skip over space */
 
 	/*
@@ -79,133 +79,133 @@ static char *strip_escapes(const char *str, const char *service,
 	 */
 	rpos = special ? 2 : 0;		/* Skip first 2 bytes in specials. */
 	escape = 0;
-	while (str[rpos] && (escape || str[rpos] != ' ')) {
-		if (escape) {
-			switch (str[rpos]) {
-			case ' ':
-			case '%':
+	போது (str[rpos] && (escape || str[rpos] != ' ')) {
+		எனில் (escape) {
+			தேர்வு (str[rpos]) {
+			நிலை ' ':
+			நிலை '%':
 				strbuf_addch(&ret, str[rpos]);
-				break;
-			case 's':
+				நிறுத்து;
+			நிலை 's':
 				strbuf_addstr(&ret, service_noprefix);
-				break;
-			case 'S':
+				நிறுத்து;
+			நிலை 'S':
 				strbuf_addstr(&ret, service);
-				break;
+				நிறுத்து;
 			}
 			escape = 0;
-		} else
-			switch (str[rpos]) {
-			case '%':
+		} இல்லையெனில்
+			தேர்வு (str[rpos]) {
+			நிலை '%':
 				escape = 1;
-				break;
-			default:
+				நிறுத்து;
+			இயல்பு:
 				strbuf_addch(&ret, str[rpos]);
-				break;
+				நிறுத்து;
 			}
 		rpos++;
 	}
-	switch (special) {
-	case 'G':
-		git_req = strbuf_detach(&ret, NULL);
-		return NULL;
-	case 'V':
-		git_req_vhost = strbuf_detach(&ret, NULL);
-		return NULL;
-	default:
-		return strbuf_detach(&ret, NULL);
+	தேர்வு (special) {
+	நிலை 'G':
+		git_req = strbuf_detach(&ret, வெற்று);
+		திரும்பு வெற்று;
+	நிலை 'V':
+		git_req_vhost = strbuf_detach(&ret, வெற்று);
+		திரும்பு வெற்று;
+	இயல்பு:
+		திரும்பு strbuf_detach(&ret, வெற்று);
 	}
 }
 
-static void parse_argv(struct strvec *out, const char *arg, const char *service)
+நிலையான வெறுமை parse_argv(கட்டமைப்பு strvec *out, மாறிலி எழுத்து *arg, மாறிலி எழுத்து *service)
 {
-	while (*arg) {
-		char *expanded = strip_escapes(arg, service, &arg);
-		if (expanded)
-			strvec_push(out, expanded);
-		free(expanded);
+	போது (*arg) {
+		எழுத்து *expanded = strip_escapes(arg, service, &arg);
+		எனில் (expanded)
+			strvec_தள்ளு(out, expanded);
+		விடுவி(expanded);
 	}
 }
 
-static void send_git_request(int stdin_fd, const char *serv, const char *repo,
-	const char *vhost)
+நிலையான வெறுமை send_git_request(முழு stdin_fd, மாறிலி எழுத்து *serv, மாறிலி எழுத்து *repo,
+	மாறிலி எழுத்து *vhost)
 {
-	if (!vhost)
+	எனில் (!vhost)
 		packet_write_fmt(stdin_fd, "%s %s%c", serv, repo, 0);
-	else
+	இல்லையெனில்
 		packet_write_fmt(stdin_fd, "%s %s%chost=%s%c", serv, repo, 0,
 			     vhost, 0);
 }
 
-static int run_child(const char *arg, const char *service)
+நிலையான முழு run_child(மாறிலி எழுத்து *arg, மாறிலி எழுத்து *service)
 {
-	int r;
-	struct child_process child = CHILD_PROCESS_INIT;
+	முழு r;
+	கட்டமைப்பு child_process child = CHILD_PROCESS_INIT;
 
 	child.in = -1;
 	child.out = -1;
 	child.err = 0;
 	parse_argv(&child.args, arg, service);
 
-	if (start_command(&child) < 0)
+	எனில் (start_command(&child) < 0)
 		die("Can't run specified command");
 
-	if (git_req)
+	எனில் (git_req)
 		send_git_request(child.in, service, git_req, git_req_vhost);
 
 	r = bidirectional_transfer_loop(child.out, child.in);
-	if (!r)
+	எனில் (!r)
 		r = finish_command(&child);
-	else
+	இல்லையெனில்
 		finish_command(&child);
-	return r;
+	திரும்பு r;
 }
 
 #define MAXCOMMAND 4096
 
-static int command_loop(const char *child)
+நிலையான முழு command_loop(மாறிலி எழுத்து *child)
 {
-	char buffer[MAXCOMMAND];
+	எழுத்து buffer[MAXCOMMAND];
 
-	while (1) {
+	போது (1) {
 		size_t i;
-		const char *arg;
+		மாறிலி எழுத்து *arg;
 
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+		எனில் (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
+			எனில் (ferror(stdin))
 				die("Command input error");
 			exit(0);
 		}
 		/* Strip end of line characters. */
 		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
+		போது (i > 0 && isspace(buffer[i - 1]))
 			buffer[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
+		எனில் (!strcmp(buffer, "capabilities")) {
 			printf("*connect\n\n");
 			fflush(stdout);
-		} else if (skip_prefix(buffer, "connect ", &arg)) {
+		} இல்லையெனில் எனில் (skip_prefix(buffer, "connect ", &arg)) {
 			printf("\n");
 			fflush(stdout);
-			return run_child(child, arg);
-		} else {
+			திரும்பு run_child(child, arg);
+		} இல்லையெனில் {
 			fprintf(stderr, "Bad command");
-			return 1;
+			திரும்பு 1;
 		}
 	}
 }
 
-int cmd_remote_ext(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+முழு cmd_remote_ext(முழு argc,
+		   மாறிலி எழுத்து **argv,
+		   மாறிலி எழுத்து *prefix,
+		   கட்டமைப்பு repository *repo UNUSED)
 {
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
-	show_usage_if_asked(argc, argv, usage_msg);
+	show_usage_if_asked(argc, argv, usage_செய்தி);
 
-	if (argc != 3)
-		usage(usage_msg);
+	எனில் (argc != 3)
+		usage(usage_செய்தி);
 
-	return command_loop(argv[2]);
+	திரும்பு command_loop(argv[2]);
 }

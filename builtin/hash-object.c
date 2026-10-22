@@ -5,27 +5,27 @@
  * Copyright (C) Junio C Hamano, 2005
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-file.h"
-#include "odb.h"
-#include "blob.h"
-#include "quote.h"
-#include "parse-options.h"
-#include "setup.h"
-#include "strbuf.h"
-#include "write-or-die.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "abspath.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "hex.h"
+#அந்தர்பாவ "object-file.h"
+#அந்தர்பாவ "odb.h"
+#அந்தர்பாவ "blob.h"
+#அந்தர்பாவ "quote.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "setup.h"
+#அந்தர்பாவ "strbuf.h"
+#அந்தர்பாவ "write-or-die.h"
 
-static void hash_fd(int fd, const char *type, const char *path, unsigned flags)
+நிலையான வெறுமை hash_fd(முழு fd, மாறிலி எழுத்து *type, மாறிலி எழுத்து *path, unsigned flags)
 {
-	struct stat st;
-	struct object_id oid;
+	கட்டமைப்பு stat st;
+	கட்டமைப்பு object_id oid;
 
-	if (fstat(fd, &st) < 0 ||
+	எனில் (fstat(fd, &st) < 0 ||
 	    index_fd(the_repository->index, &oid, fd, &st,
 		     type_from_string(type), path, flags))
 		die((flags & INDEX_WRITE_OBJECT)
@@ -35,54 +35,54 @@ static void hash_fd(int fd, const char *type, const char *path, unsigned flags)
 	maybe_flush_or_die(stdout, "hash to stdout");
 }
 
-static void hash_object(const char *path, const char *type, const char *vpath,
+நிலையான வெறுமை hash_object(மாறிலி எழுத்து *path, மாறிலி எழுத்து *type, மாறிலி எழுத்து *vpath,
 			unsigned flags)
 {
-	int fd;
+	முழு fd;
 	fd = xopen(path, O_RDONLY);
 	hash_fd(fd, type, vpath, flags);
 }
 
-static void hash_stdin_paths(const char *type, int no_filters, unsigned flags)
+நிலையான வெறுமை hash_stdin_paths(மாறிலி எழுத்து *type, முழு no_filters, unsigned flags)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf unquoted = STRBUF_INIT;
+	கட்டமைப்பு strbuf buf = STRBUF_INIT;
+	கட்டமைப்பு strbuf unquoted = STRBUF_INIT;
 
-	while (strbuf_getline(&buf, stdin) != EOF) {
-		if (buf.buf[0] == '"') {
+	போது (strbuf_getline(&buf, stdin) != EOF) {
+		எனில் (buf.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, buf.buf, NULL))
+			எனில் (unquote_c_style(&unquoted, buf.buf, வெற்று))
 				die("line is badly quoted");
 			strbuf_swap(&buf, &unquoted);
 		}
-		hash_object(buf.buf, type, no_filters ? NULL : buf.buf, flags);
+		hash_object(buf.buf, type, no_filters ? வெற்று : buf.buf, flags);
 	}
 	strbuf_release(&buf);
 	strbuf_release(&unquoted);
 }
 
-int cmd_hash_object(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+முழு cmd_hash_object(முழு argc,
+		    மாறிலி எழுத்து **argv,
+		    மாறிலி எழுத்து *prefix,
+		    கட்டமைப்பு repository *repo UNUSED)
 {
-	static const char * const hash_object_usage[] = {
+	நிலையான மாறிலி எழுத்து * மாறிலி hash_object_usage[] = {
 		N_("git hash-object [-t <type>] [-w] [--path=<file> | --no-filters]\n"
 		   "                [--stdin [--literally]] [--] <file>..."),
 		N_("git hash-object [-t <type>] [-w] --stdin-paths [--no-filters]"),
-		NULL
+		வெற்று
 	};
-	const char *type = blob_type;
-	int hashstdin = 0;
-	int stdin_paths = 0;
-	int no_filters = 0;
-	int nongit = 0;
+	மாறிலி எழுத்து *type = blob_type;
+	முழு hashstdin = 0;
+	முழு stdin_paths = 0;
+	முழு no_filters = 0;
+	முழு nongit = 0;
 	unsigned flags = INDEX_FORMAT_CHECK;
-	const char *vpath = NULL;
-	char *vpath_free = NULL;
-	const struct option hash_object_options[] = {
-		OPT_STRING('t', NULL, &type, N_("type"), N_("object type")),
-		OPT_BIT('w', NULL, &flags, N_("write the object into the object database"),
+	மாறிலி எழுத்து *vpath = வெற்று;
+	எழுத்து *vpath_free = வெற்று;
+	மாறிலி கட்டமைப்பு option hash_object_options[] = {
+		OPT_STRING('t', வெற்று, &type, N_("type"), N_("object type")),
+		OPT_BIT('w', வெற்று, &flags, N_("write the object into the object database"),
 			INDEX_WRITE_OBJECT),
 		OPT_COUNTUP( 0 , "stdin", &hashstdin, N_("read the object from stdin")),
 		OPT_BOOL( 0 , "stdin-paths", &stdin_paths, N_("read file names from stdin")),
@@ -93,65 +93,65 @@ int cmd_hash_object(int argc,
 		OPT_STRING( 0 , "path", &vpath, N_("file"), N_("process file as it were from this path")),
 		OPT_END()
 	};
-	int i;
-	const char *errstr = NULL;
+	முழு i;
+	மாறிலி எழுத்து *errstr = வெற்று;
 
 	argc = parse_options(argc, argv, prefix, hash_object_options,
 			     hash_object_usage, 0);
 
-	if (flags & INDEX_WRITE_OBJECT)
+	எனில் (flags & INDEX_WRITE_OBJECT)
 		prefix = setup_git_directory(the_repository);
-	else
+	இல்லையெனில்
 		prefix = setup_git_directory_gently(the_repository, &nongit);
 
-	if (nongit && !the_hash_algo)
+	எனில் (nongit && !the_hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
-	if (vpath && prefix) {
+	எனில் (vpath && prefix) {
 		vpath_free = prefix_filename(prefix, vpath);
 		vpath = vpath_free;
 	}
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, வெற்று);
 
-	if (stdin_paths) {
-		if (hashstdin)
+	எனில் (stdin_paths) {
+		எனில் (hashstdin)
 			errstr = "Can't use --stdin-paths with --stdin";
-		else if (argc)
+		இல்லையெனில் எனில் (argc)
 			errstr = "Can't specify files with --stdin-paths";
-		else if (vpath)
+		இல்லையெனில் எனில் (vpath)
 			errstr = "Can't use --stdin-paths with --path";
 	}
-	else {
-		if (hashstdin > 1)
+	இல்லையெனில் {
+		எனில் (hashstdin > 1)
 			errstr = "Multiple --stdin arguments are not supported";
-		if (vpath && no_filters)
+		எனில் (vpath && no_filters)
 			errstr = "Can't use --path with --no-filters";
 	}
 
-	if (errstr) {
+	எனில் (errstr) {
 		error("%s", errstr);
 		usage_with_options(hash_object_usage, hash_object_options);
 	}
 
-	if (hashstdin)
+	எனில் (hashstdin)
 		hash_fd(0, type, vpath, flags);
 
-	for (i = 0 ; i < argc; i++) {
-		const char *arg = argv[i];
-		char *to_free = NULL;
+	க்கு (i = 0 ; i < argc; i++) {
+		மாறிலி எழுத்து *arg = argv[i];
+		எழுத்து *to_free = வெற்று;
 
-		if (prefix)
+		எனில் (prefix)
 			arg = to_free = prefix_filename(prefix, arg);
-		hash_object(arg, type, no_filters ? NULL : vpath ? vpath : arg,
+		hash_object(arg, type, no_filters ? வெற்று : vpath ? vpath : arg,
 			    flags);
-		free(to_free);
+		விடுவி(to_free);
 	}
 
-	if (stdin_paths)
+	எனில் (stdin_paths)
 		hash_stdin_paths(type, no_filters, flags);
 
-	free(vpath_free);
+	விடுவி(vpath_free);
 
-	return 0;
+	திரும்பு 0;
 }

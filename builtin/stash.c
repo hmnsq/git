@@ -1,37 +1,37 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "refs.h"
-#include "stash.h"
-#include "lockfile.h"
-#include "cache-tree.h"
-#include "unpack-trees.h"
-#include "merge-ort-wrappers.h"
-#include "strvec.h"
-#include "run-command.h"
-#include "dir.h"
-#include "entry.h"
-#include "preload-index.h"
-#include "read-cache.h"
-#include "repository.h"
-#include "rerere.h"
-#include "revision.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "log-tree.h"
-#include "diffcore.h"
-#include "reflog.h"
-#include "reflog-walk.h"
-#include "add-interactive.h"
-#include "commit.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "abspath.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "hash.h"
+#அந்தர்பாவ "hex.h"
+#அந்தர்பாவ "object-name.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "refs.h"
+#அந்தர்பாவ "stash.h"
+#அந்தர்பாவ "lockfile.h"
+#அந்தர்பாவ "cache-tree.h"
+#அந்தர்பாவ "unpack-trees.h"
+#அந்தர்பாவ "merge-ort-wrappers.h"
+#அந்தர்பாவ "strvec.h"
+#அந்தர்பாவ "run-command.h"
+#அந்தர்பாவ "dir.h"
+#அந்தர்பாவ "entry.h"
+#அந்தர்பாவ "preload-index.h"
+#அந்தர்பாவ "read-cache.h"
+#அந்தர்பாவ "repository.h"
+#அந்தர்பாவ "rerere.h"
+#அந்தர்பாவ "revision.h"
+#அந்தர்பாவ "setup.h"
+#அந்தர்பாவ "sparse-index.h"
+#அந்தர்பாவ "log-tree.h"
+#அந்தர்பாவ "diffcore.h"
+#அந்தர்பாவ "reflog.h"
+#அந்தர்பாவ "reflog-walk.h"
+#அந்தர்பாவ "add-interactive.h"
+#அந்தர்பாவ "commit.h"
 
 #define INCLUDE_ALL_FILES 2
 
@@ -41,7 +41,7 @@
 	N_("git stash show [-u | --include-untracked | --only-untracked] [<diff-options>] [<stash>]")
 #define BUILTIN_STASH_DROP_USAGE \
 	N_("git stash drop [-q | --quiet] [<stash>]")
-#define BUILTIN_STASH_POP_USAGE \
+#define BUILTIN_STASH_எடு_USAGE \
 	N_("git stash pop [--index] [-q | --quiet] [<stash>]")
 #define BUILTIN_STASH_APPLY_USAGE \
 	N_("git stash apply [--index] [-q | --quiet] [--label-ours=<label>] [--label-theirs=<label>] [--label-base=<label>] [<stash>]")
@@ -49,7 +49,7 @@
 	N_("git stash branch <branchname> [<stash>]")
 #define BUILTIN_STASH_STORE_USAGE \
 	N_("git stash store [(-m | --message) <message>] [-q | --quiet] <commit>")
-#define BUILTIN_STASH_PUSH_USAGE \
+#define BUILTIN_STASH_தள்ளு_USAGE \
 	N_("git stash [push] [-p | --patch] [-S | --staged] [-k | --[no-]keep-index] [-q | --quiet]\n" \
 	   "          [-u | --include-untracked] [-a | --all] [(-m | --message) <message>]\n" \
 	   "          [--pathspec-from-file=<file> [--pathspec-file-nul]]\n" \
@@ -66,90 +66,90 @@
 #define BUILTIN_STASH_CLEAR_USAGE \
 	"git stash clear"
 
-static const char * const git_stash_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி git_stash_usage[] = {
 	BUILTIN_STASH_LIST_USAGE,
 	BUILTIN_STASH_SHOW_USAGE,
 	BUILTIN_STASH_DROP_USAGE,
-	BUILTIN_STASH_POP_USAGE,
+	BUILTIN_STASH_எடு_USAGE,
 	BUILTIN_STASH_APPLY_USAGE,
 	BUILTIN_STASH_BRANCH_USAGE,
-	BUILTIN_STASH_PUSH_USAGE,
+	BUILTIN_STASH_தள்ளு_USAGE,
 	BUILTIN_STASH_SAVE_USAGE,
 	BUILTIN_STASH_CLEAR_USAGE,
 	BUILTIN_STASH_CREATE_USAGE,
 	BUILTIN_STASH_STORE_USAGE,
 	BUILTIN_STASH_EXPORT_USAGE,
 	BUILTIN_STASH_IMPORT_USAGE,
-	NULL
+	வெற்று
 };
 
-static const char * const git_stash_list_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி git_stash_list_usage[] = {
 	BUILTIN_STASH_LIST_USAGE,
-	NULL
+	வெற்று
 };
 
-static const char * const git_stash_show_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி git_stash_show_usage[] = {
 	BUILTIN_STASH_SHOW_USAGE,
-	NULL
+	வெற்று
 };
 
-static const char * const git_stash_drop_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி git_stash_drop_usage[] = {
 	BUILTIN_STASH_DROP_USAGE,
-	NULL
+	வெற்று
 };
 
-static const char * const git_stash_pop_usage[] = {
-	BUILTIN_STASH_POP_USAGE,
-	NULL
+நிலையான மாறிலி எழுத்து * மாறிலி git_stash_எடு_usage[] = {
+	BUILTIN_STASH_எடு_USAGE,
+	வெற்று
 };
 
-static const char * const git_stash_apply_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி git_stash_apply_usage[] = {
 	BUILTIN_STASH_APPLY_USAGE,
-	NULL
+	வெற்று
 };
 
-static const char * const git_stash_branch_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி git_stash_branch_usage[] = {
 	BUILTIN_STASH_BRANCH_USAGE,
-	NULL
+	வெற்று
 };
 
-static const char * const git_stash_clear_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி git_stash_clear_usage[] = {
 	BUILTIN_STASH_CLEAR_USAGE,
-	NULL
+	வெற்று
 };
 
-static const char * const git_stash_store_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி git_stash_store_usage[] = {
 	BUILTIN_STASH_STORE_USAGE,
-	NULL
+	வெற்று
 };
 
-static const char * const git_stash_push_usage[] = {
-	BUILTIN_STASH_PUSH_USAGE,
-	NULL
+நிலையான மாறிலி எழுத்து * மாறிலி git_stash_தள்ளு_usage[] = {
+	BUILTIN_STASH_தள்ளு_USAGE,
+	வெற்று
 };
 
-static const char * const git_stash_save_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி git_stash_save_usage[] = {
 	BUILTIN_STASH_SAVE_USAGE,
-	NULL
+	வெற்று
 };
 
-static const char * const git_stash_export_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி git_stash_export_usage[] = {
 	BUILTIN_STASH_EXPORT_USAGE,
-	NULL
+	வெற்று
 };
 
-static const char * const git_stash_import_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி git_stash_import_usage[] = {
 	BUILTIN_STASH_IMPORT_USAGE,
-	NULL
+	வெற்று
 };
 
-static const char ref_stash[] = "refs/stash";
-static struct strbuf stash_index_path = STRBUF_INIT;
+நிலையான மாறிலி எழுத்து ref_stash[] = "refs/stash";
+நிலையான கட்டமைப்பு strbuf stash_index_path = STRBUF_INIT;
 
-static int show_stat = 1;
-static int show_patch;
-static int show_include_untracked;
-static int use_index;
+நிலையான முழு show_stat = 1;
+நிலையான முழு show_patch;
+நிலையான முழு show_include_untracked;
+நிலையான முழு use_index;
 
 /*
  * w_commit is set to the commit containing the working tree
@@ -162,125 +162,125 @@ static int use_index;
  * i_tree is set to the index tree
  * u_tree is set to the untracked files tree
  */
-struct stash_info {
-	struct object_id w_commit;
-	struct object_id b_commit;
-	struct object_id i_commit;
-	struct object_id u_commit;
-	struct object_id c_commit;
-	struct object_id w_tree;
-	struct object_id b_tree;
-	struct object_id i_tree;
-	struct object_id u_tree;
-	struct strbuf revision;
-	int is_stash_ref;
-	int has_u;
+கட்டமைப்பு stash_info {
+	கட்டமைப்பு object_id w_commit;
+	கட்டமைப்பு object_id b_commit;
+	கட்டமைப்பு object_id i_commit;
+	கட்டமைப்பு object_id u_commit;
+	கட்டமைப்பு object_id c_commit;
+	கட்டமைப்பு object_id w_மரம்;
+	கட்டமைப்பு object_id b_மரம்;
+	கட்டமைப்பு object_id i_மரம்;
+	கட்டமைப்பு object_id u_மரம்;
+	கட்டமைப்பு strbuf revision;
+	முழு is_stash_ref;
+	முழு has_u;
 };
 
 #define STASH_INFO_INIT { \
 	.revision = STRBUF_INIT, \
 }
 
-static void free_stash_info(struct stash_info *info)
+நிலையான வெறுமை free_stash_info(கட்டமைப்பு stash_info *info)
 {
 	strbuf_release(&info->revision);
 }
 
-static int check_stash_topology(struct repository *r, struct commit *stash)
+நிலையான முழு check_stash_topology(கட்டமைப்பு repository *r, கட்டமைப்பு commit *stash)
 {
-	struct commit *p1, *p2, *p3 = NULL;
+	கட்டமைப்பு commit *p1, *p2, *p3 = வெற்று;
 
 	/* stash must have two or three parents */
-	if (!stash->parents || !stash->parents->next ||
+	எனில் (!stash->parents || !stash->parents->next ||
 			(stash->parents->next->next && stash->parents->next->next->next))
-		return -1;
+		திரும்பு -1;
 	p1 = stash->parents->item;
 	p2 = stash->parents->next->item;
-	if (stash->parents->next->next)
+	எனில் (stash->parents->next->next)
 		p3 = stash->parents->next->next->item;
-	if (repo_parse_commit(r, p1) || repo_parse_commit(r, p2) ||
+	எனில் (repo_parse_commit(r, p1) || repo_parse_commit(r, p2) ||
 			(p3 && repo_parse_commit(r, p3)))
-		return -1;
+		திரும்பு -1;
 	/* p2 must have a single parent, p3 must have no parents */
-	if (!p2->parents || p2->parents->next || (p3 && p3->parents))
-		return -1;
-	if (repo_parse_commit(r, p2->parents->item))
-		return -1;
+	எனில் (!p2->parents || p2->parents->next || (p3 && p3->parents))
+		திரும்பு -1;
+	எனில் (repo_parse_commit(r, p2->parents->item))
+		திரும்பு -1;
 	/* p2^1 must equal p1 */
-	if (!oideq(&p1->object.oid, &p2->parents->item->object.oid))
-		return -1;
+	எனில் (!oideq(&p1->object.oid, &p2->parents->item->object.oid))
+		திரும்பு -1;
 
-	return 0;
+	திரும்பு 0;
 }
 
-static void assert_stash_like(struct stash_info *info, const char *revision)
+நிலையான வெறுமை assert_stash_like(கட்டமைப்பு stash_info *info, மாறிலி எழுத்து *revision)
 {
-	if (get_oidf(&info->b_commit, "%s^1", revision) ||
-	    get_oidf(&info->w_tree, "%s:", revision) ||
-	    get_oidf(&info->b_tree, "%s^1:", revision) ||
-	    get_oidf(&info->i_tree, "%s^2:", revision))
+	எனில் (get_oidf(&info->b_commit, "%s^1", revision) ||
+	    get_oidf(&info->w_மரம், "%s:", revision) ||
+	    get_oidf(&info->b_மரம், "%s^1:", revision) ||
+	    get_oidf(&info->i_மரம், "%s^2:", revision))
 		die(_("'%s' is not a stash-like commit"), revision);
 }
 
-static int parse_stash_revision(struct strbuf *revision, const char *commit, int quiet)
+நிலையான முழு parse_stash_revision(கட்டமைப்பு strbuf *revision, மாறிலி எழுத்து *commit, முழு quiet)
 {
 	strbuf_reset(revision);
-	if (!commit) {
-		if (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash)) {
-			if (!quiet)
+	எனில் (!commit) {
+		எனில் (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash)) {
+			எனில் (!quiet)
 				fprintf_ln(stderr, _("No stash entries found."));
-			return -1;
+			திரும்பு -1;
 		}
 
 		strbuf_addf(revision, "%s@{0}", ref_stash);
-	} else if (strspn(commit, "0123456789") == strlen(commit)) {
+	} இல்லையெனில் எனில் (strspn(commit, "0123456789") == strlen(commit)) {
 		strbuf_addf(revision, "%s@{%s}", ref_stash, commit);
-	} else {
+	} இல்லையெனில் {
 		strbuf_addstr(revision, commit);
 	}
-	return 0;
+	திரும்பு 0;
 }
 
-static int get_stash_info(struct stash_info *info, int argc, const char **argv)
+நிலையான முழு get_stash_info(கட்டமைப்பு stash_info *info, முழு argc, மாறிலி எழுத்து **argv)
 {
-	int ret;
-	char *end_of_rev;
-	char *expanded_ref;
-	const char *revision;
-	const char *commit = NULL;
-	struct object_id dummy;
-	struct strbuf symbolic = STRBUF_INIT;
+	முழு ret;
+	எழுத்து *end_of_rev;
+	எழுத்து *expanded_ref;
+	மாறிலி எழுத்து *revision;
+	மாறிலி எழுத்து *commit = வெற்று;
+	கட்டமைப்பு object_id dummy;
+	கட்டமைப்பு strbuf symbolic = STRBUF_INIT;
 
-	if (argc > 1) {
-		int i;
-		struct strbuf refs_msg = STRBUF_INIT;
+	எனில் (argc > 1) {
+		முழு i;
+		கட்டமைப்பு strbuf refs_செய்தி = STRBUF_INIT;
 
-		for (i = 0; i < argc; i++)
-			strbuf_addf(&refs_msg, " '%s'", argv[i]);
+		க்கு (i = 0; i < argc; i++)
+			strbuf_addf(&refs_செய்தி, " '%s'", argv[i]);
 
 		fprintf_ln(stderr, _("Too many revisions specified:%s"),
-			   refs_msg.buf);
-		strbuf_release(&refs_msg);
+			   refs_செய்தி.buf);
+		strbuf_release(&refs_செய்தி);
 
-		return -1;
+		திரும்பு -1;
 	}
 
-	if (argc == 1)
+	எனில் (argc == 1)
 		commit = argv[0];
 
 	strbuf_init(&info->revision, 0);
-	if (parse_stash_revision(&info->revision, commit, 0)) {
-		return -1;
+	எனில் (parse_stash_revision(&info->revision, commit, 0)) {
+		திரும்பு -1;
 	}
 
 	revision = info->revision.buf;
 
-	if (repo_get_oid(the_repository, revision, &info->w_commit))
-		return error(_("%s is not a valid reference"), revision);
+	எனில் (repo_get_oid(the_repository, revision, &info->w_commit))
+		திரும்பு error(_("%s is not a valid reference"), revision);
 
 	assert_stash_like(info, revision);
 
-	info->has_u = !get_oidf(&info->u_tree, "%s^3:", revision);
+	info->has_u = !get_oidf(&info->u_மரம், "%s^3:", revision);
 
 	end_of_rev = strchrnul(revision, '@');
 	strbuf_add(&symbolic, revision, end_of_rev - revision);
@@ -288,35 +288,35 @@ static int get_stash_info(struct stash_info *info, int argc, const char **argv)
 	ret = repo_dwim_ref(the_repository, symbolic.buf, symbolic.len,
 			    &dummy, &expanded_ref, 0);
 	strbuf_release(&symbolic);
-	switch (ret) {
-	case 0: /* Not found, but valid ref */
+	தேர்வு (ret) {
+	நிலை 0: /* Not found, but valid ref */
 		info->is_stash_ref = 0;
-		break;
-	case 1:
+		நிறுத்து;
+	நிலை 1:
 		info->is_stash_ref = !strcmp(expanded_ref, ref_stash);
-		break;
-	default: /* Invalid or ambiguous */
-		break;
+		நிறுத்து;
+	இயல்பு: /* Invalid or ambiguous */
+		நிறுத்து;
 	}
 
-	free(expanded_ref);
-	return !(ret == 0 || ret == 1);
+	விடுவி(expanded_ref);
+	திரும்பு !(ret == 0 || ret == 1);
 }
 
-static int do_clear_stash(void)
+நிலையான முழு do_clear_stash(வெறுமை)
 {
-	struct object_id obj;
-	if (repo_get_oid(the_repository, ref_stash, &obj))
-		return 0;
+	கட்டமைப்பு object_id obj;
+	எனில் (repo_get_oid(the_repository, ref_stash, &obj))
+		திரும்பு 0;
 
-	return refs_delete_ref(get_main_ref_store(the_repository), NULL,
+	திரும்பு refs_delete_ref(get_main_ref_store(the_repository), வெற்று,
 			       ref_stash, &obj, 0);
 }
 
-static int clear_stash(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+நிலையான முழு clear_stash(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+		       கட்டமைப்பு repository *repo UNUSED)
 {
-	struct option options[] = {
+	கட்டமைப்பு option options[] = {
 		OPT_END()
 	};
 
@@ -324,34 +324,34 @@ static int clear_stash(int argc, const char **argv, const char *prefix,
 			     git_stash_clear_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (argc)
-		return error(_("git stash clear with arguments is "
+	எனில் (argc)
+		திரும்பு error(_("git stash clear with arguments is "
 			       "unimplemented"));
 
-	return do_clear_stash();
+	திரும்பு do_clear_stash();
 }
 
-static int reset_tree(struct object_id *i_tree, int update, int reset)
+நிலையான முழு reset_மரம்(கட்டமைப்பு object_id *i_மரம், முழு update, முழு reset)
 {
-	int nr_trees = 1;
-	struct unpack_trees_options opts;
-	struct tree_desc t[MAX_UNPACK_TREES];
-	struct tree *tree;
-	struct lock_file lock_file = LOCK_INIT;
+	முழு nr_trees = 1;
+	கட்டமைப்பு unpack_trees_options opts;
+	கட்டமைப்பு மரம்_desc t[MAX_UNPACK_TREES];
+	கட்டமைப்பு மரம் *மரம்;
+	கட்டமைப்பு lock_file lock_file = LOCK_INIT;
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL))
-		return -1;
+	repo_read_index_preload(the_repository, வெற்று, 0);
+	எனில் (refresh_index(the_repository->index, REFRESH_QUIET, வெற்று, வெற்று, வெற்று))
+		திரும்பு -1;
 
 	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, அளவு(opts));
 
-	tree = repo_parse_tree_indirect(the_repository, i_tree);
-	if (repo_parse_tree(the_repository, tree))
-		return -1;
+	மரம் = repo_parse_மரம்_indirect(the_repository, i_மரம்);
+	எனில் (repo_parse_மரம்(the_repository, மரம்))
+		திரும்பு -1;
 
-	init_tree_desc(t, &tree->object.oid, tree->buffer, tree->size);
+	init_மரம்_desc(t, &மரம்->object.oid, மரம்->buffer, மரம்->size);
 
 	opts.head_idx = 1;
 	opts.src_index = the_repository->index;
@@ -359,44 +359,44 @@ static int reset_tree(struct object_id *i_tree, int update, int reset)
 	opts.merge = 1;
 	opts.reset = reset ? UNPACK_RESET_PROTECT_UNTRACKED : 0;
 	opts.update = update;
-	if (update)
+	எனில் (update)
 		opts.preserve_ignored = 0; /* FIXME: !overwrite_ignore */
 	opts.fn = oneway_merge;
 
-	if (unpack_trees(nr_trees, t, &opts))
-		return -1;
+	எனில் (unpack_trees(nr_trees, t, &opts))
+		திரும்பு -1;
 
-	if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
-		return error(_("unable to write new index file"));
+	எனில் (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+		திரும்பு error(_("unable to write new index file"));
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int create_index_from_tree(const struct object_id *tree_id,
-				  const char *index_path)
+நிலையான முழு create_index_from_மரம்(மாறிலி கட்டமைப்பு object_id *மரம்_id,
+				  மாறிலி எழுத்து *index_path)
 {
-	int nr_trees = 1;
-	int ret = 0;
-	struct unpack_trees_options opts;
-	struct tree_desc t[MAX_UNPACK_TREES];
-	struct tree *tree;
-	struct index_state dst_istate = INDEX_STATE_INIT(the_repository);
-	struct lock_file lock_file = LOCK_INIT;
+	முழு nr_trees = 1;
+	முழு ret = 0;
+	கட்டமைப்பு unpack_trees_options opts;
+	கட்டமைப்பு மரம்_desc t[MAX_UNPACK_TREES];
+	கட்டமைப்பு மரம் *மரம்;
+	கட்டமைப்பு index_state dst_istate = INDEX_STATE_INIT(the_repository);
+	கட்டமைப்பு lock_file lock_file = LOCK_INIT;
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL);
+	repo_read_index_preload(the_repository, வெற்று, 0);
+	refresh_index(the_repository->index, REFRESH_QUIET, வெற்று, வெற்று, வெற்று);
 
 	hold_lock_file_for_update(&lock_file, index_path, LOCK_DIE_ON_ERROR);
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, அளவு(opts));
 
-	tree = repo_parse_tree_indirect(the_repository, tree_id);
-	if (!tree || repo_parse_tree(the_repository, tree)) {
+	மரம் = repo_parse_மரம்_indirect(the_repository, மரம்_id);
+	எனில் (!மரம் || repo_parse_மரம்(the_repository, மரம்)) {
 		ret = -1;
-		goto done;
+		செல் done;
 	}
 
-	init_tree_desc(t, &tree->object.oid, tree->buffer, tree->size);
+	init_மரம்_desc(t, &மரம்->object.oid, மரம்->buffer, மரம்->size);
 
 	opts.head_idx = 1;
 	opts.src_index = the_repository->index;
@@ -405,43 +405,43 @@ static int create_index_from_tree(const struct object_id *tree_id,
 	opts.reset = UNPACK_RESET_PROTECT_UNTRACKED;
 	opts.fn = oneway_merge;
 
-	if (unpack_trees(nr_trees, t, &opts)) {
+	எனில் (unpack_trees(nr_trees, t, &opts)) {
 		ret = -1;
-		goto done;
+		செல் done;
 	}
 
-	if (write_locked_index(&dst_istate, &lock_file, COMMIT_LOCK)) {
+	எனில் (write_locked_index(&dst_istate, &lock_file, COMMIT_LOCK)) {
 		ret = error(_("unable to write new index file"));
-		goto done;
+		செல் done;
 	}
 
 done:
 	release_index(&dst_istate);
-	if (ret)
+	எனில் (ret)
 		rollback_lock_file(&lock_file);
-	return ret;
+	திரும்பு ret;
 }
 
-static int is_path_a_directory(const char *path)
+நிலையான முழு is_path_a_directory(மாறிலி எழுத்து *path)
 {
 	/*
 	 * This function differs from abspath.c:is_directory() in that
 	 * here we use lstat() instead of stat(); we do not want to
 	 * follow symbolic links here.
 	 */
-	struct stat st;
-	return (!lstat(path, &st) && S_ISDIR(st.st_mode));
+	கட்டமைப்பு stat st;
+	திரும்பு (!lstat(path, &st) && S_ISDIR(st.st_mode));
 }
 
-static void add_diff_to_buf(struct diff_queue_struct *q,
-			    struct diff_options *options UNUSED,
-			    void *data)
+நிலையான வெறுமை add_diff_to_buf(கட்டமைப்பு diff_queue_struct *q,
+			    கட்டமைப்பு diff_options *options UNUSED,
+			    வெறுமை *data)
 {
-	int i;
+	முழு i;
 
-	for (i = 0; i < q->nr; i++) {
-		if (is_path_a_directory(q->queue[i]->one->path))
-			continue;
+	க்கு (i = 0; i < q->nr; i++) {
+		எனில் (is_path_a_directory(q->queue[i]->one->path))
+			தொடர்;
 
 		strbuf_addstr(data, q->queue[i]->one->path);
 
@@ -450,10 +450,10 @@ static void add_diff_to_buf(struct diff_queue_struct *q,
 	}
 }
 
-static int restore_untracked(struct object_id *u_tree)
+நிலையான முழு restore_untracked(கட்டமைப்பு object_id *u_மரம்)
 {
-	int res;
-	struct child_process cp = CHILD_PROCESS_INIT;
+	முழு res;
+	கட்டமைப்பு child_process cp = CHILD_PROCESS_INIT;
 
 	/*
 	 * We need to run restore files from a given index, but without
@@ -461,27 +461,27 @@ static int restore_untracked(struct object_id *u_tree)
 	 * run_command to fork processes that will not interfere.
 	 */
 	cp.git_cmd = 1;
-	strvec_push(&cp.args, "read-tree");
-	strvec_push(&cp.args, oid_to_hex(u_tree));
+	strvec_தள்ளு(&cp.args, "read-tree");
+	strvec_தள்ளு(&cp.args, oid_to_hex(u_மரம்));
 	strvec_pushf(&cp.env, "GIT_INDEX_FILE=%s",
 		     stash_index_path.buf);
-	if (run_command(&cp)) {
+	எனில் (run_command(&cp)) {
 		remove_path(stash_index_path.buf);
-		return -1;
+		திரும்பு -1;
 	}
 
 	child_process_init(&cp);
 	cp.git_cmd = 1;
-	strvec_pushl(&cp.args, "checkout-index", "--all", NULL);
+	strvec_pushl(&cp.args, "checkout-index", "--all", வெற்று);
 	strvec_pushf(&cp.env, "GIT_INDEX_FILE=%s",
 		     stash_index_path.buf);
 
 	res = run_command(&cp);
 	remove_path(stash_index_path.buf);
-	return res;
+	திரும்பு res;
 }
 
-static void unstage_changes_unless_new(struct object_id *orig_tree)
+நிலையான வெறுமை unstage_changes_unless_new(கட்டமைப்பு object_id *orig_மரம்)
 {
 	/*
 	 * When we enter this function, there has been a clean merge of
@@ -494,10 +494,10 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 	 * it to the worktree before unstaging.
 	 */
 
-	struct checkout state = CHECKOUT_INIT;
-	struct diff_options diff_opts;
-	struct lock_file lock = LOCK_INIT;
-	int i;
+	கட்டமைப்பு checkout state = CHECKOUT_INIT;
+	கட்டமைப்பு diff_options diff_opts;
+	கட்டமைப்பு lock_file lock = LOCK_INIT;
+	முழு i;
 
 	/* If any entries have skip_worktree set, we'll have to check 'em out */
 	state.force = 1;
@@ -516,14 +516,14 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 	diff_opts.output_format = DIFF_FORMAT_NO_OUTPUT;
 	diff_setup_done(&diff_opts);
 
-	do_diff_cache(orig_tree, &diff_opts);
+	do_diff_cache(orig_மரம், &diff_opts);
 	diffcore_std(&diff_opts);
 
 	/* Iterate over the paths that changed due to the merge... */
-	for (i = 0; i < diff_queued_diff.nr; i++) {
-		struct diff_filepair *p;
-		struct cache_entry *ce;
-		int pos;
+	க்கு (i = 0; i < diff_queued_diff.nr; i++) {
+		கட்டமைப்பு diff_filepair *p;
+		கட்டமைப்பு cache_entry *ce;
+		முழு pos;
 
 		/* Look up the path's position in the current index. */
 		p = diff_queued_diff.queue[i];
@@ -538,14 +538,14 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 		 * path, but left it out of the working tree, then clear the
 		 * SKIP_WORKTREE bit and write it to the working tree.
 		 */
-		if (pos >= 0 && ce_skip_worktree(the_repository->index->cache[pos])) {
-			struct stat st;
+		எனில் (pos >= 0 && ce_skip_worktree(the_repository->index->cache[pos])) {
+			கட்டமைப்பு stat st;
 
 			ce = the_repository->index->cache[pos];
-			if (!lstat(ce->name, &st)) {
+			எனில் (!lstat(ce->name, &st)) {
 				/* Conflicting path present; relocate it */
-				struct strbuf new_path = STRBUF_INIT;
-				int fd;
+				கட்டமைப்பு strbuf new_path = STRBUF_INIT;
+				முழு fd;
 
 				strbuf_addf(&new_path,
 					    "%s.stash.XXXXXX", ce->name);
@@ -556,25 +556,25 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 					 "           %s -> %s\n"
 					 "         to make room.\n"),
 				       ce->name, new_path.buf);
-				if (rename(ce->name, new_path.buf))
+				எனில் (rename(ce->name, new_path.buf))
 					die("Failed to move %s to %s",
 					    ce->name, new_path.buf);
 				strbuf_release(&new_path);
 			}
-			checkout_entry(ce, &state, NULL, NULL);
+			checkout_entry(ce, &state, வெற்று, வெற்று);
 			ce->ce_flags &= ~CE_SKIP_WORKTREE;
 		}
 
 		/*
 		 * Step 3: "unstage" changes, as long as they are still tracked
 		 */
-		if (p->one->oid_valid) {
+		எனில் (p->one->oid_valid) {
 			/*
 			 * Path existed in orig_tree; restore index entry
 			 * from that tree in order to "unstage" the changes.
 			 */
-			int option = ADD_CACHE_OK_TO_REPLACE;
-			if (pos < 0)
+			முழு option = ADD_CACHE_OK_TO_REPLACE;
+			எனில் (pos < 0)
 				option = ADD_CACHE_OK_TO_ADD;
 
 			ce = make_cache_entry(the_repository->index,
@@ -591,67 +591,67 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 	 * Step 4: write the new index to disk
 	 */
 	repo_hold_locked_index(the_repository, &lock, LOCK_DIE_ON_ERROR);
-	if (write_locked_index(the_repository->index, &lock,
+	எனில் (write_locked_index(the_repository->index, &lock,
 			       COMMIT_LOCK | SKIP_IF_UNCHANGED))
 		die(_("could not write index"));
 }
 
-static enum stash_apply_result do_apply_stash(const char *prefix,
-					      struct stash_info *info,
-					      int index, int quiet,
-					      const char *label_ours,
-					      const char *label_theirs,
-					      const char *label_base)
+நிலையான எண்ணிக்கை stash_apply_result do_apply_stash(மாறிலி எழுத்து *prefix,
+					      கட்டமைப்பு stash_info *info,
+					      முழு index, முழு quiet,
+					      மாறிலி எழுத்து *label_ours,
+					      மாறிலி எழுத்து *label_theirs,
+					      மாறிலி எழுத்து *label_base)
 {
-	int clean, ret;
-	int has_index = index;
-	struct merge_options o;
-	struct object_id c_tree;
-	struct object_id index_tree;
-	struct tree *head, *merge, *merge_base;
-	struct lock_file lock = LOCK_INIT;
+	முழு clean, ret;
+	முழு has_index = index;
+	கட்டமைப்பு merge_options o;
+	கட்டமைப்பு object_id c_மரம்;
+	கட்டமைப்பு object_id index_மரம்;
+	கட்டமைப்பு மரம் *head, *merge, *merge_base;
+	கட்டமைப்பு lock_file lock = LOCK_INIT;
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
-					 NULL, NULL, NULL))
-		return error(_("could not write index"));
+	repo_read_index_preload(the_repository, வெற்று, 0);
+	எனில் (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
+					 வெற்று, வெற்று, வெற்று))
+		திரும்பு error(_("could not write index"));
 
-	if (write_index_as_tree(&c_tree, the_repository->index,
-				repo_get_index_file(the_repository), 0, NULL))
-		return error(_("cannot apply a stash in the middle of a merge"));
+	எனில் (write_index_as_மரம்(&c_மரம், the_repository->index,
+				repo_get_index_file(the_repository), 0, வெற்று))
+		திரும்பு error(_("cannot apply a stash in the middle of a merge"));
 
 	init_ui_merge_options(&o, the_repository);
 
-	if (quiet)
+	எனில் (quiet)
 		o.verbosity = 0;
 
-	if (index) {
-		if (oideq(&info->b_tree, &info->i_tree) ||
-		    oideq(&c_tree, &info->i_tree)) {
+	எனில் (index) {
+		எனில் (oideq(&info->b_மரம், &info->i_மரம்) ||
+		    oideq(&c_மரம், &info->i_மரம்)) {
 			has_index = 0;
-		} else {
-			struct merge_result result = { 0 };
+		} இல்லையெனில் {
+			கட்டமைப்பு merge_result result = { 0 };
 
 			o.branch1 = "Current index";
 			o.branch2 = "Stashed index changes";
 			o.ancestor = "Stash base";
 
-			head = lookup_tree(o.repo, &c_tree);
-			merge = lookup_tree(o.repo, &info->i_tree);
-			merge_base = lookup_tree(o.repo, &info->b_tree);
+			head = lookup_மரம்(o.repo, &c_மரம்);
+			merge = lookup_மரம்(o.repo, &info->i_மரம்);
+			merge_base = lookup_மரம்(o.repo, &info->b_மரம்);
 
 			merge_incore_nonrecursive(&o, merge_base, head, merge,
 						  &result);
 
-			if (result.clean < 0) {
+			எனில் (result.clean < 0) {
 				merge_finalize(&o, &result);
-				return error(_("index merge failed"));
-			} else if (!result.clean) {
+				திரும்பு error(_("index merge failed"));
+			} இல்லையெனில் எனில் (!result.clean) {
 				merge_finalize(&o, &result);
-				return error(_("conflicts in index. "
+				திரும்பு error(_("conflicts in index. "
 					       "Try without --index."));
-			} else {
-				oidcpy(&index_tree, &result.tree->object.oid);
+			} இல்லையெனில் {
+				oidcpy(&index_மரம், &result.மரம்->object.oid);
 				merge_finalize(&o, &result);
 			}
 		}
@@ -661,15 +661,15 @@ static enum stash_apply_result do_apply_stash(const char *prefix,
 	o.branch2 = label_theirs ? label_theirs : "Stashed changes";
 	o.ancestor = label_base ? label_base : "Stash base";
 
-	if (oideq(&info->b_tree, &c_tree))
+	எனில் (oideq(&info->b_மரம், &c_மரம்))
 		o.branch1 = "Version stash was based on";
 
-	if (o.verbosity >= 3)
+	எனில் (o.verbosity >= 3)
 		printf_ln(_("Merging %s with %s"), o.branch1, o.branch2);
 
-	head = lookup_tree(o.repo, &c_tree);
-	merge = lookup_tree(o.repo, &info->w_tree);
-	merge_base = lookup_tree(o.repo, &info->b_tree);
+	head = lookup_மரம்(o.repo, &c_மரம்);
+	merge = lookup_மரம்(o.repo, &info->w_மரம்);
+	merge_base = lookup_மரம்(o.repo, &info->b_மரம்);
 
 	repo_hold_locked_index(o.repo, &lock, LOCK_DIE_ON_ERROR);
 	clean = merge_ort_nonrecursive(&o, head, merge, merge_base);
@@ -681,34 +681,34 @@ static enum stash_apply_result do_apply_stash(const char *prefix,
 	 */
 	ret = clean >= 0 ? !clean : clean;
 
-	if (ret < 0)
+	எனில் (ret < 0)
 		rollback_lock_file(&lock);
-	else if (write_locked_index(o.repo->index, &lock,
+	இல்லையெனில் எனில் (write_locked_index(o.repo->index, &lock,
 				      COMMIT_LOCK | SKIP_IF_UNCHANGED))
 		ret = error(_("could not write index"));
 
-	if (ret) {
+	எனில் (ret) {
 		repo_rerere(the_repository, 0);
 
-		if (index)
+		எனில் (index)
 			fprintf_ln(stderr, _("Index was not unstashed."));
 
-		goto restore_untracked;
+		செல் restore_untracked;
 	}
 
-	if (has_index) {
-		if (reset_tree(&index_tree, 0, 0))
+	எனில் (has_index) {
+		எனில் (reset_மரம்(&index_மரம், 0, 0))
 			ret = -1;
-	} else {
-		unstage_changes_unless_new(&c_tree);
+	} இல்லையெனில் {
+		unstage_changes_unless_new(&c_மரம்);
 	}
 
 restore_untracked:
-	if (info->has_u && restore_untracked(&info->u_tree))
+	எனில் (info->has_u && restore_untracked(&info->u_மரம்))
 		ret = error(_("could not restore untracked files from stash"));
 
-	if (!quiet) {
-		struct child_process cp = CHILD_PROCESS_INIT;
+	எனில் (!quiet) {
+		கட்டமைப்பு child_process cp = CHILD_PROCESS_INIT;
 
 		/*
 		 * Status is quite simple and could be replaced with calls to
@@ -717,26 +717,26 @@ restore_untracked:
 		 */
 		cp.git_cmd = 1;
 		cp.dir = prefix;
-		strvec_pushf(&cp.env, GIT_WORK_TREE_ENVIRONMENT"=%s",
-			     absolute_path(repo_get_work_tree(the_repository)));
+		strvec_pushf(&cp.env, GIT_WORK_மரம்_ENVIRONMENT"=%s",
+			     absolute_path(repo_get_work_மரம்(the_repository)));
 		strvec_pushf(&cp.env, GIT_DIR_ENVIRONMENT"=%s",
 			     absolute_path(repo_get_git_dir(the_repository)));
-		strvec_push(&cp.args, "status");
+		strvec_தள்ளு(&cp.args, "status");
 		run_command(&cp);
 	}
 
-	return ret;
+	திரும்பு ret;
 }
 
-static int apply_stash(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+நிலையான முழு apply_stash(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+		       கட்டமைப்பு repository *repo UNUSED)
 {
-	int ret = -1;
-	int quiet = 0;
-	int index = use_index;
-	const char *label_ours = NULL, *label_theirs = NULL, *label_base = NULL;
-	struct stash_info info = STASH_INFO_INIT;
-	struct option options[] = {
+	முழு ret = -1;
+	முழு quiet = 0;
+	முழு index = use_index;
+	மாறிலி எழுத்து *label_ours = வெற்று, *label_theirs = வெற்று, *label_base = வெற்று;
+	கட்டமைப்பு stash_info info = STASH_INFO_INIT;
+	கட்டமைப்பு option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet, only report errors")),
 		OPT_BOOL(0, "index", &index,
 			 N_("attempt to recreate the index")),
@@ -752,73 +752,73 @@ static int apply_stash(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     git_stash_apply_usage, 0);
 
-	if (get_stash_info(&info, argc, argv))
-		goto cleanup;
+	எனில் (get_stash_info(&info, argc, argv))
+		செல் cleanup;
 
 	ret = do_apply_stash(prefix, &info, index, quiet,
 			     label_ours, label_theirs, label_base);
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	திரும்பு ret;
 }
 
-static int reject_reflog_ent(const char *refname UNUSED,
-			     struct object_id *ooid UNUSED,
-			     struct object_id *noid UNUSED,
-			     const char *email UNUSED,
+நிலையான முழு reject_reflog_ent(மாறிலி எழுத்து *refname UNUSED,
+			     கட்டமைப்பு object_id *ooid UNUSED,
+			     கட்டமைப்பு object_id *noid UNUSED,
+			     மாறிலி எழுத்து *email UNUSED,
 			     timestamp_t timestamp UNUSED,
-			     int tz UNUSED, const char *message UNUSED,
-			     void *cb_data UNUSED)
+			     முழு tz UNUSED, மாறிலி எழுத்து *message UNUSED,
+			     வெறுமை *cb_data UNUSED)
 {
-	return 1;
+	திரும்பு 1;
 }
 
-static int reflog_is_empty(const char *refname)
+நிலையான முழு reflog_is_empty(மாறிலி எழுத்து *refname)
 {
-	return !refs_for_each_reflog_ent(get_main_ref_store(the_repository),
-					 refname, reject_reflog_ent, NULL);
+	திரும்பு !refs_for_each_reflog_ent(get_main_ref_store(the_repository),
+					 refname, reject_reflog_ent, வெற்று);
 }
 
-static int do_drop_stash(struct stash_info *info, int quiet)
+நிலையான முழு do_drop_stash(கட்டமைப்பு stash_info *info, முழு quiet)
 {
-	if (!reflog_delete(info->revision.buf,
+	எனில் (!reflog_delete(info->revision.buf,
 			   EXPIRE_REFLOGS_REWRITE | EXPIRE_REFLOGS_UPDATE_REF,
 			   0)) {
-		if (!quiet)
+		எனில் (!quiet)
 			printf_ln(_("Dropped %s (%s)"), info->revision.buf,
 				  oid_to_hex(&info->w_commit));
-	} else {
-		return error(_("%s: Could not drop stash entry"),
+	} இல்லையெனில் {
+		திரும்பு error(_("%s: Could not drop stash entry"),
 			     info->revision.buf);
 	}
 
-	if (reflog_is_empty(ref_stash))
+	எனில் (reflog_is_empty(ref_stash))
 		do_clear_stash();
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int get_stash_info_assert(struct stash_info *info, int argc,
-				 const char **argv)
+நிலையான முழு get_stash_info_assert(கட்டமைப்பு stash_info *info, முழு argc,
+				 மாறிலி எழுத்து **argv)
 {
-	int ret = get_stash_info(info, argc, argv);
+	முழு ret = get_stash_info(info, argc, argv);
 
-	if (ret < 0)
-		return ret;
+	எனில் (ret < 0)
+		திரும்பு ret;
 
-	if (!info->is_stash_ref)
-		return error(_("'%s' is not a stash reference"), info->revision.buf);
+	எனில் (!info->is_stash_ref)
+		திரும்பு error(_("'%s' is not a stash reference"), info->revision.buf);
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int drop_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+நிலையான முழு drop_stash(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+		      கட்டமைப்பு repository *repo UNUSED)
 {
-	int ret = -1;
-	int quiet = 0;
-	struct stash_info info = STASH_INFO_INIT;
-	struct option options[] = {
+	முழு ret = -1;
+	முழு quiet = 0;
+	கட்டமைப்பு stash_info info = STASH_INFO_INIT;
+	கட்டமைப்பு option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet, only report errors")),
 		OPT_END()
 	};
@@ -826,23 +826,23 @@ static int drop_stash(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     git_stash_drop_usage, 0);
 
-	if (get_stash_info_assert(&info, argc, argv))
-		goto cleanup;
+	எனில் (get_stash_info_assert(&info, argc, argv))
+		செல் cleanup;
 
 	ret = do_drop_stash(&info, quiet);
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	திரும்பு ret;
 }
 
-static int pop_stash(int argc, const char **argv, const char *prefix,
-		     struct repository *repo UNUSED)
+நிலையான முழு எடு_stash(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+		     கட்டமைப்பு repository *repo UNUSED)
 {
-	int ret = -1;
-	int index = use_index;
-	int quiet = 0;
-	struct stash_info info = STASH_INFO_INIT;
-	struct option options[] = {
+	முழு ret = -1;
+	முழு index = use_index;
+	முழு quiet = 0;
+	கட்டமைப்பு stash_info info = STASH_INFO_INIT;
+	கட்டமைப்பு option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet, only report errors")),
 		OPT_BOOL(0, "index", &index,
 			 N_("attempt to recreate the index")),
@@ -850,68 +850,68 @@ static int pop_stash(int argc, const char **argv, const char *prefix,
 	};
 
 	argc = parse_options(argc, argv, prefix, options,
-			     git_stash_pop_usage, 0);
+			     git_stash_எடு_usage, 0);
 
-	if (get_stash_info_assert(&info, argc, argv))
-		goto cleanup;
+	எனில் (get_stash_info_assert(&info, argc, argv))
+		செல் cleanup;
 
-	if ((ret = do_apply_stash(prefix, &info, index, quiet,
-				  NULL, NULL, NULL)))
+	எனில் ((ret = do_apply_stash(prefix, &info, index, quiet,
+				  வெற்று, வெற்று, வெற்று)))
 		printf_ln(_("The stash entry is kept in case "
 			    "you need it again."));
-	else
+	இல்லையெனில்
 		ret = do_drop_stash(&info, quiet);
 
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	திரும்பு ret;
 }
 
-static int branch_stash(int argc, const char **argv, const char *prefix,
-			struct repository *repo UNUSED)
+நிலையான முழு branch_stash(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+			கட்டமைப்பு repository *repo UNUSED)
 {
-	int ret = -1;
-	const char *branch = NULL;
-	struct stash_info info = STASH_INFO_INIT;
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct option options[] = {
+	முழு ret = -1;
+	மாறிலி எழுத்து *branch = வெற்று;
+	கட்டமைப்பு stash_info info = STASH_INFO_INIT;
+	கட்டமைப்பு child_process cp = CHILD_PROCESS_INIT;
+	கட்டமைப்பு option options[] = {
 		OPT_END()
 	};
 
 	argc = parse_options(argc, argv, prefix, options,
 			     git_stash_branch_usage, 0);
 
-	if (!argc) {
+	எனில் (!argc) {
 		fprintf_ln(stderr, _("No branch name specified"));
-		return -1;
+		திரும்பு -1;
 	}
 
 	branch = argv[0];
 
-	if (get_stash_info(&info, argc - 1, argv + 1))
-		goto cleanup;
+	எனில் (get_stash_info(&info, argc - 1, argv + 1))
+		செல் cleanup;
 
 	cp.git_cmd = 1;
-	strvec_pushl(&cp.args, "checkout", "-b", NULL);
-	strvec_push(&cp.args, branch);
-	strvec_push(&cp.args, oid_to_hex(&info.b_commit));
+	strvec_pushl(&cp.args, "checkout", "-b", வெற்று);
+	strvec_தள்ளு(&cp.args, branch);
+	strvec_தள்ளு(&cp.args, oid_to_hex(&info.b_commit));
 	ret = run_command(&cp);
-	if (!ret)
+	எனில் (!ret)
 		ret = do_apply_stash(prefix, &info, 1, 0,
-				     NULL, NULL, NULL);
-	if (!ret && info.is_stash_ref)
+				     வெற்று, வெற்று, வெற்று);
+	எனில் (!ret && info.is_stash_ref)
 		ret = do_drop_stash(&info, 0);
 
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	திரும்பு ret;
 }
 
-static int list_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+நிலையான முழு list_stash(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+		      கட்டமைப்பு repository *repo UNUSED)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct option options[] = {
+	கட்டமைப்பு child_process cp = CHILD_PROCESS_INIT;
+	கட்டமைப்பு option options[] = {
 		OPT_END()
 	};
 
@@ -919,82 +919,82 @@ static int list_stash(int argc, const char **argv, const char *prefix,
 			     git_stash_list_usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT);
 
-	if (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash))
-		return 0;
+	எனில் (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash))
+		திரும்பு 0;
 
 	cp.git_cmd = 1;
 	strvec_pushl(&cp.args, "log", "--format=%gd: %gs", "-g",
-		     "--first-parent", NULL);
+		     "--first-parent", வெற்று);
 	strvec_pushv(&cp.args, argv);
-	strvec_push(&cp.args, ref_stash);
-	strvec_push(&cp.args, "--");
-	return run_command(&cp);
+	strvec_தள்ளு(&cp.args, ref_stash);
+	strvec_தள்ளு(&cp.args, "--");
+	திரும்பு run_command(&cp);
 }
 
-static int git_stash_config(const char *var, const char *value,
-			    const struct config_context *ctx, void *cb)
+நிலையான முழு git_stash_config(மாறிலி எழுத்து *var, மாறிலி எழுத்து *மதிப்பு,
+			    மாறிலி கட்டமைப்பு config_context *ctx, வெறுமை *cb)
 {
-	if (!strcmp(var, "stash.showstat")) {
-		show_stat = git_config_bool(var, value);
-		return 0;
+	எனில் (!strcmp(var, "stash.showstat")) {
+		show_stat = git_config_bool(var, மதிப்பு);
+		திரும்பு 0;
 	}
-	if (!strcmp(var, "stash.showpatch")) {
-		show_patch = git_config_bool(var, value);
-		return 0;
+	எனில் (!strcmp(var, "stash.showpatch")) {
+		show_patch = git_config_bool(var, மதிப்பு);
+		திரும்பு 0;
 	}
-	if (!strcmp(var, "stash.showincludeuntracked")) {
-		show_include_untracked = git_config_bool(var, value);
-		return 0;
+	எனில் (!strcmp(var, "stash.showincludeuntracked")) {
+		show_include_untracked = git_config_bool(var, மதிப்பு);
+		திரும்பு 0;
 	}
-	if (!strcmp(var, "stash.index")) {
-		use_index = git_config_bool(var, value);
-		return 0;
+	எனில் (!strcmp(var, "stash.index")) {
+		use_index = git_config_bool(var, மதிப்பு);
+		திரும்பு 0;
 	}
-	return git_diff_basic_config(var, value, ctx, cb);
+	திரும்பு git_diff_basic_config(var, மதிப்பு, ctx, cb);
 }
 
-static void diff_include_untracked(const struct stash_info *info, struct diff_options *diff_opt)
+நிலையான வெறுமை diff_include_untracked(மாறிலி கட்டமைப்பு stash_info *info, கட்டமைப்பு diff_options *diff_opt)
 {
-	const struct object_id *oid[] = { &info->w_commit, &info->u_tree };
-	struct tree *tree[ARRAY_SIZE(oid)];
-	struct tree_desc tree_desc[ARRAY_SIZE(oid)];
-	struct unpack_trees_options unpack_tree_opt = { 0 };
+	மாறிலி கட்டமைப்பு object_id *oid[] = { &info->w_commit, &info->u_மரம் };
+	கட்டமைப்பு மரம் *மரம்[ARRAY_SIZE(oid)];
+	கட்டமைப்பு மரம்_desc மரம்_desc[ARRAY_SIZE(oid)];
+	கட்டமைப்பு unpack_trees_options unpack_மரம்_opt = { 0 };
 
-	for (size_t i = 0; i < ARRAY_SIZE(oid); i++) {
-		tree[i] = repo_parse_tree_indirect(the_repository, oid[i]);
-		if (repo_parse_tree(the_repository, tree[i]) < 0)
+	க்கு (size_t i = 0; i < ARRAY_SIZE(oid); i++) {
+		மரம்[i] = repo_parse_மரம்_indirect(the_repository, oid[i]);
+		எனில் (repo_parse_மரம்(the_repository, மரம்[i]) < 0)
 			die(_("failed to parse tree"));
-		init_tree_desc(&tree_desc[i], &tree[i]->object.oid,
-			       tree[i]->buffer, tree[i]->size);
+		init_மரம்_desc(&மரம்_desc[i], &மரம்[i]->object.oid,
+			       மரம்[i]->buffer, மரம்[i]->size);
 	}
 
-	unpack_tree_opt.head_idx = -1;
-	unpack_tree_opt.src_index = the_repository->index;
-	unpack_tree_opt.dst_index = the_repository->index;
-	unpack_tree_opt.merge = 1;
-	unpack_tree_opt.fn = stash_worktree_untracked_merge;
+	unpack_மரம்_opt.head_idx = -1;
+	unpack_மரம்_opt.src_index = the_repository->index;
+	unpack_மரம்_opt.dst_index = the_repository->index;
+	unpack_மரம்_opt.merge = 1;
+	unpack_மரம்_opt.fn = stash_worktree_untracked_merge;
 
-	if (unpack_trees(ARRAY_SIZE(tree_desc), tree_desc, &unpack_tree_opt))
+	எனில் (unpack_trees(ARRAY_SIZE(மரம்_desc), மரம்_desc, &unpack_மரம்_opt))
 		die(_("failed to unpack trees"));
 
 	do_diff_cache(&info->b_commit, diff_opt);
 }
 
-static int show_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+நிலையான முழு show_stash(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+		      கட்டமைப்பு repository *repo UNUSED)
 {
-	int i;
-	int ret = -1;
-	struct stash_info info = STASH_INFO_INIT;
-	struct rev_info rev;
-	struct strvec stash_args = STRVEC_INIT;
-	struct strvec revision_args = STRVEC_INIT;
-	enum {
+	முழு i;
+	முழு ret = -1;
+	கட்டமைப்பு stash_info info = STASH_INFO_INIT;
+	கட்டமைப்பு rev_info rev;
+	கட்டமைப்பு strvec stash_args = STRVEC_INIT;
+	கட்டமைப்பு strvec revision_args = STRVEC_INIT;
+	எண்ணிக்கை {
 		UNTRACKED_NONE,
 		UNTRACKED_INCLUDE,
 		UNTRACKED_ONLY
 	} show_untracked = show_include_untracked ? UNTRACKED_INCLUDE : UNTRACKED_NONE;
-	struct option options[] = {
+	கட்டமைப்பு option options[] = {
 		OPT_SET_INT('u', "include-untracked", &show_untracked,
 			    N_("include untracked files in the stash"),
 			    UNTRACKED_INCLUDE),
@@ -1003,70 +1003,70 @@ static int show_stash(int argc, const char **argv, const char *prefix,
 			      UNTRACKED_ONLY, PARSE_OPT_NONEG),
 		OPT_END()
 	};
-	int do_usage = 0;
+	முழு do_usage = 0;
 
 	init_diff_ui_defaults();
-	repo_config(the_repository, git_diff_ui_config, NULL);
+	repo_config(the_repository, git_diff_ui_config, வெற்று);
 	repo_init_revisions(the_repository, &rev, prefix);
 
 	argc = parse_options(argc, argv, prefix, options, git_stash_show_usage,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT |
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	strvec_push(&revision_args, argv[0]);
-	for (i = 1; i < argc; i++) {
-		if (argv[i][0] != '-')
-			strvec_push(&stash_args, argv[i]);
-		else
-			strvec_push(&revision_args, argv[i]);
+	strvec_தள்ளு(&revision_args, argv[0]);
+	க்கு (i = 1; i < argc; i++) {
+		எனில் (argv[i][0] != '-')
+			strvec_தள்ளு(&stash_args, argv[i]);
+		இல்லையெனில்
+			strvec_தள்ளு(&revision_args, argv[i]);
 	}
 
-	if (get_stash_info(&info, stash_args.nr, stash_args.v))
-		goto cleanup;
+	எனில் (get_stash_info(&info, stash_args.nr, stash_args.v))
+		செல் cleanup;
 
 	/*
 	 * The config settings are applied only if there are not passed
 	 * any options.
 	 */
-	if (revision_args.nr == 1) {
-		if (show_stat)
+	எனில் (revision_args.nr == 1) {
+		எனில் (show_stat)
 			rev.diffopt.output_format = DIFF_FORMAT_DIFFSTAT;
 
-		if (show_patch)
+		எனில் (show_patch)
 			rev.diffopt.output_format |= DIFF_FORMAT_PATCH;
 
-		if (!show_stat && !show_patch) {
+		எனில் (!show_stat && !show_patch) {
 			ret = 0;
-			goto cleanup;
+			செல் cleanup;
 		}
 	}
 
-	setup_revisions_from_strvec(&revision_args, &rev, NULL);
-	if (revision_args.nr > 1)
-		goto usage;
-	if (!rev.diffopt.output_format) {
+	setup_revisions_from_strvec(&revision_args, &rev, வெற்று);
+	எனில் (revision_args.nr > 1)
+		செல் usage;
+	எனில் (!rev.diffopt.output_format) {
 		rev.diffopt.output_format = DIFF_FORMAT_PATCH;
 		diff_setup_done(&rev.diffopt);
 	}
 
 	rev.diffopt.flags.recursive = 1;
 	setup_diff_pager(&rev.diffopt);
-	switch (show_untracked) {
-	case UNTRACKED_NONE:
-		diff_tree_oid(&info.b_commit, &info.w_commit, "", &rev.diffopt);
-		break;
-	case UNTRACKED_ONLY:
-		if (info.has_u)
-			diff_root_tree_oid(&info.u_tree, "", &rev.diffopt);
-		break;
-	case UNTRACKED_INCLUDE:
-		if (info.has_u)
+	தேர்வு (show_untracked) {
+	நிலை UNTRACKED_NONE:
+		diff_மரம்_oid(&info.b_commit, &info.w_commit, "", &rev.diffopt);
+		நிறுத்து;
+	நிலை UNTRACKED_ONLY:
+		எனில் (info.has_u)
+			diff_வேர்_மரம்_oid(&info.u_மரம், "", &rev.diffopt);
+		நிறுத்து;
+	நிலை UNTRACKED_INCLUDE:
+		எனில் (info.has_u)
 			diff_include_untracked(&info, &rev.diffopt);
-		else
-			diff_tree_oid(&info.b_commit, &info.w_commit, "", &rev.diffopt);
-		break;
+		இல்லையெனில்
+			diff_மரம்_oid(&info.b_commit, &info.w_commit, "", &rev.diffopt);
+		நிறுத்து;
 	}
-	log_tree_diff_flush(&rev);
+	log_மரம்_diff_flush(&rev);
 
 	ret = diff_result_code(&rev);
 
@@ -1075,86 +1075,86 @@ cleanup:
 	strvec_clear(&stash_args);
 	free_stash_info(&info);
 	release_revisions(&rev);
-	if (do_usage)
+	எனில் (do_usage)
 		usage_with_options(git_stash_show_usage, options);
-	return ret;
+	திரும்பு ret;
 usage:
 	do_usage = 1;
-	goto cleanup;
+	செல் cleanup;
 }
 
-static int do_store_stash(const struct object_id *w_commit, const char *stash_msg,
-			  int quiet)
+நிலையான முழு do_store_stash(மாறிலி கட்டமைப்பு object_id *w_commit, மாறிலி எழுத்து *stash_செய்தி,
+			  முழு quiet)
 {
-	struct stash_info info;
-	char revision[GIT_MAX_HEXSZ];
+	கட்டமைப்பு stash_info info;
+	எழுத்து revision[GIT_MAX_HEXSZ];
 
 	oid_to_hex_r(revision, w_commit);
 	assert_stash_like(&info, revision);
 
-	if (!stash_msg)
-		stash_msg = "Created via \"git stash store\".";
+	எனில் (!stash_செய்தி)
+		stash_செய்தி = "Created via \"git stash store\".";
 
-	if (refs_update_ref(get_main_ref_store(the_repository), stash_msg, ref_stash, w_commit, NULL,
+	எனில் (refs_update_ref(get_main_ref_store(the_repository), stash_செய்தி, ref_stash, w_commit, வெற்று,
 			    REF_FORCE_CREATE_REFLOG,
 			    quiet ? UPDATE_REFS_QUIET_ON_ERR :
-			    UPDATE_REFS_MSG_ON_ERR)) {
-		if (!quiet) {
+			    UPDATE_REFS_செய்தி_ON_ERR)) {
+		எனில் (!quiet) {
 			fprintf_ln(stderr, _("Cannot update %s with %s"),
 				   ref_stash, oid_to_hex(w_commit));
 		}
-		return -1;
+		திரும்பு -1;
 	}
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int store_stash(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+நிலையான முழு store_stash(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+		       கட்டமைப்பு repository *repo UNUSED)
 {
-	int quiet = 0;
-	const char *stash_msg = NULL;
-	struct object_id obj;
-	struct option options[] = {
+	முழு quiet = 0;
+	மாறிலி எழுத்து *stash_செய்தி = வெற்று;
+	கட்டமைப்பு object_id obj;
+	கட்டமைப்பு option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet")),
-		OPT_STRING('m', "message", &stash_msg, "message",
+		OPT_STRING('m', "message", &stash_செய்தி, "message",
 			   N_("stash message")),
 		OPT_END()
 	};
-	int ret;
+	முழு ret;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     git_stash_store_usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT);
 
-	if (argc != 1) {
-		if (!quiet)
+	எனில் (argc != 1) {
+		எனில் (!quiet)
 			fprintf_ln(stderr, _("\"git stash store\" requires one "
 					     "<commit> argument"));
-		return -1;
+		திரும்பு -1;
 	}
 
-	if (repo_get_oid_with_flags(the_repository, argv[0], &obj,
+	எனில் (repo_get_oid_with_flags(the_repository, argv[0], &obj,
 				    quiet ? GET_OID_QUIETLY : 0)) {
-		if (!quiet)
+		எனில் (!quiet)
 			fprintf_ln(stderr, _("Cannot update %s with %s"),
 					     ref_stash, argv[0]);
 		ret = -1;
-		goto out;
+		செல் out;
 	}
 
-	ret = do_store_stash(&obj, stash_msg, quiet);
+	ret = do_store_stash(&obj, stash_செய்தி, quiet);
 
 out:
-	return ret;
+	திரும்பு ret;
 }
 
-static void add_pathspecs(struct strvec *args,
-			  const struct pathspec *ps) {
-	int i;
+நிலையான வெறுமை add_pathspecs(கட்டமைப்பு strvec *args,
+			  மாறிலி கட்டமைப்பு pathspec *ps) {
+	முழு i;
 
-	for (i = 0; i < ps->nr; i++)
-		strvec_push(args, ps->items[i].original);
+	க்கு (i = 0; i < ps->nr; i++)
+		strvec_தள்ளு(args, ps->பொருட்கள்[i].original);
 }
 
 /*
@@ -1164,19 +1164,19 @@ static void add_pathspecs(struct strvec *args,
  * = 0 if there are not any untracked files
  * > 0 if there are untracked files
  */
-static int get_untracked_files(const struct pathspec *ps, int include_untracked,
-			       struct strbuf *untracked_files)
+நிலையான முழு get_untracked_files(மாறிலி கட்டமைப்பு pathspec *ps, முழு include_untracked,
+			       கட்டமைப்பு strbuf *untracked_files)
 {
-	int i;
-	int found = 0;
-	struct dir_struct dir = DIR_INIT;
+	முழு i;
+	முழு found = 0;
+	கட்டமைப்பு dir_struct dir = DIR_INIT;
 
-	if (include_untracked != INCLUDE_ALL_FILES)
+	எனில் (include_untracked != INCLUDE_ALL_FILES)
 		setup_standard_excludes(&dir);
 
 	fill_directory(&dir, the_repository->index, ps);
-	for (i = 0; i < dir.nr; i++) {
-		struct dir_entry *ent = dir.entries[i];
+	க்கு (i = 0; i < dir.nr; i++) {
+		கட்டமைப்பு dir_entry *ent = dir.entries[i];
 		found++;
 		strbuf_addstr(untracked_files, ent->name);
 		/* NUL-terminate: will be fed to update-index -z */
@@ -1184,7 +1184,7 @@ static int get_untracked_files(const struct pathspec *ps, int include_untracked,
 	}
 
 	dir_clear(&dir);
-	return found;
+	திரும்பு found;
 }
 
 /*
@@ -1194,20 +1194,20 @@ static int get_untracked_files(const struct pathspec *ps, int include_untracked,
  * = 0 if there are no changes.
  * > 0 if there are changes.
  */
-static int check_changes_tracked_files(const struct pathspec *ps)
+நிலையான முழு check_changes_tracked_files(மாறிலி கட்டமைப்பு pathspec *ps)
 {
-	struct rev_info rev;
-	struct object_id dummy;
-	int ret = 0;
+	கட்டமைப்பு rev_info rev;
+	கட்டமைப்பு object_id dummy;
+	முழு ret = 0;
 
 	/* No initial commit. */
-	if (repo_get_oid(the_repository, "HEAD", &dummy))
-		return -1;
+	எனில் (repo_get_oid(the_repository, "HEAD", &dummy))
+		திரும்பு -1;
 
-	if (repo_read_index(the_repository) < 0)
-		return -1;
+	எனில் (repo_read_index(the_repository) < 0)
+		திரும்பு -1;
 
-	repo_init_revisions(the_repository, &rev, NULL);
+	repo_init_revisions(the_repository, &rev, வெற்று);
 	copy_pathspec(&rev.prune_data, ps);
 
 	rev.diffopt.flags.quick = 1;
@@ -1218,140 +1218,140 @@ static int check_changes_tracked_files(const struct pathspec *ps)
 	diff_setup_done(&rev.diffopt);
 
 	run_diff_index(&rev, DIFF_INDEX_CACHED);
-	if (diff_result_code(&rev)) {
+	எனில் (diff_result_code(&rev)) {
 		ret = 1;
-		goto done;
+		செல் done;
 	}
 
 	run_diff_files(&rev, 0);
-	if (diff_result_code(&rev)) {
+	எனில் (diff_result_code(&rev)) {
 		ret = 1;
-		goto done;
+		செல் done;
 	}
 
 done:
 	release_revisions(&rev);
-	return ret;
+	திரும்பு ret;
 }
 
 /*
  * The function will fill `untracked_files` with the names of untracked files
  * It will return 1 if there were any changes and 0 if there were not.
  */
-static int check_changes(const struct pathspec *ps, int include_untracked,
-			 struct strbuf *untracked_files)
+நிலையான முழு check_changes(மாறிலி கட்டமைப்பு pathspec *ps, முழு include_untracked,
+			 கட்டமைப்பு strbuf *untracked_files)
 {
-	int ret = 0;
-	if (check_changes_tracked_files(ps))
+	முழு ret = 0;
+	எனில் (check_changes_tracked_files(ps))
 		ret = 1;
 
-	if (include_untracked && get_untracked_files(ps, include_untracked,
+	எனில் (include_untracked && get_untracked_files(ps, include_untracked,
 						     untracked_files))
 		ret = 1;
 
-	return ret;
+	திரும்பு ret;
 }
 
-static int save_untracked_files(struct stash_info *info, struct strbuf *msg,
-				struct strbuf *files)
+நிலையான முழு save_untracked_files(கட்டமைப்பு stash_info *info, கட்டமைப்பு strbuf *செய்தி,
+				கட்டமைப்பு strbuf *files)
 {
-	int ret = 0;
-	struct strbuf untracked_msg = STRBUF_INIT;
-	struct child_process cp_upd_index = CHILD_PROCESS_INIT;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
+	முழு ret = 0;
+	கட்டமைப்பு strbuf untracked_செய்தி = STRBUF_INIT;
+	கட்டமைப்பு child_process cp_upd_index = CHILD_PROCESS_INIT;
+	கட்டமைப்பு index_state istate = INDEX_STATE_INIT(the_repository);
 
 	cp_upd_index.git_cmd = 1;
 	strvec_pushl(&cp_upd_index.args, "update-index", "-z", "--add",
-		     "--remove", "--stdin", NULL);
+		     "--remove", "--stdin", வெற்று);
 	strvec_pushf(&cp_upd_index.env, "GIT_INDEX_FILE=%s",
 			 stash_index_path.buf);
 
-	strbuf_addf(&untracked_msg, "untracked files on %s\n", msg->buf);
-	if (pipe_command(&cp_upd_index, files->buf, files->len, NULL, 0,
-			 NULL, 0)) {
+	strbuf_addf(&untracked_செய்தி, "untracked files on %s\n", செய்தி->buf);
+	எனில் (pipe_command(&cp_upd_index, files->buf, files->len, வெற்று, 0,
+			 வெற்று, 0)) {
 		ret = -1;
-		goto done;
+		செல் done;
 	}
 
-	if (write_index_as_tree(&info->u_tree, &istate, stash_index_path.buf, 0,
-				NULL)) {
+	எனில் (write_index_as_மரம்(&info->u_மரம், &istate, stash_index_path.buf, 0,
+				வெற்று)) {
 		ret = -1;
-		goto done;
+		செல் done;
 	}
 
-	if (commit_tree(untracked_msg.buf, untracked_msg.len,
-			&info->u_tree, NULL, &info->u_commit, NULL, NULL)) {
+	எனில் (commit_மரம்(untracked_செய்தி.buf, untracked_செய்தி.len,
+			&info->u_மரம், வெற்று, &info->u_commit, வெற்று, வெற்று)) {
 		ret = -1;
-		goto done;
+		செல் done;
 	}
 
 done:
 	release_index(&istate);
-	strbuf_release(&untracked_msg);
+	strbuf_release(&untracked_செய்தி);
 	remove_path(stash_index_path.buf);
-	return ret;
+	திரும்பு ret;
 }
 
-static int stash_staged(struct stash_info *info, struct strbuf *out_patch,
-			int quiet)
+நிலையான முழு stash_staged(கட்டமைப்பு stash_info *info, கட்டமைப்பு strbuf *out_patch,
+			முழு quiet)
 {
-	int ret = 0;
-	struct child_process cp_diff_tree = CHILD_PROCESS_INIT;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
+	முழு ret = 0;
+	கட்டமைப்பு child_process cp_diff_மரம் = CHILD_PROCESS_INIT;
+	கட்டமைப்பு index_state istate = INDEX_STATE_INIT(the_repository);
 
-	if (write_index_as_tree(&info->w_tree, &istate, the_repository->index_file,
-				0, NULL)) {
+	எனில் (write_index_as_மரம்(&info->w_மரம், &istate, the_repository->index_file,
+				0, வெற்று)) {
 		ret = -1;
-		goto done;
+		செல் done;
 	}
 
-	cp_diff_tree.git_cmd = 1;
-	strvec_pushl(&cp_diff_tree.args, "diff-tree", "-p", "--binary",
+	cp_diff_மரம்.git_cmd = 1;
+	strvec_pushl(&cp_diff_மரம்.args, "diff-tree", "-p", "--binary",
 		     "--no-color",
-		     "-U1", "HEAD", oid_to_hex(&info->w_tree), "--", NULL);
-	if (pipe_command(&cp_diff_tree, NULL, 0, out_patch, 0, NULL, 0)) {
+		     "-U1", "HEAD", oid_to_hex(&info->w_மரம்), "--", வெற்று);
+	எனில் (pipe_command(&cp_diff_மரம், வெற்று, 0, out_patch, 0, வெற்று, 0)) {
 		ret = -1;
-		goto done;
+		செல் done;
 	}
 
-	if (!out_patch->len) {
-		if (!quiet)
+	எனில் (!out_patch->len) {
+		எனில் (!quiet)
 			fprintf_ln(stderr, _("No staged changes"));
 		ret = 1;
 	}
 
 done:
 	release_index(&istate);
-	return ret;
+	திரும்பு ret;
 }
 
-static int stash_patch(struct stash_info *info, const struct pathspec *ps,
-		       struct strbuf *out_patch, int quiet,
-		       struct interactive_options *interactive_opts)
+நிலையான முழு stash_patch(கட்டமைப்பு stash_info *info, மாறிலி கட்டமைப்பு pathspec *ps,
+		       கட்டமைப்பு strbuf *out_patch, முழு quiet,
+		       கட்டமைப்பு interactive_options *interactive_opts)
 {
-	int ret = 0;
-	struct child_process cp_diff_tree = CHILD_PROCESS_INIT;
-	struct commit *head_commit;
-	const struct object_id *head_tree;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
-	char *old_index_env = NULL, *old_repo_index_file;
+	முழு ret = 0;
+	கட்டமைப்பு child_process cp_diff_மரம் = CHILD_PROCESS_INIT;
+	கட்டமைப்பு commit *head_commit;
+	மாறிலி கட்டமைப்பு object_id *head_மரம்;
+	கட்டமைப்பு index_state istate = INDEX_STATE_INIT(the_repository);
+	எழுத்து *old_index_env = வெற்று, *old_repo_index_file;
 
 	remove_path(stash_index_path.buf);
 
 	head_commit = lookup_commit(the_repository, &info->b_commit);
-	if (!head_commit || repo_parse_commit(the_repository, head_commit)) {
+	எனில் (!head_commit || repo_parse_commit(the_repository, head_commit)) {
 		ret = -1;
-		goto done;
+		செல் done;
 	}
-	head_tree = get_commit_tree_oid(head_commit);
-	if (!head_tree) {
+	head_மரம் = get_commit_மரம்_oid(head_commit);
+	எனில் (!head_மரம்) {
 		ret = -1;
-		goto done;
+		செல் done;
 	}
 
-	if (create_index_from_tree(head_tree, stash_index_path.buf)) {
+	எனில் (create_index_from_மரம்(head_மரம், stash_index_path.buf)) {
 		ret = -1;
-		goto done;
+		செல் done;
 	}
 
 	/* Find out what the user wants. */
@@ -1360,33 +1360,33 @@ static int stash_patch(struct stash_info *info, const struct pathspec *ps,
 	old_index_env = xstrdup_or_null(getenv(INDEX_ENVIRONMENT));
 	setenv(INDEX_ENVIRONMENT, the_repository->index_file, 1);
 
-	ret = !!run_add_p(the_repository, ADD_P_STASH, interactive_opts, NULL, ps, 0);
+	ret = !!run_add_p(the_repository, ADD_P_STASH, interactive_opts, வெற்று, ps, 0);
 
 	the_repository->index_file = old_repo_index_file;
-	if (old_index_env && *old_index_env)
+	எனில் (old_index_env && *old_index_env)
 		setenv(INDEX_ENVIRONMENT, old_index_env, 1);
-	else
+	இல்லையெனில்
 		unsetenv(INDEX_ENVIRONMENT);
 	FREE_AND_NULL(old_index_env);
 
 	/* State of the working tree. */
-	if (write_index_as_tree(&info->w_tree, &istate, stash_index_path.buf, 0,
-				NULL)) {
+	எனில் (write_index_as_மரம்(&info->w_மரம், &istate, stash_index_path.buf, 0,
+				வெற்று)) {
 		ret = -1;
-		goto done;
+		செல் done;
 	}
 
-	cp_diff_tree.git_cmd = 1;
-	strvec_pushl(&cp_diff_tree.args, "diff-tree", "-p", "-U1", "HEAD",
+	cp_diff_மரம்.git_cmd = 1;
+	strvec_pushl(&cp_diff_மரம்.args, "diff-tree", "-p", "-U1", "HEAD",
 		     "--no-color",
-		     oid_to_hex(&info->w_tree), "--", NULL);
-	if (pipe_command(&cp_diff_tree, NULL, 0, out_patch, 0, NULL, 0)) {
+		     oid_to_hex(&info->w_மரம்), "--", வெற்று);
+	எனில் (pipe_command(&cp_diff_மரம், வெற்று, 0, out_patch, 0, வெற்று, 0)) {
 		ret = -1;
-		goto done;
+		செல் done;
 	}
 
-	if (!out_patch->len) {
-		if (!quiet)
+	எனில் (!out_patch->len) {
+		எனில் (!quiet)
 			fprintf_ln(stderr, _("No changes selected"));
 		ret = 1;
 	}
@@ -1394,34 +1394,34 @@ static int stash_patch(struct stash_info *info, const struct pathspec *ps,
 done:
 	release_index(&istate);
 	remove_path(stash_index_path.buf);
-	return ret;
+	திரும்பு ret;
 }
 
-static int stash_working_tree(struct stash_info *info, const struct pathspec *ps)
+நிலையான முழு stash_working_மரம்(கட்டமைப்பு stash_info *info, மாறிலி கட்டமைப்பு pathspec *ps)
 {
-	int ret = 0;
-	struct rev_info rev;
-	struct child_process cp_upd_index = CHILD_PROCESS_INIT;
-	struct strbuf diff_output = STRBUF_INIT;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
+	முழு ret = 0;
+	கட்டமைப்பு rev_info rev;
+	கட்டமைப்பு child_process cp_upd_index = CHILD_PROCESS_INIT;
+	கட்டமைப்பு strbuf diff_output = STRBUF_INIT;
+	கட்டமைப்பு index_state istate = INDEX_STATE_INIT(the_repository);
 
-	repo_init_revisions(the_repository, &rev, NULL);
+	repo_init_revisions(the_repository, &rev, வெற்று);
 	copy_pathspec(&rev.prune_data, ps);
 
 	set_alternate_index_output(stash_index_path.buf);
-	if (reset_tree(&info->i_tree, 0, 0)) {
+	எனில் (reset_மரம்(&info->i_மரம், 0, 0)) {
 		ret = -1;
-		goto done;
+		செல் done;
 	}
-	set_alternate_index_output(NULL);
+	set_alternate_index_output(வெற்று);
 
 	rev.diffopt.output_format = DIFF_FORMAT_CALLBACK;
 	rev.diffopt.format_callback = add_diff_to_buf;
 	rev.diffopt.format_callback_data = &diff_output;
 
-	if (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
+	எனில் (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
 		ret = -1;
-		goto done;
+		செல் done;
 	}
 
 	add_pending_object(&rev, parse_object(the_repository, &info->b_commit),
@@ -1431,20 +1431,20 @@ static int stash_working_tree(struct stash_info *info, const struct pathspec *ps
 	cp_upd_index.git_cmd = 1;
 	strvec_pushl(&cp_upd_index.args, "update-index",
 		     "--ignore-skip-worktree-entries",
-		     "-z", "--add", "--remove", "--stdin", NULL);
+		     "-z", "--add", "--remove", "--stdin", வெற்று);
 	strvec_pushf(&cp_upd_index.env, "GIT_INDEX_FILE=%s",
 		     stash_index_path.buf);
 
-	if (pipe_command(&cp_upd_index, diff_output.buf, diff_output.len,
-			 NULL, 0, NULL, 0)) {
+	எனில் (pipe_command(&cp_upd_index, diff_output.buf, diff_output.len,
+			 வெற்று, 0, வெற்று, 0)) {
 		ret = -1;
-		goto done;
+		செல் done;
 	}
 
-	if (write_index_as_tree(&info->w_tree, &istate, stash_index_path.buf, 0,
-				NULL)) {
+	எனில் (write_index_as_மரம்(&info->w_மரம், &istate, stash_index_path.buf, 0,
+				வெற்று)) {
 		ret = -1;
-		goto done;
+		செல் done;
 	}
 
 done:
@@ -1452,335 +1452,335 @@ done:
 	release_revisions(&rev);
 	strbuf_release(&diff_output);
 	remove_path(stash_index_path.buf);
-	return ret;
+	திரும்பு ret;
 }
 
-static int do_create_stash(const struct pathspec *ps, struct strbuf *stash_msg_buf,
-			   int include_untracked, int patch_mode,
-			   struct interactive_options *interactive_opts,
-			   int only_staged, struct stash_info *info, struct strbuf *patch,
-			   int quiet)
+நிலையான முழு do_create_stash(மாறிலி கட்டமைப்பு pathspec *ps, கட்டமைப்பு strbuf *stash_செய்தி_buf,
+			   முழு include_untracked, முழு patch_mode,
+			   கட்டமைப்பு interactive_options *interactive_opts,
+			   முழு only_staged, கட்டமைப்பு stash_info *info, கட்டமைப்பு strbuf *patch,
+			   முழு quiet)
 {
-	int ret = 0;
-	int flags = 0;
-	int untracked_commit_option = 0;
-	const char *head_short_sha1 = NULL;
-	const char *branch_ref = NULL;
-	const char *branch_name = "(no branch)";
-	char *branch_name_buf = NULL;
-	struct commit *head_commit = NULL;
-	struct commit_list *parents = NULL;
-	struct strbuf msg = STRBUF_INIT;
-	struct strbuf commit_tree_label = STRBUF_INIT;
-	struct strbuf untracked_files = STRBUF_INIT;
+	முழு ret = 0;
+	முழு flags = 0;
+	முழு untracked_commit_option = 0;
+	மாறிலி எழுத்து *head_short_sha1 = வெற்று;
+	மாறிலி எழுத்து *branch_ref = வெற்று;
+	மாறிலி எழுத்து *branch_name = "(no branch)";
+	எழுத்து *branch_name_buf = வெற்று;
+	கட்டமைப்பு commit *head_commit = வெற்று;
+	கட்டமைப்பு commit_list *parents = வெற்று;
+	கட்டமைப்பு strbuf செய்தி = STRBUF_INIT;
+	கட்டமைப்பு strbuf commit_மரம்_label = STRBUF_INIT;
+	கட்டமைப்பு strbuf untracked_files = STRBUF_INIT;
 
 	prepare_fallback_ident("git stash", "git@stash");
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
-					 NULL, NULL, NULL) < 0) {
+	repo_read_index_preload(the_repository, வெற்று, 0);
+	எனில் (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
+					 வெற்று, வெற்று, வெற்று) < 0) {
 		ret = error(_("could not write index"));
-		goto done;
+		செல் done;
 	}
 
-	if (repo_get_oid(the_repository, "HEAD", &info->b_commit)) {
-		if (!quiet)
+	எனில் (repo_get_oid(the_repository, "HEAD", &info->b_commit)) {
+		எனில் (!quiet)
 			fprintf_ln(stderr, _("You do not have "
 					     "the initial commit yet"));
 		ret = -1;
-		goto done;
-	} else {
+		செல் done;
+	} இல்லையெனில் {
 		head_commit = lookup_commit(the_repository, &info->b_commit);
 	}
 
-	if (!check_changes(ps, include_untracked, &untracked_files)) {
+	எனில் (!check_changes(ps, include_untracked, &untracked_files)) {
 		ret = 1;
-		goto done;
+		செல் done;
 	}
 
 	branch_ref = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
-					     "HEAD", 0, NULL, &flags);
+					     "HEAD", 0, வெற்று, &flags);
 
-	if (flags & REF_ISSYMREF) {
-		if (skip_prefix(branch_ref, "refs/heads/", &branch_name))
+	எனில் (flags & REF_ISSYMREF) {
+		எனில் (skip_prefix(branch_ref, "refs/heads/", &branch_name))
 			branch_name = branch_name_buf = xstrdup(branch_name);
 	}
 
 	head_short_sha1 = repo_find_unique_abbrev(the_repository,
 						  &head_commit->object.oid,
 						  DEFAULT_ABBREV);
-	strbuf_addf(&msg, "%s: %s ", branch_name, head_short_sha1);
-	pp_commit_easy(CMIT_FMT_ONELINE, head_commit, &msg);
+	strbuf_addf(&செய்தி, "%s: %s ", branch_name, head_short_sha1);
+	pp_commit_easy(CMIT_FMT_ONELINE, head_commit, &செய்தி);
 
-	strbuf_addf(&commit_tree_label, "index on %s\n", msg.buf);
-	commit_list_insert(head_commit, &parents);
-	if (write_index_as_tree(&info->i_tree, the_repository->index,
-				repo_get_index_file(the_repository), 0, NULL) ||
-	    commit_tree(commit_tree_label.buf, commit_tree_label.len,
-			&info->i_tree, parents, &info->i_commit, NULL, NULL)) {
-		if (!quiet)
+	strbuf_addf(&commit_மரம்_label, "index on %s\n", செய்தி.buf);
+	commit_list_செருகு(head_commit, &parents);
+	எனில் (write_index_as_மரம்(&info->i_மரம், the_repository->index,
+				repo_get_index_file(the_repository), 0, வெற்று) ||
+	    commit_மரம்(commit_மரம்_label.buf, commit_மரம்_label.len,
+			&info->i_மரம், parents, &info->i_commit, வெற்று, வெற்று)) {
+		எனில் (!quiet)
 			fprintf_ln(stderr, _("Cannot save the current "
 					     "index state"));
 		ret = -1;
-		goto done;
+		செல் done;
 	}
 
 	commit_list_free(parents);
-	parents = NULL;
+	parents = வெற்று;
 
-	if (include_untracked) {
-		if (save_untracked_files(info, &msg, &untracked_files)) {
-			if (!quiet)
+	எனில் (include_untracked) {
+		எனில் (save_untracked_files(info, &செய்தி, &untracked_files)) {
+			எனில் (!quiet)
 				fprintf_ln(stderr, _("Cannot save "
 						     "the untracked files"));
 			ret = -1;
-			goto done;
+			செல் done;
 		}
 		untracked_commit_option = 1;
 	}
-	if (patch_mode) {
+	எனில் (patch_mode) {
 		ret = stash_patch(info, ps, patch, quiet, interactive_opts);
-		if (ret < 0) {
-			if (!quiet)
+		எனில் (ret < 0) {
+			எனில் (!quiet)
 				fprintf_ln(stderr, _("Cannot save the current "
 						     "worktree state"));
-			goto done;
-		} else if (ret > 0) {
-			goto done;
+			செல் done;
+		} இல்லையெனில் எனில் (ret > 0) {
+			செல் done;
 		}
-	} else if (only_staged) {
+	} இல்லையெனில் எனில் (only_staged) {
 		ret = stash_staged(info, patch, quiet);
-		if (ret < 0) {
-			if (!quiet)
+		எனில் (ret < 0) {
+			எனில் (!quiet)
 				fprintf_ln(stderr, _("Cannot save the current "
 						     "staged state"));
-			goto done;
-		} else if (ret > 0) {
-			goto done;
+			செல் done;
+		} இல்லையெனில் எனில் (ret > 0) {
+			செல் done;
 		}
-	} else {
-		if (stash_working_tree(info, ps)) {
-			if (!quiet)
+	} இல்லையெனில் {
+		எனில் (stash_working_மரம்(info, ps)) {
+			எனில் (!quiet)
 				fprintf_ln(stderr, _("Cannot save the current "
 						     "worktree state"));
 			ret = -1;
-			goto done;
+			செல் done;
 		}
 	}
 
-	if (!stash_msg_buf->len)
-		strbuf_addf(stash_msg_buf, "WIP on %s", msg.buf);
-	else
-		strbuf_insertf(stash_msg_buf, 0, "On %s: ", branch_name);
+	எனில் (!stash_செய்தி_buf->len)
+		strbuf_addf(stash_செய்தி_buf, "WIP on %s", செய்தி.buf);
+	இல்லையெனில்
+		strbuf_insertf(stash_செய்தி_buf, 0, "On %s: ", branch_name);
 
-	if (untracked_commit_option)
-		commit_list_insert(lookup_commit(the_repository,
+	எனில் (untracked_commit_option)
+		commit_list_செருகு(lookup_commit(the_repository,
 						 &info->u_commit),
 				   &parents);
-	commit_list_insert(lookup_commit(the_repository, &info->i_commit),
+	commit_list_செருகு(lookup_commit(the_repository, &info->i_commit),
 			   &parents);
-	commit_list_insert(head_commit, &parents);
+	commit_list_செருகு(head_commit, &parents);
 
-	if (commit_tree(stash_msg_buf->buf, stash_msg_buf->len, &info->w_tree,
-			parents, &info->w_commit, NULL, NULL)) {
-		if (!quiet)
+	எனில் (commit_மரம்(stash_செய்தி_buf->buf, stash_செய்தி_buf->len, &info->w_மரம்,
+			parents, &info->w_commit, வெற்று, வெற்று)) {
+		எனில் (!quiet)
 			fprintf_ln(stderr, _("Cannot record "
 					     "working tree state"));
 		ret = -1;
-		goto done;
+		செல் done;
 	}
 
 done:
-	strbuf_release(&commit_tree_label);
-	strbuf_release(&msg);
+	strbuf_release(&commit_மரம்_label);
+	strbuf_release(&செய்தி);
 	strbuf_release(&untracked_files);
 	commit_list_free(parents);
-	free(branch_name_buf);
-	return ret;
+	விடுவி(branch_name_buf);
+	திரும்பு ret;
 }
 
-static int create_stash(int argc, const char **argv, const char *prefix UNUSED,
-			struct repository *repo UNUSED)
+நிலையான முழு create_stash(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix UNUSED,
+			கட்டமைப்பு repository *repo UNUSED)
 {
-	int ret;
-	struct strbuf stash_msg_buf = STRBUF_INIT;
-	struct stash_info info = STASH_INFO_INIT;
-	struct pathspec ps;
+	முழு ret;
+	கட்டமைப்பு strbuf stash_செய்தி_buf = STRBUF_INIT;
+	கட்டமைப்பு stash_info info = STASH_INFO_INIT;
+	கட்டமைப்பு pathspec ps;
 
 	/* Starting with argv[1], since argv[0] is "create" */
-	strbuf_join_argv(&stash_msg_buf, argc - 1, ++argv, ' ');
+	strbuf_join_argv(&stash_செய்தி_buf, argc - 1, ++argv, ' ');
 
-	memset(&ps, 0, sizeof(ps));
-	if (!check_changes_tracked_files(&ps))
-		return 0;
+	memset(&ps, 0, அளவு(ps));
+	எனில் (!check_changes_tracked_files(&ps))
+		திரும்பு 0;
 
-	ret = do_create_stash(&ps, &stash_msg_buf, 0, 0, NULL, 0, &info,
-			      NULL, 0);
-	if (!ret)
+	ret = do_create_stash(&ps, &stash_செய்தி_buf, 0, 0, வெற்று, 0, &info,
+			      வெற்று, 0);
+	எனில் (!ret)
 		printf_ln("%s", oid_to_hex(&info.w_commit));
 
 	free_stash_info(&info);
-	strbuf_release(&stash_msg_buf);
-	return ret;
+	strbuf_release(&stash_செய்தி_buf);
+	திரும்பு ret;
 }
 
-static int do_push_stash(const struct pathspec *ps, const char *stash_msg, int quiet,
-			 int keep_index, int patch_mode,
-			 struct interactive_options *interactive_opts,
-			 int include_untracked, int only_staged)
+நிலையான முழு do_தள்ளு_stash(மாறிலி கட்டமைப்பு pathspec *ps, மாறிலி எழுத்து *stash_செய்தி, முழு quiet,
+			 முழு keep_index, முழு patch_mode,
+			 கட்டமைப்பு interactive_options *interactive_opts,
+			 முழு include_untracked, முழு only_staged)
 {
-	int ret = 0;
-	struct stash_info info = STASH_INFO_INIT;
-	struct strbuf patch = STRBUF_INIT;
-	struct strbuf stash_msg_buf = STRBUF_INIT;
-	struct strbuf untracked_files = STRBUF_INIT;
-	struct strbuf out = STRBUF_INIT;
+	முழு ret = 0;
+	கட்டமைப்பு stash_info info = STASH_INFO_INIT;
+	கட்டமைப்பு strbuf patch = STRBUF_INIT;
+	கட்டமைப்பு strbuf stash_செய்தி_buf = STRBUF_INIT;
+	கட்டமைப்பு strbuf untracked_files = STRBUF_INIT;
+	கட்டமைப்பு strbuf out = STRBUF_INIT;
 
-	if (patch_mode && keep_index == -1)
+	எனில் (patch_mode && keep_index == -1)
 		keep_index = 1;
 
-	if (patch_mode && include_untracked) {
+	எனில் (patch_mode && include_untracked) {
 		fprintf_ln(stderr, _("Can't use --patch and --include-untracked"
 				     " or --all at the same time"));
 		ret = -1;
-		goto done;
+		செல் done;
 	}
 
 	/* --patch overrides --staged */
-	if (patch_mode)
+	எனில் (patch_mode)
 		only_staged = 0;
 
-	if (only_staged && include_untracked) {
+	எனில் (only_staged && include_untracked) {
 		fprintf_ln(stderr, _("Can't use --staged and --include-untracked"
 				     " or --all at the same time"));
 		ret = -1;
-		goto done;
+		செல் done;
 	}
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (!include_untracked && ps->nr) {
-		char *ps_matched = xcalloc(ps->nr, 1);
+	repo_read_index_preload(the_repository, வெற்று, 0);
+	எனில் (!include_untracked && ps->nr) {
+		எழுத்து *ps_matched = xcalloc(ps->nr, 1);
 
-		if (pathspec_needs_expanded_index(the_repository->index, ps))
+		எனில் (pathspec_needs_expanded_index(the_repository->index, ps))
 			ensure_full_index(the_repository->index);
-		for (size_t i = 0; i < the_repository->index->cache_nr; i++)
+		க்கு (size_t i = 0; i < the_repository->index->cache_nr; i++)
 			ce_path_match(the_repository->index, the_repository->index->cache[i], ps,
 				      ps_matched);
 
-		if (report_path_error(ps_matched, ps)) {
+		எனில் (report_path_error(ps_matched, ps)) {
 			fprintf_ln(stderr, _("Did you forget to 'git add'?"));
 			ret = -1;
-			free(ps_matched);
-			goto done;
+			விடுவி(ps_matched);
+			செல் done;
 		}
-		free(ps_matched);
+		விடுவி(ps_matched);
 	}
 
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
-					 NULL, NULL, NULL)) {
+	எனில் (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
+					 வெற்று, வெற்று, வெற்று)) {
 		ret = error(_("could not write index"));
-		goto done;
+		செல் done;
 	}
 
-	if (!check_changes(ps, include_untracked, &untracked_files)) {
-		if (!quiet)
+	எனில் (!check_changes(ps, include_untracked, &untracked_files)) {
+		எனில் (!quiet)
 			printf_ln(_("No local changes to save"));
-		goto done;
+		செல் done;
 	}
 
-	if (!refs_reflog_exists(get_main_ref_store(the_repository), ref_stash) && do_clear_stash()) {
+	எனில் (!refs_reflog_exists(get_main_ref_store(the_repository), ref_stash) && do_clear_stash()) {
 		ret = -1;
-		if (!quiet)
+		எனில் (!quiet)
 			fprintf_ln(stderr, _("Cannot initialize stash"));
-		goto done;
+		செல் done;
 	}
 
-	if (stash_msg)
-		strbuf_addstr(&stash_msg_buf, stash_msg);
-	if (do_create_stash(ps, &stash_msg_buf, include_untracked, patch_mode,
+	எனில் (stash_செய்தி)
+		strbuf_addstr(&stash_செய்தி_buf, stash_செய்தி);
+	எனில் (do_create_stash(ps, &stash_செய்தி_buf, include_untracked, patch_mode,
 			    interactive_opts, only_staged, &info, &patch, quiet)) {
 		ret = -1;
-		goto done;
+		செல் done;
 	}
 
-	if (do_store_stash(&info.w_commit, stash_msg_buf.buf, 1)) {
+	எனில் (do_store_stash(&info.w_commit, stash_செய்தி_buf.buf, 1)) {
 		ret = -1;
-		if (!quiet)
+		எனில் (!quiet)
 			fprintf_ln(stderr, _("Cannot save the current status"));
-		goto done;
+		செல் done;
 	}
 
-	if (!quiet)
+	எனில் (!quiet)
 		printf_ln(_("Saved working directory and index state %s"),
-			  stash_msg_buf.buf);
+			  stash_செய்தி_buf.buf);
 
-	if (!(patch_mode || only_staged)) {
-		if (include_untracked && !ps->nr) {
-			struct child_process cp = CHILD_PROCESS_INIT;
+	எனில் (!(patch_mode || only_staged)) {
+		எனில் (include_untracked && !ps->nr) {
+			கட்டமைப்பு child_process cp = CHILD_PROCESS_INIT;
 
 			cp.git_cmd = 1;
-			if (startup_info->original_cwd) {
+			எனில் (startup_info->original_cwd) {
 				cp.dir = startup_info->original_cwd;
 				strvec_pushf(&cp.env, "%s=%s",
-					     GIT_WORK_TREE_ENVIRONMENT,
+					     GIT_WORK_மரம்_ENVIRONMENT,
 					     the_repository->worktree);
 			}
 			strvec_pushl(&cp.args, "clean", "--force",
-				     "--quiet", "-d", ":/", NULL);
-			if (include_untracked == INCLUDE_ALL_FILES)
-				strvec_push(&cp.args, "-x");
-			if (run_command(&cp)) {
+				     "--quiet", "-d", ":/", வெற்று);
+			எனில் (include_untracked == INCLUDE_ALL_FILES)
+				strvec_தள்ளு(&cp.args, "-x");
+			எனில் (run_command(&cp)) {
 				ret = -1;
-				goto done;
+				செல் done;
 			}
 		}
 		discard_index(the_repository->index);
-		if (ps->nr) {
-			struct child_process cp_add = CHILD_PROCESS_INIT;
-			struct child_process cp_diff = CHILD_PROCESS_INIT;
-			struct child_process cp_apply = CHILD_PROCESS_INIT;
+		எனில் (ps->nr) {
+			கட்டமைப்பு child_process cp_add = CHILD_PROCESS_INIT;
+			கட்டமைப்பு child_process cp_diff = CHILD_PROCESS_INIT;
+			கட்டமைப்பு child_process cp_apply = CHILD_PROCESS_INIT;
 
 			cp_add.git_cmd = 1;
-			strvec_push(&cp_add.args, "add");
-			if (!include_untracked)
-				strvec_push(&cp_add.args, "-u");
-			if (include_untracked == INCLUDE_ALL_FILES)
-				strvec_push(&cp_add.args, "--force");
-			strvec_push(&cp_add.args, "--");
+			strvec_தள்ளு(&cp_add.args, "add");
+			எனில் (!include_untracked)
+				strvec_தள்ளு(&cp_add.args, "-u");
+			எனில் (include_untracked == INCLUDE_ALL_FILES)
+				strvec_தள்ளு(&cp_add.args, "--force");
+			strvec_தள்ளு(&cp_add.args, "--");
 			add_pathspecs(&cp_add.args, ps);
-			if (run_command(&cp_add)) {
+			எனில் (run_command(&cp_add)) {
 				ret = -1;
-				goto done;
+				செல் done;
 			}
 
 			cp_diff.git_cmd = 1;
 			strvec_pushl(&cp_diff.args, "diff-index", "-p",
 				     "--no-color",
 				     "--cached", "--binary", "HEAD", "--",
-				     NULL);
+				     வெற்று);
 			add_pathspecs(&cp_diff.args, ps);
-			if (pipe_command(&cp_diff, NULL, 0, &out, 0, NULL, 0)) {
+			எனில் (pipe_command(&cp_diff, வெற்று, 0, &out, 0, வெற்று, 0)) {
 				ret = -1;
-				goto done;
+				செல் done;
 			}
 
 			cp_apply.git_cmd = 1;
 			strvec_pushl(&cp_apply.args, "apply", "--index",
-				     "-R", NULL);
-			if (pipe_command(&cp_apply, out.buf, out.len, NULL, 0,
-					 NULL, 0)) {
+				     "-R", வெற்று);
+			எனில் (pipe_command(&cp_apply, out.buf, out.len, வெற்று, 0,
+					 வெற்று, 0)) {
 				ret = -1;
-				goto done;
+				செல் done;
 			}
-		} else {
-			struct child_process cp = CHILD_PROCESS_INIT;
+		} இல்லையெனில் {
+			கட்டமைப்பு child_process cp = CHILD_PROCESS_INIT;
 			cp.git_cmd = 1;
 			/* BUG: this nukes untracked files in the way */
 			strvec_pushl(&cp.args, "reset", "--hard", "-q",
-				     "--no-recurse-submodules", NULL);
-			if (run_command(&cp)) {
+				     "--no-recurse-submodules", வெற்று);
+			எனில் (run_command(&cp)) {
 				ret = -1;
-				goto done;
+				செல் done;
 			}
 		}
 
@@ -1804,76 +1804,76 @@ static int do_push_stash(const struct pathspec *ps, const char *stash_msg, int q
 		 * because running it on an empty tree will cause it to fail
 		 * due to the pathspec not matching anything.
 		 */
-		if (keep_index == 1 && !is_null_oid(&info.i_tree) &&
-		    !is_empty_tree_oid(&info.i_tree, the_repository->hash_algo)) {
-			struct child_process cp = CHILD_PROCESS_INIT;
+		எனில் (keep_index == 1 && !is_null_oid(&info.i_மரம்) &&
+		    !is_empty_மரம்_oid(&info.i_மரம், the_repository->hash_algo)) {
+			கட்டமைப்பு child_process cp = CHILD_PROCESS_INIT;
 
 			cp.git_cmd = 1;
 			strvec_pushl(&cp.args, "checkout", "--no-overlay",
-				     oid_to_hex(&info.i_tree), "--", NULL);
-			if (!ps->nr)
-				strvec_push(&cp.args, ":/");
-			else
+				     oid_to_hex(&info.i_மரம்), "--", வெற்று);
+			எனில் (!ps->nr)
+				strvec_தள்ளு(&cp.args, ":/");
+			இல்லையெனில்
 				add_pathspecs(&cp.args, ps);
-			if (run_command(&cp)) {
+			எனில் (run_command(&cp)) {
 				ret = -1;
-				goto done;
+				செல் done;
 			}
 		}
-		goto done;
-	} else {
-		struct child_process cp = CHILD_PROCESS_INIT;
+		செல் done;
+	} இல்லையெனில் {
+		கட்டமைப்பு child_process cp = CHILD_PROCESS_INIT;
 
 		cp.git_cmd = 1;
-		strvec_pushl(&cp.args, "apply", "-R", NULL);
+		strvec_pushl(&cp.args, "apply", "-R", வெற்று);
 
-		if (pipe_command(&cp, patch.buf, patch.len, NULL, 0, NULL, 0)) {
-			if (!quiet)
+		எனில் (pipe_command(&cp, patch.buf, patch.len, வெற்று, 0, வெற்று, 0)) {
+			எனில் (!quiet)
 				fprintf_ln(stderr, _("Cannot remove "
 						     "worktree changes"));
 			ret = -1;
-			goto done;
+			செல் done;
 		}
 
-		if (keep_index < 1) {
-			struct child_process cp = CHILD_PROCESS_INIT;
+		எனில் (keep_index < 1) {
+			கட்டமைப்பு child_process cp = CHILD_PROCESS_INIT;
 
 			cp.git_cmd = 1;
 			strvec_pushl(&cp.args, "reset", "-q", "--refresh", "--",
-				     NULL);
+				     வெற்று);
 			add_pathspecs(&cp.args, ps);
-			if (run_command(&cp)) {
+			எனில் (run_command(&cp)) {
 				ret = -1;
-				goto done;
+				செல் done;
 			}
 		}
-		goto done;
+		செல் done;
 	}
 
 done:
 	strbuf_release(&patch);
 	strbuf_release(&out);
 	free_stash_info(&info);
-	strbuf_release(&stash_msg_buf);
+	strbuf_release(&stash_செய்தி_buf);
 	strbuf_release(&untracked_files);
-	return ret;
+	திரும்பு ret;
 }
 
-static int push_stash(int argc, const char **argv, const char *prefix,
-		      int push_assumed)
+நிலையான முழு தள்ளு_stash(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+		      முழு தள்ளு_assumed)
 {
-	int force_assume = 0;
-	int keep_index = -1;
-	int only_staged = 0;
-	int patch_mode = 0;
-	int include_untracked = 0;
-	int quiet = 0;
-	int pathspec_file_nul = 0;
-	const char *stash_msg = NULL;
-	char *pathspec_from_file = NULL;
-	struct pathspec ps;
-	struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-	struct option options[] = {
+	முழு force_assume = 0;
+	முழு keep_index = -1;
+	முழு only_staged = 0;
+	முழு patch_mode = 0;
+	முழு include_untracked = 0;
+	முழு quiet = 0;
+	முழு pathspec_file_nul = 0;
+	மாறிலி எழுத்து *stash_செய்தி = வெற்று;
+	எழுத்து *pathspec_from_file = வெற்று;
+	கட்டமைப்பு pathspec ps;
+	கட்டமைப்பு interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+	கட்டமைப்பு option options[] = {
 		OPT_BOOL('k', "keep-index", &keep_index,
 			 N_("keep index")),
 		OPT_BOOL('S', "staged", &only_staged,
@@ -1889,31 +1889,31 @@ static int push_stash(int argc, const char **argv, const char *prefix,
 			 N_("include untracked files in stash")),
 		OPT_SET_INT('a', "all", &include_untracked,
 			    N_("include ignore files"), INCLUDE_ALL_FILES),
-		OPT_STRING('m', "message", &stash_msg, N_("message"),
+		OPT_STRING('m', "message", &stash_செய்தி, N_("message"),
 			   N_("stash message")),
 		OPT_PATHSPEC_FROM_FILE(&pathspec_from_file),
 		OPT_PATHSPEC_FILE_NUL(&pathspec_file_nul),
 		OPT_END()
 	};
-	int ret;
+	முழு ret;
 
-	if (argc) {
-		int flags = PARSE_OPT_KEEP_DASHDASH;
+	எனில் (argc) {
+		முழு flags = PARSE_OPT_KEEP_DASHDASH;
 
-		if (push_assumed)
+		எனில் (தள்ளு_assumed)
 			flags |= PARSE_OPT_STOP_AT_NON_OPTION;
 
 		argc = parse_options(argc, argv, prefix, options,
-				     push_assumed ? git_stash_usage :
-				     git_stash_push_usage, flags);
+				     தள்ளு_assumed ? git_stash_usage :
+				     git_stash_தள்ளு_usage, flags);
 		force_assume |= patch_mode;
 	}
 
-	if (argc) {
-		if (!strcmp(argv[0], "--")) {
+	எனில் (argc) {
+		எனில் (!strcmp(argv[0], "--")) {
 			argc--;
 			argv++;
-		} else if (push_assumed && !force_assume) {
+		} இல்லையெனில் எனில் (தள்ளு_assumed && !force_assume) {
 			die("subcommand wasn't specified; 'push' can't be assumed due to unexpected token '%s'",
 			    argv[0]);
 		}
@@ -1922,65 +1922,65 @@ static int push_stash(int argc, const char **argv, const char *prefix,
 	parse_pathspec(&ps, 0, PATHSPEC_PREFER_FULL | PATHSPEC_PREFIX_ORIGIN,
 		       prefix, argv);
 
-	if (pathspec_from_file) {
-		if (patch_mode)
+	எனில் (pathspec_from_file) {
+		எனில் (patch_mode)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--patch");
 
-		if (only_staged)
+		எனில் (only_staged)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--staged");
 
-		if (ps.nr)
+		எனில் (ps.nr)
 			die(_("'%s' and pathspec arguments cannot be used together"), "--pathspec-from-file");
 
 		parse_pathspec_file(&ps, 0,
 				    PATHSPEC_PREFER_FULL | PATHSPEC_PREFIX_ORIGIN,
 				    prefix, pathspec_from_file, pathspec_file_nul);
-	} else if (pathspec_file_nul) {
+	} இல்லையெனில் எனில் (pathspec_file_nul) {
 		die(_("the option '%s' requires '%s'"), "--pathspec-file-nul", "--pathspec-from-file");
 	}
 
-	if (!patch_mode) {
-		if (interactive_opts.context != -1)
+	எனில் (!patch_mode) {
+		எனில் (interactive_opts.context != -1)
 			die(_("the option '%s' requires '%s'"), "--unified", "--patch");
-		if (interactive_opts.interhunkcontext != -1)
+		எனில் (interactive_opts.interhunkcontext != -1)
 			die(_("the option '%s' requires '%s'"), "--inter-hunk-context", "--patch");
-		if (!interactive_opts.auto_advance)
+		எனில் (!interactive_opts.auto_advance)
 			die(_("the option '%s' requires '%s'"), "--no-auto-advance", "--patch");
 	}
 
-	if (interactive_opts.context < -1)
+	எனில் (interactive_opts.context < -1)
 		die(_("'%s' cannot be negative"), "--unified");
-	if (interactive_opts.interhunkcontext < -1)
+	எனில் (interactive_opts.interhunkcontext < -1)
 		die(_("'%s' cannot be negative"), "--inter-hunk-context");
 
-	ret = do_push_stash(&ps, stash_msg, quiet, keep_index, patch_mode,
+	ret = do_தள்ளு_stash(&ps, stash_செய்தி, quiet, keep_index, patch_mode,
 			    &interactive_opts, include_untracked, only_staged);
 
 	clear_pathspec(&ps);
-	free(pathspec_from_file);
-	return ret;
+	விடுவி(pathspec_from_file);
+	திரும்பு ret;
 }
 
-static int push_stash_unassumed(int argc, const char **argv, const char *prefix,
-				struct repository *repo UNUSED)
+நிலையான முழு தள்ளு_stash_unassumed(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+				கட்டமைப்பு repository *repo UNUSED)
 {
-	return push_stash(argc, argv, prefix, 0);
+	திரும்பு தள்ளு_stash(argc, argv, prefix, 0);
 }
 
-static int save_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+நிலையான முழு save_stash(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+		      கட்டமைப்பு repository *repo UNUSED)
 {
-	int keep_index = -1;
-	int only_staged = 0;
-	int patch_mode = 0;
-	int include_untracked = 0;
-	int quiet = 0;
-	int ret = 0;
-	const char *stash_msg = NULL;
-	struct pathspec ps;
-	struct strbuf stash_msg_buf = STRBUF_INIT;
-	struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-	struct option options[] = {
+	முழு keep_index = -1;
+	முழு only_staged = 0;
+	முழு patch_mode = 0;
+	முழு include_untracked = 0;
+	முழு quiet = 0;
+	முழு ret = 0;
+	மாறிலி எழுத்து *stash_செய்தி = வெற்று;
+	கட்டமைப்பு pathspec ps;
+	கட்டமைப்பு strbuf stash_செய்தி_buf = STRBUF_INIT;
+	கட்டமைப்பு interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+	கட்டமைப்பு option options[] = {
 		OPT_BOOL('k', "keep-index", &keep_index,
 			 N_("keep index")),
 		OPT_BOOL('S', "staged", &only_staged,
@@ -1996,7 +1996,7 @@ static int save_stash(int argc, const char **argv, const char *prefix,
 			 N_("include untracked files in stash")),
 		OPT_SET_INT('a', "all", &include_untracked,
 			    N_("include ignore files"), INCLUDE_ALL_FILES),
-		OPT_STRING('m', "message", &stash_msg, "message",
+		OPT_STRING('m', "message", &stash_செய்தி, "message",
 			   N_("stash message")),
 		OPT_END()
 	};
@@ -2005,132 +2005,132 @@ static int save_stash(int argc, const char **argv, const char *prefix,
 			     git_stash_save_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (argc)
-		stash_msg = strbuf_join_argv(&stash_msg_buf, argc, argv, ' ');
+	எனில் (argc)
+		stash_செய்தி = strbuf_join_argv(&stash_செய்தி_buf, argc, argv, ' ');
 
-	memset(&ps, 0, sizeof(ps));
+	memset(&ps, 0, அளவு(ps));
 
-	if (interactive_opts.context < -1)
+	எனில் (interactive_opts.context < -1)
 		die(_("'%s' cannot be negative"), "--unified");
-	if (interactive_opts.interhunkcontext < -1)
+	எனில் (interactive_opts.interhunkcontext < -1)
 		die(_("'%s' cannot be negative"), "--inter-hunk-context");
 
-	if (!patch_mode) {
-		if (interactive_opts.context != -1)
+	எனில் (!patch_mode) {
+		எனில் (interactive_opts.context != -1)
 			die(_("the option '%s' requires '%s'"), "--unified", "--patch");
-		if (interactive_opts.interhunkcontext != -1)
+		எனில் (interactive_opts.interhunkcontext != -1)
 			die(_("the option '%s' requires '%s'"), "--inter-hunk-context", "--patch");
-		if (!interactive_opts.auto_advance)
+		எனில் (!interactive_opts.auto_advance)
 			die(_("the option '%s' requires '%s'"), "--no-auto-advance", "--patch");
 	}
 
-	ret = do_push_stash(&ps, stash_msg, quiet, keep_index,
+	ret = do_தள்ளு_stash(&ps, stash_செய்தி, quiet, keep_index,
 			    patch_mode, &interactive_opts, include_untracked,
 			    only_staged);
 
-	strbuf_release(&stash_msg_buf);
-	return ret;
+	strbuf_release(&stash_செய்தி_buf);
+	திரும்பு ret;
 }
 
-static int write_commit_with_parents(struct repository *r,
-				     struct object_id *out,
-				     const struct object_id *oid,
-				     struct commit_list *parents)
+நிலையான முழு write_commit_with_parents(கட்டமைப்பு repository *r,
+				     கட்டமைப்பு object_id *out,
+				     மாறிலி கட்டமைப்பு object_id *oid,
+				     கட்டமைப்பு commit_list *parents)
 {
 	size_t author_len, committer_len;
-	struct commit *this;
-	const char *orig_author, *orig_committer;
-	char *author = NULL, *committer = NULL;
-	const char *buffer;
+	கட்டமைப்பு commit *this;
+	மாறிலி எழுத்து *orig_author, *orig_committer;
+	எழுத்து *author = வெற்று, *committer = வெற்று;
+	மாறிலி எழுத்து *buffer;
 	unsigned long bufsize;
-	const char *p;
-	struct strbuf msg = STRBUF_INIT;
-	int ret = 0;
-	struct ident_split id;
+	மாறிலி எழுத்து *p;
+	கட்டமைப்பு strbuf செய்தி = STRBUF_INIT;
+	முழு ret = 0;
+	கட்டமைப்பு ident_split id;
 
 	this = lookup_commit_reference(r, oid);
 	buffer = repo_get_commit_buffer(r, this, &bufsize);
 	orig_author = find_commit_header(buffer, "author", &author_len);
 	orig_committer = find_commit_header(buffer, "committer", &committer_len);
 
-	if (!orig_author || !orig_committer) {
+	எனில் (!orig_author || !orig_committer) {
 		ret = error(_("cannot parse commit %s"), oid_to_hex(oid));
-		goto out;
+		செல் out;
 	}
 
-	if (split_ident_line(&id, orig_author, author_len) < 0 ||
-	    split_ident_line(&id, orig_committer, committer_len) < 0) {
+	எனில் (split_ident_வரி(&id, orig_author, author_len) < 0 ||
+	    split_ident_வரி(&id, orig_committer, committer_len) < 0) {
 		ret = error(_("invalid author or committer for %s"), oid_to_hex(oid));
-		goto out;
+		செல் out;
 	}
 
 	p = strstr(buffer, "\n\n");
-	strbuf_addstr(&msg, "git stash: ");
+	strbuf_addstr(&செய்தி, "git stash: ");
 
-	if (p)
-		strbuf_add(&msg, p + 2, bufsize - (p + 2 - buffer));
-	strbuf_complete_line(&msg);
+	எனில் (p)
+		strbuf_add(&செய்தி, p + 2, bufsize - (p + 2 - buffer));
+	strbuf_complete_வரி(&செய்தி);
 
 	author = xmemdupz(orig_author, author_len);
 	committer = xmemdupz(orig_committer, committer_len);
 
-	if (commit_tree_extended(msg.buf, msg.len,
-				 r->hash_algo->empty_tree, parents,
+	எனில் (commit_மரம்_extended(செய்தி.buf, செய்தி.len,
+				 r->hash_algo->empty_மரம், parents,
 				 out, author, committer,
-				 NULL, NULL)) {
+				 வெற்று, வெற்று)) {
 		ret = error(_("could not write commit"));
-		goto out;
+		செல் out;
 	}
 out:
-	strbuf_release(&msg);
+	strbuf_release(&செய்தி);
 	repo_unuse_commit_buffer(r, this, buffer);
-	free(author);
-	free(committer);
-	return ret;
+	விடுவி(author);
+	விடுவி(committer);
+	திரும்பு ret;
 }
 
-static int do_import_stash(struct repository *r, const char *rev)
+நிலையான முழு do_import_stash(கட்டமைப்பு repository *r, மாறிலி எழுத்து *rev)
 {
-	struct object_id chain;
-	int res = 0;
-	const char *buffer = NULL;
+	கட்டமைப்பு object_id chain;
+	முழு res = 0;
+	மாறிலி எழுத்து *buffer = வெற்று;
 	unsigned long bufsize;
-	struct commit *this = NULL;
-	struct commit_list *items = NULL, *cur;
-	char *msg = NULL;
+	கட்டமைப்பு commit *this = வெற்று;
+	கட்டமைப்பு commit_list *பொருட்கள் = வெற்று, *cur;
+	எழுத்து *செய்தி = வெற்று;
 
-	if (repo_get_oid(r, rev, &chain))
-		return error(_("not a valid revision: %s"), rev);
+	எனில் (repo_get_oid(r, rev, &chain))
+		திரும்பு error(_("not a valid revision: %s"), rev);
 
 	this = lookup_commit_reference(r, &chain);
-	if (!this)
-		return error(_("not a commit: %s"), rev);
+	எனில் (!this)
+		திரும்பு error(_("not a commit: %s"), rev);
 
 	/*
 	 * Walk the commit history, finding each stash entry, and load data into
 	 * the array.
 	 */
-	for (;;) {
-		const char *author, *committer;
+	க்கு (;;) {
+		மாறிலி எழுத்து *author, *committer;
 		size_t author_len, committer_len;
-		const char *p;
-		const char *expected = "git stash <git@stash> 1000684800 +0000";
-		const char *prefix = "git stash: ";
-		struct commit *stash;
-		struct tree *tree = repo_get_commit_tree(r, this);
+		மாறிலி எழுத்து *p;
+		மாறிலி எழுத்து *expected = "git stash <git@stash> 1000684800 +0000";
+		மாறிலி எழுத்து *prefix = "git stash: ";
+		கட்டமைப்பு commit *stash;
+		கட்டமைப்பு மரம் *மரம் = repo_get_commit_மரம்(r, this);
 
-		if (!tree ||
-		    !oideq(&tree->object.oid, r->hash_algo->empty_tree) ||
+		எனில் (!மரம் ||
+		    !oideq(&மரம்->object.oid, r->hash_algo->empty_மரம்) ||
 		    (this->parents &&
 		     (!this->parents->next || this->parents->next->next))) {
 			res = error(_("%s is not a valid exported stash commit"),
 					oid_to_hex(&this->object.oid));
-			goto out;
+			செல் out;
 		}
 
 		buffer = repo_get_commit_buffer(r, this, &bufsize);
 
-		if (!this->parents) {
+		எனில் (!this->parents) {
 			/*
 			 * We don't have any parents.  Make sure this is our
 			 * root commit.
@@ -2138,52 +2138,52 @@ static int do_import_stash(struct repository *r, const char *rev)
 			author = find_commit_header(buffer, "author", &author_len);
 			committer = find_commit_header(buffer, "committer", &committer_len);
 
-			if (!author || !committer) {
+			எனில் (!author || !committer) {
 				error(_("cannot parse commit %s"), oid_to_hex(&this->object.oid));
-				goto out;
+				செல் out;
 			}
 
-			if (author_len != strlen(expected) ||
+			எனில் (author_len != strlen(expected) ||
 			    committer_len != strlen(expected) ||
 			    memcmp(author, expected, author_len) ||
 			    memcmp(committer, expected, committer_len)) {
 				res = error(_("found root commit %s with invalid data"), oid_to_hex(&this->object.oid));
-				goto out;
+				செல் out;
 			}
-			break;
+			நிறுத்து;
 		}
 
 		p = strstr(buffer, "\n\n");
-		if (!p) {
+		எனில் (!p) {
 			res = error(_("cannot parse commit %s"), oid_to_hex(&this->object.oid));
-			goto out;
+			செல் out;
 		}
 
 		p += 2;
-		if (((size_t)(bufsize - (p - buffer)) < strlen(prefix)) ||
+		எனில் (((size_t)(bufsize - (p - buffer)) < strlen(prefix)) ||
 		    memcmp(prefix, p, strlen(prefix))) {
 			res = error(_("found stash commit %s without expected prefix"), oid_to_hex(&this->object.oid));
-			goto out;
+			செல் out;
 		}
 
 		stash = this->parents->next->item;
 
-		if (repo_parse_commit(r, this->parents->item) ||
+		எனில் (repo_parse_commit(r, this->parents->item) ||
 		    repo_parse_commit(r, stash)) {
 			res = error(_("cannot parse parents of commit: %s"),
 					oid_to_hex(&this->object.oid));
-			goto out;
+			செல் out;
 		}
 
-		if (check_stash_topology(r, stash)) {
+		எனில் (check_stash_topology(r, stash)) {
 			res = error(_("%s does not look like a stash commit"),
 					oid_to_hex(&stash->object.oid));
-			goto out;
+			செல் out;
 		}
 
 		repo_unuse_commit_buffer(r, this, buffer);
-		buffer = NULL;
-		items = commit_list_insert(stash, &items);
+		buffer = வெற்று;
+		பொருட்கள் = commit_list_செருகு(stash, &பொருட்கள்);
 		this = this->parents->item;
 	}
 
@@ -2191,48 +2191,48 @@ static int do_import_stash(struct repository *r, const char *rev)
 	 * Now, walk each entry, adding it to the stash as a normal stash
 	 * commit.
 	 */
-	for (cur = items; cur; cur = cur->next) {
-		const char *p;
-		struct object_id *oid;
+	க்கு (cur = பொருட்கள்; cur; cur = cur->next) {
+		மாறிலி எழுத்து *p;
+		கட்டமைப்பு object_id *oid;
 
 		this = cur->item;
 		oid = &this->object.oid;
 		buffer = repo_get_commit_buffer(r, this, &bufsize);
-		if (!buffer) {
+		எனில் (!buffer) {
 			res = error(_("cannot read commit buffer for %s"), oid_to_hex(oid));
-			goto out;
+			செல் out;
 		}
 
 		p = strstr(buffer, "\n\n");
-		if (!p) {
+		எனில் (!p) {
 			res = error(_("cannot parse commit %s"), oid_to_hex(oid));
-			goto out;
+			செல் out;
 		}
 
 		p += 2;
-		msg = xmemdupz(p, bufsize - (p - buffer));
+		செய்தி = xmemdupz(p, bufsize - (p - buffer));
 		repo_unuse_commit_buffer(r, this, buffer);
-		buffer = NULL;
+		buffer = வெற்று;
 
-		if (do_store_stash(oid, msg, 1)) {
+		எனில் (do_store_stash(oid, செய்தி, 1)) {
 			res = error(_("cannot save the stash for %s"), oid_to_hex(oid));
-			goto out;
+			செல் out;
 		}
-		FREE_AND_NULL(msg);
+		FREE_AND_NULL(செய்தி);
 	}
 out:
-	if (this && buffer)
+	எனில் (this && buffer)
 		repo_unuse_commit_buffer(r, this, buffer);
-	commit_list_free(items);
-	free(msg);
+	commit_list_free(பொருட்கள்);
+	விடுவி(செய்தி);
 
-	return res;
+	திரும்பு res;
 }
 
-static int import_stash(int argc, const char **argv, const char *prefix,
-			struct repository *repo)
+நிலையான முழு import_stash(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+			கட்டமைப்பு repository *repo)
 {
-	struct option options[] = {
+	கட்டமைப்பு option options[] = {
 		OPT_END()
 	};
 
@@ -2240,51 +2240,51 @@ static int import_stash(int argc, const char **argv, const char *prefix,
 			     git_stash_import_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (argc != 1)
-		usage_msg_opt("a revision is required", git_stash_import_usage, options);
+	எனில் (argc != 1)
+		usage_செய்தி_opt("a revision is required", git_stash_import_usage, options);
 
-	return do_import_stash(repo, argv[0]);
+	திரும்பு do_import_stash(repo, argv[0]);
 }
 
-struct stash_entry_data {
-	struct repository *r;
-	struct commit_list **items;
-	size_t count;
+கட்டமைப்பு stash_entry_data {
+	கட்டமைப்பு repository *r;
+	கட்டமைப்பு commit_list **பொருட்கள்;
+	size_t மொத்தம்;
 };
 
-static int collect_stash_entries(const char *refname UNUSED,
-				 struct object_id *old_oid UNUSED,
-				 struct object_id *new_oid,
-				 const char *committer UNUSED,
+நிலையான முழு collect_stash_entries(மாறிலி எழுத்து *refname UNUSED,
+				 கட்டமைப்பு object_id *old_oid UNUSED,
+				 கட்டமைப்பு object_id *new_oid,
+				 மாறிலி எழுத்து *committer UNUSED,
 				 timestamp_t timestamp UNUSED,
-				 int tz UNUSED, const char *msg UNUSED,
-				 void *cb_data)
+				 முழு tz UNUSED, மாறிலி எழுத்து *செய்தி UNUSED,
+				 வெறுமை *cb_data)
 {
-	struct stash_entry_data *data = cb_data;
-	struct commit *stash;
+	கட்டமைப்பு stash_entry_data *data = cb_data;
+	கட்டமைப்பு commit *stash;
 
-	data->count++;
+	data->மொத்தம்++;
 	stash = lookup_commit_reference(data->r, new_oid);
-	if (!stash || check_stash_topology(data->r, stash)) {
-		return error(_("%s does not look like a stash commit"),
+	எனில் (!stash || check_stash_topology(data->r, stash)) {
+		திரும்பு error(_("%s does not look like a stash commit"),
 			     oid_to_hex(new_oid));
 	}
-	data->items = commit_list_append(stash, data->items);
-	return 0;
+	data->பொருட்கள் = commit_list_append(stash, data->பொருட்கள்);
+	திரும்பு 0;
 }
 
-static int do_export_stash(struct repository *r,
-			   const char *ref,
-			   int argc,
-			   const char **argv)
+நிலையான முழு do_export_stash(கட்டமைப்பு repository *r,
+			   மாறிலி எழுத்து *ref,
+			   முழு argc,
+			   மாறிலி எழுத்து **argv)
 {
-	struct object_id base;
-	struct commit *prev;
-	struct commit_list *items = NULL, **iter = &items, *cur;
-	int res = 0;
-	int i;
-	struct strbuf revision = STRBUF_INIT;
-	const char *author, *committer;
+	கட்டமைப்பு object_id base;
+	கட்டமைப்பு commit *prev;
+	கட்டமைப்பு commit_list *பொருட்கள் = வெற்று, **iter = &பொருட்கள், *cur;
+	முழு res = 0;
+	முழு i;
+	கட்டமைப்பு strbuf revision = STRBUF_INIT;
+	மாறிலி எழுத்து *author, *committer;
 
 	/*
 	 * This is an arbitrary, fixed date, specifically the one used by git
@@ -2297,49 +2297,49 @@ static int do_export_stash(struct repository *r,
 			      "2001-09-17T00:00:00Z", 0);
 
 	/* First, we create a single empty commit. */
-	if (commit_tree_extended("", 0, r->hash_algo->empty_tree, NULL,
-				 &base, author, committer, NULL, NULL))
-		return error(_("unable to write base commit"));
+	எனில் (commit_மரம்_extended("", 0, r->hash_algo->empty_மரம், வெற்று,
+				 &base, author, committer, வெற்று, வெற்று))
+		திரும்பு error(_("unable to write base commit"));
 
 	prev = lookup_commit_reference(r, &base);
 
-	if (argc) {
+	எனில் (argc) {
 		/*
 		 * Find each specified stash, and load data into the array.
 		 */
-		for (i = 0; i < argc; i++) {
-			struct object_id oid;
-			struct commit *stash;
+		க்கு (i = 0; i < argc; i++) {
+			கட்டமைப்பு object_id oid;
+			கட்டமைப்பு commit *stash;
 
-			if (parse_stash_revision(&revision, argv[i], 1) ||
+			எனில் (parse_stash_revision(&revision, argv[i], 1) ||
 			    repo_get_oid_with_flags(r, revision.buf, &oid,
 						    GET_OID_QUIETLY |
 						    GET_OID_GENTLY)) {
 				res = error(_("unable to find stash entry %s"), argv[i]);
-				goto out;
+				செல் out;
 			}
 
 			stash = lookup_commit_reference(r, &oid);
-			if (!stash || check_stash_topology(r, stash)) {
+			எனில் (!stash || check_stash_topology(r, stash)) {
 				res = error(_("%s does not look like a stash commit"),
 						revision.buf);
-				goto out;
+				செல் out;
 			}
 			iter = commit_list_append(stash, iter);
 		}
-	} else {
+	} இல்லையெனில் {
 		/*
 		 * Walk the reflog, finding each stash entry, and load data into the
 		 * array.
 		 */
-		struct stash_entry_data cb_data = {
-			.r = r, .items = iter,
+		கட்டமைப்பு stash_entry_data cb_data = {
+			.r = r, .பொருட்கள் = iter,
 		};
-		if (refs_for_each_reflog_ent_reverse(get_main_ref_store(r),
+		எனில் (refs_for_each_reflog_ent_reverse(get_main_ref_store(r),
 						     "refs/stash",
 						     collect_stash_entries,
-						     &cb_data) && cb_data.count)
-			goto out;
+						     &cb_data) && cb_data.மொத்தம்)
+			செல் out;
 	}
 
 	/*
@@ -2347,47 +2347,47 @@ static int do_export_stash(struct repository *r,
 	 * but where their first parents form a chain to our original empty
 	 * base commit.
 	 */
-	items = commit_list_reverse(items);
-	for (cur = items; cur; cur = cur->next) {
-		struct commit_list *parents = NULL;
-		struct commit_list **next = &parents;
-		struct object_id out;
-		struct commit *stash = cur->item;
+	பொருட்கள் = commit_list_reverse(பொருட்கள்);
+	க்கு (cur = பொருட்கள்; cur; cur = cur->next) {
+		கட்டமைப்பு commit_list *parents = வெற்று;
+		கட்டமைப்பு commit_list **next = &parents;
+		கட்டமைப்பு object_id out;
+		கட்டமைப்பு commit *stash = cur->item;
 
 		next = commit_list_append(prev, next);
 		next = commit_list_append(stash, next);
 		res = write_commit_with_parents(r, &out, &stash->object.oid, parents);
 		commit_list_free(parents);
-		if (res)
-			goto out;
+		எனில் (res)
+			செல் out;
 		prev = lookup_commit_reference(r, &out);
 	}
-	if (ref)
-		refs_update_ref(get_main_ref_store(r), NULL, ref,
-				&prev->object.oid, NULL, 0, UPDATE_REFS_DIE_ON_ERR);
-	else
+	எனில் (ref)
+		refs_update_ref(get_main_ref_store(r), வெற்று, ref,
+				&prev->object.oid, வெற்று, 0, UPDATE_REFS_DIE_ON_ERR);
+	இல்லையெனில்
 		puts(oid_to_hex(&prev->object.oid));
 out:
 	strbuf_release(&revision);
-	commit_list_free(items);
+	commit_list_free(பொருட்கள்);
 
-	return res;
+	திரும்பு res;
 }
 
-enum export_action {
+எண்ணிக்கை export_action {
 	ACTION_NONE,
 	ACTION_PRINT,
 	ACTION_TO_REF,
 };
 
-static int export_stash(int argc,
-			const char **argv,
-			const char *prefix,
-			struct repository *repo)
+நிலையான முழு export_stash(முழு argc,
+			மாறிலி எழுத்து **argv,
+			மாறிலி எழுத்து *prefix,
+			கட்டமைப்பு repository *repo)
 {
-	const char *ref = NULL;
-	enum export_action action = ACTION_NONE;
-	struct option options[] = {
+	மாறிலி எழுத்து *ref = வெற்று;
+	எண்ணிக்கை export_action action = ACTION_NONE;
+	கட்டமைப்பு option options[] = {
 		OPT_CMDMODE(0, "print", &action,
 			    N_("print the object ID instead of writing it to a ref"),
 			    ACTION_PRINT),
@@ -2400,44 +2400,44 @@ static int export_stash(int argc,
 			     git_stash_export_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (ref && action == ACTION_NONE)
+	எனில் (ref && action == ACTION_NONE)
 		action = ACTION_TO_REF;
 
-	if (action == ACTION_NONE || (ref && action == ACTION_PRINT))
-		return error(_("exactly one of --print and --to-ref is required"));
+	எனில் (action == ACTION_NONE || (ref && action == ACTION_PRINT))
+		திரும்பு error(_("exactly one of --print and --to-ref is required"));
 
-	return do_export_stash(repo, ref, argc, argv);
+	திரும்பு do_export_stash(repo, ref, argc, argv);
 }
 
-int cmd_stash(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo)
+முழு cmd_stash(முழு argc,
+	      மாறிலி எழுத்து **argv,
+	      மாறிலி எழுத்து *prefix,
+	      கட்டமைப்பு repository *repo)
 {
 	pid_t pid = getpid();
-	const char *index_file;
-	struct strvec args = STRVEC_INIT;
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	மாறிலி எழுத்து *index_file;
+	கட்டமைப்பு strvec args = STRVEC_INIT;
+	parse_opt_subcommand_fn *fn = வெற்று;
+	கட்டமைப்பு option options[] = {
 		OPT_SUBCOMMAND("apply", &fn, apply_stash),
 		OPT_SUBCOMMAND("clear", &fn, clear_stash),
 		OPT_SUBCOMMAND("drop", &fn, drop_stash),
-		OPT_SUBCOMMAND("pop", &fn, pop_stash),
+		OPT_SUBCOMMAND("pop", &fn, எடு_stash),
 		OPT_SUBCOMMAND("branch", &fn, branch_stash),
 		OPT_SUBCOMMAND("list", &fn, list_stash),
 		OPT_SUBCOMMAND("show", &fn, show_stash),
 		OPT_SUBCOMMAND("store", &fn, store_stash),
 		OPT_SUBCOMMAND("create", &fn, create_stash),
-		OPT_SUBCOMMAND("push", &fn, push_stash_unassumed),
+		OPT_SUBCOMMAND("push", &fn, தள்ளு_stash_unassumed),
 		OPT_SUBCOMMAND("export", &fn, export_stash),
 		OPT_SUBCOMMAND("import", &fn, import_stash),
-		OPT_SUBCOMMAND_F("save", &fn, save_stash, NULL, PARSE_OPT_NOCOMPLETE),
+		OPT_SUBCOMMAND_F("save", &fn, save_stash, வெற்று, PARSE_OPT_NOCOMPLETE),
 		OPT_END()
 	};
-	const char **args_copy;
-	int ret;
+	மாறிலி எழுத்து **args_copy;
+	முழு ret;
 
-	repo_config(the_repository, git_stash_config, NULL);
+	repo_config(the_repository, git_stash_config, வெற்று);
 
 	argc = parse_options(argc, argv, prefix, options, git_stash_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL |
@@ -2451,7 +2451,7 @@ int cmd_stash(int argc,
 	strbuf_addf(&stash_index_path, "%s.stash.%" PRIuMAX, index_file,
 		    (uintmax_t)pid);
 
-	if (fn) {
+	எனில் (fn) {
 		ret = fn(argc, argv, prefix, repo);
 
 		/*
@@ -2461,15 +2461,15 @@ int cmd_stash(int argc,
 		 * Map failures to 128, the status die() uses, so that
 		 * exit status 1 unambiguously indicates conflicts.
 		 */
-		if (ret < 0)
-			return 128;
-		return ret;
-	} else if (!argc) {
-		return !!push_stash_unassumed(0, NULL, prefix, repo);
+		எனில் (ret < 0)
+			திரும்பு 128;
+		திரும்பு ret;
+	} இல்லையெனில் எனில் (!argc) {
+		திரும்பு !!தள்ளு_stash_unassumed(0, வெற்று, prefix, repo);
 	}
 
 	/* Assume 'stash push' */
-	strvec_push(&args, "push");
+	strvec_தள்ளு(&args, "push");
 	strvec_pushv(&args, argv);
 
 	/*
@@ -2478,9 +2478,9 @@ int cmd_stash(int argc,
 	 */
 	DUP_ARRAY(args_copy, args.v, args.nr);
 
-	ret = !!push_stash(args.nr, args_copy, prefix, 1);
+	ret = !!தள்ளு_stash(args.nr, args_copy, prefix, 1);
 
 	strvec_clear(&args);
-	free(args_copy);
-	return ret;
+	விடுவி(args_copy);
+	திரும்பு ret;
 }

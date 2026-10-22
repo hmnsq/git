@@ -7,166 +7,166 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refs.h"
-#include "refspec.h"
-#include "object-file.h"
-#include "odb.h"
-#include "commit.h"
-#include "object.h"
-#include "tag.h"
-#include "diff.h"
-#include "diffcore.h"
-#include "log-tree.h"
-#include "revision.h"
-#include "decorate.h"
-#include "string-list.h"
-#include "utf8.h"
-#include "parse-options.h"
-#include "quote.h"
-#include "remote.h"
-#include "blob.h"
-#include "gpg-interface.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "hex.h"
+#அந்தர்பாவ "refs.h"
+#அந்தர்பாவ "refspec.h"
+#அந்தர்பாவ "object-file.h"
+#அந்தர்பாவ "odb.h"
+#அந்தர்பாவ "commit.h"
+#அந்தர்பாவ "object.h"
+#அந்தர்பாவ "tag.h"
+#அந்தர்பாவ "diff.h"
+#அந்தர்பாவ "diffcore.h"
+#அந்தர்பாவ "log-tree.h"
+#அந்தர்பாவ "revision.h"
+#அந்தர்பாவ "decorate.h"
+#அந்தர்பாவ "string-list.h"
+#அந்தர்பாவ "utf8.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "quote.h"
+#அந்தர்பாவ "remote.h"
+#அந்தர்பாவ "blob.h"
+#அந்தர்பாவ "gpg-interface.h"
 
-static const char *const fast_export_usage[] = {
+நிலையான மாறிலி எழுத்து *மாறிலி fast_export_usage[] = {
 	N_("git fast-export [<options>] [<revision-range>] [[--] <path>...]"),
-	NULL
+	வெற்று
 };
 
-static int progress;
-static enum sign_mode signed_tag_mode = SIGN_ABORT;
-static enum sign_mode signed_commit_mode = SIGN_STRIP;
-static enum tag_of_filtered_mode { TAG_FILTERING_ABORT, DROP, REWRITE } tag_of_filtered_mode = TAG_FILTERING_ABORT;
-static enum reencode_mode { REENCODE_ABORT, REENCODE_YES, REENCODE_NO } reencode_mode = REENCODE_ABORT;
-static int fake_missing_tagger;
-static int use_done_feature;
-static int no_data;
-static int full_tree;
-static int reference_excluded_commits;
-static int show_original_ids;
-static int mark_tags;
-static struct string_list extra_refs = STRING_LIST_INIT_DUP;
-static struct string_list tag_refs = STRING_LIST_INIT_DUP;
-static struct refspec refspecs;
-static int anonymize;
-static struct hashmap anonymized_seeds;
-static struct revision_sources revision_sources;
+நிலையான முழு progress;
+நிலையான எண்ணிக்கை sign_mode signed_tag_mode = SIGN_ABORT;
+நிலையான எண்ணிக்கை sign_mode signed_commit_mode = SIGN_STRIP;
+நிலையான எண்ணிக்கை tag_of_filtered_mode { TAG_FILTERING_ABORT, DROP, REWRITE } tag_of_filtered_mode = TAG_FILTERING_ABORT;
+நிலையான எண்ணிக்கை reencode_mode { REENCODE_ABORT, REENCODE_YES, REENCODE_NO } reencode_mode = REENCODE_ABORT;
+நிலையான முழு fake_missing_tagger;
+நிலையான முழு use_done_feature;
+நிலையான முழு no_data;
+நிலையான முழு full_மரம்;
+நிலையான முழு reference_excluded_commits;
+நிலையான முழு show_original_ids;
+நிலையான முழு mark_tags;
+நிலையான கட்டமைப்பு string_list extra_refs = STRING_LIST_INIT_DUP;
+நிலையான கட்டமைப்பு string_list tag_refs = STRING_LIST_INIT_DUP;
+நிலையான கட்டமைப்பு refspec refspecs;
+நிலையான முழு anonymize;
+நிலையான கட்டமைப்பு hashmap anonymized_seeds;
+நிலையான கட்டமைப்பு revision_sources revision_sources;
 
-static int parse_opt_sign_mode(const struct option *opt,
-			       const char *arg, int unset)
+நிலையான முழு parse_opt_sign_mode(மாறிலி கட்டமைப்பு option *opt,
+			       மாறிலி எழுத்து *arg, முழு unset)
 {
-	enum sign_mode *val = opt->value;
+	எண்ணிக்கை sign_mode *val = opt->மதிப்பு;
 
-	if (unset)
-		return 0;
+	எனில் (unset)
+		திரும்பு 0;
 
-	if (parse_sign_mode(arg, val, NULL) || (*val == SIGN_STRIP_IF_INVALID) ||
+	எனில் (parse_sign_mode(arg, val, வெற்று) || (*val == SIGN_STRIP_IF_INVALID) ||
 	    (*val == SIGN_SIGN_IF_INVALID) || (*val == SIGN_ABORT_IF_INVALID))
-		return error(_("unknown %s mode: %s"), opt->long_name, arg);
+		திரும்பு error(_("unknown %s mode: %s"), opt->long_name, arg);
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int parse_opt_tag_of_filtered_mode(const struct option *opt,
-					  const char *arg, int unset)
+நிலையான முழு parse_opt_tag_of_filtered_mode(மாறிலி கட்டமைப்பு option *opt,
+					  மாறிலி எழுத்து *arg, முழு unset)
 {
-	enum tag_of_filtered_mode *val = opt->value;
+	எண்ணிக்கை tag_of_filtered_mode *val = opt->மதிப்பு;
 
-	if (unset || !strcmp(arg, "abort"))
+	எனில் (unset || !strcmp(arg, "abort"))
 		*val = TAG_FILTERING_ABORT;
-	else if (!strcmp(arg, "drop"))
+	இல்லையெனில் எனில் (!strcmp(arg, "drop"))
 		*val = DROP;
-	else if (!strcmp(arg, "rewrite"))
+	இல்லையெனில் எனில் (!strcmp(arg, "rewrite"))
 		*val = REWRITE;
-	else
-		return error(_("unknown tag-of-filtered mode: %s"), arg);
-	return 0;
+	இல்லையெனில்
+		திரும்பு error(_("unknown tag-of-filtered mode: %s"), arg);
+	திரும்பு 0;
 }
 
-static int parse_opt_reencode_mode(const struct option *opt,
-				   const char *arg, int unset)
+நிலையான முழு parse_opt_reencode_mode(மாறிலி கட்டமைப்பு option *opt,
+				   மாறிலி எழுத்து *arg, முழு unset)
 {
-	enum reencode_mode *val = opt->value;
+	எண்ணிக்கை reencode_mode *val = opt->மதிப்பு;
 
-	if (unset) {
+	எனில் (unset) {
 		*val = REENCODE_ABORT;
-		return 0;
+		திரும்பு 0;
 	}
 
-	switch (git_parse_maybe_bool(arg)) {
-	case 0:
+	தேர்வு (git_parse_maybe_bool(arg)) {
+	நிலை 0:
 		*val = REENCODE_NO;
-		break;
-	case 1:
+		நிறுத்து;
+	நிலை 1:
 		*val = REENCODE_YES;
-		break;
-	default:
-		if (!strcasecmp(arg, "abort"))
+		நிறுத்து;
+	இயல்பு:
+		எனில் (!strcasecmp(arg, "abort"))
 			*val = REENCODE_ABORT;
-		else
-			return error(_("unknown reencoding mode: %s"), arg);
+		இல்லையெனில்
+			திரும்பு error(_("unknown reencoding mode: %s"), arg);
 	}
 
-	return 0;
+	திரும்பு 0;
 }
 
-static struct decoration idnums;
-static uint32_t last_idnum;
-struct anonymized_entry {
-	struct hashmap_entry hash;
-	char *anon;
-	const char orig[FLEX_ARRAY];
+நிலையான கட்டமைப்பு decoration idnums;
+நிலையான uint32_t last_idnum;
+கட்டமைப்பு anonymized_entry {
+	கட்டமைப்பு hashmap_entry hash;
+	எழுத்து *anon;
+	மாறிலி எழுத்து orig[FLEX_ARRAY];
 };
 
-struct anonymized_entry_key {
-	struct hashmap_entry hash;
-	const char *orig;
+கட்டமைப்பு anonymized_entry_சாவி {
+	கட்டமைப்பு hashmap_entry hash;
+	மாறிலி எழுத்து *orig;
 	size_t orig_len;
 };
 
-static int anonymized_entry_cmp(const void *cmp_data UNUSED,
-				const struct hashmap_entry *eptr,
-				const struct hashmap_entry *entry_or_key,
-				const void *keydata)
+நிலையான முழு anonymized_entry_cmp(மாறிலி வெறுமை *cmp_data UNUSED,
+				மாறிலி கட்டமைப்பு hashmap_entry *eptr,
+				மாறிலி கட்டமைப்பு hashmap_entry *entry_or_சாவி,
+				மாறிலி வெறுமை *keydata)
 {
-	const struct anonymized_entry *a, *b;
+	மாறிலி கட்டமைப்பு anonymized_entry *a, *b;
 
-	a = container_of(eptr, const struct anonymized_entry, hash);
-	if (keydata) {
-		const struct anonymized_entry_key *key = keydata;
-		int equal = !xstrncmpz(a->orig, key->orig, key->orig_len);
-		return !equal;
+	a = container_of(eptr, மாறிலி கட்டமைப்பு anonymized_entry, hash);
+	எனில் (keydata) {
+		மாறிலி கட்டமைப்பு anonymized_entry_சாவி *சாவி = keydata;
+		முழு equal = !xstrncmpz(a->orig, சாவி->orig, சாவி->orig_len);
+		திரும்பு !equal;
 	}
 
-	b = container_of(entry_or_key, const struct anonymized_entry, hash);
-	return strcmp(a->orig, b->orig);
+	b = container_of(entry_or_சாவி, மாறிலி கட்டமைப்பு anonymized_entry, hash);
+	திரும்பு strcmp(a->orig, b->orig);
 }
 
-static struct anonymized_entry *add_anonymized_entry(struct hashmap *map,
+நிலையான கட்டமைப்பு anonymized_entry *add_anonymized_entry(கட்டமைப்பு hashmap *map,
 						     unsigned hash,
-						     const char *orig, size_t len,
-						     char *anon)
+						     மாறிலி எழுத்து *orig, size_t len,
+						     எழுத்து *anon)
 {
-	struct anonymized_entry *ret, *old;
+	கட்டமைப்பு anonymized_entry *ret, *old;
 
-	if (!map->cmpfn)
-		hashmap_init(map, anonymized_entry_cmp, NULL, 0);
+	எனில் (!map->cmpfn)
+		hashmap_init(map, anonymized_entry_cmp, வெற்று, 0);
 
 	FLEX_ALLOC_MEM(ret, orig, orig, len);
 	hashmap_entry_init(&ret->hash, hash);
 	ret->anon = anon;
 	old = hashmap_put_entry(map, ret, hash);
 
-	if (old) {
-		free(old->anon);
-		free(old);
+	எனில் (old) {
+		விடுவி(old->anon);
+		விடுவி(old);
 	}
 
-	return ret;
+	திரும்பு ret;
 }
 
 /*
@@ -174,30 +174,30 @@ static struct anonymized_entry *add_anonymized_entry(struct hashmap *map,
  * the same anonymized string with another. The actual generation
  * is farmed out to the generate function.
  */
-static const char *anonymize_str(struct hashmap *map,
-				 char *(*generate)(void),
-				 const char *orig, size_t len)
+நிலையான மாறிலி எழுத்து *anonymize_str(கட்டமைப்பு hashmap *map,
+				 எழுத்து *(*generate)(வெறுமை),
+				 மாறிலி எழுத்து *orig, size_t len)
 {
-	struct anonymized_entry_key key;
-	struct anonymized_entry *ret;
+	கட்டமைப்பு anonymized_entry_சாவி சாவி;
+	கட்டமைப்பு anonymized_entry *ret;
 
-	hashmap_entry_init(&key.hash, memhash(orig, len));
-	key.orig = orig;
-	key.orig_len = len;
+	hashmap_entry_init(&சாவி.hash, memhash(orig, len));
+	சாவி.orig = orig;
+	சாவி.orig_len = len;
 
 	/* First check if it's a token the user configured manually... */
-	ret = hashmap_get_entry(&anonymized_seeds, &key, hash, &key);
+	ret = hashmap_get_entry(&anonymized_seeds, &சாவி, hash, &சாவி);
 
 	/* ...otherwise check if we've already seen it in this context... */
-	if (!ret)
-		ret = hashmap_get_entry(map, &key, hash, &key);
+	எனில் (!ret)
+		ret = hashmap_get_entry(map, &சாவி, hash, &சாவி);
 
 	/* ...and finally generate a new mapping if necessary */
-	if (!ret)
-		ret = add_anonymized_entry(map, key.hash.hash,
+	எனில் (!ret)
+		ret = add_anonymized_entry(map, சாவி.hash.hash,
 					   orig, len, generate());
 
-	return ret->anon;
+	திரும்பு ret->anon;
 }
 
 /*
@@ -206,71 +206,71 @@ static const char *anonymize_str(struct hashmap *map,
  * The paths are cached via anonymize_mem so that repeated
  * lookups for "a" will yield the same value.
  */
-static void anonymize_path(struct strbuf *out, const char *path,
-			   struct hashmap *map,
-			   char *(*generate)(void))
+நிலையான வெறுமை anonymize_path(கட்டமைப்பு strbuf *out, மாறிலி எழுத்து *path,
+			   கட்டமைப்பு hashmap *map,
+			   எழுத்து *(*generate)(வெறுமை))
 {
-	while (*path) {
-		const char *end_of_component = strchrnul(path, '/');
+	போது (*path) {
+		மாறிலி எழுத்து *end_of_component = strchrnul(path, '/');
 		size_t len = end_of_component - path;
-		const char *c = anonymize_str(map, generate, path, len);
+		மாறிலி எழுத்து *c = anonymize_str(map, generate, path, len);
 		strbuf_addstr(out, c);
 		path = end_of_component;
-		if (*path)
+		எனில் (*path)
 			strbuf_addch(out, *path++);
 	}
 }
 
-static inline void *mark_to_ptr(uint32_t mark)
+நிலையான உள்வரி வெறுமை *mark_to_ptr(uint32_t mark)
 {
-	return (void *)(uintptr_t)mark;
+	திரும்பு (வெறுமை *)(uintptr_t)mark;
 }
 
-static inline uint32_t ptr_to_mark(void * mark)
+நிலையான உள்வரி uint32_t ptr_to_mark(வெறுமை * mark)
 {
-	return (uint32_t)(uintptr_t)mark;
+	திரும்பு (uint32_t)(uintptr_t)mark;
 }
 
-static inline void mark_object(struct object *object, uint32_t mark)
+நிலையான உள்வரி வெறுமை mark_object(கட்டமைப்பு object *object, uint32_t mark)
 {
 	add_decoration(&idnums, object, mark_to_ptr(mark));
 }
 
-static inline void mark_next_object(struct object *object)
+நிலையான உள்வரி வெறுமை mark_next_object(கட்டமைப்பு object *object)
 {
 	mark_object(object, ++last_idnum);
 }
 
-static int get_object_mark(struct object *object)
+நிலையான முழு get_object_mark(கட்டமைப்பு object *object)
 {
-	void *decoration = lookup_decoration(&idnums, object);
-	if (!decoration)
-		return 0;
-	return ptr_to_mark(decoration);
+	வெறுமை *decoration = lookup_decoration(&idnums, object);
+	எனில் (!decoration)
+		திரும்பு 0;
+	திரும்பு ptr_to_mark(decoration);
 }
 
-static struct commit *rewrite_commit(struct commit *p)
+நிலையான கட்டமைப்பு commit *rewrite_commit(கட்டமைப்பு commit *p)
 {
-	for (;;) {
-		if (p->parents && p->parents->next)
-			break;
-		if (p->object.flags & UNINTERESTING)
-			break;
-		if (!(p->object.flags & TREESAME))
-			break;
-		if (!p->parents)
-			return NULL;
+	க்கு (;;) {
+		எனில் (p->parents && p->parents->next)
+			நிறுத்து;
+		எனில் (p->object.flags & UNINTERESTING)
+			நிறுத்து;
+		எனில் (!(p->object.flags & TREESAME))
+			நிறுத்து;
+		எனில் (!p->parents)
+			திரும்பு வெற்று;
 		p = p->parents->item;
 	}
-	return p;
+	திரும்பு p;
 }
 
-static void show_progress(void)
+நிலையான வெறுமை show_progress(வெறுமை)
 {
-	static int counter = 0;
-	if (!progress)
-		return;
-	if ((++counter % progress) == 0)
+	நிலையான முழு counter = 0;
+	எனில் (!progress)
+		திரும்பு;
+	எனில் ((++counter % progress) == 0)
 		printf("progress %d objects\n", counter);
 }
 
@@ -285,78 +285,78 @@ static void show_progress(void)
  * There's no need to cache this result with anonymize_mem, since
  * we already handle blob content caching with marks.
  */
-static char *anonymize_blob(unsigned long *size)
+நிலையான எழுத்து *anonymize_blob(unsigned long *size)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
+	நிலையான முழு counter;
+	கட்டமைப்பு strbuf out = STRBUF_INIT;
 	strbuf_addf(&out, "anonymous blob %d", counter++);
 	*size = out.len;
-	return strbuf_detach(&out, NULL);
+	திரும்பு strbuf_detach(&out, வெற்று);
 }
 
-static void export_blob(const struct object_id *oid)
+நிலையான வெறுமை export_blob(மாறிலி கட்டமைப்பு object_id *oid)
 {
 	unsigned long size;
-	enum object_type type;
-	char *buf;
-	struct object *object;
-	int eaten;
+	எண்ணிக்கை object_type type;
+	எழுத்து *buf;
+	கட்டமைப்பு object *object;
+	முழு eaten;
 
-	if (no_data)
-		return;
+	எனில் (no_data)
+		திரும்பு;
 
-	if (is_null_oid(oid))
-		return;
+	எனில் (is_null_oid(oid))
+		திரும்பு;
 
 	object = lookup_object(the_repository, oid);
-	if (object && object->flags & SHOWN)
-		return;
+	எனில் (object && object->flags & SHOWN)
+		திரும்பு;
 
-	if (anonymize) {
+	எனில் (anonymize) {
 		buf = anonymize_blob(&size);
-		object = (struct object *)lookup_blob(the_repository, oid);
+		object = (கட்டமைப்பு object *)lookup_blob(the_repository, oid);
 		eaten = 0;
-	} else {
+	} இல்லையெனில் {
 		size_t size_st = 0;
 		buf = odb_read_object(the_repository->objects, oid, &type,
 				      &size_st);
 		size = cast_size_t_to_ulong(size_st);
-		if (!buf)
+		எனில் (!buf)
 			die(_("could not read blob %s"), oid_to_hex(oid));
-		if (check_object_signature(the_repository, oid, buf, size,
+		எனில் (check_object_signature(the_repository, oid, buf, size,
 					   type) < 0)
 			die(_("oid mismatch in blob %s"), oid_to_hex(oid));
 		object = parse_object_buffer(the_repository, oid, type,
 					     size, buf, &eaten);
 	}
 
-	if (!object)
+	எனில் (!object)
 		die(_("could not read blob %s"), oid_to_hex(oid));
 
 	mark_next_object(object);
 
 	printf("blob\nmark :%"PRIu32"\n", last_idnum);
-	if (show_original_ids)
+	எனில் (show_original_ids)
 		printf("original-oid %s\n", oid_to_hex(oid));
 	printf("data %"PRIuMAX"\n", (uintmax_t)size);
-	if (size && fwrite(buf, size, 1, stdout) != 1)
+	எனில் (size && fwrite(buf, size, 1, stdout) != 1)
 		die_errno(_("could not write blob '%s'"), oid_to_hex(oid));
 	printf("\n");
 
 	show_progress();
 
 	object->flags |= SHOWN;
-	if (!eaten)
-		free(buf);
+	எனில் (!eaten)
+		விடுவி(buf);
 }
 
-static int depth_first(const void *a_, const void *b_)
+நிலையான முழு depth_first(மாறிலி வெறுமை *a_, மாறிலி வெறுமை *b_)
 {
-	const struct diff_filepair *a = *((const struct diff_filepair **)a_);
-	const struct diff_filepair *b = *((const struct diff_filepair **)b_);
-	const char *name_a, *name_b;
-	int len_a, len_b, len;
-	int cmp;
+	மாறிலி கட்டமைப்பு diff_filepair *a = *((மாறிலி கட்டமைப்பு diff_filepair **)a_);
+	மாறிலி கட்டமைப்பு diff_filepair *b = *((மாறிலி கட்டமைப்பு diff_filepair **)b_);
+	மாறிலி எழுத்து *name_a, *name_b;
+	முழு len_a, len_b, len;
+	முழு cmp;
 
 	name_a = a->one ? a->one->path : a->two->path;
 	name_b = b->one ? b->one->path : b->two->path;
@@ -367,45 +367,45 @@ static int depth_first(const void *a_, const void *b_)
 
 	/* strcmp will sort 'd' before 'd/e', we want 'd/e' before 'd' */
 	cmp = memcmp(name_a, name_b, len);
-	if (cmp)
-		return cmp;
+	எனில் (cmp)
+		திரும்பு cmp;
 	cmp = len_b - len_a;
-	if (cmp)
-		return cmp;
+	எனில் (cmp)
+		திரும்பு cmp;
 	/*
 	 * Move 'R'ename entries last so that all references of the file
 	 * appear in the output before it is renamed (e.g., when a file
 	 * was copied and renamed in the same commit).
 	 */
-	return (a->status == 'R') - (b->status == 'R');
+	திரும்பு (a->status == 'R') - (b->status == 'R');
 }
 
-static void print_path_1(const char *path)
+நிலையான வெறுமை print_path_1(மாறிலி எழுத்து *path)
 {
-	int need_quote = quote_c_style(path, NULL, NULL, 0);
-	if (need_quote)
-		quote_c_style(path, NULL, stdout, 0);
-	else if (strchr(path, ' '))
+	முழு need_quote = quote_c_style(path, வெற்று, வெற்று, 0);
+	எனில் (need_quote)
+		quote_c_style(path, வெற்று, stdout, 0);
+	இல்லையெனில் எனில் (strchr(path, ' '))
 		printf("\"%s\"", path);
-	else
+	இல்லையெனில்
 		printf("%s", path);
 }
 
-static char *anonymize_path_component(void)
+நிலையான எழுத்து *anonymize_path_component(வெறுமை)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
+	நிலையான முழு counter;
+	கட்டமைப்பு strbuf out = STRBUF_INIT;
 	strbuf_addf(&out, "path%d", counter++);
-	return strbuf_detach(&out, NULL);
+	திரும்பு strbuf_detach(&out, வெற்று);
 }
 
-static void print_path(const char *path)
+நிலையான வெறுமை print_path(மாறிலி எழுத்து *path)
 {
-	if (!anonymize)
+	எனில் (!anonymize)
 		print_path_1(path);
-	else {
-		static struct hashmap paths;
-		static struct strbuf anon = STRBUF_INIT;
+	இல்லையெனில் {
+		நிலையான கட்டமைப்பு hashmap paths;
+		நிலையான கட்டமைப்பு strbuf anon = STRBUF_INIT;
 
 		anonymize_path(&anon, path, &paths, anonymize_path_component);
 		print_path_1(anon.buf);
@@ -413,30 +413,30 @@ static void print_path(const char *path)
 	}
 }
 
-static char *generate_fake_oid(void)
+நிலையான எழுத்து *generate_fake_oid(வெறுமை)
 {
-	static uint32_t counter = 1; /* avoid null oid */
-	const unsigned hashsz = the_hash_algo->rawsz;
-	struct object_id oid;
-	char *hex = xmallocz(GIT_MAX_HEXSZ);
+	நிலையான uint32_t counter = 1; /* avoid null oid */
+	மாறிலி unsigned hashsz = the_hash_algo->rawsz;
+	கட்டமைப்பு object_id oid;
+	எழுத்து *hex = xmallocz(GIT_MAX_HEXSZ);
 
 	oidclr(&oid, the_repository->hash_algo);
 	put_be32(oid.hash + hashsz - 4, counter++);
-	return oid_to_hex_r(hex, &oid);
+	திரும்பு oid_to_hex_r(hex, &oid);
 }
 
-static const char *anonymize_oid(const char *oid_hex)
+நிலையான மாறிலி எழுத்து *anonymize_oid(மாறிலி எழுத்து *oid_hex)
 {
-	static struct hashmap objs;
+	நிலையான கட்டமைப்பு hashmap objs;
 	size_t len = strlen(oid_hex);
-	return anonymize_str(&objs, generate_fake_oid, oid_hex, len);
+	திரும்பு anonymize_str(&objs, generate_fake_oid, oid_hex, len);
 }
 
-static void show_filemodify(struct diff_queue_struct *q,
-			    struct diff_options *options UNUSED, void *data)
+நிலையான வெறுமை show_filemodify(கட்டமைப்பு diff_queue_struct *q,
+			    கட்டமைப்பு diff_options *options UNUSED, வெறுமை *data)
 {
-	int i;
-	struct string_list *changed = data;
+	முழு i;
+	கட்டமைப்பு string_list *changed = data;
 
 	/*
 	 * Handle files below a directory first, in case they are all deleted
@@ -444,20 +444,20 @@ static void show_filemodify(struct diff_queue_struct *q,
 	 */
 	QSORT(q->queue, q->nr, depth_first);
 
-	for (i = 0; i < q->nr; i++) {
-		struct diff_filespec *ospec = q->queue[i]->one;
-		struct diff_filespec *spec = q->queue[i]->two;
+	க்கு (i = 0; i < q->nr; i++) {
+		கட்டமைப்பு diff_filespec *ospec = q->queue[i]->one;
+		கட்டமைப்பு diff_filespec *spec = q->queue[i]->two;
 
-		switch (q->queue[i]->status) {
-		case DIFF_STATUS_DELETED:
+		தேர்வு (q->queue[i]->status) {
+		நிலை DIFF_STATUS_DELETED:
 			printf("D ");
 			print_path(spec->path);
-			string_list_insert(changed, spec->path);
+			string_list_செருகு(changed, spec->path);
 			putchar('\n');
-			break;
+			நிறுத்து;
 
-		case DIFF_STATUS_COPIED:
-		case DIFF_STATUS_RENAMED:
+		நிலை DIFF_STATUS_COPIED:
+		நிலை DIFF_STATUS_RENAMED:
 			/*
 			 * If a change in the file corresponding to ospec->path
 			 * has been observed, we cannot trust its contents
@@ -465,44 +465,44 @@ static void show_filemodify(struct diff_queue_struct *q,
 			 * contents, not the current contents.  So, declare a
 			 * copy or rename only if there was no change observed.
 			 */
-			if (!string_list_has_string(changed, ospec->path)) {
+			எனில் (!string_list_has_string(changed, ospec->path)) {
 				printf("%c ", q->queue[i]->status);
 				print_path(ospec->path);
 				putchar(' ');
 				print_path(spec->path);
-				string_list_insert(changed, spec->path);
+				string_list_செருகு(changed, spec->path);
 				putchar('\n');
 
-				if (oideq(&ospec->oid, &spec->oid) &&
+				எனில் (oideq(&ospec->oid, &spec->oid) &&
 				    ospec->mode == spec->mode)
-					break;
+					நிறுத்து;
 			}
 			/* fallthrough */
 
-		case DIFF_STATUS_TYPE_CHANGED:
-		case DIFF_STATUS_MODIFIED:
-		case DIFF_STATUS_ADDED:
+		நிலை DIFF_STATUS_TYPE_CHANGED:
+		நிலை DIFF_STATUS_MODIFIED:
+		நிலை DIFF_STATUS_ADDED:
 			/*
 			 * Links refer to objects in another repositories;
 			 * output the SHA-1 verbatim.
 			 */
-			if (no_data || S_ISGITLINK(spec->mode))
+			எனில் (no_data || S_ISGITLINK(spec->mode))
 				printf("M %06o %s ", spec->mode,
 				       anonymize ?
 				       anonymize_oid(oid_to_hex(&spec->oid)) :
 				       oid_to_hex(&spec->oid));
-			else {
-				struct object *object = lookup_object(the_repository,
+			இல்லையெனில் {
+				கட்டமைப்பு object *object = lookup_object(the_repository,
 								      &spec->oid);
 				printf("M %06o :%d ", spec->mode,
 				       get_object_mark(object));
 			}
 			print_path(spec->path);
-			string_list_insert(changed, spec->path);
+			string_list_செருகு(changed, spec->path);
 			putchar('\n');
-			break;
+			நிறுத்து;
 
-		default:
+		இயல்பு:
 			die(_("unexpected comparison status '%c' for %s, %s"),
 			    q->queue[i]->status,
 			    ospec->path ? ospec->path : _("none"),
@@ -511,59 +511,59 @@ static void show_filemodify(struct diff_queue_struct *q,
 	}
 }
 
-static char *anonymize_ref_component(void)
+நிலையான எழுத்து *anonymize_ref_component(வெறுமை)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
+	நிலையான முழு counter;
+	கட்டமைப்பு strbuf out = STRBUF_INIT;
 	strbuf_addf(&out, "ref%d", counter++);
-	return strbuf_detach(&out, NULL);
+	திரும்பு strbuf_detach(&out, வெற்று);
 }
 
-static const char *anonymize_refname(const char *refname)
+நிலையான மாறிலி எழுத்து *anonymize_refname(மாறிலி எழுத்து *refname)
 {
 	/*
 	 * If any of these prefixes is found, we will leave it intact
 	 * so that tags remain tags and so forth.
 	 */
-	static const char *prefixes[] = {
+	நிலையான மாறிலி எழுத்து *prefixes[] = {
 		"refs/heads/",
 		"refs/tags/",
 		"refs/remotes/",
 		"refs/"
 	};
-	static struct hashmap refs;
-	static struct strbuf anon = STRBUF_INIT;
-	int i;
+	நிலையான கட்டமைப்பு hashmap refs;
+	நிலையான கட்டமைப்பு strbuf anon = STRBUF_INIT;
+	முழு i;
 
 	strbuf_reset(&anon);
-	for (i = 0; i < ARRAY_SIZE(prefixes); i++) {
-		if (skip_prefix(refname, prefixes[i], &refname)) {
+	க்கு (i = 0; i < ARRAY_SIZE(prefixes); i++) {
+		எனில் (skip_prefix(refname, prefixes[i], &refname)) {
 			strbuf_addstr(&anon, prefixes[i]);
-			break;
+			நிறுத்து;
 		}
 	}
 
 	anonymize_path(&anon, refname, &refs, anonymize_ref_component);
-	return anon.buf;
+	திரும்பு anon.buf;
 }
 
 /*
  * We do not even bother to cache commit messages, as they are unlikely
  * to be repeated verbatim, and it is not that interesting when they are.
  */
-static char *anonymize_commit_message(void)
+நிலையான எழுத்து *anonymize_commit_message(வெறுமை)
 {
-	static int counter;
-	return xstrfmt("subject %d\n\nbody\n", counter++);
+	நிலையான முழு counter;
+	திரும்பு xstrfmt("subject %d\n\nbody\n", counter++);
 }
 
-static char *anonymize_ident(void)
+நிலையான எழுத்து *anonymize_ident(வெறுமை)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
+	நிலையான முழு counter;
+	கட்டமைப்பு strbuf out = STRBUF_INIT;
 	strbuf_addf(&out, "User %d <user%d@example.com>", counter, counter);
 	counter++;
-	return strbuf_detach(&out, NULL);
+	திரும்பு strbuf_detach(&out, வெற்று);
 }
 
 /*
@@ -571,15 +571,15 @@ static char *anonymize_ident(void)
  * but keep timestamps intact, as they influence things like traversal
  * order (and by themselves should not be too revealing).
  */
-static void anonymize_ident_line(const char **beg, const char **end)
+நிலையான வெறுமை anonymize_ident_வரி(மாறிலி எழுத்து **beg, மாறிலி எழுத்து **end)
 {
-	static struct hashmap idents;
-	static struct strbuf buffers[] = { STRBUF_INIT, STRBUF_INIT };
-	static unsigned which_buffer;
+	நிலையான கட்டமைப்பு hashmap idents;
+	நிலையான கட்டமைப்பு strbuf buffers[] = { STRBUF_INIT, STRBUF_INIT };
+	நிலையான unsigned which_buffer;
 
-	struct strbuf *out;
-	struct ident_split split;
-	const char *end_of_header;
+	கட்டமைப்பு strbuf *out;
+	கட்டமைப்பு ident_split split;
+	மாறிலி எழுத்து *end_of_header;
 
 	out = &buffers[which_buffer++];
 	which_buffer %= ARRAY_SIZE(buffers);
@@ -587,15 +587,15 @@ static void anonymize_ident_line(const char **beg, const char **end)
 
 	/* skip "committer", "author", "tagger", etc */
 	end_of_header = strchr(*beg, ' ');
-	if (!end_of_header)
+	எனில் (!end_of_header)
 		BUG("malformed line fed to anonymize_ident_line: %.*s",
-		    (int)(*end - *beg), *beg);
+		    (முழு)(*end - *beg), *beg);
 	end_of_header++;
 	strbuf_add(out, *beg, end_of_header - *beg);
 
-	if (!split_ident_line(&split, end_of_header, *end - end_of_header) &&
+	எனில் (!split_ident_வரி(&split, end_of_header, *end - end_of_header) &&
 	    split.date_begin) {
-		const char *ident;
+		மாறிலி எழுத்து *ident;
 		size_t len;
 
 		len = split.mail_end - split.name_begin;
@@ -604,7 +604,7 @@ static void anonymize_ident_line(const char **beg, const char **end)
 		strbuf_addstr(out, ident);
 		strbuf_addch(out, ' ');
 		strbuf_add(out, split.date_begin, split.tz_end - split.date_begin);
-	} else {
+	} இல்லையெனில் {
 		strbuf_addstr(out, "Malformed Ident <malformed@example.com> 0 -0000");
 	}
 
@@ -624,21 +624,21 @@ static void anonymize_ident_line(const char **beg, const char **end)
  * If the header is found, then *end is set to point at the '\n' in
  * msg that immediately follows the header value.
  */
-static const char *find_commit_multiline_header(const char *msg,
-						const char *key,
-						const char **end)
+நிலையான மாறிலி எழுத்து *find_commit_multiline_header(மாறிலி எழுத்து *செய்தி,
+						மாறிலி எழுத்து *சாவி,
+						மாறிலி எழுத்து **end)
 {
-	struct strbuf val = STRBUF_INIT;
-	const char *bol, *eol;
+	கட்டமைப்பு strbuf val = STRBUF_INIT;
+	மாறிலி எழுத்து *bol, *eol;
 	size_t len;
 
-	bol = find_commit_header(msg, key, &len);
-	if (!bol)
-		return NULL;
+	bol = find_commit_header(செய்தி, சாவி, &len);
+	எனில் (!bol)
+		திரும்பு வெற்று;
 	eol = bol + len;
 	strbuf_add(&val, bol, len);
 
-	while (eol[0] == '\n' && eol[1] == ' ') {
+	போது (eol[0] == '\n' && eol[1] == ' ') {
 		bol = eol + 2;
 		eol = strchrnul(bol, '\n');
 		strbuf_addch(&val, '\n');
@@ -646,13 +646,13 @@ static const char *find_commit_multiline_header(const char *msg,
 	}
 
 	*end = eol;
-	return strbuf_detach(&val, NULL);
+	திரும்பு strbuf_detach(&val, வெற்று);
 }
 
-static void print_signature(const char *signature, const char *object_hash)
+நிலையான வெறுமை print_signature(மாறிலி எழுத்து *signature, மாறிலி எழுத்து *object_hash)
 {
-	if (!signature)
-		return;
+	எனில் (!signature)
+		திரும்பு;
 
 	printf("gpgsig %s %s\ndata %u\n%s\n",
 	       object_hash,
@@ -661,55 +661,55 @@ static void print_signature(const char *signature, const char *object_hash)
 	       signature);
 }
 
-static const char *append_signatures_for_header(struct string_list *signatures,
-						const char *pos,
-						const char *header,
-						const char *object_hash)
+நிலையான மாறிலி எழுத்து *append_signatures_for_header(கட்டமைப்பு string_list *signatures,
+						மாறிலி எழுத்து *pos,
+						மாறிலி எழுத்து *header,
+						மாறிலி எழுத்து *object_hash)
 {
-	const char *signature;
-	const char *start = pos;
-	const char *end = pos;
+	மாறிலி எழுத்து *signature;
+	மாறிலி எழுத்து *start = pos;
+	மாறிலி எழுத்து *end = pos;
 
-	while ((signature = find_commit_multiline_header(start + 1,
+	போது ((signature = find_commit_multiline_header(start + 1,
 							 header,
 							 &end))) {
-		string_list_append(signatures, signature)->util = (void *)object_hash;
-		free((char *)signature);
+		string_list_append(signatures, signature)->util = (வெறுமை *)object_hash;
+		விடுவி((எழுத்து *)signature);
 		start = end;
 	}
 
-	return end;
+	திரும்பு end;
 }
 
-static void handle_commit(struct commit *commit, struct rev_info *rev,
-			  struct string_list *paths_of_changed_objects)
+நிலையான வெறுமை handle_commit(கட்டமைப்பு commit *commit, கட்டமைப்பு rev_info *rev,
+			  கட்டமைப்பு string_list *paths_of_changed_objects)
 {
-	int saved_output_format = rev->diffopt.output_format;
-	const char *commit_buffer, *commit_buffer_cursor;
-	const char *author, *author_end, *committer, *committer_end;
-	const char *encoding = NULL;
+	முழு saved_output_format = rev->diffopt.output_format;
+	மாறிலி எழுத்து *commit_buffer, *commit_buffer_cursor;
+	மாறிலி எழுத்து *author, *author_end, *committer, *committer_end;
+	மாறிலி எழுத்து *encoding = வெற்று;
 	size_t encoding_len;
-	struct string_list signatures = STRING_LIST_INIT_DUP;
-	const char *message;
-	char *reencoded = NULL;
-	struct commit_list *p;
-	const char *refname;
-	int i;
+	கட்டமைப்பு string_list signatures = STRING_LIST_INIT_DUP;
+	மாறிலி எழுத்து *message;
+	எழுத்து *reencoded = வெற்று;
+	கட்டமைப்பு commit_list *p;
+	மாறிலி எழுத்து *refname;
+	முழு i;
 
 	rev->diffopt.output_format = DIFF_FORMAT_CALLBACK;
 
 	parse_commit_or_die(commit);
-	commit_buffer_cursor = commit_buffer = repo_get_commit_buffer(the_repository, commit, NULL);
+	commit_buffer_cursor = commit_buffer = repo_get_commit_buffer(the_repository, commit, வெற்று);
 
 	author = strstr(commit_buffer_cursor, "\nauthor ");
-	if (!author)
+	எனில் (!author)
 		die(_("could not find author in commit %s"),
 		    oid_to_hex(&commit->object.oid));
 	author++;
 	commit_buffer_cursor = author_end = strchrnul(author, '\n');
 
 	committer = strstr(commit_buffer_cursor, "\ncommitter ");
-	if (!committer)
+	எனில் (!committer)
 		die(_("could not find committer in commit %s"),
 		    oid_to_hex(&commit->object.oid));
 	committer++;
@@ -722,39 +722,39 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 	 * pointer to the beginning of the next line.
 	 */
 
-	if (*commit_buffer_cursor == '\n') {
+	எனில் (*commit_buffer_cursor == '\n') {
 		encoding = find_commit_header(commit_buffer_cursor + 1, "encoding", &encoding_len);
-		if (encoding)
+		எனில் (encoding)
 			commit_buffer_cursor = encoding + encoding_len;
 	}
 
-	if (*commit_buffer_cursor == '\n') {
-		const char *after_sha1 = append_signatures_for_header(&signatures, commit_buffer_cursor,
+	எனில் (*commit_buffer_cursor == '\n') {
+		மாறிலி எழுத்து *after_sha1 = append_signatures_for_header(&signatures, commit_buffer_cursor,
 								      "gpgsig", "sha1");
-		const char *after_sha256 = append_signatures_for_header(&signatures, commit_buffer_cursor,
+		மாறிலி எழுத்து *after_sha256 = append_signatures_for_header(&signatures, commit_buffer_cursor,
 									"gpgsig-sha256", "sha256");
 		commit_buffer_cursor = (after_sha1 > after_sha256) ? after_sha1 : after_sha256;
 	}
 
 	message = strstr(commit_buffer_cursor, "\n\n");
-	if (message)
+	எனில் (message)
 		message += 2;
 
-	if (commit->parents &&
+	எனில் (commit->parents &&
 	    (get_object_mark(&commit->parents->item->object) != 0 ||
 	     reference_excluded_commits) &&
-	    !full_tree) {
+	    !full_மரம்) {
 		parse_commit_or_die(commit->parents->item);
-		diff_tree_oid(get_commit_tree_oid(commit->parents->item),
-			      get_commit_tree_oid(commit), "", &rev->diffopt);
+		diff_மரம்_oid(get_commit_மரம்_oid(commit->parents->item),
+			      get_commit_மரம்_oid(commit), "", &rev->diffopt);
 	}
-	else
-		diff_root_tree_oid(get_commit_tree_oid(commit),
+	இல்லையெனில்
+		diff_வேர்_மரம்_oid(get_commit_மரம்_oid(commit),
 				   "", &rev->diffopt);
 
 	/* Export the referenced blobs, and remember the marks. */
-	for (i = 0; i < diff_queued_diff.nr; i++)
-		if (!S_ISGITLINK(diff_queued_diff.queue[i]->two->mode))
+	க்கு (i = 0; i < diff_queued_diff.nr; i++)
+		எனில் (!S_ISGITLINK(diff_queued_diff.queue[i]->two->mode))
 			export_blob(&diff_queued_diff.queue[i]->two->oid);
 
 	refname = *revision_sources_at(&revision_sources, commit);
@@ -765,95 +765,95 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 	 * repo may have enough refs for this to become slow.
 	 */
 	string_list_remove(&extra_refs, refname, 0);
-	if (anonymize) {
+	எனில் (anonymize) {
 		refname = anonymize_refname(refname);
-		anonymize_ident_line(&committer, &committer_end);
-		anonymize_ident_line(&author, &author_end);
+		anonymize_ident_வரி(&committer, &committer_end);
+		anonymize_ident_வரி(&author, &author_end);
 	}
 
 	mark_next_object(&commit->object);
-	if (anonymize) {
+	எனில் (anonymize) {
 		reencoded = anonymize_commit_message();
-	} else if (encoding) {
-		char *buf;
-		switch (reencode_mode) {
-		case REENCODE_YES:
-			buf = xstrfmt("%.*s", (int)encoding_len, encoding);
+	} இல்லையெனில் எனில் (encoding) {
+		எழுத்து *buf;
+		தேர்வு (reencode_mode) {
+		நிலை REENCODE_YES:
+			buf = xstrfmt("%.*s", (முழு)encoding_len, encoding);
 			reencoded = reencode_string(message, "UTF-8", buf);
-			free(buf);
-			break;
-		case REENCODE_NO:
-			break;
-		case REENCODE_ABORT:
+			விடுவி(buf);
+			நிறுத்து;
+		நிலை REENCODE_NO:
+			நிறுத்து;
+		நிலை REENCODE_ABORT:
 			die(_("encountered commit-specific encoding %.*s in commit "
 			      "%s; use --reencode=[yes|no] to handle it"),
-			    (int)encoding_len, encoding,
+			    (முழு)encoding_len, encoding,
 			    oid_to_hex(&commit->object.oid));
 		}
 	}
-	if (!commit->parents)
+	எனில் (!commit->parents)
 		printf("reset %s\n", refname);
 	printf("commit %s\nmark :%"PRIu32"\n", refname, last_idnum);
-	if (show_original_ids)
+	எனில் (show_original_ids)
 		printf("original-oid %s\n", oid_to_hex(&commit->object.oid));
 	printf("%.*s\n%.*s\n",
-	       (int)(author_end - author), author,
-	       (int)(committer_end - committer), committer);
-	if (signatures.nr) {
-		switch (signed_commit_mode) {
+	       (முழு)(author_end - author), author,
+	       (முழு)(committer_end - committer), committer);
+	எனில் (signatures.nr) {
+		தேர்வு (signed_commit_mode) {
 		/* Exporting modes */
-		case SIGN_WARN_VERBATIM:
+		நிலை SIGN_WARN_VERBATIM:
 			warning(_("exporting %"PRIuMAX" signature(s) for commit %s"),
 				(uintmax_t)signatures.nr, oid_to_hex(&commit->object.oid));
 			/* fallthru */
-		case SIGN_VERBATIM:
-			for (size_t i = 0; i < signatures.nr; i++) {
-				struct string_list_item *item = &signatures.items[i];
+		நிலை SIGN_VERBATIM:
+			க்கு (size_t i = 0; i < signatures.nr; i++) {
+				கட்டமைப்பு string_list_item *item = &signatures.பொருட்கள்[i];
 				print_signature(item->string, item->util);
 			}
-			break;
+			நிறுத்து;
 
 		/* Stripping modes */
-		case SIGN_WARN_STRIP:
+		நிலை SIGN_WARN_STRIP:
 			warning(_("stripping signature(s) from commit %s"),
 				oid_to_hex(&commit->object.oid));
 			/* fallthru */
-		case SIGN_STRIP:
-			break;
+		நிலை SIGN_STRIP:
+			நிறுத்து;
 
 		/* Aborting modes */
-		case SIGN_ABORT:
+		நிலை SIGN_ABORT:
 			die(_("encountered signed commit %s; use "
 			      "--signed-commits=<mode> to handle it"),
 			    oid_to_hex(&commit->object.oid));
-		default:
+		இயல்பு:
 			BUG("invalid signed_commit_mode value %d", signed_commit_mode);
 		}
 		string_list_clear(&signatures, 0);
 	}
-	if (!reencoded && encoding)
-		printf("encoding %.*s\n", (int)encoding_len, encoding);
+	எனில் (!reencoded && encoding)
+		printf("encoding %.*s\n", (முழு)encoding_len, encoding);
 	printf("data %u\n%s",
 	       (unsigned)(reencoded
 			  ? strlen(reencoded) : message
 			  ? strlen(message) : 0),
 	       reencoded ? reencoded : message ? message : "");
-	free(reencoded);
+	விடுவி(reencoded);
 	repo_unuse_commit_buffer(the_repository, commit, commit_buffer);
 
-	for (i = 0, p = commit->parents; p; p = p->next) {
-		struct object *obj = &p->item->object;
-		int mark = get_object_mark(obj);
+	க்கு (i = 0, p = commit->parents; p; p = p->next) {
+		கட்டமைப்பு object *obj = &p->item->object;
+		முழு mark = get_object_mark(obj);
 
-		if (!mark && !reference_excluded_commits)
-			continue;
-		if (i == 0)
+		எனில் (!mark && !reference_excluded_commits)
+			தொடர்;
+		எனில் (i == 0)
 			printf("from ");
-		else
+		இல்லையெனில்
 			printf("merge ");
-		if (mark)
+		எனில் (mark)
 			printf(":%d\n", mark);
-		else
+		இல்லையெனில்
 			printf("%s\n",
 			       anonymize ?
 			       anonymize_oid(oid_to_hex(&obj->oid)) :
@@ -861,9 +861,9 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 		i++;
 	}
 
-	if (full_tree)
+	எனில் (full_மரம்)
 		printf("deleteall\n");
-	log_tree_diff_flush(rev);
+	log_மரம்_diff_flush(rev);
 	string_list_clear(paths_of_changed_objects, 0);
 	rev->diffopt.output_format = saved_output_format;
 
@@ -872,69 +872,69 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 	show_progress();
 }
 
-static char *anonymize_tag(void)
+நிலையான எழுத்து *anonymize_tag(வெறுமை)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
+	நிலையான முழு counter;
+	கட்டமைப்பு strbuf out = STRBUF_INIT;
 	strbuf_addf(&out, "tag message %d", counter++);
-	return strbuf_detach(&out, NULL);
+	திரும்பு strbuf_detach(&out, வெற்று);
 }
 
 
-static void handle_tag(const char *name, struct tag *tag)
+நிலையான வெறுமை handle_tag(மாறிலி எழுத்து *name, கட்டமைப்பு tag *tag)
 {
 	size_t size;
-	enum object_type type;
-	char *buf;
-	const char *tagger, *tagger_end, *message;
+	எண்ணிக்கை object_type type;
+	எழுத்து *buf;
+	மாறிலி எழுத்து *tagger, *tagger_end, *message;
 	size_t message_size = 0;
-	struct object *tagged;
-	int tagged_mark;
-	struct commit *p;
+	கட்டமைப்பு object *tagged;
+	முழு tagged_mark;
+	கட்டமைப்பு commit *p;
 
 	/* Trees have no identifier in fast-export output, thus we have no way
 	 * to output tags of trees, tags of tags of trees, etc.  Simply omit
 	 * such tags.
 	 */
 	tagged = tag->tagged;
-	while (tagged->type == OBJ_TAG) {
-		tagged = ((struct tag *)tagged)->tagged;
+	போது (tagged->type == OBJ_TAG) {
+		tagged = ((கட்டமைப்பு tag *)tagged)->tagged;
 	}
-	if (tagged->type == OBJ_TREE) {
+	எனில் (tagged->type == OBJ_மரம்) {
 		warning(_("omitting tag %s,\nsince tags of trees (or tags "
 			  "of tags of trees, etc.) are not supported."),
 			oid_to_hex(&tag->object.oid));
-		return;
+		திரும்பு;
 	}
 
 	buf = odb_read_object(the_repository->objects, &tag->object.oid,
 			      &type, &size);
-	if (!buf)
+	எனில் (!buf)
 		die(_("could not read tag %s"), oid_to_hex(&tag->object.oid));
 	message = memmem(buf, size, "\n\n", 2);
-	if (message) {
+	எனில் (message) {
 		message += 2;
 		message_size = strlen(message);
 	}
 	tagger = memmem(buf, message ? message - buf : size, "\ntagger ", 8);
-	if (!tagger) {
-		if (fake_missing_tagger)
+	எனில் (!tagger) {
+		எனில் (fake_missing_tagger)
 			tagger = "tagger Unspecified Tagger "
 				"<unspecified-tagger> 0 +0000";
-		else
+		இல்லையெனில்
 			tagger = "";
 		tagger_end = tagger + strlen(tagger);
-	} else {
+	} இல்லையெனில் {
 		tagger++;
 		tagger_end = strchrnul(tagger, '\n');
-		if (anonymize)
-			anonymize_ident_line(&tagger, &tagger_end);
+		எனில் (anonymize)
+			anonymize_ident_வரி(&tagger, &tagger_end);
 	}
 
-	if (anonymize) {
+	எனில் (anonymize) {
 		name = anonymize_refname(name);
-		if (message) {
-			static struct hashmap tags;
+		எனில் (message) {
+			நிலையான கட்டமைப்பு hashmap tags;
 			message = anonymize_str(&tags, anonymize_tag,
 						message, message_size);
 			message_size = strlen(message);
@@ -942,33 +942,33 @@ static void handle_tag(const char *name, struct tag *tag)
 	}
 
 	/* handle signed tags */
-	if (message) {
+	எனில் (message) {
 		size_t sig_offset = parse_signed_buffer(message, message_size);
-		if (sig_offset < message_size)
-			switch (signed_tag_mode) {
+		எனில் (sig_offset < message_size)
+			தேர்வு (signed_tag_mode) {
 			/* Exporting modes */
-			case SIGN_WARN_VERBATIM:
+			நிலை SIGN_WARN_VERBATIM:
 				warning(_("exporting signed tag %s"),
 					oid_to_hex(&tag->object.oid));
 				/* fallthru */
-			case SIGN_VERBATIM:
-				break;
+			நிலை SIGN_VERBATIM:
+				நிறுத்து;
 
 			/* Stripping modes */
-			case SIGN_WARN_STRIP:
+			நிலை SIGN_WARN_STRIP:
 				warning(_("stripping signature from tag %s"),
 					oid_to_hex(&tag->object.oid));
 				/* fallthru */
-			case SIGN_STRIP:
+			நிலை SIGN_STRIP:
 				message_size = sig_offset;
-				break;
+				நிறுத்து;
 
 			/* Aborting modes */
-			case SIGN_ABORT:
+			நிலை SIGN_ABORT:
 				die(_("encountered signed tag %s; use "
 				      "--signed-tags=<mode> to handle it"),
 				    oid_to_hex(&tag->object.oid));
-			default:
+			இயல்பு:
 				BUG("invalid signed_commit_mode value %d", signed_commit_mode);
 			}
 	}
@@ -976,169 +976,169 @@ static void handle_tag(const char *name, struct tag *tag)
 	/* handle tag->tagged having been filtered out due to paths specified */
 	tagged = tag->tagged;
 	tagged_mark = get_object_mark(tagged);
-	if (!tagged_mark) {
-		switch (tag_of_filtered_mode) {
-		case TAG_FILTERING_ABORT:
+	எனில் (!tagged_mark) {
+		தேர்வு (tag_of_filtered_mode) {
+		நிலை TAG_FILTERING_ABORT:
 			die(_("tag %s tags unexported object; use "
 			      "--tag-of-filtered-object=<mode> to handle it"),
 			    oid_to_hex(&tag->object.oid));
-		case DROP:
+		நிலை DROP:
 			/* Ignore this tag altogether */
-			free(buf);
-			return;
-		case REWRITE:
-			if (tagged->type == OBJ_TAG && !mark_tags) {
+			விடுவி(buf);
+			திரும்பு;
+		நிலை REWRITE:
+			எனில் (tagged->type == OBJ_TAG && !mark_tags) {
 				die(_("cannot export nested tags unless --mark-tags is specified."));
-			} else if (tagged->type == OBJ_COMMIT) {
-				p = rewrite_commit((struct commit *)tagged);
-				if (!p) {
+			} இல்லையெனில் எனில் (tagged->type == OBJ_COMMIT) {
+				p = rewrite_commit((கட்டமைப்பு commit *)tagged);
+				எனில் (!p) {
 					printf("reset %s\nfrom %s\n\n",
 					       name, oid_to_hex(null_oid(the_hash_algo)));
-					free(buf);
-					return;
+					விடுவி(buf);
+					திரும்பு;
 				}
 				tagged_mark = get_object_mark(&p->object);
-			} else {
+			} இல்லையெனில் {
 				/* tagged->type is either OBJ_BLOB or OBJ_TAG */
 				tagged_mark = get_object_mark(tagged);
 			}
 		}
 	}
 
-	if (tagged->type == OBJ_TAG) {
+	எனில் (tagged->type == OBJ_TAG) {
 		printf("reset %s\nfrom %s\n\n",
 		       name, oid_to_hex(null_oid(the_hash_algo)));
 	}
 	skip_prefix(name, "refs/tags/", &name);
 	printf("tag %s\n", name);
-	if (mark_tags) {
+	எனில் (mark_tags) {
 		mark_next_object(&tag->object);
 		printf("mark :%"PRIu32"\n", last_idnum);
 	}
-	if (tagged_mark)
+	எனில் (tagged_mark)
 		printf("from :%d\n", tagged_mark);
-	else
+	இல்லையெனில்
 		printf("from %s\n", oid_to_hex(&tagged->oid));
 
-	if (show_original_ids)
+	எனில் (show_original_ids)
 		printf("original-oid %s\n", oid_to_hex(&tag->object.oid));
 	printf("%.*s%sdata %d\n%.*s\n",
-	       (int)(tagger_end - tagger), tagger,
+	       (முழு)(tagger_end - tagger), tagger,
 	       tagger == tagger_end ? "" : "\n",
-	       (int)message_size, (int)message_size, message ? message : "");
-	free(buf);
+	       (முழு)message_size, (முழு)message_size, message ? message : "");
+	விடுவி(buf);
 }
 
-static struct commit *get_commit(struct rev_cmdline_entry *e, const char *full_name)
+நிலையான கட்டமைப்பு commit *get_commit(கட்டமைப்பு rev_cmdline_entry *e, மாறிலி எழுத்து *full_name)
 {
-	switch (e->item->type) {
-	case OBJ_COMMIT:
-		return (struct commit *)e->item;
-	case OBJ_TAG: {
-		struct tag *tag = (struct tag *)e->item;
+	தேர்வு (e->item->type) {
+	நிலை OBJ_COMMIT:
+		திரும்பு (கட்டமைப்பு commit *)e->item;
+	நிலை OBJ_TAG: {
+		கட்டமைப்பு tag *tag = (கட்டமைப்பு tag *)e->item;
 
 		/* handle nested tags */
-		while (tag && tag->object.type == OBJ_TAG) {
+		போது (tag && tag->object.type == OBJ_TAG) {
 			parse_object(the_repository, &tag->object.oid);
 			string_list_append(&tag_refs, full_name)->util = tag;
-			tag = (struct tag *)tag->tagged;
+			tag = (கட்டமைப்பு tag *)tag->tagged;
 		}
-		if (!tag)
+		எனில் (!tag)
 			die(_("tag %s points nowhere?"), e->name);
-		return (struct commit *)tag;
+		திரும்பு (கட்டமைப்பு commit *)tag;
 	}
-	default:
-		return NULL;
+	இயல்பு:
+		திரும்பு வெற்று;
 	}
 }
 
-static void get_tags_and_duplicates(struct rev_cmdline_info *info)
+நிலையான வெறுமை get_tags_and_duplicates(கட்டமைப்பு rev_cmdline_info *info)
 {
-	int i;
+	முழு i;
 
-	for (i = 0; i < info->nr; i++) {
-		struct rev_cmdline_entry *e = info->rev + i;
-		struct object_id oid;
-		struct commit *commit;
-		char *full_name = NULL;
+	க்கு (i = 0; i < info->nr; i++) {
+		கட்டமைப்பு rev_cmdline_entry *e = info->rev + i;
+		கட்டமைப்பு object_id oid;
+		கட்டமைப்பு commit *commit;
+		எழுத்து *full_name = வெற்று;
 
-		if (e->flags & UNINTERESTING)
-			continue;
+		எனில் (e->flags & UNINTERESTING)
+			தொடர்;
 
-		if (repo_dwim_ref(the_repository, e->name, strlen(e->name),
+		எனில் (repo_dwim_ref(the_repository, e->name, strlen(e->name),
 				  &oid, &full_name, 0) != 1) {
-			free(full_name);
-			continue;
+			விடுவி(full_name);
+			தொடர்;
 		}
 
-		if (refspecs.nr) {
-			char *private;
-			private = apply_refspecs(&refspecs, full_name);
-			if (private) {
-				free(full_name);
-				full_name = private;
+		எனில் (refspecs.nr) {
+			எழுத்து *தனிப்பட்ட;
+			தனிப்பட்ட = apply_refspecs(&refspecs, full_name);
+			எனில் (தனிப்பட்ட) {
+				விடுவி(full_name);
+				full_name = தனிப்பட்ட;
 			}
 		}
 
 		commit = get_commit(e, full_name);
-		if (!commit) {
+		எனில் (!commit) {
 			warning(_("%s: unexpected object of type %s, skipping."),
 				e->name,
 				type_name(e->item->type));
-			free(full_name);
-			continue;
+			விடுவி(full_name);
+			தொடர்;
 		}
 
-		switch (commit->object.type) {
-		case OBJ_COMMIT:
-			break;
-		case OBJ_BLOB:
+		தேர்வு (commit->object.type) {
+		நிலை OBJ_COMMIT:
+			நிறுத்து;
+		நிலை OBJ_BLOB:
 			export_blob(&commit->object.oid);
-			free(full_name);
-			continue;
-		default: /* OBJ_TAG (nested tags) is already handled */
+			விடுவி(full_name);
+			தொடர்;
+		இயல்பு: /* OBJ_TAG (nested tags) is already handled */
 			warning(_("tag points to object of unexpected type %s, skipping."),
 				type_name(commit->object.type));
-			free(full_name);
-			continue;
+			விடுவி(full_name);
+			தொடர்;
 		}
 
 		/*
 		 * Make sure this ref gets properly updated eventually, whether
 		 * through a commit or manually at the end.
 		 */
-		if (e->item->type != OBJ_TAG)
+		எனில் (e->item->type != OBJ_TAG)
 			string_list_append(&extra_refs, full_name)->util = commit;
 
-		if (!*revision_sources_at(&revision_sources, commit))
+		எனில் (!*revision_sources_at(&revision_sources, commit))
 			*revision_sources_at(&revision_sources, commit) = full_name;
-		else
-			free(full_name);
+		இல்லையெனில்
+			விடுவி(full_name);
 	}
 
 	string_list_sort_u(&extra_refs, 0);
 }
 
-static void handle_tags_and_duplicates(struct string_list *extras)
+நிலையான வெறுமை handle_tags_and_duplicates(கட்டமைப்பு string_list *extras)
 {
-	struct commit *commit;
-	int i;
+	கட்டமைப்பு commit *commit;
+	முழு i;
 
-	for (i = extras->nr - 1; i >= 0; i--) {
-		const char *name = extras->items[i].string;
-		struct object *object = extras->items[i].util;
-		int mark;
+	க்கு (i = extras->nr - 1; i >= 0; i--) {
+		மாறிலி எழுத்து *name = extras->பொருட்கள்[i].string;
+		கட்டமைப்பு object *object = extras->பொருட்கள்[i].util;
+		முழு mark;
 
-		switch (object->type) {
-		case OBJ_TAG:
-			handle_tag(name, (struct tag *)object);
-			break;
-		case OBJ_COMMIT:
-			if (anonymize)
+		தேர்வு (object->type) {
+		நிலை OBJ_TAG:
+			handle_tag(name, (கட்டமைப்பு tag *)object);
+			நிறுத்து;
+		நிலை OBJ_COMMIT:
+			எனில் (anonymize)
 				name = anonymize_refname(name);
 			/* create refs pointing to already seen commits */
-			commit = rewrite_commit((struct commit *)object);
-			if (!commit) {
+			commit = rewrite_commit((கட்டமைப்பு commit *)object);
+			எனில் (!commit) {
 				/*
 				 * Neither this object nor any of its
 				 * ancestors touch any relevant paths, so
@@ -1147,11 +1147,11 @@ static void handle_tags_and_duplicates(struct string_list *extras)
 				 */
 				printf("reset %s\nfrom %s\n\n",
 				       name, oid_to_hex(null_oid(the_hash_algo)));
-				continue;
+				தொடர்;
 			}
 
 			mark = get_object_mark(&commit->object);
-			if (!mark) {
+			எனில் (!mark) {
 				/*
 				 * Getting here means we have a commit which
 				 * was excluded by a negative refspec (e.g.
@@ -1162,45 +1162,45 @@ static void handle_tags_and_duplicates(struct string_list *extras)
 				 * in its history to be deleted, which basically
 				 * just means deletion of the ref.
 				 */
-				if (!reference_excluded_commits) {
+				எனில் (!reference_excluded_commits) {
 					/* delete the ref */
 					printf("reset %s\nfrom %s\n\n",
 					       name, oid_to_hex(null_oid(the_hash_algo)));
-					continue;
+					தொடர்;
 				}
 				/* set ref to commit using oid, not mark */
 				printf("reset %s\nfrom %s\n\n", name,
 				       oid_to_hex(&commit->object.oid));
-				continue;
+				தொடர்;
 			}
 
 			printf("reset %s\nfrom :%d\n\n", name, mark
 			       );
 			show_progress();
-			break;
+			நிறுத்து;
 		}
 	}
 }
 
-static void export_marks(char *file)
+நிலையான வெறுமை export_marks(எழுத்து *file)
 {
-	unsigned int i;
+	unsigned முழு i;
 	uint32_t mark;
-	struct decoration_entry *deco = idnums.entries;
+	கட்டமைப்பு decoration_entry *deco = idnums.entries;
 	FILE *f;
-	int e = 0;
+	முழு e = 0;
 
 	f = fopen_for_writing(file);
-	if (!f)
+	எனில் (!f)
 		die_errno(_("unable to open marks file %s for writing."), file);
 
-	for (i = 0; i < idnums.size; i++) {
-		if (deco->base && deco->base->type == 1) {
+	க்கு (i = 0; i < idnums.size; i++) {
+		எனில் (deco->base && deco->base->type == 1) {
 			mark = ptr_to_mark(deco->decoration);
-			if (fprintf(f, ":%"PRIu32" %s\n", mark,
+			எனில் (fprintf(f, ":%"PRIu32" %s\n", mark,
 				oid_to_hex(&deco->base->oid)) < 0) {
 			    e = 1;
-			    break;
+			    நிறுத்து;
 			}
 		}
 		deco++;
@@ -1208,56 +1208,56 @@ static void export_marks(char *file)
 
 	e |= ferror(f);
 	e |= fclose(f);
-	if (e)
+	எனில் (e)
 		error(_("unable to write marks file %s."), file);
 }
 
-static void import_marks(char *input_file, int check_exists)
+நிலையான வெறுமை import_marks(எழுத்து *உள்ளீடு_file, முழு check_exists)
 {
-	char line[512];
+	எழுத்து வரி[512];
 	FILE *f;
-	struct stat sb;
+	கட்டமைப்பு stat sb;
 
-	if (check_exists && stat(input_file, &sb))
-		return;
+	எனில் (check_exists && stat(உள்ளீடு_file, &sb))
+		திரும்பு;
 
-	f = xfopen(input_file, "r");
-	while (fgets(line, sizeof(line), f)) {
+	f = xfopen(உள்ளீடு_file, "r");
+	போது (fgets(வரி, அளவு(வரி), f)) {
 		uint32_t mark;
-		char *line_end, *mark_end;
-		struct object_id oid;
-		struct object *object;
-		struct commit *commit;
-		enum object_type type;
+		எழுத்து *வரி_end, *mark_end;
+		கட்டமைப்பு object_id oid;
+		கட்டமைப்பு object *object;
+		கட்டமைப்பு commit *commit;
+		எண்ணிக்கை object_type type;
 
-		line_end = strchr(line, '\n');
-		if (line[0] != ':' || !line_end)
-			die(_("corrupt mark line: %s"), line);
-		*line_end = '\0';
+		வரி_end = strchr(வரி, '\n');
+		எனில் (வரி[0] != ':' || !வரி_end)
+			die(_("corrupt mark line: %s"), வரி);
+		*வரி_end = '\0';
 
-		mark = strtoumax(line + 1, &mark_end, 10);
-		if (!mark || mark_end == line + 1
+		mark = strtoumax(வரி + 1, &mark_end, 10);
+		எனில் (!mark || mark_end == வரி + 1
 			|| *mark_end != ' ' || get_oid_hex(mark_end + 1, &oid))
-			die(_("corrupt mark line: %s"), line);
+			die(_("corrupt mark line: %s"), வரி);
 
-		if (last_idnum < mark)
+		எனில் (last_idnum < mark)
 			last_idnum = mark;
 
-		type = odb_read_object_info(the_repository->objects, &oid, NULL);
-		if (type < 0)
+		type = odb_read_object_info(the_repository->objects, &oid, வெற்று);
+		எனில் (type < 0)
 			die(_("object not found: %s"), oid_to_hex(&oid));
 
-		if (type != OBJ_COMMIT)
+		எனில் (type != OBJ_COMMIT)
 			/* only commits */
-			continue;
+			தொடர்;
 
 		commit = lookup_commit(the_repository, &oid);
-		if (!commit)
+		எனில் (!commit)
 			die(_("not a commit? can't happen: %s"), oid_to_hex(&oid));
 
 		object = &commit->object;
 
-		if (object->flags & SHOWN)
+		எனில் (object->flags & SHOWN)
 			error(_("object %s already has a mark"), oid_to_hex(&oid));
 
 		mark_object(object, mark);
@@ -1267,60 +1267,60 @@ static void import_marks(char *input_file, int check_exists)
 	fclose(f);
 }
 
-static void handle_deletes(void)
+நிலையான வெறுமை handle_deletes(வெறுமை)
 {
-	int i;
-	for (i = 0; i < refspecs.nr; i++) {
-		struct refspec_item *refspec = &refspecs.items[i];
-		if (*refspec->src)
-			continue;
+	முழு i;
+	க்கு (i = 0; i < refspecs.nr; i++) {
+		கட்டமைப்பு refspec_item *refspec = &refspecs.பொருட்கள்[i];
+		எனில் (*refspec->src)
+			தொடர்;
 
 		printf("reset %s\nfrom %s\n\n",
 				refspec->dst, oid_to_hex(null_oid(the_hash_algo)));
 	}
 }
 
-static int parse_opt_anonymize_map(const struct option *opt,
-				   const char *arg, int unset)
+நிலையான முழு parse_opt_anonymize_map(மாறிலி கட்டமைப்பு option *opt,
+				   மாறிலி எழுத்து *arg, முழு unset)
 {
-	struct hashmap *map = opt->value;
-	const char *delim, *value;
+	கட்டமைப்பு hashmap *map = opt->மதிப்பு;
+	மாறிலி எழுத்து *delim, *மதிப்பு;
 	size_t keylen;
 
 	BUG_ON_OPT_NEG(unset);
 
 	delim = strchr(arg, ':');
-	if (delim) {
+	எனில் (delim) {
 		keylen = delim - arg;
-		value = delim + 1;
-	} else {
+		மதிப்பு = delim + 1;
+	} இல்லையெனில் {
 		keylen = strlen(arg);
-		value = arg;
+		மதிப்பு = arg;
 	}
 
-	if (!keylen || !*value)
-		return error(_("--anonymize-map token cannot be empty"));
+	எனில் (!keylen || !*மதிப்பு)
+		திரும்பு error(_("--anonymize-map token cannot be empty"));
 
 	add_anonymized_entry(map, memhash(arg, keylen), arg, keylen,
-			     xstrdup(value));
+			     xstrdup(மதிப்பு));
 
-	return 0;
+	திரும்பு 0;
 }
 
-int cmd_fast_export(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+முழு cmd_fast_export(முழு argc,
+		    மாறிலி எழுத்து **argv,
+		    மாறிலி எழுத்து *prefix,
+		    கட்டமைப்பு repository *repo UNUSED)
 {
-	struct rev_info revs;
-	struct commit *commit;
-	char *export_filename = NULL,
-	     *import_filename = NULL,
-	     *import_filename_if_exists = NULL;
+	கட்டமைப்பு rev_info revs;
+	கட்டமைப்பு commit *commit;
+	எழுத்து *export_filename = வெற்று,
+	     *import_filename = வெற்று,
+	     *import_filename_if_exists = வெற்று;
 	uint32_t lastimportid;
-	struct string_list refspecs_list = STRING_LIST_INIT_NODUP;
-	struct string_list paths_of_changed_objects = STRING_LIST_INIT_DUP;
-	struct option options[] = {
+	கட்டமைப்பு string_list refspecs_list = STRING_LIST_INIT_NODUP;
+	கட்டமைப்பு string_list paths_of_changed_objects = STRING_LIST_INIT_DUP;
+	கட்டமைப்பு option options[] = {
 		OPT_INTEGER(0, "progress", &progress,
 			    N_("show progress after <n> objects")),
 		OPT_CALLBACK(0, "signed-tags", &signed_tag_mode, N_("mode"),
@@ -1345,7 +1345,7 @@ int cmd_fast_export(int argc,
 			     N_("import marks from this file if it exists")),
 		OPT_BOOL(0, "fake-missing-tagger", &fake_missing_tagger,
 			 N_("fake a tagger when tags lack one")),
-		OPT_BOOL(0, "full-tree", &full_tree,
+		OPT_BOOL(0, "full-tree", &full_மரம்,
 			 N_("output full tree for each commit")),
 		OPT_BOOL(0, "use-done-feature", &use_done_feature,
 			     N_("use the done feature to terminate the stream")),
@@ -1366,11 +1366,11 @@ int cmd_fast_export(int argc,
 		OPT_END()
 	};
 
-	if (argc == 1)
+	எனில் (argc == 1)
 		usage_with_options (fast_export_usage, options);
 
 	/* we handle encodings */
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, வெற்று);
 
 	refspec_init_fetch(&refspecs, the_hash_algo);
 
@@ -1381,39 +1381,39 @@ int cmd_fast_export(int argc,
 	revs.rewrite_parents = 1;
 	argc = parse_options(argc, argv, prefix, options, fast_export_usage,
 			PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT);
-	argc = setup_revisions(argc, argv, &revs, NULL);
-	if (argc > 1)
+	argc = setup_revisions(argc, argv, &revs, வெற்று);
+	எனில் (argc > 1)
 		usage_with_options (fast_export_usage, options);
 
-	if (anonymized_seeds.cmpfn && !anonymize)
+	எனில் (anonymized_seeds.cmpfn && !anonymize)
 		die(_("the option '%s' requires '%s'"), "--anonymize-map", "--anonymize");
 
-	if (refspecs_list.nr) {
-		int i;
+	எனில் (refspecs_list.nr) {
+		முழு i;
 
-		for (i = 0; i < refspecs_list.nr; i++)
-			refspec_append(&refspecs, refspecs_list.items[i].string);
+		க்கு (i = 0; i < refspecs_list.nr; i++)
+			refspec_append(&refspecs, refspecs_list.பொருட்கள்[i].string);
 
 		string_list_clear(&refspecs_list, 1);
 	}
 
-	if (use_done_feature)
+	எனில் (use_done_feature)
 		printf("feature done\n");
 
-	if (import_filename && import_filename_if_exists)
+	எனில் (import_filename && import_filename_if_exists)
 		die(_("options '%s' and '%s' cannot be used together"), "--import-marks", "--import-marks-if-exists");
-	if (import_filename)
+	எனில் (import_filename)
 		import_marks(import_filename, 0);
-	else if (import_filename_if_exists)
+	இல்லையெனில் எனில் (import_filename_if_exists)
 		import_marks(import_filename_if_exists, 1);
 	lastimportid = last_idnum;
 
-	if (import_filename && revs.prune_data.nr)
-		full_tree = 1;
+	எனில் (import_filename && revs.prune_data.nr)
+		full_மரம் = 1;
 
 	get_tags_and_duplicates(&revs.cmdline);
 
-	if (prepare_revision_walk(&revs))
+	எனில் (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
 
 	revs.reverse = 1;
@@ -1422,7 +1422,7 @@ int cmd_fast_export(int argc,
 	revs.diffopt.flags.recursive = 1;
 
 	revs.diffopt.no_free = 1;
-	while ((commit = get_revision(&revs)))
+	போது ((commit = get_revision(&revs)))
 		handle_commit(commit, &revs, &paths_of_changed_objects);
 	revs.diffopt.no_free = 0;
 
@@ -1430,14 +1430,14 @@ int cmd_fast_export(int argc,
 	handle_tags_and_duplicates(&tag_refs);
 	handle_deletes();
 
-	if (export_filename && lastimportid != last_idnum)
+	எனில் (export_filename && lastimportid != last_idnum)
 		export_marks(export_filename);
 
-	if (use_done_feature)
+	எனில் (use_done_feature)
 		printf("done\n");
 
 	refspec_clear(&refspecs);
 	release_revisions(&revs);
 
-	return 0;
+	திரும்பு 0;
 }

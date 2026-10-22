@@ -7,65 +7,65 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
+#அந்தர்பாவ "builtin.h"
 
-#include "abspath.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "run-command.h"
-#include "strvec.h"
-#include "dir.h"
-#include "refs.h"
-#include "config.h"
-#include "unpack-trees.h"
-#include "lockfile.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "path.h"
-#include "commit.h"
-#include "diff.h"
-#include "wt-status.h"
-#include "revision.h"
-#include "commit-reach.h"
-#include "rerere.h"
-#include "branch.h"
-#include "sequencer.h"
-#include "rebase-interactive.h"
-#include "reset.h"
-#include "trace2.h"
-#include "hook.h"
-#include "trailer.h"
+#அந்தர்பாவ "abspath.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "hex.h"
+#அந்தர்பாவ "run-command.h"
+#அந்தர்பாவ "strvec.h"
+#அந்தர்பாவ "dir.h"
+#அந்தர்பாவ "refs.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "unpack-trees.h"
+#அந்தர்பாவ "lockfile.h"
+#அந்தர்பாவ "object-file.h"
+#அந்தர்பாவ "object-name.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "path.h"
+#அந்தர்பாவ "commit.h"
+#அந்தர்பாவ "diff.h"
+#அந்தர்பாவ "wt-status.h"
+#அந்தர்பாவ "revision.h"
+#அந்தர்பாவ "commit-reach.h"
+#அந்தர்பாவ "rerere.h"
+#அந்தர்பாவ "branch.h"
+#அந்தர்பாவ "sequencer.h"
+#அந்தர்பாவ "rebase-interactive.h"
+#அந்தர்பாவ "reset.h"
+#அந்தர்பாவ "trace2.h"
+#அந்தர்பாவ "hook.h"
+#அந்தர்பாவ "trailer.h"
 
-static char const * const builtin_rebase_usage[] = {
+நிலையான எழுத்து மாறிலி * மாறிலி builtin_rebase_usage[] = {
 	N_("git rebase [-i] [options] [--exec <cmd>] "
 		"[--onto <newbase> | --keep-base] [<upstream> [<branch>]]"),
 	N_("git rebase [-i] [options] [--exec <cmd>] [--onto <newbase>] "
 		"--root [<branch>]"),
 	"git rebase --continue | --abort | --skip | --edit-todo",
-	NULL
+	வெற்று
 };
 
-static GIT_PATH_FUNC(path_squash_onto, "rebase-merge/squash-onto")
-static GIT_PATH_FUNC(path_interactive, "rebase-merge/interactive")
-static GIT_PATH_FUNC(apply_dir, "rebase-apply")
-static GIT_PATH_FUNC(merge_dir, "rebase-merge")
+நிலையான GIT_PATH_FUNC(path_squash_onto, "rebase-merge/squash-onto")
+நிலையான GIT_PATH_FUNC(path_interactive, "rebase-merge/interactive")
+நிலையான GIT_PATH_FUNC(apply_dir, "rebase-apply")
+நிலையான GIT_PATH_FUNC(merge_dir, "rebase-merge")
 
-enum rebase_type {
+எண்ணிக்கை rebase_type {
 	REBASE_UNSPECIFIED = -1,
 	REBASE_APPLY,
 	REBASE_MERGE
 };
 
-enum empty_type {
+எண்ணிக்கை empty_type {
 	EMPTY_UNSPECIFIED = -1,
 	EMPTY_DROP,
 	EMPTY_KEEP,
 	EMPTY_STOP
 };
 
-enum action {
+எண்ணிக்கை action {
 	ACTION_NONE = 0,
 	ACTION_CONTINUE,
 	ACTION_SKIP,
@@ -75,7 +75,7 @@ enum action {
 	ACTION_SHOW_CURRENT_PATCH
 };
 
-static const char *action_names[] = {
+நிலையான மாறிலி எழுத்து *action_names[] = {
 	"undefined",
 	"continue",
 	"skip",
@@ -85,56 +85,56 @@ static const char *action_names[] = {
 	"show_current_patch"
 };
 
-struct rebase_options {
-	enum rebase_type type;
-	enum empty_type empty;
-	char *default_backend;
-	const char *state_dir;
-	struct commit *upstream;
-	const char *upstream_name;
-	const char *upstream_arg;
-	char *head_name;
-	struct commit *orig_head;
-	struct commit *onto;
-	const char *onto_name;
-	const char *revisions;
-	const char *switch_to;
-	int root, root_with_onto;
-	struct object_id *squash_onto;
-	struct commit *restrict_revision;
-	int dont_finish_rebase;
-	enum {
+கட்டமைப்பு rebase_options {
+	எண்ணிக்கை rebase_type type;
+	எண்ணிக்கை empty_type empty;
+	எழுத்து *default_backend;
+	மாறிலி எழுத்து *state_dir;
+	கட்டமைப்பு commit *upstream;
+	மாறிலி எழுத்து *upstream_name;
+	மாறிலி எழுத்து *upstream_arg;
+	எழுத்து *head_name;
+	கட்டமைப்பு commit *orig_head;
+	கட்டமைப்பு commit *onto;
+	மாறிலி எழுத்து *onto_name;
+	மாறிலி எழுத்து *revisions;
+	மாறிலி எழுத்து *switch_to;
+	முழு வேர், வேர்_with_onto;
+	கட்டமைப்பு object_id *squash_onto;
+	கட்டமைப்பு commit *restrict_revision;
+	முழு dont_finish_rebase;
+	எண்ணிக்கை {
 		REBASE_NO_QUIET = 1<<0,
 		REBASE_VERBOSE = 1<<1,
 		REBASE_DIFFSTAT = 1<<2,
 		REBASE_FORCE = 1<<3,
 		REBASE_INTERACTIVE_EXPLICIT = 1<<4,
 	} flags;
-	struct strvec git_am_opts;
-	enum action action;
-	char *reflog_action;
-	int signoff;
-	struct strvec trailer_args;
-	int allow_rerere_autoupdate;
-	int keep_empty;
-	int autosquash;
-	char *gpg_sign_opt;
-	int autostash;
-	int committer_date_is_author_date;
-	int ignore_date;
-	struct string_list exec;
-	int allow_empty_message;
-	int rebase_merges, rebase_cousins;
-	char *strategy;
-	struct string_list strategy_opts;
-	struct strbuf git_format_patch_opt;
-	int reschedule_failed_exec;
-	int reapply_cherry_picks;
-	int fork_point;
-	int update_refs;
-	int config_autosquash;
-	int config_rebase_merges;
-	int config_update_refs;
+	கட்டமைப்பு strvec git_am_opts;
+	எண்ணிக்கை action action;
+	எழுத்து *reflog_action;
+	முழு signoff;
+	கட்டமைப்பு strvec trailer_args;
+	முழு allow_rerere_autoupdate;
+	முழு keep_empty;
+	முழு autosquash;
+	எழுத்து *gpg_sign_opt;
+	முழு autostash;
+	முழு committer_date_is_author_date;
+	முழு ignore_date;
+	கட்டமைப்பு string_list exec;
+	முழு allow_empty_message;
+	முழு rebase_merges, rebase_cousins;
+	எழுத்து *strategy;
+	கட்டமைப்பு string_list strategy_opts;
+	கட்டமைப்பு strbuf git_format_patch_opt;
+	முழு reschedule_failed_exec;
+	முழு reapply_cherry_picks;
+	முழு fork_point;
+	முழு update_refs;
+	முழு config_autosquash;
+	முழு config_rebase_merges;
+	முழு config_update_refs;
 };
 
 #define REBASE_OPTIONS_INIT {			  	\
@@ -158,26 +158,26 @@ struct rebase_options {
 		.strategy_opts = STRING_LIST_INIT_NODUP,\
 	}
 
-static void rebase_options_release(struct rebase_options *opts)
+நிலையான வெறுமை rebase_options_release(கட்டமைப்பு rebase_options *opts)
 {
-	free(opts->default_backend);
-	free(opts->reflog_action);
-	free(opts->head_name);
+	விடுவி(opts->default_backend);
+	விடுவி(opts->reflog_action);
+	விடுவி(opts->head_name);
 	strvec_clear(&opts->git_am_opts);
-	free(opts->gpg_sign_opt);
+	விடுவி(opts->gpg_sign_opt);
 	string_list_clear(&opts->exec, 0);
-	free(opts->strategy);
+	விடுவி(opts->strategy);
 	string_list_clear(&opts->strategy_opts, 0);
 	strbuf_release(&opts->git_format_patch_opt);
 	strvec_clear(&opts->trailer_args);
 }
 
-static struct replay_opts get_replay_opts(const struct rebase_options *opts)
+நிலையான கட்டமைப்பு replay_opts get_replay_opts(மாறிலி கட்டமைப்பு rebase_options *opts)
 {
-	struct replay_opts replay = REPLAY_OPTS_INIT;
+	கட்டமைப்பு replay_opts replay = REPLAY_OPTS_INIT;
 
 	replay.action = REPLAY_INTERACTIVE_REBASE;
-	replay.strategy = NULL;
+	replay.strategy = வெற்று;
 	sequencer_init_config(&replay);
 
 	replay.signoff = opts->signoff;
@@ -185,7 +185,7 @@ static struct replay_opts get_replay_opts(const struct rebase_options *opts)
 	strvec_pushv(&replay.trailer_args, opts->trailer_args.v);
 
 	replay.allow_ff = !(opts->flags & REBASE_FORCE);
-	if (opts->allow_rerere_autoupdate)
+	எனில் (opts->allow_rerere_autoupdate)
 		replay.allow_rerere_auto = opts->allow_rerere_autoupdate;
 	replay.allow_empty = 1;
 	replay.allow_empty_message = opts->allow_empty_message;
@@ -197,56 +197,56 @@ static struct replay_opts get_replay_opts(const struct rebase_options *opts)
 	replay.committer_date_is_author_date =
 					opts->committer_date_is_author_date;
 	replay.ignore_date = opts->ignore_date;
-	free(replay.gpg_sign);
+	விடுவி(replay.gpg_sign);
 	replay.gpg_sign = xstrdup_or_null(opts->gpg_sign_opt);
 	replay.reflog_action = xstrdup(opts->reflog_action);
-	if (opts->strategy)
+	எனில் (opts->strategy)
 		replay.strategy = xstrdup_or_null(opts->strategy);
-	else if (!replay.strategy && replay.default_strategy) {
+	இல்லையெனில் எனில் (!replay.strategy && replay.default_strategy) {
 		replay.strategy = replay.default_strategy;
-		replay.default_strategy = NULL;
+		replay.default_strategy = வெற்று;
 	}
 
-	for (size_t i = 0; i < opts->strategy_opts.nr; i++)
-		strvec_push(&replay.xopts, opts->strategy_opts.items[i].string);
+	க்கு (size_t i = 0; i < opts->strategy_opts.nr; i++)
+		strvec_தள்ளு(&replay.xopts, opts->strategy_opts.பொருட்கள்[i].string);
 
-	if (opts->squash_onto) {
+	எனில் (opts->squash_onto) {
 		oidcpy(&replay.squash_onto, opts->squash_onto);
 		replay.have_squash_onto = 1;
 	}
 
-	return replay;
+	திரும்பு replay;
 }
 
-static int edit_todo_file(unsigned flags, struct replay_opts *opts)
+நிலையான முழு edit_todo_file(unsigned flags, கட்டமைப்பு replay_opts *opts)
 {
-	const char *todo_file = rebase_path_todo();
-	struct todo_list todo_list = TODO_LIST_INIT,
+	மாறிலி எழுத்து *todo_file = rebase_path_todo();
+	கட்டமைப்பு todo_list todo_list = TODO_LIST_INIT,
 		new_todo = TODO_LIST_INIT;
-	int res = 0;
+	முழு res = 0;
 
-	if (strbuf_read_file(&todo_list.buf, todo_file, 0) < 0)
-		return error_errno(_("could not read '%s'."), todo_file);
+	எனில் (strbuf_read_file(&todo_list.buf, todo_file, 0) < 0)
+		திரும்பு error_errno(_("could not read '%s'."), todo_file);
 
-	strbuf_stripspace(&todo_list.buf, comment_line_str);
+	strbuf_stripspace(&todo_list.buf, comment_வரி_str);
 	res = edit_todo_list(the_repository, opts, &todo_list, &new_todo,
-			     NULL, NULL, flags);
-	if (!res && todo_list_write_to_file(the_repository, &new_todo, todo_file,
-					    NULL, NULL, -1, flags & ~(TODO_LIST_SHORTEN_IDS)))
+			     வெற்று, வெற்று, flags);
+	எனில் (!res && todo_list_write_to_file(the_repository, &new_todo, todo_file,
+					    வெற்று, வெற்று, -1, flags & ~(TODO_LIST_SHORTEN_IDS)))
 		res = error_errno(_("could not write '%s'"), todo_file);
 
 	todo_list_release(&todo_list);
 	todo_list_release(&new_todo);
 
-	return res;
+	திரும்பு res;
 }
 
-static int get_revision_ranges(struct commit *upstream, struct commit *onto,
-			       struct object_id *orig_head, char **revisions,
-			       char **shortrevisions)
+நிலையான முழு get_revision_ranges(கட்டமைப்பு commit *upstream, கட்டமைப்பு commit *onto,
+			       கட்டமைப்பு object_id *orig_head, எழுத்து **revisions,
+			       எழுத்து **shortrevisions)
 {
-	struct commit *base_rev = upstream ? upstream : onto;
-	const char *shorthead;
+	கட்டமைப்பு commit *base_rev = upstream ? upstream : onto;
+	மாறிலி எழுத்து *shorthead;
 
 	*revisions = xstrfmt("%s...%s", oid_to_hex(&base_rev->object.oid),
 			     oid_to_hex(orig_head));
@@ -254,75 +254,75 @@ static int get_revision_ranges(struct commit *upstream, struct commit *onto,
 	shorthead = repo_find_unique_abbrev(the_repository, orig_head,
 					    DEFAULT_ABBREV);
 
-	if (upstream) {
-		const char *shortrev;
+	எனில் (upstream) {
+		மாறிலி எழுத்து *shortrev;
 
 		shortrev = repo_find_unique_abbrev(the_repository,
 						   &base_rev->object.oid,
 						   DEFAULT_ABBREV);
 
 		*shortrevisions = xstrfmt("%s..%s", shortrev, shorthead);
-	} else
+	} இல்லையெனில்
 		*shortrevisions = xstrdup(shorthead);
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int init_basic_state(struct replay_opts *opts, const char *head_name,
-			    struct commit *onto,
-			    const struct object_id *orig_head)
+நிலையான முழு init_basic_state(கட்டமைப்பு replay_opts *opts, மாறிலி எழுத்து *head_name,
+			    கட்டமைப்பு commit *onto,
+			    மாறிலி கட்டமைப்பு object_id *orig_head)
 {
 	FILE *interactive;
 
-	if (!is_directory(merge_dir()) &&
+	எனில் (!is_directory(merge_dir()) &&
 	    safe_create_dir_in_gitdir(the_repository, merge_dir()))
-		return error_errno(_("could not create temporary %s"), merge_dir());
+		திரும்பு error_errno(_("could not create temporary %s"), merge_dir());
 
 	refs_delete_reflog(get_main_ref_store(the_repository), "REBASE_HEAD");
 
 	interactive = fopen(path_interactive(), "w");
-	if (!interactive)
-		return error_errno(_("could not mark as interactive"));
+	எனில் (!interactive)
+		திரும்பு error_errno(_("could not mark as interactive"));
 	fclose(interactive);
 
-	return write_basic_state(opts, head_name, onto, orig_head);
+	திரும்பு write_basic_state(opts, head_name, onto, orig_head);
 }
 
-static int do_interactive_rebase(struct rebase_options *opts, unsigned flags)
+நிலையான முழு do_interactive_rebase(கட்டமைப்பு rebase_options *opts, unsigned flags)
 {
-	int ret = -1;
-	char *revisions = NULL, *shortrevisions = NULL;
-	struct strvec make_script_args = STRVEC_INIT;
-	struct todo_list todo_list = TODO_LIST_INIT;
-	struct replay_opts replay = get_replay_opts(opts);
+	முழு ret = -1;
+	எழுத்து *revisions = வெற்று, *shortrevisions = வெற்று;
+	கட்டமைப்பு strvec make_script_args = STRVEC_INIT;
+	கட்டமைப்பு todo_list todo_list = TODO_LIST_INIT;
+	கட்டமைப்பு replay_opts replay = get_replay_opts(opts);
 
-	if (get_revision_ranges(opts->upstream, opts->onto, &opts->orig_head->object.oid,
+	எனில் (get_revision_ranges(opts->upstream, opts->onto, &opts->orig_head->object.oid,
 				&revisions, &shortrevisions))
-		goto cleanup;
+		செல் cleanup;
 
-	strvec_pushl(&make_script_args, "", revisions, NULL);
-	if (opts->restrict_revision)
+	strvec_pushl(&make_script_args, "", revisions, வெற்று);
+	எனில் (opts->restrict_revision)
 		strvec_pushf(&make_script_args, "^%s",
 			     oid_to_hex(&opts->restrict_revision->object.oid));
 
 	ret = sequencer_make_script(the_repository, &todo_list.buf,
 				    &make_script_args, flags);
-	if (ret) {
+	எனில் (ret) {
 		error(_("could not generate todo list"));
-		goto cleanup;
+		செல் cleanup;
 	}
 
-	if (init_basic_state(&replay,
+	எனில் (init_basic_state(&replay,
 			     opts->head_name ? opts->head_name : "detached HEAD",
 			     opts->onto, &opts->orig_head->object.oid))
-		goto cleanup;
+		செல் cleanup;
 
-	if (!opts->upstream && opts->squash_onto)
+	எனில் (!opts->upstream && opts->squash_onto)
 		write_file(path_squash_onto(), "%s\n",
 			   oid_to_hex(opts->squash_onto));
 
 	discard_index(the_repository->index);
-	if (todo_list_parse_insn_buffer(the_repository, &replay,
+	எனில் (todo_list_parse_insn_buffer(the_repository, &replay,
 					todo_list.buf.buf, &todo_list))
 		BUG("unusable todo list");
 
@@ -333,18 +333,18 @@ static int do_interactive_rebase(struct rebase_options *opts, unsigned flags)
 
 cleanup:
 	replay_opts_release(&replay);
-	free(revisions);
-	free(shortrevisions);
+	விடுவி(revisions);
+	விடுவி(shortrevisions);
 	todo_list_release(&todo_list);
 	strvec_clear(&make_script_args);
 
-	return ret;
+	திரும்பு ret;
 }
 
-static int run_sequencer_rebase(struct rebase_options *opts)
+நிலையான முழு run_sequencer_rebase(கட்டமைப்பு rebase_options *opts)
 {
 	unsigned flags = 0;
-	int abbreviate_commands = 0, ret = 0;
+	முழு abbreviate_commands = 0, ret = 0;
 
 	repo_config_get_bool(the_repository, "rebase.abbreviatecommands", &abbreviate_commands);
 
@@ -352,107 +352,107 @@ static int run_sequencer_rebase(struct rebase_options *opts)
 	flags |= abbreviate_commands ? TODO_LIST_ABBREVIATE_CMDS : 0;
 	flags |= opts->rebase_merges ? TODO_LIST_REBASE_MERGES : 0;
 	flags |= opts->rebase_cousins > 0 ? TODO_LIST_REBASE_COUSINS : 0;
-	flags |= opts->root_with_onto ? TODO_LIST_ROOT_WITH_ONTO : 0;
+	flags |= opts->வேர்_with_onto ? TODO_LIST_வேர்_WITH_ONTO : 0;
 	flags |= opts->reapply_cherry_picks ? TODO_LIST_REAPPLY_CHERRY_PICKS : 0;
 	flags |= opts->flags & REBASE_NO_QUIET ? TODO_LIST_WARN_SKIPPED_CHERRY_PICKS : 0;
 
-	switch (opts->action) {
-	case ACTION_NONE: {
-		if (!opts->onto && !opts->upstream)
+	தேர்வு (opts->action) {
+	நிலை ACTION_NONE: {
+		எனில் (!opts->onto && !opts->upstream)
 			die(_("a base commit must be provided with --upstream or --onto"));
 
 		ret = do_interactive_rebase(opts, flags);
-		break;
+		நிறுத்து;
 	}
-	case ACTION_SKIP: {
-		struct string_list merge_rr = STRING_LIST_INIT_DUP;
+	நிலை ACTION_SKIP: {
+		கட்டமைப்பு string_list merge_rr = STRING_LIST_INIT_DUP;
 
 		rerere_clear(the_repository, &merge_rr);
 	}
 		/* fallthrough */
-	case ACTION_CONTINUE: {
-		struct replay_opts replay_opts = get_replay_opts(opts);
+	நிலை ACTION_CONTINUE: {
+		கட்டமைப்பு replay_opts replay_opts = get_replay_opts(opts);
 
 		ret = sequencer_continue(the_repository, &replay_opts);
 		replay_opts_release(&replay_opts);
-		break;
+		நிறுத்து;
 	}
-	case ACTION_EDIT_TODO: {
-		struct replay_opts replay_opts = get_replay_opts(opts);
+	நிலை ACTION_EDIT_TODO: {
+		கட்டமைப்பு replay_opts replay_opts = get_replay_opts(opts);
 
 		ret = edit_todo_file(flags, &replay_opts);
 		replay_opts_release(&replay_opts);
-		break;
+		நிறுத்து;
 	}
-	case ACTION_SHOW_CURRENT_PATCH: {
-		struct child_process cmd = CHILD_PROCESS_INIT;
+	நிலை ACTION_SHOW_CURRENT_PATCH: {
+		கட்டமைப்பு child_process cmd = CHILD_PROCESS_INIT;
 
 		cmd.git_cmd = 1;
-		strvec_pushl(&cmd.args, "show", "REBASE_HEAD", "--", NULL);
+		strvec_pushl(&cmd.args, "show", "REBASE_HEAD", "--", வெற்று);
 		ret = run_command(&cmd);
 
-		break;
+		நிறுத்து;
 	}
-	default:
+	இயல்பு:
 		BUG("invalid command '%d'", opts->action);
 	}
 
-	return ret;
+	திரும்பு ret;
 }
 
-static int is_merge(struct rebase_options *opts)
+நிலையான முழு is_merge(கட்டமைப்பு rebase_options *opts)
 {
-	return opts->type == REBASE_MERGE;
+	திரும்பு opts->type == REBASE_MERGE;
 }
 
-static void imply_merge(struct rebase_options *opts, const char *option)
+நிலையான வெறுமை imply_merge(கட்டமைப்பு rebase_options *opts, மாறிலி எழுத்து *option)
 {
-	switch (opts->type) {
-	case REBASE_APPLY:
+	தேர்வு (opts->type) {
+	நிலை REBASE_APPLY:
 		die(_("%s requires the merge backend"), option);
-		break;
-	case REBASE_MERGE:
-		break;
-	default:
+		நிறுத்து;
+	நிலை REBASE_MERGE:
+		நிறுத்து;
+	இயல்பு:
 		opts->type = REBASE_MERGE; /* implied */
-		break;
+		நிறுத்து;
 	}
 }
 
 /* Returns the filename prefixed by the state_dir */
-static const char *state_dir_path(const char *filename, struct rebase_options *opts)
+நிலையான மாறிலி எழுத்து *state_dir_path(மாறிலி எழுத்து *filename, கட்டமைப்பு rebase_options *opts)
 {
-	static struct strbuf path = STRBUF_INIT;
-	static size_t prefix_len;
+	நிலையான கட்டமைப்பு strbuf path = STRBUF_INIT;
+	நிலையான size_t prefix_len;
 
-	if (!prefix_len) {
+	எனில் (!prefix_len) {
 		strbuf_addf(&path, "%s/", opts->state_dir);
 		prefix_len = path.len;
 	}
 
 	strbuf_setlen(&path, prefix_len);
 	strbuf_addstr(&path, filename);
-	return path.buf;
+	திரும்பு path.buf;
 }
 
 /* Initialize the rebase options from the state directory. */
-static int read_basic_state(struct rebase_options *opts)
+நிலையான முழு read_basic_state(கட்டமைப்பு rebase_options *opts)
 {
-	struct strbuf head_name = STRBUF_INIT;
-	struct strbuf buf = STRBUF_INIT;
-	struct object_id oid;
+	கட்டமைப்பு strbuf head_name = STRBUF_INIT;
+	கட்டமைப்பு strbuf buf = STRBUF_INIT;
+	கட்டமைப்பு object_id oid;
 
-	if (!read_oneliner(&head_name, state_dir_path("head-name", opts),
+	எனில் (!read_oneliner(&head_name, state_dir_path("head-name", opts),
 			   READ_ONELINER_WARN_MISSING) ||
 	    !read_oneliner(&buf, state_dir_path("onto", opts),
 			   READ_ONELINER_WARN_MISSING))
-		return -1;
+		திரும்பு -1;
 	opts->head_name = starts_with(head_name.buf, "refs/") ?
-		xstrdup(head_name.buf) : NULL;
+		xstrdup(head_name.buf) : வெற்று;
 	strbuf_release(&head_name);
-	if (get_oid_hex(buf.buf, &oid) ||
+	எனில் (get_oid_hex(buf.buf, &oid) ||
 	    !(opts->onto = lookup_commit_object(the_repository, &oid)))
-		return error(_("invalid onto: '%s'"), buf.buf);
+		திரும்பு error(_("invalid onto: '%s'"), buf.buf);
 
 	/*
 	 * We always write to orig-head, but interactive rebase used to write to
@@ -460,59 +460,59 @@ static int read_basic_state(struct rebase_options *opts)
 	 * user upgraded git with an ongoing interactive rebase.
 	 */
 	strbuf_reset(&buf);
-	if (file_exists(state_dir_path("orig-head", opts))) {
-		if (!read_oneliner(&buf, state_dir_path("orig-head", opts),
+	எனில் (file_exists(state_dir_path("orig-head", opts))) {
+		எனில் (!read_oneliner(&buf, state_dir_path("orig-head", opts),
 				   READ_ONELINER_WARN_MISSING))
-			return -1;
-	} else if (!read_oneliner(&buf, state_dir_path("head", opts),
+			திரும்பு -1;
+	} இல்லையெனில் எனில் (!read_oneliner(&buf, state_dir_path("head", opts),
 				  READ_ONELINER_WARN_MISSING))
-		return -1;
-	if (get_oid_hex(buf.buf, &oid) ||
+		திரும்பு -1;
+	எனில் (get_oid_hex(buf.buf, &oid) ||
 	    !(opts->orig_head = lookup_commit_object(the_repository, &oid)))
-		return error(_("invalid orig-head: '%s'"), buf.buf);
+		திரும்பு error(_("invalid orig-head: '%s'"), buf.buf);
 
-	if (file_exists(state_dir_path("quiet", opts)))
+	எனில் (file_exists(state_dir_path("quiet", opts)))
 		opts->flags &= ~REBASE_NO_QUIET;
-	else
+	இல்லையெனில்
 		opts->flags |= REBASE_NO_QUIET;
 
-	if (file_exists(state_dir_path("verbose", opts)))
+	எனில் (file_exists(state_dir_path("verbose", opts)))
 		opts->flags |= REBASE_VERBOSE;
 
-	if (file_exists(state_dir_path("signoff", opts))) {
+	எனில் (file_exists(state_dir_path("signoff", opts))) {
 		opts->signoff = 1;
 		opts->flags |= REBASE_FORCE;
 	}
 
-	if (file_exists(state_dir_path("allow_rerere_autoupdate", opts))) {
+	எனில் (file_exists(state_dir_path("allow_rerere_autoupdate", opts))) {
 		strbuf_reset(&buf);
-		if (!read_oneliner(&buf, state_dir_path("allow_rerere_autoupdate", opts),
+		எனில் (!read_oneliner(&buf, state_dir_path("allow_rerere_autoupdate", opts),
 				   READ_ONELINER_WARN_MISSING))
-			return -1;
-		if (!strcmp(buf.buf, "--rerere-autoupdate"))
+			திரும்பு -1;
+		எனில் (!strcmp(buf.buf, "--rerere-autoupdate"))
 			opts->allow_rerere_autoupdate = RERERE_AUTOUPDATE;
-		else if (!strcmp(buf.buf, "--no-rerere-autoupdate"))
+		இல்லையெனில் எனில் (!strcmp(buf.buf, "--no-rerere-autoupdate"))
 			opts->allow_rerere_autoupdate = RERERE_NOAUTOUPDATE;
-		else
+		இல்லையெனில்
 			warning(_("ignoring invalid allow_rerere_autoupdate: "
 				  "'%s'"), buf.buf);
 	}
 
-	if (file_exists(state_dir_path("gpg_sign_opt", opts))) {
+	எனில் (file_exists(state_dir_path("gpg_sign_opt", opts))) {
 		strbuf_reset(&buf);
-		if (!read_oneliner(&buf, state_dir_path("gpg_sign_opt", opts),
+		எனில் (!read_oneliner(&buf, state_dir_path("gpg_sign_opt", opts),
 				   READ_ONELINER_WARN_MISSING))
-			return -1;
-		free(opts->gpg_sign_opt);
+			திரும்பு -1;
+		விடுவி(opts->gpg_sign_opt);
 		opts->gpg_sign_opt = xstrdup(buf.buf);
 	}
 
 	strbuf_release(&buf);
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int rebase_write_basic_state(struct rebase_options *opts)
+நிலையான முழு rebase_write_basic_state(கட்டமைப்பு rebase_options *opts)
 {
 	write_file(state_dir_path("head-name", opts), "%s",
 		   opts->head_name ? opts->head_name : "detached HEAD");
@@ -520,50 +520,50 @@ static int rebase_write_basic_state(struct rebase_options *opts)
 		   opts->onto ? oid_to_hex(&opts->onto->object.oid) : "");
 	write_file(state_dir_path("orig-head", opts), "%s",
 		   oid_to_hex(&opts->orig_head->object.oid));
-	if (!(opts->flags & REBASE_NO_QUIET))
+	எனில் (!(opts->flags & REBASE_NO_QUIET))
 		write_file(state_dir_path("quiet", opts), "%s", "");
-	if (opts->flags & REBASE_VERBOSE)
+	எனில் (opts->flags & REBASE_VERBOSE)
 		write_file(state_dir_path("verbose", opts), "%s", "");
-	if (opts->allow_rerere_autoupdate > 0)
+	எனில் (opts->allow_rerere_autoupdate > 0)
 		write_file(state_dir_path("allow_rerere_autoupdate", opts),
 			   "-%s-rerere-autoupdate",
 			   opts->allow_rerere_autoupdate == RERERE_AUTOUPDATE ?
 				"" : "-no");
-	if (opts->gpg_sign_opt)
+	எனில் (opts->gpg_sign_opt)
 		write_file(state_dir_path("gpg_sign_opt", opts), "%s",
 			   opts->gpg_sign_opt);
-	if (opts->signoff)
+	எனில் (opts->signoff)
 		write_file(state_dir_path("signoff", opts), "--signoff");
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int cleanup_autostash(struct rebase_options *opts)
+நிலையான முழு cleanup_autostash(கட்டமைப்பு rebase_options *opts)
 {
-	int ret;
-	struct strbuf dir = STRBUF_INIT;
-	const char *path = state_dir_path("autostash", opts);
+	முழு ret;
+	கட்டமைப்பு strbuf dir = STRBUF_INIT;
+	மாறிலி எழுத்து *path = state_dir_path("autostash", opts);
 
-	if (!file_exists(path))
-		return 0;
+	எனில் (!file_exists(path))
+		திரும்பு 0;
 	ret = apply_autostash(path);
 	strbuf_addstr(&dir, opts->state_dir);
-	if (remove_dir_recursively(&dir, 0))
+	எனில் (remove_dir_recursively(&dir, 0))
 		ret = error_errno(_("could not remove '%s'"), opts->state_dir);
 	strbuf_release(&dir);
 
-	return ret;
+	திரும்பு ret;
 }
 
-static int finish_rebase(struct rebase_options *opts)
+நிலையான முழு finish_rebase(கட்டமைப்பு rebase_options *opts)
 {
-	struct strbuf dir = STRBUF_INIT;
-	int ret = 0;
+	கட்டமைப்பு strbuf dir = STRBUF_INIT;
+	முழு ret = 0;
 
-	refs_delete_ref(get_main_ref_store(the_repository), NULL,
-			"REBASE_HEAD", NULL, REF_NO_DEREF);
-	refs_delete_ref(get_main_ref_store(the_repository), NULL,
-			"AUTO_MERGE", NULL, REF_NO_DEREF);
+	refs_delete_ref(get_main_ref_store(the_repository), வெற்று,
+			"REBASE_HEAD", வெற்று, REF_NO_DEREF);
+	refs_delete_ref(get_main_ref_store(the_repository), வெற்று,
+			"AUTO_MERGE", வெற்று, REF_NO_DEREF);
 	apply_autostash(state_dir_path("autostash", opts));
 	/*
 	 * We ignore errors in 'git maintenance run --auto', since the
@@ -572,33 +572,33 @@ static int finish_rebase(struct rebase_options *opts)
 	run_auto_maintenance(the_repository,
 			!(opts->flags & (REBASE_NO_QUIET|REBASE_VERBOSE)));
 
-	if (opts->type == REBASE_MERGE) {
-		struct replay_opts replay = REPLAY_OPTS_INIT;
+	எனில் (opts->type == REBASE_MERGE) {
+		கட்டமைப்பு replay_opts replay = REPLAY_OPTS_INIT;
 
 		replay.action = REPLAY_INTERACTIVE_REBASE;
 		ret = sequencer_remove_state(&replay);
 		replay_opts_release(&replay);
-	} else {
+	} இல்லையெனில் {
 		strbuf_addstr(&dir, opts->state_dir);
-		if (remove_dir_recursively(&dir, 0))
+		எனில் (remove_dir_recursively(&dir, 0))
 			ret = error(_("could not remove '%s'"),
 				    opts->state_dir);
 		strbuf_release(&dir);
 	}
 
-	return ret;
+	திரும்பு ret;
 }
 
-static int move_to_original_branch(struct rebase_options *opts)
+நிலையான முழு move_to_original_branch(கட்டமைப்பு rebase_options *opts)
 {
-	struct strbuf branch_reflog = STRBUF_INIT, head_reflog = STRBUF_INIT;
-	struct reset_working_tree_options ropts = { 0 };
-	int ret;
+	கட்டமைப்பு strbuf branch_reflog = STRBUF_INIT, head_reflog = STRBUF_INIT;
+	கட்டமைப்பு reset_working_மரம்_options ropts = { 0 };
+	முழு ret;
 
-	if (!opts->head_name)
-		return 0; /* nothing to move back to */
+	எனில் (!opts->head_name)
+		திரும்பு 0; /* nothing to move back to */
 
-	if (!opts->onto)
+	எனில் (!opts->onto)
 		BUG("move_to_original_branch without onto");
 
 	strbuf_addf(&branch_reflog, "%s (finish): %s onto %s",
@@ -607,62 +607,62 @@ static int move_to_original_branch(struct rebase_options *opts)
 	strbuf_addf(&head_reflog, "%s (finish): returning to %s",
 		    opts->reflog_action, opts->head_name);
 	ropts.branch = opts->head_name;
-	ropts.flags = RESET_WORKING_TREE_REFS_ONLY |
-		      RESET_WORKING_TREE_UPDATE_HEAD;
-	ropts.branch_msg = branch_reflog.buf;
-	ropts.head_msg = head_reflog.buf;
-	ret = reset_working_tree(the_repository, &ropts);
+	ropts.flags = RESET_WORKING_மரம்_REFS_ONLY |
+		      RESET_WORKING_மரம்_UPDATE_HEAD;
+	ropts.branch_செய்தி = branch_reflog.buf;
+	ropts.head_செய்தி = head_reflog.buf;
+	ret = reset_working_மரம்(the_repository, &ropts);
 
 	strbuf_release(&branch_reflog);
 	strbuf_release(&head_reflog);
-	return ret;
+	திரும்பு ret;
 }
 
-static int run_am(struct rebase_options *opts)
+நிலையான முழு run_am(கட்டமைப்பு rebase_options *opts)
 {
-	struct child_process am = CHILD_PROCESS_INIT;
-	struct child_process format_patch = CHILD_PROCESS_INIT;
-	int status;
-	char *rebased_patches;
+	கட்டமைப்பு child_process am = CHILD_PROCESS_INIT;
+	கட்டமைப்பு child_process format_patch = CHILD_PROCESS_INIT;
+	முழு status;
+	எழுத்து *rebased_patches;
 
 	am.git_cmd = 1;
-	strvec_push(&am.args, "am");
+	strvec_தள்ளு(&am.args, "am");
 	strvec_pushf(&am.env, GIT_REFLOG_ACTION_ENVIRONMENT "=%s (pick)",
 		     opts->reflog_action);
-	if (opts->action == ACTION_CONTINUE) {
-		strvec_push(&am.args, "--resolved");
+	எனில் (opts->action == ACTION_CONTINUE) {
+		strvec_தள்ளு(&am.args, "--resolved");
 		strvec_pushf(&am.args, "--resolvemsg=%s", rebase_resolvemsg);
-		if (opts->gpg_sign_opt)
-			strvec_push(&am.args, opts->gpg_sign_opt);
+		எனில் (opts->gpg_sign_opt)
+			strvec_தள்ளு(&am.args, opts->gpg_sign_opt);
 		status = run_command(&am);
-		if (status)
-			return status;
+		எனில் (status)
+			திரும்பு status;
 
-		return move_to_original_branch(opts);
+		திரும்பு move_to_original_branch(opts);
 	}
-	if (opts->action == ACTION_SKIP) {
-		strvec_push(&am.args, "--skip");
+	எனில் (opts->action == ACTION_SKIP) {
+		strvec_தள்ளு(&am.args, "--skip");
 		strvec_pushf(&am.args, "--resolvemsg=%s", rebase_resolvemsg);
 		status = run_command(&am);
-		if (status)
-			return status;
+		எனில் (status)
+			திரும்பு status;
 
-		return move_to_original_branch(opts);
+		திரும்பு move_to_original_branch(opts);
 	}
-	if (opts->action == ACTION_SHOW_CURRENT_PATCH) {
-		strvec_push(&am.args, "--show-current-patch");
-		return run_command(&am);
+	எனில் (opts->action == ACTION_SHOW_CURRENT_PATCH) {
+		strvec_தள்ளு(&am.args, "--show-current-patch");
+		திரும்பு run_command(&am);
 	}
 
 	rebased_patches = repo_git_path(the_repository, "rebased-patches");
 	format_patch.out = open(rebased_patches,
 				O_WRONLY | O_CREAT | O_TRUNC, 0666);
-	if (format_patch.out < 0) {
+	எனில் (format_patch.out < 0) {
 		status = error_errno(_("could not open '%s' for writing"),
 				     rebased_patches);
-		free(rebased_patches);
+		விடுவி(rebased_patches);
 		child_process_clear(&am);
-		return status;
+		திரும்பு status;
 	}
 
 	format_patch.git_cmd = 1;
@@ -670,32 +670,32 @@ static int run_am(struct rebase_options *opts)
 		     "--full-index", "--cherry-pick", "--right-only",
 		     "--default-prefix", "--no-renames",
 		     "--no-cover-letter", "--pretty=mboxrd", "--topo-order",
-		     "--no-base", NULL);
-	if (opts->git_format_patch_opt.len)
+		     "--no-base", வெற்று);
+	எனில் (opts->git_format_patch_opt.len)
 		strvec_split(&format_patch.args,
 			     opts->git_format_patch_opt.buf);
 	strvec_pushf(&format_patch.args, "%s...%s",
-		     oid_to_hex(opts->root ?
+		     oid_to_hex(opts->வேர் ?
 				/* this is now equivalent to !opts->upstream */
 				&opts->onto->object.oid :
 				&opts->upstream->object.oid),
 		     oid_to_hex(&opts->orig_head->object.oid));
-	if (opts->restrict_revision)
+	எனில் (opts->restrict_revision)
 		strvec_pushf(&format_patch.args, "^%s",
 			     oid_to_hex(&opts->restrict_revision->object.oid));
 
 	status = run_command(&format_patch);
-	if (status) {
-		struct reset_working_tree_options ropts = { 0 };
+	எனில் (status) {
+		கட்டமைப்பு reset_working_மரம்_options ropts = { 0 };
 		unlink(rebased_patches);
-		free(rebased_patches);
+		விடுவி(rebased_patches);
 		child_process_clear(&am);
 
 		ropts.oid = &opts->orig_head->object.oid;
 		ropts.branch = opts->head_name;
 		ropts.default_reflog_action = opts->reflog_action;
-		ropts.flags = RESET_WORKING_TREE_UPDATE_HEAD;
-		reset_working_tree(the_repository, &ropts);
+		ropts.flags = RESET_WORKING_மரம்_UPDATE_HEAD;
+		reset_working_மரம்(the_repository, &ropts);
 		error(_("\ngit encountered an error while preparing the "
 			"patches to replay\n"
 			"these revisions:\n"
@@ -703,79 +703,79 @@ static int run_am(struct rebase_options *opts)
 			"As a result, git cannot rebase them."),
 		      opts->revisions);
 
-		return status;
+		திரும்பு status;
 	}
 
 	am.in = open(rebased_patches, O_RDONLY);
-	if (am.in < 0) {
+	எனில் (am.in < 0) {
 		status = error_errno(_("could not open '%s' for reading"),
 				     rebased_patches);
-		free(rebased_patches);
+		விடுவி(rebased_patches);
 		child_process_clear(&am);
-		return status;
+		திரும்பு status;
 	}
 
 	strvec_pushv(&am.args, opts->git_am_opts.v);
-	strvec_push(&am.args, "--rebasing");
+	strvec_தள்ளு(&am.args, "--rebasing");
 	strvec_pushf(&am.args, "--resolvemsg=%s", rebase_resolvemsg);
-	strvec_push(&am.args, "--patch-format=mboxrd");
-	if (opts->allow_rerere_autoupdate == RERERE_AUTOUPDATE)
-		strvec_push(&am.args, "--rerere-autoupdate");
-	else if (opts->allow_rerere_autoupdate == RERERE_NOAUTOUPDATE)
-		strvec_push(&am.args, "--no-rerere-autoupdate");
-	if (opts->gpg_sign_opt)
-		strvec_push(&am.args, opts->gpg_sign_opt);
+	strvec_தள்ளு(&am.args, "--patch-format=mboxrd");
+	எனில் (opts->allow_rerere_autoupdate == RERERE_AUTOUPDATE)
+		strvec_தள்ளு(&am.args, "--rerere-autoupdate");
+	இல்லையெனில் எனில் (opts->allow_rerere_autoupdate == RERERE_NOAUTOUPDATE)
+		strvec_தள்ளு(&am.args, "--no-rerere-autoupdate");
+	எனில் (opts->gpg_sign_opt)
+		strvec_தள்ளு(&am.args, opts->gpg_sign_opt);
 	status = run_command(&am);
 	unlink(rebased_patches);
-	free(rebased_patches);
+	விடுவி(rebased_patches);
 
-	if (!status) {
-		return move_to_original_branch(opts);
+	எனில் (!status) {
+		திரும்பு move_to_original_branch(opts);
 	}
 
-	if (is_directory(opts->state_dir))
+	எனில் (is_directory(opts->state_dir))
 		rebase_write_basic_state(opts);
 
-	return status;
+	திரும்பு status;
 }
 
-static int run_specific_rebase(struct rebase_options *opts)
+நிலையான முழு run_specific_rebase(கட்டமைப்பு rebase_options *opts)
 {
-	int status;
+	முழு status;
 
-	if (opts->type == REBASE_MERGE) {
+	எனில் (opts->type == REBASE_MERGE) {
 		/* Run sequencer-based rebase */
-		if (!(opts->flags & REBASE_INTERACTIVE_EXPLICIT))
+		எனில் (!(opts->flags & REBASE_INTERACTIVE_EXPLICIT))
 			setenv("GIT_SEQUENCE_EDITOR", ":", 1);
-		if (opts->gpg_sign_opt) {
+		எனில் (opts->gpg_sign_opt) {
 			/* remove the leading "-S" */
-			char *tmp = xstrdup(opts->gpg_sign_opt + 2);
-			free(opts->gpg_sign_opt);
+			எழுத்து *tmp = xstrdup(opts->gpg_sign_opt + 2);
+			விடுவி(opts->gpg_sign_opt);
 			opts->gpg_sign_opt = tmp;
 		}
 
 		status = run_sequencer_rebase(opts);
-	} else if (opts->type == REBASE_APPLY)
+	} இல்லையெனில் எனில் (opts->type == REBASE_APPLY)
 		status = run_am(opts);
-	else
+	இல்லையெனில்
 		BUG("Unhandled rebase type %d", opts->type);
 
-	if (opts->dont_finish_rebase)
+	எனில் (opts->dont_finish_rebase)
 		; /* do nothing */
-	else if (opts->type == REBASE_MERGE) {
-		int quiet = !(opts->flags & (REBASE_NO_QUIET|REBASE_VERBOSE));
+	இல்லையெனில் எனில் (opts->type == REBASE_MERGE) {
+		முழு quiet = !(opts->flags & (REBASE_NO_QUIET|REBASE_VERBOSE));
 
 		/*
 		 * The sequencer cleans up after itself. Its state directory
 		 * is gone once it is done, and stays while it is stopped.
 		 */
-		if (status == 0 && !is_directory(opts->state_dir))
+		எனில் (status == 0 && !is_directory(opts->state_dir))
 			run_auto_maintenance(the_repository, quiet);
-	} else if (status == 0) {
-		if (!file_exists(state_dir_path("stopped-sha", opts)))
+	} இல்லையெனில் எனில் (status == 0) {
+		எனில் (!file_exists(state_dir_path("stopped-sha", opts)))
 			finish_rebase(opts);
-	} else if (status == 2) {
-		struct strbuf dir = STRBUF_INIT;
+	} இல்லையெனில் எனில் (status == 2) {
+		கட்டமைப்பு strbuf dir = STRBUF_INIT;
 
 		apply_autostash(state_dir_path("autostash", opts));
 		strbuf_addstr(&dir, opts->state_dir);
@@ -784,103 +784,103 @@ static int run_specific_rebase(struct rebase_options *opts)
 		die("Nothing to do");
 	}
 
-	return status ? -1 : 0;
+	திரும்பு status ? -1 : 0;
 }
 
-static void parse_rebase_merges_value(struct rebase_options *options, const char *value)
+நிலையான வெறுமை parse_rebase_merges_மதிப்பு(கட்டமைப்பு rebase_options *options, மாறிலி எழுத்து *மதிப்பு)
 {
-	if (!strcmp("no-rebase-cousins", value))
+	எனில் (!strcmp("no-rebase-cousins", மதிப்பு))
 		options->rebase_cousins = 0;
-	else if (!strcmp("rebase-cousins", value))
+	இல்லையெனில் எனில் (!strcmp("rebase-cousins", மதிப்பு))
 		options->rebase_cousins = 1;
-	else
-		die(_("Unknown rebase-merges mode: %s"), value);
+	இல்லையெனில்
+		die(_("Unknown rebase-merges mode: %s"), மதிப்பு);
 }
 
-static int rebase_config(const char *var, const char *value,
-			 const struct config_context *ctx, void *data)
+நிலையான முழு rebase_config(மாறிலி எழுத்து *var, மாறிலி எழுத்து *மதிப்பு,
+			 மாறிலி கட்டமைப்பு config_context *ctx, வெறுமை *data)
 {
-	struct rebase_options *opts = data;
+	கட்டமைப்பு rebase_options *opts = data;
 
-	if (!strcmp(var, "rebase.stat")) {
-		if (git_config_bool(var, value))
+	எனில் (!strcmp(var, "rebase.stat")) {
+		எனில் (git_config_bool(var, மதிப்பு))
 			opts->flags |= REBASE_DIFFSTAT;
-		else
+		இல்லையெனில்
 			opts->flags &= ~REBASE_DIFFSTAT;
-		return 0;
+		திரும்பு 0;
 	}
 
-	if (!strcmp(var, "rebase.autosquash")) {
-		opts->config_autosquash = git_config_bool(var, value);
-		return 0;
+	எனில் (!strcmp(var, "rebase.autosquash")) {
+		opts->config_autosquash = git_config_bool(var, மதிப்பு);
+		திரும்பு 0;
 	}
 
-	if (!strcmp(var, "commit.gpgsign")) {
-		free(opts->gpg_sign_opt);
-		opts->gpg_sign_opt = git_config_bool(var, value) ?
-			xstrdup("-S") : NULL;
-		return 0;
+	எனில் (!strcmp(var, "commit.gpgsign")) {
+		விடுவி(opts->gpg_sign_opt);
+		opts->gpg_sign_opt = git_config_bool(var, மதிப்பு) ?
+			xstrdup("-S") : வெற்று;
+		திரும்பு 0;
 	}
 
-	if (!strcmp(var, "rebase.autostash")) {
-		opts->autostash = git_config_bool(var, value);
-		return 0;
+	எனில் (!strcmp(var, "rebase.autostash")) {
+		opts->autostash = git_config_bool(var, மதிப்பு);
+		திரும்பு 0;
 	}
 
-	if (!strcmp(var, "rebase.rebasemerges")) {
-		opts->config_rebase_merges = git_parse_maybe_bool(value);
-		if (opts->config_rebase_merges < 0) {
+	எனில் (!strcmp(var, "rebase.rebasemerges")) {
+		opts->config_rebase_merges = git_parse_maybe_bool(மதிப்பு);
+		எனில் (opts->config_rebase_merges < 0) {
 			opts->config_rebase_merges = 1;
-			parse_rebase_merges_value(opts, value);
-		} else {
+			parse_rebase_merges_மதிப்பு(opts, மதிப்பு);
+		} இல்லையெனில் {
 			opts->rebase_cousins = 0;
 		}
-		return 0;
+		திரும்பு 0;
 	}
 
-	if (!strcmp(var, "rebase.updaterefs")) {
-		opts->config_update_refs = git_config_bool(var, value);
-		return 0;
+	எனில் (!strcmp(var, "rebase.updaterefs")) {
+		opts->config_update_refs = git_config_bool(var, மதிப்பு);
+		திரும்பு 0;
 	}
 
-	if (!strcmp(var, "rebase.reschedulefailedexec")) {
-		opts->reschedule_failed_exec = git_config_bool(var, value);
-		return 0;
+	எனில் (!strcmp(var, "rebase.reschedulefailedexec")) {
+		opts->reschedule_failed_exec = git_config_bool(var, மதிப்பு);
+		திரும்பு 0;
 	}
 
-	if (!strcmp(var, "rebase.forkpoint")) {
-		opts->fork_point = git_config_bool(var, value) ? -1 : 0;
-		return 0;
+	எனில் (!strcmp(var, "rebase.forkpoint")) {
+		opts->fork_point = git_config_bool(var, மதிப்பு) ? -1 : 0;
+		திரும்பு 0;
 	}
 
-	if (!strcmp(var, "rebase.backend")) {
+	எனில் (!strcmp(var, "rebase.backend")) {
 		FREE_AND_NULL(opts->default_backend);
-		return git_config_string(&opts->default_backend, var, value);
+		திரும்பு git_config_string(&opts->default_backend, var, மதிப்பு);
 	}
 
-	return git_default_config(var, value, ctx, data);
+	திரும்பு git_default_config(var, மதிப்பு, ctx, data);
 }
 
-static int checkout_up_to_date(struct rebase_options *options)
+நிலையான முழு checkout_up_to_date(கட்டமைப்பு rebase_options *options)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct reset_working_tree_options ropts = { 0 };
-	int ret = 0;
+	கட்டமைப்பு strbuf buf = STRBUF_INIT;
+	கட்டமைப்பு reset_working_மரம்_options ropts = { 0 };
+	முழு ret = 0;
 
 	strbuf_addf(&buf, "%s: checkout %s",
 		    options->reflog_action, options->switch_to);
 	ropts.oid = &options->orig_head->object.oid;
 	ropts.branch = options->head_name;
-	ropts.flags = RESET_WORKING_TREE_RUN_POST_CHECKOUT_HOOK |
-		      RESET_WORKING_TREE_UPDATE_HEAD;
-	if (!ropts.branch)
-		ropts.flags |=  RESET_WORKING_TREE_DETACH;
-	ropts.head_msg = buf.buf;
-	if (reset_working_tree(the_repository, &ropts) < 0)
+	ropts.flags = RESET_WORKING_மரம்_RUN_POST_CHECKOUT_HOOK |
+		      RESET_WORKING_மரம்_UPDATE_HEAD;
+	எனில் (!ropts.branch)
+		ropts.flags |=  RESET_WORKING_மரம்_DETACH;
+	ropts.head_செய்தி = buf.buf;
+	எனில் (reset_working_மரம்(the_repository, &ropts) < 0)
 		ret = error(_("could not switch to %s"), options->switch_to);
 	strbuf_release(&buf);
 
-	return ret;
+	திரும்பு ret;
 }
 
 /*
@@ -888,182 +888,182 @@ static int checkout_up_to_date(struct rebase_options *options)
  * no merge commits. This function *expects* `from` to be an ancestor of
  * `to`.
  */
-static int is_linear_history(struct commit *from, struct commit *to)
+நிலையான முழு is_linear_history(கட்டமைப்பு commit *from, கட்டமைப்பு commit *to)
 {
-	while (to && to != from) {
+	போது (to && to != from) {
 		repo_parse_commit(the_repository, to);
-		if (!to->parents)
-			return 1;
-		if (to->parents->next)
-			return 0;
+		எனில் (!to->parents)
+			திரும்பு 1;
+		எனில் (to->parents->next)
+			திரும்பு 0;
 		to = to->parents->item;
 	}
-	return 1;
+	திரும்பு 1;
 }
 
-static int can_fast_forward(struct commit *onto, struct commit *upstream,
-			    struct commit *restrict_revision,
-			    struct commit *head, struct object_id *branch_base)
+நிலையான முழு can_fast_forward(கட்டமைப்பு commit *onto, கட்டமைப்பு commit *upstream,
+			    கட்டமைப்பு commit *restrict_revision,
+			    கட்டமைப்பு commit *head, கட்டமைப்பு object_id *branch_base)
 {
-	struct commit_list *merge_bases = NULL;
-	int res = 0;
+	கட்டமைப்பு commit_list *merge_bases = வெற்று;
+	முழு res = 0;
 
-	if (is_null_oid(branch_base))
-		goto done; /* fill_branch_base() found multiple merge bases */
+	எனில் (is_null_oid(branch_base))
+		செல் done; /* fill_branch_base() found multiple merge bases */
 
-	if (!oideq(branch_base, &onto->object.oid))
-		goto done;
+	எனில் (!oideq(branch_base, &onto->object.oid))
+		செல் done;
 
-	if (restrict_revision && !oideq(&restrict_revision->object.oid, branch_base))
-		goto done;
+	எனில் (restrict_revision && !oideq(&restrict_revision->object.oid, branch_base))
+		செல் done;
 
-	if (!upstream)
-		goto done;
+	எனில் (!upstream)
+		செல் done;
 
-	if (repo_get_merge_bases(the_repository, upstream, head, &merge_bases) < 0)
+	எனில் (repo_get_merge_bases(the_repository, upstream, head, &merge_bases) < 0)
 		exit(128);
-	if (!merge_bases || merge_bases->next)
-		goto done;
+	எனில் (!merge_bases || merge_bases->next)
+		செல் done;
 
-	if (!oideq(&onto->object.oid, &merge_bases->item->object.oid))
-		goto done;
+	எனில் (!oideq(&onto->object.oid, &merge_bases->item->object.oid))
+		செல் done;
 
 	res = 1;
 
 done:
 	commit_list_free(merge_bases);
-	return res && is_linear_history(onto, head);
+	திரும்பு res && is_linear_history(onto, head);
 }
 
-static void fill_branch_base(struct rebase_options *options,
-			    struct object_id *branch_base)
+நிலையான வெறுமை fill_branch_base(கட்டமைப்பு rebase_options *options,
+			    கட்டமைப்பு object_id *branch_base)
 {
-	struct commit_list *merge_bases = NULL;
+	கட்டமைப்பு commit_list *merge_bases = வெற்று;
 
-	if (repo_get_merge_bases(the_repository, options->onto,
+	எனில் (repo_get_merge_bases(the_repository, options->onto,
 				 options->orig_head, &merge_bases) < 0)
 		exit(128);
-	if (!merge_bases || merge_bases->next)
+	எனில் (!merge_bases || merge_bases->next)
 		oidcpy(branch_base, null_oid(the_hash_algo));
-	else
+	இல்லையெனில்
 		oidcpy(branch_base, &merge_bases->item->object.oid);
 
 	commit_list_free(merge_bases);
 }
 
-static int parse_opt_am(const struct option *opt, const char *arg, int unset)
+நிலையான முழு parse_opt_am(மாறிலி கட்டமைப்பு option *opt, மாறிலி எழுத்து *arg, முழு unset)
 {
-	struct rebase_options *opts = opt->value;
+	கட்டமைப்பு rebase_options *opts = opt->மதிப்பு;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
-	if (opts->type != REBASE_UNSPECIFIED && opts->type != REBASE_APPLY)
+	எனில் (opts->type != REBASE_UNSPECIFIED && opts->type != REBASE_APPLY)
 	    die(_("apply options and merge options cannot be used together"));
 
 	opts->type = REBASE_APPLY;
 
-	return 0;
+	திரும்பு 0;
 }
 
 /* -i followed by -m is still -i */
-static int parse_opt_merge(const struct option *opt, const char *arg, int unset)
+நிலையான முழு parse_opt_merge(மாறிலி கட்டமைப்பு option *opt, மாறிலி எழுத்து *arg, முழு unset)
 {
-	struct rebase_options *opts = opt->value;
+	கட்டமைப்பு rebase_options *opts = opt->மதிப்பு;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
-	if (opts->type != REBASE_UNSPECIFIED && opts->type != REBASE_MERGE)
+	எனில் (opts->type != REBASE_UNSPECIFIED && opts->type != REBASE_MERGE)
 	    die(_("apply options and merge options cannot be used together"));
 
 	opts->type = REBASE_MERGE;
 
-	return 0;
+	திரும்பு 0;
 }
 
 /* -i followed by -r is still explicitly interactive, but -r alone is not */
-static int parse_opt_interactive(const struct option *opt, const char *arg,
-				 int unset)
+நிலையான முழு parse_opt_interactive(மாறிலி கட்டமைப்பு option *opt, மாறிலி எழுத்து *arg,
+				 முழு unset)
 {
-	struct rebase_options *opts = opt->value;
+	கட்டமைப்பு rebase_options *opts = opt->மதிப்பு;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
-	if (opts->type != REBASE_UNSPECIFIED && opts->type != REBASE_MERGE)
+	எனில் (opts->type != REBASE_UNSPECIFIED && opts->type != REBASE_MERGE)
 	    die(_("apply options and merge options cannot be used together"));
 
 	opts->type = REBASE_MERGE;
 	opts->flags |= REBASE_INTERACTIVE_EXPLICIT;
 
-	return 0;
+	திரும்பு 0;
 }
 
-static enum empty_type parse_empty_value(const char *value)
+நிலையான எண்ணிக்கை empty_type parse_empty_மதிப்பு(மாறிலி எழுத்து *மதிப்பு)
 {
-	if (!strcasecmp(value, "drop"))
-		return EMPTY_DROP;
-	else if (!strcasecmp(value, "keep"))
-		return EMPTY_KEEP;
-	else if (!strcasecmp(value, "stop"))
-		return EMPTY_STOP;
-	else if (!strcasecmp(value, "ask")) {
+	எனில் (!strcasecmp(மதிப்பு, "drop"))
+		திரும்பு EMPTY_DROP;
+	இல்லையெனில் எனில் (!strcasecmp(மதிப்பு, "keep"))
+		திரும்பு EMPTY_KEEP;
+	இல்லையெனில் எனில் (!strcasecmp(மதிப்பு, "stop"))
+		திரும்பு EMPTY_STOP;
+	இல்லையெனில் எனில் (!strcasecmp(மதிப்பு, "ask")) {
 		warning(_("--empty=ask is deprecated; use '--empty=stop' instead."));
-		return EMPTY_STOP;
+		திரும்பு EMPTY_STOP;
 	}
 
-	die(_("unrecognized empty type '%s'; valid values are \"drop\", \"keep\", and \"stop\"."), value);
+	die(_("unrecognized empty type '%s'; valid values are \"drop\", \"keep\", and \"stop\"."), மதிப்பு);
 }
 
-static int parse_opt_keep_empty(const struct option *opt, const char *arg,
-				int unset)
+நிலையான முழு parse_opt_keep_empty(மாறிலி கட்டமைப்பு option *opt, மாறிலி எழுத்து *arg,
+				முழு unset)
 {
-	struct rebase_options *opts = opt->value;
+	கட்டமைப்பு rebase_options *opts = opt->மதிப்பு;
 
 	BUG_ON_OPT_ARG(arg);
 
 	imply_merge(opts, unset ? "--no-keep-empty" : "--keep-empty");
 	opts->keep_empty = !unset;
-	return 0;
+	திரும்பு 0;
 }
 
-static int parse_opt_empty(const struct option *opt, const char *arg, int unset)
+நிலையான முழு parse_opt_empty(மாறிலி கட்டமைப்பு option *opt, மாறிலி எழுத்து *arg, முழு unset)
 {
-	struct rebase_options *options = opt->value;
-	enum empty_type value = parse_empty_value(arg);
+	கட்டமைப்பு rebase_options *options = opt->மதிப்பு;
+	எண்ணிக்கை empty_type மதிப்பு = parse_empty_மதிப்பு(arg);
 
 	BUG_ON_OPT_NEG(unset);
 
-	options->empty = value;
-	return 0;
+	options->empty = மதிப்பு;
+	திரும்பு 0;
 }
 
-static int parse_opt_rebase_merges(const struct option *opt, const char *arg, int unset)
+நிலையான முழு parse_opt_rebase_merges(மாறிலி கட்டமைப்பு option *opt, மாறிலி எழுத்து *arg, முழு unset)
 {
-	struct rebase_options *options = opt->value;
+	கட்டமைப்பு rebase_options *options = opt->மதிப்பு;
 
 	options->rebase_merges = !unset;
 	options->rebase_cousins = 0;
 
-	if (arg) {
-		if (!*arg) {
+	எனில் (arg) {
+		எனில் (!*arg) {
 			warning(_("--rebase-merges with an empty string "
 				  "argument is deprecated and will stop "
 				  "working in a future version of Git. Use "
 				  "--rebase-merges without an argument "
 				  "instead, which does the same thing."));
-			return 0;
+			திரும்பு 0;
 		}
-		parse_rebase_merges_value(options, arg);
+		parse_rebase_merges_மதிப்பு(options, arg);
 	}
 
-	return 0;
+	திரும்பு 0;
 }
 
-static void NORETURN error_on_missing_default_upstream(void)
+நிலையான வெறுமை NORETURN error_on_missing_default_upstream(வெறுமை)
 {
-	struct branch *current_branch = branch_get(NULL);
+	கட்டமைப்பு branch *current_branch = branch_get(வெற்று);
 
 	printf(_("%s\n"
 		 "Please specify which branch you want to rebase against.\n"
@@ -1075,10 +1075,10 @@ static void NORETURN error_on_missing_default_upstream(void)
 			"the current branch.") :
 			_("You are not currently on a branch."));
 
-	if (current_branch) {
-		const char *remote = current_branch->remote_name;
+	எனில் (current_branch) {
+		மாறிலி எழுத்து *remote = current_branch->remote_name;
 
-		if (!remote)
+		எனில் (!remote)
 			remote = _("<remote>");
 
 		printf(_("If you wish to set tracking information for this "
@@ -1091,43 +1091,43 @@ static void NORETURN error_on_missing_default_upstream(void)
 	exit(1);
 }
 
-static int check_exec_cmd(const char *cmd)
+நிலையான முழு check_exec_cmd(மாறிலி எழுத்து *cmd)
 {
-	if (strchr(cmd, '\n'))
-		return error(_("exec commands cannot contain newlines"));
+	எனில் (strchr(cmd, '\n'))
+		திரும்பு error(_("exec commands cannot contain newlines"));
 
 	/* Does the command consist purely of whitespace? */
-	if (!cmd[strspn(cmd, " \t\r\f\v")])
-		return error(_("empty exec command"));
+	எனில் (!cmd[strspn(cmd, " \t\r\f\v")])
+		திரும்பு error(_("empty exec command"));
 
-	return 0;
+	திரும்பு 0;
 }
 
-int cmd_rebase(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+முழு cmd_rebase(முழு argc,
+	       மாறிலி எழுத்து **argv,
+	       மாறிலி எழுத்து *prefix,
+	       கட்டமைப்பு repository *repo UNUSED)
 {
-	struct rebase_options options = REBASE_OPTIONS_INIT;
-	const char *branch_name;
-	const char *strategy_opt = NULL;
-	int ret, flags, total_argc, in_progress = 0;
-	int keep_base = 0;
-	int ok_to_skip_pre_rebase = 0;
-	struct strbuf msg = STRBUF_INIT;
-	struct strbuf revisions = STRBUF_INIT;
-	struct strbuf buf = STRBUF_INIT;
-	struct object_id branch_base;
-	int ignore_whitespace = 0;
-	const char *gpg_sign = NULL;
-	struct object_id squash_onto;
-	char *squash_onto_name = NULL;
-	char *keep_base_onto_name = NULL;
-	int reschedule_failed_exec = -1;
-	int allow_preemptive_ff = 1;
-	int preserve_merges_selected = 0;
-	struct reset_working_tree_options ropts = { 0 };
-	struct option builtin_rebase_options[] = {
+	கட்டமைப்பு rebase_options options = REBASE_OPTIONS_INIT;
+	மாறிலி எழுத்து *branch_name;
+	மாறிலி எழுத்து *strategy_opt = வெற்று;
+	முழு ret, flags, total_argc, in_progress = 0;
+	முழு keep_base = 0;
+	முழு ok_to_skip_pre_rebase = 0;
+	கட்டமைப்பு strbuf செய்தி = STRBUF_INIT;
+	கட்டமைப்பு strbuf revisions = STRBUF_INIT;
+	கட்டமைப்பு strbuf buf = STRBUF_INIT;
+	கட்டமைப்பு object_id branch_base;
+	முழு ignore_whitespace = 0;
+	மாறிலி எழுத்து *gpg_sign = வெற்று;
+	கட்டமைப்பு object_id squash_onto;
+	எழுத்து *squash_onto_name = வெற்று;
+	எழுத்து *keep_base_onto_name = வெற்று;
+	முழு reschedule_failed_exec = -1;
+	முழு allow_preemptive_ff = 1;
+	முழு preserve_merges_selected = 0;
+	கட்டமைப்பு reset_working_மரம்_options ropts = { 0 };
+	கட்டமைப்பு option builtin_rebase_options[] = {
 		OPT_STRING(0, "onto", &options.onto_name,
 			   N_("revision"),
 			   N_("rebase onto given branch instead of upstream")),
@@ -1145,8 +1145,8 @@ int cmd_rebase(int argc,
 			.type = OPTION_NEGBIT,
 			.short_name = 'n',
 			.long_name = "no-stat",
-			.value = &options.flags,
-			.precision = sizeof(options.flags),
+			.மதிப்பு = &options.flags,
+			.precision = அளவு(options.flags),
 			.help = N_("do not show diffstat of what changed upstream"),
 			.flags = PARSE_OPT_NOARG,
 			.defval = REBASE_DIFFSTAT,
@@ -1162,7 +1162,7 @@ int cmd_rebase(int argc,
 			 N_("ignore author date and use current date")),
 		OPT_HIDDEN_BOOL(0, "ignore-date", &options.ignore_date,
 				N_("synonym of --reset-author-date")),
-		OPT_PASSTHRU_ARGV('C', NULL, &options.git_am_opts, N_("n"),
+		OPT_PASSTHRU_ARGV('C', வெற்று, &options.git_am_opts, N_("n"),
 				  N_("passed to 'git apply'"), 0),
 		OPT_BOOL(0, "ignore-whitespace", &ignore_whitespace,
 			 N_("ignore changes in whitespace")),
@@ -1188,15 +1188,15 @@ int cmd_rebase(int argc,
 		OPT_CMDMODE(0, "show-current-patch", &options.action,
 			    N_("show the patch file being applied or merged"),
 			    ACTION_SHOW_CURRENT_PATCH),
-		OPT_CALLBACK_F(0, "apply", &options, NULL,
+		OPT_CALLBACK_F(0, "apply", &options, வெற்று,
 			N_("use apply strategies to rebase"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			parse_opt_am),
-		OPT_CALLBACK_F('m', "merge", &options, NULL,
+		OPT_CALLBACK_F('m', "merge", &options, வெற்று,
 			N_("use merging strategies to rebase"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			parse_opt_merge),
-		OPT_CALLBACK_F('i', "interactive", &options, NULL,
+		OPT_CALLBACK_F('i', "interactive", &options, வெற்று,
 			N_("let the user edit the list of commits to rebase"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			parse_opt_interactive),
@@ -1208,7 +1208,7 @@ int cmd_rebase(int argc,
 		OPT_CALLBACK_F(0, "empty", &options, "(drop|keep|stop)",
 			       N_("how to handle commits that become empty"),
 			       PARSE_OPT_NONEG, parse_opt_empty),
-		OPT_CALLBACK_F('k', "keep-empty", &options, NULL,
+		OPT_CALLBACK_F('k', "keep-empty", &options, வெற்று,
 			N_("keep commits which start empty"),
 			PARSE_OPT_NOARG | PARSE_OPT_HIDDEN,
 			parse_opt_keep_empty),
@@ -1222,7 +1222,7 @@ int cmd_rebase(int argc,
 			.type = OPTION_STRING,
 			.short_name = 'S',
 			.long_name = "gpg-sign",
-			.value = &gpg_sign,
+			.மதிப்பு = &gpg_sign,
 			.argh = N_("key-id"),
 			.help = N_("GPG-sign commits"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1247,7 +1247,7 @@ int cmd_rebase(int argc,
 				N_("option"),
 				N_("pass the argument through to the merge "
 				   "strategy")),
-		OPT_BOOL(0, "root", &options.root,
+		OPT_BOOL(0, "root", &options.வேர்,
 			 N_("rebase all reachable commits up to the root(s)")),
 		OPT_BOOL(0, "reschedule-failed-exec",
 			 &reschedule_failed_exec,
@@ -1256,7 +1256,7 @@ int cmd_rebase(int argc,
 			 N_("apply all changes, even those already present upstream")),
 		OPT_END(),
 	};
-	int i;
+	முழு i;
 
 	show_usage_with_options_if_asked(argc, argv,
 					 builtin_rebase_usage,
@@ -1270,35 +1270,35 @@ int cmd_rebase(int argc,
 
 	repo_config(the_repository, rebase_config, &options);
 	/* options.gpg_sign_opt will be either "-S" or NULL */
-	gpg_sign = options.gpg_sign_opt ? "" : NULL;
+	gpg_sign = options.gpg_sign_opt ? "" : வெற்று;
 	FREE_AND_NULL(options.gpg_sign_opt);
 
 	strbuf_reset(&buf);
 	strbuf_addf(&buf, "%s/applying", apply_dir());
-	if(file_exists(buf.buf))
+	எனில்(file_exists(buf.buf))
 		die(_("It looks like 'git am' is in progress. Cannot rebase."));
 
-	if (is_directory(apply_dir())) {
+	எனில் (is_directory(apply_dir())) {
 		options.type = REBASE_APPLY;
 		options.state_dir = apply_dir();
-	} else if (is_directory(merge_dir())) {
+	} இல்லையெனில் எனில் (is_directory(merge_dir())) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "%s/rewritten", merge_dir());
-		if (!(options.action == ACTION_ABORT) && is_directory(buf.buf)) {
+		எனில் (!(options.action == ACTION_ABORT) && is_directory(buf.buf)) {
 			die(_("`rebase --preserve-merges` (-p) is no longer supported.\n"
 			"Use `git rebase --abort` to terminate current rebase.\n"
 			"Or downgrade to v2.33, or earlier, to complete the rebase."));
-		} else {
+		} இல்லையெனில் {
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "%s/interactive", merge_dir());
 			options.type = REBASE_MERGE;
-			if (file_exists(buf.buf))
+			எனில் (file_exists(buf.buf))
 				options.flags |= REBASE_INTERACTIVE_EXPLICIT;
 		}
 		options.state_dir = merge_dir();
 	}
 
-	if (options.type != REBASE_UNSPECIFIED)
+	எனில் (options.type != REBASE_UNSPECIFIED)
 		in_progress = 1;
 
 	total_argc = argc;
@@ -1306,54 +1306,54 @@ int cmd_rebase(int argc,
 			     builtin_rebase_options,
 			     builtin_rebase_usage, 0);
 
-	if (options.trailer_args.nr) {
-		if (validate_trailer_args(&options.trailer_args))
-			die(NULL);
+	எனில் (options.trailer_args.nr) {
+		எனில் (validate_trailer_args(&options.trailer_args))
+			die(வெற்று);
 		options.flags |= REBASE_FORCE;
 	}
 
-	if (preserve_merges_selected)
+	எனில் (preserve_merges_selected)
 		die(_("--preserve-merges was replaced by --rebase-merges\n"
 			"Note: Your `pull.rebase` configuration may also be set to 'preserve',\n"
 			"which is no longer supported; use 'merges' instead"));
 
-	if (options.action != ACTION_NONE && total_argc != 2) {
+	எனில் (options.action != ACTION_NONE && total_argc != 2) {
 		usage_with_options(builtin_rebase_usage,
 				   builtin_rebase_options);
 	}
 
-	if (argc > 2)
+	எனில் (argc > 2)
 		usage_with_options(builtin_rebase_usage,
 				   builtin_rebase_options);
 
-	if (keep_base) {
-		if (options.onto_name)
+	எனில் (keep_base) {
+		எனில் (options.onto_name)
 			die(_("options '%s' and '%s' cannot be used together"), "--keep-base", "--onto");
-		if (options.root)
+		எனில் (options.வேர்)
 			die(_("options '%s' and '%s' cannot be used together"), "--keep-base", "--root");
 		/*
 		 * --keep-base defaults to --no-fork-point to keep the
 		 * base the same.
 		 */
-		if (options.fork_point < 0)
+		எனில் (options.fork_point < 0)
 			options.fork_point = 0;
 	}
-	if (options.root && options.fork_point > 0)
+	எனில் (options.வேர் && options.fork_point > 0)
 		die(_("options '%s' and '%s' cannot be used together"), "--root", "--fork-point");
 
-	if (options.action != ACTION_NONE && !in_progress)
+	எனில் (options.action != ACTION_NONE && !in_progress)
 		die(_("no rebase in progress"));
 
-	if (options.action == ACTION_EDIT_TODO && !is_merge(&options))
+	எனில் (options.action == ACTION_EDIT_TODO && !is_merge(&options))
 		die(_("The --edit-todo action can only be used during "
 		      "interactive rebase."));
 
-	if (trace2_is_enabled()) {
-		if (is_merge(&options))
+	எனில் (trace2_is_enabled()) {
+		எனில் (is_merge(&options))
 			trace2_cmd_mode("interactive");
-		else if (options.exec.nr)
+		இல்லையெனில் எனில் (options.exec.nr)
 			trace2_cmd_mode("interactive-exec");
-		else
+		இல்லையெனில்
 			trace2_cmd_mode(action_names[options.action]);
 	}
 
@@ -1361,111 +1361,111 @@ int cmd_rebase(int argc,
 	options.reflog_action =
 		xstrdup(options.reflog_action ? options.reflog_action : "rebase");
 
-	switch (options.action) {
-	case ACTION_CONTINUE: {
-		struct object_id head;
-		struct lock_file lock_file = LOCK_INIT;
-		int fd;
+	தேர்வு (options.action) {
+	நிலை ACTION_CONTINUE: {
+		கட்டமைப்பு object_id head;
+		கட்டமைப்பு lock_file lock_file = LOCK_INIT;
+		முழு fd;
 
 		/* Sanity check */
-		if (repo_get_oid(the_repository, "HEAD", &head))
+		எனில் (repo_get_oid(the_repository, "HEAD", &head))
 			die(_("Cannot read HEAD"));
 
 		fd = repo_hold_locked_index(the_repository, &lock_file, 0);
-		if (repo_read_index(the_repository) < 0)
+		எனில் (repo_read_index(the_repository) < 0)
 			die(_("could not read index"));
-		refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL,
-			      NULL);
-		if (0 <= fd)
+		refresh_index(the_repository->index, REFRESH_QUIET, வெற்று, வெற்று,
+			      வெற்று);
+		எனில் (0 <= fd)
 			repo_update_index_if_able(the_repository, &lock_file);
 		rollback_lock_file(&lock_file);
 
-		if (has_unstaged_changes(the_repository, 1)) {
+		எனில் (has_unstaged_changes(the_repository, 1)) {
 			puts(_("You must edit all merge conflicts and then\n"
 			       "mark them as resolved using git add"));
 			exit(1);
 		}
-		if (read_basic_state(&options))
+		எனில் (read_basic_state(&options))
 			exit(1);
-		goto run_rebase;
+		செல் run_rebase;
 	}
-	case ACTION_SKIP: {
-		struct string_list merge_rr = STRING_LIST_INIT_DUP;
+	நிலை ACTION_SKIP: {
+		கட்டமைப்பு string_list merge_rr = STRING_LIST_INIT_DUP;
 
 		rerere_clear(the_repository, &merge_rr);
 		string_list_clear(&merge_rr, 1);
-		ropts.flags = RESET_WORKING_TREE_HARD |
-			      RESET_WORKING_TREE_UPDATE_HEAD;
-		if (reset_working_tree(the_repository, &ropts) < 0)
+		ropts.flags = RESET_WORKING_மரம்_HARD |
+			      RESET_WORKING_மரம்_UPDATE_HEAD;
+		எனில் (reset_working_மரம்(the_repository, &ropts) < 0)
 			die(_("could not discard worktree changes"));
 		remove_branch_state(the_repository, 0);
-		if (read_basic_state(&options))
+		எனில் (read_basic_state(&options))
 			exit(1);
-		goto run_rebase;
+		செல் run_rebase;
 	}
-	case ACTION_ABORT: {
-		struct string_list merge_rr = STRING_LIST_INIT_DUP;
-		struct strbuf head_msg = STRBUF_INIT;
+	நிலை ACTION_ABORT: {
+		கட்டமைப்பு string_list merge_rr = STRING_LIST_INIT_DUP;
+		கட்டமைப்பு strbuf head_செய்தி = STRBUF_INIT;
 
 		rerere_clear(the_repository, &merge_rr);
 		string_list_clear(&merge_rr, 1);
 
-		if (read_basic_state(&options))
+		எனில் (read_basic_state(&options))
 			exit(1);
 
-		strbuf_addf(&head_msg, "%s (abort): returning to %s",
+		strbuf_addf(&head_செய்தி, "%s (abort): returning to %s",
 			    options.reflog_action,
 			    options.head_name ? options.head_name
 					      : oid_to_hex(&options.orig_head->object.oid));
 		ropts.oid = &options.orig_head->object.oid;
-		ropts.head_msg = head_msg.buf;
+		ropts.head_செய்தி = head_செய்தி.buf;
 		ropts.branch = options.head_name;
-		ropts.flags = RESET_WORKING_TREE_HARD |
-			      RESET_WORKING_TREE_UPDATE_HEAD;
-		if (reset_working_tree(the_repository, &ropts) < 0)
+		ropts.flags = RESET_WORKING_மரம்_HARD |
+			      RESET_WORKING_மரம்_UPDATE_HEAD;
+		எனில் (reset_working_மரம்(the_repository, &ropts) < 0)
 			die(_("could not move back to %s"),
 			    oid_to_hex(&options.orig_head->object.oid));
-		strbuf_release(&head_msg);
+		strbuf_release(&head_செய்தி);
 		remove_branch_state(the_repository, 0);
 		ret = finish_rebase(&options);
-		goto cleanup;
+		செல் cleanup;
 	}
-	case ACTION_QUIT: {
+	நிலை ACTION_QUIT: {
 		save_autostash(state_dir_path("autostash", &options));
-		if (options.type == REBASE_MERGE) {
-			struct replay_opts replay = REPLAY_OPTS_INIT;
+		எனில் (options.type == REBASE_MERGE) {
+			கட்டமைப்பு replay_opts replay = REPLAY_OPTS_INIT;
 
 			replay.action = REPLAY_INTERACTIVE_REBASE;
 			ret = sequencer_remove_state(&replay);
 			replay_opts_release(&replay);
-		} else {
+		} இல்லையெனில் {
 			strbuf_reset(&buf);
 			strbuf_addstr(&buf, options.state_dir);
 			ret = remove_dir_recursively(&buf, 0);
-			if (ret)
+			எனில் (ret)
 				error(_("could not remove '%s'"),
 				       options.state_dir);
 		}
-		goto cleanup;
+		செல் cleanup;
 	}
-	case ACTION_EDIT_TODO:
+	நிலை ACTION_EDIT_TODO:
 		options.dont_finish_rebase = 1;
-		goto run_rebase;
-	case ACTION_SHOW_CURRENT_PATCH:
+		செல் run_rebase;
+	நிலை ACTION_SHOW_CURRENT_PATCH:
 		options.dont_finish_rebase = 1;
-		goto run_rebase;
-	case ACTION_NONE:
-		break;
-	default:
+		செல் run_rebase;
+	நிலை ACTION_NONE:
+		நிறுத்து;
+	இயல்பு:
 		BUG("action: %d", options.action);
 	}
 
 	/* Make sure no rebase is in progress */
-	if (in_progress) {
-		const char *last_slash = strrchr(options.state_dir, '/');
-		const char *state_dir_base =
+	எனில் (in_progress) {
+		மாறிலி எழுத்து *last_slash = strrchr(options.state_dir, '/');
+		மாறிலி எழுத்து *state_dir_base =
 			last_slash ? last_slash + 1 : options.state_dir;
-		const char *cmd_live_rebase =
+		மாறிலி எழுத்து *cmd_live_rebase =
 			"git rebase (--continue | --abort | --skip)";
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "rm -fr \"%s\"", options.state_dir);
@@ -1480,50 +1480,50 @@ int cmd_rebase(int argc,
 		    state_dir_base, cmd_live_rebase, buf.buf);
 	}
 
-	if ((options.flags & REBASE_INTERACTIVE_EXPLICIT) ||
+	எனில் ((options.flags & REBASE_INTERACTIVE_EXPLICIT) ||
 	    (options.action != ACTION_NONE) ||
 	    (options.exec.nr > 0) ||
 	    options.autosquash == 1) {
 		allow_preemptive_ff = 0;
 	}
-	if (options.committer_date_is_author_date || options.ignore_date)
+	எனில் (options.committer_date_is_author_date || options.ignore_date)
 		options.flags |= REBASE_FORCE;
 
-	for (i = 0; i < options.git_am_opts.nr; i++) {
-		const char *option = options.git_am_opts.v[i], *p;
-		if (!strcmp(option, "--whitespace=fix") ||
+	க்கு (i = 0; i < options.git_am_opts.nr; i++) {
+		மாறிலி எழுத்து *option = options.git_am_opts.v[i], *p;
+		எனில் (!strcmp(option, "--whitespace=fix") ||
 		    !strcmp(option, "--whitespace=strip"))
 			allow_preemptive_ff = 0;
-		else if (skip_prefix(option, "-C", &p)) {
-			while (*p)
-				if (!isdigit(*(p++)))
+		இல்லையெனில் எனில் (skip_prefix(option, "-C", &p)) {
+			போது (*p)
+				எனில் (!isdigit(*(p++)))
 					die(_("switch `C' expects a "
 					      "numerical value"));
-		} else if (skip_prefix(option, "--whitespace=", &p)) {
-			if (*p && strcmp(p, "warn") && strcmp(p, "nowarn") &&
+		} இல்லையெனில் எனில் (skip_prefix(option, "--whitespace=", &p)) {
+			எனில் (*p && strcmp(p, "warn") && strcmp(p, "nowarn") &&
 			    strcmp(p, "error") && strcmp(p, "error-all"))
 				die("Invalid whitespace option: '%s'", p);
 		}
 	}
 
-	for (i = 0; i < options.exec.nr; i++)
-		if (check_exec_cmd(options.exec.items[i].string))
+	க்கு (i = 0; i < options.exec.nr; i++)
+		எனில் (check_exec_cmd(options.exec.பொருட்கள்[i].string))
 			exit(1);
 
-	if (!(options.flags & REBASE_NO_QUIET))
-		strvec_push(&options.git_am_opts, "-q");
+	எனில் (!(options.flags & REBASE_NO_QUIET))
+		strvec_தள்ளு(&options.git_am_opts, "-q");
 
-	if (options.empty != EMPTY_UNSPECIFIED)
+	எனில் (options.empty != EMPTY_UNSPECIFIED)
 		imply_merge(&options, "--empty");
 
-	if (options.reapply_cherry_picks < 0)
+	எனில் (options.reapply_cherry_picks < 0)
 		/*
 		 * We default to --no-reapply-cherry-picks unless
 		 * --keep-base is given; when --keep-base is given, we want
 		 * to default to --reapply-cherry-picks.
 		 */
 		options.reapply_cherry_picks = keep_base;
-	else if (!keep_base)
+	இல்லையெனில் எனில் (!keep_base)
 		/*
 		 * The apply backend always searches for and drops cherry
 		 * picks.  This is often not wanted with --keep-base, so
@@ -1538,159 +1538,159 @@ int cmd_rebase(int argc,
 					  "--reapply-cherry-picks" :
 					  "--no-reapply-cherry-picks");
 
-	if (gpg_sign)
+	எனில் (gpg_sign)
 		options.gpg_sign_opt = xstrfmt("-S%s", gpg_sign);
 
-	if (options.exec.nr)
+	எனில் (options.exec.nr)
 		imply_merge(&options, "--exec");
 
-	if (options.type == REBASE_APPLY) {
-		if (ignore_whitespace)
-			strvec_push(&options.git_am_opts,
+	எனில் (options.type == REBASE_APPLY) {
+		எனில் (ignore_whitespace)
+			strvec_தள்ளு(&options.git_am_opts,
 				    "--ignore-whitespace");
-		if (options.committer_date_is_author_date)
-			strvec_push(&options.git_am_opts,
+		எனில் (options.committer_date_is_author_date)
+			strvec_தள்ளு(&options.git_am_opts,
 				    "--committer-date-is-author-date");
-		if (options.ignore_date)
-			strvec_push(&options.git_am_opts, "--ignore-date");
-	} else {
+		எனில் (options.ignore_date)
+			strvec_தள்ளு(&options.git_am_opts, "--ignore-date");
+	} இல்லையெனில் {
 		/* REBASE_MERGE */
-		if (ignore_whitespace) {
+		எனில் (ignore_whitespace) {
 			string_list_append(&options.strategy_opts,
 					   "ignore-space-change");
 		}
 	}
 
-	if (strategy_opt)
+	எனில் (strategy_opt)
 		options.strategy = xstrdup(strategy_opt);
-	else if (options.strategy_opts.nr && !options.strategy)
+	இல்லையெனில் எனில் (options.strategy_opts.nr && !options.strategy)
 		options.strategy = xstrdup("ort");
-	if (options.strategy)
+	எனில் (options.strategy)
 		imply_merge(&options, "--strategy");
 
-	if (options.root && !options.onto_name)
+	எனில் (options.வேர் && !options.onto_name)
 		imply_merge(&options, "--root without --onto");
 
-	if (options.trailer_args.nr)
+	எனில் (options.trailer_args.nr)
 		imply_merge(&options, "--trailer");
 
-	if (isatty(2) && options.flags & REBASE_NO_QUIET)
+	எனில் (isatty(2) && options.flags & REBASE_NO_QUIET)
 		strbuf_addstr(&options.git_format_patch_opt, " --progress");
 
-	if (options.git_am_opts.nr || options.type == REBASE_APPLY) {
+	எனில் (options.git_am_opts.nr || options.type == REBASE_APPLY) {
 		/* all am options except -q are compatible only with --apply */
-		for (i = options.git_am_opts.nr - 1; i >= 0; i--)
-			if (strcmp(options.git_am_opts.v[i], "-q"))
-				break;
+		க்கு (i = options.git_am_opts.nr - 1; i >= 0; i--)
+			எனில் (strcmp(options.git_am_opts.v[i], "-q"))
+				நிறுத்து;
 
-		if (i >= 0 || options.type == REBASE_APPLY) {
-			if (is_merge(&options))
+		எனில் (i >= 0 || options.type == REBASE_APPLY) {
+			எனில் (is_merge(&options))
 				die(_("apply options and merge options "
 					  "cannot be used together"));
-			else if (options.rebase_merges == -1 && options.config_rebase_merges == 1)
+			இல்லையெனில் எனில் (options.rebase_merges == -1 && options.config_rebase_merges == 1)
 				die(_("apply options are incompatible with rebase.rebaseMerges.  Consider adding --no-rebase-merges"));
-			else if (options.update_refs == -1 && options.config_update_refs == 1)
+			இல்லையெனில் எனில் (options.update_refs == -1 && options.config_update_refs == 1)
 				die(_("apply options are incompatible with rebase.updateRefs.  Consider adding --no-update-refs"));
-			else
+			இல்லையெனில்
 				options.type = REBASE_APPLY;
 		}
 	}
 
-	if (options.update_refs == 1)
+	எனில் (options.update_refs == 1)
 		imply_merge(&options, "--update-refs");
 	options.update_refs = (options.update_refs >= 0) ? options.update_refs :
 			     ((options.config_update_refs >= 0) ? options.config_update_refs : 0);
 
-	if (options.rebase_merges == 1)
+	எனில் (options.rebase_merges == 1)
 		imply_merge(&options, "--rebase-merges");
 	options.rebase_merges = (options.rebase_merges >= 0) ? options.rebase_merges :
 				((options.config_rebase_merges >= 0) ? options.config_rebase_merges : 0);
 
-	if (options.autosquash == 1) {
+	எனில் (options.autosquash == 1) {
 		imply_merge(&options, "--autosquash");
-	} else if (options.autosquash == -1) {
+	} இல்லையெனில் எனில் (options.autosquash == -1) {
 		options.autosquash =
 			options.config_autosquash &&
 			(options.flags & REBASE_INTERACTIVE_EXPLICIT);
 	}
 
-	if (options.type == REBASE_UNSPECIFIED) {
-		if (!strcmp(options.default_backend, "merge"))
+	எனில் (options.type == REBASE_UNSPECIFIED) {
+		எனில் (!strcmp(options.default_backend, "merge"))
 			options.type = REBASE_MERGE;
-		else if (!strcmp(options.default_backend, "apply"))
+		இல்லையெனில் எனில் (!strcmp(options.default_backend, "apply"))
 			options.type = REBASE_APPLY;
-		else
+		இல்லையெனில்
 			die(_("Unknown rebase backend: %s"),
 			    options.default_backend);
 	}
 
-	switch (options.type) {
-	case REBASE_MERGE:
+	தேர்வு (options.type) {
+	நிலை REBASE_MERGE:
 		options.state_dir = merge_dir();
-		break;
-	case REBASE_APPLY:
+		நிறுத்து;
+	நிலை REBASE_APPLY:
 		options.state_dir = apply_dir();
-		break;
-	default:
+		நிறுத்து;
+	இயல்பு:
 		BUG("options.type was just set above; should be unreachable.");
 	}
 
-	if (options.empty == EMPTY_UNSPECIFIED) {
-		if (options.flags & REBASE_INTERACTIVE_EXPLICIT)
+	எனில் (options.empty == EMPTY_UNSPECIFIED) {
+		எனில் (options.flags & REBASE_INTERACTIVE_EXPLICIT)
 			options.empty = EMPTY_STOP;
-		else if (options.exec.nr > 0)
+		இல்லையெனில் எனில் (options.exec.nr > 0)
 			options.empty = EMPTY_KEEP;
-		else
+		இல்லையெனில்
 			options.empty = EMPTY_DROP;
 	}
-	if (reschedule_failed_exec > 0 && !is_merge(&options))
+	எனில் (reschedule_failed_exec > 0 && !is_merge(&options))
 		die(_("--reschedule-failed-exec requires "
 		      "--exec or --interactive"));
-	if (reschedule_failed_exec >= 0)
+	எனில் (reschedule_failed_exec >= 0)
 		options.reschedule_failed_exec = reschedule_failed_exec;
 
-	if (options.signoff) {
-		strvec_push(&options.git_am_opts, "--signoff");
+	எனில் (options.signoff) {
+		strvec_தள்ளு(&options.git_am_opts, "--signoff");
 		options.flags |= REBASE_FORCE;
 	}
 
-	if (!options.root) {
-		if (argc < 1) {
-			struct branch *branch;
+	எனில் (!options.வேர்) {
+		எனில் (argc < 1) {
+			கட்டமைப்பு branch *branch;
 
-			branch = branch_get(NULL);
+			branch = branch_get(வெற்று);
 			options.upstream_name = branch_get_upstream(branch,
-								    NULL);
-			if (!options.upstream_name)
+								    வெற்று);
+			எனில் (!options.upstream_name)
 				error_on_missing_default_upstream();
-			if (options.fork_point < 0)
+			எனில் (options.fork_point < 0)
 				options.fork_point = 1;
-		} else {
+		} இல்லையெனில் {
 			options.upstream_name = argv[0];
 			argc--;
 			argv++;
-			if (!strcmp(options.upstream_name, "-"))
+			எனில் (!strcmp(options.upstream_name, "-"))
 				options.upstream_name = "@{-1}";
 		}
 		options.upstream =
 			lookup_commit_reference_by_name(options.upstream_name);
-		if (!options.upstream)
+		எனில் (!options.upstream)
 			die(_("invalid upstream '%s'"), options.upstream_name);
 		options.upstream_arg = options.upstream_name;
-	} else {
-		if (!options.onto_name) {
-			if (commit_tree("", 0, the_hash_algo->empty_tree, NULL,
-					&squash_onto, NULL, NULL) < 0)
+	} இல்லையெனில் {
+		எனில் (!options.onto_name) {
+			எனில் (commit_மரம்("", 0, the_hash_algo->empty_மரம், வெற்று,
+					&squash_onto, வெற்று, வெற்று) < 0)
 				die(_("Could not create new root commit"));
 			options.squash_onto = &squash_onto;
 			options.onto_name = squash_onto_name =
 				xstrdup(oid_to_hex(&squash_onto));
-		} else
-			options.root_with_onto = 1;
+		} இல்லையெனில்
+			options.வேர்_with_onto = 1;
 
-		options.upstream_name = NULL;
-		options.upstream = NULL;
-		if (argc > 1)
+		options.upstream_name = வெற்று;
+		options.upstream = வெற்று;
+		எனில் (argc > 1)
 			usage_with_options(builtin_rebase_usage,
 					   builtin_rebase_options);
 		options.upstream_arg = "--root";
@@ -1703,99 +1703,99 @@ int cmd_rebase(int argc,
 	 * orig_head -- commit object name of tip of the branch before rebasing
 	 * head_name -- refs/heads/<that-branch> or NULL (detached HEAD)
 	 */
-	if (argc == 1) {
+	எனில் (argc == 1) {
 		/* Is it "rebase other branchname" or "rebase other commit"? */
-		struct object_id branch_oid;
+		கட்டமைப்பு object_id branch_oid;
 		branch_name = argv[0];
 		options.switch_to = argv[0];
 
 		/* Is it a local branch? */
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "refs/heads/%s", branch_name);
-		if (!refs_read_ref(get_main_ref_store(the_repository), buf.buf, &branch_oid)) {
+		எனில் (!refs_read_ref(get_main_ref_store(the_repository), buf.buf, &branch_oid)) {
 			die_if_checked_out(buf.buf, 1);
 			options.head_name = xstrdup(buf.buf);
 			options.orig_head =
 				lookup_commit_object(the_repository,
 						     &branch_oid);
 		/* If not is it a valid ref (branch or commit)? */
-		} else {
+		} இல்லையெனில் {
 			options.orig_head =
 				lookup_commit_reference_by_name(branch_name);
-			options.head_name = NULL;
+			options.head_name = வெற்று;
 		}
-		if (!options.orig_head)
+		எனில் (!options.orig_head)
 			die(_("no such branch/commit '%s'"), branch_name);
-	} else if (argc == 0) {
+	} இல்லையெனில் எனில் (argc == 0) {
 		/* Do not need to switch branches, we are already on it. */
 		options.head_name =
-			xstrdup_or_null(refs_resolve_ref_unsafe(get_main_ref_store(the_repository), "HEAD", 0, NULL,
+			xstrdup_or_null(refs_resolve_ref_unsafe(get_main_ref_store(the_repository), "HEAD", 0, வெற்று,
 								&flags));
-		if (!options.head_name)
+		எனில் (!options.head_name)
 			die(_("No such ref: %s"), "HEAD");
-		if (flags & REF_ISSYMREF) {
-			if (!skip_prefix(options.head_name,
+		எனில் (flags & REF_ISSYMREF) {
+			எனில் (!skip_prefix(options.head_name,
 					 "refs/heads/", &branch_name))
 				branch_name = options.head_name;
 
-		} else {
+		} இல்லையெனில் {
 			FREE_AND_NULL(options.head_name);
 			branch_name = "HEAD";
 		}
 		options.orig_head = lookup_commit_reference_by_name("HEAD");
-		if (!options.orig_head)
+		எனில் (!options.orig_head)
 			die(_("Could not resolve HEAD to a commit"));
-	} else
+	} இல்லையெனில்
 		BUG("unexpected number of arguments left to parse");
 
 	/* Make sure the branch to rebase onto is valid. */
-	if (keep_base) {
+	எனில் (keep_base) {
 		strbuf_reset(&buf);
 		strbuf_addstr(&buf, options.upstream_name);
 		strbuf_addstr(&buf, "...");
 		strbuf_addstr(&buf, branch_name);
 		options.onto_name = keep_base_onto_name = xstrdup(buf.buf);
-	} else if (!options.onto_name)
+	} இல்லையெனில் எனில் (!options.onto_name)
 		options.onto_name = options.upstream_name;
-	if (strstr(options.onto_name, "...")) {
-		if (repo_get_oid_mb(the_repository, options.onto_name, &branch_base) < 0) {
-			if (keep_base)
+	எனில் (strstr(options.onto_name, "...")) {
+		எனில் (repo_get_oid_mb(the_repository, options.onto_name, &branch_base) < 0) {
+			எனில் (keep_base)
 				die(_("'%s': need exactly one merge base with branch"),
 				    options.upstream_name);
-			else
+			இல்லையெனில்
 				die(_("'%s': need exactly one merge base"),
 				    options.onto_name);
 		}
 		options.onto = lookup_commit_or_die(&branch_base,
 						    options.onto_name);
-	} else {
+	} இல்லையெனில் {
 		options.onto =
 			lookup_commit_reference_by_name(options.onto_name);
-		if (!options.onto)
+		எனில் (!options.onto)
 			die(_("Does not point to a valid commit '%s'"),
 				options.onto_name);
 		fill_branch_base(&options, &branch_base);
 	}
 
-	if (keep_base && options.reapply_cherry_picks)
+	எனில் (keep_base && options.reapply_cherry_picks)
 		options.upstream = options.onto;
 
-	if (options.fork_point > 0)
+	எனில் (options.fork_point > 0)
 		options.restrict_revision =
 			get_fork_point(options.upstream_name, options.orig_head);
 
-	if (repo_read_index(the_repository) < 0)
+	எனில் (repo_read_index(the_repository) < 0)
 		die(_("could not read index"));
 
-	if (options.autostash)
+	எனில் (options.autostash)
 		create_autostash(the_repository,
 				 state_dir_path("autostash", &options));
 
 
-	if (require_clean_work_tree(the_repository, "rebase",
+	எனில் (require_clean_work_மரம்(the_repository, "rebase",
 				    _("Please commit or stash them."), 1, 1)) {
 		ret = -1;
-		goto cleanup_autostash;
+		செல் cleanup_autostash;
 	}
 
 	/*
@@ -1808,55 +1808,55 @@ int cmd_rebase(int argc,
 	 * in which case we could fast-forward without replacing the commits
 	 * with new commits recreated by replaying their changes.
 	 */
-	if (allow_preemptive_ff &&
+	எனில் (allow_preemptive_ff &&
 	    can_fast_forward(options.onto, options.upstream, options.restrict_revision,
 			     options.orig_head, &branch_base)) {
-		int flag;
+		முழு flag;
 
-		if (!(options.flags & REBASE_FORCE)) {
+		எனில் (!(options.flags & REBASE_FORCE)) {
 			/* Lazily switch to the target branch if needed... */
-			if (options.switch_to) {
+			எனில் (options.switch_to) {
 				ret = checkout_up_to_date(&options);
-				if (ret)
-					goto cleanup_autostash;
+				எனில் (ret)
+					செல் cleanup_autostash;
 			}
 
-			if (!(options.flags & REBASE_NO_QUIET))
+			எனில் (!(options.flags & REBASE_NO_QUIET))
 				; /* be quiet */
-			else if (!strcmp(branch_name, "HEAD") &&
-				 refs_resolve_ref_unsafe(get_main_ref_store(the_repository), "HEAD", 0, NULL, &flag))
+			இல்லையெனில் எனில் (!strcmp(branch_name, "HEAD") &&
+				 refs_resolve_ref_unsafe(get_main_ref_store(the_repository), "HEAD", 0, வெற்று, &flag))
 				puts(_("HEAD is up to date."));
-			else
+			இல்லையெனில்
 				printf(_("Current branch %s is up to date.\n"),
 				       branch_name);
 			ret = finish_rebase(&options);
-			goto cleanup;
-		} else if (!(options.flags & REBASE_NO_QUIET))
+			செல் cleanup;
+		} இல்லையெனில் எனில் (!(options.flags & REBASE_NO_QUIET))
 			; /* be quiet */
-		else if (!strcmp(branch_name, "HEAD") &&
-			 refs_resolve_ref_unsafe(get_main_ref_store(the_repository), "HEAD", 0, NULL, &flag))
+		இல்லையெனில் எனில் (!strcmp(branch_name, "HEAD") &&
+			 refs_resolve_ref_unsafe(get_main_ref_store(the_repository), "HEAD", 0, வெற்று, &flag))
 			puts(_("HEAD is up to date, rebase forced."));
-		else
+		இல்லையெனில்
 			printf(_("Current branch %s is up to date, rebase "
 				 "forced.\n"), branch_name);
 	}
 
 	/* If a hook exists, give it a chance to interrupt*/
-	if (!ok_to_skip_pre_rebase &&
+	எனில் (!ok_to_skip_pre_rebase &&
 	    run_hooks_l(the_repository, "pre-rebase", options.upstream_arg,
-			argc ? argv[0] : NULL, NULL)) {
+			argc ? argv[0] : வெற்று, வெற்று)) {
 		ret = error(_("The pre-rebase hook refused to rebase."));
-		goto cleanup_autostash;
+		செல் cleanup_autostash;
 	}
 
-	if (options.flags & REBASE_DIFFSTAT) {
-		struct diff_options opts;
+	எனில் (options.flags & REBASE_DIFFSTAT) {
+		கட்டமைப்பு diff_options opts;
 
-		if (options.flags & REBASE_VERBOSE) {
-			if (is_null_oid(&branch_base))
+		எனில் (options.flags & REBASE_VERBOSE) {
+			எனில் (is_null_oid(&branch_base))
 				printf(_("Changes to %s:\n"),
 				       oid_to_hex(&options.onto->object.oid));
-			else
+			இல்லையெனில்
 				printf(_("Changes from %s to %s:\n"),
 				       oid_to_hex(&branch_base),
 				       oid_to_hex(&options.onto->object.oid));
@@ -1869,50 +1869,50 @@ int cmd_rebase(int argc,
 			DIFF_FORMAT_SUMMARY | DIFF_FORMAT_DIFFSTAT;
 		opts.detect_rename = DIFF_DETECT_RENAME;
 		diff_setup_done(&opts);
-		diff_tree_oid(is_null_oid(&branch_base) ?
-			      the_hash_algo->empty_tree : &branch_base,
+		diff_மரம்_oid(is_null_oid(&branch_base) ?
+			      the_hash_algo->empty_மரம் : &branch_base,
 			      &options.onto->object.oid, "", &opts);
 		diffcore_std(&opts);
 		diff_flush(&opts);
 	}
 
-	if (is_merge(&options))
-		goto run_rebase;
+	எனில் (is_merge(&options))
+		செல் run_rebase;
 
 	/* Detach HEAD and reset the tree */
-	if (options.flags & REBASE_NO_QUIET)
+	எனில் (options.flags & REBASE_NO_QUIET)
 		printf(_("First, rewinding head to replay your work on top of "
 			 "it...\n"));
 
-	strbuf_addf(&msg, "%s (start): checkout %s",
+	strbuf_addf(&செய்தி, "%s (start): checkout %s",
 		    options.reflog_action, options.onto_name);
 	ropts.oid = &options.onto->object.oid;
 	ropts.orig_head = &options.orig_head->object.oid;
-	ropts.flags = RESET_WORKING_TREE_DETACH |
-		      RESET_WORKING_TREE_UPDATE_HEAD |
-		      RESET_WORKING_TREE_UPDATE_ORIG_HEAD |
-		      RESET_WORKING_TREE_RUN_POST_CHECKOUT_HOOK;
-	ropts.head_msg = msg.buf;
+	ropts.flags = RESET_WORKING_மரம்_DETACH |
+		      RESET_WORKING_மரம்_UPDATE_HEAD |
+		      RESET_WORKING_மரம்_UPDATE_ORIG_HEAD |
+		      RESET_WORKING_மரம்_RUN_POST_CHECKOUT_HOOK;
+	ropts.head_செய்தி = செய்தி.buf;
 	ropts.default_reflog_action = options.reflog_action;
-	if (reset_working_tree(the_repository, &ropts)) {
+	எனில் (reset_working_மரம்(the_repository, &ropts)) {
 		ret = error(_("Could not detach HEAD"));
-		goto cleanup_autostash;
+		செல் cleanup_autostash;
 	}
 
 	/*
 	 * If the onto is a proper descendant of the tip of the branch, then
 	 * we just fast-forwarded.
 	 */
-	if (oideq(&branch_base, &options.orig_head->object.oid)) {
+	எனில் (oideq(&branch_base, &options.orig_head->object.oid)) {
 		printf(_("Fast-forwarded %s to %s.\n"),
 			branch_name, options.onto_name);
 		move_to_original_branch(&options);
 		ret = finish_rebase(&options);
-		goto cleanup;
+		செல் cleanup;
 	}
 
 	strbuf_addf(&revisions, "%s..%s",
-		    options.root ? oid_to_hex(&options.onto->object.oid) :
+		    options.வேர் ? oid_to_hex(&options.onto->object.oid) :
 		    (options.restrict_revision ?
 		     oid_to_hex(&options.restrict_revision->object.oid) :
 		     oid_to_hex(&options.upstream->object.oid)),
@@ -1925,14 +1925,14 @@ run_rebase:
 
 cleanup:
 	strbuf_release(&buf);
-	strbuf_release(&msg);
+	strbuf_release(&செய்தி);
 	strbuf_release(&revisions);
 	rebase_options_release(&options);
-	free(squash_onto_name);
-	free(keep_base_onto_name);
-	return !!ret;
+	விடுவி(squash_onto_name);
+	விடுவி(keep_base_onto_name);
+	திரும்பு !!ret;
 
 cleanup_autostash:
 	ret |= !!cleanup_autostash(&options);
-	goto cleanup;
+	செல் cleanup;
 }

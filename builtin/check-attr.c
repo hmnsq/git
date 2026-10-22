@@ -1,96 +1,96 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "attr.h"
-#include "environment.h"
-#include "gettext.h"
-#include "object-name.h"
-#include "quote.h"
-#include "setup.h"
-#include "parse-options.h"
-#include "write-or-die.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "attr.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "object-name.h"
+#அந்தர்பாவ "quote.h"
+#அந்தர்பாவ "setup.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "write-or-die.h"
 
-static int all_attrs;
-static int cached_attrs;
-static int stdin_paths;
-static char *source;
-static const char * const check_attr_usage[] = {
+நிலையான முழு all_attrs;
+நிலையான முழு cached_attrs;
+நிலையான முழு stdin_paths;
+நிலையான எழுத்து *source;
+நிலையான மாறிலி எழுத்து * மாறிலி check_attr_usage[] = {
 N_("git check-attr [--source <tree-ish>] [-a | --all | <attr>...] [--] <pathname>..."),
 N_("git check-attr --stdin [-z] [--source <tree-ish>] [-a | --all | <attr>...]"),
-NULL
+வெற்று
 };
 
-static int nul_term_line;
+நிலையான முழு nul_term_வரி;
 
-static const struct option check_attr_options[] = {
+நிலையான மாறிலி கட்டமைப்பு option check_attr_options[] = {
 	OPT_BOOL('a', "all", &all_attrs, N_("report all attributes set on file")),
 	OPT_BOOL(0,  "cached", &cached_attrs, N_("use .gitattributes only from the index")),
 	OPT_BOOL(0 , "stdin", &stdin_paths, N_("read file names from stdin")),
-	OPT_BOOL('z', NULL, &nul_term_line,
+	OPT_BOOL('z', வெற்று, &nul_term_வரி,
 		 N_("terminate input and output records by a NUL character")),
 	OPT_STRING(0, "source", &source, N_("<tree-ish>"), N_("which tree-ish to check attributes at")),
 	OPT_END()
 };
 
-static void output_attr(struct attr_check *check, const char *file)
+நிலையான வெறுமை output_attr(கட்டமைப்பு attr_check *check, மாறிலி எழுத்து *file)
 {
-	int j;
-	int cnt = check->nr;
+	முழு j;
+	முழு cnt = check->nr;
 
-	for (j = 0; j < cnt; j++) {
-		const char *value = check->items[j].value;
+	க்கு (j = 0; j < cnt; j++) {
+		மாறிலி எழுத்து *மதிப்பு = check->பொருட்கள்[j].மதிப்பு;
 
-		if (ATTR_TRUE(value))
-			value = "set";
-		else if (ATTR_FALSE(value))
-			value = "unset";
-		else if (ATTR_UNSET(value))
-			value = "unspecified";
+		எனில் (ATTR_TRUE(மதிப்பு))
+			மதிப்பு = "set";
+		இல்லையெனில் எனில் (ATTR_FALSE(மதிப்பு))
+			மதிப்பு = "unset";
+		இல்லையெனில் எனில் (ATTR_UNSET(மதிப்பு))
+			மதிப்பு = "unspecified";
 
-		if (nul_term_line) {
+		எனில் (nul_term_வரி) {
 			printf("%s%c" /* path */
 			       "%s%c" /* attrname */
 			       "%s%c" /* attrvalue */,
 			       file, 0,
-			       git_attr_name(check->items[j].attr), 0, value, 0);
-		} else {
-			quote_c_style(file, NULL, stdout, 0);
+			       git_attr_name(check->பொருட்கள்[j].attr), 0, மதிப்பு, 0);
+		} இல்லையெனில் {
+			quote_c_style(file, வெற்று, stdout, 0);
 			printf(": %s: %s\n",
-			       git_attr_name(check->items[j].attr), value);
+			       git_attr_name(check->பொருட்கள்[j].attr), மதிப்பு);
 		}
 	}
 }
 
-static void check_attr(const char *prefix, struct attr_check *check,
-		       int collect_all,
-		       const char *file)
+நிலையான வெறுமை check_attr(மாறிலி எழுத்து *prefix, கட்டமைப்பு attr_check *check,
+		       முழு collect_all,
+		       மாறிலி எழுத்து *file)
 
 {
-	char *full_path =
+	எழுத்து *full_path =
 		prefix_path(the_repository, prefix, prefix ? strlen(prefix) : 0, file);
 
-	if (collect_all) {
+	எனில் (collect_all) {
 		git_all_attrs(the_repository->index, full_path, check);
-	} else {
+	} இல்லையெனில் {
 		git_check_attr(the_repository->index, full_path, check);
 	}
 	output_attr(check, file);
 
-	free(full_path);
+	விடுவி(full_path);
 }
 
-static void check_attr_stdin_paths(const char *prefix, struct attr_check *check,
-				   int collect_all)
+நிலையான வெறுமை check_attr_stdin_paths(மாறிலி எழுத்து *prefix, கட்டமைப்பு attr_check *check,
+				   முழு collect_all)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf unquoted = STRBUF_INIT;
+	கட்டமைப்பு strbuf buf = STRBUF_INIT;
+	கட்டமைப்பு strbuf unquoted = STRBUF_INIT;
 	strbuf_getline_fn getline_fn;
 
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	while (getline_fn(&buf, stdin) != EOF) {
-		if (!nul_term_line && buf.buf[0] == '"') {
+	getline_fn = nul_term_வரி ? strbuf_getline_nul : strbuf_getline_lf;
+	போது (getline_fn(&buf, stdin) != EOF) {
+		எனில் (!nul_term_வரி && buf.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, buf.buf, NULL))
+			எனில் (unquote_c_style(&unquoted, buf.buf, வெற்று))
 				die("line is badly quoted");
 			strbuf_swap(&buf, &unquoted);
 		}
@@ -101,25 +101,25 @@ static void check_attr_stdin_paths(const char *prefix, struct attr_check *check,
 	strbuf_release(&unquoted);
 }
 
-static NORETURN void error_with_usage(const char *msg)
+நிலையான NORETURN வெறுமை error_with_usage(மாறிலி எழுத்து *செய்தி)
 {
-	error("%s", msg);
+	error("%s", செய்தி);
 	usage_with_options(check_attr_usage, check_attr_options);
 }
 
-int cmd_check_attr(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+முழு cmd_check_attr(முழு argc,
+		   மாறிலி எழுத்து **argv,
+		   மாறிலி எழுத்து *prefix,
+		   கட்டமைப்பு repository *repo UNUSED)
 {
-	struct attr_check *check;
-	struct object_id initialized_oid;
-	int cnt, i, doubledash, filei;
+	கட்டமைப்பு attr_check *check;
+	கட்டமைப்பு object_id initialized_oid;
+	முழு cnt, i, doubledash, filei;
 
-	if (!is_bare_repository(the_repository))
-		setup_work_tree(the_repository);
+	எனில் (!is_bare_repository(the_repository))
+		setup_work_மரம்(the_repository);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, வெற்று);
 
 	argc = parse_options(argc, argv, prefix, check_attr_options,
 			     check_attr_usage, PARSE_OPT_KEEP_DASHDASH);
@@ -127,81 +127,81 @@ int cmd_check_attr(int argc,
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	if (repo_read_index(the_repository) < 0) {
+	எனில் (repo_read_index(the_repository) < 0) {
 		die("invalid cache");
 	}
 
-	if (cached_attrs)
+	எனில் (cached_attrs)
 		git_attr_set_direction(GIT_ATTR_INDEX);
 
 	doubledash = -1;
-	for (i = 0; doubledash < 0 && i < argc; i++) {
-		if (!strcmp(argv[i], "--"))
+	க்கு (i = 0; doubledash < 0 && i < argc; i++) {
+		எனில் (!strcmp(argv[i], "--"))
 			doubledash = i;
 	}
 
 	/* Process --all and/or attribute arguments: */
-	if (all_attrs) {
-		if (doubledash >= 1)
+	எனில் (all_attrs) {
+		எனில் (doubledash >= 1)
 			error_with_usage("Attributes and --all both specified");
 
 		cnt = 0;
 		filei = doubledash + 1;
-	} else if (doubledash == 0) {
+	} இல்லையெனில் எனில் (doubledash == 0) {
 		error_with_usage("No attribute specified");
-	} else if (doubledash < 0) {
-		if (!argc)
+	} இல்லையெனில் எனில் (doubledash < 0) {
+		எனில் (!argc)
 			error_with_usage("No attribute specified");
 
-		if (stdin_paths) {
+		எனில் (stdin_paths) {
 			/* Treat all arguments as attribute names. */
 			cnt = argc;
 			filei = argc;
-		} else {
+		} இல்லையெனில் {
 			/* Treat exactly one argument as an attribute name. */
 			cnt = 1;
 			filei = 1;
 		}
-	} else {
+	} இல்லையெனில் {
 		cnt = doubledash;
 		filei = doubledash + 1;
 	}
 
 	/* Check file argument(s): */
-	if (stdin_paths) {
-		if (filei < argc)
+	எனில் (stdin_paths) {
+		எனில் (filei < argc)
 			error_with_usage("Can't specify files with --stdin");
-	} else {
-		if (filei >= argc)
+	} இல்லையெனில் {
+		எனில் (filei >= argc)
 			error_with_usage("No file specified");
 	}
 
 	check = attr_check_alloc();
-	if (!all_attrs) {
-		for (i = 0; i < cnt; i++) {
-			const struct git_attr *a = git_attr(argv[i]);
+	எனில் (!all_attrs) {
+		க்கு (i = 0; i < cnt; i++) {
+			மாறிலி கட்டமைப்பு git_attr *a = git_attr(argv[i]);
 
-			if (!a)
-				return error("%s: not a valid attribute name",
+			எனில் (!a)
+				திரும்பு error("%s: not a valid attribute name",
 					     argv[i]);
 			attr_check_append(check, a);
 		}
 	}
 
-	if (source) {
-		if (repo_get_oid_tree(the_repository, source, &initialized_oid))
+	எனில் (source) {
+		எனில் (repo_get_oid_மரம்(the_repository, source, &initialized_oid))
 			die("%s: not a valid tree-ish source", source);
 		set_git_attr_source(source);
 	}
 
-	if (stdin_paths)
+	எனில் (stdin_paths)
 		check_attr_stdin_paths(prefix, check, all_attrs);
-	else {
-		for (i = filei; i < argc; i++)
+	இல்லையெனில் {
+		க்கு (i = filei; i < argc; i++)
 			check_attr(prefix, check, all_attrs, argv[i]);
 		maybe_flush_or_die(stdout, "attribute to stdout");
 	}
 
 	attr_check_free(check);
-	return 0;
+	திரும்பு 0;
 }

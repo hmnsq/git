@@ -1,23 +1,23 @@
-#include "builtin.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "url.h"
-#include "urlmatch.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "url.h"
+#அந்தர்பாவ "urlmatch.h"
 
-static const char * const builtin_url_parse_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி builtin_url_parse_usage[] = {
 	N_("git url-parse [-c <component>] [--] <url>..."),
-	NULL
+	வெற்று
 };
 
-static char *component_arg;
+நிலையான எழுத்து *component_arg;
 
-static struct option builtin_url_parse_options[] = {
+நிலையான கட்டமைப்பு option builtin_url_parse_options[] = {
 	OPT_STRING('c', "component", &component_arg, N_("component"),
 		N_("which URL component to extract")),
 	OPT_END(),
 };
 
-enum url_component {
+எண்ணிக்கை url_component {
 	URL_NONE = 0,
 	URL_SCHEME,
 	URL_USER,
@@ -27,109 +27,109 @@ enum url_component {
 	URL_PATH,
 };
 
-static void parse_or_die(const char *url, struct url_info *info)
+நிலையான வெறுமை parse_or_die(மாறிலி எழுத்து *url, கட்டமைப்பு url_info *info)
 {
-	if (url_is_local_not_ssh(url)) {
-		if (*url == '/')
+	எனில் (url_is_local_not_ssh(url)) {
+		எனில் (*url == '/')
 			die("'%s' is not a URL; if you meant a local "
 			    "repository, use 'file://%s'", url, url);
-		if (has_dos_drive_prefix(url))
+		எனில் (has_dos_drive_prefix(url))
 			die("'%s' is not a URL; if you meant a local "
 			    "repository, use 'file:///%s'", url, url);
 		die("'%s' is not a URL; if you meant a local repository, "
 		    "use a 'file://' URL with an absolute path", url);
 	}
-	if (!url_parse(url, info))
+	எனில் (!url_parse(url, info))
 		die("invalid git URL '%s': %s", url, info->err);
 }
 
-static enum url_component get_component_or_die(const char *arg)
+நிலையான எண்ணிக்கை url_component get_component_or_die(மாறிலி எழுத்து *arg)
 {
-	if (!strcmp("path", arg))
-		return URL_PATH;
-	if (!strcmp("host", arg))
-		return URL_HOST;
-	if (!strcmp("scheme", arg))
-		return URL_SCHEME;
-	if (!strcmp("user", arg))
-		return URL_USER;
-	if (!strcmp("password", arg))
-		return URL_PASSWORD;
-	if (!strcmp("port", arg))
-		return URL_PORT;
+	எனில் (!strcmp("path", arg))
+		திரும்பு URL_PATH;
+	எனில் (!strcmp("host", arg))
+		திரும்பு URL_HOST;
+	எனில் (!strcmp("scheme", arg))
+		திரும்பு URL_SCHEME;
+	எனில் (!strcmp("user", arg))
+		திரும்பு URL_USER;
+	எனில் (!strcmp("password", arg))
+		திரும்பு URL_PASSWORD;
+	எனில் (!strcmp("port", arg))
+		திரும்பு URL_PORT;
 	die("invalid git URL component '%s'", arg);
 }
 
-static char *extract_component(enum url_component component,
-			       struct url_info *info)
+நிலையான எழுத்து *extract_component(எண்ணிக்கை url_component component,
+			       கட்டமைப்பு url_info *info)
 {
 	size_t offset, length;
 
-	switch (component) {
-	case URL_SCHEME:
+	தேர்வு (component) {
+	நிலை URL_SCHEME:
 		offset = 0;
 		length = info->scheme_len;
-		break;
-	case URL_USER:
+		நிறுத்து;
+	நிலை URL_USER:
 		offset = info->user_off;
 		length = info->user_len;
-		break;
-	case URL_PASSWORD:
+		நிறுத்து;
+	நிலை URL_PASSWORD:
 		offset = info->passwd_off;
 		length = info->passwd_len;
-		break;
-	case URL_HOST:
+		நிறுத்து;
+	நிலை URL_HOST:
 		offset = info->host_off;
 		length = info->host_len;
-		break;
-	case URL_PORT:
+		நிறுத்து;
+	நிலை URL_PORT:
 		offset = info->port_off;
 		length = info->port_len;
-		break;
-	case URL_PATH:
+		நிறுத்து;
+	நிலை URL_PATH:
 		offset = info->path_off;
 		length = info->path_len;
-		break;
-	case URL_NONE:
-		return NULL;
+		நிறுத்து;
+	நிலை URL_NONE:
+		திரும்பு வெற்று;
 	}
 
-	return xstrndup(info->url + offset, length);
+	திரும்பு xstrndup(info->url + offset, length);
 }
 
-int cmd_url_parse(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+முழு cmd_url_parse(முழு argc,
+		  மாறிலி எழுத்து **argv,
+		  மாறிலி எழுத்து *prefix,
+		  கட்டமைப்பு repository *repo UNUSED)
 {
-	struct url_info info;
-	enum url_component selected = URL_NONE;
-	char *extracted;
-	int i;
+	கட்டமைப்பு url_info info;
+	எண்ணிக்கை url_component selected = URL_NONE;
+	எழுத்து *extracted;
+	முழு i;
 
 	argc = parse_options(argc, argv, prefix, builtin_url_parse_options,
 			     builtin_url_parse_usage, 0);
 
-	if (argc == 0)
+	எனில் (argc == 0)
 		usage_with_options(builtin_url_parse_usage,
 				   builtin_url_parse_options);
 
-	if (component_arg)
+	எனில் (component_arg)
 		selected = get_component_or_die(component_arg);
 
-	for (i = 0; i < argc; i++) {
+	க்கு (i = 0; i < argc; i++) {
 		parse_or_die(argv[i], &info);
 
-		if (selected != URL_NONE) {
+		எனில் (selected != URL_NONE) {
 			extracted = extract_component(selected, &info);
-			if (extracted) {
+			எனில் (extracted) {
 				puts(extracted);
-				free(extracted);
+				விடுவி(extracted);
 			}
 		}
 
-		free(info.url);
+		விடுவி(info.url);
 	}
 
-	return 0;
+	திரும்பு 0;
 }

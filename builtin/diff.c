@@ -7,29 +7,29 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "ewah/ewok.h"
-#include "lockfile.h"
-#include "color.h"
-#include "commit.h"
-#include "gettext.h"
-#include "tag.h"
-#include "diff.h"
-#include "diff-merges.h"
-#include "diffcore.h"
-#include "preload-index.h"
-#include "read-cache-ll.h"
-#include "revision.h"
-#include "log-tree.h"
-#include "setup.h"
-#include "oid-array.h"
-#include "tree.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "ewah/ewok.h"
+#அந்தர்பாவ "lockfile.h"
+#அந்தர்பாவ "color.h"
+#அந்தர்பாவ "commit.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "tag.h"
+#அந்தர்பாவ "diff.h"
+#அந்தர்பாவ "diff-merges.h"
+#அந்தர்பாவ "diffcore.h"
+#அந்தர்பாவ "preload-index.h"
+#அந்தர்பாவ "read-cache-ll.h"
+#அந்தர்பாவ "revision.h"
+#அந்தர்பாவ "log-tree.h"
+#அந்தர்பாவ "setup.h"
+#அந்தர்பாவ "oid-array.h"
+#அந்தர்பாவ "tree.h"
 
 #define DIFF_NO_INDEX_EXPLICIT 1
 #define DIFF_NO_INDEX_IMPLICIT 2
 
-static const char builtin_diff_usage[] =
+நிலையான மாறிலி எழுத்து builtin_diff_usage[] =
 "git diff [<options>] [<commit>] [--] [<path>...]\n"
 "   or: git diff [<options>] --cached [--merge-base] [<commit>] [--] [<path>...]\n"
 "   or: git diff [<options>] [--merge-base] <commit> [<commit>...] <commit> [--] [<path>...]\n"
@@ -39,36 +39,36 @@ static const char builtin_diff_usage[] =
 "\n"
 COMMON_DIFF_OPTIONS_HELP;
 
-static const char *blob_path(struct object_array_entry *entry)
+நிலையான மாறிலி எழுத்து *blob_path(கட்டமைப்பு object_array_entry *entry)
 {
-	return entry->path ? entry->path : entry->name;
+	திரும்பு entry->path ? entry->path : entry->name;
 }
 
-static void stuff_change(struct diff_options *opt,
+நிலையான வெறுமை stuff_change(கட்டமைப்பு diff_options *opt,
 			 unsigned old_mode, unsigned new_mode,
-			 const struct object_id *old_oid,
-			 const struct object_id *new_oid,
-			 int old_oid_valid,
-			 int new_oid_valid,
-			 const char *old_path,
-			 const char *new_path)
+			 மாறிலி கட்டமைப்பு object_id *old_oid,
+			 மாறிலி கட்டமைப்பு object_id *new_oid,
+			 முழு old_oid_valid,
+			 முழு new_oid_valid,
+			 மாறிலி எழுத்து *old_path,
+			 மாறிலி எழுத்து *new_path)
 {
-	struct diff_filespec *one, *two;
+	கட்டமைப்பு diff_filespec *one, *two;
 
-	if (!is_null_oid(old_oid) && !is_null_oid(new_oid) &&
+	எனில் (!is_null_oid(old_oid) && !is_null_oid(new_oid) &&
 	    oideq(old_oid, new_oid) && (old_mode == new_mode))
-		return;
+		திரும்பு;
 
-	if (opt->flags.reverse_diff) {
+	எனில் (opt->flags.reverse_diff) {
 		SWAP(old_mode, new_mode);
 		SWAP(old_oid, new_oid);
 		SWAP(old_path, new_path);
 	}
 
-	if (opt->prefix &&
+	எனில் (opt->prefix &&
 	    (strncmp(old_path, opt->prefix, opt->prefix_length) ||
 	     strncmp(new_path, opt->prefix, opt->prefix_length)))
-		return;
+		திரும்பு;
 
 	one = alloc_filespec(old_path);
 	two = alloc_filespec(new_path);
@@ -78,28 +78,28 @@ static void stuff_change(struct diff_options *opt,
 	diff_queue(&diff_queued_diff, one, two);
 }
 
-static void builtin_diff_b_f(struct rev_info *revs,
-			     int argc, const char **argv UNUSED,
-			     struct object_array_entry **blob)
+நிலையான வெறுமை builtin_diff_b_f(கட்டமைப்பு rev_info *revs,
+			     முழு argc, மாறிலி எழுத்து **argv UNUSED,
+			     கட்டமைப்பு object_array_entry **blob)
 {
 	/* Blob vs file in the working tree*/
-	struct stat st;
-	const char *path;
+	கட்டமைப்பு stat st;
+	மாறிலி எழுத்து *path;
 
-	if (argc > 1)
+	எனில் (argc > 1)
 		usage(builtin_diff_usage);
 
 	GUARD_PATHSPEC(&revs->prune_data, PATHSPEC_FROMTOP | PATHSPEC_LITERAL);
-	path = revs->prune_data.items[0].match;
+	path = revs->prune_data.பொருட்கள்[0].match;
 
-	if (lstat(path, &st))
+	எனில் (lstat(path, &st))
 		die_errno(_("failed to stat '%s'"), path);
-	if (!(S_ISREG(st.st_mode) || S_ISLNK(st.st_mode)))
+	எனில் (!(S_ISREG(st.st_mode) || S_ISLNK(st.st_mode)))
 		die(_("'%s': not a regular file or symlink"), path);
 
 	diff_set_mnemonic_prefix(&revs->diffopt, "o/", "w/");
 
-	if (blob[0]->mode == S_IFINVALID)
+	எனில் (blob[0]->mode == S_IFINVALID)
 		blob[0]->mode = canon_mode(st.st_mode);
 
 	stuff_change(&revs->diffopt,
@@ -112,19 +112,19 @@ static void builtin_diff_b_f(struct rev_info *revs,
 	diff_flush(&revs->diffopt);
 }
 
-static void builtin_diff_blobs(struct rev_info *revs,
-			       int argc, const char **argv UNUSED,
-			       struct object_array_entry **blob)
+நிலையான வெறுமை builtin_diff_blobs(கட்டமைப்பு rev_info *revs,
+			       முழு argc, மாறிலி எழுத்து **argv UNUSED,
+			       கட்டமைப்பு object_array_entry **blob)
 {
-	const unsigned mode = canon_mode(S_IFREG | 0644);
+	மாறிலி unsigned mode = canon_mode(S_IFREG | 0644);
 
-	if (argc > 1)
+	எனில் (argc > 1)
 		usage(builtin_diff_usage);
 
-	if (blob[0]->mode == S_IFINVALID)
+	எனில் (blob[0]->mode == S_IFINVALID)
 		blob[0]->mode = mode;
 
-	if (blob[1]->mode == S_IFINVALID)
+	எனில் (blob[1]->mode == S_IFINVALID)
 		blob[1]->mode = mode;
 
 	stuff_change(&revs->diffopt,
@@ -136,17 +136,17 @@ static void builtin_diff_blobs(struct rev_info *revs,
 	diff_flush(&revs->diffopt);
 }
 
-static void builtin_diff_index(struct rev_info *revs,
-			       int argc, const char **argv)
+நிலையான வெறுமை builtin_diff_index(கட்டமைப்பு rev_info *revs,
+			       முழு argc, மாறிலி எழுத்து **argv)
 {
-	unsigned int option = 0;
-	while (1 < argc) {
-		const char *arg = argv[1];
-		if (!strcmp(arg, "--cached") || !strcmp(arg, "--staged"))
+	unsigned முழு option = 0;
+	போது (1 < argc) {
+		மாறிலி எழுத்து *arg = argv[1];
+		எனில் (!strcmp(arg, "--cached") || !strcmp(arg, "--staged"))
 			option |= DIFF_INDEX_CACHED;
-		else if (!strcmp(arg, "--merge-base"))
+		இல்லையெனில் எனில் (!strcmp(arg, "--merge-base"))
 			option |= DIFF_INDEX_MERGE_BASE;
-		else
+		இல்லையெனில்
 			usage(builtin_diff_usage);
 		argv++; argc--;
 	}
@@ -154,117 +154,117 @@ static void builtin_diff_index(struct rev_info *revs,
 	 * Make sure there is one revision (i.e. pending object),
 	 * and there is no revision filtering parameters.
 	 */
-	if (revs->pending.nr != 1 ||
-	    revs->max_count != -1 || revs->min_age != -1 ||
+	எனில் (revs->pending.nr != 1 ||
+	    revs->max_மொத்தம் != -1 || revs->min_age != -1 ||
 	    revs->max_age != -1)
 		usage(builtin_diff_usage);
-	if (!(option & DIFF_INDEX_CACHED)) {
-		setup_work_tree(the_repository);
-		if (repo_read_index_preload(the_repository,
+	எனில் (!(option & DIFF_INDEX_CACHED)) {
+		setup_work_மரம்(the_repository);
+		எனில் (repo_read_index_preload(the_repository,
 					    &revs->diffopt.pathspec, 0) < 0) {
 			die_errno("repo_read_index_preload");
 		}
-	} else if (repo_read_index(the_repository) < 0) {
+	} இல்லையெனில் எனில் (repo_read_index(the_repository) < 0) {
 		die_errno("repo_read_cache");
 	}
 	run_diff_index(revs, option);
 }
 
-static void builtin_diff_tree(struct rev_info *revs,
-			      int argc, const char **argv,
-			      struct object_array_entry *ent0,
-			      struct object_array_entry *ent1)
+நிலையான வெறுமை builtin_diff_மரம்(கட்டமைப்பு rev_info *revs,
+			      முழு argc, மாறிலி எழுத்து **argv,
+			      கட்டமைப்பு object_array_entry *ent0,
+			      கட்டமைப்பு object_array_entry *ent1)
 {
-	const struct object_id *(oid[2]);
-	struct object_id mb_oid;
-	int merge_base = 0;
+	மாறிலி கட்டமைப்பு object_id *(oid[2]);
+	கட்டமைப்பு object_id mb_oid;
+	முழு merge_base = 0;
 
-	while (1 < argc) {
-		const char *arg = argv[1];
-		if (!strcmp(arg, "--merge-base"))
+	போது (1 < argc) {
+		மாறிலி எழுத்து *arg = argv[1];
+		எனில் (!strcmp(arg, "--merge-base"))
 			merge_base = 1;
-		else
+		இல்லையெனில்
 			usage(builtin_diff_usage);
 		argv++; argc--;
 	}
 
-	if (merge_base) {
+	எனில் (merge_base) {
 		diff_get_merge_base(revs, &mb_oid);
 		oid[0] = &mb_oid;
 		oid[1] = &revs->pending.objects[1].item->oid;
-	} else {
-		int swap = 0;
+	} இல்லையெனில் {
+		முழு swap = 0;
 
 		/*
 		 * We saw two trees, ent0 and ent1.  If ent1 is uninteresting,
 		 * swap them.
 		 */
-		if (ent1->item->flags & UNINTERESTING)
+		எனில் (ent1->item->flags & UNINTERESTING)
 			swap = 1;
 		oid[swap] = &ent0->item->oid;
 		oid[1 - swap] = &ent1->item->oid;
 	}
-	diff_tree_oid(oid[0], oid[1], "", &revs->diffopt);
-	log_tree_diff_flush(revs);
+	diff_மரம்_oid(oid[0], oid[1], "", &revs->diffopt);
+	log_மரம்_diff_flush(revs);
 }
 
-static void builtin_diff_combined(struct rev_info *revs,
-				  int argc, const char **argv UNUSED,
-				  struct object_array_entry *ent,
-				  int ents, int first_non_parent)
+நிலையான வெறுமை builtin_diff_combined(கட்டமைப்பு rev_info *revs,
+				  முழு argc, மாறிலி எழுத்து **argv UNUSED,
+				  கட்டமைப்பு object_array_entry *ent,
+				  முழு ents, முழு first_non_parent)
 {
-	struct oid_array parents = OID_ARRAY_INIT;
-	int i;
+	கட்டமைப்பு oid_array parents = OID_ARRAY_INIT;
+	முழு i;
 
-	if (argc > 1)
+	எனில் (argc > 1)
 		usage(builtin_diff_usage);
 
-	if (first_non_parent < 0)
+	எனில் (first_non_parent < 0)
 		die(_("no merge given, only parents."));
-	if (first_non_parent >= ents)
+	எனில் (first_non_parent >= ents)
 		BUG("first_non_parent out of range: %d", first_non_parent);
 
 	diff_merges_set_dense_combined_if_unset(revs);
 
-	for (i = 0; i < ents; i++) {
-		if (i != first_non_parent)
+	க்கு (i = 0; i < ents; i++) {
+		எனில் (i != first_non_parent)
 			oid_array_append(&parents, &ent[i].item->oid);
 	}
-	diff_tree_combined(&ent[first_non_parent].item->oid, &parents, revs);
+	diff_மரம்_combined(&ent[first_non_parent].item->oid, &parents, revs);
 	oid_array_clear(&parents);
 }
 
-static void refresh_index_quietly(void)
+நிலையான வெறுமை refresh_index_quietly(வெறுமை)
 {
-	struct lock_file lock_file = LOCK_INIT;
-	int fd;
+	கட்டமைப்பு lock_file lock_file = LOCK_INIT;
+	முழு fd;
 
 	fd = repo_hold_locked_index(the_repository, &lock_file, 0);
-	if (fd < 0)
-		return;
+	எனில் (fd < 0)
+		திரும்பு;
 	discard_index(the_repository->index);
 	repo_read_index(the_repository);
-	refresh_index(the_repository->index, REFRESH_QUIET|REFRESH_UNMERGED, NULL, NULL,
-		      NULL);
+	refresh_index(the_repository->index, REFRESH_QUIET|REFRESH_UNMERGED, வெற்று, வெற்று,
+		      வெற்று);
 	repo_update_index_if_able(the_repository, &lock_file);
 }
 
-static void builtin_diff_files(struct rev_info *revs, int argc, const char **argv)
+நிலையான வெறுமை builtin_diff_files(கட்டமைப்பு rev_info *revs, முழு argc, மாறிலி எழுத்து **argv)
 {
-	unsigned int options = 0;
+	unsigned முழு options = 0;
 
-	while (1 < argc && argv[1][0] == '-') {
-		if (!strcmp(argv[1], "--base"))
-			revs->max_count = 1;
-		else if (!strcmp(argv[1], "--ours"))
-			revs->max_count = 2;
-		else if (!strcmp(argv[1], "--theirs"))
-			revs->max_count = 3;
-		else if (!strcmp(argv[1], "-q"))
+	போது (1 < argc && argv[1][0] == '-') {
+		எனில் (!strcmp(argv[1], "--base"))
+			revs->max_மொத்தம் = 1;
+		இல்லையெனில் எனில் (!strcmp(argv[1], "--ours"))
+			revs->max_மொத்தம் = 2;
+		இல்லையெனில் எனில் (!strcmp(argv[1], "--theirs"))
+			revs->max_மொத்தம் = 3;
+		இல்லையெனில் எனில் (!strcmp(argv[1], "-q"))
 			options |= DIFF_SILENT_ON_REMOVED;
-		else if (!strcmp(argv[1], "-h"))
+		இல்லையெனில் எனில் (!strcmp(argv[1], "-h"))
 			usage(builtin_diff_usage);
-		else {
+		இல்லையெனில் {
 			error(_("invalid option: %s"), argv[1]);
 			usage(builtin_diff_usage);
 		}
@@ -277,22 +277,22 @@ static void builtin_diff_files(struct rev_info *revs, int argc, const char **arg
 	 * dense one, --cc can be explicitly asked for, or just rely
 	 * on the default).
 	 */
-	if (revs->max_count == -1 &&
+	எனில் (revs->max_மொத்தம் == -1 &&
 	    (revs->diffopt.output_format & DIFF_FORMAT_PATCH))
 		diff_merges_set_dense_combined_if_unset(revs);
 
-	setup_work_tree(the_repository);
-	if (repo_read_index_preload(the_repository, &revs->diffopt.pathspec,
+	setup_work_மரம்(the_repository);
+	எனில் (repo_read_index_preload(the_repository, &revs->diffopt.pathspec,
 				    0) < 0) {
 		die_errno("repo_read_index_preload");
 	}
 	run_diff_files(revs, options);
 }
 
-struct symdiff {
-	struct bitmap *skip;
-	int warn;
-	const char *base, *left, *right;
+கட்டமைப்பு symdiff {
+	கட்டமைப்பு bitmap *skip;
+	முழு warn;
+	மாறிலி எழுத்து *base, *இடது, *வலது;
 };
 
 /*
@@ -314,11 +314,11 @@ struct symdiff {
  * If there is no symmetric diff argument, sym->skip is NULL and
  * sym->warn is cleared.  The remaining fields are not set.
  */
-static void symdiff_prepare(struct rev_info *rev, struct symdiff *sym)
+நிலையான வெறுமை symdiff_prepare(கட்டமைப்பு rev_info *rev, கட்டமைப்பு symdiff *sym)
 {
-	int i, is_symdiff = 0, basecount = 0, othercount = 0;
-	int lpos = -1, rpos = -1, basepos = -1;
-	struct bitmap *map = NULL;
+	முழு i, is_symdiff = 0, basecount = 0, othercount = 0;
+	முழு lpos = -1, rpos = -1, basepos = -1;
+	கட்டமைப்பு bitmap *map = வெற்று;
 
 	/*
 	 * Use the whence fields to find merge bases and left and
@@ -335,35 +335,35 @@ static void symdiff_prepare(struct rev_info *rev, struct symdiff *sym)
 	 * so we must check for SYMMETRIC_LEFT too.  The two arrays
 	 * rev->pending.objects and rev->cmdline.rev are parallel.
 	 */
-	for (i = 0; i < rev->cmdline.nr; i++) {
-		struct object *obj = rev->pending.objects[i].item;
-		switch (rev->cmdline.rev[i].whence) {
-		case REV_CMD_MERGE_BASE:
-			if (basepos < 0)
+	க்கு (i = 0; i < rev->cmdline.nr; i++) {
+		கட்டமைப்பு object *obj = rev->pending.objects[i].item;
+		தேர்வு (rev->cmdline.rev[i].whence) {
+		நிலை REV_CMD_MERGE_BASE:
+			எனில் (basepos < 0)
 				basepos = i;
 			basecount++;
-			break;		/* do mark all bases */
-		case REV_CMD_LEFT:
-			if (lpos >= 0)
+			நிறுத்து;		/* do mark all bases */
+		நிலை REV_CMD_இடது:
+			எனில் (lpos >= 0)
 				usage(builtin_diff_usage);
 			lpos = i;
-			if (obj->flags & SYMMETRIC_LEFT) {
+			எனில் (obj->flags & SYMMETRIC_இடது) {
 				is_symdiff = 1;
-				break;	/* do mark A */
+				நிறுத்து;	/* do mark A */
 			}
-			continue;
-		case REV_CMD_RIGHT:
-			if (rpos >= 0)
+			தொடர்;
+		நிலை REV_CMD_வலது:
+			எனில் (rpos >= 0)
 				usage(builtin_diff_usage);
 			rpos = i;
-			continue;	/* don't mark B */
-		case REV_CMD_PARENTS_ONLY:
-		case REV_CMD_REF:
-		case REV_CMD_REV:
+			தொடர்;	/* don't mark B */
+		நிலை REV_CMD_PARENTS_ONLY:
+		நிலை REV_CMD_REF:
+		நிலை REV_CMD_REV:
 			othercount++;
-			continue;
+			தொடர்;
 		}
-		if (!map)
+		எனில் (!map)
 			map = bitmap_new();
 		bitmap_set(map, i);
 	}
@@ -371,45 +371,45 @@ static void symdiff_prepare(struct rev_info *rev, struct symdiff *sym)
 	/*
 	 * Forbid any additional revs for both A...B and A..B.
 	 */
-	if (lpos >= 0 && othercount > 0)
+	எனில் (lpos >= 0 && othercount > 0)
 		usage(builtin_diff_usage);
 
-	if (!is_symdiff) {
+	எனில் (!is_symdiff) {
 		bitmap_free(map);
 		sym->warn = 0;
-		sym->skip = NULL;
-		return;
+		sym->skip = வெற்று;
+		திரும்பு;
 	}
 
-	sym->left = rev->pending.objects[lpos].name;
-	sym->right = rev->pending.objects[rpos].name;
-	if (basecount == 0)
-		die(_("%s...%s: no merge base"), sym->left, sym->right);
+	sym->இடது = rev->pending.objects[lpos].name;
+	sym->வலது = rev->pending.objects[rpos].name;
+	எனில் (basecount == 0)
+		die(_("%s...%s: no merge base"), sym->இடது, sym->வலது);
 	sym->base = rev->pending.objects[basepos].name;
 	bitmap_unset(map, basepos);	/* unmark the base we want */
 	sym->warn = basecount > 1;
 	sym->skip = map;
 }
 
-static void symdiff_release(struct symdiff *sdiff)
+நிலையான வெறுமை symdiff_release(கட்டமைப்பு symdiff *sdiff)
 {
 	bitmap_free(sdiff->skip);
 }
 
-int cmd_diff(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo UNUSED)
+முழு cmd_diff(முழு argc,
+	     மாறிலி எழுத்து **argv,
+	     மாறிலி எழுத்து *prefix,
+	     கட்டமைப்பு repository *repo UNUSED)
 {
-	int i;
-	struct rev_info rev;
-	struct object_array ent = OBJECT_ARRAY_INIT;
-	int first_non_parent = -1;
-	int blobs = 0, paths = 0;
-	struct object_array_entry *blob[2];
-	int nongit = 0, no_index = 0;
-	int result;
-	struct symdiff sdiff;
+	முழு i;
+	கட்டமைப்பு rev_info rev;
+	கட்டமைப்பு object_array ent = OBJECT_ARRAY_INIT;
+	முழு first_non_parent = -1;
+	முழு blobs = 0, paths = 0;
+	கட்டமைப்பு object_array_entry *blob[2];
+	முழு nongit = 0, no_index = 0;
+	முழு result;
+	கட்டமைப்பு symdiff sdiff;
 
 	/*
 	 * We could get N tree-ish in the rev.pending_objects list.
@@ -444,25 +444,25 @@ int cmd_diff(int argc,
 	 */
 
 	/* Were we asked to do --no-index explicitly? */
-	for (i = 1; i < argc; i++) {
-		if (!strcmp(argv[i], "--")) {
+	க்கு (i = 1; i < argc; i++) {
+		எனில் (!strcmp(argv[i], "--")) {
 			i++;
-			break;
+			நிறுத்து;
 		}
-		if (!strcmp(argv[i], "--no-index"))
+		எனில் (!strcmp(argv[i], "--no-index"))
 			no_index = DIFF_NO_INDEX_EXPLICIT;
-		if (argv[i][0] != '-')
-			break;
+		எனில் (argv[i][0] != '-')
+			நிறுத்து;
 	}
 
 	prefix = setup_git_directory_gently(the_repository, &nongit);
 
-	if (!nongit) {
+	எனில் (!nongit) {
 		prepare_repo_settings(the_repository);
 		the_repository->settings.command_requires_full_index = 0;
 	}
 
-	if (!no_index) {
+	எனில் (!no_index) {
 		/*
 		 * Treat git diff with at least one path outside of the
 		 * repo the same as if the command would have been executed
@@ -470,7 +470,7 @@ int cmd_diff(int argc,
 		 * the same way as "git diff --no-index <a> <b>", which acts
 		 * as a colourful "diff" replacement.
 		 */
-		if (nongit || ((argc == i + 2) &&
+		எனில் (nongit || ((argc == i + 2) &&
 			       (!path_inside_repo(the_repository, prefix, argv[i]) ||
 				!path_inside_repo(the_repository, prefix, argv[i + 1]))))
 			no_index = DIFF_NO_INDEX_IMPLICIT;
@@ -482,11 +482,11 @@ int cmd_diff(int argc,
 	 * default to SHA1 here, but may eventually want to change this to be
 	 * configurable via a command line option.
 	 */
-	if (nongit)
+	எனில் (nongit)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	init_diff_ui_defaults();
-	repo_config(the_repository, git_diff_ui_config, NULL);
+	repo_config(the_repository, git_diff_ui_config, வெற்று);
 
 	/*
 	 * If we are ignoring the fact that our current directory may
@@ -496,10 +496,10 @@ int cmd_diff(int argc,
 	 * the working tree.  Where we came from is recorded in the
 	 * prefix.
 	 */
-	if (no_index && prefix) {
-		if (chdir(prefix))
+	எனில் (no_index && prefix) {
+		எனில் (chdir(prefix))
 			die(_("cannot come back to cwd"));
-		prefix = NULL;
+		prefix = வெற்று;
 	}
 
 	prefix = precompose_argv_prefix(argc, argv, prefix);
@@ -512,7 +512,7 @@ int cmd_diff(int argc,
 	rev.diffopt.flags.allow_textconv = 1;
 
 	/* If this is a no-index diff, just run it and exit there. */
-	if (no_index)
+	எனில் (no_index)
 		exit(diff_no_index(&rev, the_repository->hash_algo,
 				   no_index == DIFF_NO_INDEX_IMPLICIT,
 				   argc, argv));
@@ -531,10 +531,10 @@ int cmd_diff(int argc,
 	 */
 	rev.diffopt.ita_invisible_in_index = 1;
 
-	if (nongit)
+	எனில் (nongit)
 		die(_("Not a git repository"));
-	argc = setup_revisions(argc, argv, &rev, NULL);
-	if (!rev.diffopt.output_format) {
+	argc = setup_revisions(argc, argv, &rev, வெற்று);
+	எனில் (!rev.diffopt.output_format) {
 		rev.diffopt.output_format = DIFF_FORMAT_PATCH;
 		diff_setup_done(&rev.diffopt);
 	}
@@ -548,108 +548,108 @@ int cmd_diff(int argc,
 	 * Do we have --cached and not have a pending object, then
 	 * default to HEAD by hand.  Eek.
 	 */
-	if (!rev.pending.nr) {
-		int i;
-		for (i = 1; i < argc; i++) {
-			const char *arg = argv[i];
-			if (!strcmp(arg, "--"))
-				break;
-			else if (!strcmp(arg, "--cached") ||
+	எனில் (!rev.pending.nr) {
+		முழு i;
+		க்கு (i = 1; i < argc; i++) {
+			மாறிலி எழுத்து *arg = argv[i];
+			எனில் (!strcmp(arg, "--"))
+				நிறுத்து;
+			இல்லையெனில் எனில் (!strcmp(arg, "--cached") ||
 				 !strcmp(arg, "--staged")) {
 				add_head_to_pending(&rev);
-				if (!rev.pending.nr) {
-					struct tree *tree;
-					tree = lookup_tree(the_repository,
-							   the_repository->hash_algo->empty_tree);
-					add_pending_object(&rev, &tree->object, "HEAD");
+				எனில் (!rev.pending.nr) {
+					கட்டமைப்பு மரம் *மரம்;
+					மரம் = lookup_மரம்(the_repository,
+							   the_repository->hash_algo->empty_மரம்);
+					add_pending_object(&rev, &மரம்->object, "HEAD");
 				}
-				break;
+				நிறுத்து;
 			}
 		}
 	}
 
 	symdiff_prepare(&rev, &sdiff);
-	for (i = 0; i < rev.pending.nr; i++) {
-		struct object_array_entry *entry = &rev.pending.objects[i];
-		struct object *obj = entry->item;
-		const char *name = entry->name;
-		int flags = (obj->flags & UNINTERESTING);
-		if (!obj->parsed)
+	க்கு (i = 0; i < rev.pending.nr; i++) {
+		கட்டமைப்பு object_array_entry *entry = &rev.pending.objects[i];
+		கட்டமைப்பு object *obj = entry->item;
+		மாறிலி எழுத்து *name = entry->name;
+		முழு flags = (obj->flags & UNINTERESTING);
+		எனில் (!obj->parsed)
 			obj = parse_object(the_repository, &obj->oid);
-		obj = deref_tag(the_repository, obj, NULL, 0);
-		if (!obj)
+		obj = deref_tag(the_repository, obj, வெற்று, 0);
+		எனில் (!obj)
 			die(_("invalid object '%s' given."), name);
-		if (obj->type == OBJ_COMMIT) {
-			struct tree *tree = repo_get_commit_tree(
-				the_repository, (struct commit *)obj);
-			if (!tree)
+		எனில் (obj->type == OBJ_COMMIT) {
+			கட்டமைப்பு மரம் *மரம் = repo_get_commit_மரம்(
+				the_repository, (கட்டமைப்பு commit *)obj);
+			எனில் (!மரம்)
 				die(_("unable to read tree object for commit '%s'"), name);
-			obj = &tree->object;
+			obj = &மரம்->object;
 		}
 
-		if (obj->type == OBJ_TREE) {
-			if (sdiff.skip && bitmap_get(sdiff.skip, i))
-				continue;
+		எனில் (obj->type == OBJ_மரம்) {
+			எனில் (sdiff.skip && bitmap_get(sdiff.skip, i))
+				தொடர்;
 			obj->flags |= flags;
 			add_object_array(obj, name, &ent);
-			if (first_non_parent < 0 &&
+			எனில் (first_non_parent < 0 &&
 			    (i >= rev.cmdline.nr || /* HEAD by hand. */
 			     rev.cmdline.rev[i].whence != REV_CMD_PARENTS_ONLY))
 				first_non_parent = ent.nr - 1;
-		} else if (obj->type == OBJ_BLOB) {
-			if (2 <= blobs)
+		} இல்லையெனில் எனில் (obj->type == OBJ_BLOB) {
+			எனில் (2 <= blobs)
 				die(_("more than two blobs given: '%s'"), name);
 			blob[blobs] = entry;
 			blobs++;
 
-		} else {
+		} இல்லையெனில் {
 			die(_("unhandled object '%s' given."), name);
 		}
 	}
-	if (rev.prune_data.nr)
+	எனில் (rev.prune_data.nr)
 		paths += rev.prune_data.nr;
 
 	/*
 	 * Now, do the arguments look reasonable?
 	 */
-	if (!ent.nr) {
-		switch (blobs) {
-		case 0:
+	எனில் (!ent.nr) {
+		தேர்வு (blobs) {
+		நிலை 0:
 			builtin_diff_files(&rev, argc, argv);
-			break;
-		case 1:
-			if (paths != 1)
+			நிறுத்து;
+		நிலை 1:
+			எனில் (paths != 1)
 				usage(builtin_diff_usage);
 			builtin_diff_b_f(&rev, argc, argv, blob);
-			break;
-		case 2:
-			if (paths)
+			நிறுத்து;
+		நிலை 2:
+			எனில் (paths)
 				usage(builtin_diff_usage);
 			builtin_diff_blobs(&rev, argc, argv, blob);
-			break;
-		default:
+			நிறுத்து;
+		இயல்பு:
 			usage(builtin_diff_usage);
 		}
 	}
-	else if (blobs)
+	இல்லையெனில் எனில் (blobs)
 		usage(builtin_diff_usage);
-	else if (ent.nr == 1)
+	இல்லையெனில் எனில் (ent.nr == 1)
 		builtin_diff_index(&rev, argc, argv);
-	else if (ent.nr == 2) {
-		if (sdiff.warn)
+	இல்லையெனில் எனில் (ent.nr == 2) {
+		எனில் (sdiff.warn)
 			warning(_("%s...%s: multiple merge bases, using %s"),
-				sdiff.left, sdiff.right, sdiff.base);
-		builtin_diff_tree(&rev, argc, argv,
+				sdiff.இடது, sdiff.வலது, sdiff.base);
+		builtin_diff_மரம்(&rev, argc, argv,
 				  &ent.objects[0], &ent.objects[1]);
-	} else
+	} இல்லையெனில்
 		builtin_diff_combined(&rev, argc, argv,
 				      ent.objects, ent.nr,
 				      first_non_parent);
 	result = diff_result_code(&rev);
-	if (1 < rev.diffopt.skip_stat_unmatch)
+	எனில் (1 < rev.diffopt.skip_stat_unmatch)
 		refresh_index_quietly();
 	release_revisions(&rev);
 	object_array_clear(&ent);
 	symdiff_release(&sdiff);
-	return result;
+	திரும்பு result;
 }

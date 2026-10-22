@@ -7,31 +7,31 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "diff.h"
-#include "diff-merges.h"
-#include "commit.h"
-#include "preload-index.h"
-#include "revision.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "diff.h"
+#அந்தர்பாவ "diff-merges.h"
+#அந்தர்பாவ "commit.h"
+#அந்தர்பாவ "preload-index.h"
+#அந்தர்பாவ "revision.h"
 
-static const char diff_files_usage[] =
+நிலையான மாறிலி எழுத்து diff_files_usage[] =
 "git diff-files [-q] [-0 | -1 | -2 | -3 | -c | --cc] [<common-diff-options>] [<path>...]"
 "\n"
 COMMON_DIFF_OPTIONS_HELP;
 
-int cmd_diff_files(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+முழு cmd_diff_files(முழு argc,
+		   மாறிலி எழுத்து **argv,
+		   மாறிலி எழுத்து *prefix,
+		   கட்டமைப்பு repository *repo UNUSED)
 {
-	struct rev_info rev;
-	int result;
+	கட்டமைப்பு rev_info rev;
+	முழு result;
 	unsigned options = 0;
 
 	show_usage_if_asked(argc, argv, diff_files_usage);
 
-	repo_config(the_repository, git_diff_basic_config, NULL); /* no "diff" UI options */
+	repo_config(the_repository, git_diff_basic_config, வெற்று); /* no "diff" UI options */
 
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
@@ -47,21 +47,21 @@ int cmd_diff_files(int argc,
 
 	prefix = precompose_argv_prefix(argc, argv, prefix);
 
-	argc = setup_revisions(argc, argv, &rev, NULL);
-	while (1 < argc && argv[1][0] == '-') {
-		if (!strcmp(argv[1], "--base"))
-			rev.max_count = 1;
-		else if (!strcmp(argv[1], "--ours"))
-			rev.max_count = 2;
-		else if (!strcmp(argv[1], "--theirs"))
-			rev.max_count = 3;
-		else if (!strcmp(argv[1], "-q"))
+	argc = setup_revisions(argc, argv, &rev, வெற்று);
+	போது (1 < argc && argv[1][0] == '-') {
+		எனில் (!strcmp(argv[1], "--base"))
+			rev.max_மொத்தம் = 1;
+		இல்லையெனில் எனில் (!strcmp(argv[1], "--ours"))
+			rev.max_மொத்தம் = 2;
+		இல்லையெனில் எனில் (!strcmp(argv[1], "--theirs"))
+			rev.max_மொத்தம் = 3;
+		இல்லையெனில் எனில் (!strcmp(argv[1], "-q"))
 			options |= DIFF_SILENT_ON_REMOVED;
-		else
+		இல்லையெனில்
 			usage(diff_files_usage);
 		argv++; argc--;
 	}
-	if (!rev.diffopt.output_format)
+	எனில் (!rev.diffopt.output_format)
 		rev.diffopt.output_format = DIFF_FORMAT_RAW;
 	rev.diffopt.rotate_to_strict = 1;
 
@@ -70,9 +70,9 @@ int cmd_diff_files(int argc,
 	 * rev.max_count is reasonable (0 <= n <= 3), and
 	 * there is no other revision filtering parameters.
 	 */
-	if (rev.pending.nr ||
+	எனில் (rev.pending.nr ||
 	    rev.min_age != -1 || rev.max_age != -1 ||
-	    3 < rev.max_count)
+	    3 < rev.max_மொத்தம்)
 		usage(diff_files_usage);
 
 	/*
@@ -80,14 +80,14 @@ int cmd_diff_files(int argc,
 	 * was not asked to.  "diff-files -c -p" should not densify
 	 * (the user should ask with "diff-files --cc" explicitly).
 	 */
-	if (rev.max_count == -1 &&
+	எனில் (rev.max_மொத்தம் == -1 &&
 	    (rev.diffopt.output_format & DIFF_FORMAT_PATCH))
 		diff_merges_set_dense_combined_if_unset(&rev);
 
-	if (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0)
+	எனில் (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0)
 		die_errno("repo_read_index_preload");
 	run_diff_files(&rev, options);
 	result = diff_result_code(&rev);
 	release_revisions(&rev);
-	return result;
+	திரும்பு result;
 }

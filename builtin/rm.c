@@ -6,98 +6,98 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "environment.h"
-#include "lockfile.h"
-#include "dir.h"
-#include "gettext.h"
-#include "hash.h"
-#include "tree-walk.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "read-cache.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "advice.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "lockfile.h"
+#அந்தர்பாவ "dir.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "hash.h"
+#அந்தர்பாவ "tree-walk.h"
+#அந்தர்பாவ "object-name.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "read-cache.h"
 
-#include "string-list.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "submodule.h"
-#include "pathspec.h"
+#அந்தர்பாவ "string-list.h"
+#அந்தர்பாவ "setup.h"
+#அந்தர்பாவ "sparse-index.h"
+#அந்தர்பாவ "submodule.h"
+#அந்தர்பாவ "pathspec.h"
 
-static const char * const builtin_rm_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி builtin_rm_usage[] = {
 	N_("git rm [-f | --force] [-n] [-r] [--cached] [--ignore-unmatch]\n"
 	   "       [--quiet] [--pathspec-from-file=<file> [--pathspec-file-nul]]\n"
 	   "       [--] [<pathspec>...]"),
-	NULL
+	வெற்று
 };
 
-static struct {
-	int nr, alloc;
-	struct {
-		const char *name;
-		char is_submodule;
+நிலையான கட்டமைப்பு {
+	முழு nr, alloc;
+	கட்டமைப்பு {
+		மாறிலி எழுத்து *name;
+		எழுத்து is_submodule;
 	} *entry;
 } list;
 
-static int get_ours_cache_pos(const char *path, unsigned int pos)
+நிலையான முழு get_ours_cache_pos(மாறிலி எழுத்து *path, unsigned முழு pos)
 {
-	while ((pos < the_repository->index->cache_nr) && !strcmp(the_repository->index->cache[pos]->name, path)) {
-		if (ce_stage(the_repository->index->cache[pos]) == 2)
-			return pos;
+	போது ((pos < the_repository->index->cache_nr) && !strcmp(the_repository->index->cache[pos]->name, path)) {
+		எனில் (ce_stage(the_repository->index->cache[pos]) == 2)
+			திரும்பு pos;
 		pos++;
 	}
-	return -1;
+	திரும்பு -1;
 }
 
-static void print_error_files(struct string_list *files_list,
-			      const char *main_msg,
-			      const char *hints_msg,
-			      int *errs)
+நிலையான வெறுமை print_error_files(கட்டமைப்பு string_list *files_list,
+			      மாறிலி எழுத்து *main_செய்தி,
+			      மாறிலி எழுத்து *hints_செய்தி,
+			      முழு *errs)
 {
-	if (files_list->nr) {
-		unsigned int i;
-		struct strbuf err_msg = STRBUF_INIT;
+	எனில் (files_list->nr) {
+		unsigned முழு i;
+		கட்டமைப்பு strbuf err_செய்தி = STRBUF_INIT;
 
-		strbuf_addstr(&err_msg, main_msg);
-		for (i = 0; i < files_list->nr; i++)
-			strbuf_addf(&err_msg,
+		strbuf_addstr(&err_செய்தி, main_செய்தி);
+		க்கு (i = 0; i < files_list->nr; i++)
+			strbuf_addf(&err_செய்தி,
 				    "\n    %s",
-				    files_list->items[i].string);
-		if (advice_enabled(ADVICE_RM_HINTS))
-			strbuf_addstr(&err_msg, hints_msg);
-		*errs = error("%s", err_msg.buf);
-		strbuf_release(&err_msg);
+				    files_list->பொருட்கள்[i].string);
+		எனில் (advice_enabled(ADVICE_RM_HINTS))
+			strbuf_addstr(&err_செய்தி, hints_செய்தி);
+		*errs = error("%s", err_செய்தி.buf);
+		strbuf_release(&err_செய்தி);
 	}
 }
 
-static void submodules_absorb_gitdir_if_needed(void)
+நிலையான வெறுமை submodules_absorb_gitdir_if_needed(வெறுமை)
 {
-	int i;
-	for (i = 0; i < list.nr; i++) {
-		const char *name = list.entry[i].name;
-		int pos;
-		const struct cache_entry *ce;
+	முழு i;
+	க்கு (i = 0; i < list.nr; i++) {
+		மாறிலி எழுத்து *name = list.entry[i].name;
+		முழு pos;
+		மாறிலி கட்டமைப்பு cache_entry *ce;
 
 		pos = index_name_pos(the_repository->index, name, strlen(name));
-		if (pos < 0) {
+		எனில் (pos < 0) {
 			pos = get_ours_cache_pos(name, -pos - 1);
-			if (pos < 0)
-				continue;
+			எனில் (pos < 0)
+				தொடர்;
 		}
 		ce = the_repository->index->cache[pos];
 
-		if (!S_ISGITLINK(ce->ce_mode) ||
+		எனில் (!S_ISGITLINK(ce->ce_mode) ||
 		    !file_exists(ce->name) ||
 		    is_empty_dir(name))
-			continue;
+			தொடர்;
 
-		if (!submodule_uses_gitfile(name))
-			absorb_git_dir_into_superproject(name, NULL);
+		எனில் (!submodule_uses_gitfile(name))
+			absorb_git_dir_into_superproject(name, வெற்று);
 	}
 }
 
-static int check_local_mod(struct object_id *head, int index_only)
+நிலையான முழு check_local_mod(கட்டமைப்பு object_id *head, முழு index_only)
 {
 	/*
 	 * Items in list are already sorted in the cache order,
@@ -106,53 +106,53 @@ static int check_local_mod(struct object_id *head, int index_only)
 	 * lazy, and who cares if removal of files is a tad
 	 * slower than the theoretical maximum speed?
 	 */
-	int i, no_head;
-	int errs = 0;
-	struct string_list files_staged = STRING_LIST_INIT_NODUP;
-	struct string_list files_cached = STRING_LIST_INIT_NODUP;
-	struct string_list files_local = STRING_LIST_INIT_NODUP;
+	முழு i, no_head;
+	முழு errs = 0;
+	கட்டமைப்பு string_list files_staged = STRING_LIST_INIT_NODUP;
+	கட்டமைப்பு string_list files_cached = STRING_LIST_INIT_NODUP;
+	கட்டமைப்பு string_list files_local = STRING_LIST_INIT_NODUP;
 
 	no_head = is_null_oid(head);
-	for (i = 0; i < list.nr; i++) {
-		struct stat st;
-		int pos;
-		const struct cache_entry *ce;
-		const char *name = list.entry[i].name;
-		struct object_id oid;
+	க்கு (i = 0; i < list.nr; i++) {
+		கட்டமைப்பு stat st;
+		முழு pos;
+		மாறிலி கட்டமைப்பு cache_entry *ce;
+		மாறிலி எழுத்து *name = list.entry[i].name;
+		கட்டமைப்பு object_id oid;
 		unsigned short mode;
-		int local_changes = 0;
-		int staged_changes = 0;
+		முழு local_changes = 0;
+		முழு staged_changes = 0;
 
 		pos = index_name_pos(the_repository->index, name, strlen(name));
-		if (pos < 0) {
+		எனில் (pos < 0) {
 			/*
 			 * Skip unmerged entries except for populated submodules
 			 * that could lose history when removed.
 			 */
 			pos = get_ours_cache_pos(name, -pos - 1);
-			if (pos < 0)
-				continue;
+			எனில் (pos < 0)
+				தொடர்;
 
-			if (!S_ISGITLINK(the_repository->index->cache[pos]->ce_mode) ||
+			எனில் (!S_ISGITLINK(the_repository->index->cache[pos]->ce_mode) ||
 			    is_empty_dir(name))
-				continue;
+				தொடர்;
 		}
 		ce = the_repository->index->cache[pos];
 
-		if (lstat(ce->name, &st) < 0) {
-			if (!is_missing_file_error(errno))
+		எனில் (lstat(ce->name, &st) < 0) {
+			எனில் (!is_missing_file_error(errno))
 				warning_errno(_("failed to stat '%s'"), ce->name);
 			/* It already vanished from the working tree */
-			continue;
+			தொடர்;
 		}
-		else if (S_ISDIR(st.st_mode)) {
+		இல்லையெனில் எனில் (S_ISDIR(st.st_mode)) {
 			/* if a file was removed and it is now a
 			 * directory, that is the same as ENOENT as
 			 * far as git is concerned; we do not track
 			 * directories unless they are submodules.
 			 */
-			if (!S_ISGITLINK(ce->ce_mode))
-				continue;
+			எனில் (!S_ISGITLINK(ce->ce_mode))
+				தொடர்;
 		}
 
 		/*
@@ -174,7 +174,7 @@ static int check_local_mod(struct object_id *head, int index_only)
 		 * Is the index different from the file in the work tree?
 		 * If it's a submodule, is its work tree modified?
 		 */
-		if (ie_match_stat(the_repository->index, ce, &st, 0) ||
+		எனில் (ie_match_stat(the_repository->index, ce, &st, 0) ||
 		    (S_ISGITLINK(ce->ce_mode) &&
 		     bad_to_remove_submodule(ce->name,
 				SUBMODULE_REMOVAL_DIE_ON_ERROR |
@@ -187,8 +187,8 @@ static int check_local_mod(struct object_id *head, int index_only)
 		 * anything staged in the index is treated by the same
 		 * way as changed from the HEAD.
 		 */
-		if (no_head
-		     || get_tree_entry(the_repository, head, name, &oid, &mode)
+		எனில் (no_head
+		     || get_மரம்_entry(the_repository, head, name, &oid, &mode)
 		     || ce->ce_mode != create_ce_mode(mode)
 		     || !oideq(&ce->oid, &oid))
 			staged_changes = 1;
@@ -201,14 +201,14 @@ static int check_local_mod(struct object_id *head, int index_only)
 		 * lose information unless it is about removing an
 		 * "intent to add" entry.
 		 */
-		if (local_changes && staged_changes) {
-			if (!index_only || !ce_intent_to_add(ce))
+		எனில் (local_changes && staged_changes) {
+			எனில் (!index_only || !ce_intent_to_add(ce))
 				string_list_append(&files_staged, name);
 		}
-		else if (!index_only) {
-			if (staged_changes)
+		இல்லையெனில் எனில் (!index_only) {
+			எனில் (staged_changes)
 				string_list_append(&files_cached, name);
-			if (local_changes)
+			எனில் (local_changes)
 				string_list_append(&files_local, name);
 		}
 	}
@@ -240,20 +240,20 @@ static int check_local_mod(struct object_id *head, int index_only)
 			  &errs);
 	string_list_clear(&files_local, 0);
 
-	return errs;
+	திரும்பு errs;
 }
 
-static int show_only = 0, force = 0, index_only = 0, recursive = 0, quiet = 0;
-static int ignore_unmatch = 0, pathspec_file_nul;
-static int include_sparse;
-static char *pathspec_from_file;
+நிலையான முழு show_only = 0, force = 0, index_only = 0, recursive = 0, quiet = 0;
+நிலையான முழு ignore_unmatch = 0, pathspec_file_nul;
+நிலையான முழு include_sparse;
+நிலையான எழுத்து *pathspec_from_file;
 
-static struct option builtin_rm_options[] = {
+நிலையான கட்டமைப்பு option builtin_rm_options[] = {
 	OPT__DRY_RUN(&show_only, N_("dry run")),
 	OPT__QUIET(&quiet, N_("do not list removed files")),
 	OPT_BOOL( 0 , "cached",         &index_only, N_("only remove from the index")),
 	OPT__FORCE(&force, N_("override the up-to-date check"), PARSE_OPT_NOCOMPLETE),
-	OPT_BOOL('r', NULL,             &recursive,  N_("allow recursive removal")),
+	OPT_BOOL('r', வெற்று,             &recursive,  N_("allow recursive removal")),
 	OPT_BOOL( 0 , "ignore-unmatch", &ignore_unmatch,
 				N_("exit with a zero status even if nothing matched")),
 	OPT_BOOL(0, "sparse", &include_sparse, N_("allow updating entries outside of the sparse-checkout cone")),
@@ -262,17 +262,17 @@ static struct option builtin_rm_options[] = {
 	OPT_END(),
 };
 
-int cmd_rm(int argc,
-	   const char **argv,
-	   const char *prefix,
-	   struct repository *repo UNUSED)
+முழு cmd_rm(முழு argc,
+	   மாறிலி எழுத்து **argv,
+	   மாறிலி எழுத்து *prefix,
+	   கட்டமைப்பு repository *repo UNUSED)
 {
-	struct lock_file lock_file = LOCK_INIT;
-	int i, ret = 0;
-	struct pathspec pathspec;
-	char *seen;
+	கட்டமைப்பு lock_file lock_file = LOCK_INIT;
+	முழு i, ret = 0;
+	கட்டமைப்பு pathspec pathspec;
+	எழுத்து *seen;
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, வெற்று);
 
 	argc = parse_options(argc, argv, prefix, builtin_rm_options,
 			     builtin_rm_usage, 0);
@@ -281,91 +281,91 @@ int cmd_rm(int argc,
 		       PATHSPEC_PREFER_CWD,
 		       prefix, argv);
 
-	if (pathspec_from_file) {
-		if (pathspec.nr)
+	எனில் (pathspec_from_file) {
+		எனில் (pathspec.nr)
 			die(_("'%s' and pathspec arguments cannot be used together"), "--pathspec-from-file");
 
 		parse_pathspec_file(&pathspec, 0,
 				    PATHSPEC_PREFER_CWD,
 				    prefix, pathspec_from_file, pathspec_file_nul);
-	} else if (pathspec_file_nul) {
+	} இல்லையெனில் எனில் (pathspec_file_nul) {
 		die(_("the option '%s' requires '%s'"), "--pathspec-file-nul", "--pathspec-from-file");
 	}
 
-	if (!pathspec.nr)
+	எனில் (!pathspec.nr)
 		die(_("No pathspec was given. Which files should I remove?"));
 
-	if (!index_only)
-		setup_work_tree(the_repository);
+	எனில் (!index_only)
+		setup_work_மரம்(the_repository);
 
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
 
-	if (repo_read_index(the_repository) < 0)
+	எனில் (repo_read_index(the_repository) < 0)
 		die(_("index file corrupt"));
 
-	refresh_index(the_repository->index, REFRESH_QUIET|REFRESH_UNMERGED, &pathspec, NULL, NULL);
+	refresh_index(the_repository->index, REFRESH_QUIET|REFRESH_UNMERGED, &pathspec, வெற்று, வெற்று);
 
 	seen = xcalloc(pathspec.nr, 1);
 
-	if (pathspec_needs_expanded_index(the_repository->index, &pathspec))
+	எனில் (pathspec_needs_expanded_index(the_repository->index, &pathspec))
 		ensure_full_index(the_repository->index);
 
-	for (unsigned int i = 0; i < the_repository->index->cache_nr; i++) {
-		const struct cache_entry *ce = the_repository->index->cache[i];
+	க்கு (unsigned முழு i = 0; i < the_repository->index->cache_nr; i++) {
+		மாறிலி கட்டமைப்பு cache_entry *ce = the_repository->index->cache[i];
 
-		if (!include_sparse &&
+		எனில் (!include_sparse &&
 		    (ce_skip_worktree(ce) ||
 		     !path_in_sparse_checkout(ce->name, the_repository->index)))
-			continue;
-		if (!ce_path_match(the_repository->index, ce, &pathspec, seen))
-			continue;
+			தொடர்;
+		எனில் (!ce_path_match(the_repository->index, ce, &pathspec, seen))
+			தொடர்;
 		ALLOC_GROW(list.entry, list.nr + 1, list.alloc);
 		list.entry[list.nr].name = xstrdup(ce->name);
 		list.entry[list.nr].is_submodule = S_ISGITLINK(ce->ce_mode);
-		if (list.entry[list.nr++].is_submodule &&
+		எனில் (list.entry[list.nr++].is_submodule &&
 		    !is_staging_gitmodules_ok(the_repository->index))
 			die(_("please stage your changes to .gitmodules or stash them to proceed"));
 	}
 
-	if (pathspec.nr) {
-		const char *original;
-		int seen_any = 0;
-		char *skip_worktree_seen = NULL;
-		struct string_list only_match_skip_worktree = STRING_LIST_INIT_NODUP;
+	எனில் (pathspec.nr) {
+		மாறிலி எழுத்து *original;
+		முழு seen_any = 0;
+		எழுத்து *skip_worktree_seen = வெற்று;
+		கட்டமைப்பு string_list only_match_skip_worktree = STRING_LIST_INIT_NODUP;
 
-		for (i = 0; i < pathspec.nr; i++) {
-			original = pathspec.items[i].original;
-			if (seen[i])
+		க்கு (i = 0; i < pathspec.nr; i++) {
+			original = pathspec.பொருட்கள்[i].original;
+			எனில் (seen[i])
 				seen_any = 1;
-			else if (ignore_unmatch)
-				continue;
-			else if (!include_sparse &&
+			இல்லையெனில் எனில் (ignore_unmatch)
+				தொடர்;
+			இல்லையெனில் எனில் (!include_sparse &&
 				 matches_skip_worktree(&pathspec, i, &skip_worktree_seen))
 				string_list_append(&only_match_skip_worktree, original);
-			else
+			இல்லையெனில்
 				die(_("pathspec '%s' did not match any files"), original);
 
-			if (!recursive && seen[i] == MATCHED_RECURSIVELY)
+			எனில் (!recursive && seen[i] == MATCHED_RECURSIVELY)
 				die(_("not removing '%s' recursively without -r"),
 				    *original ? original : ".");
 		}
 
-		if (only_match_skip_worktree.nr) {
+		எனில் (only_match_skip_worktree.nr) {
 			advise_on_updating_sparse_paths(&only_match_skip_worktree);
 			ret = 1;
 		}
-		free(skip_worktree_seen);
+		விடுவி(skip_worktree_seen);
 		string_list_clear(&only_match_skip_worktree, 0);
 
-		if (!seen_any)
+		எனில் (!seen_any)
 			exit(ret);
 	}
 	clear_pathspec(&pathspec);
-	free(seen);
+	விடுவி(seen);
 
-	if (!index_only)
+	எனில் (!index_only)
 		submodules_absorb_gitdir_if_needed();
 
 	/*
@@ -378,11 +378,11 @@ int cmd_rm(int argc,
 	 * Further, if HEAD commit exists, "diff-index --cached" must
 	 * report no changes unless forced.
 	 */
-	if (!force) {
-		struct object_id oid;
-		if (repo_get_oid(the_repository, "HEAD", &oid))
+	எனில் (!force) {
+		கட்டமைப்பு object_id oid;
+		எனில் (repo_get_oid(the_repository, "HEAD", &oid))
 			oidclr(&oid, the_repository->hash_algo);
-		if (check_local_mod(&oid, index_only))
+		எனில் (check_local_mod(&oid, index_only))
 			exit(1);
 	}
 
@@ -390,17 +390,17 @@ int cmd_rm(int argc,
 	 * First remove the names from the index: we won't commit
 	 * the index unless all of them succeed.
 	 */
-	for (i = 0; i < list.nr; i++) {
-		const char *path = list.entry[i].name;
-		if (!quiet)
+	க்கு (i = 0; i < list.nr; i++) {
+		மாறிலி எழுத்து *path = list.entry[i].name;
+		எனில் (!quiet)
 			printf("rm '%s'\n", path);
 
-		if (remove_file_from_index(the_repository->index, path))
+		எனில் (remove_file_from_index(the_repository->index, path))
 			die(_("git rm: unable to remove %s"), path);
 	}
 
-	if (show_only)
-		return 0;
+	எனில் (show_only)
+		திரும்பு 0;
 
 	/*
 	 * Then, unless we used "--cached", remove the filenames from
@@ -410,38 +410,38 @@ int cmd_rm(int argc,
 	 * by then we've already committed ourselves and can't fail
 	 * in the middle)
 	 */
-	if (!index_only) {
-		int removed = 0, gitmodules_modified = 0;
-		struct strbuf buf = STRBUF_INIT;
-		int flag = force ? REMOVE_DIR_PURGE_ORIGINAL_CWD : 0;
-		for (i = 0; i < list.nr; i++) {
-			const char *path = list.entry[i].name;
-			if (list.entry[i].is_submodule) {
+	எனில் (!index_only) {
+		முழு removed = 0, gitmodules_modified = 0;
+		கட்டமைப்பு strbuf buf = STRBUF_INIT;
+		முழு flag = force ? REMOVE_DIR_PURGE_ORIGINAL_CWD : 0;
+		க்கு (i = 0; i < list.nr; i++) {
+			மாறிலி எழுத்து *path = list.entry[i].name;
+			எனில் (list.entry[i].is_submodule) {
 				strbuf_reset(&buf);
 				strbuf_addstr(&buf, path);
-				if (remove_dir_recursively(&buf, flag))
+				எனில் (remove_dir_recursively(&buf, flag))
 					die(_("could not remove '%s'"), path);
 
 				removed = 1;
-				if (!remove_path_from_gitmodules(path))
+				எனில் (!remove_path_from_gitmodules(path))
 					gitmodules_modified = 1;
-				continue;
+				தொடர்;
 			}
-			if (!remove_path(path)) {
+			எனில் (!remove_path(path)) {
 				removed = 1;
-				continue;
+				தொடர்;
 			}
-			if (!removed)
+			எனில் (!removed)
 				die_errno("git rm: '%s'", path);
 		}
 		strbuf_release(&buf);
-		if (gitmodules_modified)
+		எனில் (gitmodules_modified)
 			stage_updated_gitmodules(the_repository->index);
 	}
 
-	if (write_locked_index(the_repository->index, &lock_file,
+	எனில் (write_locked_index(the_repository->index, &lock_file,
 			       COMMIT_LOCK | SKIP_IF_UNCHANGED))
 		die(_("Unable to write new index file"));
 
-	return ret;
+	திரும்பு ret;
 }

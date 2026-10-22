@@ -1,233 +1,233 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "diff.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "parse-options.h"
-#include "setup.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "diff.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "hash.h"
+#அந்தர்பாவ "hex.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "setup.h"
 
-static void flush_current_id(size_t patchlen, struct object_id *id, struct object_id *result)
+நிலையான வெறுமை flush_current_id(size_t patchlen, கட்டமைப்பு object_id *id, கட்டமைப்பு object_id *result)
 {
-	if (patchlen)
+	எனில் (patchlen)
 		printf("%s %s\n", oid_to_hex(result), oid_to_hex(id));
 }
 
-static size_t remove_space(char *line)
+நிலையான size_t remove_space(எழுத்து *வரி)
 {
-	char *src = line;
-	char *dst = line;
-	unsigned char c;
+	எழுத்து *src = வரி;
+	எழுத்து *dst = வரி;
+	unsigned எழுத்து c;
 
-	while ((c = *src++) != '\0') {
-		if (!isspace(c))
+	போது ((c = *src++) != '\0') {
+		எனில் (!isspace(c))
 			*dst++ = c;
 	}
-	return dst - line;
+	திரும்பு dst - வரி;
 }
 
-static int scan_hunk_header(const char *p, int *p_before, int *p_after)
+நிலையான முழு scan_hunk_header(மாறிலி எழுத்து *p, முழு *p_before, முழு *p_after)
 {
-	static const char digits[] = "0123456789";
-	const char *q, *r;
-	int n;
+	நிலையான மாறிலி எழுத்து digits[] = "0123456789";
+	மாறிலி எழுத்து *q, *r;
+	முழு n;
 
 	q = p + 4;
 	n = strspn(q, digits);
-	if (q[n] == ',') {
+	எனில் (q[n] == ',') {
 		q += n + 1;
 		*p_before = atoi(q);
 		n = strspn(q, digits);
-	} else {
+	} இல்லையெனில் {
 		*p_before = 1;
 	}
 
-	if (n == 0 || q[n] != ' ' || q[n+1] != '+')
-		return 0;
+	எனில் (n == 0 || q[n] != ' ' || q[n+1] != '+')
+		திரும்பு 0;
 
 	r = q + n + 2;
 	n = strspn(r, digits);
-	if (r[n] == ',') {
+	எனில் (r[n] == ',') {
 		r += n + 1;
 		*p_after = atoi(r);
 		n = strspn(r, digits);
-	} else {
+	} இல்லையெனில் {
 		*p_after = 1;
 	}
-	if (n == 0)
-		return 0;
+	எனில் (n == 0)
+		திரும்பு 0;
 
-	return 1;
+	திரும்பு 1;
 }
 
-static size_t get_one_patchid(struct object_id *next_oid, struct object_id *result,
-			      struct strbuf *line_buf, int stable, int verbatim)
+நிலையான size_t get_one_patchid(கட்டமைப்பு object_id *next_oid, கட்டமைப்பு object_id *result,
+			      கட்டமைப்பு strbuf *வரி_buf, முழு stable, முழு verbatim)
 {
 	size_t patchlen = 0;
-	int found_next = 0;
-	int before = -1, after = -1;
-	int diff_is_binary = 0;
-	char pre_oid_str[GIT_MAX_HEXSZ + 1], post_oid_str[GIT_MAX_HEXSZ + 1];
-	struct git_hash_ctx ctx;
+	முழு found_next = 0;
+	முழு before = -1, after = -1;
+	முழு diff_is_இருமம் = 0;
+	எழுத்து pre_oid_str[GIT_MAX_HEXSZ + 1], post_oid_str[GIT_MAX_HEXSZ + 1];
+	கட்டமைப்பு git_hash_ctx ctx;
 
 	git_hash_init(&ctx, the_hash_algo);
 	oidclr(result, the_repository->hash_algo);
 
-	while (strbuf_getwholeline(line_buf, stdin, '\n') != EOF) {
-		char *line = line_buf->buf;
-		const char *p = line;
+	போது (strbuf_getwholeline(வரி_buf, stdin, '\n') != EOF) {
+		எழுத்து *வரி = வரி_buf->buf;
+		மாறிலி எழுத்து *p = வரி;
 		size_t len;
 
 		/* Possibly skip over the prefix added by "log" or "format-patch" */
-		if (!skip_prefix(line, "commit ", &p) &&
-		    !skip_prefix(line, "From ", &p) &&
-		    starts_with(line, "\\ ") && 12 < strlen(line)) {
-			if (verbatim)
-				git_hash_update(&ctx, line, strlen(line));
-			continue;
+		எனில் (!skip_prefix(வரி, "commit ", &p) &&
+		    !skip_prefix(வரி, "From ", &p) &&
+		    starts_with(வரி, "\\ ") && 12 < strlen(வரி)) {
+			எனில் (verbatim)
+				git_hash_update(&ctx, வரி, strlen(வரி));
+			தொடர்;
 		}
 
-		if (!get_oid_hex(p, next_oid)) {
+		எனில் (!get_oid_hex(p, next_oid)) {
 			found_next = 1;
-			break;
+			நிறுத்து;
 		}
 
 		/* Ignore commit comments */
-		if (!patchlen && !starts_with(line, "diff "))
-			continue;
+		எனில் (!patchlen && !starts_with(வரி, "diff "))
+			தொடர்;
 
 		/* Parsing diff header?  */
-		if (before == -1) {
-			if (starts_with(line, "GIT binary patch") ||
-			    starts_with(line, "Binary files")) {
-				diff_is_binary = 1;
+		எனில் (before == -1) {
+			எனில் (starts_with(வரி, "GIT binary patch") ||
+			    starts_with(வரி, "Binary files")) {
+				diff_is_இருமம் = 1;
 				before = 0;
 				git_hash_update(&ctx, pre_oid_str,
 						strlen(pre_oid_str));
 				git_hash_update(&ctx, post_oid_str,
 						strlen(post_oid_str));
-				if (stable)
+				எனில் (stable)
 					flush_one_hunk(result, &ctx);
-				continue;
-			} else if (skip_prefix(line, "index ", &p)) {
-				char *oid1_end = strstr(line, "..");
-				char *oid2_end = NULL;
-				if (oid1_end)
+				தொடர்;
+			} இல்லையெனில் எனில் (skip_prefix(வரி, "index ", &p)) {
+				எழுத்து *oid1_end = strstr(வரி, "..");
+				எழுத்து *oid2_end = வெற்று;
+				எனில் (oid1_end)
 					oid2_end = strstr(oid1_end, " ");
-				if (!oid2_end)
-					oid2_end = line + strlen(line) - 1;
-				if (oid1_end != NULL && oid2_end != NULL) {
+				எனில் (!oid2_end)
+					oid2_end = வரி + strlen(வரி) - 1;
+				எனில் (oid1_end != வெற்று && oid2_end != வெற்று) {
 					*oid1_end = *oid2_end = '\0';
 					strlcpy(pre_oid_str, p, GIT_MAX_HEXSZ + 1);
 					strlcpy(post_oid_str, oid1_end + 2, GIT_MAX_HEXSZ + 1);
 				}
-				continue;
-			} else if (starts_with(line, "--- "))
+				தொடர்;
+			} இல்லையெனில் எனில் (starts_with(வரி, "--- "))
 				before = after = 1;
-			else if (!isalpha(line[0]))
-				break;
+			இல்லையெனில் எனில் (!isalpha(வரி[0]))
+				நிறுத்து;
 		}
 
-		if (diff_is_binary) {
-			if (starts_with(line, "diff ")) {
-				diff_is_binary = 0;
+		எனில் (diff_is_இருமம்) {
+			எனில் (starts_with(வரி, "diff ")) {
+				diff_is_இருமம் = 0;
 				before = -1;
 			}
-			continue;
+			தொடர்;
 		}
 
 		/* Looking for a valid hunk header?  */
-		if (before == 0 && after == 0) {
-			if (starts_with(line, "@@ -")) {
+		எனில் (before == 0 && after == 0) {
+			எனில் (starts_with(வரி, "@@ -")) {
 				/* Parse next hunk, but ignore line numbers.  */
-				scan_hunk_header(line, &before, &after);
-				continue;
+				scan_hunk_header(வரி, &before, &after);
+				தொடர்;
 			}
 
 			/* Split at the end of the patch.  */
-			if (!starts_with(line, "diff "))
-				break;
+			எனில் (!starts_with(வரி, "diff "))
+				நிறுத்து;
 
 			/* Else we're parsing another header.  */
-			if (stable)
+			எனில் (stable)
 				flush_one_hunk(result, &ctx);
 			before = after = -1;
 		}
 
 		/* If we get here, we're inside a hunk.  */
-		if (line[0] == '-' || line[0] == ' ')
+		எனில் (வரி[0] == '-' || வரி[0] == ' ')
 			before--;
-		if (line[0] == '+' || line[0] == ' ')
+		எனில் (வரி[0] == '+' || வரி[0] == ' ')
 			after--;
 
 		/* Add line to hash algo (possibly removing whitespace) */
-		len = verbatim ? strlen(line) : remove_space(line);
+		len = verbatim ? strlen(வரி) : remove_space(வரி);
 		patchlen += len;
-		git_hash_update(&ctx, line, len);
+		git_hash_update(&ctx, வரி, len);
 	}
 
-	if (!found_next)
+	எனில் (!found_next)
 		oidclr(next_oid, the_repository->hash_algo);
 
 	flush_one_hunk(result, &ctx);
 	git_hash_discard(&ctx);
 
-	return patchlen;
+	திரும்பு patchlen;
 }
 
-static void generate_id_list(int stable, int verbatim)
+நிலையான வெறுமை generate_id_list(முழு stable, முழு verbatim)
 {
-	struct object_id oid, n, result;
+	கட்டமைப்பு object_id oid, n, result;
 	size_t patchlen;
-	struct strbuf line_buf = STRBUF_INIT;
+	கட்டமைப்பு strbuf வரி_buf = STRBUF_INIT;
 
 	oidclr(&oid, the_repository->hash_algo);
-	while (!feof(stdin)) {
-		patchlen = get_one_patchid(&n, &result, &line_buf, stable, verbatim);
+	போது (!feof(stdin)) {
+		patchlen = get_one_patchid(&n, &result, &வரி_buf, stable, verbatim);
 		flush_current_id(patchlen, &oid, &result);
 		oidcpy(&oid, &n);
 	}
-	strbuf_release(&line_buf);
+	strbuf_release(&வரி_buf);
 }
 
-static const char *const patch_id_usage[] = {
-	N_("git patch-id [--stable | --unstable | --verbatim]"), NULL
+நிலையான மாறிலி எழுத்து *மாறிலி patch_id_usage[] = {
+	N_("git patch-id [--stable | --unstable | --verbatim]"), வெற்று
 };
 
-struct patch_id_opts {
-	int stable;
-	int verbatim;
+கட்டமைப்பு patch_id_opts {
+	முழு stable;
+	முழு verbatim;
 };
 
-static int git_patch_id_config(const char *var, const char *value,
-			       const struct config_context *ctx, void *cb)
+நிலையான முழு git_patch_id_config(மாறிலி எழுத்து *var, மாறிலி எழுத்து *மதிப்பு,
+			       மாறிலி கட்டமைப்பு config_context *ctx, வெறுமை *cb)
 {
-	struct patch_id_opts *opts = cb;
+	கட்டமைப்பு patch_id_opts *opts = cb;
 
-	if (!strcmp(var, "patchid.stable")) {
-		opts->stable = git_config_bool(var, value);
-		return 0;
+	எனில் (!strcmp(var, "patchid.stable")) {
+		opts->stable = git_config_bool(var, மதிப்பு);
+		திரும்பு 0;
 	}
-	if (!strcmp(var, "patchid.verbatim")) {
-		opts->verbatim = git_config_bool(var, value);
-		return 0;
+	எனில் (!strcmp(var, "patchid.verbatim")) {
+		opts->verbatim = git_config_bool(var, மதிப்பு);
+		திரும்பு 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	திரும்பு git_default_config(var, மதிப்பு, ctx, cb);
 }
 
-int cmd_patch_id(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+முழு cmd_patch_id(முழு argc,
+		 மாறிலி எழுத்து **argv,
+		 மாறிலி எழுத்து *prefix,
+		 கட்டமைப்பு repository *repo UNUSED)
 {
 	/* if nothing is set, default to unstable */
-	struct patch_id_opts config = {0, 0};
-	int opts = 0;
-	struct option builtin_patch_id_options[] = {
+	கட்டமைப்பு patch_id_opts config = {0, 0};
+	முழு opts = 0;
+	கட்டமைப்பு option builtin_patch_id_options[] = {
 		OPT_CMDMODE(0, "unstable", &opts,
 		    N_("use the unstable patch ID algorithm"), 1),
 		OPT_CMDMODE(0, "stable", &opts,
@@ -240,7 +240,7 @@ int cmd_patch_id(int argc,
 	repo_config(the_repository, git_patch_id_config, &config);
 
 	/* verbatim implies stable */
-	if (config.verbatim)
+	எனில் (config.verbatim)
 		config.stable = 1;
 
 	argc = parse_options(argc, argv, prefix, builtin_patch_id_options,
@@ -255,10 +255,10 @@ int cmd_patch_id(int argc,
 	 * NEEDSWORK: This hack should be removed in favor of converting
 	 * the code that computes patch IDs to always use SHA1.
 	 */
-	if (!the_hash_algo)
+	எனில் (!the_hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	generate_id_list(opts ? opts > 1 : config.stable,
 			 opts ? opts == 3 : config.verbatim);
-	return 0;
+	திரும்பு 0;
 }

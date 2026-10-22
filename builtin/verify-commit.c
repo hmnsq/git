@@ -5,80 +5,80 @@
  *
  * Based on git-verify-tag
  */
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "object-name.h"
-#include "commit.h"
-#include "parse-options.h"
-#include "gpg-interface.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "object-name.h"
+#அந்தர்பாவ "commit.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "gpg-interface.h"
 
-static const char * const verify_commit_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி verify_commit_usage[] = {
 		N_("git verify-commit [-v | --verbose] [--raw] <commit>..."),
-		NULL
+		வெற்று
 };
 
-static int run_gpg_verify(struct commit *commit, unsigned flags)
+நிலையான முழு run_gpg_verify(கட்டமைப்பு commit *commit, unsigned flags)
 {
-	struct signature_check signature_check;
-	int ret;
+	கட்டமைப்பு signature_check signature_check;
+	முழு ret;
 
-	memset(&signature_check, 0, sizeof(signature_check));
+	memset(&signature_check, 0, அளவு(signature_check));
 
 	ret = check_commit_signature(commit, &signature_check);
 	print_signature_buffer(&signature_check, flags);
 
 	signature_check_clear(&signature_check);
-	return ret;
+	திரும்பு ret;
 }
 
-static int verify_commit(struct repository *repo, const char *name, unsigned flags)
+நிலையான முழு verify_commit(கட்டமைப்பு repository *repo, மாறிலி எழுத்து *name, unsigned flags)
 {
-	struct object_id oid;
-	struct object *obj;
+	கட்டமைப்பு object_id oid;
+	கட்டமைப்பு object *obj;
 
-	if (repo_get_oid(repo, name, &oid))
-		return error("commit '%s' not found.", name);
+	எனில் (repo_get_oid(repo, name, &oid))
+		திரும்பு error("commit '%s' not found.", name);
 
 	obj = parse_object(repo, &oid);
-	if (!obj)
-		return error("%s: unable to read file.", name);
-	if (obj->type != OBJ_COMMIT)
-		return error("%s: cannot verify a non-commit object of type %s.",
+	எனில் (!obj)
+		திரும்பு error("%s: unable to read file.", name);
+	எனில் (obj->type != OBJ_COMMIT)
+		திரும்பு error("%s: cannot verify a non-commit object of type %s.",
 				name, type_name(obj->type));
 
-	return run_gpg_verify((struct commit *)obj, flags);
+	திரும்பு run_gpg_verify((கட்டமைப்பு commit *)obj, flags);
 }
 
-int cmd_verify_commit(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo)
+முழு cmd_verify_commit(முழு argc,
+		      மாறிலி எழுத்து **argv,
+		      மாறிலி எழுத்து *prefix,
+		      கட்டமைப்பு repository *repo)
 {
-	int i = 1, verbose = 0, had_error = 0;
+	முழு i = 1, verbose = 0, had_error = 0;
 	unsigned flags = 0;
-	const struct option verify_commit_options[] = {
+	மாறிலி கட்டமைப்பு option verify_commit_options[] = {
 		OPT__VERBOSE(&verbose, N_("print commit contents")),
 		OPT_BIT(0, "raw", &flags, N_("print raw gpg status output"), GPG_VERIFY_RAW),
 		OPT_END()
 	};
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, வெற்று);
 
 	argc = parse_options(argc, argv, prefix, verify_commit_options,
 			     verify_commit_usage, PARSE_OPT_KEEP_ARGV0);
-	if (argc <= i)
+	எனில் (argc <= i)
 		usage_with_options(verify_commit_usage, verify_commit_options);
 
-	if (verbose)
+	எனில் (verbose)
 		flags |= GPG_VERIFY_VERBOSE;
 
 	/* sometimes the program was terminated because this signal
 	 * was received in the process of writing the gpg input: */
-	signal(SIGPIPE, SIG_IGN);
-	while (i < argc)
-		if (verify_commit(repo, argv[i++], flags))
+	சமிக்ஞை(SIGPIPE, SIG_IGN);
+	போது (i < argc)
+		எனில் (verify_commit(repo, argv[i++], flags))
 			had_error = 1;
-	return had_error;
+	திரும்பு had_error;
 }

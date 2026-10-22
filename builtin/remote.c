@@ -1,27 +1,27 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "date.h"
-#include "gettext.h"
-#include "ident.h"
-#include "parse-options.h"
-#include "path.h"
-#include "transport.h"
-#include "remote.h"
-#include "string-list.h"
-#include "strbuf.h"
-#include "run-command.h"
-#include "rebase.h"
-#include "refs.h"
-#include "refspec.h"
-#include "odb.h"
-#include "strvec.h"
-#include "commit-reach.h"
-#include "progress.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "advice.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "date.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "ident.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "path.h"
+#அந்தர்பாவ "transport.h"
+#அந்தர்பாவ "remote.h"
+#அந்தர்பாவ "string-list.h"
+#அந்தர்பாவ "strbuf.h"
+#அந்தர்பாவ "run-command.h"
+#அந்தர்பாவ "rebase.h"
+#அந்தர்பாவ "refs.h"
+#அந்தர்பாவ "refspec.h"
+#அந்தர்பாவ "odb.h"
+#அந்தர்பாவ "strvec.h"
+#அந்தர்பாவ "commit-reach.h"
+#அந்தர்பாவ "progress.h"
 
-static const char * const builtin_remote_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி builtin_remote_usage[] = {
 	"git remote [-v | --verbose]",
 	N_("git remote add [-t <branch>] [-m <master>] [-f] [--tags | --no-tags] [--mirror=<fetch|push>] <name> <url>"),
 	N_("git remote rename [--[no-]progress] <old> <new>"),
@@ -35,84 +35,84 @@ static const char * const builtin_remote_usage[] = {
 	N_("git remote set-url [--push] <name> <newurl> [<oldurl>]"),
 	N_("git remote set-url --add <name> <newurl>"),
 	N_("git remote set-url --delete <name> <url>"),
-	NULL
+	வெற்று
 };
 
-static const char * const builtin_remote_add_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி builtin_remote_add_usage[] = {
 	N_("git remote add [<options>] <name> <url>"),
-	NULL
+	வெற்று
 };
 
-static const char * const builtin_remote_rename_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி builtin_remote_rename_usage[] = {
 	N_("git remote rename [--[no-]progress] <old> <new>"),
-	NULL
+	வெற்று
 };
 
-static const char * const builtin_remote_rm_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி builtin_remote_rm_usage[] = {
 	N_("git remote remove <name>"),
-	NULL
+	வெற்று
 };
 
-static const char * const builtin_remote_sethead_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி builtin_remote_sethead_usage[] = {
 	N_("git remote set-head <name> (-a | --auto | -d | --delete | <branch>)"),
-	NULL
+	வெற்று
 };
 
-static const char * const builtin_remote_setbranches_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி builtin_remote_setbranches_usage[] = {
 	N_("git remote set-branches <name> <branch>..."),
 	N_("git remote set-branches --add <name> <branch>..."),
-	NULL
+	வெற்று
 };
 
-static const char * const builtin_remote_show_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி builtin_remote_show_usage[] = {
 	N_("git remote show [<options>] <name>"),
-	NULL
+	வெற்று
 };
 
-static const char * const builtin_remote_prune_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி builtin_remote_prune_usage[] = {
 	N_("git remote prune [<options>] <name>"),
-	NULL
+	வெற்று
 };
 
-static const char * const builtin_remote_update_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி builtin_remote_update_usage[] = {
 	N_("git remote update [<options>] [<group> | <remote>]..."),
-	NULL
+	வெற்று
 };
 
-static const char * const builtin_remote_geturl_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி builtin_remote_geturl_usage[] = {
 	N_("git remote get-url [--push] [--all] <name>"),
-	NULL
+	வெற்று
 };
 
-static const char * const builtin_remote_seturl_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி builtin_remote_seturl_usage[] = {
 	N_("git remote set-url [--push] <name> <newurl> [<oldurl>]"),
 	N_("git remote set-url --add <name> <newurl>"),
 	N_("git remote set-url --delete <name> <url>"),
-	NULL
+	வெற்று
 };
 
 #define GET_REF_STATES (1<<0)
 #define GET_HEAD_NAMES (1<<1)
-#define GET_PUSH_REF_STATES (1<<2)
+#define GET_தள்ளு_REF_STATES (1<<2)
 
-static int verbose;
+நிலையான முழு verbose;
 
-static int fetch_remote(const char *name)
+நிலையான முழு fetch_remote(மாறிலி எழுத்து *name)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	கட்டமைப்பு child_process cmd = CHILD_PROCESS_INIT;
 
-	strvec_push(&cmd.args, "fetch");
-	if (verbose)
-		strvec_push(&cmd.args, "-v");
-	strvec_push(&cmd.args, name);
+	strvec_தள்ளு(&cmd.args, "fetch");
+	எனில் (verbose)
+		strvec_தள்ளு(&cmd.args, "-v");
+	strvec_தள்ளு(&cmd.args, name);
 	cmd.git_cmd = 1;
 	printf_ln(_("Updating %s"), name);
-	if (run_command(&cmd))
-		return error(_("Could not fetch %s"), name);
-	return 0;
+	எனில் (run_command(&cmd))
+		திரும்பு error(_("Could not fetch %s"), name);
+	திரும்பு 0;
 }
 
-enum {
+எண்ணிக்கை {
 	TAGS_UNSET = 0,
 	TAGS_DEFAULT = 1,
 	TAGS_SET = 2
@@ -120,73 +120,73 @@ enum {
 
 #define MIRROR_NONE 0
 #define MIRROR_FETCH 1
-#define MIRROR_PUSH 2
-#define MIRROR_BOTH (MIRROR_FETCH|MIRROR_PUSH)
+#define MIRROR_தள்ளு 2
+#define MIRROR_BOTH (MIRROR_FETCH|MIRROR_தள்ளு)
 
-static void add_branch(const char *key, const char *branchname,
-		       const char *remotename, int mirror, struct strbuf *tmp)
+நிலையான வெறுமை add_branch(மாறிலி எழுத்து *சாவி, மாறிலி எழுத்து *branchname,
+		       மாறிலி எழுத்து *remotename, முழு mirror, கட்டமைப்பு strbuf *tmp)
 {
 	strbuf_reset(tmp);
 	strbuf_addch(tmp, '+');
-	if (mirror)
+	எனில் (mirror)
 		strbuf_addf(tmp, "refs/%s:refs/%s",
 				branchname, branchname);
-	else
+	இல்லையெனில்
 		strbuf_addf(tmp, "refs/heads/%s:refs/remotes/%s/%s",
 				branchname, remotename, branchname);
-	repo_config_set_multivar(the_repository, key, tmp->buf, "^$", 0);
+	repo_config_set_multivar(the_repository, சாவி, tmp->buf, "^$", 0);
 }
 
-static const char mirror_advice[] =
+நிலையான மாறிலி எழுத்து mirror_advice[] =
 N_("--mirror is dangerous and deprecated; please\n"
    "\t use --mirror=fetch or --mirror=push instead");
 
-static int parse_mirror_opt(const struct option *opt, const char *arg, int not)
+நிலையான முழு parse_mirror_opt(மாறிலி கட்டமைப்பு option *opt, மாறிலி எழுத்து *arg, முழு not)
 {
-	unsigned *mirror = opt->value;
-	if (not)
+	unsigned *mirror = opt->மதிப்பு;
+	எனில் (not)
 		*mirror = MIRROR_NONE;
-	else if (!arg) {
+	இல்லையெனில் எனில் (!arg) {
 		warning("%s", _(mirror_advice));
 		*mirror = MIRROR_BOTH;
 	}
-	else if (!strcmp(arg, "fetch"))
+	இல்லையெனில் எனில் (!strcmp(arg, "fetch"))
 		*mirror = MIRROR_FETCH;
-	else if (!strcmp(arg, "push"))
-		*mirror = MIRROR_PUSH;
-	else
-		return error(_("unknown --mirror argument: %s"), arg);
-	return 0;
+	இல்லையெனில் எனில் (!strcmp(arg, "push"))
+		*mirror = MIRROR_தள்ளு;
+	இல்லையெனில்
+		திரும்பு error(_("unknown --mirror argument: %s"), arg);
+	திரும்பு 0;
 }
 
-static int check_remote_collision(struct remote *remote, void *data)
+நிலையான முழு check_remote_collision(கட்டமைப்பு remote *remote, வெறுமை *data)
 {
-	const char *name = data;
-	const char *p;
+	மாறிலி எழுத்து *name = data;
+	மாறிலி எழுத்து *p;
 
-	if (skip_prefix(name, remote->name, &p) && *p == '/')
+	எனில் (skip_prefix(name, remote->name, &p) && *p == '/')
 		die(_("remote name '%s' is a subset of existing remote '%s'"),
 		    name, remote->name);
-	if (skip_prefix(remote->name, name, &p) && *p == '/')
+	எனில் (skip_prefix(remote->name, name, &p) && *p == '/')
 		die(_("remote name '%s' is a superset of existing remote '%s'"),
 		    name, remote->name);
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int add(int argc, const char **argv, const char *prefix,
-	       struct repository *repo UNUSED)
+நிலையான முழு add(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+	       கட்டமைப்பு repository *repo UNUSED)
 {
-	int fetch = 0, fetch_tags = TAGS_DEFAULT;
+	முழு fetch = 0, fetch_tags = TAGS_DEFAULT;
 	unsigned mirror = MIRROR_NONE;
-	struct string_list track = STRING_LIST_INIT_NODUP;
-	const char *master = NULL;
-	struct remote *remote;
-	struct strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT;
-	const char *name, *url;
-	int result = 0;
+	கட்டமைப்பு string_list track = STRING_LIST_INIT_NODUP;
+	மாறிலி எழுத்து *master = வெற்று;
+	கட்டமைப்பு remote *remote;
+	கட்டமைப்பு strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT;
+	மாறிலி எழுத்து *name, *url;
+	முழு result = 0;
 
-	struct option options[] = {
+	கட்டமைப்பு option options[] = {
 		OPT_BOOL('f', "fetch", &fetch, N_("fetch the remote branches")),
 		OPT_SET_INT(0, "tags", &fetch_tags,
 			    N_("import all tags and associated objects when fetching\n"
@@ -204,68 +204,68 @@ static int add(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_add_usage, 0);
 
-	if (argc != 2)
+	எனில் (argc != 2)
 		usage_with_options(builtin_remote_add_usage, options);
 
-	if (mirror && master)
+	எனில் (mirror && master)
 		die(_("specifying a master branch makes no sense with --mirror"));
-	if (mirror && !(mirror & MIRROR_FETCH) && track.nr)
+	எனில் (mirror && !(mirror & MIRROR_FETCH) && track.nr)
 		die(_("specifying branches to track makes sense only with fetch mirrors"));
 
 	name = argv[0];
 	url = argv[1];
 
 	remote = remote_get(name);
-	if (remote_is_configured(remote, 1)) {
+	எனில் (remote_is_configured(remote, 1)) {
 		error(_("remote %s already exists."), name);
 		exit(3);
 	}
 
-	if (!valid_remote_name(name))
+	எனில் (!valid_remote_name(name))
 		die(_("'%s' is not a valid remote name"), name);
 
-	for_each_remote(check_remote_collision, (void *)name);
+	for_each_remote(check_remote_collision, (வெறுமை *)name);
 
 	strbuf_addf(&buf, "remote.%s.url", name);
 	repo_config_set(the_repository, buf.buf, url);
 
-	if (!mirror || mirror & MIRROR_FETCH) {
+	எனில் (!mirror || mirror & MIRROR_FETCH) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.fetch", name);
-		if (track.nr == 0)
+		எனில் (track.nr == 0)
 			string_list_append(&track, "*");
-		for (size_t i = 0; i < track.nr; i++) {
-			add_branch(buf.buf, track.items[i].string,
+		க்கு (size_t i = 0; i < track.nr; i++) {
+			add_branch(buf.buf, track.பொருட்கள்[i].string,
 				   name, mirror, &buf2);
 		}
 	}
 
-	if (mirror & MIRROR_PUSH) {
+	எனில் (mirror & MIRROR_தள்ளு) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.mirror", name);
 		repo_config_set(the_repository, buf.buf, "true");
 	}
 
-	if (fetch_tags != TAGS_DEFAULT) {
+	எனில் (fetch_tags != TAGS_DEFAULT) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.tagOpt", name);
 		repo_config_set(the_repository, buf.buf,
 				fetch_tags == TAGS_SET ? "--tags" : "--no-tags");
 	}
 
-	if (fetch && fetch_remote(name)) {
+	எனில் (fetch && fetch_remote(name)) {
 		result = 1;
-		goto out;
+		செல் out;
 	}
 
-	if (master) {
+	எனில் (master) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "refs/remotes/%s/HEAD", name);
 
 		strbuf_reset(&buf2);
 		strbuf_addf(&buf2, "refs/remotes/%s/%s", name, master);
 
-		if (refs_update_symref(get_main_ref_store(the_repository), buf.buf, buf2.buf, "remote add"))
+		எனில் (refs_update_symref(get_main_ref_store(the_repository), buf.buf, buf2.buf, "remote add"))
 			result = error(_("Could not setup master '%s'"), master);
 	}
 
@@ -274,110 +274,110 @@ out:
 	strbuf_release(&buf2);
 	string_list_clear(&track, 0);
 
-	return result;
+	திரும்பு result;
 }
 
-struct branch_info {
-	char *remote_name;
-	struct string_list merge;
-	enum rebase_type rebase;
-	char *push_remote_name;
+கட்டமைப்பு branch_info {
+	எழுத்து *remote_name;
+	கட்டமைப்பு string_list merge;
+	எண்ணிக்கை rebase_type rebase;
+	எழுத்து *தள்ளு_remote_name;
 };
 
-static struct string_list branch_list = STRING_LIST_INIT_DUP;
+நிலையான கட்டமைப்பு string_list branch_list = STRING_LIST_INIT_DUP;
 
-static const char *abbrev_ref(const char *name, const char *prefix)
+நிலையான மாறிலி எழுத்து *abbrev_ref(மாறிலி எழுத்து *name, மாறிலி எழுத்து *prefix)
 {
 	skip_prefix(name, prefix, &name);
-	return name;
+	திரும்பு name;
 }
 #define abbrev_branch(name) abbrev_ref((name), "refs/heads/")
 
-static int config_read_branches(const char *key, const char *value,
-				const struct config_context *ctx UNUSED,
-				void *data UNUSED)
+நிலையான முழு config_read_branches(மாறிலி எழுத்து *சாவி, மாறிலி எழுத்து *மதிப்பு,
+				மாறிலி கட்டமைப்பு config_context *ctx UNUSED,
+				வெறுமை *data UNUSED)
 {
-	const char *orig_key = key;
-	char *name;
-	struct string_list_item *item;
-	struct branch_info *info;
-	enum { REMOTE, MERGE, REBASE, PUSH_REMOTE } type;
-	size_t key_len;
+	மாறிலி எழுத்து *orig_சாவி = சாவி;
+	எழுத்து *name;
+	கட்டமைப்பு string_list_item *item;
+	கட்டமைப்பு branch_info *info;
+	எண்ணிக்கை { REMOTE, MERGE, REBASE, தள்ளு_REMOTE } type;
+	size_t சாவி_len;
 
-	if (!starts_with(key, "branch."))
-		return 0;
+	எனில் (!starts_with(சாவி, "branch."))
+		திரும்பு 0;
 
-	key += strlen("branch.");
-	if (strip_suffix(key, ".remote", &key_len))
+	சாவி += strlen("branch.");
+	எனில் (strip_suffix(சாவி, ".remote", &சாவி_len))
 		type = REMOTE;
-	else if (strip_suffix(key, ".merge", &key_len))
+	இல்லையெனில் எனில் (strip_suffix(சாவி, ".merge", &சாவி_len))
 		type = MERGE;
-	else if (strip_suffix(key, ".rebase", &key_len))
+	இல்லையெனில் எனில் (strip_suffix(சாவி, ".rebase", &சாவி_len))
 		type = REBASE;
-	else if (strip_suffix(key, ".pushremote", &key_len))
-		type = PUSH_REMOTE;
-	else
-		return 0;
+	இல்லையெனில் எனில் (strip_suffix(சாவி, ".pushremote", &சாவி_len))
+		type = தள்ளு_REMOTE;
+	இல்லையெனில்
+		திரும்பு 0;
 
-	name = xmemdupz(key, key_len);
-	item = string_list_insert(&branch_list, name);
+	name = xmemdupz(சாவி, சாவி_len);
+	item = string_list_செருகு(&branch_list, name);
 
-	if (!item->util)
-		item->util = xcalloc(1, sizeof(struct branch_info));
+	எனில் (!item->util)
+		item->util = xcalloc(1, அளவு(கட்டமைப்பு branch_info));
 	info = item->util;
-	switch (type) {
-	case REMOTE:
-		if (info->remote_name)
-			warning(_("more than one %s"), orig_key);
-		info->remote_name = xstrdup(value);
-		break;
-	case MERGE: {
-		const char *space = strchr(value, ' ');
-		value = abbrev_branch(value);
-		while (space) {
-			char *merge;
-			merge = xstrndup(value, space - value);
+	தேர்வு (type) {
+	நிலை REMOTE:
+		எனில் (info->remote_name)
+			warning(_("more than one %s"), orig_சாவி);
+		info->remote_name = xstrdup(மதிப்பு);
+		நிறுத்து;
+	நிலை MERGE: {
+		மாறிலி எழுத்து *space = strchr(மதிப்பு, ' ');
+		மதிப்பு = abbrev_branch(மதிப்பு);
+		போது (space) {
+			எழுத்து *merge;
+			merge = xstrndup(மதிப்பு, space - மதிப்பு);
 			string_list_append(&info->merge, merge);
-			value = abbrev_branch(space + 1);
-			space = strchr(value, ' ');
+			மதிப்பு = abbrev_branch(space + 1);
+			space = strchr(மதிப்பு, ' ');
 		}
-		string_list_append(&info->merge, xstrdup(value));
-		break;
+		string_list_append(&info->merge, xstrdup(மதிப்பு));
+		நிறுத்து;
 	}
-	case REBASE:
+	நிலை REBASE:
 		/*
 		 * Consider invalid values as false and check the
 		 * truth value with >= REBASE_TRUE.
 		 */
-		info->rebase = rebase_parse_value(value);
-		if (info->rebase == REBASE_INVALID)
+		info->rebase = rebase_parse_மதிப்பு(மதிப்பு);
+		எனில் (info->rebase == REBASE_INVALID)
 			warning(_("unhandled branch.%s.rebase=%s; assuming "
-				  "'true'"), name, value);
-		break;
-	case PUSH_REMOTE:
-		if (info->push_remote_name)
-			warning(_("more than one %s"), orig_key);
-		info->push_remote_name = xstrdup(value);
-		break;
-	default:
+				  "'true'"), name, மதிப்பு);
+		நிறுத்து;
+	நிலை தள்ளு_REMOTE:
+		எனில் (info->தள்ளு_remote_name)
+			warning(_("more than one %s"), orig_சாவி);
+		info->தள்ளு_remote_name = xstrdup(மதிப்பு);
+		நிறுத்து;
+	இயல்பு:
 		BUG("unexpected type=%d", type);
 	}
 
-	free(name);
-	return 0;
+	விடுவி(name);
+	திரும்பு 0;
 }
 
-static void read_branches(void)
+நிலையான வெறுமை read_branches(வெறுமை)
 {
-	if (branch_list.nr)
-		return;
-	repo_config(the_repository, config_read_branches, NULL);
+	எனில் (branch_list.nr)
+		திரும்பு;
+	repo_config(the_repository, config_read_branches, வெற்று);
 }
 
-struct ref_states {
-	struct remote *remote;
-	struct string_list new_refs, skipped, stale, tracked, heads, push;
-	int queried;
+கட்டமைப்பு ref_states {
+	கட்டமைப்பு remote *remote;
+	கட்டமைப்பு string_list new_refs, skipped, stale, tracked, heads, தள்ளு;
+	முழு queried;
 };
 
 #define REF_STATES_INIT { \
@@ -386,31 +386,31 @@ struct ref_states {
 	.stale = STRING_LIST_INIT_DUP, \
 	.tracked = STRING_LIST_INIT_DUP, \
 	.heads = STRING_LIST_INIT_DUP, \
-	.push = STRING_LIST_INIT_DUP, \
+	.தள்ளு = STRING_LIST_INIT_DUP, \
 }
 
-static int get_ref_states(const struct ref *remote_refs, struct ref_states *states)
+நிலையான முழு get_ref_states(மாறிலி கட்டமைப்பு ref *remote_refs, கட்டமைப்பு ref_states *states)
 {
-	struct ref *fetch_map = NULL, **tail = &fetch_map;
-	struct ref *ref, *stale_refs;
-	int i;
+	கட்டமைப்பு ref *fetch_map = வெற்று, **tail = &fetch_map;
+	கட்டமைப்பு ref *ref, *stale_refs;
+	முழு i;
 
-	for (i = 0; i < states->remote->fetch.nr; i++)
-		if (get_fetch_map(remote_refs, &states->remote->fetch.items[i], &tail, 1))
+	க்கு (i = 0; i < states->remote->fetch.nr; i++)
+		எனில் (get_fetch_map(remote_refs, &states->remote->fetch.பொருட்கள்[i], &tail, 1))
 			die(_("Could not get fetch map for refspec %s"),
-				states->remote->fetch.items[i].raw);
+				states->remote->fetch.பொருட்கள்[i].raw);
 
-	for (ref = fetch_map; ref; ref = ref->next) {
-		if (refname_matches_negative_refspec_item(ref->name, &states->remote->fetch))
+	க்கு (ref = fetch_map; ref; ref = ref->next) {
+		எனில் (refname_matches_negative_refspec_item(ref->name, &states->remote->fetch))
 			string_list_append(&states->skipped, abbrev_branch(ref->name));
-		else if (!ref->peer_ref || !refs_ref_exists(get_main_ref_store(the_repository), ref->peer_ref->name))
+		இல்லையெனில் எனில் (!ref->peer_ref || !refs_ref_exists(get_main_ref_store(the_repository), ref->peer_ref->name))
 			string_list_append(&states->new_refs, abbrev_branch(ref->name));
-		else
+		இல்லையெனில்
 			string_list_append(&states->tracked, abbrev_branch(ref->name));
 	}
 	stale_refs = get_stale_heads(&states->remote->fetch, fetch_map);
-	for (ref = stale_refs; ref; ref = ref->next) {
-		struct string_list_item *item =
+	க்கு (ref = stale_refs; ref; ref = ref->next) {
+		கட்டமைப்பு string_list_item *item =
 			string_list_append(&states->stale, abbrev_branch(ref->name));
 		item->util = xstrdup(ref->name);
 	}
@@ -422,204 +422,204 @@ static int get_ref_states(const struct ref *remote_refs, struct ref_states *stat
 	string_list_sort(&states->tracked);
 	string_list_sort(&states->stale);
 
-	return 0;
+	திரும்பு 0;
 }
 
-struct push_info {
-	char *dest;
-	int forced;
-	enum {
-		PUSH_STATUS_CREATE = 0,
-		PUSH_STATUS_DELETE,
-		PUSH_STATUS_UPTODATE,
-		PUSH_STATUS_FASTFORWARD,
-		PUSH_STATUS_OUTOFDATE,
-		PUSH_STATUS_NOTQUERIED
+கட்டமைப்பு தள்ளு_info {
+	எழுத்து *dest;
+	முழு forced;
+	எண்ணிக்கை {
+		தள்ளு_STATUS_CREATE = 0,
+		தள்ளு_STATUS_DELETE,
+		தள்ளு_STATUS_UPTODATE,
+		தள்ளு_STATUS_FASTFORWARD,
+		தள்ளு_STATUS_OUTOFDATE,
+		தள்ளு_STATUS_NOTQUERIED
 	} status;
 };
 
-static int get_push_ref_states(const struct ref *remote_refs,
-	struct ref_states *states)
+நிலையான முழு get_தள்ளு_ref_states(மாறிலி கட்டமைப்பு ref *remote_refs,
+	கட்டமைப்பு ref_states *states)
 {
-	struct remote *remote = states->remote;
-	struct ref *ref, *local_refs, *push_map;
-	if (remote->mirror)
-		return 0;
+	கட்டமைப்பு remote *remote = states->remote;
+	கட்டமைப்பு ref *ref, *local_refs, *தள்ளு_map;
+	எனில் (remote->mirror)
+		திரும்பு 0;
 
 	local_refs = get_local_heads();
-	push_map = copy_ref_list(remote_refs);
+	தள்ளு_map = copy_ref_list(remote_refs);
 
-	match_push_refs(local_refs, &push_map, &remote->push, MATCH_REFS_NONE);
+	match_தள்ளு_refs(local_refs, &தள்ளு_map, &remote->தள்ளு, MATCH_REFS_NONE);
 
-	for (ref = push_map; ref; ref = ref->next) {
-		struct string_list_item *item;
-		struct push_info *info;
+	க்கு (ref = தள்ளு_map; ref; ref = ref->next) {
+		கட்டமைப்பு string_list_item *item;
+		கட்டமைப்பு தள்ளு_info *info;
 
-		if (!ref->peer_ref)
-			continue;
+		எனில் (!ref->peer_ref)
+			தொடர்;
 		oidcpy(&ref->new_oid, &ref->peer_ref->new_oid);
 
-		item = string_list_append(&states->push,
+		item = string_list_append(&states->தள்ளு,
 					  abbrev_branch(ref->peer_ref->name));
-		item->util = xcalloc(1, sizeof(struct push_info));
+		item->util = xcalloc(1, அளவு(கட்டமைப்பு தள்ளு_info));
 		info = item->util;
 		info->forced = ref->force;
 		info->dest = xstrdup(abbrev_branch(ref->name));
 
-		if (is_null_oid(&ref->new_oid)) {
-			info->status = PUSH_STATUS_DELETE;
-		} else if (oideq(&ref->old_oid, &ref->new_oid))
-			info->status = PUSH_STATUS_UPTODATE;
-		else if (is_null_oid(&ref->old_oid))
-			info->status = PUSH_STATUS_CREATE;
-		else if (odb_has_object(the_repository->objects, &ref->old_oid,
+		எனில் (is_null_oid(&ref->new_oid)) {
+			info->status = தள்ளு_STATUS_DELETE;
+		} இல்லையெனில் எனில் (oideq(&ref->old_oid, &ref->new_oid))
+			info->status = தள்ளு_STATUS_UPTODATE;
+		இல்லையெனில் எனில் (is_null_oid(&ref->old_oid))
+			info->status = தள்ளு_STATUS_CREATE;
+		இல்லையெனில் எனில் (odb_has_object(the_repository->objects, &ref->old_oid,
 					ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR) &&
 			 ref_newer(&ref->new_oid, &ref->old_oid))
-			info->status = PUSH_STATUS_FASTFORWARD;
-		else
-			info->status = PUSH_STATUS_OUTOFDATE;
+			info->status = தள்ளு_STATUS_FASTFORWARD;
+		இல்லையெனில்
+			info->status = தள்ளு_STATUS_OUTOFDATE;
 	}
 	free_refs(local_refs);
-	free_refs(push_map);
-	return 0;
+	free_refs(தள்ளு_map);
+	திரும்பு 0;
 }
 
-static int get_push_ref_states_noquery(struct ref_states *states)
+நிலையான முழு get_தள்ளு_ref_states_noquery(கட்டமைப்பு ref_states *states)
 {
-	int i;
-	struct remote *remote = states->remote;
-	struct string_list_item *item;
-	struct push_info *info;
+	முழு i;
+	கட்டமைப்பு remote *remote = states->remote;
+	கட்டமைப்பு string_list_item *item;
+	கட்டமைப்பு தள்ளு_info *info;
 
-	if (remote->mirror)
-		return 0;
+	எனில் (remote->mirror)
+		திரும்பு 0;
 
-	if (!remote->push.nr) {
-		item = string_list_append(&states->push, _("(matching)"));
-		info = item->util = xcalloc(1, sizeof(struct push_info));
-		info->status = PUSH_STATUS_NOTQUERIED;
+	எனில் (!remote->தள்ளு.nr) {
+		item = string_list_append(&states->தள்ளு, _("(matching)"));
+		info = item->util = xcalloc(1, அளவு(கட்டமைப்பு தள்ளு_info));
+		info->status = தள்ளு_STATUS_NOTQUERIED;
 		info->dest = xstrdup(item->string);
 	}
-	for (i = 0; i < remote->push.nr; i++) {
-		const struct refspec_item *spec = &remote->push.items[i];
-		if (spec->matching)
-			item = string_list_append(&states->push, _("(matching)"));
-		else if (strlen(spec->src))
-			item = string_list_append(&states->push, spec->src);
-		else
-			item = string_list_append(&states->push, _("(delete)"));
+	க்கு (i = 0; i < remote->தள்ளு.nr; i++) {
+		மாறிலி கட்டமைப்பு refspec_item *spec = &remote->தள்ளு.பொருட்கள்[i];
+		எனில் (spec->matching)
+			item = string_list_append(&states->தள்ளு, _("(matching)"));
+		இல்லையெனில் எனில் (strlen(spec->src))
+			item = string_list_append(&states->தள்ளு, spec->src);
+		இல்லையெனில்
+			item = string_list_append(&states->தள்ளு, _("(delete)"));
 
-		info = item->util = xcalloc(1, sizeof(struct push_info));
+		info = item->util = xcalloc(1, அளவு(கட்டமைப்பு தள்ளு_info));
 		info->forced = spec->force;
-		info->status = PUSH_STATUS_NOTQUERIED;
+		info->status = தள்ளு_STATUS_NOTQUERIED;
 		info->dest = xstrdup(spec->dst ? spec->dst : item->string);
 	}
-	return 0;
+	திரும்பு 0;
 }
 
-static int get_head_names(const struct ref *remote_refs, struct ref_states *states)
+நிலையான முழு get_head_names(மாறிலி கட்டமைப்பு ref *remote_refs, கட்டமைப்பு ref_states *states)
 {
-	struct ref *ref, *matches;
-	struct ref *fetch_map = NULL, **fetch_map_tail = &fetch_map;
-	struct refspec_item refspec = {
+	கட்டமைப்பு ref *ref, *matches;
+	கட்டமைப்பு ref *fetch_map = வெற்று, **fetch_map_tail = &fetch_map;
+	கட்டமைப்பு refspec_item refspec = {
 		.force = 0,
 		.pattern = 1,
-		.src = (char *) "refs/heads/*",
-		.dst = (char *) "refs/heads/*",
+		.src = (எழுத்து *) "refs/heads/*",
+		.dst = (எழுத்து *) "refs/heads/*",
 	};
 
 	get_fetch_map(remote_refs, &refspec, &fetch_map_tail, 0);
 	matches = guess_remote_head(find_ref_by_name(remote_refs, "HEAD"),
 				    fetch_map, REMOTE_GUESS_HEAD_ALL);
-	for (ref = matches; ref; ref = ref->next)
+	க்கு (ref = matches; ref; ref = ref->next)
 		string_list_append(&states->heads, abbrev_branch(ref->name));
 
 	free_refs(fetch_map);
 	free_refs(matches);
-	return 0;
+	திரும்பு 0;
 }
 
-struct known_remote {
-	struct known_remote *next;
-	struct remote *remote;
+கட்டமைப்பு known_remote {
+	கட்டமைப்பு known_remote *next;
+	கட்டமைப்பு remote *remote;
 };
 
-struct known_remotes {
-	struct remote *to_delete;
-	struct known_remote *list;
+கட்டமைப்பு known_remotes {
+	கட்டமைப்பு remote *to_delete;
+	கட்டமைப்பு known_remote *list;
 };
 
-static int add_known_remote(struct remote *remote, void *cb_data)
+நிலையான முழு add_known_remote(கட்டமைப்பு remote *remote, வெறுமை *cb_data)
 {
-	struct known_remotes *all = cb_data;
-	struct known_remote *r;
+	கட்டமைப்பு known_remotes *all = cb_data;
+	கட்டமைப்பு known_remote *r;
 
-	if (!strcmp(all->to_delete->name, remote->name))
-		return 0;
+	எனில் (!strcmp(all->to_delete->name, remote->name))
+		திரும்பு 0;
 
-	r = xmalloc(sizeof(*r));
+	r = xmalloc(அளவு(*r));
 	r->remote = remote;
 	r->next = all->list;
 	all->list = r;
-	return 0;
+	திரும்பு 0;
 }
 
-struct branches_for_remote {
-	struct remote *remote;
-	struct string_list *branches, *skipped;
-	struct known_remotes *keep;
+கட்டமைப்பு branches_for_remote {
+	கட்டமைப்பு remote *remote;
+	கட்டமைப்பு string_list *branches, *skipped;
+	கட்டமைப்பு known_remotes *keep;
 };
 
-static int add_branch_for_removal(const struct reference *ref, void *cb_data)
+நிலையான முழு add_branch_for_removal(மாறிலி கட்டமைப்பு reference *ref, வெறுமை *cb_data)
 {
-	struct branches_for_remote *branches = cb_data;
-	struct refspec_item refspec;
-	struct known_remote *kr;
+	கட்டமைப்பு branches_for_remote *branches = cb_data;
+	கட்டமைப்பு refspec_item refspec;
+	கட்டமைப்பு known_remote *kr;
 
-	memset(&refspec, 0, sizeof(refspec));
-	refspec.dst = (char *)ref->name;
-	if (remote_find_tracking(branches->remote, &refspec))
-		return 0;
-	free(refspec.src);
+	memset(&refspec, 0, அளவு(refspec));
+	refspec.dst = (எழுத்து *)ref->name;
+	எனில் (remote_find_tracking(branches->remote, &refspec))
+		திரும்பு 0;
+	விடுவி(refspec.src);
 
 	/* don't delete a branch if another remote also uses it */
-	for (kr = branches->keep->list; kr; kr = kr->next) {
-		memset(&refspec, 0, sizeof(refspec));
-		refspec.dst = (char *)ref->name;
-		if (!remote_find_tracking(kr->remote, &refspec)) {
-			free(refspec.src);
-			return 0;
+	க்கு (kr = branches->keep->list; kr; kr = kr->next) {
+		memset(&refspec, 0, அளவு(refspec));
+		refspec.dst = (எழுத்து *)ref->name;
+		எனில் (!remote_find_tracking(kr->remote, &refspec)) {
+			விடுவி(refspec.src);
+			திரும்பு 0;
 		}
 	}
 
 	/* don't delete non-remote-tracking refs */
-	if (!starts_with(ref->name, "refs/remotes/")) {
+	எனில் (!starts_with(ref->name, "refs/remotes/")) {
 		/* advise user how to delete local branches */
-		if (starts_with(ref->name, "refs/heads/"))
+		எனில் (starts_with(ref->name, "refs/heads/"))
 			string_list_append(branches->skipped,
 					   abbrev_branch(ref->name));
 		/* silently skip over other non-remote refs */
-		return 0;
+		திரும்பு 0;
 	}
 
 	string_list_append(branches->branches, ref->name);
 
-	return 0;
+	திரும்பு 0;
 }
 
-struct rename_info {
-	const char *old_name;
-	const char *new_name;
-	struct ref_transaction *transaction;
-	struct progress *progress;
-	struct strbuf *err;
+கட்டமைப்பு rename_info {
+	மாறிலி எழுத்து *old_name;
+	மாறிலி எழுத்து *new_name;
+	கட்டமைப்பு ref_transaction *transaction;
+	கட்டமைப்பு progress *progress;
+	கட்டமைப்பு strbuf *err;
 	uint32_t progress_nr;
 	uint64_t index;
 };
 
-static void compute_renamed_ref(struct rename_info *rename,
-				const char *refname,
-				struct strbuf *out)
+நிலையான வெறுமை compute_renamed_ref(கட்டமைப்பு rename_info *rename,
+				மாறிலி எழுத்து *refname,
+				கட்டமைப்பு strbuf *out)
 {
 	strbuf_reset(out);
 	strbuf_addstr(out, refname);
@@ -627,27 +627,27 @@ static void compute_renamed_ref(struct rename_info *rename,
 		      rename->new_name, strlen(rename->new_name));
 }
 
-static int rename_one_reflog_entry(const char *old_refname,
-				   struct object_id *old_oid,
-				   struct object_id *new_oid,
-				   const char *committer,
-				   timestamp_t timestamp, int tz,
-				   const char *msg, void *cb_data)
+நிலையான முழு rename_one_reflog_entry(மாறிலி எழுத்து *old_refname,
+				   கட்டமைப்பு object_id *old_oid,
+				   கட்டமைப்பு object_id *new_oid,
+				   மாறிலி எழுத்து *committer,
+				   timestamp_t timestamp, முழு tz,
+				   மாறிலி எழுத்து *செய்தி, வெறுமை *cb_data)
 {
-	struct rename_info *rename = cb_data;
-	struct strbuf new_refname = STRBUF_INIT;
-	struct strbuf identity = STRBUF_INIT;
-	struct strbuf name = STRBUF_INIT;
-	struct strbuf mail = STRBUF_INIT;
-	struct ident_split ident;
-	const char *date;
-	int error;
+	கட்டமைப்பு rename_info *rename = cb_data;
+	கட்டமைப்பு strbuf new_refname = STRBUF_INIT;
+	கட்டமைப்பு strbuf identity = STRBUF_INIT;
+	கட்டமைப்பு strbuf name = STRBUF_INIT;
+	கட்டமைப்பு strbuf mail = STRBUF_INIT;
+	கட்டமைப்பு ident_split ident;
+	மாறிலி எழுத்து *date;
+	முழு error;
 
 	compute_renamed_ref(rename, old_refname, &new_refname);
 
-	if (split_ident_line(&ident, committer, strlen(committer)) < 0) {
+	எனில் (split_ident_வரி(&ident, committer, strlen(committer)) < 0) {
 		error = -1;
-		goto out;
+		செல் out;
 	}
 
 	strbuf_add(&name, ident.name_begin, ident.name_end - ident.name_begin);
@@ -658,7 +658,7 @@ static int rename_one_reflog_entry(const char *old_refname,
 					  WANT_BLANK_IDENT, date, 0));
 
 	error = ref_transaction_update_reflog(rename->transaction, new_refname.buf,
-					      new_oid, old_oid, identity.buf, msg,
+					      new_oid, old_oid, identity.buf, செய்தி,
 					      rename->index++, rename->err);
 
 out:
@@ -666,24 +666,24 @@ out:
 	strbuf_release(&identity);
 	strbuf_release(&name);
 	strbuf_release(&mail);
-	return error;
+	திரும்பு error;
 }
 
-static int rename_one_reflog(const char *old_refname,
-			     const struct object_id *old_oid,
-			     struct rename_info *rename)
+நிலையான முழு rename_one_reflog(மாறிலி எழுத்து *old_refname,
+			     மாறிலி கட்டமைப்பு object_id *old_oid,
+			     கட்டமைப்பு rename_info *rename)
 {
-	struct strbuf new_refname = STRBUF_INIT;
-	struct strbuf message = STRBUF_INIT;
-	int error;
+	கட்டமைப்பு strbuf new_refname = STRBUF_INIT;
+	கட்டமைப்பு strbuf message = STRBUF_INIT;
+	முழு error;
 
-	if (!refs_reflog_exists(get_main_ref_store(the_repository), old_refname))
-		return 0;
+	எனில் (!refs_reflog_exists(get_main_ref_store(the_repository), old_refname))
+		திரும்பு 0;
 
 	error = refs_for_each_reflog_ent(get_main_ref_store(the_repository),
 					 old_refname, rename_one_reflog_entry, rename);
-	if (error < 0)
-		goto out;
+	எனில் (error < 0)
+		செல் out;
 
 	compute_renamed_ref(rename, old_refname, &new_refname);
 
@@ -701,27 +701,27 @@ static int rename_one_reflog(const char *old_refname,
 	error = ref_transaction_update_reflog(rename->transaction, new_refname.buf,
 					      old_oid, old_oid, git_committer_info(0),
 					      message.buf, rename->index++, rename->err);
-	if (error < 0)
-		return error;
+	எனில் (error < 0)
+		திரும்பு error;
 
 out:
 	strbuf_release(&new_refname);
 	strbuf_release(&message);
-	return error;
+	திரும்பு error;
 }
 
-static int rename_one_ref(const struct reference *ref, void *cb_data)
+நிலையான முழு rename_one_ref(மாறிலி கட்டமைப்பு reference *ref, வெறுமை *cb_data)
 {
-	struct strbuf new_referent = STRBUF_INIT;
-	struct strbuf new_refname = STRBUF_INIT;
-	struct rename_info *rename = cb_data;
-	const struct object_id *oid = ref->oid;
-	const char *referent = ref->target;
-	int error;
+	கட்டமைப்பு strbuf new_referent = STRBUF_INIT;
+	கட்டமைப்பு strbuf new_refname = STRBUF_INIT;
+	கட்டமைப்பு rename_info *rename = cb_data;
+	மாறிலி கட்டமைப்பு object_id *oid = ref->oid;
+	மாறிலி எழுத்து *referent = ref->target;
+	முழு error;
 
 	compute_renamed_ref(rename, ref->name, &new_refname);
 
-	if (ref->flags & REF_ISSYMREF) {
+	எனில் (ref->flags & REF_ISSYMREF) {
 		/*
 		 * Stupidly enough `referent` is not pointing to the immediate
 		 * target of a symref, but it's the recursively resolved value.
@@ -730,121 +730,121 @@ static int rename_one_ref(const struct reference *ref, void *cb_data)
 		 */
 		referent = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
 						   ref->name, RESOLVE_REF_NO_RECURSE,
-						   NULL, NULL);
+						   வெற்று, வெற்று);
 		compute_renamed_ref(rename, referent, &new_referent);
-		oid = NULL;
+		oid = வெற்று;
 	}
 
 	error = ref_transaction_delete(rename->transaction, ref->name,
-				       oid, referent, REF_NO_DEREF, NULL, rename->err);
-	if (error < 0)
-		goto out;
+				       oid, referent, REF_NO_DEREF, வெற்று, rename->err);
+	எனில் (error < 0)
+		செல் out;
 
 	error = ref_transaction_update(rename->transaction, new_refname.buf, oid, null_oid(the_hash_algo),
-				       (ref->flags & REF_ISSYMREF) ? new_referent.buf : NULL, NULL,
+				       (ref->flags & REF_ISSYMREF) ? new_referent.buf : வெற்று, வெற்று,
 				       REF_SKIP_CREATE_REFLOG | REF_NO_DEREF | REF_SKIP_OID_VERIFICATION,
-				       NULL, rename->err);
-	if (error < 0)
-		goto out;
+				       வெற்று, rename->err);
+	எனில் (error < 0)
+		செல் out;
 
 	error = rename_one_reflog(ref->name, oid, rename);
-	if (error < 0)
-		goto out;
+	எனில் (error < 0)
+		செல் out;
 
 	display_progress(rename->progress, ++rename->progress_nr);
 
 out:
 	strbuf_release(&new_referent);
 	strbuf_release(&new_refname);
-	return error;
+	திரும்பு error;
 }
 
-static int migrate_file(struct remote *remote)
+நிலையான முழு migrate_file(கட்டமைப்பு remote *remote)
 {
-	struct strbuf buf = STRBUF_INIT;
+	கட்டமைப்பு strbuf buf = STRBUF_INIT;
 
 	strbuf_addf(&buf, "remote.%s.url", remote->name);
-	for (size_t i = 0; i < remote->url.nr; i++)
+	க்கு (size_t i = 0; i < remote->url.nr; i++)
 		repo_config_set_multivar(the_repository, buf.buf, remote->url.v[i], "^$", 0);
 	strbuf_reset(&buf);
 	strbuf_addf(&buf, "remote.%s.push", remote->name);
-	for (int i = 0; i < remote->push.nr; i++)
-		repo_config_set_multivar(the_repository, buf.buf, remote->push.items[i].raw, "^$", 0);
+	க்கு (முழு i = 0; i < remote->தள்ளு.nr; i++)
+		repo_config_set_multivar(the_repository, buf.buf, remote->தள்ளு.பொருட்கள்[i].raw, "^$", 0);
 	strbuf_reset(&buf);
 	strbuf_addf(&buf, "remote.%s.fetch", remote->name);
-	for (int i = 0; i < remote->fetch.nr; i++)
-		repo_config_set_multivar(the_repository, buf.buf, remote->fetch.items[i].raw, "^$", 0);
+	க்கு (முழு i = 0; i < remote->fetch.nr; i++)
+		repo_config_set_multivar(the_repository, buf.buf, remote->fetch.பொருட்கள்[i].raw, "^$", 0);
 #ifndef WITH_BREAKING_CHANGES
-	if (remote->origin == REMOTE_REMOTES)
+	எனில் (remote->origin == REMOTE_REMOTES)
 		unlink_or_warn(repo_git_path_replace(the_repository, &buf,
 						     "remotes/%s", remote->name));
-	else if (remote->origin == REMOTE_BRANCHES)
+	இல்லையெனில் எனில் (remote->origin == REMOTE_BRANCHES)
 		unlink_or_warn(repo_git_path_replace(the_repository, &buf,
 						     "branches/%s", remote->name));
 #endif /* WITH_BREAKING_CHANGES */
 	strbuf_release(&buf);
 
-	return 0;
+	திரும்பு 0;
 }
 
-struct push_default_info
+கட்டமைப்பு தள்ளு_default_info
 {
-	const char *old_name;
-	enum config_scope scope;
-	struct strbuf origin;
-	int linenr;
+	மாறிலி எழுத்து *old_name;
+	எண்ணிக்கை config_scope scope;
+	கட்டமைப்பு strbuf origin;
+	முழு linenr;
 };
 
-static int config_read_push_default(const char *key, const char *value,
-	const struct config_context *ctx, void *cb)
+நிலையான முழு config_read_தள்ளு_default(மாறிலி எழுத்து *சாவி, மாறிலி எழுத்து *மதிப்பு,
+	மாறிலி கட்டமைப்பு config_context *ctx, வெறுமை *cb)
 {
-	const struct key_value_info *kvi = ctx->kvi;
+	மாறிலி கட்டமைப்பு சாவி_மதிப்பு_info *kvi = ctx->kvi;
 
-	struct push_default_info* info = cb;
-	if (strcmp(key, "remote.pushdefault") ||
-	    !value || strcmp(value, info->old_name))
-		return 0;
+	கட்டமைப்பு தள்ளு_default_info* info = cb;
+	எனில் (strcmp(சாவி, "remote.pushdefault") ||
+	    !மதிப்பு || strcmp(மதிப்பு, info->old_name))
+		திரும்பு 0;
 
 	info->scope = kvi->scope;
 	strbuf_reset(&info->origin);
 	strbuf_addstr(&info->origin, config_origin_type_name(kvi->origin_type));
 	info->linenr = kvi->linenr;
 
-	return 0;
+	திரும்பு 0;
 }
 
-static void handle_push_default(const char* old_name, const char* new_name)
+நிலையான வெறுமை handle_தள்ளு_default(மாறிலி எழுத்து* old_name, மாறிலி எழுத்து* new_name)
 {
-	struct push_default_info push_default = {
+	கட்டமைப்பு தள்ளு_default_info தள்ளு_default = {
 		.old_name = old_name,
 		.scope = CONFIG_SCOPE_UNKNOWN,
 		.origin = STRBUF_INIT,
 		.linenr = -1,
 	};
-	repo_config(the_repository, config_read_push_default, &push_default);
-	if (push_default.scope >= CONFIG_SCOPE_COMMAND)
+	repo_config(the_repository, config_read_தள்ளு_default, &தள்ளு_default);
+	எனில் (தள்ளு_default.scope >= CONFIG_SCOPE_COMMAND)
 		; /* pass */
-	else if (push_default.scope >= CONFIG_SCOPE_LOCAL) {
-		int result = repo_config_set_gently(the_repository, "remote.pushDefault",
+	இல்லையெனில் எனில் (தள்ளு_default.scope >= CONFIG_SCOPE_LOCAL) {
+		முழு result = repo_config_set_gently(the_repository, "remote.pushDefault",
 						    new_name);
-		if (new_name && result && result != CONFIG_NOTHING_SET)
+		எனில் (new_name && result && result != CONFIG_NOTHING_SET)
 			die(_("could not set '%s'"), "remote.pushDefault");
-		else if (!new_name && result && result != CONFIG_NOTHING_SET)
+		இல்லையெனில் எனில் (!new_name && result && result != CONFIG_NOTHING_SET)
 			die(_("could not unset '%s'"), "remote.pushDefault");
-	} else if (push_default.scope >= CONFIG_SCOPE_SYSTEM) {
+	} இல்லையெனில் எனில் (தள்ளு_default.scope >= CONFIG_SCOPE_SYSTEM) {
 		/* warn */
 		warning(_("The %s configuration remote.pushDefault in:\n"
 			  "\t%s:%d\n"
 			  "now names the non-existent remote '%s'"),
-			config_scope_name(push_default.scope),
-			push_default.origin.buf, push_default.linenr,
+			config_scope_name(தள்ளு_default.scope),
+			தள்ளு_default.origin.buf, தள்ளு_default.linenr,
 			old_name);
 	}
 
-	strbuf_release(&push_default.origin);
+	strbuf_release(&தள்ளு_default.origin);
 }
 
-static const char conflicting_remote_refs_advice[] = N_(
+நிலையான மாறிலி எழுத்து conflicting_remote_refs_advice[] = N_(
 	"The remote you are trying to rename has conflicting references in the\n"
 	"new target refspec. This is most likely caused by you trying to nest\n"
 	"a remote into itself, e.g. by renaming 'parent' into 'parent/child'\n"
@@ -853,74 +853,74 @@ static const char conflicting_remote_refs_advice[] = N_(
 	"If that is the case, you can address this by first renaming the\n"
 	"remote to a different name.\n");
 
-static int mv(int argc, const char **argv, const char *prefix,
-	      struct repository *repo UNUSED)
+நிலையான முழு mv(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+	      கட்டமைப்பு repository *repo UNUSED)
 {
-	int show_progress = isatty(2);
-	struct option options[] = {
+	முழு show_progress = isatty(2);
+	கட்டமைப்பு option options[] = {
 		OPT_BOOL(0, "progress", &show_progress, N_("force progress reporting")),
 		OPT_END()
 	};
-	struct remote *oldremote, *newremote;
-	struct strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT, buf3 = STRBUF_INIT,
+	கட்டமைப்பு remote *oldremote, *newremote;
+	கட்டமைப்பு strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT, buf3 = STRBUF_INIT,
 		old_remote_context = STRBUF_INIT, err = STRBUF_INIT;
-	struct rename_info rename = {
+	கட்டமைப்பு rename_info rename = {
 		.err = &err,
 	};
-	int refspecs_need_update = 0;
-	int result = 0;
+	முழு refspecs_need_update = 0;
+	முழு result = 0;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_rename_usage, 0);
 
-	if (argc != 2)
+	எனில் (argc != 2)
 		usage_with_options(builtin_remote_rename_usage, options);
 
 	rename.old_name = argv[0];
 	rename.new_name = argv[1];
 
 	oldremote = remote_get(rename.old_name);
-	if (!remote_is_configured(oldremote, 1)) {
+	எனில் (!remote_is_configured(oldremote, 1)) {
 		error(_("No such remote: '%s'"), rename.old_name);
 		exit(2);
 	}
 
-	if (!strcmp(rename.old_name, rename.new_name) && oldremote->origin != REMOTE_CONFIG)
-		return migrate_file(oldremote);
+	எனில் (!strcmp(rename.old_name, rename.new_name) && oldremote->origin != REMOTE_CONFIG)
+		திரும்பு migrate_file(oldremote);
 
 	newremote = remote_get(rename.new_name);
-	if (remote_is_configured(newremote, 1)) {
+	எனில் (remote_is_configured(newremote, 1)) {
 		error(_("remote %s already exists."), rename.new_name);
 		exit(3);
 	}
 
-	if (!valid_remote_name(rename.new_name))
+	எனில் (!valid_remote_name(rename.new_name))
 		die(_("'%s' is not a valid remote name"), rename.new_name);
 
 	strbuf_addf(&buf, "remote.%s", rename.old_name);
 	strbuf_addf(&buf2, "remote.%s", rename.new_name);
-	if (repo_config_rename_section(the_repository, buf.buf, buf2.buf) < 1) {
+	எனில் (repo_config_rename_section(the_repository, buf.buf, buf2.buf) < 1) {
 		result = error(_("Could not rename config section '%s' to '%s'"),
 			       buf.buf, buf2.buf);
-		goto out;
+		செல் out;
 	}
 
 	strbuf_addf(&old_remote_context, ":refs/remotes/%s/", rename.old_name);
 
-	for (int i = 0; i < oldremote->fetch.nr && !refspecs_need_update; i++)
-		refspecs_need_update = !!strstr(oldremote->fetch.items[i].raw,
+	க்கு (முழு i = 0; i < oldremote->fetch.nr && !refspecs_need_update; i++)
+		refspecs_need_update = !!strstr(oldremote->fetch.பொருட்கள்[i].raw,
 						old_remote_context.buf);
 
-	if (refspecs_need_update) {
-		struct refs_for_each_ref_options opts = {
+	எனில் (refspecs_need_update) {
+		கட்டமைப்பு refs_for_each_ref_options opts = {
 			.flags = REFS_FOR_EACH_INCLUDE_BROKEN,
 		};
 		rename.transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 							       0, &err);
-		if (!rename.transaction)
-			goto out;
+		எனில் (!rename.transaction)
+			செல் out;
 
-		if (show_progress)
+		எனில் (show_progress)
 			rename.progress = start_delayed_progress(the_repository,
 								 _("Renaming remote references"), 0);
 
@@ -930,34 +930,34 @@ static int mv(int argc, const char **argv, const char *prefix,
 
 		result = refs_for_each_ref_ext(get_main_ref_store(the_repository),
 					       rename_one_ref, &rename, &opts);
-		if (result < 0)
+		எனில் (result < 0)
 			die(_("queueing remote ref renames failed: %s"), rename.err->buf);
 
 		result = ref_transaction_prepare(rename.transaction, &err);
-		if (result < 0) {
+		எனில் (result < 0) {
 			error("renaming remote references failed: %s", err.buf);
-			if (result == REF_TRANSACTION_ERROR_NAME_CONFLICT)
+			எனில் (result == REF_TRANSACTION_ERROR_NAME_CONFLICT)
 				advise(conflicting_remote_refs_advice);
-			die(NULL);
+			die(வெற்று);
 		}
 	}
 
-	if (oldremote->fetch.nr) {
+	எனில் (oldremote->fetch.nr) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.fetch", rename.new_name);
-		repo_config_set_multivar(the_repository, buf.buf, NULL, NULL, CONFIG_FLAGS_MULTI_REPLACE);
-		for (int i = 0; i < oldremote->fetch.nr; i++) {
-			char *ptr;
+		repo_config_set_multivar(the_repository, buf.buf, வெற்று, வெற்று, CONFIG_FLAGS_MULTI_REPLACE);
+		க்கு (முழு i = 0; i < oldremote->fetch.nr; i++) {
+			எழுத்து *ptr;
 
 			strbuf_reset(&buf2);
-			strbuf_addstr(&buf2, oldremote->fetch.items[i].raw);
+			strbuf_addstr(&buf2, oldremote->fetch.பொருட்கள்[i].raw);
 			ptr = strstr(buf2.buf, old_remote_context.buf);
-			if (ptr) {
+			எனில் (ptr) {
 				strbuf_splice(&buf2,
 					      ptr-buf2.buf + strlen(":refs/remotes/"),
 					      strlen(rename.old_name), rename.new_name,
 					      strlen(rename.new_name));
-			} else
+			} இல்லையெனில்
 				warning(_("Not updating non-default fetch refspec\n"
 					  "\t%s\n"
 					  "\tPlease update the configuration manually if necessary."),
@@ -968,29 +968,29 @@ static int mv(int argc, const char **argv, const char *prefix,
 	}
 
 	read_branches();
-	for (size_t i = 0; i < branch_list.nr; i++) {
-		struct string_list_item *item = branch_list.items + i;
-		struct branch_info *info = item->util;
-		if (info->remote_name && !strcmp(info->remote_name, rename.old_name)) {
+	க்கு (size_t i = 0; i < branch_list.nr; i++) {
+		கட்டமைப்பு string_list_item *item = branch_list.பொருட்கள் + i;
+		கட்டமைப்பு branch_info *info = item->util;
+		எனில் (info->remote_name && !strcmp(info->remote_name, rename.old_name)) {
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "branch.%s.remote", item->string);
 			repo_config_set(the_repository, buf.buf, rename.new_name);
 		}
-		if (info->push_remote_name && !strcmp(info->push_remote_name, rename.old_name)) {
+		எனில் (info->தள்ளு_remote_name && !strcmp(info->தள்ளு_remote_name, rename.old_name)) {
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "branch.%s.pushRemote", item->string);
 			repo_config_set(the_repository, buf.buf, rename.new_name);
 		}
 	}
 
-	if (refspecs_need_update) {
+	எனில் (refspecs_need_update) {
 		result = ref_transaction_commit(rename.transaction, &err);
-		if (result < 0)
+		எனில் (result < 0)
 			die(_("renaming remote refs failed: %s"), rename.err->buf);
 
 		stop_progress(&rename.progress);
 
-		handle_push_default(rename.old_name, rename.new_name);
+		handle_தள்ளு_default(rename.old_name, rename.new_name);
 	}
 
 out:
@@ -1000,35 +1000,35 @@ out:
 	strbuf_release(&buf2);
 	strbuf_release(&buf3);
 	strbuf_release(&err);
-	return result;
+	திரும்பு result;
 }
 
-static int rm(int argc, const char **argv, const char *prefix,
-	      struct repository *repo UNUSED)
+நிலையான முழு rm(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+	      கட்டமைப்பு repository *repo UNUSED)
 {
-	struct option options[] = {
+	கட்டமைப்பு option options[] = {
 		OPT_END()
 	};
-	struct remote *remote;
-	struct strbuf buf = STRBUF_INIT;
-	struct known_remotes known_remotes = { NULL, NULL };
-	struct string_list branches = STRING_LIST_INIT_DUP;
-	struct string_list skipped = STRING_LIST_INIT_DUP;
-	struct branches_for_remote cb_data;
-	int result;
+	கட்டமைப்பு remote *remote;
+	கட்டமைப்பு strbuf buf = STRBUF_INIT;
+	கட்டமைப்பு known_remotes known_remotes = { வெற்று, வெற்று };
+	கட்டமைப்பு string_list branches = STRING_LIST_INIT_DUP;
+	கட்டமைப்பு string_list skipped = STRING_LIST_INIT_DUP;
+	கட்டமைப்பு branches_for_remote cb_data;
+	முழு result;
 
-	memset(&cb_data, 0, sizeof(cb_data));
+	memset(&cb_data, 0, அளவு(cb_data));
 	cb_data.branches = &branches;
 	cb_data.skipped = &skipped;
 	cb_data.keep = &known_remotes;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_rm_usage, 0);
-	if (argc != 1)
+	எனில் (argc != 1)
 		usage_with_options(builtin_remote_rm_usage, options);
 
 	remote = remote_get(argv[0]);
-	if (!remote_is_configured(remote, 1)) {
+	எனில் (!remote_is_configured(remote, 1)) {
 		error(_("No such remote: '%s'"), argv[0]);
 		exit(2);
 	}
@@ -1037,25 +1037,25 @@ static int rm(int argc, const char **argv, const char *prefix,
 	for_each_remote(add_known_remote, &known_remotes);
 
 	read_branches();
-	for (size_t i = 0; i < branch_list.nr; i++) {
-		struct string_list_item *item = branch_list.items + i;
-		struct branch_info *info = item->util;
-		if (info->remote_name && !strcmp(info->remote_name, remote->name)) {
-			const char *keys[] = { "remote", "merge", NULL }, **k;
-			for (k = keys; *k; k++) {
+	க்கு (size_t i = 0; i < branch_list.nr; i++) {
+		கட்டமைப்பு string_list_item *item = branch_list.பொருட்கள் + i;
+		கட்டமைப்பு branch_info *info = item->util;
+		எனில் (info->remote_name && !strcmp(info->remote_name, remote->name)) {
+			மாறிலி எழுத்து *சாவிகள்[] = { "remote", "merge", வெற்று }, **k;
+			க்கு (k = சாவிகள்; *k; k++) {
 				strbuf_reset(&buf);
 				strbuf_addf(&buf, "branch.%s.%s",
 						item->string, *k);
-				result = repo_config_set_gently(the_repository, buf.buf, NULL);
-				if (result && result != CONFIG_NOTHING_SET)
+				result = repo_config_set_gently(the_repository, buf.buf, வெற்று);
+				எனில் (result && result != CONFIG_NOTHING_SET)
 					die(_("could not unset '%s'"), buf.buf);
 			}
 		}
-		if (info->push_remote_name && !strcmp(info->push_remote_name, remote->name)) {
+		எனில் (info->தள்ளு_remote_name && !strcmp(info->தள்ளு_remote_name, remote->name)) {
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "branch.%s.pushremote", item->string);
-			result = repo_config_set_gently(the_repository, buf.buf, NULL);
-			if (result && result != CONFIG_NOTHING_SET)
+			result = repo_config_set_gently(the_repository, buf.buf, வெற்று);
+			எனில் (result && result != CONFIG_NOTHING_SET)
 				die(_("could not unset '%s'"), buf.buf);
 		}
 	}
@@ -1070,120 +1070,120 @@ static int rm(int argc, const char **argv, const char *prefix,
 				   add_branch_for_removal, &cb_data);
 	strbuf_release(&buf);
 
-	if (!result)
+	எனில் (!result)
 		result = refs_delete_refs(get_main_ref_store(the_repository),
 					  "remote: remove", &branches,
 					  REF_NO_DEREF);
 	string_list_clear(&branches, 0);
 
-	if (skipped.nr) {
+	எனில் (skipped.nr) {
 		fprintf_ln(stderr,
 			   Q_("Note: A branch outside the refs/remotes/ hierarchy was not removed;\n"
 			      "to delete it, use:",
 			      "Note: Some branches outside the refs/remotes/ hierarchy were not removed;\n"
 			      "to delete them, use:",
 			      skipped.nr));
-		for (size_t i = 0; i < skipped.nr; i++)
+		க்கு (size_t i = 0; i < skipped.nr; i++)
 			fprintf(stderr, "  git branch -d %s\n",
-				skipped.items[i].string);
+				skipped.பொருட்கள்[i].string);
 	}
 	string_list_clear(&skipped, 0);
 
-	if (!result) {
+	எனில் (!result) {
 		strbuf_addf(&buf, "remote.%s", remote->name);
-		if (repo_config_rename_section(the_repository, buf.buf, NULL) < 1) {
+		எனில் (repo_config_rename_section(the_repository, buf.buf, வெற்று) < 1) {
 			result = error(_("Could not remove config section '%s'"), buf.buf);
-			goto out;
+			செல் out;
 		}
 
-		handle_push_default(remote->name, NULL);
+		handle_தள்ளு_default(remote->name, வெற்று);
 	}
 
 out:
-	for (struct known_remote *r = known_remotes.list; r;) {
-		struct known_remote *next = r->next;
-		free(r);
+	க்கு (கட்டமைப்பு known_remote *r = known_remotes.list; r;) {
+		கட்டமைப்பு known_remote *next = r->next;
+		விடுவி(r);
 		r = next;
 	}
 	strbuf_release(&buf);
-	return result;
+	திரும்பு result;
 }
 
-static void clear_push_info(void *util, const char *string UNUSED)
+நிலையான வெறுமை clear_தள்ளு_info(வெறுமை *util, மாறிலி எழுத்து *string UNUSED)
 {
-	struct push_info *info = util;
-	free(info->dest);
-	free(info);
+	கட்டமைப்பு தள்ளு_info *info = util;
+	விடுவி(info->dest);
+	விடுவி(info);
 }
 
-static void free_remote_ref_states(struct ref_states *states)
+நிலையான வெறுமை free_remote_ref_states(கட்டமைப்பு ref_states *states)
 {
 	string_list_clear(&states->new_refs, 0);
 	string_list_clear(&states->skipped, 0);
 	string_list_clear(&states->stale, 1);
 	string_list_clear(&states->tracked, 0);
 	string_list_clear(&states->heads, 0);
-	string_list_clear_func(&states->push, clear_push_info);
+	string_list_clear_func(&states->தள்ளு, clear_தள்ளு_info);
 }
 
-static int append_ref_to_tracked_list(const struct reference *ref, void *cb_data)
+நிலையான முழு append_ref_to_tracked_list(மாறிலி கட்டமைப்பு reference *ref, வெறுமை *cb_data)
 {
-	struct ref_states *states = cb_data;
-	struct refspec_item refspec;
+	கட்டமைப்பு ref_states *states = cb_data;
+	கட்டமைப்பு refspec_item refspec;
 
-	if (ref->flags & REF_ISSYMREF)
-		return 0;
+	எனில் (ref->flags & REF_ISSYMREF)
+		திரும்பு 0;
 
-	memset(&refspec, 0, sizeof(refspec));
-	refspec.dst = (char *)ref->name;
-	if (!remote_find_tracking(states->remote, &refspec)) {
+	memset(&refspec, 0, அளவு(refspec));
+	refspec.dst = (எழுத்து *)ref->name;
+	எனில் (!remote_find_tracking(states->remote, &refspec)) {
 		string_list_append(&states->tracked, abbrev_branch(refspec.src));
-		free(refspec.src);
+		விடுவி(refspec.src);
 	}
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int get_remote_ref_states(const char *name,
-				 struct ref_states *states,
-				 int query)
+நிலையான முழு get_remote_ref_states(மாறிலி எழுத்து *name,
+				 கட்டமைப்பு ref_states *states,
+				 முழு query)
 {
 	states->remote = remote_get(name);
-	if (!states->remote)
-		return error(_("No such remote: '%s'"), name);
+	எனில் (!states->remote)
+		திரும்பு error(_("No such remote: '%s'"), name);
 
 	read_branches();
 
-	if (query) {
-		struct transport *transport;
-		const struct ref *remote_refs;
+	எனில் (query) {
+		கட்டமைப்பு transport *transport;
+		மாறிலி கட்டமைப்பு ref *remote_refs;
 
 		transport = transport_get(states->remote, states->remote->url.v[0]);
-		remote_refs = transport_get_remote_refs(transport, NULL);
+		remote_refs = transport_get_remote_refs(transport, வெற்று);
 
 		states->queried = 1;
-		if (query & GET_REF_STATES)
+		எனில் (query & GET_REF_STATES)
 			get_ref_states(remote_refs, states);
-		if (query & GET_HEAD_NAMES)
+		எனில் (query & GET_HEAD_NAMES)
 			get_head_names(remote_refs, states);
-		if (query & GET_PUSH_REF_STATES)
-			get_push_ref_states(remote_refs, states);
+		எனில் (query & GET_தள்ளு_REF_STATES)
+			get_தள்ளு_ref_states(remote_refs, states);
 		transport_disconnect(transport);
-	} else {
+	} இல்லையெனில் {
 		refs_for_each_ref(get_main_ref_store(the_repository),
 				  append_ref_to_tracked_list, states);
 		string_list_sort(&states->tracked);
-		get_push_ref_states_noquery(states);
+		get_தள்ளு_ref_states_noquery(states);
 	}
 
-	return 0;
+	திரும்பு 0;
 }
 
-struct show_info {
-	struct string_list list;
-	struct ref_states states;
-	int width, width2;
-	int any_rebase;
+கட்டமைப்பு show_info {
+	கட்டமைப்பு string_list list;
+	கட்டமைப்பு ref_states states;
+	முழு width, width2;
+	முழு any_rebase;
 };
 
 #define SHOW_INFO_INIT { \
@@ -1191,282 +1191,282 @@ struct show_info {
 	.states = REF_STATES_INIT, \
 }
 
-static int add_remote_to_show_info(struct string_list_item *item, void *cb_data)
+நிலையான முழு add_remote_to_show_info(கட்டமைப்பு string_list_item *item, வெறுமை *cb_data)
 {
-	struct show_info *info = cb_data;
-	int n = strlen(item->string);
-	if (n > info->width)
+	கட்டமைப்பு show_info *info = cb_data;
+	முழு n = strlen(item->string);
+	எனில் (n > info->width)
 		info->width = n;
-	string_list_insert(&info->list, item->string);
-	return 0;
+	string_list_செருகு(&info->list, item->string);
+	திரும்பு 0;
 }
 
-static int show_remote_info_item(struct string_list_item *item, void *cb_data)
+நிலையான முழு show_remote_info_item(கட்டமைப்பு string_list_item *item, வெறுமை *cb_data)
 {
-	struct show_info *info = cb_data;
-	struct ref_states *states = &info->states;
-	const char *name = item->string;
+	கட்டமைப்பு show_info *info = cb_data;
+	கட்டமைப்பு ref_states *states = &info->states;
+	மாறிலி எழுத்து *name = item->string;
 
-	if (states->queried) {
-		const char *fmt = "%s";
-		const char *arg = "";
-		if (string_list_has_string(&states->new_refs, name)) {
+	எனில் (states->queried) {
+		மாறிலி எழுத்து *fmt = "%s";
+		மாறிலி எழுத்து *arg = "";
+		எனில் (string_list_has_string(&states->new_refs, name)) {
 			fmt = _(" new (next fetch will store in remotes/%s)");
 			arg = states->remote->name;
-		} else if (string_list_has_string(&states->tracked, name))
+		} இல்லையெனில் எனில் (string_list_has_string(&states->tracked, name))
 			arg = _(" tracked");
-		else if (string_list_has_string(&states->skipped, name))
+		இல்லையெனில் எனில் (string_list_has_string(&states->skipped, name))
 			arg = _(" skipped");
-		else if (string_list_has_string(&states->stale, name))
+		இல்லையெனில் எனில் (string_list_has_string(&states->stale, name))
 			arg = _(" stale (use 'git remote prune' to remove)");
-		else
+		இல்லையெனில்
 			arg = _(" ???");
 		printf("    %-*s", info->width, name);
 		printf(fmt, arg);
 		printf("\n");
-	} else
+	} இல்லையெனில்
 		printf("    %s\n", name);
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int add_local_to_show_info(struct string_list_item *branch_item, void *cb_data)
+நிலையான முழு add_local_to_show_info(கட்டமைப்பு string_list_item *branch_item, வெறுமை *cb_data)
 {
-	struct show_info *show_info = cb_data;
-	struct ref_states *states = &show_info->states;
-	struct branch_info *branch_info = branch_item->util;
-	struct string_list_item *item;
-	int n;
+	கட்டமைப்பு show_info *show_info = cb_data;
+	கட்டமைப்பு ref_states *states = &show_info->states;
+	கட்டமைப்பு branch_info *branch_info = branch_item->util;
+	கட்டமைப்பு string_list_item *item;
+	முழு n;
 
-	if (!branch_info->merge.nr || !branch_info->remote_name ||
+	எனில் (!branch_info->merge.nr || !branch_info->remote_name ||
 	    strcmp(states->remote->name, branch_info->remote_name))
-		return 0;
-	if ((n = strlen(branch_item->string)) > show_info->width)
+		திரும்பு 0;
+	எனில் ((n = strlen(branch_item->string)) > show_info->width)
 		show_info->width = n;
-	if (branch_info->rebase >= REBASE_TRUE)
+	எனில் (branch_info->rebase >= REBASE_TRUE)
 		show_info->any_rebase = 1;
 
-	item = string_list_insert(&show_info->list, branch_item->string);
+	item = string_list_செருகு(&show_info->list, branch_item->string);
 	item->util = branch_info;
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int show_local_info_item(struct string_list_item *item, void *cb_data)
+நிலையான முழு show_local_info_item(கட்டமைப்பு string_list_item *item, வெறுமை *cb_data)
 {
-	struct show_info *show_info = cb_data;
-	struct branch_info *branch_info = item->util;
-	struct string_list *merge = &branch_info->merge;
-	int width = show_info->width + 4;
+	கட்டமைப்பு show_info *show_info = cb_data;
+	கட்டமைப்பு branch_info *branch_info = item->util;
+	கட்டமைப்பு string_list *merge = &branch_info->merge;
+	முழு width = show_info->width + 4;
 
-	if (branch_info->rebase >= REBASE_TRUE && branch_info->merge.nr > 1) {
+	எனில் (branch_info->rebase >= REBASE_TRUE && branch_info->merge.nr > 1) {
 		error(_("invalid branch.%s.merge; cannot rebase onto > 1 branch"),
 			item->string);
-		return 0;
+		திரும்பு 0;
 	}
 
 	printf("    %-*s ", show_info->width, item->string);
-	if (branch_info->rebase >= REBASE_TRUE) {
-		const char *msg;
-		if (branch_info->rebase == REBASE_INTERACTIVE)
-			msg = _("rebases interactively onto remote %s");
-		else if (branch_info->rebase == REBASE_MERGES)
-			msg = _("rebases interactively (with merges) onto "
+	எனில் (branch_info->rebase >= REBASE_TRUE) {
+		மாறிலி எழுத்து *செய்தி;
+		எனில் (branch_info->rebase == REBASE_INTERACTIVE)
+			செய்தி = _("rebases interactively onto remote %s");
+		இல்லையெனில் எனில் (branch_info->rebase == REBASE_MERGES)
+			செய்தி = _("rebases interactively (with merges) onto "
 				"remote %s");
-		else
-			msg = _("rebases onto remote %s");
-		printf_ln(msg, merge->items[0].string);
-		return 0;
-	} else if (show_info->any_rebase) {
-		printf_ln(_(" merges with remote %s"), merge->items[0].string);
+		இல்லையெனில்
+			செய்தி = _("rebases onto remote %s");
+		printf_ln(செய்தி, merge->பொருட்கள்[0].string);
+		திரும்பு 0;
+	} இல்லையெனில் எனில் (show_info->any_rebase) {
+		printf_ln(_(" merges with remote %s"), merge->பொருட்கள்[0].string);
 		width++;
-	} else {
-		printf_ln(_("merges with remote %s"), merge->items[0].string);
+	} இல்லையெனில் {
+		printf_ln(_("merges with remote %s"), merge->பொருட்கள்[0].string);
 	}
-	for (size_t i = 1; i < merge->nr; i++)
+	க்கு (size_t i = 1; i < merge->nr; i++)
 		printf(_("%-*s    and with remote %s\n"), width, "",
-		       merge->items[i].string);
+		       merge->பொருட்கள்[i].string);
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int add_push_to_show_info(struct string_list_item *push_item, void *cb_data)
+நிலையான முழு add_தள்ளு_to_show_info(கட்டமைப்பு string_list_item *தள்ளு_item, வெறுமை *cb_data)
 {
-	struct show_info *show_info = cb_data;
-	struct push_info *push_info = push_item->util;
-	struct string_list_item *item;
-	int n;
-	if ((n = strlen(push_item->string)) > show_info->width)
+	கட்டமைப்பு show_info *show_info = cb_data;
+	கட்டமைப்பு தள்ளு_info *தள்ளு_info = தள்ளு_item->util;
+	கட்டமைப்பு string_list_item *item;
+	முழு n;
+	எனில் ((n = strlen(தள்ளு_item->string)) > show_info->width)
 		show_info->width = n;
-	if ((n = strlen(push_info->dest)) > show_info->width2)
+	எனில் ((n = strlen(தள்ளு_info->dest)) > show_info->width2)
 		show_info->width2 = n;
-	item = string_list_append(&show_info->list, push_item->string);
-	item->util = push_item->util;
-	return 0;
+	item = string_list_append(&show_info->list, தள்ளு_item->string);
+	item->util = தள்ளு_item->util;
+	திரும்பு 0;
 }
 
 /*
  * Sorting comparison for a string list that has push_info
  * structs in its util field
  */
-static int cmp_string_with_push(const void *va, const void *vb)
+நிலையான முழு cmp_string_with_தள்ளு(மாறிலி வெறுமை *va, மாறிலி வெறுமை *vb)
 {
-	const struct string_list_item *a = va;
-	const struct string_list_item *b = vb;
-	const struct push_info *a_push = a->util;
-	const struct push_info *b_push = b->util;
-	int cmp = strcmp(a->string, b->string);
-	return cmp ? cmp : strcmp(a_push->dest, b_push->dest);
+	மாறிலி கட்டமைப்பு string_list_item *a = va;
+	மாறிலி கட்டமைப்பு string_list_item *b = vb;
+	மாறிலி கட்டமைப்பு தள்ளு_info *a_தள்ளு = a->util;
+	மாறிலி கட்டமைப்பு தள்ளு_info *b_தள்ளு = b->util;
+	முழு cmp = strcmp(a->string, b->string);
+	திரும்பு cmp ? cmp : strcmp(a_தள்ளு->dest, b_தள்ளு->dest);
 }
 
-static int show_push_info_item(struct string_list_item *item, void *cb_data)
+நிலையான முழு show_தள்ளு_info_item(கட்டமைப்பு string_list_item *item, வெறுமை *cb_data)
 {
-	struct show_info *show_info = cb_data;
-	struct push_info *push_info = item->util;
-	const char *src = item->string, *status = NULL;
+	கட்டமைப்பு show_info *show_info = cb_data;
+	கட்டமைப்பு தள்ளு_info *தள்ளு_info = item->util;
+	மாறிலி எழுத்து *src = item->string, *status = வெற்று;
 
-	switch (push_info->status) {
-	case PUSH_STATUS_CREATE:
+	தேர்வு (தள்ளு_info->status) {
+	நிலை தள்ளு_STATUS_CREATE:
 		status = _("create");
-		break;
-	case PUSH_STATUS_DELETE:
+		நிறுத்து;
+	நிலை தள்ளு_STATUS_DELETE:
 		status = _("delete");
 		src = _("(none)");
-		break;
-	case PUSH_STATUS_UPTODATE:
+		நிறுத்து;
+	நிலை தள்ளு_STATUS_UPTODATE:
 		status = _("up to date");
-		break;
-	case PUSH_STATUS_FASTFORWARD:
+		நிறுத்து;
+	நிலை தள்ளு_STATUS_FASTFORWARD:
 		status = _("fast-forwardable");
-		break;
-	case PUSH_STATUS_OUTOFDATE:
+		நிறுத்து;
+	நிலை தள்ளு_STATUS_OUTOFDATE:
 		status = _("local out of date");
-		break;
-	case PUSH_STATUS_NOTQUERIED:
-		break;
+		நிறுத்து;
+	நிலை தள்ளு_STATUS_NOTQUERIED:
+		நிறுத்து;
 	}
-	if (status) {
-		if (push_info->forced)
+	எனில் (status) {
+		எனில் (தள்ளு_info->forced)
 			printf_ln(_("    %-*s forces to %-*s (%s)"), show_info->width, src,
-			       show_info->width2, push_info->dest, status);
-		else
+			       show_info->width2, தள்ளு_info->dest, status);
+		இல்லையெனில்
 			printf_ln(_("    %-*s pushes to %-*s (%s)"), show_info->width, src,
-			       show_info->width2, push_info->dest, status);
-	} else {
-		if (push_info->forced)
+			       show_info->width2, தள்ளு_info->dest, status);
+	} இல்லையெனில் {
+		எனில் (தள்ளு_info->forced)
 			printf_ln(_("    %-*s forces to %s"), show_info->width, src,
-			       push_info->dest);
-		else
+			       தள்ளு_info->dest);
+		இல்லையெனில்
 			printf_ln(_("    %-*s pushes to %s"), show_info->width, src,
-			       push_info->dest);
+			       தள்ளு_info->dest);
 	}
-	return 0;
+	திரும்பு 0;
 }
 
-static int get_one_entry(struct remote *remote, void *priv)
+நிலையான முழு get_one_entry(கட்டமைப்பு remote *remote, வெறுமை *priv)
 {
-	struct string_list *list = priv;
-	struct strbuf remote_info_buf = STRBUF_INIT;
-	struct strvec *url;
+	கட்டமைப்பு string_list *list = priv;
+	கட்டமைப்பு strbuf remote_info_buf = STRBUF_INIT;
+	கட்டமைப்பு strvec *url;
 
-	if (remote->url.nr > 0) {
-		struct strbuf promisor_config = STRBUF_INIT;
-		const char *partial_clone_filter = NULL;
+	எனில் (remote->url.nr > 0) {
+		கட்டமைப்பு strbuf promisor_config = STRBUF_INIT;
+		மாறிலி எழுத்து *partial_clone_filter = வெற்று;
 
 		strbuf_addf(&promisor_config, "remote.%s.partialclonefilter", remote->name);
 		strbuf_addf(&remote_info_buf, "%s (fetch)", remote->url.v[0]);
-		if (!repo_config_get_string_tmp(the_repository, promisor_config.buf, &partial_clone_filter))
+		எனில் (!repo_config_get_string_tmp(the_repository, promisor_config.buf, &partial_clone_filter))
 			strbuf_addf(&remote_info_buf, " [%s]", partial_clone_filter);
 
 		strbuf_release(&promisor_config);
 		string_list_append(list, remote->name)->util =
-				strbuf_detach(&remote_info_buf, NULL);
-	} else
-		string_list_append(list, remote->name)->util = NULL;
-	url = push_url_of_remote(remote);
-	for (size_t i = 0; i < url->nr; i++) {
+				strbuf_detach(&remote_info_buf, வெற்று);
+	} இல்லையெனில்
+		string_list_append(list, remote->name)->util = வெற்று;
+	url = தள்ளு_url_of_remote(remote);
+	க்கு (size_t i = 0; i < url->nr; i++) {
 		strbuf_addf(&remote_info_buf, "%s (push)", url->v[i]);
 		string_list_append(list, remote->name)->util =
-				strbuf_detach(&remote_info_buf, NULL);
+				strbuf_detach(&remote_info_buf, வெற்று);
 	}
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int show_all(void)
+நிலையான முழு show_all(வெறுமை)
 {
-	struct string_list list = STRING_LIST_INIT_DUP;
-	int result;
+	கட்டமைப்பு string_list list = STRING_LIST_INIT_DUP;
+	முழு result;
 
 	result = for_each_remote(get_one_entry, &list);
 
-	if (!result) {
+	எனில் (!result) {
 		string_list_sort(&list);
-		for (size_t i = 0; i < list.nr; i++) {
-			struct string_list_item *item = list.items + i;
-			if (verbose)
+		க்கு (size_t i = 0; i < list.nr; i++) {
+			கட்டமைப்பு string_list_item *item = list.பொருட்கள் + i;
+			எனில் (verbose)
 				printf("%s\t%s\n", item->string,
-					item->util ? (const char *)item->util : "");
-			else {
-				if (i && !strcmp((item - 1)->string, item->string))
-					continue;
+					item->util ? (மாறிலி எழுத்து *)item->util : "");
+			இல்லையெனில் {
+				எனில் (i && !strcmp((item - 1)->string, item->string))
+					தொடர்;
 				printf("%s\n", item->string);
 			}
 		}
 	}
 	string_list_clear(&list, 1);
-	return result;
+	திரும்பு result;
 }
 
-static int show(int argc, const char **argv, const char *prefix,
-		struct repository *repo UNUSED)
+நிலையான முழு show(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+		கட்டமைப்பு repository *repo UNUSED)
 {
-	int no_query = 0, result = 0, query_flag = 0;
-	struct option options[] = {
-		OPT_BOOL('n', NULL, &no_query, N_("do not query remotes")),
+	முழு no_query = 0, result = 0, query_flag = 0;
+	கட்டமைப்பு option options[] = {
+		OPT_BOOL('n', வெற்று, &no_query, N_("do not query remotes")),
 		OPT_END()
 	};
-	struct show_info info = SHOW_INFO_INIT;
+	கட்டமைப்பு show_info info = SHOW_INFO_INIT;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_show_usage,
 			     0);
 
-	if (argc < 1)
-		return show_all();
+	எனில் (argc < 1)
+		திரும்பு show_all();
 
-	if (!no_query)
-		query_flag = (GET_REF_STATES | GET_HEAD_NAMES | GET_PUSH_REF_STATES);
+	எனில் (!no_query)
+		query_flag = (GET_REF_STATES | GET_HEAD_NAMES | GET_தள்ளு_REF_STATES);
 
-	for (; argc; argc--, argv++) {
+	க்கு (; argc; argc--, argv++) {
 		size_t i;
-		struct strvec *url;
+		கட்டமைப்பு strvec *url;
 
 		get_remote_ref_states(*argv, &info.states, query_flag);
 
 		printf_ln(_("* remote %s"), *argv);
 		printf_ln(_("  Fetch URL: %s"), info.states.remote->url.v[0]);
-		url = push_url_of_remote(info.states.remote);
-		for (i = 0; i < url->nr; i++)
+		url = தள்ளு_url_of_remote(info.states.remote);
+		க்கு (i = 0; i < url->nr; i++)
 			/*
 			 * TRANSLATORS: the colon ':' should align
 			 * with the one in " Fetch URL: %s"
 			 * translation.
 			 */
 			printf_ln(_("  Push  URL: %s"), url->v[i]);
-		if (!i)
+		எனில் (!i)
 			printf_ln(_("  Push  URL: %s"), _("(no URL)"));
-		if (no_query)
+		எனில் (no_query)
 			printf_ln(_("  HEAD branch: %s"), _("(not queried)"));
-		else if (!info.states.heads.nr)
+		இல்லையெனில் எனில் (!info.states.heads.nr)
 			printf_ln(_("  HEAD branch: %s"), _("(unknown)"));
-		else if (info.states.heads.nr == 1)
-			printf_ln(_("  HEAD branch: %s"), info.states.heads.items[0].string);
-		else {
+		இல்லையெனில் எனில் (info.states.heads.nr == 1)
+			printf_ln(_("  HEAD branch: %s"), info.states.heads.பொருட்கள்[0].string);
+		இல்லையெனில் {
 			printf(_("  HEAD branch (remote HEAD is ambiguous,"
 				 " may be one of the following):\n"));
-			for (i = 0; i < info.states.heads.nr; i++)
-				printf("    %s\n", info.states.heads.items[i].string);
+			க்கு (i = 0; i < info.states.heads.nr; i++)
+				printf("    %s\n", info.states.heads.பொருட்கள்[i].string);
 		}
 
 		/* remote branch info */
@@ -1475,7 +1475,7 @@ static int show(int argc, const char **argv, const char *prefix,
 		for_each_string_list(&info.states.skipped, add_remote_to_show_info, &info);
 		for_each_string_list(&info.states.tracked, add_remote_to_show_info, &info);
 		for_each_string_list(&info.states.stale, add_remote_to_show_info, &info);
-		if (info.list.nr)
+		எனில் (info.list.nr)
 			printf_ln(Q_("  Remote branch:%s",
 				     "  Remote branches:%s",
 				     info.list.nr),
@@ -1487,7 +1487,7 @@ static int show(int argc, const char **argv, const char *prefix,
 		info.width = 0;
 		info.any_rebase = 0;
 		for_each_string_list(&branch_list, add_local_to_show_info, &info);
-		if (info.list.nr)
+		எனில் (info.list.nr)
 			printf_ln(Q_("  Local branch configured for 'git pull':",
 				     "  Local branches configured for 'git pull':",
 				     info.list.nr));
@@ -1495,64 +1495,64 @@ static int show(int argc, const char **argv, const char *prefix,
 		string_list_clear(&info.list, 0);
 
 		/* git push info */
-		if (info.states.remote->mirror)
+		எனில் (info.states.remote->mirror)
 			printf_ln(_("  Local refs will be mirrored by 'git push'"));
 
 		info.width = info.width2 = 0;
-		for_each_string_list(&info.states.push, add_push_to_show_info, &info);
-		QSORT(info.list.items, info.list.nr, cmp_string_with_push);
-		if (info.list.nr)
+		for_each_string_list(&info.states.தள்ளு, add_தள்ளு_to_show_info, &info);
+		QSORT(info.list.பொருட்கள், info.list.nr, cmp_string_with_தள்ளு);
+		எனில் (info.list.nr)
 			printf_ln(Q_("  Local ref configured for 'git push'%s:",
 				     "  Local refs configured for 'git push'%s:",
 				     info.list.nr),
 				  no_query ? _(" (status not queried)") : "");
-		for_each_string_list(&info.list, show_push_info_item, &info);
+		for_each_string_list(&info.list, show_தள்ளு_info_item, &info);
 		string_list_clear(&info.list, 0);
 
 		free_remote_ref_states(&info.states);
 	}
 
-	return result;
+	திரும்பு result;
 }
 
-static void report_set_head_auto(const char *remote, const char *head_name,
-			struct strbuf *b_local_head, int was_detached) {
-	struct strbuf buf_prefix = STRBUF_INIT;
-	const char *prev_head = NULL;
+நிலையான வெறுமை report_set_head_auto(மாறிலி எழுத்து *remote, மாறிலி எழுத்து *head_name,
+			கட்டமைப்பு strbuf *b_local_head, முழு was_detached) {
+	கட்டமைப்பு strbuf buf_prefix = STRBUF_INIT;
+	மாறிலி எழுத்து *prev_head = வெற்று;
 
 	strbuf_addf(&buf_prefix, "refs/remotes/%s/", remote);
 	skip_prefix(b_local_head->buf, buf_prefix.buf, &prev_head);
 
-	if (prev_head && !strcmp(prev_head, head_name))
+	எனில் (prev_head && !strcmp(prev_head, head_name))
 		printf(_("'%s/HEAD' is unchanged and points to '%s'\n"),
 			remote, head_name);
-	else if (prev_head)
+	இல்லையெனில் எனில் (prev_head)
 		printf(_("'%s/HEAD' has changed from '%s' and now points to '%s'\n"),
 			remote, prev_head, head_name);
-	else if (!b_local_head->len)
+	இல்லையெனில் எனில் (!b_local_head->len)
 		printf(_("'%s/HEAD' is now created and points to '%s'\n"),
 			remote, head_name);
-	else if (was_detached && b_local_head->len)
+	இல்லையெனில் எனில் (was_detached && b_local_head->len)
 		printf(_("'%s/HEAD' was detached at '%s' and now points to '%s'\n"),
 			remote, b_local_head->buf, head_name);
-	else
+	இல்லையெனில்
 		printf(_("'%s/HEAD' used to point to '%s' "
 			"(which is not a remote branch), but now points to '%s'\n"),
 			remote, b_local_head->buf, head_name);
 	strbuf_release(&buf_prefix);
 }
 
-static int set_head(int argc, const char **argv, const char *prefix,
-		    struct repository *repo UNUSED)
+நிலையான முழு set_head(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+		    கட்டமைப்பு repository *repo UNUSED)
 {
-	int opt_a = 0, opt_d = 0, result = 0, was_detached;
-	struct strbuf b_head = STRBUF_INIT, b_remote_head = STRBUF_INIT,
+	முழு opt_a = 0, opt_d = 0, result = 0, was_detached;
+	கட்டமைப்பு strbuf b_head = STRBUF_INIT, b_remote_head = STRBUF_INIT,
 		b_local_head = STRBUF_INIT;
-	char *head_name = NULL;
-	struct ref_store *refs = get_main_ref_store(the_repository);
-	struct remote *remote;
+	எழுத்து *head_name = வெற்று;
+	கட்டமைப்பு ref_store *refs = get_main_ref_store(the_repository);
+	கட்டமைப்பு remote *remote;
 
-	struct option options[] = {
+	கட்டமைப்பு option options[] = {
 		OPT_BOOL('a', "auto", &opt_a,
 			 N_("set refs/remotes/<name>/HEAD according to remote")),
 		OPT_BOOL('d', "delete", &opt_d,
@@ -1563,51 +1563,51 @@ static int set_head(int argc, const char **argv, const char *prefix,
 			     builtin_remote_sethead_usage, 0);
 
 	/* All modes require at least a remote name. */
-	if (!argc)
+	எனில் (!argc)
 		usage_with_options(builtin_remote_sethead_usage, options);
 
 	strbuf_addf(&b_head, "refs/remotes/%s/HEAD", argv[0]);
 	remote = remote_get(argv[0]);
 
-	if (!opt_a && !opt_d && argc == 2) {
+	எனில் (!opt_a && !opt_d && argc == 2) {
 		head_name = xstrdup(argv[1]);
-	} else if (opt_a && !opt_d && argc == 1) {
-		struct ref_states states = REF_STATES_INIT;
+	} இல்லையெனில் எனில் (opt_a && !opt_d && argc == 1) {
+		கட்டமைப்பு ref_states states = REF_STATES_INIT;
 		get_remote_ref_states(argv[0], &states, GET_HEAD_NAMES);
-		if (!states.heads.nr)
+		எனில் (!states.heads.nr)
 			result |= error(_("Cannot determine remote HEAD"));
-		else if (states.heads.nr > 1) {
+		இல்லையெனில் எனில் (states.heads.nr > 1) {
 			result |= error(_("Multiple remote HEAD branches. "
 					  "Please choose one explicitly with:"));
-			for (size_t i = 0; i < states.heads.nr; i++)
+			க்கு (size_t i = 0; i < states.heads.nr; i++)
 				fprintf(stderr, "  git remote set-head %s %s\n",
-					argv[0], states.heads.items[i].string);
-		} else
-			head_name = xstrdup(states.heads.items[0].string);
+					argv[0], states.heads.பொருட்கள்[i].string);
+		} இல்லையெனில்
+			head_name = xstrdup(states.heads.பொருட்கள்[0].string);
 		free_remote_ref_states(&states);
-	} else if (opt_d && !opt_a && argc == 1) {
-		if (refs_delete_ref(refs, NULL, b_head.buf, NULL, REF_NO_DEREF))
+	} இல்லையெனில் எனில் (opt_d && !opt_a && argc == 1) {
+		எனில் (refs_delete_ref(refs, வெற்று, b_head.buf, வெற்று, REF_NO_DEREF))
 			result |= error(_("Could not delete %s"), b_head.buf);
-	} else
+	} இல்லையெனில்
 		usage_with_options(builtin_remote_sethead_usage, options);
 
-	if (!head_name)
-		goto cleanup;
+	எனில் (!head_name)
+		செல் cleanup;
 	strbuf_addf(&b_remote_head, "refs/remotes/%s/%s", argv[0], head_name);
-	if (!refs_ref_exists(refs, b_remote_head.buf)) {
+	எனில் (!refs_ref_exists(refs, b_remote_head.buf)) {
 		result |= error(_("Not a valid ref: %s"), b_remote_head.buf);
-		goto cleanup;
+		செல் cleanup;
 	}
 	was_detached = refs_update_symref_extended(refs, b_head.buf, b_remote_head.buf,
 			"remote set-head", &b_local_head, 0);
-	if (was_detached == -1) {
+	எனில் (was_detached == -1) {
 		result |= error(_("Could not set up %s"), b_head.buf);
-		goto cleanup;
+		செல் cleanup;
 	}
-	if (opt_a)
+	எனில் (opt_a)
 		report_set_head_auto(argv[0], head_name, &b_local_head, was_detached);
-	if (remote->follow_remote_head == FOLLOW_REMOTE_ALWAYS) {
-		struct strbuf config_name = STRBUF_INIT;
+	எனில் (remote->follow_remote_head == FOLLOW_REMOTE_ALWAYS) {
+		கட்டமைப்பு strbuf config_name = STRBUF_INIT;
 		strbuf_addf(&config_name,
 			"remote.%s.followremotehead", remote->name);
 		repo_config_set(the_repository, config_name.buf, "warn");
@@ -1615,25 +1615,25 @@ static int set_head(int argc, const char **argv, const char *prefix,
 	}
 
 cleanup:
-	free(head_name);
+	விடுவி(head_name);
 	strbuf_release(&b_head);
 	strbuf_release(&b_remote_head);
 	strbuf_release(&b_local_head);
-	return result;
+	திரும்பு result;
 }
 
-static int prune_remote(const char *remote, int dry_run)
+நிலையான முழு prune_remote(மாறிலி எழுத்து *remote, முழு dry_run)
 {
-	int result = 0;
-	struct ref_states states = REF_STATES_INIT;
-	struct string_list refs_to_prune = STRING_LIST_INIT_NODUP;
-	struct string_list_item *item;
+	முழு result = 0;
+	கட்டமைப்பு ref_states states = REF_STATES_INIT;
+	கட்டமைப்பு string_list refs_to_prune = STRING_LIST_INIT_NODUP;
+	கட்டமைப்பு string_list_item *item;
 
 	get_remote_ref_states(remote, &states, GET_REF_STATES);
 
-	if (!states.stale.nr) {
+	எனில் (!states.stale.nr) {
 		free_remote_ref_states(&states);
-		return 0;
+		திரும்பு 0;
 	}
 
 	printf_ln(_("Pruning %s"), remote);
@@ -1643,17 +1643,17 @@ static int prune_remote(const char *remote, int dry_run)
 		string_list_append(&refs_to_prune, item->util);
 	string_list_sort(&refs_to_prune);
 
-	if (!dry_run)
+	எனில் (!dry_run)
 		result |= refs_delete_refs(get_main_ref_store(the_repository),
 					   "remote: prune", &refs_to_prune, 0);
 
 	for_each_string_list_item(item, &states.stale) {
-		const char *refname = item->util;
+		மாறிலி எழுத்து *refname = item->util;
 
-		if (dry_run)
+		எனில் (dry_run)
 			printf_ln(_(" * [would prune] %s"),
 			       abbrev_ref(refname, "refs/remotes/"));
-		else
+		இல்லையெனில்
 			printf_ln(_(" * [pruned] %s"),
 			       abbrev_ref(refname, "refs/remotes/"));
 	}
@@ -1663,14 +1663,14 @@ static int prune_remote(const char *remote, int dry_run)
 
 	string_list_clear(&refs_to_prune, 0);
 	free_remote_ref_states(&states);
-	return result;
+	திரும்பு result;
 }
 
-static int prune(int argc, const char **argv, const char *prefix,
-		 struct repository *repo UNUSED)
+நிலையான முழு prune(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+		 கட்டமைப்பு repository *repo UNUSED)
 {
-	int dry_run = 0, result = 0;
-	struct option options[] = {
+	முழு dry_run = 0, result = 0;
+	கட்டமைப்பு option options[] = {
 		OPT__DRY_RUN(&dry_run, N_("dry run")),
 		OPT_END()
 	};
@@ -1678,138 +1678,138 @@ static int prune(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_prune_usage, 0);
 
-	if (argc < 1)
+	எனில் (argc < 1)
 		usage_with_options(builtin_remote_prune_usage, options);
 
-	for (; argc; argc--, argv++)
+	க்கு (; argc; argc--, argv++)
 		result |= prune_remote(*argv, dry_run);
 
-	return result;
+	திரும்பு result;
 }
 
-static int get_remote_default(const char *key, const char *value UNUSED,
-			      const struct config_context *ctx UNUSED,
-			      void *priv)
+நிலையான முழு get_remote_default(மாறிலி எழுத்து *சாவி, மாறிலி எழுத்து *மதிப்பு UNUSED,
+			      மாறிலி கட்டமைப்பு config_context *ctx UNUSED,
+			      வெறுமை *priv)
 {
-	if (strcmp(key, "remotes.default") == 0) {
-		int *found = priv;
+	எனில் (strcmp(சாவி, "remotes.default") == 0) {
+		முழு *found = priv;
 		*found = 1;
 	}
-	return 0;
+	திரும்பு 0;
 }
 
-static int update(int argc, const char **argv, const char *prefix,
-		  struct repository *repo UNUSED)
+நிலையான முழு update(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+		  கட்டமைப்பு repository *repo UNUSED)
 {
-	int i, prune = -1;
-	struct option options[] = {
+	முழு i, prune = -1;
+	கட்டமைப்பு option options[] = {
 		OPT_BOOL('p', "prune", &prune,
 			 N_("prune remotes after fetching")),
 		OPT_END()
 	};
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	int default_defined = 0;
+	கட்டமைப்பு child_process cmd = CHILD_PROCESS_INIT;
+	முழு default_defined = 0;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_update_usage,
 			     PARSE_OPT_KEEP_ARGV0);
 
-	strvec_push(&cmd.args, "fetch");
+	strvec_தள்ளு(&cmd.args, "fetch");
 
-	if (prune != -1)
-		strvec_push(&cmd.args, prune ? "--prune" : "--no-prune");
-	if (verbose)
-		strvec_push(&cmd.args, "-v");
-	strvec_push(&cmd.args, "--multiple");
-	if (argc < 2)
-		strvec_push(&cmd.args, "default");
-	for (i = 1; i < argc; i++)
-		strvec_push(&cmd.args, argv[i]);
+	எனில் (prune != -1)
+		strvec_தள்ளு(&cmd.args, prune ? "--prune" : "--no-prune");
+	எனில் (verbose)
+		strvec_தள்ளு(&cmd.args, "-v");
+	strvec_தள்ளு(&cmd.args, "--multiple");
+	எனில் (argc < 2)
+		strvec_தள்ளு(&cmd.args, "default");
+	க்கு (i = 1; i < argc; i++)
+		strvec_தள்ளு(&cmd.args, argv[i]);
 
-	if (strcmp(cmd.args.v[cmd.args.nr-1], "default") == 0) {
+	எனில் (strcmp(cmd.args.v[cmd.args.nr-1], "default") == 0) {
 		repo_config(the_repository, get_remote_default, &default_defined);
-		if (!default_defined) {
-			strvec_pop(&cmd.args);
-			strvec_push(&cmd.args, "--all");
+		எனில் (!default_defined) {
+			strvec_எடு(&cmd.args);
+			strvec_தள்ளு(&cmd.args, "--all");
 		}
 	}
 
 	cmd.git_cmd = 1;
-	return run_command(&cmd);
+	திரும்பு run_command(&cmd);
 }
 
-static int remove_all_fetch_refspecs(const char *key)
+நிலையான முழு remove_all_fetch_refspecs(மாறிலி எழுத்து *சாவி)
 {
-	return repo_config_set_multivar_gently(the_repository, key, NULL, NULL,
+	திரும்பு repo_config_set_multivar_gently(the_repository, சாவி, வெற்று, வெற்று,
 					       CONFIG_FLAGS_MULTI_REPLACE);
 }
 
-static void add_branches(struct remote *remote, const char **branches,
-			 const char *key)
+நிலையான வெறுமை add_branches(கட்டமைப்பு remote *remote, மாறிலி எழுத்து **branches,
+			 மாறிலி எழுத்து *சாவி)
 {
-	const char *remotename = remote->name;
-	int mirror = remote->mirror;
-	struct strbuf refspec = STRBUF_INIT;
+	மாறிலி எழுத்து *remotename = remote->name;
+	முழு mirror = remote->mirror;
+	கட்டமைப்பு strbuf refspec = STRBUF_INIT;
 
-	for (; *branches; branches++)
-		add_branch(key, *branches, remotename, mirror, &refspec);
+	க்கு (; *branches; branches++)
+		add_branch(சாவி, *branches, remotename, mirror, &refspec);
 
 	strbuf_release(&refspec);
 }
 
-static int set_remote_branches(const char *remotename, const char **branches,
-				int add_mode)
+நிலையான முழு set_remote_branches(மாறிலி எழுத்து *remotename, மாறிலி எழுத்து **branches,
+				முழு add_mode)
 {
-	struct strbuf key = STRBUF_INIT;
-	struct remote *remote;
+	கட்டமைப்பு strbuf சாவி = STRBUF_INIT;
+	கட்டமைப்பு remote *remote;
 
-	strbuf_addf(&key, "remote.%s.fetch", remotename);
+	strbuf_addf(&சாவி, "remote.%s.fetch", remotename);
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	எனில் (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
 		exit(2);
 	}
 
-	if (!add_mode && remove_all_fetch_refspecs(key.buf)) {
-		strbuf_release(&key);
-		return 1;
+	எனில் (!add_mode && remove_all_fetch_refspecs(சாவி.buf)) {
+		strbuf_release(&சாவி);
+		திரும்பு 1;
 	}
-	add_branches(remote, branches, key.buf);
+	add_branches(remote, branches, சாவி.buf);
 
-	strbuf_release(&key);
-	return 0;
+	strbuf_release(&சாவி);
+	திரும்பு 0;
 }
 
-static int set_branches(int argc, const char **argv, const char *prefix,
-			struct repository *repo UNUSED)
+நிலையான முழு set_branches(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+			கட்டமைப்பு repository *repo UNUSED)
 {
-	int add_mode = 0;
-	struct option options[] = {
+	முழு add_mode = 0;
+	கட்டமைப்பு option options[] = {
 		OPT_BOOL('\0', "add", &add_mode, N_("add branch")),
 		OPT_END()
 	};
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_setbranches_usage, 0);
-	if (argc == 0) {
+	எனில் (argc == 0) {
 		error(_("no remote specified"));
 		usage_with_options(builtin_remote_setbranches_usage, options);
 	}
-	argv[argc] = NULL;
+	argv[argc] = வெற்று;
 
-	return set_remote_branches(argv[0], argv + 1, add_mode);
+	திரும்பு set_remote_branches(argv[0], argv + 1, add_mode);
 }
 
-static int get_url(int argc, const char **argv, const char *prefix,
-		   struct repository *repo UNUSED)
+நிலையான முழு get_url(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+		   கட்டமைப்பு repository *repo UNUSED)
 {
-	int push_mode = 0, all_mode = 0;
-	const char *remotename = NULL;
-	struct remote *remote;
-	struct strvec *url;
-	struct option options[] = {
-		OPT_BOOL('\0', "push", &push_mode,
+	முழு தள்ளு_mode = 0, all_mode = 0;
+	மாறிலி எழுத்து *remotename = வெற்று;
+	கட்டமைப்பு remote *remote;
+	கட்டமைப்பு strvec *url;
+	கட்டமைப்பு option options[] = {
+		OPT_BOOL('\0', "push", &தள்ளு_mode,
 			 N_("query push URLs rather than fetch URLs")),
 		OPT_BOOL('\0', "all", &all_mode,
 			 N_("return all URLs")),
@@ -1818,43 +1818,43 @@ static int get_url(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_geturl_usage, 0);
 
-	if (argc != 1)
+	எனில் (argc != 1)
 		usage_with_options(builtin_remote_geturl_usage, options);
 
 	remotename = argv[0];
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	எனில் (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
 		exit(2);
 	}
 
-	url = push_mode ? push_url_of_remote(remote) : &remote->url;
+	url = தள்ளு_mode ? தள்ளு_url_of_remote(remote) : &remote->url;
 
-	if (all_mode) {
-		for (size_t i = 0; i < url->nr; i++)
+	எனில் (all_mode) {
+		க்கு (size_t i = 0; i < url->nr; i++)
 			printf_ln("%s", url->v[i]);
-	} else {
+	} இல்லையெனில் {
 		printf_ln("%s", url->v[0]);
 	}
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int set_url(int argc, const char **argv, const char *prefix,
-		   struct repository *repo UNUSED)
+நிலையான முழு set_url(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+		   கட்டமைப்பு repository *repo UNUSED)
 {
-	int push_mode = 0, add_mode = 0, delete_mode = 0;
-	int matches = 0, negative_matches = 0;
-	const char *remotename = NULL;
-	const char *newurl = NULL;
-	const char *oldurl = NULL;
-	struct remote *remote;
+	முழு தள்ளு_mode = 0, add_mode = 0, delete_mode = 0;
+	முழு matches = 0, negative_matches = 0;
+	மாறிலி எழுத்து *remotename = வெற்று;
+	மாறிலி எழுத்து *newurl = வெற்று;
+	மாறிலி எழுத்து *oldurl = வெற்று;
+	கட்டமைப்பு remote *remote;
 	regex_t old_regex;
-	struct strvec *urlset;
-	struct strbuf name_buf = STRBUF_INIT;
-	struct option options[] = {
-		OPT_BOOL('\0', "push", &push_mode,
+	கட்டமைப்பு strvec *urlset;
+	கட்டமைப்பு strbuf name_buf = STRBUF_INIT;
+	கட்டமைப்பு option options[] = {
+		OPT_BOOL('\0', "push", &தள்ளு_mode,
 			 N_("manipulate push URLs")),
 		OPT_BOOL('\0', "add", &add_mode,
 			 N_("add URL")),
@@ -1866,81 +1866,81 @@ static int set_url(int argc, const char **argv, const char *prefix,
 			     builtin_remote_seturl_usage,
 			     PARSE_OPT_KEEP_ARGV0);
 
-	if (add_mode && delete_mode)
+	எனில் (add_mode && delete_mode)
 		die(_("--add --delete doesn't make sense"));
 
-	if (argc < 3 || argc > 4 || ((add_mode || delete_mode) && argc != 3))
+	எனில் (argc < 3 || argc > 4 || ((add_mode || delete_mode) && argc != 3))
 		usage_with_options(builtin_remote_seturl_usage, options);
 
 	remotename = argv[1];
 	newurl = argv[2];
-	if (argc > 3)
+	எனில் (argc > 3)
 		oldurl = argv[3];
 
-	if (delete_mode)
+	எனில் (delete_mode)
 		oldurl = newurl;
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	எனில் (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
 		exit(2);
 	}
 
-	if (push_mode) {
+	எனில் (தள்ளு_mode) {
 		strbuf_addf(&name_buf, "remote.%s.pushurl", remotename);
 		urlset = &remote->pushurl;
-	} else {
+	} இல்லையெனில் {
 		strbuf_addf(&name_buf, "remote.%s.url", remotename);
 		urlset = &remote->url;
 	}
 
 	/* Special cases that add new entry. */
-	if ((!oldurl && !delete_mode) || add_mode) {
-		if (add_mode)
+	எனில் ((!oldurl && !delete_mode) || add_mode) {
+		எனில் (add_mode)
 			repo_config_set_multivar(the_repository, name_buf.buf, newurl,
 						       "^$", 0);
-		else
+		இல்லையெனில்
 			repo_config_set(the_repository, name_buf.buf, newurl);
-		goto out;
+		செல் out;
 	}
 
 	/* Old URL specified. Demand that one matches. */
-	if (regcomp(&old_regex, oldurl, REG_EXTENDED))
+	எனில் (regcomp(&old_regex, oldurl, REG_EXTENDED))
 		die(_("Invalid old URL pattern: %s"), oldurl);
 
-	for (size_t i = 0; i < urlset->nr; i++)
-		if (!regexec(&old_regex, urlset->v[i], 0, NULL, 0))
+	க்கு (size_t i = 0; i < urlset->nr; i++)
+		எனில் (!regexec(&old_regex, urlset->v[i], 0, வெற்று, 0))
 			matches++;
-		else
+		இல்லையெனில்
 			negative_matches++;
-	if (!delete_mode && !matches)
+	எனில் (!delete_mode && !matches)
 		die(_("No such URL found: %s"), oldurl);
-	if (delete_mode && !negative_matches && !push_mode)
+	எனில் (delete_mode && !negative_matches && !தள்ளு_mode)
 		die(_("Will not delete all non-push URLs"));
 
 	regfree(&old_regex);
 
-	if (!delete_mode)
+	எனில் (!delete_mode)
 		repo_config_set_multivar(the_repository, name_buf.buf, newurl, oldurl, 0);
-	else
-		repo_config_set_multivar(the_repository, name_buf.buf, NULL, oldurl,
+	இல்லையெனில்
+		repo_config_set_multivar(the_repository, name_buf.buf, வெற்று, oldurl,
 					 CONFIG_FLAGS_MULTI_REPLACE);
 out:
 	strbuf_release(&name_buf);
-	return 0;
+	திரும்பு 0;
 }
 
-int cmd_remote(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+முழு cmd_remote(முழு argc,
+	       மாறிலி எழுத்து **argv,
+	       மாறிலி எழுத்து *prefix,
+	       கட்டமைப்பு repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	parse_opt_subcommand_fn *fn = வெற்று;
+	கட்டமைப்பு option options[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose; must be placed before a subcommand")),
 		OPT_SUBCOMMAND("add", &fn, add),
 		OPT_SUBCOMMAND("rename", &fn, mv),
-		OPT_SUBCOMMAND_F("rm", &fn, rm, NULL, PARSE_OPT_NOCOMPLETE),
+		OPT_SUBCOMMAND_F("rm", &fn, rm, வெற்று, PARSE_OPT_NOCOMPLETE),
 		OPT_SUBCOMMAND("remove", &fn, rm),
 		OPT_SUBCOMMAND("set-head", &fn, set_head),
 		OPT_SUBCOMMAND("set-branches", &fn, set_branches),
@@ -1955,13 +1955,13 @@ int cmd_remote(int argc,
 	argc = parse_options(argc, argv, prefix, options, builtin_remote_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL);
 
-	if (fn) {
-		return !!fn(argc, argv, prefix, repo);
-	} else {
-		if (argc) {
+	எனில் (fn) {
+		திரும்பு !!fn(argc, argv, prefix, repo);
+	} இல்லையெனில் {
+		எனில் (argc) {
 			error(_("unknown subcommand: `%s'"), argv[0]);
 			usage_with_options(builtin_remote_usage, options);
 		}
-		return !!show_all();
+		திரும்பு !!show_all();
 	}
 }

@@ -1,101 +1,101 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "advice.h"
-#include "gettext.h"
-#include "hash.h"
-#include "merge-ort-wrappers.h"
-#include "object-name.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "advice.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "hash.h"
+#அந்தர்பாவ "merge-ort-wrappers.h"
+#அந்தர்பாவ "object-name.h"
 
-static const char builtin_merge_recursive_usage[] =
+நிலையான மாறிலி எழுத்து builtin_merge_recursive_usage[] =
 	"git %s <base>... -- <head> <remote> ...";
 
-static char *better_branch_name(const char *branch)
+நிலையான எழுத்து *better_branch_name(மாறிலி எழுத்து *branch)
 {
-	static char githead_env[8 + GIT_MAX_HEXSZ + 1];
-	char *name;
+	நிலையான எழுத்து githead_env[8 + GIT_MAX_HEXSZ + 1];
+	எழுத்து *name;
 
-	if (strlen(branch) != the_hash_algo->hexsz)
-		return xstrdup(branch);
-	xsnprintf(githead_env, sizeof(githead_env), "GITHEAD_%s", branch);
+	எனில் (strlen(branch) != the_hash_algo->hexsz)
+		திரும்பு xstrdup(branch);
+	xsnprintf(githead_env, அளவு(githead_env), "GITHEAD_%s", branch);
 	name = getenv(githead_env);
-	return xstrdup(name ? name : branch);
+	திரும்பு xstrdup(name ? name : branch);
 }
 
-int cmd_merge_recursive(int argc,
-			const char **argv,
-			const char *prefix UNUSED,
-			struct repository *repo UNUSED)
+முழு cmd_merge_recursive(முழு argc,
+			மாறிலி எழுத்து **argv,
+			மாறிலி எழுத்து *prefix UNUSED,
+			கட்டமைப்பு repository *repo UNUSED)
 {
-	struct object_id bases[21];
-	unsigned bases_count = 0;
-	int i, failed;
-	struct object_id h1, h2;
-	struct merge_options o;
-	char *better1, *better2;
-	struct commit *result;
+	கட்டமைப்பு object_id bases[21];
+	unsigned bases_மொத்தம் = 0;
+	முழு i, failed;
+	கட்டமைப்பு object_id h1, h2;
+	கட்டமைப்பு merge_options o;
+	எழுத்து *better1, *better2;
+	கட்டமைப்பு commit *result;
 
 	init_basic_merge_options(&o, the_repository);
-	if (argv[0] && ends_with(argv[0], "-subtree"))
+	எனில் (argv[0] && ends_with(argv[0], "-subtree"))
 		o.subtree_shift = "";
 
-	if (argc == 2 && (!strcmp(argv[1], "-h") ||
+	எனில் (argc == 2 && (!strcmp(argv[1], "-h") ||
 			  !strcmp(argv[1], "--help-all"))) {
-		struct strbuf msg = STRBUF_INIT;
-		strbuf_addf(&msg, builtin_merge_recursive_usage, argv[0]);
-		show_usage_if_asked(argc, argv, msg.buf);
+		கட்டமைப்பு strbuf செய்தி = STRBUF_INIT;
+		strbuf_addf(&செய்தி, builtin_merge_recursive_usage, argv[0]);
+		show_usage_if_asked(argc, argv, செய்தி.buf);
 	}
 
-	if (argc < 4)
+	எனில் (argc < 4)
 		usagef(builtin_merge_recursive_usage, argv[0]);
 
-	for (i = 1; i < argc; ++i) {
-		const char *arg = argv[i];
+	க்கு (i = 1; i < argc; ++i) {
+		மாறிலி எழுத்து *arg = argv[i];
 
-		if (starts_with(arg, "--")) {
-			if (!arg[2])
-				break;
-			if (parse_merge_opt(&o, arg + 2))
+		எனில் (starts_with(arg, "--")) {
+			எனில் (!arg[2])
+				நிறுத்து;
+			எனில் (parse_merge_opt(&o, arg + 2))
 				die(_("unknown option %s"), arg);
-			continue;
+			தொடர்;
 		}
-		if (bases_count < ARRAY_SIZE(bases)-1) {
-			if (repo_get_oid(the_repository, argv[i], &bases[bases_count++]))
+		எனில் (bases_மொத்தம் < ARRAY_SIZE(bases)-1) {
+			எனில் (repo_get_oid(the_repository, argv[i], &bases[bases_மொத்தம்++]))
 				die(_("could not parse object '%s'"), argv[i]);
 		}
-		else
+		இல்லையெனில்
 			warning(Q_("cannot handle more than %d base. "
 				   "Ignoring %s.",
 				   "cannot handle more than %d bases. "
 				   "Ignoring %s.",
 				    ARRAY_SIZE(bases)-1),
-				(int)ARRAY_SIZE(bases)-1, argv[i]);
+				(முழு)ARRAY_SIZE(bases)-1, argv[i]);
 	}
-	if (argc - i != 3) /* "--" "<head>" "<remote>" */
+	எனில் (argc - i != 3) /* "--" "<head>" "<remote>" */
 		die(_("not handling anything other than two heads merge."));
 
-	if (repo_read_index_unmerged(the_repository))
+	எனில் (repo_read_index_unmerged(the_repository))
 		die_resolve_conflict("merge");
 
 	o.branch1 = argv[++i];
 	o.branch2 = argv[++i];
 
-	if (repo_get_oid(the_repository, o.branch1, &h1))
+	எனில் (repo_get_oid(the_repository, o.branch1, &h1))
 		die(_("could not resolve ref '%s'"), o.branch1);
-	if (repo_get_oid(the_repository, o.branch2, &h2))
+	எனில் (repo_get_oid(the_repository, o.branch2, &h2))
 		die(_("could not resolve ref '%s'"), o.branch2);
 
 	o.branch1 = better1 = better_branch_name(o.branch1);
 	o.branch2 = better2 = better_branch_name(o.branch2);
 
-	if (o.verbosity >= 3)
+	எனில் (o.verbosity >= 3)
 		printf(_("Merging %s with %s\n"), o.branch1, o.branch2);
 
-	failed = merge_ort_generic(&o, &h1, &h2, bases_count, bases, &result);
+	failed = merge_ort_generic(&o, &h1, &h2, bases_மொத்தம், bases, &result);
 
-	free(better1);
-	free(better2);
+	விடுவி(better1);
+	விடுவி(better2);
 
-	if (failed < 0)
-		return 128; /* die() error code */
-	return failed;
+	எனில் (failed < 0)
+		திரும்பு 128; /* die() error code */
+	திரும்பு failed;
 }

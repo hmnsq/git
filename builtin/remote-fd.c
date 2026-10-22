@@ -1,7 +1,7 @@
-#include "builtin.h"
-#include "transport.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "transport.h"
 
-static const char usage_msg[] =
+நிலையான மாறிலி எழுத்து usage_செய்தி[] =
 	"git remote-fd <remote> <url>";
 
 /*
@@ -21,68 +21,68 @@ static const char usage_msg[] =
 
 #define MAXCOMMAND 4096
 
-static void command_loop(int input_fd, int output_fd)
+நிலையான வெறுமை command_loop(முழு உள்ளீடு_fd, முழு output_fd)
 {
-	char buffer[MAXCOMMAND];
+	எழுத்து buffer[MAXCOMMAND];
 
-	while (1) {
+	போது (1) {
 		size_t i;
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+		எனில் (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
+			எனில் (ferror(stdin))
 				die("Input error");
-			return;
+			திரும்பு;
 		}
 		/* Strip end of line characters. */
 		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
+		போது (i > 0 && isspace(buffer[i - 1]))
 			buffer[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
+		எனில் (!strcmp(buffer, "capabilities")) {
 			printf("*connect\n\n");
 			fflush(stdout);
-		} else if (starts_with(buffer, "connect ")) {
+		} இல்லையெனில் எனில் (starts_with(buffer, "connect ")) {
 			printf("\n");
 			fflush(stdout);
-			if (bidirectional_transfer_loop(input_fd,
+			எனில் (bidirectional_transfer_loop(உள்ளீடு_fd,
 				output_fd))
 				die("Copying data between file descriptors failed");
-			return;
-		} else {
+			திரும்பு;
+		} இல்லையெனில் {
 			die("Bad command: %s", buffer);
 		}
 	}
 }
 
-int cmd_remote_fd(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+முழு cmd_remote_fd(முழு argc,
+		  மாறிலி எழுத்து **argv,
+		  மாறிலி எழுத்து *prefix,
+		  கட்டமைப்பு repository *repo UNUSED)
 {
-	int input_fd = -1;
-	int output_fd = -1;
-	char *end;
+	முழு உள்ளீடு_fd = -1;
+	முழு output_fd = -1;
+	எழுத்து *end;
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
-	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 3)
-		usage(usage_msg);
+	show_usage_if_asked(argc, argv, usage_செய்தி);
+	எனில் (argc != 3)
+		usage(usage_செய்தி);
 
-	input_fd = (int)strtoul(argv[2], &end, 10);
+	உள்ளீடு_fd = (முழு)strtoul(argv[2], &end, 10);
 
-	if ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
+	எனில் ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
 		die("Bad URL syntax");
 
-	if (*end == '/' || !*end) {
-		output_fd = input_fd;
-	} else {
-		char *end2;
-		output_fd = (int)strtoul(end + 1, &end2, 10);
+	எனில் (*end == '/' || !*end) {
+		output_fd = உள்ளீடு_fd;
+	} இல்லையெனில் {
+		எழுத்து *end2;
+		output_fd = (முழு)strtoul(end + 1, &end2, 10);
 
-		if ((end2 == end + 1) || (*end2 != '/' && *end2))
+		எனில் ((end2 == end + 1) || (*end2 != '/' && *end2))
 			die("Bad URL syntax");
 	}
 
-	command_loop(input_fd, output_fd);
-	return 0;
+	command_loop(உள்ளீடு_fd, output_fd);
+	திரும்பு 0;
 }

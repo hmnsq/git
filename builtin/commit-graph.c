@@ -1,20 +1,20 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "commit.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "parse-options.h"
-#include "commit-graph.h"
-#include "odb.h"
-#include "odb/source.h"
-#include "odb/source-files.h"
-#include "progress.h"
-#include "replace-object.h"
-#include "strbuf.h"
-#include "tag.h"
-#include "trace2.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "commit.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "hex.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "commit-graph.h"
+#அந்தர்பாவ "odb.h"
+#அந்தர்பாவ "odb/source.h"
+#அந்தர்பாவ "odb/source-files.h"
+#அந்தர்பாவ "progress.h"
+#அந்தர்பாவ "replace-object.h"
+#அந்தர்பாவ "strbuf.h"
+#அந்தர்பாவ "tag.h"
+#அந்தர்பாவ "trace2.h"
 
 #define BUILTIN_COMMIT_GRAPH_VERIFY_USAGE \
 	N_("git commit-graph verify [--object-dir <dir>] [--shallow] [--[no-]progress]")
@@ -25,68 +25,68 @@
 	   "                       [--changed-paths] [--[no-]max-new-filters <n>] [--[no-]progress]\n" \
 	   "                       <split-options>")
 
-static const char * const builtin_commit_graph_verify_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி builtin_commit_graph_verify_usage[] = {
 	BUILTIN_COMMIT_GRAPH_VERIFY_USAGE,
-	NULL
+	வெற்று
 };
 
-static const char * const builtin_commit_graph_write_usage[] = {
+நிலையான மாறிலி எழுத்து * மாறிலி builtin_commit_graph_write_usage[] = {
 	BUILTIN_COMMIT_GRAPH_WRITE_USAGE,
-	NULL
+	வெற்று
 };
 
-static char const * const builtin_commit_graph_usage[] = {
+நிலையான எழுத்து மாறிலி * மாறிலி builtin_commit_graph_usage[] = {
 	BUILTIN_COMMIT_GRAPH_VERIFY_USAGE,
 	BUILTIN_COMMIT_GRAPH_WRITE_USAGE,
-	NULL,
+	வெற்று,
 };
 
-static struct opts_commit_graph {
-	const char *obj_dir;
-	int reachable;
-	int stdin_packs;
-	int stdin_commits;
-	int append;
-	int split;
-	int shallow;
-	int progress;
-	int enable_changed_paths;
+நிலையான கட்டமைப்பு opts_commit_graph {
+	மாறிலி எழுத்து *obj_dir;
+	முழு reachable;
+	முழு stdin_packs;
+	முழு stdin_commits;
+	முழு append;
+	முழு split;
+	முழு shallow;
+	முழு progress;
+	முழு enable_changed_paths;
 } opts;
 
-static struct option common_opts[] = {
+நிலையான கட்டமைப்பு option common_opts[] = {
 	OPT_STRING(0, "object-dir", &opts.obj_dir,
 		   N_("dir"),
 		   N_("the object directory to store the graph")),
 	OPT_END()
 };
 
-static struct option *add_common_options(struct option *to)
+நிலையான கட்டமைப்பு option *add_common_options(கட்டமைப்பு option *to)
 {
-	return parse_options_concat(common_opts, to);
+	திரும்பு parse_options_concat(common_opts, to);
 }
 
-static int graph_verify(int argc, const char **argv, const char *prefix,
-			struct repository *repo UNUSED)
+நிலையான முழு graph_verify(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+			கட்டமைப்பு repository *repo UNUSED)
 {
-	struct commit_graph *graph = NULL;
-	struct odb_files_dir *dir = NULL;
-	char *graph_name;
-	char *chain_name;
-	enum { OPENED_NONE, OPENED_GRAPH, OPENED_CHAIN } opened = OPENED_NONE;
-	int fd;
-	struct stat st;
-	int flags = 0;
-	int incomplete_chain = 0;
-	int ret;
+	கட்டமைப்பு commit_graph *graph = வெற்று;
+	கட்டமைப்பு odb_files_dir *dir = வெற்று;
+	எழுத்து *graph_name;
+	எழுத்து *chain_name;
+	எண்ணிக்கை { OPENED_NONE, OPENED_GRAPH, OPENED_CHAIN } opened = OPENED_NONE;
+	முழு fd;
+	கட்டமைப்பு stat st;
+	முழு flags = 0;
+	முழு incomplete_chain = 0;
+	முழு ret;
 
-	static struct option builtin_commit_graph_verify_options[] = {
+	நிலையான கட்டமைப்பு option builtin_commit_graph_verify_options[] = {
 		OPT_BOOL(0, "shallow", &opts.shallow,
 			 N_("if the commit-graph is split, only verify the tip file")),
 		OPT_BOOL(0, "progress", &opts.progress,
 			 N_("force progress reporting")),
 		OPT_END(),
 	};
-	struct option *options = add_common_options(builtin_commit_graph_verify_options);
+	கட்டமைப்பு option *options = add_common_options(builtin_commit_graph_verify_options);
 
 	trace2_cmd_mode("verify");
 
@@ -94,148 +94,148 @@ static int graph_verify(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix,
 			     options,
 			     builtin_commit_graph_verify_usage, 0);
-	if (argc)
+	எனில் (argc)
 		usage_with_options(builtin_commit_graph_verify_usage, options);
 
-	if (!opts.obj_dir)
+	எனில் (!opts.obj_dir)
 		opts.obj_dir = repo_get_object_directory(the_repository);
-	if (opts.shallow)
+	எனில் (opts.shallow)
 		flags |= COMMIT_GRAPH_VERIFY_SHALLOW;
-	if (opts.progress)
+	எனில் (opts.progress)
 		flags |= COMMIT_GRAPH_WRITE_PROGRESS;
 
 	dir = odb_source_files_find_dir(the_repository->objects, opts.obj_dir);
-	if (!dir)
+	எனில் (!dir)
 		die(_("could not find object directory matching %s"), opts.obj_dir);
 
 	graph_name = get_commit_graph_filename(dir->abspath);
 	chain_name = get_commit_graph_chain_filename(dir->abspath);
-	if (open_commit_graph(graph_name, &fd, &st))
+	எனில் (open_commit_graph(graph_name, &fd, &st))
 		opened = OPENED_GRAPH;
-	else if (errno != ENOENT)
+	இல்லையெனில் எனில் (errno != ENOENT)
 		die_errno(_("Could not open commit-graph '%s'"), graph_name);
-	else if (open_commit_graph_chain(chain_name, &fd, &st,
+	இல்லையெனில் எனில் (open_commit_graph_chain(chain_name, &fd, &st,
 					 the_repository->hash_algo))
 		opened = OPENED_CHAIN;
-	else if (errno != ENOENT)
+	இல்லையெனில் எனில் (errno != ENOENT)
 		die_errno(_("could not open commit-graph chain '%s'"), chain_name);
 
 	FREE_AND_NULL(graph_name);
 	FREE_AND_NULL(chain_name);
 	FREE_AND_NULL(options);
 
-	if (opened == OPENED_NONE)
-		return 0;
-	else if (opened == OPENED_GRAPH)
+	எனில் (opened == OPENED_NONE)
+		திரும்பு 0;
+	இல்லையெனில் எனில் (opened == OPENED_GRAPH)
 		graph = load_commit_graph_one_fd_st(the_repository, dir->abspath, fd, &st);
-	else
+	இல்லையெனில்
 		graph = load_commit_graph_chain_fd_st(the_repository->objects, fd, &st,
 						      &incomplete_chain);
 
-	if (!graph)
-		return 1;
+	எனில் (!graph)
+		திரும்பு 1;
 
 	ret = verify_commit_graph(graph, flags);
 	free_commit_graph(graph);
 
-	if (incomplete_chain) {
+	எனில் (incomplete_chain) {
 		error("one or more commit-graph chain files could not be loaded");
 		ret |= 1;
 	}
 
-	return ret;
+	திரும்பு ret;
 }
 
-extern int read_replace_refs;
-static struct commit_graph_opts write_opts;
+வெளி முழு read_replace_refs;
+நிலையான கட்டமைப்பு commit_graph_opts write_opts;
 
-static int write_option_parse_split(const struct option *opt, const char *arg,
-				    int unset)
+நிலையான முழு write_option_parse_split(மாறிலி கட்டமைப்பு option *opt, மாறிலி எழுத்து *arg,
+				    முழு unset)
 {
-	enum commit_graph_split_flags *flags = opt->value;
+	எண்ணிக்கை commit_graph_split_flags *flags = opt->மதிப்பு;
 
 	BUG_ON_OPT_NEG(unset);
 
 	opts.split = 1;
-	if (!arg)
-		return 0;
+	எனில் (!arg)
+		திரும்பு 0;
 
-	if (!strcmp(arg, "no-merge"))
+	எனில் (!strcmp(arg, "no-merge"))
 		*flags = COMMIT_GRAPH_SPLIT_MERGE_PROHIBITED;
-	else if (!strcmp(arg, "replace"))
+	இல்லையெனில் எனில் (!strcmp(arg, "replace"))
 		*flags = COMMIT_GRAPH_SPLIT_REPLACE;
-	else
+	இல்லையெனில்
 		die(_("unrecognized --split argument, %s"), arg);
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int read_one_commit(struct oidset *commits, struct progress *progress,
-			   const char *hash)
+நிலையான முழு read_one_commit(கட்டமைப்பு oidset *commits, கட்டமைப்பு progress *progress,
+			   மாறிலி எழுத்து *hash)
 {
-	struct object *result;
-	struct object_id oid;
-	const char *end;
+	கட்டமைப்பு object *result;
+	கட்டமைப்பு object_id oid;
+	மாறிலி எழுத்து *end;
 
-	if (parse_oid_hex(hash, &oid, &end))
-		return error(_("unexpected non-hex object ID: %s"), hash);
+	எனில் (parse_oid_hex(hash, &oid, &end))
+		திரும்பு error(_("unexpected non-hex object ID: %s"), hash);
 
 	result = deref_tag(the_repository, parse_object(the_repository, &oid),
-			   NULL, 0);
-	if (!result)
-		return error(_("invalid object: %s"), hash);
-	else if (object_as_type(result, OBJ_COMMIT, 1))
-		oidset_insert(commits, &result->oid);
+			   வெற்று, 0);
+	எனில் (!result)
+		திரும்பு error(_("invalid object: %s"), hash);
+	இல்லையெனில் எனில் (object_as_type(result, OBJ_COMMIT, 1))
+		oidset_செருகு(commits, &result->oid);
 
 	display_progress(progress, oidset_size(commits));
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int write_option_max_new_filters(const struct option *opt,
-					const char *arg,
-					int unset)
+நிலையான முழு write_option_max_new_filters(மாறிலி கட்டமைப்பு option *opt,
+					மாறிலி எழுத்து *arg,
+					முழு unset)
 {
-	int *to = opt->value;
-	if (unset)
+	முழு *to = opt->மதிப்பு;
+	எனில் (unset)
 		*to = -1;
-	else {
-		const char *s;
-		*to = strtol(arg, (char **)&s, 10);
-		if (*s)
-			return error(_("option `%s' expects a numerical value"),
+	இல்லையெனில் {
+		மாறிலி எழுத்து *s;
+		*to = strtol(arg, (எழுத்து **)&s, 10);
+		எனில் (*s)
+			திரும்பு error(_("option `%s' expects a numerical value"),
 				     "max-new-filters");
 	}
-	return 0;
+	திரும்பு 0;
 }
 
-static int git_commit_graph_write_config(const char *var, const char *value,
-					 const struct config_context *ctx,
-					 void *cb UNUSED)
+நிலையான முழு git_commit_graph_write_config(மாறிலி எழுத்து *var, மாறிலி எழுத்து *மதிப்பு,
+					 மாறிலி கட்டமைப்பு config_context *ctx,
+					 வெறுமை *cb UNUSED)
 {
-	if (!strcmp(var, "commitgraph.maxnewfilters"))
-		write_opts.max_new_filters = git_config_int(var, value, ctx->kvi);
-	else if (!strcmp(var, "commitgraph.changedpaths"))
-		opts.enable_changed_paths = git_config_bool(var, value) ? 1 : -1;
+	எனில் (!strcmp(var, "commitgraph.maxnewfilters"))
+		write_opts.max_new_filters = git_config_int(var, மதிப்பு, ctx->kvi);
+	இல்லையெனில் எனில் (!strcmp(var, "commitgraph.changedpaths"))
+		opts.enable_changed_paths = git_config_bool(var, மதிப்பு) ? 1 : -1;
 	/*
 	 * No need to fall-back to 'git_default_config', since this was already
 	 * called in 'cmd_commit_graph()'.
 	 */
-	return 0;
+	திரும்பு 0;
 }
 
-static int graph_write(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+நிலையான முழு graph_write(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+		       கட்டமைப்பு repository *repo UNUSED)
 {
-	struct string_list pack_indexes = STRING_LIST_INIT_DUP;
-	struct strbuf buf = STRBUF_INIT;
-	struct oidset commits = OIDSET_INIT;
-	struct odb_files_dir *dir = NULL;
-	int result = 0;
-	enum commit_graph_write_flags flags = 0;
-	struct progress *progress = NULL;
+	கட்டமைப்பு string_list pack_indexes = STRING_LIST_INIT_DUP;
+	கட்டமைப்பு strbuf buf = STRBUF_INIT;
+	கட்டமைப்பு oidset commits = OIDSET_INIT;
+	கட்டமைப்பு odb_files_dir *dir = வெற்று;
+	முழு result = 0;
+	எண்ணிக்கை commit_graph_write_flags flags = 0;
+	கட்டமைப்பு progress *progress = வெற்று;
 
-	static struct option builtin_commit_graph_write_options[] = {
+	நிலையான கட்டமைப்பு option builtin_commit_graph_write_options[] = {
 		OPT_BOOL(0, "reachable", &opts.reachable,
 			N_("start walk at all refs")),
 		OPT_BOOL(0, "stdin-packs", &opts.stdin_packs,
@@ -246,7 +246,7 @@ static int graph_write(int argc, const char **argv, const char *prefix,
 			N_("include all commits already in the commit-graph file")),
 		OPT_BOOL(0, "changed-paths", &opts.enable_changed_paths,
 			N_("enable computation for changed paths")),
-		OPT_CALLBACK_F(0, "split", &write_opts.split_flags, NULL,
+		OPT_CALLBACK_F(0, "split", &write_opts.split_flags, வெற்று,
 			N_("allow writing an incremental commit-graph file"),
 			PARSE_OPT_OPTARG | PARSE_OPT_NONEG,
 			write_option_parse_split),
@@ -257,13 +257,13 @@ static int graph_write(int argc, const char **argv, const char *prefix,
 		OPT_EXPIRY_DATE(0, "expire-time", &write_opts.expire_time,
 			N_("only expire files older than a given date-time")),
 		OPT_CALLBACK_F(0, "max-new-filters", &write_opts.max_new_filters,
-			NULL, N_("maximum number of changed-path Bloom filters to compute"),
+			வெற்று, N_("maximum number of changed-path Bloom filters to compute"),
 			0, write_option_max_new_filters),
 		OPT_BOOL(0, "progress", &opts.progress,
 			 N_("force progress reporting")),
 		OPT_END(),
 	};
-	struct option *options = add_common_options(builtin_commit_graph_write_options);
+	கட்டமைப்பு option *options = add_common_options(builtin_commit_graph_write_options);
 
 	opts.progress = isatty(2);
 	opts.enable_changed_paths = -1;
@@ -279,70 +279,70 @@ static int graph_write(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix,
 			     options,
 			     builtin_commit_graph_write_usage, 0);
-	if (argc)
+	எனில் (argc)
 		usage_with_options(builtin_commit_graph_write_usage, options);
 
-	if (opts.reachable + opts.stdin_packs + opts.stdin_commits > 1)
+	எனில் (opts.reachable + opts.stdin_packs + opts.stdin_commits > 1)
 		die(_("use at most one of --reachable, --stdin-commits, or --stdin-packs"));
-	if (!opts.obj_dir)
+	எனில் (!opts.obj_dir)
 		opts.obj_dir = repo_get_object_directory(the_repository);
-	if (opts.append)
+	எனில் (opts.append)
 		flags |= COMMIT_GRAPH_WRITE_APPEND;
-	if (opts.split)
+	எனில் (opts.split)
 		flags |= COMMIT_GRAPH_WRITE_SPLIT;
-	if (opts.progress)
+	எனில் (opts.progress)
 		flags |= COMMIT_GRAPH_WRITE_PROGRESS;
-	if (!opts.enable_changed_paths)
+	எனில் (!opts.enable_changed_paths)
 		flags |= COMMIT_GRAPH_NO_WRITE_BLOOM_FILTERS;
-	if (opts.enable_changed_paths == 1 ||
+	எனில் (opts.enable_changed_paths == 1 ||
 	    git_env_bool(GIT_TEST_COMMIT_GRAPH_CHANGED_PATHS, 0))
 		flags |= COMMIT_GRAPH_WRITE_BLOOM_FILTERS;
 
 	dir = odb_source_files_find_dir(the_repository->objects, opts.obj_dir);
-	if (!dir)
+	எனில் (!dir)
 		die(_("could not find object directory matching %s"), opts.obj_dir);
 
-	if (opts.reachable) {
-		if (write_commit_graph_reachable(the_repository, dir->abspath, flags, &write_opts))
+	எனில் (opts.reachable) {
+		எனில் (write_commit_graph_reachable(the_repository, dir->abspath, flags, &write_opts))
 			result = 1;
-		goto cleanup;
+		செல் cleanup;
 	}
 
-	if (opts.stdin_packs) {
-		struct strbuf packname = STRBUF_INIT;
+	எனில் (opts.stdin_packs) {
+		கட்டமைப்பு strbuf packname = STRBUF_INIT;
 		size_t dirlen;
 
 		strbuf_addf(&packname, "%s/pack/", dir->abspath);
 		dirlen = packname.len;
 
-		while (strbuf_getline(&buf, stdin) != EOF) {
+		போது (strbuf_getline(&buf, stdin) != EOF) {
 			strbuf_setlen(&packname, dirlen);
 			strbuf_addbuf(&packname, &buf);
 			string_list_append(&pack_indexes, packname.buf);
 		}
 
 		strbuf_release(&packname);
-	} else if (opts.stdin_commits) {
+	} இல்லையெனில் எனில் (opts.stdin_commits) {
 		oidset_init(&commits, 0);
-		if (opts.progress)
+		எனில் (opts.progress)
 			progress = start_delayed_progress(
 				the_repository,
 				_("Collecting commits from input"), 0);
 
-		while (strbuf_getline(&buf, stdin) != EOF) {
-			if (read_one_commit(&commits, progress, buf.buf)) {
+		போது (strbuf_getline(&buf, stdin) != EOF) {
+			எனில் (read_one_commit(&commits, progress, buf.buf)) {
 				result = 1;
 				stop_progress(&progress);
-				goto cleanup;
+				செல் cleanup;
 			}
 		}
 
 		stop_progress(&progress);
 	}
 
-	if (write_commit_graph(the_repository, dir->abspath,
-			       opts.stdin_packs ? &pack_indexes : NULL,
-			       opts.stdin_commits ? &commits : NULL,
+	எனில் (write_commit_graph(the_repository, dir->abspath,
+			       opts.stdin_packs ? &pack_indexes : வெற்று,
+			       opts.stdin_commits ? &commits : வெற்று,
 			       flags,
 			       &write_opts))
 		result = 1;
@@ -352,23 +352,23 @@ cleanup:
 	string_list_clear(&pack_indexes, 0);
 	strbuf_release(&buf);
 	oidset_clear(&commits);
-	return result;
+	திரும்பு result;
 }
 
-int cmd_commit_graph(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo)
+முழு cmd_commit_graph(முழு argc,
+		     மாறிலி எழுத்து **argv,
+		     மாறிலி எழுத்து *prefix,
+		     கட்டமைப்பு repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option builtin_commit_graph_options[] = {
+	parse_opt_subcommand_fn *fn = வெற்று;
+	கட்டமைப்பு option builtin_commit_graph_options[] = {
 		OPT_SUBCOMMAND("verify", &fn, graph_verify),
 		OPT_SUBCOMMAND("write", &fn, graph_write),
 		OPT_END(),
 	};
-	struct option *options = parse_options_concat(builtin_commit_graph_options, common_opts);
+	கட்டமைப்பு option *options = parse_options_concat(builtin_commit_graph_options, common_opts);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, வெற்று);
 
 	disable_replace_refs();
 	save_commit_buffer = 0;
@@ -377,5 +377,5 @@ int cmd_commit_graph(int argc,
 			     builtin_commit_graph_usage, 0);
 	FREE_AND_NULL(options);
 
-	return fn(argc, argv, prefix, repo);
+	திரும்பு fn(argc, argv, prefix, repo);
 }

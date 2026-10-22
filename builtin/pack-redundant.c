@@ -8,264 +8,264 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "gettext.h"
-#include "hex.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "hex.h"
 
-#include "packfile.h"
-#include "odb.h"
-#include "strbuf.h"
+#அந்தர்பாவ "packfile.h"
+#அந்தர்பாவ "odb.h"
+#அந்தர்பாவ "strbuf.h"
 
 #define BLKSIZE 512
 
-static const char pack_redundant_usage[] =
+நிலையான மாறிலி எழுத்து pack_redundant_usage[] =
 "git pack-redundant [--verbose] [--alt-odb] (--all | <pack-filename>...)";
 
-static int load_all_packs, verbose, alt_odb;
+நிலையான முழு load_all_packs, verbose, alt_odb;
 
-struct llist_item {
-	struct llist_item *next;
-	struct object_id oid;
+கட்டமைப்பு llist_item {
+	கட்டமைப்பு llist_item *next;
+	கட்டமைப்பு object_id oid;
 };
-static struct llist {
-	struct llist_item *front;
-	struct llist_item *back;
+நிலையான கட்டமைப்பு llist {
+	கட்டமைப்பு llist_item *front;
+	கட்டமைப்பு llist_item *back;
 	size_t size;
 } *all_objects; /* all objects which must be present in local packfiles */
 
-static struct pack_list {
-	struct pack_list *next;
-	struct packed_git *pack;
-	struct llist *unique_objects;
-	struct llist *remaining_objects;
+நிலையான கட்டமைப்பு pack_list {
+	கட்டமைப்பு pack_list *next;
+	கட்டமைப்பு packed_git *pack;
+	கட்டமைப்பு llist *unique_objects;
+	கட்டமைப்பு llist *remaining_objects;
 	size_t all_objects_size;
-} *local_packs = NULL, *altodb_packs = NULL;
+} *local_packs = வெற்று, *altodb_packs = வெற்று;
 
-static struct llist_item *free_nodes;
+நிலையான கட்டமைப்பு llist_item *free_nodes;
 
-static inline void llist_item_put(struct llist_item *item)
+நிலையான உள்வரி வெறுமை llist_item_put(கட்டமைப்பு llist_item *item)
 {
 	item->next = free_nodes;
 	free_nodes = item;
 }
 
-static inline struct llist_item *llist_item_get(void)
+நிலையான உள்வரி கட்டமைப்பு llist_item *llist_item_get(வெறுமை)
 {
-	struct llist_item *new_item;
-	if ( free_nodes ) {
+	கட்டமைப்பு llist_item *new_item;
+	எனில் ( free_nodes ) {
 		new_item = free_nodes;
 		free_nodes = free_nodes->next;
-	} else {
-		int i = 1;
+	} இல்லையெனில் {
+		முழு i = 1;
 		ALLOC_ARRAY(new_item, BLKSIZE);
-		for (; i < BLKSIZE; i++)
+		க்கு (; i < BLKSIZE; i++)
 			llist_item_put(&new_item[i]);
 	}
-	return new_item;
+	திரும்பு new_item;
 }
 
-static inline void llist_init(struct llist **list)
+நிலையான உள்வரி வெறுமை llist_init(கட்டமைப்பு llist **list)
 {
-	*list = xmalloc(sizeof(struct llist));
-	(*list)->front = (*list)->back = NULL;
+	*list = xmalloc(அளவு(கட்டமைப்பு llist));
+	(*list)->front = (*list)->back = வெற்று;
 	(*list)->size = 0;
 }
 
-static void llist_free(struct llist *list)
+நிலையான வெறுமை llist_free(கட்டமைப்பு llist *list)
 {
-	for (struct llist_item *i = list->front, *next; i; i = next) {
+	க்கு (கட்டமைப்பு llist_item *i = list->front, *next; i; i = next) {
 		next = i->next;
 		llist_item_put(i);
 	}
-	free(list);
+	விடுவி(list);
 }
 
-static struct llist * llist_copy(struct llist *list)
+நிலையான கட்டமைப்பு llist * llist_copy(கட்டமைப்பு llist *list)
 {
-	struct llist *ret;
-	struct llist_item *new_item, *old_item, *prev;
+	கட்டமைப்பு llist *ret;
+	கட்டமைப்பு llist_item *new_item, *old_item, *prev;
 
 	llist_init(&ret);
 
-	if ((ret->size = list->size) == 0)
-		return ret;
+	எனில் ((ret->size = list->size) == 0)
+		திரும்பு ret;
 
 	new_item = ret->front = llist_item_get();
 	new_item->oid = list->front->oid;
 
 	old_item = list->front->next;
-	while (old_item) {
+	போது (old_item) {
 		prev = new_item;
 		new_item = llist_item_get();
 		prev->next = new_item;
 		new_item->oid = old_item->oid;
 		old_item = old_item->next;
 	}
-	new_item->next = NULL;
+	new_item->next = வெற்று;
 	ret->back = new_item;
 
-	return ret;
+	திரும்பு ret;
 }
 
-static inline struct llist_item *llist_insert(struct llist *list,
-					      struct llist_item *after,
-					      const unsigned char *oid)
+நிலையான உள்வரி கட்டமைப்பு llist_item *llist_செருகு(கட்டமைப்பு llist *list,
+					      கட்டமைப்பு llist_item *after,
+					      மாறிலி unsigned எழுத்து *oid)
 {
-	struct llist_item *new_item = llist_item_get();
+	கட்டமைப்பு llist_item *new_item = llist_item_get();
 	oidread(&new_item->oid, oid, the_repository->hash_algo);
-	new_item->next = NULL;
+	new_item->next = வெற்று;
 
-	if (after) {
+	எனில் (after) {
 		new_item->next = after->next;
 		after->next = new_item;
-		if (after == list->back)
+		எனில் (after == list->back)
 			list->back = new_item;
-	} else {/* insert in front */
-		if (list->size == 0)
+	} இல்லையெனில் {/* insert in front */
+		எனில் (list->size == 0)
 			list->back = new_item;
-		else
+		இல்லையெனில்
 			new_item->next = list->front;
 		list->front = new_item;
 	}
 	list->size++;
-	return new_item;
+	திரும்பு new_item;
 }
 
-static inline struct llist_item *llist_insert_back(struct llist *list,
-						   const unsigned char *oid)
+நிலையான உள்வரி கட்டமைப்பு llist_item *llist_செருகு_back(கட்டமைப்பு llist *list,
+						   மாறிலி unsigned எழுத்து *oid)
 {
-	return llist_insert(list, list->back, oid);
+	திரும்பு llist_செருகு(list, list->back, oid);
 }
 
-static inline struct llist_item *llist_insert_sorted_unique(struct llist *list,
-			const struct object_id *oid, struct llist_item *hint)
+நிலையான உள்வரி கட்டமைப்பு llist_item *llist_செருகு_sorted_unique(கட்டமைப்பு llist *list,
+			மாறிலி கட்டமைப்பு object_id *oid, கட்டமைப்பு llist_item *hint)
 {
-	struct llist_item *prev = NULL, *l;
+	கட்டமைப்பு llist_item *prev = வெற்று, *l;
 
-	l = (hint == NULL) ? list->front : hint;
-	while (l) {
-		int cmp = oidcmp(&l->oid, oid);
-		if (cmp > 0) { /* we insert before this entry */
-			return llist_insert(list, prev, oid->hash);
+	l = (hint == வெற்று) ? list->front : hint;
+	போது (l) {
+		முழு cmp = oidcmp(&l->oid, oid);
+		எனில் (cmp > 0) { /* we insert before this entry */
+			திரும்பு llist_செருகு(list, prev, oid->hash);
 		}
-		if (!cmp) { /* already exists */
-			return l;
+		எனில் (!cmp) { /* already exists */
+			திரும்பு l;
 		}
 		prev = l;
 		l = l->next;
 	}
 	/* insert at the end */
-	return llist_insert_back(list, oid->hash);
+	திரும்பு llist_செருகு_back(list, oid->hash);
 }
 
 /* returns a pointer to an item in front of sha1 */
-static inline struct llist_item * llist_sorted_remove(struct llist *list, const unsigned char *oid, struct llist_item *hint)
+நிலையான உள்வரி கட்டமைப்பு llist_item * llist_sorted_remove(கட்டமைப்பு llist *list, மாறிலி unsigned எழுத்து *oid, கட்டமைப்பு llist_item *hint)
 {
-	struct llist_item *prev, *l;
+	கட்டமைப்பு llist_item *prev, *l;
 
 redo_from_start:
-	l = (hint == NULL) ? list->front : hint;
-	prev = NULL;
-	while (l) {
-		const int cmp = hashcmp(l->oid.hash, oid, the_repository->hash_algo);
-		if (cmp > 0) /* not in list, since sorted */
-			return prev;
-		if (!cmp) { /* found */
-			if (!prev) {
-				if (hint != NULL && hint != list->front) {
+	l = (hint == வெற்று) ? list->front : hint;
+	prev = வெற்று;
+	போது (l) {
+		மாறிலி முழு cmp = hashcmp(l->oid.hash, oid, the_repository->hash_algo);
+		எனில் (cmp > 0) /* not in list, since sorted */
+			திரும்பு prev;
+		எனில் (!cmp) { /* found */
+			எனில் (!prev) {
+				எனில் (hint != வெற்று && hint != list->front) {
 					/* we don't know the previous element */
-					hint = NULL;
-					goto redo_from_start;
+					hint = வெற்று;
+					செல் redo_from_start;
 				}
 				list->front = l->next;
-			} else
+			} இல்லையெனில்
 				prev->next = l->next;
-			if (l == list->back)
+			எனில் (l == list->back)
 				list->back = prev;
 			llist_item_put(l);
 			list->size--;
-			return prev;
+			திரும்பு prev;
 		}
 		prev = l;
 		l = l->next;
 	}
-	return prev;
+	திரும்பு prev;
 }
 
 /* computes A\B */
-static void llist_sorted_difference_inplace(struct llist *A,
-				     struct llist *B)
+நிலையான வெறுமை llist_sorted_difference_inplace(கட்டமைப்பு llist *A,
+				     கட்டமைப்பு llist *B)
 {
-	struct llist_item *hint, *b;
+	கட்டமைப்பு llist_item *hint, *b;
 
-	hint = NULL;
+	hint = வெற்று;
 	b = B->front;
 
-	while (b) {
+	போது (b) {
 		hint = llist_sorted_remove(A, b->oid.hash, hint);
 		b = b->next;
 	}
 }
 
-static inline struct pack_list * pack_list_insert(struct pack_list **pl,
-					   struct pack_list *entry)
+நிலையான உள்வரி கட்டமைப்பு pack_list * pack_list_செருகு(கட்டமைப்பு pack_list **pl,
+					   கட்டமைப்பு pack_list *entry)
 {
-	struct pack_list *p = xmalloc(sizeof(struct pack_list));
-	memcpy(p, entry, sizeof(struct pack_list));
+	கட்டமைப்பு pack_list *p = xmalloc(அளவு(கட்டமைப்பு pack_list));
+	memcpy(p, entry, அளவு(கட்டமைப்பு pack_list));
 	p->next = *pl;
 	*pl = p;
-	return p;
+	திரும்பு p;
 }
 
-static void pack_list_free(struct pack_list *pl)
+நிலையான வெறுமை pack_list_free(கட்டமைப்பு pack_list *pl)
 {
-	for (struct pack_list *next; pl; pl = next) {
+	க்கு (கட்டமைப்பு pack_list *next; pl; pl = next) {
 		next = pl->next;
-		free(pl);
+		விடுவி(pl);
 	}
 }
 
-static inline size_t pack_list_size(struct pack_list *pl)
+நிலையான உள்வரி size_t pack_list_size(கட்டமைப்பு pack_list *pl)
 {
 	size_t ret = 0;
-	while (pl) {
+	போது (pl) {
 		ret++;
 		pl = pl->next;
 	}
-	return ret;
+	திரும்பு ret;
 }
 
-static struct pack_list * pack_list_difference(const struct pack_list *A,
-					       const struct pack_list *B)
+நிலையான கட்டமைப்பு pack_list * pack_list_difference(மாறிலி கட்டமைப்பு pack_list *A,
+					       மாறிலி கட்டமைப்பு pack_list *B)
 {
-	struct pack_list *ret;
-	const struct pack_list *pl;
+	கட்டமைப்பு pack_list *ret;
+	மாறிலி கட்டமைப்பு pack_list *pl;
 
-	if (!A)
-		return NULL;
+	எனில் (!A)
+		திரும்பு வெற்று;
 
 	pl = B;
-	while (pl != NULL) {
-		if (A->pack == pl->pack)
-			return pack_list_difference(A->next, B);
+	போது (pl != வெற்று) {
+		எனில் (A->pack == pl->pack)
+			திரும்பு pack_list_difference(A->next, B);
 		pl = pl->next;
 	}
-	ret = xmalloc(sizeof(struct pack_list));
-	memcpy(ret, A, sizeof(struct pack_list));
+	ret = xmalloc(அளவு(கட்டமைப்பு pack_list));
+	memcpy(ret, A, அளவு(கட்டமைப்பு pack_list));
 	ret->next = pack_list_difference(A->next, B);
-	return ret;
+	திரும்பு ret;
 }
 
-static void cmp_two_packs(struct pack_list *p1, struct pack_list *p2)
+நிலையான வெறுமை cmp_two_packs(கட்டமைப்பு pack_list *p1, கட்டமைப்பு pack_list *p2)
 {
 	size_t p1_off = 0, p2_off = 0, p1_step, p2_step;
-	const unsigned char *p1_base, *p2_base;
-	struct llist_item *p1_hint = NULL, *p2_hint = NULL;
-	const unsigned int hashsz = the_hash_algo->rawsz;
+	மாறிலி unsigned எழுத்து *p1_base, *p2_base;
+	கட்டமைப்பு llist_item *p1_hint = வெற்று, *p2_hint = வெற்று;
+	மாறிலி unsigned முழு hashsz = the_hash_algo->rawsz;
 
-	if (!p1->unique_objects)
+	எனில் (!p1->unique_objects)
 		p1->unique_objects = llist_copy(p1->remaining_objects);
-	if (!p2->unique_objects)
+	எனில் (!p2->unique_objects)
 		p2->unique_objects = llist_copy(p2->remaining_objects);
 
 	p1_base = p1->pack->index_data;
@@ -275,13 +275,13 @@ static void cmp_two_packs(struct pack_list *p1, struct pack_list *p2)
 	p1_step = hashsz + ((p1->pack->index_version < 2) ? 4 : 0);
 	p2_step = hashsz + ((p2->pack->index_version < 2) ? 4 : 0);
 
-	while (p1_off < p1->pack->num_objects * p1_step &&
-	       p2_off < p2->pack->num_objects * p2_step)
+	போது (p1_off < p1->pack->இலக்கம்_objects * p1_step &&
+	       p2_off < p2->pack->இலக்கம்_objects * p2_step)
 	{
-		const int cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
+		மாறிலி முழு cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
 					the_repository->hash_algo);
 		/* cmp ~ p1 - p2 */
-		if (cmp == 0) {
+		எனில் (cmp == 0) {
 			p1_hint = llist_sorted_remove(p1->unique_objects,
 					p1_base + p1_off,
 					p1_hint);
@@ -290,22 +290,22 @@ static void cmp_two_packs(struct pack_list *p1, struct pack_list *p2)
 					p2_hint);
 			p1_off += p1_step;
 			p2_off += p2_step;
-			continue;
+			தொடர்;
 		}
-		if (cmp < 0) { /* p1 has the object, p2 doesn't */
+		எனில் (cmp < 0) { /* p1 has the object, p2 doesn't */
 			p1_off += p1_step;
-		} else { /* p2 has the object, p1 doesn't */
+		} இல்லையெனில் { /* p2 has the object, p1 doesn't */
 			p2_off += p2_step;
 		}
 	}
 }
 
-static size_t sizeof_union(struct packed_git *p1, struct packed_git *p2)
+நிலையான size_t sizeof_union(கட்டமைப்பு packed_git *p1, கட்டமைப்பு packed_git *p2)
 {
 	size_t ret = 0;
 	size_t p1_off = 0, p2_off = 0, p1_step, p2_step;
-	const unsigned char *p1_base, *p2_base;
-	const unsigned int hashsz = the_hash_algo->rawsz;
+	மாறிலி unsigned எழுத்து *p1_base, *p2_base;
+	மாறிலி unsigned முழு hashsz = the_hash_algo->rawsz;
 
 	p1_base = p1->index_data;
 	p2_base = p2->index_data;
@@ -314,121 +314,121 @@ static size_t sizeof_union(struct packed_git *p1, struct packed_git *p2)
 	p1_step = hashsz + ((p1->index_version < 2) ? 4 : 0);
 	p2_step = hashsz + ((p2->index_version < 2) ? 4 : 0);
 
-	while (p1_off < p1->num_objects * p1_step &&
-	       p2_off < p2->num_objects * p2_step)
+	போது (p1_off < p1->இலக்கம்_objects * p1_step &&
+	       p2_off < p2->இலக்கம்_objects * p2_step)
 	{
-		int cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
+		முழு cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
 				  the_repository->hash_algo);
 		/* cmp ~ p1 - p2 */
-		if (cmp == 0) {
+		எனில் (cmp == 0) {
 			ret++;
 			p1_off += p1_step;
 			p2_off += p2_step;
-			continue;
+			தொடர்;
 		}
-		if (cmp < 0) { /* p1 has the object, p2 doesn't */
+		எனில் (cmp < 0) { /* p1 has the object, p2 doesn't */
 			p1_off += p1_step;
-		} else { /* p2 has the object, p1 doesn't */
+		} இல்லையெனில் { /* p2 has the object, p1 doesn't */
 			p2_off += p2_step;
 		}
 	}
-	return ret;
+	திரும்பு ret;
 }
 
 /* another O(n^2) function ... */
-static size_t get_pack_redundancy(struct pack_list *pl)
+நிலையான size_t get_pack_redundancy(கட்டமைப்பு pack_list *pl)
 {
-	struct pack_list *subset;
+	கட்டமைப்பு pack_list *subset;
 	size_t ret = 0;
 
-	if (!pl)
-		return 0;
+	எனில் (!pl)
+		திரும்பு 0;
 
-	while ((subset = pl->next)) {
-		while (subset) {
+	போது ((subset = pl->next)) {
+		போது (subset) {
 			ret += sizeof_union(pl->pack, subset->pack);
 			subset = subset->next;
 		}
 		pl = pl->next;
 	}
-	return ret;
+	திரும்பு ret;
 }
 
-static inline off_t pack_set_bytecount(struct pack_list *pl)
+நிலையான உள்வரி off_t pack_set_bytecount(கட்டமைப்பு pack_list *pl)
 {
 	off_t ret = 0;
-	while (pl) {
+	போது (pl) {
 		ret += pl->pack->pack_size;
 		ret += pl->pack->index_size;
 		pl = pl->next;
 	}
-	return ret;
+	திரும்பு ret;
 }
 
-static int cmp_remaining_objects(const void *a, const void *b)
+நிலையான முழு cmp_remaining_objects(மாறிலி வெறுமை *a, மாறிலி வெறுமை *b)
 {
-	struct pack_list *pl_a = *((struct pack_list **)a);
-	struct pack_list *pl_b = *((struct pack_list **)b);
+	கட்டமைப்பு pack_list *pl_a = *((கட்டமைப்பு pack_list **)a);
+	கட்டமைப்பு pack_list *pl_b = *((கட்டமைப்பு pack_list **)b);
 
-	if (pl_a->remaining_objects->size == pl_b->remaining_objects->size) {
+	எனில் (pl_a->remaining_objects->size == pl_b->remaining_objects->size) {
 		/* have the same remaining_objects, big pack first */
-		if (pl_a->all_objects_size == pl_b->all_objects_size)
-			return 0;
-		else if (pl_a->all_objects_size < pl_b->all_objects_size)
-			return 1;
-		else
-			return -1;
-	} else if (pl_a->remaining_objects->size < pl_b->remaining_objects->size) {
+		எனில் (pl_a->all_objects_size == pl_b->all_objects_size)
+			திரும்பு 0;
+		இல்லையெனில் எனில் (pl_a->all_objects_size < pl_b->all_objects_size)
+			திரும்பு 1;
+		இல்லையெனில்
+			திரும்பு -1;
+	} இல்லையெனில் எனில் (pl_a->remaining_objects->size < pl_b->remaining_objects->size) {
 		/* sort by remaining objects, more objects first */
-		return 1;
-	} else {
-		return -1;
+		திரும்பு 1;
+	} இல்லையெனில் {
+		திரும்பு -1;
 	}
 }
 
 /* Sort pack_list, greater size of remaining_objects first */
-static void sort_pack_list(struct pack_list **pl)
+நிலையான வெறுமை sort_pack_list(கட்டமைப்பு pack_list **pl)
 {
-	struct pack_list **ary, *p;
+	கட்டமைப்பு pack_list **ary, *p;
 	size_t n = pack_list_size(*pl);
 
-	if (n < 2)
-		return;
+	எனில் (n < 2)
+		திரும்பு;
 
 	/* prepare an array of packed_list for easier sorting */
 	CALLOC_ARRAY(ary, n);
-	for (n = 0, p = *pl; p; p = p->next)
+	க்கு (n = 0, p = *pl; p; p = p->next)
 		ary[n++] = p;
 
 	QSORT(ary, n, cmp_remaining_objects);
 
 	/* link them back again */
-	for (size_t i = 0; i < n - 1; i++)
+	க்கு (size_t i = 0; i < n - 1; i++)
 		ary[i]->next = ary[i + 1];
-	ary[n - 1]->next = NULL;
+	ary[n - 1]->next = வெற்று;
 	*pl = ary[0];
 
-	free(ary);
+	விடுவி(ary);
 }
 
 
-static void minimize(struct pack_list **min)
+நிலையான வெறுமை minimize(கட்டமைப்பு pack_list **min)
 {
-	struct pack_list *pl, *unique = NULL, *non_unique = NULL;
-	struct llist *missing, *unique_pack_objects;
+	கட்டமைப்பு pack_list *pl, *unique = வெற்று, *non_unique = வெற்று;
+	கட்டமைப்பு llist *missing, *unique_pack_objects;
 
 	pl = local_packs;
-	while (pl) {
-		if (pl->unique_objects->size)
-			pack_list_insert(&unique, pl);
-		else
-			pack_list_insert(&non_unique, pl);
+	போது (pl) {
+		எனில் (pl->unique_objects->size)
+			pack_list_செருகு(&unique, pl);
+		இல்லையெனில்
+			pack_list_செருகு(&non_unique, pl);
 		pl = pl->next;
 	}
 	/* find out which objects are missing from the set of unique packs */
 	missing = llist_copy(all_objects);
 	pl = unique;
-	while (pl) {
+	போது (pl) {
 		llist_sorted_difference_inplace(missing, pl->remaining_objects);
 		pl = pl->next;
 	}
@@ -436,10 +436,10 @@ static void minimize(struct pack_list **min)
 	*min = unique;
 
 	/* return if there are no objects missing from the unique set */
-	if (missing->size == 0) {
+	எனில் (missing->size == 0) {
 		llist_free(missing);
 		pack_list_free(non_unique);
-		return;
+		திரும்பு;
 	}
 
 	unique_pack_objects = llist_copy(all_objects);
@@ -447,26 +447,26 @@ static void minimize(struct pack_list **min)
 
 	/* remove unique pack objects from the non_unique packs */
 	pl = non_unique;
-	while (pl) {
+	போது (pl) {
 		llist_sorted_difference_inplace(pl->remaining_objects, unique_pack_objects);
 		pl = pl->next;
 	}
 
-	while (non_unique) {
-		struct pack_list *next;
+	போது (non_unique) {
+		கட்டமைப்பு pack_list *next;
 
 		/* sort the non_unique packs, greater size of remaining_objects first */
 		sort_pack_list(&non_unique);
-		if (non_unique->remaining_objects->size == 0)
-			break;
+		எனில் (non_unique->remaining_objects->size == 0)
+			நிறுத்து;
 
-		pack_list_insert(min, non_unique);
+		pack_list_செருகு(min, non_unique);
 
-		for (pl = non_unique->next; pl && pl->remaining_objects->size > 0;  pl = pl->next)
+		க்கு (pl = non_unique->next; pl && pl->remaining_objects->size > 0;  pl = pl->next)
 			llist_sorted_difference_inplace(pl->remaining_objects, non_unique->remaining_objects);
 
 		next = non_unique->next;
-		free(non_unique);
+		விடுவி(non_unique);
 		non_unique = next;
 	}
 
@@ -475,18 +475,18 @@ static void minimize(struct pack_list **min)
 	llist_free(missing);
 }
 
-static void load_all_objects(void)
+நிலையான வெறுமை load_all_objects(வெறுமை)
 {
-	struct pack_list *pl = local_packs;
-	struct llist_item *hint, *l;
+	கட்டமைப்பு pack_list *pl = local_packs;
+	கட்டமைப்பு llist_item *hint, *l;
 
 	llist_init(&all_objects);
 
-	while (pl) {
-		hint = NULL;
+	போது (pl) {
+		hint = வெற்று;
 		l = pl->remaining_objects->front;
-		while (l) {
-			hint = llist_insert_sorted_unique(all_objects,
+		போது (l) {
+			hint = llist_செருகு_sorted_unique(all_objects,
 							  &l->oid, hint);
 			l = l->next;
 		}
@@ -494,38 +494,38 @@ static void load_all_objects(void)
 	}
 	/* remove objects present in remote packs */
 	pl = altodb_packs;
-	while (pl) {
+	போது (pl) {
 		llist_sorted_difference_inplace(all_objects, pl->remaining_objects);
 		pl = pl->next;
 	}
 }
 
 /* this scales like O(n^2) */
-static void cmp_local_packs(void)
+நிலையான வெறுமை cmp_local_packs(வெறுமை)
 {
-	struct pack_list *subset, *pl = local_packs;
+	கட்டமைப்பு pack_list *subset, *pl = local_packs;
 
 	/* only one packfile */
-	if (!pl->next) {
+	எனில் (!pl->next) {
 		llist_init(&pl->unique_objects);
-		return;
+		திரும்பு;
 	}
 
-	while ((subset = pl)) {
-		while ((subset = subset->next))
+	போது ((subset = pl)) {
+		போது ((subset = subset->next))
 			cmp_two_packs(pl, subset);
 		pl = pl->next;
 	}
 }
 
-static void scan_alt_odb_packs(void)
+நிலையான வெறுமை scan_alt_odb_packs(வெறுமை)
 {
-	struct pack_list *local, *alt;
+	கட்டமைப்பு pack_list *local, *alt;
 
 	alt = altodb_packs;
-	while (alt) {
+	போது (alt) {
 		local = local_packs;
-		while (local) {
+		போது (local) {
 			llist_sorted_difference_inplace(local->remaining_objects,
 							alt->remaining_objects);
 			local = local->next;
@@ -534,125 +534,125 @@ static void scan_alt_odb_packs(void)
 	}
 }
 
-static struct pack_list * add_pack(struct packed_git *p)
+நிலையான கட்டமைப்பு pack_list * add_pack(கட்டமைப்பு packed_git *p)
 {
-	struct pack_list l;
+	கட்டமைப்பு pack_list l;
 	size_t off = 0, step;
-	const unsigned char *base;
+	மாறிலி unsigned எழுத்து *base;
 
-	if (!p->pack_local && !(alt_odb || verbose))
-		return NULL;
+	எனில் (!p->pack_local && !(alt_odb || verbose))
+		திரும்பு வெற்று;
 
 	l.pack = p;
 	llist_init(&l.remaining_objects);
 
-	if (open_pack_index(p)) {
+	எனில் (open_pack_index(p)) {
 		llist_free(l.remaining_objects);
-		return NULL;
+		திரும்பு வெற்று;
 	}
 
 	base = p->index_data;
 	base += 256 * 4 + ((p->index_version < 2) ? 4 : 8);
 	step = the_hash_algo->rawsz + ((p->index_version < 2) ? 4 : 0);
-	while (off < p->num_objects * step) {
-		llist_insert_back(l.remaining_objects, base + off);
+	போது (off < p->இலக்கம்_objects * step) {
+		llist_செருகு_back(l.remaining_objects, base + off);
 		off += step;
 	}
 	l.all_objects_size = l.remaining_objects->size;
-	l.unique_objects = NULL;
-	if (p->pack_local)
-		return pack_list_insert(&local_packs, &l);
-	else
-		return pack_list_insert(&altodb_packs, &l);
+	l.unique_objects = வெற்று;
+	எனில் (p->pack_local)
+		திரும்பு pack_list_செருகு(&local_packs, &l);
+	இல்லையெனில்
+		திரும்பு pack_list_செருகு(&altodb_packs, &l);
 }
 
-static struct pack_list * add_pack_file(const char *filename)
+நிலையான கட்டமைப்பு pack_list * add_pack_file(மாறிலி எழுத்து *filename)
 {
-	struct packed_git *p;
+	கட்டமைப்பு packed_git *p;
 
-	if (strlen(filename) < 40)
+	எனில் (strlen(filename) < 40)
 		die("Bad pack filename: %s", filename);
 
 	repo_for_each_pack(the_repository, p)
-		if (strstr(p->pack_name, filename))
-			return add_pack(p);
+		எனில் (strstr(p->pack_name, filename))
+			திரும்பு add_pack(p);
 	die("Filename %s not found in packed_git", filename);
 }
 
-static void load_all(void)
+நிலையான வெறுமை load_all(வெறுமை)
 {
-	struct packed_git *p;
+	கட்டமைப்பு packed_git *p;
 
 	repo_for_each_pack(the_repository, p)
 		add_pack(p);
 }
 
-int cmd_pack_redundant(int argc, const char **argv, const char *prefix UNUSED, struct repository *repo UNUSED) {
-	int i; int i_still_use_this = 0; struct pack_list *min = NULL, *red, *pl;
-	struct llist *ignore;
-	struct strbuf idx_name = STRBUF_INIT;
-	char buf[GIT_MAX_HEXSZ + 2]; /* hex hash + \n + \0 */
+முழு cmd_pack_redundant(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix UNUSED, கட்டமைப்பு repository *repo UNUSED) {
+	முழு i; முழு i_still_use_this = 0; கட்டமைப்பு pack_list *min = வெற்று, *red, *pl;
+	கட்டமைப்பு llist *ignore;
+	கட்டமைப்பு strbuf idx_name = STRBUF_INIT;
+	எழுத்து buf[GIT_MAX_HEXSZ + 2]; /* hex hash + \n + \0 */
 
 	show_usage_if_asked(argc, argv, pack_redundant_usage);
 
-	for (i = 1; i < argc; i++) {
-		const char *arg = argv[i];
-		if (!strcmp(arg, "--")) {
+	க்கு (i = 1; i < argc; i++) {
+		மாறிலி எழுத்து *arg = argv[i];
+		எனில் (!strcmp(arg, "--")) {
 			i++;
-			break;
+			நிறுத்து;
 		}
-		if (!strcmp(arg, "--all")) {
+		எனில் (!strcmp(arg, "--all")) {
 			load_all_packs = 1;
-			continue;
+			தொடர்;
 		}
-		if (!strcmp(arg, "--verbose")) {
+		எனில் (!strcmp(arg, "--verbose")) {
 			verbose = 1;
-			continue;
+			தொடர்;
 		}
-		if (!strcmp(arg, "--alt-odb")) {
+		எனில் (!strcmp(arg, "--alt-odb")) {
 			alt_odb = 1;
-			continue;
+			தொடர்;
 		}
-		if (!strcmp(arg, "--i-still-use-this")) {
+		எனில் (!strcmp(arg, "--i-still-use-this")) {
 			i_still_use_this = 1;
-			continue;
+			தொடர்;
 		}
-		if (*arg == '-')
+		எனில் (*arg == '-')
 			usage(pack_redundant_usage);
-		else
-			break;
+		இல்லையெனில்
+			நிறுத்து;
 	}
 
-	if (!i_still_use_this)
-		you_still_use_that("git pack-redundant", NULL);
+	எனில் (!i_still_use_this)
+		you_still_use_that("git pack-redundant", வெற்று);
 
-	if (load_all_packs)
+	எனில் (load_all_packs)
 		load_all();
-	else
-		while (*(argv + i) != NULL)
+	இல்லையெனில்
+		போது (*(argv + i) != வெற்று)
 			add_pack_file(*(argv + i++));
 
-	if (!local_packs)
+	எனில் (!local_packs)
 		die("Zero packs found!");
 
 	load_all_objects();
 
-	if (alt_odb)
+	எனில் (alt_odb)
 		scan_alt_odb_packs();
 
 	/* ignore objects given on stdin */
 	llist_init(&ignore);
-	if (!isatty(0)) {
-		struct object_id oid;
-		while (fgets(buf, sizeof(buf), stdin)) {
-			if (get_oid_hex(buf, &oid))
+	எனில் (!isatty(0)) {
+		கட்டமைப்பு object_id oid;
+		போது (fgets(buf, அளவு(buf), stdin)) {
+			எனில் (get_oid_hex(buf, &oid))
 				die("Bad object ID on stdin: %s", buf);
-			llist_insert_sorted_unique(ignore, &oid, NULL);
+			llist_செருகு_sorted_unique(ignore, &oid, வெற்று);
 		}
 	}
 	llist_sorted_difference_inplace(all_objects, ignore);
 	pl = local_packs;
-	while (pl) {
+	போது (pl) {
 		llist_sorted_difference_inplace(pl->remaining_objects, ignore);
 		pl = pl->next;
 	}
@@ -661,12 +661,12 @@ int cmd_pack_redundant(int argc, const char **argv, const char *prefix UNUSED, s
 
 	minimize(&min);
 
-	if (verbose) {
+	எனில் (verbose) {
 		fprintf(stderr, "There are %lu packs available in alt-odbs.\n",
 			(unsigned long)pack_list_size(altodb_packs));
 		fprintf(stderr, "The smallest (bytewise) set of packs is:\n");
 		pl = min;
-		while (pl) {
+		போது (pl) {
 			fprintf(stderr, "\t%s\n", pl->pack->pack_name);
 			pl = pl->next;
 		}
@@ -679,13 +679,13 @@ int cmd_pack_redundant(int argc, const char **argv, const char *prefix UNUSED, s
 		fprintf(stderr, "Redundant packs (with indexes):\n");
 	}
 	pl = red = pack_list_difference(local_packs, min);
-	while (pl) {
+	போது (pl) {
 		printf("%s\n%s\n",
 		       odb_pack_name(pl->pack->repo, &idx_name, pl->pack->hash, "idx"),
 		       pl->pack->pack_name);
 		pl = pl->next;
 	}
-	if (verbose)
+	எனில் (verbose)
 		fprintf(stderr, "%luMB of redundant packs in total.\n",
 			(unsigned long)pack_set_bytecount(red)/(1024*1024));
 
@@ -693,5 +693,5 @@ int cmd_pack_redundant(int argc, const char **argv, const char *prefix UNUSED, s
 	pack_list_free(min);
 	llist_free(ignore);
 	strbuf_release(&idx_name);
-	return 0;
+	திரும்பு 0;
 }

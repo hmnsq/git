@@ -1,26 +1,26 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "commit.h"
-#include "environment.h"
-#include "hash.h"
-#include "hex.h"
-#include "odb.h"
-#include "parse-options.h"
-#include "path.h"
-#include "path-walk.h"
-#include "progress.h"
-#include "quote.h"
-#include "ref-filter.h"
-#include "refs.h"
-#include "revision.h"
-#include "setup.h"
-#include "strbuf.h"
-#include "string-list.h"
-#include "shallow.h"
-#include "tree.h"
-#include "tree-walk.h"
-#include "utf8.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "commit.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "hash.h"
+#அந்தர்பாவ "hex.h"
+#அந்தர்பாவ "odb.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "path.h"
+#அந்தர்பாவ "path-walk.h"
+#அந்தர்பாவ "progress.h"
+#அந்தர்பாவ "quote.h"
+#அந்தர்பாவ "ref-filter.h"
+#அந்தர்பாவ "refs.h"
+#அந்தர்பாவ "revision.h"
+#அந்தர்பாவ "setup.h"
+#அந்தர்பாவ "strbuf.h"
+#அந்தர்பாவ "string-list.h"
+#அந்தர்பாவ "shallow.h"
+#அந்தர்பாவ "tree.h"
+#அந்தர்பாவ "tree-walk.h"
+#அந்தர்பாவ "utf8.h"
 
 #define REPO_INFO_USAGE \
 	"git repo info [--format=(lines|nul) | -z] [--all | <key>...]", \
@@ -29,107 +29,107 @@
 #define REPO_STRUCTURE_USAGE \
 	"git repo structure [--format=(table|lines|nul) | -z]"
 
-static const char *const repo_usage[] = {
+நிலையான மாறிலி எழுத்து *மாறிலி repo_usage[] = {
 	REPO_INFO_USAGE,
 	REPO_STRUCTURE_USAGE,
-	NULL,
+	வெற்று,
 };
 
-static const char *const repo_info_usage[] = {
+நிலையான மாறிலி எழுத்து *மாறிலி repo_info_usage[] = {
 	REPO_INFO_USAGE,
-	NULL,
+	வெற்று,
 };
 
-static const char *const repo_structure_usage[] = {
+நிலையான மாறிலி எழுத்து *மாறிலி repo_structure_usage[] = {
 	REPO_STRUCTURE_USAGE,
-	NULL,
+	வெற்று,
 };
 
-typedef int get_value_fn(struct repository *repo, struct strbuf *buf);
+வகைவரை முழு get_மதிப்பு_fn(கட்டமைப்பு repository *repo, கட்டமைப்பு strbuf *buf);
 
-enum output_format {
+எண்ணிக்கை output_format {
 	FORMAT_TABLE,
 	FORMAT_NEWLINE_TERMINATED,
 	FORMAT_NUL_TERMINATED,
 };
 
-struct repo_info_field {
-	const char *key;
-	get_value_fn *get_value;
+கட்டமைப்பு repo_info_field {
+	மாறிலி எழுத்து *சாவி;
+	get_மதிப்பு_fn *get_மதிப்பு;
 };
 
-static int get_layout_bare(struct repository *repo UNUSED, struct strbuf *buf)
+நிலையான முழு get_layout_bare(கட்டமைப்பு repository *repo UNUSED, கட்டமைப்பு strbuf *buf)
 {
 	strbuf_addstr(buf, is_bare_repository(the_repository) ? "true" : "false");
-	return 0;
+	திரும்பு 0;
 }
 
-static int get_layout_shallow(struct repository *repo, struct strbuf *buf)
+நிலையான முழு get_layout_shallow(கட்டமைப்பு repository *repo, கட்டமைப்பு strbuf *buf)
 {
 	strbuf_addstr(buf,
 		      is_repository_shallow(repo) ? "true" : "false");
-	return 0;
+	திரும்பு 0;
 }
 
-static int get_object_format(struct repository *repo, struct strbuf *buf)
+நிலையான முழு get_object_format(கட்டமைப்பு repository *repo, கட்டமைப்பு strbuf *buf)
 {
 	strbuf_addstr(buf, repo->hash_algo->name);
-	return 0;
+	திரும்பு 0;
 }
 
-static int get_path_commondir_absolute(struct repository *repo, struct strbuf *buf)
+நிலையான முழு get_path_commondir_absolute(கட்டமைப்பு repository *repo, கட்டமைப்பு strbuf *buf)
 {
-	const char *common_dir = repo_get_common_dir(repo);
+	மாறிலி எழுத்து *common_dir = repo_get_common_dir(repo);
 
-	if (!common_dir)
-		return error(_("unable to get common directory"));
+	எனில் (!common_dir)
+		திரும்பு error(_("unable to get common directory"));
 
 	format_path(buf, common_dir, repo->prefix, PATH_FORMAT_CANONICAL);
-	return 0;
+	திரும்பு 0;
 }
 
-static int get_path_commondir_relative(struct repository *repo, struct strbuf *buf)
+நிலையான முழு get_path_commondir_relative(கட்டமைப்பு repository *repo, கட்டமைப்பு strbuf *buf)
 {
-	const char *common_dir = repo_get_common_dir(repo);
+	மாறிலி எழுத்து *common_dir = repo_get_common_dir(repo);
 
-	if (!common_dir)
-		return error(_("unable to get common directory"));
+	எனில் (!common_dir)
+		திரும்பு error(_("unable to get common directory"));
 
 	format_path(buf, common_dir, repo->prefix, PATH_FORMAT_RELATIVE);
-	return 0;
+	திரும்பு 0;
 }
 
-static int get_path_gitdir_absolute(struct repository *repo, struct strbuf *buf)
+நிலையான முழு get_path_gitdir_absolute(கட்டமைப்பு repository *repo, கட்டமைப்பு strbuf *buf)
 {
-	const char *git_dir = repo_get_git_dir(repo);
+	மாறிலி எழுத்து *git_dir = repo_get_git_dir(repo);
 
-	if (!git_dir)
-		return error(_("unable to get git directory"));
+	எனில் (!git_dir)
+		திரும்பு error(_("unable to get git directory"));
 
 	format_path(buf, git_dir, repo->prefix, PATH_FORMAT_CANONICAL);
-	return 0;
+	திரும்பு 0;
 }
 
-static int get_path_gitdir_relative(struct repository *repo, struct strbuf *buf)
+நிலையான முழு get_path_gitdir_relative(கட்டமைப்பு repository *repo, கட்டமைப்பு strbuf *buf)
 {
-	const char *git_dir = repo_get_git_dir(repo);
+	மாறிலி எழுத்து *git_dir = repo_get_git_dir(repo);
 
-	if (!git_dir)
-		return error(_("unable to get git directory"));
+	எனில் (!git_dir)
+		திரும்பு error(_("unable to get git directory"));
 
 	format_path(buf, git_dir, repo->prefix, PATH_FORMAT_RELATIVE);
-	return 0;
+	திரும்பு 0;
 }
 
-static int get_references_format(struct repository *repo, struct strbuf *buf)
+நிலையான முழு get_references_format(கட்டமைப்பு repository *repo, கட்டமைப்பு strbuf *buf)
 {
 	strbuf_addstr(buf,
 		      ref_storage_format_to_name(repo->ref_storage_format));
-	return 0;
+	திரும்பு 0;
 }
 
 /* repo_info_field keys must be in lexicographical order */
-static const struct repo_info_field repo_info_field[] = {
+நிலையான மாறிலி கட்டமைப்பு repo_info_field repo_info_field[] = {
 	{ "layout.bare", get_layout_bare },
 	{ "layout.shallow", get_layout_shallow },
 	{ "object.format", get_object_format },
@@ -140,303 +140,303 @@ static const struct repo_info_field repo_info_field[] = {
 	{ "references.format", get_references_format },
 };
 
-static int repo_info_field_cmp(const void *va, const void *vb)
+நிலையான முழு repo_info_field_cmp(மாறிலி வெறுமை *va, மாறிலி வெறுமை *vb)
 {
-	const struct repo_info_field *a = va;
-	const struct repo_info_field *b = vb;
+	மாறிலி கட்டமைப்பு repo_info_field *a = va;
+	மாறிலி கட்டமைப்பு repo_info_field *b = vb;
 
-	return strcmp(a->key, b->key);
+	திரும்பு strcmp(a->சாவி, b->சாவி);
 }
 
-static const struct repo_info_field *get_repo_info_field(const char *key)
+நிலையான மாறிலி கட்டமைப்பு repo_info_field *get_repo_info_field(மாறிலி எழுத்து *சாவி)
 {
-	const struct repo_info_field search_key = { key, NULL };
-	const struct repo_info_field *found = bsearch(&search_key,
+	மாறிலி கட்டமைப்பு repo_info_field தேடல்_சாவி = { சாவி, வெற்று };
+	மாறிலி கட்டமைப்பு repo_info_field *found = bsearch(&தேடல்_சாவி,
 						      repo_info_field,
 						      ARRAY_SIZE(repo_info_field),
-						      sizeof(*found),
+						      அளவு(*found),
 						      repo_info_field_cmp);
 
-	return found;
+	திரும்பு found;
 }
 
-static void print_field(enum output_format format, const char *key,
-			const char *value)
+நிலையான வெறுமை print_field(எண்ணிக்கை output_format format, மாறிலி எழுத்து *சாவி,
+			மாறிலி எழுத்து *மதிப்பு)
 {
-	switch (format) {
-	case FORMAT_NEWLINE_TERMINATED:
-		printf("%s=", key);
-		quote_c_style(value, NULL, stdout, 0);
+	தேர்வு (format) {
+	நிலை FORMAT_NEWLINE_TERMINATED:
+		printf("%s=", சாவி);
+		quote_c_style(மதிப்பு, வெற்று, stdout, 0);
 		putchar('\n');
-		break;
-	case FORMAT_NUL_TERMINATED:
-		printf("%s\n%s%c", key, value, '\0');
-		break;
-	default:
+		நிறுத்து;
+	நிலை FORMAT_NUL_TERMINATED:
+		printf("%s\n%s%c", சாவி, மதிப்பு, '\0');
+		நிறுத்து;
+	இயல்பு:
 		BUG("not a valid output format: %d", format);
 	}
 }
 
-static int print_fields(int argc, const char **argv,
-			struct repository *repo,
-			enum output_format format)
+நிலையான முழு print_fields(முழு argc, மாறிலி எழுத்து **argv,
+			கட்டமைப்பு repository *repo,
+			எண்ணிக்கை output_format format)
 {
-	int ret = 0;
-	struct strbuf valbuf = STRBUF_INIT;
+	முழு ret = 0;
+	கட்டமைப்பு strbuf valbuf = STRBUF_INIT;
 
-	for (int i = 0; i < argc; i++) {
-		const char *key = argv[i];
-		const struct repo_info_field *field = get_repo_info_field(key);
+	க்கு (முழு i = 0; i < argc; i++) {
+		மாறிலி எழுத்து *சாவி = argv[i];
+		மாறிலி கட்டமைப்பு repo_info_field *field = get_repo_info_field(சாவி);
 
-		if (!field) {
-			ret = error(_("key '%s' not found"), key);
-			continue;
+		எனில் (!field) {
+			ret = error(_("key '%s' not found"), சாவி);
+			தொடர்;
 		}
 
 		strbuf_reset(&valbuf);
-		field->get_value(repo, &valbuf);
-		print_field(format, key, valbuf.buf);
+		field->get_மதிப்பு(repo, &valbuf);
+		print_field(format, சாவி, valbuf.buf);
 	}
 
 	strbuf_release(&valbuf);
-	return ret;
+	திரும்பு ret;
 }
 
-static int print_all_fields(struct repository *repo,
-			    enum output_format format)
+நிலையான முழு print_all_fields(கட்டமைப்பு repository *repo,
+			    எண்ணிக்கை output_format format)
 {
-	struct strbuf valbuf = STRBUF_INIT;
+	கட்டமைப்பு strbuf valbuf = STRBUF_INIT;
 
-	for (size_t i = 0; i < ARRAY_SIZE(repo_info_field); i++) {
-		const struct repo_info_field *field = &repo_info_field[i];
+	க்கு (size_t i = 0; i < ARRAY_SIZE(repo_info_field); i++) {
+		மாறிலி கட்டமைப்பு repo_info_field *field = &repo_info_field[i];
 
 		strbuf_reset(&valbuf);
-		field->get_value(repo, &valbuf);
-		print_field(format, field->key, valbuf.buf);
+		field->get_மதிப்பு(repo, &valbuf);
+		print_field(format, field->சாவி, valbuf.buf);
 	}
 
 	strbuf_release(&valbuf);
-	return 0;
+	திரும்பு 0;
 }
 
-static int print_keys(enum output_format format)
+நிலையான முழு print_சாவிகள்(எண்ணிக்கை output_format format)
 {
-	char sep;
+	எழுத்து sep;
 
-	switch (format) {
-	case FORMAT_NEWLINE_TERMINATED:
+	தேர்வு (format) {
+	நிலை FORMAT_NEWLINE_TERMINATED:
 		sep = '\n';
-		break;
-	case FORMAT_NUL_TERMINATED:
+		நிறுத்து;
+	நிலை FORMAT_NUL_TERMINATED:
 		sep = '\0';
-		break;
-	default:
+		நிறுத்து;
+	இயல்பு:
 		die(_("--keys can only be used with --format=lines or --format=nul"));
 	}
 
-	for (size_t i = 0; i < ARRAY_SIZE(repo_info_field); i++) {
-		const struct repo_info_field *field = &repo_info_field[i];
-		printf("%s%c", field->key, sep);
+	க்கு (size_t i = 0; i < ARRAY_SIZE(repo_info_field); i++) {
+		மாறிலி கட்டமைப்பு repo_info_field *field = &repo_info_field[i];
+		printf("%s%c", field->சாவி, sep);
 	}
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int parse_format_cb(const struct option *opt,
-			   const char *arg, int unset UNUSED)
+நிலையான முழு parse_format_cb(மாறிலி கட்டமைப்பு option *opt,
+			   மாறிலி எழுத்து *arg, முழு unset UNUSED)
 {
-	enum output_format *format = opt->value;
+	எண்ணிக்கை output_format *format = opt->மதிப்பு;
 
-	if (opt->short_name == 'z')
+	எனில் (opt->short_name == 'z')
 		*format = FORMAT_NUL_TERMINATED;
-	else if (!strcmp(arg, "nul"))
+	இல்லையெனில் எனில் (!strcmp(arg, "nul"))
 		*format = FORMAT_NUL_TERMINATED;
-	else if (!strcmp(arg, "lines"))
+	இல்லையெனில் எனில் (!strcmp(arg, "lines"))
 		*format = FORMAT_NEWLINE_TERMINATED;
-	else if (!strcmp(arg, "table"))
+	இல்லையெனில் எனில் (!strcmp(arg, "table"))
 		*format = FORMAT_TABLE;
-	else
+	இல்லையெனில்
 		die(_("invalid format '%s'"), arg);
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int cmd_repo_info(int argc, const char **argv, const char *prefix,
-			 struct repository *repo)
+நிலையான முழு cmd_repo_info(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+			 கட்டமைப்பு repository *repo)
 {
-	enum output_format format = FORMAT_NEWLINE_TERMINATED;
-	int all_keys = 0;
-	int show_keys = 0;
-	struct option options[] = {
+	எண்ணிக்கை output_format format = FORMAT_NEWLINE_TERMINATED;
+	முழு all_சாவிகள் = 0;
+	முழு show_சாவிகள் = 0;
+	கட்டமைப்பு option options[] = {
 		OPT_CALLBACK_F(0, "format", &format, N_("format"),
 			       N_("output format"),
 			       PARSE_OPT_NONEG, parse_format_cb),
-		OPT_CALLBACK_F('z', NULL, &format, NULL,
+		OPT_CALLBACK_F('z', வெற்று, &format, வெற்று,
 			       N_("synonym for --format=nul"),
 			       PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			       parse_format_cb),
-		OPT_BOOL(0, "all", &all_keys, N_("print all keys/values")),
-		OPT_BOOL(0, "keys", &show_keys, N_("show keys")),
+		OPT_BOOL(0, "all", &all_சாவிகள், N_("print all keys/values")),
+		OPT_BOOL(0, "keys", &show_சாவிகள், N_("show keys")),
 		OPT_END()
 	};
 
 	argc = parse_options(argc, argv, prefix, options, repo_info_usage, 0);
 
-	if (show_keys && (all_keys || argc))
+	எனில் (show_சாவிகள் && (all_சாவிகள் || argc))
 		die(_("--keys cannot be used with a <key> or --all"));
 
-	if (show_keys)
-		return print_keys(format);
+	எனில் (show_சாவிகள்)
+		திரும்பு print_சாவிகள்(format);
 
-	if (format != FORMAT_NEWLINE_TERMINATED && format != FORMAT_NUL_TERMINATED)
+	எனில் (format != FORMAT_NEWLINE_TERMINATED && format != FORMAT_NUL_TERMINATED)
 		die(_("unsupported output format"));
 
-	if (all_keys && argc)
+	எனில் (all_சாவிகள் && argc)
 		die(_("--all and <key> cannot be used together"));
 
-	if (all_keys)
-		return print_all_fields(repo, format);
-	else
-		return print_fields(argc, argv, repo, format);
+	எனில் (all_சாவிகள்)
+		திரும்பு print_all_fields(repo, format);
+	இல்லையெனில்
+		திரும்பு print_fields(argc, argv, repo, format);
 }
 
-struct object_data {
-	struct object_id oid;
-	size_t value;
+கட்டமைப்பு object_data {
+	கட்டமைப்பு object_id oid;
+	size_t மதிப்பு;
 };
 
-struct largest_objects {
-	struct object_data tag_size;
-	struct object_data commit_size;
-	struct object_data tree_size;
-	struct object_data blob_size;
+கட்டமைப்பு largest_objects {
+	கட்டமைப்பு object_data tag_size;
+	கட்டமைப்பு object_data commit_size;
+	கட்டமைப்பு object_data மரம்_size;
+	கட்டமைப்பு object_data blob_size;
 
-	struct object_data parent_count;
-	struct object_data tree_entries;
+	கட்டமைப்பு object_data parent_மொத்தம்;
+	கட்டமைப்பு object_data மரம்_entries;
 };
 
-struct ref_stats {
+கட்டமைப்பு ref_stats {
 	size_t branches;
 	size_t remotes;
 	size_t tags;
 	size_t others;
 };
 
-struct object_values {
+கட்டமைப்பு object_மதிப்புகள் {
 	size_t tags;
 	size_t commits;
 	size_t trees;
 	size_t blobs;
 };
 
-struct object_stats {
-	struct object_values type_counts;
-	struct object_values inflated_sizes;
-	struct object_values disk_sizes;
-	struct largest_objects largest;
+கட்டமைப்பு object_stats {
+	கட்டமைப்பு object_மதிப்புகள் type_counts;
+	கட்டமைப்பு object_மதிப்புகள் inflated_sizes;
+	கட்டமைப்பு object_மதிப்புகள் disk_sizes;
+	கட்டமைப்பு largest_objects largest;
 };
 
-struct repo_structure {
-	struct ref_stats refs;
-	struct object_stats objects;
+கட்டமைப்பு repo_structure {
+	கட்டமைப்பு ref_stats refs;
+	கட்டமைப்பு object_stats objects;
 };
 
-struct stats_table {
-	struct string_list rows;
-	struct string_list annotations;
+கட்டமைப்பு stats_table {
+	கட்டமைப்பு string_list rows;
+	கட்டமைப்பு string_list annotations;
 
-	int name_col_width;
-	int value_col_width;
-	int unit_col_width;
+	முழு name_col_width;
+	முழு மதிப்பு_col_width;
+	முழு unit_col_width;
 };
 
 /*
  * Holds column data that gets stored for each row.
  */
-struct stats_table_entry {
-	char *value;
-	const char *unit;
+கட்டமைப்பு stats_table_entry {
+	எழுத்து *மதிப்பு;
+	மாறிலி எழுத்து *unit;
 	size_t index;
-	struct object_id *oid;
+	கட்டமைப்பு object_id *oid;
 };
 
-static void stats_table_vaddf(struct stats_table *table,
-			      struct stats_table_entry *entry,
-			      const char *format, va_list ap)
+நிலையான வெறுமை stats_table_vaddf(கட்டமைப்பு stats_table *table,
+			      கட்டமைப்பு stats_table_entry *entry,
+			      மாறிலி எழுத்து *format, va_list ap)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct string_list_item *item;
-	char *formatted_name;
-	int name_width;
+	கட்டமைப்பு strbuf buf = STRBUF_INIT;
+	கட்டமைப்பு string_list_item *item;
+	எழுத்து *formatted_name;
+	முழு name_width;
 
 	strbuf_vaddf(&buf, format, ap);
-	formatted_name = strbuf_detach(&buf, NULL);
+	formatted_name = strbuf_detach(&buf, வெற்று);
 	name_width = utf8_strwidth(formatted_name);
 
 	item = string_list_append_nodup(&table->rows, formatted_name);
 	item->util = entry;
 
-	if (name_width > table->name_col_width)
+	எனில் (name_width > table->name_col_width)
 		table->name_col_width = name_width;
-	if (!entry)
-		return;
-	if (entry->oid) {
+	எனில் (!entry)
+		திரும்பு;
+	எனில் (entry->oid) {
 		entry->index = table->annotations.nr + 1;
 		strbuf_addf(&buf, "[%" PRIuMAX "] %s", (uintmax_t)entry->index,
 			    oid_to_hex(entry->oid));
-		string_list_append_nodup(&table->annotations, strbuf_detach(&buf, NULL));
+		string_list_append_nodup(&table->annotations, strbuf_detach(&buf, வெற்று));
 	}
-	if (entry->value) {
-		int value_width = utf8_strwidth(entry->value);
-		if (value_width > table->value_col_width)
-			table->value_col_width = value_width;
+	எனில் (entry->மதிப்பு) {
+		முழு மதிப்பு_width = utf8_strwidth(entry->மதிப்பு);
+		எனில் (மதிப்பு_width > table->மதிப்பு_col_width)
+			table->மதிப்பு_col_width = மதிப்பு_width;
 	}
-	if (entry->unit) {
-		int unit_width = utf8_strwidth(entry->unit);
-		if (unit_width > table->unit_col_width)
+	எனில் (entry->unit) {
+		முழு unit_width = utf8_strwidth(entry->unit);
+		எனில் (unit_width > table->unit_col_width)
 			table->unit_col_width = unit_width;
 	}
 
 	strbuf_release(&buf);
 }
 
-static void stats_table_addf(struct stats_table *table, const char *format, ...)
+நிலையான வெறுமை stats_table_addf(கட்டமைப்பு stats_table *table, மாறிலி எழுத்து *format, ...)
 {
 	va_list ap;
 
 	va_start(ap, format);
-	stats_table_vaddf(table, NULL, format, ap);
+	stats_table_vaddf(table, வெற்று, format, ap);
 	va_end(ap);
 }
 
-static void stats_table_count_addf(struct stats_table *table, size_t value,
-				   const char *format, ...)
+நிலையான வெறுமை stats_table_மொத்தம்_addf(கட்டமைப்பு stats_table *table, size_t மதிப்பு,
+				   மாறிலி எழுத்து *format, ...)
 {
-	struct stats_table_entry *entry;
+	கட்டமைப்பு stats_table_entry *entry;
 	va_list ap;
 
 	CALLOC_ARRAY(entry, 1);
-	humanise_count(value, &entry->value, &entry->unit);
+	humanise_மொத்தம்(மதிப்பு, &entry->மதிப்பு, &entry->unit);
 
 	va_start(ap, format);
 	stats_table_vaddf(table, entry, format, ap);
 	va_end(ap);
 }
 
-static void stats_table_object_count_addf(struct stats_table *table,
-					  struct object_id *oid, size_t value,
-					  const char *format, ...)
+நிலையான வெறுமை stats_table_object_மொத்தம்_addf(கட்டமைப்பு stats_table *table,
+					  கட்டமைப்பு object_id *oid, size_t மதிப்பு,
+					  மாறிலி எழுத்து *format, ...)
 {
-	struct stats_table_entry *entry;
+	கட்டமைப்பு stats_table_entry *entry;
 	va_list ap;
 
 	CALLOC_ARRAY(entry, 1);
-	humanise_count(value, &entry->value, &entry->unit);
+	humanise_மொத்தம்(மதிப்பு, &entry->மதிப்பு, &entry->unit);
 
 	/*
 	 * A NULL OID should not have a table annotation.
 	 */
-	if (!is_null_oid(oid))
+	எனில் (!is_null_oid(oid))
 		entry->oid = oid;
 
 	va_start(ap, format);
@@ -444,34 +444,34 @@ static void stats_table_object_count_addf(struct stats_table *table,
 	va_end(ap);
 }
 
-static void stats_table_size_addf(struct stats_table *table, size_t value,
-				  const char *format, ...)
+நிலையான வெறுமை stats_table_size_addf(கட்டமைப்பு stats_table *table, size_t மதிப்பு,
+				  மாறிலி எழுத்து *format, ...)
 {
-	struct stats_table_entry *entry;
+	கட்டமைப்பு stats_table_entry *entry;
 	va_list ap;
 
 	CALLOC_ARRAY(entry, 1);
-	humanise_bytes(value, &entry->value, &entry->unit, HUMANISE_COMPACT);
+	humanise_bytes(மதிப்பு, &entry->மதிப்பு, &entry->unit, HUMANISE_COMPACT);
 
 	va_start(ap, format);
 	stats_table_vaddf(table, entry, format, ap);
 	va_end(ap);
 }
 
-static void stats_table_object_size_addf(struct stats_table *table,
-					 struct object_id *oid, size_t value,
-					 const char *format, ...)
+நிலையான வெறுமை stats_table_object_size_addf(கட்டமைப்பு stats_table *table,
+					 கட்டமைப்பு object_id *oid, size_t மதிப்பு,
+					 மாறிலி எழுத்து *format, ...)
 {
-	struct stats_table_entry *entry;
+	கட்டமைப்பு stats_table_entry *entry;
 	va_list ap;
 
 	CALLOC_ARRAY(entry, 1);
-	humanise_bytes(value, &entry->value, &entry->unit, HUMANISE_COMPACT);
+	humanise_bytes(மதிப்பு, &entry->மதிப்பு, &entry->unit, HUMANISE_COMPACT);
 
 	/*
 	 * A NULL OID should not have a table annotation.
 	 */
-	if (!is_null_oid(oid))
+	எனில் (!is_null_oid(oid))
 		entry->oid = oid;
 
 	va_start(ap, format);
@@ -479,48 +479,48 @@ static void stats_table_object_size_addf(struct stats_table *table,
 	va_end(ap);
 }
 
-static inline size_t get_total_reference_count(struct ref_stats *stats)
+நிலையான உள்வரி size_t get_total_reference_மொத்தம்(கட்டமைப்பு ref_stats *stats)
 {
-	return stats->branches + stats->remotes + stats->tags + stats->others;
+	திரும்பு stats->branches + stats->remotes + stats->tags + stats->others;
 }
 
-static inline size_t get_total_object_values(struct object_values *values)
+நிலையான உள்வரி size_t get_total_object_மதிப்புகள்(கட்டமைப்பு object_மதிப்புகள் *மதிப்புகள்)
 {
-	return values->tags + values->commits + values->trees + values->blobs;
+	திரும்பு மதிப்புகள்->tags + மதிப்புகள்->commits + மதிப்புகள்->trees + மதிப்புகள்->blobs;
 }
 
-static void stats_table_setup_structure(struct stats_table *table,
-					struct repo_structure *stats)
+நிலையான வெறுமை stats_table_setup_structure(கட்டமைப்பு stats_table *table,
+					கட்டமைப்பு repo_structure *stats)
 {
-	struct object_stats *objects = &stats->objects;
-	struct ref_stats *refs = &stats->refs;
+	கட்டமைப்பு object_stats *objects = &stats->objects;
+	கட்டமைப்பு ref_stats *refs = &stats->refs;
 	size_t inflated_object_total;
-	size_t object_count_total;
+	size_t object_மொத்தம்_total;
 	size_t disk_object_total;
 	size_t ref_total;
 
-	ref_total = get_total_reference_count(refs);
+	ref_total = get_total_reference_மொத்தம்(refs);
 	stats_table_addf(table, "* %s", _("References"));
-	stats_table_count_addf(table, ref_total, "  * %s", _("Count"));
-	stats_table_count_addf(table, refs->branches, "    * %s", _("Branches"));
-	stats_table_count_addf(table, refs->tags, "    * %s", _("Tags"));
-	stats_table_count_addf(table, refs->remotes, "    * %s", _("Remotes"));
-	stats_table_count_addf(table, refs->others, "    * %s", _("Others"));
+	stats_table_மொத்தம்_addf(table, ref_total, "  * %s", _("Count"));
+	stats_table_மொத்தம்_addf(table, refs->branches, "    * %s", _("Branches"));
+	stats_table_மொத்தம்_addf(table, refs->tags, "    * %s", _("Tags"));
+	stats_table_மொத்தம்_addf(table, refs->remotes, "    * %s", _("Remotes"));
+	stats_table_மொத்தம்_addf(table, refs->others, "    * %s", _("Others"));
 
-	object_count_total = get_total_object_values(&objects->type_counts);
+	object_மொத்தம்_total = get_total_object_மதிப்புகள்(&objects->type_counts);
 	stats_table_addf(table, "");
 	stats_table_addf(table, "* %s", _("Reachable objects"));
-	stats_table_count_addf(table, object_count_total, "  * %s", _("Count"));
-	stats_table_count_addf(table, objects->type_counts.commits,
+	stats_table_மொத்தம்_addf(table, object_மொத்தம்_total, "  * %s", _("Count"));
+	stats_table_மொத்தம்_addf(table, objects->type_counts.commits,
 			       "    * %s", _("Commits"));
-	stats_table_count_addf(table, objects->type_counts.trees,
+	stats_table_மொத்தம்_addf(table, objects->type_counts.trees,
 			       "    * %s", _("Trees"));
-	stats_table_count_addf(table, objects->type_counts.blobs,
+	stats_table_மொத்தம்_addf(table, objects->type_counts.blobs,
 			       "    * %s", _("Blobs"));
-	stats_table_count_addf(table, objects->type_counts.tags,
+	stats_table_மொத்தம்_addf(table, objects->type_counts.tags,
 			       "    * %s", _("Tags"));
 
-	inflated_object_total = get_total_object_values(&objects->inflated_sizes);
+	inflated_object_total = get_total_object_மதிப்புகள்(&objects->inflated_sizes);
 	stats_table_size_addf(table, inflated_object_total,
 			      "  * %s", _("Inflated size"));
 	stats_table_size_addf(table, objects->inflated_sizes.commits,
@@ -532,7 +532,7 @@ static void stats_table_setup_structure(struct stats_table *table,
 	stats_table_size_addf(table, objects->inflated_sizes.tags,
 			      "    * %s", _("Tags"));
 
-	disk_object_total = get_total_object_values(&objects->disk_sizes);
+	disk_object_total = get_total_object_மதிப்புகள்(&objects->disk_sizes);
 	stats_table_size_addf(table, disk_object_total,
 			      "  * %s", _("Disk size"));
 	stats_table_size_addf(table, objects->disk_sizes.commits,
@@ -549,99 +549,99 @@ static void stats_table_setup_structure(struct stats_table *table,
 	stats_table_addf(table, "  * %s", _("Commits"));
 	stats_table_object_size_addf(table,
 				     &objects->largest.commit_size.oid,
-				     objects->largest.commit_size.value,
+				     objects->largest.commit_size.மதிப்பு,
 				     "    * %s", _("Maximum size"));
-	stats_table_object_count_addf(table,
-				      &objects->largest.parent_count.oid,
-				      objects->largest.parent_count.value,
+	stats_table_object_மொத்தம்_addf(table,
+				      &objects->largest.parent_மொத்தம்.oid,
+				      objects->largest.parent_மொத்தம்.மதிப்பு,
 				      "    * %s", _("Maximum parents"));
 	stats_table_addf(table, "  * %s", _("Trees"));
 	stats_table_object_size_addf(table,
-				     &objects->largest.tree_size.oid,
-				     objects->largest.tree_size.value,
+				     &objects->largest.மரம்_size.oid,
+				     objects->largest.மரம்_size.மதிப்பு,
 				     "    * %s", _("Maximum size"));
-	stats_table_object_count_addf(table,
-				      &objects->largest.tree_entries.oid,
-				      objects->largest.tree_entries.value,
+	stats_table_object_மொத்தம்_addf(table,
+				      &objects->largest.மரம்_entries.oid,
+				      objects->largest.மரம்_entries.மதிப்பு,
 				      "    * %s", _("Maximum entries"));
 	stats_table_addf(table, "  * %s", _("Blobs"));
 	stats_table_object_size_addf(table,
 				     &objects->largest.blob_size.oid,
-				     objects->largest.blob_size.value,
+				     objects->largest.blob_size.மதிப்பு,
 				     "    * %s", _("Maximum size"));
 	stats_table_addf(table, "  * %s", _("Tags"));
 	stats_table_object_size_addf(table,
 				     &objects->largest.tag_size.oid,
-				     objects->largest.tag_size.value,
+				     objects->largest.tag_size.மதிப்பு,
 				     "    * %s", _("Maximum size"));
 }
 
 #define INDEX_WIDTH 4
 
-static void stats_table_print_structure(const struct stats_table *table)
+நிலையான வெறுமை stats_table_print_structure(மாறிலி கட்டமைப்பு stats_table *table)
 {
-	const char *name_col_title = _("Repository structure");
-	const char *value_col_title = _("Value");
-	int title_name_width = utf8_strwidth(name_col_title);
-	int title_value_width = utf8_strwidth(value_col_title);
-	int name_col_width = table->name_col_width;
-	int value_col_width = table->value_col_width;
-	int unit_col_width = table->unit_col_width;
-	struct string_list_item *item;
-	struct strbuf buf = STRBUF_INIT;
+	மாறிலி எழுத்து *name_col_title = _("Repository structure");
+	மாறிலி எழுத்து *மதிப்பு_col_title = _("Value");
+	முழு title_name_width = utf8_strwidth(name_col_title);
+	முழு title_மதிப்பு_width = utf8_strwidth(மதிப்பு_col_title);
+	முழு name_col_width = table->name_col_width;
+	முழு மதிப்பு_col_width = table->மதிப்பு_col_width;
+	முழு unit_col_width = table->unit_col_width;
+	கட்டமைப்பு string_list_item *item;
+	கட்டமைப்பு strbuf buf = STRBUF_INIT;
 
-	if (title_name_width > name_col_width)
+	எனில் (title_name_width > name_col_width)
 		name_col_width = title_name_width;
-	if (title_value_width > value_col_width + unit_col_width + 1)
-		value_col_width = title_value_width - unit_col_width;
+	எனில் (title_மதிப்பு_width > மதிப்பு_col_width + unit_col_width + 1)
+		மதிப்பு_col_width = title_மதிப்பு_width - unit_col_width;
 
 	strbuf_addstr(&buf, "| ");
-	strbuf_utf8_align(&buf, ALIGN_LEFT, name_col_width + INDEX_WIDTH,
+	strbuf_utf8_align(&buf, ALIGN_இடது, name_col_width + INDEX_WIDTH,
 			  name_col_title);
 	strbuf_addstr(&buf, " | ");
-	strbuf_utf8_align(&buf, ALIGN_LEFT,
-			  value_col_width + unit_col_width + 1, value_col_title);
+	strbuf_utf8_align(&buf, ALIGN_இடது,
+			  மதிப்பு_col_width + unit_col_width + 1, மதிப்பு_col_title);
 	strbuf_addstr(&buf, " |");
 	printf("%s\n", buf.buf);
 
 	printf("| ");
-	for (int i = 0; i < name_col_width + INDEX_WIDTH; i++)
+	க்கு (முழு i = 0; i < name_col_width + INDEX_WIDTH; i++)
 		putchar('-');
 	printf(" | ");
-	for (int i = 0; i < value_col_width + unit_col_width + 1; i++)
+	க்கு (முழு i = 0; i < மதிப்பு_col_width + unit_col_width + 1; i++)
 		putchar('-');
 	printf(" |\n");
 
 	for_each_string_list_item(item, &table->rows) {
-		struct stats_table_entry *entry = item->util;
-		const char *value = "";
-		const char *unit = "";
+		கட்டமைப்பு stats_table_entry *entry = item->util;
+		மாறிலி எழுத்து *மதிப்பு = "";
+		மாறிலி எழுத்து *unit = "";
 
-		if (entry) {
-			value = entry->value;
-			if (entry->unit)
+		எனில் (entry) {
+			மதிப்பு = entry->மதிப்பு;
+			எனில் (entry->unit)
 				unit = entry->unit;
 		}
 
 		strbuf_reset(&buf);
 		strbuf_addstr(&buf, "| ");
-		strbuf_utf8_align(&buf, ALIGN_LEFT, name_col_width, item->string);
+		strbuf_utf8_align(&buf, ALIGN_இடது, name_col_width, item->string);
 
-		if (entry && entry->oid)
+		எனில் (entry && entry->oid)
 			strbuf_addf(&buf, " [%" PRIuMAX "]",
 				    (uintmax_t)entry->index);
-		else
+		இல்லையெனில்
 			strbuf_addchars(&buf, ' ', INDEX_WIDTH);
 
 		strbuf_addstr(&buf, " | ");
-		strbuf_utf8_align(&buf, ALIGN_RIGHT, value_col_width, value);
+		strbuf_utf8_align(&buf, ALIGN_வலது, மதிப்பு_col_width, மதிப்பு);
 		strbuf_addch(&buf, ' ');
-		strbuf_utf8_align(&buf, ALIGN_LEFT, unit_col_width, unit);
+		strbuf_utf8_align(&buf, ALIGN_இடது, unit_col_width, unit);
 		strbuf_addstr(&buf, " |");
 		printf("%s\n", buf.buf);
 	}
 
-	if (table->annotations.nr) {
+	எனில் (table->annotations.nr) {
 		printf("\n");
 		for_each_string_list_item(item, &table->annotations)
 			printf("%s\n", item->string);
@@ -650,118 +650,118 @@ static void stats_table_print_structure(const struct stats_table *table)
 	strbuf_release(&buf);
 }
 
-static void stats_table_clear(struct stats_table *table)
+நிலையான வெறுமை stats_table_clear(கட்டமைப்பு stats_table *table)
 {
-	struct stats_table_entry *entry;
-	struct string_list_item *item;
+	கட்டமைப்பு stats_table_entry *entry;
+	கட்டமைப்பு string_list_item *item;
 
 	for_each_string_list_item(item, &table->rows) {
 		entry = item->util;
-		if (entry)
-			free(entry->value);
+		எனில் (entry)
+			விடுவி(entry->மதிப்பு);
 	}
 
 	string_list_clear(&table->rows, 1);
 	string_list_clear(&table->annotations, 1);
 }
 
-static inline void print_keyvalue(const char *key, char key_delim, size_t value,
-				  char value_delim)
+நிலையான உள்வரி வெறுமை print_keyvalue(மாறிலி எழுத்து *சாவி, எழுத்து சாவி_delim, size_t மதிப்பு,
+				  எழுத்து மதிப்பு_delim)
 {
-	printf("%s%c%" PRIuMAX "%c", key, key_delim, (uintmax_t)value,
-	       value_delim);
+	printf("%s%c%" PRIuMAX "%c", சாவி, சாவி_delim, (uintmax_t)மதிப்பு,
+	       மதிப்பு_delim);
 }
 
-static void print_object_data(const char *key, char key_delim,
-			      struct object_data *data, char value_delim)
+நிலையான வெறுமை print_object_data(மாறிலி எழுத்து *சாவி, எழுத்து சாவி_delim,
+			      கட்டமைப்பு object_data *data, எழுத்து மதிப்பு_delim)
 {
-	print_keyvalue(key, key_delim, data->value, value_delim);
-	printf("%s_oid%c%s%c", key, key_delim, oid_to_hex(&data->oid),
-	       value_delim);
+	print_keyvalue(சாவி, சாவி_delim, data->மதிப்பு, மதிப்பு_delim);
+	printf("%s_oid%c%s%c", சாவி, சாவி_delim, oid_to_hex(&data->oid),
+	       மதிப்பு_delim);
 }
 
-static void structure_keyvalue_print(struct repo_structure *stats,
-				     char key_delim, char value_delim)
+நிலையான வெறுமை structure_keyvalue_print(கட்டமைப்பு repo_structure *stats,
+				     எழுத்து சாவி_delim, எழுத்து மதிப்பு_delim)
 {
-	print_keyvalue("references.branches.count", key_delim,
-		       stats->refs.branches, value_delim);
-	print_keyvalue("references.tags.count", key_delim,
-		       stats->refs.tags, value_delim);
-	print_keyvalue("references.remotes.count", key_delim,
-		       stats->refs.remotes, value_delim);
-	print_keyvalue("references.others.count", key_delim,
-		       stats->refs.others, value_delim);
+	print_keyvalue("references.branches.count", சாவி_delim,
+		       stats->refs.branches, மதிப்பு_delim);
+	print_keyvalue("references.tags.count", சாவி_delim,
+		       stats->refs.tags, மதிப்பு_delim);
+	print_keyvalue("references.remotes.count", சாவி_delim,
+		       stats->refs.remotes, மதிப்பு_delim);
+	print_keyvalue("references.others.count", சாவி_delim,
+		       stats->refs.others, மதிப்பு_delim);
 
-	print_keyvalue("objects.commits.count", key_delim,
-		       stats->objects.type_counts.commits, value_delim);
-	print_keyvalue("objects.trees.count", key_delim,
-		       stats->objects.type_counts.trees, value_delim);
-	print_keyvalue("objects.blobs.count", key_delim,
-		       stats->objects.type_counts.blobs, value_delim);
-	print_keyvalue("objects.tags.count", key_delim,
-		       stats->objects.type_counts.tags, value_delim);
+	print_keyvalue("objects.commits.count", சாவி_delim,
+		       stats->objects.type_counts.commits, மதிப்பு_delim);
+	print_keyvalue("objects.trees.count", சாவி_delim,
+		       stats->objects.type_counts.trees, மதிப்பு_delim);
+	print_keyvalue("objects.blobs.count", சாவி_delim,
+		       stats->objects.type_counts.blobs, மதிப்பு_delim);
+	print_keyvalue("objects.tags.count", சாவி_delim,
+		       stats->objects.type_counts.tags, மதிப்பு_delim);
 
-	print_keyvalue("objects.commits.inflated_size", key_delim,
-		       stats->objects.inflated_sizes.commits, value_delim);
-	print_keyvalue("objects.trees.inflated_size", key_delim,
-		       stats->objects.inflated_sizes.trees, value_delim);
-	print_keyvalue("objects.blobs.inflated_size", key_delim,
-		       stats->objects.inflated_sizes.blobs, value_delim);
-	print_keyvalue("objects.tags.inflated_size", key_delim,
-		       stats->objects.inflated_sizes.tags, value_delim);
+	print_keyvalue("objects.commits.inflated_size", சாவி_delim,
+		       stats->objects.inflated_sizes.commits, மதிப்பு_delim);
+	print_keyvalue("objects.trees.inflated_size", சாவி_delim,
+		       stats->objects.inflated_sizes.trees, மதிப்பு_delim);
+	print_keyvalue("objects.blobs.inflated_size", சாவி_delim,
+		       stats->objects.inflated_sizes.blobs, மதிப்பு_delim);
+	print_keyvalue("objects.tags.inflated_size", சாவி_delim,
+		       stats->objects.inflated_sizes.tags, மதிப்பு_delim);
 
-	print_keyvalue("objects.commits.disk_size", key_delim,
-		       stats->objects.disk_sizes.commits, value_delim);
-	print_keyvalue("objects.trees.disk_size", key_delim,
-		       stats->objects.disk_sizes.trees, value_delim);
-	print_keyvalue("objects.blobs.disk_size", key_delim,
-		       stats->objects.disk_sizes.blobs, value_delim);
-	print_keyvalue("objects.tags.disk_size", key_delim,
-		       stats->objects.disk_sizes.tags, value_delim);
+	print_keyvalue("objects.commits.disk_size", சாவி_delim,
+		       stats->objects.disk_sizes.commits, மதிப்பு_delim);
+	print_keyvalue("objects.trees.disk_size", சாவி_delim,
+		       stats->objects.disk_sizes.trees, மதிப்பு_delim);
+	print_keyvalue("objects.blobs.disk_size", சாவி_delim,
+		       stats->objects.disk_sizes.blobs, மதிப்பு_delim);
+	print_keyvalue("objects.tags.disk_size", சாவி_delim,
+		       stats->objects.disk_sizes.tags, மதிப்பு_delim);
 
-	print_object_data("objects.commits.max_size", key_delim,
-			  &stats->objects.largest.commit_size, value_delim);
-	print_object_data("objects.trees.max_size", key_delim,
-			  &stats->objects.largest.tree_size, value_delim);
-	print_object_data("objects.blobs.max_size", key_delim,
-			  &stats->objects.largest.blob_size, value_delim);
-	print_object_data("objects.tags.max_size", key_delim,
-			  &stats->objects.largest.tag_size, value_delim);
+	print_object_data("objects.commits.max_size", சாவி_delim,
+			  &stats->objects.largest.commit_size, மதிப்பு_delim);
+	print_object_data("objects.trees.max_size", சாவி_delim,
+			  &stats->objects.largest.மரம்_size, மதிப்பு_delim);
+	print_object_data("objects.blobs.max_size", சாவி_delim,
+			  &stats->objects.largest.blob_size, மதிப்பு_delim);
+	print_object_data("objects.tags.max_size", சாவி_delim,
+			  &stats->objects.largest.tag_size, மதிப்பு_delim);
 
-	print_object_data("objects.commits.max_parents", key_delim,
-			  &stats->objects.largest.parent_count, value_delim);
-	print_object_data("objects.trees.max_entries", key_delim,
-			  &stats->objects.largest.tree_entries, value_delim);
+	print_object_data("objects.commits.max_parents", சாவி_delim,
+			  &stats->objects.largest.parent_மொத்தம், மதிப்பு_delim);
+	print_object_data("objects.trees.max_entries", சாவி_delim,
+			  &stats->objects.largest.மரம்_entries, மதிப்பு_delim);
 
 	fflush(stdout);
 }
 
-struct count_references_data {
-	struct ref_stats *stats;
-	struct rev_info *revs;
-	struct progress *progress;
+கட்டமைப்பு மொத்தம்_references_data {
+	கட்டமைப்பு ref_stats *stats;
+	கட்டமைப்பு rev_info *revs;
+	கட்டமைப்பு progress *progress;
 };
 
-static int count_references(const struct reference *ref, void *cb_data)
+நிலையான முழு மொத்தம்_references(மாறிலி கட்டமைப்பு reference *ref, வெறுமை *cb_data)
 {
-	struct count_references_data *data = cb_data;
-	struct ref_stats *stats = data->stats;
-	size_t ref_count;
+	கட்டமைப்பு மொத்தம்_references_data *data = cb_data;
+	கட்டமைப்பு ref_stats *stats = data->stats;
+	size_t ref_மொத்தம்;
 
-	switch (ref_kind_from_refname(ref->name)) {
-	case FILTER_REFS_BRANCHES:
+	தேர்வு (ref_kind_from_refname(ref->name)) {
+	நிலை FILTER_REFS_BRANCHES:
 		stats->branches++;
-		break;
-	case FILTER_REFS_REMOTES:
+		நிறுத்து;
+	நிலை FILTER_REFS_REMOTES:
 		stats->remotes++;
-		break;
-	case FILTER_REFS_TAGS:
+		நிறுத்து;
+	நிலை FILTER_REFS_TAGS:
 		stats->tags++;
-		break;
-	case FILTER_REFS_OTHERS:
+		நிறுத்து;
+	நிலை FILTER_REFS_OTHERS:
 		stats->others++;
-		break;
-	default:
+		நிறுத்து;
+	இயல்பு:
 		BUG("unexpected reference type");
 	}
 
@@ -769,154 +769,154 @@ static int count_references(const struct reference *ref, void *cb_data)
 	 * While iterating through references for counting, also add OIDs in
 	 * preparation for the path walk.
 	 */
-	add_pending_oid(data->revs, NULL, ref->oid, 0);
+	add_pending_oid(data->revs, வெற்று, ref->oid, 0);
 
-	ref_count = get_total_reference_count(stats);
-	display_progress(data->progress, ref_count);
+	ref_மொத்தம் = get_total_reference_மொத்தம்(stats);
+	display_progress(data->progress, ref_மொத்தம்);
 
-	return 0;
+	திரும்பு 0;
 }
 
-static void structure_count_references(struct ref_stats *stats,
-				       struct rev_info *revs,
-				       struct repository *repo,
-				       int show_progress)
+நிலையான வெறுமை structure_மொத்தம்_references(கட்டமைப்பு ref_stats *stats,
+				       கட்டமைப்பு rev_info *revs,
+				       கட்டமைப்பு repository *repo,
+				       முழு show_progress)
 {
-	struct count_references_data data = {
+	கட்டமைப்பு மொத்தம்_references_data data = {
 		.stats = stats,
 		.revs = revs,
 	};
 
-	if (show_progress)
+	எனில் (show_progress)
 		data.progress = start_delayed_progress(repo,
 						       _("Counting references"), 0);
 
-	refs_for_each_ref(get_main_ref_store(repo), count_references, &data);
+	refs_for_each_ref(get_main_ref_store(repo), மொத்தம்_references, &data);
 	stop_progress(&data.progress);
 }
 
-struct count_objects_data {
-	struct object_database *odb;
-	struct object_stats *stats;
-	struct progress *progress;
+கட்டமைப்பு மொத்தம்_objects_data {
+	கட்டமைப்பு object_database *odb;
+	கட்டமைப்பு object_stats *stats;
+	கட்டமைப்பு progress *progress;
 };
 
-static void check_largest(struct object_data *data, struct object_id *oid,
-			  size_t value)
+நிலையான வெறுமை check_largest(கட்டமைப்பு object_data *data, கட்டமைப்பு object_id *oid,
+			  size_t மதிப்பு)
 {
-	if (value > data->value || is_null_oid(&data->oid)) {
+	எனில் (மதிப்பு > data->மதிப்பு || is_null_oid(&data->oid)) {
 		oidcpy(&data->oid, oid);
-		data->value = value;
+		data->மதிப்பு = மதிப்பு;
 	}
 }
 
-static size_t count_tree_entries(struct object *obj)
+நிலையான size_t மொத்தம்_மரம்_entries(கட்டமைப்பு object *obj)
 {
-	struct tree *t = object_as_type(obj, OBJ_TREE, 0);
-	struct name_entry entry;
-	struct tree_desc desc;
-	size_t count = 0;
+	கட்டமைப்பு மரம் *t = object_as_type(obj, OBJ_மரம், 0);
+	கட்டமைப்பு name_entry entry;
+	கட்டமைப்பு மரம்_desc desc;
+	size_t மொத்தம் = 0;
 
-	init_tree_desc(&desc, &t->object.oid, t->buffer, t->size);
-	while (tree_entry(&desc, &entry))
-		count++;
+	init_மரம்_desc(&desc, &t->object.oid, t->buffer, t->size);
+	போது (மரம்_entry(&desc, &entry))
+		மொத்தம்++;
 
-	return count;
+	திரும்பு மொத்தம்;
 }
 
-static int count_objects(const char *path UNUSED, struct oid_array *oids,
-			 enum object_type type, void *cb_data)
+நிலையான முழு மொத்தம்_objects(மாறிலி எழுத்து *path UNUSED, கட்டமைப்பு oid_array *oids,
+			 எண்ணிக்கை object_type type, வெறுமை *cb_data)
 {
-	struct count_objects_data *data = cb_data;
-	struct object_stats *stats = data->stats;
-	size_t object_count;
+	கட்டமைப்பு மொத்தம்_objects_data *data = cb_data;
+	கட்டமைப்பு object_stats *stats = data->stats;
+	size_t object_மொத்தம்;
 
-	for (size_t i = 0; i < oids->nr; i++) {
-		struct object_info oi = OBJECT_INFO_INIT;
+	க்கு (size_t i = 0; i < oids->nr; i++) {
+		கட்டமைப்பு object_info oi = OBJECT_INFO_INIT;
 		unsigned long inflated;
 		size_t inflated_st = 0;
-		struct commit *commit;
-		struct object *obj;
-		void *content;
+		கட்டமைப்பு commit *commit;
+		கட்டமைப்பு object *obj;
+		வெறுமை *content;
 		off_t disk;
-		int eaten;
+		முழு eaten;
 
 		oi.sizep = &inflated_st;
 		oi.disk_sizep = &disk;
 		oi.contentp = &content;
 
-		if (odb_read_object_info_extended(data->odb, &oids->oid[i], &oi,
+		எனில் (odb_read_object_info_extended(data->odb, &oids->oid[i], &oi,
 						  OBJECT_INFO_SKIP_FETCH_OBJECT |
 						  OBJECT_INFO_QUICK) < 0)
-			continue;
+			தொடர்;
 		inflated = cast_size_t_to_ulong(inflated_st);
 
 		obj = parse_object_buffer(the_repository, &oids->oid[i], type,
 					  inflated, content, &eaten);
 
-		switch (type) {
-		case OBJ_TAG:
+		தேர்வு (type) {
+		நிலை OBJ_TAG:
 			stats->type_counts.tags++;
 			stats->inflated_sizes.tags += inflated;
 			stats->disk_sizes.tags += disk;
 			check_largest(&stats->largest.tag_size, &oids->oid[i],
 				      inflated);
-			break;
-		case OBJ_COMMIT:
+			நிறுத்து;
+		நிலை OBJ_COMMIT:
 			commit = object_as_type(obj, OBJ_COMMIT, 0);
 			stats->type_counts.commits++;
 			stats->inflated_sizes.commits += inflated;
 			stats->disk_sizes.commits += disk;
 			check_largest(&stats->largest.commit_size, &oids->oid[i],
 				      inflated);
-			check_largest(&stats->largest.parent_count, &oids->oid[i],
-				      commit_list_count(commit->parents));
-			break;
-		case OBJ_TREE:
+			check_largest(&stats->largest.parent_மொத்தம், &oids->oid[i],
+				      commit_list_மொத்தம்(commit->parents));
+			நிறுத்து;
+		நிலை OBJ_மரம்:
 			stats->type_counts.trees++;
 			stats->inflated_sizes.trees += inflated;
 			stats->disk_sizes.trees += disk;
-			check_largest(&stats->largest.tree_size, &oids->oid[i],
+			check_largest(&stats->largest.மரம்_size, &oids->oid[i],
 				      inflated);
-			check_largest(&stats->largest.tree_entries, &oids->oid[i],
-				      count_tree_entries(obj));
-			break;
-		case OBJ_BLOB:
+			check_largest(&stats->largest.மரம்_entries, &oids->oid[i],
+				      மொத்தம்_மரம்_entries(obj));
+			நிறுத்து;
+		நிலை OBJ_BLOB:
 			stats->type_counts.blobs++;
 			stats->inflated_sizes.blobs += inflated;
 			stats->disk_sizes.blobs += disk;
 			check_largest(&stats->largest.blob_size, &oids->oid[i],
 				      inflated);
-			break;
-		default:
+			நிறுத்து;
+		இயல்பு:
 			BUG("invalid object type");
 		}
 
-		if (!eaten)
-			free(content);
+		எனில் (!eaten)
+			விடுவி(content);
 	}
 
-	object_count = get_total_object_values(&stats->type_counts);
-	display_progress(data->progress, object_count);
+	object_மொத்தம் = get_total_object_மதிப்புகள்(&stats->type_counts);
+	display_progress(data->progress, object_மொத்தம்);
 
-	return 0;
+	திரும்பு 0;
 }
 
-static void structure_count_objects(struct object_stats *stats,
-				    struct rev_info *revs,
-				    struct repository *repo, int show_progress)
+நிலையான வெறுமை structure_மொத்தம்_objects(கட்டமைப்பு object_stats *stats,
+				    கட்டமைப்பு rev_info *revs,
+				    கட்டமைப்பு repository *repo, முழு show_progress)
 {
-	struct path_walk_info info = PATH_WALK_INFO_INIT;
-	struct count_objects_data data = {
+	கட்டமைப்பு path_walk_info info = PATH_WALK_INFO_INIT;
+	கட்டமைப்பு மொத்தம்_objects_data data = {
 		.odb = repo->objects,
 		.stats = stats,
 	};
 
 	info.revs = revs;
-	info.path_fn = count_objects;
+	info.path_fn = மொத்தம்_objects;
 	info.path_fn_data = &data;
 
-	if (show_progress)
+	எனில் (show_progress)
 		data.progress = start_delayed_progress(repo, _("Counting objects"), 0);
 
 	walk_objects_by_path(&info);
@@ -924,22 +924,22 @@ static void structure_count_objects(struct object_stats *stats,
 	stop_progress(&data.progress);
 }
 
-static int cmd_repo_structure(int argc, const char **argv, const char *prefix,
-			      struct repository *repo)
+நிலையான முழு cmd_repo_structure(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+			      கட்டமைப்பு repository *repo)
 {
-	struct stats_table table = {
+	கட்டமைப்பு stats_table table = {
 		.rows = STRING_LIST_INIT_DUP,
 		.annotations = STRING_LIST_INIT_DUP,
 	};
-	enum output_format format = FORMAT_TABLE;
-	struct repo_structure stats = { 0 };
-	struct rev_info revs;
-	int show_progress = -1;
-	struct option options[] = {
+	எண்ணிக்கை output_format format = FORMAT_TABLE;
+	கட்டமைப்பு repo_structure stats = { 0 };
+	கட்டமைப்பு rev_info revs;
+	முழு show_progress = -1;
+	கட்டமைப்பு option options[] = {
 		OPT_CALLBACK_F(0, "format", &format, N_("format"),
 			       N_("output format"),
 			       PARSE_OPT_NONEG, parse_format_cb),
-		OPT_CALLBACK_F('z', NULL, &format, NULL,
+		OPT_CALLBACK_F('z', வெற்று, &format, வெற்று,
 			       N_("synonym for --format=nul"),
 			       PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			       parse_format_cb),
@@ -948,43 +948,43 @@ static int cmd_repo_structure(int argc, const char **argv, const char *prefix,
 	};
 
 	argc = parse_options(argc, argv, prefix, options, repo_structure_usage, 0);
-	if (argc)
+	எனில் (argc)
 		usage(_("too many arguments"));
 
 	repo_init_revisions(repo, &revs, prefix);
 
-	if (show_progress < 0)
+	எனில் (show_progress < 0)
 		show_progress = isatty(2);
 
-	structure_count_references(&stats.refs, &revs, repo, show_progress);
-	structure_count_objects(&stats.objects, &revs, repo, show_progress);
+	structure_மொத்தம்_references(&stats.refs, &revs, repo, show_progress);
+	structure_மொத்தம்_objects(&stats.objects, &revs, repo, show_progress);
 
-	switch (format) {
-	case FORMAT_TABLE:
+	தேர்வு (format) {
+	நிலை FORMAT_TABLE:
 		stats_table_setup_structure(&table, &stats);
 		stats_table_print_structure(&table);
-		break;
-	case FORMAT_NEWLINE_TERMINATED:
+		நிறுத்து;
+	நிலை FORMAT_NEWLINE_TERMINATED:
 		structure_keyvalue_print(&stats, '=', '\n');
-		break;
-	case FORMAT_NUL_TERMINATED:
+		நிறுத்து;
+	நிலை FORMAT_NUL_TERMINATED:
 		structure_keyvalue_print(&stats, '\n', '\0');
-		break;
-	default:
+		நிறுத்து;
+	இயல்பு:
 		BUG("invalid output format");
 	}
 
 	stats_table_clear(&table);
 	release_revisions(&revs);
 
-	return 0;
+	திரும்பு 0;
 }
 
-int cmd_repo(int argc, const char **argv, const char *prefix,
-	     struct repository *repo)
+முழு cmd_repo(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+	     கட்டமைப்பு repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	parse_opt_subcommand_fn *fn = வெற்று;
+	கட்டமைப்பு option options[] = {
 		OPT_SUBCOMMAND("info", &fn, cmd_repo_info),
 		OPT_SUBCOMMAND("structure", &fn, cmd_repo_structure),
 		OPT_END()
@@ -992,5 +992,5 @@ int cmd_repo(int argc, const char **argv, const char *prefix,
 
 	argc = parse_options(argc, argv, prefix, options, repo_usage, 0);
 
-	return fn(argc, argv, prefix, repo);
+	திரும்பு fn(argc, argv, prefix, repo);
 }

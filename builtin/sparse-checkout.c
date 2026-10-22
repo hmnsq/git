@@ -1,94 +1,94 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "path.h"
-#include "pathspec.h"
-#include "strbuf.h"
-#include "string-list.h"
-#include "lockfile.h"
-#include "unpack-trees.h"
-#include "quote.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "worktree.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "abspath.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "dir.h"
+#அந்தர்பாவ "environment.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "object-file.h"
+#அந்தர்பாவ "object-name.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "path.h"
+#அந்தர்பாவ "pathspec.h"
+#அந்தர்பாவ "strbuf.h"
+#அந்தர்பாவ "string-list.h"
+#அந்தர்பாவ "lockfile.h"
+#அந்தர்பாவ "unpack-trees.h"
+#அந்தர்பாவ "quote.h"
+#அந்தர்பாவ "setup.h"
+#அந்தர்பாவ "sparse-index.h"
+#அந்தர்பாவ "worktree.h"
 
-static const char *empty_base = "";
+நிலையான மாறிலி எழுத்து *empty_base = "";
 
-static char const * const builtin_sparse_checkout_usage[] = {
+நிலையான எழுத்து மாறிலி * மாறிலி builtin_sparse_checkout_usage[] = {
 	N_("git sparse-checkout (init | list | set | add | reapply | disable | check-rules | clean) [<options>]"),
-	NULL
+	வெற்று
 };
 
-static void write_patterns_to_file(FILE *fp, struct pattern_list *pl)
+நிலையான வெறுமை write_patterns_to_file(FILE *fp, கட்டமைப்பு pattern_list *pl)
 {
-	int i;
+	முழு i;
 
-	for (i = 0; i < pl->nr; i++) {
-		struct path_pattern *p = pl->patterns[i];
+	க்கு (i = 0; i < pl->nr; i++) {
+		கட்டமைப்பு path_pattern *p = pl->patterns[i];
 
-		if (p->flags & PATTERN_FLAG_NEGATIVE)
+		எனில் (p->flags & PATTERN_FLAG_NEGATIVE)
 			fprintf(fp, "!");
 
 		fprintf(fp, "%s", p->pattern);
 
-		if (p->flags & PATTERN_FLAG_MUSTBEDIR)
+		எனில் (p->flags & PATTERN_FLAG_MUSTBEDIR)
 			fprintf(fp, "/");
 
 		fprintf(fp, "\n");
 	}
 }
 
-static char const * const builtin_sparse_checkout_list_usage[] = {
+நிலையான எழுத்து மாறிலி * மாறிலி builtin_sparse_checkout_list_usage[] = {
 	"git sparse-checkout list",
-	NULL
+	வெற்று
 };
 
-static int sparse_checkout_list(int argc, const char **argv, const char *prefix,
-				struct repository *repo UNUSED)
+நிலையான முழு sparse_checkout_list(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+				கட்டமைப்பு repository *repo UNUSED)
 {
-	static struct option builtin_sparse_checkout_list_options[] = {
+	நிலையான கட்டமைப்பு option builtin_sparse_checkout_list_options[] = {
 		OPT_END(),
 	};
-	struct pattern_list pl;
-	char *sparse_filename;
-	int res;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	கட்டமைப்பு pattern_list pl;
+	எழுத்து *sparse_filename;
+	முழு res;
+	கட்டமைப்பு repo_config_மதிப்புகள் *cfg = repo_config_மதிப்புகள்(the_repository);
 
-	setup_work_tree(the_repository);
-	if (!cfg->apply_sparse_checkout)
+	setup_work_மரம்(the_repository);
+	எனில் (!cfg->apply_sparse_checkout)
 		die(_("this worktree is not sparse"));
 
 	argc = parse_options(argc, argv, prefix,
 			     builtin_sparse_checkout_list_options,
 			     builtin_sparse_checkout_list_usage, 0);
 
-	memset(&pl, 0, sizeof(pl));
+	memset(&pl, 0, அளவு(pl));
 
 	pl.use_cone_patterns = cfg->core_sparse_checkout_cone;
 
 	sparse_filename = get_sparse_checkout_filename();
-	res = add_patterns_from_file_to_list(sparse_filename, "", 0, &pl, NULL, 0);
-	free(sparse_filename);
+	res = add_patterns_from_file_to_list(sparse_filename, "", 0, &pl, வெற்று, 0);
+	விடுவி(sparse_filename);
 
-	if (res < 0) {
+	எனில் (res < 0) {
 		warning(_("this worktree is not sparse (sparse-checkout file may not exist)"));
-		return 0;
+		திரும்பு 0;
 	}
 
-	if (pl.use_cone_patterns) {
-		int i;
-		struct pattern_entry *pe;
-		struct hashmap_iter iter;
-		struct string_list sl = STRING_LIST_INIT_DUP;
+	எனில் (pl.use_cone_patterns) {
+		முழு i;
+		கட்டமைப்பு pattern_entry *pe;
+		கட்டமைப்பு hashmap_iter iter;
+		கட்டமைப்பு string_list sl = STRING_LIST_INIT_DUP;
 
 		hashmap_for_each_entry(&pl.recursive_hashmap, &iter, pe, ent) {
 			/* pe->pattern starts with "/", skip it */
@@ -97,38 +97,38 @@ static int sparse_checkout_list(int argc, const char **argv, const char *prefix,
 
 		string_list_sort_u(&sl, 0);
 
-		for (i = 0; i < sl.nr; i++) {
-			quote_c_style(sl.items[i].string, NULL, stdout, 0);
+		க்கு (i = 0; i < sl.nr; i++) {
+			quote_c_style(sl.பொருட்கள்[i].string, வெற்று, stdout, 0);
 			printf("\n");
 		}
 
 		string_list_clear(&sl, 0);
-	} else {
+	} இல்லையெனில் {
 		write_patterns_to_file(stdout, &pl);
 	}
 
 	clear_pattern_list(&pl);
 
-	return 0;
+	திரும்பு 0;
 }
 
-static void clean_tracked_sparse_directories(struct repository *r)
+நிலையான வெறுமை clean_tracked_sparse_directories(கட்டமைப்பு repository *r)
 {
-	int i, was_full = 0;
-	struct strbuf path = STRBUF_INIT;
+	முழு i, was_full = 0;
+	கட்டமைப்பு strbuf path = STRBUF_INIT;
 	size_t pathlen;
-	struct string_list_item *item;
-	struct string_list sparse_dirs = STRING_LIST_INIT_DUP;
+	கட்டமைப்பு string_list_item *item;
+	கட்டமைப்பு string_list sparse_dirs = STRING_LIST_INIT_DUP;
 
 	/*
 	 * If we are not using cone mode patterns, then we cannot
 	 * delete directories outside of the sparse cone.
 	 */
-	if (!r || !r->index || !r->worktree)
-		return;
-	if (init_sparse_checkout_patterns(r->index) ||
+	எனில் (!r || !r->index || !r->worktree)
+		திரும்பு;
+	எனில் (init_sparse_checkout_patterns(r->index) ||
 	    !r->index->sparse_checkout_patterns->use_cone_patterns)
-		return;
+		திரும்பு;
 
 	/*
 	 * Use the sparse index as a data structure to assist finding
@@ -136,14 +136,14 @@ static void clean_tracked_sparse_directories(struct repository *r)
 	 * sparse index will not delete directories that contain
 	 * conflicted entries or submodules.
 	 */
-	if (r->index->sparse_index == INDEX_EXPANDED) {
+	எனில் (r->index->sparse_index == INDEX_EXPANDED) {
 		/*
 		 * If something, such as a merge conflict or other concern,
 		 * prevents us from converting to a sparse index, then do
 		 * not try deleting files.
 		 */
-		if (convert_to_sparse(r->index, SPARSE_INDEX_MEMORY_ONLY))
-			return;
+		எனில் (convert_to_sparse(r->index, SPARSE_INDEX_MEMORY_ONLY))
+			திரும்பு;
 		was_full = 1;
 	}
 
@@ -157,18 +157,18 @@ static void clean_tracked_sparse_directories(struct repository *r)
 	 * store the entries in a list before exploring, since that might
 	 * expand the sparse-index again.
 	 */
-	for (i = 0; i < r->index->cache_nr; i++) {
-		struct cache_entry *ce = r->index->cache[i];
+	க்கு (i = 0; i < r->index->cache_nr; i++) {
+		கட்டமைப்பு cache_entry *ce = r->index->cache[i];
 
-		if (S_ISSPARSEDIR(ce->ce_mode) &&
+		எனில் (S_ISSPARSEDIR(ce->ce_mode) &&
 		    repo_file_exists(r, ce->name))
 			string_list_append(&sparse_dirs, ce->name);
 	}
 
 	for_each_string_list_item(item, &sparse_dirs) {
-		struct dir_struct dir = DIR_INIT;
-		struct pathspec p = { 0 };
-		struct strvec s = STRVEC_INIT;
+		கட்டமைப்பு dir_struct dir = DIR_INIT;
+		கட்டமைப்பு pathspec p = { 0 };
+		கட்டமைப்பு strvec s = STRVEC_INIT;
 
 		strbuf_setlen(&path, pathlen);
 		strbuf_addstr(&path, item->string);
@@ -176,16 +176,16 @@ static void clean_tracked_sparse_directories(struct repository *r)
 		dir.flags |= DIR_SHOW_IGNORED_TOO;
 
 		setup_standard_excludes(&dir);
-		strvec_push(&s, path.buf);
+		strvec_தள்ளு(&s, path.buf);
 
-		parse_pathspec(&p, PATHSPEC_GLOB, 0, NULL, s.v);
+		parse_pathspec(&p, PATHSPEC_GLOB, 0, வெற்று, s.v);
 		fill_directory(&dir, r->index, &p);
 
-		if (dir.nr) {
+		எனில் (dir.nr) {
 			warning(_("directory '%s' contains untracked files,"
 				  " but is not in the sparse-checkout cone"),
 				item->string);
-		} else if (remove_dir_recursively(&path, 0)) {
+		} இல்லையெனில் எனில் (remove_dir_recursively(&path, 0)) {
 			/*
 			 * Removal is "best effort". If something blocks
 			 * the deletion, then continue with a warning.
@@ -202,26 +202,26 @@ static void clean_tracked_sparse_directories(struct repository *r)
 	string_list_clear(&sparse_dirs, 0);
 	strbuf_release(&path);
 
-	if (was_full)
+	எனில் (was_full)
 		ensure_full_index(r->index);
 }
 
-static int update_working_directory(struct repository *r,
-				    struct pattern_list *pl)
+நிலையான முழு update_working_directory(கட்டமைப்பு repository *r,
+				    கட்டமைப்பு pattern_list *pl)
 {
-	enum update_sparsity_result result;
-	struct unpack_trees_options o;
-	struct lock_file lock_file = LOCK_INIT;
-	struct pattern_list *old_pl;
+	எண்ணிக்கை update_sparsity_result result;
+	கட்டமைப்பு unpack_trees_options o;
+	கட்டமைப்பு lock_file lock_file = LOCK_INIT;
+	கட்டமைப்பு pattern_list *old_pl;
 
 	/* If no branch has been checked out, there are no updates to make. */
-	if (is_index_unborn(r->index))
-		return UPDATE_SPARSITY_SUCCESS;
+	எனில் (is_index_unborn(r->index))
+		திரும்பு UPDATE_SPARSITY_SUCCESS;
 
 	old_pl = r->index->sparse_checkout_patterns;
 	r->index->sparse_checkout_patterns = pl;
 
-	memset(&o, 0, sizeof(o));
+	memset(&o, 0, அளவு(o));
 	o.verbose_update = isatty(2);
 	o.update = 1;
 	o.head_idx = -1;
@@ -229,7 +229,7 @@ static int update_working_directory(struct repository *r,
 	o.dst_index = r->index;
 	o.skip_sparse_checkout = 0;
 
-	setup_work_tree(the_repository);
+	setup_work_மரம்(the_repository);
 
 	repo_hold_locked_index(r, &lock_file, LOCK_DIE_ON_ERROR);
 
@@ -237,57 +237,57 @@ static int update_working_directory(struct repository *r,
 	result = update_sparsity(&o, pl);
 	clear_unpack_trees_porcelain(&o);
 
-	if (result == UPDATE_SPARSITY_WARNINGS)
+	எனில் (result == UPDATE_SPARSITY_WARNINGS)
 		/*
 		 * We don't do any special handling of warnings from untracked
 		 * files in the way or dirty entries that can't be removed.
 		 */
 		result = UPDATE_SPARSITY_SUCCESS;
-	if (result == UPDATE_SPARSITY_SUCCESS)
+	எனில் (result == UPDATE_SPARSITY_SUCCESS)
 		write_locked_index(r->index, &lock_file, COMMIT_LOCK);
-	else
+	இல்லையெனில்
 		rollback_lock_file(&lock_file);
 
 	clean_tracked_sparse_directories(r);
 
-	if (r->index->sparse_checkout_patterns != pl) {
+	எனில் (r->index->sparse_checkout_patterns != pl) {
 		clear_pattern_list(r->index->sparse_checkout_patterns);
 		FREE_AND_NULL(r->index->sparse_checkout_patterns);
 	}
 	r->index->sparse_checkout_patterns = old_pl;
 
-	return result;
+	திரும்பு result;
 }
 
-static char *escaped_pattern(char *pattern)
+நிலையான எழுத்து *escaped_pattern(எழுத்து *pattern)
 {
-	char *p = pattern;
-	struct strbuf final = STRBUF_INIT;
+	எழுத்து *p = pattern;
+	கட்டமைப்பு strbuf final = STRBUF_INIT;
 
-	while (*p) {
-		if (is_glob_special(*p))
+	போது (*p) {
+		எனில் (is_glob_special(*p))
 			strbuf_addch(&final, '\\');
 
 		strbuf_addch(&final, *p);
 		p++;
 	}
 
-	return strbuf_detach(&final, NULL);
+	திரும்பு strbuf_detach(&final, வெற்று);
 }
 
-static void write_cone_to_file(FILE *fp, struct pattern_list *pl)
+நிலையான வெறுமை write_cone_to_file(FILE *fp, கட்டமைப்பு pattern_list *pl)
 {
-	int i;
-	struct pattern_entry *pe;
-	struct hashmap_iter iter;
-	struct string_list sl = STRING_LIST_INIT_DUP;
-	struct strbuf parent_pattern = STRBUF_INIT;
+	முழு i;
+	கட்டமைப்பு pattern_entry *pe;
+	கட்டமைப்பு hashmap_iter iter;
+	கட்டமைப்பு string_list sl = STRING_LIST_INIT_DUP;
+	கட்டமைப்பு strbuf parent_pattern = STRBUF_INIT;
 
 	hashmap_for_each_entry(&pl->parent_hashmap, &iter, pe, ent) {
-		if (hashmap_get_entry(&pl->recursive_hashmap, pe, ent, NULL))
-			continue;
+		எனில் (hashmap_get_entry(&pl->recursive_hashmap, pe, ent, வெற்று))
+			தொடர்;
 
-		if (!hashmap_contains_parent(&pl->recursive_hashmap,
+		எனில் (!hashmap_contains_parent(&pl->recursive_hashmap,
 					     pe->pattern,
 					     &parent_pattern))
 			string_list_append(&sl, pe->pattern);
@@ -297,18 +297,18 @@ static void write_cone_to_file(FILE *fp, struct pattern_list *pl)
 
 	fprintf(fp, "/*\n!/*/\n");
 
-	for (i = 0; i < sl.nr; i++) {
-		char *pattern = escaped_pattern(sl.items[i].string);
+	க்கு (i = 0; i < sl.nr; i++) {
+		எழுத்து *pattern = escaped_pattern(sl.பொருட்கள்[i].string);
 
-		if (strlen(pattern))
+		எனில் (strlen(pattern))
 			fprintf(fp, "%s/\n!%s/*/\n", pattern, pattern);
-		free(pattern);
+		விடுவி(pattern);
 	}
 
 	string_list_clear(&sl, 0);
 
 	hashmap_for_each_entry(&pl->recursive_hashmap, &iter, pe, ent) {
-		if (!hashmap_contains_parent(&pl->recursive_hashmap,
+		எனில் (!hashmap_contains_parent(&pl->recursive_hashmap,
 					     pe->pattern,
 					     &parent_pattern))
 			string_list_append(&sl, pe->pattern);
@@ -318,151 +318,151 @@ static void write_cone_to_file(FILE *fp, struct pattern_list *pl)
 
 	string_list_sort_u(&sl, 0);
 
-	for (i = 0; i < sl.nr; i++) {
-		char *pattern = escaped_pattern(sl.items[i].string);
+	க்கு (i = 0; i < sl.nr; i++) {
+		எழுத்து *pattern = escaped_pattern(sl.பொருட்கள்[i].string);
 		fprintf(fp, "%s/\n", pattern);
-		free(pattern);
+		விடுவி(pattern);
 	}
 
 	string_list_clear(&sl, 0);
 }
 
-static int write_patterns_and_update(struct repository *repo,
-				     struct pattern_list *pl)
+நிலையான முழு write_patterns_and_update(கட்டமைப்பு repository *repo,
+				     கட்டமைப்பு pattern_list *pl)
 {
-	char *sparse_filename;
+	எழுத்து *sparse_filename;
 	FILE *fp;
-	struct lock_file lk = LOCK_INIT;
-	int result;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	கட்டமைப்பு lock_file lk = LOCK_INIT;
+	முழு result;
+	கட்டமைப்பு repo_config_மதிப்புகள் *cfg = repo_config_மதிப்புகள்(the_repository);
 
 	sparse_filename = get_sparse_checkout_filename();
 
-	if (safe_create_leading_directories(repo, sparse_filename))
+	எனில் (safe_create_leading_directories(repo, sparse_filename))
 		die(_("failed to create directory for sparse-checkout file"));
 
 	repo_hold_lock_file_for_update(repo, &lk, sparse_filename,
 				       LOCK_DIE_ON_ERROR);
 
 	result = update_working_directory(repo, pl);
-	if (result) {
+	எனில் (result) {
 		rollback_lock_file(&lk);
-		update_working_directory(repo, NULL);
-		goto out;
+		update_working_directory(repo, வெற்று);
+		செல் out;
 	}
 
 	fp = fdopen_lock_file(&lk, "w");
-	if (!fp)
+	எனில் (!fp)
 		die_errno(_("unable to fdopen %s"), get_lock_file_path(&lk));
 
-	if (cfg->core_sparse_checkout_cone)
+	எனில் (cfg->core_sparse_checkout_cone)
 		write_cone_to_file(fp, pl);
-	else
+	இல்லையெனில்
 		write_patterns_to_file(fp, pl);
 
-	if (commit_lock_file(&lk))
+	எனில் (commit_lock_file(&lk))
 		die_errno(_("unable to write %s"), sparse_filename);
 
 out:
 	clear_pattern_list(pl);
-	free(sparse_filename);
-	return result;
+	விடுவி(sparse_filename);
+	திரும்பு result;
 }
 
-enum sparse_checkout_mode {
+எண்ணிக்கை sparse_checkout_mode {
 	MODE_NO_PATTERNS = 0,
 	MODE_ALL_PATTERNS = 1,
 	MODE_CONE_PATTERNS = 2,
 };
 
-static int set_config(struct repository *repo,
-		      enum sparse_checkout_mode mode)
+நிலையான முழு set_config(கட்டமைப்பு repository *repo,
+		      எண்ணிக்கை sparse_checkout_mode mode)
 {
 	/* Update to use worktree config, if not already. */
-	if (init_worktree_config(repo)) {
+	எனில் (init_worktree_config(repo)) {
 		error(_("failed to initialize worktree config"));
-		return 1;
+		திரும்பு 1;
 	}
 
-	if (repo_config_set_worktree_gently(repo,
+	எனில் (repo_config_set_worktree_gently(repo,
 					    "core.sparseCheckout",
 					    mode ? "true" : "false") ||
 	    repo_config_set_worktree_gently(repo,
 					    "core.sparseCheckoutCone",
 					    mode == MODE_CONE_PATTERNS ?
 						"true" : "false"))
-		return 1;
+		திரும்பு 1;
 
-	if (mode == MODE_NO_PATTERNS)
-		return set_sparse_index_config(repo, 0);
+	எனில் (mode == MODE_NO_PATTERNS)
+		திரும்பு set_sparse_index_config(repo, 0);
 
-	return 0;
+	திரும்பு 0;
 }
 
-static enum sparse_checkout_mode update_cone_mode(int *cone_mode) {
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+நிலையான எண்ணிக்கை sparse_checkout_mode update_cone_mode(முழு *cone_mode) {
+	கட்டமைப்பு repo_config_மதிப்புகள் *cfg = repo_config_மதிப்புகள்(the_repository);
 
 	/* If not specified, use previous definition of cone mode */
-	if (*cone_mode == -1 && cfg->apply_sparse_checkout)
+	எனில் (*cone_mode == -1 && cfg->apply_sparse_checkout)
 		*cone_mode = cfg->core_sparse_checkout_cone;
 
 	/* Set cone/non-cone mode appropriately */
 	cfg->apply_sparse_checkout = 1;
-	if (*cone_mode == 1 || *cone_mode == -1) {
+	எனில் (*cone_mode == 1 || *cone_mode == -1) {
 		cfg->core_sparse_checkout_cone = 1;
-		return MODE_CONE_PATTERNS;
+		திரும்பு MODE_CONE_PATTERNS;
 	}
 	cfg->core_sparse_checkout_cone = 0;
-	return MODE_ALL_PATTERNS;
+	திரும்பு MODE_ALL_PATTERNS;
 }
 
-static int update_modes(struct repository *repo, int *cone_mode, int *sparse_index)
+நிலையான முழு update_modes(கட்டமைப்பு repository *repo, முழு *cone_mode, முழு *sparse_index)
 {
-	int mode, record_mode;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	முழு mode, record_mode;
+	கட்டமைப்பு repo_config_மதிப்புகள் *cfg = repo_config_மதிப்புகள்(the_repository);
 
 	/* Determine if we need to record the mode; ensure sparse checkout on */
 	record_mode = (*cone_mode != -1) || !cfg->apply_sparse_checkout;
 
 	mode = update_cone_mode(cone_mode);
-	if (record_mode && set_config(repo, mode))
-		return 1;
+	எனில் (record_mode && set_config(repo, mode))
+		திரும்பு 1;
 
 	/* Set sparse-index/non-sparse-index mode if specified */
-	if (*sparse_index >= 0) {
-		if (set_sparse_index_config(repo, *sparse_index) < 0)
+	எனில் (*sparse_index >= 0) {
+		எனில் (set_sparse_index_config(repo, *sparse_index) < 0)
 			die(_("failed to modify sparse-index config"));
 
 		/* force an index rewrite */
 		repo_read_index(repo);
 		repo->index->updated_workdir = 1;
 
-		if (!*sparse_index)
+		எனில் (!*sparse_index)
 			ensure_full_index(repo->index);
 	}
 
-	return 0;
+	திரும்பு 0;
 }
 
-static char const * const builtin_sparse_checkout_init_usage[] = {
+நிலையான எழுத்து மாறிலி * மாறிலி builtin_sparse_checkout_init_usage[] = {
 	"git sparse-checkout init [--cone] [--[no-]sparse-index]",
-	NULL
+	வெற்று
 };
 
-static struct sparse_checkout_init_opts {
-	int cone_mode;
-	int sparse_index;
+நிலையான கட்டமைப்பு sparse_checkout_init_opts {
+	முழு cone_mode;
+	முழு sparse_index;
 } init_opts;
 
-static int sparse_checkout_init(int argc, const char **argv, const char *prefix,
-				struct repository *repo)
+நிலையான முழு sparse_checkout_init(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+				கட்டமைப்பு repository *repo)
 {
-	struct pattern_list pl;
-	char *sparse_filename;
-	int res;
-	struct object_id oid;
+	கட்டமைப்பு pattern_list pl;
+	எழுத்து *sparse_filename;
+	முழு res;
+	கட்டமைப்பு object_id oid;
 
-	static struct option builtin_sparse_checkout_init_options[] = {
+	நிலையான கட்டமைப்பு option builtin_sparse_checkout_init_options[] = {
 		OPT_BOOL(0, "cone", &init_opts.cone_mode,
 			 N_("initialize the sparse-checkout in cone mode")),
 		OPT_BOOL(0, "sparse-index", &init_opts.sparse_index,
@@ -470,7 +470,7 @@ static int sparse_checkout_init(int argc, const char **argv, const char *prefix,
 		OPT_END(),
 	};
 
-	setup_work_tree(the_repository);
+	setup_work_மரம்(the_repository);
 	repo_read_index(repo);
 
 	init_opts.cone_mode = -1;
@@ -480,191 +480,191 @@ static int sparse_checkout_init(int argc, const char **argv, const char *prefix,
 			     builtin_sparse_checkout_init_options,
 			     builtin_sparse_checkout_init_usage, 0);
 
-	if (update_modes(repo, &init_opts.cone_mode, &init_opts.sparse_index))
-		return 1;
+	எனில் (update_modes(repo, &init_opts.cone_mode, &init_opts.sparse_index))
+		திரும்பு 1;
 
-	memset(&pl, 0, sizeof(pl));
+	memset(&pl, 0, அளவு(pl));
 
 	sparse_filename = get_sparse_checkout_filename();
-	res = add_patterns_from_file_to_list(sparse_filename, "", 0, &pl, NULL, 0);
+	res = add_patterns_from_file_to_list(sparse_filename, "", 0, &pl, வெற்று, 0);
 
 	/* If we already have a sparse-checkout file, use it. */
-	if (res >= 0) {
-		free(sparse_filename);
+	எனில் (res >= 0) {
+		விடுவி(sparse_filename);
 		clear_pattern_list(&pl);
-		return update_working_directory(repo, NULL);
+		திரும்பு update_working_directory(repo, வெற்று);
 	}
 
-	if (repo_get_oid(repo, "HEAD", &oid)) {
+	எனில் (repo_get_oid(repo, "HEAD", &oid)) {
 		FILE *fp;
 
 		/* assume we are in a fresh repo, but update the sparse-checkout file */
-		if (safe_create_leading_directories(repo, sparse_filename))
+		எனில் (safe_create_leading_directories(repo, sparse_filename))
 			die(_("unable to create leading directories of %s"),
 			    sparse_filename);
 		fp = xfopen(sparse_filename, "w");
-		if (!fp)
+		எனில் (!fp)
 			die(_("failed to open '%s'"), sparse_filename);
 
-		free(sparse_filename);
+		விடுவி(sparse_filename);
 		fprintf(fp, "/*\n!/*/\n");
 		fclose(fp);
-		return 0;
+		திரும்பு 0;
 	}
 
-	free(sparse_filename);
+	விடுவி(sparse_filename);
 
 	add_pattern("/*", empty_base, 0, &pl, 0);
 	add_pattern("!/*/", empty_base, 0, &pl, 0);
 	pl.use_cone_patterns = init_opts.cone_mode;
 
-	return write_patterns_and_update(repo, &pl);
+	திரும்பு write_patterns_and_update(repo, &pl);
 }
 
-static void insert_recursive_pattern(struct pattern_list *pl, struct strbuf *path)
+நிலையான வெறுமை செருகு_recursive_pattern(கட்டமைப்பு pattern_list *pl, கட்டமைப்பு strbuf *path)
 {
-	struct pattern_entry *e = xmalloc(sizeof(*e));
+	கட்டமைப்பு pattern_entry *e = xmalloc(அளவு(*e));
 	e->patternlen = path->len;
-	e->pattern = strbuf_detach(path, NULL);
+	e->pattern = strbuf_detach(path, வெற்று);
 	hashmap_entry_init(&e->ent, fspathhash(e->pattern));
 
 	hashmap_add(&pl->recursive_hashmap, &e->ent);
 
-	while (e->patternlen) {
-		char *slash = strrchr(e->pattern, '/');
-		char *oldpattern = e->pattern;
+	போது (e->patternlen) {
+		எழுத்து *slash = strrchr(e->pattern, '/');
+		எழுத்து *oldpattern = e->pattern;
 		size_t newlen;
-		struct pattern_entry *dup;
+		கட்டமைப்பு pattern_entry *dup;
 
-		if (!slash || slash == e->pattern)
-			break;
+		எனில் (!slash || slash == e->pattern)
+			நிறுத்து;
 
 		newlen = slash - e->pattern;
-		e = xmalloc(sizeof(struct pattern_entry));
+		e = xmalloc(அளவு(கட்டமைப்பு pattern_entry));
 		e->patternlen = newlen;
 		e->pattern = xstrndup(oldpattern, newlen);
 		hashmap_entry_init(&e->ent, fspathhash(e->pattern));
 
-		dup = hashmap_get_entry(&pl->parent_hashmap, e, ent, NULL);
-		if (!dup) {
+		dup = hashmap_get_entry(&pl->parent_hashmap, e, ent, வெற்று);
+		எனில் (!dup) {
 			hashmap_add(&pl->parent_hashmap, &e->ent);
-		} else {
-			free(e->pattern);
-			free(e);
+		} இல்லையெனில் {
+			விடுவி(e->pattern);
+			விடுவி(e);
 			e = dup;
 		}
 	}
 }
 
-static void strbuf_to_cone_pattern(struct strbuf *line, struct pattern_list *pl)
+நிலையான வெறுமை strbuf_to_cone_pattern(கட்டமைப்பு strbuf *வரி, கட்டமைப்பு pattern_list *pl)
 {
-	strbuf_trim(line);
+	strbuf_trim(வரி);
 
-	strbuf_trim_trailing_dir_sep(line);
+	strbuf_trim_trailing_dir_sep(வரி);
 
-	if (strbuf_normalize_path(line))
-		die(_("could not normalize path %s"), line->buf);
+	எனில் (strbuf_normalize_path(வரி))
+		die(_("could not normalize path %s"), வரி->buf);
 
-	if (!line->len)
-		return;
+	எனில் (!வரி->len)
+		திரும்பு;
 
-	if (line->buf[0] != '/')
-		strbuf_insertstr(line, 0, "/");
+	எனில் (வரி->buf[0] != '/')
+		strbuf_insertstr(வரி, 0, "/");
 
-	insert_recursive_pattern(pl, line);
+	செருகு_recursive_pattern(pl, வரி);
 }
 
-static void add_patterns_from_input(struct pattern_list *pl,
-				    int argc, const char **argv,
+நிலையான வெறுமை add_patterns_from_உள்ளீடு(கட்டமைப்பு pattern_list *pl,
+				    முழு argc, மாறிலி எழுத்து **argv,
 				    FILE *file)
 {
-	int i;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	முழு i;
+	கட்டமைப்பு repo_config_மதிப்புகள் *cfg = repo_config_மதிப்புகள்(the_repository);
 
-	if (cfg->core_sparse_checkout_cone) {
-		struct strbuf line = STRBUF_INIT;
+	எனில் (cfg->core_sparse_checkout_cone) {
+		கட்டமைப்பு strbuf வரி = STRBUF_INIT;
 
-		hashmap_init(&pl->recursive_hashmap, pl_hashmap_cmp, NULL, 0);
-		hashmap_init(&pl->parent_hashmap, pl_hashmap_cmp, NULL, 0);
+		hashmap_init(&pl->recursive_hashmap, pl_hashmap_cmp, வெற்று, 0);
+		hashmap_init(&pl->parent_hashmap, pl_hashmap_cmp, வெற்று, 0);
 		pl->use_cone_patterns = 1;
 
-		if (file) {
-			struct strbuf unquoted = STRBUF_INIT;
-			while (!strbuf_getline(&line, file)) {
-				if (line.buf[0] == '"') {
+		எனில் (file) {
+			கட்டமைப்பு strbuf unquoted = STRBUF_INIT;
+			போது (!strbuf_getline(&வரி, file)) {
+				எனில் (வரி.buf[0] == '"') {
 					strbuf_reset(&unquoted);
-					if (unquote_c_style(&unquoted, line.buf, NULL))
+					எனில் (unquote_c_style(&unquoted, வரி.buf, வெற்று))
 						die(_("unable to unquote C-style string '%s'"),
-						line.buf);
+						வரி.buf);
 
-					strbuf_swap(&unquoted, &line);
+					strbuf_swap(&unquoted, &வரி);
 				}
 
-				strbuf_to_cone_pattern(&line, pl);
+				strbuf_to_cone_pattern(&வரி, pl);
 			}
 
 			strbuf_release(&unquoted);
-		} else {
-			for (i = 0; i < argc; i++) {
-				strbuf_setlen(&line, 0);
-				strbuf_addstr(&line, argv[i]);
-				strbuf_to_cone_pattern(&line, pl);
+		} இல்லையெனில் {
+			க்கு (i = 0; i < argc; i++) {
+				strbuf_setlen(&வரி, 0);
+				strbuf_addstr(&வரி, argv[i]);
+				strbuf_to_cone_pattern(&வரி, pl);
 			}
 		}
-		strbuf_release(&line);
-	} else {
-		if (file) {
-			struct strbuf line = STRBUF_INIT;
+		strbuf_release(&வரி);
+	} இல்லையெனில் {
+		எனில் (file) {
+			கட்டமைப்பு strbuf வரி = STRBUF_INIT;
 
-			while (!strbuf_getline(&line, file))
-				add_pattern(line.buf, empty_base, 0, pl, 0);
+			போது (!strbuf_getline(&வரி, file))
+				add_pattern(வரி.buf, empty_base, 0, pl, 0);
 
-			strbuf_release(&line);
-		} else {
-			for (i = 0; i < argc; i++)
+			strbuf_release(&வரி);
+		} இல்லையெனில் {
+			க்கு (i = 0; i < argc; i++)
 				add_pattern(argv[i], empty_base, 0, pl, 0);
 		}
 	}
 }
 
-enum modify_type {
+எண்ணிக்கை modify_type {
 	REPLACE,
 	ADD,
 };
 
-static void add_patterns_cone_mode(int argc, const char **argv,
-				   struct pattern_list *pl,
-				   int use_stdin)
+நிலையான வெறுமை add_patterns_cone_mode(முழு argc, மாறிலி எழுத்து **argv,
+				   கட்டமைப்பு pattern_list *pl,
+				   முழு use_stdin)
 {
-	struct strbuf buffer = STRBUF_INIT;
-	struct pattern_entry *pe;
-	struct hashmap_iter iter;
-	struct pattern_list existing;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
-	char *sparse_filename = get_sparse_checkout_filename();
+	கட்டமைப்பு strbuf buffer = STRBUF_INIT;
+	கட்டமைப்பு pattern_entry *pe;
+	கட்டமைப்பு hashmap_iter iter;
+	கட்டமைப்பு pattern_list existing;
+	கட்டமைப்பு repo_config_மதிப்புகள் *cfg = repo_config_மதிப்புகள்(the_repository);
+	எழுத்து *sparse_filename = get_sparse_checkout_filename();
 
-	add_patterns_from_input(pl, argc, argv,
-				use_stdin ? stdin : NULL);
+	add_patterns_from_உள்ளீடு(pl, argc, argv,
+				use_stdin ? stdin : வெற்று);
 
-	memset(&existing, 0, sizeof(existing));
+	memset(&existing, 0, அளவு(existing));
 	existing.use_cone_patterns = cfg->core_sparse_checkout_cone;
 
-	if (add_patterns_from_file_to_list(sparse_filename, "", 0,
-					   &existing, NULL, 0))
+	எனில் (add_patterns_from_file_to_list(sparse_filename, "", 0,
+					   &existing, வெற்று, 0))
 		die(_("unable to load existing sparse-checkout patterns"));
-	free(sparse_filename);
+	விடுவி(sparse_filename);
 
-	if (!existing.use_cone_patterns)
+	எனில் (!existing.use_cone_patterns)
 		die(_("existing sparse-checkout patterns do not use cone mode"));
 
 	hashmap_for_each_entry(&existing.recursive_hashmap, &iter, pe, ent) {
-		if (!hashmap_contains_parent(&pl->recursive_hashmap,
+		எனில் (!hashmap_contains_parent(&pl->recursive_hashmap,
 					pe->pattern, &buffer) ||
 		    !hashmap_contains_parent(&pl->parent_hashmap,
 					pe->pattern, &buffer)) {
 			strbuf_reset(&buffer);
 			strbuf_addstr(&buffer, pe->pattern);
-			insert_recursive_pattern(pl, &buffer);
+			செருகு_recursive_pattern(pl, &buffer);
 		}
 	}
 
@@ -672,42 +672,42 @@ static void add_patterns_cone_mode(int argc, const char **argv,
 	strbuf_release(&buffer);
 }
 
-static void add_patterns_literal(int argc, const char **argv,
-				 struct pattern_list *pl,
-				 int use_stdin)
+நிலையான வெறுமை add_patterns_literal(முழு argc, மாறிலி எழுத்து **argv,
+				 கட்டமைப்பு pattern_list *pl,
+				 முழு use_stdin)
 {
-	char *sparse_filename = get_sparse_checkout_filename();
-	if (add_patterns_from_file_to_list(sparse_filename, "", 0,
-					   pl, NULL, 0))
+	எழுத்து *sparse_filename = get_sparse_checkout_filename();
+	எனில் (add_patterns_from_file_to_list(sparse_filename, "", 0,
+					   pl, வெற்று, 0))
 		die(_("unable to load existing sparse-checkout patterns"));
-	free(sparse_filename);
-	add_patterns_from_input(pl, argc, argv, use_stdin ? stdin : NULL);
+	விடுவி(sparse_filename);
+	add_patterns_from_உள்ளீடு(pl, argc, argv, use_stdin ? stdin : வெற்று);
 }
 
-static int modify_pattern_list(struct repository *repo,
-			       struct strvec *args, int use_stdin,
-			       enum modify_type m)
+நிலையான முழு modify_pattern_list(கட்டமைப்பு repository *repo,
+			       கட்டமைப்பு strvec *args, முழு use_stdin,
+			       எண்ணிக்கை modify_type m)
 {
-	int result;
-	int changed_config = 0;
-	struct pattern_list *pl = xcalloc(1, sizeof(*pl));
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	முழு result;
+	முழு changed_config = 0;
+	கட்டமைப்பு pattern_list *pl = xcalloc(1, அளவு(*pl));
+	கட்டமைப்பு repo_config_மதிப்புகள் *cfg = repo_config_மதிப்புகள்(the_repository);
 
-	switch (m) {
-	case ADD:
-		if (cfg->core_sparse_checkout_cone)
+	தேர்வு (m) {
+	நிலை ADD:
+		எனில் (cfg->core_sparse_checkout_cone)
 			add_patterns_cone_mode(args->nr, args->v, pl, use_stdin);
-		else
+		இல்லையெனில்
 			add_patterns_literal(args->nr, args->v, pl, use_stdin);
-		break;
+		நிறுத்து;
 
-	case REPLACE:
-		add_patterns_from_input(pl, args->nr, args->v,
-					use_stdin ? stdin : NULL);
-		break;
+	நிலை REPLACE:
+		add_patterns_from_உள்ளீடு(pl, args->nr, args->v,
+					use_stdin ? stdin : வெற்று);
+		நிறுத்து;
 	}
 
-	if (!cfg->apply_sparse_checkout) {
+	எனில் (!cfg->apply_sparse_checkout) {
 		set_config(repo, MODE_ALL_PATTERNS);
 		cfg->apply_sparse_checkout = 1;
 		changed_config = 1;
@@ -715,88 +715,88 @@ static int modify_pattern_list(struct repository *repo,
 
 	result = write_patterns_and_update(repo, pl);
 
-	if (result && changed_config)
+	எனில் (result && changed_config)
 		set_config(repo, MODE_NO_PATTERNS);
 
 	clear_pattern_list(pl);
-	free(pl);
-	return result;
+	விடுவி(pl);
+	திரும்பு result;
 }
 
-static void sanitize_paths(struct repository *repo,
-			   struct strvec *args,
-			   const char *prefix, int skip_checks)
+நிலையான வெறுமை sanitize_paths(கட்டமைப்பு repository *repo,
+			   கட்டமைப்பு strvec *args,
+			   மாறிலி எழுத்து *prefix, முழு skip_checks)
 {
-	int i;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	முழு i;
+	கட்டமைப்பு repo_config_மதிப்புகள் *cfg = repo_config_மதிப்புகள்(the_repository);
 
-	if (!args->nr)
-		return;
+	எனில் (!args->nr)
+		திரும்பு;
 
-	if (prefix && *prefix && cfg->core_sparse_checkout_cone) {
+	எனில் (prefix && *prefix && cfg->core_sparse_checkout_cone) {
 		/*
 		 * The args are not pathspecs, so unfortunately we
 		 * cannot imitate how cmd_add() uses parse_pathspec().
 		 */
-		int prefix_len = strlen(prefix);
+		முழு prefix_len = strlen(prefix);
 
-		for (i = 0; i < args->nr; i++) {
-			char *prefixed_path = prefix_path(the_repository, prefix,
+		க்கு (i = 0; i < args->nr; i++) {
+			எழுத்து *prefixed_path = prefix_path(the_repository, prefix,
 							  prefix_len, args->v[i]);
 			strvec_replace(args, i, prefixed_path);
-			free(prefixed_path);
+			விடுவி(prefixed_path);
 		}
 	}
 
-	if (skip_checks)
-		return;
+	எனில் (skip_checks)
+		திரும்பு;
 
-	if (prefix && *prefix && !cfg->core_sparse_checkout_cone)
+	எனில் (prefix && *prefix && !cfg->core_sparse_checkout_cone)
 		die(_("please run from the toplevel directory in non-cone mode"));
 
-	if (cfg->core_sparse_checkout_cone) {
-		for (i = 0; i < args->nr; i++) {
-			if (args->v[i][0] == '/')
+	எனில் (cfg->core_sparse_checkout_cone) {
+		க்கு (i = 0; i < args->nr; i++) {
+			எனில் (args->v[i][0] == '/')
 				die(_("specify directories rather than patterns (no leading slash)"));
-			if (args->v[i][0] == '!')
+			எனில் (args->v[i][0] == '!')
 				die(_("specify directories rather than patterns.  If your directory starts with a '!', pass --skip-checks"));
-			if (strpbrk(args->v[i], "*?[]"))
+			எனில் (strpbrk(args->v[i], "*?[]"))
 				die(_("specify directories rather than patterns.  If your directory really has any of '*?[]\\' in it, pass --skip-checks"));
 		}
 	}
 
-	for (i = 0; i < args->nr; i++) {
-		struct cache_entry *ce;
-		struct index_state *index = repo->index;
-		int pos = index_name_pos(index, args->v[i], strlen(args->v[i]));
+	க்கு (i = 0; i < args->nr; i++) {
+		கட்டமைப்பு cache_entry *ce;
+		கட்டமைப்பு index_state *index = repo->index;
+		முழு pos = index_name_pos(index, args->v[i], strlen(args->v[i]));
 
-		if (pos < 0)
-			continue;
+		எனில் (pos < 0)
+			தொடர்;
 		ce = index->cache[pos];
-		if (S_ISSPARSEDIR(ce->ce_mode))
-			continue;
+		எனில் (S_ISSPARSEDIR(ce->ce_mode))
+			தொடர்;
 
-		if (cfg->core_sparse_checkout_cone)
+		எனில் (cfg->core_sparse_checkout_cone)
 			die(_("'%s' is not a directory; to treat it as a directory anyway, rerun with --skip-checks"), args->v[i]);
-		else
+		இல்லையெனில்
 			warning(_("pass a leading slash before paths such as '%s' if you want a single file (see NON-CONE PROBLEMS in the git-sparse-checkout manual)."), args->v[i]);
 	}
 }
 
-static char const * const builtin_sparse_checkout_add_usage[] = {
+நிலையான எழுத்து மாறிலி * மாறிலி builtin_sparse_checkout_add_usage[] = {
 	N_("git sparse-checkout add [--skip-checks] (--stdin | <patterns>)"),
-	NULL
+	வெற்று
 };
 
-static struct sparse_checkout_add_opts {
-	int skip_checks;
-	int use_stdin;
+நிலையான கட்டமைப்பு sparse_checkout_add_opts {
+	முழு skip_checks;
+	முழு use_stdin;
 } add_opts;
 
-static int sparse_checkout_add(int argc, const char **argv, const char *prefix,
-			       struct repository *repo)
+நிலையான முழு sparse_checkout_add(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+			       கட்டமைப்பு repository *repo)
 {
-	static struct option builtin_sparse_checkout_add_options[] = {
+	நிலையான கட்டமைப்பு option builtin_sparse_checkout_add_options[] = {
 		OPT_BOOL_F(0, "skip-checks", &add_opts.skip_checks,
 			   N_("skip some sanity checks on the given paths that might give false positives"),
 			   PARSE_OPT_NONEG),
@@ -804,12 +804,12 @@ static int sparse_checkout_add(int argc, const char **argv, const char *prefix,
 			 N_("read patterns from standard in")),
 		OPT_END(),
 	};
-	struct strvec patterns = STRVEC_INIT;
-	int ret;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	கட்டமைப்பு strvec patterns = STRVEC_INIT;
+	முழு ret;
+	கட்டமைப்பு repo_config_மதிப்புகள் *cfg = repo_config_மதிப்புகள்(the_repository);
 
-	setup_work_tree(the_repository);
-	if (!cfg->apply_sparse_checkout)
+	setup_work_மரம்(the_repository);
+	எனில் (!cfg->apply_sparse_checkout)
 		die(_("no sparse-checkout to add to"));
 
 	repo_read_index(repo);
@@ -818,36 +818,36 @@ static int sparse_checkout_add(int argc, const char **argv, const char *prefix,
 			     builtin_sparse_checkout_add_options,
 			     builtin_sparse_checkout_add_usage, 0);
 
-	for (int i = 0; i < argc; i++)
-		strvec_push(&patterns, argv[i]);
+	க்கு (முழு i = 0; i < argc; i++)
+		strvec_தள்ளு(&patterns, argv[i]);
 	sanitize_paths(repo, &patterns, prefix, add_opts.skip_checks);
 
 	ret = modify_pattern_list(repo, &patterns, add_opts.use_stdin, ADD);
 
 	strvec_clear(&patterns);
-	return ret;
+	திரும்பு ret;
 }
 
-static char const * const builtin_sparse_checkout_set_usage[] = {
+நிலையான எழுத்து மாறிலி * மாறிலி builtin_sparse_checkout_set_usage[] = {
 	N_("git sparse-checkout set [--[no-]cone] [--[no-]sparse-index] [--skip-checks] (--stdin | <patterns>)"),
-	NULL
+	வெற்று
 };
 
-static struct sparse_checkout_set_opts {
-	int cone_mode;
-	int sparse_index;
-	int skip_checks;
-	int use_stdin;
+நிலையான கட்டமைப்பு sparse_checkout_set_opts {
+	முழு cone_mode;
+	முழு sparse_index;
+	முழு skip_checks;
+	முழு use_stdin;
 } set_opts;
 
-static int sparse_checkout_set(int argc, const char **argv, const char *prefix,
-			       struct repository *repo)
+நிலையான முழு sparse_checkout_set(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+			       கட்டமைப்பு repository *repo)
 {
-	struct repo_config_values *cfg = repo_config_values(the_repository);
-	int default_patterns_nr = 2;
-	const char *default_patterns[] = {"/*", "!/*/", NULL};
+	கட்டமைப்பு repo_config_மதிப்புகள் *cfg = repo_config_மதிப்புகள்(the_repository);
+	முழு default_patterns_nr = 2;
+	மாறிலி எழுத்து *default_patterns[] = {"/*", "!/*/", வெற்று};
 
-	static struct option builtin_sparse_checkout_set_options[] = {
+	நிலையான கட்டமைப்பு option builtin_sparse_checkout_set_options[] = {
 		OPT_BOOL(0, "cone", &set_opts.cone_mode,
 			 N_("initialize the sparse-checkout in cone mode")),
 		OPT_BOOL(0, "sparse-index", &set_opts.sparse_index,
@@ -860,10 +860,10 @@ static int sparse_checkout_set(int argc, const char **argv, const char *prefix,
 			   PARSE_OPT_NONEG),
 		OPT_END(),
 	};
-	struct strvec patterns = STRVEC_INIT;
-	int ret;
+	கட்டமைப்பு strvec patterns = STRVEC_INIT;
+	முழு ret;
 
-	setup_work_tree(the_repository);
+	setup_work_மரம்(the_repository);
 	repo_read_index(repo);
 
 	set_opts.cone_mode = -1;
@@ -873,54 +873,54 @@ static int sparse_checkout_set(int argc, const char **argv, const char *prefix,
 			     builtin_sparse_checkout_set_options,
 			     builtin_sparse_checkout_set_usage, 0);
 
-	if (update_modes(repo, &set_opts.cone_mode, &set_opts.sparse_index))
-		return 1;
+	எனில் (update_modes(repo, &set_opts.cone_mode, &set_opts.sparse_index))
+		திரும்பு 1;
 
 	/*
 	 * Cone mode automatically specifies the toplevel directory.  For
 	 * non-cone mode, if nothing is specified, manually select just the
 	 * top-level directory (much as 'init' would do).
 	 */
-	if (!cfg->core_sparse_checkout_cone && !set_opts.use_stdin && argc == 0) {
-		for (int i = 0; i < default_patterns_nr; i++)
-			strvec_push(&patterns, default_patterns[i]);
-	} else {
-		for (int i = 0; i < argc; i++)
-			strvec_push(&patterns, argv[i]);
+	எனில் (!cfg->core_sparse_checkout_cone && !set_opts.use_stdin && argc == 0) {
+		க்கு (முழு i = 0; i < default_patterns_nr; i++)
+			strvec_தள்ளு(&patterns, default_patterns[i]);
+	} இல்லையெனில் {
+		க்கு (முழு i = 0; i < argc; i++)
+			strvec_தள்ளு(&patterns, argv[i]);
 		sanitize_paths(repo, &patterns, prefix, set_opts.skip_checks);
 	}
 
 	ret = modify_pattern_list(repo, &patterns, set_opts.use_stdin, REPLACE);
 
 	strvec_clear(&patterns);
-	return ret;
+	திரும்பு ret;
 }
 
-static char const * const builtin_sparse_checkout_reapply_usage[] = {
+நிலையான எழுத்து மாறிலி * மாறிலி builtin_sparse_checkout_reapply_usage[] = {
 	"git sparse-checkout reapply [--[no-]cone] [--[no-]sparse-index]",
-	NULL
+	வெற்று
 };
 
-static struct sparse_checkout_reapply_opts {
-	int cone_mode;
-	int sparse_index;
+நிலையான கட்டமைப்பு sparse_checkout_reapply_opts {
+	முழு cone_mode;
+	முழு sparse_index;
 } reapply_opts;
 
-static int sparse_checkout_reapply(int argc, const char **argv,
-				   const char *prefix,
-				   struct repository *repo)
+நிலையான முழு sparse_checkout_reapply(முழு argc, மாறிலி எழுத்து **argv,
+				   மாறிலி எழுத்து *prefix,
+				   கட்டமைப்பு repository *repo)
 {
-	static struct option builtin_sparse_checkout_reapply_options[] = {
+	நிலையான கட்டமைப்பு option builtin_sparse_checkout_reapply_options[] = {
 		OPT_BOOL(0, "cone", &reapply_opts.cone_mode,
 			 N_("initialize the sparse-checkout in cone mode")),
 		OPT_BOOL(0, "sparse-index", &reapply_opts.sparse_index,
 			 N_("toggle the use of a sparse index")),
 		OPT_END(),
 	};
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	கட்டமைப்பு repo_config_மதிப்புகள் *cfg = repo_config_மதிப்புகள்(the_repository);
 
-	setup_work_tree(the_repository);
-	if (!cfg->apply_sparse_checkout)
+	setup_work_மரம்(the_repository);
+	எனில் (!cfg->apply_sparse_checkout)
 		die(_("must be in a sparse-checkout to reapply sparsity patterns"));
 
 	reapply_opts.cone_mode = -1;
@@ -932,60 +932,60 @@ static int sparse_checkout_reapply(int argc, const char **argv,
 
 	repo_read_index(repo);
 
-	if (update_modes(repo, &reapply_opts.cone_mode, &reapply_opts.sparse_index))
-		return 1;
+	எனில் (update_modes(repo, &reapply_opts.cone_mode, &reapply_opts.sparse_index))
+		திரும்பு 1;
 
-	return update_working_directory(repo, NULL);
+	திரும்பு update_working_directory(repo, வெற்று);
 }
 
-static char const * const builtin_sparse_checkout_clean_usage[] = {
+நிலையான எழுத்து மாறிலி * மாறிலி builtin_sparse_checkout_clean_usage[] = {
 	"git sparse-checkout clean [-n|--dry-run]",
-	NULL
+	வெற்று
 };
 
-static int list_file_iterator(const char *path, const void *data)
+நிலையான முழு list_file_iterator(மாறிலி எழுத்து *path, மாறிலி வெறுமை *data)
 {
-	const char *msg = data;
+	மாறிலி எழுத்து *செய்தி = data;
 
-	printf(msg, path);
-	return 0;
+	printf(செய்தி, path);
+	திரும்பு 0;
 }
 
-static void list_every_file_in_dir(const char *msg,
-				   const char *directory)
+நிலையான வெறுமை list_every_file_in_dir(மாறிலி எழுத்து *செய்தி,
+				   மாறிலி எழுத்து *directory)
 {
-	struct strbuf path = STRBUF_INIT;
+	கட்டமைப்பு strbuf path = STRBUF_INIT;
 
 	strbuf_addstr(&path, directory);
-	for_each_file_in_dir(&path, list_file_iterator, msg);
+	for_each_file_in_dir(&path, list_file_iterator, செய்தி);
 	strbuf_release(&path);
 }
 
-static const char *msg_remove = N_("Removing %s\n");
-static const char *msg_would_remove = N_("Would remove %s\n");
+நிலையான மாறிலி எழுத்து *செய்தி_remove = N_("Removing %s\n");
+நிலையான மாறிலி எழுத்து *செய்தி_would_remove = N_("Would remove %s\n");
 
-static int sparse_checkout_clean(int argc, const char **argv,
-				   const char *prefix,
-				   struct repository *repo)
+நிலையான முழு sparse_checkout_clean(முழு argc, மாறிலி எழுத்து **argv,
+				   மாறிலி எழுத்து *prefix,
+				   கட்டமைப்பு repository *repo)
 {
-	struct strbuf full_path = STRBUF_INIT;
-	const char *msg = msg_remove;
+	கட்டமைப்பு strbuf full_path = STRBUF_INIT;
+	மாறிலி எழுத்து *செய்தி = செய்தி_remove;
 	size_t worktree_len;
-	int force = 0, dry_run = 0, verbose = 0;
-	int require_force = 1;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	முழு force = 0, dry_run = 0, verbose = 0;
+	முழு require_force = 1;
+	கட்டமைப்பு repo_config_மதிப்புகள் *cfg = repo_config_மதிப்புகள்(the_repository);
 
-	struct option builtin_sparse_checkout_clean_options[] = {
+	கட்டமைப்பு option builtin_sparse_checkout_clean_options[] = {
 		OPT__DRY_RUN(&dry_run, N_("dry run")),
 		OPT__FORCE(&force, N_("force"), PARSE_OPT_NOCOMPLETE),
 		OPT__VERBOSE(&verbose, N_("report each affected file, not just directories")),
 		OPT_END(),
 	};
 
-	setup_work_tree(the_repository);
-	if (!cfg->apply_sparse_checkout)
+	setup_work_மரம்(the_repository);
+	எனில் (!cfg->apply_sparse_checkout)
 		die(_("must be in a sparse-checkout to clean directories"));
-	if (!cfg->core_sparse_checkout_cone)
+	எனில் (!cfg->core_sparse_checkout_cone)
 		die(_("must be in a cone-mode sparse-checkout to clean directories"));
 
 	argc = parse_options(argc, argv, prefix,
@@ -993,16 +993,16 @@ static int sparse_checkout_clean(int argc, const char **argv,
 			     builtin_sparse_checkout_clean_usage, 0);
 
 	repo_config_get_bool(repo, "clean.requireforce", &require_force);
-	if (require_force && !force && !dry_run)
+	எனில் (require_force && !force && !dry_run)
 		die(_("for safety, refusing to clean without one of --force or --dry-run"));
 
-	if (dry_run)
-		msg = msg_would_remove;
+	எனில் (dry_run)
+		செய்தி = செய்தி_would_remove;
 
-	if (repo_read_index(repo) < 0)
+	எனில் (repo_read_index(repo) < 0)
 		die(_("failed to read index"));
 
-	if (convert_to_sparse(repo->index, SPARSE_INDEX_MEMORY_ONLY) ||
+	எனில் (convert_to_sparse(repo->index, SPARSE_INDEX_MEMORY_ONLY) ||
 	    repo->index->sparse_index == INDEX_EXPANDED)
 		die(_("failed to convert index to a sparse index; resolve merge conflicts and try again"));
 
@@ -1010,44 +1010,44 @@ static int sparse_checkout_clean(int argc, const char **argv,
 	strbuf_addch(&full_path, '/');
 	worktree_len = full_path.len;
 
-	for (size_t i = 0; i < repo->index->cache_nr; i++) {
-		struct cache_entry *ce = repo->index->cache[i];
-		if (!S_ISSPARSEDIR(ce->ce_mode))
-			continue;
+	க்கு (size_t i = 0; i < repo->index->cache_nr; i++) {
+		கட்டமைப்பு cache_entry *ce = repo->index->cache[i];
+		எனில் (!S_ISSPARSEDIR(ce->ce_mode))
+			தொடர்;
 		strbuf_setlen(&full_path, worktree_len);
 		strbuf_add(&full_path, ce->name, ce->ce_namelen);
 
-		if (!is_directory(full_path.buf))
-			continue;
+		எனில் (!is_directory(full_path.buf))
+			தொடர்;
 
-		if (verbose)
-			list_every_file_in_dir(msg, ce->name);
-		else
-			printf(msg, ce->name);
+		எனில் (verbose)
+			list_every_file_in_dir(செய்தி, ce->name);
+		இல்லையெனில்
+			printf(செய்தி, ce->name);
 
-		if (dry_run <= 0 &&
+		எனில் (dry_run <= 0 &&
 		    remove_dir_recursively(&full_path, 0))
 			warning_errno(_("failed to remove '%s'"), ce->name);
 	}
 
 	strbuf_release(&full_path);
-	return 0;
+	திரும்பு 0;
 }
 
-static char const * const builtin_sparse_checkout_disable_usage[] = {
+நிலையான எழுத்து மாறிலி * மாறிலி builtin_sparse_checkout_disable_usage[] = {
 	"git sparse-checkout disable",
-	NULL
+	வெற்று
 };
 
-static int sparse_checkout_disable(int argc, const char **argv,
-				   const char *prefix,
-				   struct repository *repo)
+நிலையான முழு sparse_checkout_disable(முழு argc, மாறிலி எழுத்து **argv,
+				   மாறிலி எழுத்து *prefix,
+				   கட்டமைப்பு repository *repo)
 {
-	static struct option builtin_sparse_checkout_disable_options[] = {
+	நிலையான கட்டமைப்பு option builtin_sparse_checkout_disable_options[] = {
 		OPT_END(),
 	};
-	struct pattern_list pl;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	கட்டமைப்பு pattern_list pl;
+	கட்டமைப்பு repo_config_மதிப்புகள் *cfg = repo_config_மதிப்புகள்(the_repository);
 
 	/*
 	 * We do not exit early if !repo->config_values.apply_sparse_checkout; due to the
@@ -1060,7 +1060,7 @@ static int sparse_checkout_disable(int argc, const char **argv,
 	 * forcibly return to a dense checkout regardless of initial state.
 	 */
 
-	setup_work_tree(the_repository);
+	setup_work_மரம்(the_repository);
 	argc = parse_options(argc, argv, prefix,
 			     builtin_sparse_checkout_disable_options,
 			     builtin_sparse_checkout_disable_usage, 0);
@@ -1072,9 +1072,9 @@ static int sparse_checkout_disable(int argc, const char **argv,
 	give_advice_on_expansion = 0;
 	repo_read_index(repo);
 
-	memset(&pl, 0, sizeof(pl));
-	hashmap_init(&pl.recursive_hashmap, pl_hashmap_cmp, NULL, 0);
-	hashmap_init(&pl.parent_hashmap, pl_hashmap_cmp, NULL, 0);
+	memset(&pl, 0, அளவு(pl));
+	hashmap_init(&pl.recursive_hashmap, pl_hashmap_cmp, வெற்று, 0);
+	hashmap_init(&pl.parent_hashmap, pl_hashmap_cmp, வெற்று, 0);
 	pl.use_cone_patterns = 0;
 	cfg->apply_sparse_checkout = 1;
 
@@ -1083,61 +1083,61 @@ static int sparse_checkout_disable(int argc, const char **argv,
 	prepare_repo_settings(the_repository);
 	repo->settings.sparse_index = 0;
 
-	if (update_working_directory(repo, &pl))
+	எனில் (update_working_directory(repo, &pl))
 		die(_("error while refreshing working directory"));
 
 	clear_pattern_list(&pl);
-	return set_config(repo, MODE_NO_PATTERNS);
+	திரும்பு set_config(repo, MODE_NO_PATTERNS);
 }
 
-static char const * const builtin_sparse_checkout_check_rules_usage[] = {
+நிலையான எழுத்து மாறிலி * மாறிலி builtin_sparse_checkout_check_rules_usage[] = {
 	N_("git sparse-checkout check-rules [-z] [--skip-checks]"
 	   "[--[no-]cone] [--rules-file <file>]"),
-	NULL
+	வெற்று
 };
 
-static struct sparse_checkout_check_rules_opts {
-	int cone_mode;
-	int null_termination;
-	char *rules_file;
+நிலையான கட்டமைப்பு sparse_checkout_check_rules_opts {
+	முழு cone_mode;
+	முழு null_termination;
+	எழுத்து *rules_file;
 } check_rules_opts;
 
-static int check_rules(struct repository *repo,
-		       struct pattern_list *pl,
-		       int null_terminated)
+நிலையான முழு check_rules(கட்டமைப்பு repository *repo,
+		       கட்டமைப்பு pattern_list *pl,
+		       முழு null_terminated)
 {
-	struct strbuf line = STRBUF_INIT;
-	struct strbuf unquoted = STRBUF_INIT;
-	char *path;
-	int line_terminator = null_terminated ? 0 : '\n';
+	கட்டமைப்பு strbuf வரி = STRBUF_INIT;
+	கட்டமைப்பு strbuf unquoted = STRBUF_INIT;
+	எழுத்து *path;
+	முழு வரி_terminator = null_terminated ? 0 : '\n';
 	strbuf_getline_fn getline_fn = null_terminated ? strbuf_getline_nul
 		: strbuf_getline;
 	repo->index->sparse_checkout_patterns = pl;
-	while (!getline_fn(&line, stdin)) {
-		path = line.buf;
-		if (!null_terminated && line.buf[0] == '"') {
+	போது (!getline_fn(&வரி, stdin)) {
+		path = வரி.buf;
+		எனில் (!null_terminated && வரி.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, line.buf, NULL))
+			எனில் (unquote_c_style(&unquoted, வரி.buf, வெற்று))
 				die(_("unable to unquote C-style string '%s'"),
-					line.buf);
+					வரி.buf);
 
 			path = unquoted.buf;
 		}
 
-		if (path_in_sparse_checkout(path, repo->index))
-			write_name_quoted(path, stdout, line_terminator);
+		எனில் (path_in_sparse_checkout(path, repo->index))
+			write_name_quoted(path, stdout, வரி_terminator);
 	}
-	strbuf_release(&line);
+	strbuf_release(&வரி);
 	strbuf_release(&unquoted);
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int sparse_checkout_check_rules(int argc, const char **argv, const char *prefix,
-				       struct repository *repo)
+நிலையான முழு sparse_checkout_check_rules(முழு argc, மாறிலி எழுத்து **argv, மாறிலி எழுத்து *prefix,
+				       கட்டமைப்பு repository *repo)
 {
-	static struct option builtin_sparse_checkout_check_rules_options[] = {
-		OPT_BOOL('z', NULL, &check_rules_opts.null_termination,
+	நிலையான கட்டமைப்பு option builtin_sparse_checkout_check_rules_options[] = {
+		OPT_BOOL('z', வெற்று, &check_rules_opts.null_termination,
 			 N_("terminate input and output files by a NUL character")),
 		OPT_BOOL(0, "cone", &check_rules_opts.cone_mode,
 			 N_("when used with --rules-file interpret patterns as cone mode patterns")),
@@ -1147,46 +1147,46 @@ static int sparse_checkout_check_rules(int argc, const char **argv, const char *
 	};
 
 	FILE *fp;
-	int ret;
-	struct pattern_list pl = {0};
-	struct repo_config_values *cfg = repo_config_values(the_repository);
-	char *sparse_filename;
+	முழு ret;
+	கட்டமைப்பு pattern_list pl = {0};
+	கட்டமைப்பு repo_config_மதிப்புகள் *cfg = repo_config_மதிப்புகள்(the_repository);
+	எழுத்து *sparse_filename;
 	check_rules_opts.cone_mode = -1;
 
 	argc = parse_options(argc, argv, prefix,
 			     builtin_sparse_checkout_check_rules_options,
 			     builtin_sparse_checkout_check_rules_usage, 0);
 
-	if (check_rules_opts.rules_file && check_rules_opts.cone_mode < 0)
+	எனில் (check_rules_opts.rules_file && check_rules_opts.cone_mode < 0)
 		check_rules_opts.cone_mode = 1;
 
 	update_cone_mode(&check_rules_opts.cone_mode);
 	pl.use_cone_patterns = cfg->core_sparse_checkout_cone;
-	if (check_rules_opts.rules_file) {
+	எனில் (check_rules_opts.rules_file) {
 		fp = xfopen(check_rules_opts.rules_file, "r");
-		add_patterns_from_input(&pl, argc, argv, fp);
+		add_patterns_from_உள்ளீடு(&pl, argc, argv, fp);
 		fclose(fp);
-	} else {
+	} இல்லையெனில் {
 		sparse_filename = get_sparse_checkout_filename();
-		if (add_patterns_from_file_to_list(sparse_filename, "", 0, &pl,
-						   NULL, 0))
+		எனில் (add_patterns_from_file_to_list(sparse_filename, "", 0, &pl,
+						   வெற்று, 0))
 			die(_("unable to load existing sparse-checkout patterns"));
-		free(sparse_filename);
+		விடுவி(sparse_filename);
 	}
 
 	ret = check_rules(repo, &pl, check_rules_opts.null_termination);
 	clear_pattern_list(&pl);
-	free(check_rules_opts.rules_file);
-	return ret;
+	விடுவி(check_rules_opts.rules_file);
+	திரும்பு ret;
 }
 
-int cmd_sparse_checkout(int argc,
-			const char **argv,
-			const char *prefix,
-			struct repository *repo)
+முழு cmd_sparse_checkout(முழு argc,
+			மாறிலி எழுத்து **argv,
+			மாறிலி எழுத்து *prefix,
+			கட்டமைப்பு repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option builtin_sparse_checkout_options[] = {
+	parse_opt_subcommand_fn *fn = வெற்று;
+	கட்டமைப்பு option builtin_sparse_checkout_options[] = {
 		OPT_SUBCOMMAND("list", &fn, sparse_checkout_list),
 		OPT_SUBCOMMAND("init", &fn, sparse_checkout_init),
 		OPT_SUBCOMMAND("set", &fn, sparse_checkout_set),
@@ -1202,10 +1202,10 @@ int cmd_sparse_checkout(int argc,
 			     builtin_sparse_checkout_options,
 			     builtin_sparse_checkout_usage, 0);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, வெற்று);
 
 	prepare_repo_settings(repo);
 	repo->settings.command_requires_full_index = 0;
 
-	return fn(argc, argv, prefix, repo);
+	திரும்பு fn(argc, argv, prefix, repo);
 }

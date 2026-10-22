@@ -1,40 +1,40 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-file.h"
-#include "pkt-line.h"
-#include "fetch-pack.h"
-#include "remote.h"
-#include "connect.h"
-#include "oid-array.h"
-#include "protocol.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "hex.h"
+#அந்தர்பாவ "object-file.h"
+#அந்தர்பாவ "pkt-line.h"
+#அந்தர்பாவ "fetch-pack.h"
+#அந்தர்பாவ "remote.h"
+#அந்தர்பாவ "connect.h"
+#அந்தர்பாவ "oid-array.h"
+#அந்தர்பாவ "protocol.h"
 
-static const char fetch_pack_usage[] =
+நிலையான மாறிலி எழுத்து fetch_pack_usage[] =
 "git fetch-pack [--all] [--stdin] [--quiet | -q] [--keep | -k] [--thin] "
 "[--include-tag] [--upload-pack=<git-upload-pack>] [--depth=<n>] "
 "[--no-progress] [--diag-url] [-v] [<host>:]<directory> [<refs>...]";
 
-static void add_sought_entry(struct ref ***sought, int *nr, int *alloc,
-			     const char *name)
+நிலையான வெறுமை add_sought_entry(கட்டமைப்பு ref ***sought, முழு *nr, முழு *alloc,
+			     மாறிலி எழுத்து *name)
 {
-	struct ref *ref;
-	struct object_id oid;
-	const char *p;
+	கட்டமைப்பு ref *ref;
+	கட்டமைப்பு object_id oid;
+	மாறிலி எழுத்து *p;
 
-	if (!parse_oid_hex(name, &oid, &p)) {
-		if (*p == ' ') {
+	எனில் (!parse_oid_hex(name, &oid, &p)) {
+		எனில் (*p == ' ') {
 			/* <oid> <ref>, find refname */
 			name = p + 1;
-		} else if (*p == '\0') {
+		} இல்லையெனில் எனில் (*p == '\0') {
 			; /* <oid>, leave oid as name */
-		} else {
+		} இல்லையெனில் {
 			/* <ref>, clear cruft from oid */
 			oidclr(&oid, the_repository->hash_algo);
 		}
-	} else {
+	} இல்லையெனில் {
 		/* <ref>, clear cruft from get_oid_hex */
 		oidclr(&oid, the_repository->hash_algo);
 	}
@@ -46,30 +46,30 @@ static void add_sought_entry(struct ref ***sought, int *nr, int *alloc,
 	(*sought)[*nr - 1] = ref;
 }
 
-int cmd_fetch_pack(int argc,
-		   const char **argv,
-		   const char *prefix UNUSED,
-		   struct repository *repo)
+முழு cmd_fetch_pack(முழு argc,
+		   மாறிலி எழுத்து **argv,
+		   மாறிலி எழுத்து *prefix UNUSED,
+		   கட்டமைப்பு repository *repo)
 {
-	int i, ret;
-	struct ref *fetched_refs = NULL, *remote_refs = NULL;
-	const char *dest = NULL;
-	struct ref **sought = NULL;
-	struct ref **sought_to_free = NULL;
-	int nr_sought = 0, alloc_sought = 0;
-	int fd[2];
-	struct string_list pack_lockfiles = STRING_LIST_INIT_DUP;
-	struct string_list *pack_lockfiles_ptr = NULL;
-	struct child_process *conn;
-	struct fetch_pack_args args;
-	struct oid_array shallow = OID_ARRAY_INIT;
-	struct string_list deepen_not = STRING_LIST_INIT_DUP;
-	struct packet_reader reader;
-	enum protocol_version version;
+	முழு i, ret;
+	கட்டமைப்பு ref *fetched_refs = வெற்று, *remote_refs = வெற்று;
+	மாறிலி எழுத்து *dest = வெற்று;
+	கட்டமைப்பு ref **sought = வெற்று;
+	கட்டமைப்பு ref **sought_to_free = வெற்று;
+	முழு nr_sought = 0, alloc_sought = 0;
+	முழு fd[2];
+	கட்டமைப்பு string_list pack_lockfiles = STRING_LIST_INIT_DUP;
+	கட்டமைப்பு string_list *pack_lockfiles_ptr = வெற்று;
+	கட்டமைப்பு child_process *conn;
+	கட்டமைப்பு fetch_pack_args args;
+	கட்டமைப்பு oid_array shallow = OID_ARRAY_INIT;
+	கட்டமைப்பு string_list deepen_not = STRING_LIST_INIT_DUP;
+	கட்டமைப்பு packet_reader reader;
+	எண்ணிக்கை protocol_version version;
 
 	packet_trace_identity("fetch-pack");
 
-	memset(&args, 0, sizeof(args));
+	memset(&args, 0, அளவு(args));
 	list_objects_filter_init(&args.filter_options);
 	args.uploadpack = "git-upload-pack";
 
@@ -77,174 +77,174 @@ int cmd_fetch_pack(int argc,
 
 	repo->fetch_if_missing = 0;
 
-	for (i = 1; i < argc && *argv[i] == '-'; i++) {
-		const char *arg = argv[i];
+	க்கு (i = 1; i < argc && *argv[i] == '-'; i++) {
+		மாறிலி எழுத்து *arg = argv[i];
 
-		if (skip_prefix(arg, "--upload-pack=", &arg)) {
+		எனில் (skip_prefix(arg, "--upload-pack=", &arg)) {
 			args.uploadpack = arg;
-			continue;
+			தொடர்;
 		}
-		if (skip_prefix(arg, "--exec=", &arg)) {
+		எனில் (skip_prefix(arg, "--exec=", &arg)) {
 			args.uploadpack = arg;
-			continue;
+			தொடர்;
 		}
-		if (!strcmp("--quiet", arg) || !strcmp("-q", arg)) {
+		எனில் (!strcmp("--quiet", arg) || !strcmp("-q", arg)) {
 			args.quiet = 1;
-			continue;
+			தொடர்;
 		}
-		if (!strcmp("--keep", arg) || !strcmp("-k", arg)) {
+		எனில் (!strcmp("--keep", arg) || !strcmp("-k", arg)) {
 			args.lock_pack = args.keep_pack;
 			args.keep_pack = 1;
-			continue;
+			தொடர்;
 		}
-		if (!strcmp("--thin", arg)) {
+		எனில் (!strcmp("--thin", arg)) {
 			args.use_thin_pack = 1;
-			continue;
+			தொடர்;
 		}
-		if (!strcmp("--include-tag", arg)) {
+		எனில் (!strcmp("--include-tag", arg)) {
 			args.include_tag = 1;
-			continue;
+			தொடர்;
 		}
-		if (!strcmp("--all", arg)) {
+		எனில் (!strcmp("--all", arg)) {
 			args.fetch_all = 1;
-			continue;
+			தொடர்;
 		}
-		if (!strcmp("--stdin", arg)) {
+		எனில் (!strcmp("--stdin", arg)) {
 			args.stdin_refs = 1;
-			continue;
+			தொடர்;
 		}
-		if (!strcmp("--diag-url", arg)) {
+		எனில் (!strcmp("--diag-url", arg)) {
 			args.diag_url = 1;
-			continue;
+			தொடர்;
 		}
-		if (!strcmp("-v", arg)) {
+		எனில் (!strcmp("-v", arg)) {
 			args.verbose = 1;
-			continue;
+			தொடர்;
 		}
-		if (skip_prefix(arg, "--depth=", &arg)) {
-			args.depth = strtol(arg, NULL, 0);
-			continue;
+		எனில் (skip_prefix(arg, "--depth=", &arg)) {
+			args.depth = strtol(arg, வெற்று, 0);
+			தொடர்;
 		}
-		if (skip_prefix(arg, "--shallow-since=", &arg)) {
+		எனில் (skip_prefix(arg, "--shallow-since=", &arg)) {
 			args.deepen_since = xstrdup(arg);
-			continue;
+			தொடர்;
 		}
-		if (skip_prefix(arg, "--shallow-exclude=", &arg)) {
+		எனில் (skip_prefix(arg, "--shallow-exclude=", &arg)) {
 			string_list_append(&deepen_not, arg);
-			continue;
+			தொடர்;
 		}
-		if (!strcmp(arg, "--deepen-relative")) {
+		எனில் (!strcmp(arg, "--deepen-relative")) {
 			args.deepen_relative = 1;
-			continue;
+			தொடர்;
 		}
-		if (!strcmp("--no-progress", arg)) {
+		எனில் (!strcmp("--no-progress", arg)) {
 			args.no_progress = 1;
-			continue;
+			தொடர்;
 		}
-		if (!strcmp("--stateless-rpc", arg)) {
+		எனில் (!strcmp("--stateless-rpc", arg)) {
 			args.stateless_rpc = 1;
-			continue;
+			தொடர்;
 		}
-		if (!strcmp("--lock-pack", arg)) {
+		எனில் (!strcmp("--lock-pack", arg)) {
 			args.lock_pack = 1;
 			pack_lockfiles_ptr = &pack_lockfiles;
-			continue;
+			தொடர்;
 		}
-		if (!strcmp("--check-self-contained-and-connected", arg)) {
+		எனில் (!strcmp("--check-self-contained-and-connected", arg)) {
 			args.check_self_contained_and_connected = 1;
-			continue;
+			தொடர்;
 		}
-		if (!strcmp("--cloning", arg)) {
+		எனில் (!strcmp("--cloning", arg)) {
 			args.cloning = 1;
-			continue;
+			தொடர்;
 		}
-		if (!strcmp("--update-shallow", arg)) {
+		எனில் (!strcmp("--update-shallow", arg)) {
 			args.update_shallow = 1;
-			continue;
+			தொடர்;
 		}
-		if (!strcmp("--from-promisor", arg)) {
+		எனில் (!strcmp("--from-promisor", arg)) {
 			args.from_promisor = 1;
-			continue;
+			தொடர்;
 		}
-		if (!strcmp("--refetch", arg)) {
+		எனில் (!strcmp("--refetch", arg)) {
 			args.refetch = 1;
-			continue;
+			தொடர்;
 		}
-		if (skip_prefix(arg, ("--filter="), &arg)) {
+		எனில் (skip_prefix(arg, ("--filter="), &arg)) {
 			parse_list_objects_filter(&args.filter_options, arg);
-			continue;
+			தொடர்;
 		}
-		if (!strcmp(arg, ("--no-filter"))) {
+		எனில் (!strcmp(arg, ("--no-filter"))) {
 			list_objects_filter_set_no_filter(&args.filter_options);
-			continue;
+			தொடர்;
 		}
 		usage(fetch_pack_usage);
 	}
-	if (deepen_not.nr)
+	எனில் (deepen_not.nr)
 		args.deepen_not = &deepen_not;
 
-	if (i < argc)
+	எனில் (i < argc)
 		dest = argv[i++];
-	else
+	இல்லையெனில்
 		usage(fetch_pack_usage);
 
 	/*
 	 * Copy refs from cmdline to growable list, then append any
 	 * refs from the standard input:
 	 */
-	for (; i < argc; i++)
+	க்கு (; i < argc; i++)
 		add_sought_entry(&sought, &nr_sought, &alloc_sought, argv[i]);
-	if (args.stdin_refs) {
-		if (args.stateless_rpc) {
+	எனில் (args.stdin_refs) {
+		எனில் (args.stateless_rpc) {
 			/* in stateless RPC mode we use pkt-line to read
 			 * from stdin, until we get a flush packet
 			 */
-			for (;;) {
-				char *line = packet_read_line(0, NULL);
-				if (!line)
-					break;
-				add_sought_entry(&sought, &nr_sought,  &alloc_sought, line);
+			க்கு (;;) {
+				எழுத்து *வரி = packet_read_வரி(0, வெற்று);
+				எனில் (!வரி)
+					நிறுத்து;
+				add_sought_entry(&sought, &nr_sought,  &alloc_sought, வரி);
 			}
 		}
-		else {
+		இல்லையெனில் {
 			/* read from stdin one ref per line, until EOF */
-			struct strbuf line = STRBUF_INIT;
-			while (strbuf_getline_lf(&line, stdin) != EOF)
-				add_sought_entry(&sought, &nr_sought, &alloc_sought, line.buf);
-			strbuf_release(&line);
+			கட்டமைப்பு strbuf வரி = STRBUF_INIT;
+			போது (strbuf_getline_lf(&வரி, stdin) != EOF)
+				add_sought_entry(&sought, &nr_sought, &alloc_sought, வரி.buf);
+			strbuf_release(&வரி);
 		}
 	}
 
-	if (args.stateless_rpc) {
-		conn = NULL;
+	எனில் (args.stateless_rpc) {
+		conn = வெற்று;
 		fd[0] = 0;
 		fd[1] = 1;
-	} else {
-		int flags = args.verbose ? CONNECT_VERBOSE : 0;
-		if (args.diag_url)
+	} இல்லையெனில் {
+		முழு flags = args.verbose ? CONNECT_VERBOSE : 0;
+		எனில் (args.diag_url)
 			flags |= CONNECT_DIAG_URL;
 		conn = git_connect(fd, dest, GIT_CONNECT_UPLOAD_PACK,
 				   args.uploadpack, flags);
-		if (!conn)
-			return args.diag_url ? 0 : 1;
+		எனில் (!conn)
+			திரும்பு args.diag_url ? 0 : 1;
 	}
 
-	packet_reader_init(&reader, fd[0], NULL, 0,
+	packet_reader_init(&reader, fd[0], வெற்று, 0,
 			   PACKET_READ_CHOMP_NEWLINE |
 			   PACKET_READ_GENTLE_ON_EOF |
 			   PACKET_READ_DIE_ON_ERR_PACKET);
 
 	version = discover_version(&reader);
-	switch (version) {
-	case protocol_v2:
-		get_remote_refs(fd[1], &reader, &remote_refs, 0, NULL, NULL,
+	தேர்வு (version) {
+	நிலை protocol_v2:
+		get_remote_refs(fd[1], &reader, &remote_refs, 0, வெற்று, வெற்று,
 				args.stateless_rpc);
-		break;
-	case protocol_v1:
-	case protocol_v0:
-		get_remote_heads(&reader, &remote_refs, 0, NULL, &shallow);
-		break;
-	case protocol_unknown_version:
+		நிறுத்து;
+	நிலை protocol_v1:
+	நிலை protocol_v0:
+		get_remote_heads(&reader, &remote_refs, 0, வெற்று, &shallow);
+		நிறுத்து;
+	நிலை protocol_unknown_version:
 		BUG("unknown protocol version");
 	}
 
@@ -258,25 +258,25 @@ int cmd_fetch_pack(int argc,
 	fetched_refs = fetch_pack(&args, fd, remote_refs, sought, nr_sought,
 			 &shallow, pack_lockfiles_ptr, version);
 
-	if (pack_lockfiles.nr) {
-		int i;
+	எனில் (pack_lockfiles.nr) {
+		முழு i;
 
-		printf("lock %s\n", pack_lockfiles.items[0].string);
+		printf("lock %s\n", pack_lockfiles.பொருட்கள்[0].string);
 		fflush(stdout);
-		for (i = 1; i < pack_lockfiles.nr; i++)
+		க்கு (i = 1; i < pack_lockfiles.nr; i++)
 			warning(_("Lockfile created but not reported: %s"),
-				pack_lockfiles.items[i].string);
+				pack_lockfiles.பொருட்கள்[i].string);
 	}
-	if (args.check_self_contained_and_connected &&
+	எனில் (args.check_self_contained_and_connected &&
 	    args.self_contained_and_connected) {
 		printf("connectivity-ok\n");
 		fflush(stdout);
 	}
 	close(fd[0]);
 	close(fd[1]);
-	if (finish_connect(conn)) {
+	எனில் (finish_connect(conn)) {
 		ret = 1;
-		goto cleanup;
+		செல் cleanup;
 	}
 
 	ret = !fetched_refs;
@@ -289,19 +289,19 @@ int cmd_fetch_pack(int argc,
 	 */
 	ret |= report_unmatched_refs(sought, nr_sought);
 
-	for (struct ref *ref = fetched_refs; ref; ref = ref->next)
+	க்கு (கட்டமைப்பு ref *ref = fetched_refs; ref; ref = ref->next)
 		printf("%s %s\n",
 		       oid_to_hex(&ref->old_oid), ref->name);
 
 cleanup:
-	for (size_t i = 0; i < nr_sought; i++)
+	க்கு (size_t i = 0; i < nr_sought; i++)
 		free_one_ref(sought_to_free[i]);
-	free(sought_to_free);
-	free(sought);
+	விடுவி(sought_to_free);
+	விடுவி(sought);
 	free_refs(fetched_refs);
 	free_refs(remote_refs);
 	list_objects_filter_release(&args.filter_options);
 	oid_array_clear(&shallow);
 	string_list_clear(&pack_lockfiles, 0);
-	return ret;
+	திரும்பு ret;
 }

@@ -1,27 +1,27 @@
-#include "builtin.h"
-#include "gettext.h"
-#include "hex.h"
-#include "config.h"
-#include "commit.h"
-#include "tree.h"
-#include "blob.h"
-#include "tag.h"
-#include "refs.h"
-#include "cache-tree.h"
-#include "fsck.h"
-#include "parse-options.h"
-#include "progress.h"
-#include "packfile.h"
-#include "object-name.h"
-#include "odb.h"
-#include "odb/streaming.h"
-#include "path.h"
-#include "read-cache-ll.h"
-#include "replace-object.h"
-#include "resolve-undo.h"
-#include "run-command.h"
-#include "sparse-index.h"
-#include "worktree.h"
+#அந்தர்பாவ "builtin.h"
+#அந்தர்பாவ "gettext.h"
+#அந்தர்பாவ "hex.h"
+#அந்தர்பாவ "config.h"
+#அந்தர்பாவ "commit.h"
+#அந்தர்பாவ "tree.h"
+#அந்தர்பாவ "blob.h"
+#அந்தர்பாவ "tag.h"
+#அந்தர்பாவ "refs.h"
+#அந்தர்பாவ "cache-tree.h"
+#அந்தர்பாவ "fsck.h"
+#அந்தர்பாவ "parse-options.h"
+#அந்தர்பாவ "progress.h"
+#அந்தர்பாவ "packfile.h"
+#அந்தர்பாவ "object-name.h"
+#அந்தர்பாவ "odb.h"
+#அந்தர்பாவ "odb/streaming.h"
+#அந்தர்பாவ "path.h"
+#அந்தர்பாவ "read-cache-ll.h"
+#அந்தர்பாவ "replace-object.h"
+#அந்தர்பாவ "resolve-undo.h"
+#அந்தர்பாவ "run-command.h"
+#அந்தர்பாவ "sparse-index.h"
+#அந்தர்பாவ "worktree.h"
 
 #define REACHABLE 0x0001
 #define SEEN      0x0002
@@ -29,98 +29,98 @@
 /* This flag is set if something points to this object. */
 #define USED      0x0008
 
-static int show_root;
-static int show_tags;
-static int show_unreachable;
-static int include_reflogs = 1;
-static int connectivity_only;
-static int check_strict;
-static struct fsck_options fsck_walk_options;
-static struct fsck_options fsck_obj_options;
-static int errors_found;
-static int write_lost_and_found;
-static int verbose;
-static int show_progress = -1;
-static int show_dangling = 1;
-static timestamp_t now;
+நிலையான முழு show_வேர்;
+நிலையான முழு show_tags;
+நிலையான முழு show_unreachable;
+நிலையான முழு include_reflogs = 1;
+நிலையான முழு connectivity_only;
+நிலையான முழு check_strict;
+நிலையான கட்டமைப்பு fsck_options fsck_walk_options;
+நிலையான கட்டமைப்பு fsck_options fsck_obj_options;
+நிலையான முழு errors_found;
+நிலையான முழு write_lost_and_found;
+நிலையான முழு verbose;
+நிலையான முழு show_progress = -1;
+நிலையான முழு show_dangling = 1;
+நிலையான timestamp_t now;
 #define ERROR_OBJECT 01
 #define ERROR_REACHABLE 02
 #define ERROR_REFS 010
 #define ERROR_COMMIT_GRAPH 020
 
-static const char *describe_object(const struct object_id *oid)
+நிலையான மாறிலி எழுத்து *describe_object(மாறிலி கட்டமைப்பு object_id *oid)
 {
-	return fsck_describe_object(&fsck_walk_options, oid);
+	திரும்பு fsck_describe_object(&fsck_walk_options, oid);
 }
 
-static const char *printable_type(struct repository *repo,
-				  const struct object_id *oid,
-				  enum object_type type)
+நிலையான மாறிலி எழுத்து *printable_type(கட்டமைப்பு repository *repo,
+				  மாறிலி கட்டமைப்பு object_id *oid,
+				  எண்ணிக்கை object_type type)
 {
-	const char *ret;
+	மாறிலி எழுத்து *ret;
 
-	if (type == OBJ_NONE)
-		type = odb_read_object_info(repo->objects, oid, NULL);
+	எனில் (type == OBJ_NONE)
+		type = odb_read_object_info(repo->objects, oid, வெற்று);
 
 	ret = type_name(type);
-	if (!ret)
+	எனில் (!ret)
 		ret = _("unknown");
 
-	return ret;
+	திரும்பு ret;
 }
 
-static int objerror(struct repository *repo, struct object *obj, const char *err)
+நிலையான முழு objerror(கட்டமைப்பு repository *repo, கட்டமைப்பு object *obj, மாறிலி எழுத்து *err)
 {
 	errors_found |= ERROR_OBJECT;
 	/* TRANSLATORS: e.g. error in tree 01bfda: <more explanation> */
 	fprintf_ln(stderr, _("error in %s %s: %s"),
 		   printable_type(repo, &obj->oid, obj->type),
 		   describe_object(&obj->oid), err);
-	return -1;
+	திரும்பு -1;
 }
 
-static int fsck_objects_error_func(struct fsck_options *o,
-				   void *fsck_report,
-				   enum fsck_msg_type msg_type,
-				   enum fsck_msg_id msg_id UNUSED,
-				   const char *message)
+நிலையான முழு fsck_objects_error_func(கட்டமைப்பு fsck_options *o,
+				   வெறுமை *fsck_report,
+				   எண்ணிக்கை fsck_செய்தி_type செய்தி_type,
+				   எண்ணிக்கை fsck_செய்தி_id செய்தி_id UNUSED,
+				   மாறிலி எழுத்து *message)
 {
-	struct fsck_object_report *report = fsck_report;
-	const struct object_id *oid = report->oid;
-	enum object_type object_type = report->object_type;
+	கட்டமைப்பு fsck_object_report *report = fsck_report;
+	மாறிலி கட்டமைப்பு object_id *oid = report->oid;
+	எண்ணிக்கை object_type object_type = report->object_type;
 
-	switch (msg_type) {
-	case FSCK_WARN:
+	தேர்வு (செய்தி_type) {
+	நிலை FSCK_WARN:
 		/* TRANSLATORS: e.g. warning in tree 01bfda: <more explanation> */
 		fprintf_ln(stderr, _("warning in %s %s: %s"),
 			   printable_type(o->repo, oid, object_type),
 			   describe_object(oid), message);
-		return 0;
-	case FSCK_ERROR:
+		திரும்பு 0;
+	நிலை FSCK_ERROR:
 		/* TRANSLATORS: e.g. error in tree 01bfda: <more explanation> */
 		fprintf_ln(stderr, _("error in %s %s: %s"),
 			   printable_type(o->repo, oid, object_type),
 			   describe_object(oid), message);
-		return 1;
-	default:
+		திரும்பு 1;
+	இயல்பு:
 		BUG("%d (FSCK_IGNORE?) should never trigger this callback",
-		    msg_type);
+		    செய்தி_type);
 	}
 }
 
-static struct object_array pending;
+நிலையான கட்டமைப்பு object_array pending;
 
-static int mark_object(struct object *obj, enum object_type type,
-		       void *data, struct fsck_options *options)
+நிலையான முழு mark_object(கட்டமைப்பு object *obj, எண்ணிக்கை object_type type,
+		       வெறுமை *data, கட்டமைப்பு fsck_options *options)
 {
-	struct object *parent = data;
+	கட்டமைப்பு object *parent = data;
 
 	/*
 	 * The only case data is NULL or type is OBJ_ANY is when
 	 * mark_object_reachable() calls us.  All the callers of
 	 * that function has non-NULL obj hence ...
 	 */
-	if (!obj) {
+	எனில் (!obj) {
 		/* ... these references to parent->fld are safe here */
 		printf_ln(_("broken link from %7s %s"),
 			  printable_type(options->repo, &parent->oid, parent->type),
@@ -129,27 +129,27 @@ static int mark_object(struct object *obj, enum object_type type,
 			  (type == OBJ_ANY ? _("unknown") : type_name(type)),
 			  _("unknown"));
 		errors_found |= ERROR_REACHABLE;
-		return 1;
+		திரும்பு 1;
 	}
 
-	if (type != OBJ_ANY && obj->type != type)
+	எனில் (type != OBJ_ANY && obj->type != type)
 		/* ... and the reference to parent is safe here */
 		objerror(options->repo, parent, _("wrong object type in link"));
 
-	if (obj->flags & REACHABLE)
-		return 0;
+	எனில் (obj->flags & REACHABLE)
+		திரும்பு 0;
 	obj->flags |= REACHABLE;
 
-	if (is_promisor_object(options->repo, &obj->oid))
+	எனில் (is_promisor_object(options->repo, &obj->oid))
 		/*
 		 * Further recursion does not need to be performed on this
 		 * object since it is a promisor object (so it does not need to
 		 * be added to "pending").
 		 */
-		return 0;
+		திரும்பு 0;
 
-	if (!(obj->flags & HAS_OBJ)) {
-		if (parent && !odb_has_object(options->repo->objects, &obj->oid,
+	எனில் (!(obj->flags & HAS_OBJ)) {
+		எனில் (parent && !odb_has_object(options->repo->objects, &obj->oid,
 					      ODB_HAS_OBJECT_RECHECK_PACKED)) {
 			printf_ln(_("broken link from %7s %s\n"
 				    "              to %7s %s"),
@@ -159,114 +159,114 @@ static int mark_object(struct object *obj, enum object_type type,
 				  describe_object(&obj->oid));
 			errors_found |= ERROR_REACHABLE;
 		}
-		return 1;
+		திரும்பு 1;
 	}
 
-	add_object_array(obj, NULL, &pending);
-	return 0;
+	add_object_array(obj, வெற்று, &pending);
+	திரும்பு 0;
 }
 
-static void mark_object_reachable(struct object *obj)
+நிலையான வெறுமை mark_object_reachable(கட்டமைப்பு object *obj)
 {
-	mark_object(obj, OBJ_ANY, NULL, &fsck_walk_options);
+	mark_object(obj, OBJ_ANY, வெற்று, &fsck_walk_options);
 }
 
-static int traverse_one_object(struct object *obj)
+நிலையான முழு traverse_one_object(கட்டமைப்பு object *obj)
 {
-	int result = fsck_walk(obj, obj, &fsck_walk_options);
+	முழு result = fsck_walk(obj, obj, &fsck_walk_options);
 
-	if (obj->type == OBJ_TREE) {
-		struct tree *tree = (struct tree *)obj;
-		free_tree_buffer(tree);
+	எனில் (obj->type == OBJ_மரம்) {
+		கட்டமைப்பு மரம் *மரம் = (கட்டமைப்பு மரம் *)obj;
+		free_மரம்_buffer(மரம்);
 	}
-	return result;
+	திரும்பு result;
 }
 
-static int traverse_reachable(struct repository *repo)
+நிலையான முழு traverse_reachable(கட்டமைப்பு repository *repo)
 {
-	struct progress *progress = NULL;
-	unsigned int nr = 0;
-	int result = 0;
-	if (show_progress)
+	கட்டமைப்பு progress *progress = வெற்று;
+	unsigned முழு nr = 0;
+	முழு result = 0;
+	எனில் (show_progress)
 		progress = start_delayed_progress(repo,
 						  _("Checking connectivity"), 0);
-	while (pending.nr) {
-		result |= traverse_one_object(object_array_pop(&pending));
+	போது (pending.nr) {
+		result |= traverse_one_object(object_array_எடு(&pending));
 		display_progress(progress, ++nr);
 	}
 	stop_progress(&progress);
-	return !!result;
+	திரும்பு !!result;
 }
 
-static int mark_used(struct object *obj, enum object_type type UNUSED,
-		     void *data UNUSED, struct fsck_options *options UNUSED)
+நிலையான முழு mark_used(கட்டமைப்பு object *obj, எண்ணிக்கை object_type type UNUSED,
+		     வெறுமை *data UNUSED, கட்டமைப்பு fsck_options *options UNUSED)
 {
-	if (!obj)
-		return 1;
+	எனில் (!obj)
+		திரும்பு 1;
 	obj->flags |= USED;
-	return 0;
+	திரும்பு 0;
 }
 
-static int mark_unreachable_referents(const struct object_id *oid,
-				      struct object_info *oi UNUSED,
-				      void *data)
+நிலையான முழு mark_unreachable_referents(மாறிலி கட்டமைப்பு object_id *oid,
+				      கட்டமைப்பு object_info *oi UNUSED,
+				      வெறுமை *data)
 {
-	struct repository *repo = data;
-	struct fsck_options options;
-	struct object *obj = lookup_object(data, oid);
+	கட்டமைப்பு repository *repo = data;
+	கட்டமைப்பு fsck_options options;
+	கட்டமைப்பு object *obj = lookup_object(data, oid);
 
-	if (!obj || !(obj->flags & HAS_OBJ))
-		return 0; /* not part of our original set */
-	if (obj->flags & REACHABLE)
-		return 0; /* reachable objects already traversed */
+	எனில் (!obj || !(obj->flags & HAS_OBJ))
+		திரும்பு 0; /* not part of our original set */
+	எனில் (obj->flags & REACHABLE)
+		திரும்பு 0; /* reachable objects already traversed */
 
 	/*
 	 * Avoid passing OBJ_NONE to fsck_walk, which will parse the object
 	 * (and we want to avoid parsing blobs).
 	 */
-	if (obj->type == OBJ_NONE) {
-		enum object_type type = odb_read_object_info(repo->objects,
-							     &obj->oid, NULL);
-		if (type > 0)
+	எனில் (obj->type == OBJ_NONE) {
+		எண்ணிக்கை object_type type = odb_read_object_info(repo->objects,
+							     &obj->oid, வெற்று);
+		எனில் (type > 0)
 			object_as_type(obj, type, 0);
 	}
 
 	fsck_options_init(&options, repo, FSCK_OPTIONS_DEFAULT);
 	options.walk = mark_used;
-	fsck_walk(obj, NULL, &options);
-	if (obj->type == OBJ_TREE)
-		free_tree_buffer((struct tree *)obj);
+	fsck_walk(obj, வெற்று, &options);
+	எனில் (obj->type == OBJ_மரம்)
+		free_மரம்_buffer((கட்டமைப்பு மரம் *)obj);
 
-	return 0;
+	திரும்பு 0;
 }
 
 /*
  * Check a single reachable object
  */
-static void check_reachable_object(struct repository *repo, struct object *obj)
+நிலையான வெறுமை check_reachable_object(கட்டமைப்பு repository *repo, கட்டமைப்பு object *obj)
 {
 	/*
 	 * We obviously want the object to be parsed,
 	 * except if it was in a pack-file and we didn't
 	 * do a full fsck
 	 */
-	if (!(obj->flags & HAS_OBJ)) {
-		if (is_promisor_object(repo, &obj->oid))
-			return;
-		if (has_object_pack(repo, &obj->oid))
-			return; /* it is in pack - forget about it */
+	எனில் (!(obj->flags & HAS_OBJ)) {
+		எனில் (is_promisor_object(repo, &obj->oid))
+			திரும்பு;
+		எனில் (has_object_pack(repo, &obj->oid))
+			திரும்பு; /* it is in pack - forget about it */
 		printf_ln(_("missing %s %s"),
 			  printable_type(repo, &obj->oid, obj->type),
 			  describe_object(&obj->oid));
 		errors_found |= ERROR_REACHABLE;
-		return;
+		திரும்பு;
 	}
 }
 
 /*
  * Check a single unreachable object
  */
-static void check_unreachable_object(struct repository *repo, struct object *obj)
+நிலையான வெறுமை check_unreachable_object(கட்டமைப்பு repository *repo, கட்டமைப்பு object *obj)
 {
 	/*
 	 * Missing unreachable object? Ignore it. It's not like
@@ -274,18 +274,18 @@ static void check_unreachable_object(struct repository *repo, struct object *obj
 	 * to complain about it being unreachable (since it does
 	 * not exist).
 	 */
-	if (!(obj->flags & HAS_OBJ))
-		return;
+	எனில் (!(obj->flags & HAS_OBJ))
+		திரும்பு;
 
 	/*
 	 * Unreachable object that exists? Show it if asked to,
 	 * since this is something that is prunable.
 	 */
-	if (show_unreachable) {
+	எனில் (show_unreachable) {
 		printf_ln(_("unreachable %s %s"),
 			  printable_type(repo, &obj->oid, obj->type),
 			  describe_object(&obj->oid));
-		return;
+		திரும்பு;
 	}
 
 	/*
@@ -300,35 +300,35 @@ static void check_unreachable_object(struct repository *repo, struct object *obj
 	 * deleted a branch by mistake, this is a prime candidate to
 	 * start looking at, for example.
 	 */
-	if (!(obj->flags & USED)) {
-		if (show_dangling)
+	எனில் (!(obj->flags & USED)) {
+		எனில் (show_dangling)
 			printf_ln(_("dangling %s %s"),
 				  printable_type(repo, &obj->oid, obj->type),
 				  describe_object(&obj->oid));
-		if (write_lost_and_found) {
-			char *filename = repo_git_path(repo, "lost-found/%s/%s",
+		எனில் (write_lost_and_found) {
+			எழுத்து *filename = repo_git_path(repo, "lost-found/%s/%s",
 				obj->type == OBJ_COMMIT ? "commit" : "other",
 				describe_object(&obj->oid));
 			FILE *f;
 
-			if (safe_create_leading_directories_const(repo, filename)) {
+			எனில் (safe_create_leading_directories_const(repo, filename)) {
 				error(_("could not create lost-found"));
-				free(filename);
-				return;
+				விடுவி(filename);
+				திரும்பு;
 			}
 			f = xfopen(filename, "w");
-			if (obj->type == OBJ_BLOB) {
-				if (odb_stream_blob_to_fd(repo->objects, fileno(f),
-							  &obj->oid, NULL, 1))
+			எனில் (obj->type == OBJ_BLOB) {
+				எனில் (odb_stream_blob_to_fd(repo->objects, fileno(f),
+							  &obj->oid, வெற்று, 1))
 					die_errno(_("could not write '%s'"), filename);
-			} else
+			} இல்லையெனில்
 				fprintf(f, "%s\n", describe_object(&obj->oid));
-			if (fclose(f))
+			எனில் (fclose(f))
 				die_errno(_("could not finish '%s'"),
 					  filename);
-			free(filename);
+			விடுவி(filename);
 		}
-		return;
+		திரும்பு;
 	}
 
 	/*
@@ -338,20 +338,20 @@ static void check_unreachable_object(struct repository *repo, struct object *obj
 	 */
 }
 
-static void check_object(struct repository *repo, struct object *obj)
+நிலையான வெறுமை check_object(கட்டமைப்பு repository *repo, கட்டமைப்பு object *obj)
 {
-	if (verbose)
+	எனில் (verbose)
 		fprintf_ln(stderr, _("Checking %s"), describe_object(&obj->oid));
 
-	if (obj->flags & REACHABLE)
+	எனில் (obj->flags & REACHABLE)
 		check_reachable_object(repo, obj);
-	else
+	இல்லையெனில்
 		check_unreachable_object(repo, obj);
 }
 
-static void check_connectivity(struct repository *repo)
+நிலையான வெறுமை check_connectivity(கட்டமைப்பு repository *repo)
 {
-	int i, max;
+	முழு i, max;
 
 	/* Traverse the pending reachable objects */
 	traverse_reachable(repo);
@@ -361,7 +361,7 @@ static void check_connectivity(struct repository *repo)
 	 * unreachable objects with USED. Do that now to make --dangling, etc
 	 * accurate.
 	 */
-	if (connectivity_only && (show_dangling || write_lost_and_found)) {
+	எனில் (connectivity_only && (show_dangling || write_lost_and_found)) {
 		/*
 		 * Even though we already have a "struct object" for each of
 		 * these in memory, we must not iterate over the internal
@@ -372,69 +372,69 @@ static void check_connectivity(struct repository *repo)
 		 * and ignore any that weren't present in our earlier
 		 * traversal.
 		 */
-		odb_for_each_object(repo->objects, NULL,
+		odb_for_each_object(repo->objects, வெற்று,
 				    mark_unreachable_referents, repo, 0);
 	}
 
 	/* Look up all the requirements, warn about missing objects.. */
 	max = get_max_object_index(repo);
-	if (verbose)
+	எனில் (verbose)
 		fprintf_ln(stderr, _("Checking connectivity (%d objects)"), max);
 
-	for (i = 0; i < max; i++) {
-		struct object *obj = get_indexed_object(repo, i);
+	க்கு (i = 0; i < max; i++) {
+		கட்டமைப்பு object *obj = get_indexed_object(repo, i);
 
-		if (obj)
+		எனில் (obj)
 			check_object(repo, obj);
 	}
 }
 
-static int fsck_obj_buffer(const struct object_id *oid, enum object_type type,
-			   unsigned long size, void *buffer, int *eaten, void *cb_data)
+நிலையான முழு fsck_obj_buffer(மாறிலி கட்டமைப்பு object_id *oid, எண்ணிக்கை object_type type,
+			   unsigned long size, வெறுமை *buffer, முழு *eaten, வெறுமை *cb_data)
 {
-	struct repository *repo = cb_data;
-	struct object *obj;
-	int err;
+	கட்டமைப்பு repository *repo = cb_data;
+	கட்டமைப்பு object *obj;
+	முழு err;
 
 	/*
 	 * Note, buffer may be NULL if type is OBJ_BLOB. See
 	 * verify_packfile(), data_valid variable for details.
 	 */
 	obj = parse_object_buffer(repo, oid, type, size, buffer, eaten);
-	if (!obj) {
+	எனில் (!obj) {
 		errors_found |= ERROR_OBJECT;
 		err = error(_("%s: object corrupt or missing"),
 			    oid_to_hex(oid));
-		goto out;
+		செல் out;
 	}
 
 	obj->flags &= ~REACHABLE;
 	obj->flags |= HAS_OBJ | SEEN;
 
-	if (verbose)
+	எனில் (verbose)
 		fprintf_ln(stderr, _("Checking %s %s"),
 			   printable_type(repo, &obj->oid, obj->type),
 			   describe_object(&obj->oid));
 
-	if (fsck_walk(obj, NULL, &fsck_obj_options))
+	எனில் (fsck_walk(obj, வெற்று, &fsck_obj_options))
 		objerror(repo, obj, _("broken links"));
 
 	err = fsck_object(obj, buffer, size, &fsck_obj_options);
-	if (err)
-		goto out;
+	எனில் (err)
+		செல் out;
 
-	if (obj->type == OBJ_COMMIT) {
-		struct commit *commit = (struct commit *) obj;
+	எனில் (obj->type == OBJ_COMMIT) {
+		கட்டமைப்பு commit *commit = (கட்டமைப்பு commit *) obj;
 
-		if (!commit->parents && show_root)
+		எனில் (!commit->parents && show_வேர்)
 			printf_ln(_("root %s"),
 				  describe_object(&commit->object.oid));
 	}
 
-	if (obj->type == OBJ_TAG) {
-		struct tag *tag = (struct tag *) obj;
+	எனில் (obj->type == OBJ_TAG) {
+		கட்டமைப்பு tag *tag = (கட்டமைப்பு tag *) obj;
 
-		if (show_tags && tag->tagged) {
+		எனில் (show_tags && tag->tagged) {
 			printf_ln(_("tagged %s %s (%s) in %s"),
 				  printable_type(repo, &tag->tagged->oid, tag->tagged->type),
 				  describe_object(&tag->tagged->oid),
@@ -444,29 +444,29 @@ static int fsck_obj_buffer(const struct object_id *oid, enum object_type type,
 	}
 
 out:
-	if (obj && obj->type == OBJ_TREE)
-		free_tree_buffer((struct tree *)obj);
-	return err;
+	எனில் (obj && obj->type == OBJ_மரம்)
+		free_மரம்_buffer((கட்டமைப்பு மரம் *)obj);
+	திரும்பு err;
 }
 
-static int default_refs;
+நிலையான முழு default_refs;
 
-static void fsck_handle_reflog_oid(struct repository *repo,
-				   const char *refname, struct object_id *oid,
+நிலையான வெறுமை fsck_handle_reflog_oid(கட்டமைப்பு repository *repo,
+				   மாறிலி எழுத்து *refname, கட்டமைப்பு object_id *oid,
 				   timestamp_t timestamp)
 {
-	struct object *obj;
+	கட்டமைப்பு object *obj;
 
-	if (!is_null_oid(oid)) {
+	எனில் (!is_null_oid(oid)) {
 		obj = lookup_object(repo, oid);
-		if (obj && (obj->flags & HAS_OBJ)) {
-			if (timestamp)
+		எனில் (obj && (obj->flags & HAS_OBJ)) {
+			எனில் (timestamp)
 				fsck_put_object_name(&fsck_walk_options, oid,
 						     "%s@{%"PRItime"}",
 						     refname, timestamp);
 			obj->flags |= USED;
 			mark_object_reachable(obj);
-		} else if (!is_promisor_object(repo, oid)) {
+		} இல்லையெனில் எனில் (!is_promisor_object(repo, oid)) {
 			error(_("%s: invalid reflog entry %s"),
 			      refname, oid_to_hex(oid));
 			errors_found |= ERROR_REACHABLE;
@@ -474,80 +474,80 @@ static void fsck_handle_reflog_oid(struct repository *repo,
 	}
 }
 
-static int fsck_handle_reflog_ent(const char *refname,
-				  struct object_id *ooid, struct object_id *noid,
-				  const char *email UNUSED,
-				  timestamp_t timestamp, int tz UNUSED,
-				  const char *message UNUSED, void *cb_data)
+நிலையான முழு fsck_handle_reflog_ent(மாறிலி எழுத்து *refname,
+				  கட்டமைப்பு object_id *ooid, கட்டமைப்பு object_id *noid,
+				  மாறிலி எழுத்து *email UNUSED,
+				  timestamp_t timestamp, முழு tz UNUSED,
+				  மாறிலி எழுத்து *message UNUSED, வெறுமை *cb_data)
 {
-	struct repository *repo = cb_data;
+	கட்டமைப்பு repository *repo = cb_data;
 
-	if (now && timestamp > now)
-		return 0;
+	எனில் (now && timestamp > now)
+		திரும்பு 0;
 
-	if (verbose)
+	எனில் (verbose)
 		fprintf_ln(stderr, _("Checking reflog %s->%s"),
 			   oid_to_hex(ooid), oid_to_hex(noid));
 
 	fsck_handle_reflog_oid(repo, refname, ooid, 0);
 	fsck_handle_reflog_oid(repo, refname, noid, timestamp);
-	return 0;
+	திரும்பு 0;
 }
 
-static int fsck_handle_reflog(const char *logname, void *cb_data)
+நிலையான முழு fsck_handle_reflog(மாறிலி எழுத்து *logname, வெறுமை *cb_data)
 {
-	struct strbuf refname = STRBUF_INIT;
-	struct worktree *wt = cb_data;
+	கட்டமைப்பு strbuf refname = STRBUF_INIT;
+	கட்டமைப்பு worktree *wt = cb_data;
 
 	strbuf_worktree_ref(wt, &refname, logname);
 	refs_for_each_reflog_ent(get_main_ref_store(wt->repo),
 				 refname.buf, fsck_handle_reflog_ent,
 				 wt->repo);
 	strbuf_release(&refname);
-	return 0;
+	திரும்பு 0;
 }
 
-struct ref_snapshot {
-	char *refname;
-	struct object_id oid;
+கட்டமைப்பு ref_snapshot {
+	எழுத்து *refname;
+	கட்டமைப்பு object_id oid;
 	/* TODO: Maybe supplement with latest reflog entry info too? */
 };
 
-struct snapshot {
+கட்டமைப்பு snapshot {
 	size_t nr;
 	size_t alloc;
-	struct ref_snapshot *ref;
+	கட்டமைப்பு ref_snapshot *ref;
 	/* TODO: Consider also snapshotting the index of each worktree. */
 };
 
-struct snapshot_ref_data {
-	struct repository *repo;
-	struct snapshot *snap;
+கட்டமைப்பு snapshot_ref_data {
+	கட்டமைப்பு repository *repo;
+	கட்டமைப்பு snapshot *snap;
 };
 
-static int snapshot_ref(const struct reference *ref, void *cb_data)
+நிலையான முழு snapshot_ref(மாறிலி கட்டமைப்பு reference *ref, வெறுமை *cb_data)
 {
-	struct snapshot_ref_data *data = cb_data;
-	struct snapshot *snap = data->snap;
-	struct object *obj;
+	கட்டமைப்பு snapshot_ref_data *data = cb_data;
+	கட்டமைப்பு snapshot *snap = data->snap;
+	கட்டமைப்பு object *obj;
 
 	obj = parse_object(data->repo, ref->oid);
-	if (!obj) {
-		if (is_promisor_object(data->repo, ref->oid)) {
+	எனில் (!obj) {
+		எனில் (is_promisor_object(data->repo, ref->oid)) {
 			/*
 			 * Increment default_refs anyway, because this is a
 			 * valid ref.
 			 */
 			 default_refs++;
-			 return 0;
+			 திரும்பு 0;
 		}
 		error(_("%s: invalid sha1 pointer %s"),
 		      ref->name, oid_to_hex(ref->oid));
 		errors_found |= ERROR_REACHABLE;
 		/* We'll continue with the rest despite the error.. */
-		return 0;
+		திரும்பு 0;
 	}
-	if (obj->type != OBJ_COMMIT && is_branch(ref->name)) {
+	எனில் (obj->type != OBJ_COMMIT && is_branch(ref->name)) {
 		error(_("%s: not a commit"), ref->name);
 		errors_found |= ERROR_REFS;
 	}
@@ -558,13 +558,13 @@ static int snapshot_ref(const struct reference *ref, void *cb_data)
 	oidcpy(&snap->ref[snap->nr].oid, ref->oid);
 	snap->nr++;
 
-	return 0;
+	திரும்பு 0;
 }
 
-static int fsck_handle_ref(const struct reference *ref, void *cb_data)
+நிலையான முழு fsck_handle_ref(மாறிலி கட்டமைப்பு reference *ref, வெறுமை *cb_data)
 {
-	struct repository *repo = cb_data;
-	struct object *obj;
+	கட்டமைப்பு repository *repo = cb_data;
+	கட்டமைப்பு object *obj;
 
 	obj = parse_object(repo, ref->oid);
 	obj->flags |= USED;
@@ -572,59 +572,59 @@ static int fsck_handle_ref(const struct reference *ref, void *cb_data)
 			     ref->oid, "%s", ref->name);
 	mark_object_reachable(obj);
 
-	return 0;
+	திரும்பு 0;
 }
 
-static void snapshot_refs(struct repository *repo,
-			  struct snapshot *snap, int argc, const char **argv)
+நிலையான வெறுமை snapshot_refs(கட்டமைப்பு repository *repo,
+			  கட்டமைப்பு snapshot *snap, முழு argc, மாறிலி எழுத்து **argv)
 {
-	struct refs_for_each_ref_options opts = {
+	கட்டமைப்பு refs_for_each_ref_options opts = {
 		.flags = REFS_FOR_EACH_INCLUDE_BROKEN,
 	};
-	struct snapshot_ref_data data = {
+	கட்டமைப்பு snapshot_ref_data data = {
 		.repo = repo,
 		.snap = snap,
 	};
-	struct worktree **worktrees, **p;
-	const char *head_points_at;
-	struct object_id head_oid;
+	கட்டமைப்பு worktree **worktrees, **p;
+	மாறிலி எழுத்து *head_points_at;
+	கட்டமைப்பு object_id head_oid;
 
-	for (int i = 0; i < argc; i++) {
-		const char *arg = argv[i];
-		struct object_id oid;
-		if (!repo_get_oid(repo, arg, &oid)) {
-			struct reference ref = {
+	க்கு (முழு i = 0; i < argc; i++) {
+		மாறிலி எழுத்து *arg = argv[i];
+		கட்டமைப்பு object_id oid;
+		எனில் (!repo_get_oid(repo, arg, &oid)) {
+			கட்டமைப்பு reference ref = {
 				.name = arg,
 				.oid = &oid,
 			};
 
 			snapshot_ref(&ref, &data);
-			continue;
+			தொடர்;
 		}
 		error(_("invalid parameter: expected sha1, got '%s'"), arg);
 		errors_found |= ERROR_OBJECT;
 	}
 
-	if (argc) {
+	எனில் (argc) {
 		include_reflogs = 0;
-		return;
+		திரும்பு;
 	}
 
 	refs_for_each_ref_ext(get_main_ref_store(repo),
 			      snapshot_ref, &data, &opts);
 
 	worktrees = get_worktrees(repo);
-	for (p = worktrees; *p; p++) {
-		struct worktree *wt = *p;
-		struct strbuf refname = STRBUF_INIT;
+	க்கு (p = worktrees; *p; p++) {
+		கட்டமைப்பு worktree *wt = *p;
+		கட்டமைப்பு strbuf refname = STRBUF_INIT;
 
 		strbuf_worktree_ref(wt, &refname, "HEAD");
 
 		head_points_at = refs_resolve_ref_unsafe(get_main_ref_store(repo),
-							 refname.buf, 0, &head_oid, NULL);
+							 refname.buf, 0, &head_oid, வெற்று);
 
-		if (head_points_at && !is_null_oid(&head_oid)) {
-			struct reference ref = {
+		எனில் (head_points_at && !is_null_oid(&head_oid)) {
+			கட்டமைப்பு reference ref = {
 				.name = refname.buf,
 				.oid = &head_oid,
 			};
@@ -642,33 +642,33 @@ static void snapshot_refs(struct repository *repo,
 	free_worktrees(worktrees);
 
 	/* Ignore reflogs newer than now */
-	now = time(NULL);
+	now = time(வெற்று);
 }
 
 
-static void free_snapshot_refs(struct snapshot *snap)
+நிலையான வெறுமை free_snapshot_refs(கட்டமைப்பு snapshot *snap)
 {
-	for (size_t i = 0; i < snap->nr; i++)
-		free(snap->ref[i].refname);
-	free(snap->ref);
+	க்கு (size_t i = 0; i < snap->nr; i++)
+		விடுவி(snap->ref[i].refname);
+	விடுவி(snap->ref);
 }
 
-static void process_refs(struct repository *repo, struct snapshot *snap)
+நிலையான வெறுமை process_refs(கட்டமைப்பு repository *repo, கட்டமைப்பு snapshot *snap)
 {
-	struct worktree **worktrees, **p;
+	கட்டமைப்பு worktree **worktrees, **p;
 
-	for (size_t i = 0; i < snap->nr; i++) {
-		struct reference ref = {
+	க்கு (size_t i = 0; i < snap->nr; i++) {
+		கட்டமைப்பு reference ref = {
 			.name = snap->ref[i].refname,
 			.oid = &snap->ref[i].oid,
 		};
 		fsck_handle_ref(&ref, repo);
 	}
 
-	if (include_reflogs) {
+	எனில் (include_reflogs) {
 		worktrees = get_worktrees(repo);
-		for (p = worktrees; *p; p++) {
-			struct worktree *wt = *p;
+		க்கு (p = worktrees; *p; p++) {
+			கட்டமைப்பு worktree *wt = *p;
 
 			refs_for_each_reflog(get_worktree_ref_store(wt),
 					     fsck_handle_reflog, wt);
@@ -688,68 +688,68 @@ static void process_refs(struct repository *repo, struct snapshot *snap)
 	 * So we just print a warning about it, and clear the
 	 * "show_unreachable" flag.
 	 */
-	if (!default_refs) {
+	எனில் (!default_refs) {
 		fprintf_ln(stderr, _("notice: No default references"));
 		show_unreachable = 0;
 	}
 }
 
-static int fsck_cache_tree(struct repository *repo, struct cache_tree *it, const char *index_path)
+நிலையான முழு fsck_cache_மரம்(கட்டமைப்பு repository *repo, கட்டமைப்பு cache_மரம் *it, மாறிலி எழுத்து *index_path)
 {
-	int i;
-	int err = 0;
+	முழு i;
+	முழு err = 0;
 
-	if (verbose)
+	எனில் (verbose)
 		fprintf_ln(stderr, _("Checking cache tree of %s"), index_path);
 
-	if (0 <= it->entry_count) {
-		struct object *obj = parse_object(repo, &it->oid);
-		if (!obj) {
+	எனில் (0 <= it->entry_மொத்தம்) {
+		கட்டமைப்பு object *obj = parse_object(repo, &it->oid);
+		எனில் (!obj) {
 			error(_("%s: invalid sha1 pointer in cache-tree of %s"),
 			      oid_to_hex(&it->oid), index_path);
 			errors_found |= ERROR_REFS;
-			return 1;
+			திரும்பு 1;
 		}
 		obj->flags |= USED;
 		fsck_put_object_name(&fsck_walk_options, &it->oid, ":");
 		mark_object_reachable(obj);
-		if (obj->type != OBJ_TREE)
+		எனில் (obj->type != OBJ_மரம்)
 			err |= objerror(repo, obj, _("non-tree in cache-tree"));
 	}
-	for (i = 0; i < it->subtree_nr; i++)
-		err |= fsck_cache_tree(repo, it->down[i]->cache_tree, index_path);
-	return err;
+	க்கு (i = 0; i < it->subtree_nr; i++)
+		err |= fsck_cache_மரம்(repo, it->down[i]->cache_மரம், index_path);
+	திரும்பு err;
 }
 
-static int fsck_resolve_undo(struct index_state *istate,
-			     const char *index_path)
+நிலையான முழு fsck_resolve_undo(கட்டமைப்பு index_state *istate,
+			     மாறிலி எழுத்து *index_path)
 {
-	struct string_list_item *item;
-	struct string_list *resolve_undo = istate->resolve_undo;
+	கட்டமைப்பு string_list_item *item;
+	கட்டமைப்பு string_list *resolve_undo = istate->resolve_undo;
 
-	if (!resolve_undo)
-		return 0;
+	எனில் (!resolve_undo)
+		திரும்பு 0;
 
 	for_each_string_list_item(item, resolve_undo) {
-		const char *path = item->string;
-		struct resolve_undo_info *ru = item->util;
-		int i;
+		மாறிலி எழுத்து *path = item->string;
+		கட்டமைப்பு resolve_undo_info *ru = item->util;
+		முழு i;
 
-		if (!ru)
-			continue;
-		for (i = 0; i < 3; i++) {
-			struct object *obj;
+		எனில் (!ru)
+			தொடர்;
+		க்கு (i = 0; i < 3; i++) {
+			கட்டமைப்பு object *obj;
 
-			if (!ru->mode[i] || !S_ISREG(ru->mode[i]))
-				continue;
+			எனில் (!ru->mode[i] || !S_ISREG(ru->mode[i]))
+				தொடர்;
 
 			obj = parse_object(istate->repo, &ru->oid[i]);
-			if (!obj) {
+			எனில் (!obj) {
 				error(_("%s: invalid sha1 pointer in resolve-undo of %s"),
 				      oid_to_hex(&ru->oid[i]),
 				      index_path);
 				errors_found |= ERROR_REFS;
-				continue;
+				தொடர்;
 			}
 			obj->flags |= USED;
 			fsck_put_object_name(&fsck_walk_options, &ru->oid[i],
@@ -757,28 +757,28 @@ static int fsck_resolve_undo(struct index_state *istate,
 			mark_object_reachable(obj);
 		}
 	}
-	return 0;
+	திரும்பு 0;
 }
 
-static void fsck_index(struct index_state *istate, const char *index_path,
-		       int is_current_worktree)
+நிலையான வெறுமை fsck_index(கட்டமைப்பு index_state *istate, மாறிலி எழுத்து *index_path,
+		       முழு is_current_worktree)
 {
-	unsigned int i;
+	unsigned முழு i;
 
 	/* TODO: audit for interaction with sparse-index. */
 	ensure_full_index(istate);
-	for (i = 0; i < istate->cache_nr; i++) {
-		unsigned int mode;
-		struct blob *blob;
-		struct object *obj;
+	க்கு (i = 0; i < istate->cache_nr; i++) {
+		unsigned முழு mode;
+		கட்டமைப்பு blob *blob;
+		கட்டமைப்பு object *obj;
 
 		mode = istate->cache[i]->ce_mode;
-		if (S_ISGITLINK(mode))
-			continue;
+		எனில் (S_ISGITLINK(mode))
+			தொடர்;
 		blob = lookup_blob(istate->repo,
 				   &istate->cache[i]->oid);
-		if (!blob)
-			continue;
+		எனில் (!blob)
+			தொடர்;
 		obj = &blob->object;
 		obj->flags |= USED;
 		fsck_put_object_name(&fsck_walk_options, &obj->oid,
@@ -787,74 +787,74 @@ static void fsck_index(struct index_state *istate, const char *index_path,
 				     istate->cache[i]->name);
 		mark_object_reachable(obj);
 	}
-	if (istate->cache_tree)
-		fsck_cache_tree(istate->repo, istate->cache_tree, index_path);
+	எனில் (istate->cache_மரம்)
+		fsck_cache_மரம்(istate->repo, istate->cache_மரம், index_path);
 	fsck_resolve_undo(istate, index_path);
 }
 
-static int mark_object_for_connectivity(const struct object_id *oid,
-					struct object_info *oi UNUSED,
-					void *cb_data)
+நிலையான முழு mark_object_for_connectivity(மாறிலி கட்டமைப்பு object_id *oid,
+					கட்டமைப்பு object_info *oi UNUSED,
+					வெறுமை *cb_data)
 {
-	struct repository *repo = cb_data;
-	struct object *obj = lookup_unknown_object(repo, oid);
+	கட்டமைப்பு repository *repo = cb_data;
+	கட்டமைப்பு object *obj = lookup_unknown_object(repo, oid);
 	obj->flags |= HAS_OBJ;
-	return 0;
+	திரும்பு 0;
 }
 
-static void fsck_refs(struct repository *r)
+நிலையான வெறுமை fsck_refs(கட்டமைப்பு repository *r)
 {
-	struct child_process refs_verify = CHILD_PROCESS_INIT;
-	struct progress *progress = NULL;
+	கட்டமைப்பு child_process refs_verify = CHILD_PROCESS_INIT;
+	கட்டமைப்பு progress *progress = வெற்று;
 
-	if (show_progress)
+	எனில் (show_progress)
 		progress = start_progress(r, _("Checking ref database"), 1);
 
-	if (verbose)
+	எனில் (verbose)
 		fprintf_ln(stderr, _("Checking ref database"));
 
 	child_process_init(&refs_verify);
 	refs_verify.git_cmd = 1;
-	strvec_pushl(&refs_verify.args, "refs", "verify", NULL);
-	if (verbose)
-		strvec_push(&refs_verify.args, "--verbose");
-	if (check_strict)
-		strvec_push(&refs_verify.args, "--strict");
+	strvec_pushl(&refs_verify.args, "refs", "verify", வெற்று);
+	எனில் (verbose)
+		strvec_தள்ளு(&refs_verify.args, "--verbose");
+	எனில் (check_strict)
+		strvec_தள்ளு(&refs_verify.args, "--strict");
 
-	if (run_command(&refs_verify))
+	எனில் (run_command(&refs_verify))
 		errors_found |= ERROR_REFS;
 
 	display_progress(progress, 1);
 	stop_progress(&progress);
 }
 
-static char const * const fsck_usage[] = {
+நிலையான எழுத்து மாறிலி * மாறிலி fsck_usage[] = {
 	N_("git fsck [--tags] [--root] [--unreachable] [--cache] [--no-reflogs]\n"
 	   "         [--[no-]full] [--strict] [--verbose] [--lost-found]\n"
 	   "         [--[no-]dangling] [--[no-]progress] [--connectivity-only]\n"
 	   "         [--[no-]name-objects] [--[no-]references] [<object>...]"),
-	NULL
+	வெற்று
 };
 
-int cmd_fsck(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo)
+முழு cmd_fsck(முழு argc,
+	     மாறிலி எழுத்து **argv,
+	     மாறிலி எழுத்து *prefix,
+	     கட்டமைப்பு repository *repo)
 {
-	struct odb_fsck_options odb_fsck_opts = {
+	கட்டமைப்பு odb_fsck_options odb_fsck_opts = {
 		.flags = ODB_FSCK_FULL,
 		.object_cb = fsck_obj_buffer,
 		.object_payload = repo,
 	};
-	int keep_cache_objects = 0;
-	int name_objects = 0;
-	int check_references = 1;
-	struct option fsck_opts[] = {
+	முழு keep_cache_objects = 0;
+	முழு name_objects = 0;
+	முழு check_references = 1;
+	கட்டமைப்பு option fsck_opts[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose")),
 		OPT_BOOL(0, "unreachable", &show_unreachable, N_("show unreachable objects")),
 		OPT_BOOL(0, "dangling", &show_dangling, N_("show dangling objects")),
 		OPT_BOOL(0, "tags", &show_tags, N_("report tags")),
-		OPT_BOOL(0, "root", &show_root, N_("report root nodes")),
+		OPT_BOOL(0, "root", &show_வேர், N_("report root nodes")),
 		OPT_BOOL(0, "cache", &keep_cache_objects, N_("make index objects head nodes")),
 		OPT_BOOL(0, "reflogs", &include_reflogs, N_("make reflogs head nodes (default)")),
 		OPT_BIT(0, "full", &odb_fsck_opts.flags,
@@ -868,10 +868,10 @@ int cmd_fsck(int argc,
 		OPT_BOOL(0, "references", &check_references, N_("check reference database consistency")),
 		OPT_END(),
 	};
-	struct snapshot snap = {
+	கட்டமைப்பு snapshot snap = {
 		.nr = 0,
 		.alloc = 0,
-		.ref = NULL
+		.ref = வெற்று
 	};
 
 	errors_found = 0;
@@ -889,30 +889,30 @@ int cmd_fsck(int argc,
 	fsck_options_init(&fsck_obj_options, repo, FSCK_OPTIONS_DEFAULT);
 	fsck_obj_options.walk = mark_used;
 	fsck_obj_options.error_func = fsck_objects_error_func;
-	if (check_strict)
+	எனில் (check_strict)
 		fsck_obj_options.strict = 1;
 
-	if (show_progress == -1)
+	எனில் (show_progress == -1)
 		show_progress = isatty(2);
-	if (verbose) {
+	எனில் (verbose) {
 		show_progress = 0;
 		odb_fsck_opts.flags |= ODB_FSCK_VERBOSE;
 	}
-	if (show_progress)
+	எனில் (show_progress)
 		odb_fsck_opts.flags |= ODB_FSCK_PROGRESS;
 
-	if (write_lost_and_found) {
+	எனில் (write_lost_and_found) {
 		odb_fsck_opts.flags |= ODB_FSCK_FULL;
 		include_reflogs = 0;
 	}
 
-	if (name_objects)
+	எனில் (name_objects)
 		fsck_enable_object_names(&fsck_walk_options);
 
 	repo_config(repo, git_fsck_config, &fsck_obj_options);
 	prepare_repo_settings(repo);
 
-	if (check_references)
+	எனில் (check_references)
 		fsck_refs(repo);
 
 	/*
@@ -926,14 +926,14 @@ int cmd_fsck(int argc,
 	/* Ensure we get a "fresh" view of the odb */
 	odb_reprepare(repo->objects);
 
-	if (connectivity_only) {
-		odb_for_each_object(repo->objects, NULL,
+	எனில் (connectivity_only) {
+		odb_for_each_object(repo->objects, வெற்று,
 				    mark_object_for_connectivity, repo, 0);
-	} else {
-		if (odb_fsck(repo->objects, &odb_fsck_opts) < 0)
+	} இல்லையெனில் {
+		எனில் (odb_fsck(repo->objects, &odb_fsck_opts) < 0)
 			errors_found |= ERROR_OBJECT;
 
-		if (fsck_finish(&fsck_obj_options))
+		எனில் (fsck_finish(&fsck_obj_options))
 			errors_found |= ERROR_OBJECT;
 	}
 
@@ -941,25 +941,25 @@ int cmd_fsck(int argc,
 	process_refs(repo, &snap);
 
 	/* If not given any explicit objects, process index files too. */
-	if (!argc)
+	எனில் (!argc)
 		keep_cache_objects = 1;
-	if (keep_cache_objects) {
+	எனில் (keep_cache_objects) {
 		/*
 		 * TODO: Consider first walking these indexes in snapshot_refs,
 		 * to snapshot where the index entries used to point, and then
 		 * check those snapshotted locations here.
 		 */
-		struct worktree **worktrees, **p;
+		கட்டமைப்பு worktree **worktrees, **p;
 
 		verify_index_checksum = 1;
 		verify_ce_order = 1;
 
 		worktrees = get_worktrees(repo);
-		for (p = worktrees; *p; p++) {
-			struct worktree *wt = *p;
-			struct index_state istate =
+		க்கு (p = worktrees; *p; p++) {
+			கட்டமைப்பு worktree *wt = *p;
+			கட்டமைப்பு index_state istate =
 				INDEX_STATE_INIT(repo);
-			char *path, *wt_gitdir;
+			எழுத்து *path, *wt_gitdir;
 
 			/*
 			 * Make a copy since the buffer is reusable
@@ -973,32 +973,32 @@ int cmd_fsck(int argc,
 			fsck_index(&istate, path, wt->is_current);
 
 			discard_index(&istate);
-			free(wt_gitdir);
-			free(path);
+			விடுவி(wt_gitdir);
+			விடுவி(path);
 		}
 		free_worktrees(worktrees);
 	}
 
 	check_connectivity(repo);
 
-	if (repo->settings.core_commit_graph) {
-		struct odb_source_files *files = odb_source_files_downcast(repo->objects->source);
-		struct child_process commit_graph_verify = CHILD_PROCESS_INIT;
+	எனில் (repo->settings.core_commit_graph) {
+		கட்டமைப்பு odb_source_files *files = odb_source_files_downcast(repo->objects->source);
+		கட்டமைப்பு child_process commit_graph_verify = CHILD_PROCESS_INIT;
 
-		for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
+		க்கு (கட்டமைப்பு odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
 			child_process_init(&commit_graph_verify);
 			commit_graph_verify.git_cmd = 1;
 			strvec_pushl(&commit_graph_verify.args, "commit-graph",
-				     "verify", "--object-dir", dir->abspath, NULL);
-			if (show_progress)
-				strvec_push(&commit_graph_verify.args, "--progress");
-			else
-				strvec_push(&commit_graph_verify.args, "--no-progress");
-			if (run_command(&commit_graph_verify))
+				     "verify", "--object-dir", dir->abspath, வெற்று);
+			எனில் (show_progress)
+				strvec_தள்ளு(&commit_graph_verify.args, "--progress");
+			இல்லையெனில்
+				strvec_தள்ளு(&commit_graph_verify.args, "--no-progress");
+			எனில் (run_command(&commit_graph_verify))
 				errors_found |= ERROR_COMMIT_GRAPH;
 		}
 	}
 
 	free_snapshot_refs(&snap);
-	return errors_found;
+	திரும்பு errors_found;
 }
