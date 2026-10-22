@@ -7,64 +7,64 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
+#شامل "builtin.h"
 
-#include "abspath.h"
-#include "bisect.h"
-#include "config.h"
-#include "commit.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "refs.h"
-#include "quote.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "path.h"
-#include "diff.h"
-#include "read-cache-ll.h"
-#include "repo-settings.h"
-#include "repository.h"
-#include "revision.h"
-#include "setup.h"
-#include "split-index.h"
-#include "submodule.h"
-#include "commit-reach.h"
-#include "shallow.h"
-#include "object-file-convert.h"
+#شامل "abspath.h"
+#شامل "bisect.h"
+#شامل "config.h"
+#شامل "commit.h"
+#شامل "environment.h"
+#شامل "gettext.h"
+#شامل "hash.h"
+#شامل "hex.h"
+#شامل "refs.h"
+#شامل "quote.h"
+#شامل "object-name.h"
+#شامل "parse-options.h"
+#شامل "path.h"
+#شامل "diff.h"
+#شامل "read-cache-ll.h"
+#شامل "repo-settings.h"
+#شامل "repository.h"
+#شامل "revision.h"
+#شامل "setup.h"
+#شامل "split-index.h"
+#شامل "submodule.h"
+#شامل "commit-reach.h"
+#شامل "shallow.h"
+#شامل "object-file-convert.h"
 
 #define DO_REVS		1
 #define DO_NOREV	2
 #define DO_FLAGS	4
 #define DO_NONFLAGS	8
-static int filter = ~0;
+ایستا صحیح filter = ~0;
 
-static const char *def;
+ایستا ثابت نویسه *def;
 
 #define NORMAL 0
 #define REVERSED 1
-static int show_type = NORMAL;
+ایستا صحیح show_type = NORMAL;
 
 #define SHOW_SYMBOLIC_ASIS 1
 #define SHOW_SYMBOLIC_FULL 2
-static int symbolic;
-static int abbrev;
-static int abbrev_ref;
-static int abbrev_ref_strict;
-static int output_sq;
+ایستا صحیح symbolic;
+ایستا صحیح abbrev;
+ایستا صحیح abbrev_ref;
+ایستا صحیح abbrev_ref_strict;
+ایستا صحیح output_sq;
 
-static int stuck_long;
-static struct ref_exclusions ref_excludes = REF_EXCLUSIONS_INIT;
+ایستا صحیح stuck_long;
+ایستا ساختار ref_exclusions ref_excludes = REF_EXCLUSIONS_INIT;
 
 /*
  * Some arguments are relevant "revision" arguments,
  * others are about output format or other details.
  * This sorts it all out.
  */
-static int is_rev_argument(const char *arg)
+ایستا صحیح is_rev_argument(ثابت نویسه *arg)
 {
-	static const char *rev_args[] = {
+	ایستا ثابت نویسه *rev_args[] = {
 		"--all",
 		"--bisect",
 		"--dense",
@@ -93,69 +93,69 @@ static int is_rev_argument(const char *arg)
 		"--topo-order",
 		"--date-order",
 		"--unpacked",
-		NULL
+		پوچ
 	};
-	const char **p = rev_args;
+	ثابت نویسه **p = rev_args;
 
 	/* accept -<digit>, like traditional "head" */
-	if ((*arg == '-') && isdigit(arg[1]))
-		return 1;
+	اگر ((*arg == '-') && isdigit(arg[1]))
+		بازگشت 1;
 
-	for (;;) {
-		const char *str = *p++;
-		int len;
-		if (!str)
-			return 0;
+	برای (;;) {
+		ثابت نویسه *str = *p++;
+		صحیح len;
+		اگر (!str)
+			بازگشت 0;
 		len = strlen(str);
-		if (!strcmp(arg, str) ||
+		اگر (!strcmp(arg, str) ||
 		    (str[len-1] == '=' && !strncmp(arg, str, len)))
-			return 1;
+			بازگشت 1;
 	}
 }
 
 /* Output argument as a string, either SQ or normal */
-static void show(const char *arg)
+ایستا تهی show(ثابت نویسه *arg)
 {
-	if (output_sq) {
-		int sq = '\'', ch;
+	اگر (output_sq) {
+		صحیح sq = '\'', ch;
 
 		putchar(sq);
-		while ((ch = *arg++)) {
-			if (ch == sq)
+		وقتی ((ch = *arg++)) {
+			اگر (ch == sq)
 				fputs("'\\'", stdout);
 			putchar(ch);
 		}
 		putchar(sq);
 		putchar(' ');
 	}
-	else
+	وگرنه
 		puts(arg);
 }
 
 /* Like show(), but with a negation prefix according to type */
-static void show_with_type(int type, const char *arg)
+ایستا تهی show_with_type(صحیح type, ثابت نویسه *arg)
 {
-	if (type != show_type)
+	اگر (type != show_type)
 		putchar('^');
 	show(arg);
 }
 
 /* Output a revision, only if filter allows it */
-static void show_rev(int type, const struct object_id *oid, const char *name)
+ایستا تهی show_rev(صحیح type, ثابت ساختار object_id *oid, ثابت نویسه *name)
 {
-	if (!(filter & DO_REVS))
-		return;
-	def = NULL;
+	اگر (!(filter & DO_REVS))
+		بازگشت;
+	def = پوچ;
 
-	if ((symbolic || abbrev_ref) && name) {
-		if (symbolic == SHOW_SYMBOLIC_FULL || abbrev_ref) {
-			struct object_id discard;
-			char *full;
+	اگر ((symbolic || abbrev_ref) && name) {
+		اگر (symbolic == SHOW_SYMBOLIC_FULL || abbrev_ref) {
+			ساختار object_id discard;
+			نویسه *full;
 
-			switch (repo_dwim_ref(the_repository, name,
+			انتخاب (repo_dwim_ref(the_repository, name,
 					      strlen(name), &discard, &full,
 					      0)) {
-			case 0:
+			حالت 0:
 				/*
 				 * Not found -- not a ref.  We could
 				 * emit "name" here, but symbolic-full
@@ -163,277 +163,277 @@ static void show_rev(int type, const struct object_id *oid, const char *name)
 				 * refs spelled in full, and they would
 				 * need to filter non-refs if we did so.
 				 */
-				break;
-			case 1: /* happy */
-				if (abbrev_ref) {
-					char *old = full;
+				بشکن;
+			حالت 1: /* happy */
+				اگر (abbrev_ref) {
+					نویسه *old = full;
 					full = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
 									    full,
 									    abbrev_ref_strict);
-					free(old);
+					آزاد(old);
 				}
 				show_with_type(type, full);
-				break;
-			default: /* ambiguous */
+				بشکن;
+			پیشفرض: /* ambiguous */
 				error("refname '%s' is ambiguous", name);
-				break;
+				بشکن;
 			}
-			free(full);
-		} else {
+			آزاد(full);
+		} وگرنه {
 			show_with_type(type, name);
 		}
 	}
-	else if (abbrev)
+	وگرنه اگر (abbrev)
 		show_with_type(type,
 			       repo_find_unique_abbrev(the_repository, oid, abbrev));
-	else
+	وگرنه
 		show_with_type(type, oid_to_hex(oid));
 }
 
 /* Output a flag, only if filter allows it. */
-static int show_flag(const char *arg)
+ایستا صحیح show_flag(ثابت نویسه *arg)
 {
-	if (!(filter & DO_FLAGS))
-		return 0;
-	if (filter & (is_rev_argument(arg) ? DO_REVS : DO_NOREV)) {
+	اگر (!(filter & DO_FLAGS))
+		بازگشت 0;
+	اگر (filter & (is_rev_argument(arg) ? DO_REVS : DO_NOREV)) {
 		show(arg);
-		return 1;
+		بازگشت 1;
 	}
-	return 0;
+	بازگشت 0;
 }
 
-static int show_default(void)
+ایستا صحیح show_default(تهی)
 {
-	const char *s = def;
+	ثابت نویسه *s = def;
 
-	if (s) {
-		struct object_id oid;
+	اگر (s) {
+		ساختار object_id oid;
 
-		def = NULL;
-		if (!repo_get_oid(the_repository, s, &oid)) {
+		def = پوچ;
+		اگر (!repo_get_oid(the_repository, s, &oid)) {
 			show_rev(NORMAL, &oid, s);
-			return 1;
+			بازگشت 1;
 		}
 	}
-	return 0;
+	بازگشت 0;
 }
 
-static int show_reference(const struct reference *ref, void *cb_data UNUSED)
+ایستا صحیح show_reference(ثابت ساختار reference *ref, تهی *cb_data UNUSED)
 {
-	if (ref_excluded(&ref_excludes, ref->name))
-		return 0;
+	اگر (ref_excluded(&ref_excludes, ref->name))
+		بازگشت 0;
 	show_rev(NORMAL, ref->oid, ref->name);
-	return 0;
+	بازگشت 0;
 }
 
-static int anti_reference(const struct reference *ref, void *cb_data UNUSED)
+ایستا صحیح anti_reference(ثابت ساختار reference *ref, تهی *cb_data UNUSED)
 {
 	show_rev(REVERSED, ref->oid, ref->name);
-	return 0;
+	بازگشت 0;
 }
 
-static int show_abbrev(const struct object_id *oid, void *cb_data UNUSED)
+ایستا صحیح show_abbrev(ثابت ساختار object_id *oid, تهی *cb_data UNUSED)
 {
-	show_rev(NORMAL, oid, NULL);
-	return 0;
+	show_rev(NORMAL, oid, پوچ);
+	بازگشت 0;
 }
 
-static void show_datestring(const char *flag, const char *datestr)
+ایستا تهی show_datestring(ثابت نویسه *flag, ثابت نویسه *datestr)
 {
-	char *buffer;
+	نویسه *buffer;
 
 	/* date handling requires both flags and revs */
-	if ((filter & (DO_FLAGS | DO_REVS)) != (DO_FLAGS | DO_REVS))
-		return;
+	اگر ((filter & (DO_FLAGS | DO_REVS)) != (DO_FLAGS | DO_REVS))
+		بازگشت;
 	buffer = xstrfmt("%s%"PRItime, flag, approxidate(datestr));
 	show(buffer);
-	free(buffer);
+	آزاد(buffer);
 }
 
-static int show_file(const char *arg, int output_prefix)
+ایستا صحیح show_file(ثابت نویسه *arg, صحیح output_prefix)
 {
 	show_default();
-	if ((filter & (DO_NONFLAGS|DO_NOREV)) == (DO_NONFLAGS|DO_NOREV)) {
-		if (output_prefix) {
-			const char *prefix = the_repository->prefix;
-			char *fname = prefix_filename(prefix, arg);
+	اگر ((filter & (DO_NONFLAGS|DO_NOREV)) == (DO_NONFLAGS|DO_NOREV)) {
+		اگر (output_prefix) {
+			ثابت نویسه *prefix = the_repository->prefix;
+			نویسه *fname = prefix_filename(prefix, arg);
 			show(fname);
-			free(fname);
-		} else
+			آزاد(fname);
+		} وگرنه
 			show(arg);
-		return 1;
+		بازگشت 1;
 	}
-	return 0;
+	بازگشت 0;
 }
 
-static int try_difference(const char *arg)
+ایستا صحیح try_difference(ثابت نویسه *arg)
 {
-	const char *dotdot;
-	struct object_id start_oid;
-	struct object_id end_oid;
-	const char *end;
-	const char *start;
-	char *to_free;
-	int symmetric;
-	static const char head_by_default[] = "HEAD";
+	ثابت نویسه *dotdot;
+	ساختار object_id start_oid;
+	ساختار object_id end_oid;
+	ثابت نویسه *end;
+	ثابت نویسه *start;
+	نویسه *to_free;
+	صحیح symmetric;
+	ایستا ثابت نویسه head_by_default[] = "HEAD";
 
-	if (!(dotdot = strstr(arg, "..")))
-		return 0;
+	اگر (!(dotdot = strstr(arg, "..")))
+		بازگشت 0;
 	start = to_free = xmemdupz(arg, dotdot - arg);
 	end = dotdot + 2;
 	symmetric = (*end == '.');
 	end += symmetric;
 
-	if (!*end)
+	اگر (!*end)
 		end = head_by_default;
-	if (dotdot == arg)
+	اگر (dotdot == arg)
 		start = head_by_default;
 
-	if (start == head_by_default && end == head_by_default &&
+	اگر (start == head_by_default && end == head_by_default &&
 	    !symmetric) {
 		/*
 		 * Just ".."?  That is not a range but the
 		 * pathspec for the parent directory.
 		 */
-		free(to_free);
-		return 0;
+		آزاد(to_free);
+		بازگشت 0;
 	}
 
-	if (!repo_get_oid_committish(the_repository, start, &start_oid) && !repo_get_oid_committish(the_repository, end, &end_oid)) {
+	اگر (!repo_get_oid_committish(the_repository, start, &start_oid) && !repo_get_oid_committish(the_repository, end, &end_oid)) {
 		show_rev(NORMAL, &end_oid, end);
 		show_rev(symmetric ? NORMAL : REVERSED, &start_oid, start);
-		if (symmetric) {
-			struct commit_list *exclude = NULL;
-			struct commit *a, *b;
+		اگر (symmetric) {
+			ساختار commit_list *exclude = پوچ;
+			ساختار commit *a, *b;
 			a = lookup_commit_reference(the_repository, &start_oid);
 			b = lookup_commit_reference(the_repository, &end_oid);
-			if (!a || !b) {
-				free(to_free);
-				return 0;
+			اگر (!a || !b) {
+				آزاد(to_free);
+				بازگشت 0;
 			}
-			if (repo_get_merge_bases(the_repository, a, b, &exclude) < 0)
+			اگر (repo_get_merge_bases(the_repository, a, b, &exclude) < 0)
 				exit(128);
-			while (exclude) {
-				struct commit *commit = pop_commit(&exclude);
-				show_rev(REVERSED, &commit->object.oid, NULL);
+			وقتی (exclude) {
+				ساختار commit *commit = برداشت_commit(&exclude);
+				show_rev(REVERSED, &commit->object.oid, پوچ);
 			}
 		}
-		free(to_free);
-		return 1;
+		آزاد(to_free);
+		بازگشت 1;
 	}
-	free(to_free);
-	return 0;
+	آزاد(to_free);
+	بازگشت 0;
 }
 
-static int try_parent_shorthands(const char *arg)
+ایستا صحیح try_parent_shorthands(ثابت نویسه *arg)
 {
-	const char *mark;
-	struct object_id oid;
-	struct commit *commit;
-	struct commit_list *parents;
-	int parent_number;
-	int include_rev = 0;
-	int include_parents = 0;
-	int exclude_parent = 0;
-	char *to_free;
+	ثابت نویسه *mark;
+	ساختار object_id oid;
+	ساختار commit *commit;
+	ساختار commit_list *parents;
+	صحیح parent_عدد;
+	صحیح include_rev = 0;
+	صحیح include_parents = 0;
+	صحیح exclude_parent = 0;
+	نویسه *to_free;
 
-	if ((mark = strstr(arg, "^!"))) {
+	اگر ((mark = strstr(arg, "^!"))) {
 		include_rev = 1;
-		if (mark[2])
-			return 0;
-	} else if ((mark = strstr(arg, "^@"))) {
+		اگر (mark[2])
+			بازگشت 0;
+	} وگرنه اگر ((mark = strstr(arg, "^@"))) {
 		include_parents = 1;
-		if (mark[2])
-			return 0;
-	} else if ((mark = strstr(arg, "^-"))) {
+		اگر (mark[2])
+			بازگشت 0;
+	} وگرنه اگر ((mark = strstr(arg, "^-"))) {
 		include_rev = 1;
 		exclude_parent = 1;
 
-		if (mark[2]) {
-			char *end;
+		اگر (mark[2]) {
+			نویسه *end;
 			exclude_parent = strtoul(mark + 2, &end, 10);
-			if (*end != '\0' || !exclude_parent)
-				return 0;
+			اگر (*end != '\0' || !exclude_parent)
+				بازگشت 0;
 		}
-	} else
-		return 0;
+	} وگرنه
+		بازگشت 0;
 
 	arg = to_free = xmemdupz(arg, mark - arg);
-	if (repo_get_oid_committish(the_repository, arg, &oid) ||
+	اگر (repo_get_oid_committish(the_repository, arg, &oid) ||
 	    !(commit = lookup_commit_reference(the_repository, &oid))) {
-		free(to_free);
-		return 0;
+		آزاد(to_free);
+		بازگشت 0;
 	}
 
-	if (exclude_parent &&
-	    exclude_parent > commit_list_count(commit->parents)) {
-		free(to_free);
-		return 0;
+	اگر (exclude_parent &&
+	    exclude_parent > commit_list_شمار(commit->parents)) {
+		آزاد(to_free);
+		بازگشت 0;
 	}
 
-	if (include_rev)
+	اگر (include_rev)
 		show_rev(NORMAL, &oid, arg);
-	for (parents = commit->parents, parent_number = 1;
+	برای (parents = commit->parents, parent_عدد = 1;
 	     parents;
-	     parents = parents->next, parent_number++) {
-		char *name = NULL;
+	     parents = parents->next, parent_عدد++) {
+		نویسه *name = پوچ;
 
-		if (exclude_parent && parent_number != exclude_parent)
-			continue;
+		اگر (exclude_parent && parent_عدد != exclude_parent)
+			ادامه;
 
-		if (symbolic)
-			name = xstrfmt("%s^%d", arg, parent_number);
+		اگر (symbolic)
+			name = xstrfmt("%s^%d", arg, parent_عدد);
 		show_rev(include_parents ? NORMAL : REVERSED,
 			 &parents->item->object.oid, name);
-		free(name);
+		آزاد(name);
 	}
 
-	free(to_free);
-	return 1;
+	آزاد(to_free);
+	بازگشت 1;
 }
 
-static int parseopt_dump(const struct option *o, const char *arg, int unset)
+ایستا صحیح parseopt_dump(ثابت ساختار option *o, ثابت نویسه *arg, صحیح unset)
 {
-	struct strbuf *parsed = o->value;
-	if (unset)
+	ساختار strbuf *parsed = o->مقدار;
+	اگر (unset)
 		strbuf_addf(parsed, " --no-%s", o->long_name);
-	else if (o->short_name && (o->long_name == NULL || !stuck_long))
+	وگرنه اگر (o->short_name && (o->long_name == پوچ || !stuck_long))
 		strbuf_addf(parsed, " -%c", o->short_name);
-	else
+	وگرنه
 		strbuf_addf(parsed, " --%s", o->long_name);
-	if (arg) {
-		if (!stuck_long)
+	اگر (arg) {
+		اگر (!stuck_long)
 			strbuf_addch(parsed, ' ');
-		else if (o->long_name)
+		وگرنه اگر (o->long_name)
 			strbuf_addch(parsed, '=');
 		sq_quote_buf(parsed, arg);
 	}
-	return 0;
+	بازگشت 0;
 }
 
-static const char *skipspaces(const char *s)
+ایستا ثابت نویسه *skipspaces(ثابت نویسه *s)
 {
-	while (isspace(*s))
+	وقتی (isspace(*s))
 		s++;
-	return s;
+	بازگشت s;
 }
 
-static char *findspace(const char *s)
+ایستا نویسه *findspace(ثابت نویسه *s)
 {
-	for (; *s; s++)
-		if (isspace(*s))
-			return (char*)s;
-	return NULL;
+	برای (; *s; s++)
+		اگر (isspace(*s))
+			بازگشت (نویسه*)s;
+	بازگشت پوچ;
 }
 
-static int cmd_parseopt(int argc, const char **argv, const char *prefix)
+ایستا صحیح cmd_parseopt(صحیح argc, ثابت نویسه **argv, ثابت نویسه *prefix)
 {
-	int keep_dashdash = 0, stop_at_non_option = 0;
-	char const * const parseopt_usage[] = {
+	صحیح keep_dashdash = 0, stop_at_non_option = 0;
+	نویسه ثابت * ثابت parseopt_usage[] = {
 		N_("git rev-parse --parseopt [<options>] -- [<args>...]"),
-		NULL
+		پوچ
 	};
-	struct option parseopt_opts[] = {
+	ساختار option parseopt_opts[] = {
 		OPT_BOOL(0, "keep-dashdash", &keep_dashdash,
 					N_("keep the `--` passed as an arg")),
 		OPT_BOOL(0, "stop-at-non-option", &stop_at_non_option,
@@ -443,108 +443,108 @@ static int cmd_parseopt(int argc, const char **argv, const char *prefix)
 					N_("output in stuck long form")),
 		OPT_END(),
 	};
-	struct strbuf sb = STRBUF_INIT, parsed = STRBUF_INIT;
-	struct strvec longnames = STRVEC_INIT;
-	struct strvec usage = STRVEC_INIT;
-	struct option *opts = NULL;
+	ساختار strbuf sb = STRBUF_INIT, parsed = STRBUF_INIT;
+	ساختار strvec longnames = STRVEC_INIT;
+	ساختار strvec usage = STRVEC_INIT;
+	ساختار option *opts = پوچ;
 	size_t opts_nr = 0, opts_alloc = 0;
 
 	strbuf_addstr(&parsed, "set --");
 	argc = parse_options(argc, argv, prefix, parseopt_opts, parseopt_usage,
 	                     PARSE_OPT_KEEP_DASHDASH);
-	if (argc < 1 || strcmp(argv[0], "--"))
+	اگر (argc < 1 || strcmp(argv[0], "--"))
 		usage_with_options(parseopt_usage, parseopt_opts);
 
 	/* get the usage up to the first line with a -- on it */
-	for (;;) {
+	برای (;;) {
 		strbuf_reset(&sb);
-		if (strbuf_getline(&sb, stdin) == EOF)
+		اگر (strbuf_getline(&sb, stdin) == EOF)
 			die(_("premature end of input"));
-		if (!strcmp("--", sb.buf)) {
-			if (!usage.nr)
+		اگر (!strcmp("--", sb.buf)) {
+			اگر (!usage.nr)
 				die(_("no usage string given before the `--' separator"));
-			break;
+			بشکن;
 		}
 
-		strvec_push(&usage, sb.buf);
+		strvec_افزودن(&usage, sb.buf);
 	}
 
 	/* parse: (<short>|<short>,<long>|<long>)[*=?!]*<arghint>? SP+ <help> */
-	while (strbuf_getline(&sb, stdin) != EOF) {
-		const char *s;
-		char *help;
-		struct option *o;
+	وقتی (strbuf_getline(&sb, stdin) != EOF) {
+		ثابت نویسه *s;
+		نویسه *help;
+		ساختار option *o;
 
-		if (!sb.len)
-			continue;
+		اگر (!sb.len)
+			ادامه;
 
 		ALLOC_GROW(opts, opts_nr + 1, opts_alloc);
-		memset(opts + opts_nr, 0, sizeof(*opts));
+		memset(opts + opts_nr, 0, اندازه(*opts));
 
 		o = &opts[opts_nr++];
 		help = findspace(sb.buf);
-		if (!help || sb.buf == help) {
+		اگر (!help || sb.buf == help) {
 			o->type = OPTION_GROUP;
 			o->help = xstrdup(skipspaces(sb.buf));
-			continue;
+			ادامه;
 		}
 
 		*help = '\0';
 
 		o->type = OPTION_CALLBACK;
 		o->help = xstrdup(skipspaces(help+1));
-		o->value = &parsed;
+		o->مقدار = &parsed;
 		o->flags = PARSE_OPT_NOARG;
 		o->callback = &parseopt_dump;
 
 		/* name(s) */
 		s = strpbrk(sb.buf, "*=?!");
-		if (!s)
+		اگر (!s)
 			s = help;
 
-		if (s == sb.buf)
+		اگر (s == sb.buf)
 			die(_("missing opt-spec before option flags"));
 
-		if (s - sb.buf == 1) { /* short option only */
+		اگر (s - sb.buf == 1) { /* short option only */
 			o->short_name = *sb.buf;
-		} else if (sb.buf[1] != ',') { /* long option only */
+		} وگرنه اگر (sb.buf[1] != ',') { /* long option only */
 			o->long_name = strvec_pushf(&longnames, "%.*s",
-						    (int)(s - sb.buf), sb.buf);
-		} else {
+						    (صحیح)(s - sb.buf), sb.buf);
+		} وگرنه {
 			o->short_name = *sb.buf;
 			o->long_name = strvec_pushf(&longnames, "%.*s",
-						    (int)(s - sb.buf - 2), sb.buf + 2);
+						    (صحیح)(s - sb.buf - 2), sb.buf + 2);
 		}
 
 		/* flags */
-		while (s < help) {
-			switch (*s++) {
-			case '=':
+		وقتی (s < help) {
+			انتخاب (*s++) {
+			حالت '=':
 				o->flags &= ~PARSE_OPT_NOARG;
-				continue;
-			case '?':
+				ادامه;
+			حالت '?':
 				o->flags &= ~PARSE_OPT_NOARG;
 				o->flags |= PARSE_OPT_OPTARG;
-				continue;
-			case '!':
+				ادامه;
+			حالت '!':
 				o->flags |= PARSE_OPT_NONEG;
-				continue;
-			case '*':
+				ادامه;
+			حالت '*':
 				o->flags |= PARSE_OPT_HIDDEN;
-				continue;
+				ادامه;
 			}
 			s--;
-			break;
+			بشکن;
 		}
 
-		if (s < help)
+		اگر (s < help)
 			o->argh = xmemdupz(s, help - s);
 	}
 	strbuf_release(&sb);
 
 	/* put an OPT_END() */
 	ALLOC_GROW(opts, opts_nr + 1, opts_alloc);
-	memset(opts + opts_nr, 0, sizeof(*opts));
+	memset(opts + opts_nr, 0, اندازه(*opts));
 	argc = parse_options(argc, argv, prefix, opts, usage.v,
 			(keep_dashdash ? PARSE_OPT_KEEP_DASHDASH : 0) |
 			(stop_at_non_option ? PARSE_OPT_STOP_AT_NON_OPTION : 0) |
@@ -558,35 +558,35 @@ static int cmd_parseopt(int argc, const char **argv, const char *prefix)
 	strbuf_release(&sb);
 	strvec_clear(&longnames);
 	strvec_clear(&usage);
-	for (size_t i = 0; i < opts_nr; i++) {
-		free((char *) opts[i].help);
-		free((char *) opts[i].argh);
+	برای (size_t i = 0; i < opts_nr; i++) {
+		آزاد((نویسه *) opts[i].help);
+		آزاد((نویسه *) opts[i].argh);
 	}
-	free(opts);
-	return 0;
+	آزاد(opts);
+	بازگشت 0;
 }
 
-static int cmd_sq_quote(int argc, const char **argv)
+ایستا صحیح cmd_sq_quote(صحیح argc, ثابت نویسه **argv)
 {
-	struct strbuf buf = STRBUF_INIT;
+	ساختار strbuf buf = STRBUF_INIT;
 
-	if (argc)
+	اگر (argc)
 		sq_quote_argv(&buf, argv);
 	printf("%s\n", buf.buf);
 	strbuf_release(&buf);
 
-	return 0;
+	بازگشت 0;
 }
 
-static void die_no_single_rev(int quiet)
+ایستا تهی die_no_single_rev(صحیح quiet)
 {
-	if (quiet)
+	اگر (quiet)
 		exit(1);
-	else
+	وگرنه
 		die(_("Needed a single revision"));
 }
 
-static const char builtin_rev_parse_usage[] =
+ایستا ثابت نویسه builtin_rev_parse_usage[] =
 N_("git rev-parse --parseopt [<options>] -- [<args>...]\n"
    "   or: git rev-parse --sq-quote [<arg>...]\n"
    "   or: git rev-parse [<options>] [<arg>...]\n"
@@ -597,43 +597,43 @@ N_("git rev-parse --parseopt [<options>] -- [<args>...]\n"
  * Parse "opt" or "opt=<value>", setting value respectively to either
  * NULL or the string after "=".
  */
-static int opt_with_value(const char *arg, const char *opt, const char **value)
+ایستا صحیح opt_with_مقدار(ثابت نویسه *arg, ثابت نویسه *opt, ثابت نویسه **مقدار)
 {
-	if (skip_prefix(arg, opt, &arg)) {
-		if (!*arg) {
-			*value = NULL;
-			return 1;
+	اگر (skip_prefix(arg, opt, &arg)) {
+		اگر (!*arg) {
+			*مقدار = پوچ;
+			بازگشت 1;
 		}
-		if (*arg++ == '=') {
-			*value = arg;
-			return 1;
+		اگر (*arg++ == '=') {
+			*مقدار = arg;
+			بازگشت 1;
 		}
 	}
-	return 0;
+	بازگشت 0;
 }
 
-static void handle_ref_opt(const char *pattern, const char *prefix)
+ایستا تهی handle_ref_opt(ثابت نویسه *pattern, ثابت نویسه *prefix)
 {
-	if (pattern) {
-		struct refs_for_each_ref_options opts = {
+	اگر (pattern) {
+		ساختار refs_for_each_ref_options opts = {
 			.pattern = pattern,
 			.prefix = prefix,
 			.trim_prefix = prefix ? strlen(prefix) : 0,
 		};
 		refs_for_each_ref_ext(get_main_ref_store(the_repository),
-				      show_reference, NULL, &opts);
-	} else {
-		struct refs_for_each_ref_options opts = {
+				      show_reference, پوچ, &opts);
+	} وگرنه {
+		ساختار refs_for_each_ref_options opts = {
 			.prefix = prefix,
 			.trim_prefix = strlen(prefix),
 		};
 		refs_for_each_ref_ext(get_main_ref_store(the_repository),
-				      show_reference, NULL, &opts);
+				      show_reference, پوچ, &opts);
 	}
 	clear_ref_exclusions(&ref_excludes);
 }
 
-enum format_type {
+شمارش format_type {
 	/* We would like a relative path. */
 	FORMAT_RELATIVE,
 	/* We would like a canonical absolute path. */
@@ -642,7 +642,7 @@ enum format_type {
 	FORMAT_DEFAULT,
 };
 
-enum default_type {
+شمارش default_type {
 	/* Our default is a relative path. */
 	DEFAULT_RELATIVE,
 	/* Our default is a relative path if there's a shared root. */
@@ -653,39 +653,39 @@ enum default_type {
 	DEFAULT_UNMODIFIED,
 };
 
-static void print_path(const char *path, const char *prefix,
-		       enum format_type format, enum default_type def)
+ایستا تهی print_path(ثابت نویسه *path, ثابت نویسه *prefix,
+		       شمارش format_type format, شمارش default_type def)
 {
-	struct strbuf sb = STRBUF_INIT;
-	enum path_format fmt;
+	ساختار strbuf sb = STRBUF_INIT;
+	شمارش path_format fmt;
 
-	if (format == FORMAT_DEFAULT) {
-		switch (def) {
-		case DEFAULT_RELATIVE:
+	اگر (format == FORMAT_DEFAULT) {
+		انتخاب (def) {
+		حالت DEFAULT_RELATIVE:
 			fmt = PATH_FORMAT_RELATIVE;
-			break;
-		case DEFAULT_RELATIVE_IF_SHARED:
+			بشکن;
+		حالت DEFAULT_RELATIVE_IF_SHARED:
 			fmt = PATH_FORMAT_RELATIVE_IF_SHARED;
-			break;
-		case DEFAULT_CANONICAL:
+			بشکن;
+		حالت DEFAULT_CANONICAL:
 			fmt = PATH_FORMAT_CANONICAL;
-			break;
-		case DEFAULT_UNMODIFIED:
-		default:
+			بشکن;
+		حالت DEFAULT_UNMODIFIED:
+		پیشفرض:
 			fmt = PATH_FORMAT_UNMODIFIED;
-			break;
+			بشکن;
 		}
-	} else {
-		switch (format) {
-		case FORMAT_RELATIVE:
+	} وگرنه {
+		انتخاب (format) {
+		حالت FORMAT_RELATIVE:
 			fmt = PATH_FORMAT_RELATIVE;
-			break;
-		case FORMAT_CANONICAL:
+			بشکن;
+		حالت FORMAT_CANONICAL:
 			fmt = PATH_FORMAT_CANONICAL;
-			break;
-		default:
+			بشکن;
+		پیشفرض:
 			fmt = PATH_FORMAT_UNMODIFIED;
-			break;
+			بشکن;
 		}
 	}
 
@@ -695,81 +695,81 @@ static void print_path(const char *path, const char *prefix,
 	strbuf_release(&sb);
 }
 
-int cmd_rev_parse(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+صحیح cmd_rev_parse(صحیح argc,
+		  ثابت نویسه **argv,
+		  ثابت نویسه *prefix,
+		  ساختار repository *repo UNUSED)
 {
-	int i, as_is = 0, verify = 0, quiet = 0, revs_count = 0, type = 0;
-	const struct git_hash_algo *output_algo = NULL;
-	const struct git_hash_algo *compat = NULL;
-	int did_repo_setup = 0;
-	int has_dashdash = 0;
-	int output_prefix = 0;
-	struct object_id oid;
-	unsigned int flags = 0;
-	const char *name = NULL;
-	struct strbuf buf = STRBUF_INIT;
-	int seen_end_of_options = 0;
-	enum format_type format = FORMAT_DEFAULT;
+	صحیح i, as_is = 0, verify = 0, quiet = 0, revs_شمار = 0, type = 0;
+	ثابت ساختار git_hash_algo *output_algo = پوچ;
+	ثابت ساختار git_hash_algo *compat = پوچ;
+	صحیح did_repo_setup = 0;
+	صحیح has_dashdash = 0;
+	صحیح output_prefix = 0;
+	ساختار object_id oid;
+	unsigned صحیح flags = 0;
+	ثابت نویسه *name = پوچ;
+	ساختار strbuf buf = STRBUF_INIT;
+	صحیح seen_end_of_options = 0;
+	شمارش format_type format = FORMAT_DEFAULT;
 
 	show_usage_if_asked(argc, argv, builtin_rev_parse_usage);
 
-	if (argc > 1 && !strcmp("--parseopt", argv[1]))
-		return cmd_parseopt(argc - 1, argv + 1, prefix);
+	اگر (argc > 1 && !strcmp("--parseopt", argv[1]))
+		بازگشت cmd_parseopt(argc - 1, argv + 1, prefix);
 
-	if (argc > 1 && !strcmp("--sq-quote", argv[1]))
-		return cmd_sq_quote(argc - 2, argv + 2);
+	اگر (argc > 1 && !strcmp("--sq-quote", argv[1]))
+		بازگشت cmd_sq_quote(argc - 2, argv + 2);
 
-	if (argc > 1 && !strcmp("-h", argv[1]))
+	اگر (argc > 1 && !strcmp("-h", argv[1]))
 		usage(builtin_rev_parse_usage);
 
-	for (i = 1; i < argc; i++) {
-		if (!strcmp(argv[i], "--")) {
+	برای (i = 1; i < argc; i++) {
+		اگر (!strcmp(argv[i], "--")) {
 			has_dashdash = 1;
-			break;
+			بشکن;
 		}
 	}
 
 	/* No options; just report on whether we're in a git repo or not. */
-	if (argc == 1) {
+	اگر (argc == 1) {
 		setup_git_directory(the_repository);
-		repo_config(the_repository, git_default_config, NULL);
-		return 0;
+		repo_config(the_repository, git_default_config, پوچ);
+		بازگشت 0;
 	}
 
-	for (i = 1; i < argc; i++) {
-		const char *arg = argv[i];
+	برای (i = 1; i < argc; i++) {
+		ثابت نویسه *arg = argv[i];
 
-		if (as_is) {
-			if (show_file(arg, output_prefix) && as_is < 2)
+		اگر (as_is) {
+			اگر (show_file(arg, output_prefix) && as_is < 2)
 				verify_filename(the_repository, prefix, arg, 0);
-			continue;
+			ادامه;
 		}
 
-		if (!seen_end_of_options) {
-			if (!strcmp(arg, "--local-env-vars")) {
-				int i;
-				for (i = 0; local_repo_env[i]; i++)
+		اگر (!seen_end_of_options) {
+			اگر (!strcmp(arg, "--local-env-vars")) {
+				صحیح i;
+				برای (i = 0; local_repo_env[i]; i++)
 					printf("%s\n", local_repo_env[i]);
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--resolve-git-dir")) {
-				const char *gitdir = argv[++i];
-				if (!gitdir)
+			اگر (!strcmp(arg, "--resolve-git-dir")) {
+				ثابت نویسه *gitdir = argv[++i];
+				اگر (!gitdir)
 					die(_("--resolve-git-dir requires an argument"));
 				gitdir = resolve_gitdir(gitdir);
-				if (!gitdir)
+				اگر (!gitdir)
 					die(_("not a gitdir '%s'"), argv[i]);
 				puts(gitdir);
-				continue;
+				ادامه;
 			}
 		}
 
 		/* The rest of the options require a git repository. */
-		if (!did_repo_setup) {
+		اگر (!did_repo_setup) {
 			prefix = setup_git_directory(the_repository);
-			repo_config(the_repository, git_default_config, NULL);
+			repo_config(the_repository, git_default_config, پوچ);
 			did_repo_setup = 1;
 
 			prepare_repo_settings(the_repository);
@@ -777,418 +777,418 @@ int cmd_rev_parse(int argc,
 			compat = the_repository->compat_hash_algo;
 		}
 
-		if (!strcmp(arg, "--")) {
+		اگر (!strcmp(arg, "--")) {
 			as_is = 2;
 			/* Pass on the "--" if we show anything but files.. */
-			if (filter & (DO_FLAGS | DO_REVS))
+			اگر (filter & (DO_FLAGS | DO_REVS))
 				show_file(arg, 0);
-			continue;
+			ادامه;
 		}
 
-		if (!seen_end_of_options && *arg == '-') {
-			if (!strcmp(arg, "--git-path")) {
-				if (!argv[i + 1])
+		اگر (!seen_end_of_options && *arg == '-') {
+			اگر (!strcmp(arg, "--git-path")) {
+				اگر (!argv[i + 1])
 					die(_("--git-path requires an argument"));
 				print_path(repo_git_path_replace(the_repository, &buf,
 								 "%s", argv[i + 1]), prefix,
 						format,
 						DEFAULT_RELATIVE_IF_SHARED);
 				i++;
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg,"-n")) {
-				if (++i >= argc)
+			اگر (!strcmp(arg,"-n")) {
+				اگر (++i >= argc)
 					die(_("-n requires an argument"));
-				if ((filter & DO_FLAGS) && (filter & DO_REVS)) {
+				اگر ((filter & DO_FLAGS) && (filter & DO_REVS)) {
 					show(arg);
 					show(argv[i]);
 				}
-				continue;
+				ادامه;
 			}
-			if (starts_with(arg, "-n")) {
-				if ((filter & DO_FLAGS) && (filter & DO_REVS))
+			اگر (starts_with(arg, "-n")) {
+				اگر ((filter & DO_FLAGS) && (filter & DO_REVS))
 					show(arg);
-				continue;
+				ادامه;
 			}
-			if (opt_with_value(arg, "--path-format", &arg)) {
-				if (!arg)
+			اگر (opt_with_مقدار(arg, "--path-format", &arg)) {
+				اگر (!arg)
 					die(_("--path-format requires an argument"));
-				if (!strcmp(arg, "absolute")) {
+				اگر (!strcmp(arg, "absolute")) {
 					format = FORMAT_CANONICAL;
-				} else if (!strcmp(arg, "relative")) {
+				} وگرنه اگر (!strcmp(arg, "relative")) {
 					format = FORMAT_RELATIVE;
-				} else {
+				} وگرنه {
 					die(_("unknown argument to --path-format: %s"), arg);
 				}
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--default")) {
+			اگر (!strcmp(arg, "--default")) {
 				def = argv[++i];
-				if (!def)
+				اگر (!def)
 					die(_("--default requires an argument"));
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--prefix")) {
+			اگر (!strcmp(arg, "--prefix")) {
 				prefix = argv[++i];
-				if (!prefix)
+				اگر (!prefix)
 					die(_("--prefix requires an argument"));
 				FREE_AND_NULL(the_repository->prefix);
 				the_repository->prefix = xstrdup(prefix);
 				output_prefix = 1;
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--revs-only")) {
+			اگر (!strcmp(arg, "--revs-only")) {
 				filter &= ~DO_NOREV;
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--no-revs")) {
+			اگر (!strcmp(arg, "--no-revs")) {
 				filter &= ~DO_REVS;
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--flags")) {
+			اگر (!strcmp(arg, "--flags")) {
 				filter &= ~DO_NONFLAGS;
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--no-flags")) {
+			اگر (!strcmp(arg, "--no-flags")) {
 				filter &= ~DO_FLAGS;
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--verify")) {
+			اگر (!strcmp(arg, "--verify")) {
 				filter &= ~(DO_FLAGS|DO_NOREV);
 				verify = 1;
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--quiet") || !strcmp(arg, "-q")) {
+			اگر (!strcmp(arg, "--quiet") || !strcmp(arg, "-q")) {
 				quiet = 1;
 				flags |= GET_OID_QUIETLY;
-				continue;
+				ادامه;
 			}
-			if (opt_with_value(arg, "--output-object-format", &arg)) {
-				if (!arg)
+			اگر (opt_with_مقدار(arg, "--output-object-format", &arg)) {
+				اگر (!arg)
 					die(_("no object format specified"));
-				if (!strcmp(arg, the_hash_algo->name) ||
+				اگر (!strcmp(arg, the_hash_algo->name) ||
 				    !strcmp(arg, "storage")) {
 					flags |= GET_OID_HASH_ANY;
 					output_algo = the_hash_algo;
-					continue;
+					ادامه;
 				}
-				else if (compat && !strcmp(arg, compat->name)) {
+				وگرنه اگر (compat && !strcmp(arg, compat->name)) {
 					flags |= GET_OID_HASH_ANY;
 					output_algo = compat;
-					continue;
+					ادامه;
 				}
-				else die(_("unsupported object format: %s"), arg);
+				وگرنه die(_("unsupported object format: %s"), arg);
 			}
-			if (opt_with_value(arg, "--short", &arg)) {
+			اگر (opt_with_مقدار(arg, "--short", &arg)) {
 				filter &= ~(DO_FLAGS|DO_NOREV);
 				verify = 1;
 				abbrev = DEFAULT_ABBREV;
-				if (!arg)
-					continue;
-				abbrev = strtoul(arg, NULL, 10);
-				if (abbrev < MINIMUM_ABBREV)
+				اگر (!arg)
+					ادامه;
+				abbrev = strtoul(arg, پوچ, 10);
+				اگر (abbrev < MINIMUM_ABBREV)
 					abbrev = MINIMUM_ABBREV;
-				else if ((int)the_hash_algo->hexsz <= abbrev)
+				وگرنه اگر ((صحیح)the_hash_algo->hexsz <= abbrev)
 					abbrev = the_hash_algo->hexsz;
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--sq")) {
+			اگر (!strcmp(arg, "--sq")) {
 				output_sq = 1;
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--not")) {
+			اگر (!strcmp(arg, "--not")) {
 				show_type ^= REVERSED;
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--symbolic")) {
+			اگر (!strcmp(arg, "--symbolic")) {
 				symbolic = SHOW_SYMBOLIC_ASIS;
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--symbolic-full-name")) {
+			اگر (!strcmp(arg, "--symbolic-full-name")) {
 				symbolic = SHOW_SYMBOLIC_FULL;
-				continue;
+				ادامه;
 			}
-			if (opt_with_value(arg, "--abbrev-ref", &arg)) {
+			اگر (opt_with_مقدار(arg, "--abbrev-ref", &arg)) {
 				abbrev_ref = 1;
 				abbrev_ref_strict =
 					repo_settings_get_warn_ambiguous_refs(the_repository);
-				if (arg) {
-					if (!strcmp(arg, "strict"))
+				اگر (arg) {
+					اگر (!strcmp(arg, "strict"))
 						abbrev_ref_strict = 1;
-					else if (!strcmp(arg, "loose"))
+					وگرنه اگر (!strcmp(arg, "loose"))
 						abbrev_ref_strict = 0;
-					else
+					وگرنه
 						die(_("unknown mode for --abbrev-ref: %s"),
 						    arg);
 				}
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--all")) {
+			اگر (!strcmp(arg, "--all")) {
 				refs_for_each_ref(get_main_ref_store(the_repository),
-						  show_reference, NULL);
+						  show_reference, پوچ);
 				clear_ref_exclusions(&ref_excludes);
-				continue;
+				ادامه;
 			}
-			if (skip_prefix(arg, "--disambiguate=", &arg)) {
+			اگر (skip_prefix(arg, "--disambiguate=", &arg)) {
 				repo_for_each_abbrev(the_repository, arg, the_hash_algo,
-						     show_abbrev, NULL);
-				continue;
+						     show_abbrev, پوچ);
+				ادامه;
 			}
-			if (!strcmp(arg, "--bisect")) {
-				char *prefix;
-				char *term_bad = NULL;
-				char *term_good = NULL;
-				struct refs_for_each_ref_options opts = { 0 };
+			اگر (!strcmp(arg, "--bisect")) {
+				نویسه *prefix;
+				نویسه *term_bad = پوچ;
+				نویسه *term_good = پوچ;
+				ساختار refs_for_each_ref_options opts = { 0 };
 				read_bisect_terms(&term_bad, &term_good);
 				prefix = xstrfmt("refs/bisect/%s", term_bad);
 				opts.prefix = prefix;
 				refs_for_each_ref_ext(get_main_ref_store(the_repository),
-						      show_reference, NULL, &opts);
-				free(prefix);
+						      show_reference, پوچ, &opts);
+				آزاد(prefix);
 				prefix = xstrfmt("refs/bisect/%s", term_good);
 				opts.prefix = prefix;
 				refs_for_each_ref_ext(get_main_ref_store(the_repository),
-						      anti_reference, NULL, &opts);
-				free(prefix);
-				free(term_good);
-				free(term_bad);
-				continue;
+						      anti_reference, پوچ, &opts);
+				آزاد(prefix);
+				آزاد(term_good);
+				آزاد(term_bad);
+				ادامه;
 			}
-			if (opt_with_value(arg, "--branches", &arg)) {
-				if (ref_excludes.hidden_refs_configured)
-					return error(_("options '%s' and '%s' cannot be used together"),
+			اگر (opt_with_مقدار(arg, "--branches", &arg)) {
+				اگر (ref_excludes.hidden_refs_configured)
+					بازگشت error(_("options '%s' and '%s' cannot be used together"),
 						     "--exclude-hidden", "--branches");
 				handle_ref_opt(arg, "refs/heads/");
-				continue;
+				ادامه;
 			}
-			if (opt_with_value(arg, "--tags", &arg)) {
-				if (ref_excludes.hidden_refs_configured)
-					return error(_("options '%s' and '%s' cannot be used together"),
+			اگر (opt_with_مقدار(arg, "--tags", &arg)) {
+				اگر (ref_excludes.hidden_refs_configured)
+					بازگشت error(_("options '%s' and '%s' cannot be used together"),
 						     "--exclude-hidden", "--tags");
 				handle_ref_opt(arg, "refs/tags/");
-				continue;
+				ادامه;
 			}
-			if (skip_prefix(arg, "--glob=", &arg)) {
-				handle_ref_opt(arg, NULL);
-				continue;
+			اگر (skip_prefix(arg, "--glob=", &arg)) {
+				handle_ref_opt(arg, پوچ);
+				ادامه;
 			}
-			if (opt_with_value(arg, "--remotes", &arg)) {
-				if (ref_excludes.hidden_refs_configured)
-					return error(_("options '%s' and '%s' cannot be used together"),
+			اگر (opt_with_مقدار(arg, "--remotes", &arg)) {
+				اگر (ref_excludes.hidden_refs_configured)
+					بازگشت error(_("options '%s' and '%s' cannot be used together"),
 						     "--exclude-hidden", "--remotes");
 				handle_ref_opt(arg, "refs/remotes/");
-				continue;
+				ادامه;
 			}
-			if (skip_prefix(arg, "--exclude=", &arg)) {
+			اگر (skip_prefix(arg, "--exclude=", &arg)) {
 				add_ref_exclusion(&ref_excludes, arg);
-				continue;
+				ادامه;
 			}
-			if (skip_prefix(arg, "--exclude-hidden=", &arg)) {
+			اگر (skip_prefix(arg, "--exclude-hidden=", &arg)) {
 				exclude_hidden_refs(&ref_excludes, arg);
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--show-toplevel")) {
-				const char *work_tree = repo_get_work_tree(the_repository);
-				if (work_tree)
-					print_path(work_tree, prefix, format, DEFAULT_UNMODIFIED);
-				else
+			اگر (!strcmp(arg, "--show-toplevel")) {
+				ثابت نویسه *work_درخت = repo_get_work_درخت(the_repository);
+				اگر (work_درخت)
+					print_path(work_درخت, prefix, format, DEFAULT_UNMODIFIED);
+				وگرنه
 					die(_("this operation must be run in a work tree"));
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--show-superproject-working-tree")) {
-				struct strbuf superproject = STRBUF_INIT;
-				if (get_superproject_working_tree(&superproject))
+			اگر (!strcmp(arg, "--show-superproject-working-tree")) {
+				ساختار strbuf superproject = STRBUF_INIT;
+				اگر (get_superproject_working_درخت(&superproject))
 					print_path(superproject.buf, prefix, format, DEFAULT_UNMODIFIED);
 				strbuf_release(&superproject);
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--show-prefix")) {
-				if (prefix)
+			اگر (!strcmp(arg, "--show-prefix")) {
+				اگر (prefix)
 					puts(prefix);
-				else
+				وگرنه
 					putchar('\n');
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--show-cdup")) {
-				const char *pfx = prefix;
-				if (!is_inside_work_tree(the_repository)) {
-					const char *work_tree =
-						repo_get_work_tree(the_repository);
-					if (work_tree)
-						printf("%s\n", work_tree);
-					continue;
+			اگر (!strcmp(arg, "--show-cdup")) {
+				ثابت نویسه *pfx = prefix;
+				اگر (!is_inside_work_درخت(the_repository)) {
+					ثابت نویسه *work_درخت =
+						repo_get_work_درخت(the_repository);
+					اگر (work_درخت)
+						printf("%s\n", work_درخت);
+					ادامه;
 				}
-				while (pfx) {
+				وقتی (pfx) {
 					pfx = strchr(pfx, '/');
-					if (pfx) {
+					اگر (pfx) {
 						pfx++;
 						printf("../");
 					}
 				}
 				putchar('\n');
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--git-dir") ||
+			اگر (!strcmp(arg, "--git-dir") ||
 			    !strcmp(arg, "--absolute-git-dir")) {
-				const char *gitdir = getenv(GIT_DIR_ENVIRONMENT);
-				char *cwd;
-				int len;
-				enum format_type wanted = format;
-				if (arg[2] == 'g') {	/* --git-dir */
-					if (gitdir) {
+				ثابت نویسه *gitdir = getenv(GIT_DIR_ENVIRONMENT);
+				نویسه *cwd;
+				صحیح len;
+				شمارش format_type wanted = format;
+				اگر (arg[2] == 'g') {	/* --git-dir */
+					اگر (gitdir) {
 						print_path(gitdir, prefix, format, DEFAULT_UNMODIFIED);
-						continue;
+						ادامه;
 					}
-					if (!prefix) {
+					اگر (!prefix) {
 						print_path(".git", prefix, format, DEFAULT_UNMODIFIED);
-						continue;
+						ادامه;
 					}
-				} else {		/* --absolute-git-dir */
+				} وگرنه {		/* --absolute-git-dir */
 					wanted = FORMAT_CANONICAL;
-					if (!gitdir && !prefix)
+					اگر (!gitdir && !prefix)
 						gitdir = ".git";
-					if (gitdir) {
-						struct strbuf realpath = STRBUF_INIT;
+					اگر (gitdir) {
+						ساختار strbuf realpath = STRBUF_INIT;
 						strbuf_realpath(&realpath, gitdir, 1);
 						puts(realpath.buf);
 						strbuf_release(&realpath);
-						continue;
+						ادامه;
 					}
 				}
 				cwd = xgetcwd();
 				len = strlen(cwd);
 				strbuf_reset(&buf);
 				strbuf_addf(&buf, "%s%s.git", cwd, len && cwd[len-1] != '/' ? "/" : "");
-				free(cwd);
+				آزاد(cwd);
 				print_path(buf.buf, prefix, wanted, DEFAULT_CANONICAL);
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--git-common-dir")) {
+			اگر (!strcmp(arg, "--git-common-dir")) {
 				print_path(repo_get_common_dir(the_repository), prefix, format, DEFAULT_RELATIVE_IF_SHARED);
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--is-inside-git-dir")) {
+			اگر (!strcmp(arg, "--is-inside-git-dir")) {
 				printf("%s\n", is_inside_git_dir(the_repository) ? "true"
 						: "false");
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--is-inside-work-tree")) {
-				printf("%s\n", is_inside_work_tree(the_repository) ? "true"
+			اگر (!strcmp(arg, "--is-inside-work-tree")) {
+				printf("%s\n", is_inside_work_درخت(the_repository) ? "true"
 						: "false");
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--is-bare-repository")) {
+			اگر (!strcmp(arg, "--is-bare-repository")) {
 				printf("%s\n", is_bare_repository(the_repository) ? "true"
 						: "false");
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--is-shallow-repository")) {
+			اگر (!strcmp(arg, "--is-shallow-repository")) {
 				printf("%s\n",
 						is_repository_shallow(the_repository) ? "true"
 						: "false");
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--shared-index-path")) {
-				if (repo_read_index(the_repository) < 0)
+			اگر (!strcmp(arg, "--shared-index-path")) {
+				اگر (repo_read_index(the_repository) < 0)
 					die(_("Could not read the index"));
-				if (the_repository->index->split_index) {
-					const struct object_id *oid = &the_repository->index->split_index->base_oid;
-					const char *path = repo_git_path_replace(the_repository, &buf, "sharedindex.%s", oid_to_hex(oid));
+				اگر (the_repository->index->split_index) {
+					ثابت ساختار object_id *oid = &the_repository->index->split_index->base_oid;
+					ثابت نویسه *path = repo_git_path_replace(the_repository, &buf, "sharedindex.%s", oid_to_hex(oid));
 					print_path(path, prefix, format, DEFAULT_RELATIVE);
 				}
-				continue;
+				ادامه;
 			}
-			if (skip_prefix(arg, "--since=", &arg)) {
+			اگر (skip_prefix(arg, "--since=", &arg)) {
 				show_datestring("--max-age=", arg);
-				continue;
+				ادامه;
 			}
-			if (skip_prefix(arg, "--after=", &arg)) {
+			اگر (skip_prefix(arg, "--after=", &arg)) {
 				show_datestring("--max-age=", arg);
-				continue;
+				ادامه;
 			}
-			if (skip_prefix(arg, "--before=", &arg)) {
+			اگر (skip_prefix(arg, "--before=", &arg)) {
 				show_datestring("--min-age=", arg);
-				continue;
+				ادامه;
 			}
-			if (skip_prefix(arg, "--until=", &arg)) {
+			اگر (skip_prefix(arg, "--until=", &arg)) {
 				show_datestring("--min-age=", arg);
-				continue;
+				ادامه;
 			}
-			if (opt_with_value(arg, "--show-object-format", &arg)) {
-				const char *val = arg ? arg : "storage";
+			اگر (opt_with_مقدار(arg, "--show-object-format", &arg)) {
+				ثابت نویسه *val = arg ? arg : "storage";
 
-				if (strcmp(val, "storage") &&
+				اگر (strcmp(val, "storage") &&
 				    strcmp(val, "compat") &&
 				    strcmp(val, "input") &&
 				    strcmp(val, "output"))
 					die(_("unknown mode for --show-object-format: %s"),
 					    arg);
 
-				if (!strcmp(val, "compat")) {
-					if (the_repository->compat_hash_algo)
+				اگر (!strcmp(val, "compat")) {
+					اگر (the_repository->compat_hash_algo)
 						puts(the_repository->compat_hash_algo->name);
-					else
+					وگرنه
 						putchar('\n');
-				} else {
+				} وگرنه {
 					puts(the_hash_algo->name);
 				}
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--show-ref-format") || !strcmp(arg, "--show-ref-storage-format")) {
+			اگر (!strcmp(arg, "--show-ref-format") || !strcmp(arg, "--show-ref-storage-format")) {
 				puts(ref_storage_format_to_name(the_repository->ref_storage_format));
-				continue;
+				ادامه;
 			}
-			if (!strcmp(arg, "--end-of-options")) {
+			اگر (!strcmp(arg, "--end-of-options")) {
 				seen_end_of_options = 1;
-				if (filter & (DO_FLAGS | DO_REVS))
+				اگر (filter & (DO_FLAGS | DO_REVS))
 					show_file(arg, 0);
-				continue;
+				ادامه;
 			}
-			if (show_flag(arg) && verify)
+			اگر (show_flag(arg) && verify)
 				die_no_single_rev(quiet);
-			continue;
+			ادامه;
 		}
 
 		/* Not a flag argument */
-		if (try_difference(arg))
-			continue;
-		if (try_parent_shorthands(arg))
-			continue;
+		اگر (try_difference(arg))
+			ادامه;
+		اگر (try_parent_shorthands(arg))
+			ادامه;
 		name = arg;
 		type = NORMAL;
-		if (*arg == '^') {
+		اگر (*arg == '^') {
 			name++;
 			type = REVERSED;
 		}
-		if (!repo_get_oid_with_flags(the_repository, name, &oid,
+		اگر (!repo_get_oid_with_flags(the_repository, name, &oid,
 					     flags)) {
-			if (output_algo)
+			اگر (output_algo)
 				repo_oid_to_algop(the_repository, &oid,
 						  output_algo, &oid);
-			if (verify)
-				revs_count++;
-			else
+			اگر (verify)
+				revs_شمار++;
+			وگرنه
 				show_rev(type, &oid, name);
-			continue;
+			ادامه;
 		}
-		if (verify)
+		اگر (verify)
 			die_no_single_rev(quiet);
-		if (has_dashdash)
+		اگر (has_dashdash)
 			die(_("bad revision '%s'"), arg);
 		as_is = 1;
-		if (!show_file(arg, output_prefix))
-			continue;
+		اگر (!show_file(arg, output_prefix))
+			ادامه;
 		verify_filename(the_repository, prefix, arg, 1);
 	}
 	strbuf_release(&buf);
-	if (verify) {
-		if (revs_count == 1) {
+	اگر (verify) {
+		اگر (revs_شمار == 1) {
 			show_rev(type, &oid, name);
-			return 0;
-		} else if (revs_count == 0 && show_default())
-			return 0;
+			بازگشت 0;
+		} وگرنه اگر (revs_شمار == 0 && show_default())
+			بازگشت 0;
 		die_no_single_rev(quiet);
-	} else
+	} وگرنه
 		show_default();
-	return 0;
+	بازگشت 0;
 }

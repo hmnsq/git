@@ -5,27 +5,27 @@
  * Copyright (C) Junio C Hamano, 2005
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-file.h"
-#include "odb.h"
-#include "blob.h"
-#include "quote.h"
-#include "parse-options.h"
-#include "setup.h"
-#include "strbuf.h"
-#include "write-or-die.h"
+#شامل "builtin.h"
+#شامل "abspath.h"
+#شامل "config.h"
+#شامل "environment.h"
+#شامل "gettext.h"
+#شامل "hex.h"
+#شامل "object-file.h"
+#شامل "odb.h"
+#شامل "blob.h"
+#شامل "quote.h"
+#شامل "parse-options.h"
+#شامل "setup.h"
+#شامل "strbuf.h"
+#شامل "write-or-die.h"
 
-static void hash_fd(int fd, const char *type, const char *path, unsigned flags)
+ایستا تهی hash_fd(صحیح fd, ثابت نویسه *type, ثابت نویسه *path, unsigned flags)
 {
-	struct stat st;
-	struct object_id oid;
+	ساختار stat st;
+	ساختار object_id oid;
 
-	if (fstat(fd, &st) < 0 ||
+	اگر (fstat(fd, &st) < 0 ||
 	    index_fd(the_repository->index, &oid, fd, &st,
 		     type_from_string(type), path, flags))
 		die((flags & INDEX_WRITE_OBJECT)
@@ -35,54 +35,54 @@ static void hash_fd(int fd, const char *type, const char *path, unsigned flags)
 	maybe_flush_or_die(stdout, "hash to stdout");
 }
 
-static void hash_object(const char *path, const char *type, const char *vpath,
+ایستا تهی hash_object(ثابت نویسه *path, ثابت نویسه *type, ثابت نویسه *vpath,
 			unsigned flags)
 {
-	int fd;
+	صحیح fd;
 	fd = xopen(path, O_RDONLY);
 	hash_fd(fd, type, vpath, flags);
 }
 
-static void hash_stdin_paths(const char *type, int no_filters, unsigned flags)
+ایستا تهی hash_stdin_paths(ثابت نویسه *type, صحیح no_filters, unsigned flags)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf unquoted = STRBUF_INIT;
+	ساختار strbuf buf = STRBUF_INIT;
+	ساختار strbuf unquoted = STRBUF_INIT;
 
-	while (strbuf_getline(&buf, stdin) != EOF) {
-		if (buf.buf[0] == '"') {
+	وقتی (strbuf_getline(&buf, stdin) != EOF) {
+		اگر (buf.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, buf.buf, NULL))
+			اگر (unquote_c_style(&unquoted, buf.buf, پوچ))
 				die("line is badly quoted");
 			strbuf_swap(&buf, &unquoted);
 		}
-		hash_object(buf.buf, type, no_filters ? NULL : buf.buf, flags);
+		hash_object(buf.buf, type, no_filters ? پوچ : buf.buf, flags);
 	}
 	strbuf_release(&buf);
 	strbuf_release(&unquoted);
 }
 
-int cmd_hash_object(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+صحیح cmd_hash_object(صحیح argc,
+		    ثابت نویسه **argv,
+		    ثابت نویسه *prefix,
+		    ساختار repository *repo UNUSED)
 {
-	static const char * const hash_object_usage[] = {
+	ایستا ثابت نویسه * ثابت hash_object_usage[] = {
 		N_("git hash-object [-t <type>] [-w] [--path=<file> | --no-filters]\n"
 		   "                [--stdin [--literally]] [--] <file>..."),
 		N_("git hash-object [-t <type>] [-w] --stdin-paths [--no-filters]"),
-		NULL
+		پوچ
 	};
-	const char *type = blob_type;
-	int hashstdin = 0;
-	int stdin_paths = 0;
-	int no_filters = 0;
-	int nongit = 0;
+	ثابت نویسه *type = blob_type;
+	صحیح hashstdin = 0;
+	صحیح stdin_paths = 0;
+	صحیح no_filters = 0;
+	صحیح nongit = 0;
 	unsigned flags = INDEX_FORMAT_CHECK;
-	const char *vpath = NULL;
-	char *vpath_free = NULL;
-	const struct option hash_object_options[] = {
-		OPT_STRING('t', NULL, &type, N_("type"), N_("object type")),
-		OPT_BIT('w', NULL, &flags, N_("write the object into the object database"),
+	ثابت نویسه *vpath = پوچ;
+	نویسه *vpath_free = پوچ;
+	ثابت ساختار option hash_object_options[] = {
+		OPT_STRING('t', پوچ, &type, N_("type"), N_("object type")),
+		OPT_BIT('w', پوچ, &flags, N_("write the object into the object database"),
 			INDEX_WRITE_OBJECT),
 		OPT_COUNTUP( 0 , "stdin", &hashstdin, N_("read the object from stdin")),
 		OPT_BOOL( 0 , "stdin-paths", &stdin_paths, N_("read file names from stdin")),
@@ -93,65 +93,65 @@ int cmd_hash_object(int argc,
 		OPT_STRING( 0 , "path", &vpath, N_("file"), N_("process file as it were from this path")),
 		OPT_END()
 	};
-	int i;
-	const char *errstr = NULL;
+	صحیح i;
+	ثابت نویسه *errstr = پوچ;
 
 	argc = parse_options(argc, argv, prefix, hash_object_options,
 			     hash_object_usage, 0);
 
-	if (flags & INDEX_WRITE_OBJECT)
+	اگر (flags & INDEX_WRITE_OBJECT)
 		prefix = setup_git_directory(the_repository);
-	else
+	وگرنه
 		prefix = setup_git_directory_gently(the_repository, &nongit);
 
-	if (nongit && !the_hash_algo)
+	اگر (nongit && !the_hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
-	if (vpath && prefix) {
+	اگر (vpath && prefix) {
 		vpath_free = prefix_filename(prefix, vpath);
 		vpath = vpath_free;
 	}
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, پوچ);
 
-	if (stdin_paths) {
-		if (hashstdin)
+	اگر (stdin_paths) {
+		اگر (hashstdin)
 			errstr = "Can't use --stdin-paths with --stdin";
-		else if (argc)
+		وگرنه اگر (argc)
 			errstr = "Can't specify files with --stdin-paths";
-		else if (vpath)
+		وگرنه اگر (vpath)
 			errstr = "Can't use --stdin-paths with --path";
 	}
-	else {
-		if (hashstdin > 1)
+	وگرنه {
+		اگر (hashstdin > 1)
 			errstr = "Multiple --stdin arguments are not supported";
-		if (vpath && no_filters)
+		اگر (vpath && no_filters)
 			errstr = "Can't use --path with --no-filters";
 	}
 
-	if (errstr) {
+	اگر (errstr) {
 		error("%s", errstr);
 		usage_with_options(hash_object_usage, hash_object_options);
 	}
 
-	if (hashstdin)
+	اگر (hashstdin)
 		hash_fd(0, type, vpath, flags);
 
-	for (i = 0 ; i < argc; i++) {
-		const char *arg = argv[i];
-		char *to_free = NULL;
+	برای (i = 0 ; i < argc; i++) {
+		ثابت نویسه *arg = argv[i];
+		نویسه *to_free = پوچ;
 
-		if (prefix)
+		اگر (prefix)
 			arg = to_free = prefix_filename(prefix, arg);
-		hash_object(arg, type, no_filters ? NULL : vpath ? vpath : arg,
+		hash_object(arg, type, no_filters ? پوچ : vpath ? vpath : arg,
 			    flags);
-		free(to_free);
+		آزاد(to_free);
 	}
 
-	if (stdin_paths)
+	اگر (stdin_paths)
 		hash_stdin_paths(type, no_filters, flags);
 
-	free(vpath_free);
+	آزاد(vpath_free);
 
-	return 0;
+	بازگشت 0;
 }

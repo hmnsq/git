@@ -1,73 +1,73 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "setup.h"
-#include "strbuf.h"
-#include "write-or-die.h"
+#شامل "builtin.h"
+#شامل "config.h"
+#شامل "environment.h"
+#شامل "gettext.h"
+#شامل "parse-options.h"
+#شامل "setup.h"
+#شامل "strbuf.h"
+#شامل "write-or-die.h"
 
-static void comment_lines(struct strbuf *buf)
+ایستا تهی comment_سطرها(ساختار strbuf *buf)
 {
-	char *msg;
+	نویسه *پیام;
 	size_t len;
 
-	msg = strbuf_detach(buf, &len);
-	strbuf_add_commented_lines(buf, msg, len, comment_line_str);
-	free(msg);
+	پیام = strbuf_detach(buf, &len);
+	strbuf_add_commented_سطرها(buf, پیام, len, comment_سطر_str);
+	آزاد(پیام);
 }
 
-static const char * const stripspace_usage[] = {
+ایستا ثابت نویسه * ثابت stripspace_usage[] = {
 	"git stripspace [-s | --strip-comments]",
 	"git stripspace [-c | --comment-lines]",
-	NULL
+	پوچ
 };
 
-enum stripspace_mode {
+شمارش stripspace_mode {
 	STRIP_DEFAULT = 0,
 	STRIP_COMMENTS,
-	COMMENT_LINES
+	COMMENT_سطرها
 };
 
-int cmd_stripspace(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+صحیح cmd_stripspace(صحیح argc,
+		   ثابت نویسه **argv,
+		   ثابت نویسه *prefix,
+		   ساختار repository *repo UNUSED)
 {
-	struct strbuf buf = STRBUF_INIT;
-	enum stripspace_mode mode = STRIP_DEFAULT;
-	int nongit;
+	ساختار strbuf buf = STRBUF_INIT;
+	شمارش stripspace_mode mode = STRIP_DEFAULT;
+	صحیح nongit;
 
-	const struct option options[] = {
+	ثابت ساختار option options[] = {
 		OPT_CMDMODE('s', "strip-comments", &mode,
 			    N_("skip and remove all lines starting with comment character"),
 			    STRIP_COMMENTS),
 		OPT_CMDMODE('c', "comment-lines", &mode,
 			    N_("prepend comment character and space to each line"),
-			    COMMENT_LINES),
+			    COMMENT_سطرها),
 		OPT_END()
 	};
 
 	argc = parse_options(argc, argv, prefix, options, stripspace_usage, 0);
-	if (argc)
+	اگر (argc)
 		usage_with_options(stripspace_usage, options);
 
-	if (mode == STRIP_COMMENTS || mode == COMMENT_LINES) {
+	اگر (mode == STRIP_COMMENTS || mode == COMMENT_سطرها) {
 		setup_git_directory_gently(the_repository, &nongit);
-		repo_config(the_repository, git_default_config, NULL);
+		repo_config(the_repository, git_default_config, پوچ);
 	}
 
-	if (strbuf_read(&buf, 0, 1024) < 0)
+	اگر (strbuf_read(&buf, 0, 1024) < 0)
 		die_errno("could not read the input");
 
-	if (mode == STRIP_DEFAULT || mode == STRIP_COMMENTS)
+	اگر (mode == STRIP_DEFAULT || mode == STRIP_COMMENTS)
 		strbuf_stripspace(&buf,
-			  mode == STRIP_COMMENTS ? comment_line_str : NULL);
-	else
-		comment_lines(&buf);
+			  mode == STRIP_COMMENTS ? comment_سطر_str : پوچ);
+	وگرنه
+		comment_سطرها(&buf);
 
 	write_or_die(1, buf.buf, buf.len);
 	strbuf_release(&buf);
-	return 0;
+	بازگشت 0;
 }

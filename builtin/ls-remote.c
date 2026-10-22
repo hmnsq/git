@@ -1,76 +1,76 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "gettext.h"
-#include "hex.h"
-#include "transport.h"
-#include "pkt-line.h"
-#include "ref-filter.h"
-#include "remote.h"
-#include "parse-options.h"
-#include "wildmatch.h"
+#شامل "builtin.h"
+#شامل "gettext.h"
+#شامل "hex.h"
+#شامل "transport.h"
+#شامل "pkt-line.h"
+#شامل "ref-filter.h"
+#شامل "remote.h"
+#شامل "parse-options.h"
+#شامل "wildmatch.h"
 
-static const char * const ls_remote_usage[] = {
+ایستا ثابت نویسه * ثابت ls_remote_usage[] = {
 	N_("git ls-remote [--branches] [--tags] [--refs] [--upload-pack=<exec>]\n"
 	   "              [-q | --quiet] [--exit-code] [--get-url] [--sort=<key>]\n"
 	   "              [--symref] [<repository> [<patterns>...]]"),
-	NULL
+	پوچ
 };
 
 /*
  * Is there one among the list of patterns that match the tail part
  * of the path?
  */
-static int tail_match(const struct strvec *pattern, const char *path)
+ایستا صحیح tail_match(ثابت ساختار strvec *pattern, ثابت نویسه *path)
 {
-	char *pathbuf;
+	نویسه *pathbuf;
 
-	if (!pattern->nr)
-		return 1; /* no restriction */
+	اگر (!pattern->nr)
+		بازگشت 1; /* no restriction */
 
 	pathbuf = xstrfmt("/%s", path);
-	for (size_t i = 0; i < pattern->nr; i++) {
-		if (!wildmatch(pattern->v[i], pathbuf, 0)) {
-			free(pathbuf);
-			return 1;
+	برای (size_t i = 0; i < pattern->nr; i++) {
+		اگر (!wildmatch(pattern->v[i], pathbuf, 0)) {
+			آزاد(pathbuf);
+			بازگشت 1;
 		}
 	}
-	free(pathbuf);
-	return 0;
+	آزاد(pathbuf);
+	بازگشت 0;
 }
 
-int cmd_ls_remote(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+صحیح cmd_ls_remote(صحیح argc,
+		  ثابت نویسه **argv,
+		  ثابت نویسه *prefix,
+		  ساختار repository *repo UNUSED)
 {
-	const char *dest = NULL;
+	ثابت نویسه *dest = پوچ;
 	unsigned flags = 0;
-	int get_url = 0;
-	int quiet = 0;
-	int status = 0;
-	int show_symref_target = 0;
-	const char *uploadpack = NULL;
-	struct strvec pattern = STRVEC_INIT;
-	struct transport_ls_refs_options transport_options =
+	صحیح get_url = 0;
+	صحیح quiet = 0;
+	صحیح status = 0;
+	صحیح show_symref_target = 0;
+	ثابت نویسه *uploadpack = پوچ;
+	ساختار strvec pattern = STRVEC_INIT;
+	ساختار transport_ls_refs_options transport_options =
 		TRANSPORT_LS_REFS_OPTIONS_INIT;
-	int i;
-	struct string_list server_options = STRING_LIST_INIT_DUP;
+	صحیح i;
+	ساختار string_list server_options = STRING_LIST_INIT_DUP;
 
-	struct remote *remote;
-	struct transport *transport;
-	const struct ref *ref;
-	struct ref_array ref_array;
-	struct ref_sorting *sorting;
-	struct string_list sorting_options = STRING_LIST_INIT_DUP;
+	ساختار remote *remote;
+	ساختار transport *transport;
+	ثابت ساختار ref *ref;
+	ساختار ref_array ref_array;
+	ساختار ref_sorting *sorting;
+	ساختار string_list sorting_options = STRING_LIST_INIT_DUP;
 
-	struct option options[] = {
+	ساختار option options[] = {
 		OPT__QUIET(&quiet, N_("do not print remote URL")),
 		OPT_STRING(0, "upload-pack", &uploadpack, N_("exec"),
 			   N_("path of git-upload-pack on the remote host")),
 		{
 			.type = OPTION_STRING,
 			.long_name = "exec",
-			.value = &uploadpack,
+			.مقدار = &uploadpack,
 			.argh = N_("exec"),
 			.help = N_("path of git-upload-pack on the remote host"),
 			.flags = PARSE_OPT_HIDDEN,
@@ -93,7 +93,7 @@ int cmd_ls_remote(int argc,
 		OPT_END()
 	};
 
-	memset(&ref_array, 0, sizeof(ref_array));
+	memset(&ref_array, 0, اندازه(ref_array));
 
 	argc = parse_options(argc, argv, prefix, options, ls_remote_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
@@ -111,61 +111,61 @@ int cmd_ls_remote(int argc,
 	 * remote's object format. Otherwise, we may end up misparsing refspecs
 	 * depending on what object hash the remote uses.
 	 */
-	if (!the_repository->hash_algo)
+	اگر (!the_repository->hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	packet_trace_identity("ls-remote");
 
-	for (int i = 1; i < argc; i++)
+	برای (صحیح i = 1; i < argc; i++)
 		strvec_pushf(&pattern, "*/%s", argv[i]);
 
-	if (flags & REF_TAGS)
-		strvec_push(&transport_options.ref_prefixes, "refs/tags/");
-	if (flags & REF_BRANCHES)
-		strvec_push(&transport_options.ref_prefixes, "refs/heads/");
+	اگر (flags & REF_TAGS)
+		strvec_افزودن(&transport_options.ref_prefixes, "refs/tags/");
+	اگر (flags & REF_BRANCHES)
+		strvec_افزودن(&transport_options.ref_prefixes, "refs/heads/");
 
 	remote = remote_get(dest);
-	if (!remote) {
-		if (dest)
+	اگر (!remote) {
+		اگر (dest)
 			die("bad repository '%s'", dest);
 		die("No remote configured to list refs from.");
 	}
 
-	if (get_url) {
+	اگر (get_url) {
 		printf("%s\n", remote->url.v[0]);
-		return 0;
+		بازگشت 0;
 	}
 
-	transport = transport_get(remote, NULL);
-	if (uploadpack)
+	transport = transport_get(remote, پوچ);
+	اگر (uploadpack)
 		transport_set_option(transport, TRANS_OPT_UPLOADPACK, uploadpack);
-	if (server_options.nr)
+	اگر (server_options.nr)
 		transport->server_options = &server_options;
 
 	ref = transport_get_remote_refs(transport, &transport_options);
-	if (ref) {
-		int hash_algo = hash_algo_by_ptr(transport_get_hash_algo(transport));
+	اگر (ref) {
+		صحیح hash_algo = hash_algo_by_ptr(transport_get_hash_algo(transport));
 		repo_set_hash_algo(the_repository, hash_algo);
 	}
 
-	if (!dest && !quiet)
+	اگر (!dest && !quiet)
 		fprintf(stderr, "From %s\n", remote->url.v[0]);
-	for ( ; ref; ref = ref->next) {
-		struct ref_array_item *item;
-		if (!check_ref_type(ref, flags))
-			continue;
-		if (!tail_match(&pattern, ref->name))
-			continue;
-		item = ref_array_push(&ref_array, ref->name, &ref->old_oid, NULL);
+	برای ( ; ref; ref = ref->next) {
+		ساختار ref_array_item *item;
+		اگر (!check_ref_type(ref, flags))
+			ادامه;
+		اگر (!tail_match(&pattern, ref->name))
+			ادامه;
+		item = ref_array_افزودن(&ref_array, ref->name, &ref->old_oid, پوچ);
 		item->symref = xstrdup_or_null(ref->symref);
 	}
 
 	sorting = ref_sorting_options(&sorting_options);
 	ref_array_sort(sorting, &ref_array);
 
-	for (i = 0; i < ref_array.nr; i++) {
-		const struct ref_array_item *ref = ref_array.items[i];
-		if (show_symref_target && ref->symref)
+	برای (i = 0; i < ref_array.nr; i++) {
+		ثابت ساختار ref_array_item *ref = ref_array.اقلام[i];
+		اگر (show_symref_target && ref->symref)
 			printf("ref: %s\t%s\n", ref->symref, ref->refname);
 		printf("%s\t%s\n", oid_to_hex(&ref->objectname), ref->refname);
 		status = 0; /* we found something */
@@ -174,11 +174,11 @@ int cmd_ls_remote(int argc,
 	string_list_clear(&server_options, 0);
 	ref_sorting_release(sorting);
 	ref_array_clear(&ref_array);
-	if (transport_disconnect(transport))
+	اگر (transport_disconnect(transport))
 		status = 1;
 	transport_ls_refs_options_release(&transport_options);
 
 	strvec_clear(&pattern);
 	string_list_clear(&server_options, 0);
-	return status;
+	بازگشت status;
 }

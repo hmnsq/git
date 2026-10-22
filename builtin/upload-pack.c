@@ -1,35 +1,35 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "exec-cmd.h"
-#include "gettext.h"
-#include "pkt-line.h"
-#include "parse-options.h"
-#include "protocol.h"
-#include "replace-object.h"
-#include "upload-pack.h"
-#include "serve.h"
-#include "setup.h"
-#include "commit.h"
-#include "environment.h"
+#شامل "builtin.h"
+#شامل "exec-cmd.h"
+#شامل "gettext.h"
+#شامل "pkt-line.h"
+#شامل "parse-options.h"
+#شامل "protocol.h"
+#شامل "replace-object.h"
+#شامل "upload-pack.h"
+#شامل "serve.h"
+#شامل "setup.h"
+#شامل "commit.h"
+#شامل "environment.h"
 
-static const char * const upload_pack_usage[] = {
+ایستا ثابت نویسه * ثابت upload_pack_usage[] = {
 	N_("git-upload-pack [--[no-]strict] [--timeout=<n>] [--stateless-rpc]\n"
 	   "                [--advertise-refs] <directory>"),
-	NULL
+	پوچ
 };
 
-int cmd_upload_pack(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+صحیح cmd_upload_pack(صحیح argc,
+		    ثابت نویسه **argv,
+		    ثابت نویسه *prefix,
+		    ساختار repository *repo UNUSED)
 {
-	const char *dir;
-	int strict = 0;
-	int advertise_refs = 0;
-	int stateless_rpc = 0;
-	int timeout = 0;
-	struct option options[] = {
+	ثابت نویسه *dir;
+	صحیح strict = 0;
+	صحیح advertise_refs = 0;
+	صحیح stateless_rpc = 0;
+	صحیح timeout = 0;
+	ساختار option options[] = {
 		OPT_BOOL(0, "stateless-rpc", &stateless_rpc,
 			 N_("quit after a single request/response exchange")),
 		OPT_HIDDEN_BOOL(0, "http-backend-info-refs", &advertise_refs,
@@ -50,40 +50,40 @@ int cmd_upload_pack(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, upload_pack_usage, 0);
 
-	if (argc != 1)
+	اگر (argc != 1)
 		usage_with_options(upload_pack_usage, options);
 
 	setup_path();
 
 	dir = argv[0];
 
-	if (strict)
+	اگر (strict)
 		enter_repo_flags |= ENTER_REPO_STRICT;
-	if (!enter_repo(the_repository, dir, enter_repo_flags))
+	اگر (!enter_repo(the_repository, dir, enter_repo_flags))
 		die("'%s' does not appear to be a git repository", dir);
 
-	switch (determine_protocol_version_server()) {
-	case protocol_v2:
-		if (advertise_refs)
+	انتخاب (determine_protocol_version_server()) {
+	حالت protocol_v2:
+		اگر (advertise_refs)
 			protocol_v2_advertise_capabilities(the_repository);
-		else
+		وگرنه
 			protocol_v2_serve_loop(the_repository, stateless_rpc);
-		break;
-	case protocol_v1:
+		بشکن;
+	حالت protocol_v1:
 		/*
 		 * v1 is just the original protocol with a version string,
 		 * so just fall through after writing the version string.
 		 */
-		if (advertise_refs || !stateless_rpc)
+		اگر (advertise_refs || !stateless_rpc)
 			packet_write_fmt(1, "version 1\n");
 
 		/* fallthrough */
-	case protocol_v0:
+	حالت protocol_v0:
 		upload_pack(advertise_refs, stateless_rpc, timeout);
-		break;
-	case protocol_unknown_version:
+		بشکن;
+	حالت protocol_unknown_version:
 		BUG("unknown protocol version");
 	}
 
-	return 0;
+	بازگشت 0;
 }

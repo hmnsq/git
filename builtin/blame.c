@@ -7,112 +7,112 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "color.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "commit.h"
-#include "diff.h"
-#include "revision.h"
-#include "quote.h"
-#include "string-list.h"
-#include "mailmap.h"
-#include "parse-options.h"
-#include "prio-queue.h"
-#include "utf8.h"
-#include "userdiff.h"
-#include "line-range.h"
-#include "line-log.h"
-#include "progress.h"
-#include "object-name.h"
-#include "odb.h"
-#include "pager.h"
-#include "blame.h"
-#include "refs.h"
-#include "setup.h"
-#include "tag.h"
-#include "write-or-die.h"
+#شامل "builtin.h"
+#شامل "config.h"
+#شامل "color.h"
+#شامل "environment.h"
+#شامل "gettext.h"
+#شامل "hex.h"
+#شامل "commit.h"
+#شامل "diff.h"
+#شامل "revision.h"
+#شامل "quote.h"
+#شامل "string-list.h"
+#شامل "mailmap.h"
+#شامل "parse-options.h"
+#شامل "prio-queue.h"
+#شامل "utf8.h"
+#شامل "userdiff.h"
+#شامل "line-range.h"
+#شامل "line-log.h"
+#شامل "progress.h"
+#شامل "object-name.h"
+#شامل "odb.h"
+#شامل "pager.h"
+#شامل "blame.h"
+#شامل "refs.h"
+#شامل "setup.h"
+#شامل "tag.h"
+#شامل "write-or-die.h"
 
-static const char blame_usage[] = N_("git blame [<options>] [<rev-opts>] [<rev>] [--] <file>");
-static const char annotate_usage[] = N_("git annotate [<options>] [<rev-opts>] [<rev>] [--] <file>");
+ایستا ثابت نویسه blame_usage[] = N_("git blame [<options>] [<rev-opts>] [<rev>] [--] <file>");
+ایستا ثابت نویسه annotate_usage[] = N_("git annotate [<options>] [<rev-opts>] [<rev>] [--] <file>");
 
-static const char *const blame_opt_usage[] = {
+ایستا ثابت نویسه *ثابت blame_opt_usage[] = {
 	blame_usage,
 	"",
 	N_("<rev-opts> are documented in git-rev-list(1)"),
-	NULL
+	پوچ
 };
 
-static const char *const annotate_opt_usage[] = {
+ایستا ثابت نویسه *ثابت annotate_opt_usage[] = {
 	annotate_usage,
 	"",
 	N_("<rev-opts> are documented in git-rev-list(1)"),
-	NULL
+	پوچ
 };
 
-static int longest_file;
-static int longest_author;
-static int max_orig_digits;
-static int max_digits;
-static int max_score_digits;
-static int show_root;
-static int reverse;
-static int blank_boundary;
-static int incremental;
-static int xdl_opts;
-static int abbrev = -1;
-static int no_whole_file_rename;
-static int show_progress;
-static char repeated_meta_color[COLOR_MAXLEN];
-static int coloring_mode;
-static struct string_list ignore_revs_file_list = STRING_LIST_INIT_DUP;
-static int mark_unblamable_lines;
-static int mark_ignored_lines;
+ایستا صحیح longest_file;
+ایستا صحیح longest_author;
+ایستا صحیح max_orig_digits;
+ایستا صحیح max_digits;
+ایستا صحیح max_score_digits;
+ایستا صحیح show_ریشه;
+ایستا صحیح reverse;
+ایستا صحیح blank_boundary;
+ایستا صحیح incremental;
+ایستا صحیح xdl_opts;
+ایستا صحیح abbrev = -1;
+ایستا صحیح no_whole_file_rename;
+ایستا صحیح show_progress;
+ایستا نویسه repeated_meta_color[COLOR_MAXLEN];
+ایستا صحیح coloring_mode;
+ایستا ساختار string_list ignore_revs_file_list = STRING_LIST_INIT_DUP;
+ایستا صحیح mark_unblamable_سطرها;
+ایستا صحیح mark_ignored_سطرها;
 
-static struct date_mode blame_date_mode = { DATE_ISO8601 };
-static size_t blame_date_width;
+ایستا ساختار date_mode blame_date_mode = { DATE_ISO8601 };
+ایستا size_t blame_date_width;
 
-static struct string_list mailmap = STRING_LIST_INIT_NODUP;
+ایستا ساختار string_list mailmap = STRING_LIST_INIT_NODUP;
 
 #ifndef DEBUG_BLAME
 #define DEBUG_BLAME 0
 #endif
 
-static unsigned blame_move_score;
-static unsigned blame_copy_score;
+ایستا unsigned blame_move_score;
+ایستا unsigned blame_copy_score;
 
 /* Remember to update object flag allocation in object.h */
 #define METAINFO_SHOWN		(1u<<12)
 #define MORE_THAN_ONE_PATH	(1u<<13)
 
-struct progress_info {
-	struct progress *progress;
-	int blamed_lines;
+ساختار progress_info {
+	ساختار progress *progress;
+	صحیح blamed_سطرها;
 };
 
-static const char *nth_line_cb(void *data, long lno)
+ایستا ثابت نویسه *nth_سطر_cb(تهی *data, long lno)
 {
-	return blame_nth_line((struct blame_scoreboard *)data, lno);
+	بازگشت blame_nth_سطر((ساختار blame_scoreboard *)data, lno);
 }
 
 /*
  * Information on commits, used for output.
  */
-struct commit_info {
-	struct strbuf author;
-	struct strbuf author_mail;
+ساختار commit_info {
+	ساختار strbuf author;
+	ساختار strbuf author_mail;
 	timestamp_t author_time;
-	struct strbuf author_tz;
+	ساختار strbuf author_tz;
 
 	/* filled only when asked for details */
-	struct strbuf committer;
-	struct strbuf committer_mail;
+	ساختار strbuf committer;
+	ساختار strbuf committer_mail;
 	timestamp_t committer_time;
-	struct strbuf committer_tz;
+	ساختار strbuf committer_tz;
 
-	struct strbuf summary;
+	ساختار strbuf summary;
 };
 
 #define COMMIT_INFO_INIT { \
@@ -128,26 +128,26 @@ struct commit_info {
 /*
  * Parse author/committer line in the commit object buffer
  */
-static void get_ac_line(const char *inbuf, const char *what,
-	struct strbuf *name, struct strbuf *mail,
-	timestamp_t *time, struct strbuf *tz)
+ایستا تهی get_ac_سطر(ثابت نویسه *inbuf, ثابت نویسه *what,
+	ساختار strbuf *name, ساختار strbuf *mail,
+	timestamp_t *time, ساختار strbuf *tz)
 {
-	struct ident_split ident;
+	ساختار ident_split ident;
 	size_t len, maillen, namelen;
-	const char *tmp, *endp;
-	const char *namebuf, *mailbuf;
+	ثابت نویسه *tmp, *endp;
+	ثابت نویسه *namebuf, *mailbuf;
 
 	tmp = strstr(inbuf, what);
-	if (!tmp)
-		goto error_out;
+	اگر (!tmp)
+		برو error_out;
 	tmp += strlen(what);
 	endp = strchr(tmp, '\n');
-	if (!endp)
+	اگر (!endp)
 		len = strlen(tmp);
-	else
+	وگرنه
 		len = endp - tmp;
 
-	if (split_ident_line(&ident, tmp, len)) {
+	اگر (split_ident_سطر(&ident, tmp, len)) {
 	error_out:
 		/* Ugh */
 		tmp = "(unknown)";
@@ -155,7 +155,7 @@ static void get_ac_line(const char *inbuf, const char *what,
 		strbuf_addstr(mail, tmp);
 		strbuf_addstr(tz, tmp);
 		*time = 0;
-		return;
+		بازگشت;
 	}
 
 	namelen = ident.name_end - ident.name_begin;
@@ -164,14 +164,14 @@ static void get_ac_line(const char *inbuf, const char *what,
 	maillen = ident.mail_end - ident.mail_begin;
 	mailbuf = ident.mail_begin;
 
-	if (ident.date_begin && ident.date_end)
-		*time = strtoul(ident.date_begin, NULL, 10);
-	else
+	اگر (ident.date_begin && ident.date_end)
+		*time = strtoul(ident.date_begin, پوچ, 10);
+	وگرنه
 		*time = 0;
 
-	if (ident.tz_begin && ident.tz_end)
+	اگر (ident.tz_begin && ident.tz_end)
 		strbuf_add(tz, ident.tz_begin, ident.tz_end - ident.tz_begin);
-	else
+	وگرنه
 		strbuf_addstr(tz, "(unknown)");
 
 	/*
@@ -180,11 +180,11 @@ static void get_ac_line(const char *inbuf, const char *what,
 	map_user(&mailmap, &mailbuf, &maillen,
 		 &namebuf, &namelen);
 
-	strbuf_addf(mail, "<%.*s>", (int)maillen, mailbuf);
+	strbuf_addf(mail, "<%.*s>", (صحیح)maillen, mailbuf);
 	strbuf_add(name, namebuf, namelen);
 }
 
-static void commit_info_destroy(struct commit_info *ci)
+ایستا تهی commit_info_destroy(ساختار commit_info *ci)
 {
 
 	strbuf_release(&ci->author);
@@ -196,26 +196,26 @@ static void commit_info_destroy(struct commit_info *ci)
 	strbuf_release(&ci->summary);
 }
 
-static void get_commit_info(struct commit *commit, struct commit_info *ret)
+ایستا تهی get_commit_info(ساختار commit *commit, ساختار commit_info *ret)
 {
-	int len;
-	const char *subject, *encoding;
-	const char *message;
+	صحیح len;
+	ثابت نویسه *subject, *encoding;
+	ثابت نویسه *message;
 
 	encoding = get_log_output_encoding();
-	message = repo_logmsg_reencode(the_repository, commit, NULL, encoding);
-	get_ac_line(message, "\nauthor ",
+	message = repo_logmsg_reencode(the_repository, commit, پوچ, encoding);
+	get_ac_سطر(message, "\nauthor ",
 		    &ret->author, &ret->author_mail,
 		    &ret->author_time, &ret->author_tz);
 
-	get_ac_line(message, "\ncommitter ",
+	get_ac_سطر(message, "\ncommitter ",
 		    &ret->committer, &ret->committer_mail,
 		    &ret->committer_time, &ret->committer_tz);
 
 	len = find_commit_subject(message, &subject);
-	if (len)
+	اگر (len)
 		strbuf_add(&ret->summary, subject, len);
-	else
+	وگرنه
 		strbuf_addf(&ret->summary, "(%s)", oid_to_hex(&commit->object.oid));
 
 	repo_unuse_commit_buffer(the_repository, commit, message);
@@ -230,10 +230,10 @@ static void get_commit_info(struct commit *commit, struct commit_info *ret)
  * To allow LF and other nonportable characters in pathnames,
  * they are c-style quoted as needed.
  */
-static void write_filename_info(struct blame_origin *suspect)
+ایستا تهی write_filename_info(ساختار blame_origin *suspect)
 {
-	if (suspect->previous) {
-		struct blame_origin *prev = suspect->previous;
+	اگر (suspect->previous) {
+		ساختار blame_origin *prev = suspect->previous;
 		printf("previous %s ", oid_to_hex(&prev->commit->object.oid));
 		write_name_quoted(prev->path, stdout, '\n');
 	}
@@ -247,12 +247,12 @@ static void write_filename_info(struct blame_origin *suspect)
  * the first time each commit appears in the output (unless the
  * user has specifically asked for us to repeat).
  */
-static int emit_one_suspect_detail(struct blame_origin *suspect, int repeat)
+ایستا صحیح emit_one_suspect_detail(ساختار blame_origin *suspect, صحیح repeat)
 {
-	struct commit_info ci = COMMIT_INFO_INIT;
+	ساختار commit_info ci = COMMIT_INFO_INIT;
 
-	if (!repeat && (suspect->commit->object.flags & METAINFO_SHOWN))
-		return 0;
+	اگر (!repeat && (suspect->commit->object.flags & METAINFO_SHOWN))
+		بازگشت 0;
 
 	suspect->commit->object.flags |= METAINFO_SHOWN;
 	get_commit_info(suspect->commit, &ci);
@@ -265,49 +265,49 @@ static int emit_one_suspect_detail(struct blame_origin *suspect, int repeat)
 	printf("committer-time %"PRItime"\n", ci.committer_time);
 	printf("committer-tz %s\n", ci.committer_tz.buf);
 	printf("summary %s\n", ci.summary.buf);
-	if (suspect->commit->object.flags & UNINTERESTING)
+	اگر (suspect->commit->object.flags & UNINTERESTING)
 		printf("boundary\n");
 
 	commit_info_destroy(&ci);
 
-	return 1;
+	بازگشت 1;
 }
 
 /*
  * The blame_entry is found to be guilty for the range.
  * Show it in incremental output.
  */
-static void found_guilty_entry(struct blame_entry *ent, void *data)
+ایستا تهی found_guilty_entry(ساختار blame_entry *ent, تهی *data)
 {
-	struct progress_info *pi = (struct progress_info *)data;
+	ساختار progress_info *pi = (ساختار progress_info *)data;
 
-	if (incremental) {
-		struct blame_origin *suspect = ent->suspect;
+	اگر (incremental) {
+		ساختار blame_origin *suspect = ent->suspect;
 
 		printf("%s %d %d %d\n",
 		       oid_to_hex(&suspect->commit->object.oid),
-		       ent->s_lno + 1, ent->lno + 1, ent->num_lines);
+		       ent->s_lno + 1, ent->lno + 1, ent->رقم_سطرها);
 		emit_one_suspect_detail(suspect, 0);
 		write_filename_info(suspect);
 		maybe_flush_or_die(stdout, "stdout");
 	}
-	pi->blamed_lines += ent->num_lines;
-	display_progress(pi->progress, pi->blamed_lines);
+	pi->blamed_سطرها += ent->رقم_سطرها;
+	display_progress(pi->progress, pi->blamed_سطرها);
 }
 
-static const char *format_time(timestamp_t time, const char *tz_str,
-			       int show_raw_time)
+ایستا ثابت نویسه *format_time(timestamp_t time, ثابت نویسه *tz_str,
+			       صحیح show_raw_time)
 {
-	static struct strbuf time_buf = STRBUF_INIT;
+	ایستا ساختار strbuf time_buf = STRBUF_INIT;
 
 	strbuf_reset(&time_buf);
-	if (show_raw_time) {
+	اگر (show_raw_time) {
 		strbuf_addf(&time_buf, "%"PRItime" %s", time, tz_str);
 	}
-	else {
-		const char *time_str;
+	وگرنه {
+		ثابت نویسه *time_str;
 		size_t time_width;
-		int tz;
+		صحیح tz;
 		tz = atoi(tz_str);
 		time_str = show_date(time, tz, blame_date_mode);
 		strbuf_addstr(&time_buf, time_str);
@@ -315,12 +315,12 @@ static const char *format_time(timestamp_t time, const char *tz_str,
 		 * Add space paddings to time_buf to display a fixed width
 		 * string, and use time_width for display width calibration.
 		 */
-		for (time_width = utf8_strwidth(time_str);
+		برای (time_width = utf8_strwidth(time_str);
 		     time_width < blame_date_width;
 		     time_width++)
 			strbuf_addch(&time_buf, ' ');
 	}
-	return time_buf.buf;
+	بازگشت time_buf.buf;
 }
 
 #define OUTPUT_ANNOTATE_COMPAT      (1U<<0)
@@ -328,17 +328,17 @@ static const char *format_time(timestamp_t time, const char *tz_str,
 #define OUTPUT_RAW_TIMESTAMP        (1U<<2)
 #define OUTPUT_PORCELAIN            (1U<<3)
 #define OUTPUT_SHOW_NAME            (1U<<4)
-#define OUTPUT_SHOW_NUMBER          (1U<<5)
+#define OUTPUT_SHOW_عدد          (1U<<5)
 #define OUTPUT_SHOW_SCORE           (1U<<6)
 #define OUTPUT_NO_AUTHOR            (1U<<7)
 #define OUTPUT_SHOW_EMAIL           (1U<<8)
-#define OUTPUT_LINE_PORCELAIN       (1U<<9)
-#define OUTPUT_COLOR_LINE           (1U<<10)
+#define OUTPUT_سطر_PORCELAIN       (1U<<9)
+#define OUTPUT_COLOR_سطر           (1U<<10)
 #define OUTPUT_SHOW_AGE_WITH_COLOR  (1U<<11)
 
-static void emit_porcelain_details(struct blame_origin *suspect, int repeat)
+ایستا تهی emit_porcelain_details(ساختار blame_origin *suspect, صحیح repeat)
 {
-	if (emit_one_suspect_detail(suspect, repeat) ||
+	اگر (emit_one_suspect_detail(suspect, repeat) ||
 	    (suspect->commit->object.flags & MORE_THAN_ONE_PATH))
 		write_filename_info(suspect);
 }
@@ -348,66 +348,66 @@ static void emit_porcelain_details(struct blame_origin *suspect, int repeat)
  * information which can be clubbed on a commit/file level, should
  * be printed via 'emit_one_suspect_detail()'.
  */
-static void emit_porcelain_per_line_details(struct blame_entry *ent)
+ایستا تهی emit_porcelain_per_سطر_details(ساختار blame_entry *ent)
 {
-	if (mark_unblamable_lines && ent->unblamable)
+	اگر (mark_unblamable_سطرها && ent->unblamable)
 		puts("unblamable");
-	if (mark_ignored_lines && ent->ignored)
+	اگر (mark_ignored_سطرها && ent->ignored)
 		puts("ignored");
 }
 
-static void emit_porcelain(struct blame_scoreboard *sb, struct blame_entry *ent,
-			   int opt)
+ایستا تهی emit_porcelain(ساختار blame_scoreboard *sb, ساختار blame_entry *ent,
+			   صحیح opt)
 {
-	int repeat = opt & OUTPUT_LINE_PORCELAIN;
-	int cnt;
-	const char *cp;
-	struct blame_origin *suspect = ent->suspect;
-	char hex[GIT_MAX_HEXSZ + 1];
+	صحیح repeat = opt & OUTPUT_سطر_PORCELAIN;
+	صحیح cnt;
+	ثابت نویسه *cp;
+	ساختار blame_origin *suspect = ent->suspect;
+	نویسه hex[GIT_MAX_HEXSZ + 1];
 
 	oid_to_hex_r(hex, &suspect->commit->object.oid);
 	printf("%s %d %d %d\n",
 	       hex,
 	       ent->s_lno + 1,
 	       ent->lno + 1,
-	       ent->num_lines);
+	       ent->رقم_سطرها);
 	emit_porcelain_details(suspect, repeat);
-	emit_porcelain_per_line_details(ent);
+	emit_porcelain_per_سطر_details(ent);
 
-	cp = blame_nth_line(sb, ent->lno);
-	for (cnt = 0; cnt < ent->num_lines; cnt++) {
-		char ch;
-		if (cnt) {
+	cp = blame_nth_سطر(sb, ent->lno);
+	برای (cnt = 0; cnt < ent->رقم_سطرها; cnt++) {
+		نویسه ch;
+		اگر (cnt) {
 			printf("%s %d %d\n", hex,
 			       ent->s_lno + 1 + cnt,
 			       ent->lno + 1 + cnt);
-			if (repeat)
+			اگر (repeat)
 				emit_porcelain_details(suspect, 1);
-			emit_porcelain_per_line_details(ent);
+			emit_porcelain_per_سطر_details(ent);
 		}
 		putchar('\t');
-		do {
+		انجامبده {
 			ch = *cp++;
 			putchar(ch);
-		} while (ch != '\n' &&
+		} وقتی (ch != '\n' &&
 			 cp < sb->final_buf + sb->final_buf_size);
 	}
 
-	if (sb->final_buf_size && cp[-1] != '\n')
+	اگر (sb->final_buf_size && cp[-1] != '\n')
 		putchar('\n');
 }
 
-static struct color_field {
+ایستا ساختار color_field {
 	timestamp_t hop;
-	char col[COLOR_MAXLEN];
+	نویسه col[COLOR_MAXLEN];
 } *colorfield;
-static int colorfield_nr, colorfield_alloc;
+ایستا صحیح colorfield_nr, colorfield_alloc;
 
-static void parse_color_fields(const char *s)
+ایستا تهی parse_color_fields(ثابت نویسه *s)
 {
-	struct string_list l = STRING_LIST_INIT_DUP;
-	struct string_list_item *item;
-	enum { EXPECT_DATE, EXPECT_COLOR } next = EXPECT_COLOR;
+	ساختار string_list l = STRING_LIST_INIT_DUP;
+	ساختار string_list_item *item;
+	شمارش { EXPECT_DATE, EXPECT_COLOR } next = EXPECT_COLOR;
 
 	colorfield_nr = 0;
 
@@ -416,153 +416,153 @@ static void parse_color_fields(const char *s)
 	ALLOC_GROW(colorfield, colorfield_nr + 1, colorfield_alloc);
 
 	for_each_string_list_item(item, &l) {
-		switch (next) {
-		case EXPECT_DATE:
+		انتخاب (next) {
+		حالت EXPECT_DATE:
 			colorfield[colorfield_nr].hop = approxidate(item->string);
 			next = EXPECT_COLOR;
 			colorfield_nr++;
 			ALLOC_GROW(colorfield, colorfield_nr + 1, colorfield_alloc);
-			break;
-		case EXPECT_COLOR:
-			if (color_parse(item->string, colorfield[colorfield_nr].col))
+			بشکن;
+		حالت EXPECT_COLOR:
+			اگر (color_parse(item->string, colorfield[colorfield_nr].col))
 				die(_("expecting a color: %s"), item->string);
 			next = EXPECT_DATE;
-			break;
+			بشکن;
 		}
 	}
 
-	if (next == EXPECT_COLOR)
+	اگر (next == EXPECT_COLOR)
 		die(_("must end with a color"));
 
 	colorfield[colorfield_nr].hop = TIME_MAX;
 	string_list_clear(&l, 0);
 }
 
-static void setup_default_color_by_age(void)
+ایستا تهی setup_default_color_by_age(تهی)
 {
 	parse_color_fields("blue,12 month ago,white,1 month ago,red");
 }
 
-static void determine_line_heat(struct commit_info *ci, const char **dest_color)
+ایستا تهی determine_سطر_heat(ساختار commit_info *ci, ثابت نویسه **dest_color)
 {
-	int i = 0;
+	صحیح i = 0;
 
-	while (i < colorfield_nr && ci->author_time > colorfield[i].hop)
+	وقتی (i < colorfield_nr && ci->author_time > colorfield[i].hop)
 		i++;
 
 	*dest_color = colorfield[i].col;
 }
 
-static inline int maybe_putc(int c, FILE *out)
+ایستا درونخطی صحیح maybe_putc(صحیح c, FILE *out)
 {
-	return out ? putc(c, out) : 0;
+	بازگشت out ? putc(c, out) : 0;
 }
 
-static size_t print_marks(FILE *out, const struct blame_entry *ent, int opt)
+ایستا size_t print_marks(FILE *out, ثابت ساختار blame_entry *ent, صحیح opt)
 {
 	size_t len = 0;
 
-	if ((ent->suspect->commit->object.flags & UNINTERESTING) &&
+	اگر ((ent->suspect->commit->object.flags & UNINTERESTING) &&
 	    !blank_boundary && !(opt & OUTPUT_ANNOTATE_COMPAT)) {
 		maybe_putc('^', out);
 		len++;
 	}
-	if (mark_unblamable_lines && ent->unblamable) {
+	اگر (mark_unblamable_سطرها && ent->unblamable) {
 		maybe_putc('*', out);
 		len++;
 	}
-	if (mark_ignored_lines && ent->ignored) {
+	اگر (mark_ignored_سطرها && ent->ignored) {
 		maybe_putc('?', out);
 		len++;
 	}
-	return len;
+	بازگشت len;
 }
 
-static size_t count_marks(const struct blame_entry *ent, int opt)
+ایستا size_t شمار_marks(ثابت ساختار blame_entry *ent, صحیح opt)
 {
-	return print_marks(NULL, ent, opt);
+	بازگشت print_marks(پوچ, ent, opt);
 }
 
-static void emit_other(struct blame_scoreboard *sb, struct blame_entry *ent,
-		       int opt, struct blame_entry *prev_ent)
+ایستا تهی emit_other(ساختار blame_scoreboard *sb, ساختار blame_entry *ent,
+		       صحیح opt, ساختار blame_entry *prev_ent)
 {
-	int cnt;
-	const char *cp;
-	struct blame_origin *suspect = ent->suspect;
-	struct commit_info ci = COMMIT_INFO_INIT;
-	char hex[GIT_MAX_HEXSZ + 1];
-	int show_raw_time = !!(opt & OUTPUT_RAW_TIMESTAMP);
-	const char *default_color = NULL, *color = NULL, *reset = NULL;
+	صحیح cnt;
+	ثابت نویسه *cp;
+	ساختار blame_origin *suspect = ent->suspect;
+	ساختار commit_info ci = COMMIT_INFO_INIT;
+	نویسه hex[GIT_MAX_HEXSZ + 1];
+	صحیح show_raw_time = !!(opt & OUTPUT_RAW_TIMESTAMP);
+	ثابت نویسه *default_color = پوچ, *color = پوچ, *reset = پوچ;
 
 	get_commit_info(suspect->commit, &ci);
 	oid_to_hex_r(hex, &suspect->commit->object.oid);
 
-	cp = blame_nth_line(sb, ent->lno);
+	cp = blame_nth_سطر(sb, ent->lno);
 
-	if (opt & OUTPUT_SHOW_AGE_WITH_COLOR) {
-		determine_line_heat(&ci, &default_color);
+	اگر (opt & OUTPUT_SHOW_AGE_WITH_COLOR) {
+		determine_سطر_heat(&ci, &default_color);
 		color = default_color;
 		reset = GIT_COLOR_RESET;
 	}
 
-	if (abbrev < MINIMUM_ABBREV)
+	اگر (abbrev < MINIMUM_ABBREV)
 		BUG("abbreviation is smaller than minimum length: %d < %d",
 		    abbrev, MINIMUM_ABBREV);
 
-	for (cnt = 0; cnt < ent->num_lines; cnt++) {
-		char ch;
+	برای (cnt = 0; cnt < ent->رقم_سطرها; cnt++) {
+		نویسه ch;
 		size_t length = (opt & OUTPUT_LONG_OBJECT_NAME) ?
 			the_hash_algo->hexsz : (size_t) abbrev;
 
-		if (opt & OUTPUT_COLOR_LINE) {
-			if (cnt > 0 ||
+		اگر (opt & OUTPUT_COLOR_سطر) {
+			اگر (cnt > 0 ||
 			    (prev_ent &&
 			     oideq(&suspect->commit->object.oid,
 				   &prev_ent->suspect->commit->object.oid))) {
 				color = repeated_meta_color;
 				reset = GIT_COLOR_RESET;
-			} else  {
-				color = default_color ? default_color : NULL;
-				reset = default_color ? GIT_COLOR_RESET : NULL;
+			} وگرنه  {
+				color = default_color ? default_color : پوچ;
+				reset = default_color ? GIT_COLOR_RESET : پوچ;
 			}
 		}
-		if (color)
+		اگر (color)
 			fputs(color, stdout);
 
-		if ((suspect->commit->object.flags & UNINTERESTING) &&
+		اگر ((suspect->commit->object.flags & UNINTERESTING) &&
 		    blank_boundary)
 			memset(hex, ' ', strlen(hex));
 		length -= print_marks(stdout, ent, opt);
 
-		printf("%.*s", (int)(length < GIT_MAX_HEXSZ ? length : GIT_MAX_HEXSZ), hex);
-		if (opt & OUTPUT_ANNOTATE_COMPAT) {
-			const char *name;
-			if (opt & OUTPUT_SHOW_EMAIL)
+		printf("%.*s", (صحیح)(length < GIT_MAX_HEXSZ ? length : GIT_MAX_HEXSZ), hex);
+		اگر (opt & OUTPUT_ANNOTATE_COMPAT) {
+			ثابت نویسه *name;
+			اگر (opt & OUTPUT_SHOW_EMAIL)
 				name = ci.author_mail.buf;
-			else
+			وگرنه
 				name = ci.author.buf;
 			printf("\t(%10s\t%10s\t%d)", name,
 			       format_time(ci.author_time, ci.author_tz.buf,
 					   show_raw_time),
 			       ent->lno + 1 + cnt);
-		} else {
-			if (opt & OUTPUT_SHOW_SCORE)
+		} وگرنه {
+			اگر (opt & OUTPUT_SHOW_SCORE)
 				printf(" %*d %02d",
 				       max_score_digits, ent->score,
 				       ent->suspect->refcnt);
-			if (opt & OUTPUT_SHOW_NAME)
+			اگر (opt & OUTPUT_SHOW_NAME)
 				printf(" %-*.*s", longest_file, longest_file,
 				       suspect->path);
-			if (opt & OUTPUT_SHOW_NUMBER)
+			اگر (opt & OUTPUT_SHOW_عدد)
 				printf(" %*d", max_orig_digits,
 				       ent->s_lno + 1 + cnt);
 
-			if (!(opt & OUTPUT_NO_AUTHOR)) {
-				const char *name;
-				int pad;
-				if (opt & OUTPUT_SHOW_EMAIL)
+			اگر (!(opt & OUTPUT_NO_AUTHOR)) {
+				ثابت نویسه *name;
+				صحیح pad;
+				اگر (opt & OUTPUT_SHOW_EMAIL)
 					name = ci.author_mail.buf;
-				else
+				وگرنه
 					name = ci.author.buf;
 				pad = longest_author - utf8_strwidth(name);
 				printf(" (%s%*s %10s",
@@ -574,45 +574,45 @@ static void emit_other(struct blame_scoreboard *sb, struct blame_entry *ent,
 			printf(" %*d) ",
 			       max_digits, ent->lno + 1 + cnt);
 		}
-		if (reset)
+		اگر (reset)
 			fputs(reset, stdout);
-		do {
+		انجامبده {
 			ch = *cp++;
 			putchar(ch);
-		} while (ch != '\n' &&
+		} وقتی (ch != '\n' &&
 			 cp < sb->final_buf + sb->final_buf_size);
 	}
 
-	if (sb->final_buf_size && cp[-1] != '\n')
+	اگر (sb->final_buf_size && cp[-1] != '\n')
 		putchar('\n');
 
 	commit_info_destroy(&ci);
 }
 
-static void output(struct blame_scoreboard *sb, int option)
+ایستا تهی output(ساختار blame_scoreboard *sb, صحیح option)
 {
-	struct blame_entry *ent, *prev_ent = NULL;
+	ساختار blame_entry *ent, *prev_ent = پوچ;
 
-	if (option & OUTPUT_PORCELAIN) {
-		for (ent = sb->ent; ent; ent = ent->next) {
-			int count = 0;
-			struct blame_origin *suspect;
-			struct commit *commit = ent->suspect->commit;
-			if (commit->object.flags & MORE_THAN_ONE_PATH)
-				continue;
-			for (suspect = get_blame_suspects(commit); suspect; suspect = suspect->next) {
-				if (suspect->guilty && count++) {
+	اگر (option & OUTPUT_PORCELAIN) {
+		برای (ent = sb->ent; ent; ent = ent->next) {
+			صحیح شمار = 0;
+			ساختار blame_origin *suspect;
+			ساختار commit *commit = ent->suspect->commit;
+			اگر (commit->object.flags & MORE_THAN_ONE_PATH)
+				ادامه;
+			برای (suspect = get_blame_suspects(commit); suspect; suspect = suspect->next) {
+				اگر (suspect->guilty && شمار++) {
 					commit->object.flags |= MORE_THAN_ONE_PATH;
-					break;
+					بشکن;
 				}
 			}
 		}
 	}
 
-	for (ent = sb->ent; ent; ent = ent->next) {
-		if (option & OUTPUT_PORCELAIN)
+	برای (ent = sb->ent; ent; ent = ent->next) {
+		اگر (option & OUTPUT_PORCELAIN)
 			emit_porcelain(sb, ent, option);
-		else {
+		وگرنه {
 			emit_other(sb, ent, option, prev_ent);
 			prev_ent = ent;
 		}
@@ -624,215 +624,215 @@ static void output(struct blame_scoreboard *sb, int option)
  * support git's cvsserver that wants to give a linear history
  * to its clients.
  */
-static int read_ancestry(const char *graft_file)
+ایستا صحیح read_ancestry(ثابت نویسه *graft_file)
 {
 	FILE *fp = fopen_or_warn(graft_file, "r");
-	struct strbuf buf = STRBUF_INIT;
-	if (!fp)
-		return -1;
-	while (!strbuf_getwholeline(&buf, fp, '\n')) {
+	ساختار strbuf buf = STRBUF_INIT;
+	اگر (!fp)
+		بازگشت -1;
+	وقتی (!strbuf_getwholeline(&buf, fp, '\n')) {
 		/* The format is just "Commit Parent1 Parent2 ...\n" */
-		struct commit_graft *graft = read_graft_line(&buf);
-		if (graft)
+		ساختار commit_graft *graft = read_graft_سطر(&buf);
+		اگر (graft)
 			register_commit_graft(the_repository, graft, 0);
 	}
 	fclose(fp);
 	strbuf_release(&buf);
-	return 0;
+	بازگشت 0;
 }
 
-static int update_auto_abbrev(int auto_abbrev, struct blame_origin *suspect)
+ایستا صحیح update_auto_abbrev(صحیح auto_abbrev, ساختار blame_origin *suspect)
 {
-	const char *uniq = repo_find_unique_abbrev(the_repository,
+	ثابت نویسه *uniq = repo_find_unique_abbrev(the_repository,
 						   &suspect->commit->object.oid,
 						   auto_abbrev);
-	int len = strlen(uniq);
-	if (auto_abbrev < len)
-		return len;
-	return auto_abbrev;
+	صحیح len = strlen(uniq);
+	اگر (auto_abbrev < len)
+		بازگشت len;
+	بازگشت auto_abbrev;
 }
 
 /*
  * How many columns do we need to show line numbers, authors,
  * and filenames?
  */
-static void find_alignment(struct blame_scoreboard *sb, int *option)
+ایستا تهی find_alignment(ساختار blame_scoreboard *sb, صحیح *option)
 {
-	int longest_src_lines = 0;
-	int longest_dst_lines = 0;
+	صحیح longest_src_سطرها = 0;
+	صحیح longest_dst_سطرها = 0;
 	unsigned largest_score = 0;
-	struct blame_entry *e;
-	int compute_auto_abbrev = (abbrev < 0);
-	int auto_abbrev = DEFAULT_ABBREV;
-	size_t max_marks_count = 0;
+	ساختار blame_entry *e;
+	صحیح compute_auto_abbrev = (abbrev < 0);
+	صحیح auto_abbrev = DEFAULT_ABBREV;
+	size_t max_marks_شمار = 0;
 
-	for (e = sb->ent; e; e = e->next) {
-		struct blame_origin *suspect = e->suspect;
-		int num;
-		size_t marks_count = count_marks(e, *option);
+	برای (e = sb->ent; e; e = e->next) {
+		ساختار blame_origin *suspect = e->suspect;
+		صحیح رقم;
+		size_t marks_شمار = شمار_marks(e, *option);
 
-		if (max_marks_count < marks_count)
-			max_marks_count = marks_count;
-		if (compute_auto_abbrev)
+		اگر (max_marks_شمار < marks_شمار)
+			max_marks_شمار = marks_شمار;
+		اگر (compute_auto_abbrev)
 			auto_abbrev = update_auto_abbrev(auto_abbrev, suspect);
-		if (strcmp(suspect->path, sb->path))
+		اگر (strcmp(suspect->path, sb->path))
 			*option |= OUTPUT_SHOW_NAME;
-		num = strlen(suspect->path);
-		if (longest_file < num)
-			longest_file = num;
-		if (!(suspect->commit->object.flags & METAINFO_SHOWN)) {
-			struct commit_info ci = COMMIT_INFO_INIT;
+		رقم = strlen(suspect->path);
+		اگر (longest_file < رقم)
+			longest_file = رقم;
+		اگر (!(suspect->commit->object.flags & METAINFO_SHOWN)) {
+			ساختار commit_info ci = COMMIT_INFO_INIT;
 			suspect->commit->object.flags |= METAINFO_SHOWN;
 			get_commit_info(suspect->commit, &ci);
-			if (*option & OUTPUT_SHOW_EMAIL)
-				num = utf8_strwidth(ci.author_mail.buf);
-			else
-				num = utf8_strwidth(ci.author.buf);
-			if (longest_author < num)
-				longest_author = num;
+			اگر (*option & OUTPUT_SHOW_EMAIL)
+				رقم = utf8_strwidth(ci.author_mail.buf);
+			وگرنه
+				رقم = utf8_strwidth(ci.author.buf);
+			اگر (longest_author < رقم)
+				longest_author = رقم;
 			commit_info_destroy(&ci);
 		}
-		num = e->s_lno + e->num_lines;
-		if (longest_src_lines < num)
-			longest_src_lines = num;
-		num = e->lno + e->num_lines;
-		if (longest_dst_lines < num)
-			longest_dst_lines = num;
-		if (largest_score < blame_entry_score(sb, e))
+		رقم = e->s_lno + e->رقم_سطرها;
+		اگر (longest_src_سطرها < رقم)
+			longest_src_سطرها = رقم;
+		رقم = e->lno + e->رقم_سطرها;
+		اگر (longest_dst_سطرها < رقم)
+			longest_dst_سطرها = رقم;
+		اگر (largest_score < blame_entry_score(sb, e))
 			largest_score = blame_entry_score(sb, e);
 	}
-	max_orig_digits = decimal_width(longest_src_lines);
-	max_digits = decimal_width(longest_dst_lines);
+	max_orig_digits = decimal_width(longest_src_سطرها);
+	max_digits = decimal_width(longest_dst_سطرها);
 	max_score_digits = decimal_width(largest_score);
 
-	if (compute_auto_abbrev)
+	اگر (compute_auto_abbrev)
 		abbrev = auto_abbrev;
-	if (abbrev < (int)the_hash_algo->hexsz) {
-		abbrev += max_marks_count;
-		if (abbrev > (int)the_hash_algo->hexsz)
+	اگر (abbrev < (صحیح)the_hash_algo->hexsz) {
+		abbrev += max_marks_شمار;
+		اگر (abbrev > (صحیح)the_hash_algo->hexsz)
 			abbrev = the_hash_algo->hexsz;
 	}
 }
 
-static void sanity_check_on_fail(struct blame_scoreboard *sb, int baa)
+ایستا تهی sanity_check_on_fail(ساختار blame_scoreboard *sb, صحیح baa)
 {
-	int opt = OUTPUT_SHOW_SCORE | OUTPUT_SHOW_NUMBER | OUTPUT_SHOW_NAME;
+	صحیح opt = OUTPUT_SHOW_SCORE | OUTPUT_SHOW_عدد | OUTPUT_SHOW_NAME;
 	find_alignment(sb, &opt);
 	output(sb, opt);
 	die("Baa %d!", baa);
 }
 
-static unsigned parse_score(const char *arg)
+ایستا unsigned parse_score(ثابت نویسه *arg)
 {
-	char *end;
+	نویسه *end;
 	unsigned long score = strtoul(arg, &end, 10);
-	if (*end)
-		return 0;
-	return score;
+	اگر (*end)
+		بازگشت 0;
+	بازگشت score;
 }
 
-static char *add_prefix(const char *prefix, const char *path)
+ایستا نویسه *add_prefix(ثابت نویسه *prefix, ثابت نویسه *path)
 {
-	return prefix_path(the_repository, prefix, prefix ? strlen(prefix) : 0, path);
+	بازگشت prefix_path(the_repository, prefix, prefix ? strlen(prefix) : 0, path);
 }
 
-static int git_blame_config(const char *var, const char *value,
-			    const struct config_context *ctx, void *cb)
+ایستا صحیح git_blame_config(ثابت نویسه *var, ثابت نویسه *مقدار,
+			    ثابت ساختار config_context *ctx, تهی *cb)
 {
-	if (!strcmp(var, "blame.showroot")) {
-		show_root = git_config_bool(var, value);
-		return 0;
+	اگر (!strcmp(var, "blame.showroot")) {
+		show_ریشه = git_config_bool(var, مقدار);
+		بازگشت 0;
 	}
-	if (!strcmp(var, "blame.blankboundary")) {
-		blank_boundary = git_config_bool(var, value);
-		return 0;
+	اگر (!strcmp(var, "blame.blankboundary")) {
+		blank_boundary = git_config_bool(var, مقدار);
+		بازگشت 0;
 	}
-	if (!strcmp(var, "blame.showemail")) {
-		int *output_option = cb;
-		if (git_config_bool(var, value))
+	اگر (!strcmp(var, "blame.showemail")) {
+		صحیح *output_option = cb;
+		اگر (git_config_bool(var, مقدار))
 			*output_option |= OUTPUT_SHOW_EMAIL;
-		else
+		وگرنه
 			*output_option &= ~OUTPUT_SHOW_EMAIL;
-		return 0;
+		بازگشت 0;
 	}
-	if (!strcmp(var, "blame.date")) {
-		if (!value)
-			return config_error_nonbool(var);
-		parse_date_format(value, &blame_date_mode);
-		return 0;
+	اگر (!strcmp(var, "blame.date")) {
+		اگر (!مقدار)
+			بازگشت config_error_nonbool(var);
+		parse_date_format(مقدار, &blame_date_mode);
+		بازگشت 0;
 	}
-	if (!strcmp(var, "blame.ignorerevsfile")) {
-		char *str;
-		int ret;
+	اگر (!strcmp(var, "blame.ignorerevsfile")) {
+		نویسه *str;
+		صحیح ret;
 
-		ret = git_config_pathname(&str, var, value);
-		if (ret)
-			return ret;
-		if (str)
-			string_list_insert(&ignore_revs_file_list, str);
-		free(str);
-		return 0;
+		ret = git_config_pathname(&str, var, مقدار);
+		اگر (ret)
+			بازگشت ret;
+		اگر (str)
+			string_list_درج(&ignore_revs_file_list, str);
+		آزاد(str);
+		بازگشت 0;
 	}
-	if (!strcmp(var, "blame.markunblamablelines")) {
-		mark_unblamable_lines = git_config_bool(var, value);
-		return 0;
+	اگر (!strcmp(var, "blame.markunblamablelines")) {
+		mark_unblamable_سطرها = git_config_bool(var, مقدار);
+		بازگشت 0;
 	}
-	if (!strcmp(var, "blame.markignoredlines")) {
-		mark_ignored_lines = git_config_bool(var, value);
-		return 0;
+	اگر (!strcmp(var, "blame.markignoredlines")) {
+		mark_ignored_سطرها = git_config_bool(var, مقدار);
+		بازگشت 0;
 	}
-	if (!strcmp(var, "color.blame.repeatedlines")) {
-		if (color_parse_mem(value, strlen(value), repeated_meta_color))
+	اگر (!strcmp(var, "color.blame.repeatedlines")) {
+		اگر (color_parse_mem(مقدار, strlen(مقدار), repeated_meta_color))
 			warning(_("invalid value for '%s': '%s'"),
-				"color.blame.repeatedLines", value);
-		return 0;
+				"color.blame.repeatedLines", مقدار);
+		بازگشت 0;
 	}
-	if (!strcmp(var, "color.blame.highlightrecent")) {
-		parse_color_fields(value);
-		return 0;
+	اگر (!strcmp(var, "color.blame.highlightrecent")) {
+		parse_color_fields(مقدار);
+		بازگشت 0;
 	}
 
-	if (!strcmp(var, "blame.coloring")) {
-		if (!value)
-			return config_error_nonbool(var);
-		if (!strcmp(value, "repeatedLines")) {
-			coloring_mode |= OUTPUT_COLOR_LINE;
-		} else if (!strcmp(value, "highlightRecent")) {
+	اگر (!strcmp(var, "blame.coloring")) {
+		اگر (!مقدار)
+			بازگشت config_error_nonbool(var);
+		اگر (!strcmp(مقدار, "repeatedLines")) {
+			coloring_mode |= OUTPUT_COLOR_سطر;
+		} وگرنه اگر (!strcmp(مقدار, "highlightRecent")) {
 			coloring_mode |= OUTPUT_SHOW_AGE_WITH_COLOR;
-		} else if (!strcmp(value, "none")) {
-			coloring_mode &= ~(OUTPUT_COLOR_LINE |
+		} وگرنه اگر (!strcmp(مقدار, "none")) {
+			coloring_mode &= ~(OUTPUT_COLOR_سطر |
 					    OUTPUT_SHOW_AGE_WITH_COLOR);
-		} else {
+		} وگرنه {
 			warning(_("invalid value for '%s': '%s'"),
-				"blame.coloring", value);
-			return 0;
+				"blame.coloring", مقدار);
+			بازگشت 0;
 		}
 	}
 
-	if (!strcmp(var, "diff.algorithm")) {
+	اگر (!strcmp(var, "diff.algorithm")) {
 		long diff_algorithm;
-		if (!value)
-			return config_error_nonbool(var);
-		diff_algorithm = parse_algorithm_value(value);
-		if (diff_algorithm < 0)
-			return error(_("unknown value for config '%s': %s"),
-				     var, value);
+		اگر (!مقدار)
+			بازگشت config_error_nonbool(var);
+		diff_algorithm = parse_algorithm_مقدار(مقدار);
+		اگر (diff_algorithm < 0)
+			بازگشت error(_("unknown value for config '%s': %s"),
+				     var, مقدار);
 		xdl_opts &= ~XDF_DIFF_ALGORITHM_MASK;
 		xdl_opts |= diff_algorithm;
-		return 0;
+		بازگشت 0;
 	}
 
-	if (git_diff_heuristic_config(var, value, cb) < 0)
-		return -1;
-	if (userdiff_config(var, value) < 0)
-		return -1;
+	اگر (git_diff_heuristic_config(var, مقدار, cb) < 0)
+		بازگشت -1;
+	اگر (userdiff_config(var, مقدار) < 0)
+		بازگشت -1;
 
-	return git_default_config(var, value, ctx, cb);
+	بازگشت git_default_config(var, مقدار, ctx, cb);
 }
 
-static int blame_copy_callback(const struct option *option, const char *arg, int unset)
+ایستا صحیح blame_copy_callback(ثابت ساختار option *option, ثابت نویسه *arg, صحیح unset)
 {
-	int *opt = option->value;
+	صحیح *opt = option->مقدار;
 
 	BUG_ON_OPT_NEG(unset);
 
@@ -843,185 +843,185 @@ static int blame_copy_callback(const struct option *option, const char *arg, int
 	 * -C -C -C enables copy from existing files for
 	 *          everybody
 	 */
-	if (*opt & PICKAXE_BLAME_COPY_HARDER)
+	اگر (*opt & PICKAXE_BLAME_COPY_HARDER)
 		*opt |= PICKAXE_BLAME_COPY_HARDEST;
-	if (*opt & PICKAXE_BLAME_COPY)
+	اگر (*opt & PICKAXE_BLAME_COPY)
 		*opt |= PICKAXE_BLAME_COPY_HARDER;
 	*opt |= PICKAXE_BLAME_COPY | PICKAXE_BLAME_MOVE;
 
-	if (arg)
+	اگر (arg)
 		blame_copy_score = parse_score(arg);
-	return 0;
+	بازگشت 0;
 }
 
-static int blame_move_callback(const struct option *option, const char *arg, int unset)
+ایستا صحیح blame_move_callback(ثابت ساختار option *option, ثابت نویسه *arg, صحیح unset)
 {
-	int *opt = option->value;
+	صحیح *opt = option->مقدار;
 
 	BUG_ON_OPT_NEG(unset);
 
 	*opt |= PICKAXE_BLAME_MOVE;
 
-	if (arg)
+	اگر (arg)
 		blame_move_score = parse_score(arg);
-	return 0;
+	بازگشت 0;
 }
 
-static int blame_diff_algorithm_minimal(const struct option *option,
-					const char *arg, int unset)
+ایستا صحیح blame_diff_algorithm_minimal(ثابت ساختار option *option,
+					ثابت نویسه *arg, صحیح unset)
 {
-	int *opt = option->value;
+	صحیح *opt = option->مقدار;
 
 	BUG_ON_OPT_ARG(arg);
 
 	*opt &= ~XDF_DIFF_ALGORITHM_MASK;
-	if (!unset)
+	اگر (!unset)
 		*opt |= XDF_NEED_MINIMAL;
 
-	return 0;
+	بازگشت 0;
 }
 
-static int blame_diff_algorithm_callback(const struct option *option,
-					 const char *arg, int unset)
+ایستا صحیح blame_diff_algorithm_callback(ثابت ساختار option *option,
+					 ثابت نویسه *arg, صحیح unset)
 {
-	int *opt = option->value;
-	long value = parse_algorithm_value(arg);
+	صحیح *opt = option->مقدار;
+	long مقدار = parse_algorithm_مقدار(arg);
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (value < 0)
-		return error(_("option diff-algorithm accepts \"myers\", "
+	اگر (مقدار < 0)
+		بازگشت error(_("option diff-algorithm accepts \"myers\", "
 			       "\"minimal\", \"patience\" and \"histogram\""));
 
 	*opt &= ~XDF_DIFF_ALGORITHM_MASK;
-	*opt |= value;
+	*opt |= مقدار;
 
-	return 0;
+	بازگشت 0;
 }
 
-static int is_a_rev(const char *name)
+ایستا صحیح is_a_rev(ثابت نویسه *name)
 {
-	struct object_id oid;
+	ساختار object_id oid;
 
-	if (repo_get_oid(the_repository, name, &oid))
-		return 0;
-	return OBJ_NONE < odb_read_object_info(the_repository->objects, &oid, NULL);
+	اگر (repo_get_oid(the_repository, name, &oid))
+		بازگشت 0;
+	بازگشت OBJ_NONE < odb_read_object_info(the_repository->objects, &oid, پوچ);
 }
 
-static int peel_to_commit_oid(struct object_id *oid_ret, void *cbdata)
+ایستا صحیح peel_to_commit_oid(ساختار object_id *oid_ret, تهی *cbdata)
 {
-	struct repository *r = ((struct blame_scoreboard *)cbdata)->repo;
-	struct object_id oid;
+	ساختار repository *r = ((ساختار blame_scoreboard *)cbdata)->repo;
+	ساختار object_id oid;
 
 	oidcpy(&oid, oid_ret);
-	while (1) {
-		struct object *obj;
-		int kind = odb_read_object_info(r->objects, &oid, NULL);
-		if (kind == OBJ_COMMIT) {
+	وقتی (1) {
+		ساختار object *obj;
+		صحیح kind = odb_read_object_info(r->objects, &oid, پوچ);
+		اگر (kind == OBJ_COMMIT) {
 			oidcpy(oid_ret, &oid);
-			return 0;
+			بازگشت 0;
 		}
-		if (kind != OBJ_TAG)
-			return -1;
-		obj = deref_tag(r, parse_object(r, &oid), NULL, 0);
-		if (!obj)
-			return -1;
+		اگر (kind != OBJ_TAG)
+			بازگشت -1;
+		obj = deref_tag(r, parse_object(r, &oid), پوچ, 0);
+		اگر (!obj)
+			بازگشت -1;
 		oidcpy(&oid, &obj->oid);
 	}
 }
 
-static void build_ignorelist(struct blame_scoreboard *sb,
-			     struct string_list *ignore_revs_file_list,
-			     struct string_list *ignore_rev_list)
+ایستا تهی build_ignorelist(ساختار blame_scoreboard *sb,
+			     ساختار string_list *ignore_revs_file_list,
+			     ساختار string_list *ignore_rev_list)
 {
-	struct string_list_item *i;
-	struct object_id oid;
+	ساختار string_list_item *i;
+	ساختار object_id oid;
 
 	oidset_init(&sb->ignore_list, 0);
 	for_each_string_list_item(i, ignore_revs_file_list) {
-		if (!strcmp(i->string, ""))
+		اگر (!strcmp(i->string, ""))
 			oidset_clear(&sb->ignore_list);
-		else
+		وگرنه
 			oidset_parse_file_carefully(&sb->ignore_list, i->string,
 						    the_repository->hash_algo,
 						    peel_to_commit_oid, sb);
 	}
 	for_each_string_list_item(i, ignore_rev_list) {
-		if (repo_get_oid_committish(the_repository, i->string, &oid) ||
+		اگر (repo_get_oid_committish(the_repository, i->string, &oid) ||
 		    peel_to_commit_oid(&oid, sb))
 			die(_("cannot find revision %s to ignore"), i->string);
-		oidset_insert(&sb->ignore_list, &oid);
+		oidset_درج(&sb->ignore_list, &oid);
 	}
 }
 
-int cmd_blame(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo UNUSED)
+صحیح cmd_blame(صحیح argc,
+	      ثابت نویسه **argv,
+	      ثابت نویسه *prefix,
+	      ساختار repository *repo UNUSED)
 {
-	struct rev_info revs;
-	char *path = NULL;
-	struct blame_scoreboard sb;
-	struct blame_origin *o;
-	struct blame_entry *ent = NULL;
+	ساختار rev_info revs;
+	نویسه *path = پوچ;
+	ساختار blame_scoreboard sb;
+	ساختار blame_origin *o;
+	ساختار blame_entry *ent = پوچ;
 	long dashdash_pos, lno;
-	struct progress_info pi = { NULL, 0 };
+	ساختار progress_info pi = { پوچ, 0 };
 
-	struct string_list range_list = STRING_LIST_INIT_NODUP;
-	struct string_list ignore_rev_list = STRING_LIST_INIT_NODUP;
-	int output_option = 0, opt = 0;
-	int show_stats = 0;
-	const char *revs_file = NULL;
-	const char *contents_from = NULL;
-	const struct option options[] = {
+	ساختار string_list range_list = STRING_LIST_INIT_NODUP;
+	ساختار string_list ignore_rev_list = STRING_LIST_INIT_NODUP;
+	صحیح output_option = 0, opt = 0;
+	صحیح show_stats = 0;
+	ثابت نویسه *revs_file = پوچ;
+	ثابت نویسه *contents_from = پوچ;
+	ثابت ساختار option options[] = {
 		OPT_BOOL(0, "incremental", &incremental, N_("show blame entries as we find them, incrementally")),
-		OPT_BOOL('b', NULL, &blank_boundary, N_("do not show object names of boundary commits (Default: off)")),
-		OPT_BOOL(0, "root", &show_root, N_("do not treat root commits as boundaries (Default: off)")),
+		OPT_BOOL('b', پوچ, &blank_boundary, N_("do not show object names of boundary commits (Default: off)")),
+		OPT_BOOL(0, "root", &show_ریشه, N_("do not treat root commits as boundaries (Default: off)")),
 		OPT_BOOL(0, "show-stats", &show_stats, N_("show work cost statistics")),
 		OPT_BOOL(0, "progress", &show_progress, N_("force progress reporting")),
 		OPT_BIT(0, "score-debug", &output_option, N_("show output score for blame entries"), OUTPUT_SHOW_SCORE),
 		OPT_BIT('f', "show-name", &output_option, N_("show original filename (Default: auto)"), OUTPUT_SHOW_NAME),
-		OPT_BIT('n', "show-number", &output_option, N_("show original linenumber (Default: off)"), OUTPUT_SHOW_NUMBER),
+		OPT_BIT('n', "show-number", &output_option, N_("show original linenumber (Default: off)"), OUTPUT_SHOW_عدد),
 		OPT_BIT('p', "porcelain", &output_option, N_("show in a format designed for machine consumption"), OUTPUT_PORCELAIN),
-		OPT_BIT(0, "line-porcelain", &output_option, N_("show porcelain format with per-line commit information"), OUTPUT_PORCELAIN|OUTPUT_LINE_PORCELAIN),
-		OPT_BIT('c', NULL, &output_option, N_("use the same output mode as git-annotate (Default: off)"), OUTPUT_ANNOTATE_COMPAT),
-		OPT_BIT('t', NULL, &output_option, N_("show raw timestamp (Default: off)"), OUTPUT_RAW_TIMESTAMP),
-		OPT_BIT('l', NULL, &output_option, N_("show long commit SHA1 (Default: off)"), OUTPUT_LONG_OBJECT_NAME),
-		OPT_BIT('s', NULL, &output_option, N_("suppress author name and timestamp (Default: off)"), OUTPUT_NO_AUTHOR),
+		OPT_BIT(0, "line-porcelain", &output_option, N_("show porcelain format with per-line commit information"), OUTPUT_PORCELAIN|OUTPUT_سطر_PORCELAIN),
+		OPT_BIT('c', پوچ, &output_option, N_("use the same output mode as git-annotate (Default: off)"), OUTPUT_ANNOTATE_COMPAT),
+		OPT_BIT('t', پوچ, &output_option, N_("show raw timestamp (Default: off)"), OUTPUT_RAW_TIMESTAMP),
+		OPT_BIT('l', پوچ, &output_option, N_("show long commit SHA1 (Default: off)"), OUTPUT_LONG_OBJECT_NAME),
+		OPT_BIT('s', پوچ, &output_option, N_("suppress author name and timestamp (Default: off)"), OUTPUT_NO_AUTHOR),
 		OPT_BIT('e', "show-email", &output_option, N_("show author email instead of name (Default: off)"), OUTPUT_SHOW_EMAIL),
-		OPT_BIT('w', NULL, &xdl_opts, N_("ignore whitespace differences"), XDF_IGNORE_WHITESPACE),
+		OPT_BIT('w', پوچ, &xdl_opts, N_("ignore whitespace differences"), XDF_IGNORE_WHITESPACE),
 		OPT_CALLBACK_F(0, "diff-algorithm", &xdl_opts, N_("<algorithm>"),
 			       N_("choose a diff algorithm"),
 			       PARSE_OPT_NONEG, blame_diff_algorithm_callback),
 		OPT_STRING_LIST(0, "ignore-rev", &ignore_rev_list, N_("rev"), N_("ignore <rev> when blaming")),
 		OPT_STRING_LIST(0, "ignore-revs-file", &ignore_revs_file_list, N_("file"), N_("ignore revisions from <file>")),
-		OPT_BIT(0, "color-lines", &output_option, N_("color redundant metadata from previous line differently"), OUTPUT_COLOR_LINE),
+		OPT_BIT(0, "color-lines", &output_option, N_("color redundant metadata from previous line differently"), OUTPUT_COLOR_سطر),
 		OPT_BIT(0, "color-by-age", &output_option, N_("color lines by age"), OUTPUT_SHOW_AGE_WITH_COLOR),
-		OPT_CALLBACK_F(0, "minimal", &xdl_opts, NULL,
+		OPT_CALLBACK_F(0, "minimal", &xdl_opts, پوچ,
 			       N_("spend extra cycles to find a better match"),
 			       PARSE_OPT_NOARG | PARSE_OPT_HIDDEN, blame_diff_algorithm_minimal),
-		OPT_STRING('S', NULL, &revs_file, N_("file"), N_("use revisions from <file> instead of calling git-rev-list")),
+		OPT_STRING('S', پوچ, &revs_file, N_("file"), N_("use revisions from <file> instead of calling git-rev-list")),
 		OPT_STRING(0, "contents", &contents_from, N_("file"), N_("use <file>'s contents as the final image")),
-		OPT_CALLBACK_F('C', NULL, &opt, N_("score"), N_("find line copies within and across files"), PARSE_OPT_OPTARG, blame_copy_callback),
-		OPT_CALLBACK_F('M', NULL, &opt, N_("score"), N_("find line movements within and across files"), PARSE_OPT_OPTARG, blame_move_callback),
-		OPT_STRING_LIST('L', NULL, &range_list, N_("range"),
+		OPT_CALLBACK_F('C', پوچ, &opt, N_("score"), N_("find line copies within and across files"), PARSE_OPT_OPTARG, blame_copy_callback),
+		OPT_CALLBACK_F('M', پوچ, &opt, N_("score"), N_("find line movements within and across files"), PARSE_OPT_OPTARG, blame_move_callback),
+		OPT_STRING_LIST('L', پوچ, &range_list, N_("range"),
 				N_("process only line range <start>,<end> or function :<funcname>")),
 		OPT__ABBREV(&abbrev),
 		OPT_END()
 	};
 
-	struct parse_opt_ctx_t ctx;
-	int cmd_is_annotate = !strcmp(argv[0], "annotate");
-	struct range_set ranges;
-	unsigned int range_i;
+	ساختار parse_opt_ctx_t ctx;
+	صحیح cmd_is_annotate = !strcmp(argv[0], "annotate");
+	ساختار range_set ranges;
+	unsigned صحیح range_i;
 	long anchor;
-	long num_lines = 0;
-	const char *str_usage = cmd_is_annotate ? annotate_usage : blame_usage;
-	const char *const *opt_usage = cmd_is_annotate ? annotate_opt_usage : blame_opt_usage;
+	long رقم_سطرها = 0;
+	ثابت نویسه *str_usage = cmd_is_annotate ? annotate_usage : blame_usage;
+	ثابت نویسه *ثابت *opt_usage = cmd_is_annotate ? annotate_opt_usage : blame_opt_usage;
 
 	setup_default_color_by_age();
 	repo_config(the_repository, git_blame_config, &output_option);
-	repo_init_revisions(the_repository, &revs, NULL);
+	repo_init_revisions(the_repository, &revs, پوچ);
 	revs.date_mode = blame_date_mode;
 	revs.diffopt.flags.allow_textconv = 1;
 	revs.diffopt.flags.follow_renames = 1;
@@ -1032,26 +1032,26 @@ int cmd_blame(int argc,
 
 	parse_options_start(&ctx, argc, argv, prefix, options,
 			    PARSE_OPT_KEEP_DASHDASH | PARSE_OPT_KEEP_ARGV0);
-	for (;;) {
-		switch (parse_options_step(&ctx, options, opt_usage)) {
-		case PARSE_OPT_NON_OPTION:
-		case PARSE_OPT_UNKNOWN:
-			break;
-		case PARSE_OPT_HELP:
+	برای (;;) {
+		انتخاب (parse_options_step(&ctx, options, opt_usage)) {
+		حالت PARSE_OPT_NON_OPTION:
+		حالت PARSE_OPT_UNKNOWN:
+			بشکن;
+		حالت PARSE_OPT_HELP:
 			exit(0);
-		case PARSE_OPT_HELP_ERROR:
-		case PARSE_OPT_ERROR:
-		case PARSE_OPT_SUBCOMMAND:
+		حالت PARSE_OPT_HELP_ERROR:
+		حالت PARSE_OPT_ERROR:
+		حالت PARSE_OPT_SUBCOMMAND:
 			exit(129);
-		case PARSE_OPT_COMPLETE:
+		حالت PARSE_OPT_COMPLETE:
 			exit(0);
-		case PARSE_OPT_DONE:
-			if (ctx.argv[0])
+		حالت PARSE_OPT_DONE:
+			اگر (ctx.argv[0])
 				dashdash_pos = ctx.cpidx;
-			goto parse_done;
+			برو parse_done;
 		}
 
-		if (!strcmp(ctx.argv[0], "--reverse")) {
+		اگر (!strcmp(ctx.argv[0], "--reverse")) {
 			ctx.argv[0] = "--children";
 			reverse = 1;
 		}
@@ -1067,47 +1067,47 @@ parse_done:
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	if (incremental || (output_option & OUTPUT_PORCELAIN)) {
-		if (show_progress > 0)
+	اگر (incremental || (output_option & OUTPUT_PORCELAIN)) {
+		اگر (show_progress > 0)
 			die(_("--progress can't be used with --incremental or porcelain formats"));
 		show_progress = 0;
-	} else if (show_progress < 0)
+	} وگرنه اگر (show_progress < 0)
 		show_progress = isatty(2);
 
-	if (!abbrev)
+	اگر (!abbrev)
 		abbrev = the_hash_algo->hexsz;
 
-	if (revs_file && read_ancestry(revs_file))
+	اگر (revs_file && read_ancestry(revs_file))
 		die_errno("reading graft file '%s' failed", revs_file);
 
-	if (cmd_is_annotate) {
+	اگر (cmd_is_annotate) {
 		output_option |= OUTPUT_ANNOTATE_COMPAT;
 		blame_date_mode.type = DATE_ISO8601;
-	} else {
+	} وگرنه {
 		blame_date_mode = revs.date_mode;
 	}
 
 	/* The maximum width used to show the dates */
-	switch (blame_date_mode.type) {
-	case DATE_RFC2822:
-		blame_date_width = sizeof("Thu, 19 Oct 2006 16:00:04 -0700");
-		break;
-	case DATE_ISO8601_STRICT:
-		blame_date_width = sizeof("2006-10-19T16:00:04-07:00");
-		break;
-	case DATE_ISO8601:
-		blame_date_width = sizeof("2006-10-19 16:00:04 -0700");
-		break;
-	case DATE_RAW:
-		blame_date_width = sizeof("1161298804 -0700");
-		break;
-	case DATE_UNIX:
-		blame_date_width = sizeof("1161298804");
-		break;
-	case DATE_SHORT:
-		blame_date_width = sizeof("2006-10-19");
-		break;
-	case DATE_RELATIVE:
+	انتخاب (blame_date_mode.type) {
+	حالت DATE_RFC2822:
+		blame_date_width = اندازه("Thu, 19 Oct 2006 16:00:04 -0700");
+		بشکن;
+	حالت DATE_ISO8601_STRICT:
+		blame_date_width = اندازه("2006-10-19T16:00:04-07:00");
+		بشکن;
+	حالت DATE_ISO8601:
+		blame_date_width = اندازه("2006-10-19 16:00:04 -0700");
+		بشکن;
+	حالت DATE_RAW:
+		blame_date_width = اندازه("1161298804 -0700");
+		بشکن;
+	حالت DATE_UNIX:
+		blame_date_width = اندازه("1161298804");
+		بشکن;
+	حالت DATE_SHORT:
+		blame_date_width = اندازه("2006-10-19");
+		بشکن;
+	حالت DATE_RELATIVE:
 		/*
 		 * TRANSLATORS: This string is used to tell us the
 		 * maximum display width for a relative timestamp in
@@ -1118,21 +1118,21 @@ parse_done:
 		 * columns.
 		 */
 		blame_date_width = utf8_strwidth(_("4 years, 11 months ago")) + 1; /* add the null */
-		break;
-	case DATE_HUMAN:
+		بشکن;
+	حالت DATE_HUMAN:
 		/* If the year is shown, no time is shown */
-		blame_date_width = sizeof("Thu Oct 19 16:00");
-		break;
-	case DATE_NORMAL:
-		blame_date_width = sizeof("Thu Oct 19 16:00:04 2006 -0700");
-		break;
-	case DATE_STRFTIME:
+		blame_date_width = اندازه("Thu Oct 19 16:00");
+		بشکن;
+	حالت DATE_NORMAL:
+		blame_date_width = اندازه("Thu Oct 19 16:00:04 2006 -0700");
+		بشکن;
+	حالت DATE_STRFTIME:
 		blame_date_width = strlen(show_date(0, 0, blame_date_mode)) + 1; /* add the null */
-		break;
+		بشکن;
 	}
 	blame_date_width -= 1; /* strip the null */
 
-	if (revs.diffopt.flags.find_copies_harder)
+	اگر (revs.diffopt.flags.find_copies_harder)
 		opt |= (PICKAXE_BLAME_COPY | PICKAXE_BLAME_MOVE |
 			PICKAXE_BLAME_COPY_HARDER);
 
@@ -1154,31 +1154,31 @@ parse_done:
 	 * Note that we must strip out <path> from the arguments: we do not
 	 * want the path pruning but we may want "bottom" processing.
 	 */
-	if (dashdash_pos) {
-		switch (argc - dashdash_pos - 1) {
-		case 2: /* (1b) */
-			if (argc != 4)
+	اگر (dashdash_pos) {
+		انتخاب (argc - dashdash_pos - 1) {
+		حالت 2: /* (1b) */
+			اگر (argc != 4)
 				usage_with_options(opt_usage, options);
 			/* reorder for the new way: <rev> -- <path> */
 			argv[1] = argv[3];
 			argv[3] = argv[2];
 			argv[2] = "--";
 			/* FALLTHROUGH */
-		case 1: /* (1a) */
+		حالت 1: /* (1a) */
 			path = add_prefix(prefix, argv[--argc]);
-			argv[argc] = NULL;
-			break;
-		default:
+			argv[argc] = پوچ;
+			بشکن;
+		پیشفرض:
 			usage_with_options(opt_usage, options);
 		}
-	} else {
-		if (argc < 2)
+	} وگرنه {
+		اگر (argc < 2)
 			usage_with_options(opt_usage, options);
-		if (argc == 3 && is_a_rev(argv[argc - 1])) { /* (2b) */
+		اگر (argc == 3 && is_a_rev(argv[argc - 1])) { /* (2b) */
 			path = add_prefix(prefix, argv[1]);
 			argv[1] = argv[2];
-		} else {	/* (2a) */
-			if (argc == 2 && is_a_rev(argv[1]) && !repo_get_work_tree(the_repository))
+		} وگرنه {	/* (2a) */
+			اگر (argc == 2 && is_a_rev(argv[1]) && !repo_get_work_درخت(the_repository))
 				die("missing <path> to blame");
 			path = add_prefix(prefix, argv[argc - 1]);
 		}
@@ -1186,13 +1186,13 @@ parse_done:
 	}
 
 	revs.disable_stdin = 1;
-	setup_revisions(argc, argv, &revs, NULL);
-	if (!revs.pending.nr && is_bare_repository(the_repository)) {
-		struct commit *head_commit;
-		struct object_id head_oid;
+	setup_revisions(argc, argv, &revs, پوچ);
+	اگر (!revs.pending.nr && is_bare_repository(the_repository)) {
+		ساختار commit *head_commit;
+		ساختار object_id head_oid;
 
-		if (!refs_resolve_ref_unsafe(get_main_ref_store(the_repository), "HEAD", RESOLVE_REF_READING,
-					     &head_oid, NULL) ||
+		اگر (!refs_resolve_ref_unsafe(get_main_ref_store(the_repository), "HEAD", RESOLVE_REF_READING,
+					     &head_oid, پوچ) ||
 		    !(head_commit = lookup_commit_reference_gently(revs.repo,
 							     &head_oid, 1)))
 			die("no such ref: HEAD");
@@ -1215,44 +1215,44 @@ parse_done:
 	 * Changed-path Bloom filters are disabled when looking
 	 * for copies.
 	 */
-	if (!(opt & PICKAXE_BLAME_COPY))
+	اگر (!(opt & PICKAXE_BLAME_COPY))
 		setup_blame_bloom_data(&sb);
 
-	lno = sb.num_lines;
+	lno = sb.رقم_سطرها;
 
-	if (lno && !range_list.nr)
+	اگر (lno && !range_list.nr)
 		string_list_append(&range_list, "1");
 
 	anchor = 1;
 	range_set_init(&ranges, range_list.nr);
-	for (range_i = 0; range_i < range_list.nr; ++range_i) {
-		long bottom, top;
-		if (parse_range_arg(range_list.items[range_i].string,
-				    nth_line_cb, &sb, lno, anchor,
-				    &bottom, &top, sb.path,
+	برای (range_i = 0; range_i < range_list.nr; ++range_i) {
+		long bottom, بالاترین;
+		اگر (parse_range_arg(range_list.اقلام[range_i].string,
+				    nth_سطر_cb, &sb, lno, anchor,
+				    &bottom, &بالاترین, sb.path,
 				    the_repository->index))
 			usage(str_usage);
-		if ((!lno && (top || bottom)) || lno < bottom)
+		اگر ((!lno && (بالاترین || bottom)) || lno < bottom)
 			die(Q_("file %s has only %lu line",
 			       "file %s has only %lu lines",
 			       lno), sb.path, lno);
-		if (bottom < 1)
+		اگر (bottom < 1)
 			bottom = 1;
-		if (top < 1 || lno < top)
-			top = lno;
+		اگر (بالاترین < 1 || lno < بالاترین)
+			بالاترین = lno;
 		bottom--;
-		range_set_append_unsafe(&ranges, bottom, top);
-		anchor = top + 1;
+		range_set_append_unsafe(&ranges, bottom, بالاترین);
+		anchor = بالاترین + 1;
 	}
 	sort_and_merge_range_set(&ranges);
 
-	for (range_i = ranges.nr; range_i > 0; --range_i) {
-		const struct range *r = &ranges.ranges[range_i - 1];
+	برای (range_i = ranges.nr; range_i > 0; --range_i) {
+		ثابت ساختار range *r = &ranges.ranges[range_i - 1];
 		ent = blame_entry_prepend(ent, r->start, r->end, o);
-		num_lines += (r->end - r->start);
+		رقم_سطرها += (r->end - r->start);
 	}
-	if (!num_lines)
-		num_lines = sb.num_lines;
+	اگر (!رقم_سطرها)
+		رقم_سطرها = sb.رقم_سطرها;
 
 	o->suspects = ent;
 	prio_queue_put(&sb.commits, o->commit);
@@ -1262,17 +1262,17 @@ parse_done:
 	range_set_release(&ranges);
 	string_list_clear(&range_list, 0);
 
-	sb.ent = NULL;
+	sb.ent = پوچ;
 
-	if (blame_move_score)
+	اگر (blame_move_score)
 		sb.move_score = blame_move_score;
-	if (blame_copy_score)
+	اگر (blame_copy_score)
 		sb.copy_score = blame_copy_score;
 
 	sb.debug = DEBUG_BLAME;
 	sb.on_sanity_fail = &sanity_check_on_fail;
 
-	sb.show_root = show_root;
+	sb.show_ریشه = show_ریشه;
 	sb.xdl_opts = xdl_opts;
 	sb.no_whole_file_rename = no_whole_file_rename;
 
@@ -1280,55 +1280,55 @@ parse_done:
 
 	sb.found_guilty_entry = &found_guilty_entry;
 	sb.found_guilty_entry_data = &pi;
-	if (show_progress)
+	اگر (show_progress)
 		pi.progress = start_delayed_progress(the_repository,
 						     _("Blaming lines"),
-						     num_lines);
+						     رقم_سطرها);
 
 	assign_blame(&sb, opt);
 
 	stop_progress(&pi.progress);
 
-	if (!incremental)
+	اگر (!incremental)
 		setup_pager(the_repository);
-	else
-		goto cleanup;
+	وگرنه
+		برو cleanup;
 
 	blame_sort_final(&sb);
 
 	blame_coalesce(&sb);
 
-	if (!(output_option & (OUTPUT_COLOR_LINE | OUTPUT_SHOW_AGE_WITH_COLOR)))
+	اگر (!(output_option & (OUTPUT_COLOR_سطر | OUTPUT_SHOW_AGE_WITH_COLOR)))
 		output_option |= coloring_mode;
 
-	if (!(output_option & OUTPUT_PORCELAIN)) {
+	اگر (!(output_option & OUTPUT_PORCELAIN)) {
 		find_alignment(&sb, &output_option);
-		if (!*repeated_meta_color &&
-		    (output_option & OUTPUT_COLOR_LINE))
+		اگر (!*repeated_meta_color &&
+		    (output_option & OUTPUT_COLOR_سطر))
 			xsnprintf(repeated_meta_color,
-				  sizeof(repeated_meta_color),
+				  اندازه(repeated_meta_color),
 				  "%s", GIT_COLOR_CYAN);
 	}
-	if (output_option & OUTPUT_ANNOTATE_COMPAT)
-		output_option &= ~(OUTPUT_COLOR_LINE | OUTPUT_SHOW_AGE_WITH_COLOR);
+	اگر (output_option & OUTPUT_ANNOTATE_COMPAT)
+		output_option &= ~(OUTPUT_COLOR_سطر | OUTPUT_SHOW_AGE_WITH_COLOR);
 
 	output(&sb, output_option);
 
-	if (show_stats) {
-		printf("num read blob: %d\n", sb.num_read_blob);
-		printf("num get patch: %d\n", sb.num_get_patch);
-		printf("num commits: %d\n", sb.num_commits);
+	اگر (show_stats) {
+		printf("num read blob: %d\n", sb.رقم_read_blob);
+		printf("num get patch: %d\n", sb.رقم_get_patch);
+		printf("num commits: %d\n", sb.رقم_commits);
 	}
 
 cleanup:
-	for (ent = sb.ent; ent; ) {
-		struct blame_entry *e = ent->next;
-		free(ent);
+	برای (ent = sb.ent; ent; ) {
+		ساختار blame_entry *e = ent->next;
+		آزاد(ent);
 		ent = e;
 	}
 
-	free(path);
+	آزاد(path);
 	cleanup_scoreboard(&sb);
 	release_revisions(&revs);
-	return 0;
+	بازگشت 0;
 }

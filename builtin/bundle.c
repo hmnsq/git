@@ -1,12 +1,12 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "gettext.h"
-#include "setup.h"
-#include "strvec.h"
-#include "parse-options.h"
-#include "pkt-line.h"
-#include "bundle.h"
+#شامل "builtin.h"
+#شامل "abspath.h"
+#شامل "gettext.h"
+#شامل "setup.h"
+#شامل "strvec.h"
+#شامل "parse-options.h"
+#شامل "pkt-line.h"
+#شامل "bundle.h"
 
 /*
  * Basic handler for bundle files to connect repositories via sneakernet.
@@ -25,54 +25,54 @@
 #define BUILTIN_BUNDLE_UNBUNDLE_USAGE \
 	N_("git bundle unbundle [--progress] <file> [<refname>...]")
 
-static char const * const builtin_bundle_usage[] = {
+ایستا نویسه ثابت * ثابت builtin_bundle_usage[] = {
 	BUILTIN_BUNDLE_CREATE_USAGE,
 	BUILTIN_BUNDLE_VERIFY_USAGE,
 	BUILTIN_BUNDLE_LIST_HEADS_USAGE,
 	BUILTIN_BUNDLE_UNBUNDLE_USAGE,
-	NULL,
+	پوچ,
 };
 
-static const char * const builtin_bundle_create_usage[] = {
+ایستا ثابت نویسه * ثابت builtin_bundle_create_usage[] = {
 	BUILTIN_BUNDLE_CREATE_USAGE,
-	NULL
+	پوچ
 };
 
-static const char * const builtin_bundle_verify_usage[] = {
+ایستا ثابت نویسه * ثابت builtin_bundle_verify_usage[] = {
 	BUILTIN_BUNDLE_VERIFY_USAGE,
-	NULL
+	پوچ
 };
 
-static const char * const builtin_bundle_list_heads_usage[] = {
+ایستا ثابت نویسه * ثابت builtin_bundle_list_heads_usage[] = {
 	BUILTIN_BUNDLE_LIST_HEADS_USAGE,
-	NULL
+	پوچ
 };
 
-static const char * const builtin_bundle_unbundle_usage[] = {
+ایستا ثابت نویسه * ثابت builtin_bundle_unbundle_usage[] = {
 	BUILTIN_BUNDLE_UNBUNDLE_USAGE,
-	NULL
+	پوچ
 };
 
-static int parse_options_cmd_bundle(int argc,
-		const char **argv,
-		const char* prefix,
-		const char * const usagestr[],
-		const struct option options[],
-		char **bundle_file) {
-	argc = parse_options(argc, argv, NULL, options, usagestr,
+ایستا صحیح parse_options_cmd_bundle(صحیح argc,
+		ثابت نویسه **argv,
+		ثابت نویسه* prefix,
+		ثابت نویسه * ثابت usagestr[],
+		ثابت ساختار option options[],
+		نویسه **bundle_file) {
+	argc = parse_options(argc, argv, پوچ, options, usagestr,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
-	if (!argc)
-		usage_msg_opt(_("need a <file> argument"), usagestr, options);
+	اگر (!argc)
+		usage_پیام_opt(_("need a <file> argument"), usagestr, options);
 	*bundle_file = prefix_filename_except_for_dash(prefix, argv[0]);
-	return argc;
+	بازگشت argc;
 }
 
-static int cmd_bundle_create(int argc, const char **argv, const char *prefix,
-			     struct repository *repo UNUSED)
+ایستا صحیح cmd_bundle_create(صحیح argc, ثابت نویسه **argv, ثابت نویسه *prefix,
+			     ساختار repository *repo UNUSED)
 {
-	int progress = isatty(STDERR_FILENO);
-	int version = -1;
-	struct option options[] = {
+	صحیح progress = isatty(STDERR_FILENO);
+	صحیح version = -1;
+	ساختار option options[] = {
 		OPT_NEGBIT('q', "quiet", &progress,
 			   N_("do not show progress meter"), 1),
 		OPT_BIT(0, "progress", &progress,
@@ -85,152 +85,152 @@ static int cmd_bundle_create(int argc, const char **argv, const char *prefix,
 			    N_("specify bundle format version")),
 		OPT_END()
 	};
-	char *bundle_file;
-	int ret;
+	نویسه *bundle_file;
+	صحیح ret;
 
 	argc = parse_options_cmd_bundle(argc, argv, prefix,
 			builtin_bundle_create_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if (!startup_info->have_repository)
+	اگر (!startup_info->have_repository)
 		die(_("Need a repository to create a bundle."));
 	ret = !!create_bundle(the_repository, bundle_file, argc, argv, version, progress);
-	free(bundle_file);
-	return ret;
+	آزاد(bundle_file);
+	بازگشت ret;
 }
 
 /*
  * Similar to read_bundle_header(), but handle "-" as stdin.
  */
-static int open_bundle(const char *path, struct bundle_header *header,
-		       const char **name)
+ایستا صحیح open_bundle(ثابت نویسه *path, ساختار bundle_header *header,
+		       ثابت نویسه **name)
 {
-	if (!strcmp(path, "-")) {
-		if (name)
+	اگر (!strcmp(path, "-")) {
+		اگر (name)
 			*name = "<stdin>";
-		return read_bundle_header_fd(0, header, "<stdin>");
+		بازگشت read_bundle_header_fd(0, header, "<stdin>");
 	}
 
-	if (name)
+	اگر (name)
 		*name = path;
-	return read_bundle_header(path, header);
+	بازگشت read_bundle_header(path, header);
 }
 
-static int cmd_bundle_verify(int argc, const char **argv, const char *prefix,
-			     struct repository *repo UNUSED) {
-	struct bundle_header header = BUNDLE_HEADER_INIT;
-	int bundle_fd = -1;
-	int quiet = 0;
-	int ret;
-	struct option options[] = {
+ایستا صحیح cmd_bundle_verify(صحیح argc, ثابت نویسه **argv, ثابت نویسه *prefix,
+			     ساختار repository *repo UNUSED) {
+	ساختار bundle_header header = BUNDLE_HEADER_INIT;
+	صحیح bundle_fd = -1;
+	صحیح quiet = 0;
+	صحیح ret;
+	ساختار option options[] = {
 		OPT_BOOL('q', "quiet", &quiet,
 			    N_("do not show bundle details")),
 		OPT_END()
 	};
-	char *bundle_file;
-	const char *name;
+	نویسه *bundle_file;
+	ثابت نویسه *name;
 
 	argc = parse_options_cmd_bundle(argc, argv, prefix,
 			builtin_bundle_verify_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if (!startup_info->have_repository) {
+	اگر (!startup_info->have_repository) {
 		ret = error(_("need a repository to verify a bundle"));
-		goto cleanup;
+		برو cleanup;
 	}
 
-	if ((bundle_fd = open_bundle(bundle_file, &header, &name)) < 0) {
+	اگر ((bundle_fd = open_bundle(bundle_file, &header, &name)) < 0) {
 		ret = 1;
-		goto cleanup;
+		برو cleanup;
 	}
 	close(bundle_fd);
-	if (verify_bundle(the_repository, &header,
+	اگر (verify_bundle(the_repository, &header,
 			  quiet ? VERIFY_BUNDLE_QUIET : VERIFY_BUNDLE_VERBOSE)) {
 		ret = 1;
-		goto cleanup;
+		برو cleanup;
 	}
 
 	fprintf(stderr, _("%s is okay\n"), name);
 	ret = 0;
 cleanup:
-	free(bundle_file);
+	آزاد(bundle_file);
 	bundle_header_release(&header);
-	return ret;
+	بازگشت ret;
 }
 
-static int cmd_bundle_list_heads(int argc, const char **argv, const char *prefix,
-				 struct repository *repo UNUSED) {
-	struct bundle_header header = BUNDLE_HEADER_INIT;
-	int bundle_fd = -1;
-	int ret;
-	struct option options[] = {
+ایستا صحیح cmd_bundle_list_heads(صحیح argc, ثابت نویسه **argv, ثابت نویسه *prefix,
+				 ساختار repository *repo UNUSED) {
+	ساختار bundle_header header = BUNDLE_HEADER_INIT;
+	صحیح bundle_fd = -1;
+	صحیح ret;
+	ساختار option options[] = {
 		OPT_END()
 	};
-	char *bundle_file;
+	نویسه *bundle_file;
 
 	argc = parse_options_cmd_bundle(argc, argv, prefix,
 			builtin_bundle_list_heads_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if ((bundle_fd = open_bundle(bundle_file, &header, NULL)) < 0) {
+	اگر ((bundle_fd = open_bundle(bundle_file, &header, پوچ)) < 0) {
 		ret = 1;
-		goto cleanup;
+		برو cleanup;
 	}
 	close(bundle_fd);
 	ret = !!list_bundle_refs(&header, argc, argv);
 cleanup:
-	free(bundle_file);
+	آزاد(bundle_file);
 	bundle_header_release(&header);
-	return ret;
+	بازگشت ret;
 }
 
-static int cmd_bundle_unbundle(int argc, const char **argv, const char *prefix,
-			       struct repository *repo UNUSED) {
-	struct bundle_header header = BUNDLE_HEADER_INIT;
-	int bundle_fd = -1;
-	int ret;
-	int progress = isatty(2);
+ایستا صحیح cmd_bundle_unbundle(صحیح argc, ثابت نویسه **argv, ثابت نویسه *prefix,
+			       ساختار repository *repo UNUSED) {
+	ساختار bundle_header header = BUNDLE_HEADER_INIT;
+	صحیح bundle_fd = -1;
+	صحیح ret;
+	صحیح progress = isatty(2);
 
-	struct option options[] = {
+	ساختار option options[] = {
 		OPT_BOOL(0, "progress", &progress,
 			 N_("show progress meter")),
 		OPT_END()
 	};
-	char *bundle_file;
-	struct strvec extra_index_pack_args = STRVEC_INIT;
+	نویسه *bundle_file;
+	ساختار strvec extra_index_pack_args = STRVEC_INIT;
 
 	argc = parse_options_cmd_bundle(argc, argv, prefix,
 			builtin_bundle_unbundle_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if (!startup_info->have_repository)
+	اگر (!startup_info->have_repository)
 		die(_("Need a repository to unbundle."));
 
-	if ((bundle_fd = open_bundle(bundle_file, &header, NULL)) < 0) {
+	اگر ((bundle_fd = open_bundle(bundle_file, &header, پوچ)) < 0) {
 		ret = 1;
-		goto cleanup;
+		برو cleanup;
 	}
-	if (progress)
+	اگر (progress)
 		strvec_pushl(&extra_index_pack_args, "-v", "--progress-title",
-			     _("Unbundling objects"), NULL);
+			     _("Unbundling objects"), پوچ);
 	ret = !!unbundle(the_repository, &header, bundle_fd,
-			 &extra_index_pack_args, NULL) ||
+			 &extra_index_pack_args, پوچ) ||
 		list_bundle_refs(&header, argc, argv);
 	bundle_header_release(&header);
 
 cleanup:
 	strvec_clear(&extra_index_pack_args);
-	free(bundle_file);
-	return ret;
+	آزاد(bundle_file);
+	بازگشت ret;
 }
 
-int cmd_bundle(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+صحیح cmd_bundle(صحیح argc,
+	       ثابت نویسه **argv,
+	       ثابت نویسه *prefix,
+	       ساختار repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	parse_opt_subcommand_fn *fn = پوچ;
+	ساختار option options[] = {
 		OPT_SUBCOMMAND("create", &fn, cmd_bundle_create),
 		OPT_SUBCOMMAND("verify", &fn, cmd_bundle_verify),
 		OPT_SUBCOMMAND("list-heads", &fn, cmd_bundle_list_heads),
@@ -243,5 +243,5 @@ int cmd_bundle(int argc,
 
 	packet_trace_identity("bundle");
 
-	return !!fn(argc, argv, prefix, repo);
+	بازگشت !!fn(argc, argv, prefix, repo);
 }

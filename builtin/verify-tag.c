@@ -5,69 +5,69 @@
  *
  * Based on git-verify-tag.sh
  */
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "tag.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "gpg-interface.h"
-#include "ref-filter.h"
+#شامل "builtin.h"
+#شامل "config.h"
+#شامل "environment.h"
+#شامل "gettext.h"
+#شامل "tag.h"
+#شامل "object-name.h"
+#شامل "parse-options.h"
+#شامل "gpg-interface.h"
+#شامل "ref-filter.h"
 
-static const char * const verify_tag_usage[] = {
+ایستا ثابت نویسه * ثابت verify_tag_usage[] = {
 		N_("git verify-tag [-v | --verbose] [--format=<format>] [--raw] <tag>..."),
-		NULL
+		پوچ
 };
 
-int cmd_verify_tag(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo)
+صحیح cmd_verify_tag(صحیح argc,
+		   ثابت نویسه **argv,
+		   ثابت نویسه *prefix,
+		   ساختار repository *repo)
 {
-	int i = 1, verbose = 0, had_error = 0;
+	صحیح i = 1, verbose = 0, had_error = 0;
 	unsigned flags = 0;
-	struct ref_format format = REF_FORMAT_INIT;
-	const struct option verify_tag_options[] = {
+	ساختار ref_format format = REF_FORMAT_INIT;
+	ثابت ساختار option verify_tag_options[] = {
 		OPT__VERBOSE(&verbose, N_("print tag contents")),
 		OPT_BIT(0, "raw", &flags, N_("print raw gpg status output"), GPG_VERIFY_RAW),
 		OPT_STRING(0, "format", &format.format, N_("format"), N_("format to use for the output")),
 		OPT_END()
 	};
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, پوچ);
 
 	argc = parse_options(argc, argv, prefix, verify_tag_options,
 			     verify_tag_usage, PARSE_OPT_KEEP_ARGV0);
-	if (argc <= i)
+	اگر (argc <= i)
 		usage_with_options(verify_tag_usage, verify_tag_options);
 
-	if (verbose)
+	اگر (verbose)
 		flags |= GPG_VERIFY_VERBOSE;
 
-	if (format.format) {
-		if (verify_ref_format(&format))
+	اگر (format.format) {
+		اگر (verify_ref_format(&format))
 			usage_with_options(verify_tag_usage,
 					   verify_tag_options);
 		flags |= GPG_VERIFY_OMIT_STATUS;
 	}
 
-	while (i < argc) {
-		struct object_id oid;
-		const char *name = argv[i++];
+	وقتی (i < argc) {
+		ساختار object_id oid;
+		ثابت نویسه *name = argv[i++];
 
-		if (repo_get_oid(repo, name, &oid)) {
+		اگر (repo_get_oid(repo, name, &oid)) {
 			had_error = !!error("tag '%s' not found.", name);
-			continue;
+			ادامه;
 		}
 
-		if (gpg_verify_tag(repo, &oid, name, flags)) {
+		اگر (gpg_verify_tag(repo, &oid, name, flags)) {
 			had_error = 1;
-			continue;
+			ادامه;
 		}
 
-		if (format.format)
-			pretty_print_ref(name, &oid, NULL, &format);
+		اگر (format.format)
+			pretty_print_ref(name, &oid, پوچ, &format);
 	}
-	return had_error;
+	بازگشت had_error;
 }

@@ -5,146 +5,146 @@
  *
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "string-list.h"
-#include "tempfile.h"
-#include "trailer.h"
-#include "config.h"
+#شامل "builtin.h"
+#شامل "environment.h"
+#شامل "gettext.h"
+#شامل "parse-options.h"
+#شامل "string-list.h"
+#شامل "tempfile.h"
+#شامل "trailer.h"
+#شامل "config.h"
 
-static const char * const git_interpret_trailers_usage[] = {
+ایستا ثابت نویسه * ثابت git_interpret_trailers_usage[] = {
 	N_("git interpret-trailers [--in-place] [--trim-empty]\n"
 	   "                       [(--trailer (<key>|<key-alias>)[(=|:)<value>])...]\n"
 	   "                       [--parse] [<file>...]"),
-	NULL
+	پوچ
 };
 
-static enum trailer_where where;
-static enum trailer_if_exists if_exists;
-static enum trailer_if_missing if_missing;
+ایستا شمارش trailer_where where;
+ایستا شمارش trailer_if_exists if_exists;
+ایستا شمارش trailer_if_missing if_missing;
 
-static int option_parse_where(const struct option *opt,
-			      const char *arg, int unset UNUSED)
+ایستا صحیح option_parse_where(ثابت ساختار option *opt,
+			      ثابت نویسه *arg, صحیح unset UNUSED)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_where(opt->value, arg);
+	بازگشت trailer_set_where(opt->مقدار, arg);
 }
 
-static int option_parse_if_exists(const struct option *opt,
-				  const char *arg, int unset UNUSED)
+ایستا صحیح option_parse_if_exists(ثابت ساختار option *opt,
+				  ثابت نویسه *arg, صحیح unset UNUSED)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_if_exists(opt->value, arg);
+	بازگشت trailer_set_if_exists(opt->مقدار, arg);
 }
 
-static int option_parse_if_missing(const struct option *opt,
-				   const char *arg, int unset UNUSED)
+ایستا صحیح option_parse_if_missing(ثابت ساختار option *opt,
+				   ثابت نویسه *arg, صحیح unset UNUSED)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_if_missing(opt->value, arg);
+	بازگشت trailer_set_if_missing(opt->مقدار, arg);
 }
 
-static void new_trailers_clear(struct list_head *trailers)
+ایستا تهی new_trailers_clear(ساختار list_head *trailers)
 {
-	struct list_head *pos, *tmp;
-	struct new_trailer_item *item;
+	ساختار list_head *pos, *tmp;
+	ساختار new_trailer_item *item;
 
 	list_for_each_safe(pos, tmp, trailers) {
-		item = list_entry(pos, struct new_trailer_item, list);
+		item = list_entry(pos, ساختار new_trailer_item, list);
 		list_del(pos);
-		free(item);
+		آزاد(item);
 	}
 }
 
-static int option_parse_trailer(const struct option *opt,
-				   const char *arg, int unset)
+ایستا صحیح option_parse_trailer(ثابت ساختار option *opt,
+				   ثابت نویسه *arg, صحیح unset)
 {
-	struct list_head *trailers = opt->value;
-	struct new_trailer_item *item;
+	ساختار list_head *trailers = opt->مقدار;
+	ساختار new_trailer_item *item;
 
-	if (unset) {
+	اگر (unset) {
 		new_trailers_clear(trailers);
-		return 0;
+		بازگشت 0;
 	}
 
-	if (!arg)
-		return -1;
+	اگر (!arg)
+		بازگشت -1;
 
-	item = xmalloc(sizeof(*item));
+	item = xmalloc(اندازه(*item));
 	item->text = arg;
 	item->where = where;
 	item->if_exists = if_exists;
 	item->if_missing = if_missing;
 	list_add_tail(&item->list, trailers);
-	return 0;
+	بازگشت 0;
 }
 
-static int parse_opt_parse(const struct option *opt, const char *arg,
-			   int unset)
+ایستا صحیح parse_opt_parse(ثابت ساختار option *opt, ثابت نویسه *arg,
+			   صحیح unset)
 {
-	struct process_trailer_options *v = opt->value;
+	ساختار process_trailer_options *v = opt->مقدار;
 	v->only_trailers = 1;
-	v->only_input = 1;
+	v->only_درون_داد = 1;
 	v->unfold = 1;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return 0;
+	بازگشت 0;
 }
 
-static void read_input_file(struct strbuf *sb, const char *file)
+ایستا تهی read_درون_داد_file(ساختار strbuf *sb, ثابت نویسه *file)
 {
-	if (file) {
-		if (strbuf_read_file(sb, file, 0) < 0)
+	اگر (file) {
+		اگر (strbuf_read_file(sb, file, 0) < 0)
 			die_errno(_("could not read input file '%s'"), file);
-	} else {
-		if (strbuf_read(sb, fileno(stdin), 0) < 0)
+	} وگرنه {
+		اگر (strbuf_read(sb, fileno(stdin), 0) < 0)
 			die_errno(_("could not read from stdin"));
 	}
-	strbuf_complete_line(sb);
+	strbuf_complete_سطر(sb);
 }
 
-static void interpret_trailers(const struct process_trailer_options *opts,
-			       struct list_head *new_trailer_head,
-			       const char *file)
+ایستا تهی interpret_trailers(ثابت ساختار process_trailer_options *opts,
+			       ساختار list_head *new_trailer_head,
+			       ثابت نویسه *file)
 {
-	struct strbuf input = STRBUF_INIT;
-	struct strbuf out = STRBUF_INIT;
-	struct tempfile *tempfile = NULL;
-	int fd = 1;
+	ساختار strbuf درون_داد = STRBUF_INIT;
+	ساختار strbuf out = STRBUF_INIT;
+	ساختار tempfile *tempfile = پوچ;
+	صحیح fd = 1;
 
 	trailer_config_init();
 
-	read_input_file(&input, file);
+	read_درون_داد_file(&درون_داد, file);
 
-	if (opts->in_place) {
+	اگر (opts->in_place) {
 		tempfile = trailer_create_in_place_tempfile(file);
-		if (!tempfile)
-			die(NULL);
+		اگر (!tempfile)
+			die(پوچ);
 		fd = tempfile->fd;
 	}
-	process_trailers(opts, new_trailer_head, &input, &out);
+	process_trailers(opts, new_trailer_head, &درون_داد, &out);
 
-	if (write_in_full(fd, out.buf, out.len) < 0)
+	اگر (write_in_full(fd, out.buf, out.len) < 0)
 		die_errno(_("could not write to temporary file '%s'"), file);
-	if (opts->in_place)
-		if (rename_tempfile(&tempfile, file))
+	اگر (opts->in_place)
+		اگر (rename_tempfile(&tempfile, file))
 			die_errno(_("could not rename temporary file to %s"), file);
 
-	strbuf_release(&input);
+	strbuf_release(&درون_داد);
 	strbuf_release(&out);
 }
 
-int cmd_interpret_trailers(int argc,
-			   const char **argv,
-			   const char *prefix,
-			   struct repository *repo UNUSED)
+صحیح cmd_interpret_trailers(صحیح argc,
+			   ثابت نویسه **argv,
+			   ثابت نویسه *prefix,
+			   ساختار repository *repo UNUSED)
 {
-	struct process_trailer_options opts = PROCESS_TRAILER_OPTIONS_INIT;
+	ساختار process_trailer_options opts = PROCESS_TRAILER_OPTIONS_INIT;
 	LIST_HEAD(trailers);
 
-	struct option options[] = {
+	ساختار option options[] = {
 		OPT_BOOL(0, "in-place", &opts.in_place, N_("edit files in place")),
 		OPT_BOOL(0, "trim-empty", &opts.trim_empty, N_("trim empty trailers")),
 
@@ -156,9 +156,9 @@ int cmd_interpret_trailers(int argc,
 			     N_("action if trailer is missing"), option_parse_if_missing),
 
 		OPT_BOOL(0, "only-trailers", &opts.only_trailers, N_("output only the trailers")),
-		OPT_BOOL(0, "only-input", &opts.only_input, N_("do not apply trailer.<key-alias> configuration variables")),
+		OPT_BOOL(0, "only-input", &opts.only_درون_داد, N_("do not apply trailer.<key-alias> configuration variables")),
 		OPT_BOOL(0, "unfold", &opts.unfold, N_("reformat multiline trailer values as single-line values")),
-		OPT_CALLBACK_F(0, "parse", &opts, NULL, N_("alias for --only-trailers --only-input --unfold"),
+		OPT_CALLBACK_F(0, "parse", &opts, پوچ, N_("alias for --only-trailers --only-input --unfold"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG, parse_opt_parse),
 		OPT_BOOL(0, "no-divider", &opts.no_divider, N_("do not treat \"---\" as the end of input")),
 		OPT_CALLBACK(0, "trailer", &trailers, N_("trailer"),
@@ -166,28 +166,28 @@ int cmd_interpret_trailers(int argc,
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, پوچ);
 
 	argc = parse_options(argc, argv, prefix, options,
 			     git_interpret_trailers_usage, 0);
 
-	if (opts.only_input && !list_empty(&trailers))
-		usage_msg_opt(
+	اگر (opts.only_درون_داد && !list_empty(&trailers))
+		usage_پیام_opt(
 			_("--trailer with --only-input does not make sense"),
 			git_interpret_trailers_usage,
 			options);
 
-	if (argc) {
-		int i;
-		for (i = 0; i < argc; i++)
+	اگر (argc) {
+		صحیح i;
+		برای (i = 0; i < argc; i++)
 			interpret_trailers(&opts, &trailers, argv[i]);
-	} else {
-		if (opts.in_place)
+	} وگرنه {
+		اگر (opts.in_place)
 			die(_("no input file given for in-place editing"));
-		interpret_trailers(&opts, &trailers, NULL);
+		interpret_trailers(&opts, &trailers, پوچ);
 	}
 
 	new_trailers_clear(&trailers);
 
-	return 0;
+	بازگشت 0;
 }

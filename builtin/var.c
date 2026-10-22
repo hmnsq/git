@@ -6,248 +6,248 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
+#شامل "builtin.h"
 
-#include "attr.h"
-#include "config.h"
-#include "editor.h"
-#include "environment.h"
-#include "ident.h"
-#include "pager.h"
-#include "parse-options.h"
-#include "path.h"
-#include "refs.h"
-#include "run-command.h"
-#include "strbuf.h"
-#include "string-list.h"
+#شامل "attr.h"
+#شامل "config.h"
+#شامل "editor.h"
+#شامل "environment.h"
+#شامل "ident.h"
+#شامل "pager.h"
+#شامل "parse-options.h"
+#شامل "path.h"
+#شامل "refs.h"
+#شامل "run-command.h"
+#شامل "strbuf.h"
+#شامل "string-list.h"
 
-static const char * const var_usage[] = {
+ایستا ثابت نویسه * ثابت var_usage[] = {
 	N_("git var [-z] -l"),
 	N_("git var [-z] <variable>..."),
-	NULL
+	پوچ
 };
 
-enum ident_part {
+شمارش ident_part {
 	IDENT_NAME,
 	IDENT_MAIL,
 	IDENT_DATE,
 };
 
-static char *ident_part(const char *ident, enum ident_part part)
+ایستا نویسه *ident_part(ثابت نویسه *ident, شمارش ident_part part)
 {
-	struct ident_split split;
+	ساختار ident_split split;
 
-	if (!ident)
-		return NULL;
-	if (split_ident_line(&split, ident, strlen(ident)))
-		return NULL;
+	اگر (!ident)
+		بازگشت پوچ;
+	اگر (split_ident_سطر(&split, ident, strlen(ident)))
+		بازگشت پوچ;
 
-	switch (part) {
-	case IDENT_NAME:
-		if (!split.name_begin || !split.name_end)
+	انتخاب (part) {
+	حالت IDENT_NAME:
+		اگر (!split.name_begin || !split.name_end)
 			BUG("split_ident_line() gave NULL names???");
-		return xmemdupz(split.name_begin,
+		بازگشت xmemdupz(split.name_begin,
 				split.name_end - split.name_begin);
-	case IDENT_MAIL:
-		if (!split.mail_begin || !split.mail_end)
+	حالت IDENT_MAIL:
+		اگر (!split.mail_begin || !split.mail_end)
 			BUG("split_ident_line() gave NULL mail???");
-		return xmemdupz(split.mail_begin,
+		بازگشت xmemdupz(split.mail_begin,
 				split.mail_end - split.mail_begin);
-	case IDENT_DATE:
-		if (!split.date_begin || !split.tz_end)
+	حالت IDENT_DATE:
+		اگر (!split.date_begin || !split.tz_end)
 			BUG("split_ident_line() gave NULL date/tz???");
-		return xmemdupz(split.date_begin,
+		بازگشت xmemdupz(split.date_begin,
 				split.tz_end - split.date_begin);
-	default:
+	پیشفرض:
 		BUG("unknown ident_part %d", part);
 	}
 }
 
-static char *committer(int ident_flag)
+ایستا نویسه *committer(صحیح ident_flag)
 {
-	return xstrdup_or_null(git_committer_info(ident_flag));
+	بازگشت xstrdup_or_null(git_committer_info(ident_flag));
 }
 
-static char *committer_name(int ident_flag)
+ایستا نویسه *committer_name(صحیح ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_NAME);
+	بازگشت ident_part(git_committer_info(ident_flag), IDENT_NAME);
 }
 
-static char *committer_email(int ident_flag)
+ایستا نویسه *committer_email(صحیح ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_MAIL);
+	بازگشت ident_part(git_committer_info(ident_flag), IDENT_MAIL);
 }
 
-static char *committer_date(int ident_flag)
+ایستا نویسه *committer_date(صحیح ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_DATE);
+	بازگشت ident_part(git_committer_info(ident_flag), IDENT_DATE);
 }
 
-static char *author(int ident_flag)
+ایستا نویسه *author(صحیح ident_flag)
 {
-	return xstrdup_or_null(git_author_info(ident_flag));
+	بازگشت xstrdup_or_null(git_author_info(ident_flag));
 }
 
-static char *author_name(int ident_flag)
+ایستا نویسه *author_name(صحیح ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_NAME);
+	بازگشت ident_part(git_author_info(ident_flag), IDENT_NAME);
 }
 
-static char *author_email(int ident_flag)
+ایستا نویسه *author_email(صحیح ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_MAIL);
+	بازگشت ident_part(git_author_info(ident_flag), IDENT_MAIL);
 }
 
-static char *author_date(int ident_flag)
+ایستا نویسه *author_date(صحیح ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_DATE);
+	بازگشت ident_part(git_author_info(ident_flag), IDENT_DATE);
 }
 
-static char *editor(int ident_flag UNUSED)
+ایستا نویسه *editor(صحیح ident_flag UNUSED)
 {
-	return xstrdup_or_null(git_editor());
+	بازگشت xstrdup_or_null(git_editor());
 }
 
-static char *sequence_editor(int ident_flag UNUSED)
+ایستا نویسه *sequence_editor(صحیح ident_flag UNUSED)
 {
-	return xstrdup_or_null(git_sequence_editor());
+	بازگشت xstrdup_or_null(git_sequence_editor());
 }
 
-static char *pager(int ident_flag UNUSED)
+ایستا نویسه *pager(صحیح ident_flag UNUSED)
 {
-	const char *pgm = git_pager(the_repository, 1);
+	ثابت نویسه *pgm = git_pager(the_repository, 1);
 
-	if (!pgm)
+	اگر (!pgm)
 		pgm = "cat";
-	return xstrdup(pgm);
+	بازگشت xstrdup(pgm);
 }
 
-static char *default_branch(int ident_flag UNUSED)
+ایستا نویسه *default_branch(صحیح ident_flag UNUSED)
 {
-	return repo_default_branch_name(the_repository, 1);
+	بازگشت repo_default_branch_name(the_repository, 1);
 }
 
-static char *shell_path(int ident_flag UNUSED)
+ایستا نویسه *shell_path(صحیح ident_flag UNUSED)
 {
-	return git_shell_path();
+	بازگشت git_shell_path();
 }
 
-static char *git_attr_val_system(int ident_flag UNUSED)
+ایستا نویسه *git_attr_val_system(صحیح ident_flag UNUSED)
 {
-	if (git_attr_system_is_enabled()) {
-		char *file = xstrdup(git_attr_system_file());
+	اگر (git_attr_system_is_enabled()) {
+		نویسه *file = xstrdup(git_attr_system_file());
 		normalize_path_copy(file, file);
-		return file;
+		بازگشت file;
 	}
-	return NULL;
+	بازگشت پوچ;
 }
 
-static char *git_attr_val_global(int ident_flag UNUSED)
+ایستا نویسه *git_attr_val_global(صحیح ident_flag UNUSED)
 {
-	char *file = xstrdup_or_null(git_attr_global_file());
-	if (file) {
+	نویسه *file = xstrdup_or_null(git_attr_global_file());
+	اگر (file) {
 		normalize_path_copy(file, file);
-		return file;
+		بازگشت file;
 	}
-	return NULL;
+	بازگشت پوچ;
 }
 
-static char *git_config_val_system(int ident_flag UNUSED)
+ایستا نویسه *git_config_val_system(صحیح ident_flag UNUSED)
 {
-	if (git_config_system()) {
-		char *file = git_system_config();
+	اگر (git_config_system()) {
+		نویسه *file = git_system_config();
 		normalize_path_copy(file, file);
-		return file;
+		بازگشت file;
 	}
-	return NULL;
+	بازگشت پوچ;
 }
 
-static void git_config_val_global(struct string_list *list)
+ایستا تهی git_config_val_global(ساختار string_list *list)
 {
-	char *user, *xdg;
+	نویسه *user, *xdg;
 
 	git_global_config_paths(&user, &xdg);
-	if (xdg && *xdg) {
+	اگر (xdg && *xdg) {
 		normalize_path_copy(xdg, xdg);
 		string_list_append(list, xdg);
 	}
-	if (user && *user) {
+	اگر (user && *user) {
 		normalize_path_copy(user, user);
 		string_list_append(list, user);
 	}
-	free(xdg);
-	free(user);
+	آزاد(xdg);
+	آزاد(user);
 }
 
-struct git_var {
-	const char *name;
-	char *(*read)(int);
-	void (*multiread)(struct string_list *);
+ساختار git_var {
+	ثابت نویسه *name;
+	نویسه *(*اقرأ)(صحیح);
+	تهی (*multiread)(ساختار string_list *);
 };
-static struct git_var git_vars[] = {
+ایستا ساختار git_var git_vars[] = {
 	{
 		.name = "GIT_COMMITTER_IDENT",
-		.read = committer,
+		.اقرأ = committer,
 	},
 	{
 		.name = "GIT_COMMITTER_NAME",
-		.read = committer_name,
+		.اقرأ = committer_name,
 	},
 	{
 		.name = "GIT_COMMITTER_EMAIL",
-		.read = committer_email,
+		.اقرأ = committer_email,
 	},
 	{
 		.name = "GIT_COMMITTER_DATE",
-		.read = committer_date,
+		.اقرأ = committer_date,
 	},
 	{
 		.name = "GIT_AUTHOR_IDENT",
-		.read = author,
+		.اقرأ = author,
 	},
 	{
 		.name = "GIT_AUTHOR_NAME",
-		.read = author_name,
+		.اقرأ = author_name,
 	},
 	{
 		.name = "GIT_AUTHOR_EMAIL",
-		.read = author_email,
+		.اقرأ = author_email,
 	},
 	{
 		.name = "GIT_AUTHOR_DATE",
-		.read = author_date,
+		.اقرأ = author_date,
 	},
 	{
 		.name = "GIT_EDITOR",
-		.read = editor,
+		.اقرأ = editor,
 	},
 	{
 		.name = "GIT_SEQUENCE_EDITOR",
-		.read = sequence_editor,
+		.اقرأ = sequence_editor,
 	},
 	{
 		.name = "GIT_PAGER",
-		.read = pager,
+		.اقرأ = pager,
 	},
 	{
 		.name = "GIT_DEFAULT_BRANCH",
-		.read = default_branch,
+		.اقرأ = default_branch,
 	},
 	{
 		.name = "GIT_SHELL_PATH",
-		.read = shell_path,
+		.اقرأ = shell_path,
 	},
 	{
 		.name = "GIT_ATTR_SYSTEM",
-		.read = git_attr_val_system,
+		.اقرأ = git_attr_val_system,
 	},
 	{
 		.name = "GIT_ATTR_GLOBAL",
-		.read = git_attr_val_global,
+		.اقرأ = git_attr_val_global,
 	},
 	{
 		.name = "GIT_CONFIG_SYSTEM",
-		.read = git_config_val_system,
+		.اقرأ = git_config_val_system,
 	},
 	{
 		.name = "GIT_CONFIG_GLOBAL",
@@ -255,74 +255,74 @@ static struct git_var git_vars[] = {
 	},
 	{
 		.name = "",
-		.read = NULL,
+		.اقرأ = پوچ,
 	},
 };
 
-static void list_vars(int nul_term)
+ایستا تهی list_vars(صحیح nul_term)
 {
-	struct git_var *ptr;
-	char delim = nul_term ? '\n' : '=';
-	char term = nul_term ? '\0' : '\n';
+	ساختار git_var *ptr;
+	نویسه delim = nul_term ? '\n' : '=';
+	نویسه term = nul_term ? '\0' : '\n';
 
-	for (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
-		if (ptr->read) {
-			char *val = ptr->read(0);
+	برای (ptr = git_vars; ptr->اقرأ || ptr->multiread; ptr++) {
+		اگر (ptr->اقرأ) {
+			نویسه *val = ptr->اقرأ(0);
 
-			if (val) {
+			اگر (val) {
 				printf("%s%c%s%c", ptr->name, delim, val, term);
-				free(val);
+				آزاد(val);
 			}
-		} else {
-			struct string_list list = STRING_LIST_INIT_DUP;
+		} وگرنه {
+			ساختار string_list list = STRING_LIST_INIT_DUP;
 
 			ptr->multiread(&list);
-			for (size_t i = 0; i < list.nr; i++)
+			برای (size_t i = 0; i < list.nr; i++)
 				printf("%s%c%s%c", ptr->name, delim,
-				       list.items[i].string, term);
+				       list.اقلام[i].string, term);
 			string_list_clear(&list, 0);
 		}
 	}
 }
 
-static const struct git_var *get_git_var(const char *var)
+ایستا ثابت ساختار git_var *get_git_var(ثابت نویسه *var)
 {
-	struct git_var *ptr;
-	for (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
-		if (strcmp(var, ptr->name) == 0) {
-			return ptr;
+	ساختار git_var *ptr;
+	برای (ptr = git_vars; ptr->اقرأ || ptr->multiread; ptr++) {
+		اگر (strcmp(var, ptr->name) == 0) {
+			بازگشت ptr;
 		}
 	}
-	return NULL;
+	بازگشت پوچ;
 }
 
-static int show_config(const char *var, const char *value,
-		       const struct config_context *ctx, void *cb)
+ایستا صحیح show_config(ثابت نویسه *var, ثابت نویسه *مقدار,
+		       ثابت ساختار config_context *ctx, تهی *cb)
 {
-	int *nul_term = cb;
-	char delim = *nul_term ? '\n' : '=';
-	char term = *nul_term ? '\0' : '\n';
+	صحیح *nul_term = cb;
+	نویسه delim = *nul_term ? '\n' : '=';
+	نویسه term = *nul_term ? '\0' : '\n';
 
-	if (value)
-		printf("%s%c%s%c", var, delim, value, term);
-	else
+	اگر (مقدار)
+		printf("%s%c%s%c", var, delim, مقدار, term);
+	وگرنه
 		printf("%s%c", var, term);
-	return git_default_config(var, value, ctx, cb);
+	بازگشت git_default_config(var, مقدار, ctx, cb);
 }
 
-int cmd_var(int argc,
-	    const char **argv,
-	    const char *prefix,
-	    struct repository *repo UNUSED)
+صحیح cmd_var(صحیح argc,
+	    ثابت نویسه **argv,
+	    ثابت نویسه *prefix,
+	    ساختار repository *repo UNUSED)
 {
-	int list = 0;
-	int nul_term = 0;
-	char delim;
-	char term;
-	struct option options[] = {
-		OPT_BOOL('l', NULL, &list,
+	صحیح list = 0;
+	صحیح nul_term = 0;
+	نویسه delim;
+	نویسه term;
+	ساختار option options[] = {
+		OPT_BOOL('l', پوچ, &list,
 			 N_("list all variables")),
-		OPT_BOOL('z', NULL, &nul_term,
+		OPT_BOOL('z', پوچ, &nul_term,
 			 N_("terminate entries with NUL")),
 		OPT_END(),
 	};
@@ -330,61 +330,61 @@ int cmd_var(int argc,
 	argc = parse_options(argc, argv, prefix, options,
 			     var_usage, PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (list) {
-		if (argc)
+	اگر (list) {
+		اگر (argc)
 			usage_with_options(var_usage, options);
 		repo_config(the_repository, show_config, &nul_term);
 		list_vars(nul_term);
-		return 0;
+		بازگشت 0;
 	}
 
-	if (!argc)
+	اگر (!argc)
 		usage_with_options(var_usage, options);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, پوچ);
 
 	delim = nul_term ? '\n' : '=';
 	term = nul_term ? '\0' : '\n';
 
-	for (int i = 0; i < argc; i++) {
-		const struct git_var *git_var = get_git_var(argv[i]);
+	برای (صحیح i = 0; i < argc; i++) {
+		ثابت ساختار git_var *git_var = get_git_var(argv[i]);
 
-		if (!git_var)
+		اگر (!git_var)
 			usage_with_options(var_usage, options);
 
-		if (git_var->read) {
-			char *val = git_var->read(IDENT_STRICT);
+		اگر (git_var->اقرأ) {
+			نویسه *val = git_var->اقرأ(IDENT_STRICT);
 
-			if (!val) {
-				if (argc == 1)
-					return 1;
-				continue;
+			اگر (!val) {
+				اگر (argc == 1)
+					بازگشت 1;
+				ادامه;
 			}
-			if (argc == 1)
+			اگر (argc == 1)
 				printf("%s%c", val, term);
-			else
+			وگرنه
 				printf("%s%c%s%c", git_var->name, delim,
 				       val, term);
-			free(val);
-		} else {
-			struct string_list list = STRING_LIST_INIT_DUP;
+			آزاد(val);
+		} وگرنه {
+			ساختار string_list list = STRING_LIST_INIT_DUP;
 
 			git_var->multiread(&list);
-			if (argc == 1 && !list.nr) {
+			اگر (argc == 1 && !list.nr) {
 				string_list_clear(&list, 0);
-				return 1;
+				بازگشت 1;
 			}
-			for (size_t j = 0; j < list.nr; j++) {
-				if (argc == 1)
-					printf("%s%c", list.items[j].string,
+			برای (size_t j = 0; j < list.nr; j++) {
+				اگر (argc == 1)
+					printf("%s%c", list.اقلام[j].string,
 					       term);
-				else
+				وگرنه
 					printf("%s%c%s%c", git_var->name, delim,
-					       list.items[j].string, term);
+					       list.اقلام[j].string, term);
 			}
 			string_list_clear(&list, 0);
 		}
 	}
 
-	return 0;
+	بازگشت 0;
 }

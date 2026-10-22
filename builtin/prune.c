@@ -1,68 +1,68 @@
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "commit.h"
-#include "diff.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "revision.h"
-#include "reachable.h"
-#include "parse-options.h"
-#include "path.h"
-#include "progress.h"
-#include "prune-packed.h"
-#include "replace-object.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
-#include "shallow.h"
+#شامل "builtin.h"
+#شامل "commit.h"
+#شامل "diff.h"
+#شامل "dir.h"
+#شامل "environment.h"
+#شامل "gettext.h"
+#شامل "hex.h"
+#شامل "revision.h"
+#شامل "reachable.h"
+#شامل "parse-options.h"
+#شامل "path.h"
+#شامل "progress.h"
+#شامل "prune-packed.h"
+#شامل "replace-object.h"
+#شامل "object-file.h"
+#شامل "object-name.h"
+#شامل "odb.h"
+#شامل "shallow.h"
 
-static const char * const prune_usage[] = {
+ایستا ثابت نویسه * ثابت prune_usage[] = {
 	N_("git prune [-n] [-v] [--progress] [--expire <time>] [--] [<head>...]"),
-	NULL
+	پوچ
 };
-static int show_only;
-static int verbose;
-static timestamp_t expire;
-static int show_progress = -1;
+ایستا صحیح show_only;
+ایستا صحیح verbose;
+ایستا timestamp_t expire;
+ایستا صحیح show_progress = -1;
 
-static int prune_tmp_file(const char *fullpath)
+ایستا صحیح prune_tmp_file(ثابت نویسه *fullpath)
 {
-	struct stat st;
-	if (lstat(fullpath, &st))
-		return error("Could not stat '%s'", fullpath);
-	if (st.st_mtime > expire)
-		return 0;
-	if (S_ISDIR(st.st_mode)) {
-		if (show_only || verbose)
+	ساختار stat st;
+	اگر (lstat(fullpath, &st))
+		بازگشت error("Could not stat '%s'", fullpath);
+	اگر (st.st_mtime > expire)
+		بازگشت 0;
+	اگر (S_ISDIR(st.st_mode)) {
+		اگر (show_only || verbose)
 			printf("Removing stale temporary directory %s\n", fullpath);
-		if (!show_only) {
-			struct strbuf remove_dir_buf = STRBUF_INIT;
+		اگر (!show_only) {
+			ساختار strbuf remove_dir_buf = STRBUF_INIT;
 
 			strbuf_addstr(&remove_dir_buf, fullpath);
 			remove_dir_recursively(&remove_dir_buf, 0);
 			strbuf_release(&remove_dir_buf);
 		}
-	} else {
-		if (show_only || verbose)
+	} وگرنه {
+		اگر (show_only || verbose)
 			printf("Removing stale temporary file %s\n", fullpath);
-		if (!show_only)
+		اگر (!show_only)
 			unlink_or_warn(fullpath);
 	}
-	return 0;
+	بازگشت 0;
 }
 
-static void perform_reachability_traversal(struct rev_info *revs)
+ایستا تهی perform_reachability_traversal(ساختار rev_info *revs)
 {
-	static int initialized;
-	struct progress *progress = NULL;
+	ایستا صحیح initialized;
+	ساختار progress *progress = پوچ;
 
-	if (initialized)
-		return;
+	اگر (initialized)
+		بازگشت;
 
-	if (show_progress)
+	اگر (show_progress)
 		progress = start_delayed_progress(revs->repo,
 						  _("Checking connectivity"), 0);
 	mark_reachable_objects(revs, 1, expire, progress);
@@ -70,60 +70,60 @@ static void perform_reachability_traversal(struct rev_info *revs)
 	initialized = 1;
 }
 
-static int is_object_reachable(const struct object_id *oid,
-			       struct rev_info *revs)
+ایستا صحیح is_object_reachable(ثابت ساختار object_id *oid,
+			       ساختار rev_info *revs)
 {
-	struct object *obj;
+	ساختار object *obj;
 
 	perform_reachability_traversal(revs);
 
 	obj = lookup_object(revs->repo, oid);
-	return obj && (obj->flags & SEEN);
+	بازگشت obj && (obj->flags & SEEN);
 }
 
-static int prune_object(const struct object_id *oid, const char *fullpath,
-			void *data)
+ایستا صحیح prune_object(ثابت ساختار object_id *oid, ثابت نویسه *fullpath,
+			تهی *data)
 {
-	struct rev_info *revs = data;
-	struct stat st;
+	ساختار rev_info *revs = data;
+	ساختار stat st;
 
-	if (is_object_reachable(oid, revs))
-		return 0;
+	اگر (is_object_reachable(oid, revs))
+		بازگشت 0;
 
-	if (lstat(fullpath, &st)) {
+	اگر (lstat(fullpath, &st)) {
 		/* report errors, but do not stop pruning */
 		error("Could not stat '%s'", fullpath);
-		return 0;
+		بازگشت 0;
 	}
-	if (st.st_mtime > expire)
-		return 0;
-	if (show_only || verbose) {
-		enum object_type type =
-			odb_read_object_info(revs->repo->objects, oid, NULL);
+	اگر (st.st_mtime > expire)
+		بازگشت 0;
+	اگر (show_only || verbose) {
+		شمارش object_type type =
+			odb_read_object_info(revs->repo->objects, oid, پوچ);
 		printf("%s %s\n", oid_to_hex(oid),
 		       (type > 0) ? type_name(type) : "unknown");
 	}
-	if (!show_only)
+	اگر (!show_only)
 		unlink_or_warn(fullpath);
-	return 0;
+	بازگشت 0;
 }
 
-static int prune_cruft(const char *basename, const char *path,
-		       void *data UNUSED)
+ایستا صحیح prune_cruft(ثابت نویسه *basename, ثابت نویسه *path,
+		       تهی *data UNUSED)
 {
-	if (starts_with(basename, "tmp_obj_"))
+	اگر (starts_with(basename, "tmp_obj_"))
 		prune_tmp_file(path);
-	else
+	وگرنه
 		fprintf(stderr, "bad sha1 file: %s\n", path);
-	return 0;
+	بازگشت 0;
 }
 
-static int prune_subdir(unsigned int nr UNUSED, const char *path,
-			void *data UNUSED)
+ایستا صحیح prune_subdir(unsigned صحیح nr UNUSED, ثابت نویسه *path,
+			تهی *data UNUSED)
 {
-	if (!show_only)
+	اگر (!show_only)
 		rmdir(path);
-	return 0;
+	بازگشت 0;
 }
 
 /*
@@ -132,32 +132,32 @@ static int prune_subdir(unsigned int nr UNUSED, const char *path,
  * files beginning with "tmp_") accumulating in the object
  * and the pack directories.
  */
-static void remove_temporary_files(const char *path)
+ایستا تهی remove_temporary_files(ثابت نویسه *path)
 {
 	DIR *dir;
-	struct dirent *de;
+	ساختار dirent *de;
 
 	dir = opendir(path);
-	if (!dir) {
-		if (errno != ENOENT)
+	اگر (!dir) {
+		اگر (errno != ENOENT)
 			fprintf(stderr, "Unable to open directory %s: %s\n",
 				path, strerror(errno));
-		return;
+		بازگشت;
 	}
-	while ((de = readdir(dir)) != NULL)
-		if (starts_with(de->d_name, "tmp_"))
+	وقتی ((de = readdir(dir)) != پوچ)
+		اگر (starts_with(de->d_name, "tmp_"))
 			prune_tmp_file(mkpath("%s/%s", path, de->d_name));
 	closedir(dir);
 }
 
-int cmd_prune(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo)
+صحیح cmd_prune(صحیح argc,
+	      ثابت نویسه **argv,
+	      ثابت نویسه *prefix,
+	      ساختار repository *repo)
 {
-	struct rev_info revs;
-	int exclude_promisor_objects = 0;
-	const struct option options[] = {
+	ساختار rev_info revs;
+	صحیح exclude_promisor_objects = 0;
+	ثابت ساختار option options[] = {
 		OPT__DRY_RUN(&show_only, N_("do not remove, show only")),
 		OPT__VERBOSE(&verbose, N_("report pruned objects")),
 		OPT_BOOL(0, "progress", &show_progress, N_("show progress")),
@@ -167,7 +167,7 @@ int cmd_prune(int argc,
 			 N_("limit traversal to objects outside promisor packfiles")),
 		OPT_END()
 	};
-	char *s;
+	نویسه *s;
 
 	expire = TIME_MAX;
 	save_commit_buffer = 0;
@@ -176,24 +176,24 @@ int cmd_prune(int argc,
 	argc = parse_options(argc, argv, prefix, options, prune_usage, 0);
 
 	repo_init_revisions(repo, &revs, prefix);
-	if (repo->repository_format_precious_objects)
+	اگر (repo->repository_format_precious_objects)
 		die(_("cannot prune in a precious-objects repo"));
 
-	while (argc--) {
-		struct object_id oid;
-		const char *name = *argv++;
+	وقتی (argc--) {
+		ساختار object_id oid;
+		ثابت نویسه *name = *argv++;
 
-		if (!repo_get_oid(repo, name, &oid)) {
-			struct object *object = parse_object_or_die(repo, &oid, name);
+		اگر (!repo_get_oid(repo, name, &oid)) {
+			ساختار object *object = parse_object_or_die(repo, &oid, name);
 			add_pending_object(&revs, object, "");
 		}
-		else
+		وگرنه
 			die("unrecognized argument: %s", name);
 	}
 
-	if (show_progress == -1)
+	اگر (show_progress == -1)
 		show_progress = isatty(2);
-	if (exclude_promisor_objects) {
+	اگر (exclude_promisor_objects) {
 		repo->fetch_if_missing = 0;
 		revs.exclude_promisor_objects = 1;
 	}
@@ -205,13 +205,13 @@ int cmd_prune(int argc,
 	remove_temporary_files(repo_get_object_directory(repo));
 	s = mkpathdup("%s/pack", repo_get_object_directory(repo));
 	remove_temporary_files(s);
-	free(s);
+	آزاد(s);
 
-	if (is_repository_shallow(repo)) {
+	اگر (is_repository_shallow(repo)) {
 		perform_reachability_traversal(&revs);
 		prune_shallow(show_only ? PRUNE_SHOW_ONLY : 0);
 	}
 
 	release_revisions(&revs);
-	return 0;
+	بازگشت 0;
 }

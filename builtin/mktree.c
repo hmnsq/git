@@ -3,29 +3,29 @@
  *
  * Copyright (c) Junio C Hamano, 2006, 2009
  */
-#include "builtin.h"
-#include "gettext.h"
-#include "hex.h"
-#include "quote.h"
-#include "strbuf.h"
-#include "tree.h"
-#include "parse-options.h"
-#include "object-file.h"
-#include "odb.h"
+#شامل "builtin.h"
+#شامل "gettext.h"
+#شامل "hex.h"
+#شامل "quote.h"
+#شامل "strbuf.h"
+#شامل "tree.h"
+#شامل "parse-options.h"
+#شامل "object-file.h"
+#شامل "odb.h"
 
-static struct treeent {
+ایستا ساختار treeent {
 	unsigned mode;
-	struct object_id oid;
-	int len;
-	char name[FLEX_ARRAY];
+	ساختار object_id oid;
+	صحیح len;
+	نویسه name[FLEX_ARRAY];
 } **entries;
-static int alloc, used;
+ایستا صحیح alloc, used;
 
-static void append_to_tree(unsigned mode, struct object_id *oid, char *path)
+ایستا تهی append_to_درخت(unsigned mode, ساختار object_id *oid, نویسه *path)
 {
-	struct treeent *ent;
+	ساختار treeent *ent;
 	size_t len = strlen(path);
-	if (strchr(path, '/'))
+	اگر (strchr(path, '/'))
 		die("path %s contains slash", path);
 
 	FLEX_ALLOC_MEM(ent, name, path, len);
@@ -37,50 +37,50 @@ static void append_to_tree(unsigned mode, struct object_id *oid, char *path)
 	entries[used++] = ent;
 }
 
-static int ent_compare(const void *a_, const void *b_)
+ایستا صحیح ent_compare(ثابت تهی *a_, ثابت تهی *b_)
 {
-	struct treeent *a = *(struct treeent **)a_;
-	struct treeent *b = *(struct treeent **)b_;
-	return base_name_compare(a->name, a->len, a->mode,
+	ساختار treeent *a = *(ساختار treeent **)a_;
+	ساختار treeent *b = *(ساختار treeent **)b_;
+	بازگشت base_name_compare(a->name, a->len, a->mode,
 				 b->name, b->len, b->mode);
 }
 
-static void write_tree(struct repository *repo, struct object_id *oid)
+ایستا تهی write_درخت(ساختار repository *repo, ساختار object_id *oid)
 {
-	struct strbuf buf;
+	ساختار strbuf buf;
 	size_t size;
-	int i;
+	صحیح i;
 
 	QSORT(entries, used, ent_compare);
-	for (size = i = 0; i < used; i++)
+	برای (size = i = 0; i < used; i++)
 		size += 32 + entries[i]->len;
 
 	strbuf_init(&buf, size);
-	for (i = 0; i < used; i++) {
-		struct treeent *ent = entries[i];
+	برای (i = 0; i < used; i++) {
+		ساختار treeent *ent = entries[i];
 		strbuf_addf(&buf, "%o %s%c", ent->mode, ent->name, '\0');
 		strbuf_add(&buf, ent->oid.hash, repo->hash_algo->rawsz);
 	}
 
-	odb_write_object(repo->objects, buf.buf, buf.len, OBJ_TREE, oid);
+	odb_write_object(repo->objects, buf.buf, buf.len, OBJ_درخت, oid);
 	strbuf_release(&buf);
 }
 
-static const char *const mktree_usage[] = {
+ایستا ثابت نویسه *ثابت mktree_usage[] = {
 	"git mktree [-z] [--missing] [--batch]",
-	NULL
+	پوچ
 };
 
-static void mktree_line(struct repository *repo, char *buf, int nul_term_line, int allow_missing)
+ایستا تهی mktree_سطر(ساختار repository *repo, نویسه *buf, صحیح nul_term_سطر, صحیح allow_missing)
 {
-	char *ptr, *ntr;
-	const char *p;
+	نویسه *ptr, *ntr;
+	ثابت نویسه *p;
 	unsigned mode;
-	enum object_type mode_type; /* object type derived from mode */
-	enum object_type obj_type; /* object type derived from sha */
-	struct object_info oi = OBJECT_INFO_INIT;
-	char *path, *to_free = NULL;
-	struct object_id oid;
+	شمارش object_type mode_type; /* object type derived from mode */
+	شمارش object_type obj_type; /* object type derived from sha */
+	ساختار object_info oi = OBJECT_INFO_INIT;
+	نویسه *path, *to_free = پوچ;
+	ساختار object_id oid;
 
 	ptr = buf;
 	/*
@@ -88,27 +88,27 @@ static void mktree_line(struct repository *repo, char *buf, int nul_term_line, i
 	 *     mode SP type SP sha1 TAB name
 	 */
 	mode = strtoul(ptr, &ntr, 8);
-	if (ptr == ntr || !ntr || *ntr != ' ')
+	اگر (ptr == ntr || !ntr || *ntr != ' ')
 		die("input format error: %s", buf);
 	ptr = ntr + 1; /* type */
 	ntr = strchr(ptr, ' ');
-	if (!ntr || parse_oid_hex_algop(ntr + 1, &oid, &p, repo->hash_algo) ||
+	اگر (!ntr || parse_oid_hex_algop(ntr + 1, &oid, &p, repo->hash_algo) ||
 	    *p != '\t')
 		die("input format error: %s", buf);
 
 	/* It is perfectly normal if we do not have a commit from a submodule */
-	if (S_ISGITLINK(mode))
+	اگر (S_ISGITLINK(mode))
 		allow_missing = 1;
 
 
 	*ntr++ = 0; /* now at the beginning of SHA1 */
 
-	path = (char *)p + 1;  /* at the beginning of name */
-	if (!nul_term_line && path[0] == '"') {
-		struct strbuf p_uq = STRBUF_INIT;
-		if (unquote_c_style(&p_uq, path, NULL))
+	path = (نویسه *)p + 1;  /* at the beginning of name */
+	اگر (!nul_term_سطر && path[0] == '"') {
+		ساختار strbuf p_uq = STRBUF_INIT;
+		اگر (unquote_c_style(&p_uq, path, پوچ))
 			die("invalid quoting");
-		path = to_free = strbuf_detach(&p_uq, NULL);
+		path = to_free = strbuf_detach(&p_uq, پوچ);
 	}
 
 	/*
@@ -116,26 +116,26 @@ static void mktree_line(struct repository *repo, char *buf, int nul_term_line, i
 	 * These should all agree.
 	 */
 	mode_type = object_type(mode);
-	if (mode_type != type_from_string(ptr)) {
+	اگر (mode_type != type_from_string(ptr)) {
 		die("entry '%s' object type (%s) doesn't match mode type (%s)",
 			path, ptr, type_name(mode_type));
 	}
 
 	/* Check the type of object identified by oid without fetching objects */
 	oi.typep = &obj_type;
-	if (odb_read_object_info_extended(repo->objects, &oid, &oi,
+	اگر (odb_read_object_info_extended(repo->objects, &oid, &oi,
 					  OBJECT_INFO_LOOKUP_REPLACE |
 					  OBJECT_INFO_SKIP_FETCH_OBJECT) < 0)
 		obj_type = -1;
 
-	if (obj_type < 0) {
-		if (allow_missing) {
+	اگر (obj_type < 0) {
+		اگر (allow_missing) {
 			; /* no problem - missing objects are presumed to be of the right type */
-		} else {
+		} وگرنه {
 			die("entry '%s' object %s is unavailable", path, oid_to_hex(&oid));
 		}
-	} else {
-		if (obj_type != mode_type) {
+	} وگرنه {
+		اگر (obj_type != mode_type) {
 			/*
 			 * The object exists but is of the wrong type.
 			 * This is a problem regardless of allow_missing
@@ -146,65 +146,65 @@ static void mktree_line(struct repository *repo, char *buf, int nul_term_line, i
 		}
 	}
 
-	append_to_tree(mode, &oid, path);
-	free(to_free);
+	append_to_درخت(mode, &oid, path);
+	آزاد(to_free);
 }
 
-int cmd_mktree(int ac,
-	       const char **av,
-	       const char *prefix,
-	       struct repository *repo)
+صحیح cmd_mktree(صحیح ac,
+	       ثابت نویسه **av,
+	       ثابت نویسه *prefix,
+	       ساختار repository *repo)
 {
-	struct strbuf sb = STRBUF_INIT;
-	struct object_id oid;
-	int nul_term_line = 0;
-	int allow_missing = 0;
-	int is_batch_mode = 0;
-	int got_eof = 0;
+	ساختار strbuf sb = STRBUF_INIT;
+	ساختار object_id oid;
+	صحیح nul_term_سطر = 0;
+	صحیح allow_missing = 0;
+	صحیح is_batch_mode = 0;
+	صحیح got_eof = 0;
 	strbuf_getline_fn getline_fn;
 
-	const struct option option[] = {
-		OPT_BOOL('z', NULL, &nul_term_line, N_("input is NUL terminated")),
+	ثابت ساختار option option[] = {
+		OPT_BOOL('z', پوچ, &nul_term_سطر, N_("input is NUL terminated")),
 		OPT_SET_INT( 0 , "missing", &allow_missing, N_("allow missing objects"), 1),
 		OPT_SET_INT( 0 , "batch", &is_batch_mode, N_("allow creation of more than one tree"), 1),
 		OPT_END()
 	};
 
 	ac = parse_options(ac, av, prefix, option, mktree_usage, 0);
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
+	getline_fn = nul_term_سطر ? strbuf_getline_nul : strbuf_getline_lf;
 
-	while (!got_eof) {
-		while (1) {
-			if (getline_fn(&sb, stdin) == EOF) {
+	وقتی (!got_eof) {
+		وقتی (1) {
+			اگر (getline_fn(&sb, stdin) == EOF) {
 				got_eof = 1;
-				break;
+				بشکن;
 			}
-			if (sb.buf[0] == '\0') {
+			اگر (sb.buf[0] == '\0') {
 				/* empty lines denote tree boundaries in batch mode */
-				if (is_batch_mode)
-					break;
+				اگر (is_batch_mode)
+					بشکن;
 				die("input format error: (blank line only valid in batch mode)");
 			}
-			mktree_line(repo, sb.buf, nul_term_line, allow_missing);
+			mktree_سطر(repo, sb.buf, nul_term_سطر, allow_missing);
 		}
-		if (is_batch_mode && got_eof && used < 1) {
+		اگر (is_batch_mode && got_eof && used < 1) {
 			/*
 			 * Execution gets here if the last tree entry is terminated with a
 			 * new-line.  The final new-line has been made optional to be
 			 * consistent with the original non-batch behaviour of mktree.
 			 */
 			; /* skip creating an empty tree */
-		} else {
-			write_tree(repo, &oid);
+		} وگرنه {
+			write_درخت(repo, &oid);
 			puts(oid_to_hex(&oid));
 			fflush(stdout);
 		}
-		for (int i = 0; i < used; i++)
-			free(entries[i]);
+		برای (صحیح i = 0; i < used; i++)
+			آزاد(entries[i]);
 		used=0; /* reset tree entry buffer for re-use in batch mode */
 	}
-	free(entries);
+	آزاد(entries);
 	strbuf_release(&sb);
 
-	return 0;
+	بازگشت 0;
 }

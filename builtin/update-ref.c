@@ -1,31 +1,31 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "refs.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "quote.h"
+#شامل "builtin.h"
+#شامل "config.h"
+#شامل "environment.h"
+#شامل "gettext.h"
+#شامل "hash.h"
+#شامل "hex.h"
+#شامل "refs.h"
+#شامل "object-name.h"
+#شامل "parse-options.h"
+#شامل "quote.h"
 
-static const char * const git_update_ref_usage[] = {
+ایستا ثابت نویسه * ثابت git_update_ref_usage[] = {
 	N_("git update-ref [<options>] -d <refname> [<old-oid>]"),
 	N_("git update-ref [<options>]    <refname> <new-oid> [<old-oid>]"),
 	N_("git update-ref [<options>] --stdin [-z] [--batch-updates]"),
-	NULL
+	پوچ
 };
 
-static char line_termination = '\n';
-static unsigned int update_flags;
-static unsigned int default_flags;
-static unsigned create_reflog_flag;
-static const char *msg;
+ایستا نویسه سطر_termination = '\n';
+ایستا unsigned صحیح update_flags;
+ایستا unsigned صحیح default_flags;
+ایستا unsigned create_reflog_flag;
+ایستا ثابت نویسه *پیام;
 
-struct command_options {
+ساختار command_options {
 	/*
 	 * Individual updates are allowed to fail without causing
 	 * update-ref to exit. This is set when using the
@@ -40,21 +40,21 @@ struct command_options {
  * Die if there is an error in how the argument is C-quoted.  This
  * function is only used if not -z.
  */
-static const char *parse_arg(const char *next, struct strbuf *arg)
+ایستا ثابت نویسه *parse_arg(ثابت نویسه *next, ساختار strbuf *arg)
 {
-	if (*next == '"') {
-		const char *orig = next;
+	اگر (*next == '"') {
+		ثابت نویسه *orig = next;
 
-		if (unquote_c_style(arg, next, &next))
+		اگر (unquote_c_style(arg, next, &next))
 			die("badly quoted argument: %s", orig);
-		if (*next && !isspace(*next))
+		اگر (*next && !isspace(*next))
 			die("unexpected character after quoted argument: %s", orig);
-	} else {
-		while (*next && !isspace(*next))
+	} وگرنه {
+		وقتی (*next && !isspace(*next))
 			strbuf_addch(arg, *next++);
 	}
 
-	return next;
+	بازگشت next;
 }
 
 /*
@@ -65,87 +65,87 @@ static const char *parse_arg(const char *next, struct strbuf *arg)
  * the argument.  Die if C-quoting is malformed or the reference name
  * is invalid.
  */
-static char *parse_refname(const char **next)
+ایستا نویسه *parse_refname(ثابت نویسه **next)
 {
-	struct strbuf ref = STRBUF_INIT;
+	ساختار strbuf ref = STRBUF_INIT;
 
-	if (line_termination) {
+	اگر (سطر_termination) {
 		/* Without -z, use the next argument */
 		*next = parse_arg(*next, &ref);
-	} else {
+	} وگرنه {
 		/* With -z, use everything up to the next NUL */
 		strbuf_addstr(&ref, *next);
 		*next += ref.len;
 	}
 
-	if (!ref.len) {
+	اگر (!ref.len) {
 		strbuf_release(&ref);
-		return NULL;
+		بازگشت پوچ;
 	}
 
-	if (check_refname_format(ref.buf, REFNAME_ALLOW_ONELEVEL))
+	اگر (check_refname_format(ref.buf, REFNAME_ALLOW_ONELEVEL))
 		die("invalid ref format: %s", ref.buf);
 
-	return strbuf_detach(&ref, NULL);
+	بازگشت strbuf_detach(&ref, پوچ);
 }
 
 /*
  * Wrapper around parse_refname which skips the next delimiter.
  */
-static char *parse_next_refname(const char **next)
+ایستا نویسه *parse_next_refname(ثابت نویسه **next)
 {
-	if (line_termination) {
+	اگر (سطر_termination) {
 		/* Without -z, consume SP and use next argument */
-		if (!**next || **next == line_termination)
-			return NULL;
-		if (**next != ' ')
+		اگر (!**next || **next == سطر_termination)
+			بازگشت پوچ;
+		اگر (**next != ' ')
 			die("expected SP but got: %s", *next);
-	} else {
+	} وگرنه {
 		/* With -z, read the next NUL-terminated line */
-		if (**next)
-			return NULL;
+		اگر (**next)
+			بازگشت پوچ;
 	}
 	/* Skip the delimiter */
 	(*next)++;
 
-	return parse_refname(next);
+	بازگشت parse_refname(next);
 }
 
 /*
  * Wrapper around parse_arg which skips the next delimiter.
  */
-static char *parse_next_arg(const char **next)
+ایستا نویسه *parse_next_arg(ثابت نویسه **next)
 {
-	struct strbuf arg = STRBUF_INIT;
+	ساختار strbuf arg = STRBUF_INIT;
 
-	if (line_termination) {
+	اگر (سطر_termination) {
 		/* Without -z, consume SP and use next argument */
-		if (!**next || **next == line_termination)
-			return NULL;
-		if (**next != ' ')
+		اگر (!**next || **next == سطر_termination)
+			بازگشت پوچ;
+		اگر (**next != ' ')
 			die("expected SP but got: %s", *next);
-	} else {
+	} وگرنه {
 		/* With -z, read the next NUL-terminated line */
-		if (**next)
-			return NULL;
+		اگر (**next)
+			بازگشت پوچ;
 	}
 	/* Skip the delimiter */
 	(*next)++;
 
-	if (line_termination) {
+	اگر (سطر_termination) {
 		/* Without -z, use the next argument */
 		*next = parse_arg(*next, &arg);
-	} else {
+	} وگرنه {
 		/* With -z, use everything up to the next NUL */
 		strbuf_addstr(&arg, *next);
 		*next += arg.len;
 	}
 
-	if (arg.len)
-		return strbuf_detach(&arg, NULL);
+	اگر (arg.len)
+		بازگشت strbuf_detach(&arg, پوچ);
 
 	strbuf_release(&arg);
-	return NULL;
+	بازگشت پوچ;
 }
 
 /*
@@ -169,55 +169,55 @@ static char *parse_next_arg(const char **next)
  * provided but cannot be converted to a SHA-1, die.  flags can
  * include PARSE_SHA1_OLD and/or PARSE_SHA1_ALLOW_EMPTY.
  */
-static int parse_next_oid(const char **next, const char *end,
-			  struct object_id *oid,
-			  const char *command, const char *refname,
-			  int flags)
+ایستا صحیح parse_next_oid(ثابت نویسه **next, ثابت نویسه *end,
+			  ساختار object_id *oid,
+			  ثابت نویسه *command, ثابت نویسه *refname,
+			  صحیح flags)
 {
-	struct strbuf arg = STRBUF_INIT;
-	int ret = 0;
+	ساختار strbuf arg = STRBUF_INIT;
+	صحیح ret = 0;
 
-	if (*next == end)
-		goto eof;
+	اگر (*next == end)
+		برو eof;
 
-	if (line_termination) {
+	اگر (سطر_termination) {
 		/* Without -z, consume SP and use next argument */
-		if (!**next || **next == line_termination)
-			return 1;
-		if (**next != ' ')
+		اگر (!**next || **next == سطر_termination)
+			بازگشت 1;
+		اگر (**next != ' ')
 			die("%s %s: expected SP but got: %s",
 			    command, refname, *next);
 		(*next)++;
 		*next = parse_arg(*next, &arg);
-		if (arg.len) {
-			if (repo_get_oid_with_flags(the_repository, arg.buf, oid,
+		اگر (arg.len) {
+			اگر (repo_get_oid_with_flags(the_repository, arg.buf, oid,
 						    GET_OID_SKIP_AMBIGUITY_CHECK))
-				goto invalid;
-		} else {
+				برو invalid;
+		} وگرنه {
 			/* Without -z, an empty value means all zeros: */
 			oidclr(oid, the_repository->hash_algo);
 		}
-	} else {
+	} وگرنه {
 		/* With -z, read the next NUL-terminated line */
-		if (**next)
+		اگر (**next)
 			die("%s %s: expected NUL but got: %s",
 			    command, refname, *next);
 		(*next)++;
-		if (*next == end)
-			goto eof;
+		اگر (*next == end)
+			برو eof;
 		strbuf_addstr(&arg, *next);
 		*next += arg.len;
 
-		if (arg.len) {
-			if (repo_get_oid_with_flags(the_repository, arg.buf, oid,
+		اگر (arg.len) {
+			اگر (repo_get_oid_with_flags(the_repository, arg.buf, oid,
 						    GET_OID_SKIP_AMBIGUITY_CHECK))
-				goto invalid;
-		} else if (flags & PARSE_SHA1_ALLOW_EMPTY) {
+				برو invalid;
+		} وگرنه اگر (flags & PARSE_SHA1_ALLOW_EMPTY) {
 			/* With -z, treat an empty value as all zeros: */
 			warning("%s %s: missing <new-oid>, treating as zero",
 				command, refname);
 			oidclr(oid, the_repository->hash_algo);
-		} else {
+		} وگرنه {
 			/*
 			 * With -z, an empty non-required value means
 			 * unspecified:
@@ -228,7 +228,7 @@ static int parse_next_oid(const char **next, const char *end,
 
 	strbuf_release(&arg);
 
-	return ret;
+	بازگشت ret;
 
  invalid:
 	die(flags & PARSE_SHA1_OLD ?
@@ -243,24 +243,24 @@ static int parse_next_oid(const char **next, const char *end,
 	    command, refname);
 }
 
-static void print_rejected_refs(const char *refname,
-				const struct object_id *old_oid,
-				const struct object_id *new_oid,
-				const char *old_target,
-				const char *new_target,
-				enum ref_transaction_error err,
-				const char *details,
-				void *cb_data UNUSED)
+ایستا تهی print_rejected_refs(ثابت نویسه *refname,
+				ثابت ساختار object_id *old_oid,
+				ثابت ساختار object_id *new_oid,
+				ثابت نویسه *old_target,
+				ثابت نویسه *new_target,
+				شمارش ref_transaction_error err,
+				ثابت نویسه *details,
+				تهی *cb_data UNUSED)
 {
-	struct strbuf sb = STRBUF_INIT;
+	ساختار strbuf sb = STRBUF_INIT;
 
-	if (details && *details)
+	اگر (details && *details)
 		error("%s", details);
 
 	strbuf_addf(&sb, "rejected %s %s %s %s\n", refname,
 		    new_oid ? oid_to_hex(new_oid) : new_target,
 		    old_oid ? oid_to_hex(old_oid) : old_target,
-		    ref_transaction_error_msg(err));
+		    ref_transaction_error_پیام(err));
 
 	fwrite(sb.buf, sb.len, 1, stdout);
 	strbuf_release(&sb);
@@ -270,22 +270,22 @@ static void print_rejected_refs(const char *refname,
  * Handle transaction errors. If we're using batches updates, we want to only
  * die for generic errors and print the remaining to the user.
  */
-static void handle_ref_transaction_error(const char *refname,
-					 struct object_id *new_oid,
-					 struct object_id *old_oid,
-					 const char *new_target,
-					 const char *old_target,
-					 enum ref_transaction_error tx_err,
-					 struct strbuf *err,
-					 struct command_options *opts)
+ایستا تهی handle_ref_transaction_error(ثابت نویسه *refname,
+					 ساختار object_id *new_oid,
+					 ساختار object_id *old_oid,
+					 ثابت نویسه *new_target,
+					 ثابت نویسه *old_target,
+					 شمارش ref_transaction_error tx_err,
+					 ساختار strbuf *err,
+					 ساختار command_options *opts)
 {
-	if (!tx_err)
-		return;
+	اگر (!tx_err)
+		بازگشت;
 
-	if (tx_err != REF_TRANSACTION_ERROR_GENERIC && opts->allow_update_failures) {
+	اگر (tx_err != REF_TRANSACTION_ERROR_GENERIC && opts->allow_update_failures) {
 		print_rejected_refs(refname, old_oid, new_oid, old_target,
-				    new_target, tx_err, err->buf, NULL);
-		return;
+				    new_target, tx_err, err->buf, پوچ);
+		بازگشت;
 	}
 
 	die("%s", err->buf);
@@ -301,273 +301,273 @@ static void handle_ref_transaction_error(const char *refname,
  * depending on how line_termination is set.
  */
 
-static void parse_cmd_update(struct ref_transaction *transaction,
-			     const char *next, const char *end,
-			     struct command_options *opts)
+ایستا تهی parse_cmd_update(ساختار ref_transaction *transaction,
+			     ثابت نویسه *next, ثابت نویسه *end,
+			     ساختار command_options *opts)
 {
-	struct strbuf err = STRBUF_INIT;
-	char *refname;
-	struct object_id new_oid, old_oid;
-	enum ref_transaction_error tx_err;
-	int have_old;
+	ساختار strbuf err = STRBUF_INIT;
+	نویسه *refname;
+	ساختار object_id new_oid, old_oid;
+	شمارش ref_transaction_error tx_err;
+	صحیح have_old;
 
 	refname = parse_refname(&next);
-	if (!refname)
+	اگر (!refname)
 		die("update: missing <ref>");
 
-	if (parse_next_oid(&next, end, &new_oid, "update", refname,
+	اگر (parse_next_oid(&next, end, &new_oid, "update", refname,
 			   PARSE_SHA1_ALLOW_EMPTY))
 		die("update %s: missing <new-oid>", refname);
 
 	have_old = !parse_next_oid(&next, end, &old_oid, "update", refname,
 				   PARSE_SHA1_OLD);
 
-	if (*next != line_termination)
+	اگر (*next != سطر_termination)
 		die("update %s: extra input: %s", refname, next);
 
 	tx_err = ref_transaction_update(transaction, refname,
-					&new_oid, have_old ? &old_oid : NULL,
-					NULL, NULL,
+					&new_oid, have_old ? &old_oid : پوچ,
+					پوچ, پوچ,
 					update_flags | create_reflog_flag,
-					msg, &err);
-	handle_ref_transaction_error(refname, &new_oid, have_old ? &old_oid : NULL,
-				     NULL, NULL, tx_err, &err, opts);
+					پیام, &err);
+	handle_ref_transaction_error(refname, &new_oid, have_old ? &old_oid : پوچ,
+				     پوچ, پوچ, tx_err, &err, opts);
 
 
 	update_flags = default_flags;
-	free(refname);
+	آزاد(refname);
 	strbuf_release(&err);
 }
 
-static void parse_cmd_symref_update(struct ref_transaction *transaction,
-				    const char *next, const char *end UNUSED,
-				    struct command_options *opts)
+ایستا تهی parse_cmd_symref_update(ساختار ref_transaction *transaction,
+				    ثابت نویسه *next, ثابت نویسه *end UNUSED,
+				    ساختار command_options *opts)
 {
-	char *refname, *new_target, *old_arg;
-	enum ref_transaction_error tx_err;
-	char *old_target = NULL;
-	struct strbuf err = STRBUF_INIT;
-	struct object_id old_oid;
-	int have_old_oid = 0;
+	نویسه *refname, *new_target, *old_arg;
+	شمارش ref_transaction_error tx_err;
+	نویسه *old_target = پوچ;
+	ساختار strbuf err = STRBUF_INIT;
+	ساختار object_id old_oid;
+	صحیح have_old_oid = 0;
 
 	refname = parse_refname(&next);
-	if (!refname)
+	اگر (!refname)
 		die("symref-update: missing <ref>");
 
 	new_target = parse_next_refname(&next);
-	if (!new_target)
+	اگر (!new_target)
 		die("symref-update %s: missing <new-target>", refname);
 
 	old_arg = parse_next_arg(&next);
-	if (old_arg) {
+	اگر (old_arg) {
 		old_target = parse_next_arg(&next);
-		if (!old_target)
+		اگر (!old_target)
 			die("symref-update %s: expected old value", refname);
 
-		if (!strcmp(old_arg, "oid")) {
-			if (repo_get_oid_with_flags(the_repository, old_target, &old_oid,
+		اگر (!strcmp(old_arg, "oid")) {
+			اگر (repo_get_oid_with_flags(the_repository, old_target, &old_oid,
 						    GET_OID_SKIP_AMBIGUITY_CHECK))
 				die("symref-update %s: invalid oid: %s", refname, old_target);
 
 			have_old_oid = 1;
-		} else if (!strcmp(old_arg, "ref")) {
-			if (check_refname_format(old_target, REFNAME_ALLOW_ONELEVEL))
+		} وگرنه اگر (!strcmp(old_arg, "ref")) {
+			اگر (check_refname_format(old_target, REFNAME_ALLOW_ONELEVEL))
 				die("symref-update %s: invalid ref: %s", refname, old_target);
-		} else {
+		} وگرنه {
 			die("symref-update %s: invalid arg '%s' for old value", refname, old_arg);
 		}
 	}
 
-	if (*next != line_termination)
+	اگر (*next != سطر_termination)
 		die("symref-update %s: extra input: %s", refname, next);
 
-	tx_err = ref_transaction_update(transaction, refname, NULL,
-					have_old_oid ? &old_oid : NULL,
+	tx_err = ref_transaction_update(transaction, refname, پوچ,
+					have_old_oid ? &old_oid : پوچ,
 					new_target,
-					have_old_oid ? NULL : old_target,
+					have_old_oid ? پوچ : old_target,
 					update_flags | create_reflog_flag,
-					msg, &err);
-	handle_ref_transaction_error(refname, NULL, have_old_oid ? &old_oid : NULL,
-				     new_target, have_old_oid ? NULL : old_target,
+					پیام, &err);
+	handle_ref_transaction_error(refname, پوچ, have_old_oid ? &old_oid : پوچ,
+				     new_target, have_old_oid ? پوچ : old_target,
 				     tx_err, &err, opts);
 
 	update_flags = default_flags;
-	free(refname);
-	free(old_arg);
-	free(old_target);
-	free(new_target);
+	آزاد(refname);
+	آزاد(old_arg);
+	آزاد(old_target);
+	آزاد(new_target);
 	strbuf_release(&err);
 }
 
-static void parse_cmd_create(struct ref_transaction *transaction,
-			     const char *next, const char *end,
-			     struct command_options *opts)
+ایستا تهی parse_cmd_create(ساختار ref_transaction *transaction,
+			     ثابت نویسه *next, ثابت نویسه *end,
+			     ساختار command_options *opts)
 {
-	struct strbuf err = STRBUF_INIT;
-	char *refname;
-	struct object_id new_oid;
-	enum ref_transaction_error tx_err;
+	ساختار strbuf err = STRBUF_INIT;
+	نویسه *refname;
+	ساختار object_id new_oid;
+	شمارش ref_transaction_error tx_err;
 
 	refname = parse_refname(&next);
-	if (!refname)
+	اگر (!refname)
 		die("create: missing <ref>");
 
-	if (parse_next_oid(&next, end, &new_oid, "create", refname, 0))
+	اگر (parse_next_oid(&next, end, &new_oid, "create", refname, 0))
 		die("create %s: missing <new-oid>", refname);
 
-	if (is_null_oid(&new_oid))
+	اگر (is_null_oid(&new_oid))
 		die("create %s: zero <new-oid>", refname);
 
-	if (*next != line_termination)
+	اگر (*next != سطر_termination)
 		die("create %s: extra input: %s", refname, next);
 
-	tx_err = ref_transaction_create(transaction, refname, &new_oid, NULL,
+	tx_err = ref_transaction_create(transaction, refname, &new_oid, پوچ,
 					update_flags | create_reflog_flag,
-					msg, &err);
-	handle_ref_transaction_error(refname, &new_oid, NULL, NULL, NULL, tx_err,
+					پیام, &err);
+	handle_ref_transaction_error(refname, &new_oid, پوچ, پوچ, پوچ, tx_err,
 				     &err, opts);
 
 	update_flags = default_flags;
-	free(refname);
+	آزاد(refname);
 	strbuf_release(&err);
 }
 
-static void parse_cmd_symref_create(struct ref_transaction *transaction,
-				    const char *next, const char *end UNUSED,
-				    struct command_options *opts)
+ایستا تهی parse_cmd_symref_create(ساختار ref_transaction *transaction,
+				    ثابت نویسه *next, ثابت نویسه *end UNUSED,
+				    ساختار command_options *opts)
 {
-	struct strbuf err = STRBUF_INIT;
-	char *refname, *new_target;
-	enum ref_transaction_error tx_err;
+	ساختار strbuf err = STRBUF_INIT;
+	نویسه *refname, *new_target;
+	شمارش ref_transaction_error tx_err;
 
 	refname = parse_refname(&next);
-	if (!refname)
+	اگر (!refname)
 		die("symref-create: missing <ref>");
 
 	new_target = parse_next_refname(&next);
-	if (!new_target)
+	اگر (!new_target)
 		die("symref-create %s: missing <new-target>", refname);
 
-	if (*next != line_termination)
+	اگر (*next != سطر_termination)
 		die("symref-create %s: extra input: %s", refname, next);
 
-	tx_err = ref_transaction_create(transaction, refname, NULL, new_target,
+	tx_err = ref_transaction_create(transaction, refname, پوچ, new_target,
 					update_flags | create_reflog_flag,
-					msg, &err);
-	handle_ref_transaction_error(refname, NULL, NULL, new_target, NULL,
+					پیام, &err);
+	handle_ref_transaction_error(refname, پوچ, پوچ, new_target, پوچ,
 				     tx_err, &err, opts);
 
 	update_flags = default_flags;
-	free(refname);
-	free(new_target);
+	آزاد(refname);
+	آزاد(new_target);
 	strbuf_release(&err);
 }
 
-static void parse_cmd_delete(struct ref_transaction *transaction,
-			     const char *next, const char *end,
-			     struct command_options *opts UNUSED)
+ایستا تهی parse_cmd_delete(ساختار ref_transaction *transaction,
+			     ثابت نویسه *next, ثابت نویسه *end,
+			     ساختار command_options *opts UNUSED)
 {
-	struct strbuf err = STRBUF_INIT;
-	char *refname;
-	struct object_id old_oid;
-	int have_old;
+	ساختار strbuf err = STRBUF_INIT;
+	نویسه *refname;
+	ساختار object_id old_oid;
+	صحیح have_old;
 
 	refname = parse_refname(&next);
-	if (!refname)
+	اگر (!refname)
 		die("delete: missing <ref>");
 
-	if (parse_next_oid(&next, end, &old_oid, "delete", refname,
+	اگر (parse_next_oid(&next, end, &old_oid, "delete", refname,
 			   PARSE_SHA1_OLD)) {
 		have_old = 0;
-	} else {
-		if (is_null_oid(&old_oid))
+	} وگرنه {
+		اگر (is_null_oid(&old_oid))
 			die("delete %s: zero <old-oid>", refname);
 		have_old = 1;
 	}
 
-	if (*next != line_termination)
+	اگر (*next != سطر_termination)
 		die("delete %s: extra input: %s", refname, next);
 
-	if (ref_transaction_delete(transaction, refname,
-				   have_old ? &old_oid : NULL,
-				   NULL, update_flags, msg, &err))
+	اگر (ref_transaction_delete(transaction, refname,
+				   have_old ? &old_oid : پوچ,
+				   پوچ, update_flags, پیام, &err))
 		die("%s", err.buf);
 
 	update_flags = default_flags;
-	free(refname);
+	آزاد(refname);
 	strbuf_release(&err);
 }
 
-static void parse_cmd_symref_delete(struct ref_transaction *transaction,
-				    const char *next, const char *end UNUSED,
-				    struct command_options *opts UNUSED)
+ایستا تهی parse_cmd_symref_delete(ساختار ref_transaction *transaction,
+				    ثابت نویسه *next, ثابت نویسه *end UNUSED,
+				    ساختار command_options *opts UNUSED)
 {
-	struct strbuf err = STRBUF_INIT;
-	char *refname, *old_target;
+	ساختار strbuf err = STRBUF_INIT;
+	نویسه *refname, *old_target;
 
-	if (!(update_flags & REF_NO_DEREF))
+	اگر (!(update_flags & REF_NO_DEREF))
 		die("symref-delete: cannot operate with deref mode");
 
 	refname = parse_refname(&next);
-	if (!refname)
+	اگر (!refname)
 		die("symref-delete: missing <ref>");
 
 	old_target = parse_next_refname(&next);
 
-	if (*next != line_termination)
+	اگر (*next != سطر_termination)
 		die("symref-delete %s: extra input: %s", refname, next);
 
-	if (ref_transaction_delete(transaction, refname, NULL,
-				   old_target, update_flags, msg, &err))
+	اگر (ref_transaction_delete(transaction, refname, پوچ,
+				   old_target, update_flags, پیام, &err))
 		die("%s", err.buf);
 
 	update_flags = default_flags;
-	free(refname);
-	free(old_target);
+	آزاد(refname);
+	آزاد(old_target);
 	strbuf_release(&err);
 }
 
-static void parse_cmd_verify(struct ref_transaction *transaction,
-			     const char *next, const char *end,
-			     struct command_options *opts UNUSED)
+ایستا تهی parse_cmd_verify(ساختار ref_transaction *transaction,
+			     ثابت نویسه *next, ثابت نویسه *end,
+			     ساختار command_options *opts UNUSED)
 {
-	struct strbuf err = STRBUF_INIT;
-	char *refname;
-	struct object_id old_oid;
+	ساختار strbuf err = STRBUF_INIT;
+	نویسه *refname;
+	ساختار object_id old_oid;
 
 	refname = parse_refname(&next);
-	if (!refname)
+	اگر (!refname)
 		die("verify: missing <ref>");
 
-	if (parse_next_oid(&next, end, &old_oid, "verify", refname,
+	اگر (parse_next_oid(&next, end, &old_oid, "verify", refname,
 			   PARSE_SHA1_OLD))
 		oidclr(&old_oid, the_repository->hash_algo);
 
-	if (*next != line_termination)
+	اگر (*next != سطر_termination)
 		die("verify %s: extra input: %s", refname, next);
 
-	if (ref_transaction_verify(transaction, refname, &old_oid,
-				   NULL, update_flags, &err))
+	اگر (ref_transaction_verify(transaction, refname, &old_oid,
+				   پوچ, update_flags, &err))
 		die("%s", err.buf);
 
 	update_flags = default_flags;
-	free(refname);
+	آزاد(refname);
 	strbuf_release(&err);
 }
 
-static void parse_cmd_symref_verify(struct ref_transaction *transaction,
-				    const char *next, const char *end UNUSED,
-				    struct command_options *opts UNUSED)
+ایستا تهی parse_cmd_symref_verify(ساختار ref_transaction *transaction,
+				    ثابت نویسه *next, ثابت نویسه *end UNUSED,
+				    ساختار command_options *opts UNUSED)
 {
-	struct strbuf err = STRBUF_INIT;
-	struct object_id old_oid;
-	char *refname, *old_target;
+	ساختار strbuf err = STRBUF_INIT;
+	ساختار object_id old_oid;
+	نویسه *refname, *old_target;
 
-	if (!(update_flags & REF_NO_DEREF))
+	اگر (!(update_flags & REF_NO_DEREF))
 		die("symref-verify: cannot operate with deref mode");
 
 	refname = parse_refname(&next);
-	if (!refname)
+	اگر (!refname)
 		die("symref-verify: missing <ref>");
 
 	/*
@@ -575,91 +575,91 @@ static void parse_cmd_symref_verify(struct ref_transaction *transaction,
 	 * ref doesn't exist.
 	 */
 	old_target = parse_next_refname(&next);
-	if (!old_target)
+	اگر (!old_target)
 		oidcpy(&old_oid, null_oid(the_hash_algo));
 
-	if (*next != line_termination)
+	اگر (*next != سطر_termination)
 		die("symref-verify %s: extra input: %s", refname, next);
 
-	if (ref_transaction_verify(transaction, refname,
-				   old_target ? NULL : &old_oid,
+	اگر (ref_transaction_verify(transaction, refname,
+				   old_target ? پوچ : &old_oid,
 				   old_target, update_flags, &err))
 		die("%s", err.buf);
 
 	update_flags = default_flags;
-	free(refname);
-	free(old_target);
+	آزاد(refname);
+	آزاد(old_target);
 	strbuf_release(&err);
 }
 
-static void report_ok(const char *command)
+ایستا تهی report_ok(ثابت نویسه *command)
 {
 	fprintf(stdout, "%s: ok\n", command);
 	fflush(stdout);
 }
 
-static void parse_cmd_option(struct ref_transaction *transaction UNUSED,
-			     const char *next, const char *end UNUSED,
-			     struct command_options *opts UNUSED)
+ایستا تهی parse_cmd_option(ساختار ref_transaction *transaction UNUSED,
+			     ثابت نویسه *next, ثابت نویسه *end UNUSED,
+			     ساختار command_options *opts UNUSED)
 {
-	const char *rest;
-	if (skip_prefix(next, "no-deref", &rest) && *rest == line_termination)
+	ثابت نویسه *rest;
+	اگر (skip_prefix(next, "no-deref", &rest) && *rest == سطر_termination)
 		update_flags |= REF_NO_DEREF;
-	else
+	وگرنه
 		die("option unknown: %s", next);
 }
 
-static void parse_cmd_start(struct ref_transaction *transaction UNUSED,
-			    const char *next, const char *end UNUSED,
-			    struct command_options *opts UNUSED)
+ایستا تهی parse_cmd_start(ساختار ref_transaction *transaction UNUSED,
+			    ثابت نویسه *next, ثابت نویسه *end UNUSED,
+			    ساختار command_options *opts UNUSED)
 {
-	if (*next != line_termination)
+	اگر (*next != سطر_termination)
 		die("start: extra input: %s", next);
 	report_ok("start");
 }
 
-static void parse_cmd_prepare(struct ref_transaction *transaction,
-			      const char *next, const char *end UNUSED,
-			      struct command_options *opts UNUSED)
+ایستا تهی parse_cmd_prepare(ساختار ref_transaction *transaction,
+			      ثابت نویسه *next, ثابت نویسه *end UNUSED,
+			      ساختار command_options *opts UNUSED)
 {
-	struct strbuf error = STRBUF_INIT;
-	if (*next != line_termination)
+	ساختار strbuf error = STRBUF_INIT;
+	اگر (*next != سطر_termination)
 		die("prepare: extra input: %s", next);
-	if (ref_transaction_prepare(transaction, &error))
+	اگر (ref_transaction_prepare(transaction, &error))
 		die("prepare: %s", error.buf);
 	report_ok("prepare");
 }
 
-static void parse_cmd_abort(struct ref_transaction *transaction,
-			    const char *next, const char *end UNUSED,
-			    struct command_options *opts UNUSED)
+ایستا تهی parse_cmd_abort(ساختار ref_transaction *transaction,
+			    ثابت نویسه *next, ثابت نویسه *end UNUSED,
+			    ساختار command_options *opts UNUSED)
 {
-	struct strbuf error = STRBUF_INIT;
-	if (*next != line_termination)
+	ساختار strbuf error = STRBUF_INIT;
+	اگر (*next != سطر_termination)
 		die("abort: extra input: %s", next);
-	if (ref_transaction_abort(transaction, &error))
+	اگر (ref_transaction_abort(transaction, &error))
 		die("abort: %s", error.buf);
 	report_ok("abort");
 }
 
-static void parse_cmd_commit(struct ref_transaction *transaction,
-			     const char *next, const char *end UNUSED,
-			     struct command_options *opts UNUSED)
+ایستا تهی parse_cmd_commit(ساختار ref_transaction *transaction,
+			     ثابت نویسه *next, ثابت نویسه *end UNUSED,
+			     ساختار command_options *opts UNUSED)
 {
-	struct strbuf error = STRBUF_INIT;
-	if (*next != line_termination)
+	ساختار strbuf error = STRBUF_INIT;
+	اگر (*next != سطر_termination)
 		die("commit: extra input: %s", next);
-	if (ref_transaction_commit(transaction, &error))
+	اگر (ref_transaction_commit(transaction, &error))
 		die("commit: %s", error.buf);
 
 	ref_transaction_for_each_rejected_update(transaction,
-						 print_rejected_refs, NULL);
+						 print_rejected_refs, پوچ);
 
 	report_ok("commit");
 	ref_transaction_free(transaction);
 }
 
-enum update_refs_state {
+شمارش update_refs_state {
 	/* Non-transactional state open for updates. */
 	UPDATE_REFS_OPEN,
 	/* A transaction has been started. */
@@ -670,12 +670,12 @@ enum update_refs_state {
 	UPDATE_REFS_CLOSED,
 };
 
-static const struct parse_cmd {
-	const char *prefix;
-	void (*fn)(struct ref_transaction *, const char *, const char *,
-		   struct command_options *);
+ایستا ثابت ساختار parse_cmd {
+	ثابت نویسه *prefix;
+	تهی (*fn)(ساختار ref_transaction *, ثابت نویسه *, ثابت نویسه *,
+		   ساختار command_options *);
 	unsigned args;
-	enum update_refs_state state;
+	شمارش update_refs_state state;
 } command[] = {
 	{ "update",        parse_cmd_update,        3, UPDATE_REFS_OPEN },
 	{ "create",        parse_cmd_create,        2, UPDATE_REFS_OPEN },
@@ -692,78 +692,78 @@ static const struct parse_cmd {
 	{ "commit",        parse_cmd_commit,        0, UPDATE_REFS_CLOSED },
 };
 
-static void update_refs_stdin(unsigned int flags)
+ایستا تهی update_refs_stdin(unsigned صحیح flags)
 {
-	struct strbuf input = STRBUF_INIT, err = STRBUF_INIT;
-	enum update_refs_state state = UPDATE_REFS_OPEN;
-	struct ref_transaction *transaction;
-	int i, j;
+	ساختار strbuf درون_داد = STRBUF_INIT, err = STRBUF_INIT;
+	شمارش update_refs_state state = UPDATE_REFS_OPEN;
+	ساختار ref_transaction *transaction;
+	صحیح i, j;
 
-	struct command_options opts = {
+	ساختار command_options opts = {
 		.allow_update_failures = flags & REF_TRANSACTION_ALLOW_FAILURE,
 	};
 
 	transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 						  flags, &err);
-	if (!transaction)
+	اگر (!transaction)
 		die("%s", err.buf);
 
 	/* Read each line dispatch its command */
-	while (!strbuf_getwholeline(&input, stdin, line_termination)) {
-		const struct parse_cmd *cmd = NULL;
+	وقتی (!strbuf_getwholeline(&درون_داد, stdin, سطر_termination)) {
+		ثابت ساختار parse_cmd *cmd = پوچ;
 
-		if (*input.buf == line_termination)
+		اگر (*درون_داد.buf == سطر_termination)
 			die("empty command in input");
-		else if (isspace(*input.buf))
-			die("whitespace before command: %s", input.buf);
+		وگرنه اگر (isspace(*درون_داد.buf))
+			die("whitespace before command: %s", درون_داد.buf);
 
-		for (i = 0; i < ARRAY_SIZE(command); i++) {
-			const char *prefix = command[i].prefix;
-			char c;
+		برای (i = 0; i < ARRAY_SIZE(command); i++) {
+			ثابت نویسه *prefix = command[i].prefix;
+			نویسه c;
 
-			if (!starts_with(input.buf, prefix))
-				continue;
+			اگر (!starts_with(درون_داد.buf, prefix))
+				ادامه;
 
 			/*
 			 * If the command has arguments, verify that it's
 			 * followed by a space. Otherwise, it shall be followed
 			 * by a line terminator.
 			 */
-			c = command[i].args ? ' ' : line_termination;
-			if (input.buf[strlen(prefix)] != c)
-				continue;
+			c = command[i].args ? ' ' : سطر_termination;
+			اگر (درون_داد.buf[strlen(prefix)] != c)
+				ادامه;
 
 			cmd = &command[i];
-			break;
+			بشکن;
 		}
-		if (!cmd)
-			die("unknown command: %s", input.buf);
+		اگر (!cmd)
+			die("unknown command: %s", درون_داد.buf);
 
 		/*
 		 * Read additional arguments if NUL-terminated. Do not raise an
 		 * error in case there is an early EOF to let the command
 		 * handle missing arguments with a proper error message.
 		 */
-		for (j = 1; line_termination == '\0' && j < cmd->args; j++)
-			if (strbuf_appendwholeline(&input, stdin, line_termination))
-				break;
+		برای (j = 1; سطر_termination == '\0' && j < cmd->args; j++)
+			اگر (strbuf_appendwholeline(&درون_داد, stdin, سطر_termination))
+				بشکن;
 
-		switch (state) {
-		case UPDATE_REFS_OPEN:
-		case UPDATE_REFS_STARTED:
-			if (state == UPDATE_REFS_STARTED && cmd->state == UPDATE_REFS_STARTED)
+		انتخاب (state) {
+		حالت UPDATE_REFS_OPEN:
+		حالت UPDATE_REFS_STARTED:
+			اگر (state == UPDATE_REFS_STARTED && cmd->state == UPDATE_REFS_STARTED)
 				die("cannot restart ongoing transaction");
 			/* Do not downgrade a transaction to a non-transaction. */
-			if (cmd->state >= state)
+			اگر (cmd->state >= state)
 				state = cmd->state;
-			break;
-		case UPDATE_REFS_PREPARED:
-			if (cmd->state != UPDATE_REFS_CLOSED)
+			بشکن;
+		حالت UPDATE_REFS_PREPARED:
+			اگر (cmd->state != UPDATE_REFS_CLOSED)
 				die("prepared transactions can only be closed");
 			state = cmd->state;
-			break;
-		case UPDATE_REFS_CLOSED:
-			if (cmd->state != UPDATE_REFS_STARTED)
+			بشکن;
+		حالت UPDATE_REFS_CLOSED:
+			اگر (cmd->state != UPDATE_REFS_STARTED)
 				die("transaction is closed");
 
 			/*
@@ -773,57 +773,57 @@ static void update_refs_stdin(unsigned int flags)
 			state = cmd->state;
 			transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 								  flags, &err);
-			if (!transaction)
+			اگر (!transaction)
 				die("%s", err.buf);
 
-			break;
+			بشکن;
 		}
 
-		cmd->fn(transaction, input.buf + strlen(cmd->prefix) + !!cmd->args,
-			input.buf + input.len, &opts);
+		cmd->fn(transaction, درون_داد.buf + strlen(cmd->prefix) + !!cmd->args,
+			درون_داد.buf + درون_داد.len, &opts);
 	}
 
-	switch (state) {
-	case UPDATE_REFS_OPEN:
+	انتخاب (state) {
+	حالت UPDATE_REFS_OPEN:
 		/* Commit by default if no transaction was requested. */
-		if (ref_transaction_commit(transaction, &err))
+		اگر (ref_transaction_commit(transaction, &err))
 			die("%s", err.buf);
 		ref_transaction_for_each_rejected_update(transaction,
-						 print_rejected_refs, NULL);
+						 print_rejected_refs, پوچ);
 		ref_transaction_free(transaction);
-		break;
-	case UPDATE_REFS_STARTED:
-	case UPDATE_REFS_PREPARED:
+		بشکن;
+	حالت UPDATE_REFS_STARTED:
+	حالت UPDATE_REFS_PREPARED:
 		/* If using a transaction, we want to abort it. */
-		if (ref_transaction_abort(transaction, &err))
+		اگر (ref_transaction_abort(transaction, &err))
 			die("%s", err.buf);
-		break;
-	case UPDATE_REFS_CLOSED:
+		بشکن;
+	حالت UPDATE_REFS_CLOSED:
 		/* Otherwise no need to do anything, the transaction was closed already. */
-		break;
+		بشکن;
 	}
 
 	strbuf_release(&err);
-	strbuf_release(&input);
+	strbuf_release(&درون_داد);
 }
 
-int cmd_update_ref(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+صحیح cmd_update_ref(صحیح argc,
+		   ثابت نویسه **argv,
+		   ثابت نویسه *prefix,
+		   ساختار repository *repo UNUSED)
 {
-	const char *refname, *oldval;
-	struct object_id oid, oldoid;
-	int delete = 0, no_deref = 0, read_stdin = 0, end_null = 0;
-	int create_reflog = 0;
-	unsigned int flags = 0;
+	ثابت نویسه *refname, *oldval;
+	ساختار object_id oid, oldoid;
+	صحیح delete = 0, no_deref = 0, read_stdin = 0, end_null = 0;
+	صحیح create_reflog = 0;
+	unsigned صحیح flags = 0;
 
-	struct option options[] = {
-		OPT_STRING( 'm', NULL, &msg, N_("reason"), N_("reason of the update")),
-		OPT_BOOL('d', NULL, &delete, N_("delete the reference")),
+	ساختار option options[] = {
+		OPT_STRING( 'm', پوچ, &پیام, N_("reason"), N_("reason of the update")),
+		OPT_BOOL('d', پوچ, &delete, N_("delete the reference")),
 		OPT_BOOL( 0 , "no-deref", &no_deref,
 					N_("update <refname> not the one it points to")),
-		OPT_BOOL('z', NULL, &end_null, N_("stdin has NUL-terminated arguments")),
+		OPT_BOOL('z', پوچ, &end_null, N_("stdin has NUL-terminated arguments")),
 		OPT_BOOL( 0 , "stdin", &read_stdin, N_("read updates from stdin")),
 		OPT_BOOL( 0 , "create-reflog", &create_reflog, N_("create a reflog")),
 		OPT_BIT('0', "batch-updates", &flags, N_("batch reference updates"),
@@ -831,75 +831,75 @@ int cmd_update_ref(int argc,
 		OPT_END(),
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, پوچ);
 	argc = parse_options(argc, argv, prefix, options, git_update_ref_usage,
 			     0);
-	if (msg && !*msg)
+	اگر (پیام && !*پیام)
 		die("Refusing to perform update with empty message.");
 
 	create_reflog_flag = create_reflog ? REF_FORCE_CREATE_REFLOG : 0;
 
-	if (no_deref) {
+	اگر (no_deref) {
 		default_flags = REF_NO_DEREF;
 		update_flags = default_flags;
 	}
 
-	if (read_stdin) {
-		if (delete || argc > 0)
+	اگر (read_stdin) {
+		اگر (delete || argc > 0)
 			usage_with_options(git_update_ref_usage, options);
-		if (end_null)
-			line_termination = '\0';
+		اگر (end_null)
+			سطر_termination = '\0';
 		update_refs_stdin(flags);
-		return 0;
-	} else if (flags & REF_TRANSACTION_ALLOW_FAILURE) {
+		بازگشت 0;
+	} وگرنه اگر (flags & REF_TRANSACTION_ALLOW_FAILURE) {
 		die("--batch-updates can only be used with --stdin");
 	}
 
-	if (end_null)
+	اگر (end_null)
 		usage_with_options(git_update_ref_usage, options);
 
-	if (delete) {
-		if (argc < 1 || argc > 2)
+	اگر (delete) {
+		اگر (argc < 1 || argc > 2)
 			usage_with_options(git_update_ref_usage, options);
 		refname = argv[0];
 		oldval = argv[1];
-	} else {
-		const char *value;
-		if (argc < 2 || argc > 3)
+	} وگرنه {
+		ثابت نویسه *مقدار;
+		اگر (argc < 2 || argc > 3)
 			usage_with_options(git_update_ref_usage, options);
 		refname = argv[0];
-		value = argv[1];
+		مقدار = argv[1];
 		oldval = argv[2];
-		if (repo_get_oid_with_flags(the_repository, value, &oid,
+		اگر (repo_get_oid_with_flags(the_repository, مقدار, &oid,
 					    GET_OID_SKIP_AMBIGUITY_CHECK))
-			die("%s: not a valid SHA1", value);
+			die("%s: not a valid SHA1", مقدار);
 	}
 
-	if (oldval) {
-		if (!*oldval)
+	اگر (oldval) {
+		اگر (!*oldval)
 			/*
 			 * The empty string implies that the reference
 			 * must not already exist:
 			 */
 			oidclr(&oldoid, the_repository->hash_algo);
-		else if (repo_get_oid_with_flags(the_repository, oldval, &oldoid,
+		وگرنه اگر (repo_get_oid_with_flags(the_repository, oldval, &oldoid,
 						 GET_OID_SKIP_AMBIGUITY_CHECK))
 			die("%s: not a valid old SHA1", oldval);
 	}
 
-	if (delete)
+	اگر (delete)
 		/*
 		 * For purposes of backwards compatibility, we treat
 		 * NULL_SHA1 as "don't care" here:
 		 */
-		return refs_delete_ref(get_main_ref_store(the_repository),
-				       msg, refname,
-				       (oldval && !is_null_oid(&oldoid)) ? &oldoid : NULL,
+		بازگشت refs_delete_ref(get_main_ref_store(the_repository),
+				       پیام, refname,
+				       (oldval && !is_null_oid(&oldoid)) ? &oldoid : پوچ,
 				       default_flags);
-	else
-		return refs_update_ref(get_main_ref_store(the_repository),
-				       msg, refname, &oid,
-				       oldval ? &oldoid : NULL,
+	وگرنه
+		بازگشت refs_update_ref(get_main_ref_store(the_repository),
+				       پیام, refname, &oid,
+				       oldval ? &oldoid : پوچ,
 				       default_flags | create_reflog_flag,
 				       UPDATE_REFS_DIE_ON_ERR);
 }

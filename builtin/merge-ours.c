@@ -8,23 +8,23 @@
  * Pretend we resolved the heads, but declare our tree trumps everybody else.
  */
 
-#include "git-compat-util.h"
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "diff.h"
+#شامل "git-compat-util.h"
+#شامل "builtin.h"
+#شامل "config.h"
+#شامل "environment.h"
+#شامل "diff.h"
 
-static const char builtin_merge_ours_usage[] =
+ایستا ثابت نویسه builtin_merge_ours_usage[] =
 	"git merge-ours <base>... -- HEAD <remote>...";
 
-int cmd_merge_ours(int argc,
-		   const char **argv,
-		   const char *prefix UNUSED,
-		   struct repository *repo)
+صحیح cmd_merge_ours(صحیح argc,
+		   ثابت نویسه **argv,
+		   ثابت نویسه *prefix UNUSED,
+		   ساختار repository *repo)
 {
 	show_usage_if_asked(argc, argv, builtin_merge_ours_usage);
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, پوچ);
 	prepare_repo_settings(repo);
 	repo->settings.command_requires_full_index = 0;
 
@@ -33,9 +33,9 @@ int cmd_merge_ours(int argc,
 	 * commit.  The index must match HEAD, or this merge cannot go
 	 * through.
 	 */
-	if (repo_read_index(repo) < 0)
+	اگر (repo_read_index(repo) < 0)
 		die_errno("read_cache failed");
-	if (index_differs_from(repo, "HEAD", NULL, 0))
-		return 2;
-	return 0;
+	اگر (index_differs_from(repo, "HEAD", پوچ, 0))
+		بازگشت 2;
+	بازگشت 0;
 }

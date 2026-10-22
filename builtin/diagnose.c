@@ -1,32 +1,32 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "abspath.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "path.h"
-#include "diagnose.h"
+#شامل "builtin.h"
+#شامل "abspath.h"
+#شامل "gettext.h"
+#شامل "parse-options.h"
+#شامل "path.h"
+#شامل "diagnose.h"
 
-static const char * const diagnose_usage[] = {
+ایستا ثابت نویسه * ثابت diagnose_usage[] = {
 	N_("git diagnose [(-o | --output-directory) <path>] [(-s | --suffix) <format>]\n"
 	   "             [--mode=<mode>]"),
-	NULL
+	پوچ
 };
 
-int cmd_diagnose(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+صحیح cmd_diagnose(صحیح argc,
+		 ثابت نویسه **argv,
+		 ثابت نویسه *prefix,
+		 ساختار repository *repo UNUSED)
 {
-	struct strbuf zip_path = STRBUF_INIT;
-	time_t now = time(NULL);
-	struct tm tm;
-	enum diagnose_mode mode = DIAGNOSE_STATS;
-	char *option_output = NULL;
-	const char *option_suffix = "%Y-%m-%d-%H%M";
-	char *prefixed_filename;
+	ساختار strbuf zip_path = STRBUF_INIT;
+	time_t now = time(پوچ);
+	ساختار tm tm;
+	شمارش diagnose_mode mode = DIAGNOSE_STATS;
+	نویسه *option_output = پوچ;
+	ثابت نویسه *option_suffix = "%Y-%m-%d-%H%M";
+	نویسه *prefixed_filename;
 
-	const struct option diagnose_options[] = {
+	ثابت ساختار option diagnose_options[] = {
 		OPT_STRING('o', "output-directory", &option_output, N_("path"),
 			   N_("specify a destination for the diagnostics archive")),
 		OPT_STRING('s', "suffix", &option_suffix, N_("format"),
@@ -50,21 +50,21 @@ int cmd_diagnose(int argc,
 	strbuf_addftime(&zip_path, option_suffix, localtime_r(&now, &tm), 0, 0);
 	strbuf_addstr(&zip_path, ".zip");
 
-	switch (safe_create_leading_directories(the_repository, zip_path.buf)) {
-	case SCLD_OK:
-	case SCLD_EXISTS:
-		break;
-	default:
+	انتخاب (safe_create_leading_directories(the_repository, zip_path.buf)) {
+	حالت SCLD_OK:
+	حالت SCLD_EXISTS:
+		بشکن;
+	پیشفرض:
 		die_errno(_("could not create leading directories for '%s'"),
 			  zip_path.buf);
 	}
 
 	/* Prepare diagnostics */
-	if (create_diagnostics_archive(the_repository, &zip_path, mode))
+	اگر (create_diagnostics_archive(the_repository, &zip_path, mode))
 		die_errno(_("unable to create diagnostics archive %s"),
 			  zip_path.buf);
 
-	free(prefixed_filename);
+	آزاد(prefixed_filename);
 	strbuf_release(&zip_path);
-	return 0;
+	بازگشت 0;
 }

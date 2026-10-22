@@ -1,34 +1,34 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "diff.h"
-#include "diff-merges.h"
-#include "commit.h"
-#include "preload-index.h"
-#include "revision.h"
-#include "setup.h"
+#شامل "builtin.h"
+#شامل "config.h"
+#شامل "diff.h"
+#شامل "diff-merges.h"
+#شامل "commit.h"
+#شامل "preload-index.h"
+#شامل "revision.h"
+#شامل "setup.h"
 
-static const char diff_cache_usage[] =
+ایستا ثابت نویسه diff_cache_usage[] =
 "git diff-index [-m] [--cached] [--merge-base] "
 "[<common-diff-options>] <tree-ish> [<path>...]"
 "\n"
 COMMON_DIFF_OPTIONS_HELP;
 
-int cmd_diff_index(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+صحیح cmd_diff_index(صحیح argc,
+		   ثابت نویسه **argv,
+		   ثابت نویسه *prefix,
+		   ساختار repository *repo UNUSED)
 {
-	struct rev_info rev;
-	unsigned int option = 0;
-	int i;
-	int result;
+	ساختار rev_info rev;
+	unsigned صحیح option = 0;
+	صحیح i;
+	صحیح result;
 
 	show_usage_if_asked(argc, argv, diff_cache_usage);
 
-	repo_config(the_repository, git_diff_basic_config, NULL); /* no "diff" UI options */
+	repo_config(the_repository, git_diff_basic_config, پوچ); /* no "diff" UI options */
 
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
@@ -43,20 +43,20 @@ int cmd_diff_index(int argc,
 	 */
 	diff_merges_suppress_m_parsing();
 
-	argc = setup_revisions(argc, argv, &rev, NULL);
-	for (i = 1; i < argc; i++) {
-		const char *arg = argv[i];
+	argc = setup_revisions(argc, argv, &rev, پوچ);
+	برای (i = 1; i < argc; i++) {
+		ثابت نویسه *arg = argv[i];
 
-		if (!strcmp(arg, "--cached"))
+		اگر (!strcmp(arg, "--cached"))
 			option |= DIFF_INDEX_CACHED;
-		else if (!strcmp(arg, "--merge-base"))
+		وگرنه اگر (!strcmp(arg, "--merge-base"))
 			option |= DIFF_INDEX_MERGE_BASE;
-		else if (!strcmp(arg, "-m"))
+		وگرنه اگر (!strcmp(arg, "-m"))
 			rev.match_missing = 1;
-		else
+		وگرنه
 			usage(diff_cache_usage);
 	}
-	if (!rev.diffopt.output_format)
+	اگر (!rev.diffopt.output_format)
 		rev.diffopt.output_format = DIFF_FORMAT_RAW;
 
 	rev.diffopt.rotate_to_strict = 1;
@@ -65,21 +65,21 @@ int cmd_diff_index(int argc,
 	 * Make sure there is one revision (i.e. pending object),
 	 * and there is no revision filtering parameters.
 	 */
-	if (rev.pending.nr != 1 ||
-	    rev.max_count != -1 || rev.min_age != -1 || rev.max_age != -1)
+	اگر (rev.pending.nr != 1 ||
+	    rev.max_شمار != -1 || rev.min_age != -1 || rev.max_age != -1)
 		usage(diff_cache_usage);
-	if (!(option & DIFF_INDEX_CACHED)) {
-		setup_work_tree(the_repository);
-		if (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
+	اگر (!(option & DIFF_INDEX_CACHED)) {
+		setup_work_درخت(the_repository);
+		اگر (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
 			perror("repo_read_index_preload");
-			return -1;
+			بازگشت -1;
 		}
-	} else if (repo_read_index(the_repository) < 0) {
+	} وگرنه اگر (repo_read_index(the_repository) < 0) {
 		perror("repo_read_index");
-		return -1;
+		بازگشت -1;
 	}
 	run_diff_index(&rev, option);
 	result = diff_result_code(&rev);
 	release_revisions(&rev);
-	return result;
+	بازگشت result;
 }

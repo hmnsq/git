@@ -1,9 +1,9 @@
-#include "builtin.h"
-#include "transport.h"
-#include "run-command.h"
-#include "pkt-line.h"
+#شامل "builtin.h"
+#شامل "transport.h"
+#شامل "run-command.h"
+#شامل "pkt-line.h"
 
-static const char usage_msg[] =
+ایستا ثابت نویسه usage_پیام[] =
 	"git remote-ext <remote> <url>";
 
 /*
@@ -25,17 +25,17 @@ static const char usage_msg[] =
  *		not activate sending git:// style request).
  */
 
-static char *git_req;
-static char *git_req_vhost;
+ایستا نویسه *git_req;
+ایستا نویسه *git_req_vhost;
 
-static char *strip_escapes(const char *str, const char *service,
-	const char **next)
+ایستا نویسه *strip_escapes(ثابت نویسه *str, ثابت نویسه *service,
+	ثابت نویسه **next)
 {
 	size_t rpos = 0;
-	int escape = 0;
-	char special = 0;
-	const char *service_noprefix = service;
-	struct strbuf ret = STRBUF_INIT;
+	صحیح escape = 0;
+	نویسه special = 0;
+	ثابت نویسه *service_noprefix = service;
+	ساختار strbuf ret = STRBUF_INIT;
 
 	skip_prefix(service_noprefix, "git-", &service_noprefix);
 
@@ -44,33 +44,33 @@ static char *strip_escapes(const char *str, const char *service,
 	setenv("GIT_EXT_SERVICE_NOPREFIX", service_noprefix, 1);
 
 	/* Scan the length of argument. */
-	while (str[rpos] && (escape || str[rpos] != ' ')) {
-		if (escape) {
-			switch (str[rpos]) {
-			case ' ':
-			case '%':
-			case 's':
-			case 'S':
-				break;
-			case 'G':
-			case 'V':
+	وقتی (str[rpos] && (escape || str[rpos] != ' ')) {
+		اگر (escape) {
+			انتخاب (str[rpos]) {
+			حالت ' ':
+			حالت '%':
+			حالت 's':
+			حالت 'S':
+				بشکن;
+			حالت 'G':
+			حالت 'V':
 				special = str[rpos];
-				if (rpos == 1)
-					break;
+				اگر (rpos == 1)
+					بشکن;
 				/* fallthrough */
-			default:
+			پیشفرض:
 				die("Bad remote-ext placeholder '%%%c'.",
 					str[rpos]);
 			}
 			escape = 0;
-		} else
+		} وگرنه
 			escape = (str[rpos] == '%');
 		rpos++;
 	}
-	if (escape && !str[rpos])
+	اگر (escape && !str[rpos])
 		die("remote-ext command has incomplete placeholder");
 	*next = str + rpos;
-	if (**next == ' ')
+	اگر (**next == ' ')
 		++*next;	/* Skip over space */
 
 	/*
@@ -79,133 +79,133 @@ static char *strip_escapes(const char *str, const char *service,
 	 */
 	rpos = special ? 2 : 0;		/* Skip first 2 bytes in specials. */
 	escape = 0;
-	while (str[rpos] && (escape || str[rpos] != ' ')) {
-		if (escape) {
-			switch (str[rpos]) {
-			case ' ':
-			case '%':
+	وقتی (str[rpos] && (escape || str[rpos] != ' ')) {
+		اگر (escape) {
+			انتخاب (str[rpos]) {
+			حالت ' ':
+			حالت '%':
 				strbuf_addch(&ret, str[rpos]);
-				break;
-			case 's':
+				بشکن;
+			حالت 's':
 				strbuf_addstr(&ret, service_noprefix);
-				break;
-			case 'S':
+				بشکن;
+			حالت 'S':
 				strbuf_addstr(&ret, service);
-				break;
+				بشکن;
 			}
 			escape = 0;
-		} else
-			switch (str[rpos]) {
-			case '%':
+		} وگرنه
+			انتخاب (str[rpos]) {
+			حالت '%':
 				escape = 1;
-				break;
-			default:
+				بشکن;
+			پیشفرض:
 				strbuf_addch(&ret, str[rpos]);
-				break;
+				بشکن;
 			}
 		rpos++;
 	}
-	switch (special) {
-	case 'G':
-		git_req = strbuf_detach(&ret, NULL);
-		return NULL;
-	case 'V':
-		git_req_vhost = strbuf_detach(&ret, NULL);
-		return NULL;
-	default:
-		return strbuf_detach(&ret, NULL);
+	انتخاب (special) {
+	حالت 'G':
+		git_req = strbuf_detach(&ret, پوچ);
+		بازگشت پوچ;
+	حالت 'V':
+		git_req_vhost = strbuf_detach(&ret, پوچ);
+		بازگشت پوچ;
+	پیشفرض:
+		بازگشت strbuf_detach(&ret, پوچ);
 	}
 }
 
-static void parse_argv(struct strvec *out, const char *arg, const char *service)
+ایستا تهی parse_argv(ساختار strvec *out, ثابت نویسه *arg, ثابت نویسه *service)
 {
-	while (*arg) {
-		char *expanded = strip_escapes(arg, service, &arg);
-		if (expanded)
-			strvec_push(out, expanded);
-		free(expanded);
+	وقتی (*arg) {
+		نویسه *expanded = strip_escapes(arg, service, &arg);
+		اگر (expanded)
+			strvec_افزودن(out, expanded);
+		آزاد(expanded);
 	}
 }
 
-static void send_git_request(int stdin_fd, const char *serv, const char *repo,
-	const char *vhost)
+ایستا تهی send_git_request(صحیح stdin_fd, ثابت نویسه *serv, ثابت نویسه *repo,
+	ثابت نویسه *vhost)
 {
-	if (!vhost)
+	اگر (!vhost)
 		packet_write_fmt(stdin_fd, "%s %s%c", serv, repo, 0);
-	else
+	وگرنه
 		packet_write_fmt(stdin_fd, "%s %s%chost=%s%c", serv, repo, 0,
 			     vhost, 0);
 }
 
-static int run_child(const char *arg, const char *service)
+ایستا صحیح run_child(ثابت نویسه *arg, ثابت نویسه *service)
 {
-	int r;
-	struct child_process child = CHILD_PROCESS_INIT;
+	صحیح r;
+	ساختار child_process child = CHILD_PROCESS_INIT;
 
 	child.in = -1;
 	child.out = -1;
 	child.err = 0;
 	parse_argv(&child.args, arg, service);
 
-	if (start_command(&child) < 0)
+	اگر (start_command(&child) < 0)
 		die("Can't run specified command");
 
-	if (git_req)
+	اگر (git_req)
 		send_git_request(child.in, service, git_req, git_req_vhost);
 
 	r = bidirectional_transfer_loop(child.out, child.in);
-	if (!r)
+	اگر (!r)
 		r = finish_command(&child);
-	else
+	وگرنه
 		finish_command(&child);
-	return r;
+	بازگشت r;
 }
 
 #define MAXCOMMAND 4096
 
-static int command_loop(const char *child)
+ایستا صحیح command_loop(ثابت نویسه *child)
 {
-	char buffer[MAXCOMMAND];
+	نویسه buffer[MAXCOMMAND];
 
-	while (1) {
+	وقتی (1) {
 		size_t i;
-		const char *arg;
+		ثابت نویسه *arg;
 
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+		اگر (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
+			اگر (ferror(stdin))
 				die("Command input error");
 			exit(0);
 		}
 		/* Strip end of line characters. */
 		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
+		وقتی (i > 0 && isspace(buffer[i - 1]))
 			buffer[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
+		اگر (!strcmp(buffer, "capabilities")) {
 			printf("*connect\n\n");
 			fflush(stdout);
-		} else if (skip_prefix(buffer, "connect ", &arg)) {
+		} وگرنه اگر (skip_prefix(buffer, "connect ", &arg)) {
 			printf("\n");
 			fflush(stdout);
-			return run_child(child, arg);
-		} else {
+			بازگشت run_child(child, arg);
+		} وگرنه {
 			fprintf(stderr, "Bad command");
-			return 1;
+			بازگشت 1;
 		}
 	}
 }
 
-int cmd_remote_ext(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+صحیح cmd_remote_ext(صحیح argc,
+		   ثابت نویسه **argv,
+		   ثابت نویسه *prefix,
+		   ساختار repository *repo UNUSED)
 {
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
-	show_usage_if_asked(argc, argv, usage_msg);
+	show_usage_if_asked(argc, argv, usage_پیام);
 
-	if (argc != 3)
-		usage(usage_msg);
+	اگر (argc != 3)
+		usage(usage_پیام);
 
-	return command_loop(argv[2]);
+	بازگشت command_loop(argv[2]);
 }

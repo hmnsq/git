@@ -1,7 +1,7 @@
-#include "builtin.h"
-#include "transport.h"
+#شامل "builtin.h"
+#شامل "transport.h"
 
-static const char usage_msg[] =
+ایستا ثابت نویسه usage_پیام[] =
 	"git remote-fd <remote> <url>";
 
 /*
@@ -21,68 +21,68 @@ static const char usage_msg[] =
 
 #define MAXCOMMAND 4096
 
-static void command_loop(int input_fd, int output_fd)
+ایستا تهی command_loop(صحیح درون_داد_fd, صحیح output_fd)
 {
-	char buffer[MAXCOMMAND];
+	نویسه buffer[MAXCOMMAND];
 
-	while (1) {
+	وقتی (1) {
 		size_t i;
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+		اگر (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
+			اگر (ferror(stdin))
 				die("Input error");
-			return;
+			بازگشت;
 		}
 		/* Strip end of line characters. */
 		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
+		وقتی (i > 0 && isspace(buffer[i - 1]))
 			buffer[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
+		اگر (!strcmp(buffer, "capabilities")) {
 			printf("*connect\n\n");
 			fflush(stdout);
-		} else if (starts_with(buffer, "connect ")) {
+		} وگرنه اگر (starts_with(buffer, "connect ")) {
 			printf("\n");
 			fflush(stdout);
-			if (bidirectional_transfer_loop(input_fd,
+			اگر (bidirectional_transfer_loop(درون_داد_fd,
 				output_fd))
 				die("Copying data between file descriptors failed");
-			return;
-		} else {
+			بازگشت;
+		} وگرنه {
 			die("Bad command: %s", buffer);
 		}
 	}
 }
 
-int cmd_remote_fd(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+صحیح cmd_remote_fd(صحیح argc,
+		  ثابت نویسه **argv,
+		  ثابت نویسه *prefix,
+		  ساختار repository *repo UNUSED)
 {
-	int input_fd = -1;
-	int output_fd = -1;
-	char *end;
+	صحیح درون_داد_fd = -1;
+	صحیح output_fd = -1;
+	نویسه *end;
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
-	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 3)
-		usage(usage_msg);
+	show_usage_if_asked(argc, argv, usage_پیام);
+	اگر (argc != 3)
+		usage(usage_پیام);
 
-	input_fd = (int)strtoul(argv[2], &end, 10);
+	درون_داد_fd = (صحیح)strtoul(argv[2], &end, 10);
 
-	if ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
+	اگر ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
 		die("Bad URL syntax");
 
-	if (*end == '/' || !*end) {
-		output_fd = input_fd;
-	} else {
-		char *end2;
-		output_fd = (int)strtoul(end + 1, &end2, 10);
+	اگر (*end == '/' || !*end) {
+		output_fd = درون_داد_fd;
+	} وگرنه {
+		نویسه *end2;
+		output_fd = (صحیح)strtoul(end + 1, &end2, 10);
 
-		if ((end2 == end + 1) || (*end2 != '/' && *end2))
+		اگر ((end2 == end + 1) || (*end2 != '/' && *end2))
 			die("Bad URL syntax");
 	}
 
-	command_loop(input_fd, output_fd);
-	return 0;
+	command_loop(درون_داد_fd, output_fd);
+	بازگشت 0;
 }

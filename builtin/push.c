@@ -4,144 +4,144 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "branch.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refspec.h"
-#include "run-command.h"
-#include "remote.h"
-#include "transport.h"
-#include "parse-options.h"
-#include "pkt-line.h"
-#include "submodule.h"
-#include "submodule-config.h"
-#include "send-pack.h"
-#include "trace2.h"
-#include "color.h"
+#شامل "builtin.h"
+#شامل "advice.h"
+#شامل "branch.h"
+#شامل "config.h"
+#شامل "dir.h"
+#شامل "environment.h"
+#شامل "gettext.h"
+#شامل "hex.h"
+#شامل "refspec.h"
+#شامل "run-command.h"
+#شامل "remote.h"
+#شامل "transport.h"
+#شامل "parse-options.h"
+#شامل "pkt-line.h"
+#شامل "submodule.h"
+#شامل "submodule-config.h"
+#شامل "send-pack.h"
+#شامل "trace2.h"
+#شامل "color.h"
 
-static const char * const push_usage[] = {
+ایستا ثابت نویسه * ثابت افزودن_usage[] = {
 	N_("git push [<options>] [<repository> [<refspec>...]]"),
-	NULL,
+	پوچ,
 };
 
-static enum git_colorbool push_use_color = GIT_COLOR_UNKNOWN;
-static char push_colors[][COLOR_MAXLEN] = {
+ایستا شمارش git_colorbool افزودن_use_color = GIT_COLOR_UNKNOWN;
+ایستا نویسه افزودن_colors[][COLOR_MAXLEN] = {
 	GIT_COLOR_RESET,
 	GIT_COLOR_RED,	/* ERROR */
 };
 
-enum color_push {
-	PUSH_COLOR_RESET = 0,
-	PUSH_COLOR_ERROR = 1
+شمارش color_افزودن {
+	افزودن_COLOR_RESET = 0,
+	افزودن_COLOR_ERROR = 1
 };
 
-static int parse_push_color_slot(const char *slot)
+ایستا صحیح parse_افزودن_color_slot(ثابت نویسه *slot)
 {
-	if (!strcasecmp(slot, "reset"))
-		return PUSH_COLOR_RESET;
-	if (!strcasecmp(slot, "error"))
-		return PUSH_COLOR_ERROR;
-	return -1;
+	اگر (!strcasecmp(slot, "reset"))
+		بازگشت افزودن_COLOR_RESET;
+	اگر (!strcasecmp(slot, "error"))
+		بازگشت افزودن_COLOR_ERROR;
+	بازگشت -1;
 }
 
-static const char *push_get_color(enum color_push ix)
+ایستا ثابت نویسه *افزودن_get_color(شمارش color_افزودن ix)
 {
-	if (want_color_stderr(push_use_color))
-		return push_colors[ix];
-	return "";
+	اگر (want_color_stderr(افزودن_use_color))
+		بازگشت افزودن_colors[ix];
+	بازگشت "";
 }
 
-static int thin = 1;
-static int deleterefs;
-static const char *receivepack;
-static int verbosity;
-static int progress = -1;
-static int recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
-static enum transport_family family;
+ایستا صحیح thin = 1;
+ایستا صحیح deleterefs;
+ایستا ثابت نویسه *receivepack;
+ایستا صحیح verbosity;
+ایستا صحیح progress = -1;
+ایستا صحیح recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
+ایستا شمارش transport_family family;
 
-static struct push_cas_option cas;
+ایستا ساختار افزودن_cas_option cas;
 
-static struct refspec rs;
+ایستا ساختار refspec rs;
 
-static struct string_list push_options_config = STRING_LIST_INIT_DUP;
+ایستا ساختار string_list افزودن_options_config = STRING_LIST_INIT_DUP;
 
-static void refspec_append_mapped(struct refspec *refspec, const char *ref,
-				  struct remote *remote, struct ref *matched)
+ایستا تهی refspec_append_mapped(ساختار refspec *refspec, ثابت نویسه *ref,
+				  ساختار remote *remote, ساختار ref *matched)
 {
-	const char *branch_name;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ثابت نویسه *branch_name;
+	ساختار repo_config_مقادیر *cfg = repo_config_مقادیر(the_repository);
 
-	if (remote->push.nr) {
-		struct refspec_item query = {
+	اگر (remote->افزودن.nr) {
+		ساختار refspec_item query = {
 			.src = matched->name,
 		};
 
-		if (!refspec_find_match(&remote->push, &query) && query.dst) {
+		اگر (!refspec_find_match(&remote->افزودن, &query) && query.dst) {
 			refspec_appendf(refspec, "%s%s:%s",
 					query.force ? "+" : "",
 					query.src, query.dst);
-			free(query.dst);
-			return;
+			آزاد(query.dst);
+			بازگشت;
 		}
 	}
 
-	if (cfg->push_default == PUSH_DEFAULT_UPSTREAM &&
+	اگر (cfg->افزودن_default == افزودن_DEFAULT_UPSTREAM &&
 	    skip_prefix(matched->name, "refs/heads/", &branch_name)) {
-		struct branch *branch = branch_get(branch_name);
-		if (branch->merge_nr == 1 && branch->merge[0]->src) {
+		ساختار branch *branch = branch_get(branch_name);
+		اگر (branch->merge_nr == 1 && branch->merge[0]->src) {
 			refspec_appendf(refspec, "%s:%s",
 					ref, branch->merge[0]->src);
-			return;
+			بازگشت;
 		}
 	}
 
 	refspec_append(refspec, ref);
 }
 
-static void set_refspecs(const char **refs, int nr, struct remote *remote)
+ایستا تهی set_refspecs(ثابت نویسه **refs, صحیح nr, ساختار remote *remote)
 {
-	struct ref *local_refs = NULL;
-	int i;
+	ساختار ref *local_refs = پوچ;
+	صحیح i;
 
-	for (i = 0; i < nr; i++) {
-		const char *ref = refs[i];
-		if (!strcmp("tag", ref)) {
-			if (nr <= ++i)
+	برای (i = 0; i < nr; i++) {
+		ثابت نویسه *ref = refs[i];
+		اگر (!strcmp("tag", ref)) {
+			اگر (nr <= ++i)
 				die(_("tag shorthand without <tag>"));
 			ref = refs[i];
-			if (deleterefs)
+			اگر (deleterefs)
 				refspec_appendf(&rs, ":refs/tags/%s", ref);
-			else
+			وگرنه
 				refspec_appendf(&rs, "refs/tags/%s", ref);
-		} else if (deleterefs) {
-			if (strchr(ref, ':') || !*ref)
+		} وگرنه اگر (deleterefs) {
+			اگر (strchr(ref, ':') || !*ref)
 				die(_("--delete only accepts plain target ref names"));
 			refspec_appendf(&rs, ":%s", ref);
-		} else if (!strchr(ref, ':')) {
-			struct ref *matched = NULL;
+		} وگرنه اگر (!strchr(ref, ':')) {
+			ساختار ref *matched = پوچ;
 
 			/* lazily grab local_refs */
-			if (!local_refs)
+			اگر (!local_refs)
 				local_refs = get_local_heads();
 
 			/* Does "ref" uniquely name our ref? */
-			if (count_refspec_match(ref, local_refs, &matched) != 1)
+			اگر (شمار_refspec_match(ref, local_refs, &matched) != 1)
 				refspec_append(&rs, ref);
-			else
+			وگرنه
 				refspec_append_mapped(&rs, ref, remote, matched);
-		} else
+		} وگرنه
 			refspec_append(&rs, ref);
 	}
 	free_refs(local_refs);
 }
 
-static NORETURN void die_push_simple(struct branch *branch,
-				     struct remote *remote)
+ایستا NORETURN تهی die_افزودن_simple(ساختار branch *branch,
+				     ساختار remote *remote)
 {
 	/*
 	 * There's no point in using shorten_unambiguous_ref here,
@@ -151,10 +151,10 @@ static NORETURN void die_push_simple(struct branch *branch,
 	 * upstream to a non-branch, we should probably be showing
 	 * them the big ugly fully qualified ref.
 	 */
-	const char *advice_pushdefault_maybe = "";
-	const char *advice_automergesimple_maybe = "";
-	const char *short_upstream = branch->merge[0]->src;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ثابت نویسه *advice_pushdefault_maybe = "";
+	ثابت نویسه *advice_automergesimple_maybe = "";
+	ثابت نویسه *short_upstream = branch->merge[0]->src;
+	ساختار repo_config_مقادیر *cfg = repo_config_مقادیر(the_repository);
 
 	skip_prefix(short_upstream, "refs/heads/", &short_upstream);
 
@@ -162,11 +162,11 @@ static NORETURN void die_push_simple(struct branch *branch,
 	 * Don't show advice for people who explicitly set
 	 * push.default.
 	 */
-	if (cfg->push_default == PUSH_DEFAULT_UNSPECIFIED)
+	اگر (cfg->افزودن_default == افزودن_DEFAULT_UNSPECIFIED)
 		advice_pushdefault_maybe = _("\n"
 				 "To choose either option permanently, "
 				 "see push.default in 'git help config'.\n");
-	if (cfg->branch_track != BRANCH_TRACK_SIMPLE)
+	اگر (cfg->branch_track != BRANCH_TRACK_SIMPLE)
 		advice_automergesimple_maybe = _("\n"
 				 "To avoid automatically configuring "
 				 "an upstream branch when its name\n"
@@ -188,23 +188,23 @@ static NORETURN void die_push_simple(struct branch *branch,
 	    advice_automergesimple_maybe);
 }
 
-static const char message_detached_head_die[] =
+ایستا ثابت نویسه message_detached_head_die[] =
 	N_("You are not currently on a branch.\n"
 	   "To push the history leading to the current (detached HEAD)\n"
 	   "state now, use\n"
 	   "\n"
 	   "    git push %s HEAD:<name-of-remote-branch>\n");
 
-static const char *get_upstream_ref(int flags, struct branch *branch, const char *remote_name)
+ایستا ثابت نویسه *get_upstream_ref(صحیح flags, ساختار branch *branch, ثابت نویسه *remote_name)
 {
-	if (branch->merge_nr == 0 && (flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
+	اگر (branch->merge_nr == 0 && (flags & TRANSPORT_افزودن_AUTO_UPSTREAM)) {
 		/* if missing, assume same; set_upstream will be defined later */
-		return branch->refname;
+		بازگشت branch->refname;
 	}
 
-	if (!branch->merge_nr || !branch->merge || !branch->remote_name) {
-		const char *advice_autosetup_maybe = "";
-		if (!(flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
+	اگر (!branch->merge_nr || !branch->merge || !branch->remote_name) {
+		ثابت نویسه *advice_autosetup_maybe = "";
+		اگر (!(flags & TRANSPORT_افزودن_AUTO_UPSTREAM)) {
 			advice_autosetup_maybe = _("\n"
 					   "To have this happen automatically for "
 					   "branches without a tracking\n"
@@ -221,61 +221,61 @@ static const char *get_upstream_ref(int flags, struct branch *branch, const char
 		    branch->name,
 		    advice_autosetup_maybe);
 	}
-	if (branch->merge_nr != 1)
+	اگر (branch->merge_nr != 1)
 		die(_("The current branch %s has multiple upstream branches, "
 		    "refusing to push."), branch->name);
 
-	return branch->merge[0]->src;
+	بازگشت branch->merge[0]->src;
 }
 
-static void setup_default_push_refspecs(int *flags, struct remote *remote)
+ایستا تهی setup_default_افزودن_refspecs(صحیح *flags, ساختار remote *remote)
 {
-	struct branch *branch;
-	const char *dst;
-	int same_remote;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ساختار branch *branch;
+	ثابت نویسه *dst;
+	صحیح same_remote;
+	ساختار repo_config_مقادیر *cfg = repo_config_مقادیر(the_repository);
 
-	switch (cfg->push_default) {
-	case PUSH_DEFAULT_MATCHING:
+	انتخاب (cfg->افزودن_default) {
+	حالت افزودن_DEFAULT_MATCHING:
 		refspec_append(&rs, ":");
-		return;
+		بازگشت;
 
-	case PUSH_DEFAULT_NOTHING:
+	حالت افزودن_DEFAULT_NOTHING:
 		die(_("You didn't specify any refspecs to push, and "
 		    "push.default is \"nothing\"."));
-		return;
-	default:
-		break;
+		بازگشت;
+	پیشفرض:
+		بشکن;
 	}
 
-	branch = branch_get(NULL);
-	if (!branch)
+	branch = branch_get(پوچ);
+	اگر (!branch)
 		die(_(message_detached_head_die), remote->name);
 
 	dst = branch->refname;
-	same_remote = !strcmp(remote->name, remote_for_branch(branch, NULL));
+	same_remote = !strcmp(remote->name, remote_for_branch(branch, پوچ));
 
-	switch (cfg->push_default) {
-	default:
-	case PUSH_DEFAULT_UNSPECIFIED:
-	case PUSH_DEFAULT_SIMPLE:
-		if (!same_remote)
-			break;
-		if (strcmp(branch->refname, get_upstream_ref(*flags, branch, remote->name)))
-			die_push_simple(branch, remote);
-		break;
+	انتخاب (cfg->افزودن_default) {
+	پیشفرض:
+	حالت افزودن_DEFAULT_UNSPECIFIED:
+	حالت افزودن_DEFAULT_SIMPLE:
+		اگر (!same_remote)
+			بشکن;
+		اگر (strcmp(branch->refname, get_upstream_ref(*flags, branch, remote->name)))
+			die_افزودن_simple(branch, remote);
+		بشکن;
 
-	case PUSH_DEFAULT_UPSTREAM:
-		if (!same_remote)
+	حالت افزودن_DEFAULT_UPSTREAM:
+		اگر (!same_remote)
 			die(_("You are pushing to remote '%s', which is not the upstream of\n"
 			      "your current branch '%s', without telling me what to push\n"
 			      "to update which remote branch."),
 			    remote->name, branch->name);
 		dst = get_upstream_ref(*flags, branch, remote->name);
-		break;
+		بشکن;
 
-	case PUSH_DEFAULT_CURRENT:
-		break;
+	حالت افزودن_DEFAULT_CURRENT:
+		بشکن;
 	}
 
 	/*
@@ -283,496 +283,496 @@ static void setup_default_push_refspecs(int *flags, struct remote *remote)
 	 * no upstream defined, then set it (with options 'simple', 'upstream',
 	 * and 'current').
 	 */
-	if ((*flags & TRANSPORT_PUSH_AUTO_UPSTREAM) && branch->merge_nr == 0)
-		*flags |= TRANSPORT_PUSH_SET_UPSTREAM;
+	اگر ((*flags & TRANSPORT_افزودن_AUTO_UPSTREAM) && branch->merge_nr == 0)
+		*flags |= TRANSPORT_افزودن_SET_UPSTREAM;
 
 	refspec_appendf(&rs, "%s:%s", branch->refname, dst);
 }
 
-static const char message_advice_pull_before_push[] =
+ایستا ثابت نویسه message_advice_pull_before_افزودن[] =
 	N_("Updates were rejected because the tip of your current branch is behind\n"
 	   "its remote counterpart. If you want to integrate the remote changes,\n"
 	   "use 'git pull' before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static const char message_advice_checkout_pull_push[] =
+ایستا ثابت نویسه message_advice_checkout_pull_افزودن[] =
 	N_("Updates were rejected because a pushed branch tip is behind its remote\n"
 	   "counterpart. If you want to integrate the remote changes, use 'git pull'\n"
 	   "before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static const char message_advice_ref_fetch_first[] =
+ایستا ثابت نویسه message_advice_ref_fetch_first[] =
 	N_("Updates were rejected because the remote contains work that you do not\n"
 	   "have locally. This is usually caused by another repository pushing to\n"
 	   "the same ref. If you want to integrate the remote changes, use\n"
 	   "'git pull' before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static const char message_advice_ref_already_exists[] =
+ایستا ثابت نویسه message_advice_ref_already_exists[] =
 	N_("Updates were rejected because the tag already exists in the remote.");
 
-static const char message_advice_ref_needs_force[] =
+ایستا ثابت نویسه message_advice_ref_needs_force[] =
 	N_("You cannot update a remote ref that points at a non-commit object,\n"
 	   "or update a remote ref to make it point at a non-commit object,\n"
 	   "without using the '--force' option.\n");
 
-static const char message_advice_ref_needs_update[] =
+ایستا ثابت نویسه message_advice_ref_needs_update[] =
 	N_("Updates were rejected because the tip of the remote-tracking branch has\n"
 	   "been updated since the last checkout. If you want to integrate the\n"
 	   "remote changes, use 'git pull' before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static void advise_pull_before_push(void)
+ایستا تهی advise_pull_before_افزودن(تهی)
 {
-	if (!advice_enabled(ADVICE_PUSH_NON_FF_CURRENT) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
-	advise(_(message_advice_pull_before_push));
+	اگر (!advice_enabled(ADVICE_افزودن_NON_FF_CURRENT) || !advice_enabled(ADVICE_افزودن_UPDATE_REJECTED))
+		بازگشت;
+	advise(_(message_advice_pull_before_افزودن));
 }
 
-static void advise_checkout_pull_push(void)
+ایستا تهی advise_checkout_pull_افزودن(تهی)
 {
-	if (!advice_enabled(ADVICE_PUSH_NON_FF_MATCHING) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
-	advise(_(message_advice_checkout_pull_push));
+	اگر (!advice_enabled(ADVICE_افزودن_NON_FF_MATCHING) || !advice_enabled(ADVICE_افزودن_UPDATE_REJECTED))
+		بازگشت;
+	advise(_(message_advice_checkout_pull_افزودن));
 }
 
-static void advise_ref_already_exists(void)
+ایستا تهی advise_ref_already_exists(تهی)
 {
-	if (!advice_enabled(ADVICE_PUSH_ALREADY_EXISTS) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	اگر (!advice_enabled(ADVICE_افزودن_ALREADY_EXISTS) || !advice_enabled(ADVICE_افزودن_UPDATE_REJECTED))
+		بازگشت;
 	advise(_(message_advice_ref_already_exists));
 }
 
-static void advise_ref_fetch_first(void)
+ایستا تهی advise_ref_fetch_first(تهی)
 {
-	if (!advice_enabled(ADVICE_PUSH_FETCH_FIRST) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	اگر (!advice_enabled(ADVICE_افزودن_FETCH_FIRST) || !advice_enabled(ADVICE_افزودن_UPDATE_REJECTED))
+		بازگشت;
 	advise(_(message_advice_ref_fetch_first));
 }
 
-static void advise_ref_needs_force(void)
+ایستا تهی advise_ref_needs_force(تهی)
 {
-	if (!advice_enabled(ADVICE_PUSH_NEEDS_FORCE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	اگر (!advice_enabled(ADVICE_افزودن_NEEDS_FORCE) || !advice_enabled(ADVICE_افزودن_UPDATE_REJECTED))
+		بازگشت;
 	advise(_(message_advice_ref_needs_force));
 }
 
-static void advise_ref_needs_update(void)
+ایستا تهی advise_ref_needs_update(تهی)
 {
-	if (!advice_enabled(ADVICE_PUSH_REF_NEEDS_UPDATE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	اگر (!advice_enabled(ADVICE_افزودن_REF_NEEDS_UPDATE) || !advice_enabled(ADVICE_افزودن_UPDATE_REJECTED))
+		بازگشت;
 	advise(_(message_advice_ref_needs_update));
 }
 
-static int push_with_options(struct transport *transport, struct refspec *rs,
-			     int flags)
+ایستا صحیح افزودن_with_options(ساختار transport *transport, ساختار refspec *rs,
+			     صحیح flags)
 {
-	int err;
-	unsigned int reject_reasons;
-	char *anon_url = transport_anonymize_url(transport->url);
+	صحیح err;
+	unsigned صحیح reject_reasons;
+	نویسه *anon_url = transport_anonymize_url(transport->url);
 
 	transport_set_verbosity(transport, verbosity, progress);
 	transport->family = family;
 
-	if (receivepack)
+	اگر (receivepack)
 		transport_set_option(transport,
 				     TRANS_OPT_RECEIVEPACK, receivepack);
-	transport_set_option(transport, TRANS_OPT_THIN, thin ? "yes" : NULL);
+	transport_set_option(transport, TRANS_OPT_THIN, thin ? "yes" : پوچ);
 
-	if (!is_empty_cas(&cas)) {
-		if (!transport->smart_options)
+	اگر (!is_empty_cas(&cas)) {
+		اگر (!transport->smart_options)
 			die("underlying transport does not support --%s option",
 			    "force-with-lease");
 		transport->smart_options->cas = &cas;
 	}
 
-	if (verbosity > 0)
+	اگر (verbosity > 0)
 		fprintf(stderr, _("Pushing to %s\n"), anon_url);
 	trace2_region_enter("push", "transport_push", the_repository);
-	err = transport_push(the_repository, transport,
+	err = transport_افزودن(the_repository, transport,
 			     rs, flags, &reject_reasons);
 	trace2_region_leave("push", "transport_push", the_repository);
-	if (err != 0) {
-		fprintf(stderr, "%s", push_get_color(PUSH_COLOR_ERROR));
+	اگر (err != 0) {
+		fprintf(stderr, "%s", افزودن_get_color(افزودن_COLOR_ERROR));
 		error(_("failed to push some refs to '%s'"), anon_url);
-		fprintf(stderr, "%s", push_get_color(PUSH_COLOR_RESET));
+		fprintf(stderr, "%s", افزودن_get_color(افزودن_COLOR_RESET));
 	}
 
 	err |= transport_disconnect(transport);
-	free(anon_url);
-	if (!err)
-		return 0;
+	آزاد(anon_url);
+	اگر (!err)
+		بازگشت 0;
 
-	if (reject_reasons & REJECT_NON_FF_HEAD) {
-		advise_pull_before_push();
-	} else if (reject_reasons & REJECT_NON_FF_OTHER) {
-		advise_checkout_pull_push();
-	} else if (reject_reasons & REJECT_ALREADY_EXISTS) {
+	اگر (reject_reasons & REJECT_NON_FF_HEAD) {
+		advise_pull_before_افزودن();
+	} وگرنه اگر (reject_reasons & REJECT_NON_FF_OTHER) {
+		advise_checkout_pull_افزودن();
+	} وگرنه اگر (reject_reasons & REJECT_ALREADY_EXISTS) {
 		advise_ref_already_exists();
-	} else if (reject_reasons & REJECT_FETCH_FIRST) {
+	} وگرنه اگر (reject_reasons & REJECT_FETCH_FIRST) {
 		advise_ref_fetch_first();
-	} else if (reject_reasons & REJECT_NEEDS_FORCE) {
+	} وگرنه اگر (reject_reasons & REJECT_NEEDS_FORCE) {
 		advise_ref_needs_force();
-	} else if (reject_reasons & REJECT_REF_NEEDS_UPDATE) {
+	} وگرنه اگر (reject_reasons & REJECT_REF_NEEDS_UPDATE) {
 		advise_ref_needs_update();
 	}
 
-	return 1;
+	بازگشت 1;
 }
 
-static int do_push(int flags,
-		   const struct string_list *push_options,
-		   struct remote *remote)
+ایستا صحیح do_افزودن(صحیح flags,
+		   ثابت ساختار string_list *افزودن_options,
+		   ساختار remote *remote)
 {
-	int errs;
-	struct strvec *url;
-	struct refspec *push_refspec = &rs;
+	صحیح errs;
+	ساختار strvec *url;
+	ساختار refspec *افزودن_refspec = &rs;
 
-	if (push_options->nr)
-		flags |= TRANSPORT_PUSH_OPTIONS;
+	اگر (افزودن_options->nr)
+		flags |= TRANSPORT_افزودن_OPTIONS;
 
-	if (!push_refspec->nr && !(flags & TRANSPORT_PUSH_ALL)) {
-		if (remote->push.nr) {
-			push_refspec = &remote->push;
-		} else if (!(flags & TRANSPORT_PUSH_MIRROR))
-			setup_default_push_refspecs(&flags, remote);
+	اگر (!افزودن_refspec->nr && !(flags & TRANSPORT_افزودن_ALL)) {
+		اگر (remote->افزودن.nr) {
+			افزودن_refspec = &remote->افزودن;
+		} وگرنه اگر (!(flags & TRANSPORT_افزودن_MIRROR))
+			setup_default_افزودن_refspecs(&flags, remote);
 	}
 	errs = 0;
-	url = push_url_of_remote(remote);
-	for (size_t i = 0; i < url->nr; i++) {
-		struct transport *transport =
+	url = افزودن_url_of_remote(remote);
+	برای (size_t i = 0; i < url->nr; i++) {
+		ساختار transport *transport =
 			transport_get(remote, url->v[i]);
-		if (flags & TRANSPORT_PUSH_OPTIONS)
-			transport->push_options = push_options;
-		if (push_with_options(transport, push_refspec, flags))
+		اگر (flags & TRANSPORT_افزودن_OPTIONS)
+			transport->افزودن_options = افزودن_options;
+		اگر (افزودن_with_options(transport, افزودن_refspec, flags))
 			errs++;
 	}
-	return !!errs;
+	بازگشت !!errs;
 }
 
-static int option_parse_recurse_submodules(const struct option *opt,
-				   const char *arg, int unset)
+ایستا صحیح option_parse_recurse_submodules(ثابت ساختار option *opt,
+				   ثابت نویسه *arg, صحیح unset)
 {
-	int *recurse_submodules = opt->value;
+	صحیح *recurse_submodules = opt->مقدار;
 
-	if (unset)
+	اگر (unset)
 		*recurse_submodules = RECURSE_SUBMODULES_OFF;
-	else {
-		if (!strcmp(arg, "only-is-on-demand")) {
-			if (*recurse_submodules == RECURSE_SUBMODULES_ONLY) {
+	وگرنه {
+		اگر (!strcmp(arg, "only-is-on-demand")) {
+			اگر (*recurse_submodules == RECURSE_SUBMODULES_ONLY) {
 				warning(_("recursing into submodule with push.recurseSubmodules=only; using on-demand instead"));
 				*recurse_submodules = RECURSE_SUBMODULES_ON_DEMAND;
 			}
-		} else {
-			*recurse_submodules = parse_push_recurse_submodules_arg(opt->long_name, arg);
+		} وگرنه {
+			*recurse_submodules = parse_افزودن_recurse_submodules_arg(opt->long_name, arg);
 		}
 	}
 
-	return 0;
+	بازگشت 0;
 }
 
-static void set_push_cert_flags(int *flags, int v)
+ایستا تهی set_افزودن_cert_flags(صحیح *flags, صحیح v)
 {
-	switch (v) {
-	case SEND_PACK_PUSH_CERT_NEVER:
-		*flags &= ~(TRANSPORT_PUSH_CERT_ALWAYS | TRANSPORT_PUSH_CERT_IF_ASKED);
-		break;
-	case SEND_PACK_PUSH_CERT_ALWAYS:
-		*flags |= TRANSPORT_PUSH_CERT_ALWAYS;
-		*flags &= ~TRANSPORT_PUSH_CERT_IF_ASKED;
-		break;
-	case SEND_PACK_PUSH_CERT_IF_ASKED:
-		*flags |= TRANSPORT_PUSH_CERT_IF_ASKED;
-		*flags &= ~TRANSPORT_PUSH_CERT_ALWAYS;
-		break;
+	انتخاب (v) {
+	حالت SEND_PACK_افزودن_CERT_NEVER:
+		*flags &= ~(TRANSPORT_افزودن_CERT_ALWAYS | TRANSPORT_افزودن_CERT_IF_ASKED);
+		بشکن;
+	حالت SEND_PACK_افزودن_CERT_ALWAYS:
+		*flags |= TRANSPORT_افزودن_CERT_ALWAYS;
+		*flags &= ~TRANSPORT_افزودن_CERT_IF_ASKED;
+		بشکن;
+	حالت SEND_PACK_افزودن_CERT_IF_ASKED:
+		*flags |= TRANSPORT_افزودن_CERT_IF_ASKED;
+		*flags &= ~TRANSPORT_افزودن_CERT_ALWAYS;
+		بشکن;
 	}
 }
 
 
-static int git_push_config(const char *k, const char *v,
-			   const struct config_context *ctx, void *cb)
+ایستا صحیح git_افزودن_config(ثابت نویسه *k, ثابت نویسه *v,
+			   ثابت ساختار config_context *ctx, تهی *cb)
 {
-	const char *slot_name;
-	int *flags = cb;
+	ثابت نویسه *slot_name;
+	صحیح *flags = cb;
 
-	if (!strcmp(k, "push.followtags")) {
-		if (git_config_bool(k, v))
-			*flags |= TRANSPORT_PUSH_FOLLOW_TAGS;
-		else
-			*flags &= ~TRANSPORT_PUSH_FOLLOW_TAGS;
-		return 0;
-	} else if (!strcmp(k, "push.autosetupremote")) {
-		if (git_config_bool(k, v))
-			*flags |= TRANSPORT_PUSH_AUTO_UPSTREAM;
-		return 0;
-	} else if (!strcmp(k, "push.gpgsign")) {
-		switch (git_parse_maybe_bool(v)) {
-		case 0:
-			set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_NEVER);
-			break;
-		case 1:
-			set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_ALWAYS);
-			break;
-		default:
-			if (!strcasecmp(v, "if-asked"))
-				set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_IF_ASKED);
-			else
-				return error(_("invalid value for '%s'"), k);
+	اگر (!strcmp(k, "push.followtags")) {
+		اگر (git_config_bool(k, v))
+			*flags |= TRANSPORT_افزودن_FOLLOW_TAGS;
+		وگرنه
+			*flags &= ~TRANSPORT_افزودن_FOLLOW_TAGS;
+		بازگشت 0;
+	} وگرنه اگر (!strcmp(k, "push.autosetupremote")) {
+		اگر (git_config_bool(k, v))
+			*flags |= TRANSPORT_افزودن_AUTO_UPSTREAM;
+		بازگشت 0;
+	} وگرنه اگر (!strcmp(k, "push.gpgsign")) {
+		انتخاب (git_parse_maybe_bool(v)) {
+		حالت 0:
+			set_افزودن_cert_flags(flags, SEND_PACK_افزودن_CERT_NEVER);
+			بشکن;
+		حالت 1:
+			set_افزودن_cert_flags(flags, SEND_PACK_افزودن_CERT_ALWAYS);
+			بشکن;
+		پیشفرض:
+			اگر (!strcasecmp(v, "if-asked"))
+				set_افزودن_cert_flags(flags, SEND_PACK_افزودن_CERT_IF_ASKED);
+			وگرنه
+				بازگشت error(_("invalid value for '%s'"), k);
 		}
-	} else if (!strcmp(k, "push.recursesubmodules")) {
-		recurse_submodules = parse_push_recurse_submodules_arg(k, v);
-	} else if (!strcmp(k, "submodule.recurse")) {
-		int val = git_config_bool(k, v) ?
+	} وگرنه اگر (!strcmp(k, "push.recursesubmodules")) {
+		recurse_submodules = parse_افزودن_recurse_submodules_arg(k, v);
+	} وگرنه اگر (!strcmp(k, "submodule.recurse")) {
+		صحیح val = git_config_bool(k, v) ?
 			RECURSE_SUBMODULES_ON_DEMAND : RECURSE_SUBMODULES_OFF;
 		recurse_submodules = val;
-	} else if (!strcmp(k, "push.pushoption")) {
-		return parse_transport_option(k, v, &push_options_config);
-	} else if (!strcmp(k, "color.push")) {
-		push_use_color = git_config_colorbool(k, v);
-		return 0;
-	} else if (skip_prefix(k, "color.push.", &slot_name)) {
-		int slot = parse_push_color_slot(slot_name);
-		if (slot < 0)
-			return 0;
-		if (!v)
-			return config_error_nonbool(k);
-		return color_parse(v, push_colors[slot]);
-	} else if (!strcmp(k, "push.useforceifincludes")) {
-		if (git_config_bool(k, v))
-			*flags |= TRANSPORT_PUSH_FORCE_IF_INCLUDES;
-		else
-			*flags &= ~TRANSPORT_PUSH_FORCE_IF_INCLUDES;
-		return 0;
+	} وگرنه اگر (!strcmp(k, "push.pushoption")) {
+		بازگشت parse_transport_option(k, v, &افزودن_options_config);
+	} وگرنه اگر (!strcmp(k, "color.push")) {
+		افزودن_use_color = git_config_colorbool(k, v);
+		بازگشت 0;
+	} وگرنه اگر (skip_prefix(k, "color.push.", &slot_name)) {
+		صحیح slot = parse_افزودن_color_slot(slot_name);
+		اگر (slot < 0)
+			بازگشت 0;
+		اگر (!v)
+			بازگشت config_error_nonbool(k);
+		بازگشت color_parse(v, افزودن_colors[slot]);
+	} وگرنه اگر (!strcmp(k, "push.useforceifincludes")) {
+		اگر (git_config_bool(k, v))
+			*flags |= TRANSPORT_افزودن_FORCE_IF_INCLUDES;
+		وگرنه
+			*flags &= ~TRANSPORT_افزودن_FORCE_IF_INCLUDES;
+		بازگشت 0;
 	}
 
-	return git_default_config(k, v, ctx, NULL);
+	بازگشت git_default_config(k, v, ctx, پوچ);
 }
 
-static int push_multiple(struct string_list *list,
-			 const struct string_list *push_options,
-			 int flags,
-			 int tags,
-			 const char **refspecs,
-			 int refspec_nr)
+ایستا صحیح افزودن_multiple(ساختار string_list *list,
+			 ثابت ساختار string_list *افزودن_options,
+			 صحیح flags,
+			 صحیح tags,
+			 ثابت نویسه **refspecs,
+			 صحیح refspec_nr)
 {
-	int result = 0;
+	صحیح result = 0;
 	size_t i;
-	struct strvec argv = STRVEC_INIT;
+	ساختار strvec argv = STRVEC_INIT;
 
-	strvec_push(&argv, "push");
+	strvec_افزودن(&argv, "push");
 
-	if (flags & TRANSPORT_PUSH_FORCE)
-		strvec_push(&argv, "--force");
-	if (flags & TRANSPORT_PUSH_DRY_RUN)
-		strvec_push(&argv, "--dry-run");
-	if (flags & TRANSPORT_PUSH_PORCELAIN)
-		strvec_push(&argv, "--porcelain");
-	if (flags & TRANSPORT_PUSH_PRUNE)
-		strvec_push(&argv, "--prune");
-	if (flags & TRANSPORT_PUSH_NO_HOOK)
-		strvec_push(&argv, "--no-verify");
-	if (flags & TRANSPORT_PUSH_FOLLOW_TAGS)
-		strvec_push(&argv, "--follow-tags");
-	if (flags & TRANSPORT_PUSH_SET_UPSTREAM)
-		strvec_push(&argv, "--set-upstream");
-	if (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES)
-		strvec_push(&argv, "--force-if-includes");
-	if (flags & TRANSPORT_PUSH_ALL)
-		strvec_push(&argv, "--all");
-	if (flags & TRANSPORT_PUSH_MIRROR)
-		strvec_push(&argv, "--mirror");
+	اگر (flags & TRANSPORT_افزودن_FORCE)
+		strvec_افزودن(&argv, "--force");
+	اگر (flags & TRANSPORT_افزودن_DRY_RUN)
+		strvec_افزودن(&argv, "--dry-run");
+	اگر (flags & TRANSPORT_افزودن_PORCELAIN)
+		strvec_افزودن(&argv, "--porcelain");
+	اگر (flags & TRANSPORT_افزودن_PRUNE)
+		strvec_افزودن(&argv, "--prune");
+	اگر (flags & TRANSPORT_افزودن_NO_HOOK)
+		strvec_افزودن(&argv, "--no-verify");
+	اگر (flags & TRANSPORT_افزودن_FOLLOW_TAGS)
+		strvec_افزودن(&argv, "--follow-tags");
+	اگر (flags & TRANSPORT_افزودن_SET_UPSTREAM)
+		strvec_افزودن(&argv, "--set-upstream");
+	اگر (flags & TRANSPORT_افزودن_FORCE_IF_INCLUDES)
+		strvec_افزودن(&argv, "--force-if-includes");
+	اگر (flags & TRANSPORT_افزودن_ALL)
+		strvec_افزودن(&argv, "--all");
+	اگر (flags & TRANSPORT_افزودن_MIRROR)
+		strvec_افزودن(&argv, "--mirror");
 
-	if (flags & TRANSPORT_PUSH_CERT_ALWAYS)
-		strvec_push(&argv, "--signed=yes");
-	else if (flags & TRANSPORT_PUSH_CERT_IF_ASKED)
-		strvec_push(&argv, "--signed=if-asked");
-	if (!thin)
-		strvec_push(&argv, "--no-thin");
+	اگر (flags & TRANSPORT_افزودن_CERT_ALWAYS)
+		strvec_افزودن(&argv, "--signed=yes");
+	وگرنه اگر (flags & TRANSPORT_افزودن_CERT_IF_ASKED)
+		strvec_افزودن(&argv, "--signed=if-asked");
+	اگر (!thin)
+		strvec_افزودن(&argv, "--no-thin");
 
-	if (deleterefs)
-		strvec_push(&argv, "--delete");
+	اگر (deleterefs)
+		strvec_افزودن(&argv, "--delete");
 
-	if (receivepack)
+	اگر (receivepack)
 		strvec_pushf(&argv, "--receive-pack=%s", receivepack);
-	if (verbosity >= 2)
-		strvec_push(&argv, "-v");
-	if (verbosity >= 1)
-		strvec_push(&argv, "-v");
-	else if (verbosity < 0)
-		strvec_push(&argv, "-q");
-	if (progress > 0)
-		strvec_push(&argv, "--progress");
-	else if (progress == 0)
-		strvec_push(&argv, "--no-progress");
+	اگر (verbosity >= 2)
+		strvec_افزودن(&argv, "-v");
+	اگر (verbosity >= 1)
+		strvec_افزودن(&argv, "-v");
+	وگرنه اگر (verbosity < 0)
+		strvec_افزودن(&argv, "-q");
+	اگر (progress > 0)
+		strvec_افزودن(&argv, "--progress");
+	وگرنه اگر (progress == 0)
+		strvec_افزودن(&argv, "--no-progress");
 
-	if (family == TRANSPORT_FAMILY_IPV4)
-		strvec_push(&argv, "--ipv4");
-	else if (family == TRANSPORT_FAMILY_IPV6)
-		strvec_push(&argv, "--ipv6");
+	اگر (family == TRANSPORT_FAMILY_IPV4)
+		strvec_افزودن(&argv, "--ipv4");
+	وگرنه اگر (family == TRANSPORT_FAMILY_IPV6)
+		strvec_افزودن(&argv, "--ipv6");
 
-	if (recurse_submodules == RECURSE_SUBMODULES_CHECK)
-		strvec_push(&argv, "--recurse-submodules=check");
-	else if (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
-		strvec_push(&argv, "--recurse-submodules=on-demand");
-	else if (recurse_submodules == RECURSE_SUBMODULES_ONLY)
-		strvec_push(&argv, "--recurse-submodules=only");
-	else if (recurse_submodules == RECURSE_SUBMODULES_OFF)
-		strvec_push(&argv, "--recurse-submodules=no");
+	اگر (recurse_submodules == RECURSE_SUBMODULES_CHECK)
+		strvec_افزودن(&argv, "--recurse-submodules=check");
+	وگرنه اگر (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+		strvec_افزودن(&argv, "--recurse-submodules=on-demand");
+	وگرنه اگر (recurse_submodules == RECURSE_SUBMODULES_ONLY)
+		strvec_افزودن(&argv, "--recurse-submodules=only");
+	وگرنه اگر (recurse_submodules == RECURSE_SUBMODULES_OFF)
+		strvec_افزودن(&argv, "--recurse-submodules=no");
 
 
-	if (tags)
-		strvec_push(&argv, "--tags");
+	اگر (tags)
+		strvec_افزودن(&argv, "--tags");
 
-	for (i = 0; i < push_options->nr; i++)
+	برای (i = 0; i < افزودن_options->nr; i++)
 		strvec_pushf(&argv, "--push-option=%s",
-			     push_options->items[i].string);
+			     افزودن_options->اقلام[i].string);
 
-	for (i = 0; i < cas.nr; i++) {
-		if (cas.entry[i].use_tracking) {
+	برای (i = 0; i < cas.nr; i++) {
+		اگر (cas.entry[i].use_tracking) {
 			strvec_pushf(&argv, "--force-with-lease=%s",
 				     cas.entry[i].refname);
-		} else if (!is_null_oid(&cas.entry[i].expect)) {
+		} وگرنه اگر (!is_null_oid(&cas.entry[i].expect)) {
 			strvec_pushf(&argv, "--force-with-lease=%s:%s",
 				     cas.entry[i].refname,
 				     oid_to_hex(&cas.entry[i].expect));
-		} else {
-			strvec_push(&argv, "--force-with-lease");
+		} وگرنه {
+			strvec_افزودن(&argv, "--force-with-lease");
 		}
 	}
 
-	for (i = 0; i < list->nr; i++) {
-		const char *name = list->items[i].string;
-		struct child_process cmd = CHILD_PROCESS_INIT;
-		int j;
+	برای (i = 0; i < list->nr; i++) {
+		ثابت نویسه *name = list->اقلام[i].string;
+		ساختار child_process cmd = CHILD_PROCESS_INIT;
+		صحیح j;
 
 		strvec_pushv(&cmd.args, argv.v);
-		strvec_push(&cmd.args, name);
+		strvec_افزودن(&cmd.args, name);
 
-		for (j = 0; j < refspec_nr; j++)
-			strvec_push(&cmd.args, refspecs[j]);
+		برای (j = 0; j < refspec_nr; j++)
+			strvec_افزودن(&cmd.args, refspecs[j]);
 
-		if (verbosity >= 0)
+		اگر (verbosity >= 0)
 			printf(_("Pushing to %s\n"), name);
 
 		cmd.git_cmd = 1;
-		if (run_command(&cmd)) {
+		اگر (run_command(&cmd)) {
 			error(_("could not push to %s"), name);
 			result = 1;
 		}
 	}
 
 	strvec_clear(&argv);
-	return result;
+	بازگشت result;
 }
 
-static void die_if_repo_looks_like_ref(const char *repo)
+ایستا تهی die_if_repo_looks_like_ref(ثابت نویسه *repo)
 {
-	const char *slash = strchr(repo, '/');
-	struct strbuf name = STRBUF_INIT;
-	int code;
+	ثابت نویسه *slash = strchr(repo, '/');
+	ساختار strbuf name = STRBUF_INIT;
+	صحیح code;
 
-	if (!slash || !slash[1] || file_exists(repo))
-		return;
+	اگر (!slash || !slash[1] || file_exists(repo))
+		بازگشت;
 
 	strbuf_add(&name, repo, slash - repo);
-	if (!remote_is_configured(remote_get(name.buf), 0)) {
+	اگر (!remote_is_configured(remote_get(name.buf), 0)) {
 		strbuf_release(&name);
-		return;
+		بازگشت;
 	}
 
 	code = die_message(_("'%s' is not a valid push target"), repo);
-	advise_if_enabled(ADVICE_PUSH_REPO_LOOKS_LIKE_REF,
+	advise_if_enabled(ADVICE_افزودن_REPO_LOOKS_LIKE_REF,
 			  _("Did you mean to use: git push %s %s?"),
 			  name.buf, slash + 1);
 	strbuf_release(&name);
 	exit(code);
 }
 
-int cmd_push(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repository UNUSED)
+صحیح cmd_افزودن(صحیح argc,
+	     ثابت نویسه **argv,
+	     ثابت نویسه *prefix,
+	     ساختار repository *repository UNUSED)
 {
-	int flags = 0;
-	int tags = 0;
-	int push_cert = -1;
-	int rc = 0;
-	int base_flags;
-	const char *repo = NULL;	/* default repository */
-	struct string_list push_options_cmdline = STRING_LIST_INIT_DUP;
-	struct string_list remote_group = STRING_LIST_INIT_DUP;
-	struct string_list *push_options;
-	const struct string_list_item *item;
+	صحیح flags = 0;
+	صحیح tags = 0;
+	صحیح افزودن_cert = -1;
+	صحیح rc = 0;
+	صحیح base_flags;
+	ثابت نویسه *repo = پوچ;	/* default repository */
+	ساختار string_list افزودن_options_cmdline = STRING_LIST_INIT_DUP;
+	ساختار string_list remote_group = STRING_LIST_INIT_DUP;
+	ساختار string_list *افزودن_options;
+	ثابت ساختار string_list_item *item;
 
-	struct option options[] = {
+	ساختار option options[] = {
 		OPT__VERBOSITY(&verbosity),
 		OPT_STRING( 0 , "repo", &repo, N_("repository"), N_("repository")),
-		OPT_BIT( 0 , "all", &flags, N_("push all branches"), TRANSPORT_PUSH_ALL),
+		OPT_BIT( 0 , "all", &flags, N_("push all branches"), TRANSPORT_افزودن_ALL),
 		OPT_ALIAS( 0 , "branches", "all"),
 		OPT_BIT( 0 , "mirror", &flags, N_("mirror all refs"),
-			    (TRANSPORT_PUSH_MIRROR|TRANSPORT_PUSH_FORCE)),
+			    (TRANSPORT_افزودن_MIRROR|TRANSPORT_افزودن_FORCE)),
 		OPT_BOOL('d', "delete", &deleterefs, N_("delete refs")),
 		OPT_BOOL( 0 , "tags", &tags, N_("push tags (can't be used with --all or --branches or --mirror)")),
-		OPT_BIT('n' , "dry-run", &flags, N_("dry run"), TRANSPORT_PUSH_DRY_RUN),
-		OPT_BIT( 0,  "porcelain", &flags, N_("machine-readable output"), TRANSPORT_PUSH_PORCELAIN),
-		OPT_BIT('f', "force", &flags, N_("force updates"), TRANSPORT_PUSH_FORCE),
+		OPT_BIT('n' , "dry-run", &flags, N_("dry run"), TRANSPORT_افزودن_DRY_RUN),
+		OPT_BIT( 0,  "porcelain", &flags, N_("machine-readable output"), TRANSPORT_افزودن_PORCELAIN),
+		OPT_BIT('f', "force", &flags, N_("force updates"), TRANSPORT_افزودن_FORCE),
 		OPT_CALLBACK_F(0, "force-with-lease", &cas, N_("<refname>:<expect>"),
 			       N_("require old value of ref to be at this value"),
-			       PARSE_OPT_OPTARG | PARSE_OPT_LITERAL_ARGHELP, parseopt_push_cas_option),
+			       PARSE_OPT_OPTARG | PARSE_OPT_LITERAL_ARGHELP, parseopt_افزودن_cas_option),
 		OPT_BIT(0, TRANS_OPT_FORCE_IF_INCLUDES, &flags,
 			N_("require remote updates to be integrated locally"),
-			TRANSPORT_PUSH_FORCE_IF_INCLUDES),
+			TRANSPORT_افزودن_FORCE_IF_INCLUDES),
 		OPT_CALLBACK(0, "recurse-submodules", &recurse_submodules, "(check|on-demand|no)",
 			     N_("control recursive pushing of submodules"), option_parse_recurse_submodules),
 		OPT_BOOL_F( 0 , "thin", &thin, N_("use thin pack"), PARSE_OPT_NOCOMPLETE),
 		OPT_STRING( 0 , "receive-pack", &receivepack, "receive-pack", N_("receive pack program")),
 		OPT_STRING( 0 , "exec", &receivepack, "receive-pack", N_("receive pack program")),
 		OPT_BIT('u', "set-upstream", &flags, N_("set upstream for git pull/status"),
-			TRANSPORT_PUSH_SET_UPSTREAM),
+			TRANSPORT_افزودن_SET_UPSTREAM),
 		OPT_BOOL(0, "progress", &progress, N_("force progress reporting")),
 		OPT_BIT(0, "prune", &flags, N_("prune locally removed refs"),
-			TRANSPORT_PUSH_PRUNE),
-		OPT_BIT(0, "no-verify", &flags, N_("bypass pre-push hook"), TRANSPORT_PUSH_NO_HOOK),
+			TRANSPORT_افزودن_PRUNE),
+		OPT_BIT(0, "no-verify", &flags, N_("bypass pre-push hook"), TRANSPORT_افزودن_NO_HOOK),
 		OPT_BIT(0, "follow-tags", &flags, N_("push missing but relevant tags"),
-			TRANSPORT_PUSH_FOLLOW_TAGS),
-		OPT_CALLBACK_F(0, "signed", &push_cert, "(yes|no|if-asked)", N_("GPG sign the push"),
-				PARSE_OPT_OPTARG, option_parse_push_signed),
-		OPT_BIT(0, "atomic", &flags, N_("request atomic transaction on remote side"), TRANSPORT_PUSH_ATOMIC),
-		OPT_STRING_LIST('o', "push-option", &push_options_cmdline, N_("server-specific"), N_("option to transmit")),
+			TRANSPORT_افزودن_FOLLOW_TAGS),
+		OPT_CALLBACK_F(0, "signed", &افزودن_cert, "(yes|no|if-asked)", N_("GPG sign the push"),
+				PARSE_OPT_OPTARG, option_parse_افزودن_signed),
+		OPT_BIT(0, "atomic", &flags, N_("request atomic transaction on remote side"), TRANSPORT_افزودن_ATOMIC),
+		OPT_STRING_LIST('o', "push-option", &افزودن_options_cmdline, N_("server-specific"), N_("option to transmit")),
 		OPT_IPVERSION(&family),
 		OPT_END()
 	};
 
 	packet_trace_identity("push");
-	repo_config(the_repository, git_push_config, &flags);
-	argc = parse_options(argc, argv, prefix, options, push_usage, 0);
-	push_options = (push_options_cmdline.nr
-		? &push_options_cmdline
-		: &push_options_config);
-	set_push_cert_flags(&flags, push_cert);
+	repo_config(the_repository, git_افزودن_config, &flags);
+	argc = parse_options(argc, argv, prefix, options, افزودن_usage, 0);
+	افزودن_options = (افزودن_options_cmdline.nr
+		? &افزودن_options_cmdline
+		: &افزودن_options_config);
+	set_افزودن_cert_flags(&flags, افزودن_cert);
 
-	refspec_init_push(&rs, the_hash_algo);
+	refspec_init_افزودن(&rs, the_hash_algo);
 
 	die_for_incompatible_opt4(deleterefs, "--delete",
 				  tags, "--tags",
-				  flags & TRANSPORT_PUSH_ALL, "--all/--branches",
-				  flags & TRANSPORT_PUSH_MIRROR, "--mirror");
-	if (deleterefs && argc < 2)
+				  flags & TRANSPORT_افزودن_ALL, "--all/--branches",
+				  flags & TRANSPORT_افزودن_MIRROR, "--mirror");
+	اگر (deleterefs && argc < 2)
 		die(_("--delete doesn't make sense without any refs"));
 
-	if (recurse_submodules == RECURSE_SUBMODULES_CHECK)
+	اگر (recurse_submodules == RECURSE_SUBMODULES_CHECK)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_CHECK;
-	else if (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+	وگرنه اگر (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_ON_DEMAND;
-	else if (recurse_submodules == RECURSE_SUBMODULES_ONLY)
+	وگرنه اگر (recurse_submodules == RECURSE_SUBMODULES_ONLY)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_ONLY;
 
-	if (argc > 0)
+	اگر (argc > 0)
 		repo = argv[0];
 
-	if (repo) {
-		if (!add_remote_or_group(repo, &remote_group)) {
-			struct remote *r;
+	اگر (repo) {
+		اگر (!add_remote_or_group(repo, &remote_group)) {
+			ساختار remote *r;
 
 			/*
 			 * Check the advice up front to avoid the remote
@@ -780,7 +780,7 @@ int cmd_push(int argc,
 			 * calls advise_if_enabled() so the hint carries the
 			 * standard "disable this message" instructions.
 			 */
-			if (advice_enabled(ADVICE_PUSH_REPO_LOOKS_LIKE_REF))
+			اگر (advice_enabled(ADVICE_افزودن_REPO_LOOKS_LIKE_REF))
 				die_if_repo_looks_like_ref(repo);
 
 			/*
@@ -793,13 +793,13 @@ int cmd_push(int argc,
 			 * identically to a named remote.
 			 */
 			r = pushremote_get(repo);
-			if (!r)
+			اگر (!r)
 				die(_("bad repository '%s'"), repo);
 			string_list_append(&remote_group, r->name);
 		}
-	} else {
-		struct remote *r = pushremote_get(NULL);
-		if (!r)
+	} وگرنه {
+		ساختار remote *r = pushremote_get(پوچ);
+		اگر (!r)
 			die(_("No configured push destination.\n"
 			    "Either specify the URL from the command-line or configure a remote repository using\n"
 			    "\n"
@@ -819,14 +819,14 @@ int cmd_push(int argc,
 		string_list_append(&remote_group, r->name);
 	}
 
-	if (!is_empty_cas(&cas) && (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES))
+	اگر (!is_empty_cas(&cas) && (flags & TRANSPORT_افزودن_FORCE_IF_INCLUDES))
 		cas.use_force_if_includes = 1;
 
-	for_each_string_list_item(item, push_options)
-		if (strchr(item->string, '\n'))
+	for_each_string_list_item(item, افزودن_options)
+		اگر (strchr(item->string, '\n'))
 			die(_("push options must not have new line characters"));
 
-	if (remote_group.nr == 1) {
+	اگر (remote_group.nr == 1) {
 		/*
 		 * Single remote (the common case): run do_push() directly
 		 * in this process.  The loop runs exactly once.
@@ -840,35 +840,35 @@ int cmd_push(int argc,
 		 */
 		base_flags = flags;
 		{
-			int inner_flags = base_flags;
-			struct remote *r = pushremote_get(remote_group.items[0].string);
-			if (!r)
+			صحیح inner_flags = base_flags;
+			ساختار remote *r = pushremote_get(remote_group.اقلام[0].string);
+			اگر (!r)
 				die(_("no such remote or remote group: %s"),
-				    remote_group.items[0].string);
+				    remote_group.اقلام[0].string);
 
-			if (r->mirror)
-				inner_flags |= (TRANSPORT_PUSH_MIRROR|TRANSPORT_PUSH_FORCE);
+			اگر (r->mirror)
+				inner_flags |= (TRANSPORT_افزودن_MIRROR|TRANSPORT_افزودن_FORCE);
 
-			if (inner_flags & TRANSPORT_PUSH_ALL) {
-				if (argc >= 2)
+			اگر (inner_flags & TRANSPORT_افزودن_ALL) {
+				اگر (argc >= 2)
 					die(_("--all can't be combined with refspecs"));
 			}
-			if (inner_flags & TRANSPORT_PUSH_MIRROR) {
-				if (argc >= 2)
+			اگر (inner_flags & TRANSPORT_افزودن_MIRROR) {
+				اگر (argc >= 2)
 					die(_("--mirror can't be combined with refspecs"));
 			}
 
 			refspec_clear(&rs);
-			rs = (struct refspec) REFSPEC_INIT_PUSH(the_hash_algo);
+			rs = (ساختار refspec) REFSPEC_INIT_افزودن(the_hash_algo);
 
-			if (tags)
+			اگر (tags)
 				refspec_append(&rs, "refs/tags/*");
-			if (argc > 0)
+			اگر (argc > 0)
 				set_refspecs(argv + 1, argc - 1, r);
 
-			rc = do_push(inner_flags, push_options, r);
+			rc = do_افزودن(inner_flags, افزودن_options, r);
 		}
-	} else {
+	} وگرنه {
 		/*
 		 * Multiple remotes: spawn one "git push <remote> [<refspecs>]"
 		 * subprocess per remote, sequentially.
@@ -876,22 +876,22 @@ int cmd_push(int argc,
 		 * Options that only make sense for a single transport connection
 		 * are rejected here.
 		 */
-		if (flags & TRANSPORT_PUSH_ATOMIC)
+		اگر (flags & TRANSPORT_افزودن_ATOMIC)
 			die(_("--atomic can only be used when pushing to one remote"));
 
-		rc = push_multiple(&remote_group, push_options, flags,
+		rc = افزودن_multiple(&remote_group, افزودن_options, flags,
 				   tags,
-				   argc > 1 ? argv + 1 : NULL,
+				   argc > 1 ? argv + 1 : پوچ,
 				   argc > 1 ? argc - 1 : 0);
 	}
 
-	string_list_clear(&push_options_cmdline, 0);
-	string_list_clear(&push_options_config, 0);
+	string_list_clear(&افزودن_options_cmdline, 0);
+	string_list_clear(&افزودن_options_config, 0);
 	string_list_clear(&remote_group, 0);
 	clear_cas_option(&cas);
 
-	if (rc == -1)
-		usage_with_options(push_usage, options);
-	else
-		return rc;
+	اگر (rc == -1)
+		usage_with_options(افزودن_usage, options);
+	وگرنه
+		بازگشت rc;
 }
