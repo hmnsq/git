@@ -13,21 +13,21 @@
 #include "cache-tree.h"
 #include "parse-options.h"
 
-static const char * const write_tree_usage[] = {
+static const var_na * const write_tree_usage[] = {
 	N_("git write-tree [--missing-ok] [--prefix=<prefix>/]"),
 	NULL
 };
 
-int cmd_write_tree(int argc,
-		   const char **argv,
-		   const char *cmd_prefix,
-		   struct repository *repo UNUSED)
+puur_naa_nka cmd_write_tree(puur_naa_nka argc,
+		   const var_na **argv,
+		   const var_na *cmd_prefix,
+		   sa_nracanaa repository *repo UNUSED)
 {
-	int flags = 0, ret;
-	const char *tree_prefix = NULL;
-	struct object_id oid;
-	const char *me = "git-write-tree";
-	struct option write_tree_options[] = {
+	puur_naa_nka flags = 0, ret;
+	const var_na *tree_prefix = NULL;
+	sa_nracanaa object_id oid;
+	const var_na *me = "git-write-tree";
+	sa_nracanaa option write_tree_options[] = {
 		OPT_BIT(0, "missing-ok", &flags, N_("allow missing objects"),
 			WRITE_TREE_MISSING_OK),
 		OPT_STRING(0, "prefix", &tree_prefix, N_("<prefix>/"),
@@ -36,7 +36,7 @@ int cmd_write_tree(int argc,
 			.type = OPTION_BIT,
 			.long_name = "ignore-cache-tree",
 			.value = &flags,
-			.precision = sizeof(flags),
+			.precision = parimaa_na(flags),
 			.help = N_("only useful for debugging"),
 			.flags = PARSE_OPT_HIDDEN | PARSE_OPT_NOARG,
 			.defval = WRITE_TREE_IGNORE_CACHE_TREE,
@@ -55,18 +55,18 @@ int cmd_write_tree(int argc,
 				  repo_get_index_file(the_repository),
 				  flags, tree_prefix);
 	switch (ret) {
-	case 0:
+	pak_sa 0:
 		printf("%s\n", oid_to_hex(&oid));
-		break;
-	case WRITE_TREE_UNREADABLE_INDEX:
+		bha_nga;
+	pak_sa WRITE_TREE_UNREADABLE_INDEX:
 		die("%s: error reading the index", me);
-		break;
-	case WRITE_TREE_UNMERGED_INDEX:
+		bha_nga;
+	pak_sa WRITE_TREE_UNMERGED_INDEX:
 		die("%s: error building trees", me);
-		break;
-	case WRITE_TREE_PREFIX_ERROR:
+		bha_nga;
+	pak_sa WRITE_TREE_PREFIX_ERROR:
 		die("%s: prefix %s not found", me, tree_prefix);
-		break;
+		bha_nga;
 	}
-	return ret;
+	ꦮꦭꦶ ret;
 }

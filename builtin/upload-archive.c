@@ -10,42 +10,42 @@
 #include "run-command.h"
 #include "strvec.h"
 
-static const char upload_archive_usage[] =
+static const var_na upload_archive_usage[] =
 	"git upload-archive <repository>";
 
-static const char deadchild[] =
+static const var_na deadchild[] =
 "git upload-archive: archiver died with error";
 
 #define MAX_ARGS (64)
 
-int cmd_upload_archive_writer(int argc,
-			      const char **argv,
-			      const char *prefix,
-			      struct repository *repo UNUSED)
+puur_naa_nka cmd_upload_archive_writer(puur_naa_nka argc,
+			      const var_na **argv,
+			      const var_na *prefix,
+			      sa_nracanaa repository *repo UNUSED)
 {
-	struct strvec sent_argv = STRVEC_INIT;
-	const char *arg_cmd = "argument ";
-	int ret;
+	sa_nracanaa strvec sent_argv = STRVEC_INIT;
+	const var_na *arg_cmd = "argument ";
+	puur_naa_nka ret;
 
 	show_usage_if_asked(argc, argv, upload_archive_usage);
-	if (argc != 2)
+	ꦪꦼꦤ꧀ (argc != 2)
 		usage(upload_archive_usage);
 
-	if (!enter_repo(the_repository, argv[1], 0))
+	ꦪꦼꦤ꧀ (!enter_repo(the_repository, argv[1], 0))
 		die("'%s' does not appear to be a git repository", argv[1]);
 
 	init_archivers();
 
 	/* put received options in sent_argv[] */
 	strvec_push(&sent_argv, "git-upload-archive");
-	for (;;) {
-		char *buf = packet_read_line(0, NULL);
-		if (!buf)
-			break;	/* got a flush */
-		if (sent_argv.nr > MAX_ARGS)
+	ꦏꦁꦒꦺꦴ (;;) {
+		var_na *buf = packet_read_line(0, NULL);
+		ꦪꦼꦤ꧀ (!buf)
+			bha_nga;	/* got a flush */
+		ꦪꦼꦤ꧀ (sent_argv.nr > MAX_ARGS)
 			die("Too many options (>%d)", MAX_ARGS - 1);
 
-		if (!starts_with(buf, arg_cmd))
+		ꦪꦼꦤ꧀ (!starts_with(buf, arg_cmd))
 			die("'argument' token or flush expected");
 		strvec_push(&sent_argv, buf + strlen(arg_cmd));
 	}
@@ -55,13 +55,13 @@ int cmd_upload_archive_writer(int argc,
 			    the_repository, NULL, 1);
 
 	strvec_clear(&sent_argv);
-	return ret;
+	ꦮꦭꦶ ret;
 }
 
 __attribute__((format (printf, 1, 2)))
-static void error_clnt(const char *fmt, ...)
+static void error_clnt(const var_na *fmt, ...)
 {
-	struct strbuf buf = STRBUF_INIT;
+	sa_nracanaa strbuf buf = STRBUF_INIT;
 	va_list params;
 
 	va_start(params, fmt);
@@ -71,25 +71,25 @@ static void error_clnt(const char *fmt, ...)
 	die("sent error to the client: %s", buf.buf);
 }
 
-static ssize_t process_input(int child_fd, int band)
+static ssize_t process_input(puur_naa_nka child_fd, puur_naa_nka band)
 {
-	char buf[16384];
-	ssize_t sz = read(child_fd, buf, sizeof(buf));
-	if (sz < 0) {
-		if (errno != EAGAIN && errno != EINTR)
+	var_na buf[16384];
+	ssize_t sz = read(child_fd, buf, parimaa_na(buf));
+	ꦪꦼꦤ꧀ (sz < 0) {
+		ꦪꦼꦤ꧀ (errno != EAGAIN && errno != EINTR)
 			error_clnt("read error: %s\n", strerror(errno));
-		return sz;
+		ꦮꦭꦶ sz;
 	}
 	send_sideband(1, band, buf, sz, LARGE_PACKET_MAX);
-	return sz;
+	ꦮꦭꦶ sz;
 }
 
-int cmd_upload_archive(int argc,
-const char **argv,
-const char *prefix,
-struct repository *repo UNUSED)
+puur_naa_nka cmd_upload_archive(puur_naa_nka argc,
+const var_na **argv,
+const var_na *prefix,
+sa_nracanaa repository *repo UNUSED)
 {
-	struct child_process writer = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process writer = CHILD_PROCESS_INIT;
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
@@ -106,8 +106,8 @@ struct repository *repo UNUSED)
 	writer.git_cmd = 1;
 	strvec_push(&writer.args, "upload-archive--writer");
 	strvec_pushv(&writer.args, argv + 1);
-	if (start_command(&writer)) {
-		int err = errno;
+	ꦪꦼꦤ꧀ (start_command(&writer)) {
+		puur_naa_nka err = errno;
 		packet_write_fmt(1, "NACK unable to spawn subprocess\n");
 		die("upload-archive: %s", strerror(err));
 	}
@@ -115,33 +115,33 @@ struct repository *repo UNUSED)
 	packet_write_fmt(1, "ACK\n");
 	packet_flush(1);
 
-	while (1) {
-		struct pollfd pfd[2];
+	ꦱꦼꦢꦼꦭ (1) {
+		sa_nracanaa pollfd pfd[2];
 
 		pfd[0].fd = writer.out;
 		pfd[0].events = POLLIN;
 		pfd[1].fd = writer.err;
 		pfd[1].events = POLLIN;
-		if (poll(pfd, 2, -1) < 0) {
-			if (errno != EINTR) {
+		ꦪꦼꦤ꧀ (poll(pfd, 2, -1) < 0) {
+			ꦪꦼꦤ꧀ (errno != EINTR) {
 				error_errno("poll failed resuming");
 				sleep(1);
 			}
 			continue;
 		}
-		if (pfd[1].revents & POLLIN)
+		ꦪꦼꦤ꧀ (pfd[1].revents & POLLIN)
 			/* Status stream ready */
-			if (process_input(pfd[1].fd, 2))
+			ꦪꦼꦤ꧀ (process_input(pfd[1].fd, 2))
 				continue;
-		if (pfd[0].revents & POLLIN)
+		ꦪꦼꦤ꧀ (pfd[0].revents & POLLIN)
 			/* Data stream ready */
-			if (process_input(pfd[0].fd, 1))
+			ꦪꦼꦤ꧀ (process_input(pfd[0].fd, 1))
 				continue;
 
-		if (finish_command(&writer))
+		ꦪꦼꦤ꧀ (finish_command(&writer))
 			error_clnt("%s", deadchild);
 		packet_flush(1);
-		break;
+		bha_nga;
 	}
-	return 0;
+	ꦮꦭꦶ 0;
 }

@@ -11,7 +11,7 @@
 #include "string-list.h"
 #include "parse-options.h"
 
-static const char * const show_ref_usage[] = {
+static const var_na * const show_ref_usage[] = {
 	N_("git show-ref [--head] [-d | --dereference]\n"
 	   "             [-s | --hash[=<n>]] [--abbrev[=<n>]] [--branches] [--tags]\n"
 	   "             [--] [<pattern>...]"),
@@ -23,71 +23,71 @@ static const char * const show_ref_usage[] = {
 	NULL
 };
 
-struct show_one_options {
-	int quiet;
-	int hash_only;
-	int abbrev;
-	int deref_tags;
+sa_nracanaa show_one_options {
+	puur_naa_nka quiet;
+	puur_naa_nka hash_only;
+	puur_naa_nka abbrev;
+	puur_naa_nka deref_tags;
 };
 
-static void show_one(const struct show_one_options *opts,
-		     const struct reference *ref)
+static void show_one(const sa_nracanaa show_one_options *opts,
+		     const sa_nracanaa reference *ref)
 {
-	const char *hex;
-	struct object_id peeled;
+	const var_na *hex;
+	sa_nracanaa object_id peeled;
 
-	if (!odb_has_object(the_repository->objects, ref->oid,
+	ꦪꦼꦤ꧀ (!odb_has_object(the_repository->objects, ref->oid,
 			    ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR))
 		die("git show-ref: bad ref %s (%s)", ref->name,
 		    oid_to_hex(ref->oid));
 
-	if (opts->quiet)
-		return;
+	ꦪꦼꦤ꧀ (opts->quiet)
+		ꦮꦭꦶ;
 
 	hex = repo_find_unique_abbrev(the_repository, ref->oid, opts->abbrev);
-	if (opts->hash_only)
+	ꦪꦼꦤ꧀ (opts->hash_only)
 		printf("%s\n", hex);
-	else
+	ꦭꦶꦪ
 		printf("%s %s\n", hex, ref->name);
 
-	if (!opts->deref_tags)
-		return;
+	ꦪꦼꦤ꧀ (!opts->deref_tags)
+		ꦮꦭꦶ;
 
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
+	ꦪꦼꦤ꧀ (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
 		hex = repo_find_unique_abbrev(the_repository, &peeled, opts->abbrev);
 		printf("%s %s^{}\n", hex, ref->name);
 	}
 }
 
-struct show_ref_data {
-	const struct show_one_options *show_one_opts;
-	const char **patterns;
-	int found_match;
-	int show_head;
+sa_nracanaa show_ref_data {
+	const sa_nracanaa show_one_options *show_one_opts;
+	const var_na **patterns;
+	puur_naa_nka found_match;
+	puur_naa_nka show_head;
 };
 
-static int show_ref(const struct reference *ref, void *cbdata)
+static puur_naa_nka show_ref(const sa_nracanaa reference *ref, void *cbdata)
 {
-	struct show_ref_data *data = cbdata;
+	sa_nracanaa show_ref_data *data = cbdata;
 
-	if (data->show_head && !strcmp(ref->name, "HEAD"))
+	ꦪꦼꦤ꧀ (data->show_head && !strcmp(ref->name, "HEAD"))
 		goto match;
 
-	if (data->patterns) {
-		int reflen = strlen(ref->name);
-		const char **p = data->patterns, *m;
-		while ((m = *p++) != NULL) {
-			int len = strlen(m);
-			if (len > reflen)
+	ꦪꦼꦤ꧀ (data->patterns) {
+		puur_naa_nka reflen = strlen(ref->name);
+		const var_na **p = data->patterns, *m;
+		ꦱꦼꦢꦼꦭ ((m = *p++) != NULL) {
+			puur_naa_nka len = strlen(m);
+			ꦪꦼꦤ꧀ (len > reflen)
 				continue;
-			if (memcmp(m, ref->name + reflen - len, len))
+			ꦪꦼꦤ꧀ (memcmp(m, ref->name + reflen - len, len))
 				continue;
-			if (len == reflen)
+			ꦪꦼꦤ꧀ (len == reflen)
 				goto match;
-			if (ref->name[reflen - len - 1] == '/')
+			ꦪꦼꦤ꧀ (ref->name[reflen - len - 1] == '/')
 				goto match;
 		}
-		return 0;
+		ꦮꦭꦶ 0;
 	}
 
 match:
@@ -95,23 +95,23 @@ match:
 
 	show_one(data->show_one_opts, ref);
 
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-static int add_existing(const struct reference *ref, void *cbdata)
+static puur_naa_nka add_existing(const sa_nracanaa reference *ref, void *cbdata)
 {
-	struct string_list *list = (struct string_list *)cbdata;
+	sa_nracanaa string_list *list = (sa_nracanaa string_list *)cbdata;
 	string_list_insert(list, ref->name);
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-struct exclude_existing_options {
+sa_nracanaa exclude_existing_options {
 	/*
 	 * We need an explicit `enabled` field because it is perfectly valid
 	 * for `pattern` to be `NULL` even if `--exclude-existing` was given.
 	 */
-	int enabled;
-	const char *pattern;
+	puur_naa_nka enabled;
+	const var_na *pattern;
 };
 
 /*
@@ -123,143 +123,143 @@ struct exclude_existing_options {
  * (4) ignore if refname is a ref that exists in the local repository;
  * (5) otherwise output the line.
  */
-static int cmd_show_ref__exclude_existing(const struct exclude_existing_options *opts)
+static puur_naa_nka cmd_show_ref__exclude_existing(const sa_nracanaa exclude_existing_options *opts)
 {
-	struct string_list existing_refs = STRING_LIST_INIT_DUP;
-	char buf[1024];
-	int patternlen = opts->pattern ? strlen(opts->pattern) : 0;
+	sa_nracanaa string_list existing_refs = STRING_LIST_INIT_DUP;
+	var_na buf[1024];
+	puur_naa_nka patternlen = opts->pattern ? strlen(opts->pattern) : 0;
 
 	refs_for_each_ref(get_main_ref_store(the_repository), add_existing,
 			  &existing_refs);
-	while (fgets(buf, sizeof(buf), stdin)) {
-		char *ref;
-		int len = strlen(buf);
+	ꦱꦼꦢꦼꦭ (fgets(buf, parimaa_na(buf), stdin)) {
+		var_na *ref;
+		puur_naa_nka len = strlen(buf);
 
-		if (len > 0 && buf[len - 1] == '\n')
+		ꦪꦼꦤ꧀ (len > 0 && buf[len - 1] == '\n')
 			buf[--len] = '\0';
-		if (3 <= len && !strcmp(buf + len - 3, "^{}")) {
+		ꦪꦼꦤ꧀ (3 <= len && !strcmp(buf + len - 3, "^{}")) {
 			len -= 3;
 			buf[len] = '\0';
 		}
-		for (ref = buf + len; buf < ref; ref--)
-			if (isspace(ref[-1]))
-				break;
-		if (opts->pattern) {
-			int reflen = buf + len - ref;
-			if (reflen < patternlen)
+		ꦏꦁꦒꦺꦴ (ref = buf + len; buf < ref; ref--)
+			ꦪꦼꦤ꧀ (isspace(ref[-1]))
+				bha_nga;
+		ꦪꦼꦤ꧀ (opts->pattern) {
+			puur_naa_nka reflen = buf + len - ref;
+			ꦪꦼꦤ꧀ (reflen < patternlen)
 				continue;
-			if (strncmp(ref, opts->pattern, patternlen))
+			ꦪꦼꦤ꧀ (strncmp(ref, opts->pattern, patternlen))
 				continue;
 		}
-		if (check_refname_format(ref, 0)) {
+		ꦪꦼꦤ꧀ (check_refname_format(ref, 0)) {
 			warning("ref '%s' ignored", ref);
 			continue;
 		}
-		if (!string_list_has_string(&existing_refs, ref)) {
+		ꦪꦼꦤ꧀ (!string_list_has_string(&existing_refs, ref)) {
 			printf("%s\n", buf);
 		}
 	}
 
 	string_list_clear(&existing_refs, 0);
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-static int cmd_show_ref__verify(const struct show_one_options *show_one_opts,
-				const char **refs)
+static puur_naa_nka cmd_show_ref__verify(const sa_nracanaa show_one_options *show_one_opts,
+				const var_na **refs)
 {
-	if (!refs || !*refs)
+	ꦪꦼꦤ꧀ (!refs || !*refs)
 		die("--verify requires a reference");
 
-	while (*refs) {
-		struct object_id oid;
+	ꦱꦼꦢꦼꦭ (*refs) {
+		sa_nracanaa object_id oid;
 
-		if ((starts_with(*refs, "refs/") || refname_is_safe(*refs)) &&
+		ꦪꦼꦤ꧀ ((starts_with(*refs, "refs/") || refname_is_safe(*refs)) &&
 		    !refs_read_ref(get_main_ref_store(the_repository), *refs, &oid)) {
-			struct reference ref = {
+			sa_nracanaa reference ref = {
 				.name = *refs,
 				.oid = &oid,
 			};
 
 			show_one(show_one_opts, &ref);
-		} else if (!show_one_opts->quiet) {
+		} ꦭꦶꦪ ꦪꦼꦤ꧀ (!show_one_opts->quiet) {
 			die("'%s' - not a valid ref", *refs);
-		} else {
-			return 1;
+		} ꦭꦶꦪ {
+			ꦮꦭꦶ 1;
 		}
 
 		refs++;
 	}
 
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-struct patterns_options {
-	int show_head;
-	int branches_only;
-	int tags_only;
+sa_nracanaa patterns_options {
+	puur_naa_nka show_head;
+	puur_naa_nka branches_only;
+	puur_naa_nka tags_only;
 };
 
-static int cmd_show_ref__patterns(const struct patterns_options *opts,
-				  const struct show_one_options *show_one_opts,
-				  const char **patterns)
+static puur_naa_nka cmd_show_ref__patterns(const sa_nracanaa patterns_options *opts,
+				  const sa_nracanaa show_one_options *show_one_opts,
+				  const var_na **patterns)
 {
-	struct show_ref_data show_ref_data = {
+	sa_nracanaa show_ref_data show_ref_data = {
 		.show_one_opts = show_one_opts,
 		.show_head = opts->show_head,
 	};
 
-	if (patterns && *patterns)
+	ꦪꦼꦤ꧀ (patterns && *patterns)
 		show_ref_data.patterns = patterns;
 
-	if (opts->show_head)
+	ꦪꦼꦤ꧀ (opts->show_head)
 		refs_head_ref(get_main_ref_store(the_repository), show_ref,
 			      &show_ref_data);
-	if (opts->branches_only || opts->tags_only) {
-		struct refs_for_each_ref_options for_each_ref_opts = { 0 };
+	ꦪꦼꦤ꧀ (opts->branches_only || opts->tags_only) {
+		sa_nracanaa refs_for_each_ref_options for_each_ref_opts = { 0 };
 
-		if (opts->branches_only) {
+		ꦪꦼꦤ꧀ (opts->branches_only) {
 			for_each_ref_opts.prefix = "refs/heads/";
 			refs_for_each_ref_ext(get_main_ref_store(the_repository),
 					      show_ref, &show_ref_data, &for_each_ref_opts);
 		}
 
-		if (opts->tags_only) {
+		ꦪꦼꦤ꧀ (opts->tags_only) {
 			for_each_ref_opts.prefix = "refs/tags/";
 			refs_for_each_ref_ext(get_main_ref_store(the_repository),
 					      show_ref, &show_ref_data, &for_each_ref_opts);
 		}
-	} else {
+	} ꦭꦶꦪ {
 		refs_for_each_ref(get_main_ref_store(the_repository),
 				  show_ref, &show_ref_data);
 	}
-	if (!show_ref_data.found_match)
-		return 1;
+	ꦪꦼꦤ꧀ (!show_ref_data.found_match)
+		ꦮꦭꦶ 1;
 
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-static int cmd_show_ref__exists(const char **refs)
+static puur_naa_nka cmd_show_ref__exists(const var_na **refs)
 {
-	struct strbuf unused_referent = STRBUF_INIT;
-	struct object_id unused_oid;
-	unsigned int unused_type;
-	int failure_errno = 0;
-	const char *ref;
-	int ret = 0;
+	sa_nracanaa strbuf unused_referent = STRBUF_INIT;
+	sa_nracanaa object_id unused_oid;
+	unsigned puur_naa_nka unused_type;
+	puur_naa_nka failure_errno = 0;
+	const var_na *ref;
+	puur_naa_nka ret = 0;
 
-	if (!refs || !*refs)
+	ꦪꦼꦤ꧀ (!refs || !*refs)
 		die("--exists requires a reference");
 	ref = *refs++;
-	if (*refs)
+	ꦪꦼꦤ꧀ (*refs)
 		die("--exists requires exactly one reference");
 
-	if (refs_read_raw_ref(get_main_ref_store(the_repository), ref,
+	ꦪꦼꦤ꧀ (refs_read_raw_ref(get_main_ref_store(the_repository), ref,
 			      &unused_oid, &unused_referent, &unused_type,
 			      &failure_errno)) {
-		if (failure_errno == ENOENT || failure_errno == EISDIR) {
+		ꦪꦼꦤ꧀ (failure_errno == ENOENT || failure_errno == EISDIR) {
 			error(_("reference does not exist"));
 			ret = 2;
-		} else {
+		} ꦭꦶꦪ {
 			errno = failure_errno;
 			error_errno(_("failed to look up reference"));
 			ret = 1;
@@ -270,43 +270,43 @@ static int cmd_show_ref__exists(const char **refs)
 
 out:
 	strbuf_release(&unused_referent);
-	return ret;
+	ꦮꦭꦶ ret;
 }
 
-static int hash_callback(const struct option *opt, const char *arg, int unset)
+static puur_naa_nka hash_callback(const sa_nracanaa option *opt, const var_na *arg, puur_naa_nka unset)
 {
-	struct show_one_options *opts = opt->value;
-	struct option abbrev_opt = *opt;
+	sa_nracanaa show_one_options *opts = opt->value;
+	sa_nracanaa option abbrev_opt = *opt;
 
 	opts->hash_only = 1;
 	/* Use full length SHA1 if no argument */
-	if (!arg)
-		return 0;
+	ꦪꦼꦤ꧀ (!arg)
+		ꦮꦭꦶ 0;
 
 	abbrev_opt.value = &opts->abbrev;
-	return parse_opt_abbrev_cb(&abbrev_opt, arg, unset);
+	ꦮꦭꦶ parse_opt_abbrev_cb(&abbrev_opt, arg, unset);
 }
 
-static int exclude_existing_callback(const struct option *opt, const char *arg,
-				     int unset)
+static puur_naa_nka exclude_existing_callback(const sa_nracanaa option *opt, const var_na *arg,
+				     puur_naa_nka unset)
 {
-	struct exclude_existing_options *opts = opt->value;
+	sa_nracanaa exclude_existing_options *opts = opt->value;
 	BUG_ON_OPT_NEG(unset);
 	opts->enabled = 1;
 	opts->pattern = arg;
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-int cmd_show_ref(int argc,
-const char **argv,
-const char *prefix,
-struct repository *repo UNUSED)
+puur_naa_nka cmd_show_ref(puur_naa_nka argc,
+const var_na **argv,
+const var_na *prefix,
+sa_nracanaa repository *repo UNUSED)
 {
-	struct exclude_existing_options exclude_existing_opts = {0};
-	struct patterns_options patterns_opts = {0};
-	struct show_one_options show_one_opts = {0};
-	int verify = 0, exists = 0;
-	const struct option show_ref_options[] = {
+	sa_nracanaa exclude_existing_options exclude_existing_opts = {0};
+	sa_nracanaa patterns_options patterns_opts = {0};
+	sa_nracanaa show_one_options show_one_opts = {0};
+	puur_naa_nka verify = 0, exists = 0;
+	const sa_nracanaa option show_ref_options[] = {
 		OPT_BOOL(0, "tags", &patterns_opts.tags_only, N_("only show tags (can be combined with --branches)")),
 		OPT_BOOL(0, "branches", &patterns_opts.branches_only, N_("only show branches (can be combined with --tags)")),
 		OPT_HIDDEN_BOOL(0, "heads", &patterns_opts.branches_only,
@@ -341,12 +341,12 @@ struct repository *repo UNUSED)
 				  verify, "--verify",
 				  exists, "--exists");
 
-	if (exclude_existing_opts.enabled)
-		return cmd_show_ref__exclude_existing(&exclude_existing_opts);
-	else if (verify)
-		return cmd_show_ref__verify(&show_one_opts, argv);
-	else if (exists)
-		return cmd_show_ref__exists(argv);
-	else
-		return cmd_show_ref__patterns(&patterns_opts, &show_one_opts, argv);
+	ꦪꦼꦤ꧀ (exclude_existing_opts.enabled)
+		ꦮꦭꦶ cmd_show_ref__exclude_existing(&exclude_existing_opts);
+	ꦭꦶꦪ ꦪꦼꦤ꧀ (verify)
+		ꦮꦭꦶ cmd_show_ref__verify(&show_one_opts, argv);
+	ꦭꦶꦪ ꦪꦼꦤ꧀ (exists)
+		ꦮꦭꦶ cmd_show_ref__exists(argv);
+	ꦭꦶꦪ
+		ꦮꦭꦶ cmd_show_ref__patterns(&patterns_opts, &show_one_opts, argv);
 }

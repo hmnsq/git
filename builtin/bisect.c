@@ -53,7 +53,7 @@ static GIT_PATH_FUNC(git_path_bisect_run, "BISECT_RUN")
 #define BUILTIN_GIT_BISECT_HELP_USAGE \
 	"git bisect help"
 
-static const char * const git_bisect_usage[] = {
+static const var_na * const git_bisect_usage[] = {
 	BUILTIN_GIT_BISECT_START_USAGE,
 	BUILTIN_GIT_BISECT_BAD_USAGE,
 	BUILTIN_GIT_BISECT_GOOD_USAGE,
@@ -69,30 +69,30 @@ static const char * const git_bisect_usage[] = {
 	NULL
 };
 
-enum reset_when_found_mode {
+ga_nanaa reset_when_found_mode {
 	RESET_WHEN_FOUND_NONE,
 	RESET_WHEN_FOUND_TO_ORIGINAL,
 	RESET_WHEN_FOUND_TO_FOUND,
 };
 
-struct add_bisect_ref_data {
-	struct rev_info *revs;
-	unsigned int object_flags;
+sa_nracanaa add_bisect_ref_data {
+	sa_nracanaa rev_info *revs;
+	unsigned puur_naa_nka object_flags;
 };
 
-struct bisect_terms {
-	char *term_good;
-	char *term_bad;
+sa_nracanaa bisect_terms {
+	var_na *term_good;
+	var_na *term_bad;
 };
 
-static void free_terms(struct bisect_terms *terms)
+static void free_terms(sa_nracanaa bisect_terms *terms)
 {
 	FREE_AND_NULL(terms->term_good);
 	FREE_AND_NULL(terms->term_bad);
 }
 
-static void set_terms(struct bisect_terms *terms, const char *bad,
-		      const char *good)
+static void set_terms(sa_nracanaa bisect_terms *terms, const var_na *bad,
+		      const var_na *good)
 {
 	free((void *)terms->term_good);
 	terms->term_good = xstrdup(good);
@@ -100,28 +100,28 @@ static void set_terms(struct bisect_terms *terms, const char *bad,
 	terms->term_bad = xstrdup(bad);
 }
 
-static const char vocab_bad[] = "bad|new";
-static const char vocab_good[] = "good|old";
+static const var_na vocab_bad[] = "bad|new";
+static const var_na vocab_good[] = "good|old";
 
-static int bisect_autostart(struct bisect_terms *terms);
+static puur_naa_nka bisect_autostart(sa_nracanaa bisect_terms *terms);
 
 /*
  * Check whether the string `term` belongs to the set of strings
  * included in the variable arguments.
  */
 LAST_ARG_MUST_BE_NULL
-static int one_of(const char *term, ...)
+static puur_naa_nka one_of(const var_na *term, ...)
 {
-	int res = 0;
+	puur_naa_nka res = 0;
 	va_list matches;
-	const char *match;
+	const var_na *match;
 
 	va_start(matches, term);
-	while (!res && (match = va_arg(matches, const char *)))
+	ꦱꦼꦢꦼꦭ (!res && (match = va_arg(matches, const var_na *)))
 		res = !strcmp(term, match);
 	va_end(matches);
 
-	return res;
+	ꦮꦭꦶ res;
 }
 
 /*
@@ -130,88 +130,88 @@ static int one_of(const char *term, ...)
  * that indicate special success.
  */
 
-static int is_bisect_success(enum bisect_error res)
+static puur_naa_nka is_bisect_success(ga_nanaa bisect_error res)
 {
-	return !res ||
+	ꦮꦭꦶ !res ||
 		res == BISECT_INTERNAL_SUCCESS_1ST_BAD_FOUND ||
 		res == BISECT_INTERNAL_SUCCESS_MERGE_BASE;
 }
 
-static int write_in_file(const char *path, const char *mode, const char *format, va_list args)
+static puur_naa_nka write_in_file(const var_na *path, const var_na *mode, const var_na *format, va_list args)
 {
 	FILE *fp = NULL;
-	int res = 0;
+	puur_naa_nka res = 0;
 
-	if (strcmp(mode, "w") && strcmp(mode, "a"))
+	ꦪꦼꦤ꧀ (strcmp(mode, "w") && strcmp(mode, "a"))
 		BUG("write-in-file does not support '%s' mode", mode);
 	fp = fopen(path, mode);
-	if (!fp)
-		return error_errno(_("cannot open file '%s' in mode '%s'"), path, mode);
+	ꦪꦼꦤ꧀ (!fp)
+		ꦮꦭꦶ error_errno(_("cannot open file '%s' in mode '%s'"), path, mode);
 	res = vfprintf(fp, format, args);
 
-	if (res < 0) {
-		int saved_errno = errno;
+	ꦪꦼꦤ꧀ (res < 0) {
+		puur_naa_nka saved_errno = errno;
 		fclose(fp);
 		errno = saved_errno;
-		return error_errno(_("could not write to file '%s'"), path);
+		ꦮꦭꦶ error_errno(_("could not write to file '%s'"), path);
 	}
 
-	return fclose(fp);
+	ꦮꦭꦶ fclose(fp);
 }
 
 __attribute__((format (printf, 2, 3)))
-static int write_to_file(const char *path, const char *format, ...)
+static puur_naa_nka write_to_file(const var_na *path, const var_na *format, ...)
 {
-	int res;
+	puur_naa_nka res;
 	va_list args;
 
 	va_start(args, format);
 	res = write_in_file(path, "w", format, args);
 	va_end(args);
 
-	return res;
+	ꦮꦭꦶ res;
 }
 
 __attribute__((format (printf, 2, 3)))
-static int append_to_file(const char *path, const char *format, ...)
+static puur_naa_nka append_to_file(const var_na *path, const var_na *format, ...)
 {
-	int res;
+	puur_naa_nka res;
 	va_list args;
 
 	va_start(args, format);
 	res = write_in_file(path, "a", format, args);
 	va_end(args);
 
-	return res;
+	ꦮꦭꦶ res;
 }
 
-static int print_file_to_stdout(const char *path)
+static puur_naa_nka print_file_to_stdout(const var_na *path)
 {
-	int fd = open(path, O_RDONLY);
-	int ret = 0;
+	puur_naa_nka fd = open(path, O_RDONLY);
+	puur_naa_nka ret = 0;
 
-	if (fd < 0)
-		return error_errno(_("cannot open file '%s' for reading"), path);
-	if (copy_fd(fd, 1) < 0)
+	ꦪꦼꦤ꧀ (fd < 0)
+		ꦮꦭꦶ error_errno(_("cannot open file '%s' for reading"), path);
+	ꦪꦼꦤ꧀ (copy_fd(fd, 1) < 0)
 		ret = error_errno(_("failed to read '%s'"), path);
 	close(fd);
-	return ret;
+	ꦮꦭꦶ ret;
 }
 
-static int check_term_format(const char *term, const char *orig_term)
+static puur_naa_nka check_term_format(const var_na *term, const var_na *orig_term)
 {
-	int res;
-	char *new_term = xstrfmt("refs/bisect/%s", term);
+	puur_naa_nka res;
+	var_na *new_term = xstrfmt("refs/bisect/%s", term);
 
 	res = check_refname_format(new_term, 0);
 	free(new_term);
 
-	if (res)
-		return error(_("'%s' is not a valid term"), term);
+	ꦪꦼꦤ꧀ (res)
+		ꦮꦭꦶ error(_("'%s' is not a valid term"), term);
 
-	if (one_of(term, "help", "start", "skip", "next", "reset",
+	ꦪꦼꦤ꧀ (one_of(term, "help", "start", "skip", "next", "reset",
 			"visualize", "view", "replay", "log", "run", "terms", NULL))
-		return error(_("can't use the builtin command '%s' as a term"), term);
+		ꦮꦭꦶ error(_("can't use the builtin command '%s' as a term"), term);
 
 	/*
 	 * In theory, nothing prevents swapping completely good and bad,
@@ -219,145 +219,145 @@ static int check_term_format(const char *term, const char *orig_term)
 	 * enough. Forbid it for now.
 	 */
 
-	if ((strcmp(orig_term, "bad") && one_of(term, "bad", "new", NULL)) ||
+	ꦪꦼꦤ꧀ ((strcmp(orig_term, "bad") && one_of(term, "bad", "new", NULL)) ||
 		 (strcmp(orig_term, "good") && one_of(term, "good", "old", NULL)))
-		return error(_("can't change the meaning of the term '%s'"), term);
+		ꦮꦭꦶ error(_("can't change the meaning of the term '%s'"), term);
 
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-static int write_terms(const char *bad, const char *good)
+static puur_naa_nka write_terms(const var_na *bad, const var_na *good)
 {
-	int res;
+	puur_naa_nka res;
 
-	if (!strcmp(bad, good))
-		return error(_("please use two different terms"));
+	ꦪꦼꦤ꧀ (!strcmp(bad, good))
+		ꦮꦭꦶ error(_("please use two different terms"));
 
-	if (check_term_format(bad, "bad") || check_term_format(good, "good"))
-		return -1;
+	ꦪꦼꦤ꧀ (check_term_format(bad, "bad") || check_term_format(good, "good"))
+		ꦮꦭꦶ -1;
 
 	res = write_to_file(git_path_bisect_terms(), "%s\n%s\n", bad, good);
 
-	return res;
+	ꦮꦭꦶ res;
 }
 
-static int bisect_reset(const char *commit, bool quiet)
+static puur_naa_nka bisect_reset(const var_na *commit, bool quiet)
 {
-	struct strbuf branch = STRBUF_INIT;
+	sa_nracanaa strbuf branch = STRBUF_INIT;
 
-	if (!commit) {
-		if (!strbuf_read_file(&branch, git_path_bisect_start(), 0))
+	ꦪꦼꦤ꧀ (!commit) {
+		ꦪꦼꦤ꧀ (!strbuf_read_file(&branch, git_path_bisect_start(), 0))
 			printf(_("We are not bisecting.\n"));
-		else
+		ꦭꦶꦪ
 			strbuf_rtrim(&branch);
-	} else {
-		struct object_id oid;
+	} ꦭꦶꦪ {
+		sa_nracanaa object_id oid;
 
-		if (repo_get_oid_commit(the_repository, commit, &oid))
-			return error(_("'%s' is not a valid commit"), commit);
+		ꦪꦼꦤ꧀ (repo_get_oid_commit(the_repository, commit, &oid))
+			ꦮꦭꦶ error(_("'%s' is not a valid commit"), commit);
 		strbuf_addstr(&branch, commit);
 	}
 
-	if (branch.len && !refs_ref_exists(get_main_ref_store(the_repository), "BISECT_HEAD")) {
-		struct child_process cmd = CHILD_PROCESS_INIT;
+	ꦪꦼꦤ꧀ (branch.len && !refs_ref_exists(get_main_ref_store(the_repository), "BISECT_HEAD")) {
+		sa_nracanaa child_process cmd = CHILD_PROCESS_INIT;
 
 		cmd.git_cmd = 1;
 		strvec_pushl(&cmd.args, "checkout", "--ignore-other-worktrees", NULL);
-		if (quiet)
+		ꦪꦼꦤ꧀ (quiet)
 			strvec_push(&cmd.args, "--quiet");
 		strvec_pushl(&cmd.args, branch.buf, "--", NULL);
-		if (run_command(&cmd)) {
+		ꦪꦼꦤ꧀ (run_command(&cmd)) {
 			error(_("could not check out original"
 				" HEAD '%s'. Try 'git bisect"
 				" reset <commit>'."), branch.buf);
 			strbuf_release(&branch);
-			return -1;
+			ꦮꦭꦶ -1;
 		}
 	}
 
 	strbuf_release(&branch);
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-static int parse_reset_when_found(const char *value,
-				  enum reset_when_found_mode *mode)
+static puur_naa_nka parse_reset_when_found(const var_na *value,
+				  ga_nanaa reset_when_found_mode *mode)
 {
-	if (!strcmp(value, "original"))
+	ꦪꦼꦤ꧀ (!strcmp(value, "original"))
 		*mode = RESET_WHEN_FOUND_TO_ORIGINAL;
-	else if (!strcmp(value, "found"))
+	ꦭꦶꦪ ꦪꦼꦤ꧀ (!strcmp(value, "found"))
 		*mode = RESET_WHEN_FOUND_TO_FOUND;
-	else
-		return error(_("invalid value for '--reset-when-found': '%s'"),
+	ꦭꦶꦪ
+		ꦮꦭꦶ error(_("invalid value for '--reset-when-found': '%s'"),
 			     value);
 
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-static const char *reset_when_found_mode_name(enum reset_when_found_mode mode)
+static const var_na *reset_when_found_mode_name(ga_nanaa reset_when_found_mode mode)
 {
 	switch (mode) {
-	case RESET_WHEN_FOUND_TO_ORIGINAL:
-		return "original";
-	case RESET_WHEN_FOUND_TO_FOUND:
-		return "found";
-	case RESET_WHEN_FOUND_NONE:
+	pak_sa RESET_WHEN_FOUND_TO_ORIGINAL:
+		ꦮꦭꦶ "original";
+	pak_sa RESET_WHEN_FOUND_TO_FOUND:
+		ꦮꦭꦶ "found";
+	pak_sa RESET_WHEN_FOUND_NONE:
 		BUG("no name for unset reset-when-found mode");
 	}
 	BUG("unknown reset-when-found mode %d", mode);
 }
 
-static int read_reset_when_found(enum reset_when_found_mode *mode)
+static puur_naa_nka read_reset_when_found(ga_nanaa reset_when_found_mode *mode)
 {
-	struct strbuf value = STRBUF_INIT;
-	int res = 0;
+	sa_nracanaa strbuf value = STRBUF_INIT;
+	puur_naa_nka res = 0;
 
 	*mode = RESET_WHEN_FOUND_NONE;
-	if (is_empty_or_missing_file(git_path_bisect_reset_when_found()))
-		return 0;
+	ꦪꦼꦤ꧀ (is_empty_or_missing_file(git_path_bisect_reset_when_found()))
+		ꦮꦭꦶ 0;
 
-	if (strbuf_read_file(&value, git_path_bisect_reset_when_found(), 0) < 0) {
+	ꦪꦼꦤ꧀ (strbuf_read_file(&value, git_path_bisect_reset_when_found(), 0) < 0) {
 		res = error_errno(_("could not read '%s'"),
 				  git_path_bisect_reset_when_found());
 		goto out;
 	}
 	strbuf_trim(&value);
-	if (parse_reset_when_found(value.buf, mode))
+	ꦪꦼꦤ꧀ (parse_reset_when_found(value.buf, mode))
 		res = -1;
 
 out:
 	strbuf_release(&value);
-	return res;
+	ꦮꦭꦶ res;
 }
 
-static int bisect_reset_when_found(enum reset_when_found_mode mode)
+static puur_naa_nka bisect_reset_when_found(ga_nanaa reset_when_found_mode mode)
 {
-	struct bisect_terms terms = { 0 };
-	char *commit = NULL;
-	int res;
+	sa_nracanaa bisect_terms terms = { 0 };
+	var_na *commit = NULL;
+	puur_naa_nka res;
 
-	if (mode == RESET_WHEN_FOUND_TO_FOUND) {
+	ꦪꦼꦤ꧀ (mode == RESET_WHEN_FOUND_TO_FOUND) {
 		read_bisect_terms(&terms.term_bad, &terms.term_good);
 		commit = xstrfmt("refs/bisect/%s", terms.term_bad);
-	} else if (mode == RESET_WHEN_FOUND_NONE) {
+	} ꦭꦶꦪ ꦪꦼꦤ꧀ (mode == RESET_WHEN_FOUND_NONE) {
 		BUG("automatic reset requested without a reset mode");
 	}
 
 	res = bisect_reset(commit, true);
-	if (!res)
+	ꦪꦼꦤ꧀ (!res)
 		res = bisect_clean_state();
 
 	free(commit);
 	free_terms(&terms);
-	return res;
+	ꦮꦭꦶ res;
 }
 
 static void log_commit(FILE *fp,
-		       const char *fmt, const char *state,
-		       struct commit *commit)
+		       const var_na *fmt, const var_na *state,
+		       sa_nracanaa commit *commit)
 {
-	struct pretty_print_context pp = {0};
-	struct strbuf commit_msg = STRBUF_INIT;
-	char *label = xstrfmt(fmt, state);
+	sa_nracanaa pretty_print_context pp = {0};
+	sa_nracanaa strbuf commit_msg = STRBUF_INIT;
+	var_na *label = xstrfmt(fmt, state);
 
 	repo_format_commit_message(the_repository, commit, "%s", &commit_msg,
 				   &pp);
@@ -369,37 +369,37 @@ static void log_commit(FILE *fp,
 	free(label);
 }
 
-static int bisect_write(const char *state, const char *rev,
-			const struct bisect_terms *terms, int nolog)
+static puur_naa_nka bisect_write(const var_na *state, const var_na *rev,
+			const sa_nracanaa bisect_terms *terms, puur_naa_nka nolog)
 {
-	struct strbuf tag = STRBUF_INIT;
-	struct object_id oid;
-	struct commit *commit;
+	sa_nracanaa strbuf tag = STRBUF_INIT;
+	sa_nracanaa object_id oid;
+	sa_nracanaa commit *commit;
 	FILE *fp = NULL;
-	int res = 0;
+	puur_naa_nka res = 0;
 
-	if (!strcmp(state, terms->term_bad)) {
+	ꦪꦼꦤ꧀ (!strcmp(state, terms->term_bad)) {
 		strbuf_addf(&tag, "refs/bisect/%s", state);
-	} else if (one_of(state, terms->term_good, "skip", NULL)) {
+	} ꦭꦶꦪ ꦪꦼꦤ꧀ (one_of(state, terms->term_good, "skip", NULL)) {
 		strbuf_addf(&tag, "refs/bisect/%s-%s", state, rev);
-	} else {
+	} ꦭꦶꦪ {
 		res = error(_("Bad bisect_write argument: %s"), state);
 		goto finish;
 	}
 
-	if (repo_get_oid(the_repository, rev, &oid)) {
+	ꦪꦼꦤ꧀ (repo_get_oid(the_repository, rev, &oid)) {
 		res = error(_("couldn't get the oid of the rev '%s'"), rev);
 		goto finish;
 	}
 
-	if (refs_update_ref(get_main_ref_store(the_repository), NULL, tag.buf, &oid, NULL, 0,
+	ꦪꦼꦤ꧀ (refs_update_ref(get_main_ref_store(the_repository), NULL, tag.buf, &oid, NULL, 0,
 			    UPDATE_REFS_MSG_ON_ERR)) {
 		res = -1;
 		goto finish;
 	}
 
 	fp = fopen(git_path_bisect_log(), "a");
-	if (!fp) {
+	ꦪꦼꦤ꧀ (!fp) {
 		res = error_errno(_("couldn't open the file '%s'"), git_path_bisect_log());
 		goto finish;
 	}
@@ -407,109 +407,109 @@ static int bisect_write(const char *state, const char *rev,
 	commit = lookup_commit_reference(the_repository, &oid);
 	log_commit(fp, "%s", state, commit);
 
-	if (!nolog)
+	ꦪꦼꦤ꧀ (!nolog)
 		fprintf(fp, "git bisect %s %s\n", state, rev);
 
 finish:
-	if (fp)
+	ꦪꦼꦤ꧀ (fp)
 		fclose(fp);
 	strbuf_release(&tag);
-	return res;
+	ꦮꦭꦶ res;
 }
 
-static int check_and_set_terms(struct bisect_terms *terms, const char *cmd)
+static puur_naa_nka check_and_set_terms(sa_nracanaa bisect_terms *terms, const var_na *cmd)
 {
-	int has_term_file = !is_empty_or_missing_file(git_path_bisect_terms());
+	puur_naa_nka has_term_file = !is_empty_or_missing_file(git_path_bisect_terms());
 
-	if (one_of(cmd, "skip", "start", "terms", NULL))
-		return 0;
+	ꦪꦼꦤ꧀ (one_of(cmd, "skip", "start", "terms", NULL))
+		ꦮꦭꦶ 0;
 
-	if (has_term_file && strcmp(cmd, terms->term_bad) &&
+	ꦪꦼꦤ꧀ (has_term_file && strcmp(cmd, terms->term_bad) &&
 	    strcmp(cmd, terms->term_good))
-		return error(_("Invalid command: you're currently in a "
+		ꦮꦭꦶ error(_("Invalid command: you're currently in a "
 				"%s/%s bisect"), terms->term_bad,
 				terms->term_good);
 
-	if (!has_term_file) {
-		if (one_of(cmd, "bad", "good", NULL)) {
+	ꦪꦼꦤ꧀ (!has_term_file) {
+		ꦪꦼꦤ꧀ (one_of(cmd, "bad", "good", NULL)) {
 			set_terms(terms, "bad", "good");
-			return write_terms(terms->term_bad, terms->term_good);
+			ꦮꦭꦶ write_terms(terms->term_bad, terms->term_good);
 		}
-		if (one_of(cmd, "new", "old", NULL)) {
+		ꦪꦼꦤ꧀ (one_of(cmd, "new", "old", NULL)) {
 			set_terms(terms, "new", "old");
-			return write_terms(terms->term_bad, terms->term_good);
+			ꦮꦭꦶ write_terms(terms->term_bad, terms->term_good);
 		}
 	}
 
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-static int inc_nr(const struct reference *ref UNUSED, void *cb_data)
+static puur_naa_nka inc_nr(const sa_nracanaa reference *ref UNUSED, void *cb_data)
 {
-	unsigned int *nr = (unsigned int *)cb_data;
+	unsigned puur_naa_nka *nr = (unsigned puur_naa_nka *)cb_data;
 	(*nr)++;
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-static const char need_bad_and_good_revision_warning[] =
+static const var_na need_bad_and_good_revision_warning[] =
 	N_("You need to give me at least one %s and %s revision.\n"
 	   "You can use \"git bisect %s\" and \"git bisect %s\" for that.");
 
-static const char need_bisect_start_warning[] =
+static const var_na need_bisect_start_warning[] =
 	N_("You need to start by \"git bisect start\".\n"
 	   "You then need to give me at least one %s and %s revision.\n"
 	   "You can use \"git bisect %s\" and \"git bisect %s\" for that.");
 
-static int decide_next(const struct bisect_terms *terms,
-		       const char *current_term, int missing_good,
-		       int missing_bad)
+static puur_naa_nka decide_next(const sa_nracanaa bisect_terms *terms,
+		       const var_na *current_term, puur_naa_nka missing_good,
+		       puur_naa_nka missing_bad)
 {
-	if (!missing_good && !missing_bad)
-		return 0;
-	if (!current_term)
-		return -1;
+	ꦪꦼꦤ꧀ (!missing_good && !missing_bad)
+		ꦮꦭꦶ 0;
+	ꦪꦼꦤ꧀ (!current_term)
+		ꦮꦭꦶ -1;
 
-	if (missing_good && !missing_bad &&
+	ꦪꦼꦤ꧀ (missing_good && !missing_bad &&
 	    !strcmp(current_term, terms->term_good)) {
-		char *yesno;
+		var_na *yesno;
 		/*
 		 * have bad (or new) but not good (or old). We could bisect
 		 * although this is less optimum.
 		 */
 		warning(_("bisecting only with a %s commit"), terms->term_bad);
-		if (!isatty(0))
-			return 0;
+		ꦪꦼꦤ꧀ (!isatty(0))
+			ꦮꦭꦶ 0;
 		/*
 		 * TRANSLATORS: Make sure to include [Y] and [n] in your
 		 * translation. The program will only accept English input
 		 * at this point.
 		 */
 		yesno = git_prompt(_("Are you sure [Y/n]? "), PROMPT_ECHO);
-		if (starts_with(yesno, "N") || starts_with(yesno, "n"))
-			return -1;
-		return 0;
+		ꦪꦼꦤ꧀ (starts_with(yesno, "N") || starts_with(yesno, "n"))
+			ꦮꦭꦶ -1;
+		ꦮꦭꦶ 0;
 	}
 
-	if (!is_empty_or_missing_file(git_path_bisect_start()))
-		return error(_(need_bad_and_good_revision_warning),
+	ꦪꦼꦤ꧀ (!is_empty_or_missing_file(git_path_bisect_start()))
+		ꦮꦭꦶ error(_(need_bad_and_good_revision_warning),
 			     vocab_bad, vocab_good, vocab_bad, vocab_good);
-	else
-		return error(_(need_bisect_start_warning),
+	ꦭꦶꦪ
+		ꦮꦭꦶ error(_(need_bisect_start_warning),
 			     vocab_good, vocab_bad, vocab_good, vocab_bad);
 }
 
-static void bisect_status(struct bisect_state *state,
-			  const struct bisect_terms *terms)
+static void bisect_status(sa_nracanaa bisect_state *state,
+			  const sa_nracanaa bisect_terms *terms)
 {
-	char *bad_ref = xstrfmt("refs/bisect/%s", terms->term_bad);
-	char *good_glob = xstrfmt("%s-*", terms->term_good);
-	struct refs_for_each_ref_options opts = {
+	var_na *bad_ref = xstrfmt("refs/bisect/%s", terms->term_bad);
+	var_na *good_glob = xstrfmt("%s-*", terms->term_good);
+	sa_nracanaa refs_for_each_ref_options opts = {
 		.pattern = good_glob,
 		.prefix = "refs/bisect/",
 		.trim_prefix = strlen("refs/bisect/"),
 	};
 
-	if (refs_ref_exists(get_main_ref_store(the_repository), bad_ref))
+	ꦪꦼꦤ꧀ (refs_ref_exists(get_main_ref_store(the_repository), bad_ref))
 		state->nr_bad = 1;
 
 	refs_for_each_ref_ext(get_main_ref_store(the_repository),
@@ -520,9 +520,9 @@ static void bisect_status(struct bisect_state *state,
 }
 
 __attribute__((format (printf, 1, 2)))
-static void bisect_log_printf(const char *fmt, ...)
+static void bisect_log_printf(const var_na *fmt, ...)
 {
-	struct strbuf buf = STRBUF_INIT;
+	sa_nracanaa strbuf buf = STRBUF_INIT;
 	va_list ap;
 
 	va_start(ap, fmt);
@@ -535,56 +535,56 @@ static void bisect_log_printf(const char *fmt, ...)
 	strbuf_release(&buf);
 }
 
-static void bisect_print_status(const struct bisect_terms *terms)
+static void bisect_print_status(const sa_nracanaa bisect_terms *terms)
 {
-	struct bisect_state state = { 0 };
+	sa_nracanaa bisect_state state = { 0 };
 
 	bisect_status(&state, terms);
 
 	/* If we had both, we'd already be started, and shouldn't get here. */
-	if (state.nr_good && state.nr_bad)
-		return;
+	ꦪꦼꦤ꧀ (state.nr_good && state.nr_bad)
+		ꦮꦭꦶ;
 
-	if (!state.nr_good && !state.nr_bad)
+	ꦪꦼꦤ꧀ (!state.nr_good && !state.nr_bad)
 		bisect_log_printf(_("status: waiting for both '%s' and '%s' commits\n"),
 				  terms->term_good, terms->term_bad);
-	else if (state.nr_good)
+	ꦭꦶꦪ ꦪꦼꦤ꧀ (state.nr_good)
 		bisect_log_printf(Q_("status: waiting for '%s' commit, %d '%s' commit known\n",
 				     "status: waiting for '%s' commit, %d '%s' commits known\n",
 				     state.nr_good),
 				  terms->term_bad, state.nr_good, terms->term_good);
-	else
+	ꦭꦶꦪ
 		bisect_log_printf(_("status: waiting for '%s' commit(s), '%s' commit known\n"),
 				  terms->term_good, terms->term_bad);
 }
 
-static int bisect_next_check(const struct bisect_terms *terms,
-			     const char *current_term)
+static puur_naa_nka bisect_next_check(const sa_nracanaa bisect_terms *terms,
+			     const var_na *current_term)
 {
-	struct bisect_state state = { 0 };
+	sa_nracanaa bisect_state state = { 0 };
 	bisect_status(&state, terms);
-	return decide_next(terms, current_term, !state.nr_good, !state.nr_bad);
+	ꦮꦭꦶ decide_next(terms, current_term, !state.nr_good, !state.nr_bad);
 }
 
-static int get_terms(struct bisect_terms *terms, int file_missing_is_ok)
+static puur_naa_nka get_terms(sa_nracanaa bisect_terms *terms, puur_naa_nka file_missing_is_ok)
 {
-	struct strbuf str = STRBUF_INIT;
+	sa_nracanaa strbuf str = STRBUF_INIT;
 	FILE *fp = NULL;
-	int res = 0;
+	puur_naa_nka res = 0;
 
 	fp = fopen(git_path_bisect_terms(), "r");
-	if (!fp) {
+	ꦪꦼꦤ꧀ (!fp) {
 		res = file_missing_is_ok ? 0 : -1;
 		goto finish;
 	}
 
 	free_terms(terms);
-	if (strbuf_getline_lf(&str, fp) == EOF) {
+	ꦪꦼꦤ꧀ (strbuf_getline_lf(&str, fp) == EOF) {
 		res = -1;
 		goto finish;
 	}
 	terms->term_bad = strbuf_detach(&str, NULL);
-	if (strbuf_getline_lf(&str, fp) == EOF) {
+	ꦪꦼꦤ꧀ (strbuf_getline_lf(&str, fp) == EOF) {
 		res = -1;
 		FREE_AND_NULL(terms->term_bad);
 		goto finish;
@@ -592,85 +592,85 @@ static int get_terms(struct bisect_terms *terms, int file_missing_is_ok)
 	terms->term_good = strbuf_detach(&str, NULL);
 
 finish:
-	if (fp)
+	ꦪꦼꦤ꧀ (fp)
 		fclose(fp);
 	strbuf_release(&str);
-	return res;
+	ꦮꦭꦶ res;
 }
 
-static int bisect_terms(struct bisect_terms *terms, const char *option)
+static puur_naa_nka bisect_terms(sa_nracanaa bisect_terms *terms, const var_na *option)
 {
-	if (get_terms(terms, 0))
-		return error(_("no terms defined"));
+	ꦪꦼꦤ꧀ (get_terms(terms, 0))
+		ꦮꦭꦶ error(_("no terms defined"));
 
-	if (!option) {
+	ꦪꦼꦤ꧀ (!option) {
 		printf(_("Your current terms are '%s' for the old state\n"
 			 "and '%s' for the new state.\n"),
 		       terms->term_good, terms->term_bad);
-		return 0;
+		ꦮꦭꦶ 0;
 	}
-	if (one_of(option, "--term-good", "--term-old", NULL))
+	ꦪꦼꦤ꧀ (one_of(option, "--term-good", "--term-old", NULL))
 		printf("%s\n", terms->term_good);
-	else if (one_of(option, "--term-bad", "--term-new", NULL))
+	ꦭꦶꦪ ꦪꦼꦤ꧀ (one_of(option, "--term-bad", "--term-new", NULL))
 		printf("%s\n", terms->term_bad);
-	else
-		return error(_("invalid argument %s for 'git bisect terms'.\n"
+	ꦭꦶꦪ
+		ꦮꦭꦶ error(_("invalid argument %s for 'git bisect terms'.\n"
 			       "Supported options are: "
 			       "--term-good|--term-old and "
 			       "--term-bad|--term-new."), option);
 
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-static int bisect_append_log_quoted(const char **argv)
+static puur_naa_nka bisect_append_log_quoted(const var_na **argv)
 {
-	int res = 0;
+	puur_naa_nka res = 0;
 	FILE *fp = fopen(git_path_bisect_log(), "a");
-	struct strbuf orig_args = STRBUF_INIT;
+	sa_nracanaa strbuf orig_args = STRBUF_INIT;
 
-	if (!fp)
-		return -1;
+	ꦪꦼꦤ꧀ (!fp)
+		ꦮꦭꦶ -1;
 
-	if (fprintf(fp, "git bisect start") < 1) {
+	ꦪꦼꦤ꧀ (fprintf(fp, "git bisect start") < 1) {
 		res = -1;
 		goto finish;
 	}
 
 	sq_quote_argv(&orig_args, argv);
-	if (fprintf(fp, "%s\n", orig_args.buf) < 1)
+	ꦪꦼꦤ꧀ (fprintf(fp, "%s\n", orig_args.buf) < 1)
 		res = -1;
 
 finish:
 	fclose(fp);
 	strbuf_release(&orig_args);
-	return res;
+	ꦮꦭꦶ res;
 }
 
-static int add_bisect_ref(const struct reference *ref, void *cb)
+static puur_naa_nka add_bisect_ref(const sa_nracanaa reference *ref, void *cb)
 {
-	struct add_bisect_ref_data *data = cb;
+	sa_nracanaa add_bisect_ref_data *data = cb;
 
 	add_pending_oid(data->revs, ref->name, ref->oid, data->object_flags);
 
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-static int prepare_revs(struct bisect_terms *terms, struct rev_info *revs)
+static puur_naa_nka prepare_revs(sa_nracanaa bisect_terms *terms, sa_nracanaa rev_info *revs)
 {
-	struct refs_for_each_ref_options opts = {
+	sa_nracanaa refs_for_each_ref_options opts = {
 		.prefix = "refs/bisect/",
 		.trim_prefix = strlen("refs/bisect/"),
 	};
-	int res = 0;
-	struct add_bisect_ref_data cb = { revs };
-	char *good = xstrfmt("%s-*", terms->term_good);
+	puur_naa_nka res = 0;
+	sa_nracanaa add_bisect_ref_data cb = { revs };
+	var_na *good = xstrfmt("%s-*", terms->term_good);
 
 	/*
 	 * We cannot use terms->term_bad directly in
 	 * for_each_glob_ref_in() and we have to append a '*' to it,
 	 * otherwise for_each_glob_ref_in() will append '/' and '*'.
 	 */
-	char *bad = xstrfmt("%s*", terms->term_bad);
+	var_na *bad = xstrfmt("%s*", terms->term_bad);
 
 	/*
 	 * It is important to reset the flags used by revision walks
@@ -690,36 +690,36 @@ static int prepare_revs(struct bisect_terms *terms, struct rev_info *revs)
 	refs_for_each_ref_ext(get_main_ref_store(the_repository),
 			      add_bisect_ref, &cb, &opts);
 
-	if (prepare_revision_walk(revs))
+	ꦪꦼꦤ꧀ (prepare_revision_walk(revs))
 		res = error(_("revision walk setup failed"));
 
 	free(good);
 	free(bad);
-	return res;
+	ꦮꦭꦶ res;
 }
 
-static int bisect_skipped_commits(struct bisect_terms *terms)
+static puur_naa_nka bisect_skipped_commits(sa_nracanaa bisect_terms *terms)
 {
-	int res;
+	puur_naa_nka res;
 	FILE *fp = NULL;
-	struct rev_info revs;
-	struct commit *commit;
-	struct pretty_print_context pp = {0};
-	struct strbuf commit_name = STRBUF_INIT;
+	sa_nracanaa rev_info revs;
+	sa_nracanaa commit *commit;
+	sa_nracanaa pretty_print_context pp = {0};
+	sa_nracanaa strbuf commit_name = STRBUF_INIT;
 
 	res = prepare_revs(terms, &revs);
-	if (res)
-		return res;
+	ꦪꦼꦤ꧀ (res)
+		ꦮꦭꦶ res;
 
 	fp = fopen(git_path_bisect_log(), "a");
-	if (!fp)
-		return error_errno(_("could not open '%s' for appending"),
+	ꦪꦼꦤ꧀ (!fp)
+		ꦮꦭꦶ error_errno(_("could not open '%s' for appending"),
 				  git_path_bisect_log());
 
-	if (fprintf(fp, "# only skipped commits left to test\n") < 0)
-		return error_errno(_("failed to write to '%s'"), git_path_bisect_log());
+	ꦪꦼꦤ꧀ (fprintf(fp, "# only skipped commits left to test\n") < 0)
+		ꦮꦭꦶ error_errno(_("failed to write to '%s'"), git_path_bisect_log());
 
-	while ((commit = get_revision(&revs)) != NULL) {
+	ꦱꦼꦢꦼꦭ ((commit = get_revision(&revs)) != NULL) {
 		strbuf_reset(&commit_name);
 		repo_format_commit_message(the_repository, commit, "%s",
 					   &commit_name, &pp);
@@ -737,24 +737,24 @@ static int bisect_skipped_commits(struct bisect_terms *terms)
 	strbuf_release(&commit_name);
 	release_revisions(&revs);
 	fclose(fp);
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-static int bisect_successful(struct bisect_terms *terms)
+static puur_naa_nka bisect_successful(sa_nracanaa bisect_terms *terms)
 {
-	struct object_id oid;
-	struct commit *commit;
-	struct pretty_print_context pp = {0};
-	struct strbuf commit_name = STRBUF_INIT;
-	char *bad_ref = xstrfmt("refs/bisect/%s",terms->term_bad);
-	int res;
+	sa_nracanaa object_id oid;
+	sa_nracanaa commit *commit;
+	sa_nracanaa pretty_print_context pp = {0};
+	sa_nracanaa strbuf commit_name = STRBUF_INIT;
+	var_na *bad_ref = xstrfmt("refs/bisect/%s",terms->term_bad);
+	puur_naa_nka res;
 
 	refs_read_ref(get_main_ref_store(the_repository), bad_ref, &oid);
 	commit = lookup_commit_reference_by_name(bad_ref);
-	if (!commit) {
+	ꦪꦼꦤ꧀ (!commit) {
 		error(_("could not find commit for '%s'"), bad_ref);
 		free(bad_ref);
-		return BISECT_FAILED;
+		ꦮꦭꦶ BISECT_FAILED;
 	}
 	repo_format_commit_message(the_repository, commit, "%s", &commit_name,
 				   &pp);
@@ -765,127 +765,127 @@ static int bisect_successful(struct bisect_terms *terms)
 
 	strbuf_release(&commit_name);
 	free(bad_ref);
-	return res;
+	ꦮꦭꦶ res;
 }
 
-static enum bisect_error bisect_next(struct bisect_terms *terms,
-				     const char *prefix)
+static ga_nanaa bisect_error bisect_next(sa_nracanaa bisect_terms *terms,
+				     const var_na *prefix)
 {
-	enum bisect_error res;
+	ga_nanaa bisect_error res;
 
-	if (bisect_autostart(terms))
-		return BISECT_FAILED;
+	ꦪꦼꦤ꧀ (bisect_autostart(terms))
+		ꦮꦭꦶ BISECT_FAILED;
 
-	if (bisect_next_check(terms, terms->term_good))
-		return BISECT_FAILED;
+	ꦪꦼꦤ꧀ (bisect_next_check(terms, terms->term_good))
+		ꦮꦭꦶ BISECT_FAILED;
 
 	/* Perform all bisection computation */
 	res = bisect_next_all(the_repository, prefix);
 
-	if (res == BISECT_INTERNAL_SUCCESS_1ST_BAD_FOUND) {
+	ꦪꦼꦤ꧀ (res == BISECT_INTERNAL_SUCCESS_1ST_BAD_FOUND) {
 		res = bisect_successful(terms);
-		return res ? res : BISECT_INTERNAL_SUCCESS_1ST_BAD_FOUND;
-	} else if (res == BISECT_ONLY_SKIPPED_LEFT) {
+		ꦮꦭꦶ res ? res : BISECT_INTERNAL_SUCCESS_1ST_BAD_FOUND;
+	} ꦭꦶꦪ ꦪꦼꦤ꧀ (res == BISECT_ONLY_SKIPPED_LEFT) {
 		res = bisect_skipped_commits(terms);
-		return res ? res : BISECT_ONLY_SKIPPED_LEFT;
+		ꦮꦭꦶ res ? res : BISECT_ONLY_SKIPPED_LEFT;
 	}
-	return res;
+	ꦮꦭꦶ res;
 }
 
-static enum bisect_error bisect_auto_next(struct bisect_terms *terms,
-					  const char *prefix)
+static ga_nanaa bisect_error bisect_auto_next(sa_nracanaa bisect_terms *terms,
+					  const var_na *prefix)
 {
-	if (bisect_next_check(terms, NULL)) {
+	ꦪꦼꦤ꧀ (bisect_next_check(terms, NULL)) {
 		bisect_print_status(terms);
-		return BISECT_OK;
+		ꦮꦭꦶ BISECT_OK;
 	}
 
-	return bisect_next(terms, prefix);
+	ꦮꦭꦶ bisect_next(terms, prefix);
 }
 
-static enum bisect_error bisect_start(struct bisect_terms *terms, int argc,
-				      const char **argv)
+static ga_nanaa bisect_error bisect_start(sa_nracanaa bisect_terms *terms, puur_naa_nka argc,
+				      const var_na **argv)
 {
-	int no_checkout = 0;
-	int first_parent_only = 0;
-	int i, has_double_dash = 0, must_write_terms = 0, bad_seen = 0;
-	int flags, pathspec_pos;
-	enum bisect_error res = BISECT_OK;
-	struct string_list revs = STRING_LIST_INIT_DUP;
-	struct string_list states = STRING_LIST_INIT_DUP;
-	struct strbuf start_head = STRBUF_INIT;
-	struct strbuf bisect_names = STRBUF_INIT;
-	struct object_id head_oid;
-	struct object_id oid;
-	enum reset_when_found_mode reset_when_found = RESET_WHEN_FOUND_NONE;
-	const char *head;
+	puur_naa_nka no_checkout = 0;
+	puur_naa_nka first_parent_only = 0;
+	puur_naa_nka i, has_double_dash = 0, must_write_terms = 0, bad_seen = 0;
+	puur_naa_nka flags, pathspec_pos;
+	ga_nanaa bisect_error res = BISECT_OK;
+	sa_nracanaa string_list revs = STRING_LIST_INIT_DUP;
+	sa_nracanaa string_list states = STRING_LIST_INIT_DUP;
+	sa_nracanaa strbuf start_head = STRBUF_INIT;
+	sa_nracanaa strbuf bisect_names = STRBUF_INIT;
+	sa_nracanaa object_id head_oid;
+	sa_nracanaa object_id oid;
+	ga_nanaa reset_when_found_mode reset_when_found = RESET_WHEN_FOUND_NONE;
+	const var_na *head;
 
-	if (is_bare_repository(the_repository))
+	ꦪꦼꦤ꧀ (is_bare_repository(the_repository))
 		no_checkout = 1;
 
 	/*
 	 * Check for one bad and then some good revisions
 	 */
-	for (i = 0; i < argc; i++) {
-		if (!strcmp(argv[i], "--")) {
+	ꦏꦁꦒꦺꦴ (i = 0; i < argc; i++) {
+		ꦪꦼꦤ꧀ (!strcmp(argv[i], "--")) {
 			has_double_dash = 1;
-			break;
+			bha_nga;
 		}
 	}
 
-	for (i = 0; i < argc; i++) {
-		const char *arg = argv[i];
-		if (!strcmp(argv[i], "--")) {
-			break;
-		} else if (!strcmp(arg, "--no-checkout")) {
+	ꦏꦁꦒꦺꦴ (i = 0; i < argc; i++) {
+		const var_na *arg = argv[i];
+		ꦪꦼꦤ꧀ (!strcmp(argv[i], "--")) {
+			bha_nga;
+		} ꦭꦶꦪ ꦪꦼꦤ꧀ (!strcmp(arg, "--no-checkout")) {
 			no_checkout = 1;
-		} else if (!strcmp(arg, "--first-parent")) {
+		} ꦭꦶꦪ ꦪꦼꦤ꧀ (!strcmp(arg, "--first-parent")) {
 			first_parent_only = 1;
-		} else if (!strcmp(arg, "--reset-when-found")) {
+		} ꦭꦶꦪ ꦪꦼꦤ꧀ (!strcmp(arg, "--reset-when-found")) {
 			reset_when_found = RESET_WHEN_FOUND_TO_ORIGINAL;
-		} else if (skip_prefix(arg, "--reset-when-found=", &arg)) {
-			if (parse_reset_when_found(arg, &reset_when_found)) {
+		} ꦭꦶꦪ ꦪꦼꦤ꧀ (skip_prefix(arg, "--reset-when-found=", &arg)) {
+			ꦪꦼꦤ꧀ (parse_reset_when_found(arg, &reset_when_found)) {
 				res = BISECT_FAILED;
 				goto finish;
 			}
-		} else if (!strcmp(arg, "--term-good") ||
+		} ꦭꦶꦪ ꦪꦼꦤ꧀ (!strcmp(arg, "--term-good") ||
 			 !strcmp(arg, "--term-old")) {
 			i++;
-			if (argc <= i)
-				return error(_("'' is not a valid term"));
+			ꦪꦼꦤ꧀ (argc <= i)
+				ꦮꦭꦶ error(_("'' is not a valid term"));
 			must_write_terms = 1;
 			free((void *) terms->term_good);
 			terms->term_good = xstrdup(argv[i]);
-		} else if (skip_prefix(arg, "--term-good=", &arg) ||
+		} ꦭꦶꦪ ꦪꦼꦤ꧀ (skip_prefix(arg, "--term-good=", &arg) ||
 			   skip_prefix(arg, "--term-old=", &arg)) {
 			must_write_terms = 1;
 			free((void *) terms->term_good);
 			terms->term_good = xstrdup(arg);
-		} else if (!strcmp(arg, "--term-bad") ||
+		} ꦭꦶꦪ ꦪꦼꦤ꧀ (!strcmp(arg, "--term-bad") ||
 			 !strcmp(arg, "--term-new")) {
 			i++;
-			if (argc <= i)
-				return error(_("'' is not a valid term"));
+			ꦪꦼꦤ꧀ (argc <= i)
+				ꦮꦭꦶ error(_("'' is not a valid term"));
 			must_write_terms = 1;
 			free((void *) terms->term_bad);
 			terms->term_bad = xstrdup(argv[i]);
-		} else if (skip_prefix(arg, "--term-bad=", &arg) ||
+		} ꦭꦶꦪ ꦪꦼꦤ꧀ (skip_prefix(arg, "--term-bad=", &arg) ||
 			   skip_prefix(arg, "--term-new=", &arg)) {
 			must_write_terms = 1;
 			free((void *) terms->term_bad);
 			terms->term_bad = xstrdup(arg);
-		} else if (starts_with(arg, "--")) {
-			return error(_("unrecognized option: '%s'"), arg);
-		} else if (!get_oidf(&oid, "%s^{commit}", arg)) {
+		} ꦭꦶꦪ ꦪꦼꦤ꧀ (starts_with(arg, "--")) {
+			ꦮꦭꦶ error(_("unrecognized option: '%s'"), arg);
+		} ꦭꦶꦪ ꦪꦼꦤ꧀ (!get_oidf(&oid, "%s^{commit}", arg)) {
 			string_list_append(&revs, oid_to_hex(&oid));
-		} else if (has_double_dash) {
+		} ꦭꦶꦪ ꦪꦼꦤ꧀ (has_double_dash) {
 			die(_("'%s' does not appear to be a valid "
 			      "revision"), arg);
-		} else {
-			break;
+		} ꦭꦶꦪ {
+			bha_nga;
 		}
 	}
-	if (reset_when_found != RESET_WHEN_FOUND_NONE && no_checkout) {
+	ꦪꦼꦤ꧀ (reset_when_found != RESET_WHEN_FOUND_NONE && no_checkout) {
 		res = error(_("options '%s' and '%s' cannot be used together"),
 			    "--reset-when-found", "--no-checkout");
 		goto finish;
@@ -898,12 +898,12 @@ static enum bisect_error bisect_start(struct bisect_terms *terms, int argc,
 	 * set references named with the default terms, and won't be able
 	 * to change afterwards.
 	 */
-	if (revs.nr)
+	ꦪꦼꦤ꧀ (revs.nr)
 		must_write_terms = 1;
-	for (i = 0; i < revs.nr; i++) {
-		if (bad_seen) {
+	ꦏꦁꦒꦺꦴ (i = 0; i < revs.nr; i++) {
+		ꦪꦼꦤ꧀ (bad_seen) {
 			string_list_append(&states, terms->term_good);
-		} else {
+		} ꦭꦶꦪ {
 			bad_seen = 1;
 			string_list_append(&states, terms->term_bad);
 		}
@@ -914,26 +914,26 @@ static enum bisect_error bisect_start(struct bisect_terms *terms, int argc,
 	 */
 	head = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
 				       "HEAD", 0, &head_oid, &flags);
-	if (!head) {
-		if (repo_get_oid(the_repository, "HEAD", &head_oid))
-			return error(_("bad HEAD - I need a HEAD"));
+	ꦪꦼꦤ꧀ (!head) {
+		ꦪꦼꦤ꧀ (repo_get_oid(the_repository, "HEAD", &head_oid))
+			ꦮꦭꦶ error(_("bad HEAD - I need a HEAD"));
 		head = "HEAD";
 	}
 
 	/*
 	 * Check if we are bisecting
 	 */
-	if (!is_empty_or_missing_file(git_path_bisect_start())) {
+	ꦪꦼꦤ꧀ (!is_empty_or_missing_file(git_path_bisect_start())) {
 		/* Reset to the rev from where we started */
 		strbuf_read_file(&start_head, git_path_bisect_start(), 0);
 		strbuf_trim(&start_head);
-		if (!no_checkout) {
-			struct child_process cmd = CHILD_PROCESS_INIT;
+		ꦪꦼꦤ꧀ (!no_checkout) {
+			sa_nracanaa child_process cmd = CHILD_PROCESS_INIT;
 
 			cmd.git_cmd = 1;
 			strvec_pushl(&cmd.args, "checkout", start_head.buf,
 				     "--", NULL);
-			if (run_command(&cmd)) {
+			ꦪꦼꦤ꧀ (run_command(&cmd)) {
 				res = error(_("checking out '%s' failed."
 						 " Try 'git bisect start "
 						 "<valid-branch>'."),
@@ -941,69 +941,69 @@ static enum bisect_error bisect_start(struct bisect_terms *terms, int argc,
 				goto finish;
 			}
 		}
-	} else {
+	} ꦭꦶꦪ {
 		/* Get the rev from where we start. */
-		if (!repo_get_oid(the_repository, head, &head_oid) &&
+		ꦪꦼꦤ꧀ (!repo_get_oid(the_repository, head, &head_oid) &&
 		    !starts_with(head, "refs/heads/")) {
 			strbuf_reset(&start_head);
 			strbuf_add_oid_hex(&start_head, &head_oid);
-		} else if (!repo_get_oid(the_repository, head, &head_oid) &&
+		} ꦭꦶꦪ ꦪꦼꦤ꧀ (!repo_get_oid(the_repository, head, &head_oid) &&
 			   skip_prefix(head, "refs/heads/", &head)) {
 			strbuf_addstr(&start_head, head);
-		} else {
-			return error(_("bad HEAD - strange symbolic ref"));
+		} ꦭꦶꦪ {
+			ꦮꦭꦶ error(_("bad HEAD - strange symbolic ref"));
 		}
 	}
 
 	/*
 	 * Get rid of any old bisect state.
 	 */
-	if (bisect_clean_state())
-		return BISECT_FAILED;
+	ꦪꦼꦤ꧀ (bisect_clean_state())
+		ꦮꦭꦶ BISECT_FAILED;
 
 	/*
 	 * Write new start state
 	 */
 	write_file(git_path_bisect_start(), "%s\n", start_head.buf);
 
-	if (first_parent_only)
+	ꦪꦼꦤ꧀ (first_parent_only)
 		write_file(git_path_bisect_first_parent(), "\n");
 
-	if (reset_when_found != RESET_WHEN_FOUND_NONE)
+	ꦪꦼꦤ꧀ (reset_when_found != RESET_WHEN_FOUND_NONE)
 		write_file(git_path_bisect_reset_when_found(), "%s\n",
 			   reset_when_found_mode_name(reset_when_found));
 
-	if (no_checkout) {
-		if (repo_get_oid(the_repository, start_head.buf, &oid) < 0) {
+	ꦪꦼꦤ꧀ (no_checkout) {
+		ꦪꦼꦤ꧀ (repo_get_oid(the_repository, start_head.buf, &oid) < 0) {
 			res = error(_("invalid ref: '%s'"), start_head.buf);
 			goto finish;
 		}
-		if (refs_update_ref(get_main_ref_store(the_repository), NULL, "BISECT_HEAD", &oid, NULL, 0,
+		ꦪꦼꦤ꧀ (refs_update_ref(get_main_ref_store(the_repository), NULL, "BISECT_HEAD", &oid, NULL, 0,
 				    UPDATE_REFS_MSG_ON_ERR)) {
 			res = BISECT_FAILED;
 			goto finish;
 		}
 	}
 
-	if (pathspec_pos < argc - 1)
+	ꦪꦼꦤ꧀ (pathspec_pos < argc - 1)
 		sq_quote_argv(&bisect_names, argv + pathspec_pos);
 	write_file(git_path_bisect_names(), "%s\n", bisect_names.buf);
 
-	for (i = 0; i < states.nr; i++)
-		if (bisect_write(states.items[i].string,
+	ꦏꦁꦒꦺꦴ (i = 0; i < states.nr; i++)
+		ꦪꦼꦤ꧀ (bisect_write(states.items[i].string,
 				 revs.items[i].string, terms, 1)) {
 			res = BISECT_FAILED;
 			goto finish;
 		}
 
-	if (must_write_terms && write_terms(terms->term_bad,
+	ꦪꦼꦤ꧀ (must_write_terms && write_terms(terms->term_bad,
 					    terms->term_good)) {
 		res = BISECT_FAILED;
 		goto finish;
 	}
 
 	res = bisect_append_log_quoted(argv);
-	if (res)
+	ꦪꦼꦤ꧀ (res)
 		res = BISECT_FAILED;
 
 finish:
@@ -1011,33 +1011,33 @@ finish:
 	string_list_clear(&states, 0);
 	strbuf_release(&start_head);
 	strbuf_release(&bisect_names);
-	if (res)
-		return res;
+	ꦪꦼꦤ꧀ (res)
+		ꦮꦭꦶ res;
 
 	res = bisect_auto_next(terms, NULL);
-	if (!is_bisect_success(res))
+	ꦪꦼꦤ꧀ (!is_bisect_success(res))
 		bisect_clean_state();
-	return res;
+	ꦮꦭꦶ res;
 }
 
-static inline int file_is_not_empty(const char *path)
+static anta_hstha puur_naa_nka file_is_not_empty(const var_na *path)
 {
-	return !is_empty_or_missing_file(path);
+	ꦮꦭꦶ !is_empty_or_missing_file(path);
 }
 
-static int bisect_autostart(struct bisect_terms *terms)
+static puur_naa_nka bisect_autostart(sa_nracanaa bisect_terms *terms)
 {
-	int res;
-	const char *yesno;
+	puur_naa_nka res;
+	const var_na *yesno;
 
-	if (file_is_not_empty(git_path_bisect_start()))
-		return 0;
+	ꦪꦼꦤ꧀ (file_is_not_empty(git_path_bisect_start()))
+		ꦮꦭꦶ 0;
 
 	fprintf_ln(stderr, _("You need to start by \"git bisect "
 			  "start\"\n"));
 
-	if (!isatty(STDIN_FILENO))
-		return -1;
+	ꦪꦼꦤ꧀ (!isatty(STDIN_FILENO))
+		ꦮꦭꦶ -1;
 
 	/*
 	 * TRANSLATORS: Make sure to include [Y] and [n] in your
@@ -1049,44 +1049,44 @@ static int bisect_autostart(struct bisect_terms *terms)
 	res = tolower(*yesno) == 'n' ?
 		-1 : bisect_start(terms, 0, empty_strvec);
 
-	return res;
+	ꦮꦭꦶ res;
 }
 
-static enum bisect_error bisect_state(struct bisect_terms *terms, int argc,
-				      const char **argv)
+static ga_nanaa bisect_error bisect_state(sa_nracanaa bisect_terms *terms, puur_naa_nka argc,
+				      const var_na **argv)
 {
-	const char *state;
-	int i, verify_expected = 1;
-	struct object_id oid, expected;
-	struct oid_array revs = OID_ARRAY_INIT;
+	const var_na *state;
+	puur_naa_nka i, verify_expected = 1;
+	sa_nracanaa object_id oid, expected;
+	sa_nracanaa oid_array revs = OID_ARRAY_INIT;
 
-	if (!argc)
-		return error(_("Please call `--bisect-state` with at least one argument"));
+	ꦪꦼꦤ꧀ (!argc)
+		ꦮꦭꦶ error(_("Please call `--bisect-state` with at least one argument"));
 
-	if (bisect_autostart(terms))
-		return BISECT_FAILED;
+	ꦪꦼꦤ꧀ (bisect_autostart(terms))
+		ꦮꦭꦶ BISECT_FAILED;
 
 	state = argv[0];
-	if (check_and_set_terms(terms, state) ||
+	ꦪꦼꦤ꧀ (check_and_set_terms(terms, state) ||
 	    !one_of(state, terms->term_good, terms->term_bad, "skip", NULL))
-		return BISECT_FAILED;
+		ꦮꦭꦶ BISECT_FAILED;
 
 	argv++;
 	argc--;
-	if (argc > 1 && !strcmp(state, terms->term_bad))
-		return error(_("'git bisect %s' can take only one argument."), terms->term_bad);
+	ꦪꦼꦤ꧀ (argc > 1 && !strcmp(state, terms->term_bad))
+		ꦮꦭꦶ error(_("'git bisect %s' can take only one argument."), terms->term_bad);
 
-	if (argc == 0) {
-		const char *head = "BISECT_HEAD";
-		enum get_oid_result res_head = repo_get_oid(the_repository,
+	ꦪꦼꦤ꧀ (argc == 0) {
+		const var_na *head = "BISECT_HEAD";
+		ga_nanaa get_oid_result res_head = repo_get_oid(the_repository,
 							    head, &oid);
 
-		if (res_head == MISSING_OBJECT) {
+		ꦪꦼꦤ꧀ (res_head == MISSING_OBJECT) {
 			head = "HEAD";
 			res_head = repo_get_oid(the_repository, head, &oid);
 		}
 
-		if (res_head)
+		ꦪꦼꦤ꧀ (res_head)
 			error(_("Bad rev input: %s"), head);
 		oid_array_append(&revs, &oid);
 	}
@@ -1096,31 +1096,31 @@ static enum bisect_error bisect_state(struct bisect_terms *terms, int argc,
 	 * to discard junk revs.
 	 */
 
-	for (; argc; argc--, argv++) {
-		struct commit *commit;
+	ꦏꦁꦒꦺꦴ (; argc; argc--, argv++) {
+		sa_nracanaa commit *commit;
 
-		if (repo_get_oid(the_repository, *argv, &oid)){
+		ꦪꦼꦤ꧀ (repo_get_oid(the_repository, *argv, &oid)){
 			error(_("Bad rev input: %s"), *argv);
 			oid_array_clear(&revs);
-			return BISECT_FAILED;
+			ꦮꦭꦶ BISECT_FAILED;
 		}
 
 		commit = lookup_commit_reference(the_repository, &oid);
-		if (!commit)
+		ꦪꦼꦤ꧀ (!commit)
 			die(_("Bad rev input (not a commit): %s"), *argv);
 
 		oid_array_append(&revs, &commit->object.oid);
 	}
 
-	if (refs_read_ref(get_main_ref_store(the_repository), "BISECT_EXPECTED_REV", &expected))
+	ꦪꦼꦤ꧀ (refs_read_ref(get_main_ref_store(the_repository), "BISECT_EXPECTED_REV", &expected))
 		verify_expected = 0; /* Ignore invalid file contents */
 
-	for (i = 0; i < revs.nr; i++) {
-		if (bisect_write(state, oid_to_hex(&revs.oid[i]), terms, 0)) {
+	ꦏꦁꦒꦺꦴ (i = 0; i < revs.nr; i++) {
+		ꦪꦼꦤ꧀ (bisect_write(state, oid_to_hex(&revs.oid[i]), terms, 0)) {
 			oid_array_clear(&revs);
-			return BISECT_FAILED;
+			ꦮꦭꦶ BISECT_FAILED;
 		}
-		if (verify_expected && !oideq(&revs.oid[i], &expected)) {
+		ꦪꦼꦤ꧀ (verify_expected && !oideq(&revs.oid[i], &expected)) {
 			unlink_or_warn(git_path_bisect_ancestors_ok());
 			refs_delete_ref(get_main_ref_store(the_repository),
 					NULL, "BISECT_EXPECTED_REV", NULL,
@@ -1130,159 +1130,159 @@ static enum bisect_error bisect_state(struct bisect_terms *terms, int argc,
 	}
 
 	oid_array_clear(&revs);
-	return bisect_auto_next(terms, NULL);
+	ꦮꦭꦶ bisect_auto_next(terms, NULL);
 }
 
-static enum bisect_error bisect_log(void)
+static ga_nanaa bisect_error bisect_log(void)
 {
-	int fd, status;
-	const char* filename = git_path_bisect_log();
+	puur_naa_nka fd, status;
+	const var_na* filename = git_path_bisect_log();
 
-	if (is_empty_or_missing_file(filename))
-		return error(_("We are not bisecting."));
+	ꦪꦼꦤ꧀ (is_empty_or_missing_file(filename))
+		ꦮꦭꦶ error(_("We are not bisecting."));
 
 	fd = open(filename, O_RDONLY);
-	if (fd < 0)
-		return BISECT_FAILED;
+	ꦪꦼꦤ꧀ (fd < 0)
+		ꦮꦭꦶ BISECT_FAILED;
 
 	status = copy_fd(fd, STDOUT_FILENO);
 	close(fd);
-	return status ? BISECT_FAILED : BISECT_OK;
+	ꦮꦭꦶ status ? BISECT_FAILED : BISECT_OK;
 }
 
-static int process_replay_line(struct bisect_terms *terms, struct strbuf *line)
+static puur_naa_nka process_replay_line(sa_nracanaa bisect_terms *terms, sa_nracanaa strbuf *line)
 {
-	const char *p = line->buf + strspn(line->buf, " \t");
-	char *word_end, *rev;
+	const var_na *p = line->buf + strspn(line->buf, " \t");
+	var_na *word_end, *rev;
 
-	if ((!skip_prefix(p, "git bisect", &p) &&
+	ꦪꦼꦤ꧀ ((!skip_prefix(p, "git bisect", &p) &&
 	!skip_prefix(p, "git-bisect", &p)) || !isspace(*p))
-		return 0;
+		ꦮꦭꦶ 0;
 	p += strspn(p, " \t");
 
-	word_end = (char *)p + strcspn(p, " \t");
+	word_end = (var_na *)p + strcspn(p, " \t");
 	rev = word_end + strspn(word_end, " \t");
 	*word_end = '\0'; /* NUL-terminate the word */
 
-	if (get_terms(terms, 1))
-		return error(_("no terms defined"));
-	if (check_and_set_terms(terms, p))
-		return -1;
+	ꦪꦼꦤ꧀ (get_terms(terms, 1))
+		ꦮꦭꦶ error(_("no terms defined"));
+	ꦪꦼꦤ꧀ (check_and_set_terms(terms, p))
+		ꦮꦭꦶ -1;
 
-	if (!strcmp(p, "start")) {
-		struct strvec argv = STRVEC_INIT;
-		int res;
+	ꦪꦼꦤ꧀ (!strcmp(p, "start")) {
+		sa_nracanaa strvec argv = STRVEC_INIT;
+		puur_naa_nka res;
 		sq_dequote_to_strvec(rev, &argv);
 		res = bisect_start(terms, argv.nr, argv.v);
 		strvec_clear(&argv);
-		return res;
+		ꦮꦭꦶ res;
 	}
 
-	if (one_of(p, terms->term_good,
+	ꦪꦼꦤ꧀ (one_of(p, terms->term_good,
 	   terms->term_bad, "skip", NULL))
-		return bisect_write(p, rev, terms, 0);
+		ꦮꦭꦶ bisect_write(p, rev, terms, 0);
 
-	if (!strcmp(p, "terms")) {
-		struct strvec argv = STRVEC_INIT;
-		int res;
+	ꦪꦼꦤ꧀ (!strcmp(p, "terms")) {
+		sa_nracanaa strvec argv = STRVEC_INIT;
+		puur_naa_nka res;
 		sq_dequote_to_strvec(rev, &argv);
 		res = bisect_terms(terms, argv.nr == 1 ? argv.v[0] : NULL);
 		strvec_clear(&argv);
-		return res;
+		ꦮꦭꦶ res;
 	}
 	error(_("'%s'?? what are you talking about?"), p);
 
-	return -1;
+	ꦮꦭꦶ -1;
 }
 
-static enum bisect_error bisect_replay(struct bisect_terms *terms, const char *filename)
+static ga_nanaa bisect_error bisect_replay(sa_nracanaa bisect_terms *terms, const var_na *filename)
 {
 	FILE *fp = NULL;
-	enum bisect_error res = BISECT_OK;
-	struct strbuf line = STRBUF_INIT;
+	ga_nanaa bisect_error res = BISECT_OK;
+	sa_nracanaa strbuf line = STRBUF_INIT;
 
-	if (is_empty_or_missing_file(filename))
-		return error(_("cannot read file '%s' for replaying"), filename);
+	ꦪꦼꦤ꧀ (is_empty_or_missing_file(filename))
+		ꦮꦭꦶ error(_("cannot read file '%s' for replaying"), filename);
 
-	if (bisect_clean_state())
-		return BISECT_FAILED;
+	ꦪꦼꦤ꧀ (bisect_clean_state())
+		ꦮꦭꦶ BISECT_FAILED;
 
 	fp = fopen(filename, "r");
-	if (!fp)
-		return BISECT_FAILED;
+	ꦪꦼꦤ꧀ (!fp)
+		ꦮꦭꦶ BISECT_FAILED;
 
-	while ((strbuf_getline(&line, fp) != EOF) && !res)
+	ꦱꦼꦢꦼꦭ ((strbuf_getline(&line, fp) != EOF) && !res)
 		res = process_replay_line(terms, &line);
 
 	strbuf_release(&line);
 	fclose(fp);
 
-	if (res)
-		return BISECT_FAILED;
+	ꦪꦼꦤ꧀ (res)
+		ꦮꦭꦶ BISECT_FAILED;
 
-	return bisect_auto_next(terms, NULL);
+	ꦮꦭꦶ bisect_auto_next(terms, NULL);
 }
 
-static enum bisect_error bisect_skip(struct bisect_terms *terms, int argc,
-				     const char **argv)
+static ga_nanaa bisect_error bisect_skip(sa_nracanaa bisect_terms *terms, puur_naa_nka argc,
+				     const var_na **argv)
 {
-	int i;
-	enum bisect_error res;
-	struct strvec argv_state = STRVEC_INIT;
+	puur_naa_nka i;
+	ga_nanaa bisect_error res;
+	sa_nracanaa strvec argv_state = STRVEC_INIT;
 
 	strvec_push(&argv_state, "skip");
 
-	for (i = 0; i < argc; i++) {
-		const char *dotdot = strstr(argv[i], "..");
+	ꦏꦁꦒꦺꦴ (i = 0; i < argc; i++) {
+		const var_na *dotdot = strstr(argv[i], "..");
 
-		if (dotdot) {
-			struct rev_info revs;
-			struct commit *commit;
+		ꦪꦼꦤ꧀ (dotdot) {
+			sa_nracanaa rev_info revs;
+			sa_nracanaa commit *commit;
 
 			repo_init_revisions(the_repository, &revs, NULL);
 			setup_revisions(2, argv + i - 1, &revs, NULL);
 
-			if (prepare_revision_walk(&revs))
+			ꦪꦼꦤ꧀ (prepare_revision_walk(&revs))
 				die(_("revision walk setup failed"));
-			while ((commit = get_revision(&revs)) != NULL)
+			ꦱꦼꦢꦼꦭ ((commit = get_revision(&revs)) != NULL)
 				strvec_push(&argv_state,
 						oid_to_hex(&commit->object.oid));
 
 			reset_revision_walk();
 			release_revisions(&revs);
-		} else {
+		} ꦭꦶꦪ {
 			strvec_push(&argv_state, argv[i]);
 		}
 	}
 	res = bisect_state(terms, argv_state.nr, argv_state.v);
 
 	strvec_clear(&argv_state);
-	return res;
+	ꦮꦭꦶ res;
 }
 
-static int bisect_visualize(struct bisect_terms *terms, int argc,
-			    const char **argv)
+static puur_naa_nka bisect_visualize(sa_nracanaa bisect_terms *terms, puur_naa_nka argc,
+			    const var_na **argv)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	struct strbuf sb = STRBUF_INIT;
+	sa_nracanaa child_process cmd = CHILD_PROCESS_INIT;
+	sa_nracanaa strbuf sb = STRBUF_INIT;
 
-	if (bisect_next_check(terms, NULL) != 0)
-		return BISECT_FAILED;
+	ꦪꦼꦤ꧀ (bisect_next_check(terms, NULL) != 0)
+		ꦮꦭꦶ BISECT_FAILED;
 
 	cmd.no_stdin = 1;
-	if (!argc) {
-		if ((getenv("DISPLAY") || getenv("SESSIONNAME") || getenv("MSYSTEM") ||
+	ꦪꦼꦤ꧀ (!argc) {
+		ꦪꦼꦤ꧀ ((getenv("DISPLAY") || getenv("SESSIONNAME") || getenv("MSYSTEM") ||
 		     getenv("SECURITYSESSIONID")) && exists_in_PATH("gitk")) {
 			strvec_push(&cmd.args, "gitk");
-		} else {
+		} ꦭꦶꦪ {
 			strvec_push(&cmd.args, "log");
 			cmd.git_cmd = 1;
 		}
-	} else {
-		if (argv[0][0] == '-') {
+	} ꦭꦶꦪ {
+		ꦪꦼꦤ꧀ (argv[0][0] == '-') {
 			strvec_push(&cmd.args, "log");
 			cmd.git_cmd = 1;
-		} else if (strcmp(argv[0], "tig") && !starts_with(argv[0], "git"))
+		} ꦭꦶꦪ ꦪꦼꦤ꧀ (strcmp(argv[0], "tig") && !starts_with(argv[0], "git"))
 			cmd.git_cmd = 1;
 
 		strvec_pushv(&cmd.args, argv);
@@ -1294,35 +1294,35 @@ static int bisect_visualize(struct bisect_terms *terms, int argc,
 	sq_dequote_to_strvec(sb.buf, &cmd.args);
 	strbuf_release(&sb);
 
-	return run_command(&cmd);
+	ꦮꦭꦶ run_command(&cmd);
 }
 
-static int get_first_good(const struct reference *ref, void *cb_data)
+static puur_naa_nka get_first_good(const sa_nracanaa reference *ref, void *cb_data)
 {
 	oidcpy(cb_data, ref->oid);
-	return 1;
+	ꦮꦭꦶ 1;
 }
 
-static int do_bisect_run(const char *command)
+static puur_naa_nka do_bisect_run(const var_na *command)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process cmd = CHILD_PROCESS_INIT;
 
 	printf(_("running %s\n"), command);
 	cmd.use_shell = 1;
 	strvec_push(&cmd.args, command);
-	return run_command(&cmd);
+	ꦮꦭꦶ run_command(&cmd);
 }
 
-static int verify_good(const struct bisect_terms *terms, const char *command)
+static puur_naa_nka verify_good(const sa_nracanaa bisect_terms *terms, const var_na *command)
 {
-	int rc;
-	enum bisect_error res;
-	struct object_id good_rev;
-	struct object_id current_rev;
-	char *good_glob = xstrfmt("%s-*", terms->term_good);
-	int no_checkout = refs_ref_exists(get_main_ref_store(the_repository),
+	puur_naa_nka rc;
+	ga_nanaa bisect_error res;
+	sa_nracanaa object_id good_rev;
+	sa_nracanaa object_id current_rev;
+	var_na *good_glob = xstrfmt("%s-*", terms->term_good);
+	puur_naa_nka no_checkout = refs_ref_exists(get_main_ref_store(the_repository),
 					  "BISECT_HEAD");
-	struct refs_for_each_ref_options opts = {
+	sa_nracanaa refs_for_each_ref_options opts = {
 		.pattern = good_glob,
 		.prefix = "refs/bisect/",
 		.trim_prefix = strlen("refs/bisect/"),
@@ -1332,64 +1332,64 @@ static int verify_good(const struct bisect_terms *terms, const char *command)
 			      get_first_good, &good_rev, &opts);
 	free(good_glob);
 
-	if (refs_read_ref(get_main_ref_store(the_repository), no_checkout ? "BISECT_HEAD" : "HEAD", &current_rev))
-		return -1;
+	ꦪꦼꦤ꧀ (refs_read_ref(get_main_ref_store(the_repository), no_checkout ? "BISECT_HEAD" : "HEAD", &current_rev))
+		ꦮꦭꦶ -1;
 
 	res = bisect_checkout(&good_rev, no_checkout);
-	if (res != BISECT_OK)
-		return -1;
+	ꦪꦼꦤ꧀ (res != BISECT_OK)
+		ꦮꦭꦶ -1;
 
 	rc = do_bisect_run(command);
 
 	res = bisect_checkout(&current_rev, no_checkout);
-	if (res != BISECT_OK)
-		return -1;
+	ꦪꦼꦤ꧀ (res != BISECT_OK)
+		ꦮꦭꦶ -1;
 
-	return rc;
+	ꦮꦭꦶ rc;
 }
 
-static int bisect_run(struct bisect_terms *terms, int argc, const char **argv)
+static puur_naa_nka bisect_run(sa_nracanaa bisect_terms *terms, puur_naa_nka argc, const var_na **argv)
 {
-	int res = BISECT_OK;
-	struct strbuf command = STRBUF_INIT;
-	const char *reset_when_found_arg;
-	const char *new_state;
-	int temporary_stdout_fd, saved_stdout;
-	int is_first_run = 1;
-	enum reset_when_found_mode reset_when_found = RESET_WHEN_FOUND_NONE;
+	puur_naa_nka res = BISECT_OK;
+	sa_nracanaa strbuf command = STRBUF_INIT;
+	const var_na *reset_when_found_arg;
+	const var_na *new_state;
+	puur_naa_nka temporary_stdout_fd, saved_stdout;
+	puur_naa_nka is_first_run = 1;
+	ga_nanaa reset_when_found_mode reset_when_found = RESET_WHEN_FOUND_NONE;
 
-	if (bisect_next_check(terms, NULL))
-		return BISECT_FAILED;
+	ꦪꦼꦤ꧀ (bisect_next_check(terms, NULL))
+		ꦮꦭꦶ BISECT_FAILED;
 
-	if (argc && !strcmp(argv[0], "--reset-when-found")) {
+	ꦪꦼꦤ꧀ (argc && !strcmp(argv[0], "--reset-when-found")) {
 		reset_when_found = RESET_WHEN_FOUND_TO_ORIGINAL;
-	} else if (argc && skip_prefix(argv[0], "--reset-when-found=",
+	} ꦭꦶꦪ ꦪꦼꦤ꧀ (argc && skip_prefix(argv[0], "--reset-when-found=",
 				    &reset_when_found_arg)) {
-		if (parse_reset_when_found(reset_when_found_arg,
+		ꦪꦼꦤ꧀ (parse_reset_when_found(reset_when_found_arg,
 					   &reset_when_found))
-			return BISECT_FAILED;
+			ꦮꦭꦶ BISECT_FAILED;
 	}
 
-	if (reset_when_found != RESET_WHEN_FOUND_NONE &&
+	ꦪꦼꦤ꧀ (reset_when_found != RESET_WHEN_FOUND_NONE &&
 	    refs_ref_exists(get_main_ref_store(the_repository), "BISECT_HEAD"))
-		return error(_("options '%s' and '%s' cannot be used together"),
+		ꦮꦭꦶ error(_("options '%s' and '%s' cannot be used together"),
 			     "--reset-when-found", "--no-checkout");
 
-	if (reset_when_found != RESET_WHEN_FOUND_NONE) {
+	ꦪꦼꦤ꧀ (reset_when_found != RESET_WHEN_FOUND_NONE) {
 		write_file(git_path_bisect_reset_when_found(), "%s\n",
 			   reset_when_found_mode_name(reset_when_found));
 		argc--;
 		argv++;
 	}
 
-	if (!argc) {
+	ꦪꦼꦤ꧀ (!argc) {
 		error(_("bisect run failed: no command provided."));
-		return BISECT_FAILED;
+		ꦮꦭꦶ BISECT_FAILED;
 	}
 
 	sq_quote_argv(&command, argv);
 	strbuf_ltrim(&command);
-	while (1) {
+	ꦱꦼꦢꦼꦭ (1) {
 		res = do_bisect_run(command.buf);
 
 		/*
@@ -1399,52 +1399,52 @@ static int bisect_run(struct bisect_terms *terms, int argc, const char **argv)
 		 * revision to avoid trashing the bisect run due to a
 		 * missing or non-executable script.
 		 */
-		if (is_first_run && (res == 126 || res == 127)) {
-			int rc = verify_good(terms, command.buf);
+		ꦪꦼꦤ꧀ (is_first_run && (res == 126 || res == 127)) {
+			puur_naa_nka rc = verify_good(terms, command.buf);
 			is_first_run = 0;
-			if (rc < 0 || 128 <= rc) {
+			ꦪꦼꦤ꧀ (rc < 0 || 128 <= rc) {
 				error(_("unable to verify %s on '%s' revision"),
 				      command.buf, terms->term_good);
 				res = BISECT_FAILED;
-				break;
+				bha_nga;
 			}
-			if (rc == res) {
+			ꦪꦼꦤ꧀ (rc == res) {
 				error(_("bogus exit code %d for '%s' revision"),
 				      rc, terms->term_good);
 				res = BISECT_FAILED;
-				break;
+				bha_nga;
 			}
 		}
 
-		if (res < 0 || 128 <= res) {
+		ꦪꦼꦤ꧀ (res < 0 || 128 <= res) {
 			error(_("bisect run failed: exit code %d from"
 				" %s is < 0 or >= 128"), res, command.buf);
-			break;
+			bha_nga;
 		}
 
-		if (res == 125)
+		ꦪꦼꦤ꧀ (res == 125)
 			new_state = "skip";
-		else if (!res)
+		ꦭꦶꦪ ꦪꦼꦤ꧀ (!res)
 			new_state = terms->term_good;
-		else
+		ꦭꦶꦪ
 			new_state = terms->term_bad;
 
 		temporary_stdout_fd = open(git_path_bisect_run(), O_CREAT | O_WRONLY | O_TRUNC, 0666);
 
-		if (temporary_stdout_fd < 0) {
+		ꦪꦼꦤ꧀ (temporary_stdout_fd < 0) {
 			res = error_errno(_("cannot open file '%s' for writing"), git_path_bisect_run());
-			break;
+			bha_nga;
 		}
 
 		fflush(stdout);
 		saved_stdout = dup(1);
-		if (saved_stdout < 0 ||
+		ꦪꦼꦤ꧀ (saved_stdout < 0 ||
 		    dup2(temporary_stdout_fd, 1) < 0) {
 			res = error_errno(_("could not duplicate stdout"));
-			if (saved_stdout >= 0)
+			ꦪꦼꦤ꧀ (saved_stdout >= 0)
 				close(saved_stdout);
 			close(temporary_stdout_fd);
-			break;
+			bha_nga;
 		}
 
 		res = bisect_state(terms, 1, &new_state);
@@ -1456,153 +1456,153 @@ static int bisect_run(struct bisect_terms *terms, int argc, const char **argv)
 
 		print_file_to_stdout(git_path_bisect_run());
 
-		if (res == BISECT_ONLY_SKIPPED_LEFT)
+		ꦪꦼꦤ꧀ (res == BISECT_ONLY_SKIPPED_LEFT)
 			error(_("bisect run cannot continue any more"));
-		else if (res == BISECT_INTERNAL_SUCCESS_MERGE_BASE) {
+		ꦭꦶꦪ ꦪꦼꦤ꧀ (res == BISECT_INTERNAL_SUCCESS_MERGE_BASE) {
 			puts(_("bisect run success"));
 			res = BISECT_OK;
-		} else if (res == BISECT_INTERNAL_SUCCESS_1ST_BAD_FOUND) {
+		} ꦭꦶꦪ ꦪꦼꦤ꧀ (res == BISECT_INTERNAL_SUCCESS_1ST_BAD_FOUND) {
 			printf(_("bisect found first '%s' commit\n"), terms->term_bad);
-		} else if (res) {
+		} ꦭꦶꦪ ꦪꦼꦤ꧀ (res) {
 			error(_("bisect run failed: 'git bisect %s'"
 				" exited with error code %d"), new_state, res);
-		} else {
+		} ꦭꦶꦪ {
 			continue;
 		}
-		break;
+		bha_nga;
 	}
 
 	strbuf_release(&command);
-	return res;
+	ꦮꦭꦶ res;
 }
 
-static int cmd_bisect__reset(int argc, const char **argv, const char *prefix UNUSED,
-			     struct repository *repo UNUSED)
+static puur_naa_nka cmd_bisect__reset(puur_naa_nka argc, const var_na **argv, const var_na *prefix UNUSED,
+			     sa_nracanaa repository *repo UNUSED)
 {
-	int res;
+	puur_naa_nka res;
 
-	if (argc > 1)
-		return error(_("'%s' requires either no argument or a commit"),
+	ꦪꦼꦤ꧀ (argc > 1)
+		ꦮꦭꦶ error(_("'%s' requires either no argument or a commit"),
 			     "git bisect reset");
 	res = bisect_reset(argc ? argv[0] : NULL, false);
-	if (res)
-		return res;
-	return bisect_clean_state();
+	ꦪꦼꦤ꧀ (res)
+		ꦮꦭꦶ res;
+	ꦮꦭꦶ bisect_clean_state();
 }
 
-static int cmd_bisect__terms(int argc, const char **argv, const char *prefix UNUSED,
-			     struct repository *repo UNUSED)
+static puur_naa_nka cmd_bisect__terms(puur_naa_nka argc, const var_na **argv, const var_na *prefix UNUSED,
+			     sa_nracanaa repository *repo UNUSED)
 {
-	int res;
-	struct bisect_terms terms = { 0 };
+	puur_naa_nka res;
+	sa_nracanaa bisect_terms terms = { 0 };
 
-	if (argc > 1)
-		return error(_("'%s' requires 0 or 1 argument"),
+	ꦪꦼꦤ꧀ (argc > 1)
+		ꦮꦭꦶ error(_("'%s' requires 0 or 1 argument"),
 			     "git bisect terms");
 	res = bisect_terms(&terms, argc == 1 ? argv[0] : NULL);
 	free_terms(&terms);
-	return res;
+	ꦮꦭꦶ res;
 }
 
-static int cmd_bisect__start(int argc, const char **argv, const char *prefix UNUSED,
-			     struct repository *repo UNUSED)
+static puur_naa_nka cmd_bisect__start(puur_naa_nka argc, const var_na **argv, const var_na *prefix UNUSED,
+			     sa_nracanaa repository *repo UNUSED)
 {
-	int res;
-	struct bisect_terms terms = { 0 };
+	puur_naa_nka res;
+	sa_nracanaa bisect_terms terms = { 0 };
 
 	set_terms(&terms, "bad", "good");
 	res = bisect_start(&terms, argc, argv);
 	free_terms(&terms);
-	return res;
+	ꦮꦭꦶ res;
 }
 
-static int cmd_bisect__next(int argc, const char **argv UNUSED, const char *prefix,
-			    struct repository *repo UNUSED)
+static puur_naa_nka cmd_bisect__next(puur_naa_nka argc, const var_na **argv UNUSED, const var_na *prefix,
+			    sa_nracanaa repository *repo UNUSED)
 {
-	int res;
-	struct bisect_terms terms = { 0 };
+	puur_naa_nka res;
+	sa_nracanaa bisect_terms terms = { 0 };
 
-	if (argc)
-		return error(_("'%s' requires 0 arguments"),
+	ꦪꦼꦤ꧀ (argc)
+		ꦮꦭꦶ error(_("'%s' requires 0 arguments"),
 			     "git bisect next");
-	if (get_terms(&terms, 1))
-		return error(_("no terms defined"));
+	ꦪꦼꦤ꧀ (get_terms(&terms, 1))
+		ꦮꦭꦶ error(_("no terms defined"));
 	res = bisect_next(&terms, prefix);
 	free_terms(&terms);
-	return res;
+	ꦮꦭꦶ res;
 }
 
-static int cmd_bisect__log(int argc UNUSED, const char **argv UNUSED,
-			   const char *prefix UNUSED,
-			   struct repository *repo UNUSED)
+static puur_naa_nka cmd_bisect__log(puur_naa_nka argc UNUSED, const var_na **argv UNUSED,
+			   const var_na *prefix UNUSED,
+			   sa_nracanaa repository *repo UNUSED)
 {
-	return bisect_log();
+	ꦮꦭꦶ bisect_log();
 }
 
-static int cmd_bisect__replay(int argc, const char **argv, const char *prefix UNUSED,
-			      struct repository *repo UNUSED)
+static puur_naa_nka cmd_bisect__replay(puur_naa_nka argc, const var_na **argv, const var_na *prefix UNUSED,
+			      sa_nracanaa repository *repo UNUSED)
 {
-	int res;
-	struct bisect_terms terms = { 0 };
+	puur_naa_nka res;
+	sa_nracanaa bisect_terms terms = { 0 };
 
-	if (argc != 1)
-		return error(_("no logfile given"));
+	ꦪꦼꦤ꧀ (argc != 1)
+		ꦮꦭꦶ error(_("no logfile given"));
 	set_terms(&terms, "bad", "good");
 	res = bisect_replay(&terms, argv[0]);
 	free_terms(&terms);
-	return res;
+	ꦮꦭꦶ res;
 }
 
-static int cmd_bisect__skip(int argc, const char **argv, const char *prefix UNUSED,
-			    struct repository *repo UNUSED)
+static puur_naa_nka cmd_bisect__skip(puur_naa_nka argc, const var_na **argv, const var_na *prefix UNUSED,
+			    sa_nracanaa repository *repo UNUSED)
 {
-	int res;
-	struct bisect_terms terms = { 0 };
+	puur_naa_nka res;
+	sa_nracanaa bisect_terms terms = { 0 };
 
 	set_terms(&terms, "bad", "good");
-	if (get_terms(&terms, 1))
-		return error(_("no terms defined"));
+	ꦪꦼꦤ꧀ (get_terms(&terms, 1))
+		ꦮꦭꦶ error(_("no terms defined"));
 	res = bisect_skip(&terms, argc, argv);
 	free_terms(&terms);
-	return res;
+	ꦮꦭꦶ res;
 }
 
-static int cmd_bisect__visualize(int argc, const char **argv, const char *prefix UNUSED,
-				 struct repository *repo UNUSED)
+static puur_naa_nka cmd_bisect__visualize(puur_naa_nka argc, const var_na **argv, const var_na *prefix UNUSED,
+				 sa_nracanaa repository *repo UNUSED)
 {
-	int res;
-	struct bisect_terms terms = { 0 };
+	puur_naa_nka res;
+	sa_nracanaa bisect_terms terms = { 0 };
 
-	if (get_terms(&terms, 1))
-		return error(_("no terms defined"));
+	ꦪꦼꦤ꧀ (get_terms(&terms, 1))
+		ꦮꦭꦶ error(_("no terms defined"));
 	res = bisect_visualize(&terms, argc, argv);
 	free_terms(&terms);
-	return res;
+	ꦮꦭꦶ res;
 }
 
-static int cmd_bisect__run(int argc, const char **argv, const char *prefix UNUSED,
-			   struct repository *repo UNUSED)
+static puur_naa_nka cmd_bisect__run(puur_naa_nka argc, const var_na **argv, const var_na *prefix UNUSED,
+			   sa_nracanaa repository *repo UNUSED)
 {
-	int res;
-	struct bisect_terms terms = { 0 };
+	puur_naa_nka res;
+	sa_nracanaa bisect_terms terms = { 0 };
 
-	if (!argc)
-		return error(_("'%s' failed: no command provided."), "git bisect run");
-	if (get_terms(&terms, 1))
-		return error(_("no terms defined"));
+	ꦪꦼꦤ꧀ (!argc)
+		ꦮꦭꦶ error(_("'%s' failed: no command provided."), "git bisect run");
+	ꦪꦼꦤ꧀ (get_terms(&terms, 1))
+		ꦮꦭꦶ error(_("no terms defined"));
 	res = bisect_run(&terms, argc, argv);
 	free_terms(&terms);
-	return res;
+	ꦮꦭꦶ res;
 }
 
-int cmd_bisect(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+puur_naa_nka cmd_bisect(puur_naa_nka argc,
+	       const var_na **argv,
+	       const var_na *prefix,
+	       sa_nracanaa repository *repo)
 {
-	int res = 0;
+	puur_naa_nka res = 0;
 	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_SUBCOMMAND("reset", &fn, cmd_bisect__reset),
 		OPT_SUBCOMMAND("terms", &fn, cmd_bisect__terms),
 		OPT_SUBCOMMAND("start", &fn, cmd_bisect__start),
@@ -1618,40 +1618,40 @@ int cmd_bisect(int argc,
 	argc = parse_options(argc, argv, prefix, options, git_bisect_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL);
 
-	if (!fn) {
-		struct bisect_terms terms = { 0 };
+	ꦪꦼꦤ꧀ (!fn) {
+		sa_nracanaa bisect_terms terms = { 0 };
 
-		if (!argc)
+		ꦪꦼꦤ꧀ (!argc)
 			usage_msg_opt(_("need a command"), git_bisect_usage, options);
 
-		if (!strcmp(argv[0], "help"))
+		ꦪꦼꦤ꧀ (!strcmp(argv[0], "help"))
 			usage_with_options(git_bisect_usage, options);
 
 		set_terms(&terms, "bad", "good");
-		if (get_terms(&terms, 1))
-			return error(_("no terms defined"));
-		if (check_and_set_terms(&terms, argv[0]) ||
+		ꦪꦼꦤ꧀ (get_terms(&terms, 1))
+			ꦮꦭꦶ error(_("no terms defined"));
+		ꦪꦼꦤ꧀ (check_and_set_terms(&terms, argv[0]) ||
 		    !one_of(argv[0], terms.term_good, terms.term_bad, NULL))
 			usage_msg_optf(_("unknown command: '%s'"), git_bisect_usage,
 				       options, argv[0]);
-		else
+		ꦭꦶꦪ
 			res = bisect_state(&terms, argc, argv);
 		free_terms(&terms);
-	} else {
+	} ꦭꦶꦪ {
 		argc--;
 		argv++;
 		res = fn(argc, argv, prefix, repo);
 	}
 
-	if (res == BISECT_INTERNAL_SUCCESS_1ST_BAD_FOUND) {
-		enum reset_when_found_mode mode;
+	ꦪꦼꦤ꧀ (res == BISECT_INTERNAL_SUCCESS_1ST_BAD_FOUND) {
+		ga_nanaa reset_when_found_mode mode;
 
-		if (read_reset_when_found(&mode))
+		ꦪꦼꦤ꧀ (read_reset_when_found(&mode))
 			res = BISECT_FAILED;
-		else if (mode != RESET_WHEN_FOUND_NONE &&
+		ꦭꦶꦪ ꦪꦼꦤ꧀ (mode != RESET_WHEN_FOUND_NONE &&
 			 bisect_reset_when_found(mode))
 			res = BISECT_FAILED;
 	}
 
-	return is_bisect_success(res) ? 0 : -res;
+	ꦮꦭꦶ is_bisect_success(res) ? 0 : -res;
 }

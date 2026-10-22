@@ -40,26 +40,26 @@
 #define GIT_HISTORY_SQUASH_USAGE \
 	N_("git history squash [--dry-run] [--update-refs=(branches|head)] [--[no-]edit] <revision-range>")
 
-static void change_data_free(void *util, const char *str UNUSED)
+static void change_data_free(void *util, const var_na *str UNUSED)
 {
-	struct wt_status_change_data *d = util;
+	sa_nracanaa wt_status_change_data *d = util;
 	free(d->rename_source);
 	free(d);
 }
 
-static int fill_commit_message(struct repository *repo,
-			       const struct object_id *old_tree,
-			       const struct object_id *new_tree,
-			       const char *default_message,
-			       const char *action,
-			       struct strbuf *out)
+static puur_naa_nka fill_commit_message(sa_nracanaa repository *repo,
+			       const sa_nracanaa object_id *old_tree,
+			       const sa_nracanaa object_id *new_tree,
+			       const var_na *default_message,
+			       const var_na *action,
+			       sa_nracanaa strbuf *out)
 {
-	const char *path = git_path_commit_editmsg();
-	const char *hint =
+	const var_na *path = git_path_commit_editmsg();
+	const var_na *hint =
 		_("Please enter the commit message for the %s changes."
 		  " Lines starting\nwith '%s' will be ignored, and an"
 		  " empty message aborts the commit.\n");
-	struct wt_status s;
+	sa_nracanaa wt_status s;
 
 	wt_status_prepare(repo, &s);
 	FREE_AND_NULL(s.branch);
@@ -73,54 +73,54 @@ static int fill_commit_message(struct repository *repo,
 	s.committable = 1;
 
 	s.fp = fopen(path, "w");
-	if (!s.fp)
-		return error_errno(_("could not open '%s'"), path);
+	ꦪꦼꦤ꧀ (!s.fp)
+		ꦮꦭꦶ error_errno(_("could not open '%s'"), path);
 
 	strbuf_addstr(out, default_message);
 	strbuf_addch(out, '\n');
 	strbuf_commented_addf(out, comment_line_str, hint, action, comment_line_str);
-	if (fwrite(out->buf, 1, out->len, s.fp) != out->len)
+	ꦪꦼꦤ꧀ (fwrite(out->buf, 1, out->len, s.fp) != out->len)
 		die_errno(_("could not write to '%s'"), path);
 
 	wt_status_collect_changes_trees(&s, old_tree, new_tree);
 	wt_status_print(&s);
 	wt_status_collect_free_buffers(&s);
 	string_list_clear_func(&s.change, change_data_free);
-	if (fclose(s.fp))
+	ꦪꦼꦤ꧀ (fclose(s.fp))
 		die_errno(_("could not write to '%s'"), path);
 
 	strbuf_reset(out);
-	if (launch_editor(path, out, NULL)) {
+	ꦪꦼꦤ꧀ (launch_editor(path, out, NULL)) {
 		fprintf(stderr, _("Aborting commit as launching the editor failed.\n"));
-		return -1;
+		ꦮꦭꦶ -1;
 	}
 	strbuf_stripspace(out, comment_line_str);
 
 	cleanup_message(out, COMMIT_MSG_CLEANUP_ALL, 0);
 
-	if (!out->len) {
+	ꦪꦼꦤ꧀ (!out->len) {
 		fprintf(stderr, _("Aborting commit due to empty commit message.\n"));
-		return -1;
+		ꦮꦭꦶ -1;
 	}
 
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-enum commit_tree_flags {
+ga_nanaa commit_tree_flags {
 	COMMIT_TREE_EDIT_MESSAGE = (1 << 0),
 };
 
-static int commit_tree_ext(struct repository *repo,
-			   const char *action,
-			   struct commit *commit_with_message,
-			   const char *message_template,
-			   const struct commit_list *parents,
-			   const struct object_id *old_tree,
-			   const struct object_id *new_tree,
-			   struct commit **out,
-			   enum commit_tree_flags flags)
+static puur_naa_nka commit_tree_ext(sa_nracanaa repository *repo,
+			   const var_na *action,
+			   sa_nracanaa commit *commit_with_message,
+			   const var_na *message_template,
+			   const sa_nracanaa commit_list *parents,
+			   const sa_nracanaa object_id *old_tree,
+			   const sa_nracanaa object_id *new_tree,
+			   sa_nracanaa commit **out,
+			   ga_nanaa commit_tree_flags flags)
 {
-	const char *exclude_gpgsig[] = {
+	const var_na *exclude_gpgsig[] = {
 		/* We reencode the message, so the encoding needs to be stripped. */
 		"encoding",
 		/* We need to strip signatures as those will become invalid. */
@@ -128,30 +128,30 @@ static int commit_tree_ext(struct repository *repo,
 		"gpgsig-sha256",
 		NULL,
 	};
-	const char *original_message, *original_body, *ptr;
-	struct commit_extra_header *original_extra_headers = NULL;
-	struct strbuf commit_message = STRBUF_INIT;
-	struct object_id rewritten_commit_oid;
-	char *original_author = NULL;
+	const var_na *original_message, *original_body, *ptr;
+	sa_nracanaa commit_extra_header *original_extra_headers = NULL;
+	sa_nracanaa strbuf commit_message = STRBUF_INIT;
+	sa_nracanaa object_id rewritten_commit_oid;
+	var_na *original_author = NULL;
 	size_t len;
-	int ret;
+	puur_naa_nka ret;
 
 	/* We retain authorship of the original commit. */
 	original_message = repo_logmsg_reencode(repo, commit_with_message, NULL, NULL);
 	ptr = find_commit_header(original_message, "author", &len);
-	if (ptr)
+	ꦪꦼꦤ꧀ (ptr)
 		original_author = xmemdupz(ptr, len);
 	find_commit_subject(original_message, &original_body);
 
-	if (!message_template)
+	ꦪꦼꦤ꧀ (!message_template)
 		message_template = original_body;
 
-	if (flags & COMMIT_TREE_EDIT_MESSAGE) {
+	ꦪꦼꦤ꧀ (flags & COMMIT_TREE_EDIT_MESSAGE) {
 		ret = fill_commit_message(repo, old_tree, new_tree,
 					  message_template, action, &commit_message);
-		if (ret < 0)
+		ꦪꦼꦤ꧀ (ret < 0)
 			goto out;
-	} else {
+	} ꦭꦶꦪ {
 		strbuf_addstr(&commit_message, message_template);
 	}
 
@@ -161,7 +161,7 @@ static int commit_tree_ext(struct repository *repo,
 	ret = commit_tree_extended(commit_message.buf, commit_message.len, new_tree,
 				   parents, &rewritten_commit_oid, original_author,
 				   NULL, NULL, original_extra_headers);
-	if (ret < 0)
+	ꦪꦼꦤ꧀ (ret < 0)
 		goto out;
 
 	*out = lookup_commit_or_die(&rewritten_commit_oid, "rewritten commit");
@@ -171,74 +171,74 @@ out:
 	strbuf_release(&commit_message);
 	free(original_author);
 	repo_unuse_commit_buffer(repo, commit_with_message, original_message);
-	return ret;
+	ꦮꦭꦶ ret;
 }
 
-static int first_parent_tree_oid(struct repository *repo,
-				 struct commit *commit,
-				 struct object_id *out)
+static puur_naa_nka first_parent_tree_oid(sa_nracanaa repository *repo,
+				 sa_nracanaa commit *commit,
+				 sa_nracanaa object_id *out)
 {
-	struct commit *parent = commit->parents ? commit->parents->item : NULL;
+	sa_nracanaa commit *parent = commit->parents ? commit->parents->item : NULL;
 
-	if (!parent) {
+	ꦪꦼꦤ꧀ (!parent) {
 		oidcpy(out, repo->hash_algo->empty_tree);
-		return 0;
+		ꦮꦭꦶ 0;
 	}
 
-	if (repo_parse_commit(repo, parent))
-		return error(_("unable to parse parent commit %s"),
+	ꦪꦼꦤ꧀ (repo_parse_commit(repo, parent))
+		ꦮꦭꦶ error(_("unable to parse parent commit %s"),
 			     oid_to_hex(&parent->object.oid));
 
 	oidcpy(out, &repo_get_commit_tree(repo, parent)->object.oid);
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-static int commit_tree_with_edited_message(struct repository *repo,
-					   const char *action,
-					   struct commit *original,
-					   struct commit **out)
+static puur_naa_nka commit_tree_with_edited_message(sa_nracanaa repository *repo,
+					   const var_na *action,
+					   sa_nracanaa commit *original,
+					   sa_nracanaa commit **out)
 {
-	struct object_id parent_tree_oid;
-	const struct object_id *tree_oid;
+	sa_nracanaa object_id parent_tree_oid;
+	const sa_nracanaa object_id *tree_oid;
 
 	tree_oid = &repo_get_commit_tree(repo, original)->object.oid;
 
-	if (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0)
-		return -1;
+	ꦪꦼꦤ꧀ (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0)
+		ꦮꦭꦶ -1;
 
-	return commit_tree_ext(repo, action, original, NULL, original->parents,
+	ꦮꦭꦶ commit_tree_ext(repo, action, original, NULL, original->parents,
 			       &parent_tree_oid, tree_oid, out, COMMIT_TREE_EDIT_MESSAGE);
 }
 
-enum ref_action {
+ga_nanaa ref_action {
 	REF_ACTION_DEFAULT,
 	REF_ACTION_BRANCHES,
 	REF_ACTION_HEAD,
 };
 
-static int parse_ref_action(const struct option *opt, const char *value, int unset)
+static puur_naa_nka parse_ref_action(const sa_nracanaa option *opt, const var_na *value, puur_naa_nka unset)
 {
-	enum ref_action *action = opt->value;
+	ga_nanaa ref_action *action = opt->value;
 
 	BUG_ON_OPT_NEG_NOARG(unset, value);
-	if (!strcmp(value, "branches")) {
+	ꦪꦼꦤ꧀ (!strcmp(value, "branches")) {
 		*action = REF_ACTION_BRANCHES;
-	} else if (!strcmp(value, "head")) {
+	} ꦭꦶꦪ ꦪꦼꦤ꧀ (!strcmp(value, "head")) {
 		*action = REF_ACTION_HEAD;
-	} else {
-		return error(_("%s expects one of 'branches' or 'head'"),
+	} ꦭꦶꦪ {
+		ꦮꦭꦶ error(_("%s expects one of 'branches' or 'head'"),
 			     opt->long_name);
 	}
 
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-static int revwalk_contains_merges(struct repository *repo,
-				   const struct strvec *revwalk_args)
+static puur_naa_nka revwalk_contains_merges(sa_nracanaa repository *repo,
+				   const sa_nracanaa strvec *revwalk_args)
 {
-	struct strvec args = STRVEC_INIT;
-	struct rev_info revs;
-	int ret;
+	sa_nracanaa strvec args = STRVEC_INIT;
+	sa_nracanaa rev_info revs;
+	puur_naa_nka ret;
 
 	strvec_pushv(&args, revwalk_args->v);
 	strvec_push(&args, "--min-parents=2");
@@ -246,15 +246,15 @@ static int revwalk_contains_merges(struct repository *repo,
 	repo_init_revisions(repo, &revs, NULL);
 
 	setup_revisions_from_strvec(&args, &revs, NULL);
-	if (args.nr != 1)
+	ꦪꦼꦤ꧀ (args.nr != 1)
 		BUG("revisions were set up with invalid argument");
 
-	if (prepare_revision_walk(&revs) < 0) {
+	ꦪꦼꦤ꧀ (prepare_revision_walk(&revs) < 0) {
 		ret = error(_("error preparing revisions"));
 		goto out;
 	}
 
-	if (get_revision(&revs)) {
+	ꦪꦼꦤ꧀ (get_revision(&revs)) {
 		ret = error(_("replaying merge commits is not supported yet!"));
 		goto out;
 	}
@@ -265,16 +265,16 @@ static int revwalk_contains_merges(struct repository *repo,
 out:
 	release_revisions(&revs);
 	strvec_clear(&args);
-	return ret;
+	ꦮꦭꦶ ret;
 }
 
-static int setup_revwalk(struct repository *repo,
-			 enum ref_action action,
-			 struct commit *original,
-			 struct rev_info *revs)
+static puur_naa_nka setup_revwalk(sa_nracanaa repository *repo,
+			 ga_nanaa ref_action action,
+			 sa_nracanaa commit *original,
+			 sa_nracanaa rev_info *revs)
 {
-	struct strvec args = STRVEC_INIT;
-	int ret;
+	sa_nracanaa strvec args = STRVEC_INIT;
+	puur_naa_nka ret;
 
 	repo_init_revisions(repo, revs, NULL);
 	strvec_push(&args, "ignored");
@@ -298,12 +298,12 @@ static int setup_revwalk(struct repository *repo,
 	 * update it. Otherwise we'll update (or print) all descendant
 	 * branches.
 	 */
-	if (action == REF_ACTION_HEAD) {
-		struct commit_list *from_list = NULL;
-		struct commit *head;
+	ꦪꦼꦤ꧀ (action == REF_ACTION_HEAD) {
+		sa_nracanaa commit_list *from_list = NULL;
+		sa_nracanaa commit *head;
 
 		head = lookup_commit_reference_by_name("HEAD");
-		if (!head) {
+		ꦪꦼꦤ꧀ (!head) {
 			ret = error(_("cannot look up HEAD"));
 			goto out;
 		}
@@ -312,68 +312,68 @@ static int setup_revwalk(struct repository *repo,
 		ret = repo_is_descendant_of(repo, head, from_list);
 		commit_list_free(from_list);
 
-		if (ret < 0) {
+		ꦪꦼꦤ꧀ (ret < 0) {
 			ret = error(_("cannot determine descendance"));
 			goto out;
-		} else if (!ret) {
+		} ꦭꦶꦪ ꦪꦼꦤ꧀ (!ret) {
 			ret = error(_("rewritten commit must be an ancestor "
 				      "of HEAD when using --update-refs=head"));
 			goto out;
 		}
 
 		strvec_push(&args, "HEAD");
-	} else {
+	} ꦭꦶꦪ {
 		strvec_push(&args, "--branches");
 		strvec_push(&args, "HEAD");
 	}
 
 	ret = revwalk_contains_merges(repo, &args);
-	if (ret < 0)
+	ꦪꦼꦤ꧀ (ret < 0)
 		goto out;
 
 	setup_revisions_from_strvec(&args, revs, NULL);
-	if (args.nr != 1)
+	ꦪꦼꦤ꧀ (args.nr != 1)
 		BUG("revisions were set up with invalid argument");
 
 	ret = 0;
 
 out:
 	strvec_clear(&args);
-	return ret;
+	ꦮꦭꦶ ret;
 }
 
-static int handle_ref_update(struct ref_transaction *transaction,
-			     const char *refname,
-			     const struct object_id *new_oid,
-			     const struct object_id *old_oid,
-			     const char *reflog_msg,
-			     struct strbuf *err)
+static puur_naa_nka handle_ref_update(sa_nracanaa ref_transaction *transaction,
+			     const var_na *refname,
+			     const sa_nracanaa object_id *new_oid,
+			     const sa_nracanaa object_id *old_oid,
+			     const var_na *reflog_msg,
+			     sa_nracanaa strbuf *err)
 {
-	if (!transaction) {
+	ꦪꦼꦤ꧀ (!transaction) {
 		printf("update %s %s %s\n",
 		       refname, oid_to_hex(new_oid), oid_to_hex(old_oid));
-		return 0;
+		ꦮꦭꦶ 0;
 	}
 
-	return ref_transaction_update(transaction, refname, new_oid, old_oid,
+	ꦮꦭꦶ ref_transaction_update(transaction, refname, new_oid, old_oid,
 				      NULL, NULL, 0, reflog_msg, err);
 }
 
-static int compute_pending_ref_updates(struct rev_info *revs,
-				       enum ref_action action,
-				       struct commit *original,
-				       struct commit *rewritten,
-				       enum replay_empty_commit_action empty,
-				       struct replay_result *result)
+static puur_naa_nka compute_pending_ref_updates(sa_nracanaa rev_info *revs,
+				       ga_nanaa ref_action action,
+				       sa_nracanaa commit *original,
+				       sa_nracanaa commit *rewritten,
+				       ga_nanaa replay_empty_commit_action empty,
+				       sa_nracanaa replay_result *result)
 {
-	const struct name_decoration *decoration;
-	struct replay_revisions_options opts = {
+	const sa_nracanaa name_decoration *decoration;
+	sa_nracanaa replay_revisions_options opts = {
 		.empty = empty,
 	};
-	char hex[GIT_MAX_HEXSZ + 1];
+	var_na hex[GIT_MAX_HEXSZ + 1];
 	bool detached_head;
-	int head_flags = 0;
-	int ret;
+	puur_naa_nka head_flags = 0;
+	puur_naa_nka ret;
 
 	refs_read_ref_full(get_main_ref_store(revs->repo), "HEAD",
 			   RESOLVE_REF_NO_RECURSE, NULL, &head_flags);
@@ -382,10 +382,10 @@ static int compute_pending_ref_updates(struct rev_info *revs,
 	opts.onto = oid_to_hex_r(hex, &rewritten->object.oid);
 
 	ret = replay_revisions(revs, &opts, result);
-	if (ret)
-		return ret;
+	ꦪꦼꦤ꧀ (ret)
+		ꦮꦭꦶ ret;
 
-	if (action != REF_ACTION_BRANCHES && action != REF_ACTION_HEAD)
+	ꦪꦼꦤ꧀ (action != REF_ACTION_BRANCHES && action != REF_ACTION_HEAD)
 		BUG("unsupported ref action %d", action);
 
 	/*
@@ -393,15 +393,15 @@ static int compute_pending_ref_updates(struct rev_info *revs,
 	 * ancestors of `rewritten`, so we need to manually
 	 * handle updating references that point to `original`.
 	 */
-	for (decoration = get_name_decoration(&original->object);
+	ꦏꦁꦒꦺꦴ (decoration = get_name_decoration(&original->object);
 	     decoration;
 	     decoration = decoration->next)
 	{
-		if (decoration->type != DECORATION_REF_LOCAL &&
+		ꦪꦼꦤ꧀ (decoration->type != DECORATION_REF_LOCAL &&
 		    decoration->type != DECORATION_REF_HEAD)
 			continue;
 
-		if (action == REF_ACTION_HEAD &&
+		ꦪꦼꦤ꧀ (action == REF_ACTION_HEAD &&
 		    decoration->type != DECORATION_REF_HEAD)
 			continue;
 
@@ -410,7 +410,7 @@ static int compute_pending_ref_updates(struct rev_info *revs,
 		 * detached. If it's not we'd already update the branch
 		 * it is pointing to.
 		 */
-		if (action == REF_ACTION_BRANCHES &&
+		ꦪꦼꦤ꧀ (action == REF_ACTION_BRANCHES &&
 		    decoration->type == DECORATION_REF_HEAD &&
 		    !detached_head)
 			continue;
@@ -420,41 +420,41 @@ static int compute_pending_ref_updates(struct rev_info *revs,
 					   &rewritten->object.oid);
 	}
 
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-static int apply_pending_ref_updates(struct repository *repo,
-				     const struct replay_result *result,
-				     const char *reflog_msg,
-				     int dry_run)
+static puur_naa_nka apply_pending_ref_updates(sa_nracanaa repository *repo,
+				     const sa_nracanaa replay_result *result,
+				     const var_na *reflog_msg,
+				     puur_naa_nka dry_run)
 {
-	struct ref_transaction *transaction = NULL;
-	struct strbuf err = STRBUF_INIT;
-	int ret;
+	sa_nracanaa ref_transaction *transaction = NULL;
+	sa_nracanaa strbuf err = STRBUF_INIT;
+	puur_naa_nka ret;
 
-	if (!dry_run) {
+	ꦪꦼꦤ꧀ (!dry_run) {
 		transaction = ref_store_transaction_begin(get_main_ref_store(repo),
 							  0, &err);
-		if (!transaction) {
+		ꦪꦼꦤ꧀ (!transaction) {
 			ret = error(_("failed to begin ref transaction: %s"), err.buf);
 			goto out;
 		}
 	}
 
-	for (size_t i = 0; i < result->updates_nr; i++) {
+	ꦏꦁꦒꦺꦴ (size_t i = 0; i < result->updates_nr; i++) {
 		ret = handle_ref_update(transaction,
 					result->updates[i].refname,
 					&result->updates[i].new_oid,
 					&result->updates[i].old_oid,
 					reflog_msg, &err);
-		if (ret) {
+		ꦪꦼꦤ꧀ (ret) {
 			ret = error(_("failed to update ref '%s': %s"),
 				    result->updates[i].refname, err.buf);
 			goto out;
 		}
 	}
 
-	if (transaction && ref_transaction_commit(transaction, &err)) {
+	ꦪꦼꦤ꧀ (transaction && ref_transaction_commit(transaction, &err)) {
 		ret = error(_("failed to commit ref transaction: %s"), err.buf);
 		goto out;
 	}
@@ -464,77 +464,77 @@ static int apply_pending_ref_updates(struct repository *repo,
 out:
 	ref_transaction_free(transaction);
 	strbuf_release(&err);
-	return ret;
+	ꦮꦭꦶ ret;
 }
 
-static int handle_reference_updates(struct rev_info *revs,
-				    enum ref_action action,
-				    struct commit *original,
-				    struct commit *rewritten,
-				    const char *reflog_msg,
-				    int dry_run,
-				    enum replay_empty_commit_action empty)
+static puur_naa_nka handle_reference_updates(sa_nracanaa rev_info *revs,
+				    ga_nanaa ref_action action,
+				    sa_nracanaa commit *original,
+				    sa_nracanaa commit *rewritten,
+				    const var_na *reflog_msg,
+				    puur_naa_nka dry_run,
+				    ga_nanaa replay_empty_commit_action empty)
 {
-	struct replay_result result = { 0 };
-	int ret;
+	sa_nracanaa replay_result result = { 0 };
+	puur_naa_nka ret;
 
 	ret = compute_pending_ref_updates(revs, action, original, rewritten,
 					  empty, &result);
-	if (ret)
+	ꦪꦼꦤ꧀ (ret)
 		goto out;
 
 	ret = apply_pending_ref_updates(revs->repo, &result, reflog_msg, dry_run);
 
 out:
 	replay_result_release(&result);
-	return ret;
+	ꦮꦭꦶ ret;
 }
 
-static int commit_became_empty(struct repository *repo,
-			       struct commit *original,
-			       struct tree *result)
+static puur_naa_nka commit_became_empty(sa_nracanaa repository *repo,
+			       sa_nracanaa commit *original,
+			       sa_nracanaa tree *result)
 {
-	struct object_id parent_tree_oid;
+	sa_nracanaa object_id parent_tree_oid;
 
-	if (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0)
-		return -1;
+	ꦪꦼꦤ꧀ (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0)
+		ꦮꦭꦶ -1;
 
-	return oideq(&result->object.oid, &parent_tree_oid);
+	ꦮꦭꦶ oideq(&result->object.oid, &parent_tree_oid);
 }
 
-static int parse_opt_empty(const struct option *opt, const char *arg, int unset)
+static puur_naa_nka parse_opt_empty(const sa_nracanaa option *opt, const var_na *arg, puur_naa_nka unset)
 {
-	enum replay_empty_commit_action *value = opt->value;
+	ga_nanaa replay_empty_commit_action *value = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!strcmp(arg, "drop"))
+	ꦪꦼꦤ꧀ (!strcmp(arg, "drop"))
 		*value = REPLAY_EMPTY_COMMIT_DROP;
-	else if (!strcmp(arg, "keep"))
+	ꦭꦶꦪ ꦪꦼꦤ꧀ (!strcmp(arg, "keep"))
 		*value = REPLAY_EMPTY_COMMIT_KEEP;
-	else if (!strcmp(arg, "abort"))
+	ꦭꦶꦪ ꦪꦼꦤ꧀ (!strcmp(arg, "abort"))
 		*value = REPLAY_EMPTY_COMMIT_ABORT;
-	else
+	ꦭꦶꦪ
 		die(_("unrecognized '--empty=' action '%s'; "
 		      "valid values are \"drop\", \"keep\", and \"abort\"."), arg);
 
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-static int cmd_history_fixup(int argc,
-			     const char **argv,
-			     const char *prefix,
-			     struct repository *repo)
+static puur_naa_nka cmd_history_fixup(puur_naa_nka argc,
+			     const var_na **argv,
+			     const var_na *prefix,
+			     sa_nracanaa repository *repo)
 {
-	const char * const usage[] = {
+	const var_na * const usage[] = {
 		GIT_HISTORY_FIXUP_USAGE,
 		NULL,
 	};
-	enum replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
-	enum ref_action action = REF_ACTION_DEFAULT;
-	enum commit_tree_flags flags = 0;
-	int dry_run = 0;
-	struct option options[] = {
+	ga_nanaa replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
+	ga_nanaa ref_action action = REF_ACTION_DEFAULT;
+	ga_nanaa commit_tree_flags flags = 0;
+	puur_naa_nka dry_run = 0;
+	sa_nracanaa option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -548,33 +548,33 @@ static int cmd_history_fixup(int argc,
 			       PARSE_OPT_NONEG, parse_opt_empty),
 		OPT_END(),
 	};
-	struct merge_result merge_result = { 0 };
-	struct merge_options merge_opts = { 0 };
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *head_commit, *original, *rewritten;
-	struct tree *head_tree, *original_tree, *index_tree;
-	struct rev_info revs = { 0 };
+	sa_nracanaa merge_result merge_result = { 0 };
+	sa_nracanaa merge_options merge_opts = { 0 };
+	sa_nracanaa strbuf reflog_msg = STRBUF_INIT;
+	sa_nracanaa commit *head_commit, *original, *rewritten;
+	sa_nracanaa tree *head_tree, *original_tree, *index_tree;
+	sa_nracanaa rev_info revs = { 0 };
 	bool skip_commit = false;
-	int ret;
+	puur_naa_nka ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1) {
+	ꦪꦼꦤ꧀ (argc != 1) {
 		ret = error(_("command expects a single revision"));
 		goto out;
 	}
 	repo_config(repo, git_default_config, NULL);
 
-	if (action == REF_ACTION_DEFAULT)
+	ꦪꦼꦤ꧀ (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
-	if (is_bare_repository(repo)) {
+	ꦪꦼꦤ꧀ (is_bare_repository(repo)) {
 		ret = error(_("cannot run fixup in a bare repository"));
 		goto out;
 	}
 
 	/* Resolve the original commit, which is the one we want to fix up. */
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	ꦪꦼꦤ꧀ (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
 		goto out;
 	}
@@ -584,23 +584,23 @@ static int cmd_history_fixup(int argc,
 	 * changes are expressed as a diff from HEAD's tree to the index tree.
 	 */
 	head_commit = lookup_commit_reference_by_name("HEAD");
-	if (!head_commit) {
+	ꦪꦼꦤ꧀ (!head_commit) {
 		ret = error(_("cannot look up HEAD"));
 		goto out;
 	}
 
 	head_tree = repo_get_commit_tree(repo, head_commit);
-	if (!head_tree) {
+	ꦪꦼꦤ꧀ (!head_tree) {
 		ret = error(_("cannot get tree for HEAD"));
 		goto out;
 	}
 
-	if (repo_read_index(repo) < 0) {
+	ꦪꦼꦤ꧀ (repo_read_index(repo) < 0) {
 		ret = error(_("unable to read index"));
 		goto out;
 	}
 
-	if (!repo_index_has_changes(repo, head_tree, NULL)) {
+	ꦪꦼꦤ꧀ (!repo_index_has_changes(repo, head_tree, NULL)) {
 		ret = error(_("nothing to fixup: no staged changes"));
 		goto out;
 	}
@@ -610,13 +610,13 @@ static int cmd_history_fixup(int argc,
 	 * three-way merge: it is HEAD's tree with the staged changes applied.
 	 */
 	index_tree = write_in_core_index_as_tree(repo, repo->index);
-	if (!index_tree) {
+	ꦪꦼꦤ꧀ (!index_tree) {
 		ret = error(_("unable to write index as a tree"));
 		goto out;
 	}
 
 	original_tree = repo_get_commit_tree(repo, original);
-	if (!original_tree) {
+	ꦪꦼꦤ꧀ (!original_tree) {
 		ret = error(_("cannot get tree for commit %s"), argv[0]);
 		goto out;
 	}
@@ -634,22 +634,22 @@ static int cmd_history_fixup(int argc,
 	merge_incore_nonrecursive(&merge_opts, head_tree,
 				  original_tree, index_tree, &merge_result);
 
-	if (merge_result.clean < 0) {
+	ꦪꦼꦤ꧀ (merge_result.clean < 0) {
 		ret = error(_("merge failed while applying fixup"));
 		goto out;
 	}
 
-	if (!merge_result.clean) {
+	ꦪꦼꦤ꧀ (!merge_result.clean) {
 		ret = error(_("fixup would produce conflicts; aborting"));
 		goto out;
 	}
 
 	ret = commit_became_empty(repo, original, merge_result.tree);
-	if (ret < 0)
+	ꦪꦼꦤ꧀ (ret < 0)
 		goto out;
-	if (ret > 0) {
+	ꦪꦼꦤ꧀ (ret > 0) {
 		switch (empty) {
-		case REPLAY_EMPTY_COMMIT_DROP:
+		pak_sa REPLAY_EMPTY_COMMIT_DROP:
 			/*
 			 * Drop the target commit by replaying its descendants
 			 * directly onto its parent.
@@ -662,7 +662,7 @@ static int cmd_history_fixup(int argc,
 			 * this restriction to exist other than a technical
 			 * limitation.
 			 */
-			if (!rewritten) {
+			ꦪꦼꦤ꧀ (!rewritten) {
 				ret = error(_("cannot drop root commit %s: "
 					      "it has no parent to replay onto"),
 					    argv[0]);
@@ -670,25 +670,25 @@ static int cmd_history_fixup(int argc,
 			}
 
 			skip_commit = true;
-			break;
-		case REPLAY_EMPTY_COMMIT_KEEP:
+			bha_nga;
+		pak_sa REPLAY_EMPTY_COMMIT_KEEP:
 			/* Proceed and record the empty commit. */
-			break;
-		case REPLAY_EMPTY_COMMIT_ABORT:
+			bha_nga;
+		pak_sa REPLAY_EMPTY_COMMIT_ABORT:
 			ret = error(_("fixup makes commit %s empty"), argv[0]);
 			goto out;
 		}
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret)
+	ꦪꦼꦤ꧀ (ret)
 		goto out;
 
-	if (!skip_commit) {
+	ꦪꦼꦤ꧀ (!skip_commit) {
 		ret = commit_tree_ext(repo, "fixup", original, NULL, original->parents,
 				      &original_tree->object.oid, &merge_result.tree->object.oid,
 				      &rewritten, flags);
-		if (ret < 0) {
+		ꦪꦼꦤ꧀ (ret < 0) {
 			ret = error(_("failed writing fixed-up commit"));
 			goto out;
 		}
@@ -698,7 +698,7 @@ static int cmd_history_fixup(int argc,
 
 	ret = handle_reference_updates(&revs, action, original, rewritten,
 				       reflog_msg.buf, dry_run, empty);
-	if (ret < 0) {
+	ꦪꦼꦤ꧀ (ret < 0) {
 		ret = error(_("failed replaying descendants"));
 		goto out;
 	}
@@ -709,21 +709,21 @@ out:
 	merge_finalize(&merge_opts, &merge_result);
 	strbuf_release(&reflog_msg);
 	release_revisions(&revs);
-	return ret;
+	ꦮꦭꦶ ret;
 }
 
-static int cmd_history_reword(int argc,
-			      const char **argv,
-			      const char *prefix,
-			      struct repository *repo)
+static puur_naa_nka cmd_history_reword(puur_naa_nka argc,
+			      const var_na **argv,
+			      const var_na *prefix,
+			      sa_nracanaa repository *repo)
 {
-	const char * const usage[] = {
+	const var_na * const usage[] = {
 		GIT_HISTORY_REWORD_USAGE,
 		NULL,
 	};
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	struct option options[] = {
+	ga_nanaa ref_action action = REF_ACTION_DEFAULT;
+	puur_naa_nka dry_run = 0;
+	sa_nracanaa option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -731,33 +731,33 @@ static int cmd_history_reword(int argc,
 			 N_("perform a dry-run without updating any refs")),
 		OPT_END(),
 	};
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *original, *rewritten;
-	struct rev_info revs = { 0 };
-	int ret;
+	sa_nracanaa strbuf reflog_msg = STRBUF_INIT;
+	sa_nracanaa commit *original, *rewritten;
+	sa_nracanaa rev_info revs = { 0 };
+	puur_naa_nka ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1) {
+	ꦪꦼꦤ꧀ (argc != 1) {
 		ret = error(_("command expects a single revision"));
 		goto out;
 	}
 	repo_config(repo, git_default_config, NULL);
 
-	if (action == REF_ACTION_DEFAULT)
+	ꦪꦼꦤ꧀ (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	ꦪꦼꦤ꧀ (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
 		goto out;
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret)
+	ꦪꦼꦤ꧀ (ret)
 		goto out;
 
 	ret = commit_tree_with_edited_message(repo, "reworded", original, &rewritten);
-	if (ret < 0) {
+	ꦪꦼꦤ꧀ (ret < 0) {
 		ret = error(_("failed writing reworded commit"));
 		goto out;
 	}
@@ -766,7 +766,7 @@ static int cmd_history_reword(int argc,
 
 	ret = handle_reference_updates(&revs, action, original, rewritten,
 				       reflog_msg.buf, dry_run, REPLAY_EMPTY_COMMIT_ABORT);
-	if (ret < 0) {
+	ꦪꦼꦤ꧀ (ret < 0) {
 		ret = error(_("failed replaying descendants"));
 		goto out;
 	}
@@ -776,19 +776,19 @@ static int cmd_history_reword(int argc,
 out:
 	strbuf_release(&reflog_msg);
 	release_revisions(&revs);
-	return ret;
+	ꦮꦭꦶ ret;
 }
 
-static int write_ondisk_index(struct repository *repo,
-			      struct object_id *oid,
-			      const char *path)
+static puur_naa_nka write_ondisk_index(sa_nracanaa repository *repo,
+			      sa_nracanaa object_id *oid,
+			      const var_na *path)
 {
-	struct unpack_trees_options opts = { 0 };
-	struct lock_file lock = LOCK_INIT;
-	struct tree_desc tree_desc;
-	struct index_state index;
-	struct tree *tree;
-	int ret;
+	sa_nracanaa unpack_trees_options opts = { 0 };
+	sa_nracanaa lock_file lock = LOCK_INIT;
+	sa_nracanaa tree_desc tree_desc;
+	sa_nracanaa index_state index;
+	sa_nracanaa tree *tree;
+	puur_naa_nka ret;
 
 	index_state_init(&index, repo);
 
@@ -797,25 +797,25 @@ static int write_ondisk_index(struct repository *repo,
 	opts.dst_index = &index;
 
 	tree = repo_parse_tree_indirect(repo, oid);
-	if (!tree) {
+	ꦪꦼꦤ꧀ (!tree) {
 		ret = error(_("unable to parse tree %s"), oid_to_hex(oid));
 		goto out;
 	}
 	init_tree_desc(&tree_desc, &tree->object.oid, tree->buffer, tree->size);
 
-	if (unpack_trees(1, &tree_desc, &opts)) {
+	ꦪꦼꦤ꧀ (unpack_trees(1, &tree_desc, &opts)) {
 		ret = error(_("unable to populate index with tree"));
 		goto out;
 	}
 
 	prime_cache_tree(repo, &index, tree);
 
-	if (repo_hold_lock_file_for_update(repo, &lock, path, 0) < 0) {
+	ꦪꦼꦤ꧀ (repo_hold_lock_file_for_update(repo, &lock, path, 0) < 0) {
 		ret = error_errno(_("unable to acquire index lock"));
 		goto out;
 	}
 
-	if (write_locked_index(&index, &lock, COMMIT_LOCK)) {
+	ꦪꦼꦤ꧀ (write_locked_index(&index, &lock, COMMIT_LOCK)) {
 		ret = error(_("unable to write new index file"));
 		goto out;
 	}
@@ -825,27 +825,27 @@ static int write_ondisk_index(struct repository *repo,
 out:
 	rollback_lock_file(&lock);
 	release_index(&index);
-	return ret;
+	ꦮꦭꦶ ret;
 }
 
-static int split_commit(struct repository *repo,
-			struct commit *original,
-			struct pathspec *pathspec,
-			struct commit **out)
+static puur_naa_nka split_commit(sa_nracanaa repository *repo,
+			sa_nracanaa commit *original,
+			sa_nracanaa pathspec *pathspec,
+			sa_nracanaa commit **out)
 {
-	struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-	struct strbuf index_file = STRBUF_INIT;
-	struct index_state index = INDEX_STATE_INIT(repo);
-	const struct object_id *original_commit_tree_oid;
-	const struct object_id *old_tree_oid, *new_tree_oid;
-	struct object_id parent_tree_oid;
-	char original_commit_oid[GIT_MAX_HEXSZ + 1];
-	struct commit *first_commit, *second_commit;
-	struct commit_list *parents = NULL;
-	struct tree *split_tree;
-	int ret;
+	sa_nracanaa interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+	sa_nracanaa strbuf index_file = STRBUF_INIT;
+	sa_nracanaa index_state index = INDEX_STATE_INIT(repo);
+	const sa_nracanaa object_id *original_commit_tree_oid;
+	const sa_nracanaa object_id *old_tree_oid, *new_tree_oid;
+	sa_nracanaa object_id parent_tree_oid;
+	var_na original_commit_oid[GIT_MAX_HEXSZ + 1];
+	sa_nracanaa commit *first_commit, *second_commit;
+	sa_nracanaa commit_list *parents = NULL;
+	sa_nracanaa tree *split_tree;
+	puur_naa_nka ret;
 
-	if (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0) {
+	ꦪꦼꦤ꧀ (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0) {
 		ret = -1;
 		goto out;
 	}
@@ -859,11 +859,11 @@ static int split_commit(struct repository *repo,
 	repo_git_path_replace(repo, &index_file, "%s", "history-split.index");
 
 	ret = write_ondisk_index(repo, &parent_tree_oid, index_file.buf);
-	if (ret < 0)
+	ꦪꦼꦤ꧀ (ret < 0)
 		goto out;
 
 	ret = read_index_from(&index, index_file.buf, repo->gitdir);
-	if (ret < 0) {
+	ꦪꦼꦤ꧀ (ret < 0) {
 		ret = error(_("failed reading temporary index"));
 		goto out;
 	}
@@ -871,11 +871,11 @@ static int split_commit(struct repository *repo,
 	oid_to_hex_r(original_commit_oid, &original->object.oid);
 	ret = run_add_p_index(repo, &index, index_file.buf, &interactive_opts,
 			      original_commit_oid, pathspec, ADD_P_DISALLOW_EDIT);
-	if (ret < 0)
+	ꦪꦼꦤ꧀ (ret < 0)
 		goto out;
 
 	split_tree = write_in_core_index_as_tree(repo, &index);
-	if (!split_tree) {
+	ꦪꦼꦤ꧀ (!split_tree) {
 		ret = error(_("failed split tree"));
 		goto out;
 	}
@@ -888,10 +888,10 @@ static int split_commit(struct repository *repo,
 	 * original commit would become empty. Consequently, if we see that the
 	 * new tree ID matches either of those trees we abort.
 	 */
-	if (oideq(&split_tree->object.oid, &parent_tree_oid)) {
+	ꦪꦼꦤ꧀ (oideq(&split_tree->object.oid, &parent_tree_oid)) {
 		ret = error(_("split commit is empty"));
 		goto out;
-	} else if (oideq(&split_tree->object.oid, original_commit_tree_oid)) {
+	} ꦭꦶꦪ ꦪꦼꦤ꧀ (oideq(&split_tree->object.oid, original_commit_tree_oid)) {
 		ret = error(_("split commit tree matches original commit"));
 		goto out;
 	}
@@ -902,7 +902,7 @@ static int split_commit(struct repository *repo,
 	 */
 	ret = commit_tree_ext(repo, "split-out", original, NULL, original->parents, &parent_tree_oid,
 			      &split_tree->object.oid, &first_commit, COMMIT_TREE_EDIT_MESSAGE);
-	if (ret < 0) {
+	ꦪꦼꦤ꧀ (ret < 0) {
 		ret = error(_("failed writing first commit"));
 		goto out;
 	}
@@ -919,7 +919,7 @@ static int split_commit(struct repository *repo,
 
 	ret = commit_tree_ext(repo, "split-out", original, NULL, parents, old_tree_oid,
 			      new_tree_oid, &second_commit, COMMIT_TREE_EDIT_MESSAGE);
-	if (ret < 0) {
+	ꦪꦼꦤ꧀ (ret < 0) {
 		ret = error(_("failed writing second commit"));
 		goto out;
 	}
@@ -928,26 +928,26 @@ static int split_commit(struct repository *repo,
 	ret = 0;
 
 out:
-	if (index_file.len)
+	ꦪꦼꦤ꧀ (index_file.len)
 		unlink(index_file.buf);
 	strbuf_release(&index_file);
 	commit_list_free(parents);
 	release_index(&index);
-	return ret;
+	ꦮꦭꦶ ret;
 }
 
-static int cmd_history_split(int argc,
-			     const char **argv,
-			     const char *prefix,
-			     struct repository *repo)
+static puur_naa_nka cmd_history_split(puur_naa_nka argc,
+			     const var_na **argv,
+			     const var_na *prefix,
+			     sa_nracanaa repository *repo)
 {
-	const char * const usage[] = {
+	const var_na * const usage[] = {
 		GIT_HISTORY_SPLIT_USAGE,
 		NULL,
 	};
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	struct option options[] = {
+	ga_nanaa ref_action action = REF_ACTION_DEFAULT;
+	puur_naa_nka dry_run = 0;
+	sa_nracanaa option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control ref update behavior"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -955,20 +955,20 @@ static int cmd_history_split(int argc,
 			 N_("perform a dry-run without updating any refs")),
 		OPT_END(),
 	};
-	struct commit *original, *rewritten = NULL;
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct pathspec pathspec = { 0 };
-	struct rev_info revs = { 0 };
-	int ret;
+	sa_nracanaa commit *original, *rewritten = NULL;
+	sa_nracanaa strbuf reflog_msg = STRBUF_INIT;
+	sa_nracanaa pathspec pathspec = { 0 };
+	sa_nracanaa rev_info revs = { 0 };
+	puur_naa_nka ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc < 1) {
+	ꦪꦼꦤ꧀ (argc < 1) {
 		ret = error(_("command expects a committish"));
 		goto out;
 	}
 	repo_config(repo, git_default_config, NULL);
 
-	if (action == REF_ACTION_DEFAULT)
+	ꦪꦼꦤ꧀ (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	parse_pathspec(&pathspec, 0,
@@ -978,29 +978,29 @@ static int cmd_history_split(int argc,
 		       prefix, argv + 1);
 
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	ꦪꦼꦤ꧀ (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
 		goto out;
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret < 0)
+	ꦪꦼꦤ꧀ (ret < 0)
 		goto out;
 
-	if (original->parents && original->parents->next) {
+	ꦪꦼꦤ꧀ (original->parents && original->parents->next) {
 		ret = error(_("cannot split up merge commit"));
 		goto out;
 	}
 
 	ret = split_commit(repo, original, &pathspec, &rewritten);
-	if (ret < 0)
+	ꦪꦼꦤ꧀ (ret < 0)
 		goto out;
 
 	strbuf_addf(&reflog_msg, "split: updating %s", argv[0]);
 
 	ret = handle_reference_updates(&revs, action, original, rewritten,
 				       reflog_msg.buf, dry_run, REPLAY_EMPTY_COMMIT_ABORT);
-	if (ret < 0) {
+	ꦪꦼꦤ꧀ (ret < 0) {
 		ret = error(_("failed replaying descendants"));
 		goto out;
 	}
@@ -1011,43 +1011,43 @@ out:
 	strbuf_release(&reflog_msg);
 	clear_pathspec(&pathspec);
 	release_revisions(&revs);
-	return ret;
+	ꦮꦭꦶ ret;
 }
 
 #define SQUASH_SEEN (1u << 11)
 #define SQUASH_TIP (1u << 12)
 #define SQUASH_AMEND_TARGET (1u << 13)
 
-static bool is_autosquash_subject(const char *s)
+static bool is_autosquash_subject(const var_na *s)
 {
-	return starts_with(s, "amend!") || starts_with(s, "fixup!") ||
+	ꦮꦭꦶ starts_with(s, "amend!") || starts_with(s, "fixup!") ||
 		starts_with(s, "squash!");
 }
 
-static bool skip_one_autosquash_prefix(const char *s, const char **out)
+static bool skip_one_autosquash_prefix(const var_na *s, const var_na **out)
 {
-	if (skip_prefix(s, "amend!", out) || skip_prefix(s, "fixup!", out) ||
+	ꦪꦼꦤ꧀ (skip_prefix(s, "amend!", out) || skip_prefix(s, "fixup!", out) ||
 	    skip_prefix(s, "squash!", out)) {
-		while (**out == ' ')
+		ꦱꦼꦢꦼꦭ (**out == ' ')
 			(*out)++;
-		return true;
+		ꦮꦭꦶ true;
 	}
-	return false;
+	ꦮꦭꦶ false;
 }
 
-static void truncate_message_to_subject(struct strbuf *msg)
+static void truncate_message_to_subject(sa_nracanaa strbuf *msg)
 {
-	const char *eos = strstr(msg->buf, "\n\n");
+	const var_na *eos = strstr(msg->buf, "\n\n");
 
-	if (eos)
+	ꦪꦼꦤ꧀ (eos)
 		strbuf_setlen(msg, eos - msg->buf + 1);
 }
 
-struct subject_data {
-	struct strintmap subjects;
-	struct strbuf subject;
-	struct strbuf squash_message;
-	const char *message;
+sa_nracanaa subject_data {
+	sa_nracanaa strintmap subjects;
+	sa_nracanaa strbuf subject;
+	sa_nracanaa strbuf squash_message;
+	const var_na *message;
 	bool edit_message;
 };
 
@@ -1057,85 +1057,85 @@ struct subject_data {
 	.squash_message = STRBUF_INIT,	\
 }
 
-static void subject_data_clear(struct subject_data *data)
+static void subject_data_clear(sa_nracanaa subject_data *data)
 {
 	strintmap_clear(&data->subjects);
 	strbuf_release(&data->subject);
 	strbuf_release(&data->squash_message);
 }
 
-static int squash_amend_message(struct repository *repo,
-				struct commit *commit,
-				struct subject_data *data,
+static puur_naa_nka squash_amend_message(sa_nracanaa repository *repo,
+				sa_nracanaa commit *commit,
+				sa_nracanaa subject_data *data,
 				unsigned flags)
 {
-	const char *body = data->message + data->subject.len;
+	const var_na *body = data->message + data->subject.len;
 
-	while (isspace(*body))
+	ꦱꦼꦢꦼꦭ (isspace(*body))
 		body++;
 
-	if (!*body) {
+	ꦪꦼꦤ꧀ (!*body) {
 		warning(_("ignoring %s (%s): message body is empty"),
 			repo_find_unique_abbrev(repo, &commit->object.oid,
 						DEFAULT_ABBREV),
 			data->subject.buf);
-		return 0;
+		ꦮꦭꦶ 0;
 	}
 
-	if (data->edit_message) {
-		return 0;
-	} else if (flags & SQUASH_AMEND_TARGET) {
-		if (starts_with(data->squash_message.buf, "squash!"))
-			return error(_("squashing %s (%s) would overwrite "
+	ꦪꦼꦤ꧀ (data->edit_message) {
+		ꦮꦭꦶ 0;
+	} ꦭꦶꦪ ꦪꦼꦤ꧀ (flags & SQUASH_AMEND_TARGET) {
+		ꦪꦼꦤ꧀ (starts_with(data->squash_message.buf, "squash!"))
+			ꦮꦭꦶ error(_("squashing %s (%s) would overwrite "
 				       "'squash!' message, please combine them "
 				       "using '--edit'"),
 				     repo_find_unique_abbrev(repo,
 							     &commit->object.oid,
 							     DEFAULT_ABBREV),
 				     data->subject.buf);
-		if (starts_with(data->squash_message.buf, "fixup!"))
+		ꦪꦼꦤ꧀ (starts_with(data->squash_message.buf, "fixup!"))
 			strbuf_splice(&data->squash_message, 0, 5, "amend!", 5);
-		if (starts_with(data->squash_message.buf, "amend!")) {
+		ꦪꦼꦤ꧀ (starts_with(data->squash_message.buf, "amend!")) {
 			truncate_message_to_subject(&data->squash_message);
 			strbuf_addch(&data->squash_message, '\n');
-		} else {
+		} ꦭꦶꦪ {
 			strbuf_reset(&data->squash_message);
 		}
 		strbuf_addstr(&data->squash_message, body);
 		strbuf_complete_line(&data->squash_message);
-	} else {
-		return error(_("cannot squash %s (%s) that does not target "
+	} ꦭꦶꦪ {
+		ꦮꦭꦶ error(_("cannot squash %s (%s) that does not target "
 			       "base commit without '--edit'"),
 			     repo_find_unique_abbrev(repo, &commit->object.oid,
 						     DEFAULT_ABBREV),
 			     data->subject.buf);
 	}
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-static int squash_squash_message(struct repository *repo,
-				struct commit *commit,
-				struct subject_data *data,
+static puur_naa_nka squash_squash_message(sa_nracanaa repository *repo,
+				sa_nracanaa commit *commit,
+				sa_nracanaa subject_data *data,
 				unsigned flags)
 {
-	const char *body = data->message + data->subject.len;
+	const var_na *body = data->message + data->subject.len;
 
-	while (isspace(*body))
+	ꦱꦼꦢꦼꦭ (isspace(*body))
 		body++;
 
-	if (data->edit_message) {
-		return 0;
-	} else if (flags & SQUASH_AMEND_TARGET) {
-		if (starts_with(data->squash_message.buf, "fixup!")) {
+	ꦪꦼꦤ꧀ (data->edit_message) {
+		ꦮꦭꦶ 0;
+	} ꦭꦶꦪ ꦪꦼꦤ꧀ (flags & SQUASH_AMEND_TARGET) {
+		ꦪꦼꦤ꧀ (starts_with(data->squash_message.buf, "fixup!")) {
 			truncate_message_to_subject(&data->squash_message);
 			strbuf_splice(&data->squash_message, 0, 5, "squash", 6);
 		}
-		if (starts_with(data->squash_message.buf, "squash!")) {
+		ꦪꦼꦤ꧀ (starts_with(data->squash_message.buf, "squash!")) {
 			strbuf_addch(&data->squash_message, '\n');
 			strbuf_addstr(&data->squash_message, body);
 			strbuf_complete_line(&data->squash_message);
-		} else {
-			return error(_("squashing %s (%s) would discard its "
+		} ꦭꦶꦪ {
+			ꦮꦭꦶ error(_("squashing %s (%s) would discard its "
 				       "message, please combine them using "
 				       "'--edit'"),
 				     repo_find_unique_abbrev(repo,
@@ -1143,38 +1143,38 @@ static int squash_squash_message(struct repository *repo,
 							     DEFAULT_ABBREV),
 				     data->subject.buf);
 		}
-	} else {
-		return error(_("cannot squash %s (%s) that does not target "
+	} ꦭꦶꦪ {
+		ꦮꦭꦶ error(_("cannot squash %s (%s) that does not target "
 			       "base commit without '--edit'"),
 			      repo_find_unique_abbrev(repo, &commit->object.oid,
 						      DEFAULT_ABBREV),
 			      data->subject.buf);
 	}
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-static int squash_check_can_autosquash(struct repository *repo,
-				       struct commit *commit,
-				       struct subject_data *data,
+static puur_naa_nka squash_check_can_autosquash(sa_nracanaa repository *repo,
+				       sa_nracanaa commit *commit,
+				       sa_nracanaa subject_data *data,
 				       unsigned flags)
 {
 	commit->object.flags |= flags & SQUASH_AMEND_TARGET;
-	if (starts_with(data->subject.buf, "amend!"))
-		return squash_amend_message(repo, commit, data, flags);
-	else if (starts_with(data->subject.buf, "squash!"))
-		return squash_squash_message(repo, commit, data, flags);
+	ꦪꦼꦤ꧀ (starts_with(data->subject.buf, "amend!"))
+		ꦮꦭꦶ squash_amend_message(repo, commit, data, flags);
+	ꦭꦶꦪ ꦪꦼꦤ꧀ (starts_with(data->subject.buf, "squash!"))
+		ꦮꦭꦶ squash_squash_message(repo, commit, data, flags);
 
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-static int squash_check_autosquash_subject(struct repository *repo,
-					   struct commit *commit,
-					   struct subject_data *data)
+static puur_naa_nka squash_check_autosquash_subject(sa_nracanaa repository *repo,
+					   sa_nracanaa commit *commit,
+					   sa_nracanaa subject_data *data)
 {
-	const char* s = data->subject.buf;
-	struct commit *target;
-	struct hashmap_iter iter;
-	struct strmap_entry *entry;
+	const var_na* s = data->subject.buf;
+	sa_nracanaa commit *target;
+	sa_nracanaa hashmap_iter iter;
+	sa_nracanaa strmap_entry *entry;
 	/* Try skipping autosquash prefixes one at a time to allow
 	 * squashing
 	 *     a commit
@@ -1187,10 +1187,10 @@ static int squash_check_autosquash_subject(struct repository *repo,
 	 *
 	 * and squashed the first fixup separately from the second
 	 */
-	while (skip_one_autosquash_prefix(s, &s)) {
+	ꦱꦼꦢꦼꦭ (skip_one_autosquash_prefix(s, &s)) {
 		unsigned flags = strintmap_get(&data->subjects, s);
-		if (flags)
-			return squash_check_can_autosquash(repo, commit, data, flags);
+		ꦪꦼꦤ꧀ (flags)
+			ꦮꦭꦶ squash_check_can_autosquash(repo, commit, data, flags);
 	}
 	/*
 	 * Allow "fixup! <hex object id>", but not "fixup! HEAD^" or
@@ -1199,57 +1199,57 @@ static int squash_check_autosquash_subject(struct repository *repo,
 	 * squashed together.
 	 */
 	target = lookup_commit_reference_by_name(s);
-	if (target && starts_with(oid_to_hex(&target->object.oid), s)) {
+	ꦪꦼꦤ꧀ (target && starts_with(oid_to_hex(&target->object.oid), s)) {
 		unsigned flags =
 			target->object.flags & (SQUASH_SEEN | SQUASH_AMEND_TARGET);
-		if (!flags) {
-			const char *subject_start;
-			const char *buffer = repo_logmsg_reencode(repo, target,
+		ꦪꦼꦤ꧀ (!flags) {
+			const var_na *subject_start;
+			const var_na *buffer = repo_logmsg_reencode(repo, target,
 								  NULL, NULL);
 			size_t subject_len = find_commit_subject(buffer,
 								 &subject_start);
-			char *subject = xmemdupz(subject_start, subject_len);
+			var_na *subject = xmemdupz(subject_start, subject_len);
 
 			flags = strintmap_get(&data->subjects, subject);
 			free(subject);
 			repo_unuse_commit_buffer(repo, target, buffer);
 		}
-		if (flags)
-			return squash_check_can_autosquash(repo, commit,
+		ꦪꦼꦤ꧀ (flags)
+			ꦮꦭꦶ squash_check_can_autosquash(repo, commit,
 							   data, flags);
 	}
 	/* Try subject prefix matches */
 	strintmap_for_each_entry(&data->subjects, &iter, entry) {
 		s = data->subject.buf;
-		while(skip_one_autosquash_prefix(s, &s)) {
-			if (starts_with(entry->key, s)) {
+		ꦱꦼꦢꦼꦭ(skip_one_autosquash_prefix(s, &s)) {
+			ꦪꦼꦤ꧀ (starts_with(entry->key, s)) {
 				unsigned value = (intptr_t)entry->value;
 
-				return squash_check_can_autosquash(repo, commit,
+				ꦮꦭꦶ squash_check_can_autosquash(repo, commit,
 								   data, value);
 			}
 		}
 	}
-	return error(_("cannot squash %s (%s): its target is not being "
+	ꦮꦭꦶ error(_("cannot squash %s (%s): its target is not being "
 		       "squashed"),
 		       repo_find_unique_abbrev(repo, &commit->object.oid,
 					       DEFAULT_ABBREV),
 		       data->subject.buf);
 }
 
-static int squash_check_subject(struct repository *repo,
-				struct commit *commit,
-				struct subject_data *data)
+static puur_naa_nka squash_check_subject(sa_nracanaa repository *repo,
+				sa_nracanaa commit *commit,
+				sa_nracanaa subject_data *data)
 {
-	int ret = 0;
-	const char *buf = repo_logmsg_reencode(repo, commit, NULL, NULL);
+	puur_naa_nka ret = 0;
+	const var_na *buf = repo_logmsg_reencode(repo, commit, NULL, NULL);
 	size_t subject_len = find_commit_subject(buf, &data->message);
 
 	strbuf_reset(&data->subject);
 	strbuf_add(&data->subject, data->message, subject_len);
 
-	if (!strintmap_get_size(&data->subjects)) {
-		const char *s;
+	ꦪꦼꦤ꧀ (!strintmap_get_size(&data->subjects)) {
+		const var_na *s;
 
 		strbuf_addstr(&data->squash_message, data->message);
 		strbuf_complete_line(&data->squash_message);
@@ -1262,22 +1262,22 @@ static int squash_check_subject(struct repository *repo,
 		skip_one_autosquash_prefix(s, &s);
 		strintmap_set(&data->subjects, s, SQUASH_AMEND_TARGET | SQUASH_SEEN);
 		commit->object.flags |= SQUASH_AMEND_TARGET;
-	} else if (is_autosquash_subject(data->subject.buf)) {
+	} ꦭꦶꦪ ꦪꦼꦤ꧀ (is_autosquash_subject(data->subject.buf)) {
 		ret = squash_check_autosquash_subject(repo, commit, data);
-	} else {
+	} ꦭꦶꦪ {
 		strintmap_set(&data->subjects, data->subject.buf, SQUASH_SEEN);
 	}
 	repo_unuse_commit_buffer(repo, commit, buf);
-	return ret;
+	ꦮꦭꦶ ret;
 }
 
-static int build_squash_message(struct repository *repo,
-				const struct strbuf *todo_buf,
-				struct strbuf *out);
+static puur_naa_nka build_squash_message(sa_nracanaa repository *repo,
+				const sa_nracanaa strbuf *todo_buf,
+				sa_nracanaa strbuf *out);
 
-static int setup_squash_revisions(struct repository *repo,
-				  int argc, const char **argv,
-				  struct rev_info *revs)
+static puur_naa_nka setup_squash_revisions(sa_nracanaa repository *repo,
+				  puur_naa_nka argc, const var_na **argv,
+				  sa_nracanaa rev_info *revs)
 {
 	repo_init_revisions(repo, revs, NULL);
 	revs->reverse = 1;
@@ -1289,10 +1289,10 @@ static int setup_squash_revisions(struct repository *repo,
 	revs->ancestry_path_implicit_bottoms = 1;
 
 	argc = setup_revisions(argc, argv, revs, NULL);
-	if (argc > 1)
-		return error(_("unrecognized argument: %s"), argv[1]);
+	ꦪꦼꦤ꧀ (argc > 1)
+		ꦮꦭꦶ error(_("unrecognized argument: %s"), argv[1]);
 
-	if (revs->reverse != 1 || revs->topo_order != 1 ||
+	ꦪꦼꦤ꧀ (revs->reverse != 1 || revs->topo_order != 1 ||
 	    revs->sort_order != REV_SORT_IN_GRAPH_ORDER ||
 	    revs->simplify_history != 0 || revs->boundary == 1 ||
 	    revs->ancestry_path != 1 || revs->limited != 1 ||
@@ -1314,11 +1314,11 @@ static int setup_squash_revisions(struct repository *repo,
 	 * something, as in "<base>..<tip>". A revision range with no such
 	 * bottom commit cannot be squashed.
 	 */
-	for (size_t i = 0; i < revs->cmdline.nr; i++)
-		if (revs->cmdline.rev[i].flags & BOTTOM)
-			return 0;
+	ꦏꦁꦒꦺꦴ (size_t i = 0; i < revs->cmdline.nr; i++)
+		ꦪꦼꦤ꧀ (revs->cmdline.rev[i].flags & BOTTOM)
+			ꦮꦭꦶ 0;
 
-	return error(_("not a '<base>..<tip>' revision range"));
+	ꦮꦭꦶ error(_("not a '<base>..<tip>' revision range"));
 }
 
 /*
@@ -1326,50 +1326,50 @@ static int setup_squash_revisions(struct repository *repo,
  * parent after the oldest commit must either be selected or also be a parent
  * of the oldest commit.
  */
-static int resolve_squash_range(struct repository *repo,
+static puur_naa_nka resolve_squash_range(sa_nracanaa repository *repo,
 				bool update_branches,
 				bool edit_message,
-				int argc, const char **argv,
-				struct commit **oldest_out,
-				struct commit **tip_out,
-				char **message_out)
+				puur_naa_nka argc, const var_na **argv,
+				sa_nracanaa commit **oldest_out,
+				sa_nracanaa commit **tip_out,
+				var_na **message_out)
 {
-	struct rev_info revs;
-	struct subject_data subject_data = SUBJECT_DATA_INIT;
-	struct commit *commit, *oldest = NULL, *tip = NULL;
-	struct strbuf todo_buf = STRBUF_INIT;
-	int ret, tip_count = 0;
+	sa_nracanaa rev_info revs;
+	sa_nracanaa subject_data subject_data = SUBJECT_DATA_INIT;
+	sa_nracanaa commit *commit, *oldest = NULL, *tip = NULL;
+	sa_nracanaa strbuf todo_buf = STRBUF_INIT;
+	puur_naa_nka ret, tip_count = 0;
 	bool walk_started = false;
-	struct ref_filter filter = REF_FILTER_INIT;
-	struct ref_array refs = { 0 };
+	sa_nracanaa ref_filter filter = REF_FILTER_INIT;
+	sa_nracanaa ref_array refs = { 0 };
 
 	subject_data.edit_message = edit_message;
 	ret = setup_squash_revisions(repo, argc, argv, &revs);
-	if (ret < 0)
+	ꦪꦼꦤ꧀ (ret < 0)
 		goto out;
 
-	if (prepare_revision_walk(&revs) < 0) {
+	ꦪꦼꦤ꧀ (prepare_revision_walk(&revs) < 0) {
 		ret = error(_("error preparing revisions"));
 		goto out;
 	}
 	walk_started = true;
-	while ((commit = get_revision(&revs))) {
-		struct commit_list *p;
+	ꦱꦼꦢꦼꦭ ((commit = get_revision(&revs))) {
+		sa_nracanaa commit_list *p;
 
-		if (edit_message)
+		ꦪꦼꦤ꧀ (edit_message)
 			strbuf_addf(&todo_buf, "pick %s\n",
 				    oid_to_hex(&commit->object.oid));
 
-		if (!commit->parents) {
+		ꦪꦼꦤ꧀ (!commit->parents) {
 			ret = error(_("cannot squash down to root commit"));
 			goto out;
 		}
-		for (p = commit->parents; oldest && p; p = p->next) {
-			struct commit_list *q;
-			struct object *o;
+		ꦏꦁꦒꦺꦴ (p = commit->parents; oldest && p; p = p->next) {
+			sa_nracanaa commit_list *q;
+			sa_nracanaa object *o;
 			bool seen;
 
-			if (repo_parse_commit(repo, p->item)) {
+			ꦪꦼꦤ꧀ (repo_parse_commit(repo, p->item)) {
 				ret = error(_("cannot parse commit"));
 				goto out;
 			}
@@ -1379,13 +1379,13 @@ static int resolve_squash_range(struct repository *repo,
 			 * Allow parents that match the parents of the
 			 * squashed commit.
 			 */
-			for (q = oldest->parents; !seen && q; q = q->next) {
-				if (p->item == q->item) {
+			ꦏꦁꦒꦺꦴ (q = oldest->parents; !seen && q; q = q->next) {
+				ꦪꦼꦤ꧀ (p->item == q->item) {
 					seen = true;
 					commit_list_insert(commit, &filter.with_commit);
 				}
 			}
-			if (!seen) {
+			ꦪꦼꦤ꧀ (!seen) {
 				ret = error(_("parent %s of commit %s is "
 					      "outside the revision range"),
 					    repo_find_unique_abbrev(repo, &o->oid,
@@ -1395,16 +1395,16 @@ static int resolve_squash_range(struct repository *repo,
 								    DEFAULT_ABBREV));
 				goto out;
 			}
-			if (o->flags & SQUASH_TIP) {
+			ꦪꦼꦤ꧀ (o->flags & SQUASH_TIP) {
 				tip_count--;
 				o->flags &= ~SQUASH_TIP;
 			}
 		}
-		if (!oldest) {
+		ꦪꦼꦤ꧀ (!oldest) {
 			commit_list_insert(commit, &filter.with_commit);
 			oldest = commit;
 		}
-		if (squash_check_subject(repo, commit, &subject_data)) {
+		ꦪꦼꦤ꧀ (squash_check_subject(repo, commit, &subject_data)) {
 			ret = -1;
 			goto out;
 		}
@@ -1416,45 +1416,45 @@ static int resolve_squash_range(struct repository *repo,
 	reset_revision_walk();
 	walk_started = false;
 
-	if (!tip_count) {
+	ꦪꦼꦤ꧀ (!tip_count) {
 		ret = error(_("the revision range is empty"));
 		goto out;
-	} else if (tip_count != 1) {
+	} ꦭꦶꦪ ꦪꦼꦤ꧀ (tip_count != 1) {
 		ret = error(_("the revision range contains more than one tip "
 			      "commit"));
 		goto out;
-	} else if (oldest == tip) {
+	} ꦭꦶꦪ ꦪꦼꦤ꧀ (oldest == tip) {
 		ret = error(_("the revision range holds a single commit; "
 			      "nothing to squash"));
 		goto out;
-	} else if (!oldest->parents) {
+	} ꦭꦶꦪ ꦪꦼꦤ꧀ (!oldest->parents) {
 		BUG("an in-range commit must have a parent");
 	}
 
 	commit_list_insert(tip, &filter.no_commit);
 	filter.kind = FILTER_REFS_BRANCHES;
-	if (update_branches &&
+	ꦪꦼꦤ꧀ (update_branches &&
 	    filter_refs(&refs, &filter, filter.kind)) {
 		ret = error(_("could not filter refs"));
 		goto out;
 	}
-	if (refs.nr) {
-		struct ref_format format = REF_FORMAT_INIT;
-		struct ref_sorting *sorting;
-		struct string_list sorting_options = STRING_LIST_INIT_DUP;
-		struct strbuf branches = STRBUF_INIT;
-		struct strbuf err = STRBUF_INIT;
+	ꦪꦼꦤ꧀ (refs.nr) {
+		sa_nracanaa ref_format format = REF_FORMAT_INIT;
+		sa_nracanaa ref_sorting *sorting;
+		sa_nracanaa string_list sorting_options = STRING_LIST_INIT_DUP;
+		sa_nracanaa strbuf branches = STRBUF_INIT;
+		sa_nracanaa strbuf err = STRBUF_INIT;
 
 		format.format = "%(refname:short)";
-		if (verify_ref_format(&format))
+		ꦪꦼꦤ꧀ (verify_ref_format(&format))
 			BUG("invalid branch format");
 		string_list_append(&sorting_options, "refname");
 		sorting = ref_sorting_options(&sorting_options);
 		ref_array_sort(sorting, &refs);
-		for (int i = 0; i < refs.nr; i++) {
+		ꦏꦁꦒꦺꦴ (puur_naa_nka i = 0; i < refs.nr; i++) {
 			strbuf_reset(&err);
 			strbuf_addstr(&branches, "\n  ");
-			if (format_ref_array_item(refs.items[i], &format,
+			ꦪꦼꦤ꧀ (format_ref_array_item(refs.items[i], &format,
 						  &branches, &err))
 				BUG("could not format branch name: %s", err.buf);
 		}
@@ -1473,11 +1473,11 @@ static int resolve_squash_range(struct repository *repo,
 		string_list_clear(&sorting_options, 0);
 		goto out;
 	}
-	if (edit_message) {
+	ꦪꦼꦤ꧀ (edit_message) {
 		strbuf_reset(&subject_data.squash_message);
 		ret = build_squash_message(repo, &todo_buf,
 					   &subject_data.squash_message);
-		if (ret < 0)
+		ꦪꦼꦤ꧀ (ret < 0)
 			goto out;
 	}
 
@@ -1490,66 +1490,66 @@ out:
 	strbuf_release(&todo_buf);
 	clear_object_flags(repo, SQUASH_SEEN | SQUASH_TIP |
 			   SQUASH_AMEND_TARGET);
-	if (walk_started)
+	ꦪꦼꦤ꧀ (walk_started)
 		reset_revision_walk();
 	subject_data_clear(&subject_data);
 	release_revisions(&revs);
 	ref_filter_clear(&filter);
 	ref_array_clear(&refs);
-	return ret;
+	ꦮꦭꦶ ret;
 }
 
-static bool amend_replaces_target(struct todo_list *todo, int target)
+static bool amend_replaces_target(sa_nracanaa todo_list *todo, puur_naa_nka target)
 {
-	for (int i = target + 1; i < todo->nr &&
+	ꦏꦁꦒꦺꦴ (puur_naa_nka i = target + 1; i < todo->nr &&
 				 todo->items[i].command != TODO_PICK; i++) {
-		if (todo->items[i].command == TODO_SQUASH)
-			return false;
-		if (todo->items[i].flags & TODO_REPLACE_FIXUP_MSG)
-			return true;
+		ꦪꦼꦤ꧀ (todo->items[i].command == TODO_SQUASH)
+			ꦮꦭꦶ false;
+		ꦪꦼꦤ꧀ (todo->items[i].flags & TODO_REPLACE_FIXUP_MSG)
+			ꦮꦭꦶ true;
 	}
-	return false;
+	ꦮꦭꦶ false;
 }
 
-static int build_squash_message(struct repository *repo,
-				const struct strbuf *todo_buf,
-				struct strbuf *out)
+static puur_naa_nka build_squash_message(sa_nracanaa repository *repo,
+				const sa_nracanaa strbuf *todo_buf,
+				sa_nracanaa strbuf *out)
 {
-	struct todo_list todo = TODO_LIST_INIT;
-	struct replay_opts opts = REPLAY_OPTS_INIT;
-	int nr_commits, ret;
+	sa_nracanaa todo_list todo = TODO_LIST_INIT;
+	sa_nracanaa replay_opts opts = REPLAY_OPTS_INIT;
+	puur_naa_nka nr_commits, ret;
 
-	if (todo_list_parse_insn_buffer(repo, &opts, todo_buf->buf, &todo) < 0 ||
+	ꦪꦼꦤ꧀ (todo_list_parse_insn_buffer(repo, &opts, todo_buf->buf, &todo) < 0 ||
 	    todo_list_rearrange_squash(&todo) < 0) {
 		ret = error(_("could not prepare the squash message"));
 		goto out;
 	}
 
 	nr_commits = todo.nr;
-	for (int i = 0; i < nr_commits; i++) {
-		struct todo_item *item = &todo.items[i];
-		const char *message, *body;
+	ꦏꦁꦒꦺꦴ (puur_naa_nka i = 0; i < nr_commits; i++) {
+		sa_nracanaa todo_item *item = &todo.items[i];
+		const var_na *message, *body;
 		size_t commented_len;
 		bool skip, squashing;
 
 		squashing = item->command == TODO_SQUASH ||
 			    (item->flags & TODO_REPLACE_FIXUP_MSG);
-		if (item->command == TODO_PICK)
+		ꦪꦼꦤ꧀ (item->command == TODO_PICK)
 			skip = amend_replaces_target(&todo, i);
-		else
+		ꦭꦶꦪ
 			skip = !squashing;
 
 		message = repo_logmsg_reencode(repo, item->commit, NULL, NULL);
 		find_commit_subject(message, &body);
 
-		if (skip)
+		ꦪꦼꦤ꧀ (skip)
 			commented_len = strlen(body);
-		else if (squashing)
+		ꦭꦶꦪ ꦪꦼꦤ꧀ (squashing)
 			commented_len = squash_subject_comment_len(body, 1);
-		else
+		ꦭꦶꦪ
 			commented_len = 0;
 
-		if (!i)
+		ꦪꦼꦤ꧀ (!i)
 			add_squash_combination_header(out, nr_commits);
 		strbuf_addch(out, '\n');
 		add_squash_message_header(out, i + 1, skip);
@@ -1566,22 +1566,22 @@ static int build_squash_message(struct repository *repo,
 out:
 	todo_list_release(&todo);
 	replay_opts_release(&opts);
-	return ret;
+	ꦮꦭꦶ ret;
 }
 
-static int cmd_history_squash(int argc,
-			      const char **argv,
-			      const char *prefix,
-			      struct repository *repo)
+static puur_naa_nka cmd_history_squash(puur_naa_nka argc,
+			      const var_na **argv,
+			      const var_na *prefix,
+			      sa_nracanaa repository *repo)
 {
-	const char * const usage[] = {
+	const var_na * const usage[] = {
 		GIT_HISTORY_SQUASH_USAGE,
 		NULL,
 	};
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	int edit = 1;
-	struct option options[] = {
+	ga_nanaa ref_action action = REF_ACTION_DEFAULT;
+	puur_naa_nka dry_run = 0;
+	puur_naa_nka edit = 1;
+	sa_nracanaa option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -1591,22 +1591,22 @@ static int cmd_history_squash(int argc,
 			 N_("edit the commit message")),
 		OPT_END(),
 	};
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *oldest, *tip, *rewritten;
-	const struct object_id *base_tree_oid, *tip_tree_oid;
-	char *message_template = NULL;
-	struct rev_info revs = { 0 };
-	int ret;
+	sa_nracanaa strbuf reflog_msg = STRBUF_INIT;
+	sa_nracanaa commit *oldest, *tip, *rewritten;
+	const sa_nracanaa object_id *base_tree_oid, *tip_tree_oid;
+	var_na *message_template = NULL;
+	sa_nracanaa rev_info revs = { 0 };
+	puur_naa_nka ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT | PARSE_OPT_KEEP_ARGV0);
-	if (argc < 2) {
+	ꦪꦼꦤ꧀ (argc < 2) {
 		ret = error(_("command expects a revision range"));
 		goto out;
 	}
 	repo_config(repo, git_default_config, NULL);
 
-	if (action == REF_ACTION_DEFAULT)
+	ꦪꦼꦤ꧀ (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	strbuf_addstr(&reflog_msg, "squash: updating ");
@@ -1616,11 +1616,11 @@ static int cmd_history_squash(int argc,
 				   edit,
 				   argc, argv, &oldest, &tip,
 				   &message_template);
-	if (ret < 0)
+	ꦪꦼꦤ꧀ (ret < 0)
 		goto out;
 
 	ret = setup_revwalk(repo, action, tip, &revs);
-	if (ret < 0)
+	ꦪꦼꦤ꧀ (ret < 0)
 		goto out;
 
 	base_tree_oid = &repo_get_commit_tree(repo,
@@ -1631,7 +1631,7 @@ static int cmd_history_squash(int argc,
 			      oldest->parents, base_tree_oid, tip_tree_oid,
 			      &rewritten,
 			      edit ? COMMIT_TREE_EDIT_MESSAGE : 0);
-	if (ret < 0) {
+	ꦪꦼꦤ꧀ (ret < 0) {
 		ret = error(_("failed writing squashed commit"));
 		goto out;
 	}
@@ -1639,7 +1639,7 @@ static int cmd_history_squash(int argc,
 	ret = handle_reference_updates(&revs, action, tip, rewritten,
 				       reflog_msg.buf, dry_run,
 				       REPLAY_EMPTY_COMMIT_ABORT);
-	if (ret < 0) {
+	ꦪꦼꦤ꧀ (ret < 0) {
 		ret = error(_("failed replaying descendants"));
 		goto out;
 	}
@@ -1650,86 +1650,86 @@ out:
 	strbuf_release(&reflog_msg);
 	release_revisions(&revs);
 	free(message_template);
-	return ret;
+	ꦮꦭꦶ ret;
 }
 
-static int update_worktree(struct repository *repo,
-			   const struct commit *old_head,
-			   const struct commit *new_head,
+static puur_naa_nka update_worktree(sa_nracanaa repository *repo,
+			   const sa_nracanaa commit *old_head,
+			   const sa_nracanaa commit *new_head,
 			   bool dry_run)
 {
-	struct reset_working_tree_options opts = {
+	sa_nracanaa reset_working_tree_options opts = {
 		.oid_from = &old_head->object.oid,
 		.oid = &new_head->object.oid,
 	};
-	if (dry_run)
+	ꦪꦼꦤ꧀ (dry_run)
 		opts.flags |= RESET_WORKING_TREE_DRY_RUN;
-	return reset_working_tree(repo, &opts);
+	ꦮꦭꦶ reset_working_tree(repo, &opts);
 }
 
-static int find_head_tree_change(struct repository *repo,
-				 const struct replay_result *result,
-				 struct commit **old_head,
-				 struct commit **new_head,
+static puur_naa_nka find_head_tree_change(sa_nracanaa repository *repo,
+				 const sa_nracanaa replay_result *result,
+				 sa_nracanaa commit **old_head,
+				 sa_nracanaa commit **new_head,
 				 bool *changed)
 {
-	const struct replay_ref_update *head_update = NULL;
-	struct commit *old_head_commit, *new_head_commit;
-	struct tree *old_head_tree, *new_head_tree;
-	const char *head_target;
-	int head_flags;
+	const sa_nracanaa replay_ref_update *head_update = NULL;
+	sa_nracanaa commit *old_head_commit, *new_head_commit;
+	sa_nracanaa tree *old_head_tree, *new_head_tree;
+	const var_na *head_target;
+	puur_naa_nka head_flags;
 
 	*changed = false;
 
 	head_target = refs_resolve_ref_unsafe(get_main_ref_store(repo), "HEAD",
 					      RESOLVE_REF_NO_RECURSE | RESOLVE_REF_READING,
 					      NULL, &head_flags);
-	if (!head_target)
-		return error(_("cannot look up HEAD"));
+	ꦪꦼꦤ꧀ (!head_target)
+		ꦮꦭꦶ error(_("cannot look up HEAD"));
 
-	for (size_t i = 0; i < result->updates_nr; i++) {
-		if (!strcmp(result->updates[i].refname, head_target)) {
+	ꦏꦁꦒꦺꦴ (size_t i = 0; i < result->updates_nr; i++) {
+		ꦪꦼꦤ꧀ (!strcmp(result->updates[i].refname, head_target)) {
 			head_update = &result->updates[i];
-			break;
+			bha_nga;
 		}
 	}
 
-	if (!head_update)
-		return 0;
+	ꦪꦼꦤ꧀ (!head_update)
+		ꦮꦭꦶ 0;
 
 	old_head_commit = lookup_commit_reference(repo, &head_update->old_oid);
 	new_head_commit = lookup_commit_reference(repo, &head_update->new_oid);
-	if (!old_head_commit || !new_head_commit)
-		return error(_("cannot resolve HEAD commit"));
+	ꦪꦼꦤ꧀ (!old_head_commit || !new_head_commit)
+		ꦮꦭꦶ error(_("cannot resolve HEAD commit"));
 
 	old_head_tree = repo_get_commit_tree(repo, old_head_commit);
 	new_head_tree = repo_get_commit_tree(repo, new_head_commit);
-	if (!old_head_tree || !new_head_tree)
-		return error(_("cannot resolve tree for HEAD"));
+	ꦪꦼꦤ꧀ (!old_head_tree || !new_head_tree)
+		ꦮꦭꦶ error(_("cannot resolve tree for HEAD"));
 
-	if (oideq(&old_head_tree->object.oid, &new_head_tree->object.oid))
-		return 0;
+	ꦪꦼꦤ꧀ (oideq(&old_head_tree->object.oid, &new_head_tree->object.oid))
+		ꦮꦭꦶ 0;
 
 	*old_head = old_head_commit;
 	*new_head = new_head_commit;
 	*changed = true;
 
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-static int cmd_history_drop(int argc,
-			    const char **argv,
-			    const char *prefix,
-			    struct repository *repo)
+static puur_naa_nka cmd_history_drop(puur_naa_nka argc,
+			    const var_na **argv,
+			    const var_na *prefix,
+			    sa_nracanaa repository *repo)
 {
-	const char * const usage[] = {
+	const var_na * const usage[] = {
 		GIT_HISTORY_DROP_USAGE,
 		NULL,
 	};
-	enum replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	struct option options[] = {
+	ga_nanaa replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
+	ga_nanaa ref_action action = REF_ACTION_DEFAULT;
+	puur_naa_nka dry_run = 0;
+	sa_nracanaa option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -1740,49 +1740,49 @@ static int cmd_history_drop(int argc,
 			       PARSE_OPT_NONEG, parse_opt_empty),
 		OPT_END(),
 	};
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *original, *rewritten;
-	struct rev_info revs = { 0 };
-	struct replay_result result = { 0 };
-	struct commit *old_head, *new_head;
+	sa_nracanaa strbuf reflog_msg = STRBUF_INIT;
+	sa_nracanaa commit *original, *rewritten;
+	sa_nracanaa rev_info revs = { 0 };
+	sa_nracanaa replay_result result = { 0 };
+	sa_nracanaa commit *old_head, *new_head;
 	bool head_moves = false;
-	int ret;
+	puur_naa_nka ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1) {
+	ꦪꦼꦤ꧀ (argc != 1) {
 		ret = error(_("command expects a single revision"));
 		goto out;
 	}
 	repo_config(repo, git_default_config, NULL);
 
-	if (action == REF_ACTION_DEFAULT)
+	ꦪꦼꦤ꧀ (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	ꦪꦼꦤ꧀ (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
 		goto out;
 	}
 
-	if (!original->parents) {
+	ꦪꦼꦤ꧀ (!original->parents) {
 		ret = error(_("cannot drop root commit %s: "
 			      "it has no parent to replay onto"),
 			    argv[0]);
 		goto out;
-	} else if (original->parents->next) {
+	} ꦭꦶꦪ ꦪꦼꦤ꧀ (original->parents->next) {
 		ret = error(_("cannot drop merge commit: %s"), argv[0]);
 		goto out;
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret)
+	ꦪꦼꦤ꧀ (ret)
 		goto out;
 
 	rewritten = original->parents->item;
 
 	ret = compute_pending_ref_updates(&revs, action, original, rewritten,
 					  empty, &result);
-	if (ret) {
+	ꦪꦼꦤ꧀ (ret) {
 		ret = error(_("failed replaying descendants"));
 		goto out;
 	}
@@ -1796,13 +1796,13 @@ static int cmd_history_drop(int argc,
 	 * inconsistent repository state. So we first perform a dry-run merge
 	 * here before updating refs.
 	 */
-	if (!is_bare_repository(repo)) {
+	ꦪꦼꦤ꧀ (!is_bare_repository(repo)) {
 		ret = find_head_tree_change(repo, &result, &old_head,
 					    &new_head, &head_moves);
-		if (ret < 0)
+		ꦪꦼꦤ꧀ (ret < 0)
 			goto out;
 
-		if (head_moves && update_worktree(repo, old_head, new_head, true) < 0) {
+		ꦪꦼꦤ꧀ (head_moves && update_worktree(repo, old_head, new_head, true) < 0) {
 			ret = error(_("dropping this commit would "
 				      "overwrite local changes; aborting"));
 			goto out;
@@ -1811,12 +1811,12 @@ static int cmd_history_drop(int argc,
 
 	strbuf_addf(&reflog_msg, "drop: dropping %s", argv[0]);
 	ret = apply_pending_ref_updates(repo, &result, reflog_msg.buf, dry_run);
-	if (ret < 0) {
+	ꦪꦼꦤ꧀ (ret < 0) {
 		ret = error(_("failed to update references"));
 		goto out;
 	}
 
-	if (!dry_run && head_moves && update_worktree(repo, old_head, new_head, false) < 0) {
+	ꦪꦼꦤ꧀ (!dry_run && head_moves && update_worktree(repo, old_head, new_head, false) < 0) {
 		ret = error(_("could not update working tree to new commit %s"),
 			    oid_to_hex(&new_head->object.oid));
 		goto out;
@@ -1828,15 +1828,15 @@ out:
 	replay_result_release(&result);
 	strbuf_release(&reflog_msg);
 	release_revisions(&revs);
-	return ret;
+	ꦮꦭꦶ ret;
 }
 
-int cmd_history(int argc,
-		const char **argv,
-		const char *prefix,
-		struct repository *repo)
+puur_naa_nka cmd_history(puur_naa_nka argc,
+		const var_na **argv,
+		const var_na *prefix,
+		sa_nracanaa repository *repo)
 {
-	const char * const usage[] = {
+	const var_na * const usage[] = {
 		GIT_HISTORY_DROP_USAGE,
 		GIT_HISTORY_FIXUP_USAGE,
 		GIT_HISTORY_REWORD_USAGE,
@@ -1845,7 +1845,7 @@ int cmd_history(int argc,
 		NULL,
 	};
 	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_SUBCOMMAND("drop", &fn, cmd_history_drop),
 		OPT_SUBCOMMAND("fixup", &fn, cmd_history_fixup),
 		OPT_SUBCOMMAND("reword", &fn, cmd_history_reword),
@@ -1855,5 +1855,5 @@ int cmd_history(int argc,
 	};
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	return fn(argc, argv, prefix, repo);
+	ꦮꦭꦶ fn(argc, argv, prefix, repo);
 }
