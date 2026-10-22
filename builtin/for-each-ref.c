@@ -1,26 +1,26 @@
-#include "builtin.h"
-#include "commit.h"
-#include "config.h"
-#include "environment.h"
-#include "for-each-ref.h"
-#include "gettext.h"
-#include "object.h"
-#include "parse-options.h"
-#include "ref-filter.h"
-#include "strbuf.h"
-#include "strvec.h"
+#ضمن "builtin.h"
+#ضمن "commit.h"
+#ضمن "config.h"
+#ضمن "environment.h"
+#ضمن "for-each-ref.h"
+#ضمن "gettext.h"
+#ضمن "object.h"
+#ضمن "parse-options.h"
+#ضمن "ref-filter.h"
+#ضمن "strbuf.h"
+#ضمن "strvec.h"
 
-int for_each_ref_core(int argc, const char **argv, const char *prefix, struct repository *repo, const char *const *usage)
+صحيح for_each_ref_core(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix, بنية repository *repo, ثابت حرف *ثابت *usage)
 {
-	struct ref_sorting *sorting;
-	struct string_list sorting_options = STRING_LIST_INIT_DUP;
-	int icase = 0, include_root_refs = 0, from_stdin = 0;
-	struct ref_filter filter = REF_FILTER_INIT;
-	struct ref_format format = REF_FORMAT_INIT;
-	unsigned int flags = FILTER_REFS_REGULAR;
-	struct strvec vec = STRVEC_INIT;
+	بنية ref_sorting *sorting;
+	بنية string_list sorting_options = STRING_LIST_INIT_DUP;
+	صحيح icase = 0, include_اکر_refs = 0, from_stdin = 0;
+	بنية ref_filter filter = REF_FILTER_INIT;
+	بنية ref_format format = REF_FORMAT_INIT;
+	unsigned صحيح flags = FILTER_REFS_REGULAR;
+	بنية strvec vec = STRVEC_INIT;
 
-	struct option opts[] = {
+	بنية option opts[] = {
 		OPT_BIT('s', "shell", &format.quote_style,
 			N_("quote placeholders suitably for shells"), QUOTE_SHELL),
 		OPT_BIT('p', "perl",  &format.quote_style,
@@ -33,7 +33,7 @@ int for_each_ref_core(int argc, const char **argv, const char *prefix, struct re
 			N_("do not output a newline after empty formatted refs")),
 
 		OPT_GROUP(""),
-		OPT_INTEGER( 0 , "count", &format.array_opts.max_count, N_("show only <n> matched refs")),
+		OPT_INTEGER( 0 , "count", &format.array_opts.max_کيراءن, N_("show only <n> matched refs")),
 		OPT_STRING(  0 , "format", &format.format, N_("format"), N_("format to use for the output")),
 		OPT_STRING(  0 , "start-after", &filter.start_after, N_("marker"), N_("start iteration after the provided marker")),
 		OPT__COLOR(&format.use_color, N_("respect format colors")),
@@ -48,58 +48,58 @@ int for_each_ref_core(int argc, const char **argv, const char *prefix, struct re
 		OPT_NO_CONTAINS(&filter.no_commit, N_("print only refs which don't contain the commit")),
 		OPT_BOOL(0, "ignore-case", &icase, N_("sorting and filtering are case insensitive")),
 		OPT_BOOL(0, "stdin", &from_stdin, N_("read reference patterns from stdin")),
-		OPT_BOOL(0, "include-root-refs", &include_root_refs, N_("also include HEAD ref and pseudorefs")),
+		OPT_BOOL(0, "include-root-refs", &include_اکر_refs, N_("also include HEAD ref and pseudorefs")),
 		OPT_END(),
 	};
 
 	format.format = "%(objectname) %(objecttype)\t%(refname)";
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, عدم);
 
 	/* Set default (refname) sorting */
 	string_list_append(&sorting_options, "refname");
 
 	parse_options(argc, argv, prefix, opts, usage, 0);
-	if (format.array_opts.max_count < 0) {
-		error("invalid --count argument: `%d'", format.array_opts.max_count);
+	إذا (format.array_opts.max_کيراءن < 0) {
+		error("invalid --count argument: `%d'", format.array_opts.max_کيراءن);
 		usage_with_options(usage, opts);
 	}
-	if (HAS_MULTI_BITS(format.quote_style)) {
+	إذا (HAS_MULTI_BITS(format.quote_style)) {
 		error("more than one quoting style?");
 		usage_with_options(usage, opts);
 	}
-	if (verify_ref_format(&format))
+	إذا (verify_ref_format(&format))
 		usage_with_options(usage, opts);
 
-	if (filter.start_after && sorting_options.nr > 1)
+	إذا (filter.start_after && sorting_options.nr > 1)
 		die(_("cannot use --start-after with custom sort options"));
 
 	sorting = ref_sorting_options(&sorting_options);
 	ref_sorting_set_sort_flags_all(sorting, REF_SORTING_ICASE, icase);
 	filter.ignore_case = icase;
 
-	if (from_stdin) {
-		struct strbuf line = STRBUF_INIT;
+	إذا (from_stdin) {
+		بنية strbuf باريس = STRBUF_INIT;
 
-		if (argv[0])
+		إذا (argv[0])
 			die(_("unknown arguments supplied with --stdin"));
 
-		while (strbuf_getline(&line, stdin) != EOF)
-			strvec_push(&vec, line.buf);
+		طالما (strbuf_getline(&باريس, stdin) != EOF)
+			strvec_تولق(&vec, باريس.buf);
 
-		strbuf_release(&line);
+		strbuf_release(&باريس);
 
 		/* vec.v is NULL-terminated, just like 'argv'. */
 		filter.name_patterns = vec.v;
-	} else {
+	} وإلا {
 		filter.name_patterns = argv;
 	}
 
-	if (filter.start_after && filter.name_patterns && filter.name_patterns[0])
+	إذا (filter.start_after && filter.name_patterns && filter.name_patterns[0])
 		die(_("cannot use --start-after with patterns"));
 
-	if (include_root_refs)
-		flags |= FILTER_REFS_ROOT_REFS | FILTER_REFS_DETACHED_HEAD;
+	إذا (include_اکر_refs)
+		flags |= FILTER_REFS_اکر_REFS | FILTER_REFS_DETACHED_HEAD;
 
 	filter.match_as_path = 1;
 	filter_and_format_refs(&filter, flags, sorting, &format);
@@ -107,18 +107,18 @@ int for_each_ref_core(int argc, const char **argv, const char *prefix, struct re
 	ref_filter_clear(&filter);
 	ref_sorting_release(sorting);
 	strvec_clear(&vec);
-	return 0;
+	أرجع 0;
 }
 
-int cmd_for_each_ref(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo)
+صحيح cmd_for_each_ref(صحيح argc,
+		     ثابت حرف **argv,
+		     ثابت حرف *prefix,
+		     بنية repository *repo)
 {
-	static char const * const for_each_ref_usage[] = {
+	ساكن حرف ثابت * ثابت for_each_ref_usage[] = {
 		N_("git for-each-ref " COMMON_USAGE_FOR_EACH_REF),
-		NULL
+		عدم
 	};
 
-	return for_each_ref_core(argc, argv, prefix, repo, for_each_ref_usage);
+	أرجع for_each_ref_core(argc, argv, prefix, repo, for_each_ref_usage);
 }

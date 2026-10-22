@@ -1,68 +1,68 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "rerere.h"
-#include "strbuf.h"
-#include "string-list.h"
-#include "xdiff/xdiff.h"
-#include "xdiff-interface.h"
-#include "pathspec.h"
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "gettext.h"
+#ضمن "parse-options.h"
+#ضمن "rerere.h"
+#ضمن "strbuf.h"
+#ضمن "string-list.h"
+#ضمن "xdiff/xdiff.h"
+#ضمن "xdiff-interface.h"
+#ضمن "pathspec.h"
 
-static const char * const rerere_usage[] = {
+ساكن ثابت حرف * ثابت rerere_usage[] = {
 	N_("git rerere [clear | forget <pathspec>... | diff | status | remaining | gc]"),
-	NULL,
+	عدم,
 };
 
-static int outf(void *dummy UNUSED, mmfile_t *ptr, int nbuf)
+ساكن صحيح outf(فراغ *dummy UNUSED, mmfile_t *ptr, صحيح nbuf)
 {
-	int i;
-	for (i = 0; i < nbuf; i++)
-		if (write_in_full(1, ptr[i].ptr, ptr[i].size) < 0)
-			return -1;
-	return 0;
+	صحيح i;
+	لكل (i = 0; i < nbuf; i++)
+		إذا (write_in_full(1, ptr[i].ptr, ptr[i].size) < 0)
+			أرجع -1;
+	أرجع 0;
 }
 
-static int diff_two(const char *file1, const char *label1,
-		const char *file2, const char *label2)
+ساكن صحيح diff_two(ثابت حرف *file1, ثابت حرف *label1,
+		ثابت حرف *file2, ثابت حرف *label2)
 {
 	xpparam_t xpp;
 	xdemitconf_t xecfg;
-	xdemitcb_t ecb = { .out_line = outf };
+	xdemitcb_t ecb = { .out_باريس = outf };
 	mmfile_t minus, plus;
-	int ret;
+	صحيح ret;
 
-	if (read_mmfile(&minus, file1))
-		return -1;
-	if (read_mmfile(&plus, file2)) {
-		free(minus.ptr);
-		return -1;
+	إذا (read_mmfile(&minus, file1))
+		أرجع -1;
+	إذا (read_mmfile(&plus, file2)) {
+		حرر(minus.ptr);
+		أرجع -1;
 	}
 
 	printf("--- a/%s\n+++ b/%s\n", label1, label2);
 	fflush(stdout);
-	memset(&xpp, 0, sizeof(xpp));
+	memset(&xpp, 0, حجم(xpp));
 	xpp.flags = 0;
-	memset(&xecfg, 0, sizeof(xecfg));
+	memset(&xecfg, 0, حجم(xecfg));
 	xecfg.ctxlen = 3;
 	ret = xdi_diff(&minus, &plus, &xpp, &xecfg, &ecb);
 
-	free(minus.ptr);
-	free(plus.ptr);
-	return ret;
+	حرر(minus.ptr);
+	حرر(plus.ptr);
+	أرجع ret;
 }
 
-int cmd_rerere(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+صحيح cmd_rerere(صحيح argc,
+	       ثابت حرف **argv,
+	       ثابت حرف *prefix,
+	       بنية repository *repo UNUSED)
 {
-	struct string_list merge_rr = STRING_LIST_INIT_DUP;
-	int autoupdate = -1, flags = 0;
+	بنية string_list merge_rr = STRING_LIST_INIT_DUP;
+	صحيح autoupdate = -1, flags = 0;
 
-	struct option options[] = {
+	بنية option options[] = {
 		OPT_SET_INT(0, "rerere-autoupdate", &autoupdate,
 			N_("register clean resolutions in index"), 1),
 		OPT_END(),
@@ -70,21 +70,21 @@ int cmd_rerere(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, rerere_usage, 0);
 
-	repo_config(the_repository, git_xmerge_config, NULL);
+	repo_config(the_repository, git_xmerge_config, عدم);
 
-	if (autoupdate == 1)
+	إذا (autoupdate == 1)
 		flags = RERERE_AUTOUPDATE;
-	if (autoupdate == 0)
+	إذا (autoupdate == 0)
 		flags = RERERE_NOAUTOUPDATE;
 
-	if (argc < 1)
-		return repo_rerere(the_repository, flags);
+	إذا (argc < 1)
+		أرجع repo_rerere(the_repository, flags);
 
-	if (!strcmp(argv[0], "forget")) {
-		struct pathspec pathspec;
-		int ret;
+	إذا (!strcmp(argv[0], "forget")) {
+		بنية pathspec pathspec;
+		صحيح ret;
 
-		if (argc < 2)
+		إذا (argc < 2)
 			warning(_("'git rerere forget' without paths is deprecated"));
 		parse_pathspec(&pathspec, 0, PATHSPEC_PREFER_CWD,
 			       prefix, argv + 1);
@@ -92,45 +92,45 @@ int cmd_rerere(int argc,
 		ret = rerere_forget(the_repository, &pathspec);
 
 		clear_pathspec(&pathspec);
-		return ret;
+		أرجع ret;
 	}
 
-	if (!strcmp(argv[0], "clear")) {
+	إذا (!strcmp(argv[0], "clear")) {
 		rerere_clear(the_repository, &merge_rr);
-	} else if (!strcmp(argv[0], "gc"))
+	} وإلا إذا (!strcmp(argv[0], "gc"))
 		rerere_gc(the_repository, &merge_rr);
-	else if (!strcmp(argv[0], "status")) {
-		if (setup_rerere(the_repository, &merge_rr,
+	وإلا إذا (!strcmp(argv[0], "status")) {
+		إذا (setup_rerere(the_repository, &merge_rr,
 				 flags | RERERE_READONLY) < 0)
-			return 0;
-		for (size_t i = 0; i < merge_rr.nr; i++)
-			printf("%s\n", merge_rr.items[i].string);
-	} else if (!strcmp(argv[0], "remaining")) {
+			أرجع 0;
+		لكل (size_t i = 0; i < merge_rr.nr; i++)
+			printf("%s\n", merge_rr.بارڠن[i].string);
+	} وإلا إذا (!strcmp(argv[0], "remaining")) {
 		rerere_remaining(the_repository, &merge_rr);
-		for (size_t i = 0; i < merge_rr.nr; i++) {
-			if (merge_rr.items[i].util != RERERE_RESOLVED)
-				printf("%s\n", merge_rr.items[i].string);
-			else
+		لكل (size_t i = 0; i < merge_rr.nr; i++) {
+			إذا (merge_rr.بارڠن[i].util != RERERE_RESOLVED)
+				printf("%s\n", merge_rr.بارڠن[i].string);
+			وإلا
 				/* prepare for later call to
 				 * string_list_clear() */
-				merge_rr.items[i].util = NULL;
+				merge_rr.بارڠن[i].util = عدم;
 		}
-	} else if (!strcmp(argv[0], "diff")) {
-		struct strbuf buf = STRBUF_INIT;
-		if (setup_rerere(the_repository, &merge_rr,
+	} وإلا إذا (!strcmp(argv[0], "diff")) {
+		بنية strbuf buf = STRBUF_INIT;
+		إذا (setup_rerere(the_repository, &merge_rr,
 				 flags | RERERE_READONLY) < 0)
-			return 0;
-		for (size_t i = 0; i < merge_rr.nr; i++) {
-			const char *path = merge_rr.items[i].string;
-			const struct rerere_id *id = merge_rr.items[i].util;
-			if (diff_two(rerere_path(&buf, id, "preimage"), path, path, path))
-				die(_("unable to generate diff for '%s'"), rerere_path(&buf, id, NULL));
+			أرجع 0;
+		لكل (size_t i = 0; i < merge_rr.nr; i++) {
+			ثابت حرف *path = merge_rr.بارڠن[i].string;
+			ثابت بنية rerere_id *id = merge_rr.بارڠن[i].util;
+			إذا (diff_two(rerere_path(&buf, id, "preimage"), path, path, path))
+				die(_("unable to generate diff for '%s'"), rerere_path(&buf, id, عدم));
 		}
 
 		strbuf_release(&buf);
-	} else
+	} وإلا
 		usage_with_options(rerere_usage, options);
 
 	string_list_clear(&merge_rr, 1);
-	return 0;
+	أرجع 0;
 }
