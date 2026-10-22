@@ -6,98 +6,98 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "environment.h"
-#include "lockfile.h"
-#include "dir.h"
-#include "gettext.h"
-#include "hash.h"
-#include "tree-walk.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "read-cache.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "advice.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "lockfile.h"
+#अन्तर्भाव "dir.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "hash.h"
+#अन्तर्भाव "tree-walk.h"
+#अन्तर्भाव "object-name.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "read-cache.h"
 
-#include "string-list.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "submodule.h"
-#include "pathspec.h"
+#अन्तर्भाव "string-list.h"
+#अन्तर्भाव "setup.h"
+#अन्तर्भाव "sparse-index.h"
+#अन्तर्भाव "submodule.h"
+#अन्तर्भाव "pathspec.h"
 
-static const char * const builtin_rm_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव builtin_rm_usage[] = {
 	N_("git rm [-f | --force] [-n] [-r] [--cached] [--ignore-unmatch]\n"
 	   "       [--quiet] [--pathspec-from-file=<file> [--pathspec-file-nul]]\n"
 	   "       [--] [<pathspec>...]"),
-	NULL
+	रिक्त
 };
 
-static struct {
-	int nr, alloc;
-	struct {
-		const char *name;
-		char is_submodule;
+स्थिर संरचना {
+	पूर्णाङ्क nr, alloc;
+	संरचना {
+		ध्रुव वर्ण *name;
+		वर्ण is_submodule;
 	} *entry;
 } list;
 
-static int get_ours_cache_pos(const char *path, unsigned int pos)
+स्थिर पूर्णाङ्क get_ours_cache_pos(ध्रुव वर्ण *path, unsigned पूर्णाङ्क pos)
 {
-	while ((pos < the_repository->index->cache_nr) && !strcmp(the_repository->index->cache[pos]->name, path)) {
-		if (ce_stage(the_repository->index->cache[pos]) == 2)
-			return pos;
+	यावत् ((pos < the_repository->index->cache_nr) && !strcmp(the_repository->index->cache[pos]->name, path)) {
+		यदि (ce_stage(the_repository->index->cache[pos]) == 2)
+			प्रत्यागम pos;
 		pos++;
 	}
-	return -1;
+	प्रत्यागम -1;
 }
 
-static void print_error_files(struct string_list *files_list,
-			      const char *main_msg,
-			      const char *hints_msg,
-			      int *errs)
+स्थिर शून्य print_error_files(संरचना string_list *files_list,
+			      ध्रुव वर्ण *main_संदेश,
+			      ध्रुव वर्ण *hints_संदेश,
+			      पूर्णाङ्क *errs)
 {
-	if (files_list->nr) {
-		unsigned int i;
-		struct strbuf err_msg = STRBUF_INIT;
+	यदि (files_list->nr) {
+		unsigned पूर्णाङ्क i;
+		संरचना strbuf err_संदेश = STRBUF_INIT;
 
-		strbuf_addstr(&err_msg, main_msg);
-		for (i = 0; i < files_list->nr; i++)
-			strbuf_addf(&err_msg,
+		strbuf_addstr(&err_संदेश, main_संदेश);
+		प्रति (i = 0; i < files_list->nr; i++)
+			strbuf_addf(&err_संदेश,
 				    "\n    %s",
-				    files_list->items[i].string);
-		if (advice_enabled(ADVICE_RM_HINTS))
-			strbuf_addstr(&err_msg, hints_msg);
-		*errs = error("%s", err_msg.buf);
-		strbuf_release(&err_msg);
+				    files_list->वस्तुएँ[i].string);
+		यदि (advice_enabled(ADVICE_RM_HINTS))
+			strbuf_addstr(&err_संदेश, hints_संदेश);
+		*errs = error("%s", err_संदेश.buf);
+		strbuf_release(&err_संदेश);
 	}
 }
 
-static void submodules_absorb_gitdir_if_needed(void)
+स्थिर शून्य submodules_absorb_gitdir_if_needed(शून्य)
 {
-	int i;
-	for (i = 0; i < list.nr; i++) {
-		const char *name = list.entry[i].name;
-		int pos;
-		const struct cache_entry *ce;
+	पूर्णाङ्क i;
+	प्रति (i = 0; i < list.nr; i++) {
+		ध्रुव वर्ण *name = list.entry[i].name;
+		पूर्णाङ्क pos;
+		ध्रुव संरचना cache_entry *ce;
 
 		pos = index_name_pos(the_repository->index, name, strlen(name));
-		if (pos < 0) {
+		यदि (pos < 0) {
 			pos = get_ours_cache_pos(name, -pos - 1);
-			if (pos < 0)
-				continue;
+			यदि (pos < 0)
+				अनुवर्त;
 		}
 		ce = the_repository->index->cache[pos];
 
-		if (!S_ISGITLINK(ce->ce_mode) ||
+		यदि (!S_ISGITLINK(ce->ce_mode) ||
 		    !file_exists(ce->name) ||
 		    is_empty_dir(name))
-			continue;
+			अनुवर्त;
 
-		if (!submodule_uses_gitfile(name))
-			absorb_git_dir_into_superproject(name, NULL);
+		यदि (!submodule_uses_gitfile(name))
+			absorb_git_dir_into_superproject(name, रिक्त);
 	}
 }
 
-static int check_local_mod(struct object_id *head, int index_only)
+स्थिर पूर्णाङ्क check_local_mod(संरचना object_id *head, पूर्णाङ्क index_only)
 {
 	/*
 	 * Items in list are already sorted in the cache order,
@@ -106,53 +106,53 @@ static int check_local_mod(struct object_id *head, int index_only)
 	 * lazy, and who cares if removal of files is a tad
 	 * slower than the theoretical maximum speed?
 	 */
-	int i, no_head;
-	int errs = 0;
-	struct string_list files_staged = STRING_LIST_INIT_NODUP;
-	struct string_list files_cached = STRING_LIST_INIT_NODUP;
-	struct string_list files_local = STRING_LIST_INIT_NODUP;
+	पूर्णाङ्क i, no_head;
+	पूर्णाङ्क errs = 0;
+	संरचना string_list files_staged = STRING_LIST_INIT_NODUP;
+	संरचना string_list files_cached = STRING_LIST_INIT_NODUP;
+	संरचना string_list files_local = STRING_LIST_INIT_NODUP;
 
 	no_head = is_null_oid(head);
-	for (i = 0; i < list.nr; i++) {
-		struct stat st;
-		int pos;
-		const struct cache_entry *ce;
-		const char *name = list.entry[i].name;
-		struct object_id oid;
+	प्रति (i = 0; i < list.nr; i++) {
+		संरचना stat st;
+		पूर्णाङ्क pos;
+		ध्रुव संरचना cache_entry *ce;
+		ध्रुव वर्ण *name = list.entry[i].name;
+		संरचना object_id oid;
 		unsigned short mode;
-		int local_changes = 0;
-		int staged_changes = 0;
+		पूर्णाङ्क local_changes = 0;
+		पूर्णाङ्क staged_changes = 0;
 
 		pos = index_name_pos(the_repository->index, name, strlen(name));
-		if (pos < 0) {
+		यदि (pos < 0) {
 			/*
 			 * Skip unmerged entries except for populated submodules
 			 * that could lose history when removed.
 			 */
 			pos = get_ours_cache_pos(name, -pos - 1);
-			if (pos < 0)
-				continue;
+			यदि (pos < 0)
+				अनुवर्त;
 
-			if (!S_ISGITLINK(the_repository->index->cache[pos]->ce_mode) ||
+			यदि (!S_ISGITLINK(the_repository->index->cache[pos]->ce_mode) ||
 			    is_empty_dir(name))
-				continue;
+				अनुवर्त;
 		}
 		ce = the_repository->index->cache[pos];
 
-		if (lstat(ce->name, &st) < 0) {
-			if (!is_missing_file_error(errno))
+		यदि (lstat(ce->name, &st) < 0) {
+			यदि (!is_missing_file_error(errno))
 				warning_errno(_("failed to stat '%s'"), ce->name);
 			/* It already vanished from the working tree */
-			continue;
+			अनुवर्त;
 		}
-		else if (S_ISDIR(st.st_mode)) {
+		अन्यथा यदि (S_ISDIR(st.st_mode)) {
 			/* if a file was removed and it is now a
 			 * directory, that is the same as ENOENT as
 			 * far as git is concerned; we do not track
 			 * directories unless they are submodules.
 			 */
-			if (!S_ISGITLINK(ce->ce_mode))
-				continue;
+			यदि (!S_ISGITLINK(ce->ce_mode))
+				अनुवर्त;
 		}
 
 		/*
@@ -174,7 +174,7 @@ static int check_local_mod(struct object_id *head, int index_only)
 		 * Is the index different from the file in the work tree?
 		 * If it's a submodule, is its work tree modified?
 		 */
-		if (ie_match_stat(the_repository->index, ce, &st, 0) ||
+		यदि (ie_match_stat(the_repository->index, ce, &st, 0) ||
 		    (S_ISGITLINK(ce->ce_mode) &&
 		     bad_to_remove_submodule(ce->name,
 				SUBMODULE_REMOVAL_DIE_ON_ERROR |
@@ -187,8 +187,8 @@ static int check_local_mod(struct object_id *head, int index_only)
 		 * anything staged in the index is treated by the same
 		 * way as changed from the HEAD.
 		 */
-		if (no_head
-		     || get_tree_entry(the_repository, head, name, &oid, &mode)
+		यदि (no_head
+		     || get_वृक्ष_entry(the_repository, head, name, &oid, &mode)
 		     || ce->ce_mode != create_ce_mode(mode)
 		     || !oideq(&ce->oid, &oid))
 			staged_changes = 1;
@@ -201,14 +201,14 @@ static int check_local_mod(struct object_id *head, int index_only)
 		 * lose information unless it is about removing an
 		 * "intent to add" entry.
 		 */
-		if (local_changes && staged_changes) {
-			if (!index_only || !ce_intent_to_add(ce))
+		यदि (local_changes && staged_changes) {
+			यदि (!index_only || !ce_intent_to_add(ce))
 				string_list_append(&files_staged, name);
 		}
-		else if (!index_only) {
-			if (staged_changes)
+		अन्यथा यदि (!index_only) {
+			यदि (staged_changes)
 				string_list_append(&files_cached, name);
-			if (local_changes)
+			यदि (local_changes)
 				string_list_append(&files_local, name);
 		}
 	}
@@ -240,20 +240,20 @@ static int check_local_mod(struct object_id *head, int index_only)
 			  &errs);
 	string_list_clear(&files_local, 0);
 
-	return errs;
+	प्रत्यागम errs;
 }
 
-static int show_only = 0, force = 0, index_only = 0, recursive = 0, quiet = 0;
-static int ignore_unmatch = 0, pathspec_file_nul;
-static int include_sparse;
-static char *pathspec_from_file;
+स्थिर पूर्णाङ्क show_only = 0, force = 0, index_only = 0, recursive = 0, quiet = 0;
+स्थिर पूर्णाङ्क ignore_unmatch = 0, pathspec_file_nul;
+स्थिर पूर्णाङ्क include_sparse;
+स्थिर वर्ण *pathspec_from_file;
 
-static struct option builtin_rm_options[] = {
+स्थिर संरचना option builtin_rm_options[] = {
 	OPT__DRY_RUN(&show_only, N_("dry run")),
 	OPT__QUIET(&quiet, N_("do not list removed files")),
 	OPT_BOOL( 0 , "cached",         &index_only, N_("only remove from the index")),
 	OPT__FORCE(&force, N_("override the up-to-date check"), PARSE_OPT_NOCOMPLETE),
-	OPT_BOOL('r', NULL,             &recursive,  N_("allow recursive removal")),
+	OPT_BOOL('r', रिक्त,             &recursive,  N_("allow recursive removal")),
 	OPT_BOOL( 0 , "ignore-unmatch", &ignore_unmatch,
 				N_("exit with a zero status even if nothing matched")),
 	OPT_BOOL(0, "sparse", &include_sparse, N_("allow updating entries outside of the sparse-checkout cone")),
@@ -262,17 +262,17 @@ static struct option builtin_rm_options[] = {
 	OPT_END(),
 };
 
-int cmd_rm(int argc,
-	   const char **argv,
-	   const char *prefix,
-	   struct repository *repo UNUSED)
+पूर्णाङ्क cmd_rm(पूर्णाङ्क argc,
+	   ध्रुव वर्ण **argv,
+	   ध्रुव वर्ण *prefix,
+	   संरचना repository *repo UNUSED)
 {
-	struct lock_file lock_file = LOCK_INIT;
-	int i, ret = 0;
-	struct pathspec pathspec;
-	char *seen;
+	संरचना lock_file lock_file = LOCK_INIT;
+	पूर्णाङ्क i, ret = 0;
+	संरचना pathspec pathspec;
+	वर्ण *seen;
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, रिक्त);
 
 	argc = parse_options(argc, argv, prefix, builtin_rm_options,
 			     builtin_rm_usage, 0);
@@ -281,91 +281,91 @@ int cmd_rm(int argc,
 		       PATHSPEC_PREFER_CWD,
 		       prefix, argv);
 
-	if (pathspec_from_file) {
-		if (pathspec.nr)
+	यदि (pathspec_from_file) {
+		यदि (pathspec.nr)
 			die(_("'%s' and pathspec arguments cannot be used together"), "--pathspec-from-file");
 
 		parse_pathspec_file(&pathspec, 0,
 				    PATHSPEC_PREFER_CWD,
 				    prefix, pathspec_from_file, pathspec_file_nul);
-	} else if (pathspec_file_nul) {
+	} अन्यथा यदि (pathspec_file_nul) {
 		die(_("the option '%s' requires '%s'"), "--pathspec-file-nul", "--pathspec-from-file");
 	}
 
-	if (!pathspec.nr)
+	यदि (!pathspec.nr)
 		die(_("No pathspec was given. Which files should I remove?"));
 
-	if (!index_only)
-		setup_work_tree(the_repository);
+	यदि (!index_only)
+		setup_work_वृक्ष(the_repository);
 
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
 
-	if (repo_read_index(the_repository) < 0)
+	यदि (repo_read_index(the_repository) < 0)
 		die(_("index file corrupt"));
 
-	refresh_index(the_repository->index, REFRESH_QUIET|REFRESH_UNMERGED, &pathspec, NULL, NULL);
+	refresh_index(the_repository->index, REFRESH_QUIET|REFRESH_UNMERGED, &pathspec, रिक्त, रिक्त);
 
 	seen = xcalloc(pathspec.nr, 1);
 
-	if (pathspec_needs_expanded_index(the_repository->index, &pathspec))
+	यदि (pathspec_needs_expanded_index(the_repository->index, &pathspec))
 		ensure_full_index(the_repository->index);
 
-	for (unsigned int i = 0; i < the_repository->index->cache_nr; i++) {
-		const struct cache_entry *ce = the_repository->index->cache[i];
+	प्रति (unsigned पूर्णाङ्क i = 0; i < the_repository->index->cache_nr; i++) {
+		ध्रुव संरचना cache_entry *ce = the_repository->index->cache[i];
 
-		if (!include_sparse &&
+		यदि (!include_sparse &&
 		    (ce_skip_worktree(ce) ||
 		     !path_in_sparse_checkout(ce->name, the_repository->index)))
-			continue;
-		if (!ce_path_match(the_repository->index, ce, &pathspec, seen))
-			continue;
+			अनुवर्त;
+		यदि (!ce_path_match(the_repository->index, ce, &pathspec, seen))
+			अनुवर्त;
 		ALLOC_GROW(list.entry, list.nr + 1, list.alloc);
 		list.entry[list.nr].name = xstrdup(ce->name);
 		list.entry[list.nr].is_submodule = S_ISGITLINK(ce->ce_mode);
-		if (list.entry[list.nr++].is_submodule &&
+		यदि (list.entry[list.nr++].is_submodule &&
 		    !is_staging_gitmodules_ok(the_repository->index))
 			die(_("please stage your changes to .gitmodules or stash them to proceed"));
 	}
 
-	if (pathspec.nr) {
-		const char *original;
-		int seen_any = 0;
-		char *skip_worktree_seen = NULL;
-		struct string_list only_match_skip_worktree = STRING_LIST_INIT_NODUP;
+	यदि (pathspec.nr) {
+		ध्रुव वर्ण *original;
+		पूर्णाङ्क seen_any = 0;
+		वर्ण *skip_worktree_seen = रिक्त;
+		संरचना string_list only_match_skip_worktree = STRING_LIST_INIT_NODUP;
 
-		for (i = 0; i < pathspec.nr; i++) {
-			original = pathspec.items[i].original;
-			if (seen[i])
+		प्रति (i = 0; i < pathspec.nr; i++) {
+			original = pathspec.वस्तुएँ[i].original;
+			यदि (seen[i])
 				seen_any = 1;
-			else if (ignore_unmatch)
-				continue;
-			else if (!include_sparse &&
+			अन्यथा यदि (ignore_unmatch)
+				अनुवर्त;
+			अन्यथा यदि (!include_sparse &&
 				 matches_skip_worktree(&pathspec, i, &skip_worktree_seen))
 				string_list_append(&only_match_skip_worktree, original);
-			else
+			अन्यथा
 				die(_("pathspec '%s' did not match any files"), original);
 
-			if (!recursive && seen[i] == MATCHED_RECURSIVELY)
+			यदि (!recursive && seen[i] == MATCHED_RECURSIVELY)
 				die(_("not removing '%s' recursively without -r"),
 				    *original ? original : ".");
 		}
 
-		if (only_match_skip_worktree.nr) {
+		यदि (only_match_skip_worktree.nr) {
 			advise_on_updating_sparse_paths(&only_match_skip_worktree);
 			ret = 1;
 		}
-		free(skip_worktree_seen);
+		मुक्त(skip_worktree_seen);
 		string_list_clear(&only_match_skip_worktree, 0);
 
-		if (!seen_any)
+		यदि (!seen_any)
 			exit(ret);
 	}
 	clear_pathspec(&pathspec);
-	free(seen);
+	मुक्त(seen);
 
-	if (!index_only)
+	यदि (!index_only)
 		submodules_absorb_gitdir_if_needed();
 
 	/*
@@ -378,11 +378,11 @@ int cmd_rm(int argc,
 	 * Further, if HEAD commit exists, "diff-index --cached" must
 	 * report no changes unless forced.
 	 */
-	if (!force) {
-		struct object_id oid;
-		if (repo_get_oid(the_repository, "HEAD", &oid))
+	यदि (!force) {
+		संरचना object_id oid;
+		यदि (repo_get_oid(the_repository, "HEAD", &oid))
 			oidclr(&oid, the_repository->hash_algo);
-		if (check_local_mod(&oid, index_only))
+		यदि (check_local_mod(&oid, index_only))
 			exit(1);
 	}
 
@@ -390,17 +390,17 @@ int cmd_rm(int argc,
 	 * First remove the names from the index: we won't commit
 	 * the index unless all of them succeed.
 	 */
-	for (i = 0; i < list.nr; i++) {
-		const char *path = list.entry[i].name;
-		if (!quiet)
+	प्रति (i = 0; i < list.nr; i++) {
+		ध्रुव वर्ण *path = list.entry[i].name;
+		यदि (!quiet)
 			printf("rm '%s'\n", path);
 
-		if (remove_file_from_index(the_repository->index, path))
+		यदि (remove_file_from_index(the_repository->index, path))
 			die(_("git rm: unable to remove %s"), path);
 	}
 
-	if (show_only)
-		return 0;
+	यदि (show_only)
+		प्रत्यागम 0;
 
 	/*
 	 * Then, unless we used "--cached", remove the filenames from
@@ -410,38 +410,38 @@ int cmd_rm(int argc,
 	 * by then we've already committed ourselves and can't fail
 	 * in the middle)
 	 */
-	if (!index_only) {
-		int removed = 0, gitmodules_modified = 0;
-		struct strbuf buf = STRBUF_INIT;
-		int flag = force ? REMOVE_DIR_PURGE_ORIGINAL_CWD : 0;
-		for (i = 0; i < list.nr; i++) {
-			const char *path = list.entry[i].name;
-			if (list.entry[i].is_submodule) {
+	यदि (!index_only) {
+		पूर्णाङ्क removed = 0, gitmodules_modified = 0;
+		संरचना strbuf buf = STRBUF_INIT;
+		पूर्णाङ्क flag = force ? REMOVE_DIR_PURGE_ORIGINAL_CWD : 0;
+		प्रति (i = 0; i < list.nr; i++) {
+			ध्रुव वर्ण *path = list.entry[i].name;
+			यदि (list.entry[i].is_submodule) {
 				strbuf_reset(&buf);
 				strbuf_addstr(&buf, path);
-				if (remove_dir_recursively(&buf, flag))
+				यदि (remove_dir_recursively(&buf, flag))
 					die(_("could not remove '%s'"), path);
 
 				removed = 1;
-				if (!remove_path_from_gitmodules(path))
+				यदि (!remove_path_from_gitmodules(path))
 					gitmodules_modified = 1;
-				continue;
+				अनुवर्त;
 			}
-			if (!remove_path(path)) {
+			यदि (!remove_path(path)) {
 				removed = 1;
-				continue;
+				अनुवर्त;
 			}
-			if (!removed)
+			यदि (!removed)
 				die_errno("git rm: '%s'", path);
 		}
 		strbuf_release(&buf);
-		if (gitmodules_modified)
+		यदि (gitmodules_modified)
 			stage_updated_gitmodules(the_repository->index);
 	}
 
-	if (write_locked_index(the_repository->index, &lock_file,
+	यदि (write_locked_index(the_repository->index, &lock_file,
 			       COMMIT_LOCK | SKIP_IF_UNCHANGED))
 		die(_("Unable to write new index file"));
 
-	return ret;
+	प्रत्यागम ret;
 }
