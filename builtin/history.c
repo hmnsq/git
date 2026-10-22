@@ -1,33 +1,33 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "cache-tree.h"
-#include "commit.h"
-#include "commit-reach.h"
-#include "config.h"
-#include "editor.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "lockfile.h"
-#include "merge-ort.h"
-#include "oidmap.h"
-#include "parse-options.h"
-#include "path.h"
-#include "read-cache.h"
-#include "refs.h"
-#include "ref-filter.h"
-#include "replay.h"
-#include "reset.h"
-#include "revision.h"
-#include "sequencer.h"
-#include "string-list.h"
-#include "strvec.h"
-#include "tree.h"
-#include "tree-walk.h"
-#include "unpack-trees.h"
-#include "wt-status.h"
+#ضمن "builtin.h"
+#ضمن "advice.h"
+#ضمن "cache-tree.h"
+#ضمن "commit.h"
+#ضمن "commit-reach.h"
+#ضمن "config.h"
+#ضمن "editor.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "hex.h"
+#ضمن "lockfile.h"
+#ضمن "merge-ort.h"
+#ضمن "oidmap.h"
+#ضمن "parse-options.h"
+#ضمن "path.h"
+#ضمن "read-cache.h"
+#ضمن "refs.h"
+#ضمن "ref-filter.h"
+#ضمن "replay.h"
+#ضمن "reset.h"
+#ضمن "revision.h"
+#ضمن "sequencer.h"
+#ضمن "string-list.h"
+#ضمن "strvec.h"
+#ضمن "tree.h"
+#ضمن "tree-walk.h"
+#ضمن "unpack-trees.h"
+#ضمن "wt-status.h"
 
 #define GIT_HISTORY_DROP_USAGE \
 	N_("git history drop <commit> [--dry-run] [--update-refs=(branches|head)] [--empty=(drop|keep|abort)]")
@@ -40,26 +40,26 @@
 #define GIT_HISTORY_SQUASH_USAGE \
 	N_("git history squash [--dry-run] [--update-refs=(branches|head)] [--[no-]edit] <revision-range>")
 
-static void change_data_free(void *util, const char *str UNUSED)
+ساكن فراغ change_data_free(فراغ *util, ثابت حرف *str UNUSED)
 {
-	struct wt_status_change_data *d = util;
-	free(d->rename_source);
-	free(d);
+	بنية wt_status_change_data *d = util;
+	حرر(d->rename_source);
+	حرر(d);
 }
 
-static int fill_commit_message(struct repository *repo,
-			       const struct object_id *old_tree,
-			       const struct object_id *new_tree,
-			       const char *default_message,
-			       const char *action,
-			       struct strbuf *out)
+ساكن صحيح fill_commit_message(بنية repository *repo,
+			       ثابت بنية object_id *old_tree,
+			       ثابت بنية object_id *new_tree,
+			       ثابت حرف *default_message,
+			       ثابت حرف *action,
+			       بنية strbuf *out)
 {
-	const char *path = git_path_commit_editmsg();
-	const char *hint =
+	ثابت حرف *path = git_path_commit_editmsg();
+	ثابت حرف *hint =
 		_("Please enter the commit message for the %s changes."
 		  " Lines starting\nwith '%s' will be ignored, and an"
 		  " empty message aborts the commit.\n");
-	struct wt_status s;
+	بنية wt_status s;
 
 	wt_status_prepare(repo, &s);
 	FREE_AND_NULL(s.branch);
@@ -73,85 +73,85 @@ static int fill_commit_message(struct repository *repo,
 	s.committable = 1;
 
 	s.fp = fopen(path, "w");
-	if (!s.fp)
-		return error_errno(_("could not open '%s'"), path);
+	𐤀𐤌 (!s.fp)
+		أرجع error_errno(_("could not open '%s'"), path);
 
 	strbuf_addstr(out, default_message);
 	strbuf_addch(out, '\n');
 	strbuf_commented_addf(out, comment_line_str, hint, action, comment_line_str);
-	if (fwrite(out->buf, 1, out->len, s.fp) != out->len)
+	𐤀𐤌 (fwrite(out->buf, 1, out->len, s.fp) != out->len)
 		die_errno(_("could not write to '%s'"), path);
 
 	wt_status_collect_changes_trees(&s, old_tree, new_tree);
 	wt_status_print(&s);
 	wt_status_collect_free_buffers(&s);
 	string_list_clear_func(&s.change, change_data_free);
-	if (fclose(s.fp))
+	𐤀𐤌 (fclose(s.fp))
 		die_errno(_("could not write to '%s'"), path);
 
 	strbuf_reset(out);
-	if (launch_editor(path, out, NULL)) {
+	𐤀𐤌 (launch_editor(path, out, عدم)) {
 		fprintf(stderr, _("Aborting commit as launching the editor failed.\n"));
-		return -1;
+		أرجع -1;
 	}
 	strbuf_stripspace(out, comment_line_str);
 
 	cleanup_message(out, COMMIT_MSG_CLEANUP_ALL, 0);
 
-	if (!out->len) {
+	𐤀𐤌 (!out->len) {
 		fprintf(stderr, _("Aborting commit due to empty commit message.\n"));
-		return -1;
+		أرجع -1;
 	}
 
-	return 0;
+	أرجع 0;
 }
 
-enum commit_tree_flags {
+تعداد commit_tree_flags {
 	COMMIT_TREE_EDIT_MESSAGE = (1 << 0),
 };
 
-static int commit_tree_ext(struct repository *repo,
-			   const char *action,
-			   struct commit *commit_with_message,
-			   const char *message_template,
-			   const struct commit_list *parents,
-			   const struct object_id *old_tree,
-			   const struct object_id *new_tree,
-			   struct commit **out,
-			   enum commit_tree_flags flags)
+ساكن صحيح commit_tree_ext(بنية repository *repo,
+			   ثابت حرف *action,
+			   بنية commit *commit_with_message,
+			   ثابت حرف *message_template,
+			   ثابت بنية commit_list *parents,
+			   ثابت بنية object_id *old_tree,
+			   ثابت بنية object_id *new_tree,
+			   بنية commit **out,
+			   تعداد commit_tree_flags flags)
 {
-	const char *exclude_gpgsig[] = {
+	ثابت حرف *exclude_gpgsig[] = {
 		/* We reencode the message, so the encoding needs to be stripped. */
 		"encoding",
 		/* We need to strip signatures as those will become invalid. */
 		"gpgsig",
 		"gpgsig-sha256",
-		NULL,
+		عدم,
 	};
-	const char *original_message, *original_body, *ptr;
-	struct commit_extra_header *original_extra_headers = NULL;
-	struct strbuf commit_message = STRBUF_INIT;
-	struct object_id rewritten_commit_oid;
-	char *original_author = NULL;
+	ثابت حرف *original_message, *original_body, *ptr;
+	بنية commit_extra_header *original_extra_headers = عدم;
+	بنية strbuf commit_message = STRBUF_INIT;
+	بنية object_id rewritten_commit_oid;
+	حرف *original_author = عدم;
 	size_t len;
-	int ret;
+	صحيح ret;
 
 	/* We retain authorship of the original commit. */
-	original_message = repo_logmsg_reencode(repo, commit_with_message, NULL, NULL);
+	original_message = repo_logmsg_reencode(repo, commit_with_message, عدم, عدم);
 	ptr = find_commit_header(original_message, "author", &len);
-	if (ptr)
+	𐤀𐤌 (ptr)
 		original_author = xmemdupz(ptr, len);
 	find_commit_subject(original_message, &original_body);
 
-	if (!message_template)
+	𐤀𐤌 (!message_template)
 		message_template = original_body;
 
-	if (flags & COMMIT_TREE_EDIT_MESSAGE) {
+	𐤀𐤌 (flags & COMMIT_TREE_EDIT_MESSAGE) {
 		ret = fill_commit_message(repo, old_tree, new_tree,
 					  message_template, action, &commit_message);
-		if (ret < 0)
-			goto out;
-	} else {
+		𐤀𐤌 (ret < 0)
+			اذهب out;
+	} وإلا {
 		strbuf_addstr(&commit_message, message_template);
 	}
 
@@ -160,103 +160,103 @@ static int commit_tree_ext(struct repository *repo,
 
 	ret = commit_tree_extended(commit_message.buf, commit_message.len, new_tree,
 				   parents, &rewritten_commit_oid, original_author,
-				   NULL, NULL, original_extra_headers);
-	if (ret < 0)
-		goto out;
+				   عدم, عدم, original_extra_headers);
+	𐤀𐤌 (ret < 0)
+		اذهب out;
 
 	*out = lookup_commit_or_die(&rewritten_commit_oid, "rewritten commit");
 
 out:
 	free_commit_extra_headers(original_extra_headers);
 	strbuf_release(&commit_message);
-	free(original_author);
+	حرر(original_author);
 	repo_unuse_commit_buffer(repo, commit_with_message, original_message);
-	return ret;
+	أرجع ret;
 }
 
-static int first_parent_tree_oid(struct repository *repo,
-				 struct commit *commit,
-				 struct object_id *out)
+ساكن صحيح first_parent_tree_oid(بنية repository *repo,
+				 بنية commit *commit,
+				 بنية object_id *out)
 {
-	struct commit *parent = commit->parents ? commit->parents->item : NULL;
+	بنية commit *parent = commit->parents ? commit->parents->item : عدم;
 
-	if (!parent) {
+	𐤀𐤌 (!parent) {
 		oidcpy(out, repo->hash_algo->empty_tree);
-		return 0;
+		أرجع 0;
 	}
 
-	if (repo_parse_commit(repo, parent))
-		return error(_("unable to parse parent commit %s"),
+	𐤀𐤌 (repo_parse_commit(repo, parent))
+		أرجع error(_("unable to parse parent commit %s"),
 			     oid_to_hex(&parent->object.oid));
 
 	oidcpy(out, &repo_get_commit_tree(repo, parent)->object.oid);
-	return 0;
+	أرجع 0;
 }
 
-static int commit_tree_with_edited_message(struct repository *repo,
-					   const char *action,
-					   struct commit *original,
-					   struct commit **out)
+ساكن صحيح commit_tree_with_edited_message(بنية repository *repo,
+					   ثابت حرف *action,
+					   بنية commit *original,
+					   بنية commit **out)
 {
-	struct object_id parent_tree_oid;
-	const struct object_id *tree_oid;
+	بنية object_id parent_tree_oid;
+	ثابت بنية object_id *tree_oid;
 
 	tree_oid = &repo_get_commit_tree(repo, original)->object.oid;
 
-	if (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0)
-		return -1;
+	𐤀𐤌 (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0)
+		أرجع -1;
 
-	return commit_tree_ext(repo, action, original, NULL, original->parents,
+	أرجع commit_tree_ext(repo, action, original, عدم, original->parents,
 			       &parent_tree_oid, tree_oid, out, COMMIT_TREE_EDIT_MESSAGE);
 }
 
-enum ref_action {
+تعداد ref_action {
 	REF_ACTION_DEFAULT,
 	REF_ACTION_BRANCHES,
 	REF_ACTION_HEAD,
 };
 
-static int parse_ref_action(const struct option *opt, const char *value, int unset)
+ساكن صحيح parse_ref_action(ثابت بنية option *opt, ثابت حرف *value, صحيح unset)
 {
-	enum ref_action *action = opt->value;
+	تعداد ref_action *action = opt->value;
 
 	BUG_ON_OPT_NEG_NOARG(unset, value);
-	if (!strcmp(value, "branches")) {
+	𐤀𐤌 (!strcmp(value, "branches")) {
 		*action = REF_ACTION_BRANCHES;
-	} else if (!strcmp(value, "head")) {
+	} وإلا 𐤀𐤌 (!strcmp(value, "head")) {
 		*action = REF_ACTION_HEAD;
-	} else {
-		return error(_("%s expects one of 'branches' or 'head'"),
+	} وإلا {
+		أرجع error(_("%s expects one of 'branches' or 'head'"),
 			     opt->long_name);
 	}
 
-	return 0;
+	أرجع 0;
 }
 
-static int revwalk_contains_merges(struct repository *repo,
-				   const struct strvec *revwalk_args)
+ساكن صحيح revwalk_contains_merges(بنية repository *repo,
+				   ثابت بنية strvec *revwalk_args)
 {
-	struct strvec args = STRVEC_INIT;
-	struct rev_info revs;
-	int ret;
+	بنية strvec args = STRVEC_INIT;
+	بنية rev_info revs;
+	صحيح ret;
 
 	strvec_pushv(&args, revwalk_args->v);
 	strvec_push(&args, "--min-parents=2");
 
-	repo_init_revisions(repo, &revs, NULL);
+	repo_init_revisions(repo, &revs, عدم);
 
-	setup_revisions_from_strvec(&args, &revs, NULL);
-	if (args.nr != 1)
+	setup_revisions_from_strvec(&args, &revs, عدم);
+	𐤀𐤌 (args.nr != 1)
 		BUG("revisions were set up with invalid argument");
 
-	if (prepare_revision_walk(&revs) < 0) {
+	𐤀𐤌 (prepare_revision_walk(&revs) < 0) {
 		ret = error(_("error preparing revisions"));
-		goto out;
+		اذهب out;
 	}
 
-	if (get_revision(&revs)) {
+	𐤀𐤌 (get_revision(&revs)) {
 		ret = error(_("replaying merge commits is not supported yet!"));
-		goto out;
+		اذهب out;
 	}
 
 	reset_revision_walk();
@@ -265,18 +265,18 @@ static int revwalk_contains_merges(struct repository *repo,
 out:
 	release_revisions(&revs);
 	strvec_clear(&args);
-	return ret;
+	أرجع ret;
 }
 
-static int setup_revwalk(struct repository *repo,
-			 enum ref_action action,
-			 struct commit *original,
-			 struct rev_info *revs)
+ساكن صحيح setup_revwalk(بنية repository *repo,
+			 تعداد ref_action action,
+			 بنية commit *original,
+			 بنية rev_info *revs)
 {
-	struct strvec args = STRVEC_INIT;
-	int ret;
+	بنية strvec args = STRVEC_INIT;
+	صحيح ret;
 
-	repo_init_revisions(repo, revs, NULL);
+	repo_init_revisions(repo, revs, عدم);
 	strvec_push(&args, "ignored");
 	strvec_push(&args, "--reverse");
 	strvec_push(&args, "--topo-order");
@@ -298,94 +298,94 @@ static int setup_revwalk(struct repository *repo,
 	 * update it. Otherwise we'll update (or print) all descendant
 	 * branches.
 	 */
-	if (action == REF_ACTION_HEAD) {
-		struct commit_list *from_list = NULL;
-		struct commit *head;
+	𐤀𐤌 (action == REF_ACTION_HEAD) {
+		بنية commit_list *from_list = عدم;
+		بنية commit *head;
 
 		head = lookup_commit_reference_by_name("HEAD");
-		if (!head) {
+		𐤀𐤌 (!head) {
 			ret = error(_("cannot look up HEAD"));
-			goto out;
+			اذهب out;
 		}
 
 		commit_list_insert(original, &from_list);
 		ret = repo_is_descendant_of(repo, head, from_list);
 		commit_list_free(from_list);
 
-		if (ret < 0) {
+		𐤀𐤌 (ret < 0) {
 			ret = error(_("cannot determine descendance"));
-			goto out;
-		} else if (!ret) {
+			اذهب out;
+		} وإلا 𐤀𐤌 (!ret) {
 			ret = error(_("rewritten commit must be an ancestor "
 				      "of HEAD when using --update-refs=head"));
-			goto out;
+			اذهب out;
 		}
 
 		strvec_push(&args, "HEAD");
-	} else {
+	} وإلا {
 		strvec_push(&args, "--branches");
 		strvec_push(&args, "HEAD");
 	}
 
 	ret = revwalk_contains_merges(repo, &args);
-	if (ret < 0)
-		goto out;
+	𐤀𐤌 (ret < 0)
+		اذهب out;
 
-	setup_revisions_from_strvec(&args, revs, NULL);
-	if (args.nr != 1)
+	setup_revisions_from_strvec(&args, revs, عدم);
+	𐤀𐤌 (args.nr != 1)
 		BUG("revisions were set up with invalid argument");
 
 	ret = 0;
 
 out:
 	strvec_clear(&args);
-	return ret;
+	أرجع ret;
 }
 
-static int handle_ref_update(struct ref_transaction *transaction,
-			     const char *refname,
-			     const struct object_id *new_oid,
-			     const struct object_id *old_oid,
-			     const char *reflog_msg,
-			     struct strbuf *err)
+ساكن صحيح handle_ref_update(بنية ref_transaction *transaction,
+			     ثابت حرف *refname,
+			     ثابت بنية object_id *new_oid,
+			     ثابت بنية object_id *old_oid,
+			     ثابت حرف *reflog_msg,
+			     بنية strbuf *err)
 {
-	if (!transaction) {
+	𐤀𐤌 (!transaction) {
 		printf("update %s %s %s\n",
 		       refname, oid_to_hex(new_oid), oid_to_hex(old_oid));
-		return 0;
+		أرجع 0;
 	}
 
-	return ref_transaction_update(transaction, refname, new_oid, old_oid,
-				      NULL, NULL, 0, reflog_msg, err);
+	أرجع ref_transaction_update(transaction, refname, new_oid, old_oid,
+				      عدم, عدم, 0, reflog_msg, err);
 }
 
-static int compute_pending_ref_updates(struct rev_info *revs,
-				       enum ref_action action,
-				       struct commit *original,
-				       struct commit *rewritten,
-				       enum replay_empty_commit_action empty,
-				       struct replay_result *result)
+ساكن صحيح compute_pending_ref_updates(بنية rev_info *revs,
+				       تعداد ref_action action,
+				       بنية commit *original,
+				       بنية commit *rewritten,
+				       تعداد replay_empty_commit_action empty,
+				       بنية replay_result *result)
 {
-	const struct name_decoration *decoration;
-	struct replay_revisions_options opts = {
+	ثابت بنية name_decoration *decoration;
+	بنية replay_revisions_options opts = {
 		.empty = empty,
 	};
-	char hex[GIT_MAX_HEXSZ + 1];
+	حرف hex[GIT_MAX_HEXSZ + 1];
 	bool detached_head;
-	int head_flags = 0;
-	int ret;
+	صحيح head_flags = 0;
+	صحيح ret;
 
 	refs_read_ref_full(get_main_ref_store(revs->repo), "HEAD",
-			   RESOLVE_REF_NO_RECURSE, NULL, &head_flags);
+			   RESOLVE_REF_NO_RECURSE, عدم, &head_flags);
 	detached_head = !(head_flags & REF_ISSYMREF);
 
 	opts.onto = oid_to_hex_r(hex, &rewritten->object.oid);
 
 	ret = replay_revisions(revs, &opts, result);
-	if (ret)
-		return ret;
+	𐤀𐤌 (ret)
+		أرجع ret;
 
-	if (action != REF_ACTION_BRANCHES && action != REF_ACTION_HEAD)
+	𐤀𐤌 (action != REF_ACTION_BRANCHES && action != REF_ACTION_HEAD)
 		BUG("unsupported ref action %d", action);
 
 	/*
@@ -393,70 +393,70 @@ static int compute_pending_ref_updates(struct rev_info *revs,
 	 * ancestors of `rewritten`, so we need to manually
 	 * handle updating references that point to `original`.
 	 */
-	for (decoration = get_name_decoration(&original->object);
+	لكل (decoration = get_name_decoration(&original->object);
 	     decoration;
 	     decoration = decoration->next)
 	{
-		if (decoration->type != DECORATION_REF_LOCAL &&
+		𐤀𐤌 (decoration->type != DECORATION_REF_LOCAL &&
 		    decoration->type != DECORATION_REF_HEAD)
-			continue;
+			استمر;
 
-		if (action == REF_ACTION_HEAD &&
+		𐤀𐤌 (action == REF_ACTION_HEAD &&
 		    decoration->type != DECORATION_REF_HEAD)
-			continue;
+			استمر;
 
 		/*
 		 * We only need to update HEAD separately in case it's
 		 * detached. If it's not we'd already update the branch
 		 * it is pointing to.
 		 */
-		if (action == REF_ACTION_BRANCHES &&
+		𐤀𐤌 (action == REF_ACTION_BRANCHES &&
 		    decoration->type == DECORATION_REF_HEAD &&
 		    !detached_head)
-			continue;
+			استمر;
 
 		replay_result_queue_update(result, decoration->name,
 					   &original->object.oid,
 					   &rewritten->object.oid);
 	}
 
-	return 0;
+	أرجع 0;
 }
 
-static int apply_pending_ref_updates(struct repository *repo,
-				     const struct replay_result *result,
-				     const char *reflog_msg,
-				     int dry_run)
+ساكن صحيح apply_pending_ref_updates(بنية repository *repo,
+				     ثابت بنية replay_result *result,
+				     ثابت حرف *reflog_msg,
+				     صحيح dry_run)
 {
-	struct ref_transaction *transaction = NULL;
-	struct strbuf err = STRBUF_INIT;
-	int ret;
+	بنية ref_transaction *transaction = عدم;
+	بنية strbuf err = STRBUF_INIT;
+	صحيح ret;
 
-	if (!dry_run) {
+	𐤀𐤌 (!dry_run) {
 		transaction = ref_store_transaction_begin(get_main_ref_store(repo),
 							  0, &err);
-		if (!transaction) {
+		𐤀𐤌 (!transaction) {
 			ret = error(_("failed to begin ref transaction: %s"), err.buf);
-			goto out;
+			اذهب out;
 		}
 	}
 
-	for (size_t i = 0; i < result->updates_nr; i++) {
+	لكل (size_t i = 0; i < result->updates_nr; i++) {
 		ret = handle_ref_update(transaction,
 					result->updates[i].refname,
 					&result->updates[i].new_oid,
 					&result->updates[i].old_oid,
 					reflog_msg, &err);
-		if (ret) {
+		𐤀𐤌 (ret) {
 			ret = error(_("failed to update ref '%s': %s"),
 				    result->updates[i].refname, err.buf);
-			goto out;
+			اذهب out;
 		}
 	}
 
-	if (transaction && ref_transaction_commit(transaction, &err)) {
+	𐤀𐤌 (transaction && ref_transaction_commit(transaction, &err)) {
 		ret = error(_("failed to commit ref transaction: %s"), err.buf);
-		goto out;
+		اذهب out;
 	}
 
 	ret = 0;
@@ -464,77 +464,77 @@ static int apply_pending_ref_updates(struct repository *repo,
 out:
 	ref_transaction_free(transaction);
 	strbuf_release(&err);
-	return ret;
+	أرجع ret;
 }
 
-static int handle_reference_updates(struct rev_info *revs,
-				    enum ref_action action,
-				    struct commit *original,
-				    struct commit *rewritten,
-				    const char *reflog_msg,
-				    int dry_run,
-				    enum replay_empty_commit_action empty)
+ساكن صحيح handle_reference_updates(بنية rev_info *revs,
+				    تعداد ref_action action,
+				    بنية commit *original,
+				    بنية commit *rewritten,
+				    ثابت حرف *reflog_msg,
+				    صحيح dry_run,
+				    تعداد replay_empty_commit_action empty)
 {
-	struct replay_result result = { 0 };
-	int ret;
+	بنية replay_result result = { 0 };
+	صحيح ret;
 
 	ret = compute_pending_ref_updates(revs, action, original, rewritten,
 					  empty, &result);
-	if (ret)
-		goto out;
+	𐤀𐤌 (ret)
+		اذهب out;
 
 	ret = apply_pending_ref_updates(revs->repo, &result, reflog_msg, dry_run);
 
 out:
 	replay_result_release(&result);
-	return ret;
+	أرجع ret;
 }
 
-static int commit_became_empty(struct repository *repo,
-			       struct commit *original,
-			       struct tree *result)
+ساكن صحيح commit_became_empty(بنية repository *repo,
+			       بنية commit *original,
+			       بنية tree *result)
 {
-	struct object_id parent_tree_oid;
+	بنية object_id parent_tree_oid;
 
-	if (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0)
-		return -1;
+	𐤀𐤌 (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0)
+		أرجع -1;
 
-	return oideq(&result->object.oid, &parent_tree_oid);
+	أرجع oideq(&result->object.oid, &parent_tree_oid);
 }
 
-static int parse_opt_empty(const struct option *opt, const char *arg, int unset)
+ساكن صحيح parse_opt_empty(ثابت بنية option *opt, ثابت حرف *arg, صحيح unset)
 {
-	enum replay_empty_commit_action *value = opt->value;
+	تعداد replay_empty_commit_action *value = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!strcmp(arg, "drop"))
+	𐤀𐤌 (!strcmp(arg, "drop"))
 		*value = REPLAY_EMPTY_COMMIT_DROP;
-	else if (!strcmp(arg, "keep"))
+	وإلا 𐤀𐤌 (!strcmp(arg, "keep"))
 		*value = REPLAY_EMPTY_COMMIT_KEEP;
-	else if (!strcmp(arg, "abort"))
+	وإلا 𐤀𐤌 (!strcmp(arg, "abort"))
 		*value = REPLAY_EMPTY_COMMIT_ABORT;
-	else
+	وإلا
 		die(_("unrecognized '--empty=' action '%s'; "
 		      "valid values are \"drop\", \"keep\", and \"abort\"."), arg);
 
-	return 0;
+	أرجع 0;
 }
 
-static int cmd_history_fixup(int argc,
-			     const char **argv,
-			     const char *prefix,
-			     struct repository *repo)
+ساكن صحيح cmd_history_fixup(صحيح argc,
+			     ثابت حرف **argv,
+			     ثابت حرف *prefix,
+			     بنية repository *repo)
 {
-	const char * const usage[] = {
+	ثابت حرف * ثابت usage[] = {
 		GIT_HISTORY_FIXUP_USAGE,
-		NULL,
+		عدم,
 	};
-	enum replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
-	enum ref_action action = REF_ACTION_DEFAULT;
-	enum commit_tree_flags flags = 0;
-	int dry_run = 0;
-	struct option options[] = {
+	تعداد replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
+	تعداد ref_action action = REF_ACTION_DEFAULT;
+	تعداد commit_tree_flags flags = 0;
+	صحيح dry_run = 0;
+	بنية option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -548,35 +548,35 @@ static int cmd_history_fixup(int argc,
 			       PARSE_OPT_NONEG, parse_opt_empty),
 		OPT_END(),
 	};
-	struct merge_result merge_result = { 0 };
-	struct merge_options merge_opts = { 0 };
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *head_commit, *original, *rewritten;
-	struct tree *head_tree, *original_tree, *index_tree;
-	struct rev_info revs = { 0 };
+	بنية merge_result merge_result = { 0 };
+	بنية merge_options merge_opts = { 0 };
+	بنية strbuf reflog_msg = STRBUF_INIT;
+	بنية commit *head_commit, *original, *rewritten;
+	بنية tree *head_tree, *original_tree, *index_tree;
+	بنية rev_info revs = { 0 };
 	bool skip_commit = false;
-	int ret;
+	صحيح ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1) {
+	𐤀𐤌 (argc != 1) {
 		ret = error(_("command expects a single revision"));
-		goto out;
+		اذهب out;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, عدم);
 
-	if (action == REF_ACTION_DEFAULT)
+	𐤀𐤌 (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
-	if (is_bare_repository(repo)) {
+	𐤀𐤌 (is_bare_repository(repo)) {
 		ret = error(_("cannot run fixup in a bare repository"));
-		goto out;
+		اذهب out;
 	}
 
 	/* Resolve the original commit, which is the one we want to fix up. */
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	𐤀𐤌 (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
-		goto out;
+		اذهب out;
 	}
 
 	/*
@@ -584,25 +584,25 @@ static int cmd_history_fixup(int argc,
 	 * changes are expressed as a diff from HEAD's tree to the index tree.
 	 */
 	head_commit = lookup_commit_reference_by_name("HEAD");
-	if (!head_commit) {
+	𐤀𐤌 (!head_commit) {
 		ret = error(_("cannot look up HEAD"));
-		goto out;
+		اذهب out;
 	}
 
 	head_tree = repo_get_commit_tree(repo, head_commit);
-	if (!head_tree) {
+	𐤀𐤌 (!head_tree) {
 		ret = error(_("cannot get tree for HEAD"));
-		goto out;
+		اذهب out;
 	}
 
-	if (repo_read_index(repo) < 0) {
+	𐤀𐤌 (repo_read_index(repo) < 0) {
 		ret = error(_("unable to read index"));
-		goto out;
+		اذهب out;
 	}
 
-	if (!repo_index_has_changes(repo, head_tree, NULL)) {
+	𐤀𐤌 (!repo_index_has_changes(repo, head_tree, عدم)) {
 		ret = error(_("nothing to fixup: no staged changes"));
-		goto out;
+		اذهب out;
 	}
 
 	/*
@@ -610,15 +610,15 @@ static int cmd_history_fixup(int argc,
 	 * three-way merge: it is HEAD's tree with the staged changes applied.
 	 */
 	index_tree = write_in_core_index_as_tree(repo, repo->index);
-	if (!index_tree) {
+	𐤀𐤌 (!index_tree) {
 		ret = error(_("unable to write index as a tree"));
-		goto out;
+		اذهب out;
 	}
 
 	original_tree = repo_get_commit_tree(repo, original);
-	if (!original_tree) {
+	𐤀𐤌 (!original_tree) {
 		ret = error(_("cannot get tree for commit %s"), argv[0]);
-		goto out;
+		اذهب out;
 	}
 
 	/*
@@ -634,27 +634,27 @@ static int cmd_history_fixup(int argc,
 	merge_incore_nonrecursive(&merge_opts, head_tree,
 				  original_tree, index_tree, &merge_result);
 
-	if (merge_result.clean < 0) {
+	𐤀𐤌 (merge_result.clean < 0) {
 		ret = error(_("merge failed while applying fixup"));
-		goto out;
+		اذهب out;
 	}
 
-	if (!merge_result.clean) {
+	𐤀𐤌 (!merge_result.clean) {
 		ret = error(_("fixup would produce conflicts; aborting"));
-		goto out;
+		اذهب out;
 	}
 
 	ret = commit_became_empty(repo, original, merge_result.tree);
-	if (ret < 0)
-		goto out;
-	if (ret > 0) {
-		switch (empty) {
-		case REPLAY_EMPTY_COMMIT_DROP:
+	𐤀𐤌 (ret < 0)
+		اذهب out;
+	𐤀𐤌 (ret > 0) {
+		بدل (empty) {
+		حالة REPLAY_EMPTY_COMMIT_DROP:
 			/*
 			 * Drop the target commit by replaying its descendants
 			 * directly onto its parent.
 			 */
-			rewritten = original->parents ? original->parents->item : NULL;
+			rewritten = original->parents ? original->parents->item : عدم;
 
 			/*
 			 * TODO: we don't yet have the ability to drop root
@@ -662,35 +662,35 @@ static int cmd_history_fixup(int argc,
 			 * this restriction to exist other than a technical
 			 * limitation.
 			 */
-			if (!rewritten) {
+			𐤀𐤌 (!rewritten) {
 				ret = error(_("cannot drop root commit %s: "
 					      "it has no parent to replay onto"),
 					    argv[0]);
-				goto out;
+				اذهب out;
 			}
 
 			skip_commit = true;
-			break;
-		case REPLAY_EMPTY_COMMIT_KEEP:
+			اكسر;
+		حالة REPLAY_EMPTY_COMMIT_KEEP:
 			/* Proceed and record the empty commit. */
-			break;
-		case REPLAY_EMPTY_COMMIT_ABORT:
+			اكسر;
+		حالة REPLAY_EMPTY_COMMIT_ABORT:
 			ret = error(_("fixup makes commit %s empty"), argv[0]);
-			goto out;
+			اذهب out;
 		}
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret)
-		goto out;
+	𐤀𐤌 (ret)
+		اذهب out;
 
-	if (!skip_commit) {
-		ret = commit_tree_ext(repo, "fixup", original, NULL, original->parents,
+	𐤀𐤌 (!skip_commit) {
+		ret = commit_tree_ext(repo, "fixup", original, عدم, original->parents,
 				      &original_tree->object.oid, &merge_result.tree->object.oid,
 				      &rewritten, flags);
-		if (ret < 0) {
+		𐤀𐤌 (ret < 0) {
 			ret = error(_("failed writing fixed-up commit"));
-			goto out;
+			اذهب out;
 		}
 	}
 
@@ -698,9 +698,9 @@ static int cmd_history_fixup(int argc,
 
 	ret = handle_reference_updates(&revs, action, original, rewritten,
 				       reflog_msg.buf, dry_run, empty);
-	if (ret < 0) {
+	𐤀𐤌 (ret < 0) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		اذهب out;
 	}
 
 	ret = 0;
@@ -709,21 +709,21 @@ out:
 	merge_finalize(&merge_opts, &merge_result);
 	strbuf_release(&reflog_msg);
 	release_revisions(&revs);
-	return ret;
+	أرجع ret;
 }
 
-static int cmd_history_reword(int argc,
-			      const char **argv,
-			      const char *prefix,
-			      struct repository *repo)
+ساكن صحيح cmd_history_reword(صحيح argc,
+			      ثابت حرف **argv,
+			      ثابت حرف *prefix,
+			      بنية repository *repo)
 {
-	const char * const usage[] = {
+	ثابت حرف * ثابت usage[] = {
 		GIT_HISTORY_REWORD_USAGE,
-		NULL,
+		عدم,
 	};
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	struct option options[] = {
+	تعداد ref_action action = REF_ACTION_DEFAULT;
+	صحيح dry_run = 0;
+	بنية option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -731,44 +731,44 @@ static int cmd_history_reword(int argc,
 			 N_("perform a dry-run without updating any refs")),
 		OPT_END(),
 	};
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *original, *rewritten;
-	struct rev_info revs = { 0 };
-	int ret;
+	بنية strbuf reflog_msg = STRBUF_INIT;
+	بنية commit *original, *rewritten;
+	بنية rev_info revs = { 0 };
+	صحيح ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1) {
+	𐤀𐤌 (argc != 1) {
 		ret = error(_("command expects a single revision"));
-		goto out;
+		اذهب out;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, عدم);
 
-	if (action == REF_ACTION_DEFAULT)
+	𐤀𐤌 (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	𐤀𐤌 (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
-		goto out;
+		اذهب out;
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret)
-		goto out;
+	𐤀𐤌 (ret)
+		اذهب out;
 
 	ret = commit_tree_with_edited_message(repo, "reworded", original, &rewritten);
-	if (ret < 0) {
+	𐤀𐤌 (ret < 0) {
 		ret = error(_("failed writing reworded commit"));
-		goto out;
+		اذهب out;
 	}
 
 	strbuf_addf(&reflog_msg, "reword: updating %s", argv[0]);
 
 	ret = handle_reference_updates(&revs, action, original, rewritten,
 				       reflog_msg.buf, dry_run, REPLAY_EMPTY_COMMIT_ABORT);
-	if (ret < 0) {
+	𐤀𐤌 (ret < 0) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		اذهب out;
 	}
 
 	ret = 0;
@@ -776,19 +776,19 @@ static int cmd_history_reword(int argc,
 out:
 	strbuf_release(&reflog_msg);
 	release_revisions(&revs);
-	return ret;
+	أرجع ret;
 }
 
-static int write_ondisk_index(struct repository *repo,
-			      struct object_id *oid,
-			      const char *path)
+ساكن صحيح write_ondisk_index(بنية repository *repo,
+			      بنية object_id *oid,
+			      ثابت حرف *path)
 {
-	struct unpack_trees_options opts = { 0 };
-	struct lock_file lock = LOCK_INIT;
-	struct tree_desc tree_desc;
-	struct index_state index;
-	struct tree *tree;
-	int ret;
+	بنية unpack_trees_options opts = { 0 };
+	بنية lock_file lock = LOCK_INIT;
+	بنية tree_desc tree_desc;
+	بنية index_state index;
+	بنية tree *tree;
+	صحيح ret;
 
 	index_state_init(&index, repo);
 
@@ -797,27 +797,27 @@ static int write_ondisk_index(struct repository *repo,
 	opts.dst_index = &index;
 
 	tree = repo_parse_tree_indirect(repo, oid);
-	if (!tree) {
+	𐤀𐤌 (!tree) {
 		ret = error(_("unable to parse tree %s"), oid_to_hex(oid));
-		goto out;
+		اذهب out;
 	}
 	init_tree_desc(&tree_desc, &tree->object.oid, tree->buffer, tree->size);
 
-	if (unpack_trees(1, &tree_desc, &opts)) {
+	𐤀𐤌 (unpack_trees(1, &tree_desc, &opts)) {
 		ret = error(_("unable to populate index with tree"));
-		goto out;
+		اذهب out;
 	}
 
 	prime_cache_tree(repo, &index, tree);
 
-	if (repo_hold_lock_file_for_update(repo, &lock, path, 0) < 0) {
+	𐤀𐤌 (repo_hold_lock_file_for_update(repo, &lock, path, 0) < 0) {
 		ret = error_errno(_("unable to acquire index lock"));
-		goto out;
+		اذهب out;
 	}
 
-	if (write_locked_index(&index, &lock, COMMIT_LOCK)) {
+	𐤀𐤌 (write_locked_index(&index, &lock, COMMIT_LOCK)) {
 		ret = error(_("unable to write new index file"));
-		goto out;
+		اذهب out;
 	}
 
 	ret = 0;
@@ -825,29 +825,29 @@ static int write_ondisk_index(struct repository *repo,
 out:
 	rollback_lock_file(&lock);
 	release_index(&index);
-	return ret;
+	أرجع ret;
 }
 
-static int split_commit(struct repository *repo,
-			struct commit *original,
-			struct pathspec *pathspec,
-			struct commit **out)
+ساكن صحيح split_commit(بنية repository *repo,
+			بنية commit *original,
+			بنية pathspec *pathspec,
+			بنية commit **out)
 {
-	struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-	struct strbuf index_file = STRBUF_INIT;
-	struct index_state index = INDEX_STATE_INIT(repo);
-	const struct object_id *original_commit_tree_oid;
-	const struct object_id *old_tree_oid, *new_tree_oid;
-	struct object_id parent_tree_oid;
-	char original_commit_oid[GIT_MAX_HEXSZ + 1];
-	struct commit *first_commit, *second_commit;
-	struct commit_list *parents = NULL;
-	struct tree *split_tree;
-	int ret;
+	بنية interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+	بنية strbuf index_file = STRBUF_INIT;
+	بنية index_state index = INDEX_STATE_INIT(repo);
+	ثابت بنية object_id *original_commit_tree_oid;
+	ثابت بنية object_id *old_tree_oid, *new_tree_oid;
+	بنية object_id parent_tree_oid;
+	حرف original_commit_oid[GIT_MAX_HEXSZ + 1];
+	بنية commit *first_commit, *second_commit;
+	بنية commit_list *parents = عدم;
+	بنية tree *split_tree;
+	صحيح ret;
 
-	if (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0) {
+	𐤀𐤌 (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0) {
 		ret = -1;
-		goto out;
+		اذهب out;
 	}
 	original_commit_tree_oid = get_commit_tree_oid(original);
 
@@ -859,25 +859,25 @@ static int split_commit(struct repository *repo,
 	repo_git_path_replace(repo, &index_file, "%s", "history-split.index");
 
 	ret = write_ondisk_index(repo, &parent_tree_oid, index_file.buf);
-	if (ret < 0)
-		goto out;
+	𐤀𐤌 (ret < 0)
+		اذهب out;
 
 	ret = read_index_from(&index, index_file.buf, repo->gitdir);
-	if (ret < 0) {
+	𐤀𐤌 (ret < 0) {
 		ret = error(_("failed reading temporary index"));
-		goto out;
+		اذهب out;
 	}
 
 	oid_to_hex_r(original_commit_oid, &original->object.oid);
 	ret = run_add_p_index(repo, &index, index_file.buf, &interactive_opts,
 			      original_commit_oid, pathspec, ADD_P_DISALLOW_EDIT);
-	if (ret < 0)
-		goto out;
+	𐤀𐤌 (ret < 0)
+		اذهب out;
 
 	split_tree = write_in_core_index_as_tree(repo, &index);
-	if (!split_tree) {
+	𐤀𐤌 (!split_tree) {
 		ret = error(_("failed split tree"));
-		goto out;
+		اذهب out;
 	}
 
 	unlink(index_file.buf);
@@ -888,23 +888,23 @@ static int split_commit(struct repository *repo,
 	 * original commit would become empty. Consequently, if we see that the
 	 * new tree ID matches either of those trees we abort.
 	 */
-	if (oideq(&split_tree->object.oid, &parent_tree_oid)) {
+	𐤀𐤌 (oideq(&split_tree->object.oid, &parent_tree_oid)) {
 		ret = error(_("split commit is empty"));
-		goto out;
-	} else if (oideq(&split_tree->object.oid, original_commit_tree_oid)) {
+		اذهب out;
+	} وإلا 𐤀𐤌 (oideq(&split_tree->object.oid, original_commit_tree_oid)) {
 		ret = error(_("split commit tree matches original commit"));
-		goto out;
+		اذهب out;
 	}
 
 	/*
 	 * The first commit is constructed from the split-out tree. The base
 	 * that shall be diffed against is the parent of the original commit.
 	 */
-	ret = commit_tree_ext(repo, "split-out", original, NULL, original->parents, &parent_tree_oid,
+	ret = commit_tree_ext(repo, "split-out", original, عدم, original->parents, &parent_tree_oid,
 			      &split_tree->object.oid, &first_commit, COMMIT_TREE_EDIT_MESSAGE);
-	if (ret < 0) {
+	𐤀𐤌 (ret < 0) {
 		ret = error(_("failed writing first commit"));
-		goto out;
+		اذهب out;
 	}
 
 	/*
@@ -917,37 +917,37 @@ static int split_commit(struct repository *repo,
 	old_tree_oid = &repo_get_commit_tree(repo, first_commit)->object.oid;
 	new_tree_oid = &repo_get_commit_tree(repo, original)->object.oid;
 
-	ret = commit_tree_ext(repo, "split-out", original, NULL, parents, old_tree_oid,
+	ret = commit_tree_ext(repo, "split-out", original, عدم, parents, old_tree_oid,
 			      new_tree_oid, &second_commit, COMMIT_TREE_EDIT_MESSAGE);
-	if (ret < 0) {
+	𐤀𐤌 (ret < 0) {
 		ret = error(_("failed writing second commit"));
-		goto out;
+		اذهب out;
 	}
 
 	*out = second_commit;
 	ret = 0;
 
 out:
-	if (index_file.len)
+	𐤀𐤌 (index_file.len)
 		unlink(index_file.buf);
 	strbuf_release(&index_file);
 	commit_list_free(parents);
 	release_index(&index);
-	return ret;
+	أرجع ret;
 }
 
-static int cmd_history_split(int argc,
-			     const char **argv,
-			     const char *prefix,
-			     struct repository *repo)
+ساكن صحيح cmd_history_split(صحيح argc,
+			     ثابت حرف **argv,
+			     ثابت حرف *prefix,
+			     بنية repository *repo)
 {
-	const char * const usage[] = {
+	ثابت حرف * ثابت usage[] = {
 		GIT_HISTORY_SPLIT_USAGE,
-		NULL,
+		عدم,
 	};
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	struct option options[] = {
+	تعداد ref_action action = REF_ACTION_DEFAULT;
+	صحيح dry_run = 0;
+	بنية option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control ref update behavior"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -955,20 +955,20 @@ static int cmd_history_split(int argc,
 			 N_("perform a dry-run without updating any refs")),
 		OPT_END(),
 	};
-	struct commit *original, *rewritten = NULL;
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct pathspec pathspec = { 0 };
-	struct rev_info revs = { 0 };
-	int ret;
+	بنية commit *original, *rewritten = عدم;
+	بنية strbuf reflog_msg = STRBUF_INIT;
+	بنية pathspec pathspec = { 0 };
+	بنية rev_info revs = { 0 };
+	صحيح ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc < 1) {
+	𐤀𐤌 (argc < 1) {
 		ret = error(_("command expects a committish"));
-		goto out;
+		اذهب out;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, عدم);
 
-	if (action == REF_ACTION_DEFAULT)
+	𐤀𐤌 (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	parse_pathspec(&pathspec, 0,
@@ -978,31 +978,31 @@ static int cmd_history_split(int argc,
 		       prefix, argv + 1);
 
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	𐤀𐤌 (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
-		goto out;
+		اذهب out;
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret < 0)
-		goto out;
+	𐤀𐤌 (ret < 0)
+		اذهب out;
 
-	if (original->parents && original->parents->next) {
+	𐤀𐤌 (original->parents && original->parents->next) {
 		ret = error(_("cannot split up merge commit"));
-		goto out;
+		اذهب out;
 	}
 
 	ret = split_commit(repo, original, &pathspec, &rewritten);
-	if (ret < 0)
-		goto out;
+	𐤀𐤌 (ret < 0)
+		اذهب out;
 
 	strbuf_addf(&reflog_msg, "split: updating %s", argv[0]);
 
 	ret = handle_reference_updates(&revs, action, original, rewritten,
 				       reflog_msg.buf, dry_run, REPLAY_EMPTY_COMMIT_ABORT);
-	if (ret < 0) {
+	𐤀𐤌 (ret < 0) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		اذهب out;
 	}
 
 	ret = 0;
@@ -1011,43 +1011,43 @@ out:
 	strbuf_release(&reflog_msg);
 	clear_pathspec(&pathspec);
 	release_revisions(&revs);
-	return ret;
+	أرجع ret;
 }
 
 #define SQUASH_SEEN (1u << 11)
 #define SQUASH_TIP (1u << 12)
 #define SQUASH_AMEND_TARGET (1u << 13)
 
-static bool is_autosquash_subject(const char *s)
+ساكن bool is_autosquash_subject(ثابت حرف *s)
 {
-	return starts_with(s, "amend!") || starts_with(s, "fixup!") ||
+	أرجع starts_with(s, "amend!") || starts_with(s, "fixup!") ||
 		starts_with(s, "squash!");
 }
 
-static bool skip_one_autosquash_prefix(const char *s, const char **out)
+ساكن bool skip_one_autosquash_prefix(ثابت حرف *s, ثابت حرف **out)
 {
-	if (skip_prefix(s, "amend!", out) || skip_prefix(s, "fixup!", out) ||
+	𐤀𐤌 (skip_prefix(s, "amend!", out) || skip_prefix(s, "fixup!", out) ||
 	    skip_prefix(s, "squash!", out)) {
-		while (**out == ' ')
+		طالما (**out == ' ')
 			(*out)++;
-		return true;
+		أرجع true;
 	}
-	return false;
+	أرجع false;
 }
 
-static void truncate_message_to_subject(struct strbuf *msg)
+ساكن فراغ truncate_message_to_subject(بنية strbuf *msg)
 {
-	const char *eos = strstr(msg->buf, "\n\n");
+	ثابت حرف *eos = strstr(msg->buf, "\n\n");
 
-	if (eos)
+	𐤀𐤌 (eos)
 		strbuf_setlen(msg, eos - msg->buf + 1);
 }
 
-struct subject_data {
-	struct strintmap subjects;
-	struct strbuf subject;
-	struct strbuf squash_message;
-	const char *message;
+بنية subject_data {
+	بنية strintmap subjects;
+	بنية strbuf subject;
+	بنية strbuf squash_message;
+	ثابت حرف *message;
 	bool edit_message;
 };
 
@@ -1057,85 +1057,85 @@ struct subject_data {
 	.squash_message = STRBUF_INIT,	\
 }
 
-static void subject_data_clear(struct subject_data *data)
+ساكن فراغ subject_data_clear(بنية subject_data *data)
 {
 	strintmap_clear(&data->subjects);
 	strbuf_release(&data->subject);
 	strbuf_release(&data->squash_message);
 }
 
-static int squash_amend_message(struct repository *repo,
-				struct commit *commit,
-				struct subject_data *data,
+ساكن صحيح squash_amend_message(بنية repository *repo,
+				بنية commit *commit,
+				بنية subject_data *data,
 				unsigned flags)
 {
-	const char *body = data->message + data->subject.len;
+	ثابت حرف *body = data->message + data->subject.len;
 
-	while (isspace(*body))
+	طالما (isspace(*body))
 		body++;
 
-	if (!*body) {
+	𐤀𐤌 (!*body) {
 		warning(_("ignoring %s (%s): message body is empty"),
 			repo_find_unique_abbrev(repo, &commit->object.oid,
 						DEFAULT_ABBREV),
 			data->subject.buf);
-		return 0;
+		أرجع 0;
 	}
 
-	if (data->edit_message) {
-		return 0;
-	} else if (flags & SQUASH_AMEND_TARGET) {
-		if (starts_with(data->squash_message.buf, "squash!"))
-			return error(_("squashing %s (%s) would overwrite "
+	𐤀𐤌 (data->edit_message) {
+		أرجع 0;
+	} وإلا 𐤀𐤌 (flags & SQUASH_AMEND_TARGET) {
+		𐤀𐤌 (starts_with(data->squash_message.buf, "squash!"))
+			أرجع error(_("squashing %s (%s) would overwrite "
 				       "'squash!' message, please combine them "
 				       "using '--edit'"),
 				     repo_find_unique_abbrev(repo,
 							     &commit->object.oid,
 							     DEFAULT_ABBREV),
 				     data->subject.buf);
-		if (starts_with(data->squash_message.buf, "fixup!"))
+		𐤀𐤌 (starts_with(data->squash_message.buf, "fixup!"))
 			strbuf_splice(&data->squash_message, 0, 5, "amend!", 5);
-		if (starts_with(data->squash_message.buf, "amend!")) {
+		𐤀𐤌 (starts_with(data->squash_message.buf, "amend!")) {
 			truncate_message_to_subject(&data->squash_message);
 			strbuf_addch(&data->squash_message, '\n');
-		} else {
+		} وإلا {
 			strbuf_reset(&data->squash_message);
 		}
 		strbuf_addstr(&data->squash_message, body);
 		strbuf_complete_line(&data->squash_message);
-	} else {
-		return error(_("cannot squash %s (%s) that does not target "
+	} وإلا {
+		أرجع error(_("cannot squash %s (%s) that does not target "
 			       "base commit without '--edit'"),
 			     repo_find_unique_abbrev(repo, &commit->object.oid,
 						     DEFAULT_ABBREV),
 			     data->subject.buf);
 	}
-	return 0;
+	أرجع 0;
 }
 
-static int squash_squash_message(struct repository *repo,
-				struct commit *commit,
-				struct subject_data *data,
+ساكن صحيح squash_squash_message(بنية repository *repo,
+				بنية commit *commit,
+				بنية subject_data *data,
 				unsigned flags)
 {
-	const char *body = data->message + data->subject.len;
+	ثابت حرف *body = data->message + data->subject.len;
 
-	while (isspace(*body))
+	طالما (isspace(*body))
 		body++;
 
-	if (data->edit_message) {
-		return 0;
-	} else if (flags & SQUASH_AMEND_TARGET) {
-		if (starts_with(data->squash_message.buf, "fixup!")) {
+	𐤀𐤌 (data->edit_message) {
+		أرجع 0;
+	} وإلا 𐤀𐤌 (flags & SQUASH_AMEND_TARGET) {
+		𐤀𐤌 (starts_with(data->squash_message.buf, "fixup!")) {
 			truncate_message_to_subject(&data->squash_message);
 			strbuf_splice(&data->squash_message, 0, 5, "squash", 6);
 		}
-		if (starts_with(data->squash_message.buf, "squash!")) {
+		𐤀𐤌 (starts_with(data->squash_message.buf, "squash!")) {
 			strbuf_addch(&data->squash_message, '\n');
 			strbuf_addstr(&data->squash_message, body);
 			strbuf_complete_line(&data->squash_message);
-		} else {
-			return error(_("squashing %s (%s) would discard its "
+		} وإلا {
+			أرجع error(_("squashing %s (%s) would discard its "
 				       "message, please combine them using "
 				       "'--edit'"),
 				     repo_find_unique_abbrev(repo,
@@ -1143,38 +1143,38 @@ static int squash_squash_message(struct repository *repo,
 							     DEFAULT_ABBREV),
 				     data->subject.buf);
 		}
-	} else {
-		return error(_("cannot squash %s (%s) that does not target "
+	} وإلا {
+		أرجع error(_("cannot squash %s (%s) that does not target "
 			       "base commit without '--edit'"),
 			      repo_find_unique_abbrev(repo, &commit->object.oid,
 						      DEFAULT_ABBREV),
 			      data->subject.buf);
 	}
-	return 0;
+	أرجع 0;
 }
 
-static int squash_check_can_autosquash(struct repository *repo,
-				       struct commit *commit,
-				       struct subject_data *data,
+ساكن صحيح squash_check_can_autosquash(بنية repository *repo,
+				       بنية commit *commit,
+				       بنية subject_data *data,
 				       unsigned flags)
 {
 	commit->object.flags |= flags & SQUASH_AMEND_TARGET;
-	if (starts_with(data->subject.buf, "amend!"))
-		return squash_amend_message(repo, commit, data, flags);
-	else if (starts_with(data->subject.buf, "squash!"))
-		return squash_squash_message(repo, commit, data, flags);
+	𐤀𐤌 (starts_with(data->subject.buf, "amend!"))
+		أرجع squash_amend_message(repo, commit, data, flags);
+	وإلا 𐤀𐤌 (starts_with(data->subject.buf, "squash!"))
+		أرجع squash_squash_message(repo, commit, data, flags);
 
-	return 0;
+	أرجع 0;
 }
 
-static int squash_check_autosquash_subject(struct repository *repo,
-					   struct commit *commit,
-					   struct subject_data *data)
+ساكن صحيح squash_check_autosquash_subject(بنية repository *repo,
+					   بنية commit *commit,
+					   بنية subject_data *data)
 {
-	const char* s = data->subject.buf;
-	struct commit *target;
-	struct hashmap_iter iter;
-	struct strmap_entry *entry;
+	ثابت حرف* s = data->subject.buf;
+	بنية commit *target;
+	بنية hashmap_iter iter;
+	بنية strmap_entry *entry;
 	/* Try skipping autosquash prefixes one at a time to allow
 	 * squashing
 	 *     a commit
@@ -1187,10 +1187,10 @@ static int squash_check_autosquash_subject(struct repository *repo,
 	 *
 	 * and squashed the first fixup separately from the second
 	 */
-	while (skip_one_autosquash_prefix(s, &s)) {
+	طالما (skip_one_autosquash_prefix(s, &s)) {
 		unsigned flags = strintmap_get(&data->subjects, s);
-		if (flags)
-			return squash_check_can_autosquash(repo, commit, data, flags);
+		𐤀𐤌 (flags)
+			أرجع squash_check_can_autosquash(repo, commit, data, flags);
 	}
 	/*
 	 * Allow "fixup! <hex object id>", but not "fixup! HEAD^" or
@@ -1199,57 +1199,57 @@ static int squash_check_autosquash_subject(struct repository *repo,
 	 * squashed together.
 	 */
 	target = lookup_commit_reference_by_name(s);
-	if (target && starts_with(oid_to_hex(&target->object.oid), s)) {
+	𐤀𐤌 (target && starts_with(oid_to_hex(&target->object.oid), s)) {
 		unsigned flags =
 			target->object.flags & (SQUASH_SEEN | SQUASH_AMEND_TARGET);
-		if (!flags) {
-			const char *subject_start;
-			const char *buffer = repo_logmsg_reencode(repo, target,
-								  NULL, NULL);
+		𐤀𐤌 (!flags) {
+			ثابت حرف *subject_start;
+			ثابت حرف *buffer = repo_logmsg_reencode(repo, target,
+								  عدم, عدم);
 			size_t subject_len = find_commit_subject(buffer,
 								 &subject_start);
-			char *subject = xmemdupz(subject_start, subject_len);
+			حرف *subject = xmemdupz(subject_start, subject_len);
 
 			flags = strintmap_get(&data->subjects, subject);
-			free(subject);
+			حرر(subject);
 			repo_unuse_commit_buffer(repo, target, buffer);
 		}
-		if (flags)
-			return squash_check_can_autosquash(repo, commit,
+		𐤀𐤌 (flags)
+			أرجع squash_check_can_autosquash(repo, commit,
 							   data, flags);
 	}
 	/* Try subject prefix matches */
 	strintmap_for_each_entry(&data->subjects, &iter, entry) {
 		s = data->subject.buf;
-		while(skip_one_autosquash_prefix(s, &s)) {
-			if (starts_with(entry->key, s)) {
+		طالما(skip_one_autosquash_prefix(s, &s)) {
+			𐤀𐤌 (starts_with(entry->key, s)) {
 				unsigned value = (intptr_t)entry->value;
 
-				return squash_check_can_autosquash(repo, commit,
+				أرجع squash_check_can_autosquash(repo, commit,
 								   data, value);
 			}
 		}
 	}
-	return error(_("cannot squash %s (%s): its target is not being "
+	أرجع error(_("cannot squash %s (%s): its target is not being "
 		       "squashed"),
 		       repo_find_unique_abbrev(repo, &commit->object.oid,
 					       DEFAULT_ABBREV),
 		       data->subject.buf);
 }
 
-static int squash_check_subject(struct repository *repo,
-				struct commit *commit,
-				struct subject_data *data)
+ساكن صحيح squash_check_subject(بنية repository *repo,
+				بنية commit *commit,
+				بنية subject_data *data)
 {
-	int ret = 0;
-	const char *buf = repo_logmsg_reencode(repo, commit, NULL, NULL);
+	صحيح ret = 0;
+	ثابت حرف *buf = repo_logmsg_reencode(repo, commit, عدم, عدم);
 	size_t subject_len = find_commit_subject(buf, &data->message);
 
 	strbuf_reset(&data->subject);
 	strbuf_add(&data->subject, data->message, subject_len);
 
-	if (!strintmap_get_size(&data->subjects)) {
-		const char *s;
+	𐤀𐤌 (!strintmap_get_size(&data->subjects)) {
+		ثابت حرف *s;
 
 		strbuf_addstr(&data->squash_message, data->message);
 		strbuf_complete_line(&data->squash_message);
@@ -1262,24 +1262,24 @@ static int squash_check_subject(struct repository *repo,
 		skip_one_autosquash_prefix(s, &s);
 		strintmap_set(&data->subjects, s, SQUASH_AMEND_TARGET | SQUASH_SEEN);
 		commit->object.flags |= SQUASH_AMEND_TARGET;
-	} else if (is_autosquash_subject(data->subject.buf)) {
+	} وإلا 𐤀𐤌 (is_autosquash_subject(data->subject.buf)) {
 		ret = squash_check_autosquash_subject(repo, commit, data);
-	} else {
+	} وإلا {
 		strintmap_set(&data->subjects, data->subject.buf, SQUASH_SEEN);
 	}
 	repo_unuse_commit_buffer(repo, commit, buf);
-	return ret;
+	أرجع ret;
 }
 
-static int build_squash_message(struct repository *repo,
-				const struct strbuf *todo_buf,
-				struct strbuf *out);
+ساكن صحيح build_squash_message(بنية repository *repo,
+				ثابت بنية strbuf *todo_buf,
+				بنية strbuf *out);
 
-static int setup_squash_revisions(struct repository *repo,
-				  int argc, const char **argv,
-				  struct rev_info *revs)
+ساكن صحيح setup_squash_revisions(بنية repository *repo,
+				  صحيح argc, ثابت حرف **argv,
+				  بنية rev_info *revs)
 {
-	repo_init_revisions(repo, revs, NULL);
+	repo_init_revisions(repo, revs, عدم);
 	revs->reverse = 1;
 	revs->topo_order = 1;
 	revs->sort_order = REV_SORT_IN_GRAPH_ORDER;
@@ -1288,11 +1288,11 @@ static int setup_squash_revisions(struct repository *repo,
 	revs->limited = 1;
 	revs->ancestry_path_implicit_bottoms = 1;
 
-	argc = setup_revisions(argc, argv, revs, NULL);
-	if (argc > 1)
-		return error(_("unrecognized argument: %s"), argv[1]);
+	argc = setup_revisions(argc, argv, revs, عدم);
+	𐤀𐤌 (argc > 1)
+		أرجع error(_("unrecognized argument: %s"), argv[1]);
 
-	if (revs->reverse != 1 || revs->topo_order != 1 ||
+	𐤀𐤌 (revs->reverse != 1 || revs->topo_order != 1 ||
 	    revs->sort_order != REV_SORT_IN_GRAPH_ORDER ||
 	    revs->simplify_history != 0 || revs->boundary == 1 ||
 	    revs->ancestry_path != 1 || revs->limited != 1 ||
@@ -1314,11 +1314,11 @@ static int setup_squash_revisions(struct repository *repo,
 	 * something, as in "<base>..<tip>". A revision range with no such
 	 * bottom commit cannot be squashed.
 	 */
-	for (size_t i = 0; i < revs->cmdline.nr; i++)
-		if (revs->cmdline.rev[i].flags & BOTTOM)
-			return 0;
+	لكل (size_t i = 0; i < revs->cmdline.nr; i++)
+		𐤀𐤌 (revs->cmdline.rev[i].flags & BOTTOM)
+			أرجع 0;
 
-	return error(_("not a '<base>..<tip>' revision range"));
+	أرجع error(_("not a '<base>..<tip>' revision range"));
 }
 
 /*
@@ -1326,52 +1326,52 @@ static int setup_squash_revisions(struct repository *repo,
  * parent after the oldest commit must either be selected or also be a parent
  * of the oldest commit.
  */
-static int resolve_squash_range(struct repository *repo,
+ساكن صحيح resolve_squash_range(بنية repository *repo,
 				bool update_branches,
 				bool edit_message,
-				int argc, const char **argv,
-				struct commit **oldest_out,
-				struct commit **tip_out,
-				char **message_out)
+				صحيح argc, ثابت حرف **argv,
+				بنية commit **oldest_out,
+				بنية commit **tip_out,
+				حرف **message_out)
 {
-	struct rev_info revs;
-	struct subject_data subject_data = SUBJECT_DATA_INIT;
-	struct commit *commit, *oldest = NULL, *tip = NULL;
-	struct strbuf todo_buf = STRBUF_INIT;
-	int ret, tip_count = 0;
+	بنية rev_info revs;
+	بنية subject_data subject_data = SUBJECT_DATA_INIT;
+	بنية commit *commit, *oldest = عدم, *tip = عدم;
+	بنية strbuf todo_buf = STRBUF_INIT;
+	صحيح ret, tip_count = 0;
 	bool walk_started = false;
-	struct ref_filter filter = REF_FILTER_INIT;
-	struct ref_array refs = { 0 };
+	بنية ref_filter filter = REF_FILTER_INIT;
+	بنية ref_array refs = { 0 };
 
 	subject_data.edit_message = edit_message;
 	ret = setup_squash_revisions(repo, argc, argv, &revs);
-	if (ret < 0)
-		goto out;
+	𐤀𐤌 (ret < 0)
+		اذهب out;
 
-	if (prepare_revision_walk(&revs) < 0) {
+	𐤀𐤌 (prepare_revision_walk(&revs) < 0) {
 		ret = error(_("error preparing revisions"));
-		goto out;
+		اذهب out;
 	}
 	walk_started = true;
-	while ((commit = get_revision(&revs))) {
-		struct commit_list *p;
+	طالما ((commit = get_revision(&revs))) {
+		بنية commit_list *p;
 
-		if (edit_message)
+		𐤀𐤌 (edit_message)
 			strbuf_addf(&todo_buf, "pick %s\n",
 				    oid_to_hex(&commit->object.oid));
 
-		if (!commit->parents) {
+		𐤀𐤌 (!commit->parents) {
 			ret = error(_("cannot squash down to root commit"));
-			goto out;
+			اذهب out;
 		}
-		for (p = commit->parents; oldest && p; p = p->next) {
-			struct commit_list *q;
-			struct object *o;
+		لكل (p = commit->parents; oldest && p; p = p->next) {
+			بنية commit_list *q;
+			بنية object *o;
 			bool seen;
 
-			if (repo_parse_commit(repo, p->item)) {
+			𐤀𐤌 (repo_parse_commit(repo, p->item)) {
 				ret = error(_("cannot parse commit"));
-				goto out;
+				اذهب out;
 			}
 			o = &p->item->object;
 			seen = o->flags & SQUASH_SEEN;
@@ -1379,13 +1379,13 @@ static int resolve_squash_range(struct repository *repo,
 			 * Allow parents that match the parents of the
 			 * squashed commit.
 			 */
-			for (q = oldest->parents; !seen && q; q = q->next) {
-				if (p->item == q->item) {
+			لكل (q = oldest->parents; !seen && q; q = q->next) {
+				𐤀𐤌 (p->item == q->item) {
 					seen = true;
 					commit_list_insert(commit, &filter.with_commit);
 				}
 			}
-			if (!seen) {
+			𐤀𐤌 (!seen) {
 				ret = error(_("parent %s of commit %s is "
 					      "outside the revision range"),
 					    repo_find_unique_abbrev(repo, &o->oid,
@@ -1393,20 +1393,20 @@ static int resolve_squash_range(struct repository *repo,
 					    repo_find_unique_abbrev(repo,
 								    &commit->object.oid,
 								    DEFAULT_ABBREV));
-				goto out;
+				اذهب out;
 			}
-			if (o->flags & SQUASH_TIP) {
+			𐤀𐤌 (o->flags & SQUASH_TIP) {
 				tip_count--;
 				o->flags &= ~SQUASH_TIP;
 			}
 		}
-		if (!oldest) {
+		𐤀𐤌 (!oldest) {
 			commit_list_insert(commit, &filter.with_commit);
 			oldest = commit;
 		}
-		if (squash_check_subject(repo, commit, &subject_data)) {
+		𐤀𐤌 (squash_check_subject(repo, commit, &subject_data)) {
 			ret = -1;
-			goto out;
+			اذهب out;
 		}
 		tip = commit;
 		tip->object.flags |= SQUASH_SEEN | SQUASH_TIP;
@@ -1416,45 +1416,45 @@ static int resolve_squash_range(struct repository *repo,
 	reset_revision_walk();
 	walk_started = false;
 
-	if (!tip_count) {
+	𐤀𐤌 (!tip_count) {
 		ret = error(_("the revision range is empty"));
-		goto out;
-	} else if (tip_count != 1) {
+		اذهب out;
+	} وإلا 𐤀𐤌 (tip_count != 1) {
 		ret = error(_("the revision range contains more than one tip "
 			      "commit"));
-		goto out;
-	} else if (oldest == tip) {
+		اذهب out;
+	} وإلا 𐤀𐤌 (oldest == tip) {
 		ret = error(_("the revision range holds a single commit; "
 			      "nothing to squash"));
-		goto out;
-	} else if (!oldest->parents) {
+		اذهب out;
+	} وإلا 𐤀𐤌 (!oldest->parents) {
 		BUG("an in-range commit must have a parent");
 	}
 
 	commit_list_insert(tip, &filter.no_commit);
 	filter.kind = FILTER_REFS_BRANCHES;
-	if (update_branches &&
+	𐤀𐤌 (update_branches &&
 	    filter_refs(&refs, &filter, filter.kind)) {
 		ret = error(_("could not filter refs"));
-		goto out;
+		اذهب out;
 	}
-	if (refs.nr) {
-		struct ref_format format = REF_FORMAT_INIT;
-		struct ref_sorting *sorting;
-		struct string_list sorting_options = STRING_LIST_INIT_DUP;
-		struct strbuf branches = STRBUF_INIT;
-		struct strbuf err = STRBUF_INIT;
+	𐤀𐤌 (refs.nr) {
+		بنية ref_format format = REF_FORMAT_INIT;
+		بنية ref_sorting *sorting;
+		بنية string_list sorting_options = STRING_LIST_INIT_DUP;
+		بنية strbuf branches = STRBUF_INIT;
+		بنية strbuf err = STRBUF_INIT;
 
 		format.format = "%(refname:short)";
-		if (verify_ref_format(&format))
+		𐤀𐤌 (verify_ref_format(&format))
 			BUG("invalid branch format");
 		string_list_append(&sorting_options, "refname");
 		sorting = ref_sorting_options(&sorting_options);
 		ref_array_sort(sorting, &refs);
-		for (int i = 0; i < refs.nr; i++) {
+		لكل (صحيح i = 0; i < refs.nr; i++) {
 			strbuf_reset(&err);
 			strbuf_addstr(&branches, "\n  ");
-			if (format_ref_array_item(refs.items[i], &format,
+			𐤀𐤌 (format_ref_array_item(refs.items[i], &format,
 						  &branches, &err))
 				BUG("could not format branch name: %s", err.buf);
 		}
@@ -1471,85 +1471,85 @@ static int resolve_squash_range(struct repository *repo,
 		strbuf_release(&branches);
 		ref_sorting_release(sorting);
 		string_list_clear(&sorting_options, 0);
-		goto out;
+		اذهب out;
 	}
-	if (edit_message) {
+	𐤀𐤌 (edit_message) {
 		strbuf_reset(&subject_data.squash_message);
 		ret = build_squash_message(repo, &todo_buf,
 					   &subject_data.squash_message);
-		if (ret < 0)
-			goto out;
+		𐤀𐤌 (ret < 0)
+			اذهب out;
 	}
 
 	*oldest_out = oldest;
 	*tip_out = tip;
-	*message_out = strbuf_detach(&subject_data.squash_message, NULL);
+	*message_out = strbuf_detach(&subject_data.squash_message, عدم);
 	ret = 0;
 
 out:
 	strbuf_release(&todo_buf);
 	clear_object_flags(repo, SQUASH_SEEN | SQUASH_TIP |
 			   SQUASH_AMEND_TARGET);
-	if (walk_started)
+	𐤀𐤌 (walk_started)
 		reset_revision_walk();
 	subject_data_clear(&subject_data);
 	release_revisions(&revs);
 	ref_filter_clear(&filter);
 	ref_array_clear(&refs);
-	return ret;
+	أرجع ret;
 }
 
-static bool amend_replaces_target(struct todo_list *todo, int target)
+ساكن bool amend_replaces_target(بنية todo_list *todo, صحيح target)
 {
-	for (int i = target + 1; i < todo->nr &&
+	لكل (صحيح i = target + 1; i < todo->nr &&
 				 todo->items[i].command != TODO_PICK; i++) {
-		if (todo->items[i].command == TODO_SQUASH)
-			return false;
-		if (todo->items[i].flags & TODO_REPLACE_FIXUP_MSG)
-			return true;
+		𐤀𐤌 (todo->items[i].command == TODO_SQUASH)
+			أرجع false;
+		𐤀𐤌 (todo->items[i].flags & TODO_REPLACE_FIXUP_MSG)
+			أرجع true;
 	}
-	return false;
+	أرجع false;
 }
 
-static int build_squash_message(struct repository *repo,
-				const struct strbuf *todo_buf,
-				struct strbuf *out)
+ساكن صحيح build_squash_message(بنية repository *repo,
+				ثابت بنية strbuf *todo_buf,
+				بنية strbuf *out)
 {
-	struct todo_list todo = TODO_LIST_INIT;
-	struct replay_opts opts = REPLAY_OPTS_INIT;
-	int nr_commits, ret;
+	بنية todo_list todo = TODO_LIST_INIT;
+	بنية replay_opts opts = REPLAY_OPTS_INIT;
+	صحيح nr_commits, ret;
 
-	if (todo_list_parse_insn_buffer(repo, &opts, todo_buf->buf, &todo) < 0 ||
+	𐤀𐤌 (todo_list_parse_insn_buffer(repo, &opts, todo_buf->buf, &todo) < 0 ||
 	    todo_list_rearrange_squash(&todo) < 0) {
 		ret = error(_("could not prepare the squash message"));
-		goto out;
+		اذهب out;
 	}
 
 	nr_commits = todo.nr;
-	for (int i = 0; i < nr_commits; i++) {
-		struct todo_item *item = &todo.items[i];
-		const char *message, *body;
+	لكل (صحيح i = 0; i < nr_commits; i++) {
+		بنية todo_item *item = &todo.items[i];
+		ثابت حرف *message, *body;
 		size_t commented_len;
 		bool skip, squashing;
 
 		squashing = item->command == TODO_SQUASH ||
 			    (item->flags & TODO_REPLACE_FIXUP_MSG);
-		if (item->command == TODO_PICK)
+		𐤀𐤌 (item->command == TODO_PICK)
 			skip = amend_replaces_target(&todo, i);
-		else
+		وإلا
 			skip = !squashing;
 
-		message = repo_logmsg_reencode(repo, item->commit, NULL, NULL);
+		message = repo_logmsg_reencode(repo, item->commit, عدم, عدم);
 		find_commit_subject(message, &body);
 
-		if (skip)
+		𐤀𐤌 (skip)
 			commented_len = strlen(body);
-		else if (squashing)
+		وإلا 𐤀𐤌 (squashing)
 			commented_len = squash_subject_comment_len(body, 1);
-		else
+		وإلا
 			commented_len = 0;
 
-		if (!i)
+		𐤀𐤌 (!i)
 			add_squash_combination_header(out, nr_commits);
 		strbuf_addch(out, '\n');
 		add_squash_message_header(out, i + 1, skip);
@@ -1566,22 +1566,22 @@ static int build_squash_message(struct repository *repo,
 out:
 	todo_list_release(&todo);
 	replay_opts_release(&opts);
-	return ret;
+	أرجع ret;
 }
 
-static int cmd_history_squash(int argc,
-			      const char **argv,
-			      const char *prefix,
-			      struct repository *repo)
+ساكن صحيح cmd_history_squash(صحيح argc,
+			      ثابت حرف **argv,
+			      ثابت حرف *prefix,
+			      بنية repository *repo)
 {
-	const char * const usage[] = {
+	ثابت حرف * ثابت usage[] = {
 		GIT_HISTORY_SQUASH_USAGE,
-		NULL,
+		عدم,
 	};
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	int edit = 1;
-	struct option options[] = {
+	تعداد ref_action action = REF_ACTION_DEFAULT;
+	صحيح dry_run = 0;
+	صحيح edit = 1;
+	بنية option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -1591,22 +1591,22 @@ static int cmd_history_squash(int argc,
 			 N_("edit the commit message")),
 		OPT_END(),
 	};
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *oldest, *tip, *rewritten;
-	const struct object_id *base_tree_oid, *tip_tree_oid;
-	char *message_template = NULL;
-	struct rev_info revs = { 0 };
-	int ret;
+	بنية strbuf reflog_msg = STRBUF_INIT;
+	بنية commit *oldest, *tip, *rewritten;
+	ثابت بنية object_id *base_tree_oid, *tip_tree_oid;
+	حرف *message_template = عدم;
+	بنية rev_info revs = { 0 };
+	صحيح ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT | PARSE_OPT_KEEP_ARGV0);
-	if (argc < 2) {
+	𐤀𐤌 (argc < 2) {
 		ret = error(_("command expects a revision range"));
-		goto out;
+		اذهب out;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, عدم);
 
-	if (action == REF_ACTION_DEFAULT)
+	𐤀𐤌 (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	strbuf_addstr(&reflog_msg, "squash: updating ");
@@ -1616,12 +1616,12 @@ static int cmd_history_squash(int argc,
 				   edit,
 				   argc, argv, &oldest, &tip,
 				   &message_template);
-	if (ret < 0)
-		goto out;
+	𐤀𐤌 (ret < 0)
+		اذهب out;
 
 	ret = setup_revwalk(repo, action, tip, &revs);
-	if (ret < 0)
-		goto out;
+	𐤀𐤌 (ret < 0)
+		اذهب out;
 
 	base_tree_oid = &repo_get_commit_tree(repo,
 					oldest->parents->item)->object.oid;
@@ -1631,17 +1631,17 @@ static int cmd_history_squash(int argc,
 			      oldest->parents, base_tree_oid, tip_tree_oid,
 			      &rewritten,
 			      edit ? COMMIT_TREE_EDIT_MESSAGE : 0);
-	if (ret < 0) {
+	𐤀𐤌 (ret < 0) {
 		ret = error(_("failed writing squashed commit"));
-		goto out;
+		اذهب out;
 	}
 
 	ret = handle_reference_updates(&revs, action, tip, rewritten,
 				       reflog_msg.buf, dry_run,
 				       REPLAY_EMPTY_COMMIT_ABORT);
-	if (ret < 0) {
+	𐤀𐤌 (ret < 0) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		اذهب out;
 	}
 
 	ret = 0;
@@ -1649,87 +1649,87 @@ static int cmd_history_squash(int argc,
 out:
 	strbuf_release(&reflog_msg);
 	release_revisions(&revs);
-	free(message_template);
-	return ret;
+	حرر(message_template);
+	أرجع ret;
 }
 
-static int update_worktree(struct repository *repo,
-			   const struct commit *old_head,
-			   const struct commit *new_head,
+ساكن صحيح update_worktree(بنية repository *repo,
+			   ثابت بنية commit *old_head,
+			   ثابت بنية commit *new_head,
 			   bool dry_run)
 {
-	struct reset_working_tree_options opts = {
+	بنية reset_working_tree_options opts = {
 		.oid_from = &old_head->object.oid,
 		.oid = &new_head->object.oid,
 	};
-	if (dry_run)
+	𐤀𐤌 (dry_run)
 		opts.flags |= RESET_WORKING_TREE_DRY_RUN;
-	return reset_working_tree(repo, &opts);
+	أرجع reset_working_tree(repo, &opts);
 }
 
-static int find_head_tree_change(struct repository *repo,
-				 const struct replay_result *result,
-				 struct commit **old_head,
-				 struct commit **new_head,
+ساكن صحيح find_head_tree_change(بنية repository *repo,
+				 ثابت بنية replay_result *result,
+				 بنية commit **old_head,
+				 بنية commit **new_head,
 				 bool *changed)
 {
-	const struct replay_ref_update *head_update = NULL;
-	struct commit *old_head_commit, *new_head_commit;
-	struct tree *old_head_tree, *new_head_tree;
-	const char *head_target;
-	int head_flags;
+	ثابت بنية replay_ref_update *head_update = عدم;
+	بنية commit *old_head_commit, *new_head_commit;
+	بنية tree *old_head_tree, *new_head_tree;
+	ثابت حرف *head_target;
+	صحيح head_flags;
 
 	*changed = false;
 
 	head_target = refs_resolve_ref_unsafe(get_main_ref_store(repo), "HEAD",
 					      RESOLVE_REF_NO_RECURSE | RESOLVE_REF_READING,
-					      NULL, &head_flags);
-	if (!head_target)
-		return error(_("cannot look up HEAD"));
+					      عدم, &head_flags);
+	𐤀𐤌 (!head_target)
+		أرجع error(_("cannot look up HEAD"));
 
-	for (size_t i = 0; i < result->updates_nr; i++) {
-		if (!strcmp(result->updates[i].refname, head_target)) {
+	لكل (size_t i = 0; i < result->updates_nr; i++) {
+		𐤀𐤌 (!strcmp(result->updates[i].refname, head_target)) {
 			head_update = &result->updates[i];
-			break;
+			اكسر;
 		}
 	}
 
-	if (!head_update)
-		return 0;
+	𐤀𐤌 (!head_update)
+		أرجع 0;
 
 	old_head_commit = lookup_commit_reference(repo, &head_update->old_oid);
 	new_head_commit = lookup_commit_reference(repo, &head_update->new_oid);
-	if (!old_head_commit || !new_head_commit)
-		return error(_("cannot resolve HEAD commit"));
+	𐤀𐤌 (!old_head_commit || !new_head_commit)
+		أرجع error(_("cannot resolve HEAD commit"));
 
 	old_head_tree = repo_get_commit_tree(repo, old_head_commit);
 	new_head_tree = repo_get_commit_tree(repo, new_head_commit);
-	if (!old_head_tree || !new_head_tree)
-		return error(_("cannot resolve tree for HEAD"));
+	𐤀𐤌 (!old_head_tree || !new_head_tree)
+		أرجع error(_("cannot resolve tree for HEAD"));
 
-	if (oideq(&old_head_tree->object.oid, &new_head_tree->object.oid))
-		return 0;
+	𐤀𐤌 (oideq(&old_head_tree->object.oid, &new_head_tree->object.oid))
+		أرجع 0;
 
 	*old_head = old_head_commit;
 	*new_head = new_head_commit;
 	*changed = true;
 
-	return 0;
+	أرجع 0;
 }
 
-static int cmd_history_drop(int argc,
-			    const char **argv,
-			    const char *prefix,
-			    struct repository *repo)
+ساكن صحيح cmd_history_drop(صحيح argc,
+			    ثابت حرف **argv,
+			    ثابت حرف *prefix,
+			    بنية repository *repo)
 {
-	const char * const usage[] = {
+	ثابت حرف * ثابت usage[] = {
 		GIT_HISTORY_DROP_USAGE,
-		NULL,
+		عدم,
 	};
-	enum replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	struct option options[] = {
+	تعداد replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
+	تعداد ref_action action = REF_ACTION_DEFAULT;
+	صحيح dry_run = 0;
+	بنية option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -1740,51 +1740,51 @@ static int cmd_history_drop(int argc,
 			       PARSE_OPT_NONEG, parse_opt_empty),
 		OPT_END(),
 	};
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *original, *rewritten;
-	struct rev_info revs = { 0 };
-	struct replay_result result = { 0 };
-	struct commit *old_head, *new_head;
+	بنية strbuf reflog_msg = STRBUF_INIT;
+	بنية commit *original, *rewritten;
+	بنية rev_info revs = { 0 };
+	بنية replay_result result = { 0 };
+	بنية commit *old_head, *new_head;
 	bool head_moves = false;
-	int ret;
+	صحيح ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1) {
+	𐤀𐤌 (argc != 1) {
 		ret = error(_("command expects a single revision"));
-		goto out;
+		اذهب out;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, عدم);
 
-	if (action == REF_ACTION_DEFAULT)
+	𐤀𐤌 (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	𐤀𐤌 (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
-		goto out;
+		اذهب out;
 	}
 
-	if (!original->parents) {
+	𐤀𐤌 (!original->parents) {
 		ret = error(_("cannot drop root commit %s: "
 			      "it has no parent to replay onto"),
 			    argv[0]);
-		goto out;
-	} else if (original->parents->next) {
+		اذهب out;
+	} وإلا 𐤀𐤌 (original->parents->next) {
 		ret = error(_("cannot drop merge commit: %s"), argv[0]);
-		goto out;
+		اذهب out;
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret)
-		goto out;
+	𐤀𐤌 (ret)
+		اذهب out;
 
 	rewritten = original->parents->item;
 
 	ret = compute_pending_ref_updates(&revs, action, original, rewritten,
 					  empty, &result);
-	if (ret) {
+	𐤀𐤌 (ret) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		اذهب out;
 	}
 
 	/*
@@ -1796,30 +1796,30 @@ static int cmd_history_drop(int argc,
 	 * inconsistent repository state. So we first perform a dry-run merge
 	 * here before updating refs.
 	 */
-	if (!is_bare_repository(repo)) {
+	𐤀𐤌 (!is_bare_repository(repo)) {
 		ret = find_head_tree_change(repo, &result, &old_head,
 					    &new_head, &head_moves);
-		if (ret < 0)
-			goto out;
+		𐤀𐤌 (ret < 0)
+			اذهب out;
 
-		if (head_moves && update_worktree(repo, old_head, new_head, true) < 0) {
+		𐤀𐤌 (head_moves && update_worktree(repo, old_head, new_head, true) < 0) {
 			ret = error(_("dropping this commit would "
 				      "overwrite local changes; aborting"));
-			goto out;
+			اذهب out;
 		}
 	}
 
 	strbuf_addf(&reflog_msg, "drop: dropping %s", argv[0]);
 	ret = apply_pending_ref_updates(repo, &result, reflog_msg.buf, dry_run);
-	if (ret < 0) {
+	𐤀𐤌 (ret < 0) {
 		ret = error(_("failed to update references"));
-		goto out;
+		اذهب out;
 	}
 
-	if (!dry_run && head_moves && update_worktree(repo, old_head, new_head, false) < 0) {
+	𐤀𐤌 (!dry_run && head_moves && update_worktree(repo, old_head, new_head, false) < 0) {
 		ret = error(_("could not update working tree to new commit %s"),
 			    oid_to_hex(&new_head->object.oid));
-		goto out;
+		اذهب out;
 	}
 
 	ret = 0;
@@ -1828,24 +1828,24 @@ out:
 	replay_result_release(&result);
 	strbuf_release(&reflog_msg);
 	release_revisions(&revs);
-	return ret;
+	أرجع ret;
 }
 
-int cmd_history(int argc,
-		const char **argv,
-		const char *prefix,
-		struct repository *repo)
+صحيح cmd_history(صحيح argc,
+		ثابت حرف **argv,
+		ثابت حرف *prefix,
+		بنية repository *repo)
 {
-	const char * const usage[] = {
+	ثابت حرف * ثابت usage[] = {
 		GIT_HISTORY_DROP_USAGE,
 		GIT_HISTORY_FIXUP_USAGE,
 		GIT_HISTORY_REWORD_USAGE,
 		GIT_HISTORY_SPLIT_USAGE,
 		GIT_HISTORY_SQUASH_USAGE,
-		NULL,
+		عدم,
 	};
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	parse_opt_subcommand_fn *fn = عدم;
+	بنية option options[] = {
 		OPT_SUBCOMMAND("drop", &fn, cmd_history_drop),
 		OPT_SUBCOMMAND("fixup", &fn, cmd_history_fixup),
 		OPT_SUBCOMMAND("reword", &fn, cmd_history_reword),
@@ -1855,5 +1855,5 @@ int cmd_history(int argc,
 	};
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	return fn(argc, argv, prefix, repo);
+	أرجع fn(argc, argv, prefix, repo);
 }

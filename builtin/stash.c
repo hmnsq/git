@@ -1,37 +1,37 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "refs.h"
-#include "stash.h"
-#include "lockfile.h"
-#include "cache-tree.h"
-#include "unpack-trees.h"
-#include "merge-ort-wrappers.h"
-#include "strvec.h"
-#include "run-command.h"
-#include "dir.h"
-#include "entry.h"
-#include "preload-index.h"
-#include "read-cache.h"
-#include "repository.h"
-#include "rerere.h"
-#include "revision.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "log-tree.h"
-#include "diffcore.h"
-#include "reflog.h"
-#include "reflog-walk.h"
-#include "add-interactive.h"
-#include "commit.h"
+#ضمن "builtin.h"
+#ضمن "abspath.h"
+#ضمن "config.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "hash.h"
+#ضمن "hex.h"
+#ضمن "object-name.h"
+#ضمن "parse-options.h"
+#ضمن "refs.h"
+#ضمن "stash.h"
+#ضمن "lockfile.h"
+#ضمن "cache-tree.h"
+#ضمن "unpack-trees.h"
+#ضمن "merge-ort-wrappers.h"
+#ضمن "strvec.h"
+#ضمن "run-command.h"
+#ضمن "dir.h"
+#ضمن "entry.h"
+#ضمن "preload-index.h"
+#ضمن "read-cache.h"
+#ضمن "repository.h"
+#ضمن "rerere.h"
+#ضمن "revision.h"
+#ضمن "setup.h"
+#ضمن "sparse-index.h"
+#ضمن "log-tree.h"
+#ضمن "diffcore.h"
+#ضمن "reflog.h"
+#ضمن "reflog-walk.h"
+#ضمن "add-interactive.h"
+#ضمن "commit.h"
 
 #define INCLUDE_ALL_FILES 2
 
@@ -66,7 +66,7 @@
 #define BUILTIN_STASH_CLEAR_USAGE \
 	"git stash clear"
 
-static const char * const git_stash_usage[] = {
+ساكن ثابت حرف * ثابت git_stash_usage[] = {
 	BUILTIN_STASH_LIST_USAGE,
 	BUILTIN_STASH_SHOW_USAGE,
 	BUILTIN_STASH_DROP_USAGE,
@@ -80,76 +80,76 @@ static const char * const git_stash_usage[] = {
 	BUILTIN_STASH_STORE_USAGE,
 	BUILTIN_STASH_EXPORT_USAGE,
 	BUILTIN_STASH_IMPORT_USAGE,
-	NULL
+	عدم
 };
 
-static const char * const git_stash_list_usage[] = {
+ساكن ثابت حرف * ثابت git_stash_list_usage[] = {
 	BUILTIN_STASH_LIST_USAGE,
-	NULL
+	عدم
 };
 
-static const char * const git_stash_show_usage[] = {
+ساكن ثابت حرف * ثابت git_stash_show_usage[] = {
 	BUILTIN_STASH_SHOW_USAGE,
-	NULL
+	عدم
 };
 
-static const char * const git_stash_drop_usage[] = {
+ساكن ثابت حرف * ثابت git_stash_drop_usage[] = {
 	BUILTIN_STASH_DROP_USAGE,
-	NULL
+	عدم
 };
 
-static const char * const git_stash_pop_usage[] = {
+ساكن ثابت حرف * ثابت git_stash_pop_usage[] = {
 	BUILTIN_STASH_POP_USAGE,
-	NULL
+	عدم
 };
 
-static const char * const git_stash_apply_usage[] = {
+ساكن ثابت حرف * ثابت git_stash_apply_usage[] = {
 	BUILTIN_STASH_APPLY_USAGE,
-	NULL
+	عدم
 };
 
-static const char * const git_stash_branch_usage[] = {
+ساكن ثابت حرف * ثابت git_stash_branch_usage[] = {
 	BUILTIN_STASH_BRANCH_USAGE,
-	NULL
+	عدم
 };
 
-static const char * const git_stash_clear_usage[] = {
+ساكن ثابت حرف * ثابت git_stash_clear_usage[] = {
 	BUILTIN_STASH_CLEAR_USAGE,
-	NULL
+	عدم
 };
 
-static const char * const git_stash_store_usage[] = {
+ساكن ثابت حرف * ثابت git_stash_store_usage[] = {
 	BUILTIN_STASH_STORE_USAGE,
-	NULL
+	عدم
 };
 
-static const char * const git_stash_push_usage[] = {
+ساكن ثابت حرف * ثابت git_stash_push_usage[] = {
 	BUILTIN_STASH_PUSH_USAGE,
-	NULL
+	عدم
 };
 
-static const char * const git_stash_save_usage[] = {
+ساكن ثابت حرف * ثابت git_stash_save_usage[] = {
 	BUILTIN_STASH_SAVE_USAGE,
-	NULL
+	عدم
 };
 
-static const char * const git_stash_export_usage[] = {
+ساكن ثابت حرف * ثابت git_stash_export_usage[] = {
 	BUILTIN_STASH_EXPORT_USAGE,
-	NULL
+	عدم
 };
 
-static const char * const git_stash_import_usage[] = {
+ساكن ثابت حرف * ثابت git_stash_import_usage[] = {
 	BUILTIN_STASH_IMPORT_USAGE,
-	NULL
+	عدم
 };
 
-static const char ref_stash[] = "refs/stash";
-static struct strbuf stash_index_path = STRBUF_INIT;
+ساكن ثابت حرف ref_stash[] = "refs/stash";
+ساكن بنية strbuf stash_index_path = STRBUF_INIT;
 
-static int show_stat = 1;
-static int show_patch;
-static int show_include_untracked;
-static int use_index;
+ساكن صحيح show_stat = 1;
+ساكن صحيح show_patch;
+ساكن صحيح show_include_untracked;
+ساكن صحيح use_index;
 
 /*
  * w_commit is set to the commit containing the working tree
@@ -162,121 +162,121 @@ static int use_index;
  * i_tree is set to the index tree
  * u_tree is set to the untracked files tree
  */
-struct stash_info {
-	struct object_id w_commit;
-	struct object_id b_commit;
-	struct object_id i_commit;
-	struct object_id u_commit;
-	struct object_id c_commit;
-	struct object_id w_tree;
-	struct object_id b_tree;
-	struct object_id i_tree;
-	struct object_id u_tree;
-	struct strbuf revision;
-	int is_stash_ref;
-	int has_u;
+بنية stash_info {
+	بنية object_id w_commit;
+	بنية object_id b_commit;
+	بنية object_id i_commit;
+	بنية object_id u_commit;
+	بنية object_id c_commit;
+	بنية object_id w_tree;
+	بنية object_id b_tree;
+	بنية object_id i_tree;
+	بنية object_id u_tree;
+	بنية strbuf revision;
+	صحيح is_stash_ref;
+	صحيح has_u;
 };
 
 #define STASH_INFO_INIT { \
 	.revision = STRBUF_INIT, \
 }
 
-static void free_stash_info(struct stash_info *info)
+ساكن فراغ free_stash_info(بنية stash_info *info)
 {
 	strbuf_release(&info->revision);
 }
 
-static int check_stash_topology(struct repository *r, struct commit *stash)
+ساكن صحيح check_stash_topology(بنية repository *r, بنية commit *stash)
 {
-	struct commit *p1, *p2, *p3 = NULL;
+	بنية commit *p1, *p2, *p3 = عدم;
 
 	/* stash must have two or three parents */
-	if (!stash->parents || !stash->parents->next ||
+	𐤀𐤌 (!stash->parents || !stash->parents->next ||
 			(stash->parents->next->next && stash->parents->next->next->next))
-		return -1;
+		أرجع -1;
 	p1 = stash->parents->item;
 	p2 = stash->parents->next->item;
-	if (stash->parents->next->next)
+	𐤀𐤌 (stash->parents->next->next)
 		p3 = stash->parents->next->next->item;
-	if (repo_parse_commit(r, p1) || repo_parse_commit(r, p2) ||
+	𐤀𐤌 (repo_parse_commit(r, p1) || repo_parse_commit(r, p2) ||
 			(p3 && repo_parse_commit(r, p3)))
-		return -1;
+		أرجع -1;
 	/* p2 must have a single parent, p3 must have no parents */
-	if (!p2->parents || p2->parents->next || (p3 && p3->parents))
-		return -1;
-	if (repo_parse_commit(r, p2->parents->item))
-		return -1;
+	𐤀𐤌 (!p2->parents || p2->parents->next || (p3 && p3->parents))
+		أرجع -1;
+	𐤀𐤌 (repo_parse_commit(r, p2->parents->item))
+		أرجع -1;
 	/* p2^1 must equal p1 */
-	if (!oideq(&p1->object.oid, &p2->parents->item->object.oid))
-		return -1;
+	𐤀𐤌 (!oideq(&p1->object.oid, &p2->parents->item->object.oid))
+		أرجع -1;
 
-	return 0;
+	أرجع 0;
 }
 
-static void assert_stash_like(struct stash_info *info, const char *revision)
+ساكن فراغ assert_stash_like(بنية stash_info *info, ثابت حرف *revision)
 {
-	if (get_oidf(&info->b_commit, "%s^1", revision) ||
+	𐤀𐤌 (get_oidf(&info->b_commit, "%s^1", revision) ||
 	    get_oidf(&info->w_tree, "%s:", revision) ||
 	    get_oidf(&info->b_tree, "%s^1:", revision) ||
 	    get_oidf(&info->i_tree, "%s^2:", revision))
 		die(_("'%s' is not a stash-like commit"), revision);
 }
 
-static int parse_stash_revision(struct strbuf *revision, const char *commit, int quiet)
+ساكن صحيح parse_stash_revision(بنية strbuf *revision, ثابت حرف *commit, صحيح quiet)
 {
 	strbuf_reset(revision);
-	if (!commit) {
-		if (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash)) {
-			if (!quiet)
+	𐤀𐤌 (!commit) {
+		𐤀𐤌 (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash)) {
+			𐤀𐤌 (!quiet)
 				fprintf_ln(stderr, _("No stash entries found."));
-			return -1;
+			أرجع -1;
 		}
 
 		strbuf_addf(revision, "%s@{0}", ref_stash);
-	} else if (strspn(commit, "0123456789") == strlen(commit)) {
+	} وإلا 𐤀𐤌 (strspn(commit, "0123456789") == strlen(commit)) {
 		strbuf_addf(revision, "%s@{%s}", ref_stash, commit);
-	} else {
+	} وإلا {
 		strbuf_addstr(revision, commit);
 	}
-	return 0;
+	أرجع 0;
 }
 
-static int get_stash_info(struct stash_info *info, int argc, const char **argv)
+ساكن صحيح get_stash_info(بنية stash_info *info, صحيح argc, ثابت حرف **argv)
 {
-	int ret;
-	char *end_of_rev;
-	char *expanded_ref;
-	const char *revision;
-	const char *commit = NULL;
-	struct object_id dummy;
-	struct strbuf symbolic = STRBUF_INIT;
+	صحيح ret;
+	حرف *end_of_rev;
+	حرف *expanded_ref;
+	ثابت حرف *revision;
+	ثابت حرف *commit = عدم;
+	بنية object_id dummy;
+	بنية strbuf symbolic = STRBUF_INIT;
 
-	if (argc > 1) {
-		int i;
-		struct strbuf refs_msg = STRBUF_INIT;
+	𐤀𐤌 (argc > 1) {
+		صحيح i;
+		بنية strbuf refs_msg = STRBUF_INIT;
 
-		for (i = 0; i < argc; i++)
+		لكل (i = 0; i < argc; i++)
 			strbuf_addf(&refs_msg, " '%s'", argv[i]);
 
 		fprintf_ln(stderr, _("Too many revisions specified:%s"),
 			   refs_msg.buf);
 		strbuf_release(&refs_msg);
 
-		return -1;
+		أرجع -1;
 	}
 
-	if (argc == 1)
+	𐤀𐤌 (argc == 1)
 		commit = argv[0];
 
 	strbuf_init(&info->revision, 0);
-	if (parse_stash_revision(&info->revision, commit, 0)) {
-		return -1;
+	𐤀𐤌 (parse_stash_revision(&info->revision, commit, 0)) {
+		أرجع -1;
 	}
 
 	revision = info->revision.buf;
 
-	if (repo_get_oid(the_repository, revision, &info->w_commit))
-		return error(_("%s is not a valid reference"), revision);
+	𐤀𐤌 (repo_get_oid(the_repository, revision, &info->w_commit))
+		أرجع error(_("%s is not a valid reference"), revision);
 
 	assert_stash_like(info, revision);
 
@@ -288,35 +288,35 @@ static int get_stash_info(struct stash_info *info, int argc, const char **argv)
 	ret = repo_dwim_ref(the_repository, symbolic.buf, symbolic.len,
 			    &dummy, &expanded_ref, 0);
 	strbuf_release(&symbolic);
-	switch (ret) {
-	case 0: /* Not found, but valid ref */
+	بدل (ret) {
+	حالة 0: /* Not found, but valid ref */
 		info->is_stash_ref = 0;
-		break;
-	case 1:
+		اكسر;
+	حالة 1:
 		info->is_stash_ref = !strcmp(expanded_ref, ref_stash);
-		break;
-	default: /* Invalid or ambiguous */
-		break;
+		اكسر;
+	افتراضي: /* Invalid or ambiguous */
+		اكسر;
 	}
 
-	free(expanded_ref);
-	return !(ret == 0 || ret == 1);
+	حرر(expanded_ref);
+	أرجع !(ret == 0 || ret == 1);
 }
 
-static int do_clear_stash(void)
+ساكن صحيح do_clear_stash(فراغ)
 {
-	struct object_id obj;
-	if (repo_get_oid(the_repository, ref_stash, &obj))
-		return 0;
+	بنية object_id obj;
+	𐤀𐤌 (repo_get_oid(the_repository, ref_stash, &obj))
+		أرجع 0;
 
-	return refs_delete_ref(get_main_ref_store(the_repository), NULL,
+	أرجع refs_delete_ref(get_main_ref_store(the_repository), عدم,
 			       ref_stash, &obj, 0);
 }
 
-static int clear_stash(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+ساكن صحيح clear_stash(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+		       بنية repository *repo UNUSED)
 {
-	struct option options[] = {
+	بنية option options[] = {
 		OPT_END()
 	};
 
@@ -324,32 +324,32 @@ static int clear_stash(int argc, const char **argv, const char *prefix,
 			     git_stash_clear_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (argc)
-		return error(_("git stash clear with arguments is "
+	𐤀𐤌 (argc)
+		أرجع error(_("git stash clear with arguments is "
 			       "unimplemented"));
 
-	return do_clear_stash();
+	أرجع do_clear_stash();
 }
 
-static int reset_tree(struct object_id *i_tree, int update, int reset)
+ساكن صحيح reset_tree(بنية object_id *i_tree, صحيح update, صحيح reset)
 {
-	int nr_trees = 1;
-	struct unpack_trees_options opts;
-	struct tree_desc t[MAX_UNPACK_TREES];
-	struct tree *tree;
-	struct lock_file lock_file = LOCK_INIT;
+	صحيح nr_trees = 1;
+	بنية unpack_trees_options opts;
+	بنية tree_desc t[MAX_UNPACK_TREES];
+	بنية tree *tree;
+	بنية lock_file lock_file = LOCK_INIT;
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL))
-		return -1;
+	repo_read_index_preload(the_repository, عدم, 0);
+	𐤀𐤌 (refresh_index(the_repository->index, REFRESH_QUIET, عدم, عدم, عدم))
+		أرجع -1;
 
 	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, حجم(opts));
 
 	tree = repo_parse_tree_indirect(the_repository, i_tree);
-	if (repo_parse_tree(the_repository, tree))
-		return -1;
+	𐤀𐤌 (repo_parse_tree(the_repository, tree))
+		أرجع -1;
 
 	init_tree_desc(t, &tree->object.oid, tree->buffer, tree->size);
 
@@ -359,41 +359,41 @@ static int reset_tree(struct object_id *i_tree, int update, int reset)
 	opts.merge = 1;
 	opts.reset = reset ? UNPACK_RESET_PROTECT_UNTRACKED : 0;
 	opts.update = update;
-	if (update)
+	𐤀𐤌 (update)
 		opts.preserve_ignored = 0; /* FIXME: !overwrite_ignore */
 	opts.fn = oneway_merge;
 
-	if (unpack_trees(nr_trees, t, &opts))
-		return -1;
+	𐤀𐤌 (unpack_trees(nr_trees, t, &opts))
+		أرجع -1;
 
-	if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
-		return error(_("unable to write new index file"));
+	𐤀𐤌 (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+		أرجع error(_("unable to write new index file"));
 
-	return 0;
+	أرجع 0;
 }
 
-static int create_index_from_tree(const struct object_id *tree_id,
-				  const char *index_path)
+ساكن صحيح create_index_from_tree(ثابت بنية object_id *tree_id,
+				  ثابت حرف *index_path)
 {
-	int nr_trees = 1;
-	int ret = 0;
-	struct unpack_trees_options opts;
-	struct tree_desc t[MAX_UNPACK_TREES];
-	struct tree *tree;
-	struct index_state dst_istate = INDEX_STATE_INIT(the_repository);
-	struct lock_file lock_file = LOCK_INIT;
+	صحيح nr_trees = 1;
+	صحيح ret = 0;
+	بنية unpack_trees_options opts;
+	بنية tree_desc t[MAX_UNPACK_TREES];
+	بنية tree *tree;
+	بنية index_state dst_istate = INDEX_STATE_INIT(the_repository);
+	بنية lock_file lock_file = LOCK_INIT;
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL);
+	repo_read_index_preload(the_repository, عدم, 0);
+	refresh_index(the_repository->index, REFRESH_QUIET, عدم, عدم, عدم);
 
 	hold_lock_file_for_update(&lock_file, index_path, LOCK_DIE_ON_ERROR);
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, حجم(opts));
 
 	tree = repo_parse_tree_indirect(the_repository, tree_id);
-	if (!tree || repo_parse_tree(the_repository, tree)) {
+	𐤀𐤌 (!tree || repo_parse_tree(the_repository, tree)) {
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 
 	init_tree_desc(t, &tree->object.oid, tree->buffer, tree->size);
@@ -405,43 +405,43 @@ static int create_index_from_tree(const struct object_id *tree_id,
 	opts.reset = UNPACK_RESET_PROTECT_UNTRACKED;
 	opts.fn = oneway_merge;
 
-	if (unpack_trees(nr_trees, t, &opts)) {
+	𐤀𐤌 (unpack_trees(nr_trees, t, &opts)) {
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 
-	if (write_locked_index(&dst_istate, &lock_file, COMMIT_LOCK)) {
+	𐤀𐤌 (write_locked_index(&dst_istate, &lock_file, COMMIT_LOCK)) {
 		ret = error(_("unable to write new index file"));
-		goto done;
+		اذهب done;
 	}
 
 done:
 	release_index(&dst_istate);
-	if (ret)
+	𐤀𐤌 (ret)
 		rollback_lock_file(&lock_file);
-	return ret;
+	أرجع ret;
 }
 
-static int is_path_a_directory(const char *path)
+ساكن صحيح is_path_a_directory(ثابت حرف *path)
 {
 	/*
 	 * This function differs from abspath.c:is_directory() in that
 	 * here we use lstat() instead of stat(); we do not want to
 	 * follow symbolic links here.
 	 */
-	struct stat st;
-	return (!lstat(path, &st) && S_ISDIR(st.st_mode));
+	بنية stat st;
+	أرجع (!lstat(path, &st) && S_ISDIR(st.st_mode));
 }
 
-static void add_diff_to_buf(struct diff_queue_struct *q,
-			    struct diff_options *options UNUSED,
-			    void *data)
+ساكن فراغ add_diff_to_buf(بنية diff_queue_struct *q,
+			    بنية diff_options *options UNUSED,
+			    فراغ *data)
 {
-	int i;
+	صحيح i;
 
-	for (i = 0; i < q->nr; i++) {
-		if (is_path_a_directory(q->queue[i]->one->path))
-			continue;
+	لكل (i = 0; i < q->nr; i++) {
+		𐤀𐤌 (is_path_a_directory(q->queue[i]->one->path))
+			استمر;
 
 		strbuf_addstr(data, q->queue[i]->one->path);
 
@@ -450,10 +450,10 @@ static void add_diff_to_buf(struct diff_queue_struct *q,
 	}
 }
 
-static int restore_untracked(struct object_id *u_tree)
+ساكن صحيح restore_untracked(بنية object_id *u_tree)
 {
-	int res;
-	struct child_process cp = CHILD_PROCESS_INIT;
+	صحيح res;
+	بنية child_process cp = CHILD_PROCESS_INIT;
 
 	/*
 	 * We need to run restore files from a given index, but without
@@ -465,23 +465,23 @@ static int restore_untracked(struct object_id *u_tree)
 	strvec_push(&cp.args, oid_to_hex(u_tree));
 	strvec_pushf(&cp.env, "GIT_INDEX_FILE=%s",
 		     stash_index_path.buf);
-	if (run_command(&cp)) {
+	𐤀𐤌 (run_command(&cp)) {
 		remove_path(stash_index_path.buf);
-		return -1;
+		أرجع -1;
 	}
 
 	child_process_init(&cp);
 	cp.git_cmd = 1;
-	strvec_pushl(&cp.args, "checkout-index", "--all", NULL);
+	strvec_pushl(&cp.args, "checkout-index", "--all", عدم);
 	strvec_pushf(&cp.env, "GIT_INDEX_FILE=%s",
 		     stash_index_path.buf);
 
 	res = run_command(&cp);
 	remove_path(stash_index_path.buf);
-	return res;
+	أرجع res;
 }
 
-static void unstage_changes_unless_new(struct object_id *orig_tree)
+ساكن فراغ unstage_changes_unless_new(بنية object_id *orig_tree)
 {
 	/*
 	 * When we enter this function, there has been a clean merge of
@@ -494,10 +494,10 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 	 * it to the worktree before unstaging.
 	 */
 
-	struct checkout state = CHECKOUT_INIT;
-	struct diff_options diff_opts;
-	struct lock_file lock = LOCK_INIT;
-	int i;
+	بنية checkout state = CHECKOUT_INIT;
+	بنية diff_options diff_opts;
+	بنية lock_file lock = LOCK_INIT;
+	صحيح i;
 
 	/* If any entries have skip_worktree set, we'll have to check 'em out */
 	state.force = 1;
@@ -520,10 +520,10 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 	diffcore_std(&diff_opts);
 
 	/* Iterate over the paths that changed due to the merge... */
-	for (i = 0; i < diff_queued_diff.nr; i++) {
-		struct diff_filepair *p;
-		struct cache_entry *ce;
-		int pos;
+	لكل (i = 0; i < diff_queued_diff.nr; i++) {
+		بنية diff_filepair *p;
+		بنية cache_entry *ce;
+		صحيح pos;
 
 		/* Look up the path's position in the current index. */
 		p = diff_queued_diff.queue[i];
@@ -538,14 +538,14 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 		 * path, but left it out of the working tree, then clear the
 		 * SKIP_WORKTREE bit and write it to the working tree.
 		 */
-		if (pos >= 0 && ce_skip_worktree(the_repository->index->cache[pos])) {
-			struct stat st;
+		𐤀𐤌 (pos >= 0 && ce_skip_worktree(the_repository->index->cache[pos])) {
+			بنية stat st;
 
 			ce = the_repository->index->cache[pos];
-			if (!lstat(ce->name, &st)) {
+			𐤀𐤌 (!lstat(ce->name, &st)) {
 				/* Conflicting path present; relocate it */
-				struct strbuf new_path = STRBUF_INIT;
-				int fd;
+				بنية strbuf new_path = STRBUF_INIT;
+				صحيح fd;
 
 				strbuf_addf(&new_path,
 					    "%s.stash.XXXXXX", ce->name);
@@ -556,25 +556,25 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 					 "           %s -> %s\n"
 					 "         to make room.\n"),
 				       ce->name, new_path.buf);
-				if (rename(ce->name, new_path.buf))
+				𐤀𐤌 (rename(ce->name, new_path.buf))
 					die("Failed to move %s to %s",
 					    ce->name, new_path.buf);
 				strbuf_release(&new_path);
 			}
-			checkout_entry(ce, &state, NULL, NULL);
+			checkout_entry(ce, &state, عدم, عدم);
 			ce->ce_flags &= ~CE_SKIP_WORKTREE;
 		}
 
 		/*
 		 * Step 3: "unstage" changes, as long as they are still tracked
 		 */
-		if (p->one->oid_valid) {
+		𐤀𐤌 (p->one->oid_valid) {
 			/*
 			 * Path existed in orig_tree; restore index entry
 			 * from that tree in order to "unstage" the changes.
 			 */
-			int option = ADD_CACHE_OK_TO_REPLACE;
-			if (pos < 0)
+			صحيح option = ADD_CACHE_OK_TO_REPLACE;
+			𐤀𐤌 (pos < 0)
 				option = ADD_CACHE_OK_TO_ADD;
 
 			ce = make_cache_entry(the_repository->index,
@@ -591,46 +591,46 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 	 * Step 4: write the new index to disk
 	 */
 	repo_hold_locked_index(the_repository, &lock, LOCK_DIE_ON_ERROR);
-	if (write_locked_index(the_repository->index, &lock,
+	𐤀𐤌 (write_locked_index(the_repository->index, &lock,
 			       COMMIT_LOCK | SKIP_IF_UNCHANGED))
 		die(_("could not write index"));
 }
 
-static enum stash_apply_result do_apply_stash(const char *prefix,
-					      struct stash_info *info,
-					      int index, int quiet,
-					      const char *label_ours,
-					      const char *label_theirs,
-					      const char *label_base)
+ساكن تعداد stash_apply_result do_apply_stash(ثابت حرف *prefix,
+					      بنية stash_info *info,
+					      صحيح index, صحيح quiet,
+					      ثابت حرف *label_ours,
+					      ثابت حرف *label_theirs,
+					      ثابت حرف *label_base)
 {
-	int clean, ret;
-	int has_index = index;
-	struct merge_options o;
-	struct object_id c_tree;
-	struct object_id index_tree;
-	struct tree *head, *merge, *merge_base;
-	struct lock_file lock = LOCK_INIT;
+	صحيح clean, ret;
+	صحيح has_index = index;
+	بنية merge_options o;
+	بنية object_id c_tree;
+	بنية object_id index_tree;
+	بنية tree *head, *merge, *merge_base;
+	بنية lock_file lock = LOCK_INIT;
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
-					 NULL, NULL, NULL))
-		return error(_("could not write index"));
+	repo_read_index_preload(the_repository, عدم, 0);
+	𐤀𐤌 (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
+					 عدم, عدم, عدم))
+		أرجع error(_("could not write index"));
 
-	if (write_index_as_tree(&c_tree, the_repository->index,
-				repo_get_index_file(the_repository), 0, NULL))
-		return error(_("cannot apply a stash in the middle of a merge"));
+	𐤀𐤌 (write_index_as_tree(&c_tree, the_repository->index,
+				repo_get_index_file(the_repository), 0, عدم))
+		أرجع error(_("cannot apply a stash in the middle of a merge"));
 
 	init_ui_merge_options(&o, the_repository);
 
-	if (quiet)
+	𐤀𐤌 (quiet)
 		o.verbosity = 0;
 
-	if (index) {
-		if (oideq(&info->b_tree, &info->i_tree) ||
+	𐤀𐤌 (index) {
+		𐤀𐤌 (oideq(&info->b_tree, &info->i_tree) ||
 		    oideq(&c_tree, &info->i_tree)) {
 			has_index = 0;
-		} else {
-			struct merge_result result = { 0 };
+		} وإلا {
+			بنية merge_result result = { 0 };
 
 			o.branch1 = "Current index";
 			o.branch2 = "Stashed index changes";
@@ -643,14 +643,14 @@ static enum stash_apply_result do_apply_stash(const char *prefix,
 			merge_incore_nonrecursive(&o, merge_base, head, merge,
 						  &result);
 
-			if (result.clean < 0) {
+			𐤀𐤌 (result.clean < 0) {
 				merge_finalize(&o, &result);
-				return error(_("index merge failed"));
-			} else if (!result.clean) {
+				أرجع error(_("index merge failed"));
+			} وإلا 𐤀𐤌 (!result.clean) {
 				merge_finalize(&o, &result);
-				return error(_("conflicts in index. "
+				أرجع error(_("conflicts in index. "
 					       "Try without --index."));
-			} else {
+			} وإلا {
 				oidcpy(&index_tree, &result.tree->object.oid);
 				merge_finalize(&o, &result);
 			}
@@ -661,10 +661,10 @@ static enum stash_apply_result do_apply_stash(const char *prefix,
 	o.branch2 = label_theirs ? label_theirs : "Stashed changes";
 	o.ancestor = label_base ? label_base : "Stash base";
 
-	if (oideq(&info->b_tree, &c_tree))
+	𐤀𐤌 (oideq(&info->b_tree, &c_tree))
 		o.branch1 = "Version stash was based on";
 
-	if (o.verbosity >= 3)
+	𐤀𐤌 (o.verbosity >= 3)
 		printf_ln(_("Merging %s with %s"), o.branch1, o.branch2);
 
 	head = lookup_tree(o.repo, &c_tree);
@@ -681,34 +681,34 @@ static enum stash_apply_result do_apply_stash(const char *prefix,
 	 */
 	ret = clean >= 0 ? !clean : clean;
 
-	if (ret < 0)
+	𐤀𐤌 (ret < 0)
 		rollback_lock_file(&lock);
-	else if (write_locked_index(o.repo->index, &lock,
+	وإلا 𐤀𐤌 (write_locked_index(o.repo->index, &lock,
 				      COMMIT_LOCK | SKIP_IF_UNCHANGED))
 		ret = error(_("could not write index"));
 
-	if (ret) {
+	𐤀𐤌 (ret) {
 		repo_rerere(the_repository, 0);
 
-		if (index)
+		𐤀𐤌 (index)
 			fprintf_ln(stderr, _("Index was not unstashed."));
 
-		goto restore_untracked;
+		اذهب restore_untracked;
 	}
 
-	if (has_index) {
-		if (reset_tree(&index_tree, 0, 0))
+	𐤀𐤌 (has_index) {
+		𐤀𐤌 (reset_tree(&index_tree, 0, 0))
 			ret = -1;
-	} else {
+	} وإلا {
 		unstage_changes_unless_new(&c_tree);
 	}
 
 restore_untracked:
-	if (info->has_u && restore_untracked(&info->u_tree))
+	𐤀𐤌 (info->has_u && restore_untracked(&info->u_tree))
 		ret = error(_("could not restore untracked files from stash"));
 
-	if (!quiet) {
-		struct child_process cp = CHILD_PROCESS_INIT;
+	𐤀𐤌 (!quiet) {
+		بنية child_process cp = CHILD_PROCESS_INIT;
 
 		/*
 		 * Status is quite simple and could be replaced with calls to
@@ -725,18 +725,18 @@ restore_untracked:
 		run_command(&cp);
 	}
 
-	return ret;
+	أرجع ret;
 }
 
-static int apply_stash(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+ساكن صحيح apply_stash(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+		       بنية repository *repo UNUSED)
 {
-	int ret = -1;
-	int quiet = 0;
-	int index = use_index;
-	const char *label_ours = NULL, *label_theirs = NULL, *label_base = NULL;
-	struct stash_info info = STASH_INFO_INIT;
-	struct option options[] = {
+	صحيح ret = -1;
+	صحيح quiet = 0;
+	صحيح index = use_index;
+	ثابت حرف *label_ours = عدم, *label_theirs = عدم, *label_base = عدم;
+	بنية stash_info info = STASH_INFO_INIT;
+	بنية option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet, only report errors")),
 		OPT_BOOL(0, "index", &index,
 			 N_("attempt to recreate the index")),
@@ -752,73 +752,73 @@ static int apply_stash(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     git_stash_apply_usage, 0);
 
-	if (get_stash_info(&info, argc, argv))
-		goto cleanup;
+	𐤀𐤌 (get_stash_info(&info, argc, argv))
+		اذهب cleanup;
 
 	ret = do_apply_stash(prefix, &info, index, quiet,
 			     label_ours, label_theirs, label_base);
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	أرجع ret;
 }
 
-static int reject_reflog_ent(const char *refname UNUSED,
-			     struct object_id *ooid UNUSED,
-			     struct object_id *noid UNUSED,
-			     const char *email UNUSED,
+ساكن صحيح reject_reflog_ent(ثابت حرف *refname UNUSED,
+			     بنية object_id *ooid UNUSED,
+			     بنية object_id *noid UNUSED,
+			     ثابت حرف *email UNUSED,
 			     timestamp_t timestamp UNUSED,
-			     int tz UNUSED, const char *message UNUSED,
-			     void *cb_data UNUSED)
+			     صحيح tz UNUSED, ثابت حرف *message UNUSED,
+			     فراغ *cb_data UNUSED)
 {
-	return 1;
+	أرجع 1;
 }
 
-static int reflog_is_empty(const char *refname)
+ساكن صحيح reflog_is_empty(ثابت حرف *refname)
 {
-	return !refs_for_each_reflog_ent(get_main_ref_store(the_repository),
-					 refname, reject_reflog_ent, NULL);
+	أرجع !refs_for_each_reflog_ent(get_main_ref_store(the_repository),
+					 refname, reject_reflog_ent, عدم);
 }
 
-static int do_drop_stash(struct stash_info *info, int quiet)
+ساكن صحيح do_drop_stash(بنية stash_info *info, صحيح quiet)
 {
-	if (!reflog_delete(info->revision.buf,
+	𐤀𐤌 (!reflog_delete(info->revision.buf,
 			   EXPIRE_REFLOGS_REWRITE | EXPIRE_REFLOGS_UPDATE_REF,
 			   0)) {
-		if (!quiet)
+		𐤀𐤌 (!quiet)
 			printf_ln(_("Dropped %s (%s)"), info->revision.buf,
 				  oid_to_hex(&info->w_commit));
-	} else {
-		return error(_("%s: Could not drop stash entry"),
+	} وإلا {
+		أرجع error(_("%s: Could not drop stash entry"),
 			     info->revision.buf);
 	}
 
-	if (reflog_is_empty(ref_stash))
+	𐤀𐤌 (reflog_is_empty(ref_stash))
 		do_clear_stash();
 
-	return 0;
+	أرجع 0;
 }
 
-static int get_stash_info_assert(struct stash_info *info, int argc,
-				 const char **argv)
+ساكن صحيح get_stash_info_assert(بنية stash_info *info, صحيح argc,
+				 ثابت حرف **argv)
 {
-	int ret = get_stash_info(info, argc, argv);
+	صحيح ret = get_stash_info(info, argc, argv);
 
-	if (ret < 0)
-		return ret;
+	𐤀𐤌 (ret < 0)
+		أرجع ret;
 
-	if (!info->is_stash_ref)
-		return error(_("'%s' is not a stash reference"), info->revision.buf);
+	𐤀𐤌 (!info->is_stash_ref)
+		أرجع error(_("'%s' is not a stash reference"), info->revision.buf);
 
-	return 0;
+	أرجع 0;
 }
 
-static int drop_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+ساكن صحيح drop_stash(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+		      بنية repository *repo UNUSED)
 {
-	int ret = -1;
-	int quiet = 0;
-	struct stash_info info = STASH_INFO_INIT;
-	struct option options[] = {
+	صحيح ret = -1;
+	صحيح quiet = 0;
+	بنية stash_info info = STASH_INFO_INIT;
+	بنية option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet, only report errors")),
 		OPT_END()
 	};
@@ -826,23 +826,23 @@ static int drop_stash(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     git_stash_drop_usage, 0);
 
-	if (get_stash_info_assert(&info, argc, argv))
-		goto cleanup;
+	𐤀𐤌 (get_stash_info_assert(&info, argc, argv))
+		اذهب cleanup;
 
 	ret = do_drop_stash(&info, quiet);
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	أرجع ret;
 }
 
-static int pop_stash(int argc, const char **argv, const char *prefix,
-		     struct repository *repo UNUSED)
+ساكن صحيح pop_stash(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+		     بنية repository *repo UNUSED)
 {
-	int ret = -1;
-	int index = use_index;
-	int quiet = 0;
-	struct stash_info info = STASH_INFO_INIT;
-	struct option options[] = {
+	صحيح ret = -1;
+	صحيح index = use_index;
+	صحيح quiet = 0;
+	بنية stash_info info = STASH_INFO_INIT;
+	بنية option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet, only report errors")),
 		OPT_BOOL(0, "index", &index,
 			 N_("attempt to recreate the index")),
@@ -852,66 +852,66 @@ static int pop_stash(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     git_stash_pop_usage, 0);
 
-	if (get_stash_info_assert(&info, argc, argv))
-		goto cleanup;
+	𐤀𐤌 (get_stash_info_assert(&info, argc, argv))
+		اذهب cleanup;
 
-	if ((ret = do_apply_stash(prefix, &info, index, quiet,
-				  NULL, NULL, NULL)))
+	𐤀𐤌 ((ret = do_apply_stash(prefix, &info, index, quiet,
+				  عدم, عدم, عدم)))
 		printf_ln(_("The stash entry is kept in case "
 			    "you need it again."));
-	else
+	وإلا
 		ret = do_drop_stash(&info, quiet);
 
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	أرجع ret;
 }
 
-static int branch_stash(int argc, const char **argv, const char *prefix,
-			struct repository *repo UNUSED)
+ساكن صحيح branch_stash(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+			بنية repository *repo UNUSED)
 {
-	int ret = -1;
-	const char *branch = NULL;
-	struct stash_info info = STASH_INFO_INIT;
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct option options[] = {
+	صحيح ret = -1;
+	ثابت حرف *branch = عدم;
+	بنية stash_info info = STASH_INFO_INIT;
+	بنية child_process cp = CHILD_PROCESS_INIT;
+	بنية option options[] = {
 		OPT_END()
 	};
 
 	argc = parse_options(argc, argv, prefix, options,
 			     git_stash_branch_usage, 0);
 
-	if (!argc) {
+	𐤀𐤌 (!argc) {
 		fprintf_ln(stderr, _("No branch name specified"));
-		return -1;
+		أرجع -1;
 	}
 
 	branch = argv[0];
 
-	if (get_stash_info(&info, argc - 1, argv + 1))
-		goto cleanup;
+	𐤀𐤌 (get_stash_info(&info, argc - 1, argv + 1))
+		اذهب cleanup;
 
 	cp.git_cmd = 1;
-	strvec_pushl(&cp.args, "checkout", "-b", NULL);
+	strvec_pushl(&cp.args, "checkout", "-b", عدم);
 	strvec_push(&cp.args, branch);
 	strvec_push(&cp.args, oid_to_hex(&info.b_commit));
 	ret = run_command(&cp);
-	if (!ret)
+	𐤀𐤌 (!ret)
 		ret = do_apply_stash(prefix, &info, 1, 0,
-				     NULL, NULL, NULL);
-	if (!ret && info.is_stash_ref)
+				     عدم, عدم, عدم);
+	𐤀𐤌 (!ret && info.is_stash_ref)
 		ret = do_drop_stash(&info, 0);
 
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	أرجع ret;
 }
 
-static int list_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+ساكن صحيح list_stash(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+		      بنية repository *repo UNUSED)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct option options[] = {
+	بنية child_process cp = CHILD_PROCESS_INIT;
+	بنية option options[] = {
 		OPT_END()
 	};
 
@@ -919,50 +919,50 @@ static int list_stash(int argc, const char **argv, const char *prefix,
 			     git_stash_list_usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT);
 
-	if (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash))
-		return 0;
+	𐤀𐤌 (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash))
+		أرجع 0;
 
 	cp.git_cmd = 1;
 	strvec_pushl(&cp.args, "log", "--format=%gd: %gs", "-g",
-		     "--first-parent", NULL);
+		     "--first-parent", عدم);
 	strvec_pushv(&cp.args, argv);
 	strvec_push(&cp.args, ref_stash);
 	strvec_push(&cp.args, "--");
-	return run_command(&cp);
+	أرجع run_command(&cp);
 }
 
-static int git_stash_config(const char *var, const char *value,
-			    const struct config_context *ctx, void *cb)
+ساكن صحيح git_stash_config(ثابت حرف *var, ثابت حرف *value,
+			    ثابت بنية config_context *ctx, فراغ *cb)
 {
-	if (!strcmp(var, "stash.showstat")) {
+	𐤀𐤌 (!strcmp(var, "stash.showstat")) {
 		show_stat = git_config_bool(var, value);
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "stash.showpatch")) {
+	𐤀𐤌 (!strcmp(var, "stash.showpatch")) {
 		show_patch = git_config_bool(var, value);
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "stash.showincludeuntracked")) {
+	𐤀𐤌 (!strcmp(var, "stash.showincludeuntracked")) {
 		show_include_untracked = git_config_bool(var, value);
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "stash.index")) {
+	𐤀𐤌 (!strcmp(var, "stash.index")) {
 		use_index = git_config_bool(var, value);
-		return 0;
+		أرجع 0;
 	}
-	return git_diff_basic_config(var, value, ctx, cb);
+	أرجع git_diff_basic_config(var, value, ctx, cb);
 }
 
-static void diff_include_untracked(const struct stash_info *info, struct diff_options *diff_opt)
+ساكن فراغ diff_include_untracked(ثابت بنية stash_info *info, بنية diff_options *diff_opt)
 {
-	const struct object_id *oid[] = { &info->w_commit, &info->u_tree };
-	struct tree *tree[ARRAY_SIZE(oid)];
-	struct tree_desc tree_desc[ARRAY_SIZE(oid)];
-	struct unpack_trees_options unpack_tree_opt = { 0 };
+	ثابت بنية object_id *oid[] = { &info->w_commit, &info->u_tree };
+	بنية tree *tree[ARRAY_SIZE(oid)];
+	بنية tree_desc tree_desc[ARRAY_SIZE(oid)];
+	بنية unpack_trees_options unpack_tree_opt = { 0 };
 
-	for (size_t i = 0; i < ARRAY_SIZE(oid); i++) {
+	لكل (size_t i = 0; i < ARRAY_SIZE(oid); i++) {
 		tree[i] = repo_parse_tree_indirect(the_repository, oid[i]);
-		if (repo_parse_tree(the_repository, tree[i]) < 0)
+		𐤀𐤌 (repo_parse_tree(the_repository, tree[i]) < 0)
 			die(_("failed to parse tree"));
 		init_tree_desc(&tree_desc[i], &tree[i]->object.oid,
 			       tree[i]->buffer, tree[i]->size);
@@ -974,27 +974,27 @@ static void diff_include_untracked(const struct stash_info *info, struct diff_op
 	unpack_tree_opt.merge = 1;
 	unpack_tree_opt.fn = stash_worktree_untracked_merge;
 
-	if (unpack_trees(ARRAY_SIZE(tree_desc), tree_desc, &unpack_tree_opt))
+	𐤀𐤌 (unpack_trees(ARRAY_SIZE(tree_desc), tree_desc, &unpack_tree_opt))
 		die(_("failed to unpack trees"));
 
 	do_diff_cache(&info->b_commit, diff_opt);
 }
 
-static int show_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+ساكن صحيح show_stash(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+		      بنية repository *repo UNUSED)
 {
-	int i;
-	int ret = -1;
-	struct stash_info info = STASH_INFO_INIT;
-	struct rev_info rev;
-	struct strvec stash_args = STRVEC_INIT;
-	struct strvec revision_args = STRVEC_INIT;
-	enum {
+	صحيح i;
+	صحيح ret = -1;
+	بنية stash_info info = STASH_INFO_INIT;
+	بنية rev_info rev;
+	بنية strvec stash_args = STRVEC_INIT;
+	بنية strvec revision_args = STRVEC_INIT;
+	تعداد {
 		UNTRACKED_NONE,
 		UNTRACKED_INCLUDE,
 		UNTRACKED_ONLY
 	} show_untracked = show_include_untracked ? UNTRACKED_INCLUDE : UNTRACKED_NONE;
-	struct option options[] = {
+	بنية option options[] = {
 		OPT_SET_INT('u', "include-untracked", &show_untracked,
 			    N_("include untracked files in the stash"),
 			    UNTRACKED_INCLUDE),
@@ -1003,10 +1003,10 @@ static int show_stash(int argc, const char **argv, const char *prefix,
 			      UNTRACKED_ONLY, PARSE_OPT_NONEG),
 		OPT_END()
 	};
-	int do_usage = 0;
+	صحيح do_usage = 0;
 
 	init_diff_ui_defaults();
-	repo_config(the_repository, git_diff_ui_config, NULL);
+	repo_config(the_repository, git_diff_ui_config, عدم);
 	repo_init_revisions(the_repository, &rev, prefix);
 
 	argc = parse_options(argc, argv, prefix, options, git_stash_show_usage,
@@ -1014,57 +1014,57 @@ static int show_stash(int argc, const char **argv, const char *prefix,
 			     PARSE_OPT_KEEP_DASHDASH);
 
 	strvec_push(&revision_args, argv[0]);
-	for (i = 1; i < argc; i++) {
-		if (argv[i][0] != '-')
+	لكل (i = 1; i < argc; i++) {
+		𐤀𐤌 (argv[i][0] != '-')
 			strvec_push(&stash_args, argv[i]);
-		else
+		وإلا
 			strvec_push(&revision_args, argv[i]);
 	}
 
-	if (get_stash_info(&info, stash_args.nr, stash_args.v))
-		goto cleanup;
+	𐤀𐤌 (get_stash_info(&info, stash_args.nr, stash_args.v))
+		اذهب cleanup;
 
 	/*
 	 * The config settings are applied only if there are not passed
 	 * any options.
 	 */
-	if (revision_args.nr == 1) {
-		if (show_stat)
+	𐤀𐤌 (revision_args.nr == 1) {
+		𐤀𐤌 (show_stat)
 			rev.diffopt.output_format = DIFF_FORMAT_DIFFSTAT;
 
-		if (show_patch)
+		𐤀𐤌 (show_patch)
 			rev.diffopt.output_format |= DIFF_FORMAT_PATCH;
 
-		if (!show_stat && !show_patch) {
+		𐤀𐤌 (!show_stat && !show_patch) {
 			ret = 0;
-			goto cleanup;
+			اذهب cleanup;
 		}
 	}
 
-	setup_revisions_from_strvec(&revision_args, &rev, NULL);
-	if (revision_args.nr > 1)
-		goto usage;
-	if (!rev.diffopt.output_format) {
+	setup_revisions_from_strvec(&revision_args, &rev, عدم);
+	𐤀𐤌 (revision_args.nr > 1)
+		اذهب usage;
+	𐤀𐤌 (!rev.diffopt.output_format) {
 		rev.diffopt.output_format = DIFF_FORMAT_PATCH;
 		diff_setup_done(&rev.diffopt);
 	}
 
 	rev.diffopt.flags.recursive = 1;
 	setup_diff_pager(&rev.diffopt);
-	switch (show_untracked) {
-	case UNTRACKED_NONE:
+	بدل (show_untracked) {
+	حالة UNTRACKED_NONE:
 		diff_tree_oid(&info.b_commit, &info.w_commit, "", &rev.diffopt);
-		break;
-	case UNTRACKED_ONLY:
-		if (info.has_u)
+		اكسر;
+	حالة UNTRACKED_ONLY:
+		𐤀𐤌 (info.has_u)
 			diff_root_tree_oid(&info.u_tree, "", &rev.diffopt);
-		break;
-	case UNTRACKED_INCLUDE:
-		if (info.has_u)
+		اكسر;
+	حالة UNTRACKED_INCLUDE:
+		𐤀𐤌 (info.has_u)
 			diff_include_untracked(&info, &rev.diffopt);
-		else
+		وإلا
 			diff_tree_oid(&info.b_commit, &info.w_commit, "", &rev.diffopt);
-		break;
+		اكسر;
 	}
 	log_tree_diff_flush(&rev);
 
@@ -1075,85 +1075,85 @@ cleanup:
 	strvec_clear(&stash_args);
 	free_stash_info(&info);
 	release_revisions(&rev);
-	if (do_usage)
+	𐤀𐤌 (do_usage)
 		usage_with_options(git_stash_show_usage, options);
-	return ret;
+	أرجع ret;
 usage:
 	do_usage = 1;
-	goto cleanup;
+	اذهب cleanup;
 }
 
-static int do_store_stash(const struct object_id *w_commit, const char *stash_msg,
-			  int quiet)
+ساكن صحيح do_store_stash(ثابت بنية object_id *w_commit, ثابت حرف *stash_msg,
+			  صحيح quiet)
 {
-	struct stash_info info;
-	char revision[GIT_MAX_HEXSZ];
+	بنية stash_info info;
+	حرف revision[GIT_MAX_HEXSZ];
 
 	oid_to_hex_r(revision, w_commit);
 	assert_stash_like(&info, revision);
 
-	if (!stash_msg)
+	𐤀𐤌 (!stash_msg)
 		stash_msg = "Created via \"git stash store\".";
 
-	if (refs_update_ref(get_main_ref_store(the_repository), stash_msg, ref_stash, w_commit, NULL,
+	𐤀𐤌 (refs_update_ref(get_main_ref_store(the_repository), stash_msg, ref_stash, w_commit, عدم,
 			    REF_FORCE_CREATE_REFLOG,
 			    quiet ? UPDATE_REFS_QUIET_ON_ERR :
 			    UPDATE_REFS_MSG_ON_ERR)) {
-		if (!quiet) {
+		𐤀𐤌 (!quiet) {
 			fprintf_ln(stderr, _("Cannot update %s with %s"),
 				   ref_stash, oid_to_hex(w_commit));
 		}
-		return -1;
+		أرجع -1;
 	}
 
-	return 0;
+	أرجع 0;
 }
 
-static int store_stash(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+ساكن صحيح store_stash(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+		       بنية repository *repo UNUSED)
 {
-	int quiet = 0;
-	const char *stash_msg = NULL;
-	struct object_id obj;
-	struct option options[] = {
+	صحيح quiet = 0;
+	ثابت حرف *stash_msg = عدم;
+	بنية object_id obj;
+	بنية option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet")),
 		OPT_STRING('m', "message", &stash_msg, "message",
 			   N_("stash message")),
 		OPT_END()
 	};
-	int ret;
+	صحيح ret;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     git_stash_store_usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT);
 
-	if (argc != 1) {
-		if (!quiet)
+	𐤀𐤌 (argc != 1) {
+		𐤀𐤌 (!quiet)
 			fprintf_ln(stderr, _("\"git stash store\" requires one "
 					     "<commit> argument"));
-		return -1;
+		أرجع -1;
 	}
 
-	if (repo_get_oid_with_flags(the_repository, argv[0], &obj,
+	𐤀𐤌 (repo_get_oid_with_flags(the_repository, argv[0], &obj,
 				    quiet ? GET_OID_QUIETLY : 0)) {
-		if (!quiet)
+		𐤀𐤌 (!quiet)
 			fprintf_ln(stderr, _("Cannot update %s with %s"),
 					     ref_stash, argv[0]);
 		ret = -1;
-		goto out;
+		اذهب out;
 	}
 
 	ret = do_store_stash(&obj, stash_msg, quiet);
 
 out:
-	return ret;
+	أرجع ret;
 }
 
-static void add_pathspecs(struct strvec *args,
-			  const struct pathspec *ps) {
-	int i;
+ساكن فراغ add_pathspecs(بنية strvec *args,
+			  ثابت بنية pathspec *ps) {
+	صحيح i;
 
-	for (i = 0; i < ps->nr; i++)
+	لكل (i = 0; i < ps->nr; i++)
 		strvec_push(args, ps->items[i].original);
 }
 
@@ -1164,19 +1164,19 @@ static void add_pathspecs(struct strvec *args,
  * = 0 if there are not any untracked files
  * > 0 if there are untracked files
  */
-static int get_untracked_files(const struct pathspec *ps, int include_untracked,
-			       struct strbuf *untracked_files)
+ساكن صحيح get_untracked_files(ثابت بنية pathspec *ps, صحيح include_untracked,
+			       بنية strbuf *untracked_files)
 {
-	int i;
-	int found = 0;
-	struct dir_struct dir = DIR_INIT;
+	صحيح i;
+	صحيح found = 0;
+	بنية dir_struct dir = DIR_INIT;
 
-	if (include_untracked != INCLUDE_ALL_FILES)
+	𐤀𐤌 (include_untracked != INCLUDE_ALL_FILES)
 		setup_standard_excludes(&dir);
 
 	fill_directory(&dir, the_repository->index, ps);
-	for (i = 0; i < dir.nr; i++) {
-		struct dir_entry *ent = dir.entries[i];
+	لكل (i = 0; i < dir.nr; i++) {
+		بنية dir_entry *ent = dir.entries[i];
 		found++;
 		strbuf_addstr(untracked_files, ent->name);
 		/* NUL-terminate: will be fed to update-index -z */
@@ -1184,7 +1184,7 @@ static int get_untracked_files(const struct pathspec *ps, int include_untracked,
 	}
 
 	dir_clear(&dir);
-	return found;
+	أرجع found;
 }
 
 /*
@@ -1194,20 +1194,20 @@ static int get_untracked_files(const struct pathspec *ps, int include_untracked,
  * = 0 if there are no changes.
  * > 0 if there are changes.
  */
-static int check_changes_tracked_files(const struct pathspec *ps)
+ساكن صحيح check_changes_tracked_files(ثابت بنية pathspec *ps)
 {
-	struct rev_info rev;
-	struct object_id dummy;
-	int ret = 0;
+	بنية rev_info rev;
+	بنية object_id dummy;
+	صحيح ret = 0;
 
 	/* No initial commit. */
-	if (repo_get_oid(the_repository, "HEAD", &dummy))
-		return -1;
+	𐤀𐤌 (repo_get_oid(the_repository, "HEAD", &dummy))
+		أرجع -1;
 
-	if (repo_read_index(the_repository) < 0)
-		return -1;
+	𐤀𐤌 (repo_read_index(the_repository) < 0)
+		أرجع -1;
 
-	repo_init_revisions(the_repository, &rev, NULL);
+	repo_init_revisions(the_repository, &rev, عدم);
 	copy_pathspec(&rev.prune_data, ps);
 
 	rev.diffopt.flags.quick = 1;
@@ -1218,140 +1218,140 @@ static int check_changes_tracked_files(const struct pathspec *ps)
 	diff_setup_done(&rev.diffopt);
 
 	run_diff_index(&rev, DIFF_INDEX_CACHED);
-	if (diff_result_code(&rev)) {
+	𐤀𐤌 (diff_result_code(&rev)) {
 		ret = 1;
-		goto done;
+		اذهب done;
 	}
 
 	run_diff_files(&rev, 0);
-	if (diff_result_code(&rev)) {
+	𐤀𐤌 (diff_result_code(&rev)) {
 		ret = 1;
-		goto done;
+		اذهب done;
 	}
 
 done:
 	release_revisions(&rev);
-	return ret;
+	أرجع ret;
 }
 
 /*
  * The function will fill `untracked_files` with the names of untracked files
  * It will return 1 if there were any changes and 0 if there were not.
  */
-static int check_changes(const struct pathspec *ps, int include_untracked,
-			 struct strbuf *untracked_files)
+ساكن صحيح check_changes(ثابت بنية pathspec *ps, صحيح include_untracked,
+			 بنية strbuf *untracked_files)
 {
-	int ret = 0;
-	if (check_changes_tracked_files(ps))
+	صحيح ret = 0;
+	𐤀𐤌 (check_changes_tracked_files(ps))
 		ret = 1;
 
-	if (include_untracked && get_untracked_files(ps, include_untracked,
+	𐤀𐤌 (include_untracked && get_untracked_files(ps, include_untracked,
 						     untracked_files))
 		ret = 1;
 
-	return ret;
+	أرجع ret;
 }
 
-static int save_untracked_files(struct stash_info *info, struct strbuf *msg,
-				struct strbuf *files)
+ساكن صحيح save_untracked_files(بنية stash_info *info, بنية strbuf *msg,
+				بنية strbuf *files)
 {
-	int ret = 0;
-	struct strbuf untracked_msg = STRBUF_INIT;
-	struct child_process cp_upd_index = CHILD_PROCESS_INIT;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
+	صحيح ret = 0;
+	بنية strbuf untracked_msg = STRBUF_INIT;
+	بنية child_process cp_upd_index = CHILD_PROCESS_INIT;
+	بنية index_state istate = INDEX_STATE_INIT(the_repository);
 
 	cp_upd_index.git_cmd = 1;
 	strvec_pushl(&cp_upd_index.args, "update-index", "-z", "--add",
-		     "--remove", "--stdin", NULL);
+		     "--remove", "--stdin", عدم);
 	strvec_pushf(&cp_upd_index.env, "GIT_INDEX_FILE=%s",
 			 stash_index_path.buf);
 
 	strbuf_addf(&untracked_msg, "untracked files on %s\n", msg->buf);
-	if (pipe_command(&cp_upd_index, files->buf, files->len, NULL, 0,
-			 NULL, 0)) {
+	𐤀𐤌 (pipe_command(&cp_upd_index, files->buf, files->len, عدم, 0,
+			 عدم, 0)) {
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 
-	if (write_index_as_tree(&info->u_tree, &istate, stash_index_path.buf, 0,
-				NULL)) {
+	𐤀𐤌 (write_index_as_tree(&info->u_tree, &istate, stash_index_path.buf, 0,
+				عدم)) {
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 
-	if (commit_tree(untracked_msg.buf, untracked_msg.len,
-			&info->u_tree, NULL, &info->u_commit, NULL, NULL)) {
+	𐤀𐤌 (commit_tree(untracked_msg.buf, untracked_msg.len,
+			&info->u_tree, عدم, &info->u_commit, عدم, عدم)) {
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 
 done:
 	release_index(&istate);
 	strbuf_release(&untracked_msg);
 	remove_path(stash_index_path.buf);
-	return ret;
+	أرجع ret;
 }
 
-static int stash_staged(struct stash_info *info, struct strbuf *out_patch,
-			int quiet)
+ساكن صحيح stash_staged(بنية stash_info *info, بنية strbuf *out_patch,
+			صحيح quiet)
 {
-	int ret = 0;
-	struct child_process cp_diff_tree = CHILD_PROCESS_INIT;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
+	صحيح ret = 0;
+	بنية child_process cp_diff_tree = CHILD_PROCESS_INIT;
+	بنية index_state istate = INDEX_STATE_INIT(the_repository);
 
-	if (write_index_as_tree(&info->w_tree, &istate, the_repository->index_file,
-				0, NULL)) {
+	𐤀𐤌 (write_index_as_tree(&info->w_tree, &istate, the_repository->index_file,
+				0, عدم)) {
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 
 	cp_diff_tree.git_cmd = 1;
 	strvec_pushl(&cp_diff_tree.args, "diff-tree", "-p", "--binary",
 		     "--no-color",
-		     "-U1", "HEAD", oid_to_hex(&info->w_tree), "--", NULL);
-	if (pipe_command(&cp_diff_tree, NULL, 0, out_patch, 0, NULL, 0)) {
+		     "-U1", "HEAD", oid_to_hex(&info->w_tree), "--", عدم);
+	𐤀𐤌 (pipe_command(&cp_diff_tree, عدم, 0, out_patch, 0, عدم, 0)) {
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 
-	if (!out_patch->len) {
-		if (!quiet)
+	𐤀𐤌 (!out_patch->len) {
+		𐤀𐤌 (!quiet)
 			fprintf_ln(stderr, _("No staged changes"));
 		ret = 1;
 	}
 
 done:
 	release_index(&istate);
-	return ret;
+	أرجع ret;
 }
 
-static int stash_patch(struct stash_info *info, const struct pathspec *ps,
-		       struct strbuf *out_patch, int quiet,
-		       struct interactive_options *interactive_opts)
+ساكن صحيح stash_patch(بنية stash_info *info, ثابت بنية pathspec *ps,
+		       بنية strbuf *out_patch, صحيح quiet,
+		       بنية interactive_options *interactive_opts)
 {
-	int ret = 0;
-	struct child_process cp_diff_tree = CHILD_PROCESS_INIT;
-	struct commit *head_commit;
-	const struct object_id *head_tree;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
-	char *old_index_env = NULL, *old_repo_index_file;
+	صحيح ret = 0;
+	بنية child_process cp_diff_tree = CHILD_PROCESS_INIT;
+	بنية commit *head_commit;
+	ثابت بنية object_id *head_tree;
+	بنية index_state istate = INDEX_STATE_INIT(the_repository);
+	حرف *old_index_env = عدم, *old_repo_index_file;
 
 	remove_path(stash_index_path.buf);
 
 	head_commit = lookup_commit(the_repository, &info->b_commit);
-	if (!head_commit || repo_parse_commit(the_repository, head_commit)) {
+	𐤀𐤌 (!head_commit || repo_parse_commit(the_repository, head_commit)) {
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 	head_tree = get_commit_tree_oid(head_commit);
-	if (!head_tree) {
+	𐤀𐤌 (!head_tree) {
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 
-	if (create_index_from_tree(head_tree, stash_index_path.buf)) {
+	𐤀𐤌 (create_index_from_tree(head_tree, stash_index_path.buf)) {
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 
 	/* Find out what the user wants. */
@@ -1360,33 +1360,33 @@ static int stash_patch(struct stash_info *info, const struct pathspec *ps,
 	old_index_env = xstrdup_or_null(getenv(INDEX_ENVIRONMENT));
 	setenv(INDEX_ENVIRONMENT, the_repository->index_file, 1);
 
-	ret = !!run_add_p(the_repository, ADD_P_STASH, interactive_opts, NULL, ps, 0);
+	ret = !!run_add_p(the_repository, ADD_P_STASH, interactive_opts, عدم, ps, 0);
 
 	the_repository->index_file = old_repo_index_file;
-	if (old_index_env && *old_index_env)
+	𐤀𐤌 (old_index_env && *old_index_env)
 		setenv(INDEX_ENVIRONMENT, old_index_env, 1);
-	else
+	وإلا
 		unsetenv(INDEX_ENVIRONMENT);
 	FREE_AND_NULL(old_index_env);
 
 	/* State of the working tree. */
-	if (write_index_as_tree(&info->w_tree, &istate, stash_index_path.buf, 0,
-				NULL)) {
+	𐤀𐤌 (write_index_as_tree(&info->w_tree, &istate, stash_index_path.buf, 0,
+				عدم)) {
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 
 	cp_diff_tree.git_cmd = 1;
 	strvec_pushl(&cp_diff_tree.args, "diff-tree", "-p", "-U1", "HEAD",
 		     "--no-color",
-		     oid_to_hex(&info->w_tree), "--", NULL);
-	if (pipe_command(&cp_diff_tree, NULL, 0, out_patch, 0, NULL, 0)) {
+		     oid_to_hex(&info->w_tree), "--", عدم);
+	𐤀𐤌 (pipe_command(&cp_diff_tree, عدم, 0, out_patch, 0, عدم, 0)) {
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 
-	if (!out_patch->len) {
-		if (!quiet)
+	𐤀𐤌 (!out_patch->len) {
+		𐤀𐤌 (!quiet)
 			fprintf_ln(stderr, _("No changes selected"));
 		ret = 1;
 	}
@@ -1394,34 +1394,34 @@ static int stash_patch(struct stash_info *info, const struct pathspec *ps,
 done:
 	release_index(&istate);
 	remove_path(stash_index_path.buf);
-	return ret;
+	أرجع ret;
 }
 
-static int stash_working_tree(struct stash_info *info, const struct pathspec *ps)
+ساكن صحيح stash_working_tree(بنية stash_info *info, ثابت بنية pathspec *ps)
 {
-	int ret = 0;
-	struct rev_info rev;
-	struct child_process cp_upd_index = CHILD_PROCESS_INIT;
-	struct strbuf diff_output = STRBUF_INIT;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
+	صحيح ret = 0;
+	بنية rev_info rev;
+	بنية child_process cp_upd_index = CHILD_PROCESS_INIT;
+	بنية strbuf diff_output = STRBUF_INIT;
+	بنية index_state istate = INDEX_STATE_INIT(the_repository);
 
-	repo_init_revisions(the_repository, &rev, NULL);
+	repo_init_revisions(the_repository, &rev, عدم);
 	copy_pathspec(&rev.prune_data, ps);
 
 	set_alternate_index_output(stash_index_path.buf);
-	if (reset_tree(&info->i_tree, 0, 0)) {
+	𐤀𐤌 (reset_tree(&info->i_tree, 0, 0)) {
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
-	set_alternate_index_output(NULL);
+	set_alternate_index_output(عدم);
 
 	rev.diffopt.output_format = DIFF_FORMAT_CALLBACK;
 	rev.diffopt.format_callback = add_diff_to_buf;
 	rev.diffopt.format_callback_data = &diff_output;
 
-	if (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
+	𐤀𐤌 (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 
 	add_pending_object(&rev, parse_object(the_repository, &info->b_commit),
@@ -1431,20 +1431,20 @@ static int stash_working_tree(struct stash_info *info, const struct pathspec *ps
 	cp_upd_index.git_cmd = 1;
 	strvec_pushl(&cp_upd_index.args, "update-index",
 		     "--ignore-skip-worktree-entries",
-		     "-z", "--add", "--remove", "--stdin", NULL);
+		     "-z", "--add", "--remove", "--stdin", عدم);
 	strvec_pushf(&cp_upd_index.env, "GIT_INDEX_FILE=%s",
 		     stash_index_path.buf);
 
-	if (pipe_command(&cp_upd_index, diff_output.buf, diff_output.len,
-			 NULL, 0, NULL, 0)) {
+	𐤀𐤌 (pipe_command(&cp_upd_index, diff_output.buf, diff_output.len,
+			 عدم, 0, عدم, 0)) {
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 
-	if (write_index_as_tree(&info->w_tree, &istate, stash_index_path.buf, 0,
-				NULL)) {
+	𐤀𐤌 (write_index_as_tree(&info->w_tree, &istate, stash_index_path.buf, 0,
+				عدم)) {
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 
 done:
@@ -1452,57 +1452,57 @@ done:
 	release_revisions(&rev);
 	strbuf_release(&diff_output);
 	remove_path(stash_index_path.buf);
-	return ret;
+	أرجع ret;
 }
 
-static int do_create_stash(const struct pathspec *ps, struct strbuf *stash_msg_buf,
-			   int include_untracked, int patch_mode,
-			   struct interactive_options *interactive_opts,
-			   int only_staged, struct stash_info *info, struct strbuf *patch,
-			   int quiet)
+ساكن صحيح do_create_stash(ثابت بنية pathspec *ps, بنية strbuf *stash_msg_buf,
+			   صحيح include_untracked, صحيح patch_mode,
+			   بنية interactive_options *interactive_opts,
+			   صحيح only_staged, بنية stash_info *info, بنية strbuf *patch,
+			   صحيح quiet)
 {
-	int ret = 0;
-	int flags = 0;
-	int untracked_commit_option = 0;
-	const char *head_short_sha1 = NULL;
-	const char *branch_ref = NULL;
-	const char *branch_name = "(no branch)";
-	char *branch_name_buf = NULL;
-	struct commit *head_commit = NULL;
-	struct commit_list *parents = NULL;
-	struct strbuf msg = STRBUF_INIT;
-	struct strbuf commit_tree_label = STRBUF_INIT;
-	struct strbuf untracked_files = STRBUF_INIT;
+	صحيح ret = 0;
+	صحيح flags = 0;
+	صحيح untracked_commit_option = 0;
+	ثابت حرف *head_short_sha1 = عدم;
+	ثابت حرف *branch_ref = عدم;
+	ثابت حرف *branch_name = "(no branch)";
+	حرف *branch_name_buf = عدم;
+	بنية commit *head_commit = عدم;
+	بنية commit_list *parents = عدم;
+	بنية strbuf msg = STRBUF_INIT;
+	بنية strbuf commit_tree_label = STRBUF_INIT;
+	بنية strbuf untracked_files = STRBUF_INIT;
 
 	prepare_fallback_ident("git stash", "git@stash");
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
-					 NULL, NULL, NULL) < 0) {
+	repo_read_index_preload(the_repository, عدم, 0);
+	𐤀𐤌 (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
+					 عدم, عدم, عدم) < 0) {
 		ret = error(_("could not write index"));
-		goto done;
+		اذهب done;
 	}
 
-	if (repo_get_oid(the_repository, "HEAD", &info->b_commit)) {
-		if (!quiet)
+	𐤀𐤌 (repo_get_oid(the_repository, "HEAD", &info->b_commit)) {
+		𐤀𐤌 (!quiet)
 			fprintf_ln(stderr, _("You do not have "
 					     "the initial commit yet"));
 		ret = -1;
-		goto done;
-	} else {
+		اذهب done;
+	} وإلا {
 		head_commit = lookup_commit(the_repository, &info->b_commit);
 	}
 
-	if (!check_changes(ps, include_untracked, &untracked_files)) {
+	𐤀𐤌 (!check_changes(ps, include_untracked, &untracked_files)) {
 		ret = 1;
-		goto done;
+		اذهب done;
 	}
 
 	branch_ref = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
-					     "HEAD", 0, NULL, &flags);
+					     "HEAD", 0, عدم, &flags);
 
-	if (flags & REF_ISSYMREF) {
-		if (skip_prefix(branch_ref, "refs/heads/", &branch_name))
+	𐤀𐤌 (flags & REF_ISSYMREF) {
+		𐤀𐤌 (skip_prefix(branch_ref, "refs/heads/", &branch_name))
 			branch_name = branch_name_buf = xstrdup(branch_name);
 	}
 
@@ -1514,66 +1514,66 @@ static int do_create_stash(const struct pathspec *ps, struct strbuf *stash_msg_b
 
 	strbuf_addf(&commit_tree_label, "index on %s\n", msg.buf);
 	commit_list_insert(head_commit, &parents);
-	if (write_index_as_tree(&info->i_tree, the_repository->index,
-				repo_get_index_file(the_repository), 0, NULL) ||
+	𐤀𐤌 (write_index_as_tree(&info->i_tree, the_repository->index,
+				repo_get_index_file(the_repository), 0, عدم) ||
 	    commit_tree(commit_tree_label.buf, commit_tree_label.len,
-			&info->i_tree, parents, &info->i_commit, NULL, NULL)) {
-		if (!quiet)
+			&info->i_tree, parents, &info->i_commit, عدم, عدم)) {
+		𐤀𐤌 (!quiet)
 			fprintf_ln(stderr, _("Cannot save the current "
 					     "index state"));
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 
 	commit_list_free(parents);
-	parents = NULL;
+	parents = عدم;
 
-	if (include_untracked) {
-		if (save_untracked_files(info, &msg, &untracked_files)) {
-			if (!quiet)
+	𐤀𐤌 (include_untracked) {
+		𐤀𐤌 (save_untracked_files(info, &msg, &untracked_files)) {
+			𐤀𐤌 (!quiet)
 				fprintf_ln(stderr, _("Cannot save "
 						     "the untracked files"));
 			ret = -1;
-			goto done;
+			اذهب done;
 		}
 		untracked_commit_option = 1;
 	}
-	if (patch_mode) {
+	𐤀𐤌 (patch_mode) {
 		ret = stash_patch(info, ps, patch, quiet, interactive_opts);
-		if (ret < 0) {
-			if (!quiet)
+		𐤀𐤌 (ret < 0) {
+			𐤀𐤌 (!quiet)
 				fprintf_ln(stderr, _("Cannot save the current "
 						     "worktree state"));
-			goto done;
-		} else if (ret > 0) {
-			goto done;
+			اذهب done;
+		} وإلا 𐤀𐤌 (ret > 0) {
+			اذهب done;
 		}
-	} else if (only_staged) {
+	} وإلا 𐤀𐤌 (only_staged) {
 		ret = stash_staged(info, patch, quiet);
-		if (ret < 0) {
-			if (!quiet)
+		𐤀𐤌 (ret < 0) {
+			𐤀𐤌 (!quiet)
 				fprintf_ln(stderr, _("Cannot save the current "
 						     "staged state"));
-			goto done;
-		} else if (ret > 0) {
-			goto done;
+			اذهب done;
+		} وإلا 𐤀𐤌 (ret > 0) {
+			اذهب done;
 		}
-	} else {
-		if (stash_working_tree(info, ps)) {
-			if (!quiet)
+	} وإلا {
+		𐤀𐤌 (stash_working_tree(info, ps)) {
+			𐤀𐤌 (!quiet)
 				fprintf_ln(stderr, _("Cannot save the current "
 						     "worktree state"));
 			ret = -1;
-			goto done;
+			اذهب done;
 		}
 	}
 
-	if (!stash_msg_buf->len)
+	𐤀𐤌 (!stash_msg_buf->len)
 		strbuf_addf(stash_msg_buf, "WIP on %s", msg.buf);
-	else
+	وإلا
 		strbuf_insertf(stash_msg_buf, 0, "On %s: ", branch_name);
 
-	if (untracked_commit_option)
+	𐤀𐤌 (untracked_commit_option)
 		commit_list_insert(lookup_commit(the_repository,
 						 &info->u_commit),
 				   &parents);
@@ -1581,13 +1581,13 @@ static int do_create_stash(const struct pathspec *ps, struct strbuf *stash_msg_b
 			   &parents);
 	commit_list_insert(head_commit, &parents);
 
-	if (commit_tree(stash_msg_buf->buf, stash_msg_buf->len, &info->w_tree,
-			parents, &info->w_commit, NULL, NULL)) {
-		if (!quiet)
+	𐤀𐤌 (commit_tree(stash_msg_buf->buf, stash_msg_buf->len, &info->w_tree,
+			parents, &info->w_commit, عدم, عدم)) {
+		𐤀𐤌 (!quiet)
 			fprintf_ln(stderr, _("Cannot record "
 					     "working tree state"));
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 
 done:
@@ -1595,192 +1595,192 @@ done:
 	strbuf_release(&msg);
 	strbuf_release(&untracked_files);
 	commit_list_free(parents);
-	free(branch_name_buf);
-	return ret;
+	حرر(branch_name_buf);
+	أرجع ret;
 }
 
-static int create_stash(int argc, const char **argv, const char *prefix UNUSED,
-			struct repository *repo UNUSED)
+ساكن صحيح create_stash(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix UNUSED,
+			بنية repository *repo UNUSED)
 {
-	int ret;
-	struct strbuf stash_msg_buf = STRBUF_INIT;
-	struct stash_info info = STASH_INFO_INIT;
-	struct pathspec ps;
+	صحيح ret;
+	بنية strbuf stash_msg_buf = STRBUF_INIT;
+	بنية stash_info info = STASH_INFO_INIT;
+	بنية pathspec ps;
 
 	/* Starting with argv[1], since argv[0] is "create" */
 	strbuf_join_argv(&stash_msg_buf, argc - 1, ++argv, ' ');
 
-	memset(&ps, 0, sizeof(ps));
-	if (!check_changes_tracked_files(&ps))
-		return 0;
+	memset(&ps, 0, حجم(ps));
+	𐤀𐤌 (!check_changes_tracked_files(&ps))
+		أرجع 0;
 
-	ret = do_create_stash(&ps, &stash_msg_buf, 0, 0, NULL, 0, &info,
-			      NULL, 0);
-	if (!ret)
+	ret = do_create_stash(&ps, &stash_msg_buf, 0, 0, عدم, 0, &info,
+			      عدم, 0);
+	𐤀𐤌 (!ret)
 		printf_ln("%s", oid_to_hex(&info.w_commit));
 
 	free_stash_info(&info);
 	strbuf_release(&stash_msg_buf);
-	return ret;
+	أرجع ret;
 }
 
-static int do_push_stash(const struct pathspec *ps, const char *stash_msg, int quiet,
-			 int keep_index, int patch_mode,
-			 struct interactive_options *interactive_opts,
-			 int include_untracked, int only_staged)
+ساكن صحيح do_push_stash(ثابت بنية pathspec *ps, ثابت حرف *stash_msg, صحيح quiet,
+			 صحيح keep_index, صحيح patch_mode,
+			 بنية interactive_options *interactive_opts,
+			 صحيح include_untracked, صحيح only_staged)
 {
-	int ret = 0;
-	struct stash_info info = STASH_INFO_INIT;
-	struct strbuf patch = STRBUF_INIT;
-	struct strbuf stash_msg_buf = STRBUF_INIT;
-	struct strbuf untracked_files = STRBUF_INIT;
-	struct strbuf out = STRBUF_INIT;
+	صحيح ret = 0;
+	بنية stash_info info = STASH_INFO_INIT;
+	بنية strbuf patch = STRBUF_INIT;
+	بنية strbuf stash_msg_buf = STRBUF_INIT;
+	بنية strbuf untracked_files = STRBUF_INIT;
+	بنية strbuf out = STRBUF_INIT;
 
-	if (patch_mode && keep_index == -1)
+	𐤀𐤌 (patch_mode && keep_index == -1)
 		keep_index = 1;
 
-	if (patch_mode && include_untracked) {
+	𐤀𐤌 (patch_mode && include_untracked) {
 		fprintf_ln(stderr, _("Can't use --patch and --include-untracked"
 				     " or --all at the same time"));
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 
 	/* --patch overrides --staged */
-	if (patch_mode)
+	𐤀𐤌 (patch_mode)
 		only_staged = 0;
 
-	if (only_staged && include_untracked) {
+	𐤀𐤌 (only_staged && include_untracked) {
 		fprintf_ln(stderr, _("Can't use --staged and --include-untracked"
 				     " or --all at the same time"));
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (!include_untracked && ps->nr) {
-		char *ps_matched = xcalloc(ps->nr, 1);
+	repo_read_index_preload(the_repository, عدم, 0);
+	𐤀𐤌 (!include_untracked && ps->nr) {
+		حرف *ps_matched = xcalloc(ps->nr, 1);
 
-		if (pathspec_needs_expanded_index(the_repository->index, ps))
+		𐤀𐤌 (pathspec_needs_expanded_index(the_repository->index, ps))
 			ensure_full_index(the_repository->index);
-		for (size_t i = 0; i < the_repository->index->cache_nr; i++)
+		لكل (size_t i = 0; i < the_repository->index->cache_nr; i++)
 			ce_path_match(the_repository->index, the_repository->index->cache[i], ps,
 				      ps_matched);
 
-		if (report_path_error(ps_matched, ps)) {
+		𐤀𐤌 (report_path_error(ps_matched, ps)) {
 			fprintf_ln(stderr, _("Did you forget to 'git add'?"));
 			ret = -1;
-			free(ps_matched);
-			goto done;
+			حرر(ps_matched);
+			اذهب done;
 		}
-		free(ps_matched);
+		حرر(ps_matched);
 	}
 
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
-					 NULL, NULL, NULL)) {
+	𐤀𐤌 (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
+					 عدم, عدم, عدم)) {
 		ret = error(_("could not write index"));
-		goto done;
+		اذهب done;
 	}
 
-	if (!check_changes(ps, include_untracked, &untracked_files)) {
-		if (!quiet)
+	𐤀𐤌 (!check_changes(ps, include_untracked, &untracked_files)) {
+		𐤀𐤌 (!quiet)
 			printf_ln(_("No local changes to save"));
-		goto done;
+		اذهب done;
 	}
 
-	if (!refs_reflog_exists(get_main_ref_store(the_repository), ref_stash) && do_clear_stash()) {
+	𐤀𐤌 (!refs_reflog_exists(get_main_ref_store(the_repository), ref_stash) && do_clear_stash()) {
 		ret = -1;
-		if (!quiet)
+		𐤀𐤌 (!quiet)
 			fprintf_ln(stderr, _("Cannot initialize stash"));
-		goto done;
+		اذهب done;
 	}
 
-	if (stash_msg)
+	𐤀𐤌 (stash_msg)
 		strbuf_addstr(&stash_msg_buf, stash_msg);
-	if (do_create_stash(ps, &stash_msg_buf, include_untracked, patch_mode,
+	𐤀𐤌 (do_create_stash(ps, &stash_msg_buf, include_untracked, patch_mode,
 			    interactive_opts, only_staged, &info, &patch, quiet)) {
 		ret = -1;
-		goto done;
+		اذهب done;
 	}
 
-	if (do_store_stash(&info.w_commit, stash_msg_buf.buf, 1)) {
+	𐤀𐤌 (do_store_stash(&info.w_commit, stash_msg_buf.buf, 1)) {
 		ret = -1;
-		if (!quiet)
+		𐤀𐤌 (!quiet)
 			fprintf_ln(stderr, _("Cannot save the current status"));
-		goto done;
+		اذهب done;
 	}
 
-	if (!quiet)
+	𐤀𐤌 (!quiet)
 		printf_ln(_("Saved working directory and index state %s"),
 			  stash_msg_buf.buf);
 
-	if (!(patch_mode || only_staged)) {
-		if (include_untracked && !ps->nr) {
-			struct child_process cp = CHILD_PROCESS_INIT;
+	𐤀𐤌 (!(patch_mode || only_staged)) {
+		𐤀𐤌 (include_untracked && !ps->nr) {
+			بنية child_process cp = CHILD_PROCESS_INIT;
 
 			cp.git_cmd = 1;
-			if (startup_info->original_cwd) {
+			𐤀𐤌 (startup_info->original_cwd) {
 				cp.dir = startup_info->original_cwd;
 				strvec_pushf(&cp.env, "%s=%s",
 					     GIT_WORK_TREE_ENVIRONMENT,
 					     the_repository->worktree);
 			}
 			strvec_pushl(&cp.args, "clean", "--force",
-				     "--quiet", "-d", ":/", NULL);
-			if (include_untracked == INCLUDE_ALL_FILES)
+				     "--quiet", "-d", ":/", عدم);
+			𐤀𐤌 (include_untracked == INCLUDE_ALL_FILES)
 				strvec_push(&cp.args, "-x");
-			if (run_command(&cp)) {
+			𐤀𐤌 (run_command(&cp)) {
 				ret = -1;
-				goto done;
+				اذهب done;
 			}
 		}
 		discard_index(the_repository->index);
-		if (ps->nr) {
-			struct child_process cp_add = CHILD_PROCESS_INIT;
-			struct child_process cp_diff = CHILD_PROCESS_INIT;
-			struct child_process cp_apply = CHILD_PROCESS_INIT;
+		𐤀𐤌 (ps->nr) {
+			بنية child_process cp_add = CHILD_PROCESS_INIT;
+			بنية child_process cp_diff = CHILD_PROCESS_INIT;
+			بنية child_process cp_apply = CHILD_PROCESS_INIT;
 
 			cp_add.git_cmd = 1;
 			strvec_push(&cp_add.args, "add");
-			if (!include_untracked)
+			𐤀𐤌 (!include_untracked)
 				strvec_push(&cp_add.args, "-u");
-			if (include_untracked == INCLUDE_ALL_FILES)
+			𐤀𐤌 (include_untracked == INCLUDE_ALL_FILES)
 				strvec_push(&cp_add.args, "--force");
 			strvec_push(&cp_add.args, "--");
 			add_pathspecs(&cp_add.args, ps);
-			if (run_command(&cp_add)) {
+			𐤀𐤌 (run_command(&cp_add)) {
 				ret = -1;
-				goto done;
+				اذهب done;
 			}
 
 			cp_diff.git_cmd = 1;
 			strvec_pushl(&cp_diff.args, "diff-index", "-p",
 				     "--no-color",
 				     "--cached", "--binary", "HEAD", "--",
-				     NULL);
+				     عدم);
 			add_pathspecs(&cp_diff.args, ps);
-			if (pipe_command(&cp_diff, NULL, 0, &out, 0, NULL, 0)) {
+			𐤀𐤌 (pipe_command(&cp_diff, عدم, 0, &out, 0, عدم, 0)) {
 				ret = -1;
-				goto done;
+				اذهب done;
 			}
 
 			cp_apply.git_cmd = 1;
 			strvec_pushl(&cp_apply.args, "apply", "--index",
-				     "-R", NULL);
-			if (pipe_command(&cp_apply, out.buf, out.len, NULL, 0,
-					 NULL, 0)) {
+				     "-R", عدم);
+			𐤀𐤌 (pipe_command(&cp_apply, out.buf, out.len, عدم, 0,
+					 عدم, 0)) {
 				ret = -1;
-				goto done;
+				اذهب done;
 			}
-		} else {
-			struct child_process cp = CHILD_PROCESS_INIT;
+		} وإلا {
+			بنية child_process cp = CHILD_PROCESS_INIT;
 			cp.git_cmd = 1;
 			/* BUG: this nukes untracked files in the way */
 			strvec_pushl(&cp.args, "reset", "--hard", "-q",
-				     "--no-recurse-submodules", NULL);
-			if (run_command(&cp)) {
+				     "--no-recurse-submodules", عدم);
+			𐤀𐤌 (run_command(&cp)) {
 				ret = -1;
-				goto done;
+				اذهب done;
 			}
 		}
 
@@ -1804,50 +1804,50 @@ static int do_push_stash(const struct pathspec *ps, const char *stash_msg, int q
 		 * because running it on an empty tree will cause it to fail
 		 * due to the pathspec not matching anything.
 		 */
-		if (keep_index == 1 && !is_null_oid(&info.i_tree) &&
+		𐤀𐤌 (keep_index == 1 && !is_null_oid(&info.i_tree) &&
 		    !is_empty_tree_oid(&info.i_tree, the_repository->hash_algo)) {
-			struct child_process cp = CHILD_PROCESS_INIT;
+			بنية child_process cp = CHILD_PROCESS_INIT;
 
 			cp.git_cmd = 1;
 			strvec_pushl(&cp.args, "checkout", "--no-overlay",
-				     oid_to_hex(&info.i_tree), "--", NULL);
-			if (!ps->nr)
+				     oid_to_hex(&info.i_tree), "--", عدم);
+			𐤀𐤌 (!ps->nr)
 				strvec_push(&cp.args, ":/");
-			else
+			وإلا
 				add_pathspecs(&cp.args, ps);
-			if (run_command(&cp)) {
+			𐤀𐤌 (run_command(&cp)) {
 				ret = -1;
-				goto done;
+				اذهب done;
 			}
 		}
-		goto done;
-	} else {
-		struct child_process cp = CHILD_PROCESS_INIT;
+		اذهب done;
+	} وإلا {
+		بنية child_process cp = CHILD_PROCESS_INIT;
 
 		cp.git_cmd = 1;
-		strvec_pushl(&cp.args, "apply", "-R", NULL);
+		strvec_pushl(&cp.args, "apply", "-R", عدم);
 
-		if (pipe_command(&cp, patch.buf, patch.len, NULL, 0, NULL, 0)) {
-			if (!quiet)
+		𐤀𐤌 (pipe_command(&cp, patch.buf, patch.len, عدم, 0, عدم, 0)) {
+			𐤀𐤌 (!quiet)
 				fprintf_ln(stderr, _("Cannot remove "
 						     "worktree changes"));
 			ret = -1;
-			goto done;
+			اذهب done;
 		}
 
-		if (keep_index < 1) {
-			struct child_process cp = CHILD_PROCESS_INIT;
+		𐤀𐤌 (keep_index < 1) {
+			بنية child_process cp = CHILD_PROCESS_INIT;
 
 			cp.git_cmd = 1;
 			strvec_pushl(&cp.args, "reset", "-q", "--refresh", "--",
-				     NULL);
+				     عدم);
 			add_pathspecs(&cp.args, ps);
-			if (run_command(&cp)) {
+			𐤀𐤌 (run_command(&cp)) {
 				ret = -1;
-				goto done;
+				اذهب done;
 			}
 		}
-		goto done;
+		اذهب done;
 	}
 
 done:
@@ -1856,24 +1856,24 @@ done:
 	free_stash_info(&info);
 	strbuf_release(&stash_msg_buf);
 	strbuf_release(&untracked_files);
-	return ret;
+	أرجع ret;
 }
 
-static int push_stash(int argc, const char **argv, const char *prefix,
-		      int push_assumed)
+ساكن صحيح push_stash(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+		      صحيح push_assumed)
 {
-	int force_assume = 0;
-	int keep_index = -1;
-	int only_staged = 0;
-	int patch_mode = 0;
-	int include_untracked = 0;
-	int quiet = 0;
-	int pathspec_file_nul = 0;
-	const char *stash_msg = NULL;
-	char *pathspec_from_file = NULL;
-	struct pathspec ps;
-	struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-	struct option options[] = {
+	صحيح force_assume = 0;
+	صحيح keep_index = -1;
+	صحيح only_staged = 0;
+	صحيح patch_mode = 0;
+	صحيح include_untracked = 0;
+	صحيح quiet = 0;
+	صحيح pathspec_file_nul = 0;
+	ثابت حرف *stash_msg = عدم;
+	حرف *pathspec_from_file = عدم;
+	بنية pathspec ps;
+	بنية interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+	بنية option options[] = {
 		OPT_BOOL('k', "keep-index", &keep_index,
 			 N_("keep index")),
 		OPT_BOOL('S', "staged", &only_staged,
@@ -1895,12 +1895,12 @@ static int push_stash(int argc, const char **argv, const char *prefix,
 		OPT_PATHSPEC_FILE_NUL(&pathspec_file_nul),
 		OPT_END()
 	};
-	int ret;
+	صحيح ret;
 
-	if (argc) {
-		int flags = PARSE_OPT_KEEP_DASHDASH;
+	𐤀𐤌 (argc) {
+		صحيح flags = PARSE_OPT_KEEP_DASHDASH;
 
-		if (push_assumed)
+		𐤀𐤌 (push_assumed)
 			flags |= PARSE_OPT_STOP_AT_NON_OPTION;
 
 		argc = parse_options(argc, argv, prefix, options,
@@ -1909,11 +1909,11 @@ static int push_stash(int argc, const char **argv, const char *prefix,
 		force_assume |= patch_mode;
 	}
 
-	if (argc) {
-		if (!strcmp(argv[0], "--")) {
+	𐤀𐤌 (argc) {
+		𐤀𐤌 (!strcmp(argv[0], "--")) {
 			argc--;
 			argv++;
-		} else if (push_assumed && !force_assume) {
+		} وإلا 𐤀𐤌 (push_assumed && !force_assume) {
 			die("subcommand wasn't specified; 'push' can't be assumed due to unexpected token '%s'",
 			    argv[0]);
 		}
@@ -1922,65 +1922,65 @@ static int push_stash(int argc, const char **argv, const char *prefix,
 	parse_pathspec(&ps, 0, PATHSPEC_PREFER_FULL | PATHSPEC_PREFIX_ORIGIN,
 		       prefix, argv);
 
-	if (pathspec_from_file) {
-		if (patch_mode)
+	𐤀𐤌 (pathspec_from_file) {
+		𐤀𐤌 (patch_mode)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--patch");
 
-		if (only_staged)
+		𐤀𐤌 (only_staged)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--staged");
 
-		if (ps.nr)
+		𐤀𐤌 (ps.nr)
 			die(_("'%s' and pathspec arguments cannot be used together"), "--pathspec-from-file");
 
 		parse_pathspec_file(&ps, 0,
 				    PATHSPEC_PREFER_FULL | PATHSPEC_PREFIX_ORIGIN,
 				    prefix, pathspec_from_file, pathspec_file_nul);
-	} else if (pathspec_file_nul) {
+	} وإلا 𐤀𐤌 (pathspec_file_nul) {
 		die(_("the option '%s' requires '%s'"), "--pathspec-file-nul", "--pathspec-from-file");
 	}
 
-	if (!patch_mode) {
-		if (interactive_opts.context != -1)
+	𐤀𐤌 (!patch_mode) {
+		𐤀𐤌 (interactive_opts.context != -1)
 			die(_("the option '%s' requires '%s'"), "--unified", "--patch");
-		if (interactive_opts.interhunkcontext != -1)
+		𐤀𐤌 (interactive_opts.interhunkcontext != -1)
 			die(_("the option '%s' requires '%s'"), "--inter-hunk-context", "--patch");
-		if (!interactive_opts.auto_advance)
+		𐤀𐤌 (!interactive_opts.auto_advance)
 			die(_("the option '%s' requires '%s'"), "--no-auto-advance", "--patch");
 	}
 
-	if (interactive_opts.context < -1)
+	𐤀𐤌 (interactive_opts.context < -1)
 		die(_("'%s' cannot be negative"), "--unified");
-	if (interactive_opts.interhunkcontext < -1)
+	𐤀𐤌 (interactive_opts.interhunkcontext < -1)
 		die(_("'%s' cannot be negative"), "--inter-hunk-context");
 
 	ret = do_push_stash(&ps, stash_msg, quiet, keep_index, patch_mode,
 			    &interactive_opts, include_untracked, only_staged);
 
 	clear_pathspec(&ps);
-	free(pathspec_from_file);
-	return ret;
+	حرر(pathspec_from_file);
+	أرجع ret;
 }
 
-static int push_stash_unassumed(int argc, const char **argv, const char *prefix,
-				struct repository *repo UNUSED)
+ساكن صحيح push_stash_unassumed(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+				بنية repository *repo UNUSED)
 {
-	return push_stash(argc, argv, prefix, 0);
+	أرجع push_stash(argc, argv, prefix, 0);
 }
 
-static int save_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+ساكن صحيح save_stash(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+		      بنية repository *repo UNUSED)
 {
-	int keep_index = -1;
-	int only_staged = 0;
-	int patch_mode = 0;
-	int include_untracked = 0;
-	int quiet = 0;
-	int ret = 0;
-	const char *stash_msg = NULL;
-	struct pathspec ps;
-	struct strbuf stash_msg_buf = STRBUF_INIT;
-	struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-	struct option options[] = {
+	صحيح keep_index = -1;
+	صحيح only_staged = 0;
+	صحيح patch_mode = 0;
+	صحيح include_untracked = 0;
+	صحيح quiet = 0;
+	صحيح ret = 0;
+	ثابت حرف *stash_msg = عدم;
+	بنية pathspec ps;
+	بنية strbuf stash_msg_buf = STRBUF_INIT;
+	بنية interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+	بنية option options[] = {
 		OPT_BOOL('k', "keep-index", &keep_index,
 			 N_("keep index")),
 		OPT_BOOL('S', "staged", &only_staged,
@@ -2005,22 +2005,22 @@ static int save_stash(int argc, const char **argv, const char *prefix,
 			     git_stash_save_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (argc)
+	𐤀𐤌 (argc)
 		stash_msg = strbuf_join_argv(&stash_msg_buf, argc, argv, ' ');
 
-	memset(&ps, 0, sizeof(ps));
+	memset(&ps, 0, حجم(ps));
 
-	if (interactive_opts.context < -1)
+	𐤀𐤌 (interactive_opts.context < -1)
 		die(_("'%s' cannot be negative"), "--unified");
-	if (interactive_opts.interhunkcontext < -1)
+	𐤀𐤌 (interactive_opts.interhunkcontext < -1)
 		die(_("'%s' cannot be negative"), "--inter-hunk-context");
 
-	if (!patch_mode) {
-		if (interactive_opts.context != -1)
+	𐤀𐤌 (!patch_mode) {
+		𐤀𐤌 (interactive_opts.context != -1)
 			die(_("the option '%s' requires '%s'"), "--unified", "--patch");
-		if (interactive_opts.interhunkcontext != -1)
+		𐤀𐤌 (interactive_opts.interhunkcontext != -1)
 			die(_("the option '%s' requires '%s'"), "--inter-hunk-context", "--patch");
-		if (!interactive_opts.auto_advance)
+		𐤀𐤌 (!interactive_opts.auto_advance)
 			die(_("the option '%s' requires '%s'"), "--no-auto-advance", "--patch");
 	}
 
@@ -2029,108 +2029,108 @@ static int save_stash(int argc, const char **argv, const char *prefix,
 			    only_staged);
 
 	strbuf_release(&stash_msg_buf);
-	return ret;
+	أرجع ret;
 }
 
-static int write_commit_with_parents(struct repository *r,
-				     struct object_id *out,
-				     const struct object_id *oid,
-				     struct commit_list *parents)
+ساكن صحيح write_commit_with_parents(بنية repository *r,
+				     بنية object_id *out,
+				     ثابت بنية object_id *oid,
+				     بنية commit_list *parents)
 {
 	size_t author_len, committer_len;
-	struct commit *this;
-	const char *orig_author, *orig_committer;
-	char *author = NULL, *committer = NULL;
-	const char *buffer;
+	بنية commit *this;
+	ثابت حرف *orig_author, *orig_committer;
+	حرف *author = عدم, *committer = عدم;
+	ثابت حرف *buffer;
 	unsigned long bufsize;
-	const char *p;
-	struct strbuf msg = STRBUF_INIT;
-	int ret = 0;
-	struct ident_split id;
+	ثابت حرف *p;
+	بنية strbuf msg = STRBUF_INIT;
+	صحيح ret = 0;
+	بنية ident_split id;
 
 	this = lookup_commit_reference(r, oid);
 	buffer = repo_get_commit_buffer(r, this, &bufsize);
 	orig_author = find_commit_header(buffer, "author", &author_len);
 	orig_committer = find_commit_header(buffer, "committer", &committer_len);
 
-	if (!orig_author || !orig_committer) {
+	𐤀𐤌 (!orig_author || !orig_committer) {
 		ret = error(_("cannot parse commit %s"), oid_to_hex(oid));
-		goto out;
+		اذهب out;
 	}
 
-	if (split_ident_line(&id, orig_author, author_len) < 0 ||
+	𐤀𐤌 (split_ident_line(&id, orig_author, author_len) < 0 ||
 	    split_ident_line(&id, orig_committer, committer_len) < 0) {
 		ret = error(_("invalid author or committer for %s"), oid_to_hex(oid));
-		goto out;
+		اذهب out;
 	}
 
 	p = strstr(buffer, "\n\n");
 	strbuf_addstr(&msg, "git stash: ");
 
-	if (p)
+	𐤀𐤌 (p)
 		strbuf_add(&msg, p + 2, bufsize - (p + 2 - buffer));
 	strbuf_complete_line(&msg);
 
 	author = xmemdupz(orig_author, author_len);
 	committer = xmemdupz(orig_committer, committer_len);
 
-	if (commit_tree_extended(msg.buf, msg.len,
+	𐤀𐤌 (commit_tree_extended(msg.buf, msg.len,
 				 r->hash_algo->empty_tree, parents,
 				 out, author, committer,
-				 NULL, NULL)) {
+				 عدم, عدم)) {
 		ret = error(_("could not write commit"));
-		goto out;
+		اذهب out;
 	}
 out:
 	strbuf_release(&msg);
 	repo_unuse_commit_buffer(r, this, buffer);
-	free(author);
-	free(committer);
-	return ret;
+	حرر(author);
+	حرر(committer);
+	أرجع ret;
 }
 
-static int do_import_stash(struct repository *r, const char *rev)
+ساكن صحيح do_import_stash(بنية repository *r, ثابت حرف *rev)
 {
-	struct object_id chain;
-	int res = 0;
-	const char *buffer = NULL;
+	بنية object_id chain;
+	صحيح res = 0;
+	ثابت حرف *buffer = عدم;
 	unsigned long bufsize;
-	struct commit *this = NULL;
-	struct commit_list *items = NULL, *cur;
-	char *msg = NULL;
+	بنية commit *this = عدم;
+	بنية commit_list *items = عدم, *cur;
+	حرف *msg = عدم;
 
-	if (repo_get_oid(r, rev, &chain))
-		return error(_("not a valid revision: %s"), rev);
+	𐤀𐤌 (repo_get_oid(r, rev, &chain))
+		أرجع error(_("not a valid revision: %s"), rev);
 
 	this = lookup_commit_reference(r, &chain);
-	if (!this)
-		return error(_("not a commit: %s"), rev);
+	𐤀𐤌 (!this)
+		أرجع error(_("not a commit: %s"), rev);
 
 	/*
 	 * Walk the commit history, finding each stash entry, and load data into
 	 * the array.
 	 */
-	for (;;) {
-		const char *author, *committer;
+	لكل (;;) {
+		ثابت حرف *author, *committer;
 		size_t author_len, committer_len;
-		const char *p;
-		const char *expected = "git stash <git@stash> 1000684800 +0000";
-		const char *prefix = "git stash: ";
-		struct commit *stash;
-		struct tree *tree = repo_get_commit_tree(r, this);
+		ثابت حرف *p;
+		ثابت حرف *expected = "git stash <git@stash> 1000684800 +0000";
+		ثابت حرف *prefix = "git stash: ";
+		بنية commit *stash;
+		بنية tree *tree = repo_get_commit_tree(r, this);
 
-		if (!tree ||
+		𐤀𐤌 (!tree ||
 		    !oideq(&tree->object.oid, r->hash_algo->empty_tree) ||
 		    (this->parents &&
 		     (!this->parents->next || this->parents->next->next))) {
 			res = error(_("%s is not a valid exported stash commit"),
 					oid_to_hex(&this->object.oid));
-			goto out;
+			اذهب out;
 		}
 
 		buffer = repo_get_commit_buffer(r, this, &bufsize);
 
-		if (!this->parents) {
+		𐤀𐤌 (!this->parents) {
 			/*
 			 * We don't have any parents.  Make sure this is our
 			 * root commit.
@@ -2138,51 +2138,51 @@ static int do_import_stash(struct repository *r, const char *rev)
 			author = find_commit_header(buffer, "author", &author_len);
 			committer = find_commit_header(buffer, "committer", &committer_len);
 
-			if (!author || !committer) {
+			𐤀𐤌 (!author || !committer) {
 				error(_("cannot parse commit %s"), oid_to_hex(&this->object.oid));
-				goto out;
+				اذهب out;
 			}
 
-			if (author_len != strlen(expected) ||
+			𐤀𐤌 (author_len != strlen(expected) ||
 			    committer_len != strlen(expected) ||
 			    memcmp(author, expected, author_len) ||
 			    memcmp(committer, expected, committer_len)) {
 				res = error(_("found root commit %s with invalid data"), oid_to_hex(&this->object.oid));
-				goto out;
+				اذهب out;
 			}
-			break;
+			اكسر;
 		}
 
 		p = strstr(buffer, "\n\n");
-		if (!p) {
+		𐤀𐤌 (!p) {
 			res = error(_("cannot parse commit %s"), oid_to_hex(&this->object.oid));
-			goto out;
+			اذهب out;
 		}
 
 		p += 2;
-		if (((size_t)(bufsize - (p - buffer)) < strlen(prefix)) ||
+		𐤀𐤌 (((size_t)(bufsize - (p - buffer)) < strlen(prefix)) ||
 		    memcmp(prefix, p, strlen(prefix))) {
 			res = error(_("found stash commit %s without expected prefix"), oid_to_hex(&this->object.oid));
-			goto out;
+			اذهب out;
 		}
 
 		stash = this->parents->next->item;
 
-		if (repo_parse_commit(r, this->parents->item) ||
+		𐤀𐤌 (repo_parse_commit(r, this->parents->item) ||
 		    repo_parse_commit(r, stash)) {
 			res = error(_("cannot parse parents of commit: %s"),
 					oid_to_hex(&this->object.oid));
-			goto out;
+			اذهب out;
 		}
 
-		if (check_stash_topology(r, stash)) {
+		𐤀𐤌 (check_stash_topology(r, stash)) {
 			res = error(_("%s does not look like a stash commit"),
 					oid_to_hex(&stash->object.oid));
-			goto out;
+			اذهب out;
 		}
 
 		repo_unuse_commit_buffer(r, this, buffer);
-		buffer = NULL;
+		buffer = عدم;
 		items = commit_list_insert(stash, &items);
 		this = this->parents->item;
 	}
@@ -2191,48 +2191,48 @@ static int do_import_stash(struct repository *r, const char *rev)
 	 * Now, walk each entry, adding it to the stash as a normal stash
 	 * commit.
 	 */
-	for (cur = items; cur; cur = cur->next) {
-		const char *p;
-		struct object_id *oid;
+	لكل (cur = items; cur; cur = cur->next) {
+		ثابت حرف *p;
+		بنية object_id *oid;
 
 		this = cur->item;
 		oid = &this->object.oid;
 		buffer = repo_get_commit_buffer(r, this, &bufsize);
-		if (!buffer) {
+		𐤀𐤌 (!buffer) {
 			res = error(_("cannot read commit buffer for %s"), oid_to_hex(oid));
-			goto out;
+			اذهب out;
 		}
 
 		p = strstr(buffer, "\n\n");
-		if (!p) {
+		𐤀𐤌 (!p) {
 			res = error(_("cannot parse commit %s"), oid_to_hex(oid));
-			goto out;
+			اذهب out;
 		}
 
 		p += 2;
 		msg = xmemdupz(p, bufsize - (p - buffer));
 		repo_unuse_commit_buffer(r, this, buffer);
-		buffer = NULL;
+		buffer = عدم;
 
-		if (do_store_stash(oid, msg, 1)) {
+		𐤀𐤌 (do_store_stash(oid, msg, 1)) {
 			res = error(_("cannot save the stash for %s"), oid_to_hex(oid));
-			goto out;
+			اذهب out;
 		}
 		FREE_AND_NULL(msg);
 	}
 out:
-	if (this && buffer)
+	𐤀𐤌 (this && buffer)
 		repo_unuse_commit_buffer(r, this, buffer);
 	commit_list_free(items);
-	free(msg);
+	حرر(msg);
 
-	return res;
+	أرجع res;
 }
 
-static int import_stash(int argc, const char **argv, const char *prefix,
-			struct repository *repo)
+ساكن صحيح import_stash(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+			بنية repository *repo)
 {
-	struct option options[] = {
+	بنية option options[] = {
 		OPT_END()
 	};
 
@@ -2240,51 +2240,51 @@ static int import_stash(int argc, const char **argv, const char *prefix,
 			     git_stash_import_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (argc != 1)
+	𐤀𐤌 (argc != 1)
 		usage_msg_opt("a revision is required", git_stash_import_usage, options);
 
-	return do_import_stash(repo, argv[0]);
+	أرجع do_import_stash(repo, argv[0]);
 }
 
-struct stash_entry_data {
-	struct repository *r;
-	struct commit_list **items;
+بنية stash_entry_data {
+	بنية repository *r;
+	بنية commit_list **items;
 	size_t count;
 };
 
-static int collect_stash_entries(const char *refname UNUSED,
-				 struct object_id *old_oid UNUSED,
-				 struct object_id *new_oid,
-				 const char *committer UNUSED,
+ساكن صحيح collect_stash_entries(ثابت حرف *refname UNUSED,
+				 بنية object_id *old_oid UNUSED,
+				 بنية object_id *new_oid,
+				 ثابت حرف *committer UNUSED,
 				 timestamp_t timestamp UNUSED,
-				 int tz UNUSED, const char *msg UNUSED,
-				 void *cb_data)
+				 صحيح tz UNUSED, ثابت حرف *msg UNUSED,
+				 فراغ *cb_data)
 {
-	struct stash_entry_data *data = cb_data;
-	struct commit *stash;
+	بنية stash_entry_data *data = cb_data;
+	بنية commit *stash;
 
 	data->count++;
 	stash = lookup_commit_reference(data->r, new_oid);
-	if (!stash || check_stash_topology(data->r, stash)) {
-		return error(_("%s does not look like a stash commit"),
+	𐤀𐤌 (!stash || check_stash_topology(data->r, stash)) {
+		أرجع error(_("%s does not look like a stash commit"),
 			     oid_to_hex(new_oid));
 	}
 	data->items = commit_list_append(stash, data->items);
-	return 0;
+	أرجع 0;
 }
 
-static int do_export_stash(struct repository *r,
-			   const char *ref,
-			   int argc,
-			   const char **argv)
+ساكن صحيح do_export_stash(بنية repository *r,
+			   ثابت حرف *ref,
+			   صحيح argc,
+			   ثابت حرف **argv)
 {
-	struct object_id base;
-	struct commit *prev;
-	struct commit_list *items = NULL, **iter = &items, *cur;
-	int res = 0;
-	int i;
-	struct strbuf revision = STRBUF_INIT;
-	const char *author, *committer;
+	بنية object_id base;
+	بنية commit *prev;
+	بنية commit_list *items = عدم, **iter = &items, *cur;
+	صحيح res = 0;
+	صحيح i;
+	بنية strbuf revision = STRBUF_INIT;
+	ثابت حرف *author, *committer;
 
 	/*
 	 * This is an arbitrary, fixed date, specifically the one used by git
@@ -2297,49 +2297,49 @@ static int do_export_stash(struct repository *r,
 			      "2001-09-17T00:00:00Z", 0);
 
 	/* First, we create a single empty commit. */
-	if (commit_tree_extended("", 0, r->hash_algo->empty_tree, NULL,
-				 &base, author, committer, NULL, NULL))
-		return error(_("unable to write base commit"));
+	𐤀𐤌 (commit_tree_extended("", 0, r->hash_algo->empty_tree, عدم,
+				 &base, author, committer, عدم, عدم))
+		أرجع error(_("unable to write base commit"));
 
 	prev = lookup_commit_reference(r, &base);
 
-	if (argc) {
+	𐤀𐤌 (argc) {
 		/*
 		 * Find each specified stash, and load data into the array.
 		 */
-		for (i = 0; i < argc; i++) {
-			struct object_id oid;
-			struct commit *stash;
+		لكل (i = 0; i < argc; i++) {
+			بنية object_id oid;
+			بنية commit *stash;
 
-			if (parse_stash_revision(&revision, argv[i], 1) ||
+			𐤀𐤌 (parse_stash_revision(&revision, argv[i], 1) ||
 			    repo_get_oid_with_flags(r, revision.buf, &oid,
 						    GET_OID_QUIETLY |
 						    GET_OID_GENTLY)) {
 				res = error(_("unable to find stash entry %s"), argv[i]);
-				goto out;
+				اذهب out;
 			}
 
 			stash = lookup_commit_reference(r, &oid);
-			if (!stash || check_stash_topology(r, stash)) {
+			𐤀𐤌 (!stash || check_stash_topology(r, stash)) {
 				res = error(_("%s does not look like a stash commit"),
 						revision.buf);
-				goto out;
+				اذهب out;
 			}
 			iter = commit_list_append(stash, iter);
 		}
-	} else {
+	} وإلا {
 		/*
 		 * Walk the reflog, finding each stash entry, and load data into the
 		 * array.
 		 */
-		struct stash_entry_data cb_data = {
+		بنية stash_entry_data cb_data = {
 			.r = r, .items = iter,
 		};
-		if (refs_for_each_reflog_ent_reverse(get_main_ref_store(r),
+		𐤀𐤌 (refs_for_each_reflog_ent_reverse(get_main_ref_store(r),
 						     "refs/stash",
 						     collect_stash_entries,
 						     &cb_data) && cb_data.count)
-			goto out;
+			اذهب out;
 	}
 
 	/*
@@ -2348,46 +2348,46 @@ static int do_export_stash(struct repository *r,
 	 * base commit.
 	 */
 	items = commit_list_reverse(items);
-	for (cur = items; cur; cur = cur->next) {
-		struct commit_list *parents = NULL;
-		struct commit_list **next = &parents;
-		struct object_id out;
-		struct commit *stash = cur->item;
+	لكل (cur = items; cur; cur = cur->next) {
+		بنية commit_list *parents = عدم;
+		بنية commit_list **next = &parents;
+		بنية object_id out;
+		بنية commit *stash = cur->item;
 
 		next = commit_list_append(prev, next);
 		next = commit_list_append(stash, next);
 		res = write_commit_with_parents(r, &out, &stash->object.oid, parents);
 		commit_list_free(parents);
-		if (res)
-			goto out;
+		𐤀𐤌 (res)
+			اذهب out;
 		prev = lookup_commit_reference(r, &out);
 	}
-	if (ref)
-		refs_update_ref(get_main_ref_store(r), NULL, ref,
-				&prev->object.oid, NULL, 0, UPDATE_REFS_DIE_ON_ERR);
-	else
+	𐤀𐤌 (ref)
+		refs_update_ref(get_main_ref_store(r), عدم, ref,
+				&prev->object.oid, عدم, 0, UPDATE_REFS_DIE_ON_ERR);
+	وإلا
 		puts(oid_to_hex(&prev->object.oid));
 out:
 	strbuf_release(&revision);
 	commit_list_free(items);
 
-	return res;
+	أرجع res;
 }
 
-enum export_action {
+تعداد export_action {
 	ACTION_NONE,
 	ACTION_PRINT,
 	ACTION_TO_REF,
 };
 
-static int export_stash(int argc,
-			const char **argv,
-			const char *prefix,
-			struct repository *repo)
+ساكن صحيح export_stash(صحيح argc,
+			ثابت حرف **argv,
+			ثابت حرف *prefix,
+			بنية repository *repo)
 {
-	const char *ref = NULL;
-	enum export_action action = ACTION_NONE;
-	struct option options[] = {
+	ثابت حرف *ref = عدم;
+	تعداد export_action action = ACTION_NONE;
+	بنية option options[] = {
 		OPT_CMDMODE(0, "print", &action,
 			    N_("print the object ID instead of writing it to a ref"),
 			    ACTION_PRINT),
@@ -2400,25 +2400,25 @@ static int export_stash(int argc,
 			     git_stash_export_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (ref && action == ACTION_NONE)
+	𐤀𐤌 (ref && action == ACTION_NONE)
 		action = ACTION_TO_REF;
 
-	if (action == ACTION_NONE || (ref && action == ACTION_PRINT))
-		return error(_("exactly one of --print and --to-ref is required"));
+	𐤀𐤌 (action == ACTION_NONE || (ref && action == ACTION_PRINT))
+		أرجع error(_("exactly one of --print and --to-ref is required"));
 
-	return do_export_stash(repo, ref, argc, argv);
+	أرجع do_export_stash(repo, ref, argc, argv);
 }
 
-int cmd_stash(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo)
+صحيح cmd_stash(صحيح argc,
+	      ثابت حرف **argv,
+	      ثابت حرف *prefix,
+	      بنية repository *repo)
 {
 	pid_t pid = getpid();
-	const char *index_file;
-	struct strvec args = STRVEC_INIT;
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	ثابت حرف *index_file;
+	بنية strvec args = STRVEC_INIT;
+	parse_opt_subcommand_fn *fn = عدم;
+	بنية option options[] = {
 		OPT_SUBCOMMAND("apply", &fn, apply_stash),
 		OPT_SUBCOMMAND("clear", &fn, clear_stash),
 		OPT_SUBCOMMAND("drop", &fn, drop_stash),
@@ -2431,13 +2431,13 @@ int cmd_stash(int argc,
 		OPT_SUBCOMMAND("push", &fn, push_stash_unassumed),
 		OPT_SUBCOMMAND("export", &fn, export_stash),
 		OPT_SUBCOMMAND("import", &fn, import_stash),
-		OPT_SUBCOMMAND_F("save", &fn, save_stash, NULL, PARSE_OPT_NOCOMPLETE),
+		OPT_SUBCOMMAND_F("save", &fn, save_stash, عدم, PARSE_OPT_NOCOMPLETE),
 		OPT_END()
 	};
-	const char **args_copy;
-	int ret;
+	ثابت حرف **args_copy;
+	صحيح ret;
 
-	repo_config(the_repository, git_stash_config, NULL);
+	repo_config(the_repository, git_stash_config, عدم);
 
 	argc = parse_options(argc, argv, prefix, options, git_stash_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL |
@@ -2451,7 +2451,7 @@ int cmd_stash(int argc,
 	strbuf_addf(&stash_index_path, "%s.stash.%" PRIuMAX, index_file,
 		    (uintmax_t)pid);
 
-	if (fn) {
+	𐤀𐤌 (fn) {
 		ret = fn(argc, argv, prefix, repo);
 
 		/*
@@ -2461,11 +2461,11 @@ int cmd_stash(int argc,
 		 * Map failures to 128, the status die() uses, so that
 		 * exit status 1 unambiguously indicates conflicts.
 		 */
-		if (ret < 0)
-			return 128;
-		return ret;
-	} else if (!argc) {
-		return !!push_stash_unassumed(0, NULL, prefix, repo);
+		𐤀𐤌 (ret < 0)
+			أرجع 128;
+		أرجع ret;
+	} وإلا 𐤀𐤌 (!argc) {
+		أرجع !!push_stash_unassumed(0, عدم, prefix, repo);
 	}
 
 	/* Assume 'stash push' */
@@ -2481,6 +2481,6 @@ int cmd_stash(int argc,
 	ret = !!push_stash(args.nr, args_copy, prefix, 1);
 
 	strvec_clear(&args);
-	free(args_copy);
-	return ret;
+	حرر(args_copy);
+	أرجع ret;
 }

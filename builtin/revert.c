@@ -1,16 +1,16 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "git-compat-util.h"
-#include "builtin.h"
-#include "parse-options.h"
-#include "diff.h"
-#include "environment.h"
-#include "gettext.h"
-#include "revision.h"
-#include "rerere.h"
-#include "run-command.h"
-#include "sequencer.h"
-#include "branch.h"
+#ضمن "git-compat-util.h"
+#ضمن "builtin.h"
+#ضمن "parse-options.h"
+#ضمن "diff.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "revision.h"
+#ضمن "rerere.h"
+#ضمن "run-command.h"
+#ضمن "sequencer.h"
+#ضمن "branch.h"
 
 /*
  * This implements the builtins revert and cherry-pick.
@@ -23,102 +23,102 @@
  * Copyright (c) 2005 Junio C Hamano
  */
 
-static const char * const revert_usage[] = {
+ساكن ثابت حرف * ثابت revert_usage[] = {
 	N_("git revert [--[no-]edit] [-n] [-m <parent-number>] [-s] [-S[<keyid>]] <commit>..."),
 	N_("git revert (--continue | --skip | --abort | --quit)"),
-	NULL
+	عدم
 };
 
-static const char * const cherry_pick_usage[] = {
+ساكن ثابت حرف * ثابت cherry_pick_usage[] = {
 	N_("git cherry-pick [--edit] [-n] [-m <parent-number>] [-s] [-x] [--ff]\n"
 	   "                [-S[<keyid>]] <commit>..."),
 	N_("git cherry-pick (--continue | --skip | --abort | --quit)"),
-	NULL
+	عدم
 };
 
-static const char *action_name(const struct replay_opts *opts)
+ساكن ثابت حرف *action_name(ثابت بنية replay_opts *opts)
 {
-	return opts->action == REPLAY_REVERT ? "revert" : "cherry-pick";
+	أرجع opts->action == REPLAY_REVERT ? "revert" : "cherry-pick";
 }
 
-static const char * const *revert_or_cherry_pick_usage(struct replay_opts *opts)
+ساكن ثابت حرف * ثابت *revert_or_cherry_pick_usage(بنية replay_opts *opts)
 {
-	return opts->action == REPLAY_REVERT ? revert_usage : cherry_pick_usage;
+	أرجع opts->action == REPLAY_REVERT ? revert_usage : cherry_pick_usage;
 }
 
-enum empty_action {
+تعداد empty_action {
 	EMPTY_COMMIT_UNSPECIFIED = -1,
 	STOP_ON_EMPTY_COMMIT,      /* output errors and stop in the middle of a cherry-pick */
 	DROP_EMPTY_COMMIT,         /* skip with a notice message */
 	KEEP_EMPTY_COMMIT,         /* keep recording as empty commits */
 };
 
-static int parse_opt_empty(const struct option *opt, const char *arg, int unset)
+ساكن صحيح parse_opt_empty(ثابت بنية option *opt, ثابت حرف *arg, صحيح unset)
 {
-	int *opt_value = opt->value;
+	صحيح *opt_value = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!strcmp(arg, "stop"))
+	𐤀𐤌 (!strcmp(arg, "stop"))
 		*opt_value = STOP_ON_EMPTY_COMMIT;
-	else if (!strcmp(arg, "drop"))
+	وإلا 𐤀𐤌 (!strcmp(arg, "drop"))
 		*opt_value = DROP_EMPTY_COMMIT;
-	else if (!strcmp(arg, "keep"))
+	وإلا 𐤀𐤌 (!strcmp(arg, "keep"))
 		*opt_value = KEEP_EMPTY_COMMIT;
-	else
-		return error(_("invalid value for '%s': '%s'"), "--empty", arg);
+	وإلا
+		أرجع error(_("invalid value for '%s': '%s'"), "--empty", arg);
 
-	return 0;
+	أرجع 0;
 }
 
-static int option_parse_m(const struct option *opt,
-			  const char *arg, int unset)
+ساكن صحيح option_parse_m(ثابت بنية option *opt,
+			  ثابت حرف *arg, صحيح unset)
 {
-	struct replay_opts *replay = opt->value;
-	char *end;
+	بنية replay_opts *replay = opt->value;
+	حرف *end;
 
-	if (unset) {
+	𐤀𐤌 (unset) {
 		replay->mainline = 0;
-		return 0;
+		أرجع 0;
 	}
 
 	replay->mainline = strtol(arg, &end, 10);
-	if (*end || replay->mainline <= 0)
-		return error(_("option `%s' expects a number greater than zero"),
+	𐤀𐤌 (*end || replay->mainline <= 0)
+		أرجع error(_("option `%s' expects a number greater than zero"),
 			     opt->long_name);
 
-	return 0;
+	أرجع 0;
 }
 
 LAST_ARG_MUST_BE_NULL
-static void verify_opt_compatible(const char *me, const char *base_opt, ...)
+ساكن فراغ verify_opt_compatible(ثابت حرف *me, ثابت حرف *base_opt, ...)
 {
-	const char *this_opt;
+	ثابت حرف *this_opt;
 	va_list ap;
 
 	va_start(ap, base_opt);
-	while ((this_opt = va_arg(ap, const char *))) {
-		if (va_arg(ap, int))
-			break;
+	طالما ((this_opt = va_arg(ap, ثابت حرف *))) {
+		𐤀𐤌 (va_arg(ap, صحيح))
+			اكسر;
 	}
 	va_end(ap);
 
-	if (this_opt)
+	𐤀𐤌 (this_opt)
 		die(_("%s: %s cannot be used with %s"), me, this_opt, base_opt);
 }
 
-static int run_sequencer(int argc, const char **argv, const char *prefix,
-			 struct replay_opts *opts)
+ساكن صحيح run_sequencer(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+			 بنية replay_opts *opts)
 {
-	const char * const * usage_str = revert_or_cherry_pick_usage(opts);
-	const char *me = action_name(opts);
-	const char *cleanup_arg = NULL;
-	const char sentinel_value = 0; /* value not important */
-	const char *strategy = &sentinel_value;
-	const char *gpg_sign = &sentinel_value;
-	enum empty_action empty_opt = EMPTY_COMMIT_UNSPECIFIED;
-	int cmd = 0, ret;
-	struct option base_options[] = {
+	ثابت حرف * ثابت * usage_str = revert_or_cherry_pick_usage(opts);
+	ثابت حرف *me = action_name(opts);
+	ثابت حرف *cleanup_arg = عدم;
+	ثابت حرف sentinel_value = 0; /* value not important */
+	ثابت حرف *strategy = &sentinel_value;
+	ثابت حرف *gpg_sign = &sentinel_value;
+	تعداد empty_action empty_opt = EMPTY_COMMIT_UNSPECIFIED;
+	صحيح cmd = 0, ret;
+	بنية option base_options[] = {
 		OPT_CMDMODE(0, "quit", &cmd, N_("end revert or cherry-pick sequence"), 'q'),
 		OPT_CMDMODE(0, "continue", &cmd, N_("resume revert or cherry-pick sequence"), 'c'),
 		OPT_CMDMODE(0, "abort", &cmd, N_("cancel revert or cherry-pick sequence"), 'a'),
@@ -126,7 +126,7 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 		OPT_CLEANUP(&cleanup_arg),
 		OPT_BOOL('n', "no-commit", &opts->no_commit, N_("don't automatically commit")),
 		OPT_BOOL('e', "edit", &opts->edit, N_("edit the commit message")),
-		OPT_NOOP_NOARG('r', NULL),
+		OPT_NOOP_NOARG('r', عدم),
 		OPT_BOOL('s', "signoff", &opts->signoff, N_("add a Signed-off-by trailer")),
 		OPT_CALLBACK('m', "mainline", opts, N_("parent-number"),
 			     N_("select mainline parent"), option_parse_m),
@@ -146,11 +146,11 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 		},
 		OPT_END()
 	};
-	struct option *options = base_options;
+	بنية option *options = base_options;
 
-	if (opts->action == REPLAY_PICK) {
-		struct option cp_extra[] = {
-			OPT_BOOL('x', NULL, &opts->record_origin, N_("append commit name")),
+	𐤀𐤌 (opts->action == REPLAY_PICK) {
+		بنية option cp_extra[] = {
+			OPT_BOOL('x', عدم, &opts->record_origin, N_("append commit name")),
 			OPT_BOOL(0, "ff", &opts->allow_ff, N_("allow fast-forward")),
 			OPT_BOOL(0, "allow-empty", &opts->allow_empty, N_("preserve initially empty commits")),
 			OPT_BOOL(0, "allow-empty-message", &opts->allow_empty_message, N_("allow commits with empty messages")),
@@ -161,8 +161,8 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 			OPT_END(),
 		};
 		options = parse_options_concat(options, cp_extra);
-	} else if (opts->action == REPLAY_REVERT) {
-		struct option cp_extra[] = {
+	} وإلا 𐤀𐤌 (opts->action == REPLAY_REVERT) {
+		بنية option cp_extra[] = {
 			OPT_BOOL(0, "reference", &opts->commit_use_reference,
 				 N_("use the 'reference' format to refer to commits")),
 			OPT_END(),
@@ -177,31 +177,31 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	if (opts->action == REPLAY_PICK) {
+	𐤀𐤌 (opts->action == REPLAY_PICK) {
 		opts->drop_redundant_commits = (empty_opt == DROP_EMPTY_COMMIT);
 		opts->keep_redundant_commits = opts->keep_redundant_commits || (empty_opt == KEEP_EMPTY_COMMIT);
 	}
 
 	/* implies allow_empty */
-	if (opts->keep_redundant_commits)
+	𐤀𐤌 (opts->keep_redundant_commits)
 		opts->allow_empty = 1;
 
-	if (cleanup_arg) {
+	𐤀𐤌 (cleanup_arg) {
 		opts->default_msg_cleanup = get_cleanup_mode(cleanup_arg, 1);
 		opts->explicit_cleanup = 1;
 	}
 
 	/* Check for incompatible command line arguments */
-	if (cmd) {
-		const char *this_operation;
-		if (cmd == 'q')
+	𐤀𐤌 (cmd) {
+		ثابت حرف *this_operation;
+		𐤀𐤌 (cmd == 'q')
 			this_operation = "--quit";
-		else if (cmd == 'c')
+		وإلا 𐤀𐤌 (cmd == 'c')
 			this_operation = "--continue";
-		else if (cmd == 's')
+		وإلا 𐤀𐤌 (cmd == 's')
 			this_operation = "--skip";
-		else {
-			assert(cmd == 'a');
+		وإلا {
+			أكد(cmd == 'a');
 			this_operation = "--abort";
 		}
 
@@ -217,79 +217,79 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 				"--no-rerere-autoupdate", opts->allow_rerere_auto == RERERE_NOAUTOUPDATE,
 				"--keep-redundant-commits", opts->keep_redundant_commits,
 				"--empty", empty_opt != EMPTY_COMMIT_UNSPECIFIED,
-				NULL);
+				عدم);
 	}
 
-	if (!opts->strategy && opts->default_strategy) {
+	𐤀𐤌 (!opts->strategy && opts->default_strategy) {
 		opts->strategy = opts->default_strategy;
-		opts->default_strategy = NULL;
+		opts->default_strategy = عدم;
 	}
 
-	if (opts->allow_ff)
+	𐤀𐤌 (opts->allow_ff)
 		verify_opt_compatible(me, "--ff",
 				"--signoff", opts->signoff,
 				"--no-commit", opts->no_commit,
 				"-x", opts->record_origin,
 				"--edit", opts->edit > 0,
-				NULL);
+				عدم);
 
-	if (cmd) {
-		opts->revs = NULL;
-	} else {
-		struct setup_revision_opt s_r_opt;
-		opts->revs = xmalloc(sizeof(*opts->revs));
-		repo_init_revisions(the_repository, opts->revs, NULL);
+	𐤀𐤌 (cmd) {
+		opts->revs = عدم;
+	} وإلا {
+		بنية setup_revision_opt s_r_opt;
+		opts->revs = xmalloc(حجم(*opts->revs));
+		repo_init_revisions(the_repository, opts->revs, عدم);
 		opts->revs->no_walk = 1;
 		opts->revs->unsorted_input = 1;
-		if (argc < 2)
+		𐤀𐤌 (argc < 2)
 			usage_with_options(usage_str, options);
-		if (!strcmp(argv[1], "-"))
+		𐤀𐤌 (!strcmp(argv[1], "-"))
 			argv[1] = "@{-1}";
-		memset(&s_r_opt, 0, sizeof(s_r_opt));
+		memset(&s_r_opt, 0, حجم(s_r_opt));
 		s_r_opt.assume_dashdash = 1;
 		argc = setup_revisions(argc, argv, opts->revs, &s_r_opt);
 	}
 
-	if (argc > 1)
+	𐤀𐤌 (argc > 1)
 		usage_with_options(usage_str, options);
 
 	/* These option values will be free()d */
-	if (gpg_sign != &sentinel_value) {
-		free(opts->gpg_sign);
+	𐤀𐤌 (gpg_sign != &sentinel_value) {
+		حرر(opts->gpg_sign);
 		opts->gpg_sign = xstrdup_or_null(gpg_sign);
 	}
-	if (strategy != &sentinel_value) {
-		free(opts->strategy);
+	𐤀𐤌 (strategy != &sentinel_value) {
+		حرر(opts->strategy);
 		opts->strategy = xstrdup_or_null(strategy);
 	}
-	free(options);
+	حرر(options);
 
-	if (cmd == 'q') {
+	𐤀𐤌 (cmd == 'q') {
 		ret = sequencer_remove_state(opts);
-		if (!ret)
+		𐤀𐤌 (!ret)
 			remove_branch_state(the_repository, 0);
-		return ret;
+		أرجع ret;
 	}
-	if (cmd == 'a')
-		return sequencer_rollback(the_repository, opts);
-	if (cmd == 'c')
+	𐤀𐤌 (cmd == 'a')
+		أرجع sequencer_rollback(the_repository, opts);
+	𐤀𐤌 (cmd == 'c')
 		ret = sequencer_continue(the_repository, opts);
-	else if (cmd == 's')
+	وإلا 𐤀𐤌 (cmd == 's')
 		ret = sequencer_skip(the_repository, opts);
-	else
+	وإلا
 		ret = sequencer_pick_revisions(the_repository, opts);
-	if (!ret)
+	𐤀𐤌 (!ret)
 		run_auto_maintenance(the_repository, opts->quiet);
-	return ret;
+	أرجع ret;
 }
 
-int cmd_revert(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+صحيح cmd_revert(صحيح argc,
+	       ثابت حرف **argv,
+	       ثابت حرف *prefix,
+	       بنية repository *repo UNUSED)
 {
-	struct replay_opts opts = REPLAY_OPTS_INIT;
-	int res;
+	بنية replay_opts opts = REPLAY_OPTS_INIT;
+	صحيح res;
 
 #ifndef WITH_BREAKING_CHANGES
 	warn_on_auto_comment_char = true;
@@ -297,19 +297,19 @@ int cmd_revert(int argc,
 	opts.action = REPLAY_REVERT;
 	sequencer_init_config(&opts);
 	res = run_sequencer(argc, argv, prefix, &opts);
-	if (res < 0)
+	𐤀𐤌 (res < 0)
 		die(_("revert failed"));
 	replay_opts_release(&opts);
-	return res;
+	أرجع res;
 }
 
-int cmd_cherry_pick(int argc,
-const char **argv,
-const char *prefix,
-struct repository *repo UNUSED)
+صحيح cmd_cherry_pick(صحيح argc,
+ثابت حرف **argv,
+ثابت حرف *prefix,
+بنية repository *repo UNUSED)
 {
-	struct replay_opts opts = REPLAY_OPTS_INIT;
-	int res;
+	بنية replay_opts opts = REPLAY_OPTS_INIT;
+	صحيح res;
 
 #ifndef WITH_BREAKING_CHANGES
 	warn_on_auto_comment_char = true;
@@ -317,8 +317,8 @@ struct repository *repo UNUSED)
 	opts.action = REPLAY_PICK;
 	sequencer_init_config(&opts);
 	res = run_sequencer(argc, argv, prefix, &opts);
-	if (res < 0)
+	𐤀𐤌 (res < 0)
 		die(_("cherry-pick failed"));
 	replay_opts_release(&opts);
-	return res;
+	أرجع res;
 }

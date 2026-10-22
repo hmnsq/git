@@ -4,12 +4,12 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "refs.h"
-#include "setup.h"
-#include "strbuf.h"
+#ضمن "builtin.h"
+#ضمن "refs.h"
+#ضمن "setup.h"
+#ضمن "strbuf.h"
 
-static const char builtin_check_ref_format_usage[] =
+ساكن ثابت حرف builtin_check_ref_format_usage[] =
 "git check-ref-format [--normalize] [<options>] <refname>\n"
 "   or: git check-ref-format --branch <branchname-shorthand>";
 
@@ -20,84 +20,84 @@ static const char builtin_check_ref_format_usage[] =
  * This function is similar to normalize_path_copy(), but stripped down
  * to meet check_ref_format's simpler needs.
  */
-static char *collapse_slashes(const char *refname)
+ساكن حرف *collapse_slashes(ثابت حرف *refname)
 {
-	char *ret = xmallocz(strlen(refname));
-	char ch;
-	char prev = '/';
-	char *cp = ret;
+	حرف *ret = xmallocz(strlen(refname));
+	حرف ch;
+	حرف prev = '/';
+	حرف *cp = ret;
 
-	while ((ch = *refname++) != '\0') {
-		if (prev == '/' && ch == prev)
-			continue;
+	طالما ((ch = *refname++) != '\0') {
+		𐤀𐤌 (prev == '/' && ch == prev)
+			استمر;
 
 		*cp++ = ch;
 		prev = ch;
 	}
 	*cp = '\0';
-	return ret;
+	أرجع ret;
 }
 
-static int check_ref_format_branch(const char *arg)
+ساكن صحيح check_ref_format_branch(ثابت حرف *arg)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *name;
-	int nongit;
+	بنية strbuf sb = STRBUF_INIT;
+	ثابت حرف *name;
+	صحيح nongit;
 
 	setup_git_directory_gently(the_repository, &nongit);
-	if (check_branch_ref(the_repository, &sb, arg) ||
+	𐤀𐤌 (check_branch_ref(the_repository, &sb, arg) ||
 	    !skip_prefix(sb.buf, "refs/heads/", &name))
 		die("'%s' is not a valid branch name", arg);
 	printf("%s\n", name);
 	strbuf_release(&sb);
-	return 0;
+	أرجع 0;
 }
 
-int cmd_check_ref_format(int argc,
-			 const char **argv,
-			 const char *prefix,
-			 struct repository *repo UNUSED)
+صحيح cmd_check_ref_format(صحيح argc,
+			 ثابت حرف **argv,
+			 ثابت حرف *prefix,
+			 بنية repository *repo UNUSED)
 {
-	int i;
-	int normalize = 0;
-	int flags = 0;
-	const char *refname;
-	char *to_free = NULL;
-	int ret = 1;
+	صحيح i;
+	صحيح normalize = 0;
+	صحيح flags = 0;
+	ثابت حرف *refname;
+	حرف *to_free = عدم;
+	صحيح ret = 1;
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
 	show_usage_if_asked(argc, argv,
 			    builtin_check_ref_format_usage);
 
-	if (argc == 3 && !strcmp(argv[1], "--branch"))
-		return check_ref_format_branch(argv[2]);
+	𐤀𐤌 (argc == 3 && !strcmp(argv[1], "--branch"))
+		أرجع check_ref_format_branch(argv[2]);
 
-	for (i = 1; i < argc && argv[i][0] == '-'; i++) {
-		if (!strcmp(argv[i], "--normalize") || !strcmp(argv[i], "--print"))
+	لكل (i = 1; i < argc && argv[i][0] == '-'; i++) {
+		𐤀𐤌 (!strcmp(argv[i], "--normalize") || !strcmp(argv[i], "--print"))
 			normalize = 1;
-		else if (!strcmp(argv[i], "--allow-onelevel"))
+		وإلا 𐤀𐤌 (!strcmp(argv[i], "--allow-onelevel"))
 			flags |= REFNAME_ALLOW_ONELEVEL;
-		else if (!strcmp(argv[i], "--no-allow-onelevel"))
+		وإلا 𐤀𐤌 (!strcmp(argv[i], "--no-allow-onelevel"))
 			flags &= ~REFNAME_ALLOW_ONELEVEL;
-		else if (!strcmp(argv[i], "--refspec-pattern"))
+		وإلا 𐤀𐤌 (!strcmp(argv[i], "--refspec-pattern"))
 			flags |= REFNAME_REFSPEC_PATTERN;
-		else
+		وإلا
 			usage(builtin_check_ref_format_usage);
 	}
-	if (! (i == argc - 1))
+	𐤀𐤌 (! (i == argc - 1))
 		usage(builtin_check_ref_format_usage);
 
 	refname = argv[i];
-	if (normalize)
+	𐤀𐤌 (normalize)
 		refname = to_free = collapse_slashes(refname);
-	if (check_refname_format(refname, flags))
-		goto cleanup;
-	if (normalize)
+	𐤀𐤌 (check_refname_format(refname, flags))
+		اذهب cleanup;
+	𐤀𐤌 (normalize)
 		printf("%s\n", refname);
 
 	ret = 0;
 cleanup:
-	free(to_free);
-	return ret;
+	حرر(to_free);
+	أرجع ret;
 }
