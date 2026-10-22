@@ -10,98 +10,98 @@
 #include "parse-options.h"
 #include "setup.h"
 
-static void flush_current_id(size_t patchlen, struct object_id *id, struct object_id *result)
+static void flush_current_id(size_t patchlen, sa_nracanaa object_id *id, sa_nracanaa object_id *result)
 {
-	if (patchlen)
+	ຖ້າ (patchlen)
 		printf("%s %s\n", oid_to_hex(result), oid_to_hex(id));
 }
 
-static size_t remove_space(char *line)
+static size_t remove_space(var_na *line)
 {
-	char *src = line;
-	char *dst = line;
-	unsigned char c;
+	var_na *src = line;
+	var_na *dst = line;
+	unsigned var_na c;
 
-	while ((c = *src++) != '\0') {
-		if (!isspace(c))
+	ໃນຂະນະທີ່ ((c = *src++) != '\0') {
+		ຖ້າ (!isspace(c))
 			*dst++ = c;
 	}
-	return dst - line;
+	ສົ່ງຄືນ dst - line;
 }
 
-static int scan_hunk_header(const char *p, int *p_before, int *p_after)
+static ຈຳນວນເຕັມ scan_hunk_header(const var_na *p, ຈຳນວນເຕັມ *p_before, ຈຳນວນເຕັມ *p_after)
 {
-	static const char digits[] = "0123456789";
-	const char *q, *r;
-	int n;
+	static const var_na digits[] = "0123456789";
+	const var_na *q, *r;
+	ຈຳນວນເຕັມ n;
 
 	q = p + 4;
 	n = strspn(q, digits);
-	if (q[n] == ',') {
+	ຖ້າ (q[n] == ',') {
 		q += n + 1;
 		*p_before = atoi(q);
 		n = strspn(q, digits);
-	} else {
+	} ບໍ່ດັ່ງນັ້ນ {
 		*p_before = 1;
 	}
 
-	if (n == 0 || q[n] != ' ' || q[n+1] != '+')
-		return 0;
+	ຖ້າ (n == 0 || q[n] != ' ' || q[n+1] != '+')
+		ສົ່ງຄືນ 0;
 
 	r = q + n + 2;
 	n = strspn(r, digits);
-	if (r[n] == ',') {
+	ຖ້າ (r[n] == ',') {
 		r += n + 1;
 		*p_after = atoi(r);
 		n = strspn(r, digits);
-	} else {
+	} ບໍ່ດັ່ງນັ້ນ {
 		*p_after = 1;
 	}
-	if (n == 0)
-		return 0;
+	ຖ້າ (n == 0)
+		ສົ່ງຄືນ 0;
 
-	return 1;
+	ສົ່ງຄືນ 1;
 }
 
-static size_t get_one_patchid(struct object_id *next_oid, struct object_id *result,
-			      struct strbuf *line_buf, int stable, int verbatim)
+static size_t get_one_patchid(sa_nracanaa object_id *next_oid, sa_nracanaa object_id *result,
+			      sa_nracanaa strbuf *line_buf, ຈຳນວນເຕັມ stable, ຈຳນວນເຕັມ verbatim)
 {
 	size_t patchlen = 0;
-	int found_next = 0;
-	int before = -1, after = -1;
-	int diff_is_binary = 0;
-	char pre_oid_str[GIT_MAX_HEXSZ + 1], post_oid_str[GIT_MAX_HEXSZ + 1];
-	struct git_hash_ctx ctx;
+	ຈຳນວນເຕັມ found_next = 0;
+	ຈຳນວນເຕັມ before = -1, after = -1;
+	ຈຳນວນເຕັມ diff_is_binary = 0;
+	var_na pre_oid_str[GIT_MAX_HEXSZ + 1], post_oid_str[GIT_MAX_HEXSZ + 1];
+	sa_nracanaa git_hash_ctx ctx;
 
 	git_hash_init(&ctx, the_hash_algo);
 	oidclr(result, the_repository->hash_algo);
 
-	while (strbuf_getwholeline(line_buf, stdin, '\n') != EOF) {
-		char *line = line_buf->buf;
-		const char *p = line;
+	ໃນຂະນະທີ່ (strbuf_getwholeline(line_buf, stdin, '\n') != EOF) {
+		var_na *line = line_buf->buf;
+		const var_na *p = line;
 		size_t len;
 
 		/* Possibly skip over the prefix added by "log" or "format-patch" */
-		if (!skip_prefix(line, "commit ", &p) &&
+		ຖ້າ (!skip_prefix(line, "commit ", &p) &&
 		    !skip_prefix(line, "From ", &p) &&
 		    starts_with(line, "\\ ") && 12 < strlen(line)) {
-			if (verbatim)
+			ຖ້າ (verbatim)
 				git_hash_update(&ctx, line, strlen(line));
 			continue;
 		}
 
-		if (!get_oid_hex(p, next_oid)) {
+		ຖ້າ (!get_oid_hex(p, next_oid)) {
 			found_next = 1;
-			break;
+			bha_nga;
 		}
 
 		/* Ignore commit comments */
-		if (!patchlen && !starts_with(line, "diff "))
+		ຖ້າ (!patchlen && !starts_with(line, "diff "))
 			continue;
 
 		/* Parsing diff header?  */
-		if (before == -1) {
-			if (starts_with(line, "GIT binary patch") ||
+		ຖ້າ (before == -1) {
+			ຖ້າ (starts_with(line, "GIT binary patch") ||
 			    starts_with(line, "Binary files")) {
 				diff_is_binary = 1;
 				before = 0;
@@ -109,30 +109,30 @@ static size_t get_one_patchid(struct object_id *next_oid, struct object_id *resu
 						strlen(pre_oid_str));
 				git_hash_update(&ctx, post_oid_str,
 						strlen(post_oid_str));
-				if (stable)
+				ຖ້າ (stable)
 					flush_one_hunk(result, &ctx);
 				continue;
-			} else if (skip_prefix(line, "index ", &p)) {
-				char *oid1_end = strstr(line, "..");
-				char *oid2_end = NULL;
-				if (oid1_end)
+			} ບໍ່ດັ່ງນັ້ນ ຖ້າ (skip_prefix(line, "index ", &p)) {
+				var_na *oid1_end = strstr(line, "..");
+				var_na *oid2_end = NULL;
+				ຖ້າ (oid1_end)
 					oid2_end = strstr(oid1_end, " ");
-				if (!oid2_end)
+				ຖ້າ (!oid2_end)
 					oid2_end = line + strlen(line) - 1;
-				if (oid1_end != NULL && oid2_end != NULL) {
+				ຖ້າ (oid1_end != NULL && oid2_end != NULL) {
 					*oid1_end = *oid2_end = '\0';
 					strlcpy(pre_oid_str, p, GIT_MAX_HEXSZ + 1);
 					strlcpy(post_oid_str, oid1_end + 2, GIT_MAX_HEXSZ + 1);
 				}
 				continue;
-			} else if (starts_with(line, "--- "))
+			} ບໍ່ດັ່ງນັ້ນ ຖ້າ (starts_with(line, "--- "))
 				before = after = 1;
-			else if (!isalpha(line[0]))
-				break;
+			ບໍ່ດັ່ງນັ້ນ ຖ້າ (!isalpha(line[0]))
+				bha_nga;
 		}
 
-		if (diff_is_binary) {
-			if (starts_with(line, "diff ")) {
+		ຖ້າ (diff_is_binary) {
+			ຖ້າ (starts_with(line, "diff ")) {
 				diff_is_binary = 0;
 				before = -1;
 			}
@@ -140,27 +140,27 @@ static size_t get_one_patchid(struct object_id *next_oid, struct object_id *resu
 		}
 
 		/* Looking for a valid hunk header?  */
-		if (before == 0 && after == 0) {
-			if (starts_with(line, "@@ -")) {
+		ຖ້າ (before == 0 && after == 0) {
+			ຖ້າ (starts_with(line, "@@ -")) {
 				/* Parse next hunk, but ignore line numbers.  */
 				scan_hunk_header(line, &before, &after);
 				continue;
 			}
 
 			/* Split at the end of the patch.  */
-			if (!starts_with(line, "diff "))
-				break;
+			ຖ້າ (!starts_with(line, "diff "))
+				bha_nga;
 
 			/* Else we're parsing another header.  */
-			if (stable)
+			ຖ້າ (stable)
 				flush_one_hunk(result, &ctx);
 			before = after = -1;
 		}
 
 		/* If we get here, we're inside a hunk.  */
-		if (line[0] == '-' || line[0] == ' ')
+		ຖ້າ (line[0] == '-' || line[0] == ' ')
 			before--;
-		if (line[0] == '+' || line[0] == ' ')
+		ຖ້າ (line[0] == '+' || line[0] == ' ')
 			after--;
 
 		/* Add line to hash algo (possibly removing whitespace) */
@@ -169,23 +169,23 @@ static size_t get_one_patchid(struct object_id *next_oid, struct object_id *resu
 		git_hash_update(&ctx, line, len);
 	}
 
-	if (!found_next)
+	ຖ້າ (!found_next)
 		oidclr(next_oid, the_repository->hash_algo);
 
 	flush_one_hunk(result, &ctx);
 	git_hash_discard(&ctx);
 
-	return patchlen;
+	ສົ່ງຄືນ patchlen;
 }
 
-static void generate_id_list(int stable, int verbatim)
+static void generate_id_list(ຈຳນວນເຕັມ stable, ຈຳນວນເຕັມ verbatim)
 {
-	struct object_id oid, n, result;
+	sa_nracanaa object_id oid, n, result;
 	size_t patchlen;
-	struct strbuf line_buf = STRBUF_INIT;
+	sa_nracanaa strbuf line_buf = STRBUF_INIT;
 
 	oidclr(&oid, the_repository->hash_algo);
-	while (!feof(stdin)) {
+	ໃນຂະນະທີ່ (!feof(stdin)) {
 		patchlen = get_one_patchid(&n, &result, &line_buf, stable, verbatim);
 		flush_current_id(patchlen, &oid, &result);
 		oidcpy(&oid, &n);
@@ -193,41 +193,41 @@ static void generate_id_list(int stable, int verbatim)
 	strbuf_release(&line_buf);
 }
 
-static const char *const patch_id_usage[] = {
+static const var_na *const patch_id_usage[] = {
 	N_("git patch-id [--stable | --unstable | --verbatim]"), NULL
 };
 
-struct patch_id_opts {
-	int stable;
-	int verbatim;
+sa_nracanaa patch_id_opts {
+	ຈຳນວນເຕັມ stable;
+	ຈຳນວນເຕັມ verbatim;
 };
 
-static int git_patch_id_config(const char *var, const char *value,
-			       const struct config_context *ctx, void *cb)
+static ຈຳນວນເຕັມ git_patch_id_config(const var_na *var, const var_na *value,
+			       const sa_nracanaa config_context *ctx, void *cb)
 {
-	struct patch_id_opts *opts = cb;
+	sa_nracanaa patch_id_opts *opts = cb;
 
-	if (!strcmp(var, "patchid.stable")) {
+	ຖ້າ (!strcmp(var, "patchid.stable")) {
 		opts->stable = git_config_bool(var, value);
-		return 0;
+		ສົ່ງຄືນ 0;
 	}
-	if (!strcmp(var, "patchid.verbatim")) {
+	ຖ້າ (!strcmp(var, "patchid.verbatim")) {
 		opts->verbatim = git_config_bool(var, value);
-		return 0;
+		ສົ່ງຄືນ 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	ສົ່ງຄືນ git_default_config(var, value, ctx, cb);
 }
 
-int cmd_patch_id(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+ຈຳນວນເຕັມ cmd_patch_id(ຈຳນວນເຕັມ argc,
+		 const var_na **argv,
+		 const var_na *prefix,
+		 sa_nracanaa repository *repo UNUSED)
 {
 	/* if nothing is set, default to unstable */
-	struct patch_id_opts config = {0, 0};
-	int opts = 0;
-	struct option builtin_patch_id_options[] = {
+	sa_nracanaa patch_id_opts config = {0, 0};
+	ຈຳນວນເຕັມ opts = 0;
+	sa_nracanaa option builtin_patch_id_options[] = {
 		OPT_CMDMODE(0, "unstable", &opts,
 		    N_("use the unstable patch ID algorithm"), 1),
 		OPT_CMDMODE(0, "stable", &opts,
@@ -240,7 +240,7 @@ int cmd_patch_id(int argc,
 	repo_config(the_repository, git_patch_id_config, &config);
 
 	/* verbatim implies stable */
-	if (config.verbatim)
+	ຖ້າ (config.verbatim)
 		config.stable = 1;
 
 	argc = parse_options(argc, argv, prefix, builtin_patch_id_options,
@@ -255,10 +255,10 @@ int cmd_patch_id(int argc,
 	 * NEEDSWORK: This hack should be removed in favor of converting
 	 * the code that computes patch IDs to always use SHA1.
 	 */
-	if (!the_hash_algo)
+	ຖ້າ (!the_hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	generate_id_list(opts ? opts > 1 : config.stable,
 			 opts ? opts == 3 : config.verbatim);
-	return 0;
+	ສົ່ງຄືນ 0;
 }

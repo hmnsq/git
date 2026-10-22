@@ -21,7 +21,7 @@
 #include "commit-reach.h"
 #include "progress.h"
 
-static const char * const builtin_remote_usage[] = {
+static const var_na * const builtin_remote_usage[] = {
 	"git remote [-v | --verbose]",
 	N_("git remote add [-t <branch>] [-m <master>] [-f] [--tags | --no-tags] [--mirror=<fetch|push>] <name> <url>"),
 	N_("git remote rename [--[no-]progress] <old> <new>"),
@@ -38,53 +38,53 @@ static const char * const builtin_remote_usage[] = {
 	NULL
 };
 
-static const char * const builtin_remote_add_usage[] = {
+static const var_na * const builtin_remote_add_usage[] = {
 	N_("git remote add [<options>] <name> <url>"),
 	NULL
 };
 
-static const char * const builtin_remote_rename_usage[] = {
+static const var_na * const builtin_remote_rename_usage[] = {
 	N_("git remote rename [--[no-]progress] <old> <new>"),
 	NULL
 };
 
-static const char * const builtin_remote_rm_usage[] = {
+static const var_na * const builtin_remote_rm_usage[] = {
 	N_("git remote remove <name>"),
 	NULL
 };
 
-static const char * const builtin_remote_sethead_usage[] = {
+static const var_na * const builtin_remote_sethead_usage[] = {
 	N_("git remote set-head <name> (-a | --auto | -d | --delete | <branch>)"),
 	NULL
 };
 
-static const char * const builtin_remote_setbranches_usage[] = {
+static const var_na * const builtin_remote_setbranches_usage[] = {
 	N_("git remote set-branches <name> <branch>..."),
 	N_("git remote set-branches --add <name> <branch>..."),
 	NULL
 };
 
-static const char * const builtin_remote_show_usage[] = {
+static const var_na * const builtin_remote_show_usage[] = {
 	N_("git remote show [<options>] <name>"),
 	NULL
 };
 
-static const char * const builtin_remote_prune_usage[] = {
+static const var_na * const builtin_remote_prune_usage[] = {
 	N_("git remote prune [<options>] <name>"),
 	NULL
 };
 
-static const char * const builtin_remote_update_usage[] = {
+static const var_na * const builtin_remote_update_usage[] = {
 	N_("git remote update [<options>] [<group> | <remote>]..."),
 	NULL
 };
 
-static const char * const builtin_remote_geturl_usage[] = {
+static const var_na * const builtin_remote_geturl_usage[] = {
 	N_("git remote get-url [--push] [--all] <name>"),
 	NULL
 };
 
-static const char * const builtin_remote_seturl_usage[] = {
+static const var_na * const builtin_remote_seturl_usage[] = {
 	N_("git remote set-url [--push] <name> <newurl> [<oldurl>]"),
 	N_("git remote set-url --add <name> <newurl>"),
 	N_("git remote set-url --delete <name> <url>"),
@@ -95,24 +95,24 @@ static const char * const builtin_remote_seturl_usage[] = {
 #define GET_HEAD_NAMES (1<<1)
 #define GET_PUSH_REF_STATES (1<<2)
 
-static int verbose;
+static ຈຳນວນເຕັມ verbose;
 
-static int fetch_remote(const char *name)
+static ຈຳນວນເຕັມ fetch_remote(const var_na *name)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process cmd = CHILD_PROCESS_INIT;
 
 	strvec_push(&cmd.args, "fetch");
-	if (verbose)
+	ຖ້າ (verbose)
 		strvec_push(&cmd.args, "-v");
 	strvec_push(&cmd.args, name);
 	cmd.git_cmd = 1;
 	printf_ln(_("Updating %s"), name);
-	if (run_command(&cmd))
-		return error(_("Could not fetch %s"), name);
-	return 0;
+	ຖ້າ (run_command(&cmd))
+		ສົ່ງຄືນ error(_("Could not fetch %s"), name);
+	ສົ່ງຄືນ 0;
 }
 
-enum {
+ga_nanaa {
 	TAGS_UNSET = 0,
 	TAGS_DEFAULT = 1,
 	TAGS_SET = 2
@@ -123,70 +123,70 @@ enum {
 #define MIRROR_PUSH 2
 #define MIRROR_BOTH (MIRROR_FETCH|MIRROR_PUSH)
 
-static void add_branch(const char *key, const char *branchname,
-		       const char *remotename, int mirror, struct strbuf *tmp)
+static void add_branch(const var_na *key, const var_na *branchname,
+		       const var_na *remotename, ຈຳນວນເຕັມ mirror, sa_nracanaa strbuf *tmp)
 {
 	strbuf_reset(tmp);
 	strbuf_addch(tmp, '+');
-	if (mirror)
+	ຖ້າ (mirror)
 		strbuf_addf(tmp, "refs/%s:refs/%s",
 				branchname, branchname);
-	else
+	ບໍ່ດັ່ງນັ້ນ
 		strbuf_addf(tmp, "refs/heads/%s:refs/remotes/%s/%s",
 				branchname, remotename, branchname);
 	repo_config_set_multivar(the_repository, key, tmp->buf, "^$", 0);
 }
 
-static const char mirror_advice[] =
+static const var_na mirror_advice[] =
 N_("--mirror is dangerous and deprecated; please\n"
    "\t use --mirror=fetch or --mirror=push instead");
 
-static int parse_mirror_opt(const struct option *opt, const char *arg, int not)
+static ຈຳນວນເຕັມ parse_mirror_opt(const sa_nracanaa option *opt, const var_na *arg, ຈຳນວນເຕັມ not)
 {
 	unsigned *mirror = opt->value;
-	if (not)
+	ຖ້າ (not)
 		*mirror = MIRROR_NONE;
-	else if (!arg) {
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (!arg) {
 		warning("%s", _(mirror_advice));
 		*mirror = MIRROR_BOTH;
 	}
-	else if (!strcmp(arg, "fetch"))
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (!strcmp(arg, "fetch"))
 		*mirror = MIRROR_FETCH;
-	else if (!strcmp(arg, "push"))
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (!strcmp(arg, "push"))
 		*mirror = MIRROR_PUSH;
-	else
-		return error(_("unknown --mirror argument: %s"), arg);
-	return 0;
+	ບໍ່ດັ່ງນັ້ນ
+		ສົ່ງຄືນ error(_("unknown --mirror argument: %s"), arg);
+	ສົ່ງຄືນ 0;
 }
 
-static int check_remote_collision(struct remote *remote, void *data)
+static ຈຳນວນເຕັມ check_remote_collision(sa_nracanaa remote *remote, void *data)
 {
-	const char *name = data;
-	const char *p;
+	const var_na *name = data;
+	const var_na *p;
 
-	if (skip_prefix(name, remote->name, &p) && *p == '/')
+	ຖ້າ (skip_prefix(name, remote->name, &p) && *p == '/')
 		die(_("remote name '%s' is a subset of existing remote '%s'"),
 		    name, remote->name);
-	if (skip_prefix(remote->name, name, &p) && *p == '/')
+	ຖ້າ (skip_prefix(remote->name, name, &p) && *p == '/')
 		die(_("remote name '%s' is a superset of existing remote '%s'"),
 		    name, remote->name);
 
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int add(int argc, const char **argv, const char *prefix,
-	       struct repository *repo UNUSED)
+static ຈຳນວນເຕັມ add(ຈຳນວນເຕັມ argc, const var_na **argv, const var_na *prefix,
+	       sa_nracanaa repository *repo UNUSED)
 {
-	int fetch = 0, fetch_tags = TAGS_DEFAULT;
+	ຈຳນວນເຕັມ fetch = 0, fetch_tags = TAGS_DEFAULT;
 	unsigned mirror = MIRROR_NONE;
-	struct string_list track = STRING_LIST_INIT_NODUP;
-	const char *master = NULL;
-	struct remote *remote;
-	struct strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT;
-	const char *name, *url;
-	int result = 0;
+	sa_nracanaa string_list track = STRING_LIST_INIT_NODUP;
+	const var_na *master = NULL;
+	sa_nracanaa remote *remote;
+	sa_nracanaa strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT;
+	const var_na *name, *url;
+	ຈຳນວນເຕັມ result = 0;
 
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_BOOL('f', "fetch", &fetch, N_("fetch the remote branches")),
 		OPT_SET_INT(0, "tags", &fetch_tags,
 			    N_("import all tags and associated objects when fetching\n"
@@ -204,24 +204,24 @@ static int add(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_add_usage, 0);
 
-	if (argc != 2)
+	ຖ້າ (argc != 2)
 		usage_with_options(builtin_remote_add_usage, options);
 
-	if (mirror && master)
+	ຖ້າ (mirror && master)
 		die(_("specifying a master branch makes no sense with --mirror"));
-	if (mirror && !(mirror & MIRROR_FETCH) && track.nr)
+	ຖ້າ (mirror && !(mirror & MIRROR_FETCH) && track.nr)
 		die(_("specifying branches to track makes sense only with fetch mirrors"));
 
 	name = argv[0];
 	url = argv[1];
 
 	remote = remote_get(name);
-	if (remote_is_configured(remote, 1)) {
+	ຖ້າ (remote_is_configured(remote, 1)) {
 		error(_("remote %s already exists."), name);
 		exit(3);
 	}
 
-	if (!valid_remote_name(name))
+	ຖ້າ (!valid_remote_name(name))
 		die(_("'%s' is not a valid remote name"), name);
 
 	for_each_remote(check_remote_collision, (void *)name);
@@ -229,43 +229,43 @@ static int add(int argc, const char **argv, const char *prefix,
 	strbuf_addf(&buf, "remote.%s.url", name);
 	repo_config_set(the_repository, buf.buf, url);
 
-	if (!mirror || mirror & MIRROR_FETCH) {
+	ຖ້າ (!mirror || mirror & MIRROR_FETCH) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.fetch", name);
-		if (track.nr == 0)
+		ຖ້າ (track.nr == 0)
 			string_list_append(&track, "*");
-		for (size_t i = 0; i < track.nr; i++) {
+		ສຳລັບ (size_t i = 0; i < track.nr; i++) {
 			add_branch(buf.buf, track.items[i].string,
 				   name, mirror, &buf2);
 		}
 	}
 
-	if (mirror & MIRROR_PUSH) {
+	ຖ້າ (mirror & MIRROR_PUSH) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.mirror", name);
 		repo_config_set(the_repository, buf.buf, "true");
 	}
 
-	if (fetch_tags != TAGS_DEFAULT) {
+	ຖ້າ (fetch_tags != TAGS_DEFAULT) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.tagOpt", name);
 		repo_config_set(the_repository, buf.buf,
 				fetch_tags == TAGS_SET ? "--tags" : "--no-tags");
 	}
 
-	if (fetch && fetch_remote(name)) {
+	ຖ້າ (fetch && fetch_remote(name)) {
 		result = 1;
 		goto out;
 	}
 
-	if (master) {
+	ຖ້າ (master) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "refs/remotes/%s/HEAD", name);
 
 		strbuf_reset(&buf2);
 		strbuf_addf(&buf2, "refs/remotes/%s/%s", name, master);
 
-		if (refs_update_symref(get_main_ref_store(the_repository), buf.buf, buf2.buf, "remote add"))
+		ຖ້າ (refs_update_symref(get_main_ref_store(the_repository), buf.buf, buf2.buf, "remote add"))
 			result = error(_("Could not setup master '%s'"), master);
 	}
 
@@ -274,110 +274,110 @@ out:
 	strbuf_release(&buf2);
 	string_list_clear(&track, 0);
 
-	return result;
+	ສົ່ງຄືນ result;
 }
 
-struct branch_info {
-	char *remote_name;
-	struct string_list merge;
-	enum rebase_type rebase;
-	char *push_remote_name;
+sa_nracanaa branch_info {
+	var_na *remote_name;
+	sa_nracanaa string_list merge;
+	ga_nanaa rebase_type rebase;
+	var_na *push_remote_name;
 };
 
-static struct string_list branch_list = STRING_LIST_INIT_DUP;
+static sa_nracanaa string_list branch_list = STRING_LIST_INIT_DUP;
 
-static const char *abbrev_ref(const char *name, const char *prefix)
+static const var_na *abbrev_ref(const var_na *name, const var_na *prefix)
 {
 	skip_prefix(name, prefix, &name);
-	return name;
+	ສົ່ງຄືນ name;
 }
 #define abbrev_branch(name) abbrev_ref((name), "refs/heads/")
 
-static int config_read_branches(const char *key, const char *value,
-				const struct config_context *ctx UNUSED,
+static ຈຳນວນເຕັມ config_read_branches(const var_na *key, const var_na *value,
+				const sa_nracanaa config_context *ctx UNUSED,
 				void *data UNUSED)
 {
-	const char *orig_key = key;
-	char *name;
-	struct string_list_item *item;
-	struct branch_info *info;
-	enum { REMOTE, MERGE, REBASE, PUSH_REMOTE } type;
+	const var_na *orig_key = key;
+	var_na *name;
+	sa_nracanaa string_list_item *item;
+	sa_nracanaa branch_info *info;
+	ga_nanaa { REMOTE, MERGE, REBASE, PUSH_REMOTE } type;
 	size_t key_len;
 
-	if (!starts_with(key, "branch."))
-		return 0;
+	ຖ້າ (!starts_with(key, "branch."))
+		ສົ່ງຄືນ 0;
 
 	key += strlen("branch.");
-	if (strip_suffix(key, ".remote", &key_len))
+	ຖ້າ (strip_suffix(key, ".remote", &key_len))
 		type = REMOTE;
-	else if (strip_suffix(key, ".merge", &key_len))
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (strip_suffix(key, ".merge", &key_len))
 		type = MERGE;
-	else if (strip_suffix(key, ".rebase", &key_len))
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (strip_suffix(key, ".rebase", &key_len))
 		type = REBASE;
-	else if (strip_suffix(key, ".pushremote", &key_len))
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (strip_suffix(key, ".pushremote", &key_len))
 		type = PUSH_REMOTE;
-	else
-		return 0;
+	ບໍ່ດັ່ງນັ້ນ
+		ສົ່ງຄືນ 0;
 
 	name = xmemdupz(key, key_len);
 	item = string_list_insert(&branch_list, name);
 
-	if (!item->util)
-		item->util = xcalloc(1, sizeof(struct branch_info));
+	ຖ້າ (!item->util)
+		item->util = xcalloc(1, parimaa_na(sa_nracanaa branch_info));
 	info = item->util;
 	switch (type) {
-	case REMOTE:
-		if (info->remote_name)
+	pak_sa REMOTE:
+		ຖ້າ (info->remote_name)
 			warning(_("more than one %s"), orig_key);
 		info->remote_name = xstrdup(value);
-		break;
-	case MERGE: {
-		const char *space = strchr(value, ' ');
+		bha_nga;
+	pak_sa MERGE: {
+		const var_na *space = strchr(value, ' ');
 		value = abbrev_branch(value);
-		while (space) {
-			char *merge;
+		ໃນຂະນະທີ່ (space) {
+			var_na *merge;
 			merge = xstrndup(value, space - value);
 			string_list_append(&info->merge, merge);
 			value = abbrev_branch(space + 1);
 			space = strchr(value, ' ');
 		}
 		string_list_append(&info->merge, xstrdup(value));
-		break;
+		bha_nga;
 	}
-	case REBASE:
+	pak_sa REBASE:
 		/*
 		 * Consider invalid values as false and check the
 		 * truth value with >= REBASE_TRUE.
 		 */
 		info->rebase = rebase_parse_value(value);
-		if (info->rebase == REBASE_INVALID)
+		ຖ້າ (info->rebase == REBASE_INVALID)
 			warning(_("unhandled branch.%s.rebase=%s; assuming "
 				  "'true'"), name, value);
-		break;
-	case PUSH_REMOTE:
-		if (info->push_remote_name)
+		bha_nga;
+	pak_sa PUSH_REMOTE:
+		ຖ້າ (info->push_remote_name)
 			warning(_("more than one %s"), orig_key);
 		info->push_remote_name = xstrdup(value);
-		break;
+		bha_nga;
 	default:
 		BUG("unexpected type=%d", type);
 	}
 
 	free(name);
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
 static void read_branches(void)
 {
-	if (branch_list.nr)
-		return;
+	ຖ້າ (branch_list.nr)
+		ສົ່ງຄືນ;
 	repo_config(the_repository, config_read_branches, NULL);
 }
 
-struct ref_states {
-	struct remote *remote;
-	struct string_list new_refs, skipped, stale, tracked, heads, push;
-	int queried;
+sa_nracanaa ref_states {
+	sa_nracanaa remote *remote;
+	sa_nracanaa string_list new_refs, skipped, stale, tracked, heads, push;
+	ຈຳນວນເຕັມ queried;
 };
 
 #define REF_STATES_INIT { \
@@ -389,28 +389,28 @@ struct ref_states {
 	.push = STRING_LIST_INIT_DUP, \
 }
 
-static int get_ref_states(const struct ref *remote_refs, struct ref_states *states)
+static ຈຳນວນເຕັມ get_ref_states(const sa_nracanaa ref *remote_refs, sa_nracanaa ref_states *states)
 {
-	struct ref *fetch_map = NULL, **tail = &fetch_map;
-	struct ref *ref, *stale_refs;
-	int i;
+	sa_nracanaa ref *fetch_map = NULL, **tail = &fetch_map;
+	sa_nracanaa ref *ref, *stale_refs;
+	ຈຳນວນເຕັມ i;
 
-	for (i = 0; i < states->remote->fetch.nr; i++)
-		if (get_fetch_map(remote_refs, &states->remote->fetch.items[i], &tail, 1))
+	ສຳລັບ (i = 0; i < states->remote->fetch.nr; i++)
+		ຖ້າ (get_fetch_map(remote_refs, &states->remote->fetch.items[i], &tail, 1))
 			die(_("Could not get fetch map for refspec %s"),
 				states->remote->fetch.items[i].raw);
 
-	for (ref = fetch_map; ref; ref = ref->next) {
-		if (refname_matches_negative_refspec_item(ref->name, &states->remote->fetch))
+	ສຳລັບ (ref = fetch_map; ref; ref = ref->next) {
+		ຖ້າ (refname_matches_negative_refspec_item(ref->name, &states->remote->fetch))
 			string_list_append(&states->skipped, abbrev_branch(ref->name));
-		else if (!ref->peer_ref || !refs_ref_exists(get_main_ref_store(the_repository), ref->peer_ref->name))
+		ບໍ່ດັ່ງນັ້ນ ຖ້າ (!ref->peer_ref || !refs_ref_exists(get_main_ref_store(the_repository), ref->peer_ref->name))
 			string_list_append(&states->new_refs, abbrev_branch(ref->name));
-		else
+		ບໍ່ດັ່ງນັ້ນ
 			string_list_append(&states->tracked, abbrev_branch(ref->name));
 	}
 	stale_refs = get_stale_heads(&states->remote->fetch, fetch_map);
-	for (ref = stale_refs; ref; ref = ref->next) {
-		struct string_list_item *item =
+	ສຳລັບ (ref = stale_refs; ref; ref = ref->next) {
+		sa_nracanaa string_list_item *item =
 			string_list_append(&states->stale, abbrev_branch(ref->name));
 		item->util = xstrdup(ref->name);
 	}
@@ -422,13 +422,13 @@ static int get_ref_states(const struct ref *remote_refs, struct ref_states *stat
 	string_list_sort(&states->tracked);
 	string_list_sort(&states->stale);
 
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-struct push_info {
-	char *dest;
-	int forced;
-	enum {
+sa_nracanaa push_info {
+	var_na *dest;
+	ຈຳນວນເຕັມ forced;
+	ga_nanaa {
 		PUSH_STATUS_CREATE = 0,
 		PUSH_STATUS_DELETE,
 		PUSH_STATUS_UPTODATE,
@@ -438,188 +438,188 @@ struct push_info {
 	} status;
 };
 
-static int get_push_ref_states(const struct ref *remote_refs,
-	struct ref_states *states)
+static ຈຳນວນເຕັມ get_push_ref_states(const sa_nracanaa ref *remote_refs,
+	sa_nracanaa ref_states *states)
 {
-	struct remote *remote = states->remote;
-	struct ref *ref, *local_refs, *push_map;
-	if (remote->mirror)
-		return 0;
+	sa_nracanaa remote *remote = states->remote;
+	sa_nracanaa ref *ref, *local_refs, *push_map;
+	ຖ້າ (remote->mirror)
+		ສົ່ງຄືນ 0;
 
 	local_refs = get_local_heads();
 	push_map = copy_ref_list(remote_refs);
 
 	match_push_refs(local_refs, &push_map, &remote->push, MATCH_REFS_NONE);
 
-	for (ref = push_map; ref; ref = ref->next) {
-		struct string_list_item *item;
-		struct push_info *info;
+	ສຳລັບ (ref = push_map; ref; ref = ref->next) {
+		sa_nracanaa string_list_item *item;
+		sa_nracanaa push_info *info;
 
-		if (!ref->peer_ref)
+		ຖ້າ (!ref->peer_ref)
 			continue;
 		oidcpy(&ref->new_oid, &ref->peer_ref->new_oid);
 
 		item = string_list_append(&states->push,
 					  abbrev_branch(ref->peer_ref->name));
-		item->util = xcalloc(1, sizeof(struct push_info));
+		item->util = xcalloc(1, parimaa_na(sa_nracanaa push_info));
 		info = item->util;
 		info->forced = ref->force;
 		info->dest = xstrdup(abbrev_branch(ref->name));
 
-		if (is_null_oid(&ref->new_oid)) {
+		ຖ້າ (is_null_oid(&ref->new_oid)) {
 			info->status = PUSH_STATUS_DELETE;
-		} else if (oideq(&ref->old_oid, &ref->new_oid))
+		} ບໍ່ດັ່ງນັ້ນ ຖ້າ (oideq(&ref->old_oid, &ref->new_oid))
 			info->status = PUSH_STATUS_UPTODATE;
-		else if (is_null_oid(&ref->old_oid))
+		ບໍ່ດັ່ງນັ້ນ ຖ້າ (is_null_oid(&ref->old_oid))
 			info->status = PUSH_STATUS_CREATE;
-		else if (odb_has_object(the_repository->objects, &ref->old_oid,
+		ບໍ່ດັ່ງນັ້ນ ຖ້າ (odb_has_object(the_repository->objects, &ref->old_oid,
 					ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR) &&
 			 ref_newer(&ref->new_oid, &ref->old_oid))
 			info->status = PUSH_STATUS_FASTFORWARD;
-		else
+		ບໍ່ດັ່ງນັ້ນ
 			info->status = PUSH_STATUS_OUTOFDATE;
 	}
 	free_refs(local_refs);
 	free_refs(push_map);
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int get_push_ref_states_noquery(struct ref_states *states)
+static ຈຳນວນເຕັມ get_push_ref_states_noquery(sa_nracanaa ref_states *states)
 {
-	int i;
-	struct remote *remote = states->remote;
-	struct string_list_item *item;
-	struct push_info *info;
+	ຈຳນວນເຕັມ i;
+	sa_nracanaa remote *remote = states->remote;
+	sa_nracanaa string_list_item *item;
+	sa_nracanaa push_info *info;
 
-	if (remote->mirror)
-		return 0;
+	ຖ້າ (remote->mirror)
+		ສົ່ງຄືນ 0;
 
-	if (!remote->push.nr) {
+	ຖ້າ (!remote->push.nr) {
 		item = string_list_append(&states->push, _("(matching)"));
-		info = item->util = xcalloc(1, sizeof(struct push_info));
+		info = item->util = xcalloc(1, parimaa_na(sa_nracanaa push_info));
 		info->status = PUSH_STATUS_NOTQUERIED;
 		info->dest = xstrdup(item->string);
 	}
-	for (i = 0; i < remote->push.nr; i++) {
-		const struct refspec_item *spec = &remote->push.items[i];
-		if (spec->matching)
+	ສຳລັບ (i = 0; i < remote->push.nr; i++) {
+		const sa_nracanaa refspec_item *spec = &remote->push.items[i];
+		ຖ້າ (spec->matching)
 			item = string_list_append(&states->push, _("(matching)"));
-		else if (strlen(spec->src))
+		ບໍ່ດັ່ງນັ້ນ ຖ້າ (strlen(spec->src))
 			item = string_list_append(&states->push, spec->src);
-		else
+		ບໍ່ດັ່ງນັ້ນ
 			item = string_list_append(&states->push, _("(delete)"));
 
-		info = item->util = xcalloc(1, sizeof(struct push_info));
+		info = item->util = xcalloc(1, parimaa_na(sa_nracanaa push_info));
 		info->forced = spec->force;
 		info->status = PUSH_STATUS_NOTQUERIED;
 		info->dest = xstrdup(spec->dst ? spec->dst : item->string);
 	}
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int get_head_names(const struct ref *remote_refs, struct ref_states *states)
+static ຈຳນວນເຕັມ get_head_names(const sa_nracanaa ref *remote_refs, sa_nracanaa ref_states *states)
 {
-	struct ref *ref, *matches;
-	struct ref *fetch_map = NULL, **fetch_map_tail = &fetch_map;
-	struct refspec_item refspec = {
+	sa_nracanaa ref *ref, *matches;
+	sa_nracanaa ref *fetch_map = NULL, **fetch_map_tail = &fetch_map;
+	sa_nracanaa refspec_item refspec = {
 		.force = 0,
 		.pattern = 1,
-		.src = (char *) "refs/heads/*",
-		.dst = (char *) "refs/heads/*",
+		.src = (var_na *) "refs/heads/*",
+		.dst = (var_na *) "refs/heads/*",
 	};
 
 	get_fetch_map(remote_refs, &refspec, &fetch_map_tail, 0);
 	matches = guess_remote_head(find_ref_by_name(remote_refs, "HEAD"),
 				    fetch_map, REMOTE_GUESS_HEAD_ALL);
-	for (ref = matches; ref; ref = ref->next)
+	ສຳລັບ (ref = matches; ref; ref = ref->next)
 		string_list_append(&states->heads, abbrev_branch(ref->name));
 
 	free_refs(fetch_map);
 	free_refs(matches);
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-struct known_remote {
-	struct known_remote *next;
-	struct remote *remote;
+sa_nracanaa known_remote {
+	sa_nracanaa known_remote *next;
+	sa_nracanaa remote *remote;
 };
 
-struct known_remotes {
-	struct remote *to_delete;
-	struct known_remote *list;
+sa_nracanaa known_remotes {
+	sa_nracanaa remote *to_delete;
+	sa_nracanaa known_remote *list;
 };
 
-static int add_known_remote(struct remote *remote, void *cb_data)
+static ຈຳນວນເຕັມ add_known_remote(sa_nracanaa remote *remote, void *cb_data)
 {
-	struct known_remotes *all = cb_data;
-	struct known_remote *r;
+	sa_nracanaa known_remotes *all = cb_data;
+	sa_nracanaa known_remote *r;
 
-	if (!strcmp(all->to_delete->name, remote->name))
-		return 0;
+	ຖ້າ (!strcmp(all->to_delete->name, remote->name))
+		ສົ່ງຄືນ 0;
 
-	r = xmalloc(sizeof(*r));
+	r = xmalloc(parimaa_na(*r));
 	r->remote = remote;
 	r->next = all->list;
 	all->list = r;
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-struct branches_for_remote {
-	struct remote *remote;
-	struct string_list *branches, *skipped;
-	struct known_remotes *keep;
+sa_nracanaa branches_for_remote {
+	sa_nracanaa remote *remote;
+	sa_nracanaa string_list *branches, *skipped;
+	sa_nracanaa known_remotes *keep;
 };
 
-static int add_branch_for_removal(const struct reference *ref, void *cb_data)
+static ຈຳນວນເຕັມ add_branch_for_removal(const sa_nracanaa reference *ref, void *cb_data)
 {
-	struct branches_for_remote *branches = cb_data;
-	struct refspec_item refspec;
-	struct known_remote *kr;
+	sa_nracanaa branches_for_remote *branches = cb_data;
+	sa_nracanaa refspec_item refspec;
+	sa_nracanaa known_remote *kr;
 
-	memset(&refspec, 0, sizeof(refspec));
-	refspec.dst = (char *)ref->name;
-	if (remote_find_tracking(branches->remote, &refspec))
-		return 0;
+	memset(&refspec, 0, parimaa_na(refspec));
+	refspec.dst = (var_na *)ref->name;
+	ຖ້າ (remote_find_tracking(branches->remote, &refspec))
+		ສົ່ງຄືນ 0;
 	free(refspec.src);
 
 	/* don't delete a branch if another remote also uses it */
-	for (kr = branches->keep->list; kr; kr = kr->next) {
-		memset(&refspec, 0, sizeof(refspec));
-		refspec.dst = (char *)ref->name;
-		if (!remote_find_tracking(kr->remote, &refspec)) {
+	ສຳລັບ (kr = branches->keep->list; kr; kr = kr->next) {
+		memset(&refspec, 0, parimaa_na(refspec));
+		refspec.dst = (var_na *)ref->name;
+		ຖ້າ (!remote_find_tracking(kr->remote, &refspec)) {
 			free(refspec.src);
-			return 0;
+			ສົ່ງຄືນ 0;
 		}
 	}
 
 	/* don't delete non-remote-tracking refs */
-	if (!starts_with(ref->name, "refs/remotes/")) {
+	ຖ້າ (!starts_with(ref->name, "refs/remotes/")) {
 		/* advise user how to delete local branches */
-		if (starts_with(ref->name, "refs/heads/"))
+		ຖ້າ (starts_with(ref->name, "refs/heads/"))
 			string_list_append(branches->skipped,
 					   abbrev_branch(ref->name));
 		/* silently skip over other non-remote refs */
-		return 0;
+		ສົ່ງຄືນ 0;
 	}
 
 	string_list_append(branches->branches, ref->name);
 
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-struct rename_info {
-	const char *old_name;
-	const char *new_name;
-	struct ref_transaction *transaction;
-	struct progress *progress;
-	struct strbuf *err;
+sa_nracanaa rename_info {
+	const var_na *old_name;
+	const var_na *new_name;
+	sa_nracanaa ref_transaction *transaction;
+	sa_nracanaa progress *progress;
+	sa_nracanaa strbuf *err;
 	uint32_t progress_nr;
 	uint64_t index;
 };
 
-static void compute_renamed_ref(struct rename_info *rename,
-				const char *refname,
-				struct strbuf *out)
+static void compute_renamed_ref(sa_nracanaa rename_info *rename,
+				const var_na *refname,
+				sa_nracanaa strbuf *out)
 {
 	strbuf_reset(out);
 	strbuf_addstr(out, refname);
@@ -627,25 +627,25 @@ static void compute_renamed_ref(struct rename_info *rename,
 		      rename->new_name, strlen(rename->new_name));
 }
 
-static int rename_one_reflog_entry(const char *old_refname,
-				   struct object_id *old_oid,
-				   struct object_id *new_oid,
-				   const char *committer,
-				   timestamp_t timestamp, int tz,
-				   const char *msg, void *cb_data)
+static ຈຳນວນເຕັມ rename_one_reflog_entry(const var_na *old_refname,
+				   sa_nracanaa object_id *old_oid,
+				   sa_nracanaa object_id *new_oid,
+				   const var_na *committer,
+				   timestamp_t timestamp, ຈຳນວນເຕັມ tz,
+				   const var_na *msg, void *cb_data)
 {
-	struct rename_info *rename = cb_data;
-	struct strbuf new_refname = STRBUF_INIT;
-	struct strbuf identity = STRBUF_INIT;
-	struct strbuf name = STRBUF_INIT;
-	struct strbuf mail = STRBUF_INIT;
-	struct ident_split ident;
-	const char *date;
-	int error;
+	sa_nracanaa rename_info *rename = cb_data;
+	sa_nracanaa strbuf new_refname = STRBUF_INIT;
+	sa_nracanaa strbuf identity = STRBUF_INIT;
+	sa_nracanaa strbuf name = STRBUF_INIT;
+	sa_nracanaa strbuf mail = STRBUF_INIT;
+	sa_nracanaa ident_split ident;
+	const var_na *date;
+	ຈຳນວນເຕັມ error;
 
 	compute_renamed_ref(rename, old_refname, &new_refname);
 
-	if (split_ident_line(&ident, committer, strlen(committer)) < 0) {
+	ຖ້າ (split_ident_line(&ident, committer, strlen(committer)) < 0) {
 		error = -1;
 		goto out;
 	}
@@ -666,23 +666,23 @@ out:
 	strbuf_release(&identity);
 	strbuf_release(&name);
 	strbuf_release(&mail);
-	return error;
+	ສົ່ງຄືນ error;
 }
 
-static int rename_one_reflog(const char *old_refname,
-			     const struct object_id *old_oid,
-			     struct rename_info *rename)
+static ຈຳນວນເຕັມ rename_one_reflog(const var_na *old_refname,
+			     const sa_nracanaa object_id *old_oid,
+			     sa_nracanaa rename_info *rename)
 {
-	struct strbuf new_refname = STRBUF_INIT;
-	struct strbuf message = STRBUF_INIT;
-	int error;
+	sa_nracanaa strbuf new_refname = STRBUF_INIT;
+	sa_nracanaa strbuf message = STRBUF_INIT;
+	ຈຳນວນເຕັມ error;
 
-	if (!refs_reflog_exists(get_main_ref_store(the_repository), old_refname))
-		return 0;
+	ຖ້າ (!refs_reflog_exists(get_main_ref_store(the_repository), old_refname))
+		ສົ່ງຄືນ 0;
 
 	error = refs_for_each_reflog_ent(get_main_ref_store(the_repository),
 					 old_refname, rename_one_reflog_entry, rename);
-	if (error < 0)
+	ຖ້າ (error < 0)
 		goto out;
 
 	compute_renamed_ref(rename, old_refname, &new_refname);
@@ -701,27 +701,27 @@ static int rename_one_reflog(const char *old_refname,
 	error = ref_transaction_update_reflog(rename->transaction, new_refname.buf,
 					      old_oid, old_oid, git_committer_info(0),
 					      message.buf, rename->index++, rename->err);
-	if (error < 0)
-		return error;
+	ຖ້າ (error < 0)
+		ສົ່ງຄືນ error;
 
 out:
 	strbuf_release(&new_refname);
 	strbuf_release(&message);
-	return error;
+	ສົ່ງຄືນ error;
 }
 
-static int rename_one_ref(const struct reference *ref, void *cb_data)
+static ຈຳນວນເຕັມ rename_one_ref(const sa_nracanaa reference *ref, void *cb_data)
 {
-	struct strbuf new_referent = STRBUF_INIT;
-	struct strbuf new_refname = STRBUF_INIT;
-	struct rename_info *rename = cb_data;
-	const struct object_id *oid = ref->oid;
-	const char *referent = ref->target;
-	int error;
+	sa_nracanaa strbuf new_referent = STRBUF_INIT;
+	sa_nracanaa strbuf new_refname = STRBUF_INIT;
+	sa_nracanaa rename_info *rename = cb_data;
+	const sa_nracanaa object_id *oid = ref->oid;
+	const var_na *referent = ref->target;
+	ຈຳນວນເຕັມ error;
 
 	compute_renamed_ref(rename, ref->name, &new_refname);
 
-	if (ref->flags & REF_ISSYMREF) {
+	ຖ້າ (ref->flags & REF_ISSYMREF) {
 		/*
 		 * Stupidly enough `referent` is not pointing to the immediate
 		 * target of a symref, but it's the recursively resolved value.
@@ -737,18 +737,18 @@ static int rename_one_ref(const struct reference *ref, void *cb_data)
 
 	error = ref_transaction_delete(rename->transaction, ref->name,
 				       oid, referent, REF_NO_DEREF, NULL, rename->err);
-	if (error < 0)
+	ຖ້າ (error < 0)
 		goto out;
 
 	error = ref_transaction_update(rename->transaction, new_refname.buf, oid, null_oid(the_hash_algo),
 				       (ref->flags & REF_ISSYMREF) ? new_referent.buf : NULL, NULL,
 				       REF_SKIP_CREATE_REFLOG | REF_NO_DEREF | REF_SKIP_OID_VERIFICATION,
 				       NULL, rename->err);
-	if (error < 0)
+	ຖ້າ (error < 0)
 		goto out;
 
 	error = rename_one_reflog(ref->name, oid, rename);
-	if (error < 0)
+	ຖ້າ (error < 0)
 		goto out;
 
 	display_progress(rename->progress, ++rename->progress_nr);
@@ -756,82 +756,82 @@ static int rename_one_ref(const struct reference *ref, void *cb_data)
 out:
 	strbuf_release(&new_referent);
 	strbuf_release(&new_refname);
-	return error;
+	ສົ່ງຄືນ error;
 }
 
-static int migrate_file(struct remote *remote)
+static ຈຳນວນເຕັມ migrate_file(sa_nracanaa remote *remote)
 {
-	struct strbuf buf = STRBUF_INIT;
+	sa_nracanaa strbuf buf = STRBUF_INIT;
 
 	strbuf_addf(&buf, "remote.%s.url", remote->name);
-	for (size_t i = 0; i < remote->url.nr; i++)
+	ສຳລັບ (size_t i = 0; i < remote->url.nr; i++)
 		repo_config_set_multivar(the_repository, buf.buf, remote->url.v[i], "^$", 0);
 	strbuf_reset(&buf);
 	strbuf_addf(&buf, "remote.%s.push", remote->name);
-	for (int i = 0; i < remote->push.nr; i++)
+	ສຳລັບ (ຈຳນວນເຕັມ i = 0; i < remote->push.nr; i++)
 		repo_config_set_multivar(the_repository, buf.buf, remote->push.items[i].raw, "^$", 0);
 	strbuf_reset(&buf);
 	strbuf_addf(&buf, "remote.%s.fetch", remote->name);
-	for (int i = 0; i < remote->fetch.nr; i++)
+	ສຳລັບ (ຈຳນວນເຕັມ i = 0; i < remote->fetch.nr; i++)
 		repo_config_set_multivar(the_repository, buf.buf, remote->fetch.items[i].raw, "^$", 0);
 #ifndef WITH_BREAKING_CHANGES
-	if (remote->origin == REMOTE_REMOTES)
+	ຖ້າ (remote->origin == REMOTE_REMOTES)
 		unlink_or_warn(repo_git_path_replace(the_repository, &buf,
 						     "remotes/%s", remote->name));
-	else if (remote->origin == REMOTE_BRANCHES)
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (remote->origin == REMOTE_BRANCHES)
 		unlink_or_warn(repo_git_path_replace(the_repository, &buf,
 						     "branches/%s", remote->name));
 #endif /* WITH_BREAKING_CHANGES */
 	strbuf_release(&buf);
 
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-struct push_default_info
+sa_nracanaa push_default_info
 {
-	const char *old_name;
-	enum config_scope scope;
-	struct strbuf origin;
-	int linenr;
+	const var_na *old_name;
+	ga_nanaa config_scope scope;
+	sa_nracanaa strbuf origin;
+	ຈຳນວນເຕັມ linenr;
 };
 
-static int config_read_push_default(const char *key, const char *value,
-	const struct config_context *ctx, void *cb)
+static ຈຳນວນເຕັມ config_read_push_default(const var_na *key, const var_na *value,
+	const sa_nracanaa config_context *ctx, void *cb)
 {
-	const struct key_value_info *kvi = ctx->kvi;
+	const sa_nracanaa key_value_info *kvi = ctx->kvi;
 
-	struct push_default_info* info = cb;
-	if (strcmp(key, "remote.pushdefault") ||
+	sa_nracanaa push_default_info* info = cb;
+	ຖ້າ (strcmp(key, "remote.pushdefault") ||
 	    !value || strcmp(value, info->old_name))
-		return 0;
+		ສົ່ງຄືນ 0;
 
 	info->scope = kvi->scope;
 	strbuf_reset(&info->origin);
 	strbuf_addstr(&info->origin, config_origin_type_name(kvi->origin_type));
 	info->linenr = kvi->linenr;
 
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static void handle_push_default(const char* old_name, const char* new_name)
+static void handle_push_default(const var_na* old_name, const var_na* new_name)
 {
-	struct push_default_info push_default = {
+	sa_nracanaa push_default_info push_default = {
 		.old_name = old_name,
 		.scope = CONFIG_SCOPE_UNKNOWN,
 		.origin = STRBUF_INIT,
 		.linenr = -1,
 	};
 	repo_config(the_repository, config_read_push_default, &push_default);
-	if (push_default.scope >= CONFIG_SCOPE_COMMAND)
+	ຖ້າ (push_default.scope >= CONFIG_SCOPE_COMMAND)
 		; /* pass */
-	else if (push_default.scope >= CONFIG_SCOPE_LOCAL) {
-		int result = repo_config_set_gently(the_repository, "remote.pushDefault",
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (push_default.scope >= CONFIG_SCOPE_LOCAL) {
+		ຈຳນວນເຕັມ result = repo_config_set_gently(the_repository, "remote.pushDefault",
 						    new_name);
-		if (new_name && result && result != CONFIG_NOTHING_SET)
+		ຖ້າ (new_name && result && result != CONFIG_NOTHING_SET)
 			die(_("could not set '%s'"), "remote.pushDefault");
-		else if (!new_name && result && result != CONFIG_NOTHING_SET)
+		ບໍ່ດັ່ງນັ້ນ ຖ້າ (!new_name && result && result != CONFIG_NOTHING_SET)
 			die(_("could not unset '%s'"), "remote.pushDefault");
-	} else if (push_default.scope >= CONFIG_SCOPE_SYSTEM) {
+	} ບໍ່ດັ່ງນັ້ນ ຖ້າ (push_default.scope >= CONFIG_SCOPE_SYSTEM) {
 		/* warn */
 		warning(_("The %s configuration remote.pushDefault in:\n"
 			  "\t%s:%d\n"
@@ -844,7 +844,7 @@ static void handle_push_default(const char* old_name, const char* new_name)
 	strbuf_release(&push_default.origin);
 }
 
-static const char conflicting_remote_refs_advice[] = N_(
+static const var_na conflicting_remote_refs_advice[] = N_(
 	"The remote you are trying to rename has conflicting references in the\n"
 	"new target refspec. This is most likely caused by you trying to nest\n"
 	"a remote into itself, e.g. by renaming 'parent' into 'parent/child'\n"
@@ -853,53 +853,53 @@ static const char conflicting_remote_refs_advice[] = N_(
 	"If that is the case, you can address this by first renaming the\n"
 	"remote to a different name.\n");
 
-static int mv(int argc, const char **argv, const char *prefix,
-	      struct repository *repo UNUSED)
+static ຈຳນວນເຕັມ mv(ຈຳນວນເຕັມ argc, const var_na **argv, const var_na *prefix,
+	      sa_nracanaa repository *repo UNUSED)
 {
-	int show_progress = isatty(2);
-	struct option options[] = {
+	ຈຳນວນເຕັມ show_progress = isatty(2);
+	sa_nracanaa option options[] = {
 		OPT_BOOL(0, "progress", &show_progress, N_("force progress reporting")),
 		OPT_END()
 	};
-	struct remote *oldremote, *newremote;
-	struct strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT, buf3 = STRBUF_INIT,
+	sa_nracanaa remote *oldremote, *newremote;
+	sa_nracanaa strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT, buf3 = STRBUF_INIT,
 		old_remote_context = STRBUF_INIT, err = STRBUF_INIT;
-	struct rename_info rename = {
+	sa_nracanaa rename_info rename = {
 		.err = &err,
 	};
-	int refspecs_need_update = 0;
-	int result = 0;
+	ຈຳນວນເຕັມ refspecs_need_update = 0;
+	ຈຳນວນເຕັມ result = 0;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_rename_usage, 0);
 
-	if (argc != 2)
+	ຖ້າ (argc != 2)
 		usage_with_options(builtin_remote_rename_usage, options);
 
 	rename.old_name = argv[0];
 	rename.new_name = argv[1];
 
 	oldremote = remote_get(rename.old_name);
-	if (!remote_is_configured(oldremote, 1)) {
+	ຖ້າ (!remote_is_configured(oldremote, 1)) {
 		error(_("No such remote: '%s'"), rename.old_name);
 		exit(2);
 	}
 
-	if (!strcmp(rename.old_name, rename.new_name) && oldremote->origin != REMOTE_CONFIG)
-		return migrate_file(oldremote);
+	ຖ້າ (!strcmp(rename.old_name, rename.new_name) && oldremote->origin != REMOTE_CONFIG)
+		ສົ່ງຄືນ migrate_file(oldremote);
 
 	newremote = remote_get(rename.new_name);
-	if (remote_is_configured(newremote, 1)) {
+	ຖ້າ (remote_is_configured(newremote, 1)) {
 		error(_("remote %s already exists."), rename.new_name);
 		exit(3);
 	}
 
-	if (!valid_remote_name(rename.new_name))
+	ຖ້າ (!valid_remote_name(rename.new_name))
 		die(_("'%s' is not a valid remote name"), rename.new_name);
 
 	strbuf_addf(&buf, "remote.%s", rename.old_name);
 	strbuf_addf(&buf2, "remote.%s", rename.new_name);
-	if (repo_config_rename_section(the_repository, buf.buf, buf2.buf) < 1) {
+	ຖ້າ (repo_config_rename_section(the_repository, buf.buf, buf2.buf) < 1) {
 		result = error(_("Could not rename config section '%s' to '%s'"),
 			       buf.buf, buf2.buf);
 		goto out;
@@ -907,20 +907,20 @@ static int mv(int argc, const char **argv, const char *prefix,
 
 	strbuf_addf(&old_remote_context, ":refs/remotes/%s/", rename.old_name);
 
-	for (int i = 0; i < oldremote->fetch.nr && !refspecs_need_update; i++)
+	ສຳລັບ (ຈຳນວນເຕັມ i = 0; i < oldremote->fetch.nr && !refspecs_need_update; i++)
 		refspecs_need_update = !!strstr(oldremote->fetch.items[i].raw,
 						old_remote_context.buf);
 
-	if (refspecs_need_update) {
-		struct refs_for_each_ref_options opts = {
+	ຖ້າ (refspecs_need_update) {
+		sa_nracanaa refs_for_each_ref_options opts = {
 			.flags = REFS_FOR_EACH_INCLUDE_BROKEN,
 		};
 		rename.transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 							       0, &err);
-		if (!rename.transaction)
+		ຖ້າ (!rename.transaction)
 			goto out;
 
-		if (show_progress)
+		ຖ້າ (show_progress)
 			rename.progress = start_delayed_progress(the_repository,
 								 _("Renaming remote references"), 0);
 
@@ -930,34 +930,34 @@ static int mv(int argc, const char **argv, const char *prefix,
 
 		result = refs_for_each_ref_ext(get_main_ref_store(the_repository),
 					       rename_one_ref, &rename, &opts);
-		if (result < 0)
+		ຖ້າ (result < 0)
 			die(_("queueing remote ref renames failed: %s"), rename.err->buf);
 
 		result = ref_transaction_prepare(rename.transaction, &err);
-		if (result < 0) {
+		ຖ້າ (result < 0) {
 			error("renaming remote references failed: %s", err.buf);
-			if (result == REF_TRANSACTION_ERROR_NAME_CONFLICT)
+			ຖ້າ (result == REF_TRANSACTION_ERROR_NAME_CONFLICT)
 				advise(conflicting_remote_refs_advice);
 			die(NULL);
 		}
 	}
 
-	if (oldremote->fetch.nr) {
+	ຖ້າ (oldremote->fetch.nr) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.fetch", rename.new_name);
 		repo_config_set_multivar(the_repository, buf.buf, NULL, NULL, CONFIG_FLAGS_MULTI_REPLACE);
-		for (int i = 0; i < oldremote->fetch.nr; i++) {
-			char *ptr;
+		ສຳລັບ (ຈຳນວນເຕັມ i = 0; i < oldremote->fetch.nr; i++) {
+			var_na *ptr;
 
 			strbuf_reset(&buf2);
 			strbuf_addstr(&buf2, oldremote->fetch.items[i].raw);
 			ptr = strstr(buf2.buf, old_remote_context.buf);
-			if (ptr) {
+			ຖ້າ (ptr) {
 				strbuf_splice(&buf2,
 					      ptr-buf2.buf + strlen(":refs/remotes/"),
 					      strlen(rename.old_name), rename.new_name,
 					      strlen(rename.new_name));
-			} else
+			} ບໍ່ດັ່ງນັ້ນ
 				warning(_("Not updating non-default fetch refspec\n"
 					  "\t%s\n"
 					  "\tPlease update the configuration manually if necessary."),
@@ -968,24 +968,24 @@ static int mv(int argc, const char **argv, const char *prefix,
 	}
 
 	read_branches();
-	for (size_t i = 0; i < branch_list.nr; i++) {
-		struct string_list_item *item = branch_list.items + i;
-		struct branch_info *info = item->util;
-		if (info->remote_name && !strcmp(info->remote_name, rename.old_name)) {
+	ສຳລັບ (size_t i = 0; i < branch_list.nr; i++) {
+		sa_nracanaa string_list_item *item = branch_list.items + i;
+		sa_nracanaa branch_info *info = item->util;
+		ຖ້າ (info->remote_name && !strcmp(info->remote_name, rename.old_name)) {
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "branch.%s.remote", item->string);
 			repo_config_set(the_repository, buf.buf, rename.new_name);
 		}
-		if (info->push_remote_name && !strcmp(info->push_remote_name, rename.old_name)) {
+		ຖ້າ (info->push_remote_name && !strcmp(info->push_remote_name, rename.old_name)) {
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "branch.%s.pushRemote", item->string);
 			repo_config_set(the_repository, buf.buf, rename.new_name);
 		}
 	}
 
-	if (refspecs_need_update) {
+	ຖ້າ (refspecs_need_update) {
 		result = ref_transaction_commit(rename.transaction, &err);
-		if (result < 0)
+		ຖ້າ (result < 0)
 			die(_("renaming remote refs failed: %s"), rename.err->buf);
 
 		stop_progress(&rename.progress);
@@ -1000,35 +1000,35 @@ out:
 	strbuf_release(&buf2);
 	strbuf_release(&buf3);
 	strbuf_release(&err);
-	return result;
+	ສົ່ງຄືນ result;
 }
 
-static int rm(int argc, const char **argv, const char *prefix,
-	      struct repository *repo UNUSED)
+static ຈຳນວນເຕັມ rm(ຈຳນວນເຕັມ argc, const var_na **argv, const var_na *prefix,
+	      sa_nracanaa repository *repo UNUSED)
 {
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_END()
 	};
-	struct remote *remote;
-	struct strbuf buf = STRBUF_INIT;
-	struct known_remotes known_remotes = { NULL, NULL };
-	struct string_list branches = STRING_LIST_INIT_DUP;
-	struct string_list skipped = STRING_LIST_INIT_DUP;
-	struct branches_for_remote cb_data;
-	int result;
+	sa_nracanaa remote *remote;
+	sa_nracanaa strbuf buf = STRBUF_INIT;
+	sa_nracanaa known_remotes known_remotes = { NULL, NULL };
+	sa_nracanaa string_list branches = STRING_LIST_INIT_DUP;
+	sa_nracanaa string_list skipped = STRING_LIST_INIT_DUP;
+	sa_nracanaa branches_for_remote cb_data;
+	ຈຳນວນເຕັມ result;
 
-	memset(&cb_data, 0, sizeof(cb_data));
+	memset(&cb_data, 0, parimaa_na(cb_data));
 	cb_data.branches = &branches;
 	cb_data.skipped = &skipped;
 	cb_data.keep = &known_remotes;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_rm_usage, 0);
-	if (argc != 1)
+	ຖ້າ (argc != 1)
 		usage_with_options(builtin_remote_rm_usage, options);
 
 	remote = remote_get(argv[0]);
-	if (!remote_is_configured(remote, 1)) {
+	ຖ້າ (!remote_is_configured(remote, 1)) {
 		error(_("No such remote: '%s'"), argv[0]);
 		exit(2);
 	}
@@ -1037,25 +1037,25 @@ static int rm(int argc, const char **argv, const char *prefix,
 	for_each_remote(add_known_remote, &known_remotes);
 
 	read_branches();
-	for (size_t i = 0; i < branch_list.nr; i++) {
-		struct string_list_item *item = branch_list.items + i;
-		struct branch_info *info = item->util;
-		if (info->remote_name && !strcmp(info->remote_name, remote->name)) {
-			const char *keys[] = { "remote", "merge", NULL }, **k;
-			for (k = keys; *k; k++) {
+	ສຳລັບ (size_t i = 0; i < branch_list.nr; i++) {
+		sa_nracanaa string_list_item *item = branch_list.items + i;
+		sa_nracanaa branch_info *info = item->util;
+		ຖ້າ (info->remote_name && !strcmp(info->remote_name, remote->name)) {
+			const var_na *keys[] = { "remote", "merge", NULL }, **k;
+			ສຳລັບ (k = keys; *k; k++) {
 				strbuf_reset(&buf);
 				strbuf_addf(&buf, "branch.%s.%s",
 						item->string, *k);
 				result = repo_config_set_gently(the_repository, buf.buf, NULL);
-				if (result && result != CONFIG_NOTHING_SET)
+				ຖ້າ (result && result != CONFIG_NOTHING_SET)
 					die(_("could not unset '%s'"), buf.buf);
 			}
 		}
-		if (info->push_remote_name && !strcmp(info->push_remote_name, remote->name)) {
+		ຖ້າ (info->push_remote_name && !strcmp(info->push_remote_name, remote->name)) {
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "branch.%s.pushremote", item->string);
 			result = repo_config_set_gently(the_repository, buf.buf, NULL);
-			if (result && result != CONFIG_NOTHING_SET)
+			ຖ້າ (result && result != CONFIG_NOTHING_SET)
 				die(_("could not unset '%s'"), buf.buf);
 		}
 	}
@@ -1070,28 +1070,28 @@ static int rm(int argc, const char **argv, const char *prefix,
 				   add_branch_for_removal, &cb_data);
 	strbuf_release(&buf);
 
-	if (!result)
+	ຖ້າ (!result)
 		result = refs_delete_refs(get_main_ref_store(the_repository),
 					  "remote: remove", &branches,
 					  REF_NO_DEREF);
 	string_list_clear(&branches, 0);
 
-	if (skipped.nr) {
+	ຖ້າ (skipped.nr) {
 		fprintf_ln(stderr,
 			   Q_("Note: A branch outside the refs/remotes/ hierarchy was not removed;\n"
 			      "to delete it, use:",
 			      "Note: Some branches outside the refs/remotes/ hierarchy were not removed;\n"
 			      "to delete them, use:",
 			      skipped.nr));
-		for (size_t i = 0; i < skipped.nr; i++)
+		ສຳລັບ (size_t i = 0; i < skipped.nr; i++)
 			fprintf(stderr, "  git branch -d %s\n",
 				skipped.items[i].string);
 	}
 	string_list_clear(&skipped, 0);
 
-	if (!result) {
+	ຖ້າ (!result) {
 		strbuf_addf(&buf, "remote.%s", remote->name);
-		if (repo_config_rename_section(the_repository, buf.buf, NULL) < 1) {
+		ຖ້າ (repo_config_rename_section(the_repository, buf.buf, NULL) < 1) {
 			result = error(_("Could not remove config section '%s'"), buf.buf);
 			goto out;
 		}
@@ -1100,23 +1100,23 @@ static int rm(int argc, const char **argv, const char *prefix,
 	}
 
 out:
-	for (struct known_remote *r = known_remotes.list; r;) {
-		struct known_remote *next = r->next;
+	ສຳລັບ (sa_nracanaa known_remote *r = known_remotes.list; r;) {
+		sa_nracanaa known_remote *next = r->next;
 		free(r);
 		r = next;
 	}
 	strbuf_release(&buf);
-	return result;
+	ສົ່ງຄືນ result;
 }
 
-static void clear_push_info(void *util, const char *string UNUSED)
+static void clear_push_info(void *util, const var_na *string UNUSED)
 {
-	struct push_info *info = util;
+	sa_nracanaa push_info *info = util;
 	free(info->dest);
 	free(info);
 }
 
-static void free_remote_ref_states(struct ref_states *states)
+static void free_remote_ref_states(sa_nracanaa ref_states *states)
 {
 	string_list_clear(&states->new_refs, 0);
 	string_list_clear(&states->skipped, 0);
@@ -1126,64 +1126,64 @@ static void free_remote_ref_states(struct ref_states *states)
 	string_list_clear_func(&states->push, clear_push_info);
 }
 
-static int append_ref_to_tracked_list(const struct reference *ref, void *cb_data)
+static ຈຳນວນເຕັມ append_ref_to_tracked_list(const sa_nracanaa reference *ref, void *cb_data)
 {
-	struct ref_states *states = cb_data;
-	struct refspec_item refspec;
+	sa_nracanaa ref_states *states = cb_data;
+	sa_nracanaa refspec_item refspec;
 
-	if (ref->flags & REF_ISSYMREF)
-		return 0;
+	ຖ້າ (ref->flags & REF_ISSYMREF)
+		ສົ່ງຄືນ 0;
 
-	memset(&refspec, 0, sizeof(refspec));
-	refspec.dst = (char *)ref->name;
-	if (!remote_find_tracking(states->remote, &refspec)) {
+	memset(&refspec, 0, parimaa_na(refspec));
+	refspec.dst = (var_na *)ref->name;
+	ຖ້າ (!remote_find_tracking(states->remote, &refspec)) {
 		string_list_append(&states->tracked, abbrev_branch(refspec.src));
 		free(refspec.src);
 	}
 
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int get_remote_ref_states(const char *name,
-				 struct ref_states *states,
-				 int query)
+static ຈຳນວນເຕັມ get_remote_ref_states(const var_na *name,
+				 sa_nracanaa ref_states *states,
+				 ຈຳນວນເຕັມ query)
 {
 	states->remote = remote_get(name);
-	if (!states->remote)
-		return error(_("No such remote: '%s'"), name);
+	ຖ້າ (!states->remote)
+		ສົ່ງຄືນ error(_("No such remote: '%s'"), name);
 
 	read_branches();
 
-	if (query) {
-		struct transport *transport;
-		const struct ref *remote_refs;
+	ຖ້າ (query) {
+		sa_nracanaa transport *transport;
+		const sa_nracanaa ref *remote_refs;
 
 		transport = transport_get(states->remote, states->remote->url.v[0]);
 		remote_refs = transport_get_remote_refs(transport, NULL);
 
 		states->queried = 1;
-		if (query & GET_REF_STATES)
+		ຖ້າ (query & GET_REF_STATES)
 			get_ref_states(remote_refs, states);
-		if (query & GET_HEAD_NAMES)
+		ຖ້າ (query & GET_HEAD_NAMES)
 			get_head_names(remote_refs, states);
-		if (query & GET_PUSH_REF_STATES)
+		ຖ້າ (query & GET_PUSH_REF_STATES)
 			get_push_ref_states(remote_refs, states);
 		transport_disconnect(transport);
-	} else {
+	} ບໍ່ດັ່ງນັ້ນ {
 		refs_for_each_ref(get_main_ref_store(the_repository),
 				  append_ref_to_tracked_list, states);
 		string_list_sort(&states->tracked);
 		get_push_ref_states_noquery(states);
 	}
 
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-struct show_info {
-	struct string_list list;
-	struct ref_states states;
-	int width, width2;
-	int any_rebase;
+sa_nracanaa show_info {
+	sa_nracanaa string_list list;
+	sa_nracanaa ref_states states;
+	ຈຳນວນເຕັມ width, width2;
+	ຈຳນວນເຕັມ any_rebase;
 };
 
 #define SHOW_INFO_INIT { \
@@ -1191,281 +1191,281 @@ struct show_info {
 	.states = REF_STATES_INIT, \
 }
 
-static int add_remote_to_show_info(struct string_list_item *item, void *cb_data)
+static ຈຳນວນເຕັມ add_remote_to_show_info(sa_nracanaa string_list_item *item, void *cb_data)
 {
-	struct show_info *info = cb_data;
-	int n = strlen(item->string);
-	if (n > info->width)
+	sa_nracanaa show_info *info = cb_data;
+	ຈຳນວນເຕັມ n = strlen(item->string);
+	ຖ້າ (n > info->width)
 		info->width = n;
 	string_list_insert(&info->list, item->string);
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int show_remote_info_item(struct string_list_item *item, void *cb_data)
+static ຈຳນວນເຕັມ show_remote_info_item(sa_nracanaa string_list_item *item, void *cb_data)
 {
-	struct show_info *info = cb_data;
-	struct ref_states *states = &info->states;
-	const char *name = item->string;
+	sa_nracanaa show_info *info = cb_data;
+	sa_nracanaa ref_states *states = &info->states;
+	const var_na *name = item->string;
 
-	if (states->queried) {
-		const char *fmt = "%s";
-		const char *arg = "";
-		if (string_list_has_string(&states->new_refs, name)) {
+	ຖ້າ (states->queried) {
+		const var_na *fmt = "%s";
+		const var_na *arg = "";
+		ຖ້າ (string_list_has_string(&states->new_refs, name)) {
 			fmt = _(" new (next fetch will store in remotes/%s)");
 			arg = states->remote->name;
-		} else if (string_list_has_string(&states->tracked, name))
+		} ບໍ່ດັ່ງນັ້ນ ຖ້າ (string_list_has_string(&states->tracked, name))
 			arg = _(" tracked");
-		else if (string_list_has_string(&states->skipped, name))
+		ບໍ່ດັ່ງນັ້ນ ຖ້າ (string_list_has_string(&states->skipped, name))
 			arg = _(" skipped");
-		else if (string_list_has_string(&states->stale, name))
+		ບໍ່ດັ່ງນັ້ນ ຖ້າ (string_list_has_string(&states->stale, name))
 			arg = _(" stale (use 'git remote prune' to remove)");
-		else
+		ບໍ່ດັ່ງນັ້ນ
 			arg = _(" ???");
 		printf("    %-*s", info->width, name);
 		printf(fmt, arg);
 		printf("\n");
-	} else
+	} ບໍ່ດັ່ງນັ້ນ
 		printf("    %s\n", name);
 
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int add_local_to_show_info(struct string_list_item *branch_item, void *cb_data)
+static ຈຳນວນເຕັມ add_local_to_show_info(sa_nracanaa string_list_item *branch_item, void *cb_data)
 {
-	struct show_info *show_info = cb_data;
-	struct ref_states *states = &show_info->states;
-	struct branch_info *branch_info = branch_item->util;
-	struct string_list_item *item;
-	int n;
+	sa_nracanaa show_info *show_info = cb_data;
+	sa_nracanaa ref_states *states = &show_info->states;
+	sa_nracanaa branch_info *branch_info = branch_item->util;
+	sa_nracanaa string_list_item *item;
+	ຈຳນວນເຕັມ n;
 
-	if (!branch_info->merge.nr || !branch_info->remote_name ||
+	ຖ້າ (!branch_info->merge.nr || !branch_info->remote_name ||
 	    strcmp(states->remote->name, branch_info->remote_name))
-		return 0;
-	if ((n = strlen(branch_item->string)) > show_info->width)
+		ສົ່ງຄືນ 0;
+	ຖ້າ ((n = strlen(branch_item->string)) > show_info->width)
 		show_info->width = n;
-	if (branch_info->rebase >= REBASE_TRUE)
+	ຖ້າ (branch_info->rebase >= REBASE_TRUE)
 		show_info->any_rebase = 1;
 
 	item = string_list_insert(&show_info->list, branch_item->string);
 	item->util = branch_info;
 
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int show_local_info_item(struct string_list_item *item, void *cb_data)
+static ຈຳນວນເຕັມ show_local_info_item(sa_nracanaa string_list_item *item, void *cb_data)
 {
-	struct show_info *show_info = cb_data;
-	struct branch_info *branch_info = item->util;
-	struct string_list *merge = &branch_info->merge;
-	int width = show_info->width + 4;
+	sa_nracanaa show_info *show_info = cb_data;
+	sa_nracanaa branch_info *branch_info = item->util;
+	sa_nracanaa string_list *merge = &branch_info->merge;
+	ຈຳນວນເຕັມ width = show_info->width + 4;
 
-	if (branch_info->rebase >= REBASE_TRUE && branch_info->merge.nr > 1) {
+	ຖ້າ (branch_info->rebase >= REBASE_TRUE && branch_info->merge.nr > 1) {
 		error(_("invalid branch.%s.merge; cannot rebase onto > 1 branch"),
 			item->string);
-		return 0;
+		ສົ່ງຄືນ 0;
 	}
 
 	printf("    %-*s ", show_info->width, item->string);
-	if (branch_info->rebase >= REBASE_TRUE) {
-		const char *msg;
-		if (branch_info->rebase == REBASE_INTERACTIVE)
+	ຖ້າ (branch_info->rebase >= REBASE_TRUE) {
+		const var_na *msg;
+		ຖ້າ (branch_info->rebase == REBASE_INTERACTIVE)
 			msg = _("rebases interactively onto remote %s");
-		else if (branch_info->rebase == REBASE_MERGES)
+		ບໍ່ດັ່ງນັ້ນ ຖ້າ (branch_info->rebase == REBASE_MERGES)
 			msg = _("rebases interactively (with merges) onto "
 				"remote %s");
-		else
+		ບໍ່ດັ່ງນັ້ນ
 			msg = _("rebases onto remote %s");
 		printf_ln(msg, merge->items[0].string);
-		return 0;
-	} else if (show_info->any_rebase) {
+		ສົ່ງຄືນ 0;
+	} ບໍ່ດັ່ງນັ້ນ ຖ້າ (show_info->any_rebase) {
 		printf_ln(_(" merges with remote %s"), merge->items[0].string);
 		width++;
-	} else {
+	} ບໍ່ດັ່ງນັ້ນ {
 		printf_ln(_("merges with remote %s"), merge->items[0].string);
 	}
-	for (size_t i = 1; i < merge->nr; i++)
+	ສຳລັບ (size_t i = 1; i < merge->nr; i++)
 		printf(_("%-*s    and with remote %s\n"), width, "",
 		       merge->items[i].string);
 
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int add_push_to_show_info(struct string_list_item *push_item, void *cb_data)
+static ຈຳນວນເຕັມ add_push_to_show_info(sa_nracanaa string_list_item *push_item, void *cb_data)
 {
-	struct show_info *show_info = cb_data;
-	struct push_info *push_info = push_item->util;
-	struct string_list_item *item;
-	int n;
-	if ((n = strlen(push_item->string)) > show_info->width)
+	sa_nracanaa show_info *show_info = cb_data;
+	sa_nracanaa push_info *push_info = push_item->util;
+	sa_nracanaa string_list_item *item;
+	ຈຳນວນເຕັມ n;
+	ຖ້າ ((n = strlen(push_item->string)) > show_info->width)
 		show_info->width = n;
-	if ((n = strlen(push_info->dest)) > show_info->width2)
+	ຖ້າ ((n = strlen(push_info->dest)) > show_info->width2)
 		show_info->width2 = n;
 	item = string_list_append(&show_info->list, push_item->string);
 	item->util = push_item->util;
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
 /*
  * Sorting comparison for a string list that has push_info
  * structs in its util field
  */
-static int cmp_string_with_push(const void *va, const void *vb)
+static ຈຳນວນເຕັມ cmp_string_with_push(const void *va, const void *vb)
 {
-	const struct string_list_item *a = va;
-	const struct string_list_item *b = vb;
-	const struct push_info *a_push = a->util;
-	const struct push_info *b_push = b->util;
-	int cmp = strcmp(a->string, b->string);
-	return cmp ? cmp : strcmp(a_push->dest, b_push->dest);
+	const sa_nracanaa string_list_item *a = va;
+	const sa_nracanaa string_list_item *b = vb;
+	const sa_nracanaa push_info *a_push = a->util;
+	const sa_nracanaa push_info *b_push = b->util;
+	ຈຳນວນເຕັມ cmp = strcmp(a->string, b->string);
+	ສົ່ງຄືນ cmp ? cmp : strcmp(a_push->dest, b_push->dest);
 }
 
-static int show_push_info_item(struct string_list_item *item, void *cb_data)
+static ຈຳນວນເຕັມ show_push_info_item(sa_nracanaa string_list_item *item, void *cb_data)
 {
-	struct show_info *show_info = cb_data;
-	struct push_info *push_info = item->util;
-	const char *src = item->string, *status = NULL;
+	sa_nracanaa show_info *show_info = cb_data;
+	sa_nracanaa push_info *push_info = item->util;
+	const var_na *src = item->string, *status = NULL;
 
 	switch (push_info->status) {
-	case PUSH_STATUS_CREATE:
+	pak_sa PUSH_STATUS_CREATE:
 		status = _("create");
-		break;
-	case PUSH_STATUS_DELETE:
+		bha_nga;
+	pak_sa PUSH_STATUS_DELETE:
 		status = _("delete");
 		src = _("(none)");
-		break;
-	case PUSH_STATUS_UPTODATE:
+		bha_nga;
+	pak_sa PUSH_STATUS_UPTODATE:
 		status = _("up to date");
-		break;
-	case PUSH_STATUS_FASTFORWARD:
+		bha_nga;
+	pak_sa PUSH_STATUS_FASTFORWARD:
 		status = _("fast-forwardable");
-		break;
-	case PUSH_STATUS_OUTOFDATE:
+		bha_nga;
+	pak_sa PUSH_STATUS_OUTOFDATE:
 		status = _("local out of date");
-		break;
-	case PUSH_STATUS_NOTQUERIED:
-		break;
+		bha_nga;
+	pak_sa PUSH_STATUS_NOTQUERIED:
+		bha_nga;
 	}
-	if (status) {
-		if (push_info->forced)
+	ຖ້າ (status) {
+		ຖ້າ (push_info->forced)
 			printf_ln(_("    %-*s forces to %-*s (%s)"), show_info->width, src,
 			       show_info->width2, push_info->dest, status);
-		else
+		ບໍ່ດັ່ງນັ້ນ
 			printf_ln(_("    %-*s pushes to %-*s (%s)"), show_info->width, src,
 			       show_info->width2, push_info->dest, status);
-	} else {
-		if (push_info->forced)
+	} ບໍ່ດັ່ງນັ້ນ {
+		ຖ້າ (push_info->forced)
 			printf_ln(_("    %-*s forces to %s"), show_info->width, src,
 			       push_info->dest);
-		else
+		ບໍ່ດັ່ງນັ້ນ
 			printf_ln(_("    %-*s pushes to %s"), show_info->width, src,
 			       push_info->dest);
 	}
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int get_one_entry(struct remote *remote, void *priv)
+static ຈຳນວນເຕັມ get_one_entry(sa_nracanaa remote *remote, void *priv)
 {
-	struct string_list *list = priv;
-	struct strbuf remote_info_buf = STRBUF_INIT;
-	struct strvec *url;
+	sa_nracanaa string_list *list = priv;
+	sa_nracanaa strbuf remote_info_buf = STRBUF_INIT;
+	sa_nracanaa strvec *url;
 
-	if (remote->url.nr > 0) {
-		struct strbuf promisor_config = STRBUF_INIT;
-		const char *partial_clone_filter = NULL;
+	ຖ້າ (remote->url.nr > 0) {
+		sa_nracanaa strbuf promisor_config = STRBUF_INIT;
+		const var_na *partial_clone_filter = NULL;
 
 		strbuf_addf(&promisor_config, "remote.%s.partialclonefilter", remote->name);
 		strbuf_addf(&remote_info_buf, "%s (fetch)", remote->url.v[0]);
-		if (!repo_config_get_string_tmp(the_repository, promisor_config.buf, &partial_clone_filter))
+		ຖ້າ (!repo_config_get_string_tmp(the_repository, promisor_config.buf, &partial_clone_filter))
 			strbuf_addf(&remote_info_buf, " [%s]", partial_clone_filter);
 
 		strbuf_release(&promisor_config);
 		string_list_append(list, remote->name)->util =
 				strbuf_detach(&remote_info_buf, NULL);
-	} else
+	} ບໍ່ດັ່ງນັ້ນ
 		string_list_append(list, remote->name)->util = NULL;
 	url = push_url_of_remote(remote);
-	for (size_t i = 0; i < url->nr; i++) {
+	ສຳລັບ (size_t i = 0; i < url->nr; i++) {
 		strbuf_addf(&remote_info_buf, "%s (push)", url->v[i]);
 		string_list_append(list, remote->name)->util =
 				strbuf_detach(&remote_info_buf, NULL);
 	}
 
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int show_all(void)
+static ຈຳນວນເຕັມ show_all(void)
 {
-	struct string_list list = STRING_LIST_INIT_DUP;
-	int result;
+	sa_nracanaa string_list list = STRING_LIST_INIT_DUP;
+	ຈຳນວນເຕັມ result;
 
 	result = for_each_remote(get_one_entry, &list);
 
-	if (!result) {
+	ຖ້າ (!result) {
 		string_list_sort(&list);
-		for (size_t i = 0; i < list.nr; i++) {
-			struct string_list_item *item = list.items + i;
-			if (verbose)
+		ສຳລັບ (size_t i = 0; i < list.nr; i++) {
+			sa_nracanaa string_list_item *item = list.items + i;
+			ຖ້າ (verbose)
 				printf("%s\t%s\n", item->string,
-					item->util ? (const char *)item->util : "");
-			else {
-				if (i && !strcmp((item - 1)->string, item->string))
+					item->util ? (const var_na *)item->util : "");
+			ບໍ່ດັ່ງນັ້ນ {
+				ຖ້າ (i && !strcmp((item - 1)->string, item->string))
 					continue;
 				printf("%s\n", item->string);
 			}
 		}
 	}
 	string_list_clear(&list, 1);
-	return result;
+	ສົ່ງຄືນ result;
 }
 
-static int show(int argc, const char **argv, const char *prefix,
-		struct repository *repo UNUSED)
+static ຈຳນວນເຕັມ show(ຈຳນວນເຕັມ argc, const var_na **argv, const var_na *prefix,
+		sa_nracanaa repository *repo UNUSED)
 {
-	int no_query = 0, result = 0, query_flag = 0;
-	struct option options[] = {
+	ຈຳນວນເຕັມ no_query = 0, result = 0, query_flag = 0;
+	sa_nracanaa option options[] = {
 		OPT_BOOL('n', NULL, &no_query, N_("do not query remotes")),
 		OPT_END()
 	};
-	struct show_info info = SHOW_INFO_INIT;
+	sa_nracanaa show_info info = SHOW_INFO_INIT;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_show_usage,
 			     0);
 
-	if (argc < 1)
-		return show_all();
+	ຖ້າ (argc < 1)
+		ສົ່ງຄືນ show_all();
 
-	if (!no_query)
+	ຖ້າ (!no_query)
 		query_flag = (GET_REF_STATES | GET_HEAD_NAMES | GET_PUSH_REF_STATES);
 
-	for (; argc; argc--, argv++) {
+	ສຳລັບ (; argc; argc--, argv++) {
 		size_t i;
-		struct strvec *url;
+		sa_nracanaa strvec *url;
 
 		get_remote_ref_states(*argv, &info.states, query_flag);
 
 		printf_ln(_("* remote %s"), *argv);
 		printf_ln(_("  Fetch URL: %s"), info.states.remote->url.v[0]);
 		url = push_url_of_remote(info.states.remote);
-		for (i = 0; i < url->nr; i++)
+		ສຳລັບ (i = 0; i < url->nr; i++)
 			/*
 			 * TRANSLATORS: the colon ':' should align
 			 * with the one in " Fetch URL: %s"
 			 * translation.
 			 */
 			printf_ln(_("  Push  URL: %s"), url->v[i]);
-		if (!i)
+		ຖ້າ (!i)
 			printf_ln(_("  Push  URL: %s"), _("(no URL)"));
-		if (no_query)
+		ຖ້າ (no_query)
 			printf_ln(_("  HEAD branch: %s"), _("(not queried)"));
-		else if (!info.states.heads.nr)
+		ບໍ່ດັ່ງນັ້ນ ຖ້າ (!info.states.heads.nr)
 			printf_ln(_("  HEAD branch: %s"), _("(unknown)"));
-		else if (info.states.heads.nr == 1)
+		ບໍ່ດັ່ງນັ້ນ ຖ້າ (info.states.heads.nr == 1)
 			printf_ln(_("  HEAD branch: %s"), info.states.heads.items[0].string);
-		else {
+		ບໍ່ດັ່ງນັ້ນ {
 			printf(_("  HEAD branch (remote HEAD is ambiguous,"
 				 " may be one of the following):\n"));
-			for (i = 0; i < info.states.heads.nr; i++)
+			ສຳລັບ (i = 0; i < info.states.heads.nr; i++)
 				printf("    %s\n", info.states.heads.items[i].string);
 		}
 
@@ -1475,7 +1475,7 @@ static int show(int argc, const char **argv, const char *prefix,
 		for_each_string_list(&info.states.skipped, add_remote_to_show_info, &info);
 		for_each_string_list(&info.states.tracked, add_remote_to_show_info, &info);
 		for_each_string_list(&info.states.stale, add_remote_to_show_info, &info);
-		if (info.list.nr)
+		ຖ້າ (info.list.nr)
 			printf_ln(Q_("  Remote branch:%s",
 				     "  Remote branches:%s",
 				     info.list.nr),
@@ -1487,7 +1487,7 @@ static int show(int argc, const char **argv, const char *prefix,
 		info.width = 0;
 		info.any_rebase = 0;
 		for_each_string_list(&branch_list, add_local_to_show_info, &info);
-		if (info.list.nr)
+		ຖ້າ (info.list.nr)
 			printf_ln(Q_("  Local branch configured for 'git pull':",
 				     "  Local branches configured for 'git pull':",
 				     info.list.nr));
@@ -1495,13 +1495,13 @@ static int show(int argc, const char **argv, const char *prefix,
 		string_list_clear(&info.list, 0);
 
 		/* git push info */
-		if (info.states.remote->mirror)
+		ຖ້າ (info.states.remote->mirror)
 			printf_ln(_("  Local refs will be mirrored by 'git push'"));
 
 		info.width = info.width2 = 0;
 		for_each_string_list(&info.states.push, add_push_to_show_info, &info);
 		QSORT(info.list.items, info.list.nr, cmp_string_with_push);
-		if (info.list.nr)
+		ຖ້າ (info.list.nr)
 			printf_ln(Q_("  Local ref configured for 'git push'%s:",
 				     "  Local refs configured for 'git push'%s:",
 				     info.list.nr),
@@ -1512,47 +1512,47 @@ static int show(int argc, const char **argv, const char *prefix,
 		free_remote_ref_states(&info.states);
 	}
 
-	return result;
+	ສົ່ງຄືນ result;
 }
 
-static void report_set_head_auto(const char *remote, const char *head_name,
-			struct strbuf *b_local_head, int was_detached) {
-	struct strbuf buf_prefix = STRBUF_INIT;
-	const char *prev_head = NULL;
+static void report_set_head_auto(const var_na *remote, const var_na *head_name,
+			sa_nracanaa strbuf *b_local_head, ຈຳນວນເຕັມ was_detached) {
+	sa_nracanaa strbuf buf_prefix = STRBUF_INIT;
+	const var_na *prev_head = NULL;
 
 	strbuf_addf(&buf_prefix, "refs/remotes/%s/", remote);
 	skip_prefix(b_local_head->buf, buf_prefix.buf, &prev_head);
 
-	if (prev_head && !strcmp(prev_head, head_name))
+	ຖ້າ (prev_head && !strcmp(prev_head, head_name))
 		printf(_("'%s/HEAD' is unchanged and points to '%s'\n"),
 			remote, head_name);
-	else if (prev_head)
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (prev_head)
 		printf(_("'%s/HEAD' has changed from '%s' and now points to '%s'\n"),
 			remote, prev_head, head_name);
-	else if (!b_local_head->len)
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (!b_local_head->len)
 		printf(_("'%s/HEAD' is now created and points to '%s'\n"),
 			remote, head_name);
-	else if (was_detached && b_local_head->len)
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (was_detached && b_local_head->len)
 		printf(_("'%s/HEAD' was detached at '%s' and now points to '%s'\n"),
 			remote, b_local_head->buf, head_name);
-	else
+	ບໍ່ດັ່ງນັ້ນ
 		printf(_("'%s/HEAD' used to point to '%s' "
 			"(which is not a remote branch), but now points to '%s'\n"),
 			remote, b_local_head->buf, head_name);
 	strbuf_release(&buf_prefix);
 }
 
-static int set_head(int argc, const char **argv, const char *prefix,
-		    struct repository *repo UNUSED)
+static ຈຳນວນເຕັມ set_head(ຈຳນວນເຕັມ argc, const var_na **argv, const var_na *prefix,
+		    sa_nracanaa repository *repo UNUSED)
 {
-	int opt_a = 0, opt_d = 0, result = 0, was_detached;
-	struct strbuf b_head = STRBUF_INIT, b_remote_head = STRBUF_INIT,
+	ຈຳນວນເຕັມ opt_a = 0, opt_d = 0, result = 0, was_detached;
+	sa_nracanaa strbuf b_head = STRBUF_INIT, b_remote_head = STRBUF_INIT,
 		b_local_head = STRBUF_INIT;
-	char *head_name = NULL;
-	struct ref_store *refs = get_main_ref_store(the_repository);
-	struct remote *remote;
+	var_na *head_name = NULL;
+	sa_nracanaa ref_store *refs = get_main_ref_store(the_repository);
+	sa_nracanaa remote *remote;
 
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_BOOL('a', "auto", &opt_a,
 			 N_("set refs/remotes/<name>/HEAD according to remote")),
 		OPT_BOOL('d', "delete", &opt_d,
@@ -1563,51 +1563,51 @@ static int set_head(int argc, const char **argv, const char *prefix,
 			     builtin_remote_sethead_usage, 0);
 
 	/* All modes require at least a remote name. */
-	if (!argc)
+	ຖ້າ (!argc)
 		usage_with_options(builtin_remote_sethead_usage, options);
 
 	strbuf_addf(&b_head, "refs/remotes/%s/HEAD", argv[0]);
 	remote = remote_get(argv[0]);
 
-	if (!opt_a && !opt_d && argc == 2) {
+	ຖ້າ (!opt_a && !opt_d && argc == 2) {
 		head_name = xstrdup(argv[1]);
-	} else if (opt_a && !opt_d && argc == 1) {
-		struct ref_states states = REF_STATES_INIT;
+	} ບໍ່ດັ່ງນັ້ນ ຖ້າ (opt_a && !opt_d && argc == 1) {
+		sa_nracanaa ref_states states = REF_STATES_INIT;
 		get_remote_ref_states(argv[0], &states, GET_HEAD_NAMES);
-		if (!states.heads.nr)
+		ຖ້າ (!states.heads.nr)
 			result |= error(_("Cannot determine remote HEAD"));
-		else if (states.heads.nr > 1) {
+		ບໍ່ດັ່ງນັ້ນ ຖ້າ (states.heads.nr > 1) {
 			result |= error(_("Multiple remote HEAD branches. "
 					  "Please choose one explicitly with:"));
-			for (size_t i = 0; i < states.heads.nr; i++)
+			ສຳລັບ (size_t i = 0; i < states.heads.nr; i++)
 				fprintf(stderr, "  git remote set-head %s %s\n",
 					argv[0], states.heads.items[i].string);
-		} else
+		} ບໍ່ດັ່ງນັ້ນ
 			head_name = xstrdup(states.heads.items[0].string);
 		free_remote_ref_states(&states);
-	} else if (opt_d && !opt_a && argc == 1) {
-		if (refs_delete_ref(refs, NULL, b_head.buf, NULL, REF_NO_DEREF))
+	} ບໍ່ດັ່ງນັ້ນ ຖ້າ (opt_d && !opt_a && argc == 1) {
+		ຖ້າ (refs_delete_ref(refs, NULL, b_head.buf, NULL, REF_NO_DEREF))
 			result |= error(_("Could not delete %s"), b_head.buf);
-	} else
+	} ບໍ່ດັ່ງນັ້ນ
 		usage_with_options(builtin_remote_sethead_usage, options);
 
-	if (!head_name)
+	ຖ້າ (!head_name)
 		goto cleanup;
 	strbuf_addf(&b_remote_head, "refs/remotes/%s/%s", argv[0], head_name);
-	if (!refs_ref_exists(refs, b_remote_head.buf)) {
+	ຖ້າ (!refs_ref_exists(refs, b_remote_head.buf)) {
 		result |= error(_("Not a valid ref: %s"), b_remote_head.buf);
 		goto cleanup;
 	}
 	was_detached = refs_update_symref_extended(refs, b_head.buf, b_remote_head.buf,
 			"remote set-head", &b_local_head, 0);
-	if (was_detached == -1) {
+	ຖ້າ (was_detached == -1) {
 		result |= error(_("Could not set up %s"), b_head.buf);
 		goto cleanup;
 	}
-	if (opt_a)
+	ຖ້າ (opt_a)
 		report_set_head_auto(argv[0], head_name, &b_local_head, was_detached);
-	if (remote->follow_remote_head == FOLLOW_REMOTE_ALWAYS) {
-		struct strbuf config_name = STRBUF_INIT;
+	ຖ້າ (remote->follow_remote_head == FOLLOW_REMOTE_ALWAYS) {
+		sa_nracanaa strbuf config_name = STRBUF_INIT;
 		strbuf_addf(&config_name,
 			"remote.%s.followremotehead", remote->name);
 		repo_config_set(the_repository, config_name.buf, "warn");
@@ -1619,21 +1619,21 @@ cleanup:
 	strbuf_release(&b_head);
 	strbuf_release(&b_remote_head);
 	strbuf_release(&b_local_head);
-	return result;
+	ສົ່ງຄືນ result;
 }
 
-static int prune_remote(const char *remote, int dry_run)
+static ຈຳນວນເຕັມ prune_remote(const var_na *remote, ຈຳນວນເຕັມ dry_run)
 {
-	int result = 0;
-	struct ref_states states = REF_STATES_INIT;
-	struct string_list refs_to_prune = STRING_LIST_INIT_NODUP;
-	struct string_list_item *item;
+	ຈຳນວນເຕັມ result = 0;
+	sa_nracanaa ref_states states = REF_STATES_INIT;
+	sa_nracanaa string_list refs_to_prune = STRING_LIST_INIT_NODUP;
+	sa_nracanaa string_list_item *item;
 
 	get_remote_ref_states(remote, &states, GET_REF_STATES);
 
-	if (!states.stale.nr) {
+	ຖ້າ (!states.stale.nr) {
 		free_remote_ref_states(&states);
-		return 0;
+		ສົ່ງຄືນ 0;
 	}
 
 	printf_ln(_("Pruning %s"), remote);
@@ -1643,17 +1643,17 @@ static int prune_remote(const char *remote, int dry_run)
 		string_list_append(&refs_to_prune, item->util);
 	string_list_sort(&refs_to_prune);
 
-	if (!dry_run)
+	ຖ້າ (!dry_run)
 		result |= refs_delete_refs(get_main_ref_store(the_repository),
 					   "remote: prune", &refs_to_prune, 0);
 
 	for_each_string_list_item(item, &states.stale) {
-		const char *refname = item->util;
+		const var_na *refname = item->util;
 
-		if (dry_run)
+		ຖ້າ (dry_run)
 			printf_ln(_(" * [would prune] %s"),
 			       abbrev_ref(refname, "refs/remotes/"));
-		else
+		ບໍ່ດັ່ງນັ້ນ
 			printf_ln(_(" * [pruned] %s"),
 			       abbrev_ref(refname, "refs/remotes/"));
 	}
@@ -1663,14 +1663,14 @@ static int prune_remote(const char *remote, int dry_run)
 
 	string_list_clear(&refs_to_prune, 0);
 	free_remote_ref_states(&states);
-	return result;
+	ສົ່ງຄືນ result;
 }
 
-static int prune(int argc, const char **argv, const char *prefix,
-		 struct repository *repo UNUSED)
+static ຈຳນວນເຕັມ prune(ຈຳນວນເຕັມ argc, const var_na **argv, const var_na *prefix,
+		 sa_nracanaa repository *repo UNUSED)
 {
-	int dry_run = 0, result = 0;
-	struct option options[] = {
+	ຈຳນວນເຕັມ dry_run = 0, result = 0;
+	sa_nracanaa option options[] = {
 		OPT__DRY_RUN(&dry_run, N_("dry run")),
 		OPT_END()
 	};
@@ -1678,37 +1678,37 @@ static int prune(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_prune_usage, 0);
 
-	if (argc < 1)
+	ຖ້າ (argc < 1)
 		usage_with_options(builtin_remote_prune_usage, options);
 
-	for (; argc; argc--, argv++)
+	ສຳລັບ (; argc; argc--, argv++)
 		result |= prune_remote(*argv, dry_run);
 
-	return result;
+	ສົ່ງຄືນ result;
 }
 
-static int get_remote_default(const char *key, const char *value UNUSED,
-			      const struct config_context *ctx UNUSED,
+static ຈຳນວນເຕັມ get_remote_default(const var_na *key, const var_na *value UNUSED,
+			      const sa_nracanaa config_context *ctx UNUSED,
 			      void *priv)
 {
-	if (strcmp(key, "remotes.default") == 0) {
-		int *found = priv;
+	ຖ້າ (strcmp(key, "remotes.default") == 0) {
+		ຈຳນວນເຕັມ *found = priv;
 		*found = 1;
 	}
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int update(int argc, const char **argv, const char *prefix,
-		  struct repository *repo UNUSED)
+static ຈຳນວນເຕັມ update(ຈຳນວນເຕັມ argc, const var_na **argv, const var_na *prefix,
+		  sa_nracanaa repository *repo UNUSED)
 {
-	int i, prune = -1;
-	struct option options[] = {
+	ຈຳນວນເຕັມ i, prune = -1;
+	sa_nracanaa option options[] = {
 		OPT_BOOL('p', "prune", &prune,
 			 N_("prune remotes after fetching")),
 		OPT_END()
 	};
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	int default_defined = 0;
+	sa_nracanaa child_process cmd = CHILD_PROCESS_INIT;
+	ຈຳນວນເຕັມ default_defined = 0;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_update_usage,
@@ -1716,99 +1716,99 @@ static int update(int argc, const char **argv, const char *prefix,
 
 	strvec_push(&cmd.args, "fetch");
 
-	if (prune != -1)
+	ຖ້າ (prune != -1)
 		strvec_push(&cmd.args, prune ? "--prune" : "--no-prune");
-	if (verbose)
+	ຖ້າ (verbose)
 		strvec_push(&cmd.args, "-v");
 	strvec_push(&cmd.args, "--multiple");
-	if (argc < 2)
+	ຖ້າ (argc < 2)
 		strvec_push(&cmd.args, "default");
-	for (i = 1; i < argc; i++)
+	ສຳລັບ (i = 1; i < argc; i++)
 		strvec_push(&cmd.args, argv[i]);
 
-	if (strcmp(cmd.args.v[cmd.args.nr-1], "default") == 0) {
+	ຖ້າ (strcmp(cmd.args.v[cmd.args.nr-1], "default") == 0) {
 		repo_config(the_repository, get_remote_default, &default_defined);
-		if (!default_defined) {
+		ຖ້າ (!default_defined) {
 			strvec_pop(&cmd.args);
 			strvec_push(&cmd.args, "--all");
 		}
 	}
 
 	cmd.git_cmd = 1;
-	return run_command(&cmd);
+	ສົ່ງຄືນ run_command(&cmd);
 }
 
-static int remove_all_fetch_refspecs(const char *key)
+static ຈຳນວນເຕັມ remove_all_fetch_refspecs(const var_na *key)
 {
-	return repo_config_set_multivar_gently(the_repository, key, NULL, NULL,
+	ສົ່ງຄືນ repo_config_set_multivar_gently(the_repository, key, NULL, NULL,
 					       CONFIG_FLAGS_MULTI_REPLACE);
 }
 
-static void add_branches(struct remote *remote, const char **branches,
-			 const char *key)
+static void add_branches(sa_nracanaa remote *remote, const var_na **branches,
+			 const var_na *key)
 {
-	const char *remotename = remote->name;
-	int mirror = remote->mirror;
-	struct strbuf refspec = STRBUF_INIT;
+	const var_na *remotename = remote->name;
+	ຈຳນວນເຕັມ mirror = remote->mirror;
+	sa_nracanaa strbuf refspec = STRBUF_INIT;
 
-	for (; *branches; branches++)
+	ສຳລັບ (; *branches; branches++)
 		add_branch(key, *branches, remotename, mirror, &refspec);
 
 	strbuf_release(&refspec);
 }
 
-static int set_remote_branches(const char *remotename, const char **branches,
-				int add_mode)
+static ຈຳນວນເຕັມ set_remote_branches(const var_na *remotename, const var_na **branches,
+				ຈຳນວນເຕັມ add_mode)
 {
-	struct strbuf key = STRBUF_INIT;
-	struct remote *remote;
+	sa_nracanaa strbuf key = STRBUF_INIT;
+	sa_nracanaa remote *remote;
 
 	strbuf_addf(&key, "remote.%s.fetch", remotename);
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	ຖ້າ (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
 		exit(2);
 	}
 
-	if (!add_mode && remove_all_fetch_refspecs(key.buf)) {
+	ຖ້າ (!add_mode && remove_all_fetch_refspecs(key.buf)) {
 		strbuf_release(&key);
-		return 1;
+		ສົ່ງຄືນ 1;
 	}
 	add_branches(remote, branches, key.buf);
 
 	strbuf_release(&key);
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int set_branches(int argc, const char **argv, const char *prefix,
-			struct repository *repo UNUSED)
+static ຈຳນວນເຕັມ set_branches(ຈຳນວນເຕັມ argc, const var_na **argv, const var_na *prefix,
+			sa_nracanaa repository *repo UNUSED)
 {
-	int add_mode = 0;
-	struct option options[] = {
+	ຈຳນວນເຕັມ add_mode = 0;
+	sa_nracanaa option options[] = {
 		OPT_BOOL('\0', "add", &add_mode, N_("add branch")),
 		OPT_END()
 	};
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_setbranches_usage, 0);
-	if (argc == 0) {
+	ຖ້າ (argc == 0) {
 		error(_("no remote specified"));
 		usage_with_options(builtin_remote_setbranches_usage, options);
 	}
 	argv[argc] = NULL;
 
-	return set_remote_branches(argv[0], argv + 1, add_mode);
+	ສົ່ງຄືນ set_remote_branches(argv[0], argv + 1, add_mode);
 }
 
-static int get_url(int argc, const char **argv, const char *prefix,
-		   struct repository *repo UNUSED)
+static ຈຳນວນເຕັມ get_url(ຈຳນວນເຕັມ argc, const var_na **argv, const var_na *prefix,
+		   sa_nracanaa repository *repo UNUSED)
 {
-	int push_mode = 0, all_mode = 0;
-	const char *remotename = NULL;
-	struct remote *remote;
-	struct strvec *url;
-	struct option options[] = {
+	ຈຳນວນເຕັມ push_mode = 0, all_mode = 0;
+	const var_na *remotename = NULL;
+	sa_nracanaa remote *remote;
+	sa_nracanaa strvec *url;
+	sa_nracanaa option options[] = {
 		OPT_BOOL('\0', "push", &push_mode,
 			 N_("query push URLs rather than fetch URLs")),
 		OPT_BOOL('\0', "all", &all_mode,
@@ -1818,42 +1818,42 @@ static int get_url(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_geturl_usage, 0);
 
-	if (argc != 1)
+	ຖ້າ (argc != 1)
 		usage_with_options(builtin_remote_geturl_usage, options);
 
 	remotename = argv[0];
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	ຖ້າ (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
 		exit(2);
 	}
 
 	url = push_mode ? push_url_of_remote(remote) : &remote->url;
 
-	if (all_mode) {
-		for (size_t i = 0; i < url->nr; i++)
+	ຖ້າ (all_mode) {
+		ສຳລັບ (size_t i = 0; i < url->nr; i++)
 			printf_ln("%s", url->v[i]);
-	} else {
+	} ບໍ່ດັ່ງນັ້ນ {
 		printf_ln("%s", url->v[0]);
 	}
 
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int set_url(int argc, const char **argv, const char *prefix,
-		   struct repository *repo UNUSED)
+static ຈຳນວນເຕັມ set_url(ຈຳນວນເຕັມ argc, const var_na **argv, const var_na *prefix,
+		   sa_nracanaa repository *repo UNUSED)
 {
-	int push_mode = 0, add_mode = 0, delete_mode = 0;
-	int matches = 0, negative_matches = 0;
-	const char *remotename = NULL;
-	const char *newurl = NULL;
-	const char *oldurl = NULL;
-	struct remote *remote;
+	ຈຳນວນເຕັມ push_mode = 0, add_mode = 0, delete_mode = 0;
+	ຈຳນວນເຕັມ matches = 0, negative_matches = 0;
+	const var_na *remotename = NULL;
+	const var_na *newurl = NULL;
+	const var_na *oldurl = NULL;
+	sa_nracanaa remote *remote;
 	regex_t old_regex;
-	struct strvec *urlset;
-	struct strbuf name_buf = STRBUF_INIT;
-	struct option options[] = {
+	sa_nracanaa strvec *urlset;
+	sa_nracanaa strbuf name_buf = STRBUF_INIT;
+	sa_nracanaa option options[] = {
 		OPT_BOOL('\0', "push", &push_mode,
 			 N_("manipulate push URLs")),
 		OPT_BOOL('\0', "add", &add_mode,
@@ -1866,77 +1866,77 @@ static int set_url(int argc, const char **argv, const char *prefix,
 			     builtin_remote_seturl_usage,
 			     PARSE_OPT_KEEP_ARGV0);
 
-	if (add_mode && delete_mode)
+	ຖ້າ (add_mode && delete_mode)
 		die(_("--add --delete doesn't make sense"));
 
-	if (argc < 3 || argc > 4 || ((add_mode || delete_mode) && argc != 3))
+	ຖ້າ (argc < 3 || argc > 4 || ((add_mode || delete_mode) && argc != 3))
 		usage_with_options(builtin_remote_seturl_usage, options);
 
 	remotename = argv[1];
 	newurl = argv[2];
-	if (argc > 3)
+	ຖ້າ (argc > 3)
 		oldurl = argv[3];
 
-	if (delete_mode)
+	ຖ້າ (delete_mode)
 		oldurl = newurl;
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	ຖ້າ (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
 		exit(2);
 	}
 
-	if (push_mode) {
+	ຖ້າ (push_mode) {
 		strbuf_addf(&name_buf, "remote.%s.pushurl", remotename);
 		urlset = &remote->pushurl;
-	} else {
+	} ບໍ່ດັ່ງນັ້ນ {
 		strbuf_addf(&name_buf, "remote.%s.url", remotename);
 		urlset = &remote->url;
 	}
 
 	/* Special cases that add new entry. */
-	if ((!oldurl && !delete_mode) || add_mode) {
-		if (add_mode)
+	ຖ້າ ((!oldurl && !delete_mode) || add_mode) {
+		ຖ້າ (add_mode)
 			repo_config_set_multivar(the_repository, name_buf.buf, newurl,
 						       "^$", 0);
-		else
+		ບໍ່ດັ່ງນັ້ນ
 			repo_config_set(the_repository, name_buf.buf, newurl);
 		goto out;
 	}
 
 	/* Old URL specified. Demand that one matches. */
-	if (regcomp(&old_regex, oldurl, REG_EXTENDED))
+	ຖ້າ (regcomp(&old_regex, oldurl, REG_EXTENDED))
 		die(_("Invalid old URL pattern: %s"), oldurl);
 
-	for (size_t i = 0; i < urlset->nr; i++)
-		if (!regexec(&old_regex, urlset->v[i], 0, NULL, 0))
+	ສຳລັບ (size_t i = 0; i < urlset->nr; i++)
+		ຖ້າ (!regexec(&old_regex, urlset->v[i], 0, NULL, 0))
 			matches++;
-		else
+		ບໍ່ດັ່ງນັ້ນ
 			negative_matches++;
-	if (!delete_mode && !matches)
+	ຖ້າ (!delete_mode && !matches)
 		die(_("No such URL found: %s"), oldurl);
-	if (delete_mode && !negative_matches && !push_mode)
+	ຖ້າ (delete_mode && !negative_matches && !push_mode)
 		die(_("Will not delete all non-push URLs"));
 
 	regfree(&old_regex);
 
-	if (!delete_mode)
+	ຖ້າ (!delete_mode)
 		repo_config_set_multivar(the_repository, name_buf.buf, newurl, oldurl, 0);
-	else
+	ບໍ່ດັ່ງນັ້ນ
 		repo_config_set_multivar(the_repository, name_buf.buf, NULL, oldurl,
 					 CONFIG_FLAGS_MULTI_REPLACE);
 out:
 	strbuf_release(&name_buf);
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-int cmd_remote(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+ຈຳນວນເຕັມ cmd_remote(ຈຳນວນເຕັມ argc,
+	       const var_na **argv,
+	       const var_na *prefix,
+	       sa_nracanaa repository *repo)
 {
 	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose; must be placed before a subcommand")),
 		OPT_SUBCOMMAND("add", &fn, add),
 		OPT_SUBCOMMAND("rename", &fn, mv),
@@ -1955,13 +1955,13 @@ int cmd_remote(int argc,
 	argc = parse_options(argc, argv, prefix, options, builtin_remote_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL);
 
-	if (fn) {
-		return !!fn(argc, argv, prefix, repo);
-	} else {
-		if (argc) {
+	ຖ້າ (fn) {
+		ສົ່ງຄືນ !!fn(argc, argv, prefix, repo);
+	} ບໍ່ດັ່ງນັ້ນ {
+		ຖ້າ (argc) {
 			error(_("unknown subcommand: `%s'"), argv[0]);
 			usage_with_options(builtin_remote_usage, options);
 		}
-		return !!show_all();
+		ສົ່ງຄືນ !!show_all();
 	}
 }

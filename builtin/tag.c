@@ -34,7 +34,7 @@
 #include "object-file-convert.h"
 #include "trailer.h"
 
-static const char * const git_tag_usage[] = {
+static const var_na * const git_tag_usage[] = {
 	N_("git tag [-a | -s | -u <key-id>] [-f] [-m <msg> | -F <file>] [-e]\n"
 	   "        [(--trailer <token>[(=|:)<value>])...]\n"
 	   "        <tagname> [<commit> | <object>]"),
@@ -47,88 +47,88 @@ static const char * const git_tag_usage[] = {
 	NULL
 };
 
-static unsigned int colopts;
-static int force_sign_annotate;
-static int config_sign_tag = -1; /* unspecified */
+static unsigned ຈຳນວນເຕັມ colopts;
+static ຈຳນວນເຕັມ force_sign_annotate;
+static ຈຳນວນເຕັມ config_sign_tag = -1; /* unspecified */
 
-static int list_tags(struct ref_filter *filter, struct ref_sorting *sorting,
-		     struct ref_format *format)
+static ຈຳນວນເຕັມ list_tags(sa_nracanaa ref_filter *filter, sa_nracanaa ref_sorting *sorting,
+		     sa_nracanaa ref_format *format)
 {
-	char *to_free = NULL;
+	var_na *to_free = NULL;
 
-	if (filter->lines == -1)
+	ຖ້າ (filter->lines == -1)
 		filter->lines = 0;
 
-	if (!format->format) {
-		if (filter->lines) {
+	ຖ້າ (!format->format) {
+		ຖ້າ (filter->lines) {
 			to_free = xstrfmt("%s %%(contents:lines=%d)",
 					  "%(align:15)%(refname:lstrip=2)%(end)",
 					  filter->lines);
 			format->format = to_free;
-		} else
+		} ບໍ່ດັ່ງນັ້ນ
 			format->format = "%(refname:lstrip=2)";
 	}
 
-	if (verify_ref_format(format))
+	ຖ້າ (verify_ref_format(format))
 		die(_("unable to parse format string"));
 	filter->with_commit_tag_algo = 1;
 	filter_and_format_refs(filter, FILTER_REFS_TAGS, sorting, format);
 
 	free(to_free);
 
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-typedef int (*each_tag_name_fn)(const char *name, const char *ref,
-				const struct object_id *oid, void *cb_data);
+typedef ຈຳນວນເຕັມ (*each_tag_name_fn)(const var_na *name, const var_na *ref,
+				const sa_nracanaa object_id *oid, void *cb_data);
 
-static int for_each_tag_name(const char **argv, each_tag_name_fn fn,
+static ຈຳນວນເຕັມ for_each_tag_name(const var_na **argv, each_tag_name_fn fn,
 			     void *cb_data)
 {
-	const char **p;
-	struct strbuf ref = STRBUF_INIT;
-	int had_error = 0;
-	struct object_id oid;
+	const var_na **p;
+	sa_nracanaa strbuf ref = STRBUF_INIT;
+	ຈຳນວນເຕັມ had_error = 0;
+	sa_nracanaa object_id oid;
 
-	for (p = argv; *p; p++) {
+	ສຳລັບ (p = argv; *p; p++) {
 		strbuf_reset(&ref);
 		strbuf_addf(&ref, "refs/tags/%s", *p);
-		if (refs_read_ref(get_main_ref_store(the_repository), ref.buf, &oid)) {
+		ຖ້າ (refs_read_ref(get_main_ref_store(the_repository), ref.buf, &oid)) {
 			error(_("tag '%s' not found."), *p);
 			had_error = 1;
 			continue;
 		}
-		if (fn(*p, ref.buf, &oid, cb_data))
+		ຖ້າ (fn(*p, ref.buf, &oid, cb_data))
 			had_error = 1;
 	}
 	strbuf_release(&ref);
-	return had_error;
+	ສົ່ງຄືນ had_error;
 }
 
-static int collect_tags(const char *name UNUSED, const char *ref,
-			const struct object_id *oid, void *cb_data)
+static ຈຳນວນເຕັມ collect_tags(const var_na *name UNUSED, const var_na *ref,
+			const sa_nracanaa object_id *oid, void *cb_data)
 {
-	struct string_list *ref_list = cb_data;
+	sa_nracanaa string_list *ref_list = cb_data;
 
 	string_list_append(ref_list, ref);
 	ref_list->items[ref_list->nr - 1].util = oiddup(oid);
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int delete_tags(const char **argv)
+static ຈຳນວນເຕັມ delete_tags(const var_na **argv)
 {
-	int result;
-	struct string_list refs_to_delete = STRING_LIST_INIT_DUP;
-	struct string_list_item *item;
+	ຈຳນວນເຕັມ result;
+	sa_nracanaa string_list refs_to_delete = STRING_LIST_INIT_DUP;
+	sa_nracanaa string_list_item *item;
 
 	result = for_each_tag_name(argv, collect_tags, (void *)&refs_to_delete);
-	if (refs_delete_refs(get_main_ref_store(the_repository), NULL, &refs_to_delete, REF_NO_DEREF))
+	ຖ້າ (refs_delete_refs(get_main_ref_store(the_repository), NULL, &refs_to_delete, REF_NO_DEREF))
 		result = 1;
 
 	for_each_string_list_item(item, &refs_to_delete) {
-		const char *name = item->string;
-		struct object_id *oid = item->util;
-		if (!refs_ref_exists(get_main_ref_store(the_repository), name))
+		const var_na *name = item->string;
+		sa_nracanaa object_id *oid = item->util;
+		ຖ້າ (!refs_ref_exists(get_main_ref_store(the_repository), name))
 			printf(_("Deleted tag '%s' (was %s)\n"),
 				item->string + 10,
 				repo_find_unique_abbrev(the_repository, oid, DEFAULT_ABBREV));
@@ -136,47 +136,47 @@ static int delete_tags(const char **argv)
 		free(oid);
 	}
 	string_list_clear(&refs_to_delete, 0);
-	return result;
+	ສົ່ງຄືນ result;
 }
 
-static int verify_tag(const char *name, const char *ref UNUSED,
-		      const struct object_id *oid, void *cb_data)
+static ຈຳນວນເຕັມ verify_tag(const var_na *name, const var_na *ref UNUSED,
+		      const sa_nracanaa object_id *oid, void *cb_data)
 {
-	int flags;
-	struct ref_format *format = cb_data;
+	ຈຳນວນເຕັມ flags;
+	sa_nracanaa ref_format *format = cb_data;
 	flags = GPG_VERIFY_VERBOSE;
 
-	if (format->format)
+	ຖ້າ (format->format)
 		flags = GPG_VERIFY_OMIT_STATUS;
 
-	if (gpg_verify_tag(the_repository, oid, name, flags))
-		return -1;
+	ຖ້າ (gpg_verify_tag(the_repository, oid, name, flags))
+		ສົ່ງຄືນ -1;
 
-	if (format->format)
+	ຖ້າ (format->format)
 		pretty_print_ref(name, oid, NULL, format);
 
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int do_sign(struct strbuf *buffer, struct object_id **compat_oid,
-		   struct object_id *compat_oid_buf)
+static ຈຳນວນເຕັມ do_sign(sa_nracanaa strbuf *buffer, sa_nracanaa object_id **compat_oid,
+		   sa_nracanaa object_id *compat_oid_buf)
 {
-	const struct git_hash_algo *compat = the_repository->compat_hash_algo;
-	struct strbuf sig = STRBUF_INIT, compat_sig = STRBUF_INIT;
-	struct strbuf compat_buf = STRBUF_INIT;
-	char *keyid = get_signing_key();
-	int ret = -1;
+	const sa_nracanaa git_hash_algo *compat = the_repository->compat_hash_algo;
+	sa_nracanaa strbuf sig = STRBUF_INIT, compat_sig = STRBUF_INIT;
+	sa_nracanaa strbuf compat_buf = STRBUF_INIT;
+	var_na *keyid = get_signing_key();
+	ຈຳນວນເຕັມ ret = -1;
 
-	if (sign_buffer(buffer, &sig, keyid, 0))
+	ຖ້າ (sign_buffer(buffer, &sig, keyid, 0))
 		goto out;
 
-	if (compat) {
-		const struct git_hash_algo *algo = the_repository->hash_algo;
+	ຖ້າ (compat) {
+		const sa_nracanaa git_hash_algo *algo = the_repository->hash_algo;
 
-		if (convert_object_file(the_repository ,&compat_buf, algo, compat,
+		ຖ້າ (convert_object_file(the_repository ,&compat_buf, algo, compat,
 					buffer->buf, buffer->len, OBJ_TAG, 1))
 			goto out;
-		if (sign_buffer(&compat_buf, &compat_sig, keyid, 0))
+		ຖ້າ (sign_buffer(&compat_buf, &compat_sig, keyid, 0))
 			goto out;
 		add_header_signature(&compat_buf, &sig, algo);
 		strbuf_addbuf(&compat_buf, &compat_sig);
@@ -185,7 +185,7 @@ static int do_sign(struct strbuf *buffer, struct object_id **compat_oid,
 		*compat_oid = compat_oid_buf;
 	}
 
-	if (compat_sig.len)
+	ຖ້າ (compat_sig.len)
 		add_header_signature(buffer, &compat_sig, compat);
 
 	strbuf_addbuf(buffer, &sig);
@@ -195,68 +195,68 @@ out:
 	strbuf_release(&compat_sig);
 	strbuf_release(&compat_buf);
 	free(keyid);
-	return ret;
+	ສົ່ງຄືນ ret;
 }
 
-static const char tag_template[] =
+static const var_na tag_template[] =
 	N_("\nWrite a message for tag:\n  %s\n"
 	"Lines starting with '%s' will be ignored.\n");
 
-static const char tag_template_nocleanup[] =
+static const var_na tag_template_nocleanup[] =
 	N_("\nWrite a message for tag:\n  %s\n"
 	"Lines starting with '%s' will be kept; you may remove them"
 	" yourself if you want to.\n");
 
-static int git_tag_config(const char *var, const char *value,
-			  const struct config_context *ctx, void *cb)
+static ຈຳນວນເຕັມ git_tag_config(const var_na *var, const var_na *value,
+			  const sa_nracanaa config_context *ctx, void *cb)
 {
-	if (!strcmp(var, "tag.gpgsign")) {
+	ຖ້າ (!strcmp(var, "tag.gpgsign")) {
 		config_sign_tag = git_config_bool(var, value);
-		return 0;
+		ສົ່ງຄືນ 0;
 	}
 
-	if (!strcmp(var, "tag.sort")) {
-		if (!value)
-			return config_error_nonbool(var);
+	ຖ້າ (!strcmp(var, "tag.sort")) {
+		ຖ້າ (!value)
+			ສົ່ງຄືນ config_error_nonbool(var);
 		string_list_append(cb, value);
-		return 0;
+		ສົ່ງຄືນ 0;
 	}
 
-	if (!strcmp(var, "tag.forcesignannotated")) {
+	ຖ້າ (!strcmp(var, "tag.forcesignannotated")) {
 		force_sign_annotate = git_config_bool(var, value);
-		return 0;
+		ສົ່ງຄືນ 0;
 	}
 
-	if (starts_with(var, "column."))
-		return git_column_config(var, value, "tag", &colopts);
+	ຖ້າ (starts_with(var, "column."))
+		ສົ່ງຄືນ git_column_config(var, value, "tag", &colopts);
 
-	if (git_color_config(var, value, cb) < 0)
-		return -1;
+	ຖ້າ (git_color_config(var, value, cb) < 0)
+		ສົ່ງຄືນ -1;
 
-	return git_default_config(var, value, ctx, cb);
+	ສົ່ງຄືນ git_default_config(var, value, ctx, cb);
 }
 
-static void write_tag_body(int fd, const struct object_id *oid)
+static void write_tag_body(ຈຳນວນເຕັມ fd, const sa_nracanaa object_id *oid)
 {
 	size_t size;
-	enum object_type type;
-	char *buf, *sp, *orig;
-	struct strbuf payload = STRBUF_INIT;
-	struct strbuf signature = STRBUF_INIT;
+	ga_nanaa object_type type;
+	var_na *buf, *sp, *orig;
+	sa_nracanaa strbuf payload = STRBUF_INIT;
+	sa_nracanaa strbuf signature = STRBUF_INIT;
 
 	orig = buf = odb_read_object(the_repository->objects, oid, &type, &size);
-	if (!buf)
-		return;
-	if (parse_signature(buf, size, &payload, &signature)) {
+	ຖ້າ (!buf)
+		ສົ່ງຄືນ;
+	ຖ້າ (parse_signature(buf, size, &payload, &signature)) {
 		buf = payload.buf;
 		size = payload.len;
 	}
 	/* skip header */
 	sp = strstr(buf, "\n\n");
 
-	if (!sp || !size || type != OBJ_TAG) {
+	ຖ້າ (!sp || !size || type != OBJ_TAG) {
 		free(buf);
-		return;
+		ສົ່ງຄືນ;
 	}
 	sp += 2; /* skip the 2 LFs */
 	write_or_die(fd, sp, buf + size - sp);
@@ -266,49 +266,49 @@ static void write_tag_body(int fd, const struct object_id *oid)
 	strbuf_release(&signature);
 }
 
-static int build_tag_object(struct strbuf *buf, int sign, struct object_id *result)
+static ຈຳນວນເຕັມ build_tag_object(sa_nracanaa strbuf *buf, ຈຳນວນເຕັມ sign, sa_nracanaa object_id *result)
 {
-	struct object_id *compat_oid = NULL, compat_oid_buf;
-	if (sign && do_sign(buf, &compat_oid, &compat_oid_buf) < 0)
-		return error(_("unable to sign the tag"));
-	if (odb_write_object_ext(the_repository->objects, buf->buf,
+	sa_nracanaa object_id *compat_oid = NULL, compat_oid_buf;
+	ຖ້າ (sign && do_sign(buf, &compat_oid, &compat_oid_buf) < 0)
+		ສົ່ງຄືນ error(_("unable to sign the tag"));
+	ຖ້າ (odb_write_object_ext(the_repository->objects, buf->buf,
 				 buf->len, OBJ_TAG, result, compat_oid, 0) < 0)
-		return error(_("unable to write tag file"));
-	return 0;
+		ສົ່ງຄືນ error(_("unable to write tag file"));
+	ສົ່ງຄືນ 0;
 }
 
-struct create_tag_options {
-	unsigned int message_given:1;
-	unsigned int use_editor:1;
-	unsigned int sign;
-	enum {
+sa_nracanaa create_tag_options {
+	unsigned ຈຳນວນເຕັມ message_given:1;
+	unsigned ຈຳນວນເຕັມ use_editor:1;
+	unsigned ຈຳນວນເຕັມ sign;
+	ga_nanaa {
 		CLEANUP_NONE,
 		CLEANUP_SPACE,
 		CLEANUP_ALL
 	} cleanup_mode;
 };
 
-static const char message_advice_nested_tag[] =
+static const var_na message_advice_nested_tag[] =
 	N_("You have created a nested tag. The object referred to by your new tag is\n"
 	   "already a tag. If you meant to tag the object that it points to, use:\n"
 	   "\n"
 	   "\tgit tag -f %s %s^{}");
 
-static void create_tag(const struct object_id *object, const char *object_ref,
-		       const char *tag,
-		       struct strbuf *buf, struct create_tag_options *opt,
-		       struct object_id *prev, struct object_id *result,
-		       struct strvec *trailer_args, char *path)
+static void create_tag(const sa_nracanaa object_id *object, const var_na *object_ref,
+		       const var_na *tag,
+		       sa_nracanaa strbuf *buf, sa_nracanaa create_tag_options *opt,
+		       sa_nracanaa object_id *prev, sa_nracanaa object_id *result,
+		       sa_nracanaa strvec *trailer_args, var_na *path)
 {
-	enum object_type type;
-	struct strbuf header = STRBUF_INIT;
-	int should_edit;
+	ga_nanaa object_type type;
+	sa_nracanaa strbuf header = STRBUF_INIT;
+	ຈຳນວນເຕັມ should_edit;
 
 	type = odb_read_object_info(the_repository->objects, object, NULL);
-	if (type <= OBJ_NONE)
+	ຖ້າ (type <= OBJ_NONE)
 		die(_("bad object type."));
 
-	if (type == OBJ_TAG)
+	ຖ້າ (type == OBJ_TAG)
 		advise_if_enabled(ADVICE_NESTED_TAG, _(message_advice_nested_tag),
 				  tag, object_ref);
 
@@ -323,25 +323,25 @@ static void create_tag(const struct object_id *object, const char *object_ref,
 		    git_committer_info(IDENT_STRICT));
 
 	should_edit = opt->use_editor || !opt->message_given;
-	if (should_edit || trailer_args->nr) {
-		int fd;
+	ຖ້າ (should_edit || trailer_args->nr) {
+		ຈຳນວນເຕັມ fd;
 
 		/* write the template message before editing: */
 		fd = xopen(path, O_CREAT | O_TRUNC | O_WRONLY, 0600);
 
-		if (opt->message_given && buf->len) {
+		ຖ້າ (opt->message_given && buf->len) {
 			strbuf_complete(buf, '\n');
 			write_or_die(fd, buf->buf, buf->len);
 			strbuf_reset(buf);
-		} else if (!is_null_oid(prev)) {
+		} ບໍ່ດັ່ງນັ້ນ ຖ້າ (!is_null_oid(prev)) {
 			write_tag_body(fd, prev);
-		} else {
-			struct strbuf buf = STRBUF_INIT;
+		} ບໍ່ດັ່ງນັ້ນ {
+			sa_nracanaa strbuf buf = STRBUF_INIT;
 			strbuf_addch(&buf, '\n');
-			if (opt->cleanup_mode == CLEANUP_ALL)
+			ຖ້າ (opt->cleanup_mode == CLEANUP_ALL)
 				strbuf_commented_addf(&buf, comment_line_str,
 				      _(tag_template), tag, comment_line_str);
-			else
+			ບໍ່ດັ່ງນັ້ນ
 				strbuf_commented_addf(&buf, comment_line_str,
 				      _(tag_template_nocleanup), tag, comment_line_str);
 			write_or_die(fd, buf.buf, buf.len);
@@ -349,53 +349,53 @@ static void create_tag(const struct object_id *object, const char *object_ref,
 		}
 		close(fd);
 
-		if (trailer_args->nr && amend_file_with_trailers(path, trailer_args))
+		ຖ້າ (trailer_args->nr && amend_file_with_trailers(path, trailer_args))
 			die(_("unable to pass trailers to --trailers"));
 
-		if (should_edit) {
-			if (launch_editor(path, buf, NULL)) {
+		ຖ້າ (should_edit) {
+			ຖ້າ (launch_editor(path, buf, NULL)) {
 				fprintf(stderr,
 					_("Please supply the message using either -m or -F option.\n"));
 				exit(1);
 			}
-		} else if (trailer_args->nr) {
+		} ບໍ່ດັ່ງນັ້ນ ຖ້າ (trailer_args->nr) {
 			strbuf_reset(buf);
-			if (strbuf_read_file(buf, path, 0) < 0)
+			ຖ້າ (strbuf_read_file(buf, path, 0) < 0)
 				die_errno(_("failed to read '%s'"), path);
 		}
 	}
 
-	if (opt->cleanup_mode != CLEANUP_NONE)
+	ຖ້າ (opt->cleanup_mode != CLEANUP_NONE)
 		strbuf_stripspace(buf,
 		  opt->cleanup_mode == CLEANUP_ALL ? comment_line_str : NULL);
 
-	if (!opt->message_given && !buf->len)
+	ຖ້າ (!opt->message_given && !buf->len)
 		die(_("no tag message?"));
 
 	strbuf_insert(buf, 0, header.buf, header.len);
 	strbuf_release(&header);
 
-	if (build_tag_object(buf, opt->sign, result) < 0) {
-		if (path)
+	ຖ້າ (build_tag_object(buf, opt->sign, result) < 0) {
+		ຖ້າ (path)
 			fprintf(stderr, _("The tag message has been left in %s\n"),
 				path);
 		exit(128);
 	}
 }
 
-static void create_reflog_msg(const struct object_id *oid, struct strbuf *sb)
+static void create_reflog_msg(const sa_nracanaa object_id *oid, sa_nracanaa strbuf *sb)
 {
-	enum object_type type;
-	struct commit *c;
-	char *buf;
+	ga_nanaa object_type type;
+	sa_nracanaa commit *c;
+	var_na *buf;
 	size_t size;
-	int subject_len = 0;
-	const char *subject_start;
+	ຈຳນວນເຕັມ subject_len = 0;
+	const var_na *subject_start;
 
-	char *rla = getenv("GIT_REFLOG_ACTION");
-	if (rla) {
+	var_na *rla = getenv("GIT_REFLOG_ACTION");
+	ຖ້າ (rla) {
 		strbuf_addstr(sb, rla);
-	} else {
+	} ບໍ່ດັ່ງນັ້ນ {
 		strbuf_addstr(sb, "tag: tagging ");
 		strbuf_add_unique_abbrev(sb, oid, DEFAULT_ABBREV);
 	}
@@ -405,86 +405,86 @@ static void create_reflog_msg(const struct object_id *oid, struct strbuf *sb)
 	switch (type) {
 	default:
 		strbuf_addstr(sb, "object of unknown type");
-		break;
-	case OBJ_COMMIT:
-		if ((buf = odb_read_object(the_repository->objects, oid, &type, &size))) {
+		bha_nga;
+	pak_sa OBJ_COMMIT:
+		ຖ້າ ((buf = odb_read_object(the_repository->objects, oid, &type, &size))) {
 			subject_len = find_commit_subject(buf, &subject_start);
 			strbuf_insert(sb, sb->len, subject_start, subject_len);
-		} else {
+		} ບໍ່ດັ່ງນັ້ນ {
 			strbuf_addstr(sb, "commit object");
 		}
 		free(buf);
 
-		if ((c = lookup_commit_reference(the_repository, oid)))
+		ຖ້າ ((c = lookup_commit_reference(the_repository, oid)))
 			strbuf_addf(sb, ", %s", show_date(c->date, 0, DATE_MODE(SHORT)));
-		break;
-	case OBJ_TREE:
+		bha_nga;
+	pak_sa OBJ_TREE:
 		strbuf_addstr(sb, "tree object");
-		break;
-	case OBJ_BLOB:
+		bha_nga;
+	pak_sa OBJ_BLOB:
 		strbuf_addstr(sb, "blob object");
-		break;
-	case OBJ_TAG:
+		bha_nga;
+	pak_sa OBJ_TAG:
 		strbuf_addstr(sb, "other tag object");
-		break;
+		bha_nga;
 	}
 	strbuf_addch(sb, ')');
 }
 
-struct msg_arg {
-	int given;
-	struct strbuf buf;
+sa_nracanaa msg_arg {
+	ຈຳນວນເຕັມ given;
+	sa_nracanaa strbuf buf;
 };
 
-static int parse_msg_arg(const struct option *opt, const char *arg, int unset)
+static ຈຳນວນເຕັມ parse_msg_arg(const sa_nracanaa option *opt, const var_na *arg, ຈຳນວນເຕັມ unset)
 {
-	struct msg_arg *msg = opt->value;
+	sa_nracanaa msg_arg *msg = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!arg)
-		return -1;
-	if (msg->buf.len)
+	ຖ້າ (!arg)
+		ສົ່ງຄືນ -1;
+	ຖ້າ (msg->buf.len)
 		strbuf_addstr(&(msg->buf), "\n\n");
 	strbuf_addstr(&(msg->buf), arg);
 	msg->given = 1;
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-int cmd_tag(int argc,
-	    const char **argv,
-	    const char *prefix,
-	    struct repository *repo UNUSED)
+ຈຳນວນເຕັມ cmd_tag(ຈຳນວນເຕັມ argc,
+	    const var_na **argv,
+	    const var_na *prefix,
+	    sa_nracanaa repository *repo UNUSED)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf ref = STRBUF_INIT;
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct object_id object, prev;
-	const char *object_ref, *tag;
-	struct create_tag_options opt;
-	char *cleanup_arg = NULL;
-	int create_reflog = 0;
-	int annotate = 0, force = 0;
-	int cmdmode = 0, create_tag_object = 0;
-	char *msgfile = NULL;
-	const char *keyid = NULL;
-	struct msg_arg msg = { .buf = STRBUF_INIT };
-	struct ref_transaction *transaction;
-	struct strbuf err = STRBUF_INIT;
-	struct ref_filter filter = REF_FILTER_INIT;
-	struct ref_sorting *sorting;
-	struct string_list sorting_options = STRING_LIST_INIT_DUP;
-	struct ref_format format = REF_FORMAT_INIT;
-	struct strvec trailer_args = STRVEC_INIT;
-	int icase = 0;
-	int edit_flag = 0;
-	struct option options[] = {
+	sa_nracanaa strbuf buf = STRBUF_INIT;
+	sa_nracanaa strbuf ref = STRBUF_INIT;
+	sa_nracanaa strbuf reflog_msg = STRBUF_INIT;
+	sa_nracanaa object_id object, prev;
+	const var_na *object_ref, *tag;
+	sa_nracanaa create_tag_options opt;
+	var_na *cleanup_arg = NULL;
+	ຈຳນວນເຕັມ create_reflog = 0;
+	ຈຳນວນເຕັມ annotate = 0, force = 0;
+	ຈຳນວນເຕັມ cmdmode = 0, create_tag_object = 0;
+	var_na *msgfile = NULL;
+	const var_na *keyid = NULL;
+	sa_nracanaa msg_arg msg = { .buf = STRBUF_INIT };
+	sa_nracanaa ref_transaction *transaction;
+	sa_nracanaa strbuf err = STRBUF_INIT;
+	sa_nracanaa ref_filter filter = REF_FILTER_INIT;
+	sa_nracanaa ref_sorting *sorting;
+	sa_nracanaa string_list sorting_options = STRING_LIST_INIT_DUP;
+	sa_nracanaa ref_format format = REF_FORMAT_INIT;
+	sa_nracanaa strvec trailer_args = STRVEC_INIT;
+	ຈຳນວນເຕັມ icase = 0;
+	ຈຳນວນເຕັມ edit_flag = 0;
+	sa_nracanaa option options[] = {
 		OPT_CMDMODE('l', "list", &cmdmode, N_("list tag names"), 'l'),
 		{
 			.type = OPTION_INTEGER,
 			.short_name = 'n',
 			.value = &filter.lines,
-			.precision = sizeof(filter.lines),
+			.precision = parimaa_na(filter.lines),
 			.argh = N_("n"),
 			.help = N_("print <n> lines of each tag message"),
 			.flags = PARSE_OPT_OPTARG,
@@ -536,9 +536,9 @@ int cmd_tag(int argc,
 		OPT_BOOL('i', "ignore-case", &icase, N_("sorting and filtering are case insensitive")),
 		OPT_END()
 	};
-	int ret = 0;
-	const char *only_in_list = NULL;
-	char *path = NULL;
+	ຈຳນວນເຕັມ ret = 0;
+	const var_na *only_in_list = NULL;
+	var_na *path = NULL;
 
 	setup_ref_filter_porcelain_msg();
 
@@ -547,102 +547,102 @@ int cmd_tag(int argc,
 	 * fall back on default (refname) sorting.
 	 */
 	repo_config(the_repository, git_tag_config, &sorting_options);
-	if (!sorting_options.nr)
+	ຖ້າ (!sorting_options.nr)
 		string_list_append(&sorting_options, "refname");
 
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, parimaa_na(opt));
 	filter.lines = -1;
 	opt.sign = -1;
 
 	argc = parse_options(argc, argv, prefix, options, git_tag_usage, 0);
 
-	if (!cmdmode) {
-		if (argc == 0)
+	ຖ້າ (!cmdmode) {
+		ຖ້າ (argc == 0)
 			cmdmode = 'l';
-		else if (filter.with_commit || filter.no_commit ||
+		ບໍ່ດັ່ງນັ້ນ ຖ້າ (filter.with_commit || filter.no_commit ||
 			 filter.reachable_from || filter.unreachable_from ||
 			 filter.points_at.nr || filter.lines != -1)
 			cmdmode = 'l';
 	}
 
-	if (cmdmode == 'l')
+	ຖ້າ (cmdmode == 'l')
 		setup_auto_pager("tag", 1);
 
-	if (trailer_args.nr)
+	ຖ້າ (trailer_args.nr)
 		trailer_config_init();
 
-	if (opt.sign == -1)
+	ຖ້າ (opt.sign == -1)
 		opt.sign = cmdmode ? 0 : config_sign_tag > 0;
 
-	if (keyid) {
+	ຖ້າ (keyid) {
 		opt.sign = 1;
 		set_signing_key(keyid);
 	}
 	create_tag_object = (opt.sign || annotate || msg.given || msgfile ||
 			     edit_flag || trailer_args.nr);
 
-	if ((create_tag_object || force) && (cmdmode != 0))
+	ຖ້າ ((create_tag_object || force) && (cmdmode != 0))
 		usage_with_options(git_tag_usage, options);
 
 	finalize_colopts(&colopts, -1);
-	if (cmdmode == 'l' && filter.lines != -1) {
-		if (explicitly_enable_column(colopts))
+	ຖ້າ (cmdmode == 'l' && filter.lines != -1) {
+		ຖ້າ (explicitly_enable_column(colopts))
 			die(_("options '%s' and '%s' cannot be used together"), "--column", "-n");
 		colopts = 0;
 	}
 	sorting = ref_sorting_options(&sorting_options);
 	ref_sorting_set_sort_flags_all(sorting, REF_SORTING_ICASE, icase);
 	filter.ignore_case = icase;
-	if (cmdmode == 'l') {
-		if (column_active(colopts)) {
-			struct column_options copts;
-			memset(&copts, 0, sizeof(copts));
+	ຖ້າ (cmdmode == 'l') {
+		ຖ້າ (column_active(colopts)) {
+			sa_nracanaa column_options copts;
+			memset(&copts, 0, parimaa_na(copts));
 			copts.padding = 2;
-			if (run_column_filter(colopts, &copts))
+			ຖ້າ (run_column_filter(colopts, &copts))
 				die(_("could not start 'git column'"));
 		}
 		filter.name_patterns = argv;
 		ret = list_tags(&filter, sorting, &format);
-		if (column_active(colopts))
+		ຖ້າ (column_active(colopts))
 			stop_column_filter();
 		goto cleanup;
 	}
-	if (filter.lines != -1)
+	ຖ້າ (filter.lines != -1)
 		only_in_list = "-n";
-	else if (filter.with_commit)
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (filter.with_commit)
 		only_in_list = "--contains";
-	else if (filter.no_commit)
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (filter.no_commit)
 		only_in_list = "--no-contains";
-	else if (filter.points_at.nr)
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (filter.points_at.nr)
 		only_in_list = "--points-at";
-	else if (filter.reachable_from)
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (filter.reachable_from)
 		only_in_list = "--merged";
-	else if (filter.unreachable_from)
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (filter.unreachable_from)
 		only_in_list = "--no-merged";
-	if (only_in_list)
+	ຖ້າ (only_in_list)
 		die(_("the '%s' option is only allowed in list mode"), only_in_list);
-	if (cmdmode == 'd') {
+	ຖ້າ (cmdmode == 'd') {
 		ret = delete_tags(argv);
 		goto cleanup;
 	}
-	if (cmdmode == 'v') {
-		if (format.format && verify_ref_format(&format))
+	ຖ້າ (cmdmode == 'v') {
+		ຖ້າ (format.format && verify_ref_format(&format))
 			usage_with_options(git_tag_usage, options);
 		ret = for_each_tag_name(argv, verify_tag, &format);
 		goto cleanup;
 	}
 
-	if (msg.given || msgfile) {
-		if (msg.given && msgfile)
+	ຖ້າ (msg.given || msgfile) {
+		ຖ້າ (msg.given && msgfile)
 			die(_("options '%s' and '%s' cannot be used together"), "-F", "-m");
-		if (msg.given)
+		ຖ້າ (msg.given)
 			strbuf_addbuf(&buf, &(msg.buf));
-		else {
-			if (!strcmp(msgfile, "-")) {
-				if (strbuf_read(&buf, 0, 1024) < 0)
+		ບໍ່ດັ່ງນັ້ນ {
+			ຖ້າ (!strcmp(msgfile, "-")) {
+				ຖ້າ (strbuf_read(&buf, 0, 1024) < 0)
 					die_errno(_("cannot read '%s'"), msgfile);
-			} else {
-				if (strbuf_read_file(&buf, msgfile, 1024) < 0)
+			} ບໍ່ດັ່ງນັ້ນ {
+				ຖ້າ (strbuf_read_file(&buf, msgfile, 1024) < 0)
 					die_errno(_("could not open or read '%s'"),
 						msgfile);
 			}
@@ -652,36 +652,36 @@ int cmd_tag(int argc,
 	tag = argv[0];
 
 	object_ref = argc == 2 ? argv[1] : "HEAD";
-	if (argc > 2)
+	ຖ້າ (argc > 2)
 		die(_("too many arguments"));
 
-	if (repo_get_oid(the_repository, object_ref, &object))
+	ຖ້າ (repo_get_oid(the_repository, object_ref, &object))
 		die(_("Failed to resolve '%s' as a valid ref."), object_ref);
 
-	if (check_tag_ref(&ref, tag))
+	ຖ້າ (check_tag_ref(&ref, tag))
 		die(_("'%s' is not a valid tag name."), tag);
 
-	if (refs_read_ref(get_main_ref_store(the_repository), ref.buf, &prev))
+	ຖ້າ (refs_read_ref(get_main_ref_store(the_repository), ref.buf, &prev))
 		oidclr(&prev, the_repository->hash_algo);
-	else if (!force)
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (!force)
 		die(_("tag '%s' already exists"), tag);
 
 	opt.message_given = msg.given || msgfile;
 	opt.use_editor = edit_flag;
 
-	if (!cleanup_arg || !strcmp(cleanup_arg, "strip"))
+	ຖ້າ (!cleanup_arg || !strcmp(cleanup_arg, "strip"))
 		opt.cleanup_mode = CLEANUP_ALL;
-	else if (!strcmp(cleanup_arg, "verbatim"))
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (!strcmp(cleanup_arg, "verbatim"))
 		opt.cleanup_mode = CLEANUP_NONE;
-	else if (!strcmp(cleanup_arg, "whitespace"))
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (!strcmp(cleanup_arg, "whitespace"))
 		opt.cleanup_mode = CLEANUP_SPACE;
-	else
+	ບໍ່ດັ່ງນັ້ນ
 		die(_("Invalid cleanup mode %s"), cleanup_arg);
 
 	create_reflog_msg(&object, &reflog_msg);
 
-	if (create_tag_object) {
-		if (force_sign_annotate && !annotate)
+	ຖ້າ (create_tag_object) {
+		ຖ້າ (force_sign_annotate && !annotate)
 			opt.sign = 1;
 		path = repo_git_path(the_repository, "TAG_EDITMSG");
 		create_tag(&object, object_ref, tag, &buf, &opt, &prev, &object,
@@ -690,24 +690,24 @@ int cmd_tag(int argc,
 
 	transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 						  0, &err);
-	if (!transaction ||
+	ຖ້າ (!transaction ||
 	    ref_transaction_update(transaction, ref.buf, &object, &prev,
 				   NULL, NULL,
 				   create_reflog ? REF_FORCE_CREATE_REFLOG : 0,
 				   reflog_msg.buf, &err) ||
 	    ref_transaction_commit(transaction, &err)) {
-		if (path)
+		ຖ້າ (path)
 			fprintf(stderr,
 				_("The tag message has been left in %s\n"),
 				path);
 		die("%s", err.buf);
 	}
-	if (path) {
+	ຖ້າ (path) {
 		unlink_or_warn(path);
 		free(path);
 	}
 	ref_transaction_free(transaction);
-	if (force && !is_null_oid(&prev) && !oideq(&prev, &object))
+	ຖ້າ (force && !is_null_oid(&prev) && !oideq(&prev, &object))
 		printf(_("Updated tag '%s' (was %s)\n"), tag,
 		       repo_find_unique_abbrev(the_repository, &prev, DEFAULT_ABBREV));
 
@@ -721,5 +721,5 @@ cleanup:
 	strbuf_release(&err);
 	strvec_clear(&trailer_args);
 	free(msgfile);
-	return ret;
+	ສົ່ງຄືນ ret;
 }

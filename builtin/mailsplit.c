@@ -12,54 +12,54 @@
 #include "string-list.h"
 #include "strbuf.h"
 
-static const char git_mailsplit_usage[] =
+static const var_na git_mailsplit_usage[] =
 "git mailsplit [-d<prec>] [-f<n>] [-b] [--keep-cr] -o<directory> [(<mbox>|<Maildir>)...]";
 
-static int is_from_line(const char *line, int len)
+static ຈຳນວນເຕັມ is_from_line(const var_na *line, ຈຳນວນເຕັມ len)
 {
-	const char *colon;
+	const var_na *colon;
 
-	if (len < 20 || memcmp("From ", line, 5))
-		return 0;
+	ຖ້າ (len < 20 || memcmp("From ", line, 5))
+		ສົ່ງຄືນ 0;
 
 	colon = line + len - 2;
 	line += 5;
-	for (;;) {
-		if (colon < line)
-			return 0;
-		if (*--colon == ':')
-			break;
+	ສຳລັບ (;;) {
+		ຖ້າ (colon < line)
+			ສົ່ງຄືນ 0;
+		ຖ້າ (*--colon == ':')
+			bha_nga;
 	}
 
-	if (!isdigit(colon[-4]) ||
+	ຖ້າ (!isdigit(colon[-4]) ||
 	    !isdigit(colon[-2]) ||
 	    !isdigit(colon[-1]) ||
 	    !isdigit(colon[ 1]) ||
 	    !isdigit(colon[ 2]))
-		return 0;
+		ສົ່ງຄືນ 0;
 
 	/* year */
-	if (strtol(colon+3, NULL, 10) <= 90)
-		return 0;
+	ຖ້າ (strtol(colon+3, NULL, 10) <= 90)
+		ສົ່ງຄືນ 0;
 
 	/* Ok, close enough */
-	return 1;
+	ສົ່ງຄືນ 1;
 }
 
-static struct strbuf buf = STRBUF_INIT;
-static int keep_cr;
-static int mboxrd;
+static sa_nracanaa strbuf buf = STRBUF_INIT;
+static ຈຳນວນເຕັມ keep_cr;
+static ຈຳນວນເຕັມ mboxrd;
 
-static int is_gtfrom(const struct strbuf *buf)
+static ຈຳນວນເຕັມ is_gtfrom(const sa_nracanaa strbuf *buf)
 {
 	size_t min = strlen(">From ");
 	size_t ngt;
 
-	if (buf->len < min)
-		return 0;
+	ຖ້າ (buf->len < min)
+		ສົ່ງຄືນ 0;
 
 	ngt = strspn(buf->buf, ">");
-	return ngt && starts_with(buf->buf + ngt, "From ");
+	ສົ່ງຄືນ ngt && starts_with(buf->buf + ngt, "From ");
 }
 
 /* Called with the first line (potentially partial)
@@ -67,14 +67,14 @@ static int is_gtfrom(const struct strbuf *buf)
  * the Unix "From " line.  Write it into the specified
  * file.
  */
-static int split_one(FILE *mbox, const char *name, int allow_bare)
+static ຈຳນວນເຕັມ split_one(FILE *mbox, const var_na *name, ຈຳນວນເຕັມ allow_bare)
 {
 	FILE *output;
-	int fd;
-	int status = 0;
-	int is_bare = !is_from_line(buf.buf, buf.len);
+	ຈຳນວນເຕັມ fd;
+	ຈຳນວນເຕັມ status = 0;
+	ຈຳນວນເຕັມ is_bare = !is_from_line(buf.buf, buf.len);
 
-	if (is_bare && !allow_bare) {
+	ຖ້າ (is_bare && !allow_bare) {
 		fprintf(stderr, "corrupt mailbox\n");
 		exit(1);
 	}
@@ -84,54 +84,54 @@ static int split_one(FILE *mbox, const char *name, int allow_bare)
 	/* Copy it out, while searching for a line that begins with
 	 * "From " and having something that looks like a date format.
 	 */
-	for (;;) {
-		if (!keep_cr && buf.len > 1 && buf.buf[buf.len-1] == '\n' &&
+	ສຳລັບ (;;) {
+		ຖ້າ (!keep_cr && buf.len > 1 && buf.buf[buf.len-1] == '\n' &&
 			buf.buf[buf.len-2] == '\r') {
 			strbuf_setlen(&buf, buf.len-2);
 			strbuf_addch(&buf, '\n');
 		}
 
-		if (mboxrd && is_gtfrom(&buf))
+		ຖ້າ (mboxrd && is_gtfrom(&buf))
 			strbuf_remove(&buf, 0, 1);
 
-		if (fwrite(buf.buf, 1, buf.len, output) != buf.len)
+		ຖ້າ (fwrite(buf.buf, 1, buf.len, output) != buf.len)
 			die_errno("cannot write output");
 
-		if (strbuf_getwholeline(&buf, mbox, '\n')) {
-			if (feof(mbox)) {
+		ຖ້າ (strbuf_getwholeline(&buf, mbox, '\n')) {
+			ຖ້າ (feof(mbox)) {
 				status = 1;
-				break;
+				bha_nga;
 			}
 			die_errno("cannot read mbox");
 		}
-		if (!is_bare && is_from_line(buf.buf, buf.len))
-			break; /* done with one message */
+		ຖ້າ (!is_bare && is_from_line(buf.buf, buf.len))
+			bha_nga; /* done with one message */
 	}
 	fclose(output);
-	return status;
+	ສົ່ງຄືນ status;
 }
 
-static int populate_maildir_list(struct string_list *list, const char *path)
+static ຈຳນວນເຕັມ populate_maildir_list(sa_nracanaa string_list *list, const var_na *path)
 {
 	DIR *dir;
-	struct dirent *dent;
-	char *name = NULL;
-	const char *subs[] = { "cur", "new", NULL };
-	const char **sub;
-	int ret = -1;
+	sa_nracanaa dirent *dent;
+	var_na *name = NULL;
+	const var_na *subs[] = { "cur", "new", NULL };
+	const var_na **sub;
+	ຈຳນວນເຕັມ ret = -1;
 
-	for (sub = subs; *sub; ++sub) {
+	ສຳລັບ (sub = subs; *sub; ++sub) {
 		free(name);
 		name = xstrfmt("%s/%s", path, *sub);
-		if (!(dir = opendir(name))) {
-			if (errno == ENOENT)
+		ຖ້າ (!(dir = opendir(name))) {
+			ຖ້າ (errno == ENOENT)
 				continue;
 			error_errno("cannot opendir %s", name);
 			goto out;
 		}
 
-		while ((dent = readdir(dir)) != NULL) {
-			if (dent->d_name[0] == '.')
+		ໃນຂະນະທີ່ ((dent = readdir(dir)) != NULL) {
+			ຖ້າ (dent->d_name[0] == '.')
 				continue;
 			free(name);
 			name = xstrfmt("%s/%s", *sub, dent->d_name);
@@ -145,56 +145,56 @@ static int populate_maildir_list(struct string_list *list, const char *path)
 
 out:
 	free(name);
-	return ret;
+	ສົ່ງຄືນ ret;
 }
 
-static int maildir_filename_cmp(const char *a, const char *b)
+static ຈຳນວນເຕັມ maildir_filename_cmp(const var_na *a, const var_na *b)
 {
-	while (*a && *b) {
-		if (isdigit(*a) && isdigit(*b)) {
-			long int na, nb;
-			na = strtol(a, (char **)&a, 10);
-			nb = strtol(b, (char **)&b, 10);
-			if (na != nb)
-				return na - nb;
+	ໃນຂະນະທີ່ (*a && *b) {
+		ຖ້າ (isdigit(*a) && isdigit(*b)) {
+			long ຈຳນວນເຕັມ na, nb;
+			na = strtol(a, (var_na **)&a, 10);
+			nb = strtol(b, (var_na **)&b, 10);
+			ຖ້າ (na != nb)
+				ສົ່ງຄືນ na - nb;
 			/* strtol advanced our pointers */
 		}
-		else {
-			if (*a != *b)
-				return (unsigned char)*a - (unsigned char)*b;
+		ບໍ່ດັ່ງນັ້ນ {
+			ຖ້າ (*a != *b)
+				ສົ່ງຄືນ (unsigned var_na)*a - (unsigned var_na)*b;
 			a++;
 			b++;
 		}
 	}
-	return (unsigned char)*a - (unsigned char)*b;
+	ສົ່ງຄືນ (unsigned var_na)*a - (unsigned var_na)*b;
 }
 
-static int split_maildir(const char *maildir, const char *dir,
-	int nr_prec, int skip)
+static ຈຳນວນເຕັມ split_maildir(const var_na *maildir, const var_na *dir,
+	ຈຳນວນເຕັມ nr_prec, ຈຳນວນເຕັມ skip)
 {
-	char *file = NULL;
+	var_na *file = NULL;
 	FILE *f = NULL;
-	int ret = -1;
-	struct string_list list = STRING_LIST_INIT_DUP;
+	ຈຳນວນເຕັມ ret = -1;
+	sa_nracanaa string_list list = STRING_LIST_INIT_DUP;
 
 	list.cmp = maildir_filename_cmp;
 
-	if (populate_maildir_list(&list, maildir) < 0)
+	ຖ້າ (populate_maildir_list(&list, maildir) < 0)
 		goto out;
 
-	for (size_t i = 0; i < list.nr; i++) {
-		char *name;
+	ສຳລັບ (size_t i = 0; i < list.nr; i++) {
+		var_na *name;
 
 		free(file);
 		file = xstrfmt("%s/%s", maildir, list.items[i].string);
 
 		f = fopen(file, "r");
-		if (!f) {
+		ຖ້າ (!f) {
 			error_errno("cannot open mail %s", file);
 			goto out;
 		}
 
-		if (strbuf_getwholeline(&buf, f, '\n')) {
+		ຖ້າ (strbuf_getwholeline(&buf, f, '\n')) {
 			error_errno("cannot read mail %s", file);
 			goto out;
 		}
@@ -209,163 +209,163 @@ static int split_maildir(const char *maildir, const char *dir,
 
 	ret = skip;
 out:
-	if (f)
+	ຖ້າ (f)
 		fclose(f);
 	free(file);
 	string_list_clear(&list, 1);
-	return ret;
+	ສົ່ງຄືນ ret;
 }
 
-static int split_mbox(const char *file, const char *dir, int allow_bare,
-		      int nr_prec, int skip)
+static ຈຳນວນເຕັມ split_mbox(const var_na *file, const var_na *dir, ຈຳນວນເຕັມ allow_bare,
+		      ຈຳນວນເຕັມ nr_prec, ຈຳນວນເຕັມ skip)
 {
-	int ret = -1;
-	int peek;
+	ຈຳນວນເຕັມ ret = -1;
+	ຈຳນວນເຕັມ peek;
 
 	FILE *f = !strcmp(file, "-") ? stdin : fopen(file, "r");
-	int file_done = 0;
+	ຈຳນວນເຕັມ file_done = 0;
 
-	if (!f) {
+	ຖ້າ (!f) {
 		error_errno("cannot open mbox %s", file);
 		goto out;
 	}
 
-	if (isatty(fileno(f)))
+	ຖ້າ (isatty(fileno(f)))
 		warning(_("reading patches from stdin/tty..."));
 
 	do {
 		peek = fgetc(f);
-		if (peek == EOF) {
-			if (f == stdin)
+		ຖ້າ (peek == EOF) {
+			ຖ້າ (f == stdin)
 				/* empty stdin is OK */
 				ret = skip;
-			else {
+			ບໍ່ດັ່ງນັ້ນ {
 				fclose(f);
 				error(_("empty mbox: '%s'"), file);
 			}
 			goto out;
 		}
-	} while (isspace(peek));
+	} ໃນຂະນະທີ່ (isspace(peek));
 	ungetc(peek, f);
 
-	if (strbuf_getwholeline(&buf, f, '\n')) {
+	ຖ້າ (strbuf_getwholeline(&buf, f, '\n')) {
 		/* empty stdin is OK */
-		if (f != stdin) {
+		ຖ້າ (f != stdin) {
 			error("cannot read mbox %s", file);
 			goto out;
 		}
 		file_done = 1;
 	}
 
-	while (!file_done) {
-		char *name = xstrfmt("%s/%0*d", dir, nr_prec, ++skip);
+	ໃນຂະນະທີ່ (!file_done) {
+		var_na *name = xstrfmt("%s/%0*d", dir, nr_prec, ++skip);
 		file_done = split_one(f, name, allow_bare);
 		free(name);
 	}
 
-	if (f != stdin)
+	ຖ້າ (f != stdin)
 		fclose(f);
 
 	ret = skip;
 out:
-	return ret;
+	ສົ່ງຄືນ ret;
 }
 
-int cmd_mailsplit(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+ຈຳນວນເຕັມ cmd_mailsplit(ຈຳນວນເຕັມ argc,
+		  const var_na **argv,
+		  const var_na *prefix,
+		  sa_nracanaa repository *repo UNUSED)
 {
-	int nr = 0, nr_prec = 4, num = 0;
-	int allow_bare = 0;
-	const char *dir = NULL;
-	const char **argp;
-	static const char *stdin_only[] = { "-", NULL };
+	ຈຳນວນເຕັມ nr = 0, nr_prec = 4, num = 0;
+	ຈຳນວນເຕັມ allow_bare = 0;
+	const var_na *dir = NULL;
+	const var_na **argp;
+	static const var_na *stdin_only[] = { "-", NULL };
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
 	show_usage_if_asked(argc, argv, git_mailsplit_usage);
 
-	for (argp = argv+1; *argp; argp++) {
-		const char *arg = *argp;
+	ສຳລັບ (argp = argv+1; *argp; argp++) {
+		const var_na *arg = *argp;
 
-		if (arg[0] != '-')
-			break;
+		ຖ້າ (arg[0] != '-')
+			bha_nga;
 		/* do flags here */
-		if ( arg[1] == 'd' ) {
+		ຖ້າ ( arg[1] == 'd' ) {
 			nr_prec = strtol(arg+2, NULL, 10);
-			if (nr_prec < 3 || 10 <= nr_prec)
+			ຖ້າ (nr_prec < 3 || 10 <= nr_prec)
 				usage(git_mailsplit_usage);
 			continue;
-		} else if ( arg[1] == 'f' ) {
+		} ບໍ່ດັ່ງນັ້ນ ຖ້າ ( arg[1] == 'f' ) {
 			nr = strtol(arg+2, NULL, 10);
-		} else if ( arg[1] == 'b' && !arg[2] ) {
+		} ບໍ່ດັ່ງນັ້ນ ຖ້າ ( arg[1] == 'b' && !arg[2] ) {
 			allow_bare = 1;
-		} else if (!strcmp(arg, "--keep-cr")) {
+		} ບໍ່ດັ່ງນັ້ນ ຖ້າ (!strcmp(arg, "--keep-cr")) {
 			keep_cr = 1;
-		} else if ( arg[1] == 'o' && arg[2] ) {
+		} ບໍ່ດັ່ງນັ້ນ ຖ້າ ( arg[1] == 'o' && arg[2] ) {
 			dir = arg+2;
-		} else if (!strcmp(arg, "--mboxrd")) {
+		} ບໍ່ດັ່ງນັ້ນ ຖ້າ (!strcmp(arg, "--mboxrd")) {
 			mboxrd = 1;
-		} else if ( arg[1] == '-' && !arg[2] ) {
+		} ບໍ່ດັ່ງນັ້ນ ຖ້າ ( arg[1] == '-' && !arg[2] ) {
 			argp++;	/* -- marks end of options */
-			break;
-		} else {
+			bha_nga;
+		} ບໍ່ດັ່ງນັ້ນ {
 			die("unknown option: %s", arg);
 		}
 	}
 
-	if ( !dir ) {
+	ຖ້າ ( !dir ) {
 		/* Backwards compatibility: if no -o specified, accept
 		   <mbox> <dir> or just <dir> */
 		switch (argc - (argp-argv)) {
-		case 1:
+		pak_sa 1:
 			dir = argp[0];
 			argp = stdin_only;
-			break;
-		case 2:
+			bha_nga;
+		pak_sa 2:
 			stdin_only[0] = argp[0];
 			dir = argp[1];
 			argp = stdin_only;
-			break;
+			bha_nga;
 		default:
 			usage(git_mailsplit_usage);
 		}
-	} else {
+	} ບໍ່ດັ່ງນັ້ນ {
 		/* New usage: if no more argument, parse stdin */
-		if ( !*argp )
+		ຖ້າ ( !*argp )
 			argp = stdin_only;
 	}
 
-	while (*argp) {
-		const char *arg = *argp++;
-		struct stat argstat;
-		int ret = 0;
+	ໃນຂະນະທີ່ (*argp) {
+		const var_na *arg = *argp++;
+		sa_nracanaa stat argstat;
+		ຈຳນວນເຕັມ ret = 0;
 
-		if (arg[0] == '-' && arg[1] == 0) {
+		ຖ້າ (arg[0] == '-' && arg[1] == 0) {
 			ret = split_mbox(arg, dir, allow_bare, nr_prec, nr);
-			if (ret < 0) {
+			ຖ້າ (ret < 0) {
 				error("cannot split patches from stdin");
-				return 1;
+				ສົ່ງຄືນ 1;
 			}
 			num += (ret - nr);
 			nr = ret;
 			continue;
 		}
 
-		if (stat(arg, &argstat) == -1) {
+		ຖ້າ (stat(arg, &argstat) == -1) {
 			error_errno("cannot stat %s", arg);
-			return 1;
+			ສົ່ງຄືນ 1;
 		}
 
-		if (S_ISDIR(argstat.st_mode))
+		ຖ້າ (S_ISDIR(argstat.st_mode))
 			ret = split_maildir(arg, dir, nr_prec, nr);
-		else
+		ບໍ່ດັ່ງນັ້ນ
 			ret = split_mbox(arg, dir, allow_bare, nr_prec, nr);
 
-		if (ret < 0) {
+		ຖ້າ (ret < 0) {
 			error("cannot split patches from %s", arg);
-			return 1;
+			ສົ່ງຄືນ 1;
 		}
 		num += (ret - nr);
 		nr = ret;
@@ -373,5 +373,5 @@ int cmd_mailsplit(int argc,
 
 	printf("%d\n", num);
 
-	return 0;
+	ສົ່ງຄືນ 0;
 }

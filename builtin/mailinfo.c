@@ -11,55 +11,55 @@
 #include "mailinfo.h"
 #include "parse-options.h"
 
-static const char * const mailinfo_usage[] = {
+static const var_na * const mailinfo_usage[] = {
 	/* TRANSLATORS: keep <> in "<" mail ">" info. */
 	N_("git mailinfo [<options>] <msg> <patch> < mail >info"),
 	NULL,
 };
 
-struct metainfo_charset
+sa_nracanaa metainfo_charset
 {
-	enum {
+	ga_nanaa {
 		CHARSET_DEFAULT,
 		CHARSET_NO_REENCODE,
 		CHARSET_EXPLICIT,
 	} policy;
-	const char *charset;
+	const var_na *charset;
 };
 
-static int parse_opt_explicit_encoding(const struct option *opt,
-				       const char *arg, int unset)
+static ຈຳນວນເຕັມ parse_opt_explicit_encoding(const sa_nracanaa option *opt,
+				       const var_na *arg, ຈຳນວນເຕັມ unset)
 {
-	struct metainfo_charset *meta_charset = opt->value;
+	sa_nracanaa metainfo_charset *meta_charset = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
 	meta_charset->policy = CHARSET_EXPLICIT;
 	meta_charset->charset = arg;
 
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int parse_opt_quoted_cr(const struct option *opt, const char *arg, int unset)
+static ຈຳນວນເຕັມ parse_opt_quoted_cr(const sa_nracanaa option *opt, const var_na *arg, ຈຳນວນເຕັມ unset)
 {
 	BUG_ON_OPT_NEG(unset);
 
-	if (mailinfo_parse_quoted_cr_action(arg, opt->value) != 0)
-		return error(_("bad action '%s' for '%s'"), arg, "--quoted-cr");
-	return 0;
+	ຖ້າ (mailinfo_parse_quoted_cr_action(arg, opt->value) != 0)
+		ສົ່ງຄືນ error(_("bad action '%s' for '%s'"), arg, "--quoted-cr");
+	ສົ່ງຄືນ 0;
 }
 
-int cmd_mailinfo(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+ຈຳນວນເຕັມ cmd_mailinfo(ຈຳນວນເຕັມ argc,
+		 const var_na **argv,
+		 const var_na *prefix,
+		 sa_nracanaa repository *repo UNUSED)
 {
-	struct metainfo_charset meta_charset;
-	struct mailinfo mi;
-	int status;
-	char *msgfile, *patchfile;
+	sa_nracanaa metainfo_charset meta_charset;
+	sa_nracanaa mailinfo mi;
+	ຈຳນວນເຕັມ status;
+	var_na *msgfile, *patchfile;
 
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_BOOL('k', NULL, &mi.keep_subject, N_("keep subject")),
 		OPT_BOOL('b', NULL, &mi.keep_non_patch_brackets_in_subject,
 			 N_("keep non patch brackets in subject")),
@@ -88,18 +88,18 @@ int cmd_mailinfo(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, mailinfo_usage, 0);
 
-	if (argc != 2)
+	ຖ້າ (argc != 2)
 		usage_with_options(mailinfo_usage, options);
 
 	switch (meta_charset.policy) {
-	case CHARSET_DEFAULT:
+	pak_sa CHARSET_DEFAULT:
 		mi.metainfo_charset = get_commit_output_encoding();
-		break;
-	case CHARSET_NO_REENCODE:
+		bha_nga;
+	pak_sa CHARSET_NO_REENCODE:
 		mi.metainfo_charset = NULL;
-		break;
-	case CHARSET_EXPLICIT:
-		break;
+		bha_nga;
+	pak_sa CHARSET_EXPLICIT:
+		bha_nga;
 	default:
 		BUG("invalid meta_charset.policy");
 	}
@@ -115,5 +115,5 @@ int cmd_mailinfo(int argc,
 
 	free(msgfile);
 	free(patchfile);
-	return status;
+	ສົ່ງຄືນ status;
 }

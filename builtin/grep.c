@@ -36,16 +36,16 @@
 #include "read-cache-ll.h"
 #include "write-or-die.h"
 
-static const char *grep_prefix;
+static const var_na *grep_prefix;
 
-static char const * const grep_usage[] = {
+static var_na const * const grep_usage[] = {
 	N_("git grep [<options>] [-e] <pattern> [<rev>...] [[--] <path>...]"),
 	NULL
 };
 
-static int recurse_submodules;
+static ຈຳນວນເຕັມ recurse_submodules;
 
-static int num_threads;
+static ຈຳນວນເຕັມ num_threads;
 
 static pthread_t *threads;
 
@@ -53,10 +53,10 @@ static pthread_t *threads;
  * threads. The producer adds struct work_items to 'todo' and the
  * consumers pick work items from the same array.
  */
-struct work_item {
-	struct grep_source source;
-	char done;
-	struct strbuf out;
+sa_nracanaa work_item {
+	sa_nracanaa grep_source source;
+	var_na done;
+	sa_nracanaa strbuf out;
 };
 
 /* In the range [todo_done, todo_start) in 'todo' we have work_items
@@ -69,26 +69,26 @@ struct work_item {
  * The ranges are modulo TODO_SIZE.
  */
 #define TODO_SIZE 128
-static struct work_item todo[TODO_SIZE];
-static int todo_start;
-static int todo_end;
-static int todo_done;
+static sa_nracanaa work_item todo[TODO_SIZE];
+static ຈຳນວນເຕັມ todo_start;
+static ຈຳນວນເຕັມ todo_end;
+static ຈຳນວນເຕັມ todo_done;
 
 /* Has all work items been added? */
-static int all_work_added;
+static ຈຳນວນເຕັມ all_work_added;
 
-static struct repository **repos_to_free;
+static sa_nracanaa repository **repos_to_free;
 static size_t repos_to_free_nr, repos_to_free_alloc;
 
 /* This lock protects all the variables above. */
 static pthread_mutex_t grep_mutex;
 
-static inline void grep_lock(void)
+static anta_hstha void grep_lock(void)
 {
 	pthread_mutex_lock(&grep_mutex);
 }
 
-static inline void grep_unlock(void)
+static anta_hstha void grep_unlock(void)
 {
 	pthread_mutex_unlock(&grep_mutex);
 }
@@ -104,16 +104,16 @@ static pthread_cond_t cond_write;
 /* Signalled when we are finished with everything. */
 static pthread_cond_t cond_result;
 
-static int skip_first_line;
+static ຈຳນວນເຕັມ skip_first_line;
 
-static void add_work(struct grep_opt *opt, struct grep_source *gs)
+static void add_work(sa_nracanaa grep_opt *opt, sa_nracanaa grep_source *gs)
 {
-	if (opt->binary != GREP_BINARY_TEXT)
+	ຖ້າ (opt->binary != GREP_BINARY_TEXT)
 		grep_source_load_driver(gs, opt->repo->index);
 
 	grep_lock();
 
-	while ((todo_end+1) % ARRAY_SIZE(todo) == todo_done) {
+	ໃນຂະນະທີ່ ((todo_end+1) % ARRAY_SIZE(todo) == todo_done) {
 		pthread_cond_wait(&cond_write, &grep_mutex);
 	}
 
@@ -126,45 +126,45 @@ static void add_work(struct grep_opt *opt, struct grep_source *gs)
 	grep_unlock();
 }
 
-static struct work_item *get_work(void)
+static sa_nracanaa work_item *get_work(void)
 {
-	struct work_item *ret;
+	sa_nracanaa work_item *ret;
 
 	grep_lock();
-	while (todo_start == todo_end && !all_work_added) {
+	ໃນຂະນະທີ່ (todo_start == todo_end && !all_work_added) {
 		pthread_cond_wait(&cond_add, &grep_mutex);
 	}
 
-	if (todo_start == todo_end && all_work_added) {
+	ຖ້າ (todo_start == todo_end && all_work_added) {
 		ret = NULL;
-	} else {
+	} ບໍ່ດັ່ງນັ້ນ {
 		ret = &todo[todo_start];
 		todo_start = (todo_start + 1) % ARRAY_SIZE(todo);
 	}
 	grep_unlock();
-	return ret;
+	ສົ່ງຄືນ ret;
 }
 
-static void work_done(struct work_item *w)
+static void work_done(sa_nracanaa work_item *w)
 {
-	int old_done;
+	ຈຳນວນເຕັມ old_done;
 
 	grep_lock();
 	w->done = 1;
 	old_done = todo_done;
-	for(; todo[todo_done].done && todo_done != todo_start;
+	ສຳລັບ(; todo[todo_done].done && todo_done != todo_start;
 	    todo_done = (todo_done+1) % ARRAY_SIZE(todo)) {
 		w = &todo[todo_done];
-		if (w->out.len) {
-			const char *p = w->out.buf;
+		ຖ້າ (w->out.len) {
+			const var_na *p = w->out.buf;
 			size_t len = w->out.len;
 
 			/* Skip the leading hunk mark of the first file. */
-			if (skip_first_line) {
-				while (len) {
+			ຖ້າ (skip_first_line) {
+				ໃນຂະນະທີ່ (len) {
 					len--;
-					if (*p++ == '\n')
-						break;
+					ຖ້າ (*p++ == '\n')
+						bha_nga;
 				}
 				skip_first_line = 0;
 			}
@@ -174,10 +174,10 @@ static void work_done(struct work_item *w)
 		grep_source_clear(&w->source);
 	}
 
-	if (old_done != todo_done)
+	ຖ້າ (old_done != todo_done)
 		pthread_cond_signal(&cond_write);
 
-	if (all_work_added && todo_done == todo_end)
+	ຖ້າ (all_work_added && todo_done == todo_end)
 		pthread_cond_signal(&cond_result);
 
 	grep_unlock();
@@ -185,9 +185,9 @@ static void work_done(struct work_item *w)
 
 static void free_repos(void)
 {
-	int i;
+	ຈຳນວນເຕັມ i;
 
-	for (i = 0; i < repos_to_free_nr; i++) {
+	ສຳລັບ (i = 0; i < repos_to_free_nr; i++) {
 		repo_clear(repos_to_free[i]);
 		free(repos_to_free[i]);
 	}
@@ -198,13 +198,13 @@ static void free_repos(void)
 
 static void *run(void *arg)
 {
-	int hit = 0;
-	struct grep_opt *opt = arg;
+	ຈຳນວນເຕັມ hit = 0;
+	sa_nracanaa grep_opt *opt = arg;
 
-	while (1) {
-		struct work_item *w = get_work();
-		if (!w)
-			break;
+	ໃນຂະນະທີ່ (1) {
+		sa_nracanaa work_item *w = get_work();
+		ຖ້າ (!w)
+			bha_nga;
 
 		opt->output_priv = w;
 		hit |= grep_source(opt, &w->source);
@@ -214,18 +214,18 @@ static void *run(void *arg)
 	free_grep_patterns(opt);
 	free(opt);
 
-	return (void*) (intptr_t) hit;
+	ສົ່ງຄືນ (void*) (intptr_t) hit;
 }
 
-static void strbuf_out(struct grep_opt *opt, const void *buf, size_t size)
+static void strbuf_out(sa_nracanaa grep_opt *opt, const void *buf, size_t size)
 {
-	struct work_item *w = opt->output_priv;
+	sa_nracanaa work_item *w = opt->output_priv;
 	strbuf_add(&w->out, buf, size);
 }
 
-static void start_threads(struct grep_opt *opt)
+static void start_threads(sa_nracanaa grep_opt *opt)
 {
-	int i;
+	ຈຳນວນເຕັມ i;
 
 	pthread_mutex_init(&grep_mutex, NULL);
 	pthread_mutex_init(&grep_attr_mutex, NULL);
@@ -235,37 +235,37 @@ static void start_threads(struct grep_opt *opt)
 	grep_use_locks = 1;
 	enable_obj_read_lock();
 
-	for (i = 0; i < ARRAY_SIZE(todo); i++) {
+	ສຳລັບ (i = 0; i < ARRAY_SIZE(todo); i++) {
 		strbuf_init(&todo[i].out, 0);
 	}
 
 	CALLOC_ARRAY(threads, num_threads);
-	for (i = 0; i < num_threads; i++) {
-		int err;
-		struct grep_opt *o = grep_opt_dup(opt);
+	ສຳລັບ (i = 0; i < num_threads; i++) {
+		ຈຳນວນເຕັມ err;
+		sa_nracanaa grep_opt *o = grep_opt_dup(opt);
 		o->output = strbuf_out;
 		compile_grep_patterns(o);
 		err = pthread_create(&threads[i], NULL, run, o);
 
-		if (err)
+		ຖ້າ (err)
 			die(_("grep: failed to create thread: %s"),
 			    strerror(err));
 	}
 }
 
-static int wait_all(void)
+static ຈຳນວນເຕັມ wait_all(void)
 {
-	int hit = 0;
-	int i;
+	ຈຳນວນເຕັມ hit = 0;
+	ຈຳນວນເຕັມ i;
 
-	if (!HAVE_THREADS)
+	ຖ້າ (!HAVE_THREADS)
 		BUG("Never call this function unless you have started threads");
 
 	grep_lock();
 	all_work_added = 1;
 
 	/* Wait until all work is done. */
-	while (todo_done != todo_end)
+	ໃນຂະນະທີ່ (todo_done != todo_end)
 		pthread_cond_wait(&cond_result, &grep_mutex);
 
 	/* Wake up all the consumer threads so they can see that there
@@ -274,10 +274,10 @@ static int wait_all(void)
 	pthread_cond_broadcast(&cond_add);
 	grep_unlock();
 
-	for (i = 0; i < num_threads; i++) {
+	ສຳລັບ (i = 0; i < num_threads; i++) {
 		void *h;
 		pthread_join(threads[i], &h);
-		hit |= (int) (intptr_t) h;
+		hit |= (ຈຳນວນເຕັມ) (intptr_t) h;
 	}
 
 	free(threads);
@@ -290,25 +290,25 @@ static int wait_all(void)
 	grep_use_locks = 0;
 	disable_obj_read_lock();
 
-	return hit;
+	ສົ່ງຄືນ hit;
 }
 
-static int grep_cmd_config(const char *var, const char *value,
-			   const struct config_context *ctx, void *cb)
+static ຈຳນວນເຕັມ grep_cmd_config(const var_na *var, const var_na *value,
+			   const sa_nracanaa config_context *ctx, void *cb)
 {
-	int st = grep_config(var, value, ctx, cb);
+	ຈຳນວນເຕັມ st = grep_config(var, value, ctx, cb);
 
-	if (git_color_config(var, value, cb) < 0)
+	ຖ້າ (git_color_config(var, value, cb) < 0)
 		st = -1;
-	else if (git_default_config(var, value, ctx, cb) < 0)
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (git_default_config(var, value, ctx, cb) < 0)
 		st = -1;
 
-	if (!strcmp(var, "grep.threads")) {
+	ຖ້າ (!strcmp(var, "grep.threads")) {
 		num_threads = git_config_int(var, value, ctx->kvi);
-		if (num_threads < 0)
+		ຖ້າ (num_threads < 0)
 			die(_("invalid number of threads specified (%d) for %s"),
 			    num_threads, var);
-		else if (!HAVE_THREADS && num_threads > 1) {
+		ບໍ່ດັ່ງນັ້ນ ຖ້າ (!HAVE_THREADS && num_threads > 1) {
 			/*
 			 * TRANSLATORS: %s is the configuration
 			 * variable for tweaking threads, currently
@@ -319,146 +319,146 @@ static int grep_cmd_config(const char *var, const char *value,
 		}
 	}
 
-	if (!strcmp(var, "submodule.recurse"))
+	ຖ້າ (!strcmp(var, "submodule.recurse"))
 		recurse_submodules = git_config_bool(var, value);
 
-	return st;
+	ສົ່ງຄືນ st;
 }
 
-static void grep_source_name(struct grep_opt *opt, const char *filename,
-			     int tree_name_len, struct strbuf *out)
+static void grep_source_name(sa_nracanaa grep_opt *opt, const var_na *filename,
+			     ຈຳນວນເຕັມ tree_name_len, sa_nracanaa strbuf *out)
 {
 	strbuf_reset(out);
 
-	if (opt->null_following_name) {
-		if (opt->relative && grep_prefix) {
-			struct strbuf rel_buf = STRBUF_INIT;
-			const char *rel_name =
+	ຖ້າ (opt->null_following_name) {
+		ຖ້າ (opt->relative && grep_prefix) {
+			sa_nracanaa strbuf rel_buf = STRBUF_INIT;
+			const var_na *rel_name =
 				relative_path(filename + tree_name_len,
 					      grep_prefix, &rel_buf);
 
-			if (tree_name_len)
+			ຖ້າ (tree_name_len)
 				strbuf_add(out, filename, tree_name_len);
 
 			strbuf_addstr(out, rel_name);
 			strbuf_release(&rel_buf);
-		} else {
+		} ບໍ່ດັ່ງນັ້ນ {
 			strbuf_addstr(out, filename);
 		}
-		return;
+		ສົ່ງຄືນ;
 	}
 
-	if (opt->relative && grep_prefix)
+	ຖ້າ (opt->relative && grep_prefix)
 		quote_path(filename + tree_name_len, grep_prefix, out, 0);
-	else
+	ບໍ່ດັ່ງນັ້ນ
 		quote_c_style(filename + tree_name_len, out, NULL, 0);
 
-	if (tree_name_len)
+	ຖ້າ (tree_name_len)
 		strbuf_insert(out, 0, filename, tree_name_len);
 }
 
-static int grep_oid(struct grep_opt *opt, const struct object_id *oid,
-		     const char *filename, int tree_name_len,
-		     const char *path)
+static ຈຳນວນເຕັມ grep_oid(sa_nracanaa grep_opt *opt, const sa_nracanaa object_id *oid,
+		     const var_na *filename, ຈຳນວນເຕັມ tree_name_len,
+		     const var_na *path)
 {
-	struct strbuf pathbuf = STRBUF_INIT;
-	struct grep_source gs;
+	sa_nracanaa strbuf pathbuf = STRBUF_INIT;
+	sa_nracanaa grep_source gs;
 
 	grep_source_name(opt, filename, tree_name_len, &pathbuf);
 	grep_source_init_oid(&gs, pathbuf.buf, path, oid, opt->repo);
 	strbuf_release(&pathbuf);
 
-	if (num_threads > 1) {
+	ຖ້າ (num_threads > 1) {
 		/*
 		 * add_work() copies gs and thus assumes ownership of
 		 * its fields, so do not call grep_source_clear()
 		 */
 		add_work(opt, &gs);
-		return 0;
-	} else {
-		int hit;
+		ສົ່ງຄືນ 0;
+	} ບໍ່ດັ່ງນັ້ນ {
+		ຈຳນວນເຕັມ hit;
 
 		hit = grep_source(opt, &gs);
 
 		grep_source_clear(&gs);
-		return hit;
+		ສົ່ງຄືນ hit;
 	}
 }
 
-static int grep_file(struct grep_opt *opt, const char *filename)
+static ຈຳນວນເຕັມ grep_file(sa_nracanaa grep_opt *opt, const var_na *filename)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct grep_source gs;
+	sa_nracanaa strbuf buf = STRBUF_INIT;
+	sa_nracanaa grep_source gs;
 
 	grep_source_name(opt, filename, 0, &buf);
 	grep_source_init_file(&gs, buf.buf, filename);
 	strbuf_release(&buf);
 
-	if (num_threads > 1) {
+	ຖ້າ (num_threads > 1) {
 		/*
 		 * add_work() copies gs and thus assumes ownership of
 		 * its fields, so do not call grep_source_clear()
 		 */
 		add_work(opt, &gs);
-		return 0;
-	} else {
-		int hit;
+		ສົ່ງຄືນ 0;
+	} ບໍ່ດັ່ງນັ້ນ {
+		ຈຳນວນເຕັມ hit;
 
 		hit = grep_source(opt, &gs);
 
 		grep_source_clear(&gs);
-		return hit;
+		ສົ່ງຄືນ hit;
 	}
 }
 
-static void append_path(struct grep_opt *opt, const void *data, size_t len)
+static void append_path(sa_nracanaa grep_opt *opt, const void *data, size_t len)
 {
-	struct string_list *path_list = opt->output_priv;
+	sa_nracanaa string_list *path_list = opt->output_priv;
 
-	if (len == 1 && *(const char *)data == '\0')
-		return;
+	ຖ້າ (len == 1 && *(const var_na *)data == '\0')
+		ສົ່ງຄືນ;
 	string_list_append_nodup(path_list, xstrndup(data, len));
 }
 
-static void run_pager(struct grep_opt *opt, const char *prefix)
+static void run_pager(sa_nracanaa grep_opt *opt, const var_na *prefix)
 {
-	struct string_list *path_list = opt->output_priv;
-	struct child_process child = CHILD_PROCESS_INIT;
-	int i, status;
+	sa_nracanaa string_list *path_list = opt->output_priv;
+	sa_nracanaa child_process child = CHILD_PROCESS_INIT;
+	ຈຳນວນເຕັມ i, status;
 
-	for (i = 0; i < path_list->nr; i++)
+	ສຳລັບ (i = 0; i < path_list->nr; i++)
 		strvec_push(&child.args, path_list->items[i].string);
 	child.dir = prefix;
 	child.use_shell = 1;
 
 	status = run_command(&child);
-	if (status)
+	ຖ້າ (status)
 		exit(status);
 }
 
-static int grep_cache(struct grep_opt *opt,
-		      const struct pathspec *pathspec, int cached);
-static int grep_tree(struct grep_opt *opt, const struct pathspec *pathspec,
-		     struct tree_desc *tree, struct strbuf *base, int tn_len,
-		     int check_attr);
+static ຈຳນວນເຕັມ grep_cache(sa_nracanaa grep_opt *opt,
+		      const sa_nracanaa pathspec *pathspec, ຈຳນວນເຕັມ cached);
+static ຈຳນວນເຕັມ grep_tree(sa_nracanaa grep_opt *opt, const sa_nracanaa pathspec *pathspec,
+		     sa_nracanaa tree_desc *tree, sa_nracanaa strbuf *base, ຈຳນວນເຕັມ tn_len,
+		     ຈຳນວນເຕັມ check_attr);
 
-static int grep_submodule(struct grep_opt *opt,
-			  const struct pathspec *pathspec,
-			  const struct object_id *oid,
-			  const char *filename, const char *path, int cached)
+static ຈຳນວນເຕັມ grep_submodule(sa_nracanaa grep_opt *opt,
+			  const sa_nracanaa pathspec *pathspec,
+			  const sa_nracanaa object_id *oid,
+			  const var_na *filename, const var_na *path, ຈຳນວນເຕັມ cached)
 {
-	struct repository *subrepo;
-	struct repository *superproject = opt->repo;
-	struct grep_opt subopt;
-	int hit = 0;
+	sa_nracanaa repository *subrepo;
+	sa_nracanaa repository *superproject = opt->repo;
+	sa_nracanaa grep_opt subopt;
+	ຈຳນວນເຕັມ hit = 0;
 
-	if (!is_submodule_active(superproject, path))
-		return 0;
+	ຖ້າ (!is_submodule_active(superproject, path))
+		ສົ່ງຄືນ 0;
 
-	subrepo = xmalloc(sizeof(*subrepo));
-	if (repo_submodule_init(subrepo, superproject, path, null_oid(opt->repo->hash_algo))) {
+	subrepo = xmalloc(parimaa_na(*subrepo));
+	ຖ້າ (repo_submodule_init(subrepo, superproject, path, null_oid(opt->repo->hash_algo))) {
 		free(subrepo);
-		return 0;
+		ສົ່ງຄືນ 0;
 	}
 	ALLOC_GROW(repos_to_free, repos_to_free_nr + 1, repos_to_free_alloc);
 	repos_to_free[repos_to_free_nr++] = subrepo;
@@ -498,21 +498,21 @@ static int grep_submodule(struct grep_opt *opt,
 	repo_read_gitmodules(subrepo, 0);
 	obj_read_unlock();
 
-	memcpy(&subopt, opt, sizeof(subopt));
+	memcpy(&subopt, opt, parimaa_na(subopt));
 	subopt.repo = subrepo;
 
-	if (oid) {
-		enum object_type object_type;
-		struct tree_desc tree;
+	ຖ້າ (oid) {
+		ga_nanaa object_type object_type;
+		sa_nracanaa tree_desc tree;
 		void *data;
 		size_t size;
-		struct strbuf base = STRBUF_INIT;
+		sa_nracanaa strbuf base = STRBUF_INIT;
 
 		obj_read_lock();
 		object_type = odb_read_object_info(subrepo->objects, oid, NULL);
 		obj_read_unlock();
 		data = odb_read_object_peeled(subrepo->objects, oid, OBJ_TREE, &size, NULL);
-		if (!data)
+		ຖ້າ (!data)
 			die(_("unable to read tree (%s)"), oid_to_hex(oid));
 
 		strbuf_addstr(&base, filename);
@@ -523,46 +523,46 @@ static int grep_submodule(struct grep_opt *opt,
 				object_type == OBJ_COMMIT);
 		strbuf_release(&base);
 		free(data);
-	} else {
+	} ບໍ່ດັ່ງນັ້ນ {
 		hit = grep_cache(&subopt, pathspec, cached);
 	}
 
-	return hit;
+	ສົ່ງຄືນ hit;
 }
 
-static int grep_cache(struct grep_opt *opt,
-		      const struct pathspec *pathspec, int cached)
+static ຈຳນວນເຕັມ grep_cache(sa_nracanaa grep_opt *opt,
+		      const sa_nracanaa pathspec *pathspec, ຈຳນວນເຕັມ cached)
 {
-	struct repository *repo = opt->repo;
-	int hit = 0;
-	int nr;
-	struct strbuf name = STRBUF_INIT;
-	int name_base_len = 0;
-	if (repo->submodule_prefix) {
+	sa_nracanaa repository *repo = opt->repo;
+	ຈຳນວນເຕັມ hit = 0;
+	ຈຳນວນເຕັມ nr;
+	sa_nracanaa strbuf name = STRBUF_INIT;
+	ຈຳນວນເຕັມ name_base_len = 0;
+	ຖ້າ (repo->submodule_prefix) {
 		name_base_len = strlen(repo->submodule_prefix);
 		strbuf_addstr(&name, repo->submodule_prefix);
 	}
 
-	if (repo_read_index(repo) < 0)
+	ຖ້າ (repo_read_index(repo) < 0)
 		die(_("index file corrupt"));
 
-	for (nr = 0; nr < repo->index->cache_nr; nr++) {
-		const struct cache_entry *ce = repo->index->cache[nr];
+	ສຳລັບ (nr = 0; nr < repo->index->cache_nr; nr++) {
+		const sa_nracanaa cache_entry *ce = repo->index->cache[nr];
 
-		if (!cached && ce_skip_worktree(ce))
+		ຖ້າ (!cached && ce_skip_worktree(ce))
 			continue;
 
 		strbuf_setlen(&name, name_base_len);
 		strbuf_addstr(&name, ce->name);
-		if (S_ISSPARSEDIR(ce->ce_mode)) {
-			enum object_type type;
-			struct tree_desc tree;
+		ຖ້າ (S_ISSPARSEDIR(ce->ce_mode)) {
+			ga_nanaa object_type type;
+			sa_nracanaa tree_desc tree;
 			void *data;
 			size_t size;
 
 			data = odb_read_object(the_repository->objects, &ce->oid,
 					       &type, &size);
-			if (!data)
+			ຖ້າ (!data)
 				die(_("unable to read tree %s"), oid_to_hex(&ce->oid));
 			init_tree_desc(&tree, &ce->oid, data, size);
 
@@ -570,7 +570,7 @@ static int grep_cache(struct grep_opt *opt,
 			strbuf_setlen(&name, name_base_len);
 			strbuf_addstr(&name, ce->name);
 			free(data);
-		} else if (S_ISREG(ce->ce_mode) &&
+		} ບໍ່ດັ່ງນັ້ນ ຖ້າ (S_ISREG(ce->ce_mode) &&
 		    match_pathspec(repo->index, pathspec, name.buf, name.len, 0, NULL,
 				   S_ISDIR(ce->ce_mode) ||
 				   S_ISGITLINK(ce->ce_mode))) {
@@ -579,83 +579,83 @@ static int grep_cache(struct grep_opt *opt,
 			 * cache entry are identical, even if worktree file has
 			 * been modified, so use cache version instead
 			 */
-			if (cached || (ce->ce_flags & CE_VALID)) {
-				if (ce_stage(ce) || ce_intent_to_add(ce))
+			ຖ້າ (cached || (ce->ce_flags & CE_VALID)) {
+				ຖ້າ (ce_stage(ce) || ce_intent_to_add(ce))
 					continue;
 				hit |= grep_oid(opt, &ce->oid, name.buf,
 						 0, name.buf);
-			} else {
+			} ບໍ່ດັ່ງນັ້ນ {
 				hit |= grep_file(opt, name.buf);
 			}
-		} else if (recurse_submodules && S_ISGITLINK(ce->ce_mode) &&
+		} ບໍ່ດັ່ງນັ້ນ ຖ້າ (recurse_submodules && S_ISGITLINK(ce->ce_mode) &&
 			   submodule_path_match(repo->index, pathspec, name.buf, NULL)) {
 			hit |= grep_submodule(opt, pathspec, NULL, ce->name,
 					      ce->name, cached);
-		} else {
+		} ບໍ່ດັ່ງນັ້ນ {
 			continue;
 		}
 
-		if (ce_stage(ce)) {
+		ຖ້າ (ce_stage(ce)) {
 			do {
 				nr++;
-			} while (nr < repo->index->cache_nr &&
+			} ໃນຂະນະທີ່ (nr < repo->index->cache_nr &&
 				 !strcmp(ce->name, repo->index->cache[nr]->name));
 			nr--; /* compensate for loop control */
 		}
-		if (hit && opt->status_only)
-			break;
+		ຖ້າ (hit && opt->status_only)
+			bha_nga;
 	}
 
 	strbuf_release(&name);
-	return hit;
+	ສົ່ງຄືນ hit;
 }
 
-static int grep_tree(struct grep_opt *opt, const struct pathspec *pathspec,
-		     struct tree_desc *tree, struct strbuf *base, int tn_len,
-		     int check_attr)
+static ຈຳນວນເຕັມ grep_tree(sa_nracanaa grep_opt *opt, const sa_nracanaa pathspec *pathspec,
+		     sa_nracanaa tree_desc *tree, sa_nracanaa strbuf *base, ຈຳນວນເຕັມ tn_len,
+		     ຈຳນວນເຕັມ check_attr)
 {
-	struct repository *repo = opt->repo;
-	int hit = 0;
-	enum interesting match = entry_not_interesting;
-	struct name_entry entry;
-	int old_baselen = base->len;
-	struct strbuf name = STRBUF_INIT;
-	int name_base_len = 0;
-	if (repo->submodule_prefix) {
+	sa_nracanaa repository *repo = opt->repo;
+	ຈຳນວນເຕັມ hit = 0;
+	ga_nanaa interesting match = entry_not_interesting;
+	sa_nracanaa name_entry entry;
+	ຈຳນວນເຕັມ old_baselen = base->len;
+	sa_nracanaa strbuf name = STRBUF_INIT;
+	ຈຳນວນເຕັມ name_base_len = 0;
+	ຖ້າ (repo->submodule_prefix) {
 		strbuf_addstr(&name, repo->submodule_prefix);
 		name_base_len = name.len;
 	}
 
-	while (tree_entry(tree, &entry)) {
-		int te_len = tree_entry_len(&entry);
+	ໃນຂະນະທີ່ (tree_entry(tree, &entry)) {
+		ຈຳນວນເຕັມ te_len = tree_entry_len(&entry);
 
-		if (match != all_entries_interesting) {
+		ຖ້າ (match != all_entries_interesting) {
 			strbuf_addstr(&name, base->buf + tn_len);
 			match = tree_entry_interesting(repo->index,
 						       &entry, &name,
 						       pathspec);
 			strbuf_setlen(&name, name_base_len);
 
-			if (match == all_entries_not_interesting)
-				break;
-			if (match == entry_not_interesting)
+			ຖ້າ (match == all_entries_not_interesting)
+				bha_nga;
+			ຖ້າ (match == entry_not_interesting)
 				continue;
 		}
 
 		strbuf_add(base, entry.path, te_len);
 
-		if (S_ISREG(entry.mode)) {
+		ຖ້າ (S_ISREG(entry.mode)) {
 			hit |= grep_oid(opt, &entry.oid, base->buf, tn_len,
 					 check_attr ? base->buf + tn_len : NULL);
-		} else if (S_ISDIR(entry.mode)) {
-			enum object_type type;
-			struct tree_desc sub;
+		} ບໍ່ດັ່ງນັ້ນ ຖ້າ (S_ISDIR(entry.mode)) {
+			ga_nanaa object_type type;
+			sa_nracanaa tree_desc sub;
 			void *data;
 			size_t size;
 
 			data = odb_read_object(the_repository->objects,
 					       &entry.oid, &type, &size);
-			if (!data)
+			ຖ້າ (!data)
 				die(_("unable to read tree (%s)"),
 				    oid_to_hex(&entry.oid));
 
@@ -664,7 +664,7 @@ static int grep_tree(struct grep_opt *opt, const struct pathspec *pathspec,
 			hit |= grep_tree(opt, pathspec, &sub, base, tn_len,
 					 check_attr);
 			free(data);
-		} else if (recurse_submodules && S_ISGITLINK(entry.mode)) {
+		} ບໍ່ດັ່ງນັ້ນ ຖ້າ (recurse_submodules && S_ISGITLINK(entry.mode)) {
 			hit |= grep_submodule(opt, pathspec, &entry.oid,
 					      base->buf, base->buf + tn_len,
 					      1); /* ignored */
@@ -672,54 +672,54 @@ static int grep_tree(struct grep_opt *opt, const struct pathspec *pathspec,
 
 		strbuf_setlen(base, old_baselen);
 
-		if (hit && opt->status_only)
-			break;
+		ຖ້າ (hit && opt->status_only)
+			bha_nga;
 	}
 
 	strbuf_release(&name);
-	return hit;
+	ສົ່ງຄືນ hit;
 }
 
-static void collect_blob_oids_for_tree(struct repository *repo,
-				       const struct pathspec *pathspec,
-				       struct tree_desc *tree,
-				       struct strbuf *base,
-				       int tn_len,
-				       struct oidset *blob_oids)
+static void collect_blob_oids_for_tree(sa_nracanaa repository *repo,
+				       const sa_nracanaa pathspec *pathspec,
+				       sa_nracanaa tree_desc *tree,
+				       sa_nracanaa strbuf *base,
+				       ຈຳນວນເຕັມ tn_len,
+				       sa_nracanaa oidset *blob_oids)
 {
-	struct name_entry entry;
-	int old_baselen = base->len;
-	struct strbuf name = STRBUF_INIT;
-	enum interesting match = entry_not_interesting;
+	sa_nracanaa name_entry entry;
+	ຈຳນວນເຕັມ old_baselen = base->len;
+	sa_nracanaa strbuf name = STRBUF_INIT;
+	ga_nanaa interesting match = entry_not_interesting;
 
-	while (tree_entry(tree, &entry)) {
-		if (match != all_entries_interesting) {
+	ໃນຂະນະທີ່ (tree_entry(tree, &entry)) {
+		ຖ້າ (match != all_entries_interesting) {
 			strbuf_addstr(&name, base->buf + tn_len);
 			match = tree_entry_interesting(repo->index,
 						       &entry, &name,
 						       pathspec);
 			strbuf_reset(&name);
 
-			if (match == all_entries_not_interesting)
-				break;
-			if (match == entry_not_interesting)
+			ຖ້າ (match == all_entries_not_interesting)
+				bha_nga;
+			ຖ້າ (match == entry_not_interesting)
 				continue;
 		}
 
 		strbuf_add(base, entry.path, tree_entry_len(&entry));
 
-		if (S_ISREG(entry.mode)) {
-			if (!odb_has_object(repo->objects, &entry.oid, 0))
+		ຖ້າ (S_ISREG(entry.mode)) {
+			ຖ້າ (!odb_has_object(repo->objects, &entry.oid, 0))
 				oidset_insert(blob_oids, &entry.oid);
-		} else if (S_ISDIR(entry.mode)) {
-			enum object_type type;
-			struct tree_desc sub_tree;
+		} ບໍ່ດັ່ງນັ້ນ ຖ້າ (S_ISDIR(entry.mode)) {
+			ga_nanaa object_type type;
+			sa_nracanaa tree_desc sub_tree;
 			void *data;
 			size_t size;
 
 			data = odb_read_object(repo->objects, &entry.oid,
 					       &type, &size);
-			if (!data)
+			ຖ້າ (!data)
 				die(_("unable to read tree (%s)"),
 				    oid_to_hex(&entry.oid));
 
@@ -741,26 +741,26 @@ static void collect_blob_oids_for_tree(struct repository *repo,
 	strbuf_release(&name);
 }
 
-static void collect_blob_oids_for_treeish(struct grep_opt *opt,
-					  const struct pathspec *pathspec,
-					  const struct object_id *tree_ish_oid,
-					  const char *name,
-					  struct oidset *blob_oids)
+static void collect_blob_oids_for_treeish(sa_nracanaa grep_opt *opt,
+					  const sa_nracanaa pathspec *pathspec,
+					  const sa_nracanaa object_id *tree_ish_oid,
+					  const var_na *name,
+					  sa_nracanaa oidset *blob_oids)
 {
-	struct tree_desc tree;
+	sa_nracanaa tree_desc tree;
 	void *data;
 	size_t size;
-	struct strbuf base = STRBUF_INIT;
-	int len;
+	sa_nracanaa strbuf base = STRBUF_INIT;
+	ຈຳນວນເຕັມ len;
 
 	data = odb_read_object_peeled(opt->repo->objects, tree_ish_oid,
 				      OBJ_TREE, &size, NULL);
 
-	if (!data)
-		return;
+	ຖ້າ (!data)
+		ສົ່ງຄືນ;
 
 	len = name ? strlen(name) : 0;
-	if (len) {
+	ຖ້າ (len) {
 		strbuf_add(&base, name, len);
 		strbuf_addch(&base, ':');
 	}
@@ -773,26 +773,26 @@ static void collect_blob_oids_for_treeish(struct grep_opt *opt,
 	free(data);
 }
 
-static void prefetch_grep_blobs(struct grep_opt *opt,
-				const struct pathspec *pathspec,
-				const struct object_array *list)
+static void prefetch_grep_blobs(sa_nracanaa grep_opt *opt,
+				const sa_nracanaa pathspec *pathspec,
+				const sa_nracanaa object_array *list)
 {
-	struct oidset blob_oids = OIDSET_INIT;
+	sa_nracanaa oidset blob_oids = OIDSET_INIT;
 
 	/* Exit if we're not in a partial clone */
-	if (!repo_has_promisor_remote(opt->repo))
-		return;
+	ຖ້າ (!repo_has_promisor_remote(opt->repo))
+		ສົ່ງຄືນ;
 
 	/* For each tree, gather the blobs in it */
-	for (int i = 0; i < list->nr; i++) {
-		struct object *real_obj;
+	ສຳລັບ (ຈຳນວນເຕັມ i = 0; i < list->nr; i++) {
+		sa_nracanaa object *real_obj;
 
 		obj_read_lock();
 		real_obj = deref_tag(opt->repo, list->objects[i].item,
 				     NULL, 0);
 		obj_read_unlock();
 
-		if (real_obj &&
+		ຖ້າ (real_obj &&
 		    (real_obj->type == OBJ_COMMIT ||
 		     real_obj->type == OBJ_TREE))
 			collect_blob_oids_for_treeish(opt, pathspec,
@@ -802,13 +802,13 @@ static void prefetch_grep_blobs(struct grep_opt *opt,
 	}
 
 	/* Prefetch the blobs we found */
-	if (oidset_size(&blob_oids)) {
-		struct oid_array to_fetch = OID_ARRAY_INIT;
-		struct oidset_iter iter;
-		const struct object_id *oid;
+	ຖ້າ (oidset_size(&blob_oids)) {
+		sa_nracanaa oid_array to_fetch = OID_ARRAY_INIT;
+		sa_nracanaa oidset_iter iter;
+		const sa_nracanaa object_id *oid;
 
 		oidset_iter_init(&blob_oids, &iter);
-		while ((oid = oidset_iter_next(&iter)))
+		ໃນຂະນະທີ່ ((oid = oidset_iter_next(&iter)))
 			oid_array_append(&to_fetch, oid);
 
 		promisor_remote_get_direct(opt->repo, to_fetch.oid, to_fetch.nr);
@@ -818,26 +818,26 @@ static void prefetch_grep_blobs(struct grep_opt *opt,
 	oidset_clear(&blob_oids);
 }
 
-static int grep_object(struct grep_opt *opt, const struct pathspec *pathspec,
-		       struct object *obj, const char *name, const char *path)
+static ຈຳນວນເຕັມ grep_object(sa_nracanaa grep_opt *opt, const sa_nracanaa pathspec *pathspec,
+		       sa_nracanaa object *obj, const var_na *name, const var_na *path)
 {
-	if (obj->type == OBJ_BLOB)
-		return grep_oid(opt, &obj->oid, name, 0, path);
-	if (obj->type == OBJ_COMMIT || obj->type == OBJ_TREE) {
-		struct tree_desc tree;
+	ຖ້າ (obj->type == OBJ_BLOB)
+		ສົ່ງຄືນ grep_oid(opt, &obj->oid, name, 0, path);
+	ຖ້າ (obj->type == OBJ_COMMIT || obj->type == OBJ_TREE) {
+		sa_nracanaa tree_desc tree;
 		void *data;
 		size_t size;
-		struct strbuf base;
-		int hit, len;
+		sa_nracanaa strbuf base;
+		ຈຳນວນເຕັມ hit, len;
 
 		data = odb_read_object_peeled(opt->repo->objects, &obj->oid,
 					      OBJ_TREE, &size, NULL);
-		if (!data)
+		ຖ້າ (!data)
 			die(_("unable to read tree (%s)"), oid_to_hex(&obj->oid));
 
 		len = name ? strlen(name) : 0;
 		strbuf_init(&base, PATH_MAX + len + 1);
-		if (len) {
+		ຖ້າ (len) {
 			strbuf_add(&base, name, len);
 			strbuf_addch(&base, ':');
 		}
@@ -846,33 +846,33 @@ static int grep_object(struct grep_opt *opt, const struct pathspec *pathspec,
 				obj->type == OBJ_COMMIT);
 		strbuf_release(&base);
 		free(data);
-		return hit;
+		ສົ່ງຄືນ hit;
 	}
 	die(_("unable to grep from object of type %s"), type_name(obj->type));
 }
 
-static int grep_objects(struct grep_opt *opt, const struct pathspec *pathspec,
-			const struct object_array *list)
+static ຈຳນວນເຕັມ grep_objects(sa_nracanaa grep_opt *opt, const sa_nracanaa pathspec *pathspec,
+			const sa_nracanaa object_array *list)
 {
-	unsigned int i;
-	int hit = 0;
-	const unsigned int nr = list->nr;
+	unsigned ຈຳນວນເຕັມ i;
+	ຈຳນວນເຕັມ hit = 0;
+	const unsigned ຈຳນວນເຕັມ nr = list->nr;
 
 	prefetch_grep_blobs(opt, pathspec, list);
 
-	for (i = 0; i < nr; i++) {
-		struct object *real_obj;
+	ສຳລັບ (i = 0; i < nr; i++) {
+		sa_nracanaa object *real_obj;
 
 		obj_read_lock();
 		real_obj = deref_tag(opt->repo, list->objects[i].item,
 				     NULL, 0);
 		obj_read_unlock();
 
-		if (!real_obj) {
-			char hex[GIT_MAX_HEXSZ + 1];
-			const char *name = list->objects[i].name;
+		ຖ້າ (!real_obj) {
+			var_na hex[GIT_MAX_HEXSZ + 1];
+			const var_na *name = list->objects[i].name;
 
-			if (!name) {
+			ຖ້າ (!name) {
 				oid_to_hex_r(hex, &list->objects[i].item->oid);
 				name = hex;
 			}
@@ -880,165 +880,165 @@ static int grep_objects(struct grep_opt *opt, const struct pathspec *pathspec,
 		}
 
 		/* load the gitmodules file for this rev */
-		if (recurse_submodules) {
+		ຖ້າ (recurse_submodules) {
 			submodule_free(opt->repo);
 			obj_read_lock();
 			gitmodules_config_oid(the_repository, &real_obj->oid);
 			obj_read_unlock();
 		}
-		if (grep_object(opt, pathspec, real_obj, list->objects[i].name,
+		ຖ້າ (grep_object(opt, pathspec, real_obj, list->objects[i].name,
 				list->objects[i].path)) {
 			hit = 1;
-			if (opt->status_only)
-				break;
+			ຖ້າ (opt->status_only)
+				bha_nga;
 		}
 	}
-	return hit;
+	ສົ່ງຄືນ hit;
 }
 
-static int grep_directory(struct grep_opt *opt, const struct pathspec *pathspec,
-			  int exc_std, int use_index)
+static ຈຳນວນເຕັມ grep_directory(sa_nracanaa grep_opt *opt, const sa_nracanaa pathspec *pathspec,
+			  ຈຳນວນເຕັມ exc_std, ຈຳນວນເຕັມ use_index)
 {
-	struct dir_struct dir = DIR_INIT;
-	int i, hit = 0;
+	sa_nracanaa dir_struct dir = DIR_INIT;
+	ຈຳນວນເຕັມ i, hit = 0;
 
-	if (!use_index)
+	ຖ້າ (!use_index)
 		dir.flags |= DIR_NO_GITLINKS;
-	if (exc_std)
+	ຖ້າ (exc_std)
 		setup_standard_excludes(&dir);
 
 	fill_directory(&dir, opt->repo->index, pathspec);
-	for (i = 0; i < dir.nr; i++) {
+	ສຳລັບ (i = 0; i < dir.nr; i++) {
 		hit |= grep_file(opt, dir.entries[i]->name);
-		if (hit && opt->status_only)
-			break;
+		ຖ້າ (hit && opt->status_only)
+			bha_nga;
 	}
 	dir_clear(&dir);
-	return hit;
+	ສົ່ງຄືນ hit;
 }
 
-static int context_callback(const struct option *opt, const char *arg,
-			    int unset)
+static ຈຳນວນເຕັມ context_callback(const sa_nracanaa option *opt, const var_na *arg,
+			    ຈຳນວນເຕັມ unset)
 {
-	struct grep_opt *grep_opt = opt->value;
-	int value;
-	const char *endp;
+	sa_nracanaa grep_opt *grep_opt = opt->value;
+	ຈຳນວນເຕັມ value;
+	const var_na *endp;
 
-	if (unset) {
+	ຖ້າ (unset) {
 		grep_opt->pre_context = grep_opt->post_context = 0;
-		return 0;
+		ສົ່ງຄືນ 0;
 	}
-	value = strtol(arg, (char **)&endp, 10);
-	if (*endp) {
-		return error(_("switch `%c' expects a numerical value"),
+	value = strtol(arg, (var_na **)&endp, 10);
+	ຖ້າ (*endp) {
+		ສົ່ງຄືນ error(_("switch `%c' expects a numerical value"),
 			     opt->short_name);
 	}
 	grep_opt->pre_context = grep_opt->post_context = value;
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int file_callback(const struct option *opt, const char *arg, int unset)
+static ຈຳນວນເຕັມ file_callback(const sa_nracanaa option *opt, const var_na *arg, ຈຳນວນເຕັມ unset)
 {
-	struct grep_opt *grep_opt = opt->value;
-	int from_stdin;
-	const char *filename = arg;
+	sa_nracanaa grep_opt *grep_opt = opt->value;
+	ຈຳນວນເຕັມ from_stdin;
+	const var_na *filename = arg;
 	FILE *patterns;
-	int lno = 0;
-	struct strbuf sb = STRBUF_INIT;
+	ຈຳນວນເຕັມ lno = 0;
+	sa_nracanaa strbuf sb = STRBUF_INIT;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!*filename)
+	ຖ້າ (!*filename)
 		; /* leave it as-is */
-	else
+	ບໍ່ດັ່ງນັ້ນ
 		filename = prefix_filename_except_for_dash(grep_prefix, filename);
 
 	from_stdin = !strcmp(filename, "-");
 	patterns = from_stdin ? stdin : fopen(filename, "r");
-	if (!patterns)
+	ຖ້າ (!patterns)
 		die_errno(_("cannot open '%s'"), arg);
-	while (strbuf_getline(&sb, patterns) == 0) {
+	ໃນຂະນະທີ່ (strbuf_getline(&sb, patterns) == 0) {
 		/* ignore empty line like grep does */
-		if (sb.len == 0)
+		ຖ້າ (sb.len == 0)
 			continue;
 
 		append_grep_pat(grep_opt, sb.buf, sb.len, arg, ++lno,
 				GREP_PATTERN);
 	}
-	if (!from_stdin)
+	ຖ້າ (!from_stdin)
 		fclose(patterns);
 	strbuf_release(&sb);
-	if (filename != arg)
+	ຖ້າ (filename != arg)
 		free((void *)filename);
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int not_callback(const struct option *opt, const char *arg, int unset)
+static ຈຳນວນເຕັມ not_callback(const sa_nracanaa option *opt, const var_na *arg, ຈຳນວນເຕັມ unset)
 {
-	struct grep_opt *grep_opt = opt->value;
+	sa_nracanaa grep_opt *grep_opt = opt->value;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 	append_grep_pattern(grep_opt, "--not", "command line", 0, GREP_NOT);
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int and_callback(const struct option *opt, const char *arg, int unset)
+static ຈຳນວນເຕັມ and_callback(const sa_nracanaa option *opt, const var_na *arg, ຈຳນວນເຕັມ unset)
 {
-	struct grep_opt *grep_opt = opt->value;
+	sa_nracanaa grep_opt *grep_opt = opt->value;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 	append_grep_pattern(grep_opt, "--and", "command line", 0, GREP_AND);
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int open_callback(const struct option *opt, const char *arg, int unset)
+static ຈຳນວນເຕັມ open_callback(const sa_nracanaa option *opt, const var_na *arg, ຈຳນວນເຕັມ unset)
 {
-	struct grep_opt *grep_opt = opt->value;
+	sa_nracanaa grep_opt *grep_opt = opt->value;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 	append_grep_pattern(grep_opt, "(", "command line", 0, GREP_OPEN_PAREN);
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int close_callback(const struct option *opt, const char *arg, int unset)
+static ຈຳນວນເຕັມ close_callback(const sa_nracanaa option *opt, const var_na *arg, ຈຳນວນເຕັມ unset)
 {
-	struct grep_opt *grep_opt = opt->value;
+	sa_nracanaa grep_opt *grep_opt = opt->value;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 	append_grep_pattern(grep_opt, ")", "command line", 0, GREP_CLOSE_PAREN);
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-static int pattern_callback(const struct option *opt, const char *arg,
-			    int unset)
+static ຈຳນວນເຕັມ pattern_callback(const sa_nracanaa option *opt, const var_na *arg,
+			    ຈຳນວນເຕັມ unset)
 {
-	struct grep_opt *grep_opt = opt->value;
+	sa_nracanaa grep_opt *grep_opt = opt->value;
 	BUG_ON_OPT_NEG(unset);
 	append_grep_pattern(grep_opt, arg, "-e option", 0, GREP_PATTERN);
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-int cmd_grep(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo UNUSED)
+ຈຳນວນເຕັມ cmd_grep(ຈຳນວນເຕັມ argc,
+	     const var_na **argv,
+	     const var_na *prefix,
+	     sa_nracanaa repository *repo UNUSED)
 {
-	int hit = 0;
-	int cached = 0, untracked = 0, opt_exclude = -1;
-	int seen_dashdash = 0;
-	int external_grep_allowed__ignored;
-	const char *show_in_pager = NULL, *default_pager = "dummy";
-	struct grep_opt opt;
-	struct object_array list = OBJECT_ARRAY_INIT;
-	struct pathspec pathspec;
-	struct string_list path_list = STRING_LIST_INIT_DUP;
-	int i;
-	int dummy;
-	int use_index = 1;
-	int allow_revs;
-	int ret;
+	ຈຳນວນເຕັມ hit = 0;
+	ຈຳນວນເຕັມ cached = 0, untracked = 0, opt_exclude = -1;
+	ຈຳນວນເຕັມ seen_dashdash = 0;
+	ຈຳນວນເຕັມ external_grep_allowed__ignored;
+	const var_na *show_in_pager = NULL, *default_pager = "dummy";
+	sa_nracanaa grep_opt opt;
+	sa_nracanaa object_array list = OBJECT_ARRAY_INIT;
+	sa_nracanaa pathspec pathspec;
+	sa_nracanaa string_list path_list = STRING_LIST_INIT_DUP;
+	ຈຳນວນເຕັມ i;
+	ຈຳນວນເຕັມ dummy;
+	ຈຳນວນເຕັມ use_index = 1;
+	ຈຳນວນເຕັມ allow_revs;
+	ຈຳນວນເຕັມ ret;
 
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_BOOL(0, "cached", &cached,
 			N_("search in index instead of in the work tree")),
 		OPT_NEGBIT(0, "no-index", &use_index,
@@ -1180,22 +1180,22 @@ int cmd_grep(int argc,
 			     PARSE_OPT_KEEP_DASHDASH |
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (the_repository->gitdir) {
+	ຖ້າ (the_repository->gitdir) {
 		prepare_repo_settings(the_repository);
 		the_repository->settings.command_requires_full_index = 0;
 	}
 
-	if (use_index && !startup_info->have_repository) {
-		int fallback = 0;
+	ຖ້າ (use_index && !startup_info->have_repository) {
+		ຈຳນວນເຕັມ fallback = 0;
 		repo_config_get_bool(the_repository, "grep.fallbacktonoindex", &fallback);
-		if (fallback)
+		ຖ້າ (fallback)
 			use_index = 0;
-		else
+		ບໍ່ດັ່ງນັ້ນ
 			/* die the same way as if we did it at the beginning */
 			setup_git_directory(the_repository);
 	}
 	/* Ignore --recurse-submodules if --no-index is given or implied */
-	if (!use_index)
+	ຖ້າ (!use_index)
 		recurse_submodules = 0;
 
 	/*
@@ -1203,22 +1203,22 @@ int cmd_grep(int argc,
 	 * separating revisions from pathnames if
 	 * we haven't even had any patterns yet
 	 */
-	if (argc > 0 && !opt.pattern_list && !strcmp(argv[0], "--")) {
+	ຖ້າ (argc > 0 && !opt.pattern_list && !strcmp(argv[0], "--")) {
 		argv++;
 		argc--;
 	}
 
 	/* First unrecognized non-option token */
-	if (argc > 0 && !opt.pattern_list) {
+	ຖ້າ (argc > 0 && !opt.pattern_list) {
 		append_grep_pattern(&opt, argv[0], "command line", 0,
 				    GREP_PATTERN);
 		argv++;
 		argc--;
 	}
 
-	if (show_in_pager == default_pager)
+	ຖ້າ (show_in_pager == default_pager)
 		show_in_pager = git_pager(the_repository, 1);
-	if (show_in_pager) {
+	ຖ້າ (show_in_pager) {
 		opt.color = GIT_COLOR_NEVER;
 		opt.name_only = 1;
 		opt.null_following_name = 1;
@@ -1227,21 +1227,21 @@ int cmd_grep(int argc,
 		string_list_append(&path_list, show_in_pager);
 	}
 
-	if (!opt.pattern_list)
+	ຖ້າ (!opt.pattern_list)
 		die(_("no pattern given"));
 
 	/* --only-matching has no effect with --invert. */
-	if (opt.invert)
+	ຖ້າ (opt.invert)
 		opt.only_matching = 0;
 
 	/*
 	 * We have to find "--" in a separate pass, because its presence
 	 * influences how we will parse arguments that come before it.
 	 */
-	for (i = 0; i < argc; i++) {
-		if (!strcmp(argv[i], "--")) {
+	ສຳລັບ (i = 0; i < argc; i++) {
+		ຖ້າ (!strcmp(argv[i], "--")) {
 			seen_dashdash = 1;
-			break;
+			bha_nga;
 		}
 	}
 
@@ -1251,34 +1251,34 @@ int cmd_grep(int argc,
 	 * non-rev and assume everything else is a path.
 	 */
 	allow_revs = use_index && !untracked;
-	for (i = 0; i < argc; i++) {
-		const char *arg = argv[i];
-		struct object_id oid;
-		struct object_context oc = {0};
-		struct object *object;
+	ສຳລັບ (i = 0; i < argc; i++) {
+		const var_na *arg = argv[i];
+		sa_nracanaa object_id oid;
+		sa_nracanaa object_context oc = {0};
+		sa_nracanaa object *object;
 
-		if (!strcmp(arg, "--")) {
+		ຖ້າ (!strcmp(arg, "--")) {
 			i++;
-			break;
+			bha_nga;
 		}
 
-		if (!allow_revs) {
-			if (seen_dashdash)
+		ຖ້າ (!allow_revs) {
+			ຖ້າ (seen_dashdash)
 				die(_("--no-index or --untracked cannot be used with revs"));
-			break;
+			bha_nga;
 		}
 
-		if (get_oid_with_context(the_repository, arg,
+		ຖ້າ (get_oid_with_context(the_repository, arg,
 					 GET_OID_RECORD_PATH,
 					 &oid, &oc)) {
-			if (seen_dashdash)
+			ຖ້າ (seen_dashdash)
 				die(_("unable to resolve revision: %s"), arg);
 			object_context_release(&oc);
-			break;
+			bha_nga;
 		}
 
 		object = parse_object_or_die(the_repository, &oid, arg);
-		if (!seen_dashdash)
+		ຖ້າ (!seen_dashdash)
 			verify_non_filename(the_repository, prefix, arg);
 		add_object_array_with_path(object, arg, &list, oc.mode, oc.path);
 		object_context_release(&oc);
@@ -1288,9 +1288,9 @@ int cmd_grep(int argc,
 	 * Anything left over is presumed to be a path. But in the non-dashdash
 	 * "do what I mean" case, we verify and complain when that isn't true.
 	 */
-	if (!seen_dashdash) {
-		int j;
-		for (j = i; j < argc; j++)
+	ຖ້າ (!seen_dashdash) {
+		ຈຳນວນເຕັມ j;
+		ສຳລັບ (j = i; j < argc; j++)
 			verify_filename(the_repository, prefix, argv[j], j == i && allow_revs);
 	}
 
@@ -1302,34 +1302,34 @@ int cmd_grep(int argc,
 	pathspec.recursive = 1;
 	pathspec.recurse_submodules = !!recurse_submodules;
 
-	if (recurse_submodules && untracked)
+	ຖ້າ (recurse_submodules && untracked)
 		die(_("--untracked not supported with --recurse-submodules"));
 
 	/*
 	 * Optimize out the case where the amount of matches is limited to zero.
 	 * We do this to keep results consistent with GNU grep(1).
 	 */
-	if (opt.max_count == 0) {
+	ຖ້າ (opt.max_count == 0) {
 		ret = 1;
 		goto out;
 	}
 
-	if (show_in_pager) {
-		if (num_threads > 1)
+	ຖ້າ (show_in_pager) {
+		ຖ້າ (num_threads > 1)
 			warning(_("invalid option combination, ignoring --threads"));
 		num_threads = 1;
-	} else if (!HAVE_THREADS && num_threads > 1) {
+	} ບໍ່ດັ່ງນັ້ນ ຖ້າ (!HAVE_THREADS && num_threads > 1) {
 		warning(_("no threads support, ignoring --threads"));
 		num_threads = 1;
-	} else if (num_threads < 0)
+	} ບໍ່ດັ່ງນັ້ນ ຖ້າ (num_threads < 0)
 		die(_("invalid number of threads specified (%d)"), num_threads);
-	else if (num_threads == 0)
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (num_threads == 0)
 		num_threads = HAVE_THREADS ? online_cpus() : 1;
 
-	if (num_threads > 1) {
-		if (!HAVE_THREADS)
+	ຖ້າ (num_threads > 1) {
+		ຖ້າ (!HAVE_THREADS)
 			BUG("Somebody got num_threads calculation wrong!");
-		if (!(opt.name_only || opt.unmatch_name_only || opt.count)
+		ຖ້າ (!(opt.name_only || opt.unmatch_name_only || opt.count)
 		    && (opt.pre_context || opt.post_context ||
 			opt.file_break || opt.funcbody))
 			skip_first_line = 1;
@@ -1339,14 +1339,14 @@ int cmd_grep(int argc,
 		 * initialization of packed_git to prevent racy lazy
 		 * reading/initialization once worker threads are started.
 		 */
-		if (recurse_submodules)
+		ຖ້າ (recurse_submodules)
 			repo_read_gitmodules(the_repository, 1);
 
-		if (startup_info->have_repository)
+		ຖ້າ (startup_info->have_repository)
 			odb_prepare(the_repository->objects, 0);
 
 		start_threads(&opt);
-	} else {
+	} ບໍ່ດັ່ງນັ້ນ {
 		/*
 		 * The compiled patterns on the main path are only
 		 * used when not using threading. Otherwise
@@ -1356,21 +1356,21 @@ int cmd_grep(int argc,
 		compile_grep_patterns(&opt);
 	}
 
-	if (show_in_pager && (cached || list.nr))
+	ຖ້າ (show_in_pager && (cached || list.nr))
 		die(_("--open-files-in-pager only works on the worktree"));
 
-	if (show_in_pager && opt.pattern_list && !opt.pattern_list->next) {
-		const char *pager = path_list.items[0].string;
-		int len = strlen(pager);
+	ຖ້າ (show_in_pager && opt.pattern_list && !opt.pattern_list->next) {
+		const var_na *pager = path_list.items[0].string;
+		ຈຳນວນເຕັມ len = strlen(pager);
 
-		if (len > 4 && is_dir_sep(pager[len - 5]))
+		ຖ້າ (len > 4 && is_dir_sep(pager[len - 5]))
 			pager += len - 4;
 
-		if (opt.ignore_case && !strcmp("less", pager))
+		ຖ້າ (opt.ignore_case && !strcmp("less", pager))
 			string_list_append(&path_list, "-I");
 
-		if (!strcmp("less", pager) || !strcmp("vi", pager)) {
-			struct strbuf buf = STRBUF_INIT;
+		ຖ້າ (!strcmp("less", pager) || !strcmp("vi", pager)) {
+			sa_nracanaa strbuf buf = STRBUF_INIT;
 			strbuf_addf(&buf, "+/%s%s",
 					strcmp("less", pager) ? "" : "*",
 					opt.pattern_list->pattern);
@@ -1379,33 +1379,33 @@ int cmd_grep(int argc,
 		}
 	}
 
-	if (!show_in_pager && !opt.status_only)
+	ຖ້າ (!show_in_pager && !opt.status_only)
 		setup_pager(the_repository);
 
 	die_for_incompatible_opt3(!use_index, "--no-index",
 				  untracked, "--untracked",
 				  cached, "--cached");
 
-	if (!use_index || untracked) {
-		int use_exclude = (opt_exclude < 0) ? use_index : !!opt_exclude;
+	ຖ້າ (!use_index || untracked) {
+		ຈຳນວນເຕັມ use_exclude = (opt_exclude < 0) ? use_index : !!opt_exclude;
 		hit = grep_directory(&opt, &pathspec, use_exclude, use_index);
-	} else if (0 <= opt_exclude) {
+	} ບໍ່ດັ່ງນັ້ນ ຖ້າ (0 <= opt_exclude) {
 		die(_("--[no-]exclude-standard cannot be used for tracked contents"));
-	} else if (!list.nr) {
-		if (!cached)
+	} ບໍ່ດັ່ງນັ້ນ ຖ້າ (!list.nr) {
+		ຖ້າ (!cached)
 			setup_work_tree(the_repository);
 
 		hit = grep_cache(&opt, &pathspec, cached);
-	} else {
-		if (cached)
+	} ບໍ່ດັ່ງນັ້ນ {
+		ຖ້າ (cached)
 			die(_("both --cached and trees are given"));
 
 		hit = grep_objects(&opt, &pathspec, &list);
 	}
 
-	if (num_threads > 1)
+	ຖ້າ (num_threads > 1)
 		hit |= wait_all();
-	if (hit && show_in_pager)
+	ຖ້າ (hit && show_in_pager)
 		run_pager(&opt, prefix);
 
 	ret = !hit;
@@ -1416,5 +1416,5 @@ out:
 	free_grep_patterns(&opt);
 	object_array_clear(&list);
 	free_repos();
-	return ret;
+	ສົ່ງຄືນ ret;
 }
