@@ -10,44 +10,44 @@
 #include "color.h"
 
 
-static const char * const builtin_range_diff_usage[] = {
+static const var_na * const builtin_range_diff_usage[] = {
 N_("git range-diff [<options>] <old-base>..<old-tip> <new-base>..<new-tip>"),
 N_("git range-diff [<options>] <old-tip>...<new-tip>"),
 N_("git range-diff [<options>] <base> <old-tip> <new-tip>"),
 NULL
 };
 
-static int parse_max_memory(const struct option *opt, const char *arg, int unset)
+static ကိန်းပြည့် parse_max_memory(const sa_nracanaa option *opt, const var_na *arg, ကိန်းပြည့် unset)
 {
 	size_t *max_memory = opt->value;
 	uintmax_t val;
 
-	if (unset)
-		return 0;
+	အကယ်၍ (unset)
+		ပြန်ပေး 0;
 
-	if (!git_parse_unsigned(arg, &val, SIZE_MAX))
-		return error(_("invalid max-memory value: %s"), arg);
+	အကယ်၍ (!git_parse_unsigned(arg, &val, SIZE_MAX))
+		ပြန်ပေး error(_("invalid max-memory value: %s"), arg);
 
 	*max_memory = (size_t)val;
-	return 0;
+	ပြန်ပေး 0;
 }
 
-int cmd_range_diff(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+ကိန်းပြည့် cmd_range_diff(ကိန်းပြည့် argc,
+		   const var_na **argv,
+		   const var_na *prefix,
+		   sa_nracanaa repository *repo UNUSED)
 {
-	struct diff_options diffopt = { NULL };
-	struct strvec log_arg = STRVEC_INIT;
-	struct strvec diff_merges_arg = STRVEC_INIT;
-	struct range_diff_options range_diff_opts = {
+	sa_nracanaa diff_options diffopt = { NULL };
+	sa_nracanaa strvec log_arg = STRVEC_INIT;
+	sa_nracanaa strvec diff_merges_arg = STRVEC_INIT;
+	sa_nracanaa range_diff_options range_diff_opts = {
 		.creation_factor = RANGE_DIFF_CREATION_FACTOR_DEFAULT,
 		.max_memory = RANGE_DIFF_MAX_MEMORY_DEFAULT,
 		.diffopt = &diffopt,
 		.log_arg = &log_arg
 	};
-	int simple_color = -1, left_only = 0, right_only = 0;
-	struct option range_diff_options[] = {
+	ကိန်းပြည့် simple_color = -1, left_only = 0, right_only = 0;
+	sa_nracanaa option range_diff_options[] = {
 		OPT_INTEGER(0, "creation-factor",
 			    &range_diff_opts.creation_factor,
 			    N_("percentage by which creation is weighted")),
@@ -70,11 +70,11 @@ int cmd_range_diff(int argc,
 			 N_("only emit output related to the second range")),
 		OPT_END()
 	};
-	struct option *options;
-	int i, dash_dash = -1, res = 0;
-	struct strbuf range1 = STRBUF_INIT, range2 = STRBUF_INIT;
-	struct object_id oid;
-	const char *three_dots = NULL;
+	sa_nracanaa option *options;
+	ကိန်းပြည့် i, dash_dash = -1, res = 0;
+	sa_nracanaa strbuf range1 = STRBUF_INIT, range2 = STRBUF_INIT;
+	sa_nracanaa object_id oid;
+	const var_na *three_dots = NULL;
 
 	repo_config(the_repository, git_diff_ui_config, NULL);
 
@@ -87,37 +87,37 @@ int cmd_range_diff(int argc,
 	diff_setup_done(&diffopt);
 
 	/* force color when --dual-color was used */
-	if (!simple_color)
+	အကယ်၍ (!simple_color)
 		diffopt.use_color = GIT_COLOR_ALWAYS;
 
 	/* If `--diff-merges` was specified, imply `--merges` */
-	if (diff_merges_arg.nr) {
+	အကယ်၍ (diff_merges_arg.nr) {
 		range_diff_opts.include_merges = 1;
 		strvec_pushv(&log_arg, diff_merges_arg.v);
 	}
 
-	for (i = 0; i < argc; i++)
-		if (!strcmp(argv[i], "--")) {
+	အတွက် (i = 0; i < argc; i++)
+		အကယ်၍ (!strcmp(argv[i], "--")) {
 			dash_dash = i;
-			break;
+			bha_nga;
 		}
 
-	if (dash_dash == 3 ||
+	အကယ်၍ (dash_dash == 3 ||
 	    (dash_dash < 0 && argc > 2 &&
 	     !repo_get_oid_committish(the_repository, argv[0], &oid) &&
 	     !repo_get_oid_committish(the_repository, argv[1], &oid) &&
 	     !repo_get_oid_committish(the_repository, argv[2], &oid))) {
-		if (dash_dash < 0)
+		အကယ်၍ (dash_dash < 0)
 			; /* already validated arguments */
-		else if (repo_get_oid_committish(the_repository, argv[0], &oid))
+		မဟုတ်ပါက အကယ်၍ (repo_get_oid_committish(the_repository, argv[0], &oid))
 			usage_msg_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[0]);
-		else if (repo_get_oid_committish(the_repository, argv[1], &oid))
+		မဟုတ်ပါက အကယ်၍ (repo_get_oid_committish(the_repository, argv[1], &oid))
 			usage_msg_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[1]);
-		else if (repo_get_oid_committish(the_repository, argv[2], &oid))
+		မဟုတ်ပါက အကယ်၍ (repo_get_oid_committish(the_repository, argv[2], &oid))
 			usage_msg_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[2]);
@@ -127,17 +127,17 @@ int cmd_range_diff(int argc,
 
 		strvec_pushv(&log_arg, argv +
 			     (dash_dash < 0 ? 3 : dash_dash));
-	} else if (dash_dash == 2 ||
+	} မဟုတ်ပါက အကယ်၍ (dash_dash == 2 ||
 		   (dash_dash < 0 && argc > 1 &&
 		    is_range_diff_range(argv[0]) &&
 		    is_range_diff_range(argv[1]))) {
-		if (dash_dash < 0)
+		အကယ်၍ (dash_dash < 0)
 			; /* already validated arguments */
-		else if (!is_range_diff_range(argv[0]))
+		မဟုတ်ပါက အကယ်၍ (!is_range_diff_range(argv[0]))
 			usage_msg_optf(_("not a commit range: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[0]);
-		else if (!is_range_diff_range(argv[1]))
+		မဟုတ်ပါက အကယ်၍ (!is_range_diff_range(argv[1]))
 			usage_msg_optf(_("not a commit range: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[1]);
@@ -147,30 +147,30 @@ int cmd_range_diff(int argc,
 
 		strvec_pushv(&log_arg, argv +
 			     (dash_dash < 0 ? 2 : dash_dash));
-	} else if (dash_dash == 1 ||
+	} မဟုတ်ပါက အကယ်၍ (dash_dash == 1 ||
 		   (dash_dash < 0 && argc > 0 &&
 		    (three_dots = strstr(argv[0], "...")))) {
-		const char *a, *b;
-		int a_len;
+		const var_na *a, *b;
+		ကိန်းပြည့် a_len;
 
-		if (dash_dash < 0)
+		အကယ်၍ (dash_dash < 0)
 			; /* already validated arguments */
-		else if (!(three_dots = strstr(argv[0], "...")))
+		မဟုတ်ပါက အကယ်၍ (!(three_dots = strstr(argv[0], "...")))
 			usage_msg_optf(_("not a symmetric range: '%s'"),
 					 builtin_range_diff_usage, options,
 					 argv[0]);
 
-		if (three_dots == argv[0]) {
+		အကယ်၍ (three_dots == argv[0]) {
 			a = "HEAD";
 			a_len = strlen(a);
-		} else {
+		} မဟုတ်ပါက {
 			a = argv[0];
-			a_len = (int)(three_dots - a);
+			a_len = (ကိန်းပြည့်)(three_dots - a);
 		}
 
-		if (three_dots[3])
+		အကယ်၍ (three_dots[3])
 			b = three_dots + 3;
-		else
+		မဟုတ်ပါက
 			b = "HEAD";
 
 		strbuf_addf(&range1, "%s..%.*s", b, a_len, a);
@@ -178,7 +178,7 @@ int cmd_range_diff(int argc,
 
 		strvec_pushv(&log_arg, argv +
 			     (dash_dash < 0 ? 1 : dash_dash));
-	} else
+	} မဟုတ်ပါက
 		usage_msg_opt(_("need two commit ranges"),
 			      builtin_range_diff_usage, options);
 	FREE_AND_NULL(options);
@@ -193,5 +193,5 @@ int cmd_range_diff(int argc,
 	strbuf_release(&range1);
 	strbuf_release(&range2);
 
-	return res;
+	ပြန်ပေး res;
 }

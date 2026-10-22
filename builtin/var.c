@@ -21,157 +21,157 @@
 #include "strbuf.h"
 #include "string-list.h"
 
-static const char * const var_usage[] = {
+static const var_na * const var_usage[] = {
 	N_("git var [-z] -l"),
 	N_("git var [-z] <variable>..."),
 	NULL
 };
 
-enum ident_part {
+ga_nanaa ident_part {
 	IDENT_NAME,
 	IDENT_MAIL,
 	IDENT_DATE,
 };
 
-static char *ident_part(const char *ident, enum ident_part part)
+static var_na *ident_part(const var_na *ident, ga_nanaa ident_part part)
 {
-	struct ident_split split;
+	sa_nracanaa ident_split split;
 
-	if (!ident)
-		return NULL;
-	if (split_ident_line(&split, ident, strlen(ident)))
-		return NULL;
+	အကယ်၍ (!ident)
+		ပြန်ပေး NULL;
+	အကယ်၍ (split_ident_line(&split, ident, strlen(ident)))
+		ပြန်ပေး NULL;
 
 	switch (part) {
-	case IDENT_NAME:
-		if (!split.name_begin || !split.name_end)
+	pak_sa IDENT_NAME:
+		အကယ်၍ (!split.name_begin || !split.name_end)
 			BUG("split_ident_line() gave NULL names???");
-		return xmemdupz(split.name_begin,
+		ပြန်ပေး xmemdupz(split.name_begin,
 				split.name_end - split.name_begin);
-	case IDENT_MAIL:
-		if (!split.mail_begin || !split.mail_end)
+	pak_sa IDENT_MAIL:
+		အကယ်၍ (!split.mail_begin || !split.mail_end)
 			BUG("split_ident_line() gave NULL mail???");
-		return xmemdupz(split.mail_begin,
+		ပြန်ပေး xmemdupz(split.mail_begin,
 				split.mail_end - split.mail_begin);
-	case IDENT_DATE:
-		if (!split.date_begin || !split.tz_end)
+	pak_sa IDENT_DATE:
+		အကယ်၍ (!split.date_begin || !split.tz_end)
 			BUG("split_ident_line() gave NULL date/tz???");
-		return xmemdupz(split.date_begin,
+		ပြန်ပေး xmemdupz(split.date_begin,
 				split.tz_end - split.date_begin);
 	default:
 		BUG("unknown ident_part %d", part);
 	}
 }
 
-static char *committer(int ident_flag)
+static var_na *committer(ကိန်းပြည့် ident_flag)
 {
-	return xstrdup_or_null(git_committer_info(ident_flag));
+	ပြန်ပေး xstrdup_or_null(git_committer_info(ident_flag));
 }
 
-static char *committer_name(int ident_flag)
+static var_na *committer_name(ကိန်းပြည့် ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_NAME);
+	ပြန်ပေး ident_part(git_committer_info(ident_flag), IDENT_NAME);
 }
 
-static char *committer_email(int ident_flag)
+static var_na *committer_email(ကိန်းပြည့် ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_MAIL);
+	ပြန်ပေး ident_part(git_committer_info(ident_flag), IDENT_MAIL);
 }
 
-static char *committer_date(int ident_flag)
+static var_na *committer_date(ကိန်းပြည့် ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_DATE);
+	ပြန်ပေး ident_part(git_committer_info(ident_flag), IDENT_DATE);
 }
 
-static char *author(int ident_flag)
+static var_na *author(ကိန်းပြည့် ident_flag)
 {
-	return xstrdup_or_null(git_author_info(ident_flag));
+	ပြန်ပေး xstrdup_or_null(git_author_info(ident_flag));
 }
 
-static char *author_name(int ident_flag)
+static var_na *author_name(ကိန်းပြည့် ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_NAME);
+	ပြန်ပေး ident_part(git_author_info(ident_flag), IDENT_NAME);
 }
 
-static char *author_email(int ident_flag)
+static var_na *author_email(ကိန်းပြည့် ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_MAIL);
+	ပြန်ပေး ident_part(git_author_info(ident_flag), IDENT_MAIL);
 }
 
-static char *author_date(int ident_flag)
+static var_na *author_date(ကိန်းပြည့် ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_DATE);
+	ပြန်ပေး ident_part(git_author_info(ident_flag), IDENT_DATE);
 }
 
-static char *editor(int ident_flag UNUSED)
+static var_na *editor(ကိန်းပြည့် ident_flag UNUSED)
 {
-	return xstrdup_or_null(git_editor());
+	ပြန်ပေး xstrdup_or_null(git_editor());
 }
 
-static char *sequence_editor(int ident_flag UNUSED)
+static var_na *sequence_editor(ကိန်းပြည့် ident_flag UNUSED)
 {
-	return xstrdup_or_null(git_sequence_editor());
+	ပြန်ပေး xstrdup_or_null(git_sequence_editor());
 }
 
-static char *pager(int ident_flag UNUSED)
+static var_na *pager(ကိန်းပြည့် ident_flag UNUSED)
 {
-	const char *pgm = git_pager(the_repository, 1);
+	const var_na *pgm = git_pager(the_repository, 1);
 
-	if (!pgm)
+	အကယ်၍ (!pgm)
 		pgm = "cat";
-	return xstrdup(pgm);
+	ပြန်ပေး xstrdup(pgm);
 }
 
-static char *default_branch(int ident_flag UNUSED)
+static var_na *default_branch(ကိန်းပြည့် ident_flag UNUSED)
 {
-	return repo_default_branch_name(the_repository, 1);
+	ပြန်ပေး repo_default_branch_name(the_repository, 1);
 }
 
-static char *shell_path(int ident_flag UNUSED)
+static var_na *shell_path(ကိန်းပြည့် ident_flag UNUSED)
 {
-	return git_shell_path();
+	ပြန်ပေး git_shell_path();
 }
 
-static char *git_attr_val_system(int ident_flag UNUSED)
+static var_na *git_attr_val_system(ကိန်းပြည့် ident_flag UNUSED)
 {
-	if (git_attr_system_is_enabled()) {
-		char *file = xstrdup(git_attr_system_file());
+	အကယ်၍ (git_attr_system_is_enabled()) {
+		var_na *file = xstrdup(git_attr_system_file());
 		normalize_path_copy(file, file);
-		return file;
+		ပြန်ပေး file;
 	}
-	return NULL;
+	ပြန်ပေး NULL;
 }
 
-static char *git_attr_val_global(int ident_flag UNUSED)
+static var_na *git_attr_val_global(ကိန်းပြည့် ident_flag UNUSED)
 {
-	char *file = xstrdup_or_null(git_attr_global_file());
-	if (file) {
+	var_na *file = xstrdup_or_null(git_attr_global_file());
+	အကယ်၍ (file) {
 		normalize_path_copy(file, file);
-		return file;
+		ပြန်ပေး file;
 	}
-	return NULL;
+	ပြန်ပေး NULL;
 }
 
-static char *git_config_val_system(int ident_flag UNUSED)
+static var_na *git_config_val_system(ကိန်းပြည့် ident_flag UNUSED)
 {
-	if (git_config_system()) {
-		char *file = git_system_config();
+	အကယ်၍ (git_config_system()) {
+		var_na *file = git_system_config();
 		normalize_path_copy(file, file);
-		return file;
+		ပြန်ပေး file;
 	}
-	return NULL;
+	ပြန်ပေး NULL;
 }
 
-static void git_config_val_global(struct string_list *list)
+static void git_config_val_global(sa_nracanaa string_list *list)
 {
-	char *user, *xdg;
+	var_na *user, *xdg;
 
 	git_global_config_paths(&user, &xdg);
-	if (xdg && *xdg) {
+	အကယ်၍ (xdg && *xdg) {
 		normalize_path_copy(xdg, xdg);
 		string_list_append(list, xdg);
 	}
-	if (user && *user) {
+	အကယ်၍ (user && *user) {
 		normalize_path_copy(user, user);
 		string_list_append(list, user);
 	}
@@ -179,12 +179,12 @@ static void git_config_val_global(struct string_list *list)
 	free(user);
 }
 
-struct git_var {
-	const char *name;
-	char *(*read)(int);
-	void (*multiread)(struct string_list *);
+sa_nracanaa git_var {
+	const var_na *name;
+	var_na *(*read)(ကိန်းပြည့်);
+	void (*multiread)(sa_nracanaa string_list *);
 };
-static struct git_var git_vars[] = {
+static sa_nracanaa git_var git_vars[] = {
 	{
 		.name = "GIT_COMMITTER_IDENT",
 		.read = committer,
@@ -259,25 +259,25 @@ static struct git_var git_vars[] = {
 	},
 };
 
-static void list_vars(int nul_term)
+static void list_vars(ကိန်းပြည့် nul_term)
 {
-	struct git_var *ptr;
-	char delim = nul_term ? '\n' : '=';
-	char term = nul_term ? '\0' : '\n';
+	sa_nracanaa git_var *ptr;
+	var_na delim = nul_term ? '\n' : '=';
+	var_na term = nul_term ? '\0' : '\n';
 
-	for (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
-		if (ptr->read) {
-			char *val = ptr->read(0);
+	အတွက် (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
+		အကယ်၍ (ptr->read) {
+			var_na *val = ptr->read(0);
 
-			if (val) {
+			အကယ်၍ (val) {
 				printf("%s%c%s%c", ptr->name, delim, val, term);
 				free(val);
 			}
-		} else {
-			struct string_list list = STRING_LIST_INIT_DUP;
+		} မဟုတ်ပါက {
+			sa_nracanaa string_list list = STRING_LIST_INIT_DUP;
 
 			ptr->multiread(&list);
-			for (size_t i = 0; i < list.nr; i++)
+			အတွက် (size_t i = 0; i < list.nr; i++)
 				printf("%s%c%s%c", ptr->name, delim,
 				       list.items[i].string, term);
 			string_list_clear(&list, 0);
@@ -285,41 +285,41 @@ static void list_vars(int nul_term)
 	}
 }
 
-static const struct git_var *get_git_var(const char *var)
+static const sa_nracanaa git_var *get_git_var(const var_na *var)
 {
-	struct git_var *ptr;
-	for (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
-		if (strcmp(var, ptr->name) == 0) {
-			return ptr;
+	sa_nracanaa git_var *ptr;
+	အတွက် (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
+		အကယ်၍ (strcmp(var, ptr->name) == 0) {
+			ပြန်ပေး ptr;
 		}
 	}
-	return NULL;
+	ပြန်ပေး NULL;
 }
 
-static int show_config(const char *var, const char *value,
-		       const struct config_context *ctx, void *cb)
+static ကိန်းပြည့် show_config(const var_na *var, const var_na *value,
+		       const sa_nracanaa config_context *ctx, void *cb)
 {
-	int *nul_term = cb;
-	char delim = *nul_term ? '\n' : '=';
-	char term = *nul_term ? '\0' : '\n';
+	ကိန်းပြည့် *nul_term = cb;
+	var_na delim = *nul_term ? '\n' : '=';
+	var_na term = *nul_term ? '\0' : '\n';
 
-	if (value)
+	အကယ်၍ (value)
 		printf("%s%c%s%c", var, delim, value, term);
-	else
+	မဟုတ်ပါက
 		printf("%s%c", var, term);
-	return git_default_config(var, value, ctx, cb);
+	ပြန်ပေး git_default_config(var, value, ctx, cb);
 }
 
-int cmd_var(int argc,
-	    const char **argv,
-	    const char *prefix,
-	    struct repository *repo UNUSED)
+ကိန်းပြည့် cmd_var(ကိန်းပြည့် argc,
+	    const var_na **argv,
+	    const var_na *prefix,
+	    sa_nracanaa repository *repo UNUSED)
 {
-	int list = 0;
-	int nul_term = 0;
-	char delim;
-	char term;
-	struct option options[] = {
+	ကိန်းပြည့် list = 0;
+	ကိန်းပြည့် nul_term = 0;
+	var_na delim;
+	var_na term;
+	sa_nracanaa option options[] = {
 		OPT_BOOL('l', NULL, &list,
 			 N_("list all variables")),
 		OPT_BOOL('z', NULL, &nul_term,
@@ -330,15 +330,15 @@ int cmd_var(int argc,
 	argc = parse_options(argc, argv, prefix, options,
 			     var_usage, PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (list) {
-		if (argc)
+	အကယ်၍ (list) {
+		အကယ်၍ (argc)
 			usage_with_options(var_usage, options);
 		repo_config(the_repository, show_config, &nul_term);
 		list_vars(nul_term);
-		return 0;
+		ပြန်ပေး 0;
 	}
 
-	if (!argc)
+	အကယ်၍ (!argc)
 		usage_with_options(var_usage, options);
 
 	repo_config(the_repository, git_default_config, NULL);
@@ -346,39 +346,39 @@ int cmd_var(int argc,
 	delim = nul_term ? '\n' : '=';
 	term = nul_term ? '\0' : '\n';
 
-	for (int i = 0; i < argc; i++) {
-		const struct git_var *git_var = get_git_var(argv[i]);
+	အတွက် (ကိန်းပြည့် i = 0; i < argc; i++) {
+		const sa_nracanaa git_var *git_var = get_git_var(argv[i]);
 
-		if (!git_var)
+		အကယ်၍ (!git_var)
 			usage_with_options(var_usage, options);
 
-		if (git_var->read) {
-			char *val = git_var->read(IDENT_STRICT);
+		အကယ်၍ (git_var->read) {
+			var_na *val = git_var->read(IDENT_STRICT);
 
-			if (!val) {
-				if (argc == 1)
-					return 1;
+			အကယ်၍ (!val) {
+				အကယ်၍ (argc == 1)
+					ပြန်ပေး 1;
 				continue;
 			}
-			if (argc == 1)
+			အကယ်၍ (argc == 1)
 				printf("%s%c", val, term);
-			else
+			မဟုတ်ပါက
 				printf("%s%c%s%c", git_var->name, delim,
 				       val, term);
 			free(val);
-		} else {
-			struct string_list list = STRING_LIST_INIT_DUP;
+		} မဟုတ်ပါက {
+			sa_nracanaa string_list list = STRING_LIST_INIT_DUP;
 
 			git_var->multiread(&list);
-			if (argc == 1 && !list.nr) {
+			အကယ်၍ (argc == 1 && !list.nr) {
 				string_list_clear(&list, 0);
-				return 1;
+				ပြန်ပေး 1;
 			}
-			for (size_t j = 0; j < list.nr; j++) {
-				if (argc == 1)
+			အတွက် (size_t j = 0; j < list.nr; j++) {
+				အကယ်၍ (argc == 1)
 					printf("%s%c", list.items[j].string,
 					       term);
-				else
+				မဟုတ်ပါက
 					printf("%s%c%s%c", git_var->name, delim,
 					       list.items[j].string, term);
 			}
@@ -386,5 +386,5 @@ int cmd_var(int argc,
 		}
 	}
 
-	return 0;
+	ပြန်ပေး 0;
 }

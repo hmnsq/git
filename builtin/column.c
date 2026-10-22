@@ -7,28 +7,28 @@
 #include "string-list.h"
 #include "column.h"
 
-static const char * const builtin_column_usage[] = {
+static const var_na * const builtin_column_usage[] = {
 	N_("git column [<options>]"),
 	NULL
 };
-static unsigned int colopts;
+static unsigned ကိန်းပြည့် colopts;
 
-static int column_config(const char *var, const char *value,
-			 const struct config_context *ctx UNUSED, void *cb)
+static ကိန်းပြည့် column_config(const var_na *var, const var_na *value,
+			 const sa_nracanaa config_context *ctx UNUSED, void *cb)
 {
-	return git_column_config(var, value, cb, &colopts);
+	ပြန်ပေး git_column_config(var, value, cb, &colopts);
 }
 
-int cmd_column(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+ကိန်းပြည့် cmd_column(ကိန်းပြည့် argc,
+	       const var_na **argv,
+	       const var_na *prefix,
+	       sa_nracanaa repository *repo UNUSED)
 {
-	struct string_list list = STRING_LIST_INIT_DUP;
-	struct strbuf sb = STRBUF_INIT;
-	struct column_options copts;
-	const char *command = NULL, *real_command = NULL;
-	struct option options[] = {
+	sa_nracanaa string_list list = STRING_LIST_INIT_DUP;
+	sa_nracanaa strbuf sb = STRBUF_INIT;
+	sa_nracanaa column_options copts;
+	const var_na *command = NULL, *real_command = NULL;
+	sa_nracanaa option options[] = {
 		OPT_STRING(0, "command", &real_command, N_("name"), N_("lookup config vars")),
 		OPT_COLUMN(0, "mode", &colopts, N_("layout to use")),
 		OPT_UNSIGNED(0, "raw-mode", &colopts, N_("layout to use")),
@@ -40,29 +40,29 @@ int cmd_column(int argc,
 	};
 
 	/* This one is special and must be the first one */
-	if (argc > 1 && starts_with(argv[1], "--command=")) {
+	အကယ်၍ (argc > 1 && starts_with(argv[1], "--command=")) {
 		command = argv[1] + 10;
 		repo_config(the_repository, column_config, (void *)command);
-	} else
+	} မဟုတ်ပါက
 		repo_config(the_repository, column_config, NULL);
 
-	memset(&copts, 0, sizeof(copts));
+	memset(&copts, 0, parimaa_na(copts));
 	copts.padding = 1;
 	argc = parse_options(argc, argv, prefix, options, builtin_column_usage, 0);
-	if (copts.padding < 0)
+	အကယ်၍ (copts.padding < 0)
 		die(_("%s must be non-negative"), "--padding");
-	if (argc)
+	အကယ်၍ (argc)
 		usage_with_options(builtin_column_usage, options);
-	if (real_command || command) {
-		if (!real_command || !command || strcmp(real_command, command))
+	အကယ်၍ (real_command || command) {
+		အကယ်၍ (!real_command || !command || strcmp(real_command, command))
 			die(_("--command must be the first argument"));
 	}
 	finalize_colopts(&colopts, -1);
-	while (!strbuf_getline(&sb, stdin))
+	နေစဉ် (!strbuf_getline(&sb, stdin))
 		string_list_append(&list, sb.buf);
 
 	print_columns(&list, colopts, &copts);
 	strbuf_release(&sb);
 	string_list_clear(&list, 0);
-	return 0;
+	ပြန်ပေး 0;
 }

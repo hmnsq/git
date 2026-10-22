@@ -64,7 +64,7 @@
 	"\n" \
 	"    git worktree add --orphan %s\n")
 
-static const char * const git_worktree_usage[] = {
+static const var_na * const git_worktree_usage[] = {
 	BUILTIN_WORKTREE_ADD_USAGE,
 	BUILTIN_WORKTREE_LIST_USAGE,
 	BUILTIN_WORKTREE_LOCK_USAGE,
@@ -76,159 +76,159 @@ static const char * const git_worktree_usage[] = {
 	NULL
 };
 
-static const char * const git_worktree_add_usage[] = {
+static const var_na * const git_worktree_add_usage[] = {
 	BUILTIN_WORKTREE_ADD_USAGE,
 	NULL,
 };
 
-static const char * const git_worktree_list_usage[] = {
+static const var_na * const git_worktree_list_usage[] = {
 	BUILTIN_WORKTREE_LIST_USAGE,
 	NULL
 };
 
-static const char * const git_worktree_lock_usage[] = {
+static const var_na * const git_worktree_lock_usage[] = {
 	BUILTIN_WORKTREE_LOCK_USAGE,
 	NULL
 };
 
-static const char * const git_worktree_move_usage[] = {
+static const var_na * const git_worktree_move_usage[] = {
 	BUILTIN_WORKTREE_MOVE_USAGE,
 	NULL
 };
 
-static const char * const git_worktree_prune_usage[] = {
+static const var_na * const git_worktree_prune_usage[] = {
 	BUILTIN_WORKTREE_PRUNE_USAGE,
 	NULL
 };
 
-static const char * const git_worktree_remove_usage[] = {
+static const var_na * const git_worktree_remove_usage[] = {
 	BUILTIN_WORKTREE_REMOVE_USAGE,
 	NULL
 };
 
-static const char * const git_worktree_repair_usage[] = {
+static const var_na * const git_worktree_repair_usage[] = {
 	BUILTIN_WORKTREE_REPAIR_USAGE,
 	NULL
 };
 
-static const char * const git_worktree_unlock_usage[] = {
+static const var_na * const git_worktree_unlock_usage[] = {
 	BUILTIN_WORKTREE_UNLOCK_USAGE,
 	NULL
 };
 
-struct add_opts {
-	int force;
-	int detach;
-	int quiet;
-	int checkout;
-	int orphan;
-	int relative_paths;
-	const char *keep_locked;
+sa_nracanaa add_opts {
+	ကိန်းပြည့် force;
+	ကိန်းပြည့် detach;
+	ကိန်းပြည့် quiet;
+	ကိန်းပြည့် checkout;
+	ကိန်းပြည့် orphan;
+	ကိန်းပြည့် relative_paths;
+	const var_na *keep_locked;
 };
 
-static int show_only;
-static int verbose;
-static int guess_remote;
-static int use_relative_paths;
+static ကိန်းပြည့် show_only;
+static ကိန်းပြည့် verbose;
+static ကိန်းပြည့် guess_remote;
+static ကိန်းပြည့် use_relative_paths;
 static timestamp_t expire;
 
-static int git_worktree_config(const char *var, const char *value,
-			       const struct config_context *ctx, void *cb)
+static ကိန်းပြည့် git_worktree_config(const var_na *var, const var_na *value,
+			       const sa_nracanaa config_context *ctx, void *cb)
 {
-	if (!strcmp(var, "worktree.guessremote")) {
+	အကယ်၍ (!strcmp(var, "worktree.guessremote")) {
 		guess_remote = git_config_bool(var, value);
-		return 0;
-	} else if (!strcmp(var, "worktree.userelativepaths")) {
+		ပြန်ပေး 0;
+	} မဟုတ်ပါက အကယ်၍ (!strcmp(var, "worktree.userelativepaths")) {
 		use_relative_paths = git_config_bool(var, value);
-		return 0;
+		ပြန်ပေး 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	ပြန်ပေး git_default_config(var, value, ctx, cb);
 }
 
-static int delete_git_dir(const char *id)
+static ကိန်းပြည့် delete_git_dir(const var_na *id)
 {
-	struct strbuf sb = STRBUF_INIT;
-	int ret;
+	sa_nracanaa strbuf sb = STRBUF_INIT;
+	ကိန်းပြည့် ret;
 
 	repo_common_path_append(the_repository, &sb, "worktrees/%s", id);
 	ret = remove_dir_recursively(&sb, 0);
-	if (ret < 0 && errno == ENOTDIR)
+	အကယ်၍ (ret < 0 && errno == ENOTDIR)
 		ret = unlink(sb.buf);
-	if (ret)
+	အကယ်၍ (ret)
 		error_errno(_("failed to delete '%s'"), sb.buf);
 	strbuf_release(&sb);
-	return ret;
+	ပြန်ပေး ret;
 }
 
 static void delete_worktrees_dir_if_empty(void)
 {
-	char *path = repo_git_path(the_repository, "worktrees");
+	var_na *path = repo_git_path(the_repository, "worktrees");
 	rmdir(path); /* ignore failed removal */
 	free(path);
 }
 
-static void prune_worktree(const char *id, const char *reason)
+static void prune_worktree(const var_na *id, const var_na *reason)
 {
-	if (show_only || verbose)
+	အကယ်၍ (show_only || verbose)
 		fprintf_ln(stderr, _("Removing %s/%s: %s"), "worktrees", id, reason);
-	if (!show_only)
+	အကယ်၍ (!show_only)
 		delete_git_dir(id);
 }
 
-static int prune_cmp(const void *a, const void *b)
+static ကိန်းပြည့် prune_cmp(const void *a, const void *b)
 {
-	const struct string_list_item *x = a;
-	const struct string_list_item *y = b;
-	int c;
+	const sa_nracanaa string_list_item *x = a;
+	const sa_nracanaa string_list_item *y = b;
+	ကိန်းပြည့် c;
 
-	if ((c = fspathcmp(x->string, y->string)))
-	    return c;
+	အကယ်၍ ((c = fspathcmp(x->string, y->string)))
+	    ပြန်ပေး c;
 	/*
 	 * paths same; prune_dupes() removes all but the first worktree entry
 	 * having the same path, so sort main worktree ('util' is NULL) above
 	 * linked worktrees ('util' not NULL) since main worktree can't be
 	 * removed
 	 */
-	if (!x->util)
-		return -1;
-	if (!y->util)
-		return 1;
+	အကယ်၍ (!x->util)
+		ပြန်ပေး -1;
+	အကယ်၍ (!y->util)
+		ပြန်ပေး 1;
 	/* paths same; sort by .git/worktrees/<id> */
-	return strcmp(x->util, y->util);
+	ပြန်ပေး strcmp(x->util, y->util);
 }
 
-static void prune_dups(struct string_list *l)
+static void prune_dups(sa_nracanaa string_list *l)
 {
-	int i;
+	ကိန်းပြည့် i;
 
 	QSORT(l->items, l->nr, prune_cmp);
-	for (i = 1; i < l->nr; i++) {
-		if (!fspathcmp(l->items[i].string, l->items[i - 1].string))
+	အတွက် (i = 1; i < l->nr; i++) {
+		အကယ်၍ (!fspathcmp(l->items[i].string, l->items[i - 1].string))
 			prune_worktree(l->items[i].util, "duplicate entry");
 	}
 }
 
 static void prune_worktrees(void)
 {
-	struct strbuf reason = STRBUF_INIT;
-	struct strbuf main_path = STRBUF_INIT;
-	struct string_list kept = STRING_LIST_INIT_DUP;
-	char *path;
+	sa_nracanaa strbuf reason = STRBUF_INIT;
+	sa_nracanaa strbuf main_path = STRBUF_INIT;
+	sa_nracanaa string_list kept = STRING_LIST_INIT_DUP;
+	var_na *path;
 	DIR *dir;
-	struct dirent *d;
+	sa_nracanaa dirent *d;
 
 	path = repo_git_path(the_repository, "worktrees");
 	dir = opendir(path);
 	free(path);
-	if (!dir)
-		return;
-	while ((d = readdir_skip_dot_and_dotdot(dir)) != NULL) {
-		char *path;
+	အကယ်၍ (!dir)
+		ပြန်ပေး;
+	နေစဉ် ((d = readdir_skip_dot_and_dotdot(dir)) != NULL) {
+		var_na *path;
 		strbuf_reset(&reason);
-		if (should_prune_worktree(the_repository, d->d_name, &reason, &path, expire))
+		အကယ်၍ (should_prune_worktree(the_repository, d->d_name, &reason, &path, expire))
 			prune_worktree(d->d_name, reason.buf);
-		else if (path)
+		မဟုတ်ပါက အကယ်၍ (path)
 			string_list_append_nodup(&kept, path)->util = xstrdup(d->d_name);
 	}
 	closedir(dir);
@@ -240,15 +240,15 @@ static void prune_worktrees(void)
 	prune_dups(&kept);
 	string_list_clear(&kept, 1);
 
-	if (!show_only)
+	အကယ်၍ (!show_only)
 		delete_worktrees_dir_if_empty();
 	strbuf_release(&reason);
 }
 
-static int prune(int ac, const char **av, const char *prefix,
-		 struct repository *repo UNUSED)
+static ကိန်းပြည့် prune(ကိန်းပြည့် ac, const var_na **av, const var_na *prefix,
+		 sa_nracanaa repository *repo UNUSED)
 {
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT__DRY_RUN(&show_only, N_("do not remove, show only")),
 		OPT__VERBOSE(&verbose, N_("report pruned working trees")),
 		OPT_EXPIRY_DATE(0, "expire", &expire,
@@ -259,93 +259,93 @@ static int prune(int ac, const char **av, const char *prefix,
 	expire = TIME_MAX;
 	ac = parse_options(ac, av, prefix, options, git_worktree_prune_usage,
 			   0);
-	if (ac)
+	အကယ်၍ (ac)
 		usage_with_options(git_worktree_prune_usage, options);
 	prune_worktrees();
-	return 0;
+	ပြန်ပေး 0;
 }
 
-static char *junk_work_tree;
-static char *junk_git_dir;
-static int is_junk;
+static var_na *junk_work_tree;
+static var_na *junk_git_dir;
+static ကိန်းပြည့် is_junk;
 static pid_t junk_pid;
 
 static void remove_junk(void)
 {
-	struct strbuf sb = STRBUF_INIT;
-	if (!is_junk || getpid() != junk_pid)
-		return;
-	if (junk_git_dir) {
+	sa_nracanaa strbuf sb = STRBUF_INIT;
+	အကယ်၍ (!is_junk || getpid() != junk_pid)
+		ပြန်ပေး;
+	အကယ်၍ (junk_git_dir) {
 		strbuf_addstr(&sb, junk_git_dir);
 		remove_dir_recursively(&sb, 0);
 		strbuf_reset(&sb);
 	}
-	if (junk_work_tree) {
+	အကယ်၍ (junk_work_tree) {
 		strbuf_addstr(&sb, junk_work_tree);
 		remove_dir_recursively(&sb, 0);
 	}
 	strbuf_release(&sb);
 }
 
-static void remove_junk_on_signal(int signo)
+static void remove_junk_on_signal(ကိန်းပြည့် signo)
 {
 	remove_junk();
 	sigchain_pop(signo);
 	raise(signo);
 }
 
-static char *worktree_basename_dup(const char *path)
+static var_na *worktree_basename_dup(const var_na *path)
 {
-	const char *name;
-	int len;
+	const var_na *name;
+	ကိန်းပြည့် len;
 
 	len = strlen(path);
-	while (len && is_dir_sep(path[len - 1]))
+	နေစဉ် (len && is_dir_sep(path[len - 1]))
 		len--;
 
 	name = path + len;
-	while (name > path && !is_dir_sep(name[-1]))
+	နေစဉ် (name > path && !is_dir_sep(name[-1]))
 		name--;
 
-	return xmemdupz(name, path + len - name);
+	ပြန်ပေး xmemdupz(name, path + len - name);
 }
 
 /* check that path is viable location for worktree */
-static void check_candidate_path(const char *path,
-				 int force,
-				 struct worktree **worktrees,
-				 const char *cmd)
+static void check_candidate_path(const var_na *path,
+				 ကိန်းပြည့် force,
+				 sa_nracanaa worktree **worktrees,
+				 const var_na *cmd)
 {
-	struct worktree *wt;
-	int locked;
+	sa_nracanaa worktree *wt;
+	ကိန်းပြည့် locked;
 
-	if (file_exists(path) && !is_empty_dir(path))
+	အကယ်၍ (file_exists(path) && !is_empty_dir(path))
 		die(_("'%s' already exists"), path);
 
 	wt = find_worktree_by_path(worktrees, path);
-	if (!wt)
-		return;
+	အကယ်၍ (!wt)
+		ပြန်ပေး;
 
 	locked = !!worktree_lock_reason(wt);
-	if ((!locked && force) || (locked && force > 1)) {
-		if (delete_git_dir(wt->id))
+	အကယ်၍ ((!locked && force) || (locked && force > 1)) {
+		အကယ်၍ (delete_git_dir(wt->id))
 		    die(_("unusable worktree destination '%s'"), path);
-		return;
+		ပြန်ပေး;
 	}
 
-	if (locked)
+	အကယ်၍ (locked)
 		die(_("'%s' is a missing but locked worktree;\nuse '%s -f -f' to override, or 'unlock' and 'prune' or 'remove' to clear"), path, cmd);
-	else
+	မဟုတ်ပါက
 		die(_("'%s' is a missing but already registered worktree;\nuse '%s -f' to override, or 'prune' or 'remove' to clear"), path, cmd);
 }
 
-static void copy_sparse_checkout(const char *worktree_git_dir)
+static void copy_sparse_checkout(const var_na *worktree_git_dir)
 {
-	char *from_file = repo_git_path(the_repository, "info/sparse-checkout");
-	char *to_file = xstrfmt("%s/info/sparse-checkout", worktree_git_dir);
+	var_na *from_file = repo_git_path(the_repository, "info/sparse-checkout");
+	var_na *to_file = xstrfmt("%s/info/sparse-checkout", worktree_git_dir);
 
-	if (file_exists(from_file)) {
-		if (safe_create_leading_directories(the_repository, to_file) ||
+	အကယ်၍ (file_exists(from_file)) {
+		အကယ်၍ (safe_create_leading_directories(the_repository, to_file) ||
 			copy_file(the_repository, to_file, from_file, 0666))
 			error(_("failed to copy '%s' to '%s'; sparse-checkout may not work correctly"),
 				from_file, to_file);
@@ -355,16 +355,16 @@ static void copy_sparse_checkout(const char *worktree_git_dir)
 	free(to_file);
 }
 
-static void copy_filtered_worktree_config(const char *worktree_git_dir)
+static void copy_filtered_worktree_config(const var_na *worktree_git_dir)
 {
-	char *from_file = repo_git_path(the_repository, "config.worktree");
-	char *to_file = xstrfmt("%s/config.worktree", worktree_git_dir);
+	var_na *from_file = repo_git_path(the_repository, "config.worktree");
+	var_na *to_file = xstrfmt("%s/config.worktree", worktree_git_dir);
 
-	if (file_exists(from_file)) {
-		struct config_set cs = { { 0 } };
-		int bare;
+	အကယ်၍ (file_exists(from_file)) {
+		sa_nracanaa config_set cs = { { 0 } };
+		ကိန်းပြည့် bare;
 
-		if (safe_create_leading_directories(the_repository, to_file) ||
+		အကယ်၍ (safe_create_leading_directories(the_repository, to_file) ||
 			copy_file(the_repository, to_file, from_file, 0666)) {
 			error(_("failed to copy worktree config from '%s' to '%s'"),
 				from_file, to_file);
@@ -374,13 +374,13 @@ static void copy_filtered_worktree_config(const char *worktree_git_dir)
 		git_configset_init(&cs);
 		git_configset_add_file(&cs, from_file);
 
-		if (!git_configset_get_bool(&cs, "core.bare", &bare) &&
+		အကယ်၍ (!git_configset_get_bool(&cs, "core.bare", &bare) &&
 			bare &&
 			repo_config_set_multivar_in_file_gently(the_repository,
 				to_file, "core.bare", NULL, "true", NULL, 0))
 			error(_("failed to unset '%s' in '%s'"),
 				"core.bare", to_file);
-		if (!git_configset_get(&cs, "core.worktree") &&
+		အကယ်၍ (!git_configset_get(&cs, "core.worktree") &&
 			repo_config_set_in_file_gently(the_repository, to_file,
 						       "core.worktree", NULL, NULL))
 			error(_("failed to unset '%s' in '%s'"),
@@ -394,32 +394,32 @@ worktree_copy_cleanup:
 	free(to_file);
 }
 
-static int checkout_worktree(const struct add_opts *opts,
-			     struct strvec *child_env)
+static ကိန်းပြည့် checkout_worktree(const sa_nracanaa add_opts *opts,
+			     sa_nracanaa strvec *child_env)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process cp = CHILD_PROCESS_INIT;
 	cp.git_cmd = 1;
 	strvec_pushl(&cp.args, "reset", "--hard", "--no-recurse-submodules", NULL);
-	if (opts->quiet)
+	အကယ်၍ (opts->quiet)
 		strvec_push(&cp.args, "--quiet");
 	strvec_pushv(&cp.env, child_env->v);
-	return run_command(&cp);
+	ပြန်ပေး run_command(&cp);
 }
 
-static int make_worktree_orphan(const char * ref, const struct add_opts *opts,
-				struct strvec *child_env)
+static ကိန်းပြည့် make_worktree_orphan(const var_na * ref, const sa_nracanaa add_opts *opts,
+				sa_nracanaa strvec *child_env)
 {
-	struct strbuf symref = STRBUF_INIT;
-	struct child_process cp = CHILD_PROCESS_INIT;
+	sa_nracanaa strbuf symref = STRBUF_INIT;
+	sa_nracanaa child_process cp = CHILD_PROCESS_INIT;
 
 	validate_new_branchname(ref, &symref, 0);
 	strvec_pushl(&cp.args, "symbolic-ref", "HEAD", symref.buf, NULL);
-	if (opts->quiet)
+	အကယ်၍ (opts->quiet)
 		strvec_push(&cp.args, "--quiet");
 	strvec_pushv(&cp.env, child_env->v);
 	strbuf_release(&symref);
 	cp.git_cmd = 1;
-	return run_command(&cp);
+	ပြန်ပေး run_command(&cp);
 }
 
 /*
@@ -430,16 +430,16 @@ static int make_worktree_orphan(const char * ref, const struct add_opts *opts,
  * Create the necessary folder structure to facilitate the same. But to ensure
  * that the former path is still considered a Git directory, add stubs.
  */
-static void setup_alternate_ref_dir(struct worktree *wt, const char *wt_git_path)
+static void setup_alternate_ref_dir(sa_nracanaa worktree *wt, const var_na *wt_git_path)
 {
-	struct strbuf sb = STRBUF_INIT;
-	char *path;
+	sa_nracanaa strbuf sb = STRBUF_INIT;
+	var_na *path;
 
 	path = wt->repo->ref_storage_payload;
-	if (!path)
-		return;
+	အကယ်၍ (!path)
+		ပြန်ပေး;
 
-	if (!is_absolute_path(path))
+	အကယ်၍ (!is_absolute_path(path))
 		strbuf_addf(&sb, "%s/", wt->repo->commondir);
 
 	strbuf_addf(&sb, "%s/worktrees", path);
@@ -455,23 +455,23 @@ static void setup_alternate_ref_dir(struct worktree *wt, const char *wt_git_path
 	strbuf_release(&sb);
 }
 
-static int add_worktree(const char *path, const char *refname,
-			const struct add_opts *opts)
+static ကိန်းပြည့် add_worktree(const var_na *path, const var_na *refname,
+			const sa_nracanaa add_opts *opts)
 {
-	struct strbuf sb_git = STRBUF_INIT, sb_repo = STRBUF_INIT;
-	struct strbuf sb = STRBUF_INIT;
-	const char *name;
-	char *name_to_free = NULL;
-	struct strvec child_env = STRVEC_INIT;
-	unsigned int counter = 0;
-	int len, ret;
-	struct strbuf symref = STRBUF_INIT;
-	struct commit *commit = NULL;
-	int is_branch = 0;
-	struct strbuf sb_name = STRBUF_INIT;
-	struct worktree **worktrees, *wt = NULL;
-	struct ref_store *wt_refs;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	sa_nracanaa strbuf sb_git = STRBUF_INIT, sb_repo = STRBUF_INIT;
+	sa_nracanaa strbuf sb = STRBUF_INIT;
+	const var_na *name;
+	var_na *name_to_free = NULL;
+	sa_nracanaa strvec child_env = STRVEC_INIT;
+	unsigned ကိန်းပြည့် counter = 0;
+	ကိန်းပြည့် len, ret;
+	sa_nracanaa strbuf symref = STRBUF_INIT;
+	sa_nracanaa commit *commit = NULL;
+	ကိန်းပြည့် is_branch = 0;
+	sa_nracanaa strbuf sb_name = STRBUF_INIT;
+	sa_nracanaa worktree **worktrees, *wt = NULL;
+	sa_nracanaa ref_store *wt_refs;
+	sa_nracanaa repo_config_values *cfg = repo_config_values(the_repository);
 
 	worktrees = get_worktrees(the_repository);
 	check_candidate_path(path, opts->force, worktrees, "add");
@@ -479,32 +479,32 @@ static int add_worktree(const char *path, const char *refname,
 	worktrees = NULL;
 
 	/* is 'refname' a branch or commit? */
-	if (!opts->detach && !check_branch_ref(the_repository, &symref, refname) &&
+	အကယ်၍ (!opts->detach && !check_branch_ref(the_repository, &symref, refname) &&
 	    refs_ref_exists(get_main_ref_store(the_repository), symref.buf)) {
 		is_branch = 1;
-		if (!opts->force)
+		အကယ်၍ (!opts->force)
 			die_if_checked_out(symref.buf, 0);
 	}
 	commit = lookup_commit_reference_by_name(refname);
-	if (!commit && !opts->orphan)
+	အကယ်၍ (!commit && !opts->orphan)
 		die(_("invalid reference: %s"), refname);
 
 	name = name_to_free = worktree_basename_dup(path);
-	if (!*name)
+	အကယ်၍ (!*name)
 		die(_("invalid path '%s'"), path);
 	sanitize_refname_component(name, &sb_name);
-	if (!sb_name.len)
+	အကယ်၍ (!sb_name.len)
 		BUG("How come '%s' becomes empty after sanitization?", name);
 	name = sb_name.buf;
 	repo_git_path_replace(the_repository, &sb_repo, "worktrees/%s", name);
 	len = sb_repo.len;
-	if (safe_create_leading_directories_const(the_repository, sb_repo.buf))
+	အကယ်၍ (safe_create_leading_directories_const(the_repository, sb_repo.buf))
 		die_errno(_("could not create leading directories of '%s'"),
 			  sb_repo.buf);
 
-	while (mkdir(sb_repo.buf, 0777)) {
+	နေစဉ် (mkdir(sb_repo.buf, 0777)) {
 		counter++;
-		if ((errno != EEXIST) || !counter /* overflow */)
+		အကယ်၍ ((errno != EEXIST) || !counter /* overflow */)
 			die_errno(_("could not create directory of '%s'"),
 				  sb_repo.buf);
 		strbuf_setlen(&sb_repo, len);
@@ -524,13 +524,13 @@ static int add_worktree(const char *path, const char *refname,
 	 * after the preparation is over.
 	 */
 	strbuf_addf(&sb, "%s/locked", sb_repo.buf);
-	if (opts->keep_locked)
+	အကယ်၍ (opts->keep_locked)
 		write_file(sb.buf, "%s", opts->keep_locked);
-	else
+	မဟုတ်ပါက
 		write_file(sb.buf, _("initializing"));
 
 	strbuf_addf(&sb_git, "%s/.git", path);
-	if (safe_create_leading_directories_const(the_repository, sb_git.buf))
+	အကယ်၍ (safe_create_leading_directories_const(the_repository, sb_git.buf))
 		die_errno(_("could not create leading directories of '%s'"),
 			  sb_git.buf);
 	junk_work_tree = xstrdup(path);
@@ -547,7 +547,7 @@ static int add_worktree(const char *path, const char *refname,
 	 * Set up the ref store of the worktree and create the HEAD reference.
 	 */
 	wt = get_linked_worktree(the_repository, name, 1);
-	if (!wt) {
+	အကယ်၍ (!wt) {
 		ret = error(_("could not find created worktree '%s'"), name);
 		goto done;
 	}
@@ -555,22 +555,22 @@ static int add_worktree(const char *path, const char *refname,
 	wt_refs = get_worktree_ref_store(wt);
 
 	ret = ref_store_create_on_disk(wt_refs, REF_STORE_CREATE_ON_DISK_IS_WORKTREE, &sb);
-	if (ret)
+	အကယ်၍ (ret)
 		goto done;
 
-	if (!is_branch && commit)
+	အကယ်၍ (!is_branch && commit)
 		ret = refs_update_ref(wt_refs, NULL, "HEAD", &commit->object.oid,
 				      NULL, 0, UPDATE_REFS_MSG_ON_ERR);
-	else
+	မဟုတ်ပါက
 		ret = refs_update_symref(wt_refs, "HEAD", symref.buf, NULL);
-	if (ret)
+	အကယ်၍ (ret)
 		goto done;
 
 	/*
 	 * If the current worktree has sparse-checkout enabled, then copy
 	 * the sparse-checkout patterns from the current worktree.
 	 */
-	if (cfg->apply_sparse_checkout)
+	အကယ်၍ (cfg->apply_sparse_checkout)
 		copy_sparse_checkout(sb_repo.buf);
 
 	/*
@@ -578,17 +578,17 @@ static int add_worktree(const char *path, const char *refname,
 	 * values from the current worktree into the new one, that way the
 	 * new worktree behaves the same as this one.
 	 */
-	if (the_repository->repository_format_worktree_config)
+	အကယ်၍ (the_repository->repository_format_worktree_config)
 		copy_filtered_worktree_config(sb_repo.buf);
 
 	strvec_pushf(&child_env, "%s=%s", GIT_DIR_ENVIRONMENT, sb_git.buf);
 	strvec_pushf(&child_env, "%s=%s", GIT_WORK_TREE_ENVIRONMENT, path);
 
-	if (opts->orphan &&
+	အကယ်၍ (opts->orphan &&
 	    (ret = make_worktree_orphan(refname, opts, &child_env)))
 		goto done;
 
-	if (opts->checkout &&
+	အကယ်၍ (opts->checkout &&
 	    (ret = checkout_worktree(opts, &child_env)))
 		goto done;
 
@@ -597,7 +597,7 @@ static int add_worktree(const char *path, const char *refname,
 	FREE_AND_NULL(junk_git_dir);
 
 done:
-	if (ret || !opts->keep_locked) {
+	အကယ်၍ (ret || !opts->keep_locked) {
 		strbuf_reset(&sb);
 		strbuf_addf(&sb, "%s/locked", sb_repo.buf);
 		unlink_or_warn(sb.buf);
@@ -607,8 +607,8 @@ done:
 	 * Hook failure does not warrant worktree deletion, so run hook after
 	 * is_junk is cleared, but do return appropriate code when hook fails.
 	 */
-	if (!ret && opts->checkout && !opts->orphan) {
-		struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT_FORCE_SERIAL;
+	အကယ်၍ (!ret && opts->checkout && !opts->orphan) {
+		sa_nracanaa run_hooks_opt opt = RUN_HOOKS_OPT_INIT_FORCE_SERIAL;
 
 		strvec_pushl(&opt.env, "GIT_DIR", "GIT_WORK_TREE", NULL);
 		strvec_pushl(&opt.args,
@@ -629,33 +629,33 @@ done:
 	strbuf_release(&sb_name);
 	free_worktree(wt);
 	free(name_to_free);
-	return ret;
+	ပြန်ပေး ret;
 }
 
-static void print_preparing_worktree_line(int detach,
-					  const char *branch,
-					  const char *new_branch,
-					  int force_new_branch)
+static void print_preparing_worktree_line(ကိန်းပြည့် detach,
+					  const var_na *branch,
+					  const var_na *new_branch,
+					  ကိန်းပြည့် force_new_branch)
 {
-	if (force_new_branch) {
-		struct commit *commit = lookup_commit_reference_by_name(new_branch);
-		if (!commit)
+	အကယ်၍ (force_new_branch) {
+		sa_nracanaa commit *commit = lookup_commit_reference_by_name(new_branch);
+		အကယ်၍ (!commit)
 			fprintf_ln(stderr, _("Preparing worktree (new branch '%s')"), new_branch);
-		else
+		မဟုတ်ပါက
 			fprintf_ln(stderr, _("Preparing worktree (resetting branch '%s'; was at %s)"),
 				  new_branch,
 				  repo_find_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV));
-	} else if (new_branch) {
+	} မဟုတ်ပါက အကယ်၍ (new_branch) {
 		fprintf_ln(stderr, _("Preparing worktree (new branch '%s')"), new_branch);
-	} else {
-		struct strbuf s = STRBUF_INIT;
-		if (!detach && !check_branch_ref(the_repository, &s, branch) &&
+	} မဟုတ်ပါက {
+		sa_nracanaa strbuf s = STRBUF_INIT;
+		အကယ်၍ (!detach && !check_branch_ref(the_repository, &s, branch) &&
 		    refs_ref_exists(get_main_ref_store(the_repository), s.buf))
 			fprintf_ln(stderr, _("Preparing worktree (checking out '%s')"),
 				  branch);
-		else {
-			struct commit *commit = lookup_commit_reference_by_name(branch);
-			if (!commit)
+		မဟုတ်ပါက {
+			sa_nracanaa commit *commit = lookup_commit_reference_by_name(branch);
+			အကယ်၍ (!commit)
 				BUG("unreachable: invalid reference: %s", branch);
 			fprintf_ln(stderr, _("Preparing worktree (detached HEAD %s)"),
 				  repo_find_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV));
@@ -670,9 +670,9 @@ static void print_preparing_worktree_line(int detach,
  *
  * Returns 0 on failure and non-zero on success.
  */
-static int first_valid_ref(const struct reference *ref UNUSED, void *cb_data UNUSED)
+static ကိန်းပြည့် first_valid_ref(const sa_nracanaa reference *ref UNUSED, void *cb_data UNUSED)
 {
-	return 1;
+	ပြန်ပေး 1;
 }
 
 /**
@@ -687,16 +687,16 @@ static int first_valid_ref(const struct reference *ref UNUSED, void *cb_data UNU
  *
  * Returns 1 if any of the previous checks are true, otherwise returns 0.
  */
-static int can_use_local_refs(const struct add_opts *opts)
+static ကိန်းပြည့် can_use_local_refs(const sa_nracanaa add_opts *opts)
 {
-	if (refs_head_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
-		return 1;
-	} else if (refs_for_each_branch_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
-		if (!opts->quiet)
+	အကယ်၍ (refs_head_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
+		ပြန်ပေး 1;
+	} မဟုတ်ပါက အကယ်၍ (refs_for_each_branch_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
+		အကယ်၍ (!opts->quiet)
 			warning(_("HEAD points to an invalid (or orphaned) reference.\n"));
-		return 1;
+		ပြန်ပေး 1;
 	}
-	return 0;
+	ပြန်ပေး 0;
 }
 
 /**
@@ -712,17 +712,17 @@ static int can_use_local_refs(const struct add_opts *opts)
  *
  * Returns 1 if checks 1. and 2. are true, otherwise 0.
  */
-static int can_use_remote_refs(const struct add_opts *opts)
+static ကိန်းပြည့် can_use_remote_refs(const sa_nracanaa add_opts *opts)
 {
-	if (!guess_remote) {
-		return 0;
-	} else if (refs_for_each_remote_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
-		return 1;
-	} else if (!opts->force && remote_get(NULL)) {
+	အကယ်၍ (!guess_remote) {
+		ပြန်ပေး 0;
+	} မဟုတ်ပါက အကယ်၍ (refs_for_each_remote_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
+		ပြန်ပေး 1;
+	} မဟုတ်ပါက အကယ်၍ (!opts->force && remote_get(NULL)) {
 		die(_("No local or remote refs exist despite at least one remote\n"
 		      "present, stopping; use 'add -f' to override or fetch a remote first"));
 	}
-	return 0;
+	ပြန်ပေး 0;
 }
 
 /**
@@ -743,30 +743,30 @@ static int can_use_remote_refs(const struct add_opts *opts)
  * checked and the repo is in a state that looks like the user added a remote
  * but forgot to fetch (and did not override the warning with -f).
  */
-static int dwim_orphan(const struct add_opts *opts, int opt_track, int remote)
+static ကိန်းပြည့် dwim_orphan(const sa_nracanaa add_opts *opts, ကိန်းပြည့် opt_track, ကိန်းပြည့် remote)
 {
-	if (can_use_local_refs(opts)) {
-		return 0;
-	} else if (remote && can_use_remote_refs(opts)) {
-		return 0;
-	} else if (!opts->quiet) {
+	အကယ်၍ (can_use_local_refs(opts)) {
+		ပြန်ပေး 0;
+	} မဟုတ်ပါက အကယ်၍ (remote && can_use_remote_refs(opts)) {
+		ပြန်ပေး 0;
+	} မဟုတ်ပါက အကယ်၍ (!opts->quiet) {
 		fprintf_ln(stderr, WORKTREE_ADD_DWIM_ORPHAN_INFER_TEXT);
 	}
 
-	if (opt_track) {
+	အကယ်၍ (opt_track) {
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--track");
-	} else if (!opts->checkout) {
+	} မဟုတ်ပါက အကယ်၍ (!opts->checkout) {
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--no-checkout");
 	}
-	return 1;
+	ပြန်ပေး 1;
 }
 
-static void advise_disambiguating_remotes(const char *path, const char *branch,
-					  const struct string_list *matched_remote_names)
+static void advise_disambiguating_remotes(const var_na *path, const var_na *branch,
+					  const sa_nracanaa string_list *matched_remote_names)
 {
-	struct string_list_item *item;
+	sa_nracanaa string_list_item *item;
 
 	advise(_("Branch name '%s' appears in multiple remotes:"), branch);
 	for_each_string_list_item(item, matched_remote_names) {
@@ -782,30 +782,30 @@ static void advise_disambiguating_remotes(const char *path, const char *branch,
 	       branch, path, branch);
 }
 
-static char *dwim_branch(const struct add_opts *opts, const char *path, char **new_branch)
+static var_na *dwim_branch(const sa_nracanaa add_opts *opts, const var_na *path, var_na **new_branch)
 {
-	int branch_exists;
-	char *branchname = worktree_basename_dup(path);
-	struct strbuf ref = STRBUF_INIT;
+	ကိန်းပြည့် branch_exists;
+	var_na *branchname = worktree_basename_dup(path);
+	sa_nracanaa strbuf ref = STRBUF_INIT;
 
 	branch_exists = !check_branch_ref(the_repository, &ref, branchname) &&
 			refs_ref_exists(get_main_ref_store(the_repository),
 					ref.buf);
 	strbuf_release(&ref);
-	if (branch_exists)
-		return branchname;
+	အကယ်၍ (branch_exists)
+		ပြန်ပေး branchname;
 
 	*new_branch = branchname;
-	if (guess_remote) {
-		struct object_id oid;
-		char *remote;
-		int num_matches = 0;
-		struct string_list matched_remote_names = STRING_LIST_INIT_DUP;
+	အကယ်၍ (guess_remote) {
+		sa_nracanaa object_id oid;
+		var_na *remote;
+		ကိန်းပြည့် num_matches = 0;
+		sa_nracanaa string_list matched_remote_names = STRING_LIST_INIT_DUP;
 
 		remote = unique_tracking_name(*new_branch, &oid, &num_matches,
 					      &matched_remote_names);
-		if (!remote && num_matches > 1) {
-			if (!opts->quiet &&
+		အကယ်၍ (!remote && num_matches > 1) {
+			အကယ်၍ (!opts->quiet &&
 			    advice_enabled(ADVICE_CHECKOUT_AMBIGUOUS_REMOTE_BRANCH_NAME))
 				advise_disambiguating_remotes(path, *new_branch,
 							      &matched_remote_names);
@@ -813,26 +813,26 @@ static char *dwim_branch(const struct add_opts *opts, const char *path, char **n
 			    *new_branch, num_matches);
 		}
 		string_list_clear(&matched_remote_names, 0);
-		return remote;
+		ပြန်ပေး remote;
 	}
-	return NULL;
+	ပြန်ပေး NULL;
 }
 
-static int add(int ac, const char **av, const char *prefix,
-	       struct repository *repo UNUSED)
+static ကိန်းပြည့် add(ကိန်းပြည့် ac, const var_na **av, const var_na *prefix,
+	       sa_nracanaa repository *repo UNUSED)
 {
-	struct add_opts opts;
-	const char *new_branch_force = NULL;
-	char *path;
-	const char *branch;
-	char *branch_to_free = NULL;
-	char *new_branch_to_free = NULL;
-	const char *new_branch = NULL;
-	char *opt_track = NULL;
-	const char *lock_reason = NULL;
-	int keep_locked = 0;
-	int used_new_branch_options;
-	struct option options[] = {
+	sa_nracanaa add_opts opts;
+	const var_na *new_branch_force = NULL;
+	var_na *path;
+	const var_na *branch;
+	var_na *branch_to_free = NULL;
+	var_na *new_branch_to_free = NULL;
+	const var_na *new_branch = NULL;
+	var_na *opt_track = NULL;
+	const var_na *lock_reason = NULL;
+	ကိန်းပြည့် keep_locked = 0;
+	ကိန်းပြည့် used_new_branch_options;
+	sa_nracanaa option options[] = {
 		OPT__FORCE(&opts.force,
 			   N_("checkout <branch> even if already checked out in other worktree"),
 			   PARSE_OPT_NOCOMPLETE),
@@ -856,95 +856,95 @@ static int add(int ac, const char **av, const char *prefix,
 			 N_("use relative paths for worktrees")),
 		OPT_END()
 	};
-	int ret;
+	ကိန်းပြည့် ret;
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, parimaa_na(opts));
 	opts.checkout = 1;
 	opts.relative_paths = use_relative_paths;
 	ac = parse_options(ac, av, prefix, options, git_worktree_add_usage, 0);
-	if (!!opts.detach + !!new_branch + !!new_branch_force > 1)
+	အကယ်၍ (!!opts.detach + !!new_branch + !!new_branch_force > 1)
 		die(_("options '%s', '%s', and '%s' cannot be used together"), "-b", "-B", "--detach");
-	if (opts.detach && opts.orphan)
+	အကယ်၍ (opts.detach && opts.orphan)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--detach");
-	if (opts.orphan && opt_track)
+	အကယ်၍ (opts.orphan && opt_track)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--track");
-	if (opts.orphan && !opts.checkout)
+	အကယ်၍ (opts.orphan && !opts.checkout)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--no-checkout");
-	if (opts.orphan && ac == 2)
+	အကယ်၍ (opts.orphan && ac == 2)
 		die(_("option '%s' and commit-ish cannot be used together"),
 		    "--orphan");
-	if (lock_reason && !keep_locked)
+	အကယ်၍ (lock_reason && !keep_locked)
 		die(_("the option '%s' requires '%s'"), "--reason", "--lock");
-	if (lock_reason)
+	အကယ်၍ (lock_reason)
 		opts.keep_locked = lock_reason;
-	else if (keep_locked)
+	မဟုတ်ပါက အကယ်၍ (keep_locked)
 		opts.keep_locked = _("added with --lock");
 
-	if (ac < 1 || ac > 2)
+	အကယ်၍ (ac < 1 || ac > 2)
 		usage_with_options(git_worktree_add_usage, options);
 
 	path = prefix_filename(prefix, av[0]);
 	branch = ac < 2 ? "HEAD" : av[1];
 	used_new_branch_options = new_branch || new_branch_force;
 
-	if (!strcmp(branch, "-"))
+	အကယ်၍ (!strcmp(branch, "-"))
 		branch = "@{-1}";
 
-	if (new_branch_force) {
-		struct strbuf symref = STRBUF_INIT;
+	အကယ်၍ (new_branch_force) {
+		sa_nracanaa strbuf symref = STRBUF_INIT;
 
 		new_branch = new_branch_force;
 
-		if (!opts.force &&
+		အကယ်၍ (!opts.force &&
 		    !check_branch_ref(the_repository, &symref, new_branch) &&
 		    refs_ref_exists(get_main_ref_store(the_repository), symref.buf))
 			die_if_checked_out(symref.buf, 0);
 		strbuf_release(&symref);
 	}
 
-	if (opts.orphan && !new_branch) {
+	အကယ်၍ (opts.orphan && !new_branch) {
 		new_branch = new_branch_to_free = worktree_basename_dup(path);
-	} else if (opts.orphan) {
+	} မဟုတ်ပါက အကယ်၍ (opts.orphan) {
 		; /* no-op */
-	} else if (opts.detach) {
+	} မဟုတ်ပါက အကယ်၍ (opts.detach) {
 		/* Check HEAD */
-		if (!strcmp(branch, "HEAD"))
+		အကယ်၍ (!strcmp(branch, "HEAD"))
 			can_use_local_refs(&opts);
-	} else if (ac < 2 && new_branch) {
+	} မဟုတ်ပါက အကယ်၍ (ac < 2 && new_branch) {
 		/* DWIM: Infer --orphan when repo has no refs. */
 		opts.orphan = dwim_orphan(&opts, !!opt_track, 0);
-	} else if (ac < 2) {
+	} မဟုတ်ပါက အကယ်၍ (ac < 2) {
 		/* DWIM: Guess branch name from path. */
-		char *s = dwim_branch(&opts, path, &new_branch_to_free);
-		if (s)
+		var_na *s = dwim_branch(&opts, path, &new_branch_to_free);
+		အကယ်၍ (s)
 			branch = branch_to_free = s;
 		new_branch = new_branch_to_free;
 
 		/* DWIM: Infer --orphan when repo has no refs. */
 		opts.orphan = (!s) && dwim_orphan(&opts, !!opt_track, 1);
-	} else if (ac == 2 && new_branch) {
-		if (!strcmp(branch, "HEAD"))
+	} မဟုတ်ပါက အကယ်၍ (ac == 2 && new_branch) {
+		အကယ်၍ (!strcmp(branch, "HEAD"))
 			can_use_local_refs(&opts);
-	} else if (ac == 2) {
-		struct commit *commit;
+	} မဟုတ်ပါက အကယ်၍ (ac == 2) {
+		sa_nracanaa commit *commit;
 
 		commit = lookup_commit_reference_by_name(branch);
-		if (!commit) {
-			struct object_id oid;
-			char *remote;
-			int num_matches = 0;
-			struct string_list matched_remote_names = STRING_LIST_INIT_DUP;
+		အကယ်၍ (!commit) {
+			sa_nracanaa object_id oid;
+			var_na *remote;
+			ကိန်းပြည့် num_matches = 0;
+			sa_nracanaa string_list matched_remote_names = STRING_LIST_INIT_DUP;
 
 			remote = unique_tracking_name(branch, &oid, &num_matches,
 						      &matched_remote_names);
-			if (remote) {
+			အကယ်၍ (remote) {
 				new_branch = branch;
 				branch = new_branch_to_free = remote;
-			} else if (num_matches > 1) {
-				if (!opts.quiet &&
+			} မဟုတ်ပါက အကယ်၍ (num_matches > 1) {
+				အကယ်၍ (!opts.quiet &&
 				    advice_enabled(ADVICE_CHECKOUT_AMBIGUOUS_REMOTE_BRANCH_NAME))
 					advise_disambiguating_remotes(path, branch,
 								      &matched_remote_names);
@@ -954,47 +954,47 @@ static int add(int ac, const char **av, const char *prefix,
 			string_list_clear(&matched_remote_names, 0);
 		}
 
-		if (!strcmp(branch, "HEAD"))
+		အကယ်၍ (!strcmp(branch, "HEAD"))
 			can_use_local_refs(&opts);
 
 	}
 
-	if (!opts.orphan && !lookup_commit_reference_by_name(branch)) {
-		int attempt_hint = !opts.quiet && (ac < 2);
-		if (attempt_hint && used_new_branch_options) {
+	အကယ်၍ (!opts.orphan && !lookup_commit_reference_by_name(branch)) {
+		ကိန်းပြည့် attempt_hint = !opts.quiet && (ac < 2);
+		အကယ်၍ (attempt_hint && used_new_branch_options) {
 			advise_if_enabled(ADVICE_WORKTREE_ADD_ORPHAN,
 				WORKTREE_ADD_ORPHAN_WITH_DASH_B_HINT_TEXT,
 				new_branch, path);
-		} else if (attempt_hint) {
+		} မဟုတ်ပါက အကယ်၍ (attempt_hint) {
 			advise_if_enabled(ADVICE_WORKTREE_ADD_ORPHAN,
 				WORKTREE_ADD_ORPHAN_NO_DASH_B_HINT_TEXT, path);
 		}
 		die(_("invalid reference: %s"), branch);
 	}
 
-	if (!opts.quiet)
+	အကယ်၍ (!opts.quiet)
 		print_preparing_worktree_line(opts.detach, branch, new_branch, !!new_branch_force);
 
-	if (opts.orphan) {
+	အကယ်၍ (opts.orphan) {
 		branch = new_branch;
-	} else if (new_branch) {
-		struct child_process cp = CHILD_PROCESS_INIT;
+	} မဟုတ်ပါက အကယ်၍ (new_branch) {
+		sa_nracanaa child_process cp = CHILD_PROCESS_INIT;
 		cp.git_cmd = 1;
 		strvec_push(&cp.args, "branch");
-		if (new_branch_force)
+		အကယ်၍ (new_branch_force)
 			strvec_push(&cp.args, "--force");
-		if (opts.quiet)
+		အကယ်၍ (opts.quiet)
 			strvec_push(&cp.args, "--quiet");
 		strvec_push(&cp.args, new_branch);
 		strvec_push(&cp.args, branch);
-		if (opt_track)
+		အကယ်၍ (opt_track)
 			strvec_push(&cp.args, opt_track);
-		if (run_command(&cp)) {
+		အကယ်၍ (run_command(&cp)) {
 			ret = -1;
 			goto cleanup;
 		}
 		branch = new_branch;
-	} else if (opt_track) {
+	} မဟုတ်ပါက အကယ်၍ (opt_track) {
 		die(_("--[no-]track can only be used if a new branch is created"));
 	}
 
@@ -1004,134 +1004,134 @@ cleanup:
 	free(opt_track);
 	free(branch_to_free);
 	free(new_branch_to_free);
-	return ret;
+	ပြန်ပေး ret;
 }
 
-static void show_worktree_porcelain(struct worktree *wt, int line_terminator)
+static void show_worktree_porcelain(sa_nracanaa worktree *wt, ကိန်းပြည့် line_terminator)
 {
-	const char *reason;
+	const var_na *reason;
 
 	printf("worktree %s%c", wt->path, line_terminator);
-	if (wt->is_bare)
+	အကယ်၍ (wt->is_bare)
 		printf("bare%c", line_terminator);
-	else {
+	မဟုတ်ပါက {
 		printf("HEAD %s%c", oid_to_hex(&wt->head_oid), line_terminator);
-		if (wt->is_detached)
+		အကယ်၍ (wt->is_detached)
 			printf("detached%c", line_terminator);
-		else if (wt->head_ref)
+		မဟုတ်ပါက အကယ်၍ (wt->head_ref)
 			printf("branch %s%c", wt->head_ref, line_terminator);
 	}
 
 	reason = worktree_lock_reason(wt);
-	if (reason) {
+	အကယ်၍ (reason) {
 		fputs("locked", stdout);
-		if (*reason) {
+		အကယ်၍ (*reason) {
 			fputc(' ', stdout);
 			write_name_quoted(reason, stdout, line_terminator);
-		} else {
+		} မဟုတ်ပါက {
 			fputc(line_terminator, stdout);
 		}
 	}
 
 	reason = worktree_prune_reason(wt, expire);
-	if (reason)
+	အကယ်၍ (reason)
 		printf("prunable %s%c", reason, line_terminator);
 
 	fputc(line_terminator, stdout);
 }
 
-struct worktree_display {
-	char *path;
-	int width;
+sa_nracanaa worktree_display {
+	var_na *path;
+	ကိန်းပြည့် width;
 };
 
-static void show_worktree(struct worktree *wt, struct worktree_display *display,
-			  int path_maxwidth, int abbrev_len)
+static void show_worktree(sa_nracanaa worktree *wt, sa_nracanaa worktree_display *display,
+			  ကိန်းပြည့် path_maxwidth, ကိန်းပြည့် abbrev_len)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *reason;
+	sa_nracanaa strbuf sb = STRBUF_INIT;
+	const var_na *reason;
 
 	strbuf_addf(&sb, "%s%*s", display->path, 1 + path_maxwidth - display->width, "");
-	if (wt->is_bare)
+	အကယ်၍ (wt->is_bare)
 		strbuf_addstr(&sb, "(bare)");
-	else {
+	မဟုတ်ပါက {
 		strbuf_addf(&sb, "%-*s ", abbrev_len,
 				repo_find_unique_abbrev(the_repository, &wt->head_oid, DEFAULT_ABBREV));
-		if (wt->is_detached)
+		အကယ်၍ (wt->is_detached)
 			strbuf_addstr(&sb, "(detached HEAD)");
-		else if (wt->head_ref) {
-			char *ref = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
+		မဟုတ်ပါက အကယ်၍ (wt->head_ref) {
+			var_na *ref = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
 								 wt->head_ref,
 								 0);
 			strbuf_addf(&sb, "[%s]", ref);
 			free(ref);
-		} else
+		} မဟုတ်ပါက
 			strbuf_addstr(&sb, "(error)");
 	}
 
 	reason = worktree_lock_reason(wt);
-	if (verbose && reason && *reason)
+	အကယ်၍ (verbose && reason && *reason)
 		strbuf_addf(&sb, "\n\tlocked: %s", reason);
-	else if (reason)
+	မဟုတ်ပါက အကယ်၍ (reason)
 		strbuf_addstr(&sb, " locked");
 
 	reason = worktree_prune_reason(wt, expire);
-	if (verbose && reason)
+	အကယ်၍ (verbose && reason)
 		strbuf_addf(&sb, "\n\tprunable: %s", reason);
-	else if (reason)
+	မဟုတ်ပါက အကယ်၍ (reason)
 		strbuf_addstr(&sb, " prunable");
 
 	printf("%s\n", sb.buf);
 	strbuf_release(&sb);
 }
 
-static void measure_widths(struct worktree **wt, int *abbrev,
-			   struct worktree_display **d, int *maxwidth)
+static void measure_widths(sa_nracanaa worktree **wt, ကိန်းပြည့် *abbrev,
+			   sa_nracanaa worktree_display **d, ကိန်းပြည့် *maxwidth)
 {
-	int i, display_alloc = 0;
-	struct worktree_display *display = NULL;
-	struct strbuf buf = STRBUF_INIT;
+	ကိန်းပြည့် i, display_alloc = 0;
+	sa_nracanaa worktree_display *display = NULL;
+	sa_nracanaa strbuf buf = STRBUF_INIT;
 
-	for (i = 0; wt[i]; i++) {
-		int sha1_len;
+	အတွက် (i = 0; wt[i]; i++) {
+		ကိန်းပြည့် sha1_len;
 		ALLOC_GROW(display, i + 1, display_alloc);
 		quote_path(wt[i]->path, NULL, &buf, 0);
 		display[i].width = utf8_strwidth(buf.buf);
 		display[i].path = strbuf_detach(&buf, NULL);
 
-		if (display[i].width > *maxwidth)
+		အကယ်၍ (display[i].width > *maxwidth)
 			*maxwidth = display[i].width;
 		sha1_len = strlen(repo_find_unique_abbrev(the_repository, &wt[i]->head_oid, *abbrev));
-		if (sha1_len > *abbrev)
+		အကယ်၍ (sha1_len > *abbrev)
 			*abbrev = sha1_len;
 	}
 	*d = display;
 }
 
-static int pathcmp(const void *a_, const void *b_)
+static ကိန်းပြည့် pathcmp(const void *a_, const void *b_)
 {
-	const struct worktree *const *a = a_;
-	const struct worktree *const *b = b_;
-	return fspathcmp((*a)->path, (*b)->path);
+	const sa_nracanaa worktree *const *a = a_;
+	const sa_nracanaa worktree *const *b = b_;
+	ပြန်ပေး fspathcmp((*a)->path, (*b)->path);
 }
 
-static void pathsort(struct worktree **wt)
+static void pathsort(sa_nracanaa worktree **wt)
 {
-	int n = 0;
-	struct worktree **p = wt;
+	ကိန်းပြည့် n = 0;
+	sa_nracanaa worktree **p = wt;
 
-	while (*p++)
+	နေစဉ် (*p++)
 		n++;
 	QSORT(wt, n, pathcmp);
 }
 
-static int list(int ac, const char **av, const char *prefix,
-		struct repository *repo UNUSED)
+static ကိန်းပြည့် list(ကိန်းပြည့် ac, const var_na **av, const var_na *prefix,
+		sa_nracanaa repository *repo UNUSED)
 {
-	int porcelain = 0;
-	int line_terminator = '\n';
+	ကိန်းပြည့် porcelain = 0;
+	ကိန်းပြည့် line_terminator = '\n';
 
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_BOOL(0, "porcelain", &porcelain, N_("machine-readable output")),
 		OPT__VERBOSE(&verbose, N_("show extended annotations and reasons, if available")),
 		OPT_EXPIRY_DATE(0, "expire", &expire,
@@ -1143,66 +1143,66 @@ static int list(int ac, const char **av, const char *prefix,
 
 	expire = TIME_MAX;
 	ac = parse_options(ac, av, prefix, options, git_worktree_list_usage, 0);
-	if (ac)
+	အကယ်၍ (ac)
 		usage_with_options(git_worktree_list_usage, options);
-	else if (verbose && porcelain)
+	မဟုတ်ပါက အကယ်၍ (verbose && porcelain)
 		die(_("options '%s' and '%s' cannot be used together"), "--verbose", "--porcelain");
-	else if (!line_terminator && !porcelain)
+	မဟုတ်ပါက အကယ်၍ (!line_terminator && !porcelain)
 		die(_("the option '%s' requires '%s'"), "-z", "--porcelain");
-	else {
-		struct worktree **worktrees = get_worktrees(the_repository);
-		int path_maxwidth = 0, abbrev = DEFAULT_ABBREV, i;
-		struct worktree_display *display = NULL;
+	မဟုတ်ပါက {
+		sa_nracanaa worktree **worktrees = get_worktrees(the_repository);
+		ကိန်းပြည့် path_maxwidth = 0, abbrev = DEFAULT_ABBREV, i;
+		sa_nracanaa worktree_display *display = NULL;
 
 		/* sort worktrees by path but keep main worktree at top */
 		pathsort(worktrees + 1);
 
-		if (!porcelain)
+		အကယ်၍ (!porcelain)
 			measure_widths(worktrees, &abbrev,
 				       &display, &path_maxwidth);
 
-		for (i = 0; worktrees[i]; i++) {
-			if (porcelain)
+		အတွက် (i = 0; worktrees[i]; i++) {
+			အကယ်၍ (porcelain)
 				show_worktree_porcelain(worktrees[i],
 							line_terminator);
-			else
+			မဟုတ်ပါက
 				show_worktree(worktrees[i],
 					      &display[i], path_maxwidth, abbrev);
 		}
-		for (i = 0; display && worktrees[i]; i++)
+		အတွက် (i = 0; display && worktrees[i]; i++)
 			free(display[i].path);
 		free(display);
 		free_worktrees(worktrees);
 	}
-	return 0;
+	ပြန်ပေး 0;
 }
 
-static int lock_worktree(int ac, const char **av, const char *prefix,
-			 struct repository *repo UNUSED)
+static ကိန်းပြည့် lock_worktree(ကိန်းပြည့် ac, const var_na **av, const var_na *prefix,
+			 sa_nracanaa repository *repo UNUSED)
 {
-	const char *reason = "", *old_reason;
-	struct option options[] = {
+	const var_na *reason = "", *old_reason;
+	sa_nracanaa option options[] = {
 		OPT_STRING(0, "reason", &reason, N_("string"),
 			   N_("reason for locking")),
 		OPT_END()
 	};
-	struct worktree **worktrees, *wt;
-	char *path;
+	sa_nracanaa worktree **worktrees, *wt;
+	var_na *path;
 
 	ac = parse_options(ac, av, prefix, options, git_worktree_lock_usage, 0);
-	if (ac != 1)
+	အကယ်၍ (ac != 1)
 		usage_with_options(git_worktree_lock_usage, options);
 
 	worktrees = get_worktrees(the_repository);
 	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	အကယ်၍ (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	အကယ်၍ (is_main_worktree(wt))
 		die(_("The main working tree cannot be locked or unlocked"));
 
 	old_reason = worktree_lock_reason(wt);
-	if (old_reason) {
-		if (*old_reason)
+	အကယ်၍ (old_reason) {
+		အကယ်၍ (*old_reason)
 			die(_("'%s' is already locked, reason: %s"),
 			    av[0], old_reason);
 		die(_("'%s' is already locked"), av[0]);
@@ -1213,30 +1213,30 @@ static int lock_worktree(int ac, const char **av, const char *prefix,
 
 	free_worktrees(worktrees);
 	free(path);
-	return 0;
+	ပြန်ပေး 0;
 }
 
-static int unlock_worktree(int ac, const char **av, const char *prefix,
-			   struct repository *repo UNUSED)
+static ကိန်းပြည့် unlock_worktree(ကိန်းပြည့် ac, const var_na **av, const var_na *prefix,
+			   sa_nracanaa repository *repo UNUSED)
 {
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_END()
 	};
-	struct worktree **worktrees, *wt;
-	char *path;
-	int ret;
+	sa_nracanaa worktree **worktrees, *wt;
+	var_na *path;
+	ကိန်းပြည့် ret;
 
 	ac = parse_options(ac, av, prefix, options, git_worktree_unlock_usage, 0);
-	if (ac != 1)
+	အကယ်၍ (ac != 1)
 		usage_with_options(git_worktree_unlock_usage, options);
 
 	worktrees = get_worktrees(the_repository);
 	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	အကယ်၍ (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	အကယ်၍ (is_main_worktree(wt))
 		die(_("The main working tree cannot be locked or unlocked"));
-	if (!worktree_lock_reason(wt))
+	အကယ်၍ (!worktree_lock_reason(wt))
 		die(_("'%s' is not locked"), av[0]);
 
 	path = repo_common_path(the_repository, "worktrees/%s/locked", wt->id);
@@ -1244,56 +1244,56 @@ static int unlock_worktree(int ac, const char **av, const char *prefix,
 
 	free_worktrees(worktrees);
 	free(path);
-	return ret;
+	ပြန်ပေး ret;
 }
 
-static void validate_no_submodules(const struct worktree *wt)
+static void validate_no_submodules(const sa_nracanaa worktree *wt)
 {
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
-	struct strbuf path = STRBUF_INIT;
-	int i, found_submodules = 0;
-	char *wt_gitdir;
+	sa_nracanaa index_state istate = INDEX_STATE_INIT(the_repository);
+	sa_nracanaa strbuf path = STRBUF_INIT;
+	ကိန်းပြည့် i, found_submodules = 0;
+	var_na *wt_gitdir;
 
 	wt_gitdir = get_worktree_git_dir(wt);
 
-	if (is_directory(worktree_git_path(wt, "modules"))) {
+	အကယ်၍ (is_directory(worktree_git_path(wt, "modules"))) {
 		/*
 		 * There could be false positives, e.g. the "modules"
 		 * directory exists but is empty. But it's a rare case and
 		 * this simpler check is probably good enough for now.
 		 */
 		found_submodules = 1;
-	} else if (read_index_from(&istate, worktree_git_path(wt, "index"),
+	} မဟုတ်ပါက အကယ်၍ (read_index_from(&istate, worktree_git_path(wt, "index"),
 				   wt_gitdir) > 0) {
-		for (i = 0; i < istate.cache_nr; i++) {
-			struct cache_entry *ce = istate.cache[i];
-			int err;
+		အတွက် (i = 0; i < istate.cache_nr; i++) {
+			sa_nracanaa cache_entry *ce = istate.cache[i];
+			ကိန်းပြည့် err;
 
-			if (!S_ISGITLINK(ce->ce_mode))
+			အကယ်၍ (!S_ISGITLINK(ce->ce_mode))
 				continue;
 
 			strbuf_reset(&path);
 			strbuf_addf(&path, "%s/%s", wt->path, ce->name);
-			if (!is_submodule_populated_gently(path.buf, &err))
+			အကယ်၍ (!is_submodule_populated_gently(path.buf, &err))
 				continue;
 
 			found_submodules = 1;
-			break;
+			bha_nga;
 		}
 	}
 	discard_index(&istate);
 	strbuf_release(&path);
 	free(wt_gitdir);
 
-	if (found_submodules)
+	အကယ်၍ (found_submodules)
 		die(_("working trees containing submodules cannot be moved or removed"));
 }
 
-static int move_worktree(int ac, const char **av, const char *prefix,
-			 struct repository *repo UNUSED)
+static ကိန်းပြည့် move_worktree(ကိန်းပြည့် ac, const var_na **av, const var_na *prefix,
+			 sa_nracanaa repository *repo UNUSED)
 {
-	int force = 0;
-	struct option options[] = {
+	ကိန်းပြည့် force = 0;
+	sa_nracanaa option options[] = {
 		OPT__FORCE(&force,
 			 N_("force move even if worktree is dirty or locked"),
 			 PARSE_OPT_NOCOMPLETE),
@@ -1301,15 +1301,15 @@ static int move_worktree(int ac, const char **av, const char *prefix,
 			 N_("use relative paths for worktrees")),
 		OPT_END()
 	};
-	struct worktree **worktrees, *wt;
-	struct strbuf dst = STRBUF_INIT;
-	struct strbuf errmsg = STRBUF_INIT;
-	const char *reason = NULL;
-	char *path;
+	sa_nracanaa worktree **worktrees, *wt;
+	sa_nracanaa strbuf dst = STRBUF_INIT;
+	sa_nracanaa strbuf errmsg = STRBUF_INIT;
+	const var_na *reason = NULL;
+	var_na *path;
 
 	ac = parse_options(ac, av, prefix, options, git_worktree_move_usage,
 			   0);
-	if (ac != 2)
+	အကယ်၍ (ac != 2)
 		usage_with_options(git_worktree_move_usage, options);
 
 	path = prefix_filename(prefix, av[1]);
@@ -1318,14 +1318,14 @@ static int move_worktree(int ac, const char **av, const char *prefix,
 
 	worktrees = get_worktrees(the_repository);
 	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	အကယ်၍ (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	အကယ်၍ (is_main_worktree(wt))
 		die(_("'%s' is a main working tree"), av[0]);
-	if (is_directory(dst.buf)) {
-		const char *sep = find_last_dir_sep(wt->path);
+	အကယ်၍ (is_directory(dst.buf)) {
+		const var_na *sep = find_last_dir_sep(wt->path);
 
-		if (!sep)
+		အကယ်၍ (!sep)
 			die(_("could not figure out destination name from '%s'"),
 			    wt->path);
 		strbuf_trim_trailing_dir_sep(&dst);
@@ -1335,27 +1335,27 @@ static int move_worktree(int ac, const char **av, const char *prefix,
 
 	validate_no_submodules(wt);
 
-	if (force < 2)
+	အကယ်၍ (force < 2)
 		reason = worktree_lock_reason(wt);
-	if (reason) {
-		if (*reason)
+	အကယ်၍ (reason) {
+		အကယ်၍ (*reason)
 			die(_("cannot move a locked working tree, lock reason: %s\nuse 'move -f -f' to override or unlock first"),
 			    reason);
 		die(_("cannot move a locked working tree;\nuse 'move -f -f' to override or unlock first"));
 	}
-	if (validate_worktree(wt, &errmsg, 0))
+	အကယ်၍ (validate_worktree(wt, &errmsg, 0))
 		die(_("validation failed, cannot move working tree: %s"),
 		    errmsg.buf);
 	strbuf_release(&errmsg);
 
-	if (rename(wt->path, dst.buf) == -1)
+	အကယ်၍ (rename(wt->path, dst.buf) == -1)
 		die_errno(_("failed to move '%s' to '%s'"), wt->path, dst.buf);
 
 	update_worktree_location(wt, dst.buf, use_relative_paths);
 
 	strbuf_release(&dst);
 	free_worktrees(worktrees);
-	return 0;
+	ပြန်ပေး 0;
 }
 
 /*
@@ -1369,12 +1369,12 @@ static int move_worktree(int ac, const char **av, const char *prefix,
  * it's absolutely safe to do so from _our_ point of view because we
  * know better.
  */
-static void check_clean_worktree(struct worktree *wt,
-				 const char *original_path)
+static void check_clean_worktree(sa_nracanaa worktree *wt,
+				 const var_na *original_path)
 {
-	struct child_process cp;
-	char buf[1];
-	int ret;
+	sa_nracanaa child_process cp;
+	var_na buf[1];
+	ကိန်းပြည့် ret;
 
 	/*
 	 * Until we sort this out, all submodules are "dirty" and
@@ -1394,74 +1394,74 @@ static void check_clean_worktree(struct worktree *wt,
 	cp.dir = wt->path;
 	cp.out = -1;
 	ret = start_command(&cp);
-	if (ret)
+	အကယ်၍ (ret)
 		die_errno(_("failed to run 'git status' on '%s'"),
 			  original_path);
-	ret = xread(cp.out, buf, sizeof(buf));
-	if (ret)
+	ret = xread(cp.out, buf, parimaa_na(buf));
+	အကယ်၍ (ret)
 		die(_("'%s' contains modified or untracked files, use --force to delete it"),
 		    original_path);
 	close(cp.out);
 	ret = finish_command(&cp);
-	if (ret)
+	အကယ်၍ (ret)
 		die_errno(_("failed to run 'git status' on '%s', code %d"),
 			  original_path, ret);
 }
 
-static int delete_git_work_tree(struct worktree *wt)
+static ကိန်းပြည့် delete_git_work_tree(sa_nracanaa worktree *wt)
 {
-	struct strbuf sb = STRBUF_INIT;
-	int ret = 0;
+	sa_nracanaa strbuf sb = STRBUF_INIT;
+	ကိန်းပြည့် ret = 0;
 
 	strbuf_addstr(&sb, wt->path);
-	if (remove_dir_recursively(&sb, 0)) {
+	အကယ်၍ (remove_dir_recursively(&sb, 0)) {
 		error_errno(_("failed to delete '%s'"), sb.buf);
 		ret = -1;
 	}
 	strbuf_release(&sb);
-	return ret;
+	ပြန်ပေး ret;
 }
 
-static int remove_worktree(int ac, const char **av, const char *prefix,
-			   struct repository *repo UNUSED)
+static ကိန်းပြည့် remove_worktree(ကိန်းပြည့် ac, const var_na **av, const var_na *prefix,
+			   sa_nracanaa repository *repo UNUSED)
 {
-	int force = 0;
-	struct option options[] = {
+	ကိန်းပြည့် force = 0;
+	sa_nracanaa option options[] = {
 		OPT__FORCE(&force,
 			 N_("force removal even if worktree is dirty or locked"),
 			 PARSE_OPT_NOCOMPLETE),
 		OPT_END()
 	};
-	struct worktree **worktrees, *wt;
-	struct strbuf errmsg = STRBUF_INIT;
-	const char *reason = NULL;
-	int ret = 0;
+	sa_nracanaa worktree **worktrees, *wt;
+	sa_nracanaa strbuf errmsg = STRBUF_INIT;
+	const var_na *reason = NULL;
+	ကိန်းပြည့် ret = 0;
 
 	ac = parse_options(ac, av, prefix, options, git_worktree_remove_usage, 0);
-	if (ac != 1)
+	အကယ်၍ (ac != 1)
 		usage_with_options(git_worktree_remove_usage, options);
 
 	worktrees = get_worktrees(the_repository);
 	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	အကယ်၍ (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	အကယ်၍ (is_main_worktree(wt))
 		die(_("'%s' is a main working tree"), av[0]);
-	if (force < 2)
+	အကယ်၍ (force < 2)
 		reason = worktree_lock_reason(wt);
-	if (reason) {
-		if (*reason)
+	အကယ်၍ (reason) {
+		အကယ်၍ (*reason)
 			die(_("cannot remove a locked working tree, lock reason: %s\nuse 'remove -f -f' to override or unlock first"),
 			    reason);
 		die(_("cannot remove a locked working tree;\nuse 'remove -f -f' to override or unlock first"));
 	}
-	if (validate_worktree(wt, &errmsg, WT_VALIDATE_WORKTREE_MISSING_OK))
+	အကယ်၍ (validate_worktree(wt, &errmsg, WT_VALIDATE_WORKTREE_MISSING_OK))
 		die(_("validation failed, cannot remove working tree: %s"),
 		    errmsg.buf);
 	strbuf_release(&errmsg);
 
-	if (file_exists(wt->path)) {
-		if (!force)
+	အကယ်၍ (file_exists(wt->path)) {
+		အကယ်၍ (!force)
 			check_clean_worktree(wt, av[0]);
 
 		ret |= delete_git_work_tree(wt);
@@ -1474,48 +1474,48 @@ static int remove_worktree(int ac, const char **av, const char *prefix,
 	delete_worktrees_dir_if_empty();
 
 	free_worktrees(worktrees);
-	return ret;
+	ပြန်ပေး ret;
 }
 
-static void report_repair(int iserr, const char *path, const char *msg, void *cb_data)
+static void report_repair(ကိန်းပြည့် iserr, const var_na *path, const var_na *msg, void *cb_data)
 {
-	if (!iserr) {
+	အကယ်၍ (!iserr) {
 		fprintf_ln(stderr, _("repair: %s: %s"), msg, path);
-	} else {
-		int *exit_status = (int *)cb_data;
+	} မဟုတ်ပါက {
+		ကိန်းပြည့် *exit_status = (ကိန်းပြည့် *)cb_data;
 		fprintf_ln(stderr, _("error: %s: %s"), msg, path);
 		*exit_status = 1;
 	}
 }
 
-static int repair(int ac, const char **av, const char *prefix,
-		  struct repository *repo UNUSED)
+static ကိန်းပြည့် repair(ကိန်းပြည့် ac, const var_na **av, const var_na *prefix,
+		  sa_nracanaa repository *repo UNUSED)
 {
-	const char **p;
-	const char *self[] = { ".", NULL };
-	struct option options[] = {
+	const var_na **p;
+	const var_na *self[] = { ".", NULL };
+	sa_nracanaa option options[] = {
 		OPT_BOOL(0, "relative-paths", &use_relative_paths,
 			 N_("use relative paths for worktrees")),
 		OPT_END()
 	};
-	int rc = 0;
+	ကိန်းပြည့် rc = 0;
 
 	ac = parse_options(ac, av, prefix, options, git_worktree_repair_usage, 0);
 	p = ac > 0 ? av : self;
-	for (; *p; p++)
+	အတွက် (; *p; p++)
 		repair_worktree_at_path(the_repository, *p, report_repair,
 					&rc, use_relative_paths);
 	repair_worktrees(the_repository, report_repair, &rc, use_relative_paths);
-	return rc;
+	ပြန်ပေး rc;
 }
 
-int cmd_worktree(int ac,
-		 const char **av,
-		 const char *prefix,
-		 struct repository *repo)
+ကိန်းပြည့် cmd_worktree(ကိန်းပြည့် ac,
+		 const var_na **av,
+		 const var_na *prefix,
+		 sa_nracanaa repository *repo)
 {
 	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_SUBCOMMAND("add", &fn, add),
 		OPT_SUBCOMMAND("prune", &fn, prune),
 		OPT_SUBCOMMAND("list", &fn, list),
@@ -1529,7 +1529,7 @@ int cmd_worktree(int ac,
 
 	repo_config(the_repository, git_worktree_config, NULL);
 
-	if (!prefix)
+	အကယ်၍ (!prefix)
 		prefix = "";
 
 	ac = parse_options(ac, av, prefix, options, git_worktree_usage, 0);
@@ -1537,5 +1537,5 @@ int cmd_worktree(int ac,
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	return fn(ac, av, prefix, repo);
+	ပြန်ပေး fn(ac, av, prefix, repo);
 }

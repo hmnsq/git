@@ -9,15 +9,15 @@
 #include "run-command.h"
 #include "string-list.h"
 
-static const char * const for_each_repo_usage[] = {
+static const var_na * const for_each_repo_usage[] = {
 	N_("git for-each-repo --config=<config> [--] <arguments>"),
 	NULL
 };
 
-static int run_command_on_repo(const char *path, const char **argv)
+static ကိန်းပြည့် run_command_on_repo(const var_na *path, const var_na **argv)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
-	char *abspath = interpolate_path(path, 0);
+	sa_nracanaa child_process child = CHILD_PROCESS_INIT;
+	var_na *abspath = interpolate_path(path, 0);
 
 	sanitize_repo_env(&child.env);
 
@@ -27,21 +27,21 @@ static int run_command_on_repo(const char *path, const char **argv)
 
 	free(abspath);
 
-	return run_command(&child);
+	ပြန်ပေး run_command(&child);
 }
 
-int cmd_for_each_repo(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo UNUSED)
+ကိန်းပြည့် cmd_for_each_repo(ကိန်းပြည့် argc,
+		      const var_na **argv,
+		      const var_na *prefix,
+		      sa_nracanaa repository *repo UNUSED)
 {
-	static const char *config_key = NULL;
-	int keep_going = 0;
-	int result = 0;
-	const struct string_list *values;
-	int err;
+	static const var_na *config_key = NULL;
+	ကိန်းပြည့် keep_going = 0;
+	ကိန်းပြည့် result = 0;
+	const sa_nracanaa string_list *values;
+	ကိန်းပြည့် err;
 
-	const struct option options[] = {
+	const sa_nracanaa option options[] = {
 		OPT_STRING(0, "config", &config_key, N_("config"),
 			   N_("config key storing a list of repository paths")),
 		OPT_BOOL(0, "keep-going", &keep_going,
@@ -52,24 +52,24 @@ int cmd_for_each_repo(int argc,
 	argc = parse_options(argc, argv, prefix, options, for_each_repo_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (!config_key)
+	အကယ်၍ (!config_key)
 		die(_("missing --config=<config>"));
 
 	err = repo_config_get_string_multi(the_repository, config_key, &values);
-	if (err < 0)
+	အကယ်၍ (err < 0)
 		usage_msg_optf(_("got bad config --config=%s"),
 			       for_each_repo_usage, options, config_key);
-	else if (err)
-		return 0;
+	မဟုတ်ပါက အကယ်၍ (err)
+		ပြန်ပေး 0;
 
-	for (size_t i = 0; i < values->nr; i++) {
-		int ret = run_command_on_repo(values->items[i].string, argv);
-		if (ret) {
-			if (!keep_going)
-					return ret;
+	အတွက် (size_t i = 0; i < values->nr; i++) {
+		ကိန်းပြည့် ret = run_command_on_repo(values->items[i].string, argv);
+		အကယ်၍ (ret) {
+			အကယ်၍ (!keep_going)
+					ပြန်ပေး ret;
 			result = 1;
 		}
 	}
 
-	return result;
+	ပြန်ပေး result;
 }

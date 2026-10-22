@@ -37,42 +37,42 @@
 	   "                  [--rewrite] [--updateref] [--stale-fix]\n" \
 	   "                  [--dry-run | -n] [--verbose] [--all [--single-worktree] | <refs>...]")
 
-static const char *const reflog_show_usage[] = {
+static const var_na *const reflog_show_usage[] = {
 	BUILTIN_REFLOG_SHOW_USAGE,
 	NULL,
 };
 
-static const char *const reflog_list_usage[] = {
+static const var_na *const reflog_list_usage[] = {
 	BUILTIN_REFLOG_LIST_USAGE,
 	NULL,
 };
 
-static const char *const reflog_exists_usage[] = {
+static const var_na *const reflog_exists_usage[] = {
 	BUILTIN_REFLOG_EXISTS_USAGE,
 	NULL,
 };
 
-static const char *const reflog_write_usage[] = {
+static const var_na *const reflog_write_usage[] = {
 	BUILTIN_REFLOG_WRITE_USAGE,
 	NULL,
 };
 
-static const char *const reflog_delete_usage[] = {
+static const var_na *const reflog_delete_usage[] = {
 	BUILTIN_REFLOG_DELETE_USAGE,
 	NULL
 };
 
-static const char *const reflog_drop_usage[] = {
+static const var_na *const reflog_drop_usage[] = {
 	BUILTIN_REFLOG_DROP_USAGE,
 	NULL,
 };
 
-static const char *const reflog_expire_usage[] = {
+static const var_na *const reflog_expire_usage[] = {
 	BUILTIN_REFLOG_EXPIRE_USAGE,
 	NULL
 };
 
-static const char *const reflog_usage[] = {
+static const var_na *const reflog_usage[] = {
 	BUILTIN_REFLOG_SHOW_USAGE,
 	BUILTIN_REFLOG_LIST_USAGE,
 	BUILTIN_REFLOG_EXISTS_USAGE,
@@ -83,67 +83,67 @@ static const char *const reflog_usage[] = {
 	NULL
 };
 
-struct worktree_reflogs {
-	struct worktree *worktree;
-	struct string_list reflogs;
+sa_nracanaa worktree_reflogs {
+	sa_nracanaa worktree *worktree;
+	sa_nracanaa string_list reflogs;
 };
 
-static int collect_reflog(const char *ref, void *cb_data)
+static ကိန်းပြည့် collect_reflog(const var_na *ref, void *cb_data)
 {
-	struct worktree_reflogs *cb = cb_data;
-	struct worktree *worktree = cb->worktree;
-	struct strbuf newref = STRBUF_INIT;
+	sa_nracanaa worktree_reflogs *cb = cb_data;
+	sa_nracanaa worktree *worktree = cb->worktree;
+	sa_nracanaa strbuf newref = STRBUF_INIT;
 
 	/*
 	 * Avoid collecting the same shared ref multiple times because
 	 * they are available via all worktrees.
 	 */
-	if (!worktree->is_current &&
+	အကယ်၍ (!worktree->is_current &&
 	    parse_worktree_ref(ref, NULL, NULL, NULL) == REF_WORKTREE_SHARED)
-		return 0;
+		ပြန်ပေး 0;
 
 	strbuf_worktree_ref(worktree, &newref, ref);
 	string_list_append_nodup(&cb->reflogs, strbuf_detach(&newref, NULL));
 
-	return 0;
+	ပြန်ပေး 0;
 }
 
-static int expire_unreachable_callback(const struct option *opt,
-				 const char *arg,
-				 int unset)
+static ကိန်းပြည့် expire_unreachable_callback(const sa_nracanaa option *opt,
+				 const var_na *arg,
+				 ကိန်းပြည့် unset)
 {
-	struct reflog_expire_options *opts = opt->value;
+	sa_nracanaa reflog_expire_options *opts = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (parse_expiry_date(arg, &opts->expire_unreachable))
+	အကယ်၍ (parse_expiry_date(arg, &opts->expire_unreachable))
 		die(_("invalid timestamp '%s' given to '--%s'"),
 		    arg, opt->long_name);
 
 	opts->explicit_expiry |= REFLOG_EXPIRE_UNREACH;
-	return 0;
+	ပြန်ပေး 0;
 }
 
-static int expire_total_callback(const struct option *opt,
-				 const char *arg,
-				 int unset)
+static ကိန်းပြည့် expire_total_callback(const sa_nracanaa option *opt,
+				 const var_na *arg,
+				 ကိန်းပြည့် unset)
 {
-	struct reflog_expire_options *opts = opt->value;
+	sa_nracanaa reflog_expire_options *opts = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (parse_expiry_date(arg, &opts->expire_total))
+	အကယ်၍ (parse_expiry_date(arg, &opts->expire_total))
 		die(_("invalid timestamp '%s' given to '--%s'"),
 		    arg, opt->long_name);
 
 	opts->explicit_expiry |= REFLOG_EXPIRE_TOTAL;
-	return 0;
+	ပြန်ပေး 0;
 }
 
-static int cmd_reflog_show(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+static ကိန်းပြည့် cmd_reflog_show(ကိန်းပြည့် argc, const var_na **argv, const var_na *prefix,
+			   sa_nracanaa repository *repo UNUSED)
 {
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_END()
 	};
 
@@ -151,43 +151,43 @@ static int cmd_reflog_show(int argc, const char **argv, const char *prefix,
 		      PARSE_OPT_KEEP_DASHDASH | PARSE_OPT_KEEP_ARGV0 |
 		      PARSE_OPT_KEEP_UNKNOWN_OPT);
 
-	return cmd_log_reflog(argc, argv, prefix, the_repository);
+	ပြန်ပေး cmd_log_reflog(argc, argv, prefix, the_repository);
 }
 
-static int show_reflog(const char *refname, void *cb_data UNUSED)
+static ကိန်းပြည့် show_reflog(const var_na *refname, void *cb_data UNUSED)
 {
 	printf("%s\n", refname);
-	return 0;
+	ပြန်ပေး 0;
 }
 
-static int cmd_reflog_list(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+static ကိန်းပြည့် cmd_reflog_list(ကိန်းပြည့် argc, const var_na **argv, const var_na *prefix,
+			   sa_nracanaa repository *repo UNUSED)
 {
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_END()
 	};
-	struct ref_store *ref_store;
+	sa_nracanaa ref_store *ref_store;
 
 	argc = parse_options(argc, argv, prefix, options, reflog_list_usage, 0);
-	if (argc)
-		return error(_("%s does not accept arguments: '%s'"),
+	အကယ်၍ (argc)
+		ပြန်ပေး error(_("%s does not accept arguments: '%s'"),
 			     "list", argv[0]);
 
 	ref_store = get_main_ref_store(the_repository);
 
-	return refs_for_each_reflog(ref_store, show_reflog, NULL);
+	ပြန်ပေး refs_for_each_reflog(ref_store, show_reflog, NULL);
 }
 
-static int cmd_reflog_expire(int argc, const char **argv, const char *prefix,
-			     struct repository *repo UNUSED)
+static ကိန်းပြည့် cmd_reflog_expire(ကိန်းပြည့် argc, const var_na **argv, const var_na *prefix,
+			     sa_nracanaa repository *repo UNUSED)
 {
 	timestamp_t now = time(NULL);
-	struct reflog_expire_options opts = REFLOG_EXPIRE_OPTIONS_INIT(now);
-	int i, status, do_all, single_worktree = 0;
-	unsigned int flags = 0;
-	int verbose = 0;
+	sa_nracanaa reflog_expire_options opts = REFLOG_EXPIRE_OPTIONS_INIT(now);
+	ကိန်းပြည့် i, status, do_all, single_worktree = 0;
+	unsigned ကိန်းပြည့် flags = 0;
+	ကိန်းပြည့် verbose = 0;
 	reflog_expiry_should_prune_fn *should_prune_fn = should_expire_reflog_ent;
-	const struct option options[] = {
+	const sa_nracanaa option options[] = {
 		OPT_BIT('n', "dry-run", &flags, N_("do not actually prune any entries"),
 			EXPIRE_REFLOGS_DRY_RUN),
 		OPT_BIT(0, "rewrite", &flags,
@@ -220,7 +220,7 @@ static int cmd_reflog_expire(int argc, const char **argv, const char *prefix,
 
 	argc = parse_options(argc, argv, prefix, options, reflog_expire_usage, 0);
 
-	if (verbose)
+	အကယ်၍ (verbose)
 		should_prune_fn = should_expire_reflog_ent_verbose;
 
 	/*
@@ -228,31 +228,31 @@ static int cmd_reflog_expire(int argc, const char **argv, const char *prefix,
 	 * even in older repository.  We cannot trust what's reachable
 	 * from reflog if the repository was pruned with older git.
 	 */
-	if (opts.stalefix) {
-		struct rev_info revs;
+	အကယ်၍ (opts.stalefix) {
+		sa_nracanaa rev_info revs;
 
 		repo_init_revisions(the_repository, &revs, prefix);
 		revs.do_not_die_on_missing_objects = 1;
 		revs.ignore_missing = 1;
 		revs.ignore_missing_links = 1;
-		if (verbose)
+		အကယ်၍ (verbose)
 			printf(_("Marking reachable objects..."));
 		mark_reachable_objects(&revs, 0, 0, NULL);
 		release_revisions(&revs);
-		if (verbose)
+		အကယ်၍ (verbose)
 			putchar('\n');
 	}
 
-	if (do_all) {
-		struct worktree_reflogs collected = {
+	အကယ်၍ (do_all) {
+		sa_nracanaa worktree_reflogs collected = {
 			.reflogs = STRING_LIST_INIT_DUP,
 		};
-		struct string_list_item *item;
-		struct worktree **worktrees, **p;
+		sa_nracanaa string_list_item *item;
+		sa_nracanaa worktree **worktrees, **p;
 
 		worktrees = get_worktrees(the_repository);
-		for (p = worktrees; *p; p++) {
-			if (single_worktree && !(*p)->is_current)
+		အတွက် (p = worktrees; *p; p++) {
+			အကယ်၍ (single_worktree && !(*p)->is_current)
 				continue;
 			collected.worktree = *p;
 			refs_for_each_reflog(get_worktree_ref_store(*p),
@@ -261,7 +261,7 @@ static int cmd_reflog_expire(int argc, const char **argv, const char *prefix,
 		free_worktrees(worktrees);
 
 		for_each_string_list_item(item, &collected.reflogs) {
-			struct expire_reflog_policy_cb cb = {
+			sa_nracanaa expire_reflog_policy_cb cb = {
 				.opts = opts,
 				.dry_run = !!(flags & EXPIRE_REFLOGS_DRY_RUN),
 			};
@@ -277,11 +277,11 @@ static int cmd_reflog_expire(int argc, const char **argv, const char *prefix,
 		string_list_clear(&collected.reflogs, 0);
 	}
 
-	for (i = 0; i < argc; i++) {
-		char *ref;
-		struct expire_reflog_policy_cb cb = { .opts = opts };
+	အတွက် (i = 0; i < argc; i++) {
+		var_na *ref;
+		sa_nracanaa expire_reflog_policy_cb cb = { .opts = opts };
 
-		if (!repo_dwim_log(the_repository, argv[i], strlen(argv[i]), NULL, &ref)) {
+		အကယ်၍ (!repo_dwim_log(the_repository, argv[i], strlen(argv[i]), NULL, &ref)) {
 			status |= error(_("reflog could not be found: '%s'"), argv[i]);
 			continue;
 		}
@@ -297,17 +297,17 @@ static int cmd_reflog_expire(int argc, const char **argv, const char *prefix,
 
 	reflog_clear_expire_config(&opts);
 
-	return status;
+	ပြန်ပေး status;
 }
 
-static int cmd_reflog_delete(int argc, const char **argv, const char *prefix,
-			     struct repository *repo UNUSED)
+static ကိန်းပြည့် cmd_reflog_delete(ကိန်းပြည့် argc, const var_na **argv, const var_na *prefix,
+			     sa_nracanaa repository *repo UNUSED)
 {
-	int i, status = 0;
-	unsigned int flags = 0;
-	int verbose = 0;
+	ကိန်းပြည့် i, status = 0;
+	unsigned ကိန်းပြည့် flags = 0;
+	ကိန်းပြည့် verbose = 0;
 
-	const struct option options[] = {
+	const sa_nracanaa option options[] = {
 		OPT_BIT('n', "dry-run", &flags, N_("do not actually prune any entries"),
 			EXPIRE_REFLOGS_DRY_RUN),
 		OPT_BIT(0, "rewrite", &flags,
@@ -322,40 +322,40 @@ static int cmd_reflog_delete(int argc, const char **argv, const char *prefix,
 
 	argc = parse_options(argc, argv, prefix, options, reflog_delete_usage, 0);
 
-	if (argc < 1)
-		return error(_("no reflog specified to delete"));
+	အကယ်၍ (argc < 1)
+		ပြန်ပေး error(_("no reflog specified to delete"));
 
-	for (i = 0; i < argc; i++)
+	အတွက် (i = 0; i < argc; i++)
 		status |= reflog_delete(argv[i], flags, verbose);
 
-	return status;
+	ပြန်ပေး status;
 }
 
-static int cmd_reflog_exists(int argc, const char **argv, const char *prefix,
-			     struct repository *repo UNUSED)
+static ကိန်းပြည့် cmd_reflog_exists(ကိန်းပြည့် argc, const var_na **argv, const var_na *prefix,
+			     sa_nracanaa repository *repo UNUSED)
 {
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_END()
 	};
-	const char *refname;
+	const var_na *refname;
 
 	argc = parse_options(argc, argv, prefix, options, reflog_exists_usage,
 			     0);
-	if (!argc)
+	အကယ်၍ (!argc)
 		usage_with_options(reflog_exists_usage, options);
 
 	refname = argv[0];
-	if (check_refname_format(refname, REFNAME_ALLOW_ONELEVEL))
+	အကယ်၍ (check_refname_format(refname, REFNAME_ALLOW_ONELEVEL))
 		die(_("invalid ref format: %s"), refname);
-	return !refs_reflog_exists(get_main_ref_store(the_repository),
+	ပြန်ပေး !refs_reflog_exists(get_main_ref_store(the_repository),
 				   refname);
 }
 
-static int cmd_reflog_drop(int argc, const char **argv, const char *prefix,
-			   struct repository *repo)
+static ကိန်းပြည့် cmd_reflog_drop(ကိန်းပြည့် argc, const var_na **argv, const var_na *prefix,
+			   sa_nracanaa repository *repo)
 {
-	int ret = 0, do_all = 0, single_worktree = 0;
-	const struct option options[] = {
+	ကိန်းပြည့် ret = 0, do_all = 0, single_worktree = 0;
+	const sa_nracanaa option options[] = {
 		OPT_BOOL(0, "all", &do_all, N_("drop the reflogs of all references")),
 		OPT_BOOL(0, "single-worktree", &single_worktree,
 			 N_("drop reflogs from the current worktree only")),
@@ -364,19 +364,19 @@ static int cmd_reflog_drop(int argc, const char **argv, const char *prefix,
 
 	argc = parse_options(argc, argv, prefix, options, reflog_drop_usage, 0);
 
-	if (argc && do_all)
+	အကယ်၍ (argc && do_all)
 		usage(_("references specified along with --all"));
 
-	if (do_all) {
-		struct worktree_reflogs collected = {
+	အကယ်၍ (do_all) {
+		sa_nracanaa worktree_reflogs collected = {
 			.reflogs = STRING_LIST_INIT_DUP,
 		};
-		struct string_list_item *item;
-		struct worktree **worktrees, **p;
+		sa_nracanaa string_list_item *item;
+		sa_nracanaa worktree **worktrees, **p;
 
 		worktrees = get_worktrees(the_repository);
-		for (p = worktrees; *p; p++) {
-			if (single_worktree && !(*p)->is_current)
+		အတွက် (p = worktrees; *p; p++) {
+			အကယ်၍ (single_worktree && !(*p)->is_current)
 				continue;
 			collected.worktree = *p;
 			refs_for_each_reflog(get_worktree_ref_store(*p),
@@ -389,12 +389,12 @@ static int cmd_reflog_drop(int argc, const char **argv, const char *prefix,
 						     item->string);
 		string_list_clear(&collected.reflogs, 0);
 
-		return ret;
+		ပြန်ပေး ret;
 	}
 
-	for (int i = 0; i < argc; i++) {
-		char *ref;
-		if (!repo_dwim_log(repo, argv[i], strlen(argv[i]), NULL, &ref)) {
+	အတွက် (ကိန်းပြည့် i = 0; i < argc; i++) {
+		var_na *ref;
+		အကယ်၍ (!repo_dwim_log(repo, argv[i], strlen(argv[i]), NULL, &ref)) {
 			ret |= error(_("reflog could not be found: '%s'"), argv[i]);
 			continue;
 		}
@@ -403,74 +403,74 @@ static int cmd_reflog_drop(int argc, const char **argv, const char *prefix,
 		free(ref);
 	}
 
-	return ret;
+	ပြန်ပေး ret;
 }
 
-static int cmd_reflog_write(int argc, const char **argv, const char *prefix,
-			    struct repository *repo)
+static ကိန်းပြည့် cmd_reflog_write(ကိန်းပြည့် argc, const var_na **argv, const var_na *prefix,
+			    sa_nracanaa repository *repo)
 {
-	const struct option options[] = {
+	const sa_nracanaa option options[] = {
 		OPT_END()
 	};
-	struct object_id old_oid, new_oid;
-	struct strbuf err = STRBUF_INIT;
-	struct ref_transaction *tx;
-	const char *ref, *message;
-	int ret;
+	sa_nracanaa object_id old_oid, new_oid;
+	sa_nracanaa strbuf err = STRBUF_INIT;
+	sa_nracanaa ref_transaction *tx;
+	const var_na *ref, *message;
+	ကိန်းပြည့် ret;
 
 	repo_config(repo, git_ident_config, NULL);
 
 	argc = parse_options(argc, argv, prefix, options, reflog_write_usage, 0);
-	if (argc != 4)
+	အကယ်၍ (argc != 4)
 		usage_with_options(reflog_write_usage, options);
 
 	ref = argv[0];
-	if (!is_root_ref(ref) && check_refname_format(ref, 0))
+	အကယ်၍ (!is_root_ref(ref) && check_refname_format(ref, 0))
 		die(_("invalid reference name: %s"), ref);
 
 	ret = get_oid_hex_algop(argv[1], &old_oid, repo->hash_algo);
-	if (ret)
+	အကယ်၍ (ret)
 		die(_("invalid old object ID: '%s'"), argv[1]);
-	if (!is_null_oid(&old_oid) && !odb_has_object(repo->objects, &old_oid, 0))
+	အကယ်၍ (!is_null_oid(&old_oid) && !odb_has_object(repo->objects, &old_oid, 0))
 		die(_("old object '%s' does not exist"), argv[1]);
 
 	ret = get_oid_hex_algop(argv[2], &new_oid, repo->hash_algo);
-	if (ret)
+	အကယ်၍ (ret)
 		die(_("invalid new object ID: '%s'"), argv[2]);
-	if (!is_null_oid(&new_oid) && !odb_has_object(repo->objects, &new_oid, 0))
+	အကယ်၍ (!is_null_oid(&new_oid) && !odb_has_object(repo->objects, &new_oid, 0))
 		die(_("new object '%s' does not exist"), argv[2]);
 
 	message = argv[3];
 
 	tx = ref_store_transaction_begin(get_main_ref_store(repo), 0, &err);
-	if (!tx)
+	အကယ်၍ (!tx)
 		die(_("cannot start transaction: %s"), err.buf);
 
 	ret = ref_transaction_update_reflog(tx, ref, &new_oid, &old_oid,
 					    git_committer_info(0),
 					    message, 0, &err);
-	if (ret)
+	အကယ်၍ (ret)
 		die(_("cannot queue reflog update: %s"), err.buf);
 
 	ret = ref_transaction_commit(tx, &err);
-	if (ret)
+	အကယ်၍ (ret)
 		die(_("cannot commit reflog update: %s"), err.buf);
 
 	ref_transaction_free(tx);
 	strbuf_release(&err);
-	return 0;
+	ပြန်ပေး 0;
 }
 
 /*
  * main "reflog"
  */
-int cmd_reflog(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repository)
+ကိန်းပြည့် cmd_reflog(ကိန်းပြည့် argc,
+	       const var_na **argv,
+	       const var_na *prefix,
+	       sa_nracanaa repository *repository)
 {
 	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_SUBCOMMAND("show", &fn, cmd_reflog_show),
 		OPT_SUBCOMMAND("list", &fn, cmd_reflog_list),
 		OPT_SUBCOMMAND("exists", &fn, cmd_reflog_exists),
@@ -485,8 +485,8 @@ int cmd_reflog(int argc,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL |
 			     PARSE_OPT_KEEP_DASHDASH | PARSE_OPT_KEEP_ARGV0 |
 			     PARSE_OPT_KEEP_UNKNOWN_OPT);
-	if (fn)
-		return fn(argc - 1, argv + 1, prefix, repository);
-	else
-		return cmd_log_reflog(argc, argv, prefix, repository);
+	အကယ်၍ (fn)
+		ပြန်ပေး fn(argc - 1, argv + 1, prefix, repository);
+	မဟုတ်ပါက
+		ပြန်ပေး cmd_log_reflog(argc, argv, prefix, repository);
 }
