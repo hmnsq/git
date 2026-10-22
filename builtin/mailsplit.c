@@ -5,61 +5,61 @@
  * so you can process them further from there.
  */
 
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#నిర్వచించు DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "gettext.h"
-#include "string-list.h"
-#include "strbuf.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "string-list.h"
+#అన్తర్భావ "strbuf.h"
 
-static const char git_mailsplit_usage[] =
+స్థిర స్థిరరాశి అక్షరం git_mailsplit_usage[] =
 "git mailsplit [-d<prec>] [-f<n>] [-b] [--keep-cr] -o<directory> [(<mbox>|<Maildir>)...]";
 
-static int is_from_line(const char *line, int len)
+స్థిర పూర్ణాంకం is_from_పంక్తి(స్థిరరాశి అక్షరం *పంక్తి, పూర్ణాంకం len)
 {
-	const char *colon;
+	స్థిరరాశి అక్షరం *colon;
 
-	if (len < 20 || memcmp("From ", line, 5))
-		return 0;
+	ఒకవేళ (len < 20 || memcmp("From ", పంక్తి, 5))
+		తిరిగి 0;
 
-	colon = line + len - 2;
-	line += 5;
-	for (;;) {
-		if (colon < line)
-			return 0;
-		if (*--colon == ':')
-			break;
+	colon = పంక్తి + len - 2;
+	పంక్తి += 5;
+	కొరకు (;;) {
+		ఒకవేళ (colon < పంక్తి)
+			తిరిగి 0;
+		ఒకవేళ (*--colon == ':')
+			ఆపు;
 	}
 
-	if (!isdigit(colon[-4]) ||
-	    !isdigit(colon[-2]) ||
-	    !isdigit(colon[-1]) ||
-	    !isdigit(colon[ 1]) ||
-	    !isdigit(colon[ 2]))
-		return 0;
+	ఒకవేళ (!అంకెనా(colon[-4]) ||
+	    !అంకెనా(colon[-2]) ||
+	    !అంకెనా(colon[-1]) ||
+	    !అంకెనా(colon[ 1]) ||
+	    !అంకెనా(colon[ 2]))
+		తిరిగి 0;
 
 	/* year */
-	if (strtol(colon+3, NULL, 10) <= 90)
-		return 0;
+	ఒకవేళ (strtol(colon+3, ఖాళీ, 10) <= 90)
+		తిరిగి 0;
 
 	/* Ok, close enough */
-	return 1;
+	తిరిగి 1;
 }
 
-static struct strbuf buf = STRBUF_INIT;
-static int keep_cr;
-static int mboxrd;
+స్థిర నిర్మాణం strbuf buf = STRBUF_INIT;
+స్థిర పూర్ణాంకం keep_cr;
+స్థిర పూర్ణాంకం mboxrd;
 
-static int is_gtfrom(const struct strbuf *buf)
+స్థిర పూర్ణాంకం is_gtfrom(స్థిరరాశి నిర్మాణం strbuf *buf)
 {
-	size_t min = strlen(">From ");
-	size_t ngt;
+	కొలత_t min = అక్షరశ్రేణి_పొడవు(">From ");
+	కొలత_t ngt;
 
-	if (buf->len < min)
-		return 0;
+	ఒకవేళ (buf->len < min)
+		తిరిగి 0;
 
 	ngt = strspn(buf->buf, ">");
-	return ngt && starts_with(buf->buf + ngt, "From ");
+	తిరిగి ngt && starts_with(buf->buf + ngt, "From ");
 }
 
 /* Called with the first line (potentially partial)
@@ -67,16 +67,16 @@ static int is_gtfrom(const struct strbuf *buf)
  * the Unix "From " line.  Write it into the specified
  * file.
  */
-static int split_one(FILE *mbox, const char *name, int allow_bare)
+స్థిర పూర్ణాంకం విభజించు_one(FILE *mbox, స్థిరరాశి అక్షరం *name, పూర్ణాంకం allow_bare)
 {
 	FILE *output;
-	int fd;
-	int status = 0;
-	int is_bare = !is_from_line(buf.buf, buf.len);
+	పూర్ణాంకం fd;
+	పూర్ణాంకం స్థితి_2 = 0;
+	పూర్ణాంకం is_bare = !is_from_పంక్తి(buf.buf, buf.len);
 
-	if (is_bare && !allow_bare) {
+	ఒకవేళ (is_bare && !allow_bare) {
 		fprintf(stderr, "corrupt mailbox\n");
-		exit(1);
+		నిష్క్రమించు(1);
 	}
 	fd = xopen(name, O_WRONLY | O_CREAT | O_EXCL, 0666);
 	output = xfdopen(fd, "w");
@@ -84,58 +84,58 @@ static int split_one(FILE *mbox, const char *name, int allow_bare)
 	/* Copy it out, while searching for a line that begins with
 	 * "From " and having something that looks like a date format.
 	 */
-	for (;;) {
-		if (!keep_cr && buf.len > 1 && buf.buf[buf.len-1] == '\n' &&
+	కొరకు (;;) {
+		ఒకవేళ (!keep_cr && buf.len > 1 && buf.buf[buf.len-1] == '\n' &&
 			buf.buf[buf.len-2] == '\r') {
 			strbuf_setlen(&buf, buf.len-2);
 			strbuf_addch(&buf, '\n');
 		}
 
-		if (mboxrd && is_gtfrom(&buf))
+		ఒకవేళ (mboxrd && is_gtfrom(&buf))
 			strbuf_remove(&buf, 0, 1);
 
-		if (fwrite(buf.buf, 1, buf.len, output) != buf.len)
+		ఒకవేళ (fwrite(buf.buf, 1, buf.len, output) != buf.len)
 			die_errno("cannot write output");
 
-		if (strbuf_getwholeline(&buf, mbox, '\n')) {
-			if (feof(mbox)) {
-				status = 1;
-				break;
+		ఒకవేళ (strbuf_getwholeline(&buf, mbox, '\n')) {
+			ఒకవేళ (feof(mbox)) {
+				స్థితి_2 = 1;
+				ఆపు;
 			}
 			die_errno("cannot read mbox");
 		}
-		if (!is_bare && is_from_line(buf.buf, buf.len))
-			break; /* done with one message */
+		ఒకవేళ (!is_bare && is_from_పంక్తి(buf.buf, buf.len))
+			ఆపు; /* done with one message */
 	}
 	fclose(output);
-	return status;
+	తిరిగి స్థితి_2;
 }
 
-static int populate_maildir_list(struct string_list *list, const char *path)
+స్థిర పూర్ణాంకం populate_maildir_list(నిర్మాణం string_list *list, స్థిరరాశి అక్షరం *మార్గం)
 {
 	DIR *dir;
-	struct dirent *dent;
-	char *name = NULL;
-	const char *subs[] = { "cur", "new", NULL };
-	const char **sub;
-	int ret = -1;
+	నిర్మాణం dirent *dent;
+	అక్షరం *name = ఖాళీ;
+	స్థిరరాశి అక్షరం *subs[] = { "cur", "new", ఖాళీ };
+	స్థిరరాశి అక్షరం **sub;
+	పూర్ణాంకం ret = -1;
 
-	for (sub = subs; *sub; ++sub) {
-		free(name);
-		name = xstrfmt("%s/%s", path, *sub);
-		if (!(dir = opendir(name))) {
-			if (errno == ENOENT)
-				continue;
+	కొరకు (sub = subs; *sub; ++sub) {
+		విడుదల(name);
+		name = xstrfmt("%s/%s", మార్గం, *sub);
+		ఒకవేళ (!(dir = opendir(name))) {
+			ఒకవేళ (errno == ENOENT)
+				కొనసాగు;
 			error_errno("cannot opendir %s", name);
-			goto out;
+			వెళ్ళు బహిర్గతం;
 		}
 
-		while ((dent = readdir(dir)) != NULL) {
-			if (dent->d_name[0] == '.')
-				continue;
-			free(name);
+		అయితే ((dent = readdir(dir)) != ఖాళీ) {
+			ఒకవేళ (dent->d_name[0] == '.')
+				కొనసాగు;
+			విడుదల(name);
 			name = xstrfmt("%s/%s", *sub, dent->d_name);
-			string_list_insert(list, name);
+			string_list_చొప్పించు(list, name);
 		}
 
 		closedir(dir);
@@ -143,235 +143,235 @@ static int populate_maildir_list(struct string_list *list, const char *path)
 
 	ret = 0;
 
-out:
-	free(name);
-	return ret;
+బహిర్గతం:
+	విడుదల(name);
+	తిరిగి ret;
 }
 
-static int maildir_filename_cmp(const char *a, const char *b)
+స్థిర పూర్ణాంకం maildir_filename_cmp(స్థిరరాశి అక్షరం *a, స్థిరరాశి అక్షరం *b)
 {
-	while (*a && *b) {
-		if (isdigit(*a) && isdigit(*b)) {
-			long int na, nb;
-			na = strtol(a, (char **)&a, 10);
-			nb = strtol(b, (char **)&b, 10);
-			if (na != nb)
-				return na - nb;
+	అయితే (*a && *b) {
+		ఒకవేళ (అంకెనా(*a) && అంకెనా(*b)) {
+			దీర్ఘ పూర్ణాంకం na, nb;
+			na = strtol(a, (అక్షరం **)&a, 10);
+			nb = strtol(b, (అక్షరం **)&b, 10);
+			ఒకవేళ (na != nb)
+				తిరిగి na - nb;
 			/* strtol advanced our pointers */
 		}
-		else {
-			if (*a != *b)
-				return (unsigned char)*a - (unsigned char)*b;
+		లేకపోతే {
+			ఒకవేళ (*a != *b)
+				తిరిగి (గుర్తులేని అక్షరం)*a - (గుర్తులేని అక్షరం)*b;
 			a++;
 			b++;
 		}
 	}
-	return (unsigned char)*a - (unsigned char)*b;
+	తిరిగి (గుర్తులేని అక్షరం)*a - (గుర్తులేని అక్షరం)*b;
 }
 
-static int split_maildir(const char *maildir, const char *dir,
-	int nr_prec, int skip)
+స్థిర పూర్ణాంకం విభజించు_maildir(స్థిరరాశి అక్షరం *maildir, స్థిరరాశి అక్షరం *dir,
+	పూర్ణాంకం nr_prec, పూర్ణాంకం skip)
 {
-	char *file = NULL;
-	FILE *f = NULL;
-	int ret = -1;
-	struct string_list list = STRING_LIST_INIT_DUP;
+	అక్షరం *file = ఖాళీ;
+	FILE *f = ఖాళీ;
+	పూర్ణాంకం ret = -1;
+	నిర్మాణం string_list list = STRING_LIST_INIT_DUP;
 
 	list.cmp = maildir_filename_cmp;
 
-	if (populate_maildir_list(&list, maildir) < 0)
-		goto out;
+	ఒకవేళ (populate_maildir_list(&list, maildir) < 0)
+		వెళ్ళు బహిర్గతం;
 
-	for (size_t i = 0; i < list.nr; i++) {
-		char *name;
+	కొరకు (కొలత_t i = 0; i < list.nr; i++) {
+		అక్షరం *name;
 
-		free(file);
-		file = xstrfmt("%s/%s", maildir, list.items[i].string);
+		విడుదల(file);
+		file = xstrfmt("%s/%s", maildir, list.వస్తువులు[i].string);
 
 		f = fopen(file, "r");
-		if (!f) {
+		ఒకవేళ (!f) {
 			error_errno("cannot open mail %s", file);
-			goto out;
+			వెళ్ళు బహిర్గతం;
 		}
 
-		if (strbuf_getwholeline(&buf, f, '\n')) {
+		ఒకవేళ (strbuf_getwholeline(&buf, f, '\n')) {
 			error_errno("cannot read mail %s", file);
-			goto out;
+			వెళ్ళు బహిర్గతం;
 		}
 
 		name = xstrfmt("%s/%0*d", dir, nr_prec, ++skip);
-		split_one(f, name, 1);
-		free(name);
+		విభజించు_one(f, name, 1);
+		విడుదల(name);
 
 		fclose(f);
-		f = NULL;
+		f = ఖాళీ;
 	}
 
 	ret = skip;
-out:
-	if (f)
+బహిర్గతం:
+	ఒకవేళ (f)
 		fclose(f);
-	free(file);
+	విడుదల(file);
 	string_list_clear(&list, 1);
-	return ret;
+	తిరిగి ret;
 }
 
-static int split_mbox(const char *file, const char *dir, int allow_bare,
-		      int nr_prec, int skip)
+స్థిర పూర్ణాంకం విభజించు_mbox(స్థిరరాశి అక్షరం *file, స్థిరరాశి అక్షరం *dir, పూర్ణాంకం allow_bare,
+		      పూర్ణాంకం nr_prec, పూర్ణాంకం skip)
 {
-	int ret = -1;
-	int peek;
+	పూర్ణాంకం ret = -1;
+	పూర్ణాంకం peek;
 
 	FILE *f = !strcmp(file, "-") ? stdin : fopen(file, "r");
-	int file_done = 0;
+	పూర్ణాంకం file_పూర్తి = 0;
 
-	if (!f) {
+	ఒకవేళ (!f) {
 		error_errno("cannot open mbox %s", file);
-		goto out;
+		వెళ్ళు బహిర్గతం;
 	}
 
-	if (isatty(fileno(f)))
+	ఒకవేళ (isatty(fileno(f)))
 		warning(_("reading patches from stdin/tty..."));
 
-	do {
+	చేయి {
 		peek = fgetc(f);
-		if (peek == EOF) {
-			if (f == stdin)
+		ఒకవేళ (peek == EOF) {
+			ఒకవేళ (f == stdin)
 				/* empty stdin is OK */
 				ret = skip;
-			else {
+			లేకపోతే {
 				fclose(f);
 				error(_("empty mbox: '%s'"), file);
 			}
-			goto out;
+			వెళ్ళు బహిర్గతం;
 		}
-	} while (isspace(peek));
+	} అయితే (ఖాళీనా(peek));
 	ungetc(peek, f);
 
-	if (strbuf_getwholeline(&buf, f, '\n')) {
+	ఒకవేళ (strbuf_getwholeline(&buf, f, '\n')) {
 		/* empty stdin is OK */
-		if (f != stdin) {
+		ఒకవేళ (f != stdin) {
 			error("cannot read mbox %s", file);
-			goto out;
+			వెళ్ళు బహిర్గతం;
 		}
-		file_done = 1;
+		file_పూర్తి = 1;
 	}
 
-	while (!file_done) {
-		char *name = xstrfmt("%s/%0*d", dir, nr_prec, ++skip);
-		file_done = split_one(f, name, allow_bare);
-		free(name);
+	అయితే (!file_పూర్తి) {
+		అక్షరం *name = xstrfmt("%s/%0*d", dir, nr_prec, ++skip);
+		file_పూర్తి = విభజించు_one(f, name, allow_bare);
+		విడుదల(name);
 	}
 
-	if (f != stdin)
+	ఒకవేళ (f != stdin)
 		fclose(f);
 
 	ret = skip;
-out:
-	return ret;
+బహిర్గతం:
+	తిరిగి ret;
 }
 
-int cmd_mailsplit(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+పూర్ణాంకం cmd_mailsplit(పూర్ణాంకం argc,
+		  స్థిరరాశి అక్షరం **argv,
+		  స్థిరరాశి అక్షరం *ఉపసర్గ,
+		  నిర్మాణం repository *repo వాడని)
 {
-	int nr = 0, nr_prec = 4, num = 0;
-	int allow_bare = 0;
-	const char *dir = NULL;
-	const char **argp;
-	static const char *stdin_only[] = { "-", NULL };
+	పూర్ణాంకం nr = 0, nr_prec = 4, అంకె = 0;
+	పూర్ణాంకం allow_bare = 0;
+	స్థిరరాశి అక్షరం *dir = ఖాళీ;
+	స్థిరరాశి అక్షరం **argp;
+	స్థిర స్థిరరాశి అక్షరం *stdin_only[] = { "-", ఖాళీ };
 
-	BUG_ON_NON_EMPTY_PREFIX(prefix);
+	BUG_ON_NON_ఖాళీలు_ఉపసర్గ(ఉపసర్గ);
 
 	show_usage_if_asked(argc, argv, git_mailsplit_usage);
 
-	for (argp = argv+1; *argp; argp++) {
-		const char *arg = *argp;
+	కొరకు (argp = argv+1; *argp; argp++) {
+		స్థిరరాశి అక్షరం *arg = *argp;
 
-		if (arg[0] != '-')
-			break;
+		ఒకవేళ (arg[0] != '-')
+			ఆపు;
 		/* do flags here */
-		if ( arg[1] == 'd' ) {
-			nr_prec = strtol(arg+2, NULL, 10);
-			if (nr_prec < 3 || 10 <= nr_prec)
+		ఒకవేళ ( arg[1] == 'd' ) {
+			nr_prec = strtol(arg+2, ఖాళీ, 10);
+			ఒకవేళ (nr_prec < 3 || 10 <= nr_prec)
 				usage(git_mailsplit_usage);
-			continue;
-		} else if ( arg[1] == 'f' ) {
-			nr = strtol(arg+2, NULL, 10);
-		} else if ( arg[1] == 'b' && !arg[2] ) {
+			కొనసాగు;
+		} లేకపోతే ఒకవేళ ( arg[1] == 'f' ) {
+			nr = strtol(arg+2, ఖాళీ, 10);
+		} లేకపోతే ఒకవేళ ( arg[1] == 'b' && !arg[2] ) {
 			allow_bare = 1;
-		} else if (!strcmp(arg, "--keep-cr")) {
+		} లేకపోతే ఒకవేళ (!strcmp(arg, "--keep-cr")) {
 			keep_cr = 1;
-		} else if ( arg[1] == 'o' && arg[2] ) {
+		} లేకపోతే ఒకవేళ ( arg[1] == 'o' && arg[2] ) {
 			dir = arg+2;
-		} else if (!strcmp(arg, "--mboxrd")) {
+		} లేకపోతే ఒకవేళ (!strcmp(arg, "--mboxrd")) {
 			mboxrd = 1;
-		} else if ( arg[1] == '-' && !arg[2] ) {
+		} లేకపోతే ఒకవేళ ( arg[1] == '-' && !arg[2] ) {
 			argp++;	/* -- marks end of options */
-			break;
-		} else {
+			ఆపు;
+		} లేకపోతే {
 			die("unknown option: %s", arg);
 		}
 	}
 
-	if ( !dir ) {
+	ఒకవేళ ( !dir ) {
 		/* Backwards compatibility: if no -o specified, accept
 		   <mbox> <dir> or just <dir> */
-		switch (argc - (argp-argv)) {
-		case 1:
+		ఎంపిక (argc - (argp-argv)) {
+		స్థితి 1:
 			dir = argp[0];
 			argp = stdin_only;
-			break;
-		case 2:
+			ఆపు;
+		స్థితి 2:
 			stdin_only[0] = argp[0];
 			dir = argp[1];
 			argp = stdin_only;
-			break;
-		default:
+			ఆపు;
+		అప్రమేయ:
 			usage(git_mailsplit_usage);
 		}
-	} else {
+	} లేకపోతే {
 		/* New usage: if no more argument, parse stdin */
-		if ( !*argp )
+		ఒకవేళ ( !*argp )
 			argp = stdin_only;
 	}
 
-	while (*argp) {
-		const char *arg = *argp++;
-		struct stat argstat;
-		int ret = 0;
+	అయితే (*argp) {
+		స్థిరరాశి అక్షరం *arg = *argp++;
+		నిర్మాణం stat argstat;
+		పూర్ణాంకం ret = 0;
 
-		if (arg[0] == '-' && arg[1] == 0) {
-			ret = split_mbox(arg, dir, allow_bare, nr_prec, nr);
-			if (ret < 0) {
+		ఒకవేళ (arg[0] == '-' && arg[1] == 0) {
+			ret = విభజించు_mbox(arg, dir, allow_bare, nr_prec, nr);
+			ఒకవేళ (ret < 0) {
 				error("cannot split patches from stdin");
-				return 1;
+				తిరిగి 1;
 			}
-			num += (ret - nr);
+			అంకె += (ret - nr);
 			nr = ret;
-			continue;
+			కొనసాగు;
 		}
 
-		if (stat(arg, &argstat) == -1) {
+		ఒకవేళ (stat(arg, &argstat) == -1) {
 			error_errno("cannot stat %s", arg);
-			return 1;
+			తిరిగి 1;
 		}
 
-		if (S_ISDIR(argstat.st_mode))
-			ret = split_maildir(arg, dir, nr_prec, nr);
-		else
-			ret = split_mbox(arg, dir, allow_bare, nr_prec, nr);
+		ఒకవేళ (S_ISDIR(argstat.st_బహుళకం))
+			ret = విభజించు_maildir(arg, dir, nr_prec, nr);
+		లేకపోతే
+			ret = విభజించు_mbox(arg, dir, allow_bare, nr_prec, nr);
 
-		if (ret < 0) {
+		ఒకవేళ (ret < 0) {
 			error("cannot split patches from %s", arg);
-			return 1;
+			తిరిగి 1;
 		}
-		num += (ret - nr);
+		అంకె += (ret - nr);
 		nr = ret;
 	}
 
-	printf("%d\n", num);
+	రాయి("%d\n", అంకె);
 
-	return 0;
+	తిరిగి 0;
 }

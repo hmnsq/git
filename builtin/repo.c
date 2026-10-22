@@ -1,767 +1,767 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "commit.h"
-#include "environment.h"
-#include "hash.h"
-#include "hex.h"
-#include "odb.h"
-#include "parse-options.h"
-#include "path.h"
-#include "path-walk.h"
-#include "progress.h"
-#include "quote.h"
-#include "ref-filter.h"
-#include "refs.h"
-#include "revision.h"
-#include "setup.h"
-#include "strbuf.h"
-#include "string-list.h"
-#include "shallow.h"
-#include "tree.h"
-#include "tree-walk.h"
-#include "utf8.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "commit.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "hash.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "odb.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "path.h"
+#అన్తర్భావ "path-walk.h"
+#అన్తర్భావ "progress.h"
+#అన్తర్భావ "quote.h"
+#అన్తర్భావ "ref-filter.h"
+#అన్తర్భావ "refs.h"
+#అన్తర్భావ "revision.h"
+#అన్తర్భావ "setup.h"
+#అన్తర్భావ "strbuf.h"
+#అన్తర్భావ "string-list.h"
+#అన్తర్భావ "shallow.h"
+#అన్తర్భావ "tree.h"
+#అన్తర్భావ "tree-walk.h"
+#అన్తర్భావ "utf8.h"
 
-#define REPO_INFO_USAGE \
+#నిర్వచించు REPO_INFO_USAGE \
 	"git repo info [--format=(lines|nul) | -z] [--all | <key>...]", \
 	"git repo info --keys [--format=(lines|nul) | -z]"
 
-#define REPO_STRUCTURE_USAGE \
+#నిర్వచించు REPO_STRUCTURE_USAGE \
 	"git repo structure [--format=(table|lines|nul) | -z]"
 
-static const char *const repo_usage[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి repo_usage[] = {
 	REPO_INFO_USAGE,
 	REPO_STRUCTURE_USAGE,
-	NULL,
+	ఖాళీ,
 };
 
-static const char *const repo_info_usage[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి repo_info_usage[] = {
 	REPO_INFO_USAGE,
-	NULL,
+	ఖాళీ,
 };
 
-static const char *const repo_structure_usage[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి repo_structure_usage[] = {
 	REPO_STRUCTURE_USAGE,
-	NULL,
+	ఖాళీ,
 };
 
-typedef int get_value_fn(struct repository *repo, struct strbuf *buf);
+రకనిర్వచనం పూర్ణాంకం get_విలువ_fn(నిర్మాణం repository *repo, నిర్మాణం strbuf *buf);
 
-enum output_format {
-	FORMAT_TABLE,
+గణన output_format {
+	FORMAT_పట్టిక,
 	FORMAT_NEWLINE_TERMINATED,
 	FORMAT_NUL_TERMINATED,
 };
 
-struct repo_info_field {
-	const char *key;
-	get_value_fn *get_value;
+నిర్మాణం repo_info_క్షేత్రం {
+	స్థిరరాశి అక్షరం *కీలకం;
+	get_విలువ_fn *get_విలువ;
 };
 
-static int get_layout_bare(struct repository *repo UNUSED, struct strbuf *buf)
+స్థిర పూర్ణాంకం get_layout_bare(నిర్మాణం repository *repo వాడని, నిర్మాణం strbuf *buf)
 {
 	strbuf_addstr(buf, is_bare_repository(the_repository) ? "true" : "false");
-	return 0;
+	తిరిగి 0;
 }
 
-static int get_layout_shallow(struct repository *repo, struct strbuf *buf)
+స్థిర పూర్ణాంకం get_layout_shallow(నిర్మాణం repository *repo, నిర్మాణం strbuf *buf)
 {
 	strbuf_addstr(buf,
 		      is_repository_shallow(repo) ? "true" : "false");
-	return 0;
+	తిరిగి 0;
 }
 
-static int get_object_format(struct repository *repo, struct strbuf *buf)
+స్థిర పూర్ణాంకం get_object_format(నిర్మాణం repository *repo, నిర్మాణం strbuf *buf)
 {
 	strbuf_addstr(buf, repo->hash_algo->name);
-	return 0;
+	తిరిగి 0;
 }
 
-static int get_path_commondir_absolute(struct repository *repo, struct strbuf *buf)
+స్థిర పూర్ణాంకం get_మార్గం_commondir_absolute(నిర్మాణం repository *repo, నిర్మాణం strbuf *buf)
 {
-	const char *common_dir = repo_get_common_dir(repo);
+	స్థిరరాశి అక్షరం *common_dir = repo_get_common_dir(repo);
 
-	if (!common_dir)
-		return error(_("unable to get common directory"));
+	ఒకవేళ (!common_dir)
+		తిరిగి error(_("unable to get common directory"));
 
-	format_path(buf, common_dir, repo->prefix, PATH_FORMAT_CANONICAL);
-	return 0;
+	format_మార్గం(buf, common_dir, repo->ఉపసర్గ, మార్గం_FORMAT_CANONICAL);
+	తిరిగి 0;
 }
 
-static int get_path_commondir_relative(struct repository *repo, struct strbuf *buf)
+స్థిర పూర్ణాంకం get_మార్గం_commondir_relative(నిర్మాణం repository *repo, నిర్మాణం strbuf *buf)
 {
-	const char *common_dir = repo_get_common_dir(repo);
+	స్థిరరాశి అక్షరం *common_dir = repo_get_common_dir(repo);
 
-	if (!common_dir)
-		return error(_("unable to get common directory"));
+	ఒకవేళ (!common_dir)
+		తిరిగి error(_("unable to get common directory"));
 
-	format_path(buf, common_dir, repo->prefix, PATH_FORMAT_RELATIVE);
-	return 0;
+	format_మార్గం(buf, common_dir, repo->ఉపసర్గ, మార్గం_FORMAT_RELATIVE);
+	తిరిగి 0;
 }
 
-static int get_path_gitdir_absolute(struct repository *repo, struct strbuf *buf)
+స్థిర పూర్ణాంకం get_మార్గం_gitdir_absolute(నిర్మాణం repository *repo, నిర్మాణం strbuf *buf)
 {
-	const char *git_dir = repo_get_git_dir(repo);
+	స్థిరరాశి అక్షరం *git_dir = repo_get_git_dir(repo);
 
-	if (!git_dir)
-		return error(_("unable to get git directory"));
+	ఒకవేళ (!git_dir)
+		తిరిగి error(_("unable to get git directory"));
 
-	format_path(buf, git_dir, repo->prefix, PATH_FORMAT_CANONICAL);
-	return 0;
+	format_మార్గం(buf, git_dir, repo->ఉపసర్గ, మార్గం_FORMAT_CANONICAL);
+	తిరిగి 0;
 }
 
-static int get_path_gitdir_relative(struct repository *repo, struct strbuf *buf)
+స్థిర పూర్ణాంకం get_మార్గం_gitdir_relative(నిర్మాణం repository *repo, నిర్మాణం strbuf *buf)
 {
-	const char *git_dir = repo_get_git_dir(repo);
+	స్థిరరాశి అక్షరం *git_dir = repo_get_git_dir(repo);
 
-	if (!git_dir)
-		return error(_("unable to get git directory"));
+	ఒకవేళ (!git_dir)
+		తిరిగి error(_("unable to get git directory"));
 
-	format_path(buf, git_dir, repo->prefix, PATH_FORMAT_RELATIVE);
-	return 0;
+	format_మార్గం(buf, git_dir, repo->ఉపసర్గ, మార్గం_FORMAT_RELATIVE);
+	తిరిగి 0;
 }
 
-static int get_references_format(struct repository *repo, struct strbuf *buf)
+స్థిర పూర్ణాంకం get_references_format(నిర్మాణం repository *repo, నిర్మాణం strbuf *buf)
 {
 	strbuf_addstr(buf,
-		      ref_storage_format_to_name(repo->ref_storage_format));
-	return 0;
+		      ref_storage_format_గమ్యం_name(repo->ref_storage_format));
+	తిరిగి 0;
 }
 
 /* repo_info_field keys must be in lexicographical order */
-static const struct repo_info_field repo_info_field[] = {
+స్థిర స్థిరరాశి నిర్మాణం repo_info_క్షేత్రం repo_info_క్షేత్రం[] = {
 	{ "layout.bare", get_layout_bare },
 	{ "layout.shallow", get_layout_shallow },
 	{ "object.format", get_object_format },
-	{ "path.commondir.absolute", get_path_commondir_absolute },
-	{ "path.commondir.relative", get_path_commondir_relative },
-	{ "path.gitdir.absolute", get_path_gitdir_absolute },
-	{ "path.gitdir.relative", get_path_gitdir_relative },
+	{ "path.commondir.absolute", get_మార్గం_commondir_absolute },
+	{ "path.commondir.relative", get_మార్గం_commondir_relative },
+	{ "path.gitdir.absolute", get_మార్గం_gitdir_absolute },
+	{ "path.gitdir.relative", get_మార్గం_gitdir_relative },
 	{ "references.format", get_references_format },
 };
 
-static int repo_info_field_cmp(const void *va, const void *vb)
+స్థిర పూర్ణాంకం repo_info_క్షేత్రం_cmp(స్థిరరాశి శూన్య *va, స్థిరరాశి శూన్య *vb)
 {
-	const struct repo_info_field *a = va;
-	const struct repo_info_field *b = vb;
+	స్థిరరాశి నిర్మాణం repo_info_క్షేత్రం *a = va;
+	స్థిరరాశి నిర్మాణం repo_info_క్షేత్రం *b = vb;
 
-	return strcmp(a->key, b->key);
+	తిరిగి strcmp(a->కీలకం, b->కీలకం);
 }
 
-static const struct repo_info_field *get_repo_info_field(const char *key)
+స్థిర స్థిరరాశి నిర్మాణం repo_info_క్షేత్రం *get_repo_info_క్షేత్రం(స్థిరరాశి అక్షరం *కీలకం)
 {
-	const struct repo_info_field search_key = { key, NULL };
-	const struct repo_info_field *found = bsearch(&search_key,
-						      repo_info_field,
-						      ARRAY_SIZE(repo_info_field),
-						      sizeof(*found),
-						      repo_info_field_cmp);
+	స్థిరరాశి నిర్మాణం repo_info_క్షేత్రం శోధన_కీలకం = { కీలకం, ఖాళీ };
+	స్థిరరాశి నిర్మాణం repo_info_క్షేత్రం *దొరికింది_2 = bsearch(&శోధన_కీలకం,
+						      repo_info_క్షేత్రం,
+						      ARRAY_కొలత(repo_info_క్షేత్రం),
+						      పరిమాణం(*దొరికింది_2),
+						      repo_info_క్షేత్రం_cmp);
 
-	return found;
+	తిరిగి దొరికింది_2;
 }
 
-static void print_field(enum output_format format, const char *key,
-			const char *value)
+స్థిర శూన్య print_క్షేత్రం(గణన output_format format, స్థిరరాశి అక్షరం *కీలకం,
+			స్థిరరాశి అక్షరం *విలువ)
 {
-	switch (format) {
-	case FORMAT_NEWLINE_TERMINATED:
-		printf("%s=", key);
-		quote_c_style(value, NULL, stdout, 0);
-		putchar('\n');
-		break;
-	case FORMAT_NUL_TERMINATED:
-		printf("%s\n%s%c", key, value, '\0');
-		break;
-	default:
+	ఎంపిక (format) {
+	స్థితి FORMAT_NEWLINE_TERMINATED:
+		రాయి("%s=", కీలకం);
+		quote_c_style(విలువ, ఖాళీ, stdout, 0);
+		అక్షరం_రాయి('\n');
+		ఆపు;
+	స్థితి FORMAT_NUL_TERMINATED:
+		రాయి("%s\n%s%c", కీలకం, విలువ, '\0');
+		ఆపు;
+	అప్రమేయ:
 		BUG("not a valid output format: %d", format);
 	}
 }
 
-static int print_fields(int argc, const char **argv,
-			struct repository *repo,
-			enum output_format format)
+స్థిర పూర్ణాంకం print_fields(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv,
+			నిర్మాణం repository *repo,
+			గణన output_format format)
 {
-	int ret = 0;
-	struct strbuf valbuf = STRBUF_INIT;
+	పూర్ణాంకం ret = 0;
+	నిర్మాణం strbuf valbuf = STRBUF_INIT;
 
-	for (int i = 0; i < argc; i++) {
-		const char *key = argv[i];
-		const struct repo_info_field *field = get_repo_info_field(key);
+	కొరకు (పూర్ణాంకం i = 0; i < argc; i++) {
+		స్థిరరాశి అక్షరం *కీలకం = argv[i];
+		స్థిరరాశి నిర్మాణం repo_info_క్షేత్రం *క్షేత్రం = get_repo_info_క్షేత్రం(కీలకం);
 
-		if (!field) {
-			ret = error(_("key '%s' not found"), key);
-			continue;
+		ఒకవేళ (!క్షేత్రం) {
+			ret = error(_("key '%s' not found"), కీలకం);
+			కొనసాగు;
 		}
 
 		strbuf_reset(&valbuf);
-		field->get_value(repo, &valbuf);
-		print_field(format, key, valbuf.buf);
+		క్షేత్రం->get_విలువ(repo, &valbuf);
+		print_క్షేత్రం(format, కీలకం, valbuf.buf);
 	}
 
 	strbuf_release(&valbuf);
-	return ret;
+	తిరిగి ret;
 }
 
-static int print_all_fields(struct repository *repo,
-			    enum output_format format)
+స్థిర పూర్ణాంకం print_all_fields(నిర్మాణం repository *repo,
+			    గణన output_format format)
 {
-	struct strbuf valbuf = STRBUF_INIT;
+	నిర్మాణం strbuf valbuf = STRBUF_INIT;
 
-	for (size_t i = 0; i < ARRAY_SIZE(repo_info_field); i++) {
-		const struct repo_info_field *field = &repo_info_field[i];
+	కొరకు (కొలత_t i = 0; i < ARRAY_కొలత(repo_info_క్షేత్రం); i++) {
+		స్థిరరాశి నిర్మాణం repo_info_క్షేత్రం *క్షేత్రం = &repo_info_క్షేత్రం[i];
 
 		strbuf_reset(&valbuf);
-		field->get_value(repo, &valbuf);
-		print_field(format, field->key, valbuf.buf);
+		క్షేత్రం->get_విలువ(repo, &valbuf);
+		print_క్షేత్రం(format, క్షేత్రం->కీలకం, valbuf.buf);
 	}
 
 	strbuf_release(&valbuf);
-	return 0;
+	తిరిగి 0;
 }
 
-static int print_keys(enum output_format format)
+స్థిర పూర్ణాంకం print_కీలకాలు(గణన output_format format)
 {
-	char sep;
+	అక్షరం sep;
 
-	switch (format) {
-	case FORMAT_NEWLINE_TERMINATED:
+	ఎంపిక (format) {
+	స్థితి FORMAT_NEWLINE_TERMINATED:
 		sep = '\n';
-		break;
-	case FORMAT_NUL_TERMINATED:
+		ఆపు;
+	స్థితి FORMAT_NUL_TERMINATED:
 		sep = '\0';
-		break;
-	default:
+		ఆపు;
+	అప్రమేయ:
 		die(_("--keys can only be used with --format=lines or --format=nul"));
 	}
 
-	for (size_t i = 0; i < ARRAY_SIZE(repo_info_field); i++) {
-		const struct repo_info_field *field = &repo_info_field[i];
-		printf("%s%c", field->key, sep);
+	కొరకు (కొలత_t i = 0; i < ARRAY_కొలత(repo_info_క్షేత్రం); i++) {
+		స్థిరరాశి నిర్మాణం repo_info_క్షేత్రం *క్షేత్రం = &repo_info_క్షేత్రం[i];
+		రాయి("%s%c", క్షేత్రం->కీలకం, sep);
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int parse_format_cb(const struct option *opt,
-			   const char *arg, int unset UNUSED)
+స్థిర పూర్ణాంకం parse_format_cb(స్థిరరాశి నిర్మాణం option *opt,
+			   స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset వాడని)
 {
-	enum output_format *format = opt->value;
+	గణన output_format *format = opt->విలువ;
 
-	if (opt->short_name == 'z')
+	ఒకవేళ (opt->short_name == 'z')
 		*format = FORMAT_NUL_TERMINATED;
-	else if (!strcmp(arg, "nul"))
+	లేకపోతే ఒకవేళ (!strcmp(arg, "nul"))
 		*format = FORMAT_NUL_TERMINATED;
-	else if (!strcmp(arg, "lines"))
+	లేకపోతే ఒకవేళ (!strcmp(arg, "lines"))
 		*format = FORMAT_NEWLINE_TERMINATED;
-	else if (!strcmp(arg, "table"))
-		*format = FORMAT_TABLE;
-	else
+	లేకపోతే ఒకవేళ (!strcmp(arg, "table"))
+		*format = FORMAT_పట్టిక;
+	లేకపోతే
 		die(_("invalid format '%s'"), arg);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int cmd_repo_info(int argc, const char **argv, const char *prefix,
-			 struct repository *repo)
+స్థిర పూర్ణాంకం cmd_repo_info(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			 నిర్మాణం repository *repo)
 {
-	enum output_format format = FORMAT_NEWLINE_TERMINATED;
-	int all_keys = 0;
-	int show_keys = 0;
-	struct option options[] = {
+	గణన output_format format = FORMAT_NEWLINE_TERMINATED;
+	పూర్ణాంకం all_కీలకాలు = 0;
+	పూర్ణాంకం show_కీలకాలు = 0;
+	నిర్మాణం option options[] = {
 		OPT_CALLBACK_F(0, "format", &format, N_("format"),
 			       N_("output format"),
 			       PARSE_OPT_NONEG, parse_format_cb),
-		OPT_CALLBACK_F('z', NULL, &format, NULL,
+		OPT_CALLBACK_F('z', ఖాళీ, &format, ఖాళీ,
 			       N_("synonym for --format=nul"),
 			       PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			       parse_format_cb),
-		OPT_BOOL(0, "all", &all_keys, N_("print all keys/values")),
-		OPT_BOOL(0, "keys", &show_keys, N_("show keys")),
-		OPT_END()
+		OPT_BOOL(0, "all", &all_కీలకాలు, N_("print all keys/values")),
+		OPT_BOOL(0, "keys", &show_కీలకాలు, N_("show keys")),
+		OPT_చివర()
 	};
 
-	argc = parse_options(argc, argv, prefix, options, repo_info_usage, 0);
+	argc = parse_options(argc, argv, ఉపసర్గ, options, repo_info_usage, 0);
 
-	if (show_keys && (all_keys || argc))
+	ఒకవేళ (show_కీలకాలు && (all_కీలకాలు || argc))
 		die(_("--keys cannot be used with a <key> or --all"));
 
-	if (show_keys)
-		return print_keys(format);
+	ఒకవేళ (show_కీలకాలు)
+		తిరిగి print_కీలకాలు(format);
 
-	if (format != FORMAT_NEWLINE_TERMINATED && format != FORMAT_NUL_TERMINATED)
+	ఒకవేళ (format != FORMAT_NEWLINE_TERMINATED && format != FORMAT_NUL_TERMINATED)
 		die(_("unsupported output format"));
 
-	if (all_keys && argc)
+	ఒకవేళ (all_కీలకాలు && argc)
 		die(_("--all and <key> cannot be used together"));
 
-	if (all_keys)
-		return print_all_fields(repo, format);
-	else
-		return print_fields(argc, argv, repo, format);
+	ఒకవేళ (all_కీలకాలు)
+		తిరిగి print_all_fields(repo, format);
+	లేకపోతే
+		తిరిగి print_fields(argc, argv, repo, format);
 }
 
-struct object_data {
-	struct object_id oid;
-	size_t value;
+నిర్మాణం object_దత్తాంశం {
+	నిర్మాణం object_id oid;
+	కొలత_t విలువ;
 };
 
-struct largest_objects {
-	struct object_data tag_size;
-	struct object_data commit_size;
-	struct object_data tree_size;
-	struct object_data blob_size;
+నిర్మాణం అతిపెద్ద_objects {
+	నిర్మాణం object_దత్తాంశం ట్యాగ్_కొలత;
+	నిర్మాణం object_దత్తాంశం commit_కొలత;
+	నిర్మాణం object_దత్తాంశం వృక్షం_కొలత;
+	నిర్మాణం object_దత్తాంశం blob_కొలత;
 
-	struct object_data parent_count;
-	struct object_data tree_entries;
+	నిర్మాణం object_దత్తాంశం మాతృ_లెక్క;
+	నిర్మాణం object_దత్తాంశం వృక్షం_entries;
 };
 
-struct ref_stats {
-	size_t branches;
-	size_t remotes;
-	size_t tags;
-	size_t others;
+నిర్మాణం ref_stats {
+	కొలత_t branches;
+	కొలత_t remotes;
+	కొలత_t ట్యాగులు;
+	కొలత_t others;
 };
 
-struct object_values {
-	size_t tags;
-	size_t commits;
-	size_t trees;
-	size_t blobs;
+నిర్మాణం object_విలువలు {
+	కొలత_t ట్యాగులు;
+	కొలత_t commits;
+	కొలత_t trees;
+	కొలత_t blobs;
 };
 
-struct object_stats {
-	struct object_values type_counts;
-	struct object_values inflated_sizes;
-	struct object_values disk_sizes;
-	struct largest_objects largest;
+నిర్మాణం object_stats {
+	నిర్మాణం object_విలువలు type_counts;
+	నిర్మాణం object_విలువలు inflated_sizes;
+	నిర్మాణం object_విలువలు disk_sizes;
+	నిర్మాణం అతిపెద్ద_objects అతిపెద్ద;
 };
 
-struct repo_structure {
-	struct ref_stats refs;
-	struct object_stats objects;
+నిర్మాణం repo_structure {
+	నిర్మాణం ref_stats refs;
+	నిర్మాణం object_stats objects;
 };
 
-struct stats_table {
-	struct string_list rows;
-	struct string_list annotations;
+నిర్మాణం stats_పట్టిక {
+	నిర్మాణం string_list అడ్డువరుసలు;
+	నిర్మాణం string_list annotations;
 
-	int name_col_width;
-	int value_col_width;
-	int unit_col_width;
+	పూర్ణాంకం name_నిలువు_వెడల్పు;
+	పూర్ణాంకం విలువ_నిలువు_వెడల్పు;
+	పూర్ణాంకం unit_నిలువు_వెడల్పు;
 };
 
 /*
  * Holds column data that gets stored for each row.
  */
-struct stats_table_entry {
-	char *value;
-	const char *unit;
-	size_t index;
-	struct object_id *oid;
+నిర్మాణం stats_పట్టిక_నమోదు {
+	అక్షరం *విలువ;
+	స్థిరరాశి అక్షరం *unit;
+	కొలత_t సూచీ;
+	నిర్మాణం object_id *oid;
 };
 
-static void stats_table_vaddf(struct stats_table *table,
-			      struct stats_table_entry *entry,
-			      const char *format, va_list ap)
+స్థిర శూన్య stats_పట్టిక_vaddf(నిర్మాణం stats_పట్టిక *పట్టిక,
+			      నిర్మాణం stats_పట్టిక_నమోదు *నమోదు_2,
+			      స్థిరరాశి అక్షరం *format, va_list ap)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct string_list_item *item;
-	char *formatted_name;
-	int name_width;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
+	నిర్మాణం string_list_అంశం *అంశం;
+	అక్షరం *formatted_name;
+	పూర్ణాంకం name_వెడల్పు;
 
 	strbuf_vaddf(&buf, format, ap);
-	formatted_name = strbuf_detach(&buf, NULL);
-	name_width = utf8_strwidth(formatted_name);
+	formatted_name = strbuf_detach(&buf, ఖాళీ);
+	name_వెడల్పు = utf8_strwidth(formatted_name);
 
-	item = string_list_append_nodup(&table->rows, formatted_name);
-	item->util = entry;
+	అంశం = string_list_append_nodup(&పట్టిక->అడ్డువరుసలు, formatted_name);
+	అంశం->util = నమోదు_2;
 
-	if (name_width > table->name_col_width)
-		table->name_col_width = name_width;
-	if (!entry)
-		return;
-	if (entry->oid) {
-		entry->index = table->annotations.nr + 1;
-		strbuf_addf(&buf, "[%" PRIuMAX "] %s", (uintmax_t)entry->index,
-			    oid_to_hex(entry->oid));
-		string_list_append_nodup(&table->annotations, strbuf_detach(&buf, NULL));
+	ఒకవేళ (name_వెడల్పు > పట్టిక->name_నిలువు_వెడల్పు)
+		పట్టిక->name_నిలువు_వెడల్పు = name_వెడల్పు;
+	ఒకవేళ (!నమోదు_2)
+		తిరిగి;
+	ఒకవేళ (నమోదు_2->oid) {
+		నమోదు_2->సూచీ = పట్టిక->annotations.nr + 1;
+		strbuf_addf(&buf, "[%" PRIuMAX "] %s", (uintmax_t)నమోదు_2->సూచీ,
+			    oid_గమ్యం_hex(నమోదు_2->oid));
+		string_list_append_nodup(&పట్టిక->annotations, strbuf_detach(&buf, ఖాళీ));
 	}
-	if (entry->value) {
-		int value_width = utf8_strwidth(entry->value);
-		if (value_width > table->value_col_width)
-			table->value_col_width = value_width;
+	ఒకవేళ (నమోదు_2->విలువ) {
+		పూర్ణాంకం విలువ_వెడల్పు = utf8_strwidth(నమోదు_2->విలువ);
+		ఒకవేళ (విలువ_వెడల్పు > పట్టిక->విలువ_నిలువు_వెడల్పు)
+			పట్టిక->విలువ_నిలువు_వెడల్పు = విలువ_వెడల్పు;
 	}
-	if (entry->unit) {
-		int unit_width = utf8_strwidth(entry->unit);
-		if (unit_width > table->unit_col_width)
-			table->unit_col_width = unit_width;
+	ఒకవేళ (నమోదు_2->unit) {
+		పూర్ణాంకం unit_వెడల్పు = utf8_strwidth(నమోదు_2->unit);
+		ఒకవేళ (unit_వెడల్పు > పట్టిక->unit_నిలువు_వెడల్పు)
+			పట్టిక->unit_నిలువు_వెడల్పు = unit_వెడల్పు;
 	}
 
 	strbuf_release(&buf);
 }
 
-static void stats_table_addf(struct stats_table *table, const char *format, ...)
+స్థిర శూన్య stats_పట్టిక_addf(నిర్మాణం stats_పట్టిక *పట్టిక, స్థిరరాశి అక్షరం *format, ...)
 {
 	va_list ap;
 
-	va_start(ap, format);
-	stats_table_vaddf(table, NULL, format, ap);
-	va_end(ap);
+	va_ప్రారంభం(ap, format);
+	stats_పట్టిక_vaddf(పట్టిక, ఖాళీ, format, ap);
+	va_చివర(ap);
 }
 
-static void stats_table_count_addf(struct stats_table *table, size_t value,
-				   const char *format, ...)
+స్థిర శూన్య stats_పట్టిక_లెక్క_addf(నిర్మాణం stats_పట్టిక *పట్టిక, కొలత_t విలువ,
+				   స్థిరరాశి అక్షరం *format, ...)
 {
-	struct stats_table_entry *entry;
+	నిర్మాణం stats_పట్టిక_నమోదు *నమోదు_2;
 	va_list ap;
 
-	CALLOC_ARRAY(entry, 1);
-	humanise_count(value, &entry->value, &entry->unit);
+	CALLOC_ARRAY(నమోదు_2, 1);
+	humanise_లెక్క(విలువ, &నమోదు_2->విలువ, &నమోదు_2->unit);
 
-	va_start(ap, format);
-	stats_table_vaddf(table, entry, format, ap);
-	va_end(ap);
+	va_ప్రారంభం(ap, format);
+	stats_పట్టిక_vaddf(పట్టిక, నమోదు_2, format, ap);
+	va_చివర(ap);
 }
 
-static void stats_table_object_count_addf(struct stats_table *table,
-					  struct object_id *oid, size_t value,
-					  const char *format, ...)
+స్థిర శూన్య stats_పట్టిక_object_లెక్క_addf(నిర్మాణం stats_పట్టిక *పట్టిక,
+					  నిర్మాణం object_id *oid, కొలత_t విలువ,
+					  స్థిరరాశి అక్షరం *format, ...)
 {
-	struct stats_table_entry *entry;
+	నిర్మాణం stats_పట్టిక_నమోదు *నమోదు_2;
 	va_list ap;
 
-	CALLOC_ARRAY(entry, 1);
-	humanise_count(value, &entry->value, &entry->unit);
+	CALLOC_ARRAY(నమోదు_2, 1);
+	humanise_లెక్క(విలువ, &నమోదు_2->విలువ, &నమోదు_2->unit);
 
 	/*
 	 * A NULL OID should not have a table annotation.
 	 */
-	if (!is_null_oid(oid))
-		entry->oid = oid;
+	ఒకవేళ (!is_null_oid(oid))
+		నమోదు_2->oid = oid;
 
-	va_start(ap, format);
-	stats_table_vaddf(table, entry, format, ap);
-	va_end(ap);
+	va_ప్రారంభం(ap, format);
+	stats_పట్టిక_vaddf(పట్టిక, నమోదు_2, format, ap);
+	va_చివర(ap);
 }
 
-static void stats_table_size_addf(struct stats_table *table, size_t value,
-				  const char *format, ...)
+స్థిర శూన్య stats_పట్టిక_కొలత_addf(నిర్మాణం stats_పట్టిక *పట్టిక, కొలత_t విలువ,
+				  స్థిరరాశి అక్షరం *format, ...)
 {
-	struct stats_table_entry *entry;
+	నిర్మాణం stats_పట్టిక_నమోదు *నమోదు_2;
 	va_list ap;
 
-	CALLOC_ARRAY(entry, 1);
-	humanise_bytes(value, &entry->value, &entry->unit, HUMANISE_COMPACT);
+	CALLOC_ARRAY(నమోదు_2, 1);
+	humanise_బైట్లు(విలువ, &నమోదు_2->విలువ, &నమోదు_2->unit, HUMANISE_COMPACT);
 
-	va_start(ap, format);
-	stats_table_vaddf(table, entry, format, ap);
-	va_end(ap);
+	va_ప్రారంభం(ap, format);
+	stats_పట్టిక_vaddf(పట్టిక, నమోదు_2, format, ap);
+	va_చివర(ap);
 }
 
-static void stats_table_object_size_addf(struct stats_table *table,
-					 struct object_id *oid, size_t value,
-					 const char *format, ...)
+స్థిర శూన్య stats_పట్టిక_object_కొలత_addf(నిర్మాణం stats_పట్టిక *పట్టిక,
+					 నిర్మాణం object_id *oid, కొలత_t విలువ,
+					 స్థిరరాశి అక్షరం *format, ...)
 {
-	struct stats_table_entry *entry;
+	నిర్మాణం stats_పట్టిక_నమోదు *నమోదు_2;
 	va_list ap;
 
-	CALLOC_ARRAY(entry, 1);
-	humanise_bytes(value, &entry->value, &entry->unit, HUMANISE_COMPACT);
+	CALLOC_ARRAY(నమోదు_2, 1);
+	humanise_బైట్లు(విలువ, &నమోదు_2->విలువ, &నమోదు_2->unit, HUMANISE_COMPACT);
 
 	/*
 	 * A NULL OID should not have a table annotation.
 	 */
-	if (!is_null_oid(oid))
-		entry->oid = oid;
+	ఒకవేళ (!is_null_oid(oid))
+		నమోదు_2->oid = oid;
 
-	va_start(ap, format);
-	stats_table_vaddf(table, entry, format, ap);
-	va_end(ap);
+	va_ప్రారంభం(ap, format);
+	stats_పట్టిక_vaddf(పట్టిక, నమోదు_2, format, ap);
+	va_చివర(ap);
 }
 
-static inline size_t get_total_reference_count(struct ref_stats *stats)
+స్థిర అంతఃవరుస కొలత_t get_మొత్తం_reference_లెక్క(నిర్మాణం ref_stats *stats)
 {
-	return stats->branches + stats->remotes + stats->tags + stats->others;
+	తిరిగి stats->branches + stats->remotes + stats->ట్యాగులు + stats->others;
 }
 
-static inline size_t get_total_object_values(struct object_values *values)
+స్థిర అంతఃవరుస కొలత_t get_మొత్తం_object_విలువలు(నిర్మాణం object_విలువలు *విలువలు)
 {
-	return values->tags + values->commits + values->trees + values->blobs;
+	తిరిగి విలువలు->ట్యాగులు + విలువలు->commits + విలువలు->trees + విలువలు->blobs;
 }
 
-static void stats_table_setup_structure(struct stats_table *table,
-					struct repo_structure *stats)
+స్థిర శూన్య stats_పట్టిక_అమరిక_structure(నిర్మాణం stats_పట్టిక *పట్టిక,
+					నిర్మాణం repo_structure *stats)
 {
-	struct object_stats *objects = &stats->objects;
-	struct ref_stats *refs = &stats->refs;
-	size_t inflated_object_total;
-	size_t object_count_total;
-	size_t disk_object_total;
-	size_t ref_total;
+	నిర్మాణం object_stats *objects = &stats->objects;
+	నిర్మాణం ref_stats *refs = &stats->refs;
+	కొలత_t inflated_object_మొత్తం;
+	కొలత_t object_లెక్క_మొత్తం;
+	కొలత_t disk_object_మొత్తం;
+	కొలత_t ref_మొత్తం;
 
-	ref_total = get_total_reference_count(refs);
-	stats_table_addf(table, "* %s", _("References"));
-	stats_table_count_addf(table, ref_total, "  * %s", _("Count"));
-	stats_table_count_addf(table, refs->branches, "    * %s", _("Branches"));
-	stats_table_count_addf(table, refs->tags, "    * %s", _("Tags"));
-	stats_table_count_addf(table, refs->remotes, "    * %s", _("Remotes"));
-	stats_table_count_addf(table, refs->others, "    * %s", _("Others"));
+	ref_మొత్తం = get_మొత్తం_reference_లెక్క(refs);
+	stats_పట్టిక_addf(పట్టిక, "* %s", _("References"));
+	stats_పట్టిక_లెక్క_addf(పట్టిక, ref_మొత్తం, "  * %s", _("Count"));
+	stats_పట్టిక_లెక్క_addf(పట్టిక, refs->branches, "    * %s", _("Branches"));
+	stats_పట్టిక_లెక్క_addf(పట్టిక, refs->ట్యాగులు, "    * %s", _("Tags"));
+	stats_పట్టిక_లెక్క_addf(పట్టిక, refs->remotes, "    * %s", _("Remotes"));
+	stats_పట్టిక_లెక్క_addf(పట్టిక, refs->others, "    * %s", _("Others"));
 
-	object_count_total = get_total_object_values(&objects->type_counts);
-	stats_table_addf(table, "");
-	stats_table_addf(table, "* %s", _("Reachable objects"));
-	stats_table_count_addf(table, object_count_total, "  * %s", _("Count"));
-	stats_table_count_addf(table, objects->type_counts.commits,
+	object_లెక్క_మొత్తం = get_మొత్తం_object_విలువలు(&objects->type_counts);
+	stats_పట్టిక_addf(పట్టిక, "");
+	stats_పట్టిక_addf(పట్టిక, "* %s", _("Reachable objects"));
+	stats_పట్టిక_లెక్క_addf(పట్టిక, object_లెక్క_మొత్తం, "  * %s", _("Count"));
+	stats_పట్టిక_లెక్క_addf(పట్టిక, objects->type_counts.commits,
 			       "    * %s", _("Commits"));
-	stats_table_count_addf(table, objects->type_counts.trees,
+	stats_పట్టిక_లెక్క_addf(పట్టిక, objects->type_counts.trees,
 			       "    * %s", _("Trees"));
-	stats_table_count_addf(table, objects->type_counts.blobs,
+	stats_పట్టిక_లెక్క_addf(పట్టిక, objects->type_counts.blobs,
 			       "    * %s", _("Blobs"));
-	stats_table_count_addf(table, objects->type_counts.tags,
+	stats_పట్టిక_లెక్క_addf(పట్టిక, objects->type_counts.ట్యాగులు,
 			       "    * %s", _("Tags"));
 
-	inflated_object_total = get_total_object_values(&objects->inflated_sizes);
-	stats_table_size_addf(table, inflated_object_total,
+	inflated_object_మొత్తం = get_మొత్తం_object_విలువలు(&objects->inflated_sizes);
+	stats_పట్టిక_కొలత_addf(పట్టిక, inflated_object_మొత్తం,
 			      "  * %s", _("Inflated size"));
-	stats_table_size_addf(table, objects->inflated_sizes.commits,
+	stats_పట్టిక_కొలత_addf(పట్టిక, objects->inflated_sizes.commits,
 			      "    * %s", _("Commits"));
-	stats_table_size_addf(table, objects->inflated_sizes.trees,
+	stats_పట్టిక_కొలత_addf(పట్టిక, objects->inflated_sizes.trees,
 			      "    * %s", _("Trees"));
-	stats_table_size_addf(table, objects->inflated_sizes.blobs,
+	stats_పట్టిక_కొలత_addf(పట్టిక, objects->inflated_sizes.blobs,
 			      "    * %s", _("Blobs"));
-	stats_table_size_addf(table, objects->inflated_sizes.tags,
+	stats_పట్టిక_కొలత_addf(పట్టిక, objects->inflated_sizes.ట్యాగులు,
 			      "    * %s", _("Tags"));
 
-	disk_object_total = get_total_object_values(&objects->disk_sizes);
-	stats_table_size_addf(table, disk_object_total,
+	disk_object_మొత్తం = get_మొత్తం_object_విలువలు(&objects->disk_sizes);
+	stats_పట్టిక_కొలత_addf(పట్టిక, disk_object_మొత్తం,
 			      "  * %s", _("Disk size"));
-	stats_table_size_addf(table, objects->disk_sizes.commits,
+	stats_పట్టిక_కొలత_addf(పట్టిక, objects->disk_sizes.commits,
 			      "    * %s", _("Commits"));
-	stats_table_size_addf(table, objects->disk_sizes.trees,
+	stats_పట్టిక_కొలత_addf(పట్టిక, objects->disk_sizes.trees,
 			      "    * %s", _("Trees"));
-	stats_table_size_addf(table, objects->disk_sizes.blobs,
+	stats_పట్టిక_కొలత_addf(పట్టిక, objects->disk_sizes.blobs,
 			      "    * %s", _("Blobs"));
-	stats_table_size_addf(table, objects->disk_sizes.tags,
+	stats_పట్టిక_కొలత_addf(పట్టిక, objects->disk_sizes.ట్యాగులు,
 			      "    * %s", _("Tags"));
 
-	stats_table_addf(table, "");
-	stats_table_addf(table, "* %s", _("Largest objects"));
-	stats_table_addf(table, "  * %s", _("Commits"));
-	stats_table_object_size_addf(table,
-				     &objects->largest.commit_size.oid,
-				     objects->largest.commit_size.value,
+	stats_పట్టిక_addf(పట్టిక, "");
+	stats_పట్టిక_addf(పట్టిక, "* %s", _("Largest objects"));
+	stats_పట్టిక_addf(పట్టిక, "  * %s", _("Commits"));
+	stats_పట్టిక_object_కొలత_addf(పట్టిక,
+				     &objects->అతిపెద్ద.commit_కొలత.oid,
+				     objects->అతిపెద్ద.commit_కొలత.విలువ,
 				     "    * %s", _("Maximum size"));
-	stats_table_object_count_addf(table,
-				      &objects->largest.parent_count.oid,
-				      objects->largest.parent_count.value,
+	stats_పట్టిక_object_లెక్క_addf(పట్టిక,
+				      &objects->అతిపెద్ద.మాతృ_లెక్క.oid,
+				      objects->అతిపెద్ద.మాతృ_లెక్క.విలువ,
 				      "    * %s", _("Maximum parents"));
-	stats_table_addf(table, "  * %s", _("Trees"));
-	stats_table_object_size_addf(table,
-				     &objects->largest.tree_size.oid,
-				     objects->largest.tree_size.value,
+	stats_పట్టిక_addf(పట్టిక, "  * %s", _("Trees"));
+	stats_పట్టిక_object_కొలత_addf(పట్టిక,
+				     &objects->అతిపెద్ద.వృక్షం_కొలత.oid,
+				     objects->అతిపెద్ద.వృక్షం_కొలత.విలువ,
 				     "    * %s", _("Maximum size"));
-	stats_table_object_count_addf(table,
-				      &objects->largest.tree_entries.oid,
-				      objects->largest.tree_entries.value,
+	stats_పట్టిక_object_లెక్క_addf(పట్టిక,
+				      &objects->అతిపెద్ద.వృక్షం_entries.oid,
+				      objects->అతిపెద్ద.వృక్షం_entries.విలువ,
 				      "    * %s", _("Maximum entries"));
-	stats_table_addf(table, "  * %s", _("Blobs"));
-	stats_table_object_size_addf(table,
-				     &objects->largest.blob_size.oid,
-				     objects->largest.blob_size.value,
+	stats_పట్టిక_addf(పట్టిక, "  * %s", _("Blobs"));
+	stats_పట్టిక_object_కొలత_addf(పట్టిక,
+				     &objects->అతిపెద్ద.blob_కొలత.oid,
+				     objects->అతిపెద్ద.blob_కొలత.విలువ,
 				     "    * %s", _("Maximum size"));
-	stats_table_addf(table, "  * %s", _("Tags"));
-	stats_table_object_size_addf(table,
-				     &objects->largest.tag_size.oid,
-				     objects->largest.tag_size.value,
+	stats_పట్టిక_addf(పట్టిక, "  * %s", _("Tags"));
+	stats_పట్టిక_object_కొలత_addf(పట్టిక,
+				     &objects->అతిపెద్ద.ట్యాగ్_కొలత.oid,
+				     objects->అతిపెద్ద.ట్యాగ్_కొలత.విలువ,
 				     "    * %s", _("Maximum size"));
 }
 
-#define INDEX_WIDTH 4
+#నిర్వచించు సూచీ_వెడల్పు 4
 
-static void stats_table_print_structure(const struct stats_table *table)
+స్థిర శూన్య stats_పట్టిక_print_structure(స్థిరరాశి నిర్మాణం stats_పట్టిక *పట్టిక)
 {
-	const char *name_col_title = _("Repository structure");
-	const char *value_col_title = _("Value");
-	int title_name_width = utf8_strwidth(name_col_title);
-	int title_value_width = utf8_strwidth(value_col_title);
-	int name_col_width = table->name_col_width;
-	int value_col_width = table->value_col_width;
-	int unit_col_width = table->unit_col_width;
-	struct string_list_item *item;
-	struct strbuf buf = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *name_నిలువు_title = _("Repository structure");
+	స్థిరరాశి అక్షరం *విలువ_నిలువు_title = _("Value");
+	పూర్ణాంకం title_name_వెడల్పు = utf8_strwidth(name_నిలువు_title);
+	పూర్ణాంకం title_విలువ_వెడల్పు = utf8_strwidth(విలువ_నిలువు_title);
+	పూర్ణాంకం name_నిలువు_వెడల్పు = పట్టిక->name_నిలువు_వెడల్పు;
+	పూర్ణాంకం విలువ_నిలువు_వెడల్పు = పట్టిక->విలువ_నిలువు_వెడల్పు;
+	పూర్ణాంకం unit_నిలువు_వెడల్పు = పట్టిక->unit_నిలువు_వెడల్పు;
+	నిర్మాణం string_list_అంశం *అంశం;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
 
-	if (title_name_width > name_col_width)
-		name_col_width = title_name_width;
-	if (title_value_width > value_col_width + unit_col_width + 1)
-		value_col_width = title_value_width - unit_col_width;
+	ఒకవేళ (title_name_వెడల్పు > name_నిలువు_వెడల్పు)
+		name_నిలువు_వెడల్పు = title_name_వెడల్పు;
+	ఒకవేళ (title_విలువ_వెడల్పు > విలువ_నిలువు_వెడల్పు + unit_నిలువు_వెడల్పు + 1)
+		విలువ_నిలువు_వెడల్పు = title_విలువ_వెడల్పు - unit_నిలువు_వెడల్పు;
 
 	strbuf_addstr(&buf, "| ");
-	strbuf_utf8_align(&buf, ALIGN_LEFT, name_col_width + INDEX_WIDTH,
-			  name_col_title);
+	strbuf_utf8_align(&buf, ALIGN_ఎడమ, name_నిలువు_వెడల్పు + సూచీ_వెడల్పు,
+			  name_నిలువు_title);
 	strbuf_addstr(&buf, " | ");
-	strbuf_utf8_align(&buf, ALIGN_LEFT,
-			  value_col_width + unit_col_width + 1, value_col_title);
+	strbuf_utf8_align(&buf, ALIGN_ఎడమ,
+			  విలువ_నిలువు_వెడల్పు + unit_నిలువు_వెడల్పు + 1, విలువ_నిలువు_title);
 	strbuf_addstr(&buf, " |");
-	printf("%s\n", buf.buf);
+	రాయి("%s\n", buf.buf);
 
-	printf("| ");
-	for (int i = 0; i < name_col_width + INDEX_WIDTH; i++)
-		putchar('-');
-	printf(" | ");
-	for (int i = 0; i < value_col_width + unit_col_width + 1; i++)
-		putchar('-');
-	printf(" |\n");
+	రాయి("| ");
+	కొరకు (పూర్ణాంకం i = 0; i < name_నిలువు_వెడల్పు + సూచీ_వెడల్పు; i++)
+		అక్షరం_రాయి('-');
+	రాయి(" | ");
+	కొరకు (పూర్ణాంకం i = 0; i < విలువ_నిలువు_వెడల్పు + unit_నిలువు_వెడల్పు + 1; i++)
+		అక్షరం_రాయి('-');
+	రాయి(" |\n");
 
-	for_each_string_list_item(item, &table->rows) {
-		struct stats_table_entry *entry = item->util;
-		const char *value = "";
-		const char *unit = "";
+	for_each_string_list_అంశం(అంశం, &పట్టిక->అడ్డువరుసలు) {
+		నిర్మాణం stats_పట్టిక_నమోదు *నమోదు_2 = అంశం->util;
+		స్థిరరాశి అక్షరం *విలువ = "";
+		స్థిరరాశి అక్షరం *unit = "";
 
-		if (entry) {
-			value = entry->value;
-			if (entry->unit)
-				unit = entry->unit;
+		ఒకవేళ (నమోదు_2) {
+			విలువ = నమోదు_2->విలువ;
+			ఒకవేళ (నమోదు_2->unit)
+				unit = నమోదు_2->unit;
 		}
 
 		strbuf_reset(&buf);
 		strbuf_addstr(&buf, "| ");
-		strbuf_utf8_align(&buf, ALIGN_LEFT, name_col_width, item->string);
+		strbuf_utf8_align(&buf, ALIGN_ఎడమ, name_నిలువు_వెడల్పు, అంశం->string);
 
-		if (entry && entry->oid)
+		ఒకవేళ (నమోదు_2 && నమోదు_2->oid)
 			strbuf_addf(&buf, " [%" PRIuMAX "]",
-				    (uintmax_t)entry->index);
-		else
-			strbuf_addchars(&buf, ' ', INDEX_WIDTH);
+				    (uintmax_t)నమోదు_2->సూచీ);
+		లేకపోతే
+			strbuf_addchars(&buf, ' ', సూచీ_వెడల్పు);
 
 		strbuf_addstr(&buf, " | ");
-		strbuf_utf8_align(&buf, ALIGN_RIGHT, value_col_width, value);
+		strbuf_utf8_align(&buf, ALIGN_కుడి, విలువ_నిలువు_వెడల్పు, విలువ);
 		strbuf_addch(&buf, ' ');
-		strbuf_utf8_align(&buf, ALIGN_LEFT, unit_col_width, unit);
+		strbuf_utf8_align(&buf, ALIGN_ఎడమ, unit_నిలువు_వెడల్పు, unit);
 		strbuf_addstr(&buf, " |");
-		printf("%s\n", buf.buf);
+		రాయి("%s\n", buf.buf);
 	}
 
-	if (table->annotations.nr) {
-		printf("\n");
-		for_each_string_list_item(item, &table->annotations)
-			printf("%s\n", item->string);
+	ఒకవేళ (పట్టిక->annotations.nr) {
+		రాయి("\n");
+		for_each_string_list_అంశం(అంశం, &పట్టిక->annotations)
+			రాయి("%s\n", అంశం->string);
 	}
 
 	strbuf_release(&buf);
 }
 
-static void stats_table_clear(struct stats_table *table)
+స్థిర శూన్య stats_పట్టిక_clear(నిర్మాణం stats_పట్టిక *పట్టిక)
 {
-	struct stats_table_entry *entry;
-	struct string_list_item *item;
+	నిర్మాణం stats_పట్టిక_నమోదు *నమోదు_2;
+	నిర్మాణం string_list_అంశం *అంశం;
 
-	for_each_string_list_item(item, &table->rows) {
-		entry = item->util;
-		if (entry)
-			free(entry->value);
+	for_each_string_list_అంశం(అంశం, &పట్టిక->అడ్డువరుసలు) {
+		నమోదు_2 = అంశం->util;
+		ఒకవేళ (నమోదు_2)
+			విడుదల(నమోదు_2->విలువ);
 	}
 
-	string_list_clear(&table->rows, 1);
-	string_list_clear(&table->annotations, 1);
+	string_list_clear(&పట్టిక->అడ్డువరుసలు, 1);
+	string_list_clear(&పట్టిక->annotations, 1);
 }
 
-static inline void print_keyvalue(const char *key, char key_delim, size_t value,
-				  char value_delim)
+స్థిర అంతఃవరుస శూన్య print_keyvalue(స్థిరరాశి అక్షరం *కీలకం, అక్షరం కీలకం_delim, కొలత_t విలువ,
+				  అక్షరం విలువ_delim)
 {
-	printf("%s%c%" PRIuMAX "%c", key, key_delim, (uintmax_t)value,
-	       value_delim);
+	రాయి("%s%c%" PRIuMAX "%c", కీలకం, కీలకం_delim, (uintmax_t)విలువ,
+	       విలువ_delim);
 }
 
-static void print_object_data(const char *key, char key_delim,
-			      struct object_data *data, char value_delim)
+స్థిర శూన్య print_object_దత్తాంశం(స్థిరరాశి అక్షరం *కీలకం, అక్షరం కీలకం_delim,
+			      నిర్మాణం object_దత్తాంశం *దత్తాంశం, అక్షరం విలువ_delim)
 {
-	print_keyvalue(key, key_delim, data->value, value_delim);
-	printf("%s_oid%c%s%c", key, key_delim, oid_to_hex(&data->oid),
-	       value_delim);
+	print_keyvalue(కీలకం, కీలకం_delim, దత్తాంశం->విలువ, విలువ_delim);
+	రాయి("%s_oid%c%s%c", కీలకం, కీలకం_delim, oid_గమ్యం_hex(&దత్తాంశం->oid),
+	       విలువ_delim);
 }
 
-static void structure_keyvalue_print(struct repo_structure *stats,
-				     char key_delim, char value_delim)
+స్థిర శూన్య structure_keyvalue_print(నిర్మాణం repo_structure *stats,
+				     అక్షరం కీలకం_delim, అక్షరం విలువ_delim)
 {
-	print_keyvalue("references.branches.count", key_delim,
-		       stats->refs.branches, value_delim);
-	print_keyvalue("references.tags.count", key_delim,
-		       stats->refs.tags, value_delim);
-	print_keyvalue("references.remotes.count", key_delim,
-		       stats->refs.remotes, value_delim);
-	print_keyvalue("references.others.count", key_delim,
-		       stats->refs.others, value_delim);
+	print_keyvalue("references.branches.count", కీలకం_delim,
+		       stats->refs.branches, విలువ_delim);
+	print_keyvalue("references.tags.count", కీలకం_delim,
+		       stats->refs.ట్యాగులు, విలువ_delim);
+	print_keyvalue("references.remotes.count", కీలకం_delim,
+		       stats->refs.remotes, విలువ_delim);
+	print_keyvalue("references.others.count", కీలకం_delim,
+		       stats->refs.others, విలువ_delim);
 
-	print_keyvalue("objects.commits.count", key_delim,
-		       stats->objects.type_counts.commits, value_delim);
-	print_keyvalue("objects.trees.count", key_delim,
-		       stats->objects.type_counts.trees, value_delim);
-	print_keyvalue("objects.blobs.count", key_delim,
-		       stats->objects.type_counts.blobs, value_delim);
-	print_keyvalue("objects.tags.count", key_delim,
-		       stats->objects.type_counts.tags, value_delim);
+	print_keyvalue("objects.commits.count", కీలకం_delim,
+		       stats->objects.type_counts.commits, విలువ_delim);
+	print_keyvalue("objects.trees.count", కీలకం_delim,
+		       stats->objects.type_counts.trees, విలువ_delim);
+	print_keyvalue("objects.blobs.count", కీలకం_delim,
+		       stats->objects.type_counts.blobs, విలువ_delim);
+	print_keyvalue("objects.tags.count", కీలకం_delim,
+		       stats->objects.type_counts.ట్యాగులు, విలువ_delim);
 
-	print_keyvalue("objects.commits.inflated_size", key_delim,
-		       stats->objects.inflated_sizes.commits, value_delim);
-	print_keyvalue("objects.trees.inflated_size", key_delim,
-		       stats->objects.inflated_sizes.trees, value_delim);
-	print_keyvalue("objects.blobs.inflated_size", key_delim,
-		       stats->objects.inflated_sizes.blobs, value_delim);
-	print_keyvalue("objects.tags.inflated_size", key_delim,
-		       stats->objects.inflated_sizes.tags, value_delim);
+	print_keyvalue("objects.commits.inflated_size", కీలకం_delim,
+		       stats->objects.inflated_sizes.commits, విలువ_delim);
+	print_keyvalue("objects.trees.inflated_size", కీలకం_delim,
+		       stats->objects.inflated_sizes.trees, విలువ_delim);
+	print_keyvalue("objects.blobs.inflated_size", కీలకం_delim,
+		       stats->objects.inflated_sizes.blobs, విలువ_delim);
+	print_keyvalue("objects.tags.inflated_size", కీలకం_delim,
+		       stats->objects.inflated_sizes.ట్యాగులు, విలువ_delim);
 
-	print_keyvalue("objects.commits.disk_size", key_delim,
-		       stats->objects.disk_sizes.commits, value_delim);
-	print_keyvalue("objects.trees.disk_size", key_delim,
-		       stats->objects.disk_sizes.trees, value_delim);
-	print_keyvalue("objects.blobs.disk_size", key_delim,
-		       stats->objects.disk_sizes.blobs, value_delim);
-	print_keyvalue("objects.tags.disk_size", key_delim,
-		       stats->objects.disk_sizes.tags, value_delim);
+	print_keyvalue("objects.commits.disk_size", కీలకం_delim,
+		       stats->objects.disk_sizes.commits, విలువ_delim);
+	print_keyvalue("objects.trees.disk_size", కీలకం_delim,
+		       stats->objects.disk_sizes.trees, విలువ_delim);
+	print_keyvalue("objects.blobs.disk_size", కీలకం_delim,
+		       stats->objects.disk_sizes.blobs, విలువ_delim);
+	print_keyvalue("objects.tags.disk_size", కీలకం_delim,
+		       stats->objects.disk_sizes.ట్యాగులు, విలువ_delim);
 
-	print_object_data("objects.commits.max_size", key_delim,
-			  &stats->objects.largest.commit_size, value_delim);
-	print_object_data("objects.trees.max_size", key_delim,
-			  &stats->objects.largest.tree_size, value_delim);
-	print_object_data("objects.blobs.max_size", key_delim,
-			  &stats->objects.largest.blob_size, value_delim);
-	print_object_data("objects.tags.max_size", key_delim,
-			  &stats->objects.largest.tag_size, value_delim);
+	print_object_దత్తాంశం("objects.commits.max_size", కీలకం_delim,
+			  &stats->objects.అతిపెద్ద.commit_కొలత, విలువ_delim);
+	print_object_దత్తాంశం("objects.trees.max_size", కీలకం_delim,
+			  &stats->objects.అతిపెద్ద.వృక్షం_కొలత, విలువ_delim);
+	print_object_దత్తాంశం("objects.blobs.max_size", కీలకం_delim,
+			  &stats->objects.అతిపెద్ద.blob_కొలత, విలువ_delim);
+	print_object_దత్తాంశం("objects.tags.max_size", కీలకం_delim,
+			  &stats->objects.అతిపెద్ద.ట్యాగ్_కొలత, విలువ_delim);
 
-	print_object_data("objects.commits.max_parents", key_delim,
-			  &stats->objects.largest.parent_count, value_delim);
-	print_object_data("objects.trees.max_entries", key_delim,
-			  &stats->objects.largest.tree_entries, value_delim);
+	print_object_దత్తాంశం("objects.commits.max_parents", కీలకం_delim,
+			  &stats->objects.అతిపెద్ద.మాతృ_లెక్క, విలువ_delim);
+	print_object_దత్తాంశం("objects.trees.max_entries", కీలకం_delim,
+			  &stats->objects.అతిపెద్ద.వృక్షం_entries, విలువ_delim);
 
 	fflush(stdout);
 }
 
-struct count_references_data {
-	struct ref_stats *stats;
-	struct rev_info *revs;
-	struct progress *progress;
+నిర్మాణం లెక్క_references_దత్తాంశం {
+	నిర్మాణం ref_stats *stats;
+	నిర్మాణం rev_info *revs;
+	నిర్మాణం పురోగతి *పురోగతి;
 };
 
-static int count_references(const struct reference *ref, void *cb_data)
+స్థిర పూర్ణాంకం లెక్క_references(స్థిరరాశి నిర్మాణం reference *ref, శూన్య *cb_దత్తాంశం)
 {
-	struct count_references_data *data = cb_data;
-	struct ref_stats *stats = data->stats;
-	size_t ref_count;
+	నిర్మాణం లెక్క_references_దత్తాంశం *దత్తాంశం = cb_దత్తాంశం;
+	నిర్మాణం ref_stats *stats = దత్తాంశం->stats;
+	కొలత_t ref_లెక్క;
 
-	switch (ref_kind_from_refname(ref->name)) {
-	case FILTER_REFS_BRANCHES:
+	ఎంపిక (ref_రకం_from_refname(ref->name)) {
+	స్థితి FILTER_REFS_BRANCHES:
 		stats->branches++;
-		break;
-	case FILTER_REFS_REMOTES:
+		ఆపు;
+	స్థితి FILTER_REFS_REMOTES:
 		stats->remotes++;
-		break;
-	case FILTER_REFS_TAGS:
-		stats->tags++;
-		break;
-	case FILTER_REFS_OTHERS:
+		ఆపు;
+	స్థితి FILTER_REFS_ట్యాగులు:
+		stats->ట్యాగులు++;
+		ఆపు;
+	స్థితి FILTER_REFS_OTHERS:
 		stats->others++;
-		break;
-	default:
+		ఆపు;
+	అప్రమేయ:
 		BUG("unexpected reference type");
 	}
 
@@ -769,228 +769,228 @@ static int count_references(const struct reference *ref, void *cb_data)
 	 * While iterating through references for counting, also add OIDs in
 	 * preparation for the path walk.
 	 */
-	add_pending_oid(data->revs, NULL, ref->oid, 0);
+	కూడు_pending_oid(దత్తాంశం->revs, ఖాళీ, ref->oid, 0);
 
-	ref_count = get_total_reference_count(stats);
-	display_progress(data->progress, ref_count);
+	ref_లెక్క = get_మొత్తం_reference_లెక్క(stats);
+	display_పురోగతి(దత్తాంశం->పురోగతి, ref_లెక్క);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static void structure_count_references(struct ref_stats *stats,
-				       struct rev_info *revs,
-				       struct repository *repo,
-				       int show_progress)
+స్థిర శూన్య structure_లెక్క_references(నిర్మాణం ref_stats *stats,
+				       నిర్మాణం rev_info *revs,
+				       నిర్మాణం repository *repo,
+				       పూర్ణాంకం show_పురోగతి)
 {
-	struct count_references_data data = {
+	నిర్మాణం లెక్క_references_దత్తాంశం దత్తాంశం = {
 		.stats = stats,
 		.revs = revs,
 	};
 
-	if (show_progress)
-		data.progress = start_delayed_progress(repo,
+	ఒకవేళ (show_పురోగతి)
+		దత్తాంశం.పురోగతి = ప్రారంభం_delayed_పురోగతి(repo,
 						       _("Counting references"), 0);
 
-	refs_for_each_ref(get_main_ref_store(repo), count_references, &data);
-	stop_progress(&data.progress);
+	refs_for_each_ref(get_main_ref_store(repo), లెక్క_references, &దత్తాంశం);
+	stop_పురోగతి(&దత్తాంశం.పురోగతి);
 }
 
-struct count_objects_data {
-	struct object_database *odb;
-	struct object_stats *stats;
-	struct progress *progress;
+నిర్మాణం లెక్క_objects_దత్తాంశం {
+	నిర్మాణం object_database *odb;
+	నిర్మాణం object_stats *stats;
+	నిర్మాణం పురోగతి *పురోగతి;
 };
 
-static void check_largest(struct object_data *data, struct object_id *oid,
-			  size_t value)
+స్థిర శూన్య check_అతిపెద్ద(నిర్మాణం object_దత్తాంశం *దత్తాంశం, నిర్మాణం object_id *oid,
+			  కొలత_t విలువ)
 {
-	if (value > data->value || is_null_oid(&data->oid)) {
-		oidcpy(&data->oid, oid);
-		data->value = value;
+	ఒకవేళ (విలువ > దత్తాంశం->విలువ || is_null_oid(&దత్తాంశం->oid)) {
+		oidcpy(&దత్తాంశం->oid, oid);
+		దత్తాంశం->విలువ = విలువ;
 	}
 }
 
-static size_t count_tree_entries(struct object *obj)
+స్థిర కొలత_t లెక్క_వృక్షం_entries(నిర్మాణం object *obj)
 {
-	struct tree *t = object_as_type(obj, OBJ_TREE, 0);
-	struct name_entry entry;
-	struct tree_desc desc;
-	size_t count = 0;
+	నిర్మాణం వృక్షం *t = object_as_type(obj, OBJ_వృక్షం, 0);
+	నిర్మాణం name_నమోదు నమోదు_2;
+	నిర్మాణం వృక్షం_desc desc;
+	కొలత_t లెక్క = 0;
 
-	init_tree_desc(&desc, &t->object.oid, t->buffer, t->size);
-	while (tree_entry(&desc, &entry))
-		count++;
+	init_వృక్షం_desc(&desc, &t->object.oid, t->బఫరు, t->కొలత);
+	అయితే (వృక్షం_నమోదు(&desc, &నమోదు_2))
+		లెక్క++;
 
-	return count;
+	తిరిగి లెక్క;
 }
 
-static int count_objects(const char *path UNUSED, struct oid_array *oids,
-			 enum object_type type, void *cb_data)
+స్థిర పూర్ణాంకం లెక్క_objects(స్థిరరాశి అక్షరం *మార్గం వాడని, నిర్మాణం oid_array *oids,
+			 గణన object_type type, శూన్య *cb_దత్తాంశం)
 {
-	struct count_objects_data *data = cb_data;
-	struct object_stats *stats = data->stats;
-	size_t object_count;
+	నిర్మాణం లెక్క_objects_దత్తాంశం *దత్తాంశం = cb_దత్తాంశం;
+	నిర్మాణం object_stats *stats = దత్తాంశం->stats;
+	కొలత_t object_లెక్క;
 
-	for (size_t i = 0; i < oids->nr; i++) {
-		struct object_info oi = OBJECT_INFO_INIT;
-		unsigned long inflated;
-		size_t inflated_st = 0;
-		struct commit *commit;
-		struct object *obj;
-		void *content;
+	కొరకు (కొలత_t i = 0; i < oids->nr; i++) {
+		నిర్మాణం object_info oi = OBJECT_INFO_INIT;
+		గుర్తులేని దీర్ఘ inflated;
+		కొలత_t inflated_st = 0;
+		నిర్మాణం commit *commit;
+		నిర్మాణం object *obj;
+		శూన్య *content;
 		off_t disk;
-		int eaten;
+		పూర్ణాంకం eaten;
 
 		oi.sizep = &inflated_st;
 		oi.disk_sizep = &disk;
 		oi.contentp = &content;
 
-		if (odb_read_object_info_extended(data->odb, &oids->oid[i], &oi,
+		ఒకవేళ (odb_read_object_info_extended(దత్తాంశం->odb, &oids->oid[i], &oi,
 						  OBJECT_INFO_SKIP_FETCH_OBJECT |
-						  OBJECT_INFO_QUICK) < 0)
-			continue;
-		inflated = cast_size_t_to_ulong(inflated_st);
+						  OBJECT_INFO_శీఘ్ర) < 0)
+			కొనసాగు;
+		inflated = cast_కొలత_t_గమ్యం_ulong(inflated_st);
 
-		obj = parse_object_buffer(the_repository, &oids->oid[i], type,
+		obj = parse_object_బఫరు(the_repository, &oids->oid[i], type,
 					  inflated, content, &eaten);
 
-		switch (type) {
-		case OBJ_TAG:
-			stats->type_counts.tags++;
-			stats->inflated_sizes.tags += inflated;
-			stats->disk_sizes.tags += disk;
-			check_largest(&stats->largest.tag_size, &oids->oid[i],
+		ఎంపిక (type) {
+		స్థితి OBJ_ట్యాగ్:
+			stats->type_counts.ట్యాగులు++;
+			stats->inflated_sizes.ట్యాగులు += inflated;
+			stats->disk_sizes.ట్యాగులు += disk;
+			check_అతిపెద్ద(&stats->అతిపెద్ద.ట్యాగ్_కొలత, &oids->oid[i],
 				      inflated);
-			break;
-		case OBJ_COMMIT:
+			ఆపు;
+		స్థితి OBJ_COMMIT:
 			commit = object_as_type(obj, OBJ_COMMIT, 0);
 			stats->type_counts.commits++;
 			stats->inflated_sizes.commits += inflated;
 			stats->disk_sizes.commits += disk;
-			check_largest(&stats->largest.commit_size, &oids->oid[i],
+			check_అతిపెద్ద(&stats->అతిపెద్ద.commit_కొలత, &oids->oid[i],
 				      inflated);
-			check_largest(&stats->largest.parent_count, &oids->oid[i],
-				      commit_list_count(commit->parents));
-			break;
-		case OBJ_TREE:
+			check_అతిపెద్ద(&stats->అతిపెద్ద.మాతృ_లెక్క, &oids->oid[i],
+				      commit_list_లెక్క(commit->parents));
+			ఆపు;
+		స్థితి OBJ_వృక్షం:
 			stats->type_counts.trees++;
 			stats->inflated_sizes.trees += inflated;
 			stats->disk_sizes.trees += disk;
-			check_largest(&stats->largest.tree_size, &oids->oid[i],
+			check_అతిపెద్ద(&stats->అతిపెద్ద.వృక్షం_కొలత, &oids->oid[i],
 				      inflated);
-			check_largest(&stats->largest.tree_entries, &oids->oid[i],
-				      count_tree_entries(obj));
-			break;
-		case OBJ_BLOB:
+			check_అతిపెద్ద(&stats->అతిపెద్ద.వృక్షం_entries, &oids->oid[i],
+				      లెక్క_వృక్షం_entries(obj));
+			ఆపు;
+		స్థితి OBJ_BLOB:
 			stats->type_counts.blobs++;
 			stats->inflated_sizes.blobs += inflated;
 			stats->disk_sizes.blobs += disk;
-			check_largest(&stats->largest.blob_size, &oids->oid[i],
+			check_అతిపెద్ద(&stats->అతిపెద్ద.blob_కొలత, &oids->oid[i],
 				      inflated);
-			break;
-		default:
+			ఆపు;
+		అప్రమేయ:
 			BUG("invalid object type");
 		}
 
-		if (!eaten)
-			free(content);
+		ఒకవేళ (!eaten)
+			విడుదల(content);
 	}
 
-	object_count = get_total_object_values(&stats->type_counts);
-	display_progress(data->progress, object_count);
+	object_లెక్క = get_మొత్తం_object_విలువలు(&stats->type_counts);
+	display_పురోగతి(దత్తాంశం->పురోగతి, object_లెక్క);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static void structure_count_objects(struct object_stats *stats,
-				    struct rev_info *revs,
-				    struct repository *repo, int show_progress)
+స్థిర శూన్య structure_లెక్క_objects(నిర్మాణం object_stats *stats,
+				    నిర్మాణం rev_info *revs,
+				    నిర్మాణం repository *repo, పూర్ణాంకం show_పురోగతి)
 {
-	struct path_walk_info info = PATH_WALK_INFO_INIT;
-	struct count_objects_data data = {
+	నిర్మాణం మార్గం_walk_info info = మార్గం_WALK_INFO_INIT;
+	నిర్మాణం లెక్క_objects_దత్తాంశం దత్తాంశం = {
 		.odb = repo->objects,
 		.stats = stats,
 	};
 
 	info.revs = revs;
-	info.path_fn = count_objects;
-	info.path_fn_data = &data;
+	info.మార్గం_fn = లెక్క_objects;
+	info.మార్గం_fn_దత్తాంశం = &దత్తాంశం;
 
-	if (show_progress)
-		data.progress = start_delayed_progress(repo, _("Counting objects"), 0);
+	ఒకవేళ (show_పురోగతి)
+		దత్తాంశం.పురోగతి = ప్రారంభం_delayed_పురోగతి(repo, _("Counting objects"), 0);
 
-	walk_objects_by_path(&info);
-	path_walk_info_clear(&info);
-	stop_progress(&data.progress);
+	walk_objects_by_మార్గం(&info);
+	మార్గం_walk_info_clear(&info);
+	stop_పురోగతి(&దత్తాంశం.పురోగతి);
 }
 
-static int cmd_repo_structure(int argc, const char **argv, const char *prefix,
-			      struct repository *repo)
+స్థిర పూర్ణాంకం cmd_repo_structure(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			      నిర్మాణం repository *repo)
 {
-	struct stats_table table = {
-		.rows = STRING_LIST_INIT_DUP,
+	నిర్మాణం stats_పట్టిక పట్టిక = {
+		.అడ్డువరుసలు = STRING_LIST_INIT_DUP,
 		.annotations = STRING_LIST_INIT_DUP,
 	};
-	enum output_format format = FORMAT_TABLE;
-	struct repo_structure stats = { 0 };
-	struct rev_info revs;
-	int show_progress = -1;
-	struct option options[] = {
+	గణన output_format format = FORMAT_పట్టిక;
+	నిర్మాణం repo_structure stats = { 0 };
+	నిర్మాణం rev_info revs;
+	పూర్ణాంకం show_పురోగతి = -1;
+	నిర్మాణం option options[] = {
 		OPT_CALLBACK_F(0, "format", &format, N_("format"),
 			       N_("output format"),
 			       PARSE_OPT_NONEG, parse_format_cb),
-		OPT_CALLBACK_F('z', NULL, &format, NULL,
+		OPT_CALLBACK_F('z', ఖాళీ, &format, ఖాళీ,
 			       N_("synonym for --format=nul"),
 			       PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			       parse_format_cb),
-		OPT_BOOL(0, "progress", &show_progress, N_("show progress")),
-		OPT_END()
+		OPT_BOOL(0, "progress", &show_పురోగతి, N_("show progress")),
+		OPT_చివర()
 	};
 
-	argc = parse_options(argc, argv, prefix, options, repo_structure_usage, 0);
-	if (argc)
+	argc = parse_options(argc, argv, ఉపసర్గ, options, repo_structure_usage, 0);
+	ఒకవేళ (argc)
 		usage(_("too many arguments"));
 
-	repo_init_revisions(repo, &revs, prefix);
+	repo_init_revisions(repo, &revs, ఉపసర్గ);
 
-	if (show_progress < 0)
-		show_progress = isatty(2);
+	ఒకవేళ (show_పురోగతి < 0)
+		show_పురోగతి = isatty(2);
 
-	structure_count_references(&stats.refs, &revs, repo, show_progress);
-	structure_count_objects(&stats.objects, &revs, repo, show_progress);
+	structure_లెక్క_references(&stats.refs, &revs, repo, show_పురోగతి);
+	structure_లెక్క_objects(&stats.objects, &revs, repo, show_పురోగతి);
 
-	switch (format) {
-	case FORMAT_TABLE:
-		stats_table_setup_structure(&table, &stats);
-		stats_table_print_structure(&table);
-		break;
-	case FORMAT_NEWLINE_TERMINATED:
+	ఎంపిక (format) {
+	స్థితి FORMAT_పట్టిక:
+		stats_పట్టిక_అమరిక_structure(&పట్టిక, &stats);
+		stats_పట్టిక_print_structure(&పట్టిక);
+		ఆపు;
+	స్థితి FORMAT_NEWLINE_TERMINATED:
 		structure_keyvalue_print(&stats, '=', '\n');
-		break;
-	case FORMAT_NUL_TERMINATED:
+		ఆపు;
+	స్థితి FORMAT_NUL_TERMINATED:
 		structure_keyvalue_print(&stats, '\n', '\0');
-		break;
-	default:
+		ఆపు;
+	అప్రమేయ:
 		BUG("invalid output format");
 	}
 
-	stats_table_clear(&table);
+	stats_పట్టిక_clear(&పట్టిక);
 	release_revisions(&revs);
 
-	return 0;
+	తిరిగి 0;
 }
 
-int cmd_repo(int argc, const char **argv, const char *prefix,
-	     struct repository *repo)
+పూర్ణాంకం cmd_repo(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+	     నిర్మాణం repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	parse_opt_subcommand_fn *fn = ఖాళీ;
+	నిర్మాణం option options[] = {
 		OPT_SUBCOMMAND("info", &fn, cmd_repo_info),
 		OPT_SUBCOMMAND("structure", &fn, cmd_repo_structure),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	argc = parse_options(argc, argv, prefix, options, repo_usage, 0);
+	argc = parse_options(argc, argv, ఉపసర్గ, options, repo_usage, 0);
 
-	return fn(argc, argv, prefix, repo);
+	తిరిగి fn(argc, argv, ఉపసర్గ, repo);
 }

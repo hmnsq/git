@@ -3,158 +3,158 @@
  *
  * Copyright (C) Linus Torvalds, 2005
  */
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-name.h"
-#include "odb.h"
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "odb.h"
 
-#include "commit.h"
-#include "parse-options.h"
+#అన్తర్భావ "commit.h"
+#అన్తర్భావ "parse-options.h"
 
-static const char * const commit_tree_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి commit_వృక్షం_usage[] = {
 	N_("git commit-tree <tree> [(-p <parent>)...]"),
 	N_("git commit-tree [(-p <parent>)...] [-S[<keyid>]] [(-m <message>)...]\n"
 	   "                [(-F <file>)...] <tree>"),
-	NULL
+	ఖాళీ
 };
 
-static const char *sign_commit;
+స్థిర స్థిరరాశి అక్షరం *sign_commit;
 
-static void new_parent(struct commit *parent, struct commit_list **parents_p)
+స్థిర శూన్య new_మాతృ(నిర్మాణం commit *మాతృ, నిర్మాణం commit_list **parents_p)
 {
-	struct object_id *oid = &parent->object.oid;
-	struct commit_list *parents;
-	for (parents = *parents_p; parents; parents = parents->next) {
-		if (parents->item == parent) {
-			error(_("duplicate parent %s ignored"), oid_to_hex(oid));
-			return;
+	నిర్మాణం object_id *oid = &మాతృ->object.oid;
+	నిర్మాణం commit_list *parents;
+	కొరకు (parents = *parents_p; parents; parents = parents->తదుపరి) {
+		ఒకవేళ (parents->అంశం == మాతృ) {
+			error(_("duplicate parent %s ignored"), oid_గమ్యం_hex(oid));
+			తిరిగి;
 		}
-		parents_p = &parents->next;
+		parents_p = &parents->తదుపరి;
 	}
-	commit_list_insert(parent, parents_p);
+	commit_list_చొప్పించు(మాతృ, parents_p);
 }
 
-static int parse_parent_arg_callback(const struct option *opt,
-		const char *arg, int unset)
+స్థిర పూర్ణాంకం parse_మాతృ_arg_callback(స్థిరరాశి నిర్మాణం option *opt,
+		స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	struct object_id oid;
-	struct commit_list **parents = opt->value;
+	నిర్మాణం object_id oid;
+	నిర్మాణం commit_list **parents = opt->విలువ;
 
 	BUG_ON_OPT_NEG_NOARG(unset, arg);
 
-	if (repo_get_oid_commit(the_repository, arg, &oid))
+	ఒకవేళ (repo_get_oid_commit(the_repository, arg, &oid))
 		die(_("not a valid object name %s"), arg);
 
 	odb_assert_oid_type(the_repository->objects, &oid, OBJ_COMMIT);
-	new_parent(lookup_commit(the_repository, &oid), parents);
-	return 0;
+	new_మాతృ(lookup_commit(the_repository, &oid), parents);
+	తిరిగి 0;
 }
 
-static int parse_message_arg_callback(const struct option *opt,
-		const char *arg, int unset)
+స్థిర పూర్ణాంకం parse_సందేశం_arg_callback(స్థిరరాశి నిర్మాణం option *opt,
+		స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	struct strbuf *buf = opt->value;
+	నిర్మాణం strbuf *buf = opt->విలువ;
 
 	BUG_ON_OPT_NEG_NOARG(unset, arg);
 
-	if (buf->len)
+	ఒకవేళ (buf->len)
 		strbuf_addch(buf, '\n');
 	strbuf_addstr(buf, arg);
-	strbuf_complete_line(buf);
+	strbuf_complete_పంక్తి(buf);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int parse_file_arg_callback(const struct option *opt,
-		const char *arg, int unset)
+స్థిర పూర్ణాంకం parse_file_arg_callback(స్థిరరాశి నిర్మాణం option *opt,
+		స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	int fd;
-	struct strbuf *buf = opt->value;
+	పూర్ణాంకం fd;
+	నిర్మాణం strbuf *buf = opt->విలువ;
 
 	BUG_ON_OPT_NEG_NOARG(unset, arg);
 
-	if (buf->len)
+	ఒకవేళ (buf->len)
 		strbuf_addch(buf, '\n');
-	if (!strcmp(arg, "-"))
+	ఒకవేళ (!strcmp(arg, "-"))
 		fd = 0;
-	else {
+	లేకపోతే {
 		fd = xopen(arg, O_RDONLY);
 	}
-	if (strbuf_read(buf, fd, 0) < 0)
+	ఒకవేళ (strbuf_read(buf, fd, 0) < 0)
 		die_errno(_("git commit-tree: failed to read '%s'"), arg);
-	if (fd && close(fd))
+	ఒకవేళ (fd && close(fd))
 		die_errno(_("git commit-tree: failed to close '%s'"), arg);
 
-	return 0;
+	తిరిగి 0;
 }
 
-int cmd_commit_tree(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+పూర్ణాంకం cmd_commit_వృక్షం(పూర్ణాంకం argc,
+		    స్థిరరాశి అక్షరం **argv,
+		    స్థిరరాశి అక్షరం *ఉపసర్గ,
+		    నిర్మాణం repository *repo వాడని)
 {
-	static struct strbuf buffer = STRBUF_INIT;
-	struct commit_list *parents = NULL;
-	struct object_id tree_oid;
-	struct object_id commit_oid;
+	స్థిర నిర్మాణం strbuf బఫరు = STRBUF_INIT;
+	నిర్మాణం commit_list *parents = ఖాళీ;
+	నిర్మాణం object_id వృక్షం_oid;
+	నిర్మాణం object_id commit_oid;
 
-	struct option options[] = {
-		OPT_CALLBACK_F('p', NULL, &parents, N_("parent"),
+	నిర్మాణం option options[] = {
+		OPT_CALLBACK_F('p', ఖాళీ, &parents, N_("parent"),
 			N_("id of a parent commit object"), PARSE_OPT_NONEG,
-			parse_parent_arg_callback),
-		OPT_CALLBACK_F('m', NULL, &buffer, N_("message"),
+			parse_మాతృ_arg_callback),
+		OPT_CALLBACK_F('m', ఖాళీ, &బఫరు, N_("message"),
 			N_("commit message"), PARSE_OPT_NONEG,
-			parse_message_arg_callback),
-		OPT_CALLBACK_F('F', NULL, &buffer, N_("file"),
+			parse_సందేశం_arg_callback),
+		OPT_CALLBACK_F('F', ఖాళీ, &బఫరు, N_("file"),
 			N_("read commit log message from file"), PARSE_OPT_NONEG,
 			parse_file_arg_callback),
 		{
 			.type = OPTION_STRING,
 			.short_name = 'S',
 			.long_name = "gpg-sign",
-			.value = &sign_commit,
+			.విలువ = &sign_commit,
 			.argh = N_("key-id"),
 			.help = N_("GPG sign commit"),
 			.flags = PARSE_OPT_OPTARG,
 			.defval = (intptr_t) "",
 		},
-		OPT_END()
+		OPT_చివర()
 	};
-	int ret;
+	పూర్ణాంకం ret;
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ఖాళీ);
 
 	show_usage_with_options_if_asked(argc, argv,
-					 commit_tree_usage, options);
+					 commit_వృక్షం_usage, options);
 
-	argc = parse_options(argc, argv, prefix, options, commit_tree_usage, 0);
+	argc = parse_options(argc, argv, ఉపసర్గ, options, commit_వృక్షం_usage, 0);
 
-	if (argc != 1)
+	ఒకవేళ (argc != 1)
 		die(_("must give exactly one tree"));
 
-	if (repo_get_oid_tree(the_repository, argv[0], &tree_oid))
+	ఒకవేళ (repo_get_oid_వృక్షం(the_repository, argv[0], &వృక్షం_oid))
 		die(_("not a valid object name %s"), argv[0]);
 
-	if (!buffer.len) {
-		if (strbuf_read(&buffer, 0, 0) < 0)
+	ఒకవేళ (!బఫరు.len) {
+		ఒకవేళ (strbuf_read(&బఫరు, 0, 0) < 0)
 			die_errno(_("git commit-tree: failed to read"));
 	}
 
-	if (commit_tree(buffer.buf, buffer.len, &tree_oid, parents, &commit_oid,
-			NULL, sign_commit)) {
+	ఒకవేళ (commit_వృక్షం(బఫరు.buf, బఫరు.len, &వృక్షం_oid, parents, &commit_oid,
+			ఖాళీ, sign_commit)) {
 		ret = 1;
-		goto out;
+		వెళ్ళు బహిర్గతం;
 	}
 
-	printf("%s\n", oid_to_hex(&commit_oid));
+	రాయి("%s\n", oid_గమ్యం_hex(&commit_oid));
 	ret = 0;
 
-out:
+బహిర్గతం:
 	commit_list_free(parents);
-	strbuf_release(&buffer);
-	return ret;
+	strbuf_release(&బఫరు);
+	తిరిగి ret;
 }

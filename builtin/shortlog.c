@@ -1,25 +1,25 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "commit.h"
-#include "diff.h"
-#include "environment.h"
-#include "gettext.h"
-#include "string-list.h"
-#include "revision.h"
-#include "utf8.h"
-#include "mailmap.h"
-#include "setup.h"
-#include "shortlog.h"
-#include "parse-options.h"
-#include "trailer.h"
-#include "strmap.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "commit.h"
+#అన్తర్భావ "diff.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "string-list.h"
+#అన్తర్భావ "revision.h"
+#అన్తర్భావ "utf8.h"
+#అన్తర్భావ "mailmap.h"
+#అన్తర్భావ "setup.h"
+#అన్తర్భావ "shortlog.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "trailer.h"
+#అన్తర్భావ "strmap.h"
 
-static char const * const shortlog_usage[] = {
+స్థిర అక్షరం స్థిరరాశి * స్థిరరాశి shortlog_usage[] = {
 	N_("git shortlog [<options>] [<revision-range>] [[--] <path>...]"),
 	N_("git log --pretty=short | git shortlog [<options>]"),
-	NULL
+	ఖాళీ
 };
 
 /*
@@ -33,381 +33,381 @@ static char const * const shortlog_usage[] = {
  *
  *  This macro accesses the latter.
  */
-#define UTIL_TO_INT(x) ((intptr_t)(x)->util)
+#నిర్వచించు UTIL_గమ్యం_INT(x) ((intptr_t)(x)->util)
 
-static int compare_by_counter(const void *a1, const void *a2)
+స్థిర పూర్ణాంకం compare_by_counter(స్థిరరాశి శూన్య *a1, స్థిరరాశి శూన్య *a2)
 {
-	const struct string_list_item *i1 = a1, *i2 = a2;
-	return UTIL_TO_INT(i2) - UTIL_TO_INT(i1);
+	స్థిరరాశి నిర్మాణం string_list_అంశం *i1 = a1, *i2 = a2;
+	తిరిగి UTIL_గమ్యం_INT(i2) - UTIL_గమ్యం_INT(i1);
 }
 
-static int compare_by_list(const void *a1, const void *a2)
+స్థిర పూర్ణాంకం compare_by_list(స్థిరరాశి శూన్య *a1, స్థిరరాశి శూన్య *a2)
 {
-	const struct string_list_item *i1 = a1, *i2 = a2;
-	const struct string_list *l1 = i1->util, *l2 = i2->util;
+	స్థిరరాశి నిర్మాణం string_list_అంశం *i1 = a1, *i2 = a2;
+	స్థిరరాశి నిర్మాణం string_list *l1 = i1->util, *l2 = i2->util;
 
-	if (l1->nr < l2->nr)
-		return 1;
-	else if (l1->nr == l2->nr)
-		return 0;
-	else
-		return -1;
+	ఒకవేళ (l1->nr < l2->nr)
+		తిరిగి 1;
+	లేకపోతే ఒకవేళ (l1->nr == l2->nr)
+		తిరిగి 0;
+	లేకపోతే
+		తిరిగి -1;
 }
 
-static void insert_one_record(struct shortlog *log,
-			      const char *ident,
-			      const char *oneline)
+స్థిర శూన్య చొప్పించు_one_రికార్డు(నిర్మాణం shortlog *సంవర్గమానం,
+			      స్థిరరాశి అక్షరం *ident,
+			      స్థిరరాశి అక్షరం *oneline)
 {
-	struct string_list_item *item;
+	నిర్మాణం string_list_అంశం *అంశం;
 
-	item = string_list_insert(&log->list, ident);
+	అంశం = string_list_చొప్పించు(&సంవర్గమానం->list, ident);
 
-	if (log->summary)
-		item->util = (void *)(UTIL_TO_INT(item) + 1);
-	else {
-		char *buffer;
-		struct strbuf subject = STRBUF_INIT;
-		const char *eol;
+	ఒకవేళ (సంవర్గమానం->summary)
+		అంశం->util = (శూన్య *)(UTIL_గమ్యం_INT(అంశం) + 1);
+	లేకపోతే {
+		అక్షరం *బఫరు;
+		నిర్మాణం strbuf subject = STRBUF_INIT;
+		స్థిరరాశి అక్షరం *eol;
 
 		/* Skip any leading whitespace, including any blank lines. */
-		while (*oneline && isspace(*oneline))
+		అయితే (*oneline && ఖాళీనా(*oneline))
 			oneline++;
 		eol = strchr(oneline, '\n');
-		if (!eol)
-			eol = oneline + strlen(oneline);
-		if (starts_with(oneline, "[PATCH")) {
-			const char *eob = strchr(oneline, ']');
-			if (eob && (!eol || eob < eol))
+		ఒకవేళ (!eol)
+			eol = oneline + అక్షరశ్రేణి_పొడవు(oneline);
+		ఒకవేళ (starts_with(oneline, "[PATCH")) {
+			స్థిరరాశి అక్షరం *eob = strchr(oneline, ']');
+			ఒకవేళ (eob && (!eol || eob < eol))
 				oneline = eob + 1;
 		}
-		while (*oneline && isspace(*oneline) && *oneline != '\n')
+		అయితే (*oneline && ఖాళీనా(*oneline) && *oneline != '\n')
 			oneline++;
 		format_subject(&subject, oneline, " ");
-		buffer = strbuf_detach(&subject, NULL);
+		బఫరు = strbuf_detach(&subject, ఖాళీ);
 
-		if (!item->util) {
-			item->util = xmalloc(sizeof(struct string_list));
-			string_list_init_nodup(item->util);
+		ఒకవేళ (!అంశం->util) {
+			అంశం->util = xmalloc(పరిమాణం(నిర్మాణం string_list));
+			string_list_init_nodup(అంశం->util);
 		}
-		string_list_append(item->util, buffer);
+		string_list_append(అంశం->util, బఫరు);
 	}
 }
 
-static int parse_ident(struct shortlog *log,
-		       struct strbuf *out, const char *in)
+స్థిర పూర్ణాంకం parse_ident(నిర్మాణం shortlog *సంవర్గమానం,
+		       నిర్మాణం strbuf *బహిర్గతం, స్థిరరాశి అక్షరం *లోపల)
 {
-	const char *mailbuf, *namebuf;
-	size_t namelen, maillen;
-	struct ident_split ident;
+	స్థిరరాశి అక్షరం *mailbuf, *namebuf;
+	కొలత_t namelen, maillen;
+	నిర్మాణం ident_విభజించు ident;
 
-	if (split_ident_line(&ident, in, strlen(in)))
-		return -1;
+	ఒకవేళ (విభజించు_ident_పంక్తి(&ident, లోపల, అక్షరశ్రేణి_పొడవు(లోపల)))
+		తిరిగి -1;
 
 	namebuf = ident.name_begin;
 	mailbuf = ident.mail_begin;
-	namelen = ident.name_end - ident.name_begin;
-	maillen = ident.mail_end - ident.mail_begin;
+	namelen = ident.name_చివర - ident.name_begin;
+	maillen = ident.mail_చివర - ident.mail_begin;
 
-	map_user(&log->mailmap, &mailbuf, &maillen, &namebuf, &namelen);
-	strbuf_add(out, namebuf, namelen);
-	if (log->email)
-		strbuf_addf(out, " <%.*s>", (int)maillen, mailbuf);
+	map_user(&సంవర్గమానం->mailmap, &mailbuf, &maillen, &namebuf, &namelen);
+	strbuf_కూడు(బహిర్గతం, namebuf, namelen);
+	ఒకవేళ (సంవర్గమానం->email)
+		strbuf_addf(బహిర్గతం, " <%.*s>", (పూర్ణాంకం)maillen, mailbuf);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static void read_from_stdin(struct shortlog *log)
+స్థిర శూన్య read_from_stdin(నిర్మాణం shortlog *సంవర్గమానం)
 {
-	struct strbuf ident = STRBUF_INIT;
-	struct strbuf mapped_ident = STRBUF_INIT;
-	struct strbuf oneline = STRBUF_INIT;
-	static const char *author_match[2] = { "Author: ", "author " };
-	static const char *committer_match[2] = { "Commit: ", "committer " };
-	const char **match;
+	నిర్మాణం strbuf ident = STRBUF_INIT;
+	నిర్మాణం strbuf mapped_ident = STRBUF_INIT;
+	నిర్మాణం strbuf oneline = STRBUF_INIT;
+	స్థిర స్థిరరాశి అక్షరం *author_సరిపోలిక[2] = { "Author: ", "author " };
+	స్థిర స్థిరరాశి అక్షరం *committer_సరిపోలిక[2] = { "Commit: ", "committer " };
+	స్థిరరాశి అక్షరం **సరిపోలిక;
 
-	if (HAS_MULTI_BITS(log->groups))
+	ఒకవేళ (HAS_MULTI_బిట్లు(సంవర్గమానం->groups))
 		die(_("using multiple --group options with stdin is not supported"));
 
-	switch (log->groups) {
-	case SHORTLOG_GROUP_AUTHOR:
-		match = author_match;
-		break;
-	case SHORTLOG_GROUP_COMMITTER:
-		match = committer_match;
-		break;
-	case SHORTLOG_GROUP_TRAILER:
+	ఎంపిక (సంవర్గమానం->groups) {
+	స్థితి SHORTLOG_సమూహం_AUTHOR:
+		సరిపోలిక = author_సరిపోలిక;
+		ఆపు;
+	స్థితి SHORTLOG_సమూహం_COMMITTER:
+		సరిపోలిక = committer_సరిపోలిక;
+		ఆపు;
+	స్థితి SHORTLOG_సమూహం_TRAILER:
 		die(_("using %s with stdin is not supported"), "--group=trailer");
-	case SHORTLOG_GROUP_FORMAT:
+	స్థితి SHORTLOG_సమూహం_FORMAT:
 		die(_("using %s with stdin is not supported"), "--group=format");
-	default:
+	అప్రమేయ:
 		BUG("unhandled shortlog group");
 	}
 
-	while (strbuf_getline_lf(&ident, stdin) != EOF) {
-		const char *v;
-		if (!skip_prefix(ident.buf, match[0], &v) &&
-		    !skip_prefix(ident.buf, match[1], &v))
-			continue;
-		while (strbuf_getline_lf(&oneline, stdin) != EOF &&
+	అయితే (strbuf_getline_lf(&ident, stdin) != EOF) {
+		స్థిరరాశి అక్షరం *v;
+		ఒకవేళ (!skip_ఉపసర్గ(ident.buf, సరిపోలిక[0], &v) &&
+		    !skip_ఉపసర్గ(ident.buf, సరిపోలిక[1], &v))
+			కొనసాగు;
+		అయితే (strbuf_getline_lf(&oneline, stdin) != EOF &&
 		       oneline.len)
 			; /* discard headers */
-		while (strbuf_getline_lf(&oneline, stdin) != EOF &&
+		అయితే (strbuf_getline_lf(&oneline, stdin) != EOF &&
 		       !oneline.len)
 			; /* discard blanks */
 
 		strbuf_reset(&mapped_ident);
-		if (parse_ident(log, &mapped_ident, v) < 0)
-			continue;
+		ఒకవేళ (parse_ident(సంవర్గమానం, &mapped_ident, v) < 0)
+			కొనసాగు;
 
-		insert_one_record(log, mapped_ident.buf, oneline.buf);
+		చొప్పించు_one_రికార్డు(సంవర్గమానం, mapped_ident.buf, oneline.buf);
 	}
 	strbuf_release(&ident);
 	strbuf_release(&mapped_ident);
 	strbuf_release(&oneline);
 }
 
-static void insert_records_from_trailers(struct shortlog *log,
-					 struct strset *dups,
-					 struct commit *commit,
-					 struct pretty_print_context *ctx,
-					 const char *oneline)
+స్థిర శూన్య చొప్పించు_రికార్డులు_from_trailers(నిర్మాణం shortlog *సంవర్గమానం,
+					 నిర్మాణం strset *dups,
+					 నిర్మాణం commit *commit,
+					 నిర్మాణం pretty_print_context *ctx,
+					 స్థిరరాశి అక్షరం *oneline)
 {
-	struct trailer_iterator iter;
-	const char *commit_buffer, *body;
-	struct strbuf ident = STRBUF_INIT;
+	నిర్మాణం trailer_iterator iter;
+	స్థిరరాశి అక్షరం *commit_బఫరు, *body;
+	నిర్మాణం strbuf ident = STRBUF_INIT;
 
-	if (!log->trailers.nr)
-		return;
+	ఒకవేళ (!సంవర్గమానం->trailers.nr)
+		తిరిగి;
 
 	/*
 	 * Using repo_format_commit_message("%B") would be simpler here, but
 	 * this saves us copying the message.
 	 */
-	commit_buffer = repo_logmsg_reencode(the_repository, commit, NULL,
+	commit_బఫరు = repo_logmsg_reencode(the_repository, commit, ఖాళీ,
 					     ctx->output_encoding);
-	body = strstr(commit_buffer, "\n\n");
-	if (!body)
-		goto out;
+	body = అక్షరశ్రేణి_శోధన(commit_బఫరు, "\n\n");
+	ఒకవేళ (!body)
+		వెళ్ళు బహిర్గతం;
 
 	trailer_iterator_init(&iter, body);
-	while (trailer_iterator_advance(&iter)) {
-		const char *value = iter.val.buf;
+	అయితే (trailer_iterator_advance(&iter)) {
+		స్థిరరాశి అక్షరం *విలువ = iter.val.buf;
 
-		if (!string_list_has_string(&log->trailers, iter.key.buf))
-			continue;
+		ఒకవేళ (!string_list_has_string(&సంవర్గమానం->trailers, iter.కీలకం.buf))
+			కొనసాగు;
 
 		strbuf_reset(&ident);
-		if (!parse_ident(log, &ident, value))
-			value = ident.buf;
+		ఒకవేళ (!parse_ident(సంవర్గమానం, &ident, విలువ))
+			విలువ = ident.buf;
 
-		if (!strset_add(dups, value))
-			continue;
-		insert_one_record(log, value, oneline);
+		ఒకవేళ (!strset_కూడు(dups, విలువ))
+			కొనసాగు;
+		చొప్పించు_one_రికార్డు(సంవర్గమానం, విలువ, oneline);
 	}
 	trailer_iterator_release(&iter);
 
-out:
+బహిర్గతం:
 	strbuf_release(&ident);
-	repo_unuse_commit_buffer(the_repository, commit, commit_buffer);
+	repo_unuse_commit_బఫరు(the_repository, commit, commit_బఫరు);
 }
 
-static int shortlog_needs_dedup(const struct shortlog *log)
+స్థిర పూర్ణాంకం shortlog_needs_dedup(స్థిరరాశి నిర్మాణం shortlog *సంవర్గమానం)
 {
-	return HAS_MULTI_BITS(log->groups) || log->format.nr > 1 || log->trailers.nr;
+	తిరిగి HAS_MULTI_బిట్లు(సంవర్గమానం->groups) || సంవర్గమానం->format.nr > 1 || సంవర్గమానం->trailers.nr;
 }
 
-static void insert_records_from_format(struct shortlog *log,
-				       struct strset *dups,
-				       struct commit *commit,
-				       struct pretty_print_context *ctx,
-				       const char *oneline)
+స్థిర శూన్య చొప్పించు_రికార్డులు_from_format(నిర్మాణం shortlog *సంవర్గమానం,
+				       నిర్మాణం strset *dups,
+				       నిర్మాణం commit *commit,
+				       నిర్మాణం pretty_print_context *ctx,
+				       స్థిరరాశి అక్షరం *oneline)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct string_list_item *item;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
+	నిర్మాణం string_list_అంశం *అంశం;
 
-	for_each_string_list_item(item, &log->format) {
+	for_each_string_list_అంశం(అంశం, &సంవర్గమానం->format) {
 		strbuf_reset(&buf);
 
-		repo_format_commit_message(the_repository, commit,
-					   item->string, &buf, ctx);
+		repo_format_commit_సందేశం(the_repository, commit,
+					   అంశం->string, &buf, ctx);
 
-		if (!shortlog_needs_dedup(log) || strset_add(dups, buf.buf))
-			insert_one_record(log, buf.buf, oneline);
+		ఒకవేళ (!shortlog_needs_dedup(సంవర్గమానం) || strset_కూడు(dups, buf.buf))
+			చొప్పించు_one_రికార్డు(సంవర్గమానం, buf.buf, oneline);
 	}
 
 	strbuf_release(&buf);
 }
 
-void shortlog_add_commit(struct shortlog *log, struct commit *commit)
+శూన్య shortlog_కూడు_commit(నిర్మాణం shortlog *సంవర్గమానం, నిర్మాణం commit *commit)
 {
-	struct strbuf oneline = STRBUF_INIT;
-	struct strset dups = STRSET_INIT;
-	struct pretty_print_context ctx = {0};
-	const char *oneline_str;
+	నిర్మాణం strbuf oneline = STRBUF_INIT;
+	నిర్మాణం strset dups = STRSET_INIT;
+	నిర్మాణం pretty_print_context ctx = {0};
+	స్థిరరాశి అక్షరం *oneline_str;
 
 	ctx.fmt = CMIT_FMT_USERFORMAT;
-	ctx.abbrev = log->abbrev;
-	ctx.date_mode = log->date_mode;
+	ctx.abbrev = సంవర్గమానం->abbrev;
+	ctx.date_బహుళకం = సంవర్గమానం->date_బహుళకం;
 	ctx.output_encoding = get_log_output_encoding();
 
-	if (!log->summary) {
-		if (log->user_format)
+	ఒకవేళ (!సంవర్గమానం->summary) {
+		ఒకవేళ (సంవర్గమానం->user_format)
 			pretty_print_commit(&ctx, commit, &oneline);
-		else
-			repo_format_commit_message(the_repository, commit,
+		లేకపోతే
+			repo_format_commit_సందేశం(the_repository, commit,
 						   "%s", &oneline, &ctx);
 	}
 	oneline_str = oneline.len ? oneline.buf : "<none>";
 
-	insert_records_from_trailers(log, &dups, commit, &ctx, oneline_str);
-	insert_records_from_format(log, &dups, commit, &ctx, oneline_str);
+	చొప్పించు_రికార్డులు_from_trailers(సంవర్గమానం, &dups, commit, &ctx, oneline_str);
+	చొప్పించు_రికార్డులు_from_format(సంవర్గమానం, &dups, commit, &ctx, oneline_str);
 
 	strset_clear(&dups);
 	strbuf_release(&oneline);
 }
 
-static void get_from_rev(struct rev_info *rev, struct shortlog *log)
+స్థిర శూన్య get_from_rev(నిర్మాణం rev_info *rev, నిర్మాణం shortlog *సంవర్గమానం)
 {
-	struct commit *commit;
+	నిర్మాణం commit *commit;
 
-	if (prepare_revision_walk(rev))
+	ఒకవేళ (prepare_revision_walk(rev))
 		die(_("revision walk setup failed"));
-	while ((commit = get_revision(rev)) != NULL)
-		shortlog_add_commit(log, commit);
+	అయితే ((commit = get_revision(rev)) != ఖాళీ)
+		shortlog_కూడు_commit(సంవర్గమానం, commit);
 }
 
-static int parse_uint(char const **arg, int comma, int defval)
+స్థిర పూర్ణాంకం parse_uint(అక్షరం స్థిరరాశి **arg, పూర్ణాంకం comma, పూర్ణాంకం defval)
 {
-	unsigned long ul;
-	int ret;
-	char *endp;
+	గుర్తులేని దీర్ఘ ul;
+	పూర్ణాంకం ret;
+	అక్షరం *endp;
 
 	ul = strtoul(*arg, &endp, 10);
-	if (*endp && *endp != comma)
-		return -1;
-	if (ul > INT_MAX)
-		return -1;
-	ret = *arg == endp ? defval : (int)ul;
+	ఒకవేళ (*endp && *endp != comma)
+		తిరిగి -1;
+	ఒకవేళ (ul > గరిష్ఠ_పూర్ణాంకం)
+		తిరిగి -1;
+	ret = *arg == endp ? defval : (పూర్ణాంకం)ul;
 	*arg = *endp ? endp + 1 : endp;
-	return ret;
+	తిరిగి ret;
 }
 
-static const char wrap_arg_usage[] = "-w[<width>[,<indent1>[,<indent2>]]]";
-#define DEFAULT_WRAPLEN 76
-#define DEFAULT_INDENT1 6
-#define DEFAULT_INDENT2 9
+స్థిర స్థిరరాశి అక్షరం wrap_arg_usage[] = "-w[<width>[,<indent1>[,<indent2>]]]";
+#నిర్వచించు DEFAULT_WRAPLEN 76
+#నిర్వచించు DEFAULT_INDENT1 6
+#నిర్వచించు DEFAULT_INDENT2 9
 
-static int parse_wrap_args(const struct option *opt, const char *arg, int unset)
+స్థిర పూర్ణాంకం parse_wrap_వాదనలు(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	struct shortlog *log = opt->value;
+	నిర్మాణం shortlog *సంవర్గమానం = opt->విలువ;
 
-	log->wrap_lines = !unset;
-	if (unset)
-		return 0;
-	if (!arg) {
-		log->wrap = DEFAULT_WRAPLEN;
-		log->in1 = DEFAULT_INDENT1;
-		log->in2 = DEFAULT_INDENT2;
-		return 0;
+	సంవర్గమానం->wrap_పంక్తులు = !unset;
+	ఒకవేళ (unset)
+		తిరిగి 0;
+	ఒకవేళ (!arg) {
+		సంవర్గమానం->wrap = DEFAULT_WRAPLEN;
+		సంవర్గమానం->in1 = DEFAULT_INDENT1;
+		సంవర్గమానం->in2 = DEFAULT_INDENT2;
+		తిరిగి 0;
 	}
 
-	log->wrap = parse_uint(&arg, ',', DEFAULT_WRAPLEN);
-	log->in1 = parse_uint(&arg, ',', DEFAULT_INDENT1);
-	log->in2 = parse_uint(&arg, '\0', DEFAULT_INDENT2);
-	if (log->wrap < 0 || log->in1 < 0 || log->in2 < 0)
-		return error(wrap_arg_usage);
-	if (log->wrap &&
-	    ((log->in1 && log->wrap <= log->in1) ||
-	     (log->in2 && log->wrap <= log->in2)))
-		return error(wrap_arg_usage);
-	return 0;
+	సంవర్గమానం->wrap = parse_uint(&arg, ',', DEFAULT_WRAPLEN);
+	సంవర్గమానం->in1 = parse_uint(&arg, ',', DEFAULT_INDENT1);
+	సంవర్గమానం->in2 = parse_uint(&arg, '\0', DEFAULT_INDENT2);
+	ఒకవేళ (సంవర్గమానం->wrap < 0 || సంవర్గమానం->in1 < 0 || సంవర్గమానం->in2 < 0)
+		తిరిగి error(wrap_arg_usage);
+	ఒకవేళ (సంవర్గమానం->wrap &&
+	    ((సంవర్గమానం->in1 && సంవర్గమానం->wrap <= సంవర్గమానం->in1) ||
+	     (సంవర్గమానం->in2 && సంవర్గమానం->wrap <= సంవర్గమానం->in2)))
+		తిరిగి error(wrap_arg_usage);
+	తిరిగి 0;
 }
 
-static int parse_group_option(const struct option *opt, const char *arg, int unset)
+స్థిర పూర్ణాంకం parse_సమూహం_option(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	struct shortlog *log = opt->value;
-	const char *field;
+	నిర్మాణం shortlog *సంవర్గమానం = opt->విలువ;
+	స్థిరరాశి అక్షరం *క్షేత్రం;
 
-	if (unset) {
-		log->groups = 0;
-		string_list_clear(&log->trailers, 0);
-		string_list_clear(&log->format, 0);
-	} else if (!strcasecmp(arg, "author"))
-		log->groups |= SHORTLOG_GROUP_AUTHOR;
-	else if (!strcasecmp(arg, "committer"))
-		log->groups |= SHORTLOG_GROUP_COMMITTER;
-	else if (skip_prefix(arg, "trailer:", &field)) {
-		log->groups |= SHORTLOG_GROUP_TRAILER;
-		string_list_append(&log->trailers, field);
-	} else if (skip_prefix(arg, "format:", &field)) {
-		log->groups |= SHORTLOG_GROUP_FORMAT;
-		string_list_append(&log->format, field);
-	} else if (strchr(arg, '%')) {
-		log->groups |= SHORTLOG_GROUP_FORMAT;
-		string_list_append(&log->format, arg);
-	} else {
-		return error(_("unknown group type: %s"), arg);
+	ఒకవేళ (unset) {
+		సంవర్గమానం->groups = 0;
+		string_list_clear(&సంవర్గమానం->trailers, 0);
+		string_list_clear(&సంవర్గమానం->format, 0);
+	} లేకపోతే ఒకవేళ (!strcasecmp(arg, "author"))
+		సంవర్గమానం->groups |= SHORTLOG_సమూహం_AUTHOR;
+	లేకపోతే ఒకవేళ (!strcasecmp(arg, "committer"))
+		సంవర్గమానం->groups |= SHORTLOG_సమూహం_COMMITTER;
+	లేకపోతే ఒకవేళ (skip_ఉపసర్గ(arg, "trailer:", &క్షేత్రం)) {
+		సంవర్గమానం->groups |= SHORTLOG_సమూహం_TRAILER;
+		string_list_append(&సంవర్గమానం->trailers, క్షేత్రం);
+	} లేకపోతే ఒకవేళ (skip_ఉపసర్గ(arg, "format:", &క్షేత్రం)) {
+		సంవర్గమానం->groups |= SHORTLOG_సమూహం_FORMAT;
+		string_list_append(&సంవర్గమానం->format, క్షేత్రం);
+	} లేకపోతే ఒకవేళ (strchr(arg, '%')) {
+		సంవర్గమానం->groups |= SHORTLOG_సమూహం_FORMAT;
+		string_list_append(&సంవర్గమానం->format, arg);
+	} లేకపోతే {
+		తిరిగి error(_("unknown group type: %s"), arg);
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
 
-void shortlog_init(struct shortlog *log)
+శూన్య shortlog_init(నిర్మాణం shortlog *సంవర్గమానం)
 {
-	memset(log, 0, sizeof(*log));
+	memset(సంవర్గమానం, 0, పరిమాణం(*సంవర్గమానం));
 
-	read_mailmap(the_repository, &log->mailmap);
+	read_mailmap(the_repository, &సంవర్గమానం->mailmap);
 
-	log->list.strdup_strings = 1;
-	log->wrap = DEFAULT_WRAPLEN;
-	log->in1 = DEFAULT_INDENT1;
-	log->in2 = DEFAULT_INDENT2;
-	log->trailers.strdup_strings = 1;
-	log->trailers.cmp = strcasecmp;
-	log->format.strdup_strings = 1;
+	సంవర్గమానం->list.strdup_అక్షరశ్రేణులు = 1;
+	సంవర్గమానం->wrap = DEFAULT_WRAPLEN;
+	సంవర్గమానం->in1 = DEFAULT_INDENT1;
+	సంవర్గమానం->in2 = DEFAULT_INDENT2;
+	సంవర్గమానం->trailers.strdup_అక్షరశ్రేణులు = 1;
+	సంవర్గమానం->trailers.cmp = strcasecmp;
+	సంవర్గమానం->format.strdup_అక్షరశ్రేణులు = 1;
 }
 
-void shortlog_finish_setup(struct shortlog *log)
+శూన్య shortlog_ముగింపు_అమరిక(నిర్మాణం shortlog *సంవర్గమానం)
 {
-	if (log->groups & SHORTLOG_GROUP_AUTHOR)
-		string_list_append(&log->format,
-				   log->email ? "%aN <%aE>" : "%aN");
-	if (log->groups & SHORTLOG_GROUP_COMMITTER)
-		string_list_append(&log->format,
-				   log->email ? "%cN <%cE>" : "%cN");
+	ఒకవేళ (సంవర్గమానం->groups & SHORTLOG_సమూహం_AUTHOR)
+		string_list_append(&సంవర్గమానం->format,
+				   సంవర్గమానం->email ? "%aN <%aE>" : "%aN");
+	ఒకవేళ (సంవర్గమానం->groups & SHORTLOG_సమూహం_COMMITTER)
+		string_list_append(&సంవర్గమానం->format,
+				   సంవర్గమానం->email ? "%cN <%cE>" : "%cN");
 
-	string_list_sort(&log->trailers);
+	string_list_క్రమీకరించు(&సంవర్గమానం->trailers);
 }
 
-int cmd_shortlog(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+పూర్ణాంకం cmd_shortlog(పూర్ణాంకం argc,
+		 స్థిరరాశి అక్షరం **argv,
+		 స్థిరరాశి అక్షరం *ఉపసర్గ,
+		 నిర్మాణం repository *repo వాడని)
 {
-	struct shortlog log = { STRING_LIST_INIT_NODUP };
-	struct rev_info rev;
-	int nongit = !startup_info->have_repository;
+	నిర్మాణం shortlog సంవర్గమానం = { STRING_LIST_INIT_NODUP };
+	నిర్మాణం rev_info rev;
+	పూర్ణాంకం nongit = !startup_info->have_repository;
 
-	const struct option options[] = {
-		OPT_BIT('c', "committer", &log.groups,
+	స్థిరరాశి నిర్మాణం option options[] = {
+		OPT_బిట్టు('c', "committer", &సంవర్గమానం.groups,
 			N_("group by committer rather than author"),
-			SHORTLOG_GROUP_COMMITTER),
-		OPT_BOOL('n', "numbered", &log.sort_by_number,
+			SHORTLOG_సమూహం_COMMITTER),
+		OPT_BOOL('n', "numbered", &సంవర్గమానం.క్రమీకరించు_by_సంఖ్య,
 			 N_("sort output according to the number of commits per author")),
-		OPT_BOOL('s', "summary", &log.summary,
+		OPT_BOOL('s', "summary", &సంవర్గమానం.summary,
 			 N_("suppress commit descriptions, only provides commit count")),
-		OPT_BOOL('e', "email", &log.email,
+		OPT_BOOL('e', "email", &సంవర్గమానం.email,
 			 N_("show the email address of each author")),
-		OPT_CALLBACK_F('w', NULL, &log, N_("<w>[,<i1>[,<i2>]]"),
+		OPT_CALLBACK_F('w', ఖాళీ, &సంవర్గమానం, N_("<w>[,<i1>[,<i2>]]"),
 			N_("linewrap output"), PARSE_OPT_OPTARG,
-			&parse_wrap_args),
-		OPT_CALLBACK(0, "group", &log, N_("field"),
-			N_("group by field"), parse_group_option),
-		OPT_END(),
+			&parse_wrap_వాదనలు),
+		OPT_CALLBACK(0, "group", &సంవర్గమానం, N_("field"),
+			N_("group by field"), parse_సమూహం_option),
+		OPT_చివర(),
 	};
 
-	struct parse_opt_ctx_t ctx;
+	నిర్మాణం parse_opt_ctx_t ctx;
 
 	/*
 	 * NEEDSWORK: Later on we'll call parse_revision_opt which relies on
@@ -418,120 +418,120 @@ int cmd_shortlog(int argc,
 	 * SHA1, but ideally the parsing machinery would be split between
 	 * git/nongit so that we do not have to do this.
 	 */
-	if (nongit && !the_hash_algo)
-		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
+	ఒకవేళ (nongit && !the_hash_algo)
+		repo_సమితి_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
-	repo_config(the_repository, git_default_config, NULL);
-	shortlog_init(&log);
-	repo_init_revisions(the_repository, &rev, prefix);
-	parse_options_start(&ctx, argc, argv, prefix, options,
+	repo_config(the_repository, git_default_config, ఖాళీ);
+	shortlog_init(&సంవర్గమానం);
+	repo_init_revisions(the_repository, &rev, ఉపసర్గ);
+	parse_options_ప్రారంభం(&ctx, argc, argv, ఉపసర్గ, options,
 			    PARSE_OPT_KEEP_DASHDASH | PARSE_OPT_KEEP_ARGV0);
 
-	for (;;) {
-		switch (parse_options_step(&ctx, options, shortlog_usage)) {
-		case PARSE_OPT_NON_OPTION:
-		case PARSE_OPT_UNKNOWN:
-			break;
-		case PARSE_OPT_HELP:
-			exit(0);
-		case PARSE_OPT_HELP_ERROR:
-		case PARSE_OPT_ERROR:
-		case PARSE_OPT_SUBCOMMAND:
-			exit(129);
-		case PARSE_OPT_COMPLETE:
-			exit(0);
-		case PARSE_OPT_DONE:
-			goto parse_done;
+	కొరకు (;;) {
+		ఎంపిక (parse_options_అడుగు(&ctx, options, shortlog_usage)) {
+		స్థితి PARSE_OPT_NON_OPTION:
+		స్థితి PARSE_OPT_UNKNOWN:
+			ఆపు;
+		స్థితి PARSE_OPT_HELP:
+			నిష్క్రమించు(0);
+		స్థితి PARSE_OPT_HELP_ERROR:
+		స్థితి PARSE_OPT_ERROR:
+		స్థితి PARSE_OPT_SUBCOMMAND:
+			నిష్క్రమించు(129);
+		స్థితి PARSE_OPT_COMPLETE:
+			నిష్క్రమించు(0);
+		స్థితి PARSE_OPT_పూర్తి:
+			వెళ్ళు parse_పూర్తి;
 		}
 		parse_revision_opt(&rev, &ctx, options, shortlog_usage);
 	}
-parse_done:
-	revision_opts_finish(&rev);
-	argc = parse_options_end(&ctx);
+parse_పూర్తి:
+	revision_opts_ముగింపు(&rev);
+	argc = parse_options_చివర(&ctx);
 
-	if (nongit && argc > 1) {
+	ఒకవేళ (nongit && argc > 1) {
 		error(_("too many arguments given outside repository"));
 		usage_with_options(shortlog_usage, options);
 	}
 
-	if (!nongit && setup_revisions(argc, argv, &rev, NULL) != 1) {
+	ఒకవేళ (!nongit && అమరిక_revisions(argc, argv, &rev, ఖాళీ) != 1) {
 		error(_("unrecognized argument: %s"), argv[1]);
 		usage_with_options(shortlog_usage, options);
 	}
 
-	log.user_format = rev.commit_format == CMIT_FMT_USERFORMAT;
-	log.abbrev = rev.abbrev;
-	log.file = rev.diffopt.file;
-	log.date_mode = rev.date_mode;
+	సంవర్గమానం.user_format = rev.commit_format == CMIT_FMT_USERFORMAT;
+	సంవర్గమానం.abbrev = rev.abbrev;
+	సంవర్గమానం.file = rev.diffopt.file;
+	సంవర్గమానం.date_బహుళకం = rev.date_బహుళకం;
 
-	if (!log.groups)
-		log.groups = SHORTLOG_GROUP_AUTHOR;
-	shortlog_finish_setup(&log);
+	ఒకవేళ (!సంవర్గమానం.groups)
+		సంవర్గమానం.groups = SHORTLOG_సమూహం_AUTHOR;
+	shortlog_ముగింపు_అమరిక(&సంవర్గమానం);
 
 	/* assume HEAD if from a tty */
-	if (!nongit && !rev.pending.nr && isatty(0))
-		add_head_to_pending(&rev);
-	if (rev.pending.nr == 0) {
-		if (isatty(0))
+	ఒకవేళ (!nongit && !rev.pending.nr && isatty(0))
+		కూడు_తల_గమ్యం_pending(&rev);
+	ఒకవేళ (rev.pending.nr == 0) {
+		ఒకవేళ (isatty(0))
 			fprintf(stderr, _("(reading log message from standard input)\n"));
-		read_from_stdin(&log);
+		read_from_stdin(&సంవర్గమానం);
 	}
-	else
-		get_from_rev(&rev, &log);
+	లేకపోతే
+		get_from_rev(&rev, &సంవర్గమానం);
 
-	shortlog_output(&log);
+	shortlog_output(&సంవర్గమానం);
 	release_revisions(&rev);
-	return 0;
+	తిరిగి 0;
 }
 
-static void add_wrapped_shortlog_msg(struct strbuf *sb, const char *s,
-				     const struct shortlog *log)
+స్థిర శూన్య కూడు_wrapped_shortlog_సందేశం(నిర్మాణం strbuf *sb, స్థిరరాశి అక్షరం *s,
+				     స్థిరరాశి నిర్మాణం shortlog *సంవర్గమానం)
 {
-	strbuf_add_wrapped_text(sb, s, log->in1, log->in2, log->wrap);
+	strbuf_కూడు_wrapped_పాఠ్యం(sb, s, సంవర్గమానం->in1, సంవర్గమానం->in2, సంవర్గమానం->wrap);
 	strbuf_addch(sb, '\n');
 }
 
-void shortlog_output(struct shortlog *log)
+శూన్య shortlog_output(నిర్మాణం shortlog *సంవర్గమానం)
 {
-	size_t i, j;
-	struct strbuf sb = STRBUF_INIT;
+	కొలత_t i, j;
+	నిర్మాణం strbuf sb = STRBUF_INIT;
 
-	if (log->sort_by_number)
-		STABLE_QSORT(log->list.items, log->list.nr,
-		      log->summary ? compare_by_counter : compare_by_list);
-	for (i = 0; i < log->list.nr; i++) {
-		const struct string_list_item *item = &log->list.items[i];
-		if (log->summary) {
-			fprintf(log->file, "%6d\t%s\n",
-				(int)UTIL_TO_INT(item), item->string);
-		} else {
-			struct string_list *onelines = item->util;
-			fprintf(log->file, "%s (%"PRIuMAX"):\n",
-				item->string, (uintmax_t)onelines->nr);
-			for (j = onelines->nr; j >= 1; j--) {
-				const char *msg = onelines->items[j - 1].string;
+	ఒకవేళ (సంవర్గమానం->క్రమీకరించు_by_సంఖ్య)
+		STABLE_QSORT(సంవర్గమానం->list.వస్తువులు, సంవర్గమానం->list.nr,
+		      సంవర్గమానం->summary ? compare_by_counter : compare_by_list);
+	కొరకు (i = 0; i < సంవర్గమానం->list.nr; i++) {
+		స్థిరరాశి నిర్మాణం string_list_అంశం *అంశం = &సంవర్గమానం->list.వస్తువులు[i];
+		ఒకవేళ (సంవర్గమానం->summary) {
+			fprintf(సంవర్గమానం->file, "%6d\t%s\n",
+				(పూర్ణాంకం)UTIL_గమ్యం_INT(అంశం), అంశం->string);
+		} లేకపోతే {
+			నిర్మాణం string_list *onelines = అంశం->util;
+			fprintf(సంవర్గమానం->file, "%s (%"PRIuMAX"):\n",
+				అంశం->string, (uintmax_t)onelines->nr);
+			కొరకు (j = onelines->nr; j >= 1; j--) {
+				స్థిరరాశి అక్షరం *సందేశం = onelines->వస్తువులు[j - 1].string;
 
-				if (log->wrap_lines) {
+				ఒకవేళ (సంవర్గమానం->wrap_పంక్తులు) {
 					strbuf_reset(&sb);
-					add_wrapped_shortlog_msg(&sb, msg, log);
-					fwrite(sb.buf, sb.len, 1, log->file);
+					కూడు_wrapped_shortlog_సందేశం(&sb, సందేశం, సంవర్గమానం);
+					fwrite(sb.buf, sb.len, 1, సంవర్గమానం->file);
 				}
-				else
-					fprintf(log->file, "      %s\n", msg);
+				లేకపోతే
+					fprintf(సంవర్గమానం->file, "      %s\n", సందేశం);
 			}
-			putc('\n', log->file);
-			onelines->strdup_strings = 1;
+			putc('\n', సంవర్గమానం->file);
+			onelines->strdup_అక్షరశ్రేణులు = 1;
 			string_list_clear(onelines, 0);
-			free(onelines);
+			విడుదల(onelines);
 		}
 
-		log->list.items[i].util = NULL;
+		సంవర్గమానం->list.వస్తువులు[i].util = ఖాళీ;
 	}
 
 	strbuf_release(&sb);
-	log->list.strdup_strings = 1;
-	string_list_clear(&log->list, 1);
-	clear_mailmap(&log->mailmap);
-	string_list_clear(&log->format, 0);
-	string_list_clear(&log->trailers, 0);
+	సంవర్గమానం->list.strdup_అక్షరశ్రేణులు = 1;
+	string_list_clear(&సంవర్గమానం->list, 1);
+	clear_mailmap(&సంవర్గమానం->mailmap);
+	string_list_clear(&సంవర్గమానం->format, 0);
+	string_list_clear(&సంవర్గమానం->trailers, 0);
 }

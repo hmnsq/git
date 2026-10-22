@@ -1,131 +1,131 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "hex.h"
-#include "read-cache-ll.h"
-#include "run-command.h"
-#include "sparse-index.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "read-cache-ll.h"
+#అన్తర్భావ "run-command.h"
+#అన్తర్భావ "sparse-index.h"
 
-static const char *pgm;
-static int one_shot, quiet;
-static int err;
+స్థిర స్థిరరాశి అక్షరం *pgm;
+స్థిర పూర్ణాంకం one_shot, quiet;
+స్థిర పూర్ణాంకం err;
 
-static int merge_entry(int pos, const char *path)
+స్థిర పూర్ణాంకం విలీనం_నమోదు(పూర్ణాంకం pos, స్థిరరాశి అక్షరం *మార్గం)
 {
-	int found;
-	const char *arguments[] = { pgm, "", "", "", path, "", "", "", NULL };
-	char hexbuf[4][GIT_MAX_HEXSZ + 1];
-	char ownbuf[4][60];
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	పూర్ణాంకం దొరికింది_2;
+	స్థిరరాశి అక్షరం *arguments[] = { pgm, "", "", "", మార్గం, "", "", "", ఖాళీ };
+	అక్షరం hexbuf[4][GIT_MAX_HEXSZ + 1];
+	అక్షరం ownbuf[4][60];
+	నిర్మాణం బిడ్డ_process cmd = బిడ్డ_PROCESS_INIT;
 
-	if (pos >= the_repository->index->cache_nr)
-		die("git merge-index: %s not in the cache", path);
-	found = 0;
-	do {
-		const struct cache_entry *ce = the_repository->index->cache[pos];
-		int stage = ce_stage(ce);
+	ఒకవేళ (pos >= the_repository->సూచీ->cache_nr)
+		die("git merge-index: %s not in the cache", మార్గం);
+	దొరికింది_2 = 0;
+	చేయి {
+		స్థిరరాశి నిర్మాణం cache_నమోదు *ce = the_repository->సూచీ->cache[pos];
+		పూర్ణాంకం stage = ce_stage(ce);
 
-		if (strcmp(ce->name, path))
-			break;
-		found++;
-		oid_to_hex_r(hexbuf[stage], &ce->oid);
-		xsnprintf(ownbuf[stage], sizeof(ownbuf[stage]), "%o", ce->ce_mode);
+		ఒకవేళ (strcmp(ce->name, మార్గం))
+			ఆపు;
+		దొరికింది_2++;
+		oid_గమ్యం_hex_r(hexbuf[stage], &ce->oid);
+		xsnprintf(ownbuf[stage], పరిమాణం(ownbuf[stage]), "%o", ce->ce_బహుళకం);
 		arguments[stage] = hexbuf[stage];
 		arguments[stage + 4] = ownbuf[stage];
-	} while (++pos < the_repository->index->cache_nr);
-	if (!found)
-		die("git merge-index: %s not in the cache", path);
+	} అయితే (++pos < the_repository->సూచీ->cache_nr);
+	ఒకవేళ (!దొరికింది_2)
+		die("git merge-index: %s not in the cache", మార్గం);
 
-	strvec_pushv(&cmd.args, arguments);
-	if (run_command(&cmd)) {
-		if (one_shot)
+	strvec_pushv(&cmd.వాదనలు, arguments);
+	ఒకవేళ (నిరంతరం_command(&cmd)) {
+		ఒకవేళ (one_shot)
 			err++;
-		else {
-			if (!quiet)
+		లేకపోతే {
+			ఒకవేళ (!quiet)
 				die("merge program failed");
-			exit(1);
+			నిష్క్రమించు(1);
 		}
 	}
-	return found;
+	తిరిగి దొరికింది_2;
 }
 
-static void merge_one_path(const char *path)
+స్థిర శూన్య విలీనం_one_మార్గం(స్థిరరాశి అక్షరం *మార్గం)
 {
-	int pos = index_name_pos(the_repository->index, path, strlen(path));
+	పూర్ణాంకం pos = సూచీ_name_pos(the_repository->సూచీ, మార్గం, అక్షరశ్రేణి_పొడవు(మార్గం));
 
 	/*
 	 * If it already exists in the cache as stage0, it's
 	 * already merged and there is nothing to do.
 	 */
-	if (pos < 0)
-		merge_entry(-pos-1, path);
+	ఒకవేళ (pos < 0)
+		విలీనం_నమోదు(-pos-1, మార్గం);
 }
 
-static void merge_all(void)
+స్థిర శూన్య విలీనం_all(శూన్య)
 {
-	int i;
+	పూర్ణాంకం i;
 	/* TODO: audit for interaction with sparse-index. */
-	ensure_full_index(the_repository->index);
-	for (i = 0; i < the_repository->index->cache_nr; i++) {
-		const struct cache_entry *ce = the_repository->index->cache[i];
-		if (!ce_stage(ce))
-			continue;
-		i += merge_entry(i, ce->name)-1;
+	ensure_నిండిన_సూచీ(the_repository->సూచీ);
+	కొరకు (i = 0; i < the_repository->సూచీ->cache_nr; i++) {
+		స్థిరరాశి నిర్మాణం cache_నమోదు *ce = the_repository->సూచీ->cache[i];
+		ఒకవేళ (!ce_stage(ce))
+			కొనసాగు;
+		i += విలీనం_నమోదు(i, ce->name)-1;
 	}
 }
 
-static const char usage_string[] =
+స్థిర స్థిరరాశి అక్షరం usage_string[] =
 "git merge-index [-o] [-q] <merge-program> (-a | [--] [<filename>...])";
 
-int cmd_merge_index(int argc,
-		    const char **argv,
-		    const char *prefix UNUSED,
-		    struct repository *repo UNUSED)
+పూర్ణాంకం cmd_విలీనం_సూచీ(పూర్ణాంకం argc,
+		    స్థిరరాశి అక్షరం **argv,
+		    స్థిరరాశి అక్షరం *ఉపసర్గ వాడని,
+		    నిర్మాణం repository *repo వాడని)
 {
-	int i, force_file = 0;
+	పూర్ణాంకం i, force_file = 0;
 
 	/* Without this we cannot rely on waitpid() to tell
 	 * what happened to our children.
 	 */
-	signal(SIGCHLD, SIG_DFL);
+	సంకేతం(SIGCHLD, SIG_DFL);
 
 	show_usage_if_asked(argc, argv, usage_string);
 
-	if (argc < 3)
+	ఒకవేళ (argc < 3)
 		usage(usage_string);
 
-	repo_read_index(the_repository);
+	repo_read_సూచీ(the_repository);
 
 	/* TODO: audit for interaction with sparse-index. */
-	ensure_full_index(the_repository->index);
+	ensure_నిండిన_సూచీ(the_repository->సూచీ);
 
 	i = 1;
-	if (!strcmp(argv[i], "-o")) {
+	ఒకవేళ (!strcmp(argv[i], "-o")) {
 		one_shot = 1;
 		i++;
 	}
-	if (!strcmp(argv[i], "-q")) {
+	ఒకవేళ (!strcmp(argv[i], "-q")) {
 		quiet = 1;
 		i++;
 	}
 	pgm = argv[i++];
-	for (; i < argc; i++) {
-		const char *arg = argv[i];
-		if (!force_file && *arg == '-') {
-			if (!strcmp(arg, "--")) {
+	కొరకు (; i < argc; i++) {
+		స్థిరరాశి అక్షరం *arg = argv[i];
+		ఒకవేళ (!force_file && *arg == '-') {
+			ఒకవేళ (!strcmp(arg, "--")) {
 				force_file = 1;
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "-a")) {
-				merge_all();
-				continue;
+			ఒకవేళ (!strcmp(arg, "-a")) {
+				విలీనం_all();
+				కొనసాగు;
 			}
 			die("git merge-index: unknown option %s", arg);
 		}
-		merge_one_path(arg);
+		విలీనం_one_మార్గం(arg);
 	}
-	if (err && !quiet)
+	ఒకవేళ (err && !quiet)
 		die("merge program failed");
-	return err;
+	తిరిగి err;
 }

@@ -4,67 +4,67 @@
  * Copyright (C) Linus Torvalds, 2005
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
+#అన్తర్భావ "builtin.h"
 
-#include "abspath.h"
-#include "bisect.h"
-#include "config.h"
-#include "commit.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "refs.h"
-#include "quote.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "path.h"
-#include "diff.h"
-#include "read-cache-ll.h"
-#include "repo-settings.h"
-#include "repository.h"
-#include "revision.h"
-#include "setup.h"
-#include "split-index.h"
-#include "submodule.h"
-#include "commit-reach.h"
-#include "shallow.h"
-#include "object-file-convert.h"
+#అన్తర్భావ "abspath.h"
+#అన్తర్భావ "bisect.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "commit.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hash.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "refs.h"
+#అన్తర్భావ "quote.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "path.h"
+#అన్తర్భావ "diff.h"
+#అన్తర్భావ "read-cache-ll.h"
+#అన్తర్భావ "repo-settings.h"
+#అన్తర్భావ "repository.h"
+#అన్తర్భావ "revision.h"
+#అన్తర్భావ "setup.h"
+#అన్తర్భావ "split-index.h"
+#అన్తర్భావ "submodule.h"
+#అన్తర్భావ "commit-reach.h"
+#అన్తర్భావ "shallow.h"
+#అన్తర్భావ "object-file-convert.h"
 
-#define DO_REVS		1
-#define DO_NOREV	2
-#define DO_FLAGS	4
-#define DO_NONFLAGS	8
-static int filter = ~0;
+#నిర్వచించు DO_REVS		1
+#నిర్వచించు DO_NOREV	2
+#నిర్వచించు DO_FLAGS	4
+#నిర్వచించు DO_NONFLAGS	8
+స్థిర పూర్ణాంకం filter = ~0;
 
-static const char *def;
+స్థిర స్థిరరాశి అక్షరం *def;
 
-#define NORMAL 0
-#define REVERSED 1
-static int show_type = NORMAL;
+#నిర్వచించు సాధారణ 0
+#నిర్వచించు REVERSED 1
+స్థిర పూర్ణాంకం show_type = సాధారణ;
 
-#define SHOW_SYMBOLIC_ASIS 1
-#define SHOW_SYMBOLIC_FULL 2
-static int symbolic;
-static int abbrev;
-static int abbrev_ref;
-static int abbrev_ref_strict;
-static int output_sq;
+#నిర్వచించు SHOW_SYMBOLIC_ASIS 1
+#నిర్వచించు SHOW_SYMBOLIC_నిండిన 2
+స్థిర పూర్ణాంకం symbolic;
+స్థిర పూర్ణాంకం abbrev;
+స్థిర పూర్ణాంకం abbrev_ref;
+స్థిర పూర్ణాంకం abbrev_ref_strict;
+స్థిర పూర్ణాంకం output_sq;
 
-static int stuck_long;
-static struct ref_exclusions ref_excludes = REF_EXCLUSIONS_INIT;
+స్థిర పూర్ణాంకం stuck_long;
+స్థిర నిర్మాణం ref_exclusions ref_excludes = REF_EXCLUSIONS_INIT;
 
 /*
  * Some arguments are relevant "revision" arguments,
  * others are about output format or other details.
  * This sorts it all out.
  */
-static int is_rev_argument(const char *arg)
+స్థిర పూర్ణాంకం is_rev_వాదం(స్థిరరాశి అక్షరం *arg)
 {
-	static const char *rev_args[] = {
+	స్థిర స్థిరరాశి అక్షరం *rev_వాదనలు[] = {
 		"--all",
 		"--bisect",
 		"--dense",
@@ -93,69 +93,69 @@ static int is_rev_argument(const char *arg)
 		"--topo-order",
 		"--date-order",
 		"--unpacked",
-		NULL
+		ఖాళీ
 	};
-	const char **p = rev_args;
+	స్థిరరాశి అక్షరం **p = rev_వాదనలు;
 
 	/* accept -<digit>, like traditional "head" */
-	if ((*arg == '-') && isdigit(arg[1]))
-		return 1;
+	ఒకవేళ ((*arg == '-') && అంకెనా(arg[1]))
+		తిరిగి 1;
 
-	for (;;) {
-		const char *str = *p++;
-		int len;
-		if (!str)
-			return 0;
-		len = strlen(str);
-		if (!strcmp(arg, str) ||
-		    (str[len-1] == '=' && !strncmp(arg, str, len)))
-			return 1;
+	కొరకు (;;) {
+		స్థిరరాశి అక్షరం *str = *p++;
+		పూర్ణాంకం len;
+		ఒకవేళ (!str)
+			తిరిగి 0;
+		len = అక్షరశ్రేణి_పొడవు(str);
+		ఒకవేళ (!strcmp(arg, str) ||
+		    (str[len-1] == '=' && !అక్షరశ్రేణి_పోలిక(arg, str, len)))
+			తిరిగి 1;
 	}
 }
 
 /* Output argument as a string, either SQ or normal */
-static void show(const char *arg)
+స్థిర శూన్య show(స్థిరరాశి అక్షరం *arg)
 {
-	if (output_sq) {
-		int sq = '\'', ch;
+	ఒకవేళ (output_sq) {
+		పూర్ణాంకం sq = '\'', ch;
 
-		putchar(sq);
-		while ((ch = *arg++)) {
-			if (ch == sq)
+		అక్షరం_రాయి(sq);
+		అయితే ((ch = *arg++)) {
+			ఒకవేళ (ch == sq)
 				fputs("'\\'", stdout);
-			putchar(ch);
+			అక్షరం_రాయి(ch);
 		}
-		putchar(sq);
-		putchar(' ');
+		అక్షరం_రాయి(sq);
+		అక్షరం_రాయి(' ');
 	}
-	else
+	లేకపోతే
 		puts(arg);
 }
 
 /* Like show(), but with a negation prefix according to type */
-static void show_with_type(int type, const char *arg)
+స్థిర శూన్య show_with_type(పూర్ణాంకం type, స్థిరరాశి అక్షరం *arg)
 {
-	if (type != show_type)
-		putchar('^');
+	ఒకవేళ (type != show_type)
+		అక్షరం_రాయి('^');
 	show(arg);
 }
 
 /* Output a revision, only if filter allows it */
-static void show_rev(int type, const struct object_id *oid, const char *name)
+స్థిర శూన్య show_rev(పూర్ణాంకం type, స్థిరరాశి నిర్మాణం object_id *oid, స్థిరరాశి అక్షరం *name)
 {
-	if (!(filter & DO_REVS))
-		return;
-	def = NULL;
+	ఒకవేళ (!(filter & DO_REVS))
+		తిరిగి;
+	def = ఖాళీ;
 
-	if ((symbolic || abbrev_ref) && name) {
-		if (symbolic == SHOW_SYMBOLIC_FULL || abbrev_ref) {
-			struct object_id discard;
-			char *full;
+	ఒకవేళ ((symbolic || abbrev_ref) && name) {
+		ఒకవేళ (symbolic == SHOW_SYMBOLIC_నిండిన || abbrev_ref) {
+			నిర్మాణం object_id discard;
+			అక్షరం *నిండిన;
 
-			switch (repo_dwim_ref(the_repository, name,
-					      strlen(name), &discard, &full,
+			ఎంపిక (repo_dwim_ref(the_repository, name,
+					      అక్షరశ్రేణి_పొడవు(name), &discard, &నిండిన,
 					      0)) {
-			case 0:
+			స్థితి 0:
 				/*
 				 * Not found -- not a ref.  We could
 				 * emit "name" here, but symbolic-full
@@ -163,277 +163,277 @@ static void show_rev(int type, const struct object_id *oid, const char *name)
 				 * refs spelled in full, and they would
 				 * need to filter non-refs if we did so.
 				 */
-				break;
-			case 1: /* happy */
-				if (abbrev_ref) {
-					char *old = full;
-					full = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
-									    full,
+				ఆపు;
+			స్థితి 1: /* happy */
+				ఒకవేళ (abbrev_ref) {
+					అక్షరం *old = నిండిన;
+					నిండిన = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
+									    నిండిన,
 									    abbrev_ref_strict);
-					free(old);
+					విడుదల(old);
 				}
-				show_with_type(type, full);
-				break;
-			default: /* ambiguous */
+				show_with_type(type, నిండిన);
+				ఆపు;
+			అప్రమేయ: /* ambiguous */
 				error("refname '%s' is ambiguous", name);
-				break;
+				ఆపు;
 			}
-			free(full);
-		} else {
+			విడుదల(నిండిన);
+		} లేకపోతే {
 			show_with_type(type, name);
 		}
 	}
-	else if (abbrev)
+	లేకపోతే ఒకవేళ (abbrev)
 		show_with_type(type,
-			       repo_find_unique_abbrev(the_repository, oid, abbrev));
-	else
-		show_with_type(type, oid_to_hex(oid));
+			       repo_కనుగొను_unique_abbrev(the_repository, oid, abbrev));
+	లేకపోతే
+		show_with_type(type, oid_గమ్యం_hex(oid));
 }
 
 /* Output a flag, only if filter allows it. */
-static int show_flag(const char *arg)
+స్థిర పూర్ణాంకం show_flag(స్థిరరాశి అక్షరం *arg)
 {
-	if (!(filter & DO_FLAGS))
-		return 0;
-	if (filter & (is_rev_argument(arg) ? DO_REVS : DO_NOREV)) {
+	ఒకవేళ (!(filter & DO_FLAGS))
+		తిరిగి 0;
+	ఒకవేళ (filter & (is_rev_వాదం(arg) ? DO_REVS : DO_NOREV)) {
 		show(arg);
-		return 1;
+		తిరిగి 1;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static int show_default(void)
+స్థిర పూర్ణాంకం show_default(శూన్య)
 {
-	const char *s = def;
+	స్థిరరాశి అక్షరం *s = def;
 
-	if (s) {
-		struct object_id oid;
+	ఒకవేళ (s) {
+		నిర్మాణం object_id oid;
 
-		def = NULL;
-		if (!repo_get_oid(the_repository, s, &oid)) {
-			show_rev(NORMAL, &oid, s);
-			return 1;
+		def = ఖాళీ;
+		ఒకవేళ (!repo_get_oid(the_repository, s, &oid)) {
+			show_rev(సాధారణ, &oid, s);
+			తిరిగి 1;
 		}
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static int show_reference(const struct reference *ref, void *cb_data UNUSED)
+స్థిర పూర్ణాంకం show_reference(స్థిరరాశి నిర్మాణం reference *ref, శూన్య *cb_దత్తాంశం వాడని)
 {
-	if (ref_excluded(&ref_excludes, ref->name))
-		return 0;
-	show_rev(NORMAL, ref->oid, ref->name);
-	return 0;
+	ఒకవేళ (ref_excluded(&ref_excludes, ref->name))
+		తిరిగి 0;
+	show_rev(సాధారణ, ref->oid, ref->name);
+	తిరిగి 0;
 }
 
-static int anti_reference(const struct reference *ref, void *cb_data UNUSED)
+స్థిర పూర్ణాంకం anti_reference(స్థిరరాశి నిర్మాణం reference *ref, శూన్య *cb_దత్తాంశం వాడని)
 {
 	show_rev(REVERSED, ref->oid, ref->name);
-	return 0;
+	తిరిగి 0;
 }
 
-static int show_abbrev(const struct object_id *oid, void *cb_data UNUSED)
+స్థిర పూర్ణాంకం show_abbrev(స్థిరరాశి నిర్మాణం object_id *oid, శూన్య *cb_దత్తాంశం వాడని)
 {
-	show_rev(NORMAL, oid, NULL);
-	return 0;
+	show_rev(సాధారణ, oid, ఖాళీ);
+	తిరిగి 0;
 }
 
-static void show_datestring(const char *flag, const char *datestr)
+స్థిర శూన్య show_datestring(స్థిరరాశి అక్షరం *flag, స్థిరరాశి అక్షరం *datestr)
 {
-	char *buffer;
+	అక్షరం *బఫరు;
 
 	/* date handling requires both flags and revs */
-	if ((filter & (DO_FLAGS | DO_REVS)) != (DO_FLAGS | DO_REVS))
-		return;
-	buffer = xstrfmt("%s%"PRItime, flag, approxidate(datestr));
-	show(buffer);
-	free(buffer);
+	ఒకవేళ ((filter & (DO_FLAGS | DO_REVS)) != (DO_FLAGS | DO_REVS))
+		తిరిగి;
+	బఫరు = xstrfmt("%s%"PRItime, flag, approxidate(datestr));
+	show(బఫరు);
+	విడుదల(బఫరు);
 }
 
-static int show_file(const char *arg, int output_prefix)
+స్థిర పూర్ణాంకం show_file(స్థిరరాశి అక్షరం *arg, పూర్ణాంకం output_ఉపసర్గ)
 {
 	show_default();
-	if ((filter & (DO_NONFLAGS|DO_NOREV)) == (DO_NONFLAGS|DO_NOREV)) {
-		if (output_prefix) {
-			const char *prefix = the_repository->prefix;
-			char *fname = prefix_filename(prefix, arg);
+	ఒకవేళ ((filter & (DO_NONFLAGS|DO_NOREV)) == (DO_NONFLAGS|DO_NOREV)) {
+		ఒకవేళ (output_ఉపసర్గ) {
+			స్థిరరాశి అక్షరం *ఉపసర్గ = the_repository->ఉపసర్గ;
+			అక్షరం *fname = ఉపసర్గ_filename(ఉపసర్గ, arg);
 			show(fname);
-			free(fname);
-		} else
+			విడుదల(fname);
+		} లేకపోతే
 			show(arg);
-		return 1;
+		తిరిగి 1;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static int try_difference(const char *arg)
+స్థిర పూర్ణాంకం try_difference(స్థిరరాశి అక్షరం *arg)
 {
-	const char *dotdot;
-	struct object_id start_oid;
-	struct object_id end_oid;
-	const char *end;
-	const char *start;
-	char *to_free;
-	int symmetric;
-	static const char head_by_default[] = "HEAD";
+	స్థిరరాశి అక్షరం *dotdot;
+	నిర్మాణం object_id ప్రారంభం_oid;
+	నిర్మాణం object_id చివర_oid;
+	స్థిరరాశి అక్షరం *చివర;
+	స్థిరరాశి అక్షరం *ప్రారంభం;
+	అక్షరం *గమ్యం_free;
+	పూర్ణాంకం సౌష్ఠవ;
+	స్థిర స్థిరరాశి అక్షరం తల_by_default[] = "HEAD";
 
-	if (!(dotdot = strstr(arg, "..")))
-		return 0;
-	start = to_free = xmemdupz(arg, dotdot - arg);
-	end = dotdot + 2;
-	symmetric = (*end == '.');
-	end += symmetric;
+	ఒకవేళ (!(dotdot = అక్షరశ్రేణి_శోధన(arg, "..")))
+		తిరిగి 0;
+	ప్రారంభం = గమ్యం_free = xmemdupz(arg, dotdot - arg);
+	చివర = dotdot + 2;
+	సౌష్ఠవ = (*చివర == '.');
+	చివర += సౌష్ఠవ;
 
-	if (!*end)
-		end = head_by_default;
-	if (dotdot == arg)
-		start = head_by_default;
+	ఒకవేళ (!*చివర)
+		చివర = తల_by_default;
+	ఒకవేళ (dotdot == arg)
+		ప్రారంభం = తల_by_default;
 
-	if (start == head_by_default && end == head_by_default &&
-	    !symmetric) {
+	ఒకవేళ (ప్రారంభం == తల_by_default && చివర == తల_by_default &&
+	    !సౌష్ఠవ) {
 		/*
 		 * Just ".."?  That is not a range but the
 		 * pathspec for the parent directory.
 		 */
-		free(to_free);
-		return 0;
+		విడుదల(గమ్యం_free);
+		తిరిగి 0;
 	}
 
-	if (!repo_get_oid_committish(the_repository, start, &start_oid) && !repo_get_oid_committish(the_repository, end, &end_oid)) {
-		show_rev(NORMAL, &end_oid, end);
-		show_rev(symmetric ? NORMAL : REVERSED, &start_oid, start);
-		if (symmetric) {
-			struct commit_list *exclude = NULL;
-			struct commit *a, *b;
-			a = lookup_commit_reference(the_repository, &start_oid);
-			b = lookup_commit_reference(the_repository, &end_oid);
-			if (!a || !b) {
-				free(to_free);
-				return 0;
+	ఒకవేళ (!repo_get_oid_committish(the_repository, ప్రారంభం, &ప్రారంభం_oid) && !repo_get_oid_committish(the_repository, చివర, &చివర_oid)) {
+		show_rev(సాధారణ, &చివర_oid, చివర);
+		show_rev(సౌష్ఠవ ? సాధారణ : REVERSED, &ప్రారంభం_oid, ప్రారంభం);
+		ఒకవేళ (సౌష్ఠవ) {
+			నిర్మాణం commit_list *exclude = ఖాళీ;
+			నిర్మాణం commit *a, *b;
+			a = lookup_commit_reference(the_repository, &ప్రారంభం_oid);
+			b = lookup_commit_reference(the_repository, &చివర_oid);
+			ఒకవేళ (!a || !b) {
+				విడుదల(గమ్యం_free);
+				తిరిగి 0;
 			}
-			if (repo_get_merge_bases(the_repository, a, b, &exclude) < 0)
-				exit(128);
-			while (exclude) {
-				struct commit *commit = pop_commit(&exclude);
-				show_rev(REVERSED, &commit->object.oid, NULL);
+			ఒకవేళ (repo_get_విలీనం_bases(the_repository, a, b, &exclude) < 0)
+				నిష్క్రమించు(128);
+			అయితే (exclude) {
+				నిర్మాణం commit *commit = తీయి_commit(&exclude);
+				show_rev(REVERSED, &commit->object.oid, ఖాళీ);
 			}
 		}
-		free(to_free);
-		return 1;
+		విడుదల(గమ్యం_free);
+		తిరిగి 1;
 	}
-	free(to_free);
-	return 0;
+	విడుదల(గమ్యం_free);
+	తిరిగి 0;
 }
 
-static int try_parent_shorthands(const char *arg)
+స్థిర పూర్ణాంకం try_మాతృ_shorthands(స్థిరరాశి అక్షరం *arg)
 {
-	const char *mark;
-	struct object_id oid;
-	struct commit *commit;
-	struct commit_list *parents;
-	int parent_number;
-	int include_rev = 0;
-	int include_parents = 0;
-	int exclude_parent = 0;
-	char *to_free;
+	స్థిరరాశి అక్షరం *mark;
+	నిర్మాణం object_id oid;
+	నిర్మాణం commit *commit;
+	నిర్మాణం commit_list *parents;
+	పూర్ణాంకం మాతృ_సంఖ్య;
+	పూర్ణాంకం include_rev = 0;
+	పూర్ణాంకం include_parents = 0;
+	పూర్ణాంకం exclude_మాతృ = 0;
+	అక్షరం *గమ్యం_free;
 
-	if ((mark = strstr(arg, "^!"))) {
+	ఒకవేళ ((mark = అక్షరశ్రేణి_శోధన(arg, "^!"))) {
 		include_rev = 1;
-		if (mark[2])
-			return 0;
-	} else if ((mark = strstr(arg, "^@"))) {
+		ఒకవేళ (mark[2])
+			తిరిగి 0;
+	} లేకపోతే ఒకవేళ ((mark = అక్షరశ్రేణి_శోధన(arg, "^@"))) {
 		include_parents = 1;
-		if (mark[2])
-			return 0;
-	} else if ((mark = strstr(arg, "^-"))) {
+		ఒకవేళ (mark[2])
+			తిరిగి 0;
+	} లేకపోతే ఒకవేళ ((mark = అక్షరశ్రేణి_శోధన(arg, "^-"))) {
 		include_rev = 1;
-		exclude_parent = 1;
+		exclude_మాతృ = 1;
 
-		if (mark[2]) {
-			char *end;
-			exclude_parent = strtoul(mark + 2, &end, 10);
-			if (*end != '\0' || !exclude_parent)
-				return 0;
+		ఒకవేళ (mark[2]) {
+			అక్షరం *చివర;
+			exclude_మాతృ = strtoul(mark + 2, &చివర, 10);
+			ఒకవేళ (*చివర != '\0' || !exclude_మాతృ)
+				తిరిగి 0;
 		}
-	} else
-		return 0;
+	} లేకపోతే
+		తిరిగి 0;
 
-	arg = to_free = xmemdupz(arg, mark - arg);
-	if (repo_get_oid_committish(the_repository, arg, &oid) ||
+	arg = గమ్యం_free = xmemdupz(arg, mark - arg);
+	ఒకవేళ (repo_get_oid_committish(the_repository, arg, &oid) ||
 	    !(commit = lookup_commit_reference(the_repository, &oid))) {
-		free(to_free);
-		return 0;
+		విడుదల(గమ్యం_free);
+		తిరిగి 0;
 	}
 
-	if (exclude_parent &&
-	    exclude_parent > commit_list_count(commit->parents)) {
-		free(to_free);
-		return 0;
+	ఒకవేళ (exclude_మాతృ &&
+	    exclude_మాతృ > commit_list_లెక్క(commit->parents)) {
+		విడుదల(గమ్యం_free);
+		తిరిగి 0;
 	}
 
-	if (include_rev)
-		show_rev(NORMAL, &oid, arg);
-	for (parents = commit->parents, parent_number = 1;
+	ఒకవేళ (include_rev)
+		show_rev(సాధారణ, &oid, arg);
+	కొరకు (parents = commit->parents, మాతృ_సంఖ్య = 1;
 	     parents;
-	     parents = parents->next, parent_number++) {
-		char *name = NULL;
+	     parents = parents->తదుపరి, మాతృ_సంఖ్య++) {
+		అక్షరం *name = ఖాళీ;
 
-		if (exclude_parent && parent_number != exclude_parent)
-			continue;
+		ఒకవేళ (exclude_మాతృ && మాతృ_సంఖ్య != exclude_మాతృ)
+			కొనసాగు;
 
-		if (symbolic)
-			name = xstrfmt("%s^%d", arg, parent_number);
-		show_rev(include_parents ? NORMAL : REVERSED,
-			 &parents->item->object.oid, name);
-		free(name);
+		ఒకవేళ (symbolic)
+			name = xstrfmt("%s^%d", arg, మాతృ_సంఖ్య);
+		show_rev(include_parents ? సాధారణ : REVERSED,
+			 &parents->అంశం->object.oid, name);
+		విడుదల(name);
 	}
 
-	free(to_free);
-	return 1;
+	విడుదల(గమ్యం_free);
+	తిరిగి 1;
 }
 
-static int parseopt_dump(const struct option *o, const char *arg, int unset)
+స్థిర పూర్ణాంకం parseopt_dump(స్థిరరాశి నిర్మాణం option *o, స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	struct strbuf *parsed = o->value;
-	if (unset)
+	నిర్మాణం strbuf *parsed = o->విలువ;
+	ఒకవేళ (unset)
 		strbuf_addf(parsed, " --no-%s", o->long_name);
-	else if (o->short_name && (o->long_name == NULL || !stuck_long))
+	లేకపోతే ఒకవేళ (o->short_name && (o->long_name == ఖాళీ || !stuck_long))
 		strbuf_addf(parsed, " -%c", o->short_name);
-	else
+	లేకపోతే
 		strbuf_addf(parsed, " --%s", o->long_name);
-	if (arg) {
-		if (!stuck_long)
+	ఒకవేళ (arg) {
+		ఒకవేళ (!stuck_long)
 			strbuf_addch(parsed, ' ');
-		else if (o->long_name)
+		లేకపోతే ఒకవేళ (o->long_name)
 			strbuf_addch(parsed, '=');
 		sq_quote_buf(parsed, arg);
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static const char *skipspaces(const char *s)
+స్థిర స్థిరరాశి అక్షరం *skipspaces(స్థిరరాశి అక్షరం *s)
 {
-	while (isspace(*s))
+	అయితే (ఖాళీనా(*s))
 		s++;
-	return s;
+	తిరిగి s;
 }
 
-static char *findspace(const char *s)
+స్థిర అక్షరం *findspace(స్థిరరాశి అక్షరం *s)
 {
-	for (; *s; s++)
-		if (isspace(*s))
-			return (char*)s;
-	return NULL;
+	కొరకు (; *s; s++)
+		ఒకవేళ (ఖాళీనా(*s))
+			తిరిగి (అక్షరం*)s;
+	తిరిగి ఖాళీ;
 }
 
-static int cmd_parseopt(int argc, const char **argv, const char *prefix)
+స్థిర పూర్ణాంకం cmd_parseopt(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ)
 {
-	int keep_dashdash = 0, stop_at_non_option = 0;
-	char const * const parseopt_usage[] = {
+	పూర్ణాంకం keep_dashdash = 0, stop_at_non_option = 0;
+	అక్షరం స్థిరరాశి * స్థిరరాశి parseopt_usage[] = {
 		N_("git rev-parse --parseopt [<options>] -- [<args>...]"),
-		NULL
+		ఖాళీ
 	};
-	struct option parseopt_opts[] = {
+	నిర్మాణం option parseopt_opts[] = {
 		OPT_BOOL(0, "keep-dashdash", &keep_dashdash,
 					N_("keep the `--` passed as an arg")),
 		OPT_BOOL(0, "stop-at-non-option", &stop_at_non_option,
@@ -441,111 +441,111 @@ static int cmd_parseopt(int argc, const char **argv, const char *prefix)
 					   "first non-option argument")),
 		OPT_BOOL(0, "stuck-long", &stuck_long,
 					N_("output in stuck long form")),
-		OPT_END(),
+		OPT_చివర(),
 	};
-	struct strbuf sb = STRBUF_INIT, parsed = STRBUF_INIT;
-	struct strvec longnames = STRVEC_INIT;
-	struct strvec usage = STRVEC_INIT;
-	struct option *opts = NULL;
-	size_t opts_nr = 0, opts_alloc = 0;
+	నిర్మాణం strbuf sb = STRBUF_INIT, parsed = STRBUF_INIT;
+	నిర్మాణం strvec longnames = STRVEC_INIT;
+	నిర్మాణం strvec usage = STRVEC_INIT;
+	నిర్మాణం option *opts = ఖాళీ;
+	కొలత_t opts_nr = 0, opts_alloc = 0;
 
 	strbuf_addstr(&parsed, "set --");
-	argc = parse_options(argc, argv, prefix, parseopt_opts, parseopt_usage,
+	argc = parse_options(argc, argv, ఉపసర్గ, parseopt_opts, parseopt_usage,
 	                     PARSE_OPT_KEEP_DASHDASH);
-	if (argc < 1 || strcmp(argv[0], "--"))
+	ఒకవేళ (argc < 1 || strcmp(argv[0], "--"))
 		usage_with_options(parseopt_usage, parseopt_opts);
 
 	/* get the usage up to the first line with a -- on it */
-	for (;;) {
+	కొరకు (;;) {
 		strbuf_reset(&sb);
-		if (strbuf_getline(&sb, stdin) == EOF)
+		ఒకవేళ (strbuf_getline(&sb, stdin) == EOF)
 			die(_("premature end of input"));
-		if (!strcmp("--", sb.buf)) {
-			if (!usage.nr)
+		ఒకవేళ (!strcmp("--", sb.buf)) {
+			ఒకవేళ (!usage.nr)
 				die(_("no usage string given before the `--' separator"));
-			break;
+			ఆపు;
 		}
 
-		strvec_push(&usage, sb.buf);
+		strvec_నెట్టు(&usage, sb.buf);
 	}
 
 	/* parse: (<short>|<short>,<long>|<long>)[*=?!]*<arghint>? SP+ <help> */
-	while (strbuf_getline(&sb, stdin) != EOF) {
-		const char *s;
-		char *help;
-		struct option *o;
+	అయితే (strbuf_getline(&sb, stdin) != EOF) {
+		స్థిరరాశి అక్షరం *s;
+		అక్షరం *help;
+		నిర్మాణం option *o;
 
-		if (!sb.len)
-			continue;
+		ఒకవేళ (!sb.len)
+			కొనసాగు;
 
 		ALLOC_GROW(opts, opts_nr + 1, opts_alloc);
-		memset(opts + opts_nr, 0, sizeof(*opts));
+		memset(opts + opts_nr, 0, పరిమాణం(*opts));
 
 		o = &opts[opts_nr++];
 		help = findspace(sb.buf);
-		if (!help || sb.buf == help) {
-			o->type = OPTION_GROUP;
+		ఒకవేళ (!help || sb.buf == help) {
+			o->type = OPTION_సమూహం;
 			o->help = xstrdup(skipspaces(sb.buf));
-			continue;
+			కొనసాగు;
 		}
 
 		*help = '\0';
 
 		o->type = OPTION_CALLBACK;
 		o->help = xstrdup(skipspaces(help+1));
-		o->value = &parsed;
+		o->విలువ = &parsed;
 		o->flags = PARSE_OPT_NOARG;
 		o->callback = &parseopt_dump;
 
 		/* name(s) */
 		s = strpbrk(sb.buf, "*=?!");
-		if (!s)
+		ఒకవేళ (!s)
 			s = help;
 
-		if (s == sb.buf)
+		ఒకవేళ (s == sb.buf)
 			die(_("missing opt-spec before option flags"));
 
-		if (s - sb.buf == 1) { /* short option only */
+		ఒకవేళ (s - sb.buf == 1) { /* short option only */
 			o->short_name = *sb.buf;
-		} else if (sb.buf[1] != ',') { /* long option only */
+		} లేకపోతే ఒకవేళ (sb.buf[1] != ',') { /* long option only */
 			o->long_name = strvec_pushf(&longnames, "%.*s",
-						    (int)(s - sb.buf), sb.buf);
-		} else {
+						    (పూర్ణాంకం)(s - sb.buf), sb.buf);
+		} లేకపోతే {
 			o->short_name = *sb.buf;
 			o->long_name = strvec_pushf(&longnames, "%.*s",
-						    (int)(s - sb.buf - 2), sb.buf + 2);
+						    (పూర్ణాంకం)(s - sb.buf - 2), sb.buf + 2);
 		}
 
 		/* flags */
-		while (s < help) {
-			switch (*s++) {
-			case '=':
+		అయితే (s < help) {
+			ఎంపిక (*s++) {
+			స్థితి '=':
 				o->flags &= ~PARSE_OPT_NOARG;
-				continue;
-			case '?':
+				కొనసాగు;
+			స్థితి '?':
 				o->flags &= ~PARSE_OPT_NOARG;
 				o->flags |= PARSE_OPT_OPTARG;
-				continue;
-			case '!':
+				కొనసాగు;
+			స్థితి '!':
 				o->flags |= PARSE_OPT_NONEG;
-				continue;
-			case '*':
+				కొనసాగు;
+			స్థితి '*':
 				o->flags |= PARSE_OPT_HIDDEN;
-				continue;
+				కొనసాగు;
 			}
 			s--;
-			break;
+			ఆపు;
 		}
 
-		if (s < help)
+		ఒకవేళ (s < help)
 			o->argh = xmemdupz(s, help - s);
 	}
 	strbuf_release(&sb);
 
 	/* put an OPT_END() */
 	ALLOC_GROW(opts, opts_nr + 1, opts_alloc);
-	memset(opts + opts_nr, 0, sizeof(*opts));
-	argc = parse_options(argc, argv, prefix, opts, usage.v,
+	memset(opts + opts_nr, 0, పరిమాణం(*opts));
+	argc = parse_options(argc, argv, ఉపసర్గ, opts, usage.v,
 			(keep_dashdash ? PARSE_OPT_KEEP_DASHDASH : 0) |
 			(stop_at_non_option ? PARSE_OPT_STOP_AT_NON_OPTION : 0) |
 			PARSE_OPT_SHELL_EVAL);
@@ -558,35 +558,35 @@ static int cmd_parseopt(int argc, const char **argv, const char *prefix)
 	strbuf_release(&sb);
 	strvec_clear(&longnames);
 	strvec_clear(&usage);
-	for (size_t i = 0; i < opts_nr; i++) {
-		free((char *) opts[i].help);
-		free((char *) opts[i].argh);
+	కొరకు (కొలత_t i = 0; i < opts_nr; i++) {
+		విడుదల((అక్షరం *) opts[i].help);
+		విడుదల((అక్షరం *) opts[i].argh);
 	}
-	free(opts);
-	return 0;
+	విడుదల(opts);
+	తిరిగి 0;
 }
 
-static int cmd_sq_quote(int argc, const char **argv)
+స్థిర పూర్ణాంకం cmd_sq_quote(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv)
 {
-	struct strbuf buf = STRBUF_INIT;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
 
-	if (argc)
+	ఒకవేళ (argc)
 		sq_quote_argv(&buf, argv);
-	printf("%s\n", buf.buf);
+	రాయి("%s\n", buf.buf);
 	strbuf_release(&buf);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static void die_no_single_rev(int quiet)
+స్థిర శూన్య die_no_single_rev(పూర్ణాంకం quiet)
 {
-	if (quiet)
-		exit(1);
-	else
+	ఒకవేళ (quiet)
+		నిష్క్రమించు(1);
+	లేకపోతే
 		die(_("Needed a single revision"));
 }
 
-static const char builtin_rev_parse_usage[] =
+స్థిర స్థిరరాశి అక్షరం builtin_rev_parse_usage[] =
 N_("git rev-parse --parseopt [<options>] -- [<args>...]\n"
    "   or: git rev-parse --sq-quote [<arg>...]\n"
    "   or: git rev-parse [<options>] [<arg>...]\n"
@@ -597,43 +597,43 @@ N_("git rev-parse --parseopt [<options>] -- [<args>...]\n"
  * Parse "opt" or "opt=<value>", setting value respectively to either
  * NULL or the string after "=".
  */
-static int opt_with_value(const char *arg, const char *opt, const char **value)
+స్థిర పూర్ణాంకం opt_with_విలువ(స్థిరరాశి అక్షరం *arg, స్థిరరాశి అక్షరం *opt, స్థిరరాశి అక్షరం **విలువ)
 {
-	if (skip_prefix(arg, opt, &arg)) {
-		if (!*arg) {
-			*value = NULL;
-			return 1;
+	ఒకవేళ (skip_ఉపసర్గ(arg, opt, &arg)) {
+		ఒకవేళ (!*arg) {
+			*విలువ = ఖాళీ;
+			తిరిగి 1;
 		}
-		if (*arg++ == '=') {
-			*value = arg;
-			return 1;
+		ఒకవేళ (*arg++ == '=') {
+			*విలువ = arg;
+			తిరిగి 1;
 		}
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static void handle_ref_opt(const char *pattern, const char *prefix)
+స్థిర శూన్య handle_ref_opt(స్థిరరాశి అక్షరం *నమూనా, స్థిరరాశి అక్షరం *ఉపసర్గ)
 {
-	if (pattern) {
-		struct refs_for_each_ref_options opts = {
-			.pattern = pattern,
-			.prefix = prefix,
-			.trim_prefix = prefix ? strlen(prefix) : 0,
+	ఒకవేళ (నమూనా) {
+		నిర్మాణం refs_for_each_ref_options opts = {
+			.నమూనా = నమూనా,
+			.ఉపసర్గ = ఉపసర్గ,
+			.trim_ఉపసర్గ = ఉపసర్గ ? అక్షరశ్రేణి_పొడవు(ఉపసర్గ) : 0,
 		};
 		refs_for_each_ref_ext(get_main_ref_store(the_repository),
-				      show_reference, NULL, &opts);
-	} else {
-		struct refs_for_each_ref_options opts = {
-			.prefix = prefix,
-			.trim_prefix = strlen(prefix),
+				      show_reference, ఖాళీ, &opts);
+	} లేకపోతే {
+		నిర్మాణం refs_for_each_ref_options opts = {
+			.ఉపసర్గ = ఉపసర్గ,
+			.trim_ఉపసర్గ = అక్షరశ్రేణి_పొడవు(ఉపసర్గ),
 		};
 		refs_for_each_ref_ext(get_main_ref_store(the_repository),
-				      show_reference, NULL, &opts);
+				      show_reference, ఖాళీ, &opts);
 	}
 	clear_ref_exclusions(&ref_excludes);
 }
 
-enum format_type {
+గణన format_type {
 	/* We would like a relative path. */
 	FORMAT_RELATIVE,
 	/* We would like a canonical absolute path. */
@@ -642,7 +642,7 @@ enum format_type {
 	FORMAT_DEFAULT,
 };
 
-enum default_type {
+గణన default_type {
 	/* Our default is a relative path. */
 	DEFAULT_RELATIVE,
 	/* Our default is a relative path if there's a shared root. */
@@ -653,542 +653,542 @@ enum default_type {
 	DEFAULT_UNMODIFIED,
 };
 
-static void print_path(const char *path, const char *prefix,
-		       enum format_type format, enum default_type def)
+స్థిర శూన్య print_మార్గం(స్థిరరాశి అక్షరం *మార్గం, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		       గణన format_type format, గణన default_type def)
 {
-	struct strbuf sb = STRBUF_INIT;
-	enum path_format fmt;
+	నిర్మాణం strbuf sb = STRBUF_INIT;
+	గణన మార్గం_format fmt;
 
-	if (format == FORMAT_DEFAULT) {
-		switch (def) {
-		case DEFAULT_RELATIVE:
-			fmt = PATH_FORMAT_RELATIVE;
-			break;
-		case DEFAULT_RELATIVE_IF_SHARED:
-			fmt = PATH_FORMAT_RELATIVE_IF_SHARED;
-			break;
-		case DEFAULT_CANONICAL:
-			fmt = PATH_FORMAT_CANONICAL;
-			break;
-		case DEFAULT_UNMODIFIED:
-		default:
-			fmt = PATH_FORMAT_UNMODIFIED;
-			break;
+	ఒకవేళ (format == FORMAT_DEFAULT) {
+		ఎంపిక (def) {
+		స్థితి DEFAULT_RELATIVE:
+			fmt = మార్గం_FORMAT_RELATIVE;
+			ఆపు;
+		స్థితి DEFAULT_RELATIVE_IF_SHARED:
+			fmt = మార్గం_FORMAT_RELATIVE_IF_SHARED;
+			ఆపు;
+		స్థితి DEFAULT_CANONICAL:
+			fmt = మార్గం_FORMAT_CANONICAL;
+			ఆపు;
+		స్థితి DEFAULT_UNMODIFIED:
+		అప్రమేయ:
+			fmt = మార్గం_FORMAT_UNMODIFIED;
+			ఆపు;
 		}
-	} else {
-		switch (format) {
-		case FORMAT_RELATIVE:
-			fmt = PATH_FORMAT_RELATIVE;
-			break;
-		case FORMAT_CANONICAL:
-			fmt = PATH_FORMAT_CANONICAL;
-			break;
-		default:
-			fmt = PATH_FORMAT_UNMODIFIED;
-			break;
+	} లేకపోతే {
+		ఎంపిక (format) {
+		స్థితి FORMAT_RELATIVE:
+			fmt = మార్గం_FORMAT_RELATIVE;
+			ఆపు;
+		స్థితి FORMAT_CANONICAL:
+			fmt = మార్గం_FORMAT_CANONICAL;
+			ఆపు;
+		అప్రమేయ:
+			fmt = మార్గం_FORMAT_UNMODIFIED;
+			ఆపు;
 		}
 	}
 
-	format_path(&sb, path, prefix, fmt);
+	format_మార్గం(&sb, మార్గం, ఉపసర్గ, fmt);
 	puts(sb.buf);
 
 	strbuf_release(&sb);
 }
 
-int cmd_rev_parse(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+పూర్ణాంకం cmd_rev_parse(పూర్ణాంకం argc,
+		  స్థిరరాశి అక్షరం **argv,
+		  స్థిరరాశి అక్షరం *ఉపసర్గ,
+		  నిర్మాణం repository *repo వాడని)
 {
-	int i, as_is = 0, verify = 0, quiet = 0, revs_count = 0, type = 0;
-	const struct git_hash_algo *output_algo = NULL;
-	const struct git_hash_algo *compat = NULL;
-	int did_repo_setup = 0;
-	int has_dashdash = 0;
-	int output_prefix = 0;
-	struct object_id oid;
-	unsigned int flags = 0;
-	const char *name = NULL;
-	struct strbuf buf = STRBUF_INIT;
-	int seen_end_of_options = 0;
-	enum format_type format = FORMAT_DEFAULT;
+	పూర్ణాంకం i, as_is = 0, verify = 0, quiet = 0, revs_లెక్క = 0, type = 0;
+	స్థిరరాశి నిర్మాణం git_hash_algo *output_algo = ఖాళీ;
+	స్థిరరాశి నిర్మాణం git_hash_algo *compat = ఖాళీ;
+	పూర్ణాంకం did_repo_అమరిక = 0;
+	పూర్ణాంకం has_dashdash = 0;
+	పూర్ణాంకం output_ఉపసర్గ = 0;
+	నిర్మాణం object_id oid;
+	గుర్తులేని పూర్ణాంకం flags = 0;
+	స్థిరరాశి అక్షరం *name = ఖాళీ;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
+	పూర్ణాంకం చూసిన_చివర_యొక్క_options = 0;
+	గణన format_type format = FORMAT_DEFAULT;
 
 	show_usage_if_asked(argc, argv, builtin_rev_parse_usage);
 
-	if (argc > 1 && !strcmp("--parseopt", argv[1]))
-		return cmd_parseopt(argc - 1, argv + 1, prefix);
+	ఒకవేళ (argc > 1 && !strcmp("--parseopt", argv[1]))
+		తిరిగి cmd_parseopt(argc - 1, argv + 1, ఉపసర్గ);
 
-	if (argc > 1 && !strcmp("--sq-quote", argv[1]))
-		return cmd_sq_quote(argc - 2, argv + 2);
+	ఒకవేళ (argc > 1 && !strcmp("--sq-quote", argv[1]))
+		తిరిగి cmd_sq_quote(argc - 2, argv + 2);
 
-	if (argc > 1 && !strcmp("-h", argv[1]))
+	ఒకవేళ (argc > 1 && !strcmp("-h", argv[1]))
 		usage(builtin_rev_parse_usage);
 
-	for (i = 1; i < argc; i++) {
-		if (!strcmp(argv[i], "--")) {
+	కొరకు (i = 1; i < argc; i++) {
+		ఒకవేళ (!strcmp(argv[i], "--")) {
 			has_dashdash = 1;
-			break;
+			ఆపు;
 		}
 	}
 
 	/* No options; just report on whether we're in a git repo or not. */
-	if (argc == 1) {
-		setup_git_directory(the_repository);
-		repo_config(the_repository, git_default_config, NULL);
-		return 0;
+	ఒకవేళ (argc == 1) {
+		అమరిక_git_directory(the_repository);
+		repo_config(the_repository, git_default_config, ఖాళీ);
+		తిరిగి 0;
 	}
 
-	for (i = 1; i < argc; i++) {
-		const char *arg = argv[i];
+	కొరకు (i = 1; i < argc; i++) {
+		స్థిరరాశి అక్షరం *arg = argv[i];
 
-		if (as_is) {
-			if (show_file(arg, output_prefix) && as_is < 2)
-				verify_filename(the_repository, prefix, arg, 0);
-			continue;
+		ఒకవేళ (as_is) {
+			ఒకవేళ (show_file(arg, output_ఉపసర్గ) && as_is < 2)
+				verify_filename(the_repository, ఉపసర్గ, arg, 0);
+			కొనసాగు;
 		}
 
-		if (!seen_end_of_options) {
-			if (!strcmp(arg, "--local-env-vars")) {
-				int i;
-				for (i = 0; local_repo_env[i]; i++)
-					printf("%s\n", local_repo_env[i]);
-				continue;
+		ఒకవేళ (!చూసిన_చివర_యొక్క_options) {
+			ఒకవేళ (!strcmp(arg, "--local-env-vars")) {
+				పూర్ణాంకం i;
+				కొరకు (i = 0; local_repo_env[i]; i++)
+					రాయి("%s\n", local_repo_env[i]);
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--resolve-git-dir")) {
-				const char *gitdir = argv[++i];
-				if (!gitdir)
+			ఒకవేళ (!strcmp(arg, "--resolve-git-dir")) {
+				స్థిరరాశి అక్షరం *gitdir = argv[++i];
+				ఒకవేళ (!gitdir)
 					die(_("--resolve-git-dir requires an argument"));
 				gitdir = resolve_gitdir(gitdir);
-				if (!gitdir)
+				ఒకవేళ (!gitdir)
 					die(_("not a gitdir '%s'"), argv[i]);
 				puts(gitdir);
-				continue;
+				కొనసాగు;
 			}
 		}
 
 		/* The rest of the options require a git repository. */
-		if (!did_repo_setup) {
-			prefix = setup_git_directory(the_repository);
-			repo_config(the_repository, git_default_config, NULL);
-			did_repo_setup = 1;
+		ఒకవేళ (!did_repo_అమరిక) {
+			ఉపసర్గ = అమరిక_git_directory(the_repository);
+			repo_config(the_repository, git_default_config, ఖాళీ);
+			did_repo_అమరిక = 1;
 
 			prepare_repo_settings(the_repository);
-			the_repository->settings.command_requires_full_index = 0;
+			the_repository->settings.command_requires_నిండిన_సూచీ = 0;
 			compat = the_repository->compat_hash_algo;
 		}
 
-		if (!strcmp(arg, "--")) {
+		ఒకవేళ (!strcmp(arg, "--")) {
 			as_is = 2;
 			/* Pass on the "--" if we show anything but files.. */
-			if (filter & (DO_FLAGS | DO_REVS))
+			ఒకవేళ (filter & (DO_FLAGS | DO_REVS))
 				show_file(arg, 0);
-			continue;
+			కొనసాగు;
 		}
 
-		if (!seen_end_of_options && *arg == '-') {
-			if (!strcmp(arg, "--git-path")) {
-				if (!argv[i + 1])
+		ఒకవేళ (!చూసిన_చివర_యొక్క_options && *arg == '-') {
+			ఒకవేళ (!strcmp(arg, "--git-path")) {
+				ఒకవేళ (!argv[i + 1])
 					die(_("--git-path requires an argument"));
-				print_path(repo_git_path_replace(the_repository, &buf,
-								 "%s", argv[i + 1]), prefix,
+				print_మార్గం(repo_git_మార్గం_replace(the_repository, &buf,
+								 "%s", argv[i + 1]), ఉపసర్గ,
 						format,
 						DEFAULT_RELATIVE_IF_SHARED);
 				i++;
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg,"-n")) {
-				if (++i >= argc)
+			ఒకవేళ (!strcmp(arg,"-n")) {
+				ఒకవేళ (++i >= argc)
 					die(_("-n requires an argument"));
-				if ((filter & DO_FLAGS) && (filter & DO_REVS)) {
+				ఒకవేళ ((filter & DO_FLAGS) && (filter & DO_REVS)) {
 					show(arg);
 					show(argv[i]);
 				}
-				continue;
+				కొనసాగు;
 			}
-			if (starts_with(arg, "-n")) {
-				if ((filter & DO_FLAGS) && (filter & DO_REVS))
+			ఒకవేళ (starts_with(arg, "-n")) {
+				ఒకవేళ ((filter & DO_FLAGS) && (filter & DO_REVS))
 					show(arg);
-				continue;
+				కొనసాగు;
 			}
-			if (opt_with_value(arg, "--path-format", &arg)) {
-				if (!arg)
+			ఒకవేళ (opt_with_విలువ(arg, "--path-format", &arg)) {
+				ఒకవేళ (!arg)
 					die(_("--path-format requires an argument"));
-				if (!strcmp(arg, "absolute")) {
+				ఒకవేళ (!strcmp(arg, "absolute")) {
 					format = FORMAT_CANONICAL;
-				} else if (!strcmp(arg, "relative")) {
+				} లేకపోతే ఒకవేళ (!strcmp(arg, "relative")) {
 					format = FORMAT_RELATIVE;
-				} else {
+				} లేకపోతే {
 					die(_("unknown argument to --path-format: %s"), arg);
 				}
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--default")) {
+			ఒకవేళ (!strcmp(arg, "--default")) {
 				def = argv[++i];
-				if (!def)
+				ఒకవేళ (!def)
 					die(_("--default requires an argument"));
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--prefix")) {
-				prefix = argv[++i];
-				if (!prefix)
+			ఒకవేళ (!strcmp(arg, "--prefix")) {
+				ఉపసర్గ = argv[++i];
+				ఒకవేళ (!ఉపసర్గ)
 					die(_("--prefix requires an argument"));
-				FREE_AND_NULL(the_repository->prefix);
-				the_repository->prefix = xstrdup(prefix);
-				output_prefix = 1;
-				continue;
+				FREE_AND_NULL(the_repository->ఉపసర్గ);
+				the_repository->ఉపసర్గ = xstrdup(ఉపసర్గ);
+				output_ఉపసర్గ = 1;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--revs-only")) {
+			ఒకవేళ (!strcmp(arg, "--revs-only")) {
 				filter &= ~DO_NOREV;
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--no-revs")) {
+			ఒకవేళ (!strcmp(arg, "--no-revs")) {
 				filter &= ~DO_REVS;
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--flags")) {
+			ఒకవేళ (!strcmp(arg, "--flags")) {
 				filter &= ~DO_NONFLAGS;
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--no-flags")) {
+			ఒకవేళ (!strcmp(arg, "--no-flags")) {
 				filter &= ~DO_FLAGS;
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--verify")) {
+			ఒకవేళ (!strcmp(arg, "--verify")) {
 				filter &= ~(DO_FLAGS|DO_NOREV);
 				verify = 1;
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--quiet") || !strcmp(arg, "-q")) {
+			ఒకవేళ (!strcmp(arg, "--quiet") || !strcmp(arg, "-q")) {
 				quiet = 1;
 				flags |= GET_OID_QUIETLY;
-				continue;
+				కొనసాగు;
 			}
-			if (opt_with_value(arg, "--output-object-format", &arg)) {
-				if (!arg)
+			ఒకవేళ (opt_with_విలువ(arg, "--output-object-format", &arg)) {
+				ఒకవేళ (!arg)
 					die(_("no object format specified"));
-				if (!strcmp(arg, the_hash_algo->name) ||
+				ఒకవేళ (!strcmp(arg, the_hash_algo->name) ||
 				    !strcmp(arg, "storage")) {
 					flags |= GET_OID_HASH_ANY;
 					output_algo = the_hash_algo;
-					continue;
+					కొనసాగు;
 				}
-				else if (compat && !strcmp(arg, compat->name)) {
+				లేకపోతే ఒకవేళ (compat && !strcmp(arg, compat->name)) {
 					flags |= GET_OID_HASH_ANY;
 					output_algo = compat;
-					continue;
+					కొనసాగు;
 				}
-				else die(_("unsupported object format: %s"), arg);
+				లేకపోతే die(_("unsupported object format: %s"), arg);
 			}
-			if (opt_with_value(arg, "--short", &arg)) {
+			ఒకవేళ (opt_with_విలువ(arg, "--short", &arg)) {
 				filter &= ~(DO_FLAGS|DO_NOREV);
 				verify = 1;
 				abbrev = DEFAULT_ABBREV;
-				if (!arg)
-					continue;
-				abbrev = strtoul(arg, NULL, 10);
-				if (abbrev < MINIMUM_ABBREV)
+				ఒకవేళ (!arg)
+					కొనసాగు;
+				abbrev = strtoul(arg, ఖాళీ, 10);
+				ఒకవేళ (abbrev < MINIMUM_ABBREV)
 					abbrev = MINIMUM_ABBREV;
-				else if ((int)the_hash_algo->hexsz <= abbrev)
+				లేకపోతే ఒకవేళ ((పూర్ణాంకం)the_hash_algo->hexsz <= abbrev)
 					abbrev = the_hash_algo->hexsz;
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--sq")) {
+			ఒకవేళ (!strcmp(arg, "--sq")) {
 				output_sq = 1;
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--not")) {
+			ఒకవేళ (!strcmp(arg, "--not")) {
 				show_type ^= REVERSED;
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--symbolic")) {
+			ఒకవేళ (!strcmp(arg, "--symbolic")) {
 				symbolic = SHOW_SYMBOLIC_ASIS;
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--symbolic-full-name")) {
-				symbolic = SHOW_SYMBOLIC_FULL;
-				continue;
+			ఒకవేళ (!strcmp(arg, "--symbolic-full-name")) {
+				symbolic = SHOW_SYMBOLIC_నిండిన;
+				కొనసాగు;
 			}
-			if (opt_with_value(arg, "--abbrev-ref", &arg)) {
+			ఒకవేళ (opt_with_విలువ(arg, "--abbrev-ref", &arg)) {
 				abbrev_ref = 1;
 				abbrev_ref_strict =
 					repo_settings_get_warn_ambiguous_refs(the_repository);
-				if (arg) {
-					if (!strcmp(arg, "strict"))
+				ఒకవేళ (arg) {
+					ఒకవేళ (!strcmp(arg, "strict"))
 						abbrev_ref_strict = 1;
-					else if (!strcmp(arg, "loose"))
+					లేకపోతే ఒకవేళ (!strcmp(arg, "loose"))
 						abbrev_ref_strict = 0;
-					else
+					లేకపోతే
 						die(_("unknown mode for --abbrev-ref: %s"),
 						    arg);
 				}
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--all")) {
+			ఒకవేళ (!strcmp(arg, "--all")) {
 				refs_for_each_ref(get_main_ref_store(the_repository),
-						  show_reference, NULL);
+						  show_reference, ఖాళీ);
 				clear_ref_exclusions(&ref_excludes);
-				continue;
+				కొనసాగు;
 			}
-			if (skip_prefix(arg, "--disambiguate=", &arg)) {
+			ఒకవేళ (skip_ఉపసర్గ(arg, "--disambiguate=", &arg)) {
 				repo_for_each_abbrev(the_repository, arg, the_hash_algo,
-						     show_abbrev, NULL);
-				continue;
+						     show_abbrev, ఖాళీ);
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--bisect")) {
-				char *prefix;
-				char *term_bad = NULL;
-				char *term_good = NULL;
-				struct refs_for_each_ref_options opts = { 0 };
-				read_bisect_terms(&term_bad, &term_good);
-				prefix = xstrfmt("refs/bisect/%s", term_bad);
-				opts.prefix = prefix;
+			ఒకవేళ (!strcmp(arg, "--bisect")) {
+				అక్షరం *ఉపసర్గ;
+				అక్షరం *పదం_bad = ఖాళీ;
+				అక్షరం *పదం_good = ఖాళీ;
+				నిర్మాణం refs_for_each_ref_options opts = { 0 };
+				read_bisect_terms(&పదం_bad, &పదం_good);
+				ఉపసర్గ = xstrfmt("refs/bisect/%s", పదం_bad);
+				opts.ఉపసర్గ = ఉపసర్గ;
 				refs_for_each_ref_ext(get_main_ref_store(the_repository),
-						      show_reference, NULL, &opts);
-				free(prefix);
-				prefix = xstrfmt("refs/bisect/%s", term_good);
-				opts.prefix = prefix;
+						      show_reference, ఖాళీ, &opts);
+				విడుదల(ఉపసర్గ);
+				ఉపసర్గ = xstrfmt("refs/bisect/%s", పదం_good);
+				opts.ఉపసర్గ = ఉపసర్గ;
 				refs_for_each_ref_ext(get_main_ref_store(the_repository),
-						      anti_reference, NULL, &opts);
-				free(prefix);
-				free(term_good);
-				free(term_bad);
-				continue;
+						      anti_reference, ఖాళీ, &opts);
+				విడుదల(ఉపసర్గ);
+				విడుదల(పదం_good);
+				విడుదల(పదం_bad);
+				కొనసాగు;
 			}
-			if (opt_with_value(arg, "--branches", &arg)) {
-				if (ref_excludes.hidden_refs_configured)
-					return error(_("options '%s' and '%s' cannot be used together"),
+			ఒకవేళ (opt_with_విలువ(arg, "--branches", &arg)) {
+				ఒకవేళ (ref_excludes.hidden_refs_configured)
+					తిరిగి error(_("options '%s' and '%s' cannot be used together"),
 						     "--exclude-hidden", "--branches");
 				handle_ref_opt(arg, "refs/heads/");
-				continue;
+				కొనసాగు;
 			}
-			if (opt_with_value(arg, "--tags", &arg)) {
-				if (ref_excludes.hidden_refs_configured)
-					return error(_("options '%s' and '%s' cannot be used together"),
+			ఒకవేళ (opt_with_విలువ(arg, "--tags", &arg)) {
+				ఒకవేళ (ref_excludes.hidden_refs_configured)
+					తిరిగి error(_("options '%s' and '%s' cannot be used together"),
 						     "--exclude-hidden", "--tags");
 				handle_ref_opt(arg, "refs/tags/");
-				continue;
+				కొనసాగు;
 			}
-			if (skip_prefix(arg, "--glob=", &arg)) {
-				handle_ref_opt(arg, NULL);
-				continue;
+			ఒకవేళ (skip_ఉపసర్గ(arg, "--glob=", &arg)) {
+				handle_ref_opt(arg, ఖాళీ);
+				కొనసాగు;
 			}
-			if (opt_with_value(arg, "--remotes", &arg)) {
-				if (ref_excludes.hidden_refs_configured)
-					return error(_("options '%s' and '%s' cannot be used together"),
+			ఒకవేళ (opt_with_విలువ(arg, "--remotes", &arg)) {
+				ఒకవేళ (ref_excludes.hidden_refs_configured)
+					తిరిగి error(_("options '%s' and '%s' cannot be used together"),
 						     "--exclude-hidden", "--remotes");
 				handle_ref_opt(arg, "refs/remotes/");
-				continue;
+				కొనసాగు;
 			}
-			if (skip_prefix(arg, "--exclude=", &arg)) {
-				add_ref_exclusion(&ref_excludes, arg);
-				continue;
+			ఒకవేళ (skip_ఉపసర్గ(arg, "--exclude=", &arg)) {
+				కూడు_ref_exclusion(&ref_excludes, arg);
+				కొనసాగు;
 			}
-			if (skip_prefix(arg, "--exclude-hidden=", &arg)) {
+			ఒకవేళ (skip_ఉపసర్గ(arg, "--exclude-hidden=", &arg)) {
 				exclude_hidden_refs(&ref_excludes, arg);
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--show-toplevel")) {
-				const char *work_tree = repo_get_work_tree(the_repository);
-				if (work_tree)
-					print_path(work_tree, prefix, format, DEFAULT_UNMODIFIED);
-				else
+			ఒకవేళ (!strcmp(arg, "--show-toplevel")) {
+				స్థిరరాశి అక్షరం *work_వృక్షం = repo_get_work_వృక్షం(the_repository);
+				ఒకవేళ (work_వృక్షం)
+					print_మార్గం(work_వృక్షం, ఉపసర్గ, format, DEFAULT_UNMODIFIED);
+				లేకపోతే
 					die(_("this operation must be run in a work tree"));
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--show-superproject-working-tree")) {
-				struct strbuf superproject = STRBUF_INIT;
-				if (get_superproject_working_tree(&superproject))
-					print_path(superproject.buf, prefix, format, DEFAULT_UNMODIFIED);
+			ఒకవేళ (!strcmp(arg, "--show-superproject-working-tree")) {
+				నిర్మాణం strbuf superproject = STRBUF_INIT;
+				ఒకవేళ (get_superproject_working_వృక్షం(&superproject))
+					print_మార్గం(superproject.buf, ఉపసర్గ, format, DEFAULT_UNMODIFIED);
 				strbuf_release(&superproject);
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--show-prefix")) {
-				if (prefix)
-					puts(prefix);
-				else
-					putchar('\n');
-				continue;
+			ఒకవేళ (!strcmp(arg, "--show-prefix")) {
+				ఒకవేళ (ఉపసర్గ)
+					puts(ఉపసర్గ);
+				లేకపోతే
+					అక్షరం_రాయి('\n');
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--show-cdup")) {
-				const char *pfx = prefix;
-				if (!is_inside_work_tree(the_repository)) {
-					const char *work_tree =
-						repo_get_work_tree(the_repository);
-					if (work_tree)
-						printf("%s\n", work_tree);
-					continue;
+			ఒకవేళ (!strcmp(arg, "--show-cdup")) {
+				స్థిరరాశి అక్షరం *pfx = ఉపసర్గ;
+				ఒకవేళ (!is_inside_work_వృక్షం(the_repository)) {
+					స్థిరరాశి అక్షరం *work_వృక్షం =
+						repo_get_work_వృక్షం(the_repository);
+					ఒకవేళ (work_వృక్షం)
+						రాయి("%s\n", work_వృక్షం);
+					కొనసాగు;
 				}
-				while (pfx) {
+				అయితే (pfx) {
 					pfx = strchr(pfx, '/');
-					if (pfx) {
+					ఒకవేళ (pfx) {
 						pfx++;
-						printf("../");
+						రాయి("../");
 					}
 				}
-				putchar('\n');
-				continue;
+				అక్షరం_రాయి('\n');
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--git-dir") ||
+			ఒకవేళ (!strcmp(arg, "--git-dir") ||
 			    !strcmp(arg, "--absolute-git-dir")) {
-				const char *gitdir = getenv(GIT_DIR_ENVIRONMENT);
-				char *cwd;
-				int len;
-				enum format_type wanted = format;
-				if (arg[2] == 'g') {	/* --git-dir */
-					if (gitdir) {
-						print_path(gitdir, prefix, format, DEFAULT_UNMODIFIED);
-						continue;
+				స్థిరరాశి అక్షరం *gitdir = getenv(GIT_DIR_ENVIRONMENT);
+				అక్షరం *cwd;
+				పూర్ణాంకం len;
+				గణన format_type wanted = format;
+				ఒకవేళ (arg[2] == 'g') {	/* --git-dir */
+					ఒకవేళ (gitdir) {
+						print_మార్గం(gitdir, ఉపసర్గ, format, DEFAULT_UNMODIFIED);
+						కొనసాగు;
 					}
-					if (!prefix) {
-						print_path(".git", prefix, format, DEFAULT_UNMODIFIED);
-						continue;
+					ఒకవేళ (!ఉపసర్గ) {
+						print_మార్గం(".git", ఉపసర్గ, format, DEFAULT_UNMODIFIED);
+						కొనసాగు;
 					}
-				} else {		/* --absolute-git-dir */
+				} లేకపోతే {		/* --absolute-git-dir */
 					wanted = FORMAT_CANONICAL;
-					if (!gitdir && !prefix)
+					ఒకవేళ (!gitdir && !ఉపసర్గ)
 						gitdir = ".git";
-					if (gitdir) {
-						struct strbuf realpath = STRBUF_INIT;
+					ఒకవేళ (gitdir) {
+						నిర్మాణం strbuf realpath = STRBUF_INIT;
 						strbuf_realpath(&realpath, gitdir, 1);
 						puts(realpath.buf);
 						strbuf_release(&realpath);
-						continue;
+						కొనసాగు;
 					}
 				}
 				cwd = xgetcwd();
-				len = strlen(cwd);
+				len = అక్షరశ్రేణి_పొడవు(cwd);
 				strbuf_reset(&buf);
 				strbuf_addf(&buf, "%s%s.git", cwd, len && cwd[len-1] != '/' ? "/" : "");
-				free(cwd);
-				print_path(buf.buf, prefix, wanted, DEFAULT_CANONICAL);
-				continue;
+				విడుదల(cwd);
+				print_మార్గం(buf.buf, ఉపసర్గ, wanted, DEFAULT_CANONICAL);
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--git-common-dir")) {
-				print_path(repo_get_common_dir(the_repository), prefix, format, DEFAULT_RELATIVE_IF_SHARED);
-				continue;
+			ఒకవేళ (!strcmp(arg, "--git-common-dir")) {
+				print_మార్గం(repo_get_common_dir(the_repository), ఉపసర్గ, format, DEFAULT_RELATIVE_IF_SHARED);
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--is-inside-git-dir")) {
-				printf("%s\n", is_inside_git_dir(the_repository) ? "true"
+			ఒకవేళ (!strcmp(arg, "--is-inside-git-dir")) {
+				రాయి("%s\n", is_inside_git_dir(the_repository) ? "true"
 						: "false");
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--is-inside-work-tree")) {
-				printf("%s\n", is_inside_work_tree(the_repository) ? "true"
+			ఒకవేళ (!strcmp(arg, "--is-inside-work-tree")) {
+				రాయి("%s\n", is_inside_work_వృక్షం(the_repository) ? "true"
 						: "false");
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--is-bare-repository")) {
-				printf("%s\n", is_bare_repository(the_repository) ? "true"
+			ఒకవేళ (!strcmp(arg, "--is-bare-repository")) {
+				రాయి("%s\n", is_bare_repository(the_repository) ? "true"
 						: "false");
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--is-shallow-repository")) {
-				printf("%s\n",
+			ఒకవేళ (!strcmp(arg, "--is-shallow-repository")) {
+				రాయి("%s\n",
 						is_repository_shallow(the_repository) ? "true"
 						: "false");
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--shared-index-path")) {
-				if (repo_read_index(the_repository) < 0)
+			ఒకవేళ (!strcmp(arg, "--shared-index-path")) {
+				ఒకవేళ (repo_read_సూచీ(the_repository) < 0)
 					die(_("Could not read the index"));
-				if (the_repository->index->split_index) {
-					const struct object_id *oid = &the_repository->index->split_index->base_oid;
-					const char *path = repo_git_path_replace(the_repository, &buf, "sharedindex.%s", oid_to_hex(oid));
-					print_path(path, prefix, format, DEFAULT_RELATIVE);
+				ఒకవేళ (the_repository->సూచీ->విభజించు_సూచీ) {
+					స్థిరరాశి నిర్మాణం object_id *oid = &the_repository->సూచీ->విభజించు_సూచీ->పునాది_oid;
+					స్థిరరాశి అక్షరం *మార్గం = repo_git_మార్గం_replace(the_repository, &buf, "sharedindex.%s", oid_గమ్యం_hex(oid));
+					print_మార్గం(మార్గం, ఉపసర్గ, format, DEFAULT_RELATIVE);
 				}
-				continue;
+				కొనసాగు;
 			}
-			if (skip_prefix(arg, "--since=", &arg)) {
+			ఒకవేళ (skip_ఉపసర్గ(arg, "--since=", &arg)) {
 				show_datestring("--max-age=", arg);
-				continue;
+				కొనసాగు;
 			}
-			if (skip_prefix(arg, "--after=", &arg)) {
+			ఒకవేళ (skip_ఉపసర్గ(arg, "--after=", &arg)) {
 				show_datestring("--max-age=", arg);
-				continue;
+				కొనసాగు;
 			}
-			if (skip_prefix(arg, "--before=", &arg)) {
+			ఒకవేళ (skip_ఉపసర్గ(arg, "--before=", &arg)) {
 				show_datestring("--min-age=", arg);
-				continue;
+				కొనసాగు;
 			}
-			if (skip_prefix(arg, "--until=", &arg)) {
+			ఒకవేళ (skip_ఉపసర్గ(arg, "--until=", &arg)) {
 				show_datestring("--min-age=", arg);
-				continue;
+				కొనసాగు;
 			}
-			if (opt_with_value(arg, "--show-object-format", &arg)) {
-				const char *val = arg ? arg : "storage";
+			ఒకవేళ (opt_with_విలువ(arg, "--show-object-format", &arg)) {
+				స్థిరరాశి అక్షరం *val = arg ? arg : "storage";
 
-				if (strcmp(val, "storage") &&
+				ఒకవేళ (strcmp(val, "storage") &&
 				    strcmp(val, "compat") &&
 				    strcmp(val, "input") &&
 				    strcmp(val, "output"))
 					die(_("unknown mode for --show-object-format: %s"),
 					    arg);
 
-				if (!strcmp(val, "compat")) {
-					if (the_repository->compat_hash_algo)
+				ఒకవేళ (!strcmp(val, "compat")) {
+					ఒకవేళ (the_repository->compat_hash_algo)
 						puts(the_repository->compat_hash_algo->name);
-					else
-						putchar('\n');
-				} else {
+					లేకపోతే
+						అక్షరం_రాయి('\n');
+				} లేకపోతే {
 					puts(the_hash_algo->name);
 				}
-				continue;
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--show-ref-format") || !strcmp(arg, "--show-ref-storage-format")) {
-				puts(ref_storage_format_to_name(the_repository->ref_storage_format));
-				continue;
+			ఒకవేళ (!strcmp(arg, "--show-ref-format") || !strcmp(arg, "--show-ref-storage-format")) {
+				puts(ref_storage_format_గమ్యం_name(the_repository->ref_storage_format));
+				కొనసాగు;
 			}
-			if (!strcmp(arg, "--end-of-options")) {
-				seen_end_of_options = 1;
-				if (filter & (DO_FLAGS | DO_REVS))
+			ఒకవేళ (!strcmp(arg, "--end-of-options")) {
+				చూసిన_చివర_యొక్క_options = 1;
+				ఒకవేళ (filter & (DO_FLAGS | DO_REVS))
 					show_file(arg, 0);
-				continue;
+				కొనసాగు;
 			}
-			if (show_flag(arg) && verify)
+			ఒకవేళ (show_flag(arg) && verify)
 				die_no_single_rev(quiet);
-			continue;
+			కొనసాగు;
 		}
 
 		/* Not a flag argument */
-		if (try_difference(arg))
-			continue;
-		if (try_parent_shorthands(arg))
-			continue;
+		ఒకవేళ (try_difference(arg))
+			కొనసాగు;
+		ఒకవేళ (try_మాతృ_shorthands(arg))
+			కొనసాగు;
 		name = arg;
-		type = NORMAL;
-		if (*arg == '^') {
+		type = సాధారణ;
+		ఒకవేళ (*arg == '^') {
 			name++;
 			type = REVERSED;
 		}
-		if (!repo_get_oid_with_flags(the_repository, name, &oid,
+		ఒకవేళ (!repo_get_oid_with_flags(the_repository, name, &oid,
 					     flags)) {
-			if (output_algo)
-				repo_oid_to_algop(the_repository, &oid,
+			ఒకవేళ (output_algo)
+				repo_oid_గమ్యం_algop(the_repository, &oid,
 						  output_algo, &oid);
-			if (verify)
-				revs_count++;
-			else
+			ఒకవేళ (verify)
+				revs_లెక్క++;
+			లేకపోతే
 				show_rev(type, &oid, name);
-			continue;
+			కొనసాగు;
 		}
-		if (verify)
+		ఒకవేళ (verify)
 			die_no_single_rev(quiet);
-		if (has_dashdash)
+		ఒకవేళ (has_dashdash)
 			die(_("bad revision '%s'"), arg);
 		as_is = 1;
-		if (!show_file(arg, output_prefix))
-			continue;
-		verify_filename(the_repository, prefix, arg, 1);
+		ఒకవేళ (!show_file(arg, output_ఉపసర్గ))
+			కొనసాగు;
+		verify_filename(the_repository, ఉపసర్గ, arg, 1);
 	}
 	strbuf_release(&buf);
-	if (verify) {
-		if (revs_count == 1) {
+	ఒకవేళ (verify) {
+		ఒకవేళ (revs_లెక్క == 1) {
 			show_rev(type, &oid, name);
-			return 0;
-		} else if (revs_count == 0 && show_default())
-			return 0;
+			తిరిగి 0;
+		} లేకపోతే ఒకవేళ (revs_లెక్క == 0 && show_default())
+			తిరిగి 0;
 		die_no_single_rev(quiet);
-	} else
+	} లేకపోతే
 		show_default();
-	return 0;
+	తిరిగి 0;
 }

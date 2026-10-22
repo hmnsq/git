@@ -10,245 +10,245 @@
  * Copyright (c) 2006 Shawn O. Pearce
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "date.h"
-#include "dir.h"
-#include "environment.h"
-#include "hex.h"
-#include "config.h"
-#include "tempfile.h"
-#include "lockfile.h"
-#include "parse-options.h"
-#include "run-command.h"
-#include "sigchain.h"
-#include "strvec.h"
-#include "commit.h"
-#include "commit-graph.h"
-#include "packfile.h"
-#include "object-file.h"
-#include "odb.h"
-#include "path.h"
-#include "reflog.h"
-#include "rerere.h"
-#include "revision.h"
-#include "refs.h"
-#include "remote.h"
-#include "exec-cmd.h"
-#include "gettext.h"
-#include "hook.h"
-#include "setup.h"
-#include "trace2.h"
-#include "worktree.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "abspath.h"
+#అన్తర్భావ "date.h"
+#అన్తర్భావ "dir.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "tempfile.h"
+#అన్తర్భావ "lockfile.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "run-command.h"
+#అన్తర్భావ "sigchain.h"
+#అన్తర్భావ "strvec.h"
+#అన్తర్భావ "commit.h"
+#అన్తర్భావ "commit-graph.h"
+#అన్తర్భావ "packfile.h"
+#అన్తర్భావ "object-file.h"
+#అన్తర్భావ "odb.h"
+#అన్తర్భావ "path.h"
+#అన్తర్భావ "reflog.h"
+#అన్తర్భావ "rerere.h"
+#అన్తర్భావ "revision.h"
+#అన్తర్భావ "refs.h"
+#అన్తర్భావ "remote.h"
+#అన్తర్భావ "exec-cmd.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hook.h"
+#అన్తర్భావ "setup.h"
+#అన్తర్భావ "trace2.h"
+#అన్తర్భావ "worktree.h"
 
-#define FAILED_RUN "failed to run %s"
+#నిర్వచించు FAILED_నిరంతరం "failed to run %s"
 
-static const char * const builtin_gc_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_gc_usage[] = {
 	N_("git gc [<options>]"),
-	NULL
+	ఖాళీ
 };
 
-static timestamp_t gc_log_expire_time;
-static struct tempfile *pidfile;
-static struct lock_file log_lock;
-static struct string_list pack_garbage = STRING_LIST_INIT_DUP;
+స్థిర timestamp_t gc_log_expire_సమయం;
+స్థిర నిర్మాణం tempfile *pidfile;
+స్థిర నిర్మాణం తాళం_file log_తాళం;
+స్థిర నిర్మాణం string_list pack_garbage = STRING_LIST_INIT_DUP;
 
-static void clean_pack_garbage(void)
+స్థిర శూన్య clean_pack_garbage(శూన్య)
 {
-	int i;
-	for (i = 0; i < pack_garbage.nr; i++)
-		unlink_or_warn(pack_garbage.items[i].string);
+	పూర్ణాంకం i;
+	కొరకు (i = 0; i < pack_garbage.nr; i++)
+		unlink_or_warn(pack_garbage.వస్తువులు[i].string);
 	string_list_clear(&pack_garbage, 0);
 }
 
-static void report_pack_garbage(unsigned seen_bits, const char *path)
+స్థిర శూన్య report_pack_garbage(గుర్తులేని చూసిన_బిట్లు, స్థిరరాశి అక్షరం *మార్గం)
 {
-	if (seen_bits == PACKDIR_FILE_IDX)
-		string_list_append(&pack_garbage, path);
+	ఒకవేళ (చూసిన_బిట్లు == PACKDIR_FILE_IDX)
+		string_list_append(&pack_garbage, మార్గం);
 }
 
-static void process_log_file(void)
+స్థిర శూన్య process_log_file(శూన్య)
 {
-	struct stat st;
-	if (fstat(get_lock_file_fd(&log_lock), &st)) {
+	నిర్మాణం stat st;
+	ఒకవేళ (fstat(get_తాళం_file_fd(&log_తాళం), &st)) {
 		/*
 		 * Perhaps there was an i/o error or another
 		 * unlikely situation.  Try to make a note of
 		 * this in gc.log along with any existing
 		 * messages.
 		 */
-		int saved_errno = errno;
+		పూర్ణాంకం saved_errno = errno;
 		fprintf(stderr, _("Failed to fstat %s: %s"),
-			get_lock_file_path(&log_lock),
+			get_తాళం_file_మార్గం(&log_తాళం),
 			strerror(saved_errno));
 		fflush(stderr);
-		commit_lock_file(&log_lock);
+		commit_తాళం_file(&log_తాళం);
 		errno = saved_errno;
-	} else if (st.st_size) {
+	} లేకపోతే ఒకవేళ (st.st_కొలత) {
 		/* There was some error recorded in the lock file */
-		commit_lock_file(&log_lock);
-	} else {
-		char *path = repo_git_path(the_repository, "gc.log");
+		commit_తాళం_file(&log_తాళం);
+	} లేకపోతే {
+		అక్షరం *మార్గం = repo_git_మార్గం(the_repository, "gc.log");
 		/* No error, clean up any old gc.log */
-		unlink(path);
-		rollback_lock_file(&log_lock);
-		free(path);
+		unlink(మార్గం);
+		rollback_తాళం_file(&log_తాళం);
+		విడుదల(మార్గం);
 	}
 }
 
-static void process_log_file_at_exit(void)
+స్థిర శూన్య process_log_file_at_exit(శూన్య)
 {
 	fflush(stderr);
 	process_log_file();
 }
 
-static int gc_config_is_timestamp_never(const char *var)
+స్థిర పూర్ణాంకం gc_config_is_timestamp_never(స్థిరరాశి అక్షరం *var)
 {
-	const char *value;
+	స్థిరరాశి అక్షరం *విలువ;
 	timestamp_t expire;
 
-	if (!repo_config_get_value(the_repository, var, &value) && value) {
-		if (parse_expiry_date(value, &expire))
-			die(_("failed to parse '%s' value '%s'"), var, value);
-		return expire == 0;
+	ఒకవేళ (!repo_config_get_విలువ(the_repository, var, &విలువ) && విలువ) {
+		ఒకవేళ (parse_expiry_date(విలువ, &expire))
+			die(_("failed to parse '%s' value '%s'"), var, విలువ);
+		తిరిగి expire == 0;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-struct gc_config {
-	int pack_refs;
-	int prune_reflogs;
-	int cruft_packs;
-	unsigned long max_cruft_size;
-	int aggressive_depth;
-	int aggressive_window;
-	int detach_auto;
-	char *gc_log_expire;
-	char *prune_expire;
-	char *prune_worktrees_expire;
-	char *repack_expire_to;
+నిర్మాణం gc_config {
+	పూర్ణాంకం pack_refs;
+	పూర్ణాంకం prune_reflogs;
+	పూర్ణాంకం cruft_packs;
+	గుర్తులేని దీర్ఘ max_cruft_కొలత;
+	పూర్ణాంకం aggressive_లోతు;
+	పూర్ణాంకం aggressive_కిటికీ;
+	పూర్ణాంకం detach_auto;
+	అక్షరం *gc_log_expire;
+	అక్షరం *prune_expire;
+	అక్షరం *prune_worktrees_expire;
+	అక్షరం *repack_expire_గమ్యం;
 };
 
-#define GC_CONFIG_INIT { \
+#నిర్వచించు GC_CONFIG_INIT { \
 	.pack_refs = 1, \
 	.prune_reflogs = 1, \
 	.cruft_packs = 1, \
-	.aggressive_depth = 50, \
-	.aggressive_window = 250, \
+	.aggressive_లోతు = 50, \
+	.aggressive_కిటికీ = 250, \
 	.detach_auto = 1, \
 	.gc_log_expire = xstrdup("1.day.ago"), \
 	.prune_expire = xstrdup("2.weeks.ago"), \
 	.prune_worktrees_expire = xstrdup("3.months.ago"), \
 }
 
-static void gc_config_release(struct gc_config *cfg)
+స్థిర శూన్య gc_config_release(నిర్మాణం gc_config *cfg)
 {
-	free(cfg->gc_log_expire);
-	free(cfg->prune_expire);
-	free(cfg->prune_worktrees_expire);
+	విడుదల(cfg->gc_log_expire);
+	విడుదల(cfg->prune_expire);
+	విడుదల(cfg->prune_worktrees_expire);
 }
 
-static void gc_config(struct gc_config *cfg)
+స్థిర శూన్య gc_config(నిర్మాణం gc_config *cfg)
 {
-	const char *value;
-	char *owned = NULL;
+	స్థిరరాశి అక్షరం *విలువ;
+	అక్షరం *owned = ఖాళీ;
 
-	if (!repo_config_get_value(the_repository, "gc.packrefs", &value)) {
-		if (value && !strcmp(value, "notbare"))
+	ఒకవేళ (!repo_config_get_విలువ(the_repository, "gc.packrefs", &విలువ)) {
+		ఒకవేళ (విలువ && !strcmp(విలువ, "notbare"))
 			cfg->pack_refs = -1;
-		else
-			cfg->pack_refs = git_config_bool("gc.packrefs", value);
+		లేకపోతే
+			cfg->pack_refs = git_config_bool("gc.packrefs", విలువ);
 	}
 
-	if (gc_config_is_timestamp_never("gc.reflogexpire") &&
+	ఒకవేళ (gc_config_is_timestamp_never("gc.reflogexpire") &&
 	    gc_config_is_timestamp_never("gc.reflogexpireunreachable"))
 		cfg->prune_reflogs = 0;
 
-	repo_config_get_int(the_repository, "gc.aggressivewindow", &cfg->aggressive_window);
-	repo_config_get_int(the_repository, "gc.aggressivedepth", &cfg->aggressive_depth);
+	repo_config_get_int(the_repository, "gc.aggressivewindow", &cfg->aggressive_కిటికీ);
+	repo_config_get_int(the_repository, "gc.aggressivedepth", &cfg->aggressive_లోతు);
 	repo_config_get_bool(the_repository, "gc.autodetach", &cfg->detach_auto);
 	repo_config_get_bool(the_repository, "gc.cruftpacks", &cfg->cruft_packs);
-	repo_config_get_ulong(the_repository, "gc.maxcruftsize", &cfg->max_cruft_size);
+	repo_config_get_ulong(the_repository, "gc.maxcruftsize", &cfg->max_cruft_కొలత);
 
-	if (!repo_config_get_expiry(the_repository, "gc.pruneexpire", &owned)) {
-		free(cfg->prune_expire);
+	ఒకవేళ (!repo_config_get_expiry(the_repository, "gc.pruneexpire", &owned)) {
+		విడుదల(cfg->prune_expire);
 		cfg->prune_expire = owned;
 	}
 
-	if (!repo_config_get_expiry(the_repository, "gc.worktreepruneexpire", &owned)) {
-		free(cfg->prune_worktrees_expire);
+	ఒకవేళ (!repo_config_get_expiry(the_repository, "gc.worktreepruneexpire", &owned)) {
+		విడుదల(cfg->prune_worktrees_expire);
 		cfg->prune_worktrees_expire = owned;
 	}
 
-	if (!repo_config_get_expiry(the_repository, "gc.logexpiry", &owned)) {
-		free(cfg->gc_log_expire);
+	ఒకవేళ (!repo_config_get_expiry(the_repository, "gc.logexpiry", &owned)) {
+		విడుదల(cfg->gc_log_expire);
 		cfg->gc_log_expire = owned;
 	}
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ఖాళీ);
 }
 
-enum schedule_priority {
-	SCHEDULE_NONE = 0,
-	SCHEDULE_WEEKLY = 1,
-	SCHEDULE_DAILY = 2,
-	SCHEDULE_HOURLY = 3,
+గణన కాలపట్టిక_ప్రాధాన్యత {
+	కాలపట్టిక_NONE = 0,
+	కాలపట్టిక_WEEKLY = 1,
+	కాలపట్టిక_DAILY = 2,
+	కాలపట్టిక_HOURLY = 3,
 };
 
-static enum schedule_priority parse_schedule(const char *value)
+స్థిర గణన కాలపట్టిక_ప్రాధాన్యత parse_కాలపట్టిక(స్థిరరాశి అక్షరం *విలువ)
 {
-	if (!value)
-		return SCHEDULE_NONE;
-	if (!strcasecmp(value, "hourly"))
-		return SCHEDULE_HOURLY;
-	if (!strcasecmp(value, "daily"))
-		return SCHEDULE_DAILY;
-	if (!strcasecmp(value, "weekly"))
-		return SCHEDULE_WEEKLY;
-	return SCHEDULE_NONE;
+	ఒకవేళ (!విలువ)
+		తిరిగి కాలపట్టిక_NONE;
+	ఒకవేళ (!strcasecmp(విలువ, "hourly"))
+		తిరిగి కాలపట్టిక_HOURLY;
+	ఒకవేళ (!strcasecmp(విలువ, "daily"))
+		తిరిగి కాలపట్టిక_DAILY;
+	ఒకవేళ (!strcasecmp(విలువ, "weekly"))
+		తిరిగి కాలపట్టిక_WEEKLY;
+	తిరిగి కాలపట్టిక_NONE;
 }
 
-enum maintenance_task_label {
+గణన maintenance_task_label {
 	TASK_PREFETCH,
 	TASK_LOOSE_OBJECTS,
 	TASK_INCREMENTAL_REPACK,
 	TASK_GEOMETRIC_REPACK,
 	TASK_GC,
-	TASK_COMMIT_GRAPH,
+	TASK_COMMIT_లేఖాచిత్రం,
 	TASK_PACK_REFS,
 	TASK_REFLOG_EXPIRE,
 	TASK_WORKTREE_PRUNE,
 	TASK_RERERE_GC,
 
 	/* Leave as final value */
-	TASK__COUNT
+	TASK_లెక్క
 };
 
-struct maintenance_run_opts {
-	enum maintenance_task_label *tasks;
-	size_t tasks_nr, tasks_alloc;
-	int auto_flag;
-	int detach;
-	int quiet;
-	enum schedule_priority schedule;
+నిర్మాణం maintenance_నిరంతరం_opts {
+	గణన maintenance_task_label *tasks;
+	కొలత_t tasks_nr, tasks_alloc;
+	పూర్ణాంకం auto_flag;
+	పూర్ణాంకం detach;
+	పూర్ణాంకం quiet;
+	గణన కాలపట్టిక_ప్రాధాన్యత కాలపట్టిక;
 };
-#define MAINTENANCE_RUN_OPTS_INIT { \
+#నిర్వచించు MAINTENANCE_నిరంతరం_OPTS_INIT { \
 	.detach = -1, \
 }
 
-static void maintenance_run_opts_release(struct maintenance_run_opts *opts)
+స్థిర శూన్య maintenance_నిరంతరం_opts_release(నిర్మాణం maintenance_నిరంతరం_opts *opts)
 {
-	free(opts->tasks);
+	విడుదల(opts->tasks);
 }
 
-static int pack_refs_condition(UNUSED struct gc_config *cfg)
+స్థిర పూర్ణాంకం pack_refs_condition(వాడని నిర్మాణం gc_config *cfg)
 {
-	struct string_list included_refs = STRING_LIST_INIT_NODUP;
-	struct ref_exclusions excludes = REF_EXCLUSIONS_INIT;
-	struct refs_optimize_opts optimize_opts = {
+	నిర్మాణం string_list included_refs = STRING_LIST_INIT_NODUP;
+	నిర్మాణం ref_exclusions excludes = REF_EXCLUSIONS_INIT;
+	నిర్మాణం refs_optimize_opts optimize_opts = {
 		.exclusions = &excludes,
 		.includes = &included_refs,
 		.flags = REFS_OPTIMIZE_PRUNE | REFS_OPTIMIZE_AUTO,
@@ -258,196 +258,196 @@ static int pack_refs_condition(UNUSED struct gc_config *cfg)
 	/* Check for all refs, similar to 'git refs optimize --all'. */
 	string_list_append(optimize_opts.includes, "*");
 
-	if (refs_optimize_required(get_main_ref_store(the_repository),
+	ఒకవేళ (refs_optimize_required(get_main_ref_store(the_repository),
 				   &optimize_opts, &required))
-		return 0;
+		తిరిగి 0;
 
 	clear_ref_exclusions(&excludes);
 	string_list_clear(&included_refs, 0);
 
-	return required;
+	తిరిగి required;
 }
 
-static int maintenance_task_pack_refs(struct maintenance_run_opts *opts,
-				      UNUSED struct gc_config *cfg)
+స్థిర పూర్ణాంకం maintenance_task_pack_refs(నిర్మాణం maintenance_నిరంతరం_opts *opts,
+				      వాడని నిర్మాణం gc_config *cfg)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process cmd = బిడ్డ_PROCESS_INIT;
 
 	cmd.git_cmd = 1;
-	strvec_pushl(&cmd.args, "pack-refs", "--all", "--prune", NULL);
-	if (opts->auto_flag)
-		strvec_push(&cmd.args, "--auto");
+	strvec_pushl(&cmd.వాదనలు, "pack-refs", "--all", "--prune", ఖాళీ);
+	ఒకవేళ (opts->auto_flag)
+		strvec_నెట్టు(&cmd.వాదనలు, "--auto");
 
-	return run_command(&cmd);
+	తిరిగి నిరంతరం_command(&cmd);
 }
 
-struct count_reflog_entries_data {
-	struct expire_reflog_policy_cb policy;
-	size_t count;
-	size_t limit;
+నిర్మాణం లెక్క_reflog_entries_దత్తాంశం {
+	నిర్మాణం expire_reflog_policy_cb policy;
+	కొలత_t లెక్క;
+	కొలత_t హద్దు;
 };
 
-static int count_reflog_entries(const char *refname UNUSED,
-				struct object_id *old_oid, struct object_id *new_oid,
-				const char *committer, timestamp_t timestamp,
-				int tz, const char *msg, void *cb_data)
+స్థిర పూర్ణాంకం లెక్క_reflog_entries(స్థిరరాశి అక్షరం *refname వాడని,
+				నిర్మాణం object_id *old_oid, నిర్మాణం object_id *new_oid,
+				స్థిరరాశి అక్షరం *committer, timestamp_t timestamp,
+				పూర్ణాంకం tz, స్థిరరాశి అక్షరం *సందేశం, శూన్య *cb_దత్తాంశం)
 {
-	struct count_reflog_entries_data *data = cb_data;
-	if (should_expire_reflog_ent(old_oid, new_oid, committer, timestamp, tz, msg, &data->policy))
-		data->count++;
-	return data->count >= data->limit;
+	నిర్మాణం లెక్క_reflog_entries_దత్తాంశం *దత్తాంశం = cb_దత్తాంశం;
+	ఒకవేళ (should_expire_reflog_ent(old_oid, new_oid, committer, timestamp, tz, సందేశం, &దత్తాంశం->policy))
+		దత్తాంశం->లెక్క++;
+	తిరిగి దత్తాంశం->లెక్క >= దత్తాంశం->హద్దు;
 }
 
-static int reflog_expire_condition(struct gc_config *cfg UNUSED)
+స్థిర పూర్ణాంకం reflog_expire_condition(నిర్మాణం gc_config *cfg వాడని)
 {
-	timestamp_t now = time(NULL);
-	struct count_reflog_entries_data data = {
+	timestamp_t now = సమయం(ఖాళీ);
+	నిర్మాణం లెక్క_reflog_entries_దత్తాంశం దత్తాంశం = {
 		.policy = {
 			.opts = REFLOG_EXPIRE_OPTIONS_INIT(now),
 		},
 	};
-	int limit = 100;
+	పూర్ణాంకం హద్దు = 100;
 
-	repo_config_get_int(the_repository, "maintenance.reflog-expire.auto", &limit);
-	if (!limit)
-		return 0;
-	if (limit < 0)
-		return 1;
-	data.limit = limit;
+	repo_config_get_int(the_repository, "maintenance.reflog-expire.auto", &హద్దు);
+	ఒకవేళ (!హద్దు)
+		తిరిగి 0;
+	ఒకవేళ (హద్దు < 0)
+		తిరిగి 1;
+	దత్తాంశం.హద్దు = హద్దు;
 
-	repo_config(the_repository, reflog_expire_config, &data.policy.opts);
+	repo_config(the_repository, reflog_expire_config, &దత్తాంశం.policy.opts);
 
-	reflog_expire_options_set_refname(&data.policy.opts, "HEAD");
+	reflog_expire_options_సమితి_refname(&దత్తాంశం.policy.opts, "HEAD");
 	refs_for_each_reflog_ent(get_main_ref_store(the_repository), "HEAD",
-				 count_reflog_entries, &data);
+				 లెక్క_reflog_entries, &దత్తాంశం);
 
-	reflog_expiry_cleanup(&data.policy);
-	reflog_clear_expire_config(&data.policy.opts);
-	return data.count >= data.limit;
+	reflog_expiry_cleanup(&దత్తాంశం.policy);
+	reflog_clear_expire_config(&దత్తాంశం.policy.opts);
+	తిరిగి దత్తాంశం.లెక్క >= దత్తాంశం.హద్దు;
 }
 
-static int maintenance_task_reflog_expire(struct maintenance_run_opts *opts UNUSED,
-					  struct gc_config *cfg UNUSED)
+స్థిర పూర్ణాంకం maintenance_task_reflog_expire(నిర్మాణం maintenance_నిరంతరం_opts *opts వాడని,
+					  నిర్మాణం gc_config *cfg వాడని)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process cmd = బిడ్డ_PROCESS_INIT;
 	cmd.git_cmd = 1;
-	strvec_pushl(&cmd.args, "reflog", "expire", "--all", NULL);
-	return run_command(&cmd);
+	strvec_pushl(&cmd.వాదనలు, "reflog", "expire", "--all", ఖాళీ);
+	తిరిగి నిరంతరం_command(&cmd);
 }
 
-static int maintenance_task_worktree_prune(struct maintenance_run_opts *opts UNUSED,
-					   struct gc_config *cfg)
+స్థిర పూర్ణాంకం maintenance_task_worktree_prune(నిర్మాణం maintenance_నిరంతరం_opts *opts వాడని,
+					   నిర్మాణం gc_config *cfg)
 {
-	struct child_process prune_worktrees_cmd = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process prune_worktrees_cmd = బిడ్డ_PROCESS_INIT;
 
 	prune_worktrees_cmd.git_cmd = 1;
-	strvec_pushl(&prune_worktrees_cmd.args, "worktree", "prune", "--expire", NULL);
-	strvec_push(&prune_worktrees_cmd.args, cfg->prune_worktrees_expire);
+	strvec_pushl(&prune_worktrees_cmd.వాదనలు, "worktree", "prune", "--expire", ఖాళీ);
+	strvec_నెట్టు(&prune_worktrees_cmd.వాదనలు, cfg->prune_worktrees_expire);
 
-	return run_command(&prune_worktrees_cmd);
+	తిరిగి నిరంతరం_command(&prune_worktrees_cmd);
 }
 
-static int worktree_prune_condition(struct gc_config *cfg)
+స్థిర పూర్ణాంకం worktree_prune_condition(నిర్మాణం gc_config *cfg)
 {
-	struct strbuf buf = STRBUF_INIT;
-	int should_prune = 0, limit = 1;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
+	పూర్ణాంకం should_prune = 0, హద్దు = 1;
 	timestamp_t expiry_date;
-	struct dirent *d;
-	DIR *dir = NULL;
+	నిర్మాణం dirent *d;
+	DIR *dir = ఖాళీ;
 
-	repo_config_get_int(the_repository, "maintenance.worktree-prune.auto", &limit);
-	if (limit <= 0) {
-		should_prune = limit < 0;
-		goto out;
+	repo_config_get_int(the_repository, "maintenance.worktree-prune.auto", &హద్దు);
+	ఒకవేళ (హద్దు <= 0) {
+		should_prune = హద్దు < 0;
+		వెళ్ళు బహిర్గతం;
 	}
 
-	if (parse_expiry_date(cfg->prune_worktrees_expire, &expiry_date))
-		goto out;
+	ఒకవేళ (parse_expiry_date(cfg->prune_worktrees_expire, &expiry_date))
+		వెళ్ళు బహిర్గతం;
 
-	dir = opendir(repo_git_path_replace(the_repository, &buf, "worktrees"));
-	if (!dir)
-		goto out;
+	dir = opendir(repo_git_మార్గం_replace(the_repository, &buf, "worktrees"));
+	ఒకవేళ (!dir)
+		వెళ్ళు బహిర్గతం;
 
-	while (limit && (d = readdir_skip_dot_and_dotdot(dir))) {
-		char *wtpath;
+	అయితే (హద్దు && (d = readdir_skip_dot_and_dotdot(dir))) {
+		అక్షరం *wtpath;
 		strbuf_reset(&buf);
-		if (should_prune_worktree(the_repository, d->d_name, &buf, &wtpath, expiry_date))
-			limit--;
-		free(wtpath);
+		ఒకవేళ (should_prune_worktree(the_repository, d->d_name, &buf, &wtpath, expiry_date))
+			హద్దు--;
+		విడుదల(wtpath);
 	}
 
-	should_prune = !limit;
+	should_prune = !హద్దు;
 
-out:
-	if (dir)
+బహిర్గతం:
+	ఒకవేళ (dir)
 		closedir(dir);
 	strbuf_release(&buf);
-	return should_prune;
+	తిరిగి should_prune;
 }
 
-static int maintenance_task_rerere_gc(struct maintenance_run_opts *opts UNUSED,
-				      struct gc_config *cfg UNUSED)
+స్థిర పూర్ణాంకం maintenance_task_rerere_gc(నిర్మాణం maintenance_నిరంతరం_opts *opts వాడని,
+				      నిర్మాణం gc_config *cfg వాడని)
 {
-	struct child_process rerere_cmd = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process rerere_cmd = బిడ్డ_PROCESS_INIT;
 	rerere_cmd.git_cmd = 1;
-	strvec_pushl(&rerere_cmd.args, "rerere", "gc", NULL);
-	return run_command(&rerere_cmd);
+	strvec_pushl(&rerere_cmd.వాదనలు, "rerere", "gc", ఖాళీ);
+	తిరిగి నిరంతరం_command(&rerere_cmd);
 }
 
-static int rerere_gc_condition(struct gc_config *cfg UNUSED)
+స్థిర పూర్ణాంకం rerere_gc_condition(నిర్మాణం gc_config *cfg వాడని)
 {
-	int limit = 512;
+	పూర్ణాంకం హద్దు = 512;
 
-	repo_config_get_int(the_repository, "maintenance.rerere-gc.auto", &limit);
-	if (!limit)
-		return 0; /* never prune */
-	if (limit < 0)
-		return 1; /* always prune */
+	repo_config_get_int(the_repository, "maintenance.rerere-gc.auto", &హద్దు);
+	ఒకవేళ (!హద్దు)
+		తిరిగి 0; /* never prune */
+	ఒకవేళ (హద్దు < 0)
+		తిరిగి 1; /* always prune */
 
-	return rerere_gc_needed(the_repository, (size_t)limit);
+	తిరిగి rerere_gc_needed(the_repository, (కొలత_t)హద్దు);
 }
 
-#define OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, aggressive) \
+#నిర్వచించు OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, aggressive) \
 	.prune_expire = (cfg)->prune_expire, \
-	.expire_to = (cfg)->repack_expire_to, \
+	.expire_గమ్యం = (cfg)->repack_expire_గమ్యం, \
 	.cruft_packs = (cfg)->cruft_packs, \
-	.max_cruft_size = (cfg)->max_cruft_size, \
-	.window = (aggressive) ? (cfg)->aggressive_window : 0, \
-	.depth = (aggressive) ? (cfg)->aggressive_depth : 0
+	.max_cruft_కొలత = (cfg)->max_cruft_కొలత, \
+	.కిటికీ = (aggressive) ? (cfg)->aggressive_కిటికీ : 0, \
+	.లోతు = (aggressive) ? (cfg)->aggressive_లోతు : 0
 
 /* return NULL on success, else hostname running the gc */
-static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
+స్థిర స్థిరరాశి అక్షరం *తాళం_repo_for_gc(పూర్ణాంకం force, pid_t* ret_pid)
 {
-	struct lock_file lock = LOCK_INIT;
-	char my_host[HOST_NAME_MAX + 1];
-	struct strbuf sb = STRBUF_INIT;
-	struct stat st;
+	నిర్మాణం తాళం_file తాళం = తాళం_INIT;
+	అక్షరం my_host[HOST_NAME_MAX + 1];
+	నిర్మాణం strbuf sb = STRBUF_INIT;
+	నిర్మాణం stat st;
 	uintmax_t pid;
 	FILE *fp;
-	int fd;
-	char *pidfile_path;
+	పూర్ణాంకం fd;
+	అక్షరం *pidfile_మార్గం;
 
-	if (is_tempfile_active(pidfile))
+	ఒకవేళ (is_tempfile_చురుకైన(pidfile))
 		/* already locked */
-		return NULL;
+		తిరిగి ఖాళీ;
 
-	if (xgethostname(my_host, sizeof(my_host)))
-		xsnprintf(my_host, sizeof(my_host), "unknown");
+	ఒకవేళ (xgethostname(my_host, పరిమాణం(my_host)))
+		xsnprintf(my_host, పరిమాణం(my_host), "unknown");
 
-	pidfile_path = repo_git_path(the_repository, "gc.pid");
-	fd = hold_lock_file_for_update(&lock, pidfile_path,
-				       LOCK_DIE_ON_ERROR);
-	if (!force) {
-		static char locking_host[HOST_NAME_MAX + 1];
-		static char *scan_fmt;
-		int should_exit;
+	pidfile_మార్గం = repo_git_మార్గం(the_repository, "gc.pid");
+	fd = hold_తాళం_file_for_update(&తాళం, pidfile_మార్గం,
+				       తాళం_DIE_ON_ERROR);
+	ఒకవేళ (!force) {
+		స్థిర అక్షరం locking_host[HOST_NAME_MAX + 1];
+		స్థిర అక్షరం *పరిశీలన_fmt;
+		పూర్ణాంకం should_exit;
 
-		if (!scan_fmt)
-			scan_fmt = xstrfmt("%s %%%ds", "%"SCNuMAX, HOST_NAME_MAX);
-		fp = fopen(pidfile_path, "r");
-		memset(locking_host, 0, sizeof(locking_host));
+		ఒకవేళ (!పరిశీలన_fmt)
+			పరిశీలన_fmt = xstrfmt("%s %%%ds", "%"SCNuMAX, HOST_NAME_MAX);
+		fp = fopen(pidfile_మార్గం, "r");
+		memset(locking_host, 0, పరిమాణం(locking_host));
 		should_exit =
-			fp != NULL &&
+			fp != ఖాళీ &&
 			!fstat(fileno(fp), &st) &&
 			/*
 			 * 12 hour limit is very generous as gc should
@@ -458,29 +458,29 @@ static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
 			 * after the user verifies that no gc is
 			 * running.
 			 */
-			time(NULL) - st.st_mtime <= 12 * 3600 &&
-			fscanf(fp, scan_fmt, &pid, locking_host) == 2 &&
+			సమయం(ఖాళీ) - st.st_mtime <= 12 * 3600 &&
+			fscanf(fp, పరిశీలన_fmt, &pid, locking_host) == 2 &&
 			/* be gentle to concurrent "gc" on remote hosts */
 			(strcmp(locking_host, my_host) || !kill(pid, 0) || errno == EPERM);
-		if (fp)
+		ఒకవేళ (fp)
 			fclose(fp);
-		if (should_exit) {
-			if (fd >= 0)
-				rollback_lock_file(&lock);
+		ఒకవేళ (should_exit) {
+			ఒకవేళ (fd >= 0)
+				rollback_తాళం_file(&తాళం);
 			*ret_pid = pid;
-			free(pidfile_path);
-			return locking_host;
+			విడుదల(pidfile_మార్గం);
+			తిరిగి locking_host;
 		}
 	}
 
 	strbuf_addf(&sb, "%"PRIuMAX" %s",
 		    (uintmax_t) getpid(), my_host);
-	write_in_full(fd, sb.buf, sb.len);
+	write_లోపల_నిండిన(fd, sb.buf, sb.len);
 	strbuf_release(&sb);
-	commit_lock_file(&lock);
-	pidfile = register_tempfile(pidfile_path);
-	free(pidfile_path);
-	return NULL;
+	commit_తాళం_file(&తాళం);
+	pidfile = రిజిస్టరు_tempfile(pidfile_మార్గం);
+	విడుదల(pidfile_మార్గం);
+	తిరిగి ఖాళీ;
 }
 
 /*
@@ -489,29 +489,29 @@ static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
  * message and returns with a non-[01] status code if an error occurred
  * while reading gc.log
  */
-static int report_last_gc_error(void)
+స్థిర పూర్ణాంకం report_చివరి_gc_error(శూన్య)
 {
-	struct strbuf sb = STRBUF_INIT;
-	int ret = 0;
+	నిర్మాణం strbuf sb = STRBUF_INIT;
+	పూర్ణాంకం ret = 0;
 	ssize_t len;
-	struct stat st;
-	char *gc_log_path = repo_git_path(the_repository, "gc.log");
+	నిర్మాణం stat st;
+	అక్షరం *gc_log_మార్గం = repo_git_మార్గం(the_repository, "gc.log");
 
-	if (stat(gc_log_path, &st)) {
-		if (errno == ENOENT)
-			goto done;
+	ఒకవేళ (stat(gc_log_మార్గం, &st)) {
+		ఒకవేళ (errno == ENOENT)
+			వెళ్ళు పూర్తి;
 
-		ret = die_message_errno(_("cannot stat '%s'"), gc_log_path);
-		goto done;
+		ret = die_సందేశం_errno(_("cannot stat '%s'"), gc_log_మార్గం);
+		వెళ్ళు పూర్తి;
 	}
 
-	if (st.st_mtime < gc_log_expire_time)
-		goto done;
+	ఒకవేళ (st.st_mtime < gc_log_expire_సమయం)
+		వెళ్ళు పూర్తి;
 
-	len = strbuf_read_file(&sb, gc_log_path, 0);
-	if (len < 0)
-		ret = die_message_errno(_("cannot read '%s'"), gc_log_path);
-	else if (len > 0) {
+	len = strbuf_read_file(&sb, gc_log_మార్గం, 0);
+	ఒకవేళ (len < 0)
+		ret = die_సందేశం_errno(_("cannot read '%s'"), gc_log_మార్గం);
+	లేకపోతే ఒకవేళ (len > 0) {
 		/*
 		 * A previous gc failed.  Report the error, and don't
 		 * bother with an automatic gc run since it is likely
@@ -523,77 +523,77 @@ static int report_last_gc_error(void)
 			       "Automatic cleanup will not be performed "
 			       "until the file is removed.\n\n"
 			       "%s"),
-			    gc_log_path, sb.buf);
+			    gc_log_మార్గం, sb.buf);
 		ret = 1;
 	}
 	strbuf_release(&sb);
-done:
-	free(gc_log_path);
-	return ret;
+పూర్తి:
+	విడుదల(gc_log_మార్గం);
+	తిరిగి ret;
 }
 
-static int gc_foreground_tasks(struct maintenance_run_opts *opts,
-			       struct gc_config *cfg)
+స్థిర పూర్ణాంకం gc_foreground_tasks(నిర్మాణం maintenance_నిరంతరం_opts *opts,
+			       నిర్మాణం gc_config *cfg)
 {
-	if (cfg->pack_refs && maintenance_task_pack_refs(opts, cfg))
-		return error(FAILED_RUN, "pack-refs");
-	if (cfg->prune_reflogs && maintenance_task_reflog_expire(opts, cfg))
-		return error(FAILED_RUN, "reflog");
-	return 0;
+	ఒకవేళ (cfg->pack_refs && maintenance_task_pack_refs(opts, cfg))
+		తిరిగి error(FAILED_నిరంతరం, "pack-refs");
+	ఒకవేళ (cfg->prune_reflogs && maintenance_task_reflog_expire(opts, cfg))
+		తిరిగి error(FAILED_నిరంతరం, "reflog");
+	తిరిగి 0;
 }
 
-static int maintenance_task_odb(struct maintenance_run_opts *opts,
-				struct gc_config *cfg,
-				int keep_largest_pack,
-				int aggressive)
+స్థిర పూర్ణాంకం maintenance_task_odb(నిర్మాణం maintenance_నిరంతరం_opts *opts,
+				నిర్మాణం gc_config *cfg,
+				పూర్ణాంకం keep_అతిపెద్ద_pack,
+				పూర్ణాంకం aggressive)
 {
-	struct odb_optimize_options odb_opts = {
+	నిర్మాణం odb_optimize_options odb_opts = {
 		.strategy = ODB_OPTIMIZE_INCREMENTAL,
-		.keep_largest_pack = keep_largest_pack,
+		.keep_అతిపెద్ద_pack = keep_అతిపెద్ద_pack,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, aggressive),
 	};
 
-	if (opts->auto_flag)
+	ఒకవేళ (opts->auto_flag)
 		odb_opts.flags |= ODB_OPTIMIZE_AUTO;
-	if (!opts->quiet)
+	ఒకవేళ (!opts->quiet)
 		odb_opts.flags |= ODB_OPTIMIZE_VERBOSE;
-	if (aggressive)
+	ఒకవేళ (aggressive)
 		odb_opts.flags |= ODB_OPTIMIZE_NO_REUSE_DELTAS;
 
-	return odb_optimize(the_repository->objects, &odb_opts);
+	తిరిగి odb_optimize(the_repository->objects, &odb_opts);
 }
 
-int cmd_gc(int argc,
-	   const char **argv,
-	   const char *prefix,
-	   struct repository *repo UNUSED)
+పూర్ణాంకం cmd_gc(పూర్ణాంకం argc,
+	   స్థిరరాశి అక్షరం **argv,
+	   స్థిరరాశి అక్షరం *ఉపసర్గ,
+	   నిర్మాణం repository *repo వాడని)
 {
-	int aggressive = 0;
-	int force = 0;
-	const char *name;
+	పూర్ణాంకం aggressive = 0;
+	పూర్ణాంకం force = 0;
+	స్థిరరాశి అక్షరం *name;
 	pid_t pid;
-	int daemonized = 0;
-	int keep_largest_pack = -1;
-	int skip_foreground_tasks = 0;
+	పూర్ణాంకం daemonized = 0;
+	పూర్ణాంకం keep_అతిపెద్ద_pack = -1;
+	పూర్ణాంకం skip_foreground_tasks = 0;
 	timestamp_t dummy;
-	struct maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
-	struct gc_config cfg = GC_CONFIG_INIT;
-	const char *prune_expire_sentinel = "sentinel";
-	const char *prune_expire_arg = prune_expire_sentinel;
-	int ret;
-	struct option builtin_gc_options[] = {
+	నిర్మాణం maintenance_నిరంతరం_opts opts = MAINTENANCE_నిరంతరం_OPTS_INIT;
+	నిర్మాణం gc_config cfg = GC_CONFIG_INIT;
+	స్థిరరాశి అక్షరం *prune_expire_sentinel = "sentinel";
+	స్థిరరాశి అక్షరం *prune_expire_arg = prune_expire_sentinel;
+	పూర్ణాంకం ret;
+	నిర్మాణం option builtin_gc_options[] = {
 		OPT__QUIET(&opts.quiet, N_("suppress progress reporting")),
 		{
 			.type = OPTION_STRING,
 			.long_name = "prune",
-			.value = &prune_expire_arg,
+			.విలువ = &prune_expire_arg,
 			.argh = N_("date"),
 			.help = N_("prune unreferenced objects"),
 			.flags = PARSE_OPT_OPTARG,
 			.defval = (intptr_t)prune_expire_arg,
 		},
 		OPT_BOOL(0, "cruft", &cfg.cruft_packs, N_("pack unreferenced objects separately")),
-		OPT_UNSIGNED(0, "max-cruft-size", &cfg.max_cruft_size,
+		OPT_UNSIGNED(0, "max-cruft-size", &cfg.max_cruft_కొలత,
 			     N_("with --cruft, limit the size of new cruft packs")),
 		OPT_BOOL(0, "aggressive", &aggressive, N_("be more thorough (increased runtime)")),
 		OPT_BOOL_F(0, "auto", &opts.auto_flag, N_("enable auto-gc mode"),
@@ -603,13 +603,13 @@ int cmd_gc(int argc,
 		OPT_BOOL_F(0, "force", &force,
 			   N_("force running gc even if there may be another gc running"),
 			   PARSE_OPT_NOCOMPLETE),
-		OPT_BOOL(0, "keep-largest-pack", &keep_largest_pack,
+		OPT_BOOL(0, "keep-largest-pack", &keep_అతిపెద్ద_pack,
 			 N_("repack all other packs except the largest pack")),
-		OPT_STRING(0, "expire-to", &cfg.repack_expire_to, N_("dir"),
+		OPT_STRING(0, "expire-to", &cfg.repack_expire_గమ్యం, N_("dir"),
 			   N_("pack prefix to store a pack containing pruned objects")),
 		OPT_HIDDEN_BOOL(0, "skip-foreground-tasks", &skip_foreground_tasks,
 			   N_("skip maintenance tasks typically done in the foreground")),
-		OPT_END()
+		OPT_చివర()
 	};
 
 	show_usage_with_options_if_asked(argc, argv,
@@ -617,71 +617,71 @@ int cmd_gc(int argc,
 
 	gc_config(&cfg);
 
-	if (parse_expiry_date(cfg.gc_log_expire, &gc_log_expire_time))
+	ఒకవేళ (parse_expiry_date(cfg.gc_log_expire, &gc_log_expire_సమయం))
 		die(_("failed to parse gc.logExpiry value %s"), cfg.gc_log_expire);
 
-	if (cfg.pack_refs < 0)
+	ఒకవేళ (cfg.pack_refs < 0)
 		cfg.pack_refs = !is_bare_repository(the_repository);
 
-	argc = parse_options(argc, argv, prefix, builtin_gc_options,
+	argc = parse_options(argc, argv, ఉపసర్గ, builtin_gc_options,
 			     builtin_gc_usage, 0);
-	if (argc > 0)
+	ఒకవేళ (argc > 0)
 		usage_with_options(builtin_gc_usage, builtin_gc_options);
 
-	if (prune_expire_arg != prune_expire_sentinel) {
-		free(cfg.prune_expire);
+	ఒకవేళ (prune_expire_arg != prune_expire_sentinel) {
+		విడుదల(cfg.prune_expire);
 		cfg.prune_expire = xstrdup_or_null(prune_expire_arg);
 	}
-	if (cfg.prune_expire && parse_expiry_date(cfg.prune_expire, &dummy))
+	ఒకవేళ (cfg.prune_expire && parse_expiry_date(cfg.prune_expire, &dummy))
 		die(_("failed to parse prune expiry value %s"), cfg.prune_expire);
 
-	if (opts.auto_flag) {
-		struct odb_optimize_options optimize_opts = {
+	ఒకవేళ (opts.auto_flag) {
+		నిర్మాణం odb_optimize_options optimize_opts = {
 			.strategy = ODB_OPTIMIZE_INCREMENTAL,
 			OPTIMIZE_FIELDS_FROM_GC_CONFIG(&cfg, 0),
 		};
 
-		if (cfg.detach_auto && opts.detach < 0)
+		ఒకవేళ (cfg.detach_auto && opts.detach < 0)
 			opts.detach = 1;
 
 		/*
 		 * Auto-gc should be least intrusive as possible.
 		 */
-		if (!odb_optimize_required(the_repository->objects, &optimize_opts) ||
-		    run_hooks(the_repository, "pre-auto-gc")) {
+		ఒకవేళ (!odb_optimize_required(the_repository->objects, &optimize_opts) ||
+		    నిరంతరం_hooks(the_repository, "pre-auto-gc")) {
 			ret = 0;
-			goto out;
+			వెళ్ళు బహిర్గతం;
 		}
 
-		if (!opts.quiet) {
-			if (opts.detach > 0)
+		ఒకవేళ (!opts.quiet) {
+			ఒకవేళ (opts.detach > 0)
 				fprintf(stderr, _("Auto packing the repository in background for optimum performance.\n"));
-			else
+			లేకపోతే
 				fprintf(stderr, _("Auto packing the repository for optimum performance.\n"));
 			fprintf(stderr, _("See \"git help gc\" for manual housekeeping.\n"));
 		}
 	}
 
-	if (opts.detach > 0) {
-		ret = report_last_gc_error();
-		if (ret == 1) {
+	ఒకవేళ (opts.detach > 0) {
+		ret = report_చివరి_gc_error();
+		ఒకవేళ (ret == 1) {
 			/* Last gc --auto failed. Skip this one. */
 			ret = 0;
-			goto out;
+			వెళ్ళు బహిర్గతం;
 
-		} else if (ret) {
+		} లేకపోతే ఒకవేళ (ret) {
 			/* an I/O error occurred, already reported */
-			goto out;
+			వెళ్ళు బహిర్గతం;
 		}
 
-		if (!skip_foreground_tasks) {
-			if (lock_repo_for_gc(force, &pid)) {
+		ఒకవేళ (!skip_foreground_tasks) {
+			ఒకవేళ (తాళం_repo_for_gc(force, &pid)) {
 				ret = 0;
-				goto out;
+				వెళ్ళు బహిర్గతం;
 			}
 
-			if (gc_foreground_tasks(&opts, &cfg) < 0)
-				die(NULL);
+			ఒకవేళ (gc_foreground_tasks(&opts, &cfg) < 0)
+				die(ఖాళీ);
 			delete_tempfile(&pidfile);
 		}
 
@@ -692,475 +692,475 @@ int cmd_gc(int argc,
 		daemonized = !daemonize();
 	}
 
-	name = lock_repo_for_gc(force, &pid);
-	if (name) {
-		if (opts.auto_flag) {
+	name = తాళం_repo_for_gc(force, &pid);
+	ఒకవేళ (name) {
+		ఒకవేళ (opts.auto_flag) {
 			ret = 0;
-			goto out; /* be quiet on --auto */
+			వెళ్ళు బహిర్గతం; /* be quiet on --auto */
 		}
 
 		die(_("gc is already running on machine '%s' pid %"PRIuMAX" (use --force if not)"),
 		    name, (uintmax_t)pid);
 	}
 
-	if (daemonized) {
-		char *path = repo_git_path(the_repository, "gc.log");
-		hold_lock_file_for_update(&log_lock, path,
-					  LOCK_DIE_ON_ERROR);
-		dup2(get_lock_file_fd(&log_lock), 2);
+	ఒకవేళ (daemonized) {
+		అక్షరం *మార్గం = repo_git_మార్గం(the_repository, "gc.log");
+		hold_తాళం_file_for_update(&log_తాళం, మార్గం,
+					  తాళం_DIE_ON_ERROR);
+		dup2(get_తాళం_file_fd(&log_తాళం), 2);
 		atexit(process_log_file_at_exit);
-		free(path);
+		విడుదల(మార్గం);
 	}
 
-	if (opts.detach <= 0 && !skip_foreground_tasks)
+	ఒకవేళ (opts.detach <= 0 && !skip_foreground_tasks)
 		gc_foreground_tasks(&opts, &cfg);
 
-	if (cfg.prune_worktrees_expire &&
+	ఒకవేళ (cfg.prune_worktrees_expire &&
 	    maintenance_task_worktree_prune(&opts, &cfg))
-		die(FAILED_RUN, "worktree");
+		die(FAILED_నిరంతరం, "worktree");
 
-	if (maintenance_task_rerere_gc(&opts, &cfg))
-		die(FAILED_RUN, "rerere");
+	ఒకవేళ (maintenance_task_rerere_gc(&opts, &cfg))
+		die(FAILED_నిరంతరం, "rerere");
 
-	if (maintenance_task_odb(&opts, &cfg, keep_largest_pack, aggressive))
-		die(NULL);
+	ఒకవేళ (maintenance_task_odb(&opts, &cfg, keep_అతిపెద్ద_pack, aggressive))
+		die(ఖాళీ);
 
 	report_garbage = report_pack_garbage;
 	odb_reprepare(the_repository->objects);
-	if (pack_garbage.nr > 0) {
+	ఒకవేళ (pack_garbage.nr > 0) {
 		odb_close(the_repository->objects);
 		clean_pack_garbage();
 	}
 
-	if (the_repository->settings.gc_write_commit_graph == 1)
-		write_commit_graph_reachable(the_repository,
-					     the_repository->objects->source->path,
-					     !opts.quiet && !daemonized ? COMMIT_GRAPH_WRITE_PROGRESS : 0,
-					     NULL);
+	ఒకవేళ (the_repository->settings.gc_write_commit_లేఖాచిత్రం == 1)
+		write_commit_లేఖాచిత్రం_reachable(the_repository,
+					     the_repository->objects->ఆధారం->మార్గం,
+					     !opts.quiet && !daemonized ? COMMIT_లేఖాచిత్రం_WRITE_పురోగతి : 0,
+					     ఖాళీ);
 
-	if (!daemonized) {
-		char *path = repo_git_path(the_repository, "gc.log");
-		unlink(path);
-		free(path);
+	ఒకవేళ (!daemonized) {
+		అక్షరం *మార్గం = repo_git_మార్గం(the_repository, "gc.log");
+		unlink(మార్గం);
+		విడుదల(మార్గం);
 	}
 
-out:
-	maintenance_run_opts_release(&opts);
+బహిర్గతం:
+	maintenance_నిరంతరం_opts_release(&opts);
 	gc_config_release(&cfg);
-	return 0;
+	తిరిగి 0;
 }
 
-static const char *const builtin_maintenance_run_usage[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి builtin_maintenance_నిరంతరం_usage[] = {
 	N_("git maintenance run [--auto] [--[no-]quiet] [--task=<task>] [--schedule]"),
-	NULL
+	ఖాళీ
 };
 
-static int maintenance_opt_schedule(const struct option *opt, const char *arg,
-				    int unset)
+స్థిర పూర్ణాంకం maintenance_opt_కాలపట్టిక(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg,
+				    పూర్ణాంకం unset)
 {
-	enum schedule_priority *priority = opt->value;
+	గణన కాలపట్టిక_ప్రాధాన్యత *ప్రాధాన్యత = opt->విలువ;
 
-	if (unset)
+	ఒకవేళ (unset)
 		die(_("--no-schedule is not allowed"));
 
-	*priority = parse_schedule(arg);
+	*ప్రాధాన్యత = parse_కాలపట్టిక(arg);
 
-	if (!*priority)
+	ఒకవేళ (!*ప్రాధాన్యత)
 		die(_("unrecognized --schedule argument '%s'"), arg);
 
-	return 0;
+	తిరిగి 0;
 }
 
-struct cg_auto_data {
-	int num_not_in_graph;
-	int limit;
+నిర్మాణం cg_auto_దత్తాంశం {
+	పూర్ణాంకం అంకె_not_లోపల_లేఖాచిత్రం;
+	పూర్ణాంకం హద్దు;
 };
 
-static int dfs_on_ref(const struct reference *ref, void *cb_data)
+స్థిర పూర్ణాంకం dfs_on_ref(స్థిరరాశి నిర్మాణం reference *ref, శూన్య *cb_దత్తాంశం)
 {
-	struct cg_auto_data *data = (struct cg_auto_data *)cb_data;
-	int result = 0;
-	const struct object_id *maybe_peeled = ref->oid;
-	struct object_id peeled;
-	struct commit_list *stack = NULL;
-	struct commit *commit;
+	నిర్మాణం cg_auto_దత్తాంశం *దత్తాంశం = (నిర్మాణం cg_auto_దత్తాంశం *)cb_దత్తాంశం;
+	పూర్ణాంకం ఫలితం = 0;
+	స్థిరరాశి నిర్మాణం object_id *maybe_peeled = ref->oid;
+	నిర్మాణం object_id peeled;
+	నిర్మాణం commit_list *దొంతర = ఖాళీ;
+	నిర్మాణం commit *commit;
 
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled))
+	ఒకవేళ (!reference_get_peeled_oid(the_repository, ref, &peeled))
 		maybe_peeled = &peeled;
-	if (odb_read_object_info(the_repository->objects, maybe_peeled, NULL) != OBJ_COMMIT)
-		return 0;
+	ఒకవేళ (odb_read_object_info(the_repository->objects, maybe_peeled, ఖాళీ) != OBJ_COMMIT)
+		తిరిగి 0;
 
 	commit = lookup_commit(the_repository, maybe_peeled);
-	if (!commit || commit->object.flags & SEEN)
-		return 0;
-	commit->object.flags |= SEEN;
+	ఒకవేళ (!commit || commit->object.flags & చూసిన_2)
+		తిరిగి 0;
+	commit->object.flags |= చూసిన_2;
 
-	if (repo_parse_commit(the_repository, commit) ||
-	    commit_graph_position(commit) != COMMIT_NOT_FROM_GRAPH)
-		return 0;
+	ఒకవేళ (repo_parse_commit(the_repository, commit) ||
+	    commit_లేఖాచిత్రం_position(commit) != COMMIT_NOT_FROM_లేఖాచిత్రం)
+		తిరిగి 0;
 
-	data->num_not_in_graph++;
+	దత్తాంశం->అంకె_not_లోపల_లేఖాచిత్రం++;
 
-	if (data->num_not_in_graph >= data->limit)
-		return 1;
+	ఒకవేళ (దత్తాంశం->అంకె_not_లోపల_లేఖాచిత్రం >= దత్తాంశం->హద్దు)
+		తిరిగి 1;
 
-	commit_list_insert(commit, &stack);
+	commit_list_చొప్పించు(commit, &దొంతర);
 
-	while (!result && stack) {
-		struct commit_list *parent;
+	అయితే (!ఫలితం && దొంతర) {
+		నిర్మాణం commit_list *మాతృ;
 
-		commit = pop_commit(&stack);
+		commit = తీయి_commit(&దొంతర);
 
-		for (parent = commit->parents; parent; parent = parent->next) {
-			if (repo_parse_commit(the_repository, parent->item) ||
-			    commit_graph_position(parent->item) != COMMIT_NOT_FROM_GRAPH ||
-			    parent->item->object.flags & SEEN)
-				continue;
+		కొరకు (మాతృ = commit->parents; మాతృ; మాతృ = మాతృ->తదుపరి) {
+			ఒకవేళ (repo_parse_commit(the_repository, మాతృ->అంశం) ||
+			    commit_లేఖాచిత్రం_position(మాతృ->అంశం) != COMMIT_NOT_FROM_లేఖాచిత్రం ||
+			    మాతృ->అంశం->object.flags & చూసిన_2)
+				కొనసాగు;
 
-			parent->item->object.flags |= SEEN;
-			data->num_not_in_graph++;
+			మాతృ->అంశం->object.flags |= చూసిన_2;
+			దత్తాంశం->అంకె_not_లోపల_లేఖాచిత్రం++;
 
-			if (data->num_not_in_graph >= data->limit) {
-				result = 1;
-				break;
+			ఒకవేళ (దత్తాంశం->అంకె_not_లోపల_లేఖాచిత్రం >= దత్తాంశం->హద్దు) {
+				ఫలితం = 1;
+				ఆపు;
 			}
 
-			commit_list_insert(parent->item, &stack);
+			commit_list_చొప్పించు(మాతృ->అంశం, &దొంతర);
 		}
 	}
 
-	commit_list_free(stack);
-	return result;
+	commit_list_free(దొంతర);
+	తిరిగి ఫలితం;
 }
 
-static int should_write_commit_graph(struct gc_config *cfg UNUSED)
+స్థిర పూర్ణాంకం should_write_commit_లేఖాచిత్రం(నిర్మాణం gc_config *cfg వాడని)
 {
-	int result;
-	struct cg_auto_data data;
+	పూర్ణాంకం ఫలితం;
+	నిర్మాణం cg_auto_దత్తాంశం దత్తాంశం;
 
-	data.num_not_in_graph = 0;
-	data.limit = 100;
+	దత్తాంశం.అంకె_not_లోపల_లేఖాచిత్రం = 0;
+	దత్తాంశం.హద్దు = 100;
 	repo_config_get_int(the_repository, "maintenance.commit-graph.auto",
-			    &data.limit);
+			    &దత్తాంశం.హద్దు);
 
-	if (!data.limit)
-		return 0;
-	if (data.limit < 0)
-		return 1;
+	ఒకవేళ (!దత్తాంశం.హద్దు)
+		తిరిగి 0;
+	ఒకవేళ (దత్తాంశం.హద్దు < 0)
+		తిరిగి 1;
 
-	result = refs_for_each_ref(get_main_ref_store(the_repository),
-				   dfs_on_ref, &data);
+	ఫలితం = refs_for_each_ref(get_main_ref_store(the_repository),
+				   dfs_on_ref, &దత్తాంశం);
 
-	repo_clear_commit_marks(the_repository, SEEN);
+	repo_clear_commit_marks(the_repository, చూసిన_2);
 
-	return result;
+	తిరిగి ఫలితం;
 }
 
-static int run_write_commit_graph(struct maintenance_run_opts *opts)
+స్థిర పూర్ణాంకం నిరంతరం_write_commit_లేఖాచిత్రం(నిర్మాణం maintenance_నిరంతరం_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process బిడ్డ = బిడ్డ_PROCESS_INIT;
 
-	child.git_cmd = 1;
-	child.odb_to_close = the_repository->objects;
-	strvec_pushl(&child.args, "commit-graph", "write",
-		     "--split", "--reachable", NULL);
+	బిడ్డ.git_cmd = 1;
+	బిడ్డ.odb_గమ్యం_close = the_repository->objects;
+	strvec_pushl(&బిడ్డ.వాదనలు, "commit-graph", "write",
+		     "--split", "--reachable", ఖాళీ);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
-	else
-		strvec_push(&child.args, "--progress");
+	ఒకవేళ (opts->quiet)
+		strvec_నెట్టు(&బిడ్డ.వాదనలు, "--no-progress");
+	లేకపోతే
+		strvec_నెట్టు(&బిడ్డ.వాదనలు, "--progress");
 
-	return !!run_command(&child);
+	తిరిగి !!నిరంతరం_command(&బిడ్డ);
 }
 
-static int maintenance_task_commit_graph(struct maintenance_run_opts *opts,
-					 struct gc_config *cfg UNUSED)
+స్థిర పూర్ణాంకం maintenance_task_commit_లేఖాచిత్రం(నిర్మాణం maintenance_నిరంతరం_opts *opts,
+					 నిర్మాణం gc_config *cfg వాడని)
 {
 	prepare_repo_settings(the_repository);
-	if (!the_repository->settings.core_commit_graph)
-		return 0;
+	ఒకవేళ (!the_repository->settings.core_commit_లేఖాచిత్రం)
+		తిరిగి 0;
 
-	if (run_write_commit_graph(opts)) {
+	ఒకవేళ (నిరంతరం_write_commit_లేఖాచిత్రం(opts)) {
 		error(_("failed to write commit-graph"));
-		return 1;
+		తిరిగి 1;
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int fetch_remote(struct remote *remote, void *cbdata)
+స్థిర పూర్ణాంకం fetch_remote(నిర్మాణం remote *remote, శూన్య *cbdata)
 {
-	struct maintenance_run_opts *opts = cbdata;
-	struct child_process child = CHILD_PROCESS_INIT;
+	నిర్మాణం maintenance_నిరంతరం_opts *opts = cbdata;
+	నిర్మాణం బిడ్డ_process బిడ్డ = బిడ్డ_PROCESS_INIT;
 
-	if (remote->skip_default_update)
-		return 0;
+	ఒకవేళ (remote->skip_default_update)
+		తిరిగి 0;
 
-	child.git_cmd = 1;
-	strvec_pushl(&child.args, "fetch", remote->name,
+	బిడ్డ.git_cmd = 1;
+	strvec_pushl(&బిడ్డ.వాదనలు, "fetch", remote->name,
 		     "--prefetch", "--prune", "--no-tags",
 		     "--no-write-fetch-head", "--recurse-submodules=no",
-		     NULL);
+		     ఖాళీ);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--quiet");
+	ఒకవేళ (opts->quiet)
+		strvec_నెట్టు(&బిడ్డ.వాదనలు, "--quiet");
 
-	return !!run_command(&child);
+	తిరిగి !!నిరంతరం_command(&బిడ్డ);
 }
 
-static int maintenance_task_prefetch(struct maintenance_run_opts *opts,
-				     struct gc_config *cfg UNUSED)
+స్థిర పూర్ణాంకం maintenance_task_prefetch(నిర్మాణం maintenance_నిరంతరం_opts *opts,
+				     నిర్మాణం gc_config *cfg వాడని)
 {
-	if (for_each_remote(fetch_remote, opts)) {
+	ఒకవేళ (for_each_remote(fetch_remote, opts)) {
 		error(_("failed to prefetch remotes"));
-		return 1;
+		తిరిగి 1;
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int maintenance_task_gc_foreground(struct maintenance_run_opts *opts,
-					  struct gc_config *cfg)
+స్థిర పూర్ణాంకం maintenance_task_gc_foreground(నిర్మాణం maintenance_నిరంతరం_opts *opts,
+					  నిర్మాణం gc_config *cfg)
 {
-	return gc_foreground_tasks(opts, cfg);
+	తిరిగి gc_foreground_tasks(opts, cfg);
 }
 
-static int maintenance_task_gc_background(struct maintenance_run_opts *opts,
-					  struct gc_config *cfg UNUSED)
+స్థిర పూర్ణాంకం maintenance_task_gc_background(నిర్మాణం maintenance_నిరంతరం_opts *opts,
+					  నిర్మాణం gc_config *cfg వాడని)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process బిడ్డ = బిడ్డ_PROCESS_INIT;
 
-	child.git_cmd = 1;
-	child.odb_to_close = the_repository->objects;
-	strvec_push(&child.args, "gc");
+	బిడ్డ.git_cmd = 1;
+	బిడ్డ.odb_గమ్యం_close = the_repository->objects;
+	strvec_నెట్టు(&బిడ్డ.వాదనలు, "gc");
 
-	if (opts->auto_flag)
-		strvec_push(&child.args, "--auto");
-	if (opts->quiet)
-		strvec_push(&child.args, "--quiet");
-	else
-		strvec_push(&child.args, "--no-quiet");
-	strvec_push(&child.args, "--no-detach");
-	strvec_push(&child.args, "--skip-foreground-tasks");
+	ఒకవేళ (opts->auto_flag)
+		strvec_నెట్టు(&బిడ్డ.వాదనలు, "--auto");
+	ఒకవేళ (opts->quiet)
+		strvec_నెట్టు(&బిడ్డ.వాదనలు, "--quiet");
+	లేకపోతే
+		strvec_నెట్టు(&బిడ్డ.వాదనలు, "--no-quiet");
+	strvec_నెట్టు(&బిడ్డ.వాదనలు, "--no-detach");
+	strvec_నెట్టు(&బిడ్డ.వాదనలు, "--skip-foreground-tasks");
 
-	return run_command(&child);
+	తిరిగి నిరంతరం_command(&బిడ్డ);
 }
 
-static int gc_condition(struct gc_config *cfg)
+స్థిర పూర్ణాంకం gc_condition(నిర్మాణం gc_config *cfg)
 {
-	struct odb_optimize_options opts = {
+	నిర్మాణం odb_optimize_options opts = {
 		.strategy = ODB_OPTIMIZE_INCREMENTAL,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, 0),
 	};
-	return odb_optimize_required(the_repository->objects, &opts);
+	తిరిగి odb_optimize_required(the_repository->objects, &opts);
 }
 
-static int prune_packed(struct maintenance_run_opts *opts)
+స్థిర పూర్ణాంకం prune_packed(నిర్మాణం maintenance_నిరంతరం_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process బిడ్డ = బిడ్డ_PROCESS_INIT;
 
-	child.git_cmd = 1;
-	strvec_push(&child.args, "prune-packed");
+	బిడ్డ.git_cmd = 1;
+	strvec_నెట్టు(&బిడ్డ.వాదనలు, "prune-packed");
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--quiet");
+	ఒకవేళ (opts->quiet)
+		strvec_నెట్టు(&బిడ్డ.వాదనలు, "--quiet");
 
-	return !!run_command(&child);
+	తిరిగి !!నిరంతరం_command(&బిడ్డ);
 }
 
-struct write_loose_object_data {
-	FILE *in;
-	int count;
-	int batch_size;
+నిర్మాణం write_loose_object_దత్తాంశం {
+	FILE *లోపల;
+	పూర్ణాంకం లెక్క;
+	పూర్ణాంకం batch_కొలత;
 };
 
-static int loose_object_auto_limit = 100;
+స్థిర పూర్ణాంకం loose_object_auto_హద్దు = 100;
 
-static int loose_object_count(const struct object_id *oid UNUSED,
-			      const char *path UNUSED,
-			      void *data)
+స్థిర పూర్ణాంకం loose_object_లెక్క(స్థిరరాశి నిర్మాణం object_id *oid వాడని,
+			      స్థిరరాశి అక్షరం *మార్గం వాడని,
+			      శూన్య *దత్తాంశం)
 {
-	int *count = (int*)data;
-	if (++(*count) >= loose_object_auto_limit)
-		return 1;
-	return 0;
+	పూర్ణాంకం *లెక్క = (పూర్ణాంకం*)దత్తాంశం;
+	ఒకవేళ (++(*లెక్క) >= loose_object_auto_హద్దు)
+		తిరిగి 1;
+	తిరిగి 0;
 }
 
-static int loose_object_auto_condition(struct gc_config *cfg UNUSED)
+స్థిర పూర్ణాంకం loose_object_auto_condition(నిర్మాణం gc_config *cfg వాడని)
 {
-	int count = 0;
+	పూర్ణాంకం లెక్క = 0;
 
 	repo_config_get_int(the_repository, "maintenance.loose-objects.auto",
-			    &loose_object_auto_limit);
+			    &loose_object_auto_హద్దు);
 
-	if (!loose_object_auto_limit)
-		return 0;
-	if (loose_object_auto_limit < 0)
-		return 1;
+	ఒకవేళ (!loose_object_auto_హద్దు)
+		తిరిగి 0;
+	ఒకవేళ (loose_object_auto_హద్దు < 0)
+		తిరిగి 1;
 
-	return for_each_loose_file_in_source(the_repository->objects->source,
-					     loose_object_count,
-					     NULL, NULL, &count);
+	తిరిగి for_each_loose_file_లోపల_ఆధారం(the_repository->objects->ఆధారం,
+					     loose_object_లెక్క,
+					     ఖాళీ, ఖాళీ, &లెక్క);
 }
 
-static int bail_on_loose(const struct object_id *oid UNUSED,
-			 const char *path UNUSED,
-			 void *data UNUSED)
+స్థిర పూర్ణాంకం bail_on_loose(స్థిరరాశి నిర్మాణం object_id *oid వాడని,
+			 స్థిరరాశి అక్షరం *మార్గం వాడని,
+			 శూన్య *దత్తాంశం వాడని)
 {
-	return 1;
+	తిరిగి 1;
 }
 
-static int write_loose_object_to_stdin(const struct object_id *oid,
-				       const char *path UNUSED,
-				       void *data)
+స్థిర పూర్ణాంకం write_loose_object_గమ్యం_stdin(స్థిరరాశి నిర్మాణం object_id *oid,
+				       స్థిరరాశి అక్షరం *మార్గం వాడని,
+				       శూన్య *దత్తాంశం)
 {
-	struct write_loose_object_data *d = (struct write_loose_object_data *)data;
+	నిర్మాణం write_loose_object_దత్తాంశం *d = (నిర్మాణం write_loose_object_దత్తాంశం *)దత్తాంశం;
 
-	fprintf(d->in, "%s\n", oid_to_hex(oid));
+	fprintf(d->లోపల, "%s\n", oid_గమ్యం_hex(oid));
 
 	/* If batch_size is INT_MAX, then this will return 0 always. */
-	return ++(d->count) > d->batch_size;
+	తిరిగి ++(d->లెక్క) > d->batch_కొలత;
 }
 
-static int pack_loose(struct maintenance_run_opts *opts)
+స్థిర పూర్ణాంకం pack_loose(నిర్మాణం maintenance_నిరంతరం_opts *opts)
 {
-	struct repository *r = the_repository;
-	int result = 0;
-	struct write_loose_object_data data;
-	struct child_process pack_proc = CHILD_PROCESS_INIT;
+	నిర్మాణం repository *r = the_repository;
+	పూర్ణాంకం ఫలితం = 0;
+	నిర్మాణం write_loose_object_దత్తాంశం దత్తాంశం;
+	నిర్మాణం బిడ్డ_process pack_proc = బిడ్డ_PROCESS_INIT;
 
 	/*
 	 * Do not start pack-objects process
 	 * if there are no loose objects.
 	 */
-	if (!for_each_loose_file_in_source(r->objects->source,
+	ఒకవేళ (!for_each_loose_file_లోపల_ఆధారం(r->objects->ఆధారం,
 					   bail_on_loose,
-					   NULL, NULL, NULL))
-		return 0;
+					   ఖాళీ, ఖాళీ, ఖాళీ))
+		తిరిగి 0;
 
 	pack_proc.git_cmd = 1;
 
-	strvec_push(&pack_proc.args, "pack-objects");
-	if (opts->quiet)
-		strvec_push(&pack_proc.args, "--quiet");
-	else
-		strvec_push(&pack_proc.args, "--no-quiet");
-	strvec_pushf(&pack_proc.args, "%s/pack/loose", r->objects->source->path);
+	strvec_నెట్టు(&pack_proc.వాదనలు, "pack-objects");
+	ఒకవేళ (opts->quiet)
+		strvec_నెట్టు(&pack_proc.వాదనలు, "--quiet");
+	లేకపోతే
+		strvec_నెట్టు(&pack_proc.వాదనలు, "--no-quiet");
+	strvec_pushf(&pack_proc.వాదనలు, "%s/pack/loose", r->objects->ఆధారం->మార్గం);
 
-	pack_proc.in = -1;
+	pack_proc.లోపల = -1;
 
 	/*
 	 * git-pack-objects(1) ends up writing the pack hash to stdout, which
 	 * we do not care for.
 	 */
-	pack_proc.out = -1;
+	pack_proc.బహిర్గతం = -1;
 
-	if (start_command(&pack_proc)) {
+	ఒకవేళ (ప్రారంభం_command(&pack_proc)) {
 		error(_("failed to start 'git pack-objects' process"));
-		return 1;
+		తిరిగి 1;
 	}
 
-	data.in = xfdopen(pack_proc.in, "w");
-	data.count = 0;
-	data.batch_size = 50000;
+	దత్తాంశం.లోపల = xfdopen(pack_proc.లోపల, "w");
+	దత్తాంశం.లెక్క = 0;
+	దత్తాంశం.batch_కొలత = 50000;
 
 	repo_config_get_int(r, "maintenance.loose-objects.batchSize",
-			    &data.batch_size);
+			    &దత్తాంశం.batch_కొలత);
 
 	/* If configured as 0, then remove limit. */
-	if (!data.batch_size)
-		data.batch_size = INT_MAX;
-	else if (data.batch_size > 0)
-		data.batch_size--; /* Decrease for equality on limit. */
+	ఒకవేళ (!దత్తాంశం.batch_కొలత)
+		దత్తాంశం.batch_కొలత = గరిష్ఠ_పూర్ణాంకం;
+	లేకపోతే ఒకవేళ (దత్తాంశం.batch_కొలత > 0)
+		దత్తాంశం.batch_కొలత--; /* Decrease for equality on limit. */
 
-	for_each_loose_file_in_source(r->objects->source,
-				      write_loose_object_to_stdin,
-				      NULL, NULL, &data);
+	for_each_loose_file_లోపల_ఆధారం(r->objects->ఆధారం,
+				      write_loose_object_గమ్యం_stdin,
+				      ఖాళీ, ఖాళీ, &దత్తాంశం);
 
-	fclose(data.in);
+	fclose(దత్తాంశం.లోపల);
 
-	if (finish_command(&pack_proc)) {
+	ఒకవేళ (ముగింపు_command(&pack_proc)) {
 		error(_("failed to finish 'git pack-objects' process"));
-		result = 1;
+		ఫలితం = 1;
 	}
 
-	return result;
+	తిరిగి ఫలితం;
 }
 
-static int maintenance_task_loose_objects(struct maintenance_run_opts *opts,
-					  struct gc_config *cfg UNUSED)
+స్థిర పూర్ణాంకం maintenance_task_loose_objects(నిర్మాణం maintenance_నిరంతరం_opts *opts,
+					  నిర్మాణం gc_config *cfg వాడని)
 {
-	return prune_packed(opts) || pack_loose(opts);
+	తిరిగి prune_packed(opts) || pack_loose(opts);
 }
 
-static int incremental_repack_auto_condition(struct gc_config *cfg UNUSED)
+స్థిర పూర్ణాంకం incremental_repack_auto_condition(నిర్మాణం gc_config *cfg వాడని)
 {
-	struct packed_git *p;
-	int incremental_repack_auto_limit = 10;
-	int count = 0;
+	నిర్మాణం packed_git *p;
+	పూర్ణాంకం incremental_repack_auto_హద్దు = 10;
+	పూర్ణాంకం లెక్క = 0;
 
 	prepare_repo_settings(the_repository);
-	if (!the_repository->settings.core_multi_pack_index)
-		return 0;
+	ఒకవేళ (!the_repository->settings.core_multi_pack_సూచీ)
+		తిరిగి 0;
 
 	repo_config_get_int(the_repository, "maintenance.incremental-repack.auto",
-			    &incremental_repack_auto_limit);
+			    &incremental_repack_auto_హద్దు);
 
-	if (!incremental_repack_auto_limit)
-		return 0;
-	if (incremental_repack_auto_limit < 0)
-		return 1;
+	ఒకవేళ (!incremental_repack_auto_హద్దు)
+		తిరిగి 0;
+	ఒకవేళ (incremental_repack_auto_హద్దు < 0)
+		తిరిగి 1;
 
 	repo_for_each_pack(the_repository, p) {
-		if (count >= incremental_repack_auto_limit)
-			break;
-		if (!p->multi_pack_index)
-			count++;
+		ఒకవేళ (లెక్క >= incremental_repack_auto_హద్దు)
+			ఆపు;
+		ఒకవేళ (!p->multi_pack_సూచీ)
+			లెక్క++;
 	}
 
-	return count >= incremental_repack_auto_limit;
+	తిరిగి లెక్క >= incremental_repack_auto_హద్దు;
 }
 
-static int multi_pack_index_write(struct maintenance_run_opts *opts)
+స్థిర పూర్ణాంకం multi_pack_సూచీ_write(నిర్మాణం maintenance_నిరంతరం_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process బిడ్డ = బిడ్డ_PROCESS_INIT;
 
-	child.git_cmd = 1;
-	strvec_pushl(&child.args, "multi-pack-index", "write", NULL);
+	బిడ్డ.git_cmd = 1;
+	strvec_pushl(&బిడ్డ.వాదనలు, "multi-pack-index", "write", ఖాళీ);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
-	else
-		strvec_push(&child.args, "--progress");
+	ఒకవేళ (opts->quiet)
+		strvec_నెట్టు(&బిడ్డ.వాదనలు, "--no-progress");
+	లేకపోతే
+		strvec_నెట్టు(&బిడ్డ.వాదనలు, "--progress");
 
-	if (run_command(&child))
-		return error(_("failed to write multi-pack-index"));
+	ఒకవేళ (నిరంతరం_command(&బిడ్డ))
+		తిరిగి error(_("failed to write multi-pack-index"));
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int multi_pack_index_expire(struct maintenance_run_opts *opts)
+స్థిర పూర్ణాంకం multi_pack_సూచీ_expire(నిర్మాణం maintenance_నిరంతరం_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process బిడ్డ = బిడ్డ_PROCESS_INIT;
 
-	child.git_cmd = 1;
-	child.odb_to_close = the_repository->objects;
-	strvec_pushl(&child.args, "multi-pack-index", "expire", NULL);
+	బిడ్డ.git_cmd = 1;
+	బిడ్డ.odb_గమ్యం_close = the_repository->objects;
+	strvec_pushl(&బిడ్డ.వాదనలు, "multi-pack-index", "expire", ఖాళీ);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
-	else
-		strvec_push(&child.args, "--progress");
+	ఒకవేళ (opts->quiet)
+		strvec_నెట్టు(&బిడ్డ.వాదనలు, "--no-progress");
+	లేకపోతే
+		strvec_నెట్టు(&బిడ్డ.వాదనలు, "--progress");
 
-	if (run_command(&child))
-		return error(_("'git multi-pack-index expire' failed"));
+	ఒకవేళ (నిరంతరం_command(&బిడ్డ))
+		తిరిగి error(_("'git multi-pack-index expire' failed"));
 
-	return 0;
+	తిరిగి 0;
 }
 
-#define TWO_GIGABYTES (INT32_MAX)
+#నిర్వచించు TWO_GIGABYTES (INT32_MAX)
 
-static off_t get_auto_pack_size(void)
+స్థిర off_t get_auto_pack_కొలత(శూన్య)
 {
 	/*
 	 * The "auto" value is special: we optimize for
@@ -1174,99 +1174,99 @@ static off_t get_auto_pack_size(void)
 	 * at least two packs if there are three or more
 	 * packs.
 	 */
-	off_t max_size = 0;
-	off_t second_largest_size = 0;
-	off_t result_size;
-	struct packed_git *p;
-	struct repository *r = the_repository;
+	off_t max_కొలత = 0;
+	off_t రెండవ_అతిపెద్ద_కొలత = 0;
+	off_t ఫలితం_కొలత;
+	నిర్మాణం packed_git *p;
+	నిర్మాణం repository *r = the_repository;
 
 	odb_reprepare(r->objects);
 	repo_for_each_pack(r, p) {
-		if (p->pack_size > max_size) {
-			second_largest_size = max_size;
-			max_size = p->pack_size;
-		} else if (p->pack_size > second_largest_size)
-			second_largest_size = p->pack_size;
+		ఒకవేళ (p->pack_కొలత > max_కొలత) {
+			రెండవ_అతిపెద్ద_కొలత = max_కొలత;
+			max_కొలత = p->pack_కొలత;
+		} లేకపోతే ఒకవేళ (p->pack_కొలత > రెండవ_అతిపెద్ద_కొలత)
+			రెండవ_అతిపెద్ద_కొలత = p->pack_కొలత;
 	}
 
-	result_size = second_largest_size + 1;
+	ఫలితం_కొలత = రెండవ_అతిపెద్ద_కొలత + 1;
 
 	/* But limit ourselves to a batch size of 2g */
-	if (result_size > TWO_GIGABYTES)
-		result_size = TWO_GIGABYTES;
+	ఒకవేళ (ఫలితం_కొలత > TWO_GIGABYTES)
+		ఫలితం_కొలత = TWO_GIGABYTES;
 
-	return result_size;
+	తిరిగి ఫలితం_కొలత;
 }
 
-static int multi_pack_index_repack(struct maintenance_run_opts *opts)
+స్థిర పూర్ణాంకం multi_pack_సూచీ_repack(నిర్మాణం maintenance_నిరంతరం_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process బిడ్డ = బిడ్డ_PROCESS_INIT;
 
-	child.git_cmd = 1;
-	child.odb_to_close = the_repository->objects;
-	strvec_pushl(&child.args, "multi-pack-index", "repack", NULL);
+	బిడ్డ.git_cmd = 1;
+	బిడ్డ.odb_గమ్యం_close = the_repository->objects;
+	strvec_pushl(&బిడ్డ.వాదనలు, "multi-pack-index", "repack", ఖాళీ);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
-	else
-		strvec_push(&child.args, "--progress");
+	ఒకవేళ (opts->quiet)
+		strvec_నెట్టు(&బిడ్డ.వాదనలు, "--no-progress");
+	లేకపోతే
+		strvec_నెట్టు(&బిడ్డ.వాదనలు, "--progress");
 
-	strvec_pushf(&child.args, "--batch-size=%"PRIuMAX,
-				  (uintmax_t)get_auto_pack_size());
+	strvec_pushf(&బిడ్డ.వాదనలు, "--batch-size=%"PRIuMAX,
+				  (uintmax_t)get_auto_pack_కొలత());
 
-	if (run_command(&child))
-		return error(_("'git multi-pack-index repack' failed"));
+	ఒకవేళ (నిరంతరం_command(&బిడ్డ))
+		తిరిగి error(_("'git multi-pack-index repack' failed"));
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int maintenance_task_incremental_repack(struct maintenance_run_opts *opts,
-					       struct gc_config *cfg UNUSED)
+స్థిర పూర్ణాంకం maintenance_task_incremental_repack(నిర్మాణం maintenance_నిరంతరం_opts *opts,
+					       నిర్మాణం gc_config *cfg వాడని)
 {
 	prepare_repo_settings(the_repository);
-	if (!the_repository->settings.core_multi_pack_index) {
+	ఒకవేళ (!the_repository->settings.core_multi_pack_సూచీ) {
 		warning(_("skipping incremental-repack task because core.multiPackIndex is disabled"));
-		return 0;
+		తిరిగి 0;
 	}
 
-	if (multi_pack_index_write(opts))
-		return 1;
-	if (multi_pack_index_expire(opts))
-		return 1;
-	if (multi_pack_index_repack(opts))
-		return 1;
-	return 0;
+	ఒకవేళ (multi_pack_సూచీ_write(opts))
+		తిరిగి 1;
+	ఒకవేళ (multi_pack_సూచీ_expire(opts))
+		తిరిగి 1;
+	ఒకవేళ (multi_pack_సూచీ_repack(opts))
+		తిరిగి 1;
+	తిరిగి 0;
 }
 
-static int maintenance_task_geometric_repack(struct maintenance_run_opts *opts,
-					     struct gc_config *cfg)
+స్థిర పూర్ణాంకం maintenance_task_geometric_repack(నిర్మాణం maintenance_నిరంతరం_opts *opts,
+					     నిర్మాణం gc_config *cfg)
 {
-	struct odb_optimize_options odb_opts = {
+	నిర్మాణం odb_optimize_options odb_opts = {
 		.strategy = ODB_OPTIMIZE_GEOMETRIC,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, 0),
 	};
 
-	if (!opts->quiet)
+	ఒకవేళ (!opts->quiet)
 		odb_opts.flags |= ODB_OPTIMIZE_VERBOSE;
 
-	return odb_optimize(the_repository->objects, &odb_opts);
+	తిరిగి odb_optimize(the_repository->objects, &odb_opts);
 }
 
-static int geometric_repack_auto_condition(struct gc_config *cfg)
+స్థిర పూర్ణాంకం geometric_repack_auto_condition(నిర్మాణం gc_config *cfg)
 {
-	struct odb_optimize_options opts = {
+	నిర్మాణం odb_optimize_options opts = {
 		.strategy = ODB_OPTIMIZE_GEOMETRIC,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, 0),
 	};
-	return odb_optimize_required(the_repository->objects, &opts);
+	తిరిగి odb_optimize_required(the_repository->objects, &opts);
 }
 
-typedef int (*maintenance_task_fn)(struct maintenance_run_opts *opts,
-				   struct gc_config *cfg);
-typedef int (*maintenance_auto_fn)(struct gc_config *cfg);
+రకనిర్వచనం పూర్ణాంకం (*maintenance_task_fn)(నిర్మాణం maintenance_నిరంతరం_opts *opts,
+				   నిర్మాణం gc_config *cfg);
+రకనిర్వచనం పూర్ణాంకం (*maintenance_auto_fn)(నిర్మాణం gc_config *cfg);
 
-struct maintenance_task {
-	const char *name;
+నిర్మాణం maintenance_task {
+	స్థిరరాశి అక్షరం *name;
 
 	/*
 	 * Work that will be executed before detaching. This should not include
@@ -1288,7 +1288,7 @@ struct maintenance_task {
 	maintenance_auto_fn auto_condition;
 };
 
-static const struct maintenance_task tasks[] = {
+స్థిర స్థిరరాశి నిర్మాణం maintenance_task tasks[] = {
 	[TASK_PREFETCH] = {
 		.name = "prefetch",
 		.background = maintenance_task_prefetch,
@@ -1314,10 +1314,10 @@ static const struct maintenance_task tasks[] = {
 		.background = maintenance_task_gc_background,
 		.auto_condition = gc_condition,
 	},
-	[TASK_COMMIT_GRAPH] = {
+	[TASK_COMMIT_లేఖాచిత్రం] = {
 		.name = "commit-graph",
-		.background = maintenance_task_commit_graph,
-		.auto_condition = should_write_commit_graph,
+		.background = maintenance_task_commit_లేఖాచిత్రం,
+		.auto_condition = should_write_commit_లేఖాచిత్రం,
 	},
 	[TASK_PACK_REFS] = {
 		.name = "pack-refs",
@@ -1341,65 +1341,65 @@ static const struct maintenance_task tasks[] = {
 	},
 };
 
-enum task_phase {
+గణన task_phase {
 	TASK_PHASE_FOREGROUND,
 	TASK_PHASE_BACKGROUND,
 };
 
-enum auto_gc_hook_result {
+గణన auto_gc_hook_ఫలితం {
 	AUTO_GC_HOOK_UNDECIDED = 0,
-	AUTO_GC_HOOK_RUN = 1,
+	AUTO_GC_HOOK_నిరంతరం = 1,
 	AUTO_GC_HOOK_SKIP = 2,
 };
 
-static int maybe_run_task(const struct maintenance_task *task,
-			  struct repository *repo,
-			  struct maintenance_run_opts *opts,
-			  struct gc_config *cfg,
-			  enum task_phase phase,
-			  enum auto_gc_hook_result *auto_gc_hook_result)
+స్థిర పూర్ణాంకం maybe_నిరంతరం_task(స్థిరరాశి నిర్మాణం maintenance_task *task,
+			  నిర్మాణం repository *repo,
+			  నిర్మాణం maintenance_నిరంతరం_opts *opts,
+			  నిర్మాణం gc_config *cfg,
+			  గణన task_phase phase,
+			  గణన auto_gc_hook_ఫలితం *auto_gc_hook_ఫలితం)
 {
-	int foreground = (phase == TASK_PHASE_FOREGROUND);
+	పూర్ణాంకం foreground = (phase == TASK_PHASE_FOREGROUND);
 	maintenance_task_fn fn = foreground ? task->foreground : task->background;
-	const char *region = foreground ? "maintenance foreground" : "maintenance";
-	int ret = 0;
+	స్థిరరాశి అక్షరం *region = foreground ? "maintenance foreground" : "maintenance";
+	పూర్ణాంకం ret = 0;
 
-	if (!fn)
-		return 0;
-	if (opts->auto_flag) {
-		if (*auto_gc_hook_result == AUTO_GC_HOOK_SKIP)
-			return 0;
+	ఒకవేళ (!fn)
+		తిరిగి 0;
+	ఒకవేళ (opts->auto_flag) {
+		ఒకవేళ (*auto_gc_hook_ఫలితం == AUTO_GC_HOOK_SKIP)
+			తిరిగి 0;
 
-		if (!task->auto_condition || !task->auto_condition(cfg))
-			return 0;
+		ఒకవేళ (!task->auto_condition || !task->auto_condition(cfg))
+			తిరిగి 0;
 
-		if (*auto_gc_hook_result == AUTO_GC_HOOK_UNDECIDED)
-			*auto_gc_hook_result = run_hooks(repo, "pre-auto-gc") ?
-				AUTO_GC_HOOK_SKIP : AUTO_GC_HOOK_RUN;
-		if (*auto_gc_hook_result == AUTO_GC_HOOK_SKIP)
-			return 0;
+		ఒకవేళ (*auto_gc_hook_ఫలితం == AUTO_GC_HOOK_UNDECIDED)
+			*auto_gc_hook_ఫలితం = నిరంతరం_hooks(repo, "pre-auto-gc") ?
+				AUTO_GC_HOOK_SKIP : AUTO_GC_HOOK_నిరంతరం;
+		ఒకవేళ (*auto_gc_hook_ఫలితం == AUTO_GC_HOOK_SKIP)
+			తిరిగి 0;
 	}
 
 	trace2_region_enter(region, task->name, repo);
-	if (fn(opts, cfg)) {
+	ఒకవేళ (fn(opts, cfg)) {
 		error(_("task '%s' failed"), task->name);
 		ret = 1;
 	}
 	trace2_region_leave(region, task->name, repo);
 
-	return ret;
+	తిరిగి ret;
 }
 
-static int maintenance_run_tasks(struct maintenance_run_opts *opts,
-				 struct gc_config *cfg)
+స్థిర పూర్ణాంకం maintenance_నిరంతరం_tasks(నిర్మాణం maintenance_నిరంతరం_opts *opts,
+				 నిర్మాణం gc_config *cfg)
 {
-	int result = 0;
-	struct lock_file lk;
-	struct repository *r = the_repository;
-	char *lock_path = xstrfmt("%s/maintenance", r->objects->source->path);
-	enum auto_gc_hook_result auto_gc_hook_result = AUTO_GC_HOOK_UNDECIDED;
+	పూర్ణాంకం ఫలితం = 0;
+	నిర్మాణం తాళం_file lk;
+	నిర్మాణం repository *r = the_repository;
+	అక్షరం *తాళం_మార్గం = xstrfmt("%s/maintenance", r->objects->ఆధారం->మార్గం);
+	గణన auto_gc_hook_ఫలితం auto_gc_hook_ఫలితం = AUTO_GC_HOOK_UNDECIDED;
 
-	if (repo_hold_lock_file_for_update(r, &lk, lock_path, LOCK_NO_DEREF) < 0) {
+	ఒకవేళ (repo_hold_తాళం_file_for_update(r, &lk, తాళం_మార్గం, తాళం_NO_DEREF) < 0) {
 		/*
 		 * Another maintenance command is running.
 		 *
@@ -1407,81 +1407,81 @@ static int maintenance_run_tasks(struct maintenance_run_opts *opts,
 		 * recursive process stack. Do not report an error in
 		 * that case.
 		 */
-		if (!opts->auto_flag && !opts->quiet)
+		ఒకవేళ (!opts->auto_flag && !opts->quiet)
 			warning(_("lock file '%s' exists, skipping maintenance"),
-				lock_path);
-		free(lock_path);
-		return 0;
+				తాళం_మార్గం);
+		విడుదల(తాళం_మార్గం);
+		తిరిగి 0;
 	}
-	free(lock_path);
+	విడుదల(తాళం_మార్గం);
 
-	for (size_t i = 0; i < opts->tasks_nr; i++)
-		if (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
-				   TASK_PHASE_FOREGROUND, &auto_gc_hook_result))
-			result = 1;
+	కొరకు (కొలత_t i = 0; i < opts->tasks_nr; i++)
+		ఒకవేళ (maybe_నిరంతరం_task(&tasks[opts->tasks[i]], r, opts, cfg,
+				   TASK_PHASE_FOREGROUND, &auto_gc_hook_ఫలితం))
+			ఫలితం = 1;
 
 	/* Failure to daemonize is ok, we'll continue in foreground. */
-	if (opts->detach > 0) {
+	ఒకవేళ (opts->detach > 0) {
 		trace2_region_enter("maintenance", "detach", the_repository);
 		daemonize();
 		trace2_region_leave("maintenance", "detach", the_repository);
 	}
 
-	for (size_t i = 0; i < opts->tasks_nr; i++)
-		if (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
-				   TASK_PHASE_BACKGROUND, &auto_gc_hook_result))
-			result = 1;
+	కొరకు (కొలత_t i = 0; i < opts->tasks_nr; i++)
+		ఒకవేళ (maybe_నిరంతరం_task(&tasks[opts->tasks[i]], r, opts, cfg,
+				   TASK_PHASE_BACKGROUND, &auto_gc_hook_ఫలితం))
+			ఫలితం = 1;
 
-	rollback_lock_file(&lk);
-	return result;
+	rollback_తాళం_file(&lk);
+	తిరిగి ఫలితం;
 }
 
-enum maintenance_type {
+గణన maintenance_type {
 	/* As invoked via `git maintenance run --schedule=`. */
 	MAINTENANCE_TYPE_SCHEDULED = (1 << 0),
 	/* As invoked via `git maintenance run` and with `--auto`. */
 	MAINTENANCE_TYPE_MANUAL    = (1 << 1),
 };
 
-struct maintenance_strategy {
-	struct {
-		unsigned type;
-		enum schedule_priority schedule;
-	} tasks[TASK__COUNT];
+నిర్మాణం maintenance_strategy {
+	నిర్మాణం {
+		గుర్తులేని type;
+		గణన కాలపట్టిక_ప్రాధాన్యత కాలపట్టిక;
+	} tasks[TASK_లెక్క];
 };
 
-static const struct maintenance_strategy none_strategy = { 0 };
+స్థిర స్థిరరాశి నిర్మాణం maintenance_strategy none_strategy = { 0 };
 
-static const struct maintenance_strategy gc_strategy = {
+స్థిర స్థిరరాశి నిర్మాణం maintenance_strategy gc_strategy = {
 	.tasks = {
 		[TASK_GC] = {
 			.type = MAINTENANCE_TYPE_MANUAL | MAINTENANCE_TYPE_SCHEDULED,
-			.schedule = SCHEDULE_DAILY,
+			.కాలపట్టిక = కాలపట్టిక_DAILY,
 		},
 	},
 };
 
-static const struct maintenance_strategy incremental_strategy = {
+స్థిర స్థిరరాశి నిర్మాణం maintenance_strategy incremental_strategy = {
 	.tasks = {
-		[TASK_COMMIT_GRAPH] = {
+		[TASK_COMMIT_లేఖాచిత్రం] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED,
-			.schedule = SCHEDULE_HOURLY,
+			.కాలపట్టిక = కాలపట్టిక_HOURLY,
 		},
 		[TASK_PREFETCH] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED,
-			.schedule = SCHEDULE_HOURLY,
+			.కాలపట్టిక = కాలపట్టిక_HOURLY,
 		},
 		[TASK_INCREMENTAL_REPACK] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED,
-			.schedule = SCHEDULE_DAILY,
+			.కాలపట్టిక = కాలపట్టిక_DAILY,
 		},
 		[TASK_LOOSE_OBJECTS] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED,
-			.schedule = SCHEDULE_DAILY,
+			.కాలపట్టిక = కాలపట్టిక_DAILY,
 		},
 		[TASK_PACK_REFS] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED,
-			.schedule = SCHEDULE_WEEKLY,
+			.కాలపట్టిక = కాలపట్టిక_WEEKLY,
 		},
 		/*
 		 * Historically, the "incremental" strategy was only available
@@ -1500,67 +1500,67 @@ static const struct maintenance_strategy incremental_strategy = {
 	},
 };
 
-static const struct maintenance_strategy geometric_strategy = {
+స్థిర స్థిరరాశి నిర్మాణం maintenance_strategy geometric_strategy = {
 	.tasks = {
-		[TASK_COMMIT_GRAPH] = {
+		[TASK_COMMIT_లేఖాచిత్రం] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED | MAINTENANCE_TYPE_MANUAL,
-			.schedule = SCHEDULE_HOURLY,
+			.కాలపట్టిక = కాలపట్టిక_HOURLY,
 		},
 		[TASK_GEOMETRIC_REPACK] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED | MAINTENANCE_TYPE_MANUAL,
-			.schedule = SCHEDULE_DAILY,
+			.కాలపట్టిక = కాలపట్టిక_DAILY,
 		},
 		[TASK_PACK_REFS] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED | MAINTENANCE_TYPE_MANUAL,
-			.schedule = SCHEDULE_DAILY,
+			.కాలపట్టిక = కాలపట్టిక_DAILY,
 		},
 		[TASK_RERERE_GC] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED | MAINTENANCE_TYPE_MANUAL,
-			.schedule = SCHEDULE_WEEKLY,
+			.కాలపట్టిక = కాలపట్టిక_WEEKLY,
 		},
 		[TASK_REFLOG_EXPIRE] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED | MAINTENANCE_TYPE_MANUAL,
-			.schedule = SCHEDULE_WEEKLY,
+			.కాలపట్టిక = కాలపట్టిక_WEEKLY,
 		},
 		[TASK_WORKTREE_PRUNE] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED | MAINTENANCE_TYPE_MANUAL,
-			.schedule = SCHEDULE_WEEKLY,
+			.కాలపట్టిక = కాలపట్టిక_WEEKLY,
 		},
 	},
 };
 
-static struct maintenance_strategy parse_maintenance_strategy(const char *name)
+స్థిర నిర్మాణం maintenance_strategy parse_maintenance_strategy(స్థిరరాశి అక్షరం *name)
 {
-	if (!strcasecmp(name, "incremental"))
-		return incremental_strategy;
-	if (!strcasecmp(name, "gc"))
-		return gc_strategy;
-	if (!strcasecmp(name, "geometric"))
-		return geometric_strategy;
+	ఒకవేళ (!strcasecmp(name, "incremental"))
+		తిరిగి incremental_strategy;
+	ఒకవేళ (!strcasecmp(name, "gc"))
+		తిరిగి gc_strategy;
+	ఒకవేళ (!strcasecmp(name, "geometric"))
+		తిరిగి geometric_strategy;
 	die(_("unknown maintenance strategy: '%s'"), name);
 }
 
-static void initialize_task_config(struct maintenance_run_opts *opts,
-				   const struct string_list *selected_tasks)
+స్థిర శూన్య initialize_task_config(నిర్మాణం maintenance_నిరంతరం_opts *opts,
+				   స్థిరరాశి నిర్మాణం string_list *selected_tasks)
 {
-	struct strbuf config_name = STRBUF_INIT;
-	struct maintenance_strategy strategy;
-	enum maintenance_type type;
-	const char *config_str;
+	నిర్మాణం strbuf config_name = STRBUF_INIT;
+	నిర్మాణం maintenance_strategy strategy;
+	గణన maintenance_type type;
+	స్థిరరాశి అక్షరం *config_str;
 
 	/*
 	 * In case the user has asked us to run tasks explicitly we only use
 	 * those specified tasks. Specifically, we do _not_ want to consult the
 	 * config or maintenance strategy.
 	 */
-	if (selected_tasks->nr) {
-		for (size_t i = 0; i < selected_tasks->nr; i++) {
-			enum maintenance_task_label label = (intptr_t)selected_tasks->items[i].util;;
+	ఒకవేళ (selected_tasks->nr) {
+		కొరకు (కొలత_t i = 0; i < selected_tasks->nr; i++) {
+			గణన maintenance_task_label label = (intptr_t)selected_tasks->వస్తువులు[i].util;;
 			ALLOC_GROW(opts->tasks, opts->tasks_nr + 1, opts->tasks_alloc);
 			opts->tasks[opts->tasks_nr++] = label;
 		}
 
-		return;
+		తిరిగి;
 	}
 
 	/*
@@ -1576,36 +1576,36 @@ static void initialize_task_config(struct maintenance_run_opts *opts,
 	 * override specific aspects of our strategy. Furthermore, both
 	 * strategies can be overridden by setting "maintenance.strategy".
 	 */
-	if (opts->schedule) {
+	ఒకవేళ (opts->కాలపట్టిక) {
 		strategy = none_strategy;
 		type = MAINTENANCE_TYPE_SCHEDULED;
-	} else {
+	} లేకపోతే {
 		strategy = geometric_strategy;
 		type = MAINTENANCE_TYPE_MANUAL;
 	}
 
-	if (!repo_config_get_string_tmp(the_repository, "maintenance.strategy", &config_str))
+	ఒకవేళ (!repo_config_get_string_tmp(the_repository, "maintenance.strategy", &config_str))
 		strategy = parse_maintenance_strategy(config_str);
 
-	for (size_t i = 0; i < TASK__COUNT; i++) {
-		int config_value;
+	కొరకు (కొలత_t i = 0; i < TASK_లెక్క; i++) {
+		పూర్ణాంకం config_విలువ;
 
 		strbuf_reset(&config_name);
 		strbuf_addf(&config_name, "maintenance.%s.enabled",
 			    tasks[i].name);
-		if (!repo_config_get_bool(the_repository, config_name.buf, &config_value))
-			strategy.tasks[i].type = config_value ? type : 0;
-		if (!(strategy.tasks[i].type & type))
-			continue;
+		ఒకవేళ (!repo_config_get_bool(the_repository, config_name.buf, &config_విలువ))
+			strategy.tasks[i].type = config_విలువ ? type : 0;
+		ఒకవేళ (!(strategy.tasks[i].type & type))
+			కొనసాగు;
 
-		if (opts->schedule) {
+		ఒకవేళ (opts->కాలపట్టిక) {
 			strbuf_reset(&config_name);
 			strbuf_addf(&config_name, "maintenance.%s.schedule",
 				    tasks[i].name);
-			if (!repo_config_get_string_tmp(the_repository, config_name.buf, &config_str))
-				strategy.tasks[i].schedule = parse_schedule(config_str);
-			if (strategy.tasks[i].schedule < opts->schedule)
-				continue;
+			ఒకవేళ (!repo_config_get_string_tmp(the_repository, config_name.buf, &config_str))
+				strategy.tasks[i].కాలపట్టిక = parse_కాలపట్టిక(config_str);
+			ఒకవేళ (strategy.tasks[i].కాలపట్టిక < opts->కాలపట్టిక)
+				కొనసాగు;
 		}
 
 		ALLOC_GROW(opts->tasks, opts->tasks_nr + 1, opts->tasks_alloc);
@@ -1615,278 +1615,278 @@ static void initialize_task_config(struct maintenance_run_opts *opts,
 	strbuf_release(&config_name);
 }
 
-static int task_option_parse(const struct option *opt,
-			     const char *arg, int unset)
+స్థిర పూర్ణాంకం task_option_parse(స్థిరరాశి నిర్మాణం option *opt,
+			     స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	struct string_list *selected_tasks = opt->value;
-	size_t i;
+	నిర్మాణం string_list *selected_tasks = opt->విలువ;
+	కొలత_t i;
 
 	BUG_ON_OPT_NEG(unset);
 
-	for (i = 0; i < TASK__COUNT; i++)
-		if (!strcasecmp(tasks[i].name, arg))
-			break;
-	if (i >= TASK__COUNT) {
+	కొరకు (i = 0; i < TASK_లెక్క; i++)
+		ఒకవేళ (!strcasecmp(tasks[i].name, arg))
+			ఆపు;
+	ఒకవేళ (i >= TASK_లెక్క) {
 		error(_("'%s' is not a valid task"), arg);
-		return 1;
+		తిరిగి 1;
 	}
 
-	if (unsorted_string_list_has_string(selected_tasks, arg)) {
+	ఒకవేళ (unsorted_string_list_has_string(selected_tasks, arg)) {
 		error(_("task '%s' cannot be selected multiple times"), arg);
-		return 1;
+		తిరిగి 1;
 	}
 
-	string_list_append(selected_tasks, arg)->util = (void *)(intptr_t)i;
+	string_list_append(selected_tasks, arg)->util = (శూన్య *)(intptr_t)i;
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int maintenance_run(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం maintenance_నిరంతరం(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			   నిర్మాణం repository *repo వాడని)
 {
-	struct maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
-	struct string_list selected_tasks = STRING_LIST_INIT_DUP;
-	struct gc_config cfg = GC_CONFIG_INIT;
-	struct option builtin_maintenance_run_options[] = {
+	నిర్మాణం maintenance_నిరంతరం_opts opts = MAINTENANCE_నిరంతరం_OPTS_INIT;
+	నిర్మాణం string_list selected_tasks = STRING_LIST_INIT_DUP;
+	నిర్మాణం gc_config cfg = GC_CONFIG_INIT;
+	నిర్మాణం option builtin_maintenance_నిరంతరం_options[] = {
 		OPT_BOOL(0, "auto", &opts.auto_flag,
 			 N_("run tasks based on the state of the repository")),
 		OPT_BOOL(0, "detach", &opts.detach,
 			 N_("perform maintenance in the background")),
-		OPT_CALLBACK(0, "schedule", &opts.schedule, N_("frequency"),
+		OPT_CALLBACK(0, "schedule", &opts.కాలపట్టిక, N_("frequency"),
 			     N_("run tasks based on frequency"),
-			     maintenance_opt_schedule),
+			     maintenance_opt_కాలపట్టిక),
 		OPT_BOOL(0, "quiet", &opts.quiet,
 			 N_("do not report progress or other information over stderr")),
 		OPT_CALLBACK_F(0, "task", &selected_tasks, N_("task"),
 			N_("run a specific task"),
 			PARSE_OPT_NONEG, task_option_parse),
-		OPT_END()
+		OPT_చివర()
 	};
-	int ret;
+	పూర్ణాంకం ret;
 
 	opts.quiet = !isatty(2);
 
-	argc = parse_options(argc, argv, prefix,
-			     builtin_maintenance_run_options,
-			     builtin_maintenance_run_usage,
+	argc = parse_options(argc, argv, ఉపసర్గ,
+			     builtin_maintenance_నిరంతరం_options,
+			     builtin_maintenance_నిరంతరం_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 
 	die_for_incompatible_opt2(opts.auto_flag, "--auto",
-				  opts.schedule, "--schedule=");
+				  opts.కాలపట్టిక, "--schedule=");
 	die_for_incompatible_opt2(selected_tasks.nr, "--task=",
-				  opts.schedule, "--schedule=");
+				  opts.కాలపట్టిక, "--schedule=");
 
 	gc_config(&cfg);
 	initialize_task_config(&opts, &selected_tasks);
 
-	if (argc != 0)
-		usage_with_options(builtin_maintenance_run_usage,
-				   builtin_maintenance_run_options);
+	ఒకవేళ (argc != 0)
+		usage_with_options(builtin_maintenance_నిరంతరం_usage,
+				   builtin_maintenance_నిరంతరం_options);
 
-	ret = maintenance_run_tasks(&opts, &cfg);
+	ret = maintenance_నిరంతరం_tasks(&opts, &cfg);
 
 	string_list_clear(&selected_tasks, 0);
-	maintenance_run_opts_release(&opts);
+	maintenance_నిరంతరం_opts_release(&opts);
 	gc_config_release(&cfg);
-	return ret;
+	తిరిగి ret;
 }
 
-static char *get_maintpath(void)
+స్థిర అక్షరం *get_maintpath(శూన్య)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *p = the_repository->worktree ?
+	నిర్మాణం strbuf sb = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *p = the_repository->worktree ?
 		the_repository->worktree : the_repository->gitdir;
 
 	strbuf_realpath(&sb, p, 1);
-	return strbuf_detach(&sb, NULL);
+	తిరిగి strbuf_detach(&sb, ఖాళీ);
 }
 
-static char const * const builtin_maintenance_register_usage[] = {
+స్థిర అక్షరం స్థిరరాశి * స్థిరరాశి builtin_maintenance_రిజిస్టరు_usage[] = {
 	"git maintenance register [--config-file <path>]",
-	NULL
+	ఖాళీ
 };
 
-static int maintenance_register(int argc, const char **argv, const char *prefix,
-				struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం maintenance_రిజిస్టరు(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+				నిర్మాణం repository *repo వాడని)
 {
-	char *config_file = NULL;
-	struct option options[] = {
+	అక్షరం *config_file = ఖాళీ;
+	నిర్మాణం option options[] = {
 		OPT_STRING(0, "config-file", &config_file, N_("file"), N_("use given config file")),
-		OPT_END(),
+		OPT_చివర(),
 	};
-	int found = 0;
-	const char *key = "maintenance.repo";
-	char *maintpath = get_maintpath();
-	struct string_list_item *item;
-	const struct string_list *list;
+	పూర్ణాంకం దొరికింది_2 = 0;
+	స్థిరరాశి అక్షరం *కీలకం = "maintenance.repo";
+	అక్షరం *maintpath = get_maintpath();
+	నిర్మాణం string_list_అంశం *అంశం;
+	స్థిరరాశి నిర్మాణం string_list *list;
 
-	argc = parse_options(argc, argv, prefix, options,
-			     builtin_maintenance_register_usage, 0);
-	if (argc)
-		usage_with_options(builtin_maintenance_register_usage,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
+			     builtin_maintenance_రిజిస్టరు_usage, 0);
+	ఒకవేళ (argc)
+		usage_with_options(builtin_maintenance_రిజిస్టరు_usage,
 				   options);
 
 	/* Disable foreground maintenance */
-	repo_config_set(the_repository, "maintenance.auto", "false");
+	repo_config_సమితి(the_repository, "maintenance.auto", "false");
 
 	/* Set maintenance strategy, if unset */
-	if (repo_config_get(the_repository, "maintenance.strategy"))
-		repo_config_set(the_repository, "maintenance.strategy", "incremental");
+	ఒకవేళ (repo_config_get(the_repository, "maintenance.strategy"))
+		repo_config_సమితి(the_repository, "maintenance.strategy", "incremental");
 
-	if (!repo_config_get_string_multi(the_repository, key, &list)) {
-		for_each_string_list_item(item, list) {
-			if (!strcmp(maintpath, item->string)) {
-				found = 1;
-				break;
+	ఒకవేళ (!repo_config_get_string_multi(the_repository, కీలకం, &list)) {
+		for_each_string_list_అంశం(అంశం, list) {
+			ఒకవేళ (!strcmp(maintpath, అంశం->string)) {
+				దొరికింది_2 = 1;
+				ఆపు;
 			}
 		}
 	}
 
-	if (!found) {
-		int rc;
-		char *global_config_file = NULL;
+	ఒకవేళ (!దొరికింది_2) {
+		పూర్ణాంకం rc;
+		అక్షరం *global_config_file = ఖాళీ;
 
-		if (!config_file) {
+		ఒకవేళ (!config_file) {
 			global_config_file = git_global_config();
 			config_file = global_config_file;
 		}
-		if (!config_file)
+		ఒకవేళ (!config_file)
 			die(_("$HOME not set"));
-		rc = repo_config_set_multivar_in_file_gently(the_repository,
+		rc = repo_config_సమితి_multivar_లోపల_file_gently(the_repository,
 			config_file, "maintenance.repo", maintpath,
-			CONFIG_REGEX_NONE, NULL, 0);
-		free(global_config_file);
+			CONFIG_REGEX_NONE, ఖాళీ, 0);
+		విడుదల(global_config_file);
 
-		if (rc)
+		ఒకవేళ (rc)
 			die(_("unable to add '%s' value of '%s'"),
-			    key, maintpath);
+			    కీలకం, maintpath);
 	}
 
-	free(maintpath);
-	return 0;
+	విడుదల(maintpath);
+	తిరిగి 0;
 }
 
-static char const * const builtin_maintenance_unregister_usage[] = {
+స్థిర అక్షరం స్థిరరాశి * స్థిరరాశి builtin_maintenance_unregister_usage[] = {
 	"git maintenance unregister [--config-file <path>] [--force]",
-	NULL
+	ఖాళీ
 };
 
-static int maintenance_unregister(int argc, const char **argv, const char *prefix,
-				  struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం maintenance_unregister(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+				  నిర్మాణం repository *repo వాడని)
 {
-	int force = 0;
-	char *config_file = NULL;
-	struct option options[] = {
+	పూర్ణాంకం force = 0;
+	అక్షరం *config_file = ఖాళీ;
+	నిర్మాణం option options[] = {
 		OPT_STRING(0, "config-file", &config_file, N_("file"), N_("use given config file")),
 		OPT__FORCE(&force,
 			   N_("return success even if repository was not registered"),
 			   PARSE_OPT_NOCOMPLETE),
-		OPT_END(),
+		OPT_చివర(),
 	};
-	const char *key = "maintenance.repo";
-	char *maintpath = get_maintpath();
-	int found = 0;
-	struct string_list_item *item;
-	const struct string_list *list;
-	struct config_set cs = { { 0 } };
+	స్థిరరాశి అక్షరం *కీలకం = "maintenance.repo";
+	అక్షరం *maintpath = get_maintpath();
+	పూర్ణాంకం దొరికింది_2 = 0;
+	నిర్మాణం string_list_అంశం *అంశం;
+	స్థిరరాశి నిర్మాణం string_list *list;
+	నిర్మాణం config_సమితి cs = { { 0 } };
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     builtin_maintenance_unregister_usage, 0);
-	if (argc)
+	ఒకవేళ (argc)
 		usage_with_options(builtin_maintenance_unregister_usage,
 				   options);
 
-	if (config_file) {
+	ఒకవేళ (config_file) {
 		git_configset_init(&cs);
-		git_configset_add_file(&cs, config_file);
+		git_configset_కూడు_file(&cs, config_file);
 	}
-	if (!(config_file
-	      ? git_configset_get_string_multi(&cs, key, &list)
-	      : repo_config_get_string_multi(the_repository, key, &list))) {
-		for_each_string_list_item(item, list) {
-			if (!strcmp(maintpath, item->string)) {
-				found = 1;
-				break;
+	ఒకవేళ (!(config_file
+	      ? git_configset_get_string_multi(&cs, కీలకం, &list)
+	      : repo_config_get_string_multi(the_repository, కీలకం, &list))) {
+		for_each_string_list_అంశం(అంశం, list) {
+			ఒకవేళ (!strcmp(maintpath, అంశం->string)) {
+				దొరికింది_2 = 1;
+				ఆపు;
 			}
 		}
 	}
 
-	if (found) {
-		int rc;
-		char *global_config_file = NULL;
+	ఒకవేళ (దొరికింది_2) {
+		పూర్ణాంకం rc;
+		అక్షరం *global_config_file = ఖాళీ;
 
-		if (!config_file) {
+		ఒకవేళ (!config_file) {
 			global_config_file = git_global_config();
 			config_file = global_config_file;
 		}
-		if (!config_file)
+		ఒకవేళ (!config_file)
 			die(_("$HOME not set"));
-		rc = repo_config_set_multivar_in_file_gently(the_repository,
-			config_file, key, NULL, maintpath, NULL,
-			CONFIG_FLAGS_MULTI_REPLACE | CONFIG_FLAGS_FIXED_VALUE);
-		free(global_config_file);
+		rc = repo_config_సమితి_multivar_లోపల_file_gently(the_repository,
+			config_file, కీలకం, ఖాళీ, maintpath, ఖాళీ,
+			CONFIG_FLAGS_MULTI_REPLACE | CONFIG_FLAGS_FIXED_విలువ);
+		విడుదల(global_config_file);
 
-		if (rc &&
-		    (!force || rc == CONFIG_NOTHING_SET))
+		ఒకవేళ (rc &&
+		    (!force || rc == CONFIG_NOTHING_సమితి))
 			die(_("unable to unset '%s' value of '%s'"),
-			    key, maintpath);
-	} else if (!force) {
+			    కీలకం, maintpath);
+	} లేకపోతే ఒకవేళ (!force) {
 		die(_("repository '%s' is not registered"), maintpath);
 	}
 
 	git_configset_clear(&cs);
-	free(maintpath);
-	return 0;
+	విడుదల(maintpath);
+	తిరిగి 0;
 }
 
-static const char *get_frequency(enum schedule_priority schedule)
+స్థిర స్థిరరాశి అక్షరం *get_frequency(గణన కాలపట్టిక_ప్రాధాన్యత కాలపట్టిక)
 {
-	switch (schedule) {
-	case SCHEDULE_HOURLY:
-		return "hourly";
-	case SCHEDULE_DAILY:
-		return "daily";
-	case SCHEDULE_WEEKLY:
-		return "weekly";
-	default:
-		BUG("invalid schedule %d", schedule);
+	ఎంపిక (కాలపట్టిక) {
+	స్థితి కాలపట్టిక_HOURLY:
+		తిరిగి "hourly";
+	స్థితి కాలపట్టిక_DAILY:
+		తిరిగి "daily";
+	స్థితి కాలపట్టిక_WEEKLY:
+		తిరిగి "weekly";
+	అప్రమేయ:
+		BUG("invalid schedule %d", కాలపట్టిక);
 	}
 }
 
-static const char *extraconfig[] = {
+స్థిర స్థిరరాశి అక్షరం *extraconfig[] = {
 	"credential.interactive=false",
 	"core.askPass=true", /* 'true' returns success, but no output. */
-	NULL
+	ఖాళీ
 };
 
-static const char *get_extra_config_parameters(void) {
-	static const char *result = NULL;
-	struct strbuf builder = STRBUF_INIT;
+స్థిర స్థిరరాశి అక్షరం *get_extra_config_parameters(శూన్య) {
+	స్థిర స్థిరరాశి అక్షరం *ఫలితం = ఖాళీ;
+	నిర్మాణం strbuf builder = STRBUF_INIT;
 
-	if (result)
-		return result;
+	ఒకవేళ (ఫలితం)
+		తిరిగి ఫలితం;
 
-	for (const char **s = extraconfig; s && *s; s++)
+	కొరకు (స్థిరరాశి అక్షరం **s = extraconfig; s && *s; s++)
 		strbuf_addf(&builder, "-c %s ", *s);
 
-	result = strbuf_detach(&builder, NULL);
-	return result;
+	ఫలితం = strbuf_detach(&builder, ఖాళీ);
+	తిరిగి ఫలితం;
 }
 
-static const char *get_extra_launchctl_strings(void) {
-	static const char *result = NULL;
-	struct strbuf builder = STRBUF_INIT;
+స్థిర స్థిరరాశి అక్షరం *get_extra_launchctl_అక్షరశ్రేణులు(శూన్య) {
+	స్థిర స్థిరరాశి అక్షరం *ఫలితం = ఖాళీ;
+	నిర్మాణం strbuf builder = STRBUF_INIT;
 
-	if (result)
-		return result;
+	ఒకవేళ (ఫలితం)
+		తిరిగి ఫలితం;
 
-	for (const char **s = extraconfig; s && *s; s++) {
+	కొరకు (స్థిరరాశి అక్షరం **s = extraconfig; s && *s; s++) {
 		strbuf_addstr(&builder, "<string>-c</string>\n");
 		strbuf_addf(&builder, "<string>%s</string>\n", *s);
 	}
 
-	result = strbuf_detach(&builder, NULL);
-	return result;
+	ఫలితం = strbuf_detach(&builder, ఖాళీ);
+	తిరిగి ఫలితం;
 }
 
 /*
@@ -1929,173 +1929,173 @@ static const char *get_extra_launchctl_strings(void) {
  *     | "qux" |    true     | "qux" (allocated) |     false     |
  *     +-------+-------------+-------------------+---------------+
  */
-static int get_schedule_cmd(const char *cmd, int *is_available, char **out)
+స్థిర పూర్ణాంకం get_కాలపట్టిక_cmd(స్థిరరాశి అక్షరం *cmd, పూర్ణాంకం *is_అందుబాటు, అక్షరం **బహిర్గతం)
 {
-	char *testing = xstrdup_or_null(getenv("GIT_TEST_MAINT_SCHEDULER"));
-	struct string_list_item *item;
-	struct string_list list = STRING_LIST_INIT_NODUP;
+	అక్షరం *testing = xstrdup_or_null(getenv("GIT_TEST_MAINT_SCHEDULER"));
+	నిర్మాణం string_list_అంశం *అంశం;
+	నిర్మాణం string_list list = STRING_LIST_INIT_NODUP;
 
-	if (!testing) {
-		if (out)
-			*out = xstrdup(cmd);
-		return 0;
+	ఒకవేళ (!testing) {
+		ఒకవేళ (బహిర్గతం)
+			*బహిర్గతం = xstrdup(cmd);
+		తిరిగి 0;
 	}
 
-	if (is_available)
-		*is_available = 0;
+	ఒకవేళ (is_అందుబాటు)
+		*is_అందుబాటు = 0;
 
-	string_list_split_in_place(&list, testing, ",", -1);
-	for_each_string_list_item(item, &list) {
-		struct string_list pair = STRING_LIST_INIT_NODUP;
+	string_list_విభజించు_లోపల_ఉంచు(&list, testing, ",", -1);
+	for_each_string_list_అంశం(అంశం, &list) {
+		నిర్మాణం string_list pair = STRING_LIST_INIT_NODUP;
 
-		if (string_list_split_in_place(&pair, item->string, ":", 2) != 2)
-			continue;
+		ఒకవేళ (string_list_విభజించు_లోపల_ఉంచు(&pair, అంశం->string, ":", 2) != 2)
+			కొనసాగు;
 
-		if (!strcmp(cmd, pair.items[0].string)) {
-			if (out)
-				*out = xstrdup(pair.items[1].string);
-			if (is_available)
-				*is_available = 1;
+		ఒకవేళ (!strcmp(cmd, pair.వస్తువులు[0].string)) {
+			ఒకవేళ (బహిర్గతం)
+				*బహిర్గతం = xstrdup(pair.వస్తువులు[1].string);
+			ఒకవేళ (is_అందుబాటు)
+				*is_అందుబాటు = 1;
 			string_list_clear(&pair, 0);
-			goto out;
+			వెళ్ళు బహిర్గతం;
 		}
 
 		string_list_clear(&pair, 0);
 	}
 
-	if (out)
-		*out = xstrdup(cmd);
+	ఒకవేళ (బహిర్గతం)
+		*బహిర్గతం = xstrdup(cmd);
 
-out:
+బహిర్గతం:
 	string_list_clear(&list, 0);
-	free(testing);
-	return 1;
+	విడుదల(testing);
+	తిరిగి 1;
 }
 
-static int get_random_minute(void)
+స్థిర పూర్ణాంకం get_random_minute(శూన్య)
 {
 	/* Use a static value when under tests. */
-	if (getenv("GIT_TEST_MAINT_SCHEDULER"))
-		return 13;
+	ఒకవేళ (getenv("GIT_TEST_MAINT_SCHEDULER"))
+		తిరిగి 13;
 
-	return git_rand(0) % 60;
+	తిరిగి git_rand(0) % 60;
 }
 
-static int is_launchctl_available(void)
+స్థిర పూర్ణాంకం is_launchctl_అందుబాటు(శూన్య)
 {
-	int is_available;
-	if (get_schedule_cmd("launchctl", &is_available, NULL))
-		return is_available;
+	పూర్ణాంకం is_అందుబాటు;
+	ఒకవేళ (get_కాలపట్టిక_cmd("launchctl", &is_అందుబాటు, ఖాళీ))
+		తిరిగి is_అందుబాటు;
 
-#ifdef __APPLE__
-	return 1;
-#else
-	return 0;
-#endif
+#నిర్వచితమైతే __APPLE__
+	తిరిగి 1;
+#లేకపోతే
+	తిరిగి 0;
+#అయితే_ముగింపు
 }
 
-static char *launchctl_service_name(const char *frequency)
+స్థిర అక్షరం *launchctl_service_name(స్థిరరాశి అక్షరం *frequency)
 {
-	struct strbuf label = STRBUF_INIT;
+	నిర్మాణం strbuf label = STRBUF_INIT;
 	strbuf_addf(&label, "org.git-scm.git.%s", frequency);
-	return strbuf_detach(&label, NULL);
+	తిరిగి strbuf_detach(&label, ఖాళీ);
 }
 
-static char *launchctl_service_filename(const char *name)
+స్థిర అక్షరం *launchctl_service_filename(స్థిరరాశి అక్షరం *name)
 {
-	char *expanded;
-	struct strbuf filename = STRBUF_INIT;
+	అక్షరం *expanded;
+	నిర్మాణం strbuf filename = STRBUF_INIT;
 	strbuf_addf(&filename, "~/Library/LaunchAgents/%s.plist", name);
 
-	expanded = interpolate_path(filename.buf, 1);
-	if (!expanded)
+	expanded = interpolate_మార్గం(filename.buf, 1);
+	ఒకవేళ (!expanded)
 		die(_("failed to expand path '%s'"), filename.buf);
 
 	strbuf_release(&filename);
-	return expanded;
+	తిరిగి expanded;
 }
 
-static char *launchctl_get_uid(void)
+స్థిర అక్షరం *launchctl_get_uid(శూన్య)
 {
-	return xstrfmt("gui/%d", getuid());
+	తిరిగి xstrfmt("gui/%d", getuid());
 }
 
-static int launchctl_boot_plist(int enable, const char *filename)
+స్థిర పూర్ణాంకం launchctl_boot_plist(పూర్ణాంకం enable, స్థిరరాశి అక్షరం *filename)
 {
-	char *cmd;
-	int result;
-	struct child_process child = CHILD_PROCESS_INIT;
-	char *uid = launchctl_get_uid();
+	అక్షరం *cmd;
+	పూర్ణాంకం ఫలితం;
+	నిర్మాణం బిడ్డ_process బిడ్డ = బిడ్డ_PROCESS_INIT;
+	అక్షరం *uid = launchctl_get_uid();
 
-	get_schedule_cmd("launchctl", NULL, &cmd);
-	strvec_split(&child.args, cmd);
-	strvec_pushl(&child.args, enable ? "bootstrap" : "bootout", uid,
-		     filename, NULL);
+	get_కాలపట్టిక_cmd("launchctl", ఖాళీ, &cmd);
+	strvec_విభజించు(&బిడ్డ.వాదనలు, cmd);
+	strvec_pushl(&బిడ్డ.వాదనలు, enable ? "bootstrap" : "bootout", uid,
+		     filename, ఖాళీ);
 
-	child.no_stderr = 1;
-	child.no_stdout = 1;
+	బిడ్డ.no_stderr = 1;
+	బిడ్డ.no_stdout = 1;
 
-	if (start_command(&child))
+	ఒకవేళ (ప్రారంభం_command(&బిడ్డ))
 		die(_("failed to start launchctl"));
 
-	result = finish_command(&child);
+	ఫలితం = ముగింపు_command(&బిడ్డ);
 
-	free(cmd);
-	free(uid);
-	return result;
+	విడుదల(cmd);
+	విడుదల(uid);
+	తిరిగి ఫలితం;
 }
 
-static int launchctl_remove_plist(enum schedule_priority schedule)
+స్థిర పూర్ణాంకం launchctl_remove_plist(గణన కాలపట్టిక_ప్రాధాన్యత కాలపట్టిక)
 {
-	const char *frequency = get_frequency(schedule);
-	char *name = launchctl_service_name(frequency);
-	char *filename = launchctl_service_filename(name);
-	int result = launchctl_boot_plist(0, filename);
+	స్థిరరాశి అక్షరం *frequency = get_frequency(కాలపట్టిక);
+	అక్షరం *name = launchctl_service_name(frequency);
+	అక్షరం *filename = launchctl_service_filename(name);
+	పూర్ణాంకం ఫలితం = launchctl_boot_plist(0, filename);
 	unlink(filename);
-	free(filename);
-	free(name);
-	return result;
+	విడుదల(filename);
+	విడుదల(name);
+	తిరిగి ఫలితం;
 }
 
-static int launchctl_remove_plists(void)
+స్థిర పూర్ణాంకం launchctl_remove_plists(శూన్య)
 {
-	return launchctl_remove_plist(SCHEDULE_HOURLY) ||
-	       launchctl_remove_plist(SCHEDULE_DAILY) ||
-	       launchctl_remove_plist(SCHEDULE_WEEKLY);
+	తిరిగి launchctl_remove_plist(కాలపట్టిక_HOURLY) ||
+	       launchctl_remove_plist(కాలపట్టిక_DAILY) ||
+	       launchctl_remove_plist(కాలపట్టిక_WEEKLY);
 }
 
-static int launchctl_list_contains_plist(const char *name, const char *cmd)
+స్థిర పూర్ణాంకం launchctl_list_కలిగియుంది_plist(స్థిరరాశి అక్షరం *name, స్థిరరాశి అక్షరం *cmd)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process బిడ్డ = బిడ్డ_PROCESS_INIT;
 
-	strvec_split(&child.args, cmd);
-	strvec_pushl(&child.args, "list", name, NULL);
+	strvec_విభజించు(&బిడ్డ.వాదనలు, cmd);
+	strvec_pushl(&బిడ్డ.వాదనలు, "list", name, ఖాళీ);
 
-	child.no_stderr = 1;
-	child.no_stdout = 1;
+	బిడ్డ.no_stderr = 1;
+	బిడ్డ.no_stdout = 1;
 
-	if (start_command(&child))
+	ఒకవేళ (ప్రారంభం_command(&బిడ్డ))
 		die(_("failed to start launchctl"));
 
 	/* Returns failure if 'name' doesn't exist. */
-	return !finish_command(&child);
+	తిరిగి !ముగింపు_command(&బిడ్డ);
 }
 
-static int launchctl_schedule_plist(const char *exec_path, enum schedule_priority schedule)
+స్థిర పూర్ణాంకం launchctl_కాలపట్టిక_plist(స్థిరరాశి అక్షరం *exec_మార్గం, గణన కాలపట్టిక_ప్రాధాన్యత కాలపట్టిక)
 {
-	int i, fd;
-	const char *preamble, *repeat;
-	const char *frequency = get_frequency(schedule);
-	char *name = launchctl_service_name(frequency);
-	char *filename = launchctl_service_filename(name);
-	struct lock_file lk = LOCK_INIT;
-	static unsigned long lock_file_timeout_ms = ULONG_MAX;
-	struct strbuf plist = STRBUF_INIT, plist2 = STRBUF_INIT;
-	struct stat st;
-	char *cmd;
-	int minute = get_random_minute();
+	పూర్ణాంకం i, fd;
+	స్థిరరాశి అక్షరం *preamble, *repeat;
+	స్థిరరాశి అక్షరం *frequency = get_frequency(కాలపట్టిక);
+	అక్షరం *name = launchctl_service_name(frequency);
+	అక్షరం *filename = launchctl_service_filename(name);
+	నిర్మాణం తాళం_file lk = తాళం_INIT;
+	స్థిర గుర్తులేని దీర్ఘ తాళం_file_timeout_ms = ULONG_MAX;
+	నిర్మాణం strbuf plist = STRBUF_INIT, plist2 = STRBUF_INIT;
+	నిర్మాణం stat st;
+	అక్షరం *cmd;
+	పూర్ణాంకం minute = get_random_minute();
 
-	get_schedule_cmd("launchctl", NULL, &cmd);
+	get_కాలపట్టిక_cmd("launchctl", ఖాళీ, &cmd);
 	preamble = "<?xml version=\"1.0\"?>\n"
 		   "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
 		   "<plist version=\"1.0\">"
@@ -2115,30 +2115,30 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 		   "</array>\n"
 		   "<key>StartCalendarInterval</key>\n"
 		   "<array>\n";
-	strbuf_addf(&plist, preamble, name, exec_path, exec_path,
-		    get_extra_launchctl_strings(), frequency);
+	strbuf_addf(&plist, preamble, name, exec_మార్గం, exec_మార్గం,
+		    get_extra_launchctl_అక్షరశ్రేణులు(), frequency);
 
-	switch (schedule) {
-	case SCHEDULE_HOURLY:
+	ఎంపిక (కాలపట్టిక) {
+	స్థితి కాలపట్టిక_HOURLY:
 		repeat = "<dict>\n"
 			 "<key>Hour</key><integer>%d</integer>\n"
 			 "<key>Minute</key><integer>%d</integer>\n"
 			 "</dict>\n";
-		for (i = 1; i <= 23; i++)
+		కొరకు (i = 1; i <= 23; i++)
 			strbuf_addf(&plist, repeat, i, minute);
-		break;
+		ఆపు;
 
-	case SCHEDULE_DAILY:
+	స్థితి కాలపట్టిక_DAILY:
 		repeat = "<dict>\n"
 			 "<key>Weekday</key><integer>%d</integer>\n"
 			 "<key>Hour</key><integer>0</integer>\n"
 			 "<key>Minute</key><integer>%d</integer>\n"
 			 "</dict>\n";
-		for (i = 1; i <= 6; i++)
+		కొరకు (i = 1; i <= 6; i++)
 			strbuf_addf(&plist, repeat, i, minute);
-		break;
+		ఆపు;
 
-	case SCHEDULE_WEEKLY:
+	స్థితి కాలపట్టిక_WEEKLY:
 		strbuf_addf(&plist,
 			    "<dict>\n"
 			    "<key>Weekday</key><integer>0</integer>\n"
@@ -2146,133 +2146,133 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 			    "<key>Minute</key><integer>%d</integer>\n"
 			    "</dict>\n",
 			    minute);
-		break;
+		ఆపు;
 
-	default:
+	అప్రమేయ:
 		/* unreachable */
-		break;
+		ఆపు;
 	}
 	strbuf_addstr(&plist, "</array>\n</dict>\n</plist>\n");
 
-	if (safe_create_leading_directories(the_repository, filename))
+	ఒకవేళ (సురక్షిత_create_leading_directories(the_repository, filename))
 		die(_("failed to create directories for '%s'"), filename);
 
-	if ((long)lock_file_timeout_ms < 0 &&
+	ఒకవేళ ((దీర్ఘ)తాళం_file_timeout_ms < 0 &&
 	    repo_config_get_ulong(the_repository, "gc.launchctlplistlocktimeoutms",
-				 &lock_file_timeout_ms))
-		lock_file_timeout_ms = 150;
+				 &తాళం_file_timeout_ms))
+		తాళం_file_timeout_ms = 150;
 
-	fd = hold_lock_file_for_update_timeout(&lk, filename, LOCK_DIE_ON_ERROR,
-					       lock_file_timeout_ms);
+	fd = hold_తాళం_file_for_update_timeout(&lk, filename, తాళం_DIE_ON_ERROR,
+					       తాళం_file_timeout_ms);
 
 	/*
 	 * Does this file already exist? With the intended contents? Is it
 	 * registered already? Then it does not need to be re-registered.
 	 */
-	if (!stat(filename, &st) && st.st_size == plist.len &&
+	ఒకవేళ (!stat(filename, &st) && st.st_కొలత == plist.len &&
 	    strbuf_read_file(&plist2, filename, plist.len) == plist.len &&
 	    !strbuf_cmp(&plist, &plist2) &&
-	    launchctl_list_contains_plist(name, cmd))
-		rollback_lock_file(&lk);
-	else {
-		if (write_in_full(fd, plist.buf, plist.len) < 0 ||
-		    commit_lock_file(&lk))
+	    launchctl_list_కలిగియుంది_plist(name, cmd))
+		rollback_తాళం_file(&lk);
+	లేకపోతే {
+		ఒకవేళ (write_లోపల_నిండిన(fd, plist.buf, plist.len) < 0 ||
+		    commit_తాళం_file(&lk))
 			die_errno(_("could not write '%s'"), filename);
 
 		/* bootout might fail if not already running, so ignore */
 		launchctl_boot_plist(0, filename);
-		if (launchctl_boot_plist(1, filename))
+		ఒకవేళ (launchctl_boot_plist(1, filename))
 			die(_("failed to bootstrap service %s"), filename);
 	}
 
-	free(filename);
-	free(name);
-	free(cmd);
+	విడుదల(filename);
+	విడుదల(name);
+	విడుదల(cmd);
 	strbuf_release(&plist);
 	strbuf_release(&plist2);
-	return 0;
+	తిరిగి 0;
 }
 
-static int launchctl_add_plists(void)
+స్థిర పూర్ణాంకం launchctl_కూడు_plists(శూన్య)
 {
-	const char *exec_path = git_exec_path();
+	స్థిరరాశి అక్షరం *exec_మార్గం = git_exec_మార్గం();
 
-	return launchctl_schedule_plist(exec_path, SCHEDULE_HOURLY) ||
-	       launchctl_schedule_plist(exec_path, SCHEDULE_DAILY) ||
-	       launchctl_schedule_plist(exec_path, SCHEDULE_WEEKLY);
+	తిరిగి launchctl_కాలపట్టిక_plist(exec_మార్గం, కాలపట్టిక_HOURLY) ||
+	       launchctl_కాలపట్టిక_plist(exec_మార్గం, కాలపట్టిక_DAILY) ||
+	       launchctl_కాలపట్టిక_plist(exec_మార్గం, కాలపట్టిక_WEEKLY);
 }
 
-static int launchctl_update_schedule(int run_maintenance, int fd UNUSED)
+స్థిర పూర్ణాంకం launchctl_update_కాలపట్టిక(పూర్ణాంకం నిరంతరం_maintenance, పూర్ణాంకం fd వాడని)
 {
-	if (run_maintenance)
-		return launchctl_add_plists();
-	else
-		return launchctl_remove_plists();
+	ఒకవేళ (నిరంతరం_maintenance)
+		తిరిగి launchctl_కూడు_plists();
+	లేకపోతే
+		తిరిగి launchctl_remove_plists();
 }
 
-static int is_schtasks_available(void)
+స్థిర పూర్ణాంకం is_schtasks_అందుబాటు(శూన్య)
 {
-	int is_available;
-	if (get_schedule_cmd("schtasks", &is_available, NULL))
-		return is_available;
+	పూర్ణాంకం is_అందుబాటు;
+	ఒకవేళ (get_కాలపట్టిక_cmd("schtasks", &is_అందుబాటు, ఖాళీ))
+		తిరిగి is_అందుబాటు;
 
-#ifdef GIT_WINDOWS_NATIVE
-	return 1;
-#else
-	return 0;
-#endif
+#నిర్వచితమైతే GIT_WINDOWS_NATIVE
+	తిరిగి 1;
+#లేకపోతే
+	తిరిగి 0;
+#అయితే_ముగింపు
 }
 
-static char *schtasks_task_name(const char *frequency)
+స్థిర అక్షరం *schtasks_task_name(స్థిరరాశి అక్షరం *frequency)
 {
-	struct strbuf label = STRBUF_INIT;
+	నిర్మాణం strbuf label = STRBUF_INIT;
 	strbuf_addf(&label, "Git Maintenance (%s)", frequency);
-	return strbuf_detach(&label, NULL);
+	తిరిగి strbuf_detach(&label, ఖాళీ);
 }
 
-static int schtasks_remove_task(enum schedule_priority schedule)
+స్థిర పూర్ణాంకం schtasks_remove_task(గణన కాలపట్టిక_ప్రాధాన్యత కాలపట్టిక)
 {
-	char *cmd;
-	struct child_process child = CHILD_PROCESS_INIT;
-	const char *frequency = get_frequency(schedule);
-	char *name = schtasks_task_name(frequency);
+	అక్షరం *cmd;
+	నిర్మాణం బిడ్డ_process బిడ్డ = బిడ్డ_PROCESS_INIT;
+	స్థిరరాశి అక్షరం *frequency = get_frequency(కాలపట్టిక);
+	అక్షరం *name = schtasks_task_name(frequency);
 
-	get_schedule_cmd("schtasks", NULL, &cmd);
-	strvec_split(&child.args, cmd);
-	strvec_pushl(&child.args, "/delete", "/tn", name, "/f", NULL);
-	free(name);
-	free(cmd);
+	get_కాలపట్టిక_cmd("schtasks", ఖాళీ, &cmd);
+	strvec_విభజించు(&బిడ్డ.వాదనలు, cmd);
+	strvec_pushl(&బిడ్డ.వాదనలు, "/delete", "/tn", name, "/f", ఖాళీ);
+	విడుదల(name);
+	విడుదల(cmd);
 
-	return run_command(&child);
+	తిరిగి నిరంతరం_command(&బిడ్డ);
 }
 
-static int schtasks_remove_tasks(void)
+స్థిర పూర్ణాంకం schtasks_remove_tasks(శూన్య)
 {
-	return schtasks_remove_task(SCHEDULE_HOURLY) ||
-	       schtasks_remove_task(SCHEDULE_DAILY) ||
-	       schtasks_remove_task(SCHEDULE_WEEKLY);
+	తిరిగి schtasks_remove_task(కాలపట్టిక_HOURLY) ||
+	       schtasks_remove_task(కాలపట్టిక_DAILY) ||
+	       schtasks_remove_task(కాలపట్టిక_WEEKLY);
 }
 
-static int schtasks_schedule_task(const char *exec_path, enum schedule_priority schedule)
+స్థిర పూర్ణాంకం schtasks_కాలపట్టిక_task(స్థిరరాశి అక్షరం *exec_మార్గం, గణన కాలపట్టిక_ప్రాధాన్యత కాలపట్టిక)
 {
-	char *cmd;
-	int result;
-	struct child_process child = CHILD_PROCESS_INIT;
-	const char *xml;
-	struct tempfile *tfile;
-	const char *frequency = get_frequency(schedule);
-	char *name = schtasks_task_name(frequency);
-	struct strbuf tfilename = STRBUF_INIT;
-	int minute = get_random_minute();
+	అక్షరం *cmd;
+	పూర్ణాంకం ఫలితం;
+	నిర్మాణం బిడ్డ_process బిడ్డ = బిడ్డ_PROCESS_INIT;
+	స్థిరరాశి అక్షరం *xml;
+	నిర్మాణం tempfile *tfile;
+	స్థిరరాశి అక్షరం *frequency = get_frequency(కాలపట్టిక);
+	అక్షరం *name = schtasks_task_name(frequency);
+	నిర్మాణం strbuf tfilename = STRBUF_INIT;
+	పూర్ణాంకం minute = get_random_minute();
 
-	get_schedule_cmd("schtasks", NULL, &cmd);
+	get_కాలపట్టిక_cmd("schtasks", ఖాళీ, &cmd);
 
 	strbuf_addf(&tfilename, "%s/schedule_%s_XXXXXX",
 		    repo_get_common_dir(the_repository), frequency);
 	tfile = xmks_tempfile(tfilename.buf);
 	strbuf_release(&tfilename);
 
-	if (!fdopen_tempfile(tfile, "w"))
+	ఒకవేళ (!fdopen_tempfile(tfile, "w"))
 		die(_("failed to create temp xml file"));
 
 	xml = "<?xml version=\"1.0\" ?>\n"
@@ -2281,8 +2281,8 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 	      "<CalendarTrigger>\n";
 	fputs(xml, tfile->fp);
 
-	switch (schedule) {
-	case SCHEDULE_HOURLY:
+	ఎంపిక (కాలపట్టిక) {
+	స్థితి కాలపట్టిక_HOURLY:
 		fprintf(tfile->fp,
 			"<StartBoundary>2020-01-01T01:%02d:00</StartBoundary>\n"
 			"<Enabled>true</Enabled>\n"
@@ -2295,9 +2295,9 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 			"<StopAtDurationEnd>false</StopAtDurationEnd>\n"
 			"</Repetition>\n",
 			minute);
-		break;
+		ఆపు;
 
-	case SCHEDULE_DAILY:
+	స్థితి కాలపట్టిక_DAILY:
 		fprintf(tfile->fp,
 			"<StartBoundary>2020-01-01T00:%02d:00</StartBoundary>\n"
 			"<Enabled>true</Enabled>\n"
@@ -2313,9 +2313,9 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 			"<WeeksInterval>1</WeeksInterval>\n"
 			"</ScheduleByWeek>\n",
 			minute);
-		break;
+		ఆపు;
 
-	case SCHEDULE_WEEKLY:
+	స్థితి కాలపట్టిక_WEEKLY:
 		fprintf(tfile->fp,
 			"<StartBoundary>2020-01-01T00:%02d:00</StartBoundary>\n"
 			"<Enabled>true</Enabled>\n"
@@ -2326,10 +2326,10 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 			"<WeeksInterval>1</WeeksInterval>\n"
 			"</ScheduleByWeek>\n",
 			minute);
-		break;
+		ఆపు;
 
-	default:
-		break;
+	అప్రమేయ:
+		ఆపు;
 	}
 
 	xml = "</CalendarTrigger>\n"
@@ -2356,127 +2356,127 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 	      "</Exec>\n"
 	      "</Actions>\n"
 	      "</Task>\n";
-	fprintf(tfile->fp, xml, exec_path, exec_path,
+	fprintf(tfile->fp, xml, exec_మార్గం, exec_మార్గం,
 		get_extra_config_parameters(), frequency);
-	strvec_split(&child.args, cmd);
-	strvec_pushl(&child.args, "/create", "/tn", name, "/f", "/xml",
-				  get_tempfile_path(tfile), NULL);
+	strvec_విభజించు(&బిడ్డ.వాదనలు, cmd);
+	strvec_pushl(&బిడ్డ.వాదనలు, "/create", "/tn", name, "/f", "/xml",
+				  get_tempfile_మార్గం(tfile), ఖాళీ);
 	close_tempfile_gently(tfile);
 
-	child.no_stdout = 1;
-	child.no_stderr = 1;
+	బిడ్డ.no_stdout = 1;
+	బిడ్డ.no_stderr = 1;
 
-	if (start_command(&child))
+	ఒకవేళ (ప్రారంభం_command(&బిడ్డ))
 		die(_("failed to start schtasks"));
-	result = finish_command(&child);
+	ఫలితం = ముగింపు_command(&బిడ్డ);
 
 	delete_tempfile(&tfile);
-	free(name);
-	free(cmd);
-	return result;
+	విడుదల(name);
+	విడుదల(cmd);
+	తిరిగి ఫలితం;
 }
 
-static int schtasks_schedule_tasks(void)
+స్థిర పూర్ణాంకం schtasks_కాలపట్టిక_tasks(శూన్య)
 {
-	const char *exec_path = git_exec_path();
+	స్థిరరాశి అక్షరం *exec_మార్గం = git_exec_మార్గం();
 
-	return schtasks_schedule_task(exec_path, SCHEDULE_HOURLY) ||
-	       schtasks_schedule_task(exec_path, SCHEDULE_DAILY) ||
-	       schtasks_schedule_task(exec_path, SCHEDULE_WEEKLY);
+	తిరిగి schtasks_కాలపట్టిక_task(exec_మార్గం, కాలపట్టిక_HOURLY) ||
+	       schtasks_కాలపట్టిక_task(exec_మార్గం, కాలపట్టిక_DAILY) ||
+	       schtasks_కాలపట్టిక_task(exec_మార్గం, కాలపట్టిక_WEEKLY);
 }
 
-static int schtasks_update_schedule(int run_maintenance, int fd UNUSED)
+స్థిర పూర్ణాంకం schtasks_update_కాలపట్టిక(పూర్ణాంకం నిరంతరం_maintenance, పూర్ణాంకం fd వాడని)
 {
-	if (run_maintenance)
-		return schtasks_schedule_tasks();
-	else
-		return schtasks_remove_tasks();
+	ఒకవేళ (నిరంతరం_maintenance)
+		తిరిగి schtasks_కాలపట్టిక_tasks();
+	లేకపోతే
+		తిరిగి schtasks_remove_tasks();
 }
 
-MAYBE_UNUSED
-static int check_crontab_process(const char *cmd)
+MAYBE_వాడని
+స్థిర పూర్ణాంకం check_crontab_process(స్థిరరాశి అక్షరం *cmd)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process బిడ్డ = బిడ్డ_PROCESS_INIT;
 
-	strvec_split(&child.args, cmd);
-	strvec_push(&child.args, "-l");
-	child.no_stdin = 1;
-	child.no_stdout = 1;
-	child.no_stderr = 1;
-	child.silent_exec_failure = 1;
+	strvec_విభజించు(&బిడ్డ.వాదనలు, cmd);
+	strvec_నెట్టు(&బిడ్డ.వాదనలు, "-l");
+	బిడ్డ.no_stdin = 1;
+	బిడ్డ.no_stdout = 1;
+	బిడ్డ.no_stderr = 1;
+	బిడ్డ.silent_exec_failure = 1;
 
-	if (start_command(&child))
-		return 0;
+	ఒకవేళ (ప్రారంభం_command(&బిడ్డ))
+		తిరిగి 0;
 	/* Ignore exit code, as an empty crontab will return error. */
-	finish_command(&child);
-	return 1;
+	ముగింపు_command(&బిడ్డ);
+	తిరిగి 1;
 }
 
-static int is_crontab_available(void)
+స్థిర పూర్ణాంకం is_crontab_అందుబాటు(శూన్య)
 {
-	char *cmd;
-	int is_available;
-	int ret;
+	అక్షరం *cmd;
+	పూర్ణాంకం is_అందుబాటు;
+	పూర్ణాంకం ret;
 
-	if (get_schedule_cmd("crontab", &is_available, &cmd)) {
-		ret = is_available;
-		goto out;
+	ఒకవేళ (get_కాలపట్టిక_cmd("crontab", &is_అందుబాటు, &cmd)) {
+		ret = is_అందుబాటు;
+		వెళ్ళు బహిర్గతం;
 	}
 
-#ifdef __APPLE__
+#నిర్వచితమైతే __APPLE__
 	/*
 	 * macOS has cron, but it requires special permissions and will
 	 * create a UI alert when attempting to run this command.
 	 */
 	ret = 0;
-#else
+#లేకపోతే
 	ret = check_crontab_process(cmd);
-#endif
+#అయితే_ముగింపు
 
-out:
-	free(cmd);
-	return ret;
+బహిర్గతం:
+	విడుదల(cmd);
+	తిరిగి ret;
 }
 
-#define BEGIN_LINE "# BEGIN GIT MAINTENANCE SCHEDULE"
-#define END_LINE "# END GIT MAINTENANCE SCHEDULE"
+#నిర్వచించు BEGIN_పంక్తి "# BEGIN GIT MAINTENANCE SCHEDULE"
+#నిర్వచించు చివర_పంక్తి "# END GIT MAINTENANCE SCHEDULE"
 
-static int crontab_update_schedule(int run_maintenance, int fd)
+స్థిర పూర్ణాంకం crontab_update_కాలపట్టిక(పూర్ణాంకం నిరంతరం_maintenance, పూర్ణాంకం fd)
 {
-	char *cmd;
-	int result = 0;
-	int in_old_region = 0;
-	struct child_process crontab_list = CHILD_PROCESS_INIT;
-	struct child_process crontab_edit = CHILD_PROCESS_INIT;
-	FILE *cron_list, *cron_in;
-	struct strbuf line = STRBUF_INIT;
-	struct tempfile *tmpedit = NULL;
-	int minute = get_random_minute();
+	అక్షరం *cmd;
+	పూర్ణాంకం ఫలితం = 0;
+	పూర్ణాంకం లోపల_old_region = 0;
+	నిర్మాణం బిడ్డ_process crontab_list = బిడ్డ_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process crontab_edit = బిడ్డ_PROCESS_INIT;
+	FILE *cron_list, *cron_లోపల;
+	నిర్మాణం strbuf పంక్తి = STRBUF_INIT;
+	నిర్మాణం tempfile *tmpedit = ఖాళీ;
+	పూర్ణాంకం minute = get_random_minute();
 
-	get_schedule_cmd("crontab", NULL, &cmd);
-	strvec_split(&crontab_list.args, cmd);
-	strvec_push(&crontab_list.args, "-l");
-	crontab_list.in = -1;
-	crontab_list.out = dup(fd);
+	get_కాలపట్టిక_cmd("crontab", ఖాళీ, &cmd);
+	strvec_విభజించు(&crontab_list.వాదనలు, cmd);
+	strvec_నెట్టు(&crontab_list.వాదనలు, "-l");
+	crontab_list.లోపల = -1;
+	crontab_list.బహిర్గతం = dup(fd);
 	crontab_list.git_cmd = 0;
 
-	if (start_command(&crontab_list)) {
-		result = error(_("failed to run 'crontab -l'; your system might not support 'cron'"));
-		goto out;
+	ఒకవేళ (ప్రారంభం_command(&crontab_list)) {
+		ఫలితం = error(_("failed to run 'crontab -l'; your system might not support 'cron'"));
+		వెళ్ళు బహిర్గతం;
 	}
 
 	/* Ignore exit code, as an empty crontab will return error. */
-	finish_command(&crontab_list);
+	ముగింపు_command(&crontab_list);
 
 	tmpedit = mks_tempfile_t(".git_cron_edit_tmpXXXXXX");
-	if (!tmpedit) {
-		result = error(_("failed to create crontab temporary file"));
-		goto out;
+	ఒకవేళ (!tmpedit) {
+		ఫలితం = error(_("failed to create crontab temporary file"));
+		వెళ్ళు బహిర్గతం;
 	}
-	cron_in = fdopen_tempfile(tmpedit, "w");
-	if (!cron_in) {
-		result = error(_("failed to open temporary file"));
-		goto out;
+	cron_లోపల = fdopen_tempfile(tmpedit, "w");
+	ఒకవేళ (!cron_లోపల) {
+		ఫలితం = error(_("failed to open temporary file"));
+		వెళ్ళు బహిర్గతం;
 	}
 
 	/*
@@ -2486,120 +2486,120 @@ static int crontab_update_schedule(int run_maintenance, int fd)
 	cron_list = fdopen(fd, "r");
 	rewind(cron_list);
 
-	while (!strbuf_getline_lf(&line, cron_list)) {
-		if (!in_old_region && !strcmp(line.buf, BEGIN_LINE))
-			in_old_region = 1;
-		else if (in_old_region && !strcmp(line.buf, END_LINE))
-			in_old_region = 0;
-		else if (!in_old_region)
-			fprintf(cron_in, "%s\n", line.buf);
+	అయితే (!strbuf_getline_lf(&పంక్తి, cron_list)) {
+		ఒకవేళ (!లోపల_old_region && !strcmp(పంక్తి.buf, BEGIN_పంక్తి))
+			లోపల_old_region = 1;
+		లేకపోతే ఒకవేళ (లోపల_old_region && !strcmp(పంక్తి.buf, చివర_పంక్తి))
+			లోపల_old_region = 0;
+		లేకపోతే ఒకవేళ (!లోపల_old_region)
+			fprintf(cron_లోపల, "%s\n", పంక్తి.buf);
 	}
-	strbuf_release(&line);
+	strbuf_release(&పంక్తి);
 
-	if (run_maintenance) {
-		struct strbuf line_format = STRBUF_INIT;
-		const char *exec_path = git_exec_path();
+	ఒకవేళ (నిరంతరం_maintenance) {
+		నిర్మాణం strbuf పంక్తి_format = STRBUF_INIT;
+		స్థిరరాశి అక్షరం *exec_మార్గం = git_exec_మార్గం();
 
-		fprintf(cron_in, "%s\n", BEGIN_LINE);
-		fprintf(cron_in,
+		fprintf(cron_లోపల, "%s\n", BEGIN_పంక్తి);
+		fprintf(cron_లోపల,
 			"# The following schedule was created by Git\n");
-		fprintf(cron_in, "# Any edits made in this region might be\n");
-		fprintf(cron_in,
+		fprintf(cron_లోపల, "# Any edits made in this region might be\n");
+		fprintf(cron_లోపల,
 			"# replaced in the future by a Git command.\n\n");
 
-		strbuf_addf(&line_format,
+		strbuf_addf(&పంక్తి_format,
 			    "%%d %%s * * %%s \"%s/git\" --exec-path=\"%s\" %s for-each-repo --keep-going --config=maintenance.repo maintenance run --schedule=%%s\n",
-			    exec_path, exec_path, get_extra_config_parameters());
-		fprintf(cron_in, line_format.buf, minute, "1-23", "*", "hourly");
-		fprintf(cron_in, line_format.buf, minute, "0", "1-6", "daily");
-		fprintf(cron_in, line_format.buf, minute, "0", "0", "weekly");
-		strbuf_release(&line_format);
+			    exec_మార్గం, exec_మార్గం, get_extra_config_parameters());
+		fprintf(cron_లోపల, పంక్తి_format.buf, minute, "1-23", "*", "hourly");
+		fprintf(cron_లోపల, పంక్తి_format.buf, minute, "0", "1-6", "daily");
+		fprintf(cron_లోపల, పంక్తి_format.buf, minute, "0", "0", "weekly");
+		strbuf_release(&పంక్తి_format);
 
-		fprintf(cron_in, "\n%s\n", END_LINE);
+		fprintf(cron_లోపల, "\n%s\n", చివర_పంక్తి);
 	}
 
-	fflush(cron_in);
+	fflush(cron_లోపల);
 
-	strvec_split(&crontab_edit.args, cmd);
-	strvec_push(&crontab_edit.args, get_tempfile_path(tmpedit));
+	strvec_విభజించు(&crontab_edit.వాదనలు, cmd);
+	strvec_నెట్టు(&crontab_edit.వాదనలు, get_tempfile_మార్గం(tmpedit));
 	crontab_edit.git_cmd = 0;
 
-	if (start_command(&crontab_edit)) {
-		result = error(_("failed to run 'crontab'; your system might not support 'cron'"));
-		goto out;
+	ఒకవేళ (ప్రారంభం_command(&crontab_edit)) {
+		ఫలితం = error(_("failed to run 'crontab'; your system might not support 'cron'"));
+		వెళ్ళు బహిర్గతం;
 	}
 
-	if (finish_command(&crontab_edit))
-		result = error(_("'crontab' died"));
-	else
+	ఒకవేళ (ముగింపు_command(&crontab_edit))
+		ఫలితం = error(_("'crontab' died"));
+	లేకపోతే
 		fclose(cron_list);
 
-out:
+బహిర్గతం:
 	delete_tempfile(&tmpedit);
-	free(cmd);
-	return result;
+	విడుదల(cmd);
+	తిరిగి ఫలితం;
 }
 
-static int real_is_systemd_timer_available(void)
+స్థిర పూర్ణాంకం real_is_systemd_timer_అందుబాటు(శూన్య)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process బిడ్డ = బిడ్డ_PROCESS_INIT;
 
-	strvec_pushl(&child.args, "systemctl", "--user", "list-timers", NULL);
-	child.no_stdin = 1;
-	child.no_stdout = 1;
-	child.no_stderr = 1;
-	child.silent_exec_failure = 1;
+	strvec_pushl(&బిడ్డ.వాదనలు, "systemctl", "--user", "list-timers", ఖాళీ);
+	బిడ్డ.no_stdin = 1;
+	బిడ్డ.no_stdout = 1;
+	బిడ్డ.no_stderr = 1;
+	బిడ్డ.silent_exec_failure = 1;
 
-	if (start_command(&child))
-		return 0;
-	if (finish_command(&child))
-		return 0;
-	return 1;
+	ఒకవేళ (ప్రారంభం_command(&బిడ్డ))
+		తిరిగి 0;
+	ఒకవేళ (ముగింపు_command(&బిడ్డ))
+		తిరిగి 0;
+	తిరిగి 1;
 }
 
-static int is_systemd_timer_available(void)
+స్థిర పూర్ణాంకం is_systemd_timer_అందుబాటు(శూన్య)
 {
-	int is_available;
+	పూర్ణాంకం is_అందుబాటు;
 
-	if (get_schedule_cmd("systemctl", &is_available, NULL))
-		return is_available;
+	ఒకవేళ (get_కాలపట్టిక_cmd("systemctl", &is_అందుబాటు, ఖాళీ))
+		తిరిగి is_అందుబాటు;
 
-	return real_is_systemd_timer_available();
+	తిరిగి real_is_systemd_timer_అందుబాటు();
 }
 
-static char *xdg_config_home_systemd(const char *filename)
+స్థిర అక్షరం *xdg_config_home_systemd(స్థిరరాశి అక్షరం *filename)
 {
-	return xdg_config_home_for("systemd/user", filename);
+	తిరిగి xdg_config_home_for("systemd/user", filename);
 }
 
-#define SYSTEMD_UNIT_FORMAT "git-maintenance@%s.%s"
+#నిర్వచించు SYSTEMD_UNIT_FORMAT "git-maintenance@%s.%s"
 
-static int systemd_timer_delete_timer_file(enum schedule_priority priority)
+స్థిర పూర్ణాంకం systemd_timer_delete_timer_file(గణన కాలపట్టిక_ప్రాధాన్యత ప్రాధాన్యత)
 {
-	int ret = 0;
-	const char *frequency = get_frequency(priority);
-	char *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
-	char *filename = xdg_config_home_systemd(local_timer_name);
+	పూర్ణాంకం ret = 0;
+	స్థిరరాశి అక్షరం *frequency = get_frequency(ప్రాధాన్యత);
+	అక్షరం *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
+	అక్షరం *filename = xdg_config_home_systemd(local_timer_name);
 
-	if (unlink(filename) && !is_missing_file_error(errno))
+	ఒకవేళ (unlink(filename) && !is_missing_file_error(errno))
 		ret = error_errno(_("failed to delete '%s'"), filename);
 
-	free(filename);
-	free(local_timer_name);
-	return ret;
+	విడుదల(filename);
+	విడుదల(local_timer_name);
+	తిరిగి ret;
 }
 
-static int systemd_timer_delete_service_template(void)
+స్థిర పూర్ణాంకం systemd_timer_delete_service_template(శూన్య)
 {
-	int ret = 0;
-	char *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
-	char *filename = xdg_config_home_systemd(local_service_name);
-	if (unlink(filename) && !is_missing_file_error(errno))
+	పూర్ణాంకం ret = 0;
+	అక్షరం *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
+	అక్షరం *filename = xdg_config_home_systemd(local_service_name);
+	ఒకవేళ (unlink(filename) && !is_missing_file_error(errno))
 		ret = error_errno(_("failed to delete '%s'"), filename);
 
-	free(filename);
-	free(local_service_name);
-	return ret;
+	విడుదల(filename);
+	విడుదల(local_service_name);
+	తిరిగి ret;
 }
 
 /*
@@ -2607,41 +2607,41 @@ static int systemd_timer_delete_service_template(void)
  * file using a custom minute. This timer file cannot use the templating
  * system, so we generate a specific file for each.
  */
-static int systemd_timer_write_timer_file(enum schedule_priority schedule,
-					  int minute)
+స్థిర పూర్ణాంకం systemd_timer_write_timer_file(గణన కాలపట్టిక_ప్రాధాన్యత కాలపట్టిక,
+					  పూర్ణాంకం minute)
 {
-	int res = -1;
-	char *filename;
+	పూర్ణాంకం res = -1;
+	అక్షరం *filename;
 	FILE *file;
-	const char *unit;
-	char *schedule_pattern = NULL;
-	const char *frequency = get_frequency(schedule);
-	char *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
+	స్థిరరాశి అక్షరం *unit;
+	అక్షరం *కాలపట్టిక_నమూనా = ఖాళీ;
+	స్థిరరాశి అక్షరం *frequency = get_frequency(కాలపట్టిక);
+	అక్షరం *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
 
 	filename = xdg_config_home_systemd(local_timer_name);
 
-	if (safe_create_leading_directories(the_repository, filename)) {
+	ఒకవేళ (సురక్షిత_create_leading_directories(the_repository, filename)) {
 		error(_("failed to create directories for '%s'"), filename);
-		goto error;
+		వెళ్ళు error;
 	}
 	file = fopen_or_warn(filename, "w");
-	if (!file)
-		goto error;
+	ఒకవేళ (!file)
+		వెళ్ళు error;
 
-	switch (schedule) {
-	case SCHEDULE_HOURLY:
-		schedule_pattern = xstrfmt("*-*-* 1..23:%02d:00", minute);
-		break;
+	ఎంపిక (కాలపట్టిక) {
+	స్థితి కాలపట్టిక_HOURLY:
+		కాలపట్టిక_నమూనా = xstrfmt("*-*-* 1..23:%02d:00", minute);
+		ఆపు;
 
-	case SCHEDULE_DAILY:
-		schedule_pattern = xstrfmt("Tue..Sun *-*-* 0:%02d:00", minute);
-		break;
+	స్థితి కాలపట్టిక_DAILY:
+		కాలపట్టిక_నమూనా = xstrfmt("Tue..Sun *-*-* 0:%02d:00", minute);
+		ఆపు;
 
-	case SCHEDULE_WEEKLY:
-		schedule_pattern = xstrfmt("Mon 0:%02d:00", minute);
-		break;
+	స్థితి కాలపట్టిక_WEEKLY:
+		కాలపట్టిక_నమూనా = xstrfmt("Mon 0:%02d:00", minute);
+		ఆపు;
 
-	default:
+	అప్రమేయ:
 		BUG("Unhandled schedule_priority");
 	}
 
@@ -2658,23 +2658,23 @@ static int systemd_timer_write_timer_file(enum schedule_priority schedule,
 	       "\n"
 	       "[Install]\n"
 	       "WantedBy=timers.target\n";
-	if (fprintf(file, unit, schedule_pattern) < 0) {
+	ఒకవేళ (fprintf(file, unit, కాలపట్టిక_నమూనా) < 0) {
 		error(_("failed to write to '%s'"), filename);
 		fclose(file);
-		goto error;
+		వెళ్ళు error;
 	}
-	if (fclose(file) == EOF) {
+	ఒకవేళ (fclose(file) == EOF) {
 		error_errno(_("failed to flush '%s'"), filename);
-		goto error;
+		వెళ్ళు error;
 	}
 
 	res = 0;
 
 error:
-	free(schedule_pattern);
-	free(local_timer_name);
-	free(filename);
-	return res;
+	విడుదల(కాలపట్టిక_నమూనా);
+	విడుదల(local_timer_name);
+	విడుదల(filename);
+	తిరిగి res;
 }
 
 /*
@@ -2684,22 +2684,22 @@ error:
  * and will use this file and insert the <schedule> into the template at
  * the position of "%i".
  */
-static int systemd_timer_write_service_template(const char *exec_path)
+స్థిర పూర్ణాంకం systemd_timer_write_service_template(స్థిరరాశి అక్షరం *exec_మార్గం)
 {
-	int res = -1;
-	char *filename;
+	పూర్ణాంకం res = -1;
+	అక్షరం *filename;
 	FILE *file;
-	const char *unit;
-	char *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
+	స్థిరరాశి అక్షరం *unit;
+	అక్షరం *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
 
 	filename = xdg_config_home_systemd(local_service_name);
-	if (safe_create_leading_directories(the_repository, filename)) {
+	ఒకవేళ (సురక్షిత_create_leading_directories(the_repository, filename)) {
 		error(_("failed to create directories for '%s'"), filename);
-		goto error;
+		వెళ్ళు error;
 	}
 	file = fopen_or_warn(filename, "w");
-	if (!file)
-		goto error;
+	ఒకవేళ (!file)
+		వెళ్ళు error;
 
 	unit = "# This file was created and is maintained by Git.\n"
 	       "# Any edits made in this file might be replaced in the future\n"
@@ -2720,32 +2720,32 @@ static int systemd_timer_write_service_template(const char *exec_path)
 	       "RestrictSUIDSGID=yes\n"
 	       "SystemCallArchitectures=native\n"
 	       "SystemCallFilter=@system-service\n";
-	if (fprintf(file, unit, exec_path, exec_path, get_extra_config_parameters()) < 0) {
+	ఒకవేళ (fprintf(file, unit, exec_మార్గం, exec_మార్గం, get_extra_config_parameters()) < 0) {
 		error(_("failed to write to '%s'"), filename);
 		fclose(file);
-		goto error;
+		వెళ్ళు error;
 	}
-	if (fclose(file) == EOF) {
+	ఒకవేళ (fclose(file) == EOF) {
 		error_errno(_("failed to flush '%s'"), filename);
-		goto error;
+		వెళ్ళు error;
 	}
 
 	res = 0;
 
 error:
-	free(local_service_name);
-	free(filename);
-	return res;
+	విడుదల(local_service_name);
+	విడుదల(filename);
+	తిరిగి res;
 }
 
-static int systemd_timer_enable_unit(int enable,
-				     enum schedule_priority schedule,
-				     int minute)
+స్థిర పూర్ణాంకం systemd_timer_enable_unit(పూర్ణాంకం enable,
+				     గణన కాలపట్టిక_ప్రాధాన్యత కాలపట్టిక,
+				     పూర్ణాంకం minute)
 {
-	char *cmd = NULL;
-	struct child_process child = CHILD_PROCESS_INIT;
-	const char *frequency = get_frequency(schedule);
-	int ret;
+	అక్షరం *cmd = ఖాళీ;
+	నిర్మాణం బిడ్డ_process బిడ్డ = బిడ్డ_PROCESS_INIT;
+	స్థిరరాశి అక్షరం *frequency = get_frequency(కాలపట్టిక);
+	పూర్ణాంకం ret;
 
 	/*
 	 * Disabling the systemd unit while it is already disabled makes
@@ -2756,25 +2756,25 @@ static int systemd_timer_enable_unit(int enable,
 	 * On the other hand, enabling a systemd unit which is already enabled
 	 * produces no error.
 	 */
-	if (!enable) {
-		child.no_stderr = 1;
-	} else if (systemd_timer_write_timer_file(schedule, minute)) {
+	ఒకవేళ (!enable) {
+		బిడ్డ.no_stderr = 1;
+	} లేకపోతే ఒకవేళ (systemd_timer_write_timer_file(కాలపట్టిక, minute)) {
 		ret = -1;
-		goto out;
+		వెళ్ళు బహిర్గతం;
 	}
 
-	get_schedule_cmd("systemctl", NULL, &cmd);
-	strvec_split(&child.args, cmd);
-	strvec_pushl(&child.args, "--user", enable ? "enable" : "disable",
-		     "--now", NULL);
-	strvec_pushf(&child.args, SYSTEMD_UNIT_FORMAT, frequency, "timer");
+	get_కాలపట్టిక_cmd("systemctl", ఖాళీ, &cmd);
+	strvec_విభజించు(&బిడ్డ.వాదనలు, cmd);
+	strvec_pushl(&బిడ్డ.వాదనలు, "--user", enable ? "enable" : "disable",
+		     "--now", ఖాళీ);
+	strvec_pushf(&బిడ్డ.వాదనలు, SYSTEMD_UNIT_FORMAT, frequency, "timer");
 
-	if (start_command(&child)) {
+	ఒకవేళ (ప్రారంభం_command(&బిడ్డ)) {
 		ret = error(_("failed to start systemctl"));
-		goto out;
+		వెళ్ళు బహిర్గతం;
 	}
 
-	if (finish_command(&child)) {
+	ఒకవేళ (ముగింపు_command(&బిడ్డ)) {
 		/*
 		 * Disabling an already disabled systemd unit makes
 		 * systemctl fail.
@@ -2782,83 +2782,83 @@ static int systemd_timer_enable_unit(int enable,
 		 *
 		 * Enabling an enabled systemd unit doesn't fail.
 		 */
-		if (enable) {
+		ఒకవేళ (enable) {
 			ret = error(_("failed to run systemctl"));
-			goto out;
+			వెళ్ళు బహిర్గతం;
 		}
 	}
 
 	ret = 0;
 
-out:
-	free(cmd);
-	return ret;
+బహిర్గతం:
+	విడుదల(cmd);
+	తిరిగి ret;
 }
 
 /*
  * A previous version of Git wrote the timer units as template files.
  * Clean these up, if they exist.
  */
-static void systemd_timer_delete_stale_timer_templates(void)
+స్థిర శూన్య systemd_timer_delete_stale_timer_templates(శూన్య)
 {
-	char *timer_template_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "timer");
-	char *filename = xdg_config_home_systemd(timer_template_name);
+	అక్షరం *timer_template_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "timer");
+	అక్షరం *filename = xdg_config_home_systemd(timer_template_name);
 
-	if (unlink(filename) && !is_missing_file_error(errno))
+	ఒకవేళ (unlink(filename) && !is_missing_file_error(errno))
 		warning(_("failed to delete '%s'"), filename);
 
-	free(filename);
-	free(timer_template_name);
+	విడుదల(filename);
+	విడుదల(timer_template_name);
 }
 
-static int systemd_timer_delete_unit_files(void)
+స్థిర పూర్ణాంకం systemd_timer_delete_unit_files(శూన్య)
 {
 	systemd_timer_delete_stale_timer_templates();
 
 	/* Purposefully not short-circuited to make sure all are called. */
-	return systemd_timer_delete_timer_file(SCHEDULE_HOURLY) |
-	       systemd_timer_delete_timer_file(SCHEDULE_DAILY) |
-	       systemd_timer_delete_timer_file(SCHEDULE_WEEKLY) |
+	తిరిగి systemd_timer_delete_timer_file(కాలపట్టిక_HOURLY) |
+	       systemd_timer_delete_timer_file(కాలపట్టిక_DAILY) |
+	       systemd_timer_delete_timer_file(కాలపట్టిక_WEEKLY) |
 	       systemd_timer_delete_service_template();
 }
 
-static int systemd_timer_delete_units(void)
+స్థిర పూర్ణాంకం systemd_timer_delete_units(శూన్య)
 {
-	int minute = get_random_minute();
+	పూర్ణాంకం minute = get_random_minute();
 	/* Purposefully not short-circuited to make sure all are called. */
-	return systemd_timer_enable_unit(0, SCHEDULE_HOURLY, minute) |
-	       systemd_timer_enable_unit(0, SCHEDULE_DAILY, minute) |
-	       systemd_timer_enable_unit(0, SCHEDULE_WEEKLY, minute) |
+	తిరిగి systemd_timer_enable_unit(0, కాలపట్టిక_HOURLY, minute) |
+	       systemd_timer_enable_unit(0, కాలపట్టిక_DAILY, minute) |
+	       systemd_timer_enable_unit(0, కాలపట్టిక_WEEKLY, minute) |
 	       systemd_timer_delete_unit_files();
 }
 
-static int systemd_timer_setup_units(void)
+స్థిర పూర్ణాంకం systemd_timer_అమరిక_units(శూన్య)
 {
-	int minute = get_random_minute();
-	const char *exec_path = git_exec_path();
+	పూర్ణాంకం minute = get_random_minute();
+	స్థిరరాశి అక్షరం *exec_మార్గం = git_exec_మార్గం();
 
-	int ret = systemd_timer_write_service_template(exec_path) ||
-		  systemd_timer_enable_unit(1, SCHEDULE_HOURLY, minute) ||
-		  systemd_timer_enable_unit(1, SCHEDULE_DAILY, minute) ||
-		  systemd_timer_enable_unit(1, SCHEDULE_WEEKLY, minute);
+	పూర్ణాంకం ret = systemd_timer_write_service_template(exec_మార్గం) ||
+		  systemd_timer_enable_unit(1, కాలపట్టిక_HOURLY, minute) ||
+		  systemd_timer_enable_unit(1, కాలపట్టిక_DAILY, minute) ||
+		  systemd_timer_enable_unit(1, కాలపట్టిక_WEEKLY, minute);
 
-	if (ret)
+	ఒకవేళ (ret)
 		systemd_timer_delete_units();
-	else
+	లేకపోతే
 		systemd_timer_delete_stale_timer_templates();
 
-	return ret;
+	తిరిగి ret;
 }
 
-static int systemd_timer_update_schedule(int run_maintenance, int fd UNUSED)
+స్థిర పూర్ణాంకం systemd_timer_update_కాలపట్టిక(పూర్ణాంకం నిరంతరం_maintenance, పూర్ణాంకం fd వాడని)
 {
-	if (run_maintenance)
-		return systemd_timer_setup_units();
-	else
-		return systemd_timer_delete_units();
+	ఒకవేళ (నిరంతరం_maintenance)
+		తిరిగి systemd_timer_అమరిక_units();
+	లేకపోతే
+		తిరిగి systemd_timer_delete_units();
 }
 
-enum scheduler {
+గణన scheduler {
 	SCHEDULER_INVALID = -1,
 	SCHEDULER_AUTO,
 	SCHEDULER_CRON,
@@ -2867,236 +2867,236 @@ enum scheduler {
 	SCHEDULER_SCHTASKS,
 };
 
-static const struct {
-	const char *name;
-	int (*is_available)(void);
-	int (*update_schedule)(int run_maintenance, int fd);
+స్థిర స్థిరరాశి నిర్మాణం {
+	స్థిరరాశి అక్షరం *name;
+	పూర్ణాంకం (*is_అందుబాటు)(శూన్య);
+	పూర్ణాంకం (*update_కాలపట్టిక)(పూర్ణాంకం నిరంతరం_maintenance, పూర్ణాంకం fd);
 } scheduler_fn[] = {
 	[SCHEDULER_CRON] = {
 		.name = "crontab",
-		.is_available = is_crontab_available,
-		.update_schedule = crontab_update_schedule,
+		.is_అందుబాటు = is_crontab_అందుబాటు,
+		.update_కాలపట్టిక = crontab_update_కాలపట్టిక,
 	},
 	[SCHEDULER_SYSTEMD] = {
 		.name = "systemctl",
-		.is_available = is_systemd_timer_available,
-		.update_schedule = systemd_timer_update_schedule,
+		.is_అందుబాటు = is_systemd_timer_అందుబాటు,
+		.update_కాలపట్టిక = systemd_timer_update_కాలపట్టిక,
 	},
 	[SCHEDULER_LAUNCHCTL] = {
 		.name = "launchctl",
-		.is_available = is_launchctl_available,
-		.update_schedule = launchctl_update_schedule,
+		.is_అందుబాటు = is_launchctl_అందుబాటు,
+		.update_కాలపట్టిక = launchctl_update_కాలపట్టిక,
 	},
 	[SCHEDULER_SCHTASKS] = {
 		.name = "schtasks",
-		.is_available = is_schtasks_available,
-		.update_schedule = schtasks_update_schedule,
+		.is_అందుబాటు = is_schtasks_అందుబాటు,
+		.update_కాలపట్టిక = schtasks_update_కాలపట్టిక,
 	},
 };
 
-static enum scheduler parse_scheduler(const char *value)
+స్థిర గణన scheduler parse_scheduler(స్థిరరాశి అక్షరం *విలువ)
 {
-	if (!value)
-		return SCHEDULER_INVALID;
-	else if (!strcasecmp(value, "auto"))
-		return SCHEDULER_AUTO;
-	else if (!strcasecmp(value, "cron") || !strcasecmp(value, "crontab"))
-		return SCHEDULER_CRON;
-	else if (!strcasecmp(value, "systemd") ||
-		 !strcasecmp(value, "systemd-timer"))
-		return SCHEDULER_SYSTEMD;
-	else if (!strcasecmp(value, "launchctl"))
-		return SCHEDULER_LAUNCHCTL;
-	else if (!strcasecmp(value, "schtasks"))
-		return SCHEDULER_SCHTASKS;
-	else
-		return SCHEDULER_INVALID;
+	ఒకవేళ (!విలువ)
+		తిరిగి SCHEDULER_INVALID;
+	లేకపోతే ఒకవేళ (!strcasecmp(విలువ, "auto"))
+		తిరిగి SCHEDULER_AUTO;
+	లేకపోతే ఒకవేళ (!strcasecmp(విలువ, "cron") || !strcasecmp(విలువ, "crontab"))
+		తిరిగి SCHEDULER_CRON;
+	లేకపోతే ఒకవేళ (!strcasecmp(విలువ, "systemd") ||
+		 !strcasecmp(విలువ, "systemd-timer"))
+		తిరిగి SCHEDULER_SYSTEMD;
+	లేకపోతే ఒకవేళ (!strcasecmp(విలువ, "launchctl"))
+		తిరిగి SCHEDULER_LAUNCHCTL;
+	లేకపోతే ఒకవేళ (!strcasecmp(విలువ, "schtasks"))
+		తిరిగి SCHEDULER_SCHTASKS;
+	లేకపోతే
+		తిరిగి SCHEDULER_INVALID;
 }
 
-static int maintenance_opt_scheduler(const struct option *opt, const char *arg,
-				     int unset)
+స్థిర పూర్ణాంకం maintenance_opt_scheduler(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg,
+				     పూర్ణాంకం unset)
 {
-	enum scheduler *scheduler = opt->value;
+	గణన scheduler *scheduler = opt->విలువ;
 
 	BUG_ON_OPT_NEG(unset);
 
 	*scheduler = parse_scheduler(arg);
-	if (*scheduler == SCHEDULER_INVALID)
-		return error(_("unrecognized --scheduler argument '%s'"), arg);
-	return 0;
+	ఒకవేళ (*scheduler == SCHEDULER_INVALID)
+		తిరిగి error(_("unrecognized --scheduler argument '%s'"), arg);
+	తిరిగి 0;
 }
 
-struct maintenance_start_opts {
-	enum scheduler scheduler;
+నిర్మాణం maintenance_ప్రారంభం_opts {
+	గణన scheduler scheduler;
 };
 
-static enum scheduler resolve_scheduler(enum scheduler scheduler)
+స్థిర గణన scheduler resolve_scheduler(గణన scheduler scheduler)
 {
-	if (scheduler != SCHEDULER_AUTO)
-		return scheduler;
+	ఒకవేళ (scheduler != SCHEDULER_AUTO)
+		తిరిగి scheduler;
 
-#if defined(__APPLE__)
-	return SCHEDULER_LAUNCHCTL;
+#ఒకవేళ defined(__APPLE__)
+	తిరిగి SCHEDULER_LAUNCHCTL;
 
-#elif defined(GIT_WINDOWS_NATIVE)
-	return SCHEDULER_SCHTASKS;
+#లేదావేళ defined(GIT_WINDOWS_NATIVE)
+	తిరిగి SCHEDULER_SCHTASKS;
 
-#elif defined(__linux__)
-	if (is_systemd_timer_available())
-		return SCHEDULER_SYSTEMD;
-	else if (is_crontab_available())
-		return SCHEDULER_CRON;
-	else
+#లేదావేళ defined(__linux__)
+	ఒకవేళ (is_systemd_timer_అందుబాటు())
+		తిరిగి SCHEDULER_SYSTEMD;
+	లేకపోతే ఒకవేళ (is_crontab_అందుబాటు())
+		తిరిగి SCHEDULER_CRON;
+	లేకపోతే
 		die(_("neither systemd timers nor crontab are available"));
 
-#else
-	return SCHEDULER_CRON;
-#endif
+#లేకపోతే
+	తిరిగి SCHEDULER_CRON;
+#అయితే_ముగింపు
 }
 
-static void validate_scheduler(enum scheduler scheduler)
+స్థిర శూన్య validate_scheduler(గణన scheduler scheduler)
 {
-	if (scheduler == SCHEDULER_INVALID)
+	ఒకవేళ (scheduler == SCHEDULER_INVALID)
 		BUG("invalid scheduler");
-	if (scheduler == SCHEDULER_AUTO)
+	ఒకవేళ (scheduler == SCHEDULER_AUTO)
 		BUG("resolve_scheduler should have been called before");
 
-	if (!scheduler_fn[scheduler].is_available())
+	ఒకవేళ (!scheduler_fn[scheduler].is_అందుబాటు())
 		die(_("%s scheduler is not available"),
 		    scheduler_fn[scheduler].name);
 }
 
-static int update_background_schedule(const struct maintenance_start_opts *opts,
-				      int enable)
+స్థిర పూర్ణాంకం update_background_కాలపట్టిక(స్థిరరాశి నిర్మాణం maintenance_ప్రారంభం_opts *opts,
+				      పూర్ణాంకం enable)
 {
-	unsigned int i;
-	int result = 0;
-	struct lock_file lk;
-	char *lock_path = xstrfmt("%s/schedule", the_repository->objects->source->path);
+	గుర్తులేని పూర్ణాంకం i;
+	పూర్ణాంకం ఫలితం = 0;
+	నిర్మాణం తాళం_file lk;
+	అక్షరం *తాళం_మార్గం = xstrfmt("%s/schedule", the_repository->objects->ఆధారం->మార్గం);
 
-	if (hold_lock_file_for_update(&lk, lock_path, LOCK_NO_DEREF) < 0) {
-		if (errno == EEXIST)
+	ఒకవేళ (hold_తాళం_file_for_update(&lk, తాళం_మార్గం, తాళం_NO_DEREF) < 0) {
+		ఒకవేళ (errno == EEXIST)
 			error(_("unable to create '%s.lock': %s.\n\n"
 			    "Another scheduled git-maintenance(1) process seems to be running in this\n"
 			    "repository. Please make sure no other maintenance processes are running and\n"
 			    "then try again. If it still fails, a git-maintenance(1) process may have\n"
 			    "crashed in this repository earlier: remove the file manually to continue."),
-			    absolute_path(lock_path), strerror(errno));
-		else
+			    absolute_మార్గం(తాళం_మార్గం), strerror(errno));
+		లేకపోతే
 			error_errno(_("cannot acquire lock for scheduled background maintenance"));
-		free(lock_path);
-		return -1;
+		విడుదల(తాళం_మార్గం);
+		తిరిగి -1;
 	}
 
-	for (i = 1; i < ARRAY_SIZE(scheduler_fn); i++) {
-		if (enable && opts->scheduler == i)
-			continue;
-		if (!scheduler_fn[i].is_available())
-			continue;
-		scheduler_fn[i].update_schedule(0, get_lock_file_fd(&lk));
+	కొరకు (i = 1; i < ARRAY_కొలత(scheduler_fn); i++) {
+		ఒకవేళ (enable && opts->scheduler == i)
+			కొనసాగు;
+		ఒకవేళ (!scheduler_fn[i].is_అందుబాటు())
+			కొనసాగు;
+		scheduler_fn[i].update_కాలపట్టిక(0, get_తాళం_file_fd(&lk));
 	}
 
-	if (enable)
-		result = scheduler_fn[opts->scheduler].update_schedule(
-			1, get_lock_file_fd(&lk));
+	ఒకవేళ (enable)
+		ఫలితం = scheduler_fn[opts->scheduler].update_కాలపట్టిక(
+			1, get_తాళం_file_fd(&lk));
 
-	rollback_lock_file(&lk);
+	rollback_తాళం_file(&lk);
 
-	free(lock_path);
-	return result;
+	విడుదల(తాళం_మార్గం);
+	తిరిగి ఫలితం;
 }
 
-static const char *const builtin_maintenance_start_usage[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి builtin_maintenance_ప్రారంభం_usage[] = {
 	N_("git maintenance start [--scheduler=<scheduler>]"),
-	NULL
+	ఖాళీ
 };
 
-static int maintenance_start(int argc, const char **argv, const char *prefix,
-			     struct repository *repo)
+స్థిర పూర్ణాంకం maintenance_ప్రారంభం(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			     నిర్మాణం repository *repo)
 {
-	struct maintenance_start_opts opts = { 0 };
-	struct option options[] = {
+	నిర్మాణం maintenance_ప్రారంభం_opts opts = { 0 };
+	నిర్మాణం option options[] = {
 		OPT_CALLBACK_F(
 			0, "scheduler", &opts.scheduler, N_("scheduler"),
 			N_("scheduler to trigger git maintenance run"),
 			PARSE_OPT_NONEG, maintenance_opt_scheduler),
-		OPT_END()
+		OPT_చివర()
 	};
-	const char *register_args[] = { "register", NULL };
+	స్థిరరాశి అక్షరం *రిజిస్టరు_వాదనలు[] = { "register", ఖాళీ };
 
-	argc = parse_options(argc, argv, prefix, options,
-			     builtin_maintenance_start_usage, 0);
-	if (argc)
-		usage_with_options(builtin_maintenance_start_usage, options);
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
+			     builtin_maintenance_ప్రారంభం_usage, 0);
+	ఒకవేళ (argc)
+		usage_with_options(builtin_maintenance_ప్రారంభం_usage, options);
 
 	opts.scheduler = resolve_scheduler(opts.scheduler);
 	validate_scheduler(opts.scheduler);
 
-	if (update_background_schedule(&opts, 1))
+	ఒకవేళ (update_background_కాలపట్టిక(&opts, 1))
 		die(_("failed to set up maintenance schedule"));
 
-	if (maintenance_register(ARRAY_SIZE(register_args)-1, register_args, NULL, repo))
+	ఒకవేళ (maintenance_రిజిస్టరు(ARRAY_కొలత(రిజిస్టరు_వాదనలు)-1, రిజిస్టరు_వాదనలు, ఖాళీ, repo))
 		warning(_("failed to add repo to global config"));
-	return 0;
+	తిరిగి 0;
 }
 
-static const char *const builtin_maintenance_stop_usage[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి builtin_maintenance_stop_usage[] = {
 	"git maintenance stop",
-	NULL
+	ఖాళీ
 };
 
-static int maintenance_stop(int argc, const char **argv, const char *prefix,
-			    struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం maintenance_stop(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			    నిర్మాణం repository *repo వాడని)
 {
-	struct option options[] = {
-		OPT_END()
+	నిర్మాణం option options[] = {
+		OPT_చివర()
 	};
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     builtin_maintenance_stop_usage, 0);
-	if (argc)
+	ఒకవేళ (argc)
 		usage_with_options(builtin_maintenance_stop_usage, options);
-	return update_background_schedule(NULL, 0);
+	తిరిగి update_background_కాలపట్టిక(ఖాళీ, 0);
 }
 
-static const char *const builtin_maintenance_is_needed_usage[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి builtin_maintenance_is_needed_usage[] = {
 	"git maintenance is-needed [--task=<task>] [--schedule]",
-	NULL
+	ఖాళీ
 };
 
-static int maintenance_is_needed(int argc, const char **argv, const char *prefix,
-				 struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం maintenance_is_needed(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+				 నిర్మాణం repository *repo వాడని)
 {
-	struct maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
-	struct string_list selected_tasks = STRING_LIST_INIT_DUP;
-	struct gc_config cfg = GC_CONFIG_INIT;
-	struct option options[] = {
+	నిర్మాణం maintenance_నిరంతరం_opts opts = MAINTENANCE_నిరంతరం_OPTS_INIT;
+	నిర్మాణం string_list selected_tasks = STRING_LIST_INIT_DUP;
+	నిర్మాణం gc_config cfg = GC_CONFIG_INIT;
+	నిర్మాణం option options[] = {
 		OPT_BOOL(0, "auto", &opts.auto_flag,
 			 N_("run tasks based on the state of the repository")),
 		OPT_CALLBACK_F(0, "task", &selected_tasks, N_("task"),
 			       N_("check a specific task"),
 			       PARSE_OPT_NONEG, task_option_parse),
-		OPT_END()
+		OPT_చివర()
 	};
 	bool is_needed = false;
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     builtin_maintenance_is_needed_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
-	if (argc)
+	ఒకవేళ (argc)
 		usage_with_options(builtin_maintenance_is_needed_usage, options);
 
 	gc_config(&cfg);
 	initialize_task_config(&opts, &selected_tasks);
 
-	if (opts.auto_flag) {
-		for (size_t i = 0; i < opts.tasks_nr; i++) {
-			if (tasks[opts.tasks[i]].auto_condition &&
+	ఒకవేళ (opts.auto_flag) {
+		కొరకు (కొలత_t i = 0; i < opts.tasks_nr; i++) {
+			ఒకవేళ (tasks[opts.tasks[i]].auto_condition &&
 			    tasks[opts.tasks[i]].auto_condition(&cfg)) {
 				is_needed = true;
-				break;
+				ఆపు;
 			}
 		}
-	} else {
+	} లేకపోతే {
 		/*
 		 * When not using --auto we always require maintenance right now.
 		 *
@@ -3110,36 +3110,36 @@ static int maintenance_is_needed(int argc, const char **argv, const char *prefix
 	}
 
 	string_list_clear(&selected_tasks, 0);
-	maintenance_run_opts_release(&opts);
+	maintenance_నిరంతరం_opts_release(&opts);
 	gc_config_release(&cfg);
 
-	if (is_needed)
-		return 0;
-	return 1;
+	ఒకవేళ (is_needed)
+		తిరిగి 0;
+	తిరిగి 1;
 }
 
-static const char *const builtin_maintenance_usage[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి builtin_maintenance_usage[] = {
 	N_("git maintenance <subcommand> [<options>]"),
-	NULL,
+	ఖాళీ,
 };
 
-int cmd_maintenance(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo)
+పూర్ణాంకం cmd_maintenance(పూర్ణాంకం argc,
+		    స్థిరరాశి అక్షరం **argv,
+		    స్థిరరాశి అక్షరం *ఉపసర్గ,
+		    నిర్మాణం repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option builtin_maintenance_options[] = {
-		OPT_SUBCOMMAND("run", &fn, maintenance_run),
-		OPT_SUBCOMMAND("start", &fn, maintenance_start),
+	parse_opt_subcommand_fn *fn = ఖాళీ;
+	నిర్మాణం option builtin_maintenance_options[] = {
+		OPT_SUBCOMMAND("run", &fn, maintenance_నిరంతరం),
+		OPT_SUBCOMMAND("start", &fn, maintenance_ప్రారంభం),
 		OPT_SUBCOMMAND("stop", &fn, maintenance_stop),
-		OPT_SUBCOMMAND("register", &fn, maintenance_register),
+		OPT_SUBCOMMAND("register", &fn, maintenance_రిజిస్టరు),
 		OPT_SUBCOMMAND("unregister", &fn, maintenance_unregister),
 		OPT_SUBCOMMAND("is-needed", &fn, maintenance_is_needed),
-		OPT_END(),
+		OPT_చివర(),
 	};
 
-	argc = parse_options(argc, argv, prefix, builtin_maintenance_options,
+	argc = parse_options(argc, argv, ఉపసర్గ, builtin_maintenance_options,
 			     builtin_maintenance_usage, 0);
-	return fn(argc, argv, prefix, repo);
+	తిరిగి fn(argc, argv, ఉపసర్గ, repo);
 }

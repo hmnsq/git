@@ -1,65 +1,65 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "config.h"
-#include "commit.h"
-#include "tag.h"
-#include "refs.h"
-#include "object-name.h"
-#include "pager.h"
-#include "parse-options.h"
-#include "hash-lookup.h"
-#include "commit-slab.h"
-#include "commit-graph.h"
-#include "wildmatch.h"
-#include "mem-pool.h"
-#include "pretty.h"
-#include "revision.h"
-#include "notes.h"
-#include "write-or-die.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "commit.h"
+#అన్తర్భావ "tag.h"
+#అన్తర్భావ "refs.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "pager.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "hash-lookup.h"
+#అన్తర్భావ "commit-slab.h"
+#అన్తర్భావ "commit-graph.h"
+#అన్తర్భావ "wildmatch.h"
+#అన్తర్భావ "mem-pool.h"
+#అన్తర్భావ "pretty.h"
+#అన్తర్భావ "revision.h"
+#అన్తర్భావ "notes.h"
+#అన్తర్భావ "write-or-die.h"
 
 /*
  * One day.  See the 'name a rev shortly after epoch' test in t6120 when
  * changing this value
  */
-#define CUTOFF_DATE_SLOP 86400
+#నిర్వచించు CUTOFF_DATE_SLOP 86400
 
-struct rev_name {
-	const char *tip_name;
+నిర్మాణం rev_name {
+	స్థిరరాశి అక్షరం *tip_name;
 	timestamp_t taggerdate;
-	int generation;
-	int distance;
-	int from_tag;
+	పూర్ణాంకం generation;
+	పూర్ణాంకం దూరం;
+	పూర్ణాంకం from_ట్యాగ్;
 };
 
-define_commit_slab(commit_rev_name, struct rev_name);
+define_commit_slab(commit_rev_name, నిర్మాణం rev_name);
 
-static timestamp_t generation_cutoff = GENERATION_NUMBER_INFINITY;
-static timestamp_t cutoff = TIME_MAX;
-static struct commit_rev_name rev_names;
+స్థిర timestamp_t generation_cutoff = GENERATION_సంఖ్య_INFINITY;
+స్థిర timestamp_t cutoff = సమయం_MAX;
+స్థిర నిర్మాణం commit_rev_name rev_పేర్లు;
 
 /* Disable the cutoff checks entirely */
-static void disable_cutoff(void)
+స్థిర శూన్య disable_cutoff(శూన్య)
 {
 	generation_cutoff = 0;
 	cutoff = 0;
 }
 
 /* Cutoff searching any commits older than this one */
-static void set_commit_cutoff(struct commit *commit)
+స్థిర శూన్య సమితి_commit_cutoff(నిర్మాణం commit *commit)
 {
 
-	if (cutoff > commit->date)
+	ఒకవేళ (cutoff > commit->date)
 		cutoff = commit->date;
 
-	if (generation_cutoff) {
-		timestamp_t generation = commit_graph_generation(commit);
+	ఒకవేళ (generation_cutoff) {
+		timestamp_t generation = commit_లేఖాచిత్రం_generation(commit);
 
-		if (generation_cutoff > generation)
+		ఒకవేళ (generation_cutoff > generation)
 			generation_cutoff = generation;
 	}
 }
@@ -67,340 +67,340 @@ static void set_commit_cutoff(struct commit *commit)
 /* adjust the commit date cutoff with a slop to allow for slightly incorrect
  * commit timestamps in case of clock skew.
  */
-static void adjust_cutoff_timestamp_for_slop(void)
+స్థిర శూన్య adjust_cutoff_timestamp_for_slop(శూన్య)
 {
-	if (cutoff) {
+	ఒకవేళ (cutoff) {
 		/* check for underflow */
-		if (cutoff > TIME_MIN + CUTOFF_DATE_SLOP)
+		ఒకవేళ (cutoff > సమయం_MIN + CUTOFF_DATE_SLOP)
 			cutoff = cutoff - CUTOFF_DATE_SLOP;
-		else
-			cutoff = TIME_MIN;
+		లేకపోతే
+			cutoff = సమయం_MIN;
 	}
 }
 
 /* Check if a commit is before the cutoff. Prioritize generation numbers
  * first, but use the commit timestamp if we lack generation data.
  */
-static int commit_is_before_cutoff(struct commit *commit)
+స్థిర పూర్ణాంకం commit_is_before_cutoff(నిర్మాణం commit *commit)
 {
-	if (generation_cutoff < GENERATION_NUMBER_INFINITY)
-		return generation_cutoff &&
-			commit_graph_generation(commit) < generation_cutoff;
+	ఒకవేళ (generation_cutoff < GENERATION_సంఖ్య_INFINITY)
+		తిరిగి generation_cutoff &&
+			commit_లేఖాచిత్రం_generation(commit) < generation_cutoff;
 
-	return commit->date < cutoff;
+	తిరిగి commit->date < cutoff;
 }
 
 /* How many generations are maximally preferred over _one_ merge traversal? */
-#define MERGE_TRAVERSAL_WEIGHT 65535
+#నిర్వచించు విలీనం_TRAVERSAL_బరువు 65535
 
-static int is_valid_rev_name(const struct rev_name *name)
+స్థిర పూర్ణాంకం is_valid_rev_name(స్థిరరాశి నిర్మాణం rev_name *name)
 {
-	return name && name->tip_name;
+	తిరిగి name && name->tip_name;
 }
 
-static struct rev_name *get_commit_rev_name(const struct commit *commit)
+స్థిర నిర్మాణం rev_name *get_commit_rev_name(స్థిరరాశి నిర్మాణం commit *commit)
 {
-	struct rev_name *name = commit_rev_name_peek(&rev_names, commit);
+	నిర్మాణం rev_name *name = commit_rev_name_peek(&rev_పేర్లు, commit);
 
-	return is_valid_rev_name(name) ? name : NULL;
+	తిరిగి is_valid_rev_name(name) ? name : ఖాళీ;
 }
 
-static int effective_distance(int distance, int generation)
+స్థిర పూర్ణాంకం effective_దూరం(పూర్ణాంకం దూరం, పూర్ణాంకం generation)
 {
-	return distance + (generation > 0 ? MERGE_TRAVERSAL_WEIGHT : 0);
+	తిరిగి దూరం + (generation > 0 ? విలీనం_TRAVERSAL_బరువు : 0);
 }
 
-static int is_better_name(struct rev_name *name,
+స్థిర పూర్ణాంకం is_better_name(నిర్మాణం rev_name *name,
 			  timestamp_t taggerdate,
-			  int generation,
-			  int distance,
-			  int from_tag)
+			  పూర్ణాంకం generation,
+			  పూర్ణాంకం దూరం,
+			  పూర్ణాంకం from_ట్యాగ్)
 {
-	int name_distance = effective_distance(name->distance, name->generation);
-	int new_distance = effective_distance(distance, generation);
+	పూర్ణాంకం name_దూరం = effective_దూరం(name->దూరం, name->generation);
+	పూర్ణాంకం new_దూరం = effective_దూరం(దూరం, generation);
 
 	/* If both are tags, we prefer the nearer one. */
-	if (from_tag && name->from_tag)
-		return name_distance > new_distance;
+	ఒకవేళ (from_ట్యాగ్ && name->from_ట్యాగ్)
+		తిరిగి name_దూరం > new_దూరం;
 
 	/* Favor a tag over a non-tag. */
-	if (name->from_tag != from_tag)
-		return from_tag;
+	ఒకవేళ (name->from_ట్యాగ్ != from_ట్యాగ్)
+		తిరిగి from_ట్యాగ్;
 
 	/*
 	 * We are now looking at two non-tags.  Tiebreak to favor
 	 * shorter hops.
 	 */
-	if (name_distance != new_distance)
-		return name_distance > new_distance;
+	ఒకవేళ (name_దూరం != new_దూరం)
+		తిరిగి name_దూరం > new_దూరం;
 
 	/* ... or tiebreak to favor older date */
-	if (name->taggerdate != taggerdate)
-		return name->taggerdate > taggerdate;
+	ఒకవేళ (name->taggerdate != taggerdate)
+		తిరిగి name->taggerdate > taggerdate;
 
 	/* keep the current one if we cannot decide */
-	return 0;
+	తిరిగి 0;
 }
 
-static struct rev_name *create_or_update_name(struct commit *commit,
+స్థిర నిర్మాణం rev_name *create_or_update_name(నిర్మాణం commit *commit,
 					      timestamp_t taggerdate,
-					      int generation, int distance,
-					      int from_tag)
+					      పూర్ణాంకం generation, పూర్ణాంకం దూరం,
+					      పూర్ణాంకం from_ట్యాగ్)
 {
-	struct rev_name *name = commit_rev_name_at(&rev_names, commit);
+	నిర్మాణం rev_name *name = commit_rev_name_at(&rev_పేర్లు, commit);
 
-	if (is_valid_rev_name(name) &&
-	    !is_better_name(name, taggerdate, generation, distance, from_tag))
-		return NULL;
+	ఒకవేళ (is_valid_rev_name(name) &&
+	    !is_better_name(name, taggerdate, generation, దూరం, from_ట్యాగ్))
+		తిరిగి ఖాళీ;
 
 	name->taggerdate = taggerdate;
 	name->generation = generation;
-	name->distance = distance;
-	name->from_tag = from_tag;
+	name->దూరం = దూరం;
+	name->from_ట్యాగ్ = from_ట్యాగ్;
 
-	return name;
+	తిరిగి name;
 }
 
-static char *get_parent_name(const struct rev_name *name, int parent_number,
-			     struct mem_pool *string_pool)
+స్థిర అక్షరం *get_మాతృ_name(స్థిరరాశి నిర్మాణం rev_name *name, పూర్ణాంకం మాతృ_సంఖ్య,
+			     నిర్మాణం mem_pool *string_pool)
 {
-	size_t len;
+	కొలత_t len;
 
 	strip_suffix(name->tip_name, "^0", &len);
-	if (name->generation > 0) {
-		return mem_pool_strfmt(string_pool, "%.*s~%d^%d",
-				       (int)len, name->tip_name,
-				       name->generation, parent_number);
-	} else {
-		return mem_pool_strfmt(string_pool, "%.*s^%d",
-				       (int)len, name->tip_name, parent_number);
+	ఒకవేళ (name->generation > 0) {
+		తిరిగి mem_pool_strfmt(string_pool, "%.*s~%d^%d",
+				       (పూర్ణాంకం)len, name->tip_name,
+				       name->generation, మాతృ_సంఖ్య);
+	} లేకపోతే {
+		తిరిగి mem_pool_strfmt(string_pool, "%.*s^%d",
+				       (పూర్ణాంకం)len, name->tip_name, మాతృ_సంఖ్య);
 	}
 }
 
-static void name_rev(struct commit *start_commit,
-		const char *tip_name, timestamp_t taggerdate,
-		int from_tag, int deref, struct mem_pool *string_pool)
+స్థిర శూన్య name_rev(నిర్మాణం commit *ప్రారంభం_commit,
+		స్థిరరాశి అక్షరం *tip_name, timestamp_t taggerdate,
+		పూర్ణాంకం from_ట్యాగ్, పూర్ణాంకం deref, నిర్మాణం mem_pool *string_pool)
 {
-	struct commit_stack stack = COMMIT_STACK_INIT;
-	struct commit *commit;
-	struct commit_stack parents_to_queue = COMMIT_STACK_INIT;
-	struct rev_name *start_name;
+	నిర్మాణం commit_దొంతర దొంతర = COMMIT_దొంతర_INIT;
+	నిర్మాణం commit *commit;
+	నిర్మాణం commit_దొంతర parents_గమ్యం_వరుస = COMMIT_దొంతర_INIT;
+	నిర్మాణం rev_name *ప్రారంభం_name;
 
-	repo_parse_commit(the_repository, start_commit);
-	if (commit_is_before_cutoff(start_commit))
-		return;
+	repo_parse_commit(the_repository, ప్రారంభం_commit);
+	ఒకవేళ (commit_is_before_cutoff(ప్రారంభం_commit))
+		తిరిగి;
 
-	start_name = create_or_update_name(start_commit, taggerdate, 0, 0,
-					   from_tag);
-	if (!start_name)
-		return;
-	if (deref)
-		start_name->tip_name = mem_pool_strfmt(string_pool, "%s^0",
+	ప్రారంభం_name = create_or_update_name(ప్రారంభం_commit, taggerdate, 0, 0,
+					   from_ట్యాగ్);
+	ఒకవేళ (!ప్రారంభం_name)
+		తిరిగి;
+	ఒకవేళ (deref)
+		ప్రారంభం_name->tip_name = mem_pool_strfmt(string_pool, "%s^0",
 						       tip_name);
-	else
-		start_name->tip_name = mem_pool_strdup(string_pool, tip_name);
+	లేకపోతే
+		ప్రారంభం_name->tip_name = mem_pool_strdup(string_pool, tip_name);
 
-	commit_stack_push(&stack, start_commit);
+	commit_దొంతర_నెట్టు(&దొంతర, ప్రారంభం_commit);
 
-	while ((commit = commit_stack_pop(&stack))) {
-		struct rev_name *name = get_commit_rev_name(commit);
-		struct commit_list *parents;
-		int parent_number = 1;
+	అయితే ((commit = commit_దొంతర_తీయి(&దొంతర))) {
+		నిర్మాణం rev_name *name = get_commit_rev_name(commit);
+		నిర్మాణం commit_list *parents;
+		పూర్ణాంకం మాతృ_సంఖ్య = 1;
 
-		parents_to_queue.nr = 0;
+		parents_గమ్యం_వరుస.nr = 0;
 
-		for (parents = commit->parents;
+		కొరకు (parents = commit->parents;
 				parents;
-				parents = parents->next, parent_number++) {
-			struct commit *parent = parents->item;
-			struct rev_name *parent_name;
-			int generation, distance;
+				parents = parents->తదుపరి, మాతృ_సంఖ్య++) {
+			నిర్మాణం commit *మాతృ = parents->అంశం;
+			నిర్మాణం rev_name *మాతృ_name;
+			పూర్ణాంకం generation, దూరం;
 
-			repo_parse_commit(the_repository, parent);
-			if (commit_is_before_cutoff(parent))
-				continue;
+			repo_parse_commit(the_repository, మాతృ);
+			ఒకవేళ (commit_is_before_cutoff(మాతృ))
+				కొనసాగు;
 
-			if (parent_number > 1) {
+			ఒకవేళ (మాతృ_సంఖ్య > 1) {
 				generation = 0;
-				distance = name->distance + MERGE_TRAVERSAL_WEIGHT;
-			} else {
+				దూరం = name->దూరం + విలీనం_TRAVERSAL_బరువు;
+			} లేకపోతే {
 				generation = name->generation + 1;
-				distance = name->distance + 1;
+				దూరం = name->దూరం + 1;
 			}
 
-			parent_name = create_or_update_name(parent, taggerdate,
+			మాతృ_name = create_or_update_name(మాతృ, taggerdate,
 							    generation,
-							    distance, from_tag);
-			if (parent_name) {
-				if (parent_number > 1)
-					parent_name->tip_name =
-						get_parent_name(name,
-								parent_number,
+							    దూరం, from_ట్యాగ్);
+			ఒకవేళ (మాతృ_name) {
+				ఒకవేళ (మాతృ_సంఖ్య > 1)
+					మాతృ_name->tip_name =
+						get_మాతృ_name(name,
+								మాతృ_సంఖ్య,
 								string_pool);
-				else
-					parent_name->tip_name = name->tip_name;
-				commit_stack_push(&parents_to_queue, parent);
+				లేకపోతే
+					మాతృ_name->tip_name = name->tip_name;
+				commit_దొంతర_నెట్టు(&parents_గమ్యం_వరుస, మాతృ);
 			}
 		}
 
 		/* The first parent must come out first from the stack */
-		while (parents_to_queue.nr)
-			commit_stack_push(&stack,
-					  commit_stack_pop(&parents_to_queue));
+		అయితే (parents_గమ్యం_వరుస.nr)
+			commit_దొంతర_నెట్టు(&దొంతర,
+					  commit_దొంతర_తీయి(&parents_గమ్యం_వరుస));
 	}
 
-	commit_stack_clear(&stack);
-	commit_stack_clear(&parents_to_queue);
+	commit_దొంతర_clear(&దొంతర);
+	commit_దొంతర_clear(&parents_గమ్యం_వరుస);
 }
 
-static int subpath_matches(const char *path, const char *filter)
+స్థిర పూర్ణాంకం subpath_matches(స్థిరరాశి అక్షరం *మార్గం, స్థిరరాశి అక్షరం *filter)
 {
-	const char *subpath = path;
+	స్థిరరాశి అక్షరం *subpath = మార్గం;
 
-	while (subpath) {
-		if (!wildmatch(filter, subpath, 0))
-			return subpath - path;
+	అయితే (subpath) {
+		ఒకవేళ (!wildmatch(filter, subpath, 0))
+			తిరిగి subpath - మార్గం;
 		subpath = strchr(subpath, '/');
-		if (subpath)
+		ఒకవేళ (subpath)
 			subpath++;
 	}
-	return -1;
+	తిరిగి -1;
 }
 
-struct name_ref_data {
-	int tags_only;
-	int name_only;
-	struct string_list ref_filters;
-	struct string_list exclude_filters;
+నిర్మాణం name_ref_దత్తాంశం {
+	పూర్ణాంకం ట్యాగులు_only;
+	పూర్ణాంకం name_only;
+	నిర్మాణం string_list ref_filters;
+	నిర్మాణం string_list exclude_filters;
 };
 
-struct pretty_format {
-	struct pretty_print_context ctx;
-	struct userformat_want want;
+నిర్మాణం pretty_format {
+	నిర్మాణం pretty_print_context ctx;
+	నిర్మాణం userformat_want want;
 };
 
-enum command_type {
+గణన command_type {
 	NAME_REV = 1,
 	FORMAT_REV = 2,
 };
 
-enum stdin_mode {
-    TEXT = 1,
+గణన stdin_బహుళకం {
+    పాఠ్యం_2 = 1,
     REVS = 2,
 };
 
-struct command {
-	enum command_type type;
-	union {
-		int name_only;
-		struct pretty_format *pretty_format;
+నిర్మాణం command {
+	గణన command_type type;
+	సంఘం {
+		పూర్ణాంకం name_only;
+		నిర్మాణం pretty_format *pretty_format;
 	} u;
 };
 
-static void init_name_rev_command(struct command *cmd,
-				  int name_only)
+స్థిర శూన్య init_name_rev_command(నిర్మాణం command *cmd,
+				  పూర్ణాంకం name_only)
 {
 	cmd->type = NAME_REV;
 	cmd->u.name_only = name_only;
 }
 
-static void init_format_rev_command(struct command *cmd,
-				    struct pretty_format *pretty_format)
+స్థిర శూన్య init_format_rev_command(నిర్మాణం command *cmd,
+				    నిర్మాణం pretty_format *pretty_format)
 {
 	cmd->type = FORMAT_REV;
 	cmd->u.pretty_format = pretty_format;
 }
 
-static struct tip_table {
-	struct tip_table_entry {
-		struct object_id oid;
-		const char *refname;
-		struct commit *commit;
+స్థిర నిర్మాణం tip_పట్టిక {
+	నిర్మాణం tip_పట్టిక_నమోదు {
+		నిర్మాణం object_id oid;
+		స్థిరరాశి అక్షరం *refname;
+		నిర్మాణం commit *commit;
 		timestamp_t taggerdate;
-		unsigned int from_tag:1;
-		unsigned int deref:1;
-	} *table;
-	int nr;
-	int alloc;
-	int sorted;
-} tip_table;
+		గుర్తులేని పూర్ణాంకం from_ట్యాగ్:1;
+		గుర్తులేని పూర్ణాంకం deref:1;
+	} *పట్టిక;
+	పూర్ణాంకం nr;
+	పూర్ణాంకం alloc;
+	పూర్ణాంకం sorted;
+} tip_పట్టిక;
 
-static void add_to_tip_table(const struct object_id *oid, const char *refname,
-			     int shorten_unambiguous, struct commit *commit,
-			     timestamp_t taggerdate, int from_tag, int deref)
+స్థిర శూన్య కూడు_గమ్యం_tip_పట్టిక(స్థిరరాశి నిర్మాణం object_id *oid, స్థిరరాశి అక్షరం *refname,
+			     పూర్ణాంకం shorten_unambiguous, నిర్మాణం commit *commit,
+			     timestamp_t taggerdate, పూర్ణాంకం from_ట్యాగ్, పూర్ణాంకం deref)
 {
-	char *short_refname = NULL;
+	అక్షరం *short_refname = ఖాళీ;
 
-	if (shorten_unambiguous)
+	ఒకవేళ (shorten_unambiguous)
 		short_refname = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
 							     refname, 0);
-	else if (skip_prefix(refname, "refs/heads/", &refname))
+	లేకపోతే ఒకవేళ (skip_ఉపసర్గ(refname, "refs/heads/", &refname))
 		; /* refname already advanced */
-	else
-		skip_prefix(refname, "refs/", &refname);
+	లేకపోతే
+		skip_ఉపసర్గ(refname, "refs/", &refname);
 
-	ALLOC_GROW(tip_table.table, tip_table.nr + 1, tip_table.alloc);
-	oidcpy(&tip_table.table[tip_table.nr].oid, oid);
-	tip_table.table[tip_table.nr].refname = short_refname ?
+	ALLOC_GROW(tip_పట్టిక.పట్టిక, tip_పట్టిక.nr + 1, tip_పట్టిక.alloc);
+	oidcpy(&tip_పట్టిక.పట్టిక[tip_పట్టిక.nr].oid, oid);
+	tip_పట్టిక.పట్టిక[tip_పట్టిక.nr].refname = short_refname ?
 		short_refname : xstrdup(refname);
-	tip_table.table[tip_table.nr].commit = commit;
-	tip_table.table[tip_table.nr].taggerdate = taggerdate;
-	tip_table.table[tip_table.nr].from_tag = from_tag;
-	tip_table.table[tip_table.nr].deref = deref;
-	tip_table.nr++;
-	tip_table.sorted = 0;
+	tip_పట్టిక.పట్టిక[tip_పట్టిక.nr].commit = commit;
+	tip_పట్టిక.పట్టిక[tip_పట్టిక.nr].taggerdate = taggerdate;
+	tip_పట్టిక.పట్టిక[tip_పట్టిక.nr].from_ట్యాగ్ = from_ట్యాగ్;
+	tip_పట్టిక.పట్టిక[tip_పట్టిక.nr].deref = deref;
+	tip_పట్టిక.nr++;
+	tip_పట్టిక.sorted = 0;
 }
 
-static int tipcmp(const void *a_, const void *b_)
+స్థిర పూర్ణాంకం tipcmp(స్థిరరాశి శూన్య *a_, స్థిరరాశి శూన్య *b_)
 {
-	const struct tip_table_entry *a = a_, *b = b_;
-	return oidcmp(&a->oid, &b->oid);
+	స్థిరరాశి నిర్మాణం tip_పట్టిక_నమోదు *a = a_, *b = b_;
+	తిరిగి oidcmp(&a->oid, &b->oid);
 }
 
-static int cmp_by_tag_and_age(const void *a_, const void *b_)
+స్థిర పూర్ణాంకం cmp_by_ట్యాగ్_and_age(స్థిరరాశి శూన్య *a_, స్థిరరాశి శూన్య *b_)
 {
-	const struct tip_table_entry *a = a_, *b = b_;
-	int cmp;
+	స్థిరరాశి నిర్మాణం tip_పట్టిక_నమోదు *a = a_, *b = b_;
+	పూర్ణాంకం cmp;
 
 	/* Prefer tags. */
-	cmp = b->from_tag - a->from_tag;
-	if (cmp)
-		return cmp;
+	cmp = b->from_ట్యాగ్ - a->from_ట్యాగ్;
+	ఒకవేళ (cmp)
+		తిరిగి cmp;
 
 	/* Older is better. */
-	if (a->taggerdate < b->taggerdate)
-		return -1;
-	return a->taggerdate != b->taggerdate;
+	ఒకవేళ (a->taggerdate < b->taggerdate)
+		తిరిగి -1;
+	తిరిగి a->taggerdate != b->taggerdate;
 }
 
-static int name_ref(const struct reference *ref, void *cb_data)
+స్థిర పూర్ణాంకం name_ref(స్థిరరాశి నిర్మాణం reference *ref, శూన్య *cb_దత్తాంశం)
 {
-	struct object *o = parse_object(the_repository, ref->oid);
-	struct name_ref_data *data = cb_data;
-	int can_abbreviate_output = data->tags_only && data->name_only;
-	int deref = 0;
-	int from_tag = 0;
-	struct commit *commit = NULL;
-	timestamp_t taggerdate = TIME_MAX;
+	నిర్మాణం object *o = parse_object(the_repository, ref->oid);
+	నిర్మాణం name_ref_దత్తాంశం *దత్తాంశం = cb_దత్తాంశం;
+	పూర్ణాంకం can_abbreviate_output = దత్తాంశం->ట్యాగులు_only && దత్తాంశం->name_only;
+	పూర్ణాంకం deref = 0;
+	పూర్ణాంకం from_ట్యాగ్ = 0;
+	నిర్మాణం commit *commit = ఖాళీ;
+	timestamp_t taggerdate = సమయం_MAX;
 
-	if (data->tags_only && !starts_with(ref->name, "refs/tags/"))
-		return 0;
+	ఒకవేళ (దత్తాంశం->ట్యాగులు_only && !starts_with(ref->name, "refs/tags/"))
+		తిరిగి 0;
 
-	if (data->exclude_filters.nr) {
-		struct string_list_item *item;
+	ఒకవేళ (దత్తాంశం->exclude_filters.nr) {
+		నిర్మాణం string_list_అంశం *అంశం;
 
-		for_each_string_list_item(item, &data->exclude_filters) {
-			if (subpath_matches(ref->name, item->string) >= 0)
-				return 0;
+		for_each_string_list_అంశం(అంశం, &దత్తాంశం->exclude_filters) {
+			ఒకవేళ (subpath_matches(ref->name, అంశం->string) >= 0)
+				తిరిగి 0;
 		}
 	}
 
-	if (data->ref_filters.nr) {
-		struct string_list_item *item;
-		int matched = 0;
+	ఒకవేళ (దత్తాంశం->ref_filters.nr) {
+		నిర్మాణం string_list_అంశం *అంశం;
+		పూర్ణాంకం matched = 0;
 
 		/* See if any of the patterns match. */
-		for_each_string_list_item(item, &data->ref_filters) {
+		for_each_string_list_అంశం(అంశం, &దత్తాంశం->ref_filters) {
 			/*
 			 * Check all patterns even after finding a match, so
 			 * that we can see if a match with a subpath exists.
@@ -411,181 +411,181 @@ static int name_ref(const struct reference *ref, void *cb_data)
 			 * shouldn't stop when seeing 'refs/tags/v1.4' matches
 			 * 'refs/tags/v*'.  We should show it as 'v1.4'.
 			 */
-			switch (subpath_matches(ref->name, item->string)) {
-			case -1: /* did not match */
-				break;
-			case 0: /* matched fully */
+			ఎంపిక (subpath_matches(ref->name, అంశం->string)) {
+			స్థితి -1: /* did not match */
+				ఆపు;
+			స్థితి 0: /* matched fully */
 				matched = 1;
-				break;
-			default: /* matched subpath */
+				ఆపు;
+			అప్రమేయ: /* matched subpath */
 				matched = 1;
 				can_abbreviate_output = 1;
-				break;
+				ఆపు;
 			}
 		}
 
 		/* If none of the patterns matched, stop now */
-		if (!matched)
-			return 0;
+		ఒకవేళ (!matched)
+			తిరిగి 0;
 	}
 
-	while (o && o->type == OBJ_TAG) {
-		struct tag *t = (struct tag *) o;
-		if (!t->tagged)
-			break; /* broken repository */
+	అయితే (o && o->type == OBJ_ట్యాగ్) {
+		నిర్మాణం ట్యాగ్ *t = (నిర్మాణం ట్యాగ్ *) o;
+		ఒకవేళ (!t->tagged)
+			ఆపు; /* broken repository */
 		o = parse_object(the_repository, &t->tagged->oid);
 		deref = 1;
 		taggerdate = t->date;
 	}
-	if (o && o->type == OBJ_COMMIT) {
-		commit = (struct commit *)o;
-		from_tag = starts_with(ref->name, "refs/tags/");
-		if (taggerdate == TIME_MAX)
+	ఒకవేళ (o && o->type == OBJ_COMMIT) {
+		commit = (నిర్మాణం commit *)o;
+		from_ట్యాగ్ = starts_with(ref->name, "refs/tags/");
+		ఒకవేళ (taggerdate == సమయం_MAX)
 			taggerdate = commit->date;
 	}
 
-	add_to_tip_table(ref->oid, ref->name, can_abbreviate_output,
-			 commit, taggerdate, from_tag, deref);
-	return 0;
+	కూడు_గమ్యం_tip_పట్టిక(ref->oid, ref->name, can_abbreviate_output,
+			 commit, taggerdate, from_ట్యాగ్, deref);
+	తిరిగి 0;
 }
 
-static void name_tips(struct mem_pool *string_pool)
+స్థిర శూన్య name_tips(నిర్మాణం mem_pool *string_pool)
 {
-	int i;
+	పూర్ణాంకం i;
 
 	/*
 	 * Try to set better names first, so that worse ones spread
 	 * less.
 	 */
-	QSORT(tip_table.table, tip_table.nr, cmp_by_tag_and_age);
-	for (i = 0; i < tip_table.nr; i++) {
-		struct tip_table_entry *e = &tip_table.table[i];
-		if (e->commit) {
+	QSORT(tip_పట్టిక.పట్టిక, tip_పట్టిక.nr, cmp_by_ట్యాగ్_and_age);
+	కొరకు (i = 0; i < tip_పట్టిక.nr; i++) {
+		నిర్మాణం tip_పట్టిక_నమోదు *e = &tip_పట్టిక.పట్టిక[i];
+		ఒకవేళ (e->commit) {
 			name_rev(e->commit, e->refname, e->taggerdate,
-				 e->from_tag, e->deref, string_pool);
+				 e->from_ట్యాగ్, e->deref, string_pool);
 		}
 	}
 }
 
-static const struct object_id *nth_tip_table_ent(size_t ix, const void *table_)
+స్థిర స్థిరరాశి నిర్మాణం object_id *nth_tip_పట్టిక_ent(కొలత_t ix, స్థిరరాశి శూన్య *పట్టిక_2)
 {
-	const struct tip_table_entry *table = table_;
-	return &table[ix].oid;
+	స్థిరరాశి నిర్మాణం tip_పట్టిక_నమోదు *పట్టిక = పట్టిక_2;
+	తిరిగి &పట్టిక[ix].oid;
 }
 
-static const char *get_exact_ref_match(const struct object *o)
+స్థిర స్థిరరాశి అక్షరం *get_exact_ref_సరిపోలిక(స్థిరరాశి నిర్మాణం object *o)
 {
-	int found;
+	పూర్ణాంకం దొరికింది_2;
 
-	if (!tip_table.table || !tip_table.nr)
-		return NULL;
+	ఒకవేళ (!tip_పట్టిక.పట్టిక || !tip_పట్టిక.nr)
+		తిరిగి ఖాళీ;
 
-	if (!tip_table.sorted) {
-		QSORT(tip_table.table, tip_table.nr, tipcmp);
-		tip_table.sorted = 1;
+	ఒకవేళ (!tip_పట్టిక.sorted) {
+		QSORT(tip_పట్టిక.పట్టిక, tip_పట్టిక.nr, tipcmp);
+		tip_పట్టిక.sorted = 1;
 	}
 
-	found = oid_pos(&o->oid, tip_table.table, tip_table.nr,
-			nth_tip_table_ent);
-	if (0 <= found)
-		return tip_table.table[found].refname;
-	return NULL;
+	దొరికింది_2 = oid_pos(&o->oid, tip_పట్టిక.పట్టిక, tip_పట్టిక.nr,
+			nth_tip_పట్టిక_ent);
+	ఒకవేళ (0 <= దొరికింది_2)
+		తిరిగి tip_పట్టిక.పట్టిక[దొరికింది_2].refname;
+	తిరిగి ఖాళీ;
 }
 
 /* may return a constant string or use "buf" as scratch space */
-static const char *get_rev_name(const struct object *o, struct strbuf *buf)
+స్థిర స్థిరరాశి అక్షరం *get_rev_name(స్థిరరాశి నిర్మాణం object *o, నిర్మాణం strbuf *buf)
 {
-	struct rev_name *n;
-	const struct commit *c;
+	నిర్మాణం rev_name *n;
+	స్థిరరాశి నిర్మాణం commit *c;
 
-	if (o->type != OBJ_COMMIT)
-		return get_exact_ref_match(o);
-	c = (const struct commit *) o;
+	ఒకవేళ (o->type != OBJ_COMMIT)
+		తిరిగి get_exact_ref_సరిపోలిక(o);
+	c = (స్థిరరాశి నిర్మాణం commit *) o;
 	n = get_commit_rev_name(c);
-	if (!n)
-		return NULL;
+	ఒకవేళ (!n)
+		తిరిగి ఖాళీ;
 
-	if (!n->generation) {
-		return n->tip_name;
-	} else {
+	ఒకవేళ (!n->generation) {
+		తిరిగి n->tip_name;
+	} లేకపోతే {
 		strbuf_reset(buf);
 		strbuf_addstr(buf, n->tip_name);
 		strbuf_strip_suffix(buf, "^0");
 		strbuf_addf(buf, "~%d", n->generation);
-		return buf->buf;
+		తిరిగి buf->buf;
 	}
 }
 
-static const char *get_format_rev(const struct commit *c,
-				  struct pretty_format *format_ctx,
-				  struct strbuf *buf)
+స్థిర స్థిరరాశి అక్షరం *get_format_rev(స్థిరరాశి నిర్మాణం commit *c,
+				  నిర్మాణం pretty_format *format_ctx,
+				  నిర్మాణం strbuf *buf)
 {
 	strbuf_reset(buf);
 
-	if (format_ctx->want.notes) {
-		struct strbuf notebuf = STRBUF_INIT;
+	ఒకవేళ (format_ctx->want.notes) {
+		నిర్మాణం strbuf notebuf = STRBUF_INIT;
 
 		format_display_notes(&c->object.oid, &notebuf,
 				     get_log_output_encoding(),
 				     format_ctx->ctx.fmt == CMIT_FMT_USERFORMAT);
-		format_ctx->ctx.notes_message = strbuf_detach(&notebuf, NULL);
+		format_ctx->ctx.notes_సందేశం = strbuf_detach(&notebuf, ఖాళీ);
 	}
 
 	pretty_print_commit(&format_ctx->ctx, c, buf);
-	FREE_AND_NULL(format_ctx->ctx.notes_message);
+	FREE_AND_NULL(format_ctx->ctx.notes_సందేశం);
 
-	return buf->buf;
+	తిరిగి buf->buf;
 }
 
-static void show_name(const struct object *obj,
-		      const char *caller_name,
-		      int always, int allow_undefined, int name_only)
+స్థిర శూన్య show_name(స్థిరరాశి నిర్మాణం object *obj,
+		      స్థిరరాశి అక్షరం *caller_name,
+		      పూర్ణాంకం always, పూర్ణాంకం allow_undefined, పూర్ణాంకం name_only)
 {
-	const char *name;
-	const struct object_id *oid = &obj->oid;
-	struct strbuf buf = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *name;
+	స్థిరరాశి నిర్మాణం object_id *oid = &obj->oid;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
 
-	if (!name_only)
-		printf("%s ", caller_name ? caller_name : oid_to_hex(oid));
+	ఒకవేళ (!name_only)
+		రాయి("%s ", caller_name ? caller_name : oid_గమ్యం_hex(oid));
 	name = get_rev_name(obj, &buf);
-	if (name)
-		printf("%s\n", name);
-	else if (allow_undefined)
-		printf("undefined\n");
-	else if (always)
-		printf("%s\n",
-		       repo_find_unique_abbrev(the_repository, oid, DEFAULT_ABBREV));
-	else
-		die("cannot describe '%s'", oid_to_hex(oid));
+	ఒకవేళ (name)
+		రాయి("%s\n", name);
+	లేకపోతే ఒకవేళ (allow_undefined)
+		రాయి("undefined\n");
+	లేకపోతే ఒకవేళ (always)
+		రాయి("%s\n",
+		       repo_కనుగొను_unique_abbrev(the_repository, oid, DEFAULT_ABBREV));
+	లేకపోతే
+		die("cannot describe '%s'", oid_గమ్యం_hex(oid));
 	strbuf_release(&buf);
 }
 
-static char const * const name_rev_usage[] = {
+స్థిర అక్షరం స్థిరరాశి * స్థిరరాశి name_rev_usage[] = {
 	N_("git name-rev [<options>] <commit>..."),
 	N_("git name-rev [<options>] --all"),
 	N_("git name-rev [<options>] --annotate-stdin"),
-	NULL
+	ఖాళీ
 };
 
-static void name_rev_line(char *p, struct command *cmd)
+స్థిర శూన్య name_rev_పంక్తి(అక్షరం *p, నిర్మాణం command *cmd)
 {
-	struct strbuf buf = STRBUF_INIT;
-	int counter = 0;
-	char *p_start;
-	const unsigned hexsz = the_hash_algo->hexsz;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
+	పూర్ణాంకం counter = 0;
+	అక్షరం *p_ప్రారంభం;
+	స్థిరరాశి గుర్తులేని hexsz = the_hash_algo->hexsz;
 
-	for (p_start = p; *p; p++) {
-#define ishex(x) (isdigit((x)) || ((x) >= 'a' && (x) <= 'f'))
-		if (!ishex(*p)) {
+	కొరకు (p_ప్రారంభం = p; *p; p++) {
+#నిర్వచించు ishex(x) (అంకెనా((x)) || ((x) >= 'a' && (x) <= 'f'))
+		ఒకవేళ (!ishex(*p)) {
 			counter = 0;
-		} else if (++counter == hexsz &&
+		} లేకపోతే ఒకవేళ (++counter == hexsz &&
 			   !ishex(*(p + 1))) {
-			struct object_id oid;
-			const char *name = NULL;
-			char c = *(p + 1);
-			int p_len = p - p_start + 1;
-			struct object *o = NULL;
-			int oid_ret = 1;
+			నిర్మాణం object_id oid;
+			స్థిరరాశి అక్షరం *name = ఖాళీ;
+			అక్షరం c = *(p + 1);
+			పూర్ణాంకం p_len = p - p_ప్రారంభం + 1;
+			నిర్మాణం object *o = ఖాళీ;
+			పూర్ణాంకం oid_ret = 1;
 
 			counter = 0;
 
@@ -593,348 +593,348 @@ static void name_rev_line(char *p, struct command *cmd)
 			oid_ret = repo_get_oid(the_repository, p - (hexsz - 1), &oid);
 			*(p + 1) = c;
 
-			switch (cmd->type) {
-			case NAME_REV:
-				if (!oid_ret)
+			ఎంపిక (cmd->type) {
+			స్థితి NAME_REV:
+				ఒకవేళ (!oid_ret)
 					o = lookup_object(the_repository, &oid);
-				if (o)
+				ఒకవేళ (o)
 					name = get_rev_name(o, &buf);
-				if (!name)
-					continue;
-				if (cmd->u.name_only)
-					printf("%.*s%s", p_len - hexsz, p_start, name);
-				else
-					printf("%.*s (%s)", p_len, p_start, name);
-				break;
-			case FORMAT_REV:
-				if (!oid_ret)
+				ఒకవేళ (!name)
+					కొనసాగు;
+				ఒకవేళ (cmd->u.name_only)
+					రాయి("%.*s%s", p_len - hexsz, p_ప్రారంభం, name);
+				లేకపోతే
+					రాయి("%.*s (%s)", p_len, p_ప్రారంభం, name);
+				ఆపు;
+			స్థితి FORMAT_REV:
+				ఒకవేళ (!oid_ret)
 					o = parse_object(the_repository, &oid);
-				if (o && o->type == OBJ_COMMIT)
-					name = get_format_rev((const struct commit *)o,
+				ఒకవేళ (o && o->type == OBJ_COMMIT)
+					name = get_format_rev((స్థిరరాశి నిర్మాణం commit *)o,
 							      cmd->u.pretty_format,
 							      &buf);
-				if (name)
-					printf("%.*s%s", p_len - hexsz, p_start, name);
-				else
-					printf("%.*s", p_len, p_start);
-				break;
-			default:
+				ఒకవేళ (name)
+					రాయి("%.*s%s", p_len - hexsz, p_ప్రారంభం, name);
+				లేకపోతే
+					రాయి("%.*s", p_len, p_ప్రారంభం);
+				ఆపు;
+			అప్రమేయ:
 				BUG("uncovered case: %d", cmd->type);
 			}
 
-			p_start = p + 1;
+			p_ప్రారంభం = p + 1;
 		}
 	}
 
 	/* flush */
-	if (p_start != p)
-		fwrite(p_start, p - p_start, 1, stdout);
+	ఒకవేళ (p_ప్రారంభం != p)
+		fwrite(p_ప్రారంభం, p - p_ప్రారంభం, 1, stdout);
 
 	strbuf_release(&buf);
 }
 
-int cmd_name_rev(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+పూర్ణాంకం cmd_name_rev(పూర్ణాంకం argc,
+		 స్థిరరాశి అక్షరం **argv,
+		 స్థిరరాశి అక్షరం *ఉపసర్గ,
+		 నిర్మాణం repository *repo వాడని)
 {
-	struct mem_pool string_pool;
-	struct object_array revs = OBJECT_ARRAY_INIT;
+	నిర్మాణం mem_pool string_pool;
+	నిర్మాణం object_array revs = OBJECT_ARRAY_INIT;
 
-#ifndef WITH_BREAKING_CHANGES
-	int transform_stdin = 0;
-#endif
-	int all = 0, annotate_stdin = 0, allow_undefined = 1, always = 0, peel_tag = 0;
-	struct name_ref_data data = { 0, 0, STRING_LIST_INIT_NODUP, STRING_LIST_INIT_NODUP };
-	struct command cmd;
-	struct option opts[] = {
-		OPT_BOOL(0, "name-only", &data.name_only, N_("print only ref-based names (no object names)")),
-		OPT_BOOL(0, "tags", &data.tags_only, N_("only use tags to name the commits")),
-		OPT_STRING_LIST(0, "refs", &data.ref_filters, N_("pattern"),
+#నిర్వచితం_కాకపోతే WITH_BREAKING_CHANGES
+	పూర్ణాంకం transform_stdin = 0;
+#అయితే_ముగింపు
+	పూర్ణాంకం all = 0, annotate_stdin = 0, allow_undefined = 1, always = 0, peel_ట్యాగ్ = 0;
+	నిర్మాణం name_ref_దత్తాంశం దత్తాంశం = { 0, 0, STRING_LIST_INIT_NODUP, STRING_LIST_INIT_NODUP };
+	నిర్మాణం command cmd;
+	నిర్మాణం option opts[] = {
+		OPT_BOOL(0, "name-only", &దత్తాంశం.name_only, N_("print only ref-based names (no object names)")),
+		OPT_BOOL(0, "tags", &దత్తాంశం.ట్యాగులు_only, N_("only use tags to name the commits")),
+		OPT_STRING_LIST(0, "refs", &దత్తాంశం.ref_filters, N_("pattern"),
 				N_("only use refs matching <pattern>")),
-		OPT_STRING_LIST(0, "exclude", &data.exclude_filters, N_("pattern"),
+		OPT_STRING_LIST(0, "exclude", &దత్తాంశం.exclude_filters, N_("pattern"),
 				N_("ignore refs matching <pattern>")),
-		OPT_GROUP(""),
+		OPT_సమూహం(""),
 		OPT_BOOL(0, "all", &all, N_("list all commits reachable from all refs")),
-#ifndef WITH_BREAKING_CHANGES
+#నిర్వచితం_కాకపోతే WITH_BREAKING_CHANGES
 		OPT_BOOL_F(0,
 			   "stdin",
 			   &transform_stdin,
 			   N_("deprecated: use --annotate-stdin instead"),
 			   PARSE_OPT_HIDDEN),
-#endif /* WITH_BREAKING_CHANGES */
+#అయితే_ముగింపు /* WITH_BREAKING_CHANGES */
 		OPT_BOOL(0, "annotate-stdin", &annotate_stdin, N_("annotate text from stdin")),
 		OPT_BOOL(0, "undefined", &allow_undefined, N_("allow to print `undefined` names (default)")),
 		OPT_BOOL(0, "always", &always,
 			 N_("show abbreviated commit object as fallback")),
-		OPT_HIDDEN_BOOL(0, "peel-tag", &peel_tag,
+		OPT_HIDDEN_BOOL(0, "peel-tag", &peel_ట్యాగ్,
 				N_("dereference tags in the input (internal use)")),
-		OPT_END(),
+		OPT_చివర(),
 	};
 
 	mem_pool_init(&string_pool, 0);
-	init_commit_rev_name(&rev_names);
-	repo_config(the_repository, git_default_config, NULL);
-	argc = parse_options(argc, argv, prefix, opts, name_rev_usage, 0);
-	init_name_rev_command(&cmd, data.name_only);
+	init_commit_rev_name(&rev_పేర్లు);
+	repo_config(the_repository, git_default_config, ఖాళీ);
+	argc = parse_options(argc, argv, ఉపసర్గ, opts, name_rev_usage, 0);
+	init_name_rev_command(&cmd, దత్తాంశం.name_only);
 
-#ifndef WITH_BREAKING_CHANGES
-	if (transform_stdin) {
+#నిర్వచితం_కాకపోతే WITH_BREAKING_CHANGES
+	ఒకవేళ (transform_stdin) {
 		warning("--stdin is deprecated. Please use --annotate-stdin instead, "
 					"which is functionally equivalent.\n"
 					"This option will be removed in a future release.");
 		annotate_stdin = 1;
 	}
-#endif
+#అయితే_ముగింపు
 
-	if (all + annotate_stdin + !!argc > 1) {
+	ఒకవేళ (all + annotate_stdin + !!argc > 1) {
 		error("Specify either a list, or --all, not both!");
 		usage_with_options(name_rev_usage, opts);
 	}
-	if (all || annotate_stdin)
+	ఒకవేళ (all || annotate_stdin)
 		disable_cutoff();
 
-	for (; argc; argc--, argv++) {
-		struct object_id oid;
-		struct object *object;
-		struct commit *commit;
+	కొరకు (; argc; argc--, argv++) {
+		నిర్మాణం object_id oid;
+		నిర్మాణం object *object;
+		నిర్మాణం commit *commit;
 
-		if (repo_get_oid(the_repository, *argv, &oid)) {
+		ఒకవేళ (repo_get_oid(the_repository, *argv, &oid)) {
 			fprintf(stderr, "Could not get sha1 for %s. Skipping.\n",
 					*argv);
-			continue;
+			కొనసాగు;
 		}
 
-		commit = NULL;
+		commit = ఖాళీ;
 		object = parse_object(the_repository, &oid);
-		if (object) {
-			struct object *peeled = deref_tag(the_repository,
+		ఒకవేళ (object) {
+			నిర్మాణం object *peeled = deref_ట్యాగ్(the_repository,
 							  object, *argv, 0);
-			if (peeled && peeled->type == OBJ_COMMIT)
-				commit = (struct commit *)peeled;
+			ఒకవేళ (peeled && peeled->type == OBJ_COMMIT)
+				commit = (నిర్మాణం commit *)peeled;
 		}
 
-		if (!object) {
+		ఒకవేళ (!object) {
 			fprintf(stderr, "Could not get object for %s. Skipping.\n",
 					*argv);
-			continue;
+			కొనసాగు;
 		}
 
-		if (commit)
-			set_commit_cutoff(commit);
+		ఒకవేళ (commit)
+			సమితి_commit_cutoff(commit);
 
-		if (peel_tag) {
-			if (!commit) {
+		ఒకవేళ (peel_ట్యాగ్) {
+			ఒకవేళ (!commit) {
 				fprintf(stderr, "Could not get commit for %s. Skipping.\n",
 					*argv);
-				continue;
+				కొనసాగు;
 			}
-			object = (struct object *)commit;
+			object = (నిర్మాణం object *)commit;
 		}
-		add_object_array(object, *argv, &revs);
+		కూడు_object_array(object, *argv, &revs);
 	}
 
 	adjust_cutoff_timestamp_for_slop();
 
-	refs_for_each_ref(get_main_ref_store(the_repository), name_ref, &data);
+	refs_for_each_ref(get_main_ref_store(the_repository), name_ref, &దత్తాంశం);
 	name_tips(&string_pool);
 
-	if (annotate_stdin) {
-		struct strbuf sb = STRBUF_INIT;
+	ఒకవేళ (annotate_stdin) {
+		నిర్మాణం strbuf sb = STRBUF_INIT;
 
-		while (strbuf_getline(&sb, stdin) != EOF) {
+		అయితే (strbuf_getline(&sb, stdin) != EOF) {
 			strbuf_addch(&sb, '\n');
-			name_rev_line(sb.buf, &cmd);
+			name_rev_పంక్తి(sb.buf, &cmd);
 		}
 		strbuf_release(&sb);
-	} else if (all) {
-		int i, max;
+	} లేకపోతే ఒకవేళ (all) {
+		పూర్ణాంకం i, max;
 
-		max = get_max_object_index(the_repository);
-		for (i = 0; i < max; i++) {
-			struct object *obj = get_indexed_object(the_repository, i);
-			if (!obj || obj->type != OBJ_COMMIT)
-				continue;
-			show_name(obj, NULL,
-				  always, allow_undefined, data.name_only);
+		max = get_max_object_సూచీ(the_repository);
+		కొరకు (i = 0; i < max; i++) {
+			నిర్మాణం object *obj = get_సూచీకృత_object(the_repository, i);
+			ఒకవేళ (!obj || obj->type != OBJ_COMMIT)
+				కొనసాగు;
+			show_name(obj, ఖాళీ,
+				  always, allow_undefined, దత్తాంశం.name_only);
 		}
-	} else {
-		int i;
-		for (i = 0; i < revs.nr; i++)
-			show_name(revs.objects[i].item, revs.objects[i].name,
-				  always, allow_undefined, data.name_only);
+	} లేకపోతే {
+		పూర్ణాంకం i;
+		కొరకు (i = 0; i < revs.nr; i++)
+			show_name(revs.objects[i].అంశం, revs.objects[i].name,
+				  always, allow_undefined, దత్తాంశం.name_only);
 	}
 
-	string_list_clear(&data.ref_filters, 0);
-	string_list_clear(&data.exclude_filters, 0);
+	string_list_clear(&దత్తాంశం.ref_filters, 0);
+	string_list_clear(&దత్తాంశం.exclude_filters, 0);
 	mem_pool_discard(&string_pool, 0);
 	object_array_clear(&revs);
-	return 0;
+	తిరిగి 0;
 }
 
-struct format_nul_data {
-	bool nul_input;
+నిర్మాణం format_nul_దత్తాంశం {
+	bool nul_ఆదానం;
 	bool nul_output;
 };
 
-static int format_nul_cb(const struct option *option,
-			 const char *arg,
-			 int unset)
+స్థిర పూర్ణాంకం format_nul_cb(స్థిరరాశి నిర్మాణం option *option,
+			 స్థిరరాశి అక్షరం *arg,
+			 పూర్ణాంకం unset)
 {
-	struct format_nul_data *data = option->value;
-	data->nul_input = 1;
-	data->nul_output = 1;
+	నిర్మాణం format_nul_దత్తాంశం *దత్తాంశం = option->విలువ;
+	దత్తాంశం->nul_ఆదానం = 1;
+	దత్తాంశం->nul_output = 1;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return 0;
+	తిరిగి 0;
 }
 
-static enum stdin_mode parse_stdin_mode(const char *stdin_mode)
+స్థిర గణన stdin_బహుళకం parse_stdin_బహుళకం(స్థిరరాశి అక్షరం *stdin_బహుళకం)
 {
-	if (!strcmp(stdin_mode, "text"))
-		return TEXT;
-	else if (!strcmp(stdin_mode, "revs") ||
-		 !strcmp(stdin_mode, "rev"))
-		return REVS;
-	else
+	ఒకవేళ (!strcmp(stdin_బహుళకం, "text"))
+		తిరిగి పాఠ్యం_2;
+	లేకపోతే ఒకవేళ (!strcmp(stdin_బహుళకం, "revs") ||
+		 !strcmp(stdin_బహుళకం, "rev"))
+		తిరిగి REVS;
+	లేకపోతే
 		die(_("'%s' needs to be either text, revs, or rev"),
 		    "--stdin-mode");
 }
 
-static char const *const format_rev_usage[] = {
+స్థిర అక్షరం స్థిరరాశి *స్థిరరాశి format_rev_usage[] = {
 	N_("(EXPERIMENTAL!) git format-rev --stdin-mode=<mode> "
 	   "--format=<pretty> [--[no-]notes=<ref>] "
 	   "[-z] [--[no-]null-output] [--[no-]null-input]"),
-	NULL
+	ఖాళీ
 };
 
-int cmd_format_rev(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+పూర్ణాంకం cmd_format_rev(పూర్ణాంకం argc,
+		   స్థిరరాశి అక్షరం **argv,
+		   స్థిరరాశి అక్షరం *ఉపసర్గ,
+		   నిర్మాణం repository *repo వాడని)
 {
-	const char *format = NULL;
-	enum stdin_mode stdin_mode;
-	const char *stdin_mode_arg = NULL;
-	struct format_nul_data nul_data = { 0, 0 };
-	char output_terminator;
+	స్థిరరాశి అక్షరం *format = ఖాళీ;
+	గణన stdin_బహుళకం stdin_బహుళకం;
+	స్థిరరాశి అక్షరం *stdin_బహుళకం_arg = ఖాళీ;
+	నిర్మాణం format_nul_దత్తాంశం nul_దత్తాంశం = { 0, 0 };
+	అక్షరం output_terminator;
 	strbuf_getline_fn getline_fn;
-	struct display_notes_opt format_notes_opt;
-	struct rev_info format_rev = REV_INFO_INIT;
-	struct pretty_format format_pp = { 0 };
-	struct string_list notes = STRING_LIST_INIT_NODUP;
-	struct strbuf scratch_buf = STRBUF_INIT;
-	struct command cmd;
-	struct option opts[] = {
+	నిర్మాణం display_notes_opt format_notes_opt;
+	నిర్మాణం rev_info format_rev = REV_INFO_INIT;
+	నిర్మాణం pretty_format format_pp = { 0 };
+	నిర్మాణం string_list notes = STRING_LIST_INIT_NODUP;
+	నిర్మాణం strbuf scratch_buf = STRBUF_INIT;
+	నిర్మాణం command cmd;
+	నిర్మాణం option opts[] = {
 		OPT_STRING(0, "format", &format, N_("format"),
 			   N_("pretty format to use")),
-		OPT_STRING(0, "stdin-mode", &stdin_mode_arg, N_("stdin-mode"),
+		OPT_STRING(0, "stdin-mode", &stdin_బహుళకం_arg, N_("stdin-mode"),
 			   N_("how revs are processed")),
 		OPT_STRING_LIST(0, "notes", &notes, N_("notes"),
 				N_("display notes for pretty format")),
-		OPT_CALLBACK_F('z', "null", &nul_data, N_("z"),
+		OPT_CALLBACK_F('z', "null", &nul_దత్తాంశం, N_("z"),
 			       N_("Use NUL for input and output termination"),
 			       PARSE_OPT_NOARG | PARSE_OPT_NONEG, format_nul_cb),
-		OPT_BOOL(0, "null-input", &nul_data.nul_input,
+		OPT_BOOL(0, "null-input", &nul_దత్తాంశం.nul_ఆదానం,
 			 N_("Use NUL for input termination")),
-		OPT_BOOL(0, "null-output", &nul_data.nul_output,
+		OPT_BOOL(0, "null-output", &nul_దత్తాంశం.nul_output,
 			 N_("Use NUL for output termination")),
-		OPT_END(),
+		OPT_చివర(),
 	};
 
-	argc = parse_options(argc, argv, prefix, opts, format_rev_usage, 0);
+	argc = parse_options(argc, argv, ఉపసర్గ, opts, format_rev_usage, 0);
 
-	if (argc > 0) {
+	ఒకవేళ (argc > 0) {
 		error(_("too many arguments"));
 		usage_with_options(format_rev_usage, opts);
 	}
 
-	if (!format)
+	ఒకవేళ (!format)
 		die(_("'%s' is required"), "--format");
-	if (!stdin_mode_arg)
+	ఒకవేళ (!stdin_బహుళకం_arg)
 		die(_("'%s' is required"), "--stdin-mode");
 
-	getline_fn = nul_data.nul_input ? strbuf_getline_nul : strbuf_getline_lf;
-	output_terminator = nul_data.nul_output ? '\0' : '\n';
+	getline_fn = nul_దత్తాంశం.nul_ఆదానం ? strbuf_getline_nul : strbuf_getline_lf;
+	output_terminator = nul_దత్తాంశం.nul_output ? '\0' : '\n';
 
 	init_display_notes(&format_notes_opt);
-	stdin_mode = parse_stdin_mode(stdin_mode_arg);
+	stdin_బహుళకం = parse_stdin_బహుళకం(stdin_బహుళకం_arg);
 
 	get_commit_format(format, &format_rev);
 	format_pp.ctx.rev = &format_rev;
 	format_pp.ctx.fmt = format_rev.commit_format;
 	format_pp.ctx.abbrev = format_rev.abbrev;
-	format_pp.ctx.date_mode_explicit = format_rev.date_mode_explicit;
-	format_pp.ctx.date_mode = format_rev.date_mode;
+	format_pp.ctx.date_బహుళకం_explicit = format_rev.date_బహుళకం_explicit;
+	format_pp.ctx.date_బహుళకం = format_rev.date_బహుళకం;
 	format_pp.ctx.color = GIT_COLOR_AUTO;
 
-	userformat_find_requirements(format,
+	userformat_కనుగొను_requirements(format,
 				     &format_pp.want);
-	if (format_pp.want.notes) {
-		int ignore_show_notes = 0;
-		struct string_list_item *n;
+	ఒకవేళ (format_pp.want.notes) {
+		పూర్ణాంకం ignore_show_notes = 0;
+		నిర్మాణం string_list_అంశం *n;
 
-		for_each_string_list_item(n, &notes)
+		for_each_string_list_అంశం(n, &notes)
 			enable_ref_display_notes(&format_notes_opt,
 						 &ignore_show_notes,
 						 n->string);
-		load_display_notes(&format_notes_opt);
+		ఎక్కించు_display_notes(&format_notes_opt);
 	}
 
 	init_format_rev_command(&cmd, &format_pp);
 
-	switch (stdin_mode) {
-	case TEXT:
-		while (getline_fn(&scratch_buf, stdin) != EOF) {
-			name_rev_line(scratch_buf.buf, &cmd);
+	ఎంపిక (stdin_బహుళకం) {
+	స్థితి పాఠ్యం_2:
+		అయితే (getline_fn(&scratch_buf, stdin) != EOF) {
+			name_rev_పంక్తి(scratch_buf.buf, &cmd);
 			/*
 			 * We do not pass on the terminator to name_rev_line,
 			 * unlike name-rev.
 			 */
-			printf("%c", output_terminator);
+			రాయి("%c", output_terminator);
 			maybe_flush_or_die(stdout, "stdout");
 		}
-		break;
-	case REVS:
-		while (getline_fn(&scratch_buf, stdin) != EOF) {
-			struct object_id oid;
-			struct object *object;
-			struct object *peeled;
+		ఆపు;
+	స్థితి REVS:
+		అయితే (getline_fn(&scratch_buf, stdin) != EOF) {
+			నిర్మాణం object_id oid;
+			నిర్మాణం object *object;
+			నిర్మాణం object *peeled;
 
-			if (repo_get_oid(the_repository, scratch_buf.buf, &oid)) {
+			ఒకవేళ (repo_get_oid(the_repository, scratch_buf.buf, &oid)) {
 				fprintf(stderr, "Could not get object name for %s. Skipping.\n",
 					scratch_buf.buf);
-				continue;
+				కొనసాగు;
 			}
 
 			object = parse_object(the_repository, &oid);
-			if (!object) {
+			ఒకవేళ (!object) {
 				fprintf(stderr, "Could not get object for %s. Skipping.\n",
 					scratch_buf.buf);
-				continue;
+				కొనసాగు;
 			}
 
-			peeled = deref_tag(the_repository, object, scratch_buf.buf, 0);
-			if (!peeled || peeled->type != OBJ_COMMIT) {
+			peeled = deref_ట్యాగ్(the_repository, object, scratch_buf.buf, 0);
+			ఒకవేళ (!peeled || peeled->type != OBJ_COMMIT) {
 				fprintf(stderr,
 					"Could not get commit for %s. Skipping.\n",
 					scratch_buf.buf);
-				continue;
+				కొనసాగు;
 			}
 
-			get_format_rev((struct commit *)peeled,
+			get_format_rev((నిర్మాణం commit *)peeled,
 				       &format_pp, &scratch_buf);
-			printf("%s%c", scratch_buf.buf, output_terminator);
+			రాయి("%s%c", scratch_buf.buf, output_terminator);
 			maybe_flush_or_die(stdout, "stdout");
 			strbuf_release(&scratch_buf);
 		}
-		break;
-	default:
-		BUG("uncovered case: %d", stdin_mode);
+		ఆపు;
+	అప్రమేయ:
+		BUG("uncovered case: %d", stdin_బహుళకం);
 	}
 
 	strbuf_release(&scratch_buf);
 	string_list_clear(&notes, 0);
 	release_display_notes(&format_notes_opt);
-	return 0;
+	తిరిగి 0;
 }

@@ -1,52 +1,52 @@
 /* We need this macro to access core_apply_sparse_checkout */
-#define USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "git-compat-util.h"
-#include "config.h"
-#include "parse-options.h"
-#include "repository.h"
-#include "commit.h"
-#include "dir.h"
-#include "environment.h"
-#include "hex.h"
-#include "tree.h"
-#include "tree-walk.h"
-#include "object.h"
-#include "odb.h"
-#include "oid-array.h"
-#include "oidset.h"
-#include "promisor-remote.h"
-#include "strmap.h"
-#include "string-list.h"
-#include "revision.h"
-#include "trace2.h"
-#include "progress.h"
-#include "packfile.h"
-#include "path-walk.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "git-compat-util.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "repository.h"
+#అన్తర్భావ "commit.h"
+#అన్తర్భావ "dir.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "tree.h"
+#అన్తర్భావ "tree-walk.h"
+#అన్తర్భావ "object.h"
+#అన్తర్భావ "odb.h"
+#అన్తర్భావ "oid-array.h"
+#అన్తర్భావ "oidset.h"
+#అన్తర్భావ "promisor-remote.h"
+#అన్తర్భావ "strmap.h"
+#అన్తర్భావ "string-list.h"
+#అన్తర్భావ "revision.h"
+#అన్తర్భావ "trace2.h"
+#అన్తర్భావ "progress.h"
+#అన్తర్భావ "packfile.h"
+#అన్తర్భావ "path-walk.h"
 
-static const char * const builtin_backfill_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_backfill_usage[] = {
 	N_("git backfill [--min-batch-size=<n>] [--[no-]sparse] [--[no-]include-edges] [<revision-range>]"),
-	NULL
+	ఖాళీ
 };
 
-struct backfill_context {
-	struct repository *repo;
-	struct oid_array current_batch;
-	size_t min_batch_size;
-	int sparse;
-	int include_edges;
-	struct rev_info revs;
+నిర్మాణం backfill_context {
+	నిర్మాణం repository *repo;
+	నిర్మాణం oid_array current_batch;
+	కొలత_t min_batch_కొలత;
+	పూర్ణాంకం sparse;
+	పూర్ణాంకం include_అంచులు;
+	నిర్మాణం rev_info revs;
 };
 
-static void backfill_context_clear(struct backfill_context *ctx)
+స్థిర శూన్య backfill_context_clear(నిర్మాణం backfill_context *ctx)
 {
 	oid_array_clear(&ctx->current_batch);
 }
 
-static void download_batch(struct backfill_context *ctx)
+స్థిర శూన్య download_batch(నిర్మాణం backfill_context *ctx)
 {
-	promisor_remote_get_direct(ctx->repo,
+	promisor_remote_get_ప్రత్యక్ష(ctx->repo,
 				   ctx->current_batch.oid,
 				   ctx->current_batch.nr);
 	oid_array_clear(&ctx->current_batch);
@@ -58,131 +58,131 @@ static void download_batch(struct backfill_context *ctx)
 	odb_reprepare(ctx->repo->objects);
 }
 
-static int fill_missing_blobs(const char *path UNUSED,
-			      struct oid_array *list,
-			      enum object_type type,
-			      void *data)
+స్థిర పూర్ణాంకం fill_missing_blobs(స్థిరరాశి అక్షరం *మార్గం వాడని,
+			      నిర్మాణం oid_array *list,
+			      గణన object_type type,
+			      శూన్య *దత్తాంశం)
 {
-	struct backfill_context *ctx = data;
+	నిర్మాణం backfill_context *ctx = దత్తాంశం;
 
-	if (type != OBJ_BLOB)
-		return 0;
+	ఒకవేళ (type != OBJ_BLOB)
+		తిరిగి 0;
 
-	for (size_t i = 0; i < list->nr; i++) {
-		if (!odb_has_object(ctx->repo->objects, &list->oid[i], 0))
+	కొరకు (కొలత_t i = 0; i < list->nr; i++) {
+		ఒకవేళ (!odb_has_object(ctx->repo->objects, &list->oid[i], 0))
 			oid_array_append(&ctx->current_batch, &list->oid[i]);
 	}
 
-	if (ctx->current_batch.nr >= ctx->min_batch_size)
+	ఒకవేళ (ctx->current_batch.nr >= ctx->min_batch_కొలత)
 		download_batch(ctx);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static void reject_unsupported_rev_list_options(struct rev_info *revs)
+స్థిర శూన్య reject_unsupported_rev_list_options(నిర్మాణం rev_info *revs)
 {
-	if (revs->diffopt.pickaxe)
+	ఒకవేళ (revs->diffopt.pickaxe)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    (revs->diffopt.pickaxe_opts & DIFF_PICKAXE_REGEX) ? "-G" : "-S");
-	if (revs->diffopt.filter || revs->diffopt.filter_not)
+	ఒకవేళ (revs->diffopt.filter || revs->diffopt.filter_not)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--diff-filter");
-	if (revs->diffopt.flags.follow_renames)
+	ఒకవేళ (revs->diffopt.flags.follow_renames)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--follow");
-	if (revs->line_level_traverse)
+	ఒకవేళ (revs->పంక్తి_level_traverse)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "-L");
-	if (revs->explicit_diff_merges)
+	ఒకవేళ (revs->explicit_diff_merges)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--diff-merges");
-	if (!path_walk_filter_compatible(&revs->filter))
+	ఒకవేళ (!మార్గం_walk_filter_compatible(&revs->filter))
 		die(_("cannot backfill with these filter options"));
-	if (revs->filter.blob_limit_value)
+	ఒకవేళ (revs->filter.blob_హద్దు_విలువ)
 		die(_("cannot backfill with blob size limits"));
 }
 
-static int do_backfill(struct backfill_context *ctx)
+స్థిర పూర్ణాంకం do_backfill(నిర్మాణం backfill_context *ctx)
 {
-	struct path_walk_info info = PATH_WALK_INFO_INIT;
-	int ret;
+	నిర్మాణం మార్గం_walk_info info = మార్గం_WALK_INFO_INIT;
+	పూర్ణాంకం ret;
 
-	if (ctx->sparse) {
+	ఒకవేళ (ctx->sparse) {
 		CALLOC_ARRAY(info.pl, 1);
 		info.pl_sparse_trees = 1;
-		if (get_sparse_checkout_patterns(info.pl)) {
-			path_walk_info_clear(&info);
-			return error(_("problem loading sparse-checkout"));
+		ఒకవేళ (get_sparse_checkout_patterns(info.pl)) {
+			మార్గం_walk_info_clear(&info);
+			తిరిగి error(_("problem loading sparse-checkout"));
 		}
 	}
 
 	/* Walk from HEAD if otherwise unspecified. */
-	if (!ctx->revs.pending.nr)
-		add_head_to_pending(&ctx->revs);
-	if (ctx->include_edges)
-		ctx->revs.edge_hint = 1;
+	ఒకవేళ (!ctx->revs.pending.nr)
+		కూడు_తల_గమ్యం_pending(&ctx->revs);
+	ఒకవేళ (ctx->include_అంచులు)
+		ctx->revs.అంచు_hint = 1;
 
 	info.blobs = 1;
-	info.tags = info.commits = info.trees = 0;
+	info.ట్యాగులు = info.commits = info.trees = 0;
 
 	info.revs = &ctx->revs;
-	info.path_fn = fill_missing_blobs;
-	info.path_fn_data = ctx;
+	info.మార్గం_fn = fill_missing_blobs;
+	info.మార్గం_fn_దత్తాంశం = ctx;
 
-	ret = walk_objects_by_path(&info);
+	ret = walk_objects_by_మార్గం(&info);
 
 	/* Download the objects that did not fill a batch. */
-	if (!ret)
+	ఒకవేళ (!ret)
 		download_batch(ctx);
 
-	path_walk_info_clear(&info);
-	return ret;
+	మార్గం_walk_info_clear(&info);
+	తిరిగి ret;
 }
 
-int cmd_backfill(int argc, const char **argv, const char *prefix, struct repository *repo)
+పూర్ణాంకం cmd_backfill(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ, నిర్మాణం repository *repo)
 {
-	int result;
-	struct backfill_context ctx = {
+	పూర్ణాంకం ఫలితం;
+	నిర్మాణం backfill_context ctx = {
 		.repo = repo,
 		.current_batch = OID_ARRAY_INIT,
-		.min_batch_size = 50000,
+		.min_batch_కొలత = 50000,
 		.sparse = -1,
 		.revs = REV_INFO_INIT,
-		.include_edges = 1,
+		.include_అంచులు = 1,
 	};
-	struct option options[] = {
-		OPT_UNSIGNED(0, "min-batch-size", &ctx.min_batch_size,
+	నిర్మాణం option options[] = {
+		OPT_UNSIGNED(0, "min-batch-size", &ctx.min_batch_కొలత,
 			     N_("Minimum number of objects to request at a time")),
 		OPT_BOOL(0, "sparse", &ctx.sparse,
 			 N_("Restrict the missing objects to the current sparse-checkout")),
-		OPT_BOOL(0, "include-edges", &ctx.include_edges,
+		OPT_BOOL(0, "include-edges", &ctx.include_అంచులు,
 			 N_("Include blobs from boundary commits in the backfill")),
-		OPT_END(),
+		OPT_చివర(),
 	};
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	నిర్మాణం repo_config_విలువలు *cfg = repo_config_విలువలు(the_repository);
 
 	show_usage_with_options_if_asked(argc, argv,
 					 builtin_backfill_usage, options);
 
-	argc = parse_options(argc, argv, prefix, options, builtin_backfill_usage,
+	argc = parse_options(argc, argv, ఉపసర్గ, options, builtin_backfill_usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT |
 			     PARSE_OPT_KEEP_ARGV0 |
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	repo_init_revisions(repo, &ctx.revs, prefix);
-	argc = setup_revisions(argc, argv, &ctx.revs, NULL);
+	repo_init_revisions(repo, &ctx.revs, ఉపసర్గ);
+	argc = అమరిక_revisions(argc, argv, &ctx.revs, ఖాళీ);
 
-	if (argc > 1)
+	ఒకవేళ (argc > 1)
 		die(_("unrecognized argument: %s"), argv[1]);
 	reject_unsupported_rev_list_options(&ctx.revs);
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ఖాళీ);
 
-	if (ctx.sparse < 0)
+	ఒకవేళ (ctx.sparse < 0)
 		ctx.sparse = cfg->apply_sparse_checkout;
 
-	result = do_backfill(&ctx);
+	ఫలితం = do_backfill(&ctx);
 	backfill_context_clear(&ctx);
 	release_revisions(&ctx.revs);
-	return result;
+	తిరిగి ఫలితం;
 }

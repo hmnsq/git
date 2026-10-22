@@ -1,27 +1,27 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "date.h"
-#include "gettext.h"
-#include "ident.h"
-#include "parse-options.h"
-#include "path.h"
-#include "transport.h"
-#include "remote.h"
-#include "string-list.h"
-#include "strbuf.h"
-#include "run-command.h"
-#include "rebase.h"
-#include "refs.h"
-#include "refspec.h"
-#include "odb.h"
-#include "strvec.h"
-#include "commit-reach.h"
-#include "progress.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "advice.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "date.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "ident.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "path.h"
+#అన్తర్భావ "transport.h"
+#అన్తర్భావ "remote.h"
+#అన్తర్భావ "string-list.h"
+#అన్తర్భావ "strbuf.h"
+#అన్తర్భావ "run-command.h"
+#అన్తర్భావ "rebase.h"
+#అన్తర్భావ "refs.h"
+#అన్తర్భావ "refspec.h"
+#అన్తర్భావ "odb.h"
+#అన్తర్భావ "strvec.h"
+#అన్తర్భావ "commit-reach.h"
+#అన్తర్భావ "progress.h"
 
-static const char * const builtin_remote_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_remote_usage[] = {
 	"git remote [-v | --verbose]",
 	N_("git remote add [-t <branch>] [-m <master>] [-f] [--tags | --no-tags] [--mirror=<fetch|push>] <name> <url>"),
 	N_("git remote rename [--[no-]progress] <old> <new>"),
@@ -35,655 +35,655 @@ static const char * const builtin_remote_usage[] = {
 	N_("git remote set-url [--push] <name> <newurl> [<oldurl>]"),
 	N_("git remote set-url --add <name> <newurl>"),
 	N_("git remote set-url --delete <name> <url>"),
-	NULL
+	ఖాళీ
 };
 
-static const char * const builtin_remote_add_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_remote_కూడు_usage[] = {
 	N_("git remote add [<options>] <name> <url>"),
-	NULL
+	ఖాళీ
 };
 
-static const char * const builtin_remote_rename_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_remote_rename_usage[] = {
 	N_("git remote rename [--[no-]progress] <old> <new>"),
-	NULL
+	ఖాళీ
 };
 
-static const char * const builtin_remote_rm_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_remote_rm_usage[] = {
 	N_("git remote remove <name>"),
-	NULL
+	ఖాళీ
 };
 
-static const char * const builtin_remote_sethead_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_remote_sethead_usage[] = {
 	N_("git remote set-head <name> (-a | --auto | -d | --delete | <branch>)"),
-	NULL
+	ఖాళీ
 };
 
-static const char * const builtin_remote_setbranches_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_remote_setbranches_usage[] = {
 	N_("git remote set-branches <name> <branch>..."),
 	N_("git remote set-branches --add <name> <branch>..."),
-	NULL
+	ఖాళీ
 };
 
-static const char * const builtin_remote_show_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_remote_show_usage[] = {
 	N_("git remote show [<options>] <name>"),
-	NULL
+	ఖాళీ
 };
 
-static const char * const builtin_remote_prune_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_remote_prune_usage[] = {
 	N_("git remote prune [<options>] <name>"),
-	NULL
+	ఖాళీ
 };
 
-static const char * const builtin_remote_update_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_remote_update_usage[] = {
 	N_("git remote update [<options>] [<group> | <remote>]..."),
-	NULL
+	ఖాళీ
 };
 
-static const char * const builtin_remote_geturl_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_remote_geturl_usage[] = {
 	N_("git remote get-url [--push] [--all] <name>"),
-	NULL
+	ఖాళీ
 };
 
-static const char * const builtin_remote_seturl_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_remote_seturl_usage[] = {
 	N_("git remote set-url [--push] <name> <newurl> [<oldurl>]"),
 	N_("git remote set-url --add <name> <newurl>"),
 	N_("git remote set-url --delete <name> <url>"),
-	NULL
+	ఖాళీ
 };
 
-#define GET_REF_STATES (1<<0)
-#define GET_HEAD_NAMES (1<<1)
-#define GET_PUSH_REF_STATES (1<<2)
+#నిర్వచించు GET_REF_స్థితులు (1<<0)
+#నిర్వచించు GET_తల_పేర్లు (1<<1)
+#నిర్వచించు GET_నెట్టు_REF_స్థితులు (1<<2)
 
-static int verbose;
+స్థిర పూర్ణాంకం verbose;
 
-static int fetch_remote(const char *name)
+స్థిర పూర్ణాంకం fetch_remote(స్థిరరాశి అక్షరం *name)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process cmd = బిడ్డ_PROCESS_INIT;
 
-	strvec_push(&cmd.args, "fetch");
-	if (verbose)
-		strvec_push(&cmd.args, "-v");
-	strvec_push(&cmd.args, name);
+	strvec_నెట్టు(&cmd.వాదనలు, "fetch");
+	ఒకవేళ (verbose)
+		strvec_నెట్టు(&cmd.వాదనలు, "-v");
+	strvec_నెట్టు(&cmd.వాదనలు, name);
 	cmd.git_cmd = 1;
 	printf_ln(_("Updating %s"), name);
-	if (run_command(&cmd))
-		return error(_("Could not fetch %s"), name);
-	return 0;
+	ఒకవేళ (నిరంతరం_command(&cmd))
+		తిరిగి error(_("Could not fetch %s"), name);
+	తిరిగి 0;
 }
 
-enum {
-	TAGS_UNSET = 0,
-	TAGS_DEFAULT = 1,
-	TAGS_SET = 2
+గణన {
+	ట్యాగులు_UNSET = 0,
+	ట్యాగులు_DEFAULT = 1,
+	ట్యాగులు_సమితి = 2
 };
 
-#define MIRROR_NONE 0
-#define MIRROR_FETCH 1
-#define MIRROR_PUSH 2
-#define MIRROR_BOTH (MIRROR_FETCH|MIRROR_PUSH)
+#నిర్వచించు MIRROR_NONE 0
+#నిర్వచించు MIRROR_FETCH 1
+#నిర్వచించు MIRROR_నెట్టు 2
+#నిర్వచించు MIRROR_BOTH (MIRROR_FETCH|MIRROR_నెట్టు)
 
-static void add_branch(const char *key, const char *branchname,
-		       const char *remotename, int mirror, struct strbuf *tmp)
+స్థిర శూన్య కూడు_branch(స్థిరరాశి అక్షరం *కీలకం, స్థిరరాశి అక్షరం *branchname,
+		       స్థిరరాశి అక్షరం *remotename, పూర్ణాంకం mirror, నిర్మాణం strbuf *tmp)
 {
 	strbuf_reset(tmp);
 	strbuf_addch(tmp, '+');
-	if (mirror)
+	ఒకవేళ (mirror)
 		strbuf_addf(tmp, "refs/%s:refs/%s",
 				branchname, branchname);
-	else
+	లేకపోతే
 		strbuf_addf(tmp, "refs/heads/%s:refs/remotes/%s/%s",
 				branchname, remotename, branchname);
-	repo_config_set_multivar(the_repository, key, tmp->buf, "^$", 0);
+	repo_config_సమితి_multivar(the_repository, కీలకం, tmp->buf, "^$", 0);
 }
 
-static const char mirror_advice[] =
+స్థిర స్థిరరాశి అక్షరం mirror_advice[] =
 N_("--mirror is dangerous and deprecated; please\n"
    "\t use --mirror=fetch or --mirror=push instead");
 
-static int parse_mirror_opt(const struct option *opt, const char *arg, int not)
+స్థిర పూర్ణాంకం parse_mirror_opt(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg, పూర్ణాంకం not)
 {
-	unsigned *mirror = opt->value;
-	if (not)
+	గుర్తులేని *mirror = opt->విలువ;
+	ఒకవేళ (not)
 		*mirror = MIRROR_NONE;
-	else if (!arg) {
+	లేకపోతే ఒకవేళ (!arg) {
 		warning("%s", _(mirror_advice));
 		*mirror = MIRROR_BOTH;
 	}
-	else if (!strcmp(arg, "fetch"))
+	లేకపోతే ఒకవేళ (!strcmp(arg, "fetch"))
 		*mirror = MIRROR_FETCH;
-	else if (!strcmp(arg, "push"))
-		*mirror = MIRROR_PUSH;
-	else
-		return error(_("unknown --mirror argument: %s"), arg);
-	return 0;
+	లేకపోతే ఒకవేళ (!strcmp(arg, "push"))
+		*mirror = MIRROR_నెట్టు;
+	లేకపోతే
+		తిరిగి error(_("unknown --mirror argument: %s"), arg);
+	తిరిగి 0;
 }
 
-static int check_remote_collision(struct remote *remote, void *data)
+స్థిర పూర్ణాంకం check_remote_collision(నిర్మాణం remote *remote, శూన్య *దత్తాంశం)
 {
-	const char *name = data;
-	const char *p;
+	స్థిరరాశి అక్షరం *name = దత్తాంశం;
+	స్థిరరాశి అక్షరం *p;
 
-	if (skip_prefix(name, remote->name, &p) && *p == '/')
+	ఒకవేళ (skip_ఉపసర్గ(name, remote->name, &p) && *p == '/')
 		die(_("remote name '%s' is a subset of existing remote '%s'"),
 		    name, remote->name);
-	if (skip_prefix(remote->name, name, &p) && *p == '/')
+	ఒకవేళ (skip_ఉపసర్గ(remote->name, name, &p) && *p == '/')
 		die(_("remote name '%s' is a superset of existing remote '%s'"),
 		    name, remote->name);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int add(int argc, const char **argv, const char *prefix,
-	       struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం కూడు(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+	       నిర్మాణం repository *repo వాడని)
 {
-	int fetch = 0, fetch_tags = TAGS_DEFAULT;
-	unsigned mirror = MIRROR_NONE;
-	struct string_list track = STRING_LIST_INIT_NODUP;
-	const char *master = NULL;
-	struct remote *remote;
-	struct strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT;
-	const char *name, *url;
-	int result = 0;
+	పూర్ణాంకం fetch = 0, fetch_ట్యాగులు = ట్యాగులు_DEFAULT;
+	గుర్తులేని mirror = MIRROR_NONE;
+	నిర్మాణం string_list track = STRING_LIST_INIT_NODUP;
+	స్థిరరాశి అక్షరం *master = ఖాళీ;
+	నిర్మాణం remote *remote;
+	నిర్మాణం strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *name, *url;
+	పూర్ణాంకం ఫలితం = 0;
 
-	struct option options[] = {
+	నిర్మాణం option options[] = {
 		OPT_BOOL('f', "fetch", &fetch, N_("fetch the remote branches")),
-		OPT_SET_INT(0, "tags", &fetch_tags,
+		OPT_సమితి_INT(0, "tags", &fetch_ట్యాగులు,
 			    N_("import all tags and associated objects when fetching\n"
 			       "or do not fetch any tag at all (--no-tags)"),
-			    TAGS_SET),
+			    ట్యాగులు_సమితి),
 		OPT_STRING_LIST('t', "track", &track, N_("branch"),
 				N_("branch(es) to track")),
 		OPT_STRING('m', "master", &master, N_("branch"), N_("master branch")),
 		OPT_CALLBACK_F(0, "mirror", &mirror, "(push|fetch)",
 			N_("set up remote as a mirror to push to or fetch from"),
 			PARSE_OPT_OPTARG | PARSE_OPT_COMP_ARG, parse_mirror_opt),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
-			     builtin_remote_add_usage, 0);
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
+			     builtin_remote_కూడు_usage, 0);
 
-	if (argc != 2)
-		usage_with_options(builtin_remote_add_usage, options);
+	ఒకవేళ (argc != 2)
+		usage_with_options(builtin_remote_కూడు_usage, options);
 
-	if (mirror && master)
+	ఒకవేళ (mirror && master)
 		die(_("specifying a master branch makes no sense with --mirror"));
-	if (mirror && !(mirror & MIRROR_FETCH) && track.nr)
+	ఒకవేళ (mirror && !(mirror & MIRROR_FETCH) && track.nr)
 		die(_("specifying branches to track makes sense only with fetch mirrors"));
 
 	name = argv[0];
 	url = argv[1];
 
 	remote = remote_get(name);
-	if (remote_is_configured(remote, 1)) {
+	ఒకవేళ (remote_is_configured(remote, 1)) {
 		error(_("remote %s already exists."), name);
-		exit(3);
+		నిష్క్రమించు(3);
 	}
 
-	if (!valid_remote_name(name))
+	ఒకవేళ (!valid_remote_name(name))
 		die(_("'%s' is not a valid remote name"), name);
 
-	for_each_remote(check_remote_collision, (void *)name);
+	for_each_remote(check_remote_collision, (శూన్య *)name);
 
 	strbuf_addf(&buf, "remote.%s.url", name);
-	repo_config_set(the_repository, buf.buf, url);
+	repo_config_సమితి(the_repository, buf.buf, url);
 
-	if (!mirror || mirror & MIRROR_FETCH) {
+	ఒకవేళ (!mirror || mirror & MIRROR_FETCH) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.fetch", name);
-		if (track.nr == 0)
+		ఒకవేళ (track.nr == 0)
 			string_list_append(&track, "*");
-		for (size_t i = 0; i < track.nr; i++) {
-			add_branch(buf.buf, track.items[i].string,
+		కొరకు (కొలత_t i = 0; i < track.nr; i++) {
+			కూడు_branch(buf.buf, track.వస్తువులు[i].string,
 				   name, mirror, &buf2);
 		}
 	}
 
-	if (mirror & MIRROR_PUSH) {
+	ఒకవేళ (mirror & MIRROR_నెట్టు) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.mirror", name);
-		repo_config_set(the_repository, buf.buf, "true");
+		repo_config_సమితి(the_repository, buf.buf, "true");
 	}
 
-	if (fetch_tags != TAGS_DEFAULT) {
+	ఒకవేళ (fetch_ట్యాగులు != ట్యాగులు_DEFAULT) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.tagOpt", name);
-		repo_config_set(the_repository, buf.buf,
-				fetch_tags == TAGS_SET ? "--tags" : "--no-tags");
+		repo_config_సమితి(the_repository, buf.buf,
+				fetch_ట్యాగులు == ట్యాగులు_సమితి ? "--tags" : "--no-tags");
 	}
 
-	if (fetch && fetch_remote(name)) {
-		result = 1;
-		goto out;
+	ఒకవేళ (fetch && fetch_remote(name)) {
+		ఫలితం = 1;
+		వెళ్ళు బహిర్గతం;
 	}
 
-	if (master) {
+	ఒకవేళ (master) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "refs/remotes/%s/HEAD", name);
 
 		strbuf_reset(&buf2);
 		strbuf_addf(&buf2, "refs/remotes/%s/%s", name, master);
 
-		if (refs_update_symref(get_main_ref_store(the_repository), buf.buf, buf2.buf, "remote add"))
-			result = error(_("Could not setup master '%s'"), master);
+		ఒకవేళ (refs_update_symref(get_main_ref_store(the_repository), buf.buf, buf2.buf, "remote add"))
+			ఫలితం = error(_("Could not setup master '%s'"), master);
 	}
 
-out:
+బహిర్గతం:
 	strbuf_release(&buf);
 	strbuf_release(&buf2);
 	string_list_clear(&track, 0);
 
-	return result;
+	తిరిగి ఫలితం;
 }
 
-struct branch_info {
-	char *remote_name;
-	struct string_list merge;
-	enum rebase_type rebase;
-	char *push_remote_name;
+నిర్మాణం branch_info {
+	అక్షరం *remote_name;
+	నిర్మాణం string_list విలీనం;
+	గణన rebase_type rebase;
+	అక్షరం *నెట్టు_remote_name;
 };
 
-static struct string_list branch_list = STRING_LIST_INIT_DUP;
+స్థిర నిర్మాణం string_list branch_list = STRING_LIST_INIT_DUP;
 
-static const char *abbrev_ref(const char *name, const char *prefix)
+స్థిర స్థిరరాశి అక్షరం *abbrev_ref(స్థిరరాశి అక్షరం *name, స్థిరరాశి అక్షరం *ఉపసర్గ)
 {
-	skip_prefix(name, prefix, &name);
-	return name;
+	skip_ఉపసర్గ(name, ఉపసర్గ, &name);
+	తిరిగి name;
 }
-#define abbrev_branch(name) abbrev_ref((name), "refs/heads/")
+#నిర్వచించు abbrev_branch(name) abbrev_ref((name), "refs/heads/")
 
-static int config_read_branches(const char *key, const char *value,
-				const struct config_context *ctx UNUSED,
-				void *data UNUSED)
+స్థిర పూర్ణాంకం config_read_branches(స్థిరరాశి అక్షరం *కీలకం, స్థిరరాశి అక్షరం *విలువ,
+				స్థిరరాశి నిర్మాణం config_context *ctx వాడని,
+				శూన్య *దత్తాంశం వాడని)
 {
-	const char *orig_key = key;
-	char *name;
-	struct string_list_item *item;
-	struct branch_info *info;
-	enum { REMOTE, MERGE, REBASE, PUSH_REMOTE } type;
-	size_t key_len;
+	స్థిరరాశి అక్షరం *orig_కీలకం = కీలకం;
+	అక్షరం *name;
+	నిర్మాణం string_list_అంశం *అంశం;
+	నిర్మాణం branch_info *info;
+	గణన { REMOTE, విలీనం_2, REBASE, నెట్టు_REMOTE } type;
+	కొలత_t కీలకం_len;
 
-	if (!starts_with(key, "branch."))
-		return 0;
+	ఒకవేళ (!starts_with(కీలకం, "branch."))
+		తిరిగి 0;
 
-	key += strlen("branch.");
-	if (strip_suffix(key, ".remote", &key_len))
+	కీలకం += అక్షరశ్రేణి_పొడవు("branch.");
+	ఒకవేళ (strip_suffix(కీలకం, ".remote", &కీలకం_len))
 		type = REMOTE;
-	else if (strip_suffix(key, ".merge", &key_len))
-		type = MERGE;
-	else if (strip_suffix(key, ".rebase", &key_len))
+	లేకపోతే ఒకవేళ (strip_suffix(కీలకం, ".merge", &కీలకం_len))
+		type = విలీనం_2;
+	లేకపోతే ఒకవేళ (strip_suffix(కీలకం, ".rebase", &కీలకం_len))
 		type = REBASE;
-	else if (strip_suffix(key, ".pushremote", &key_len))
-		type = PUSH_REMOTE;
-	else
-		return 0;
+	లేకపోతే ఒకవేళ (strip_suffix(కీలకం, ".pushremote", &కీలకం_len))
+		type = నెట్టు_REMOTE;
+	లేకపోతే
+		తిరిగి 0;
 
-	name = xmemdupz(key, key_len);
-	item = string_list_insert(&branch_list, name);
+	name = xmemdupz(కీలకం, కీలకం_len);
+	అంశం = string_list_చొప్పించు(&branch_list, name);
 
-	if (!item->util)
-		item->util = xcalloc(1, sizeof(struct branch_info));
-	info = item->util;
-	switch (type) {
-	case REMOTE:
-		if (info->remote_name)
-			warning(_("more than one %s"), orig_key);
-		info->remote_name = xstrdup(value);
-		break;
-	case MERGE: {
-		const char *space = strchr(value, ' ');
-		value = abbrev_branch(value);
-		while (space) {
-			char *merge;
-			merge = xstrndup(value, space - value);
-			string_list_append(&info->merge, merge);
-			value = abbrev_branch(space + 1);
-			space = strchr(value, ' ');
+	ఒకవేళ (!అంశం->util)
+		అంశం->util = xcalloc(1, పరిమాణం(నిర్మాణం branch_info));
+	info = అంశం->util;
+	ఎంపిక (type) {
+	స్థితి REMOTE:
+		ఒకవేళ (info->remote_name)
+			warning(_("more than one %s"), orig_కీలకం);
+		info->remote_name = xstrdup(విలువ);
+		ఆపు;
+	స్థితి విలీనం_2: {
+		స్థిరరాశి అక్షరం *space = strchr(విలువ, ' ');
+		విలువ = abbrev_branch(విలువ);
+		అయితే (space) {
+			అక్షరం *విలీనం;
+			విలీనం = xstrndup(విలువ, space - విలువ);
+			string_list_append(&info->విలీనం, విలీనం);
+			విలువ = abbrev_branch(space + 1);
+			space = strchr(విలువ, ' ');
 		}
-		string_list_append(&info->merge, xstrdup(value));
-		break;
+		string_list_append(&info->విలీనం, xstrdup(విలువ));
+		ఆపు;
 	}
-	case REBASE:
+	స్థితి REBASE:
 		/*
 		 * Consider invalid values as false and check the
 		 * truth value with >= REBASE_TRUE.
 		 */
-		info->rebase = rebase_parse_value(value);
-		if (info->rebase == REBASE_INVALID)
+		info->rebase = rebase_parse_విలువ(విలువ);
+		ఒకవేళ (info->rebase == REBASE_INVALID)
 			warning(_("unhandled branch.%s.rebase=%s; assuming "
-				  "'true'"), name, value);
-		break;
-	case PUSH_REMOTE:
-		if (info->push_remote_name)
-			warning(_("more than one %s"), orig_key);
-		info->push_remote_name = xstrdup(value);
-		break;
-	default:
+				  "'true'"), name, విలువ);
+		ఆపు;
+	స్థితి నెట్టు_REMOTE:
+		ఒకవేళ (info->నెట్టు_remote_name)
+			warning(_("more than one %s"), orig_కీలకం);
+		info->నెట్టు_remote_name = xstrdup(విలువ);
+		ఆపు;
+	అప్రమేయ:
 		BUG("unexpected type=%d", type);
 	}
 
-	free(name);
-	return 0;
+	విడుదల(name);
+	తిరిగి 0;
 }
 
-static void read_branches(void)
+స్థిర శూన్య read_branches(శూన్య)
 {
-	if (branch_list.nr)
-		return;
-	repo_config(the_repository, config_read_branches, NULL);
+	ఒకవేళ (branch_list.nr)
+		తిరిగి;
+	repo_config(the_repository, config_read_branches, ఖాళీ);
 }
 
-struct ref_states {
-	struct remote *remote;
-	struct string_list new_refs, skipped, stale, tracked, heads, push;
-	int queried;
+నిర్మాణం ref_స్థితులు {
+	నిర్మాణం remote *remote;
+	నిర్మాణం string_list new_refs, skipped, stale, tracked, heads, నెట్టు;
+	పూర్ణాంకం queried;
 };
 
-#define REF_STATES_INIT { \
+#నిర్వచించు REF_స్థితులు_INIT { \
 	.new_refs = STRING_LIST_INIT_DUP, \
 	.skipped = STRING_LIST_INIT_DUP, \
 	.stale = STRING_LIST_INIT_DUP, \
 	.tracked = STRING_LIST_INIT_DUP, \
 	.heads = STRING_LIST_INIT_DUP, \
-	.push = STRING_LIST_INIT_DUP, \
+	.నెట్టు = STRING_LIST_INIT_DUP, \
 }
 
-static int get_ref_states(const struct ref *remote_refs, struct ref_states *states)
+స్థిర పూర్ణాంకం get_ref_స్థితులు(స్థిరరాశి నిర్మాణం ref *remote_refs, నిర్మాణం ref_స్థితులు *స్థితులు)
 {
-	struct ref *fetch_map = NULL, **tail = &fetch_map;
-	struct ref *ref, *stale_refs;
-	int i;
+	నిర్మాణం ref *fetch_map = ఖాళీ, **తోక = &fetch_map;
+	నిర్మాణం ref *ref, *stale_refs;
+	పూర్ణాంకం i;
 
-	for (i = 0; i < states->remote->fetch.nr; i++)
-		if (get_fetch_map(remote_refs, &states->remote->fetch.items[i], &tail, 1))
+	కొరకు (i = 0; i < స్థితులు->remote->fetch.nr; i++)
+		ఒకవేళ (get_fetch_map(remote_refs, &స్థితులు->remote->fetch.వస్తువులు[i], &తోక, 1))
 			die(_("Could not get fetch map for refspec %s"),
-				states->remote->fetch.items[i].raw);
+				స్థితులు->remote->fetch.వస్తువులు[i].raw);
 
-	for (ref = fetch_map; ref; ref = ref->next) {
-		if (refname_matches_negative_refspec_item(ref->name, &states->remote->fetch))
-			string_list_append(&states->skipped, abbrev_branch(ref->name));
-		else if (!ref->peer_ref || !refs_ref_exists(get_main_ref_store(the_repository), ref->peer_ref->name))
-			string_list_append(&states->new_refs, abbrev_branch(ref->name));
-		else
-			string_list_append(&states->tracked, abbrev_branch(ref->name));
+	కొరకు (ref = fetch_map; ref; ref = ref->తదుపరి) {
+		ఒకవేళ (refname_matches_negative_refspec_అంశం(ref->name, &స్థితులు->remote->fetch))
+			string_list_append(&స్థితులు->skipped, abbrev_branch(ref->name));
+		లేకపోతే ఒకవేళ (!ref->peer_ref || !refs_ref_exists(get_main_ref_store(the_repository), ref->peer_ref->name))
+			string_list_append(&స్థితులు->new_refs, abbrev_branch(ref->name));
+		లేకపోతే
+			string_list_append(&స్థితులు->tracked, abbrev_branch(ref->name));
 	}
-	stale_refs = get_stale_heads(&states->remote->fetch, fetch_map);
-	for (ref = stale_refs; ref; ref = ref->next) {
-		struct string_list_item *item =
-			string_list_append(&states->stale, abbrev_branch(ref->name));
-		item->util = xstrdup(ref->name);
+	stale_refs = get_stale_heads(&స్థితులు->remote->fetch, fetch_map);
+	కొరకు (ref = stale_refs; ref; ref = ref->తదుపరి) {
+		నిర్మాణం string_list_అంశం *అంశం =
+			string_list_append(&స్థితులు->stale, abbrev_branch(ref->name));
+		అంశం->util = xstrdup(ref->name);
 	}
 	free_refs(stale_refs);
 	free_refs(fetch_map);
 
-	string_list_sort(&states->new_refs);
-	string_list_sort(&states->skipped);
-	string_list_sort(&states->tracked);
-	string_list_sort(&states->stale);
+	string_list_క్రమీకరించు(&స్థితులు->new_refs);
+	string_list_క్రమీకరించు(&స్థితులు->skipped);
+	string_list_క్రమీకరించు(&స్థితులు->tracked);
+	string_list_క్రమీకరించు(&స్థితులు->stale);
 
-	return 0;
+	తిరిగి 0;
 }
 
-struct push_info {
-	char *dest;
-	int forced;
-	enum {
-		PUSH_STATUS_CREATE = 0,
-		PUSH_STATUS_DELETE,
-		PUSH_STATUS_UPTODATE,
-		PUSH_STATUS_FASTFORWARD,
-		PUSH_STATUS_OUTOFDATE,
-		PUSH_STATUS_NOTQUERIED
-	} status;
+నిర్మాణం నెట్టు_info {
+	అక్షరం *dest;
+	పూర్ణాంకం forced;
+	గణన {
+		నెట్టు_స్థితి_CREATE = 0,
+		నెట్టు_స్థితి_DELETE,
+		నెట్టు_స్థితి_UPTODATE,
+		నెట్టు_స్థితి_FASTFORWARD,
+		నెట్టు_స్థితి_OUTOFDATE,
+		నెట్టు_స్థితి_NOTQUERIED
+	} స్థితి_2;
 };
 
-static int get_push_ref_states(const struct ref *remote_refs,
-	struct ref_states *states)
+స్థిర పూర్ణాంకం get_నెట్టు_ref_స్థితులు(స్థిరరాశి నిర్మాణం ref *remote_refs,
+	నిర్మాణం ref_స్థితులు *స్థితులు)
 {
-	struct remote *remote = states->remote;
-	struct ref *ref, *local_refs, *push_map;
-	if (remote->mirror)
-		return 0;
+	నిర్మాణం remote *remote = స్థితులు->remote;
+	నిర్మాణం ref *ref, *local_refs, *నెట్టు_map;
+	ఒకవేళ (remote->mirror)
+		తిరిగి 0;
 
 	local_refs = get_local_heads();
-	push_map = copy_ref_list(remote_refs);
+	నెట్టు_map = copy_ref_list(remote_refs);
 
-	match_push_refs(local_refs, &push_map, &remote->push, MATCH_REFS_NONE);
+	సరిపోలిక_నెట్టు_refs(local_refs, &నెట్టు_map, &remote->నెట్టు, సరిపోలిక_REFS_NONE);
 
-	for (ref = push_map; ref; ref = ref->next) {
-		struct string_list_item *item;
-		struct push_info *info;
+	కొరకు (ref = నెట్టు_map; ref; ref = ref->తదుపరి) {
+		నిర్మాణం string_list_అంశం *అంశం;
+		నిర్మాణం నెట్టు_info *info;
 
-		if (!ref->peer_ref)
-			continue;
+		ఒకవేళ (!ref->peer_ref)
+			కొనసాగు;
 		oidcpy(&ref->new_oid, &ref->peer_ref->new_oid);
 
-		item = string_list_append(&states->push,
+		అంశం = string_list_append(&స్థితులు->నెట్టు,
 					  abbrev_branch(ref->peer_ref->name));
-		item->util = xcalloc(1, sizeof(struct push_info));
-		info = item->util;
+		అంశం->util = xcalloc(1, పరిమాణం(నిర్మాణం నెట్టు_info));
+		info = అంశం->util;
 		info->forced = ref->force;
 		info->dest = xstrdup(abbrev_branch(ref->name));
 
-		if (is_null_oid(&ref->new_oid)) {
-			info->status = PUSH_STATUS_DELETE;
-		} else if (oideq(&ref->old_oid, &ref->new_oid))
-			info->status = PUSH_STATUS_UPTODATE;
-		else if (is_null_oid(&ref->old_oid))
-			info->status = PUSH_STATUS_CREATE;
-		else if (odb_has_object(the_repository->objects, &ref->old_oid,
+		ఒకవేళ (is_null_oid(&ref->new_oid)) {
+			info->స్థితి_2 = నెట్టు_స్థితి_DELETE;
+		} లేకపోతే ఒకవేళ (oideq(&ref->old_oid, &ref->new_oid))
+			info->స్థితి_2 = నెట్టు_స్థితి_UPTODATE;
+		లేకపోతే ఒకవేళ (is_null_oid(&ref->old_oid))
+			info->స్థితి_2 = నెట్టు_స్థితి_CREATE;
+		లేకపోతే ఒకవేళ (odb_has_object(the_repository->objects, &ref->old_oid,
 					ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR) &&
 			 ref_newer(&ref->new_oid, &ref->old_oid))
-			info->status = PUSH_STATUS_FASTFORWARD;
-		else
-			info->status = PUSH_STATUS_OUTOFDATE;
+			info->స్థితి_2 = నెట్టు_స్థితి_FASTFORWARD;
+		లేకపోతే
+			info->స్థితి_2 = నెట్టు_స్థితి_OUTOFDATE;
 	}
 	free_refs(local_refs);
-	free_refs(push_map);
-	return 0;
+	free_refs(నెట్టు_map);
+	తిరిగి 0;
 }
 
-static int get_push_ref_states_noquery(struct ref_states *states)
+స్థిర పూర్ణాంకం get_నెట్టు_ref_స్థితులు_noquery(నిర్మాణం ref_స్థితులు *స్థితులు)
 {
-	int i;
-	struct remote *remote = states->remote;
-	struct string_list_item *item;
-	struct push_info *info;
+	పూర్ణాంకం i;
+	నిర్మాణం remote *remote = స్థితులు->remote;
+	నిర్మాణం string_list_అంశం *అంశం;
+	నిర్మాణం నెట్టు_info *info;
 
-	if (remote->mirror)
-		return 0;
+	ఒకవేళ (remote->mirror)
+		తిరిగి 0;
 
-	if (!remote->push.nr) {
-		item = string_list_append(&states->push, _("(matching)"));
-		info = item->util = xcalloc(1, sizeof(struct push_info));
-		info->status = PUSH_STATUS_NOTQUERIED;
-		info->dest = xstrdup(item->string);
+	ఒకవేళ (!remote->నెట్టు.nr) {
+		అంశం = string_list_append(&స్థితులు->నెట్టు, _("(matching)"));
+		info = అంశం->util = xcalloc(1, పరిమాణం(నిర్మాణం నెట్టు_info));
+		info->స్థితి_2 = నెట్టు_స్థితి_NOTQUERIED;
+		info->dest = xstrdup(అంశం->string);
 	}
-	for (i = 0; i < remote->push.nr; i++) {
-		const struct refspec_item *spec = &remote->push.items[i];
-		if (spec->matching)
-			item = string_list_append(&states->push, _("(matching)"));
-		else if (strlen(spec->src))
-			item = string_list_append(&states->push, spec->src);
-		else
-			item = string_list_append(&states->push, _("(delete)"));
+	కొరకు (i = 0; i < remote->నెట్టు.nr; i++) {
+		స్థిరరాశి నిర్మాణం refspec_అంశం *spec = &remote->నెట్టు.వస్తువులు[i];
+		ఒకవేళ (spec->matching)
+			అంశం = string_list_append(&స్థితులు->నెట్టు, _("(matching)"));
+		లేకపోతే ఒకవేళ (అక్షరశ్రేణి_పొడవు(spec->src))
+			అంశం = string_list_append(&స్థితులు->నెట్టు, spec->src);
+		లేకపోతే
+			అంశం = string_list_append(&స్థితులు->నెట్టు, _("(delete)"));
 
-		info = item->util = xcalloc(1, sizeof(struct push_info));
+		info = అంశం->util = xcalloc(1, పరిమాణం(నిర్మాణం నెట్టు_info));
 		info->forced = spec->force;
-		info->status = PUSH_STATUS_NOTQUERIED;
-		info->dest = xstrdup(spec->dst ? spec->dst : item->string);
+		info->స్థితి_2 = నెట్టు_స్థితి_NOTQUERIED;
+		info->dest = xstrdup(spec->dst ? spec->dst : అంశం->string);
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static int get_head_names(const struct ref *remote_refs, struct ref_states *states)
+స్థిర పూర్ణాంకం get_తల_పేర్లు(స్థిరరాశి నిర్మాణం ref *remote_refs, నిర్మాణం ref_స్థితులు *స్థితులు)
 {
-	struct ref *ref, *matches;
-	struct ref *fetch_map = NULL, **fetch_map_tail = &fetch_map;
-	struct refspec_item refspec = {
+	నిర్మాణం ref *ref, *matches;
+	నిర్మాణం ref *fetch_map = ఖాళీ, **fetch_map_తోక = &fetch_map;
+	నిర్మాణం refspec_అంశం refspec = {
 		.force = 0,
-		.pattern = 1,
-		.src = (char *) "refs/heads/*",
-		.dst = (char *) "refs/heads/*",
+		.నమూనా = 1,
+		.src = (అక్షరం *) "refs/heads/*",
+		.dst = (అక్షరం *) "refs/heads/*",
 	};
 
-	get_fetch_map(remote_refs, &refspec, &fetch_map_tail, 0);
-	matches = guess_remote_head(find_ref_by_name(remote_refs, "HEAD"),
-				    fetch_map, REMOTE_GUESS_HEAD_ALL);
-	for (ref = matches; ref; ref = ref->next)
-		string_list_append(&states->heads, abbrev_branch(ref->name));
+	get_fetch_map(remote_refs, &refspec, &fetch_map_తోక, 0);
+	matches = guess_remote_తల(కనుగొను_ref_by_name(remote_refs, "HEAD"),
+				    fetch_map, REMOTE_GUESS_తల_ALL);
+	కొరకు (ref = matches; ref; ref = ref->తదుపరి)
+		string_list_append(&స్థితులు->heads, abbrev_branch(ref->name));
 
 	free_refs(fetch_map);
 	free_refs(matches);
-	return 0;
+	తిరిగి 0;
 }
 
-struct known_remote {
-	struct known_remote *next;
-	struct remote *remote;
+నిర్మాణం తెలిసిన_remote {
+	నిర్మాణం తెలిసిన_remote *తదుపరి;
+	నిర్మాణం remote *remote;
 };
 
-struct known_remotes {
-	struct remote *to_delete;
-	struct known_remote *list;
+నిర్మాణం తెలిసిన_remotes {
+	నిర్మాణం remote *గమ్యం_delete;
+	నిర్మాణం తెలిసిన_remote *list;
 };
 
-static int add_known_remote(struct remote *remote, void *cb_data)
+స్థిర పూర్ణాంకం కూడు_తెలిసిన_remote(నిర్మాణం remote *remote, శూన్య *cb_దత్తాంశం)
 {
-	struct known_remotes *all = cb_data;
-	struct known_remote *r;
+	నిర్మాణం తెలిసిన_remotes *all = cb_దత్తాంశం;
+	నిర్మాణం తెలిసిన_remote *r;
 
-	if (!strcmp(all->to_delete->name, remote->name))
-		return 0;
+	ఒకవేళ (!strcmp(all->గమ్యం_delete->name, remote->name))
+		తిరిగి 0;
 
-	r = xmalloc(sizeof(*r));
+	r = xmalloc(పరిమాణం(*r));
 	r->remote = remote;
-	r->next = all->list;
+	r->తదుపరి = all->list;
 	all->list = r;
-	return 0;
+	తిరిగి 0;
 }
 
-struct branches_for_remote {
-	struct remote *remote;
-	struct string_list *branches, *skipped;
-	struct known_remotes *keep;
+నిర్మాణం branches_for_remote {
+	నిర్మాణం remote *remote;
+	నిర్మాణం string_list *branches, *skipped;
+	నిర్మాణం తెలిసిన_remotes *keep;
 };
 
-static int add_branch_for_removal(const struct reference *ref, void *cb_data)
+స్థిర పూర్ణాంకం కూడు_branch_for_removal(స్థిరరాశి నిర్మాణం reference *ref, శూన్య *cb_దత్తాంశం)
 {
-	struct branches_for_remote *branches = cb_data;
-	struct refspec_item refspec;
-	struct known_remote *kr;
+	నిర్మాణం branches_for_remote *branches = cb_దత్తాంశం;
+	నిర్మాణం refspec_అంశం refspec;
+	నిర్మాణం తెలిసిన_remote *kr;
 
-	memset(&refspec, 0, sizeof(refspec));
-	refspec.dst = (char *)ref->name;
-	if (remote_find_tracking(branches->remote, &refspec))
-		return 0;
-	free(refspec.src);
+	memset(&refspec, 0, పరిమాణం(refspec));
+	refspec.dst = (అక్షరం *)ref->name;
+	ఒకవేళ (remote_కనుగొను_tracking(branches->remote, &refspec))
+		తిరిగి 0;
+	విడుదల(refspec.src);
 
 	/* don't delete a branch if another remote also uses it */
-	for (kr = branches->keep->list; kr; kr = kr->next) {
-		memset(&refspec, 0, sizeof(refspec));
-		refspec.dst = (char *)ref->name;
-		if (!remote_find_tracking(kr->remote, &refspec)) {
-			free(refspec.src);
-			return 0;
+	కొరకు (kr = branches->keep->list; kr; kr = kr->తదుపరి) {
+		memset(&refspec, 0, పరిమాణం(refspec));
+		refspec.dst = (అక్షరం *)ref->name;
+		ఒకవేళ (!remote_కనుగొను_tracking(kr->remote, &refspec)) {
+			విడుదల(refspec.src);
+			తిరిగి 0;
 		}
 	}
 
 	/* don't delete non-remote-tracking refs */
-	if (!starts_with(ref->name, "refs/remotes/")) {
+	ఒకవేళ (!starts_with(ref->name, "refs/remotes/")) {
 		/* advise user how to delete local branches */
-		if (starts_with(ref->name, "refs/heads/"))
+		ఒకవేళ (starts_with(ref->name, "refs/heads/"))
 			string_list_append(branches->skipped,
 					   abbrev_branch(ref->name));
 		/* silently skip over other non-remote refs */
-		return 0;
+		తిరిగి 0;
 	}
 
 	string_list_append(branches->branches, ref->name);
 
-	return 0;
+	తిరిగి 0;
 }
 
-struct rename_info {
-	const char *old_name;
-	const char *new_name;
-	struct ref_transaction *transaction;
-	struct progress *progress;
-	struct strbuf *err;
-	uint32_t progress_nr;
-	uint64_t index;
+నిర్మాణం rename_info {
+	స్థిరరాశి అక్షరం *old_name;
+	స్థిరరాశి అక్షరం *new_name;
+	నిర్మాణం ref_transaction *transaction;
+	నిర్మాణం పురోగతి *పురోగతి;
+	నిర్మాణం strbuf *err;
+	uint32_t పురోగతి_nr;
+	uint64_t సూచీ;
 };
 
-static void compute_renamed_ref(struct rename_info *rename,
-				const char *refname,
-				struct strbuf *out)
+స్థిర శూన్య compute_renamed_ref(నిర్మాణం rename_info *rename,
+				స్థిరరాశి అక్షరం *refname,
+				నిర్మాణం strbuf *బహిర్గతం)
 {
-	strbuf_reset(out);
-	strbuf_addstr(out, refname);
-	strbuf_splice(out, strlen("refs/remotes/"), strlen(rename->old_name),
-		      rename->new_name, strlen(rename->new_name));
+	strbuf_reset(బహిర్గతం);
+	strbuf_addstr(బహిర్గతం, refname);
+	strbuf_splice(బహిర్గతం, అక్షరశ్రేణి_పొడవు("refs/remotes/"), అక్షరశ్రేణి_పొడవు(rename->old_name),
+		      rename->new_name, అక్షరశ్రేణి_పొడవు(rename->new_name));
 }
 
-static int rename_one_reflog_entry(const char *old_refname,
-				   struct object_id *old_oid,
-				   struct object_id *new_oid,
-				   const char *committer,
-				   timestamp_t timestamp, int tz,
-				   const char *msg, void *cb_data)
+స్థిర పూర్ణాంకం rename_one_reflog_నమోదు(స్థిరరాశి అక్షరం *old_refname,
+				   నిర్మాణం object_id *old_oid,
+				   నిర్మాణం object_id *new_oid,
+				   స్థిరరాశి అక్షరం *committer,
+				   timestamp_t timestamp, పూర్ణాంకం tz,
+				   స్థిరరాశి అక్షరం *సందేశం, శూన్య *cb_దత్తాంశం)
 {
-	struct rename_info *rename = cb_data;
-	struct strbuf new_refname = STRBUF_INIT;
-	struct strbuf identity = STRBUF_INIT;
-	struct strbuf name = STRBUF_INIT;
-	struct strbuf mail = STRBUF_INIT;
-	struct ident_split ident;
-	const char *date;
-	int error;
+	నిర్మాణం rename_info *rename = cb_దత్తాంశం;
+	నిర్మాణం strbuf new_refname = STRBUF_INIT;
+	నిర్మాణం strbuf తటస్థం = STRBUF_INIT;
+	నిర్మాణం strbuf name = STRBUF_INIT;
+	నిర్మాణం strbuf mail = STRBUF_INIT;
+	నిర్మాణం ident_విభజించు ident;
+	స్థిరరాశి అక్షరం *date;
+	పూర్ణాంకం error;
 
 	compute_renamed_ref(rename, old_refname, &new_refname);
 
-	if (split_ident_line(&ident, committer, strlen(committer)) < 0) {
+	ఒకవేళ (విభజించు_ident_పంక్తి(&ident, committer, అక్షరశ్రేణి_పొడవు(committer)) < 0) {
 		error = -1;
-		goto out;
+		వెళ్ళు బహిర్గతం;
 	}
 
-	strbuf_add(&name, ident.name_begin, ident.name_end - ident.name_begin);
-	strbuf_add(&mail, ident.mail_begin, ident.mail_end - ident.mail_begin);
+	strbuf_కూడు(&name, ident.name_begin, ident.name_చివర - ident.name_begin);
+	strbuf_కూడు(&mail, ident.mail_begin, ident.mail_చివర - ident.mail_begin);
 
-	date = show_date(timestamp, tz, DATE_MODE(NORMAL));
-	strbuf_addstr(&identity, fmt_ident(name.buf, mail.buf,
+	date = show_date(timestamp, tz, DATE_బహుళకం(సాధారణ));
+	strbuf_addstr(&తటస్థం, fmt_ident(name.buf, mail.buf,
 					  WANT_BLANK_IDENT, date, 0));
 
 	error = ref_transaction_update_reflog(rename->transaction, new_refname.buf,
-					      new_oid, old_oid, identity.buf, msg,
-					      rename->index++, rename->err);
+					      new_oid, old_oid, తటస్థం.buf, సందేశం,
+					      rename->సూచీ++, rename->err);
 
-out:
+బహిర్గతం:
 	strbuf_release(&new_refname);
-	strbuf_release(&identity);
+	strbuf_release(&తటస్థం);
 	strbuf_release(&name);
 	strbuf_release(&mail);
-	return error;
+	తిరిగి error;
 }
 
-static int rename_one_reflog(const char *old_refname,
-			     const struct object_id *old_oid,
-			     struct rename_info *rename)
+స్థిర పూర్ణాంకం rename_one_reflog(స్థిరరాశి అక్షరం *old_refname,
+			     స్థిరరాశి నిర్మాణం object_id *old_oid,
+			     నిర్మాణం rename_info *rename)
 {
-	struct strbuf new_refname = STRBUF_INIT;
-	struct strbuf message = STRBUF_INIT;
-	int error;
+	నిర్మాణం strbuf new_refname = STRBUF_INIT;
+	నిర్మాణం strbuf సందేశం_2 = STRBUF_INIT;
+	పూర్ణాంకం error;
 
-	if (!refs_reflog_exists(get_main_ref_store(the_repository), old_refname))
-		return 0;
+	ఒకవేళ (!refs_reflog_exists(get_main_ref_store(the_repository), old_refname))
+		తిరిగి 0;
 
 	error = refs_for_each_reflog_ent(get_main_ref_store(the_repository),
-					 old_refname, rename_one_reflog_entry, rename);
-	if (error < 0)
-		goto out;
+					 old_refname, rename_one_reflog_నమోదు, rename);
+	ఒకవేళ (error < 0)
+		వెళ్ళు బహిర్గతం;
 
 	compute_renamed_ref(rename, old_refname, &new_refname);
 
@@ -695,33 +695,33 @@ static int rename_one_reflog(const char *old_refname,
 	 * Furthermore, we only append the entry in case the reference
 	 * resolves. Missing references shouldn't have reflogs anyway.
 	 */
-	strbuf_addf(&message, "remote: renamed %s to %s", old_refname,
+	strbuf_addf(&సందేశం_2, "remote: renamed %s to %s", old_refname,
 		    new_refname.buf);
 
 	error = ref_transaction_update_reflog(rename->transaction, new_refname.buf,
 					      old_oid, old_oid, git_committer_info(0),
-					      message.buf, rename->index++, rename->err);
-	if (error < 0)
-		return error;
+					      సందేశం_2.buf, rename->సూచీ++, rename->err);
+	ఒకవేళ (error < 0)
+		తిరిగి error;
 
-out:
+బహిర్గతం:
 	strbuf_release(&new_refname);
-	strbuf_release(&message);
-	return error;
+	strbuf_release(&సందేశం_2);
+	తిరిగి error;
 }
 
-static int rename_one_ref(const struct reference *ref, void *cb_data)
+స్థిర పూర్ణాంకం rename_one_ref(స్థిరరాశి నిర్మాణం reference *ref, శూన్య *cb_దత్తాంశం)
 {
-	struct strbuf new_referent = STRBUF_INIT;
-	struct strbuf new_refname = STRBUF_INIT;
-	struct rename_info *rename = cb_data;
-	const struct object_id *oid = ref->oid;
-	const char *referent = ref->target;
-	int error;
+	నిర్మాణం strbuf new_referent = STRBUF_INIT;
+	నిర్మాణం strbuf new_refname = STRBUF_INIT;
+	నిర్మాణం rename_info *rename = cb_దత్తాంశం;
+	స్థిరరాశి నిర్మాణం object_id *oid = ref->oid;
+	స్థిరరాశి అక్షరం *referent = ref->లక్ష్యం;
+	పూర్ణాంకం error;
 
 	compute_renamed_ref(rename, ref->name, &new_refname);
 
-	if (ref->flags & REF_ISSYMREF) {
+	ఒకవేళ (ref->flags & REF_ISSYMREF) {
 		/*
 		 * Stupidly enough `referent` is not pointing to the immediate
 		 * target of a symref, but it's the recursively resolved value.
@@ -730,121 +730,121 @@ static int rename_one_ref(const struct reference *ref, void *cb_data)
 		 */
 		referent = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
 						   ref->name, RESOLVE_REF_NO_RECURSE,
-						   NULL, NULL);
+						   ఖాళీ, ఖాళీ);
 		compute_renamed_ref(rename, referent, &new_referent);
-		oid = NULL;
+		oid = ఖాళీ;
 	}
 
 	error = ref_transaction_delete(rename->transaction, ref->name,
-				       oid, referent, REF_NO_DEREF, NULL, rename->err);
-	if (error < 0)
-		goto out;
+				       oid, referent, REF_NO_DEREF, ఖాళీ, rename->err);
+	ఒకవేళ (error < 0)
+		వెళ్ళు బహిర్గతం;
 
 	error = ref_transaction_update(rename->transaction, new_refname.buf, oid, null_oid(the_hash_algo),
-				       (ref->flags & REF_ISSYMREF) ? new_referent.buf : NULL, NULL,
+				       (ref->flags & REF_ISSYMREF) ? new_referent.buf : ఖాళీ, ఖాళీ,
 				       REF_SKIP_CREATE_REFLOG | REF_NO_DEREF | REF_SKIP_OID_VERIFICATION,
-				       NULL, rename->err);
-	if (error < 0)
-		goto out;
+				       ఖాళీ, rename->err);
+	ఒకవేళ (error < 0)
+		వెళ్ళు బహిర్గతం;
 
 	error = rename_one_reflog(ref->name, oid, rename);
-	if (error < 0)
-		goto out;
+	ఒకవేళ (error < 0)
+		వెళ్ళు బహిర్గతం;
 
-	display_progress(rename->progress, ++rename->progress_nr);
+	display_పురోగతి(rename->పురోగతి, ++rename->పురోగతి_nr);
 
-out:
+బహిర్గతం:
 	strbuf_release(&new_referent);
 	strbuf_release(&new_refname);
-	return error;
+	తిరిగి error;
 }
 
-static int migrate_file(struct remote *remote)
+స్థిర పూర్ణాంకం migrate_file(నిర్మాణం remote *remote)
 {
-	struct strbuf buf = STRBUF_INIT;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
 
 	strbuf_addf(&buf, "remote.%s.url", remote->name);
-	for (size_t i = 0; i < remote->url.nr; i++)
-		repo_config_set_multivar(the_repository, buf.buf, remote->url.v[i], "^$", 0);
+	కొరకు (కొలత_t i = 0; i < remote->url.nr; i++)
+		repo_config_సమితి_multivar(the_repository, buf.buf, remote->url.v[i], "^$", 0);
 	strbuf_reset(&buf);
 	strbuf_addf(&buf, "remote.%s.push", remote->name);
-	for (int i = 0; i < remote->push.nr; i++)
-		repo_config_set_multivar(the_repository, buf.buf, remote->push.items[i].raw, "^$", 0);
+	కొరకు (పూర్ణాంకం i = 0; i < remote->నెట్టు.nr; i++)
+		repo_config_సమితి_multivar(the_repository, buf.buf, remote->నెట్టు.వస్తువులు[i].raw, "^$", 0);
 	strbuf_reset(&buf);
 	strbuf_addf(&buf, "remote.%s.fetch", remote->name);
-	for (int i = 0; i < remote->fetch.nr; i++)
-		repo_config_set_multivar(the_repository, buf.buf, remote->fetch.items[i].raw, "^$", 0);
-#ifndef WITH_BREAKING_CHANGES
-	if (remote->origin == REMOTE_REMOTES)
-		unlink_or_warn(repo_git_path_replace(the_repository, &buf,
+	కొరకు (పూర్ణాంకం i = 0; i < remote->fetch.nr; i++)
+		repo_config_సమితి_multivar(the_repository, buf.buf, remote->fetch.వస్తువులు[i].raw, "^$", 0);
+#నిర్వచితం_కాకపోతే WITH_BREAKING_CHANGES
+	ఒకవేళ (remote->origin == REMOTE_REMOTES)
+		unlink_or_warn(repo_git_మార్గం_replace(the_repository, &buf,
 						     "remotes/%s", remote->name));
-	else if (remote->origin == REMOTE_BRANCHES)
-		unlink_or_warn(repo_git_path_replace(the_repository, &buf,
+	లేకపోతే ఒకవేళ (remote->origin == REMOTE_BRANCHES)
+		unlink_or_warn(repo_git_మార్గం_replace(the_repository, &buf,
 						     "branches/%s", remote->name));
-#endif /* WITH_BREAKING_CHANGES */
+#అయితే_ముగింపు /* WITH_BREAKING_CHANGES */
 	strbuf_release(&buf);
 
-	return 0;
+	తిరిగి 0;
 }
 
-struct push_default_info
+నిర్మాణం నెట్టు_default_info
 {
-	const char *old_name;
-	enum config_scope scope;
-	struct strbuf origin;
-	int linenr;
+	స్థిరరాశి అక్షరం *old_name;
+	గణన config_scope scope;
+	నిర్మాణం strbuf origin;
+	పూర్ణాంకం linenr;
 };
 
-static int config_read_push_default(const char *key, const char *value,
-	const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం config_read_నెట్టు_default(స్థిరరాశి అక్షరం *కీలకం, స్థిరరాశి అక్షరం *విలువ,
+	స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	const struct key_value_info *kvi = ctx->kvi;
+	స్థిరరాశి నిర్మాణం కీలకం_విలువ_info *kvi = ctx->kvi;
 
-	struct push_default_info* info = cb;
-	if (strcmp(key, "remote.pushdefault") ||
-	    !value || strcmp(value, info->old_name))
-		return 0;
+	నిర్మాణం నెట్టు_default_info* info = cb;
+	ఒకవేళ (strcmp(కీలకం, "remote.pushdefault") ||
+	    !విలువ || strcmp(విలువ, info->old_name))
+		తిరిగి 0;
 
 	info->scope = kvi->scope;
 	strbuf_reset(&info->origin);
 	strbuf_addstr(&info->origin, config_origin_type_name(kvi->origin_type));
 	info->linenr = kvi->linenr;
 
-	return 0;
+	తిరిగి 0;
 }
 
-static void handle_push_default(const char* old_name, const char* new_name)
+స్థిర శూన్య handle_నెట్టు_default(స్థిరరాశి అక్షరం* old_name, స్థిరరాశి అక్షరం* new_name)
 {
-	struct push_default_info push_default = {
+	నిర్మాణం నెట్టు_default_info నెట్టు_default = {
 		.old_name = old_name,
 		.scope = CONFIG_SCOPE_UNKNOWN,
 		.origin = STRBUF_INIT,
 		.linenr = -1,
 	};
-	repo_config(the_repository, config_read_push_default, &push_default);
-	if (push_default.scope >= CONFIG_SCOPE_COMMAND)
+	repo_config(the_repository, config_read_నెట్టు_default, &నెట్టు_default);
+	ఒకవేళ (నెట్టు_default.scope >= CONFIG_SCOPE_COMMAND)
 		; /* pass */
-	else if (push_default.scope >= CONFIG_SCOPE_LOCAL) {
-		int result = repo_config_set_gently(the_repository, "remote.pushDefault",
+	లేకపోతే ఒకవేళ (నెట్టు_default.scope >= CONFIG_SCOPE_LOCAL) {
+		పూర్ణాంకం ఫలితం = repo_config_సమితి_gently(the_repository, "remote.pushDefault",
 						    new_name);
-		if (new_name && result && result != CONFIG_NOTHING_SET)
+		ఒకవేళ (new_name && ఫలితం && ఫలితం != CONFIG_NOTHING_సమితి)
 			die(_("could not set '%s'"), "remote.pushDefault");
-		else if (!new_name && result && result != CONFIG_NOTHING_SET)
+		లేకపోతే ఒకవేళ (!new_name && ఫలితం && ఫలితం != CONFIG_NOTHING_సమితి)
 			die(_("could not unset '%s'"), "remote.pushDefault");
-	} else if (push_default.scope >= CONFIG_SCOPE_SYSTEM) {
+	} లేకపోతే ఒకవేళ (నెట్టు_default.scope >= CONFIG_SCOPE_SYSTEM) {
 		/* warn */
 		warning(_("The %s configuration remote.pushDefault in:\n"
 			  "\t%s:%d\n"
 			  "now names the non-existent remote '%s'"),
-			config_scope_name(push_default.scope),
-			push_default.origin.buf, push_default.linenr,
+			config_scope_name(నెట్టు_default.scope),
+			నెట్టు_default.origin.buf, నెట్టు_default.linenr,
 			old_name);
 	}
 
-	strbuf_release(&push_default.origin);
+	strbuf_release(&నెట్టు_default.origin);
 }
 
-static const char conflicting_remote_refs_advice[] = N_(
+స్థిర స్థిరరాశి అక్షరం conflicting_remote_refs_advice[] = N_(
 	"The remote you are trying to rename has conflicting references in the\n"
 	"new target refspec. This is most likely caused by you trying to nest\n"
 	"a remote into itself, e.g. by renaming 'parent' into 'parent/child'\n"
@@ -853,209 +853,209 @@ static const char conflicting_remote_refs_advice[] = N_(
 	"If that is the case, you can address this by first renaming the\n"
 	"remote to a different name.\n");
 
-static int mv(int argc, const char **argv, const char *prefix,
-	      struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం mv(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+	      నిర్మాణం repository *repo వాడని)
 {
-	int show_progress = isatty(2);
-	struct option options[] = {
-		OPT_BOOL(0, "progress", &show_progress, N_("force progress reporting")),
-		OPT_END()
+	పూర్ణాంకం show_పురోగతి = isatty(2);
+	నిర్మాణం option options[] = {
+		OPT_BOOL(0, "progress", &show_పురోగతి, N_("force progress reporting")),
+		OPT_చివర()
 	};
-	struct remote *oldremote, *newremote;
-	struct strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT, buf3 = STRBUF_INIT,
+	నిర్మాణం remote *oldremote, *newremote;
+	నిర్మాణం strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT, buf3 = STRBUF_INIT,
 		old_remote_context = STRBUF_INIT, err = STRBUF_INIT;
-	struct rename_info rename = {
+	నిర్మాణం rename_info rename = {
 		.err = &err,
 	};
-	int refspecs_need_update = 0;
-	int result = 0;
+	పూర్ణాంకం refspecs_need_update = 0;
+	పూర్ణాంకం ఫలితం = 0;
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     builtin_remote_rename_usage, 0);
 
-	if (argc != 2)
+	ఒకవేళ (argc != 2)
 		usage_with_options(builtin_remote_rename_usage, options);
 
 	rename.old_name = argv[0];
 	rename.new_name = argv[1];
 
 	oldremote = remote_get(rename.old_name);
-	if (!remote_is_configured(oldremote, 1)) {
+	ఒకవేళ (!remote_is_configured(oldremote, 1)) {
 		error(_("No such remote: '%s'"), rename.old_name);
-		exit(2);
+		నిష్క్రమించు(2);
 	}
 
-	if (!strcmp(rename.old_name, rename.new_name) && oldremote->origin != REMOTE_CONFIG)
-		return migrate_file(oldremote);
+	ఒకవేళ (!strcmp(rename.old_name, rename.new_name) && oldremote->origin != REMOTE_CONFIG)
+		తిరిగి migrate_file(oldremote);
 
 	newremote = remote_get(rename.new_name);
-	if (remote_is_configured(newremote, 1)) {
+	ఒకవేళ (remote_is_configured(newremote, 1)) {
 		error(_("remote %s already exists."), rename.new_name);
-		exit(3);
+		నిష్క్రమించు(3);
 	}
 
-	if (!valid_remote_name(rename.new_name))
+	ఒకవేళ (!valid_remote_name(rename.new_name))
 		die(_("'%s' is not a valid remote name"), rename.new_name);
 
 	strbuf_addf(&buf, "remote.%s", rename.old_name);
 	strbuf_addf(&buf2, "remote.%s", rename.new_name);
-	if (repo_config_rename_section(the_repository, buf.buf, buf2.buf) < 1) {
-		result = error(_("Could not rename config section '%s' to '%s'"),
+	ఒకవేళ (repo_config_rename_section(the_repository, buf.buf, buf2.buf) < 1) {
+		ఫలితం = error(_("Could not rename config section '%s' to '%s'"),
 			       buf.buf, buf2.buf);
-		goto out;
+		వెళ్ళు బహిర్గతం;
 	}
 
 	strbuf_addf(&old_remote_context, ":refs/remotes/%s/", rename.old_name);
 
-	for (int i = 0; i < oldremote->fetch.nr && !refspecs_need_update; i++)
-		refspecs_need_update = !!strstr(oldremote->fetch.items[i].raw,
+	కొరకు (పూర్ణాంకం i = 0; i < oldremote->fetch.nr && !refspecs_need_update; i++)
+		refspecs_need_update = !!అక్షరశ్రేణి_శోధన(oldremote->fetch.వస్తువులు[i].raw,
 						old_remote_context.buf);
 
-	if (refspecs_need_update) {
-		struct refs_for_each_ref_options opts = {
+	ఒకవేళ (refspecs_need_update) {
+		నిర్మాణం refs_for_each_ref_options opts = {
 			.flags = REFS_FOR_EACH_INCLUDE_BROKEN,
 		};
 		rename.transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 							       0, &err);
-		if (!rename.transaction)
-			goto out;
+		ఒకవేళ (!rename.transaction)
+			వెళ్ళు బహిర్గతం;
 
-		if (show_progress)
-			rename.progress = start_delayed_progress(the_repository,
+		ఒకవేళ (show_పురోగతి)
+			rename.పురోగతి = ప్రారంభం_delayed_పురోగతి(the_repository,
 								 _("Renaming remote references"), 0);
 
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "refs/remotes/%s/", rename.old_name);
-		opts.prefix = buf.buf;
+		opts.ఉపసర్గ = buf.buf;
 
-		result = refs_for_each_ref_ext(get_main_ref_store(the_repository),
+		ఫలితం = refs_for_each_ref_ext(get_main_ref_store(the_repository),
 					       rename_one_ref, &rename, &opts);
-		if (result < 0)
+		ఒకవేళ (ఫలితం < 0)
 			die(_("queueing remote ref renames failed: %s"), rename.err->buf);
 
-		result = ref_transaction_prepare(rename.transaction, &err);
-		if (result < 0) {
+		ఫలితం = ref_transaction_prepare(rename.transaction, &err);
+		ఒకవేళ (ఫలితం < 0) {
 			error("renaming remote references failed: %s", err.buf);
-			if (result == REF_TRANSACTION_ERROR_NAME_CONFLICT)
+			ఒకవేళ (ఫలితం == REF_TRANSACTION_ERROR_NAME_CONFLICT)
 				advise(conflicting_remote_refs_advice);
-			die(NULL);
+			die(ఖాళీ);
 		}
 	}
 
-	if (oldremote->fetch.nr) {
+	ఒకవేళ (oldremote->fetch.nr) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.fetch", rename.new_name);
-		repo_config_set_multivar(the_repository, buf.buf, NULL, NULL, CONFIG_FLAGS_MULTI_REPLACE);
-		for (int i = 0; i < oldremote->fetch.nr; i++) {
-			char *ptr;
+		repo_config_సమితి_multivar(the_repository, buf.buf, ఖాళీ, ఖాళీ, CONFIG_FLAGS_MULTI_REPLACE);
+		కొరకు (పూర్ణాంకం i = 0; i < oldremote->fetch.nr; i++) {
+			అక్షరం *ptr;
 
 			strbuf_reset(&buf2);
-			strbuf_addstr(&buf2, oldremote->fetch.items[i].raw);
-			ptr = strstr(buf2.buf, old_remote_context.buf);
-			if (ptr) {
+			strbuf_addstr(&buf2, oldremote->fetch.వస్తువులు[i].raw);
+			ptr = అక్షరశ్రేణి_శోధన(buf2.buf, old_remote_context.buf);
+			ఒకవేళ (ptr) {
 				strbuf_splice(&buf2,
-					      ptr-buf2.buf + strlen(":refs/remotes/"),
-					      strlen(rename.old_name), rename.new_name,
-					      strlen(rename.new_name));
-			} else
+					      ptr-buf2.buf + అక్షరశ్రేణి_పొడవు(":refs/remotes/"),
+					      అక్షరశ్రేణి_పొడవు(rename.old_name), rename.new_name,
+					      అక్షరశ్రేణి_పొడవు(rename.new_name));
+			} లేకపోతే
 				warning(_("Not updating non-default fetch refspec\n"
 					  "\t%s\n"
 					  "\tPlease update the configuration manually if necessary."),
 					buf2.buf);
 
-			repo_config_set_multivar(the_repository, buf.buf, buf2.buf, "^$", 0);
+			repo_config_సమితి_multivar(the_repository, buf.buf, buf2.buf, "^$", 0);
 		}
 	}
 
 	read_branches();
-	for (size_t i = 0; i < branch_list.nr; i++) {
-		struct string_list_item *item = branch_list.items + i;
-		struct branch_info *info = item->util;
-		if (info->remote_name && !strcmp(info->remote_name, rename.old_name)) {
+	కొరకు (కొలత_t i = 0; i < branch_list.nr; i++) {
+		నిర్మాణం string_list_అంశం *అంశం = branch_list.వస్తువులు + i;
+		నిర్మాణం branch_info *info = అంశం->util;
+		ఒకవేళ (info->remote_name && !strcmp(info->remote_name, rename.old_name)) {
 			strbuf_reset(&buf);
-			strbuf_addf(&buf, "branch.%s.remote", item->string);
-			repo_config_set(the_repository, buf.buf, rename.new_name);
+			strbuf_addf(&buf, "branch.%s.remote", అంశం->string);
+			repo_config_సమితి(the_repository, buf.buf, rename.new_name);
 		}
-		if (info->push_remote_name && !strcmp(info->push_remote_name, rename.old_name)) {
+		ఒకవేళ (info->నెట్టు_remote_name && !strcmp(info->నెట్టు_remote_name, rename.old_name)) {
 			strbuf_reset(&buf);
-			strbuf_addf(&buf, "branch.%s.pushRemote", item->string);
-			repo_config_set(the_repository, buf.buf, rename.new_name);
+			strbuf_addf(&buf, "branch.%s.pushRemote", అంశం->string);
+			repo_config_సమితి(the_repository, buf.buf, rename.new_name);
 		}
 	}
 
-	if (refspecs_need_update) {
-		result = ref_transaction_commit(rename.transaction, &err);
-		if (result < 0)
+	ఒకవేళ (refspecs_need_update) {
+		ఫలితం = ref_transaction_commit(rename.transaction, &err);
+		ఒకవేళ (ఫలితం < 0)
 			die(_("renaming remote refs failed: %s"), rename.err->buf);
 
-		stop_progress(&rename.progress);
+		stop_పురోగతి(&rename.పురోగతి);
 
-		handle_push_default(rename.old_name, rename.new_name);
+		handle_నెట్టు_default(rename.old_name, rename.new_name);
 	}
 
-out:
+బహిర్గతం:
 	ref_transaction_free(rename.transaction);
 	strbuf_release(&old_remote_context);
 	strbuf_release(&buf);
 	strbuf_release(&buf2);
 	strbuf_release(&buf3);
 	strbuf_release(&err);
-	return result;
+	తిరిగి ఫలితం;
 }
 
-static int rm(int argc, const char **argv, const char *prefix,
-	      struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం rm(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+	      నిర్మాణం repository *repo వాడని)
 {
-	struct option options[] = {
-		OPT_END()
+	నిర్మాణం option options[] = {
+		OPT_చివర()
 	};
-	struct remote *remote;
-	struct strbuf buf = STRBUF_INIT;
-	struct known_remotes known_remotes = { NULL, NULL };
-	struct string_list branches = STRING_LIST_INIT_DUP;
-	struct string_list skipped = STRING_LIST_INIT_DUP;
-	struct branches_for_remote cb_data;
-	int result;
+	నిర్మాణం remote *remote;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
+	నిర్మాణం తెలిసిన_remotes తెలిసిన_remotes = { ఖాళీ, ఖాళీ };
+	నిర్మాణం string_list branches = STRING_LIST_INIT_DUP;
+	నిర్మాణం string_list skipped = STRING_LIST_INIT_DUP;
+	నిర్మాణం branches_for_remote cb_దత్తాంశం;
+	పూర్ణాంకం ఫలితం;
 
-	memset(&cb_data, 0, sizeof(cb_data));
-	cb_data.branches = &branches;
-	cb_data.skipped = &skipped;
-	cb_data.keep = &known_remotes;
+	memset(&cb_దత్తాంశం, 0, పరిమాణం(cb_దత్తాంశం));
+	cb_దత్తాంశం.branches = &branches;
+	cb_దత్తాంశం.skipped = &skipped;
+	cb_దత్తాంశం.keep = &తెలిసిన_remotes;
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     builtin_remote_rm_usage, 0);
-	if (argc != 1)
+	ఒకవేళ (argc != 1)
 		usage_with_options(builtin_remote_rm_usage, options);
 
 	remote = remote_get(argv[0]);
-	if (!remote_is_configured(remote, 1)) {
+	ఒకవేళ (!remote_is_configured(remote, 1)) {
 		error(_("No such remote: '%s'"), argv[0]);
-		exit(2);
+		నిష్క్రమించు(2);
 	}
 
-	known_remotes.to_delete = remote;
-	for_each_remote(add_known_remote, &known_remotes);
+	తెలిసిన_remotes.గమ్యం_delete = remote;
+	for_each_remote(కూడు_తెలిసిన_remote, &తెలిసిన_remotes);
 
 	read_branches();
-	for (size_t i = 0; i < branch_list.nr; i++) {
-		struct string_list_item *item = branch_list.items + i;
-		struct branch_info *info = item->util;
-		if (info->remote_name && !strcmp(info->remote_name, remote->name)) {
-			const char *keys[] = { "remote", "merge", NULL }, **k;
-			for (k = keys; *k; k++) {
+	కొరకు (కొలత_t i = 0; i < branch_list.nr; i++) {
+		నిర్మాణం string_list_అంశం *అంశం = branch_list.వస్తువులు + i;
+		నిర్మాణం branch_info *info = అంశం->util;
+		ఒకవేళ (info->remote_name && !strcmp(info->remote_name, remote->name)) {
+			స్థిరరాశి అక్షరం *కీలకాలు[] = { "remote", "merge", ఖాళీ }, **k;
+			కొరకు (k = కీలకాలు; *k; k++) {
 				strbuf_reset(&buf);
 				strbuf_addf(&buf, "branch.%s.%s",
-						item->string, *k);
-				result = repo_config_set_gently(the_repository, buf.buf, NULL);
-				if (result && result != CONFIG_NOTHING_SET)
+						అంశం->string, *k);
+				ఫలితం = repo_config_సమితి_gently(the_repository, buf.buf, ఖాళీ);
+				ఒకవేళ (ఫలితం && ఫలితం != CONFIG_NOTHING_సమితి)
 					die(_("could not unset '%s'"), buf.buf);
 			}
 		}
-		if (info->push_remote_name && !strcmp(info->push_remote_name, remote->name)) {
+		ఒకవేళ (info->నెట్టు_remote_name && !strcmp(info->నెట్టు_remote_name, remote->name)) {
 			strbuf_reset(&buf);
-			strbuf_addf(&buf, "branch.%s.pushremote", item->string);
-			result = repo_config_set_gently(the_repository, buf.buf, NULL);
-			if (result && result != CONFIG_NOTHING_SET)
+			strbuf_addf(&buf, "branch.%s.pushremote", అంశం->string);
+			ఫలితం = repo_config_సమితి_gently(the_repository, buf.buf, ఖాళీ);
+			ఒకవేళ (ఫలితం && ఫలితం != CONFIG_NOTHING_సమితి)
 				die(_("could not unset '%s'"), buf.buf);
 		}
 	}
@@ -1065,903 +1065,903 @@ static int rm(int argc, const char **argv, const char *prefix,
 	 * the branches one by one, since for_each_ref() relies on cached
 	 * refs, which are invalidated when deleting a branch.
 	 */
-	cb_data.remote = remote;
-	result = refs_for_each_ref(get_main_ref_store(the_repository),
-				   add_branch_for_removal, &cb_data);
+	cb_దత్తాంశం.remote = remote;
+	ఫలితం = refs_for_each_ref(get_main_ref_store(the_repository),
+				   కూడు_branch_for_removal, &cb_దత్తాంశం);
 	strbuf_release(&buf);
 
-	if (!result)
-		result = refs_delete_refs(get_main_ref_store(the_repository),
+	ఒకవేళ (!ఫలితం)
+		ఫలితం = refs_delete_refs(get_main_ref_store(the_repository),
 					  "remote: remove", &branches,
 					  REF_NO_DEREF);
 	string_list_clear(&branches, 0);
 
-	if (skipped.nr) {
+	ఒకవేళ (skipped.nr) {
 		fprintf_ln(stderr,
 			   Q_("Note: A branch outside the refs/remotes/ hierarchy was not removed;\n"
 			      "to delete it, use:",
 			      "Note: Some branches outside the refs/remotes/ hierarchy were not removed;\n"
 			      "to delete them, use:",
 			      skipped.nr));
-		for (size_t i = 0; i < skipped.nr; i++)
+		కొరకు (కొలత_t i = 0; i < skipped.nr; i++)
 			fprintf(stderr, "  git branch -d %s\n",
-				skipped.items[i].string);
+				skipped.వస్తువులు[i].string);
 	}
 	string_list_clear(&skipped, 0);
 
-	if (!result) {
+	ఒకవేళ (!ఫలితం) {
 		strbuf_addf(&buf, "remote.%s", remote->name);
-		if (repo_config_rename_section(the_repository, buf.buf, NULL) < 1) {
-			result = error(_("Could not remove config section '%s'"), buf.buf);
-			goto out;
+		ఒకవేళ (repo_config_rename_section(the_repository, buf.buf, ఖాళీ) < 1) {
+			ఫలితం = error(_("Could not remove config section '%s'"), buf.buf);
+			వెళ్ళు బహిర్గతం;
 		}
 
-		handle_push_default(remote->name, NULL);
+		handle_నెట్టు_default(remote->name, ఖాళీ);
 	}
 
-out:
-	for (struct known_remote *r = known_remotes.list; r;) {
-		struct known_remote *next = r->next;
-		free(r);
-		r = next;
+బహిర్గతం:
+	కొరకు (నిర్మాణం తెలిసిన_remote *r = తెలిసిన_remotes.list; r;) {
+		నిర్మాణం తెలిసిన_remote *తదుపరి = r->తదుపరి;
+		విడుదల(r);
+		r = తదుపరి;
 	}
 	strbuf_release(&buf);
-	return result;
+	తిరిగి ఫలితం;
 }
 
-static void clear_push_info(void *util, const char *string UNUSED)
+స్థిర శూన్య clear_నెట్టు_info(శూన్య *util, స్థిరరాశి అక్షరం *string వాడని)
 {
-	struct push_info *info = util;
-	free(info->dest);
-	free(info);
+	నిర్మాణం నెట్టు_info *info = util;
+	విడుదల(info->dest);
+	విడుదల(info);
 }
 
-static void free_remote_ref_states(struct ref_states *states)
+స్థిర శూన్య free_remote_ref_స్థితులు(నిర్మాణం ref_స్థితులు *స్థితులు)
 {
-	string_list_clear(&states->new_refs, 0);
-	string_list_clear(&states->skipped, 0);
-	string_list_clear(&states->stale, 1);
-	string_list_clear(&states->tracked, 0);
-	string_list_clear(&states->heads, 0);
-	string_list_clear_func(&states->push, clear_push_info);
+	string_list_clear(&స్థితులు->new_refs, 0);
+	string_list_clear(&స్థితులు->skipped, 0);
+	string_list_clear(&స్థితులు->stale, 1);
+	string_list_clear(&స్థితులు->tracked, 0);
+	string_list_clear(&స్థితులు->heads, 0);
+	string_list_clear_func(&స్థితులు->నెట్టు, clear_నెట్టు_info);
 }
 
-static int append_ref_to_tracked_list(const struct reference *ref, void *cb_data)
+స్థిర పూర్ణాంకం append_ref_గమ్యం_tracked_list(స్థిరరాశి నిర్మాణం reference *ref, శూన్య *cb_దత్తాంశం)
 {
-	struct ref_states *states = cb_data;
-	struct refspec_item refspec;
+	నిర్మాణం ref_స్థితులు *స్థితులు = cb_దత్తాంశం;
+	నిర్మాణం refspec_అంశం refspec;
 
-	if (ref->flags & REF_ISSYMREF)
-		return 0;
+	ఒకవేళ (ref->flags & REF_ISSYMREF)
+		తిరిగి 0;
 
-	memset(&refspec, 0, sizeof(refspec));
-	refspec.dst = (char *)ref->name;
-	if (!remote_find_tracking(states->remote, &refspec)) {
-		string_list_append(&states->tracked, abbrev_branch(refspec.src));
-		free(refspec.src);
+	memset(&refspec, 0, పరిమాణం(refspec));
+	refspec.dst = (అక్షరం *)ref->name;
+	ఒకవేళ (!remote_కనుగొను_tracking(స్థితులు->remote, &refspec)) {
+		string_list_append(&స్థితులు->tracked, abbrev_branch(refspec.src));
+		విడుదల(refspec.src);
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int get_remote_ref_states(const char *name,
-				 struct ref_states *states,
-				 int query)
+స్థిర పూర్ణాంకం get_remote_ref_స్థితులు(స్థిరరాశి అక్షరం *name,
+				 నిర్మాణం ref_స్థితులు *స్థితులు,
+				 పూర్ణాంకం query)
 {
-	states->remote = remote_get(name);
-	if (!states->remote)
-		return error(_("No such remote: '%s'"), name);
+	స్థితులు->remote = remote_get(name);
+	ఒకవేళ (!స్థితులు->remote)
+		తిరిగి error(_("No such remote: '%s'"), name);
 
 	read_branches();
 
-	if (query) {
-		struct transport *transport;
-		const struct ref *remote_refs;
+	ఒకవేళ (query) {
+		నిర్మాణం transport *transport;
+		స్థిరరాశి నిర్మాణం ref *remote_refs;
 
-		transport = transport_get(states->remote, states->remote->url.v[0]);
-		remote_refs = transport_get_remote_refs(transport, NULL);
+		transport = transport_get(స్థితులు->remote, స్థితులు->remote->url.v[0]);
+		remote_refs = transport_get_remote_refs(transport, ఖాళీ);
 
-		states->queried = 1;
-		if (query & GET_REF_STATES)
-			get_ref_states(remote_refs, states);
-		if (query & GET_HEAD_NAMES)
-			get_head_names(remote_refs, states);
-		if (query & GET_PUSH_REF_STATES)
-			get_push_ref_states(remote_refs, states);
+		స్థితులు->queried = 1;
+		ఒకవేళ (query & GET_REF_స్థితులు)
+			get_ref_స్థితులు(remote_refs, స్థితులు);
+		ఒకవేళ (query & GET_తల_పేర్లు)
+			get_తల_పేర్లు(remote_refs, స్థితులు);
+		ఒకవేళ (query & GET_నెట్టు_REF_స్థితులు)
+			get_నెట్టు_ref_స్థితులు(remote_refs, స్థితులు);
 		transport_disconnect(transport);
-	} else {
+	} లేకపోతే {
 		refs_for_each_ref(get_main_ref_store(the_repository),
-				  append_ref_to_tracked_list, states);
-		string_list_sort(&states->tracked);
-		get_push_ref_states_noquery(states);
+				  append_ref_గమ్యం_tracked_list, స్థితులు);
+		string_list_క్రమీకరించు(&స్థితులు->tracked);
+		get_నెట్టు_ref_స్థితులు_noquery(స్థితులు);
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
-struct show_info {
-	struct string_list list;
-	struct ref_states states;
-	int width, width2;
-	int any_rebase;
+నిర్మాణం show_info {
+	నిర్మాణం string_list list;
+	నిర్మాణం ref_స్థితులు స్థితులు;
+	పూర్ణాంకం వెడల్పు, width2;
+	పూర్ణాంకం any_rebase;
 };
 
-#define SHOW_INFO_INIT { \
+#నిర్వచించు SHOW_INFO_INIT { \
 	.list = STRING_LIST_INIT_DUP, \
-	.states = REF_STATES_INIT, \
+	.స్థితులు = REF_స్థితులు_INIT, \
 }
 
-static int add_remote_to_show_info(struct string_list_item *item, void *cb_data)
+స్థిర పూర్ణాంకం కూడు_remote_గమ్యం_show_info(నిర్మాణం string_list_అంశం *అంశం, శూన్య *cb_దత్తాంశం)
 {
-	struct show_info *info = cb_data;
-	int n = strlen(item->string);
-	if (n > info->width)
-		info->width = n;
-	string_list_insert(&info->list, item->string);
-	return 0;
+	నిర్మాణం show_info *info = cb_దత్తాంశం;
+	పూర్ణాంకం n = అక్షరశ్రేణి_పొడవు(అంశం->string);
+	ఒకవేళ (n > info->వెడల్పు)
+		info->వెడల్పు = n;
+	string_list_చొప్పించు(&info->list, అంశం->string);
+	తిరిగి 0;
 }
 
-static int show_remote_info_item(struct string_list_item *item, void *cb_data)
+స్థిర పూర్ణాంకం show_remote_info_అంశం(నిర్మాణం string_list_అంశం *అంశం, శూన్య *cb_దత్తాంశం)
 {
-	struct show_info *info = cb_data;
-	struct ref_states *states = &info->states;
-	const char *name = item->string;
+	నిర్మాణం show_info *info = cb_దత్తాంశం;
+	నిర్మాణం ref_స్థితులు *స్థితులు = &info->స్థితులు;
+	స్థిరరాశి అక్షరం *name = అంశం->string;
 
-	if (states->queried) {
-		const char *fmt = "%s";
-		const char *arg = "";
-		if (string_list_has_string(&states->new_refs, name)) {
+	ఒకవేళ (స్థితులు->queried) {
+		స్థిరరాశి అక్షరం *fmt = "%s";
+		స్థిరరాశి అక్షరం *arg = "";
+		ఒకవేళ (string_list_has_string(&స్థితులు->new_refs, name)) {
 			fmt = _(" new (next fetch will store in remotes/%s)");
-			arg = states->remote->name;
-		} else if (string_list_has_string(&states->tracked, name))
+			arg = స్థితులు->remote->name;
+		} లేకపోతే ఒకవేళ (string_list_has_string(&స్థితులు->tracked, name))
 			arg = _(" tracked");
-		else if (string_list_has_string(&states->skipped, name))
+		లేకపోతే ఒకవేళ (string_list_has_string(&స్థితులు->skipped, name))
 			arg = _(" skipped");
-		else if (string_list_has_string(&states->stale, name))
+		లేకపోతే ఒకవేళ (string_list_has_string(&స్థితులు->stale, name))
 			arg = _(" stale (use 'git remote prune' to remove)");
-		else
+		లేకపోతే
 			arg = _(" ???");
-		printf("    %-*s", info->width, name);
-		printf(fmt, arg);
-		printf("\n");
-	} else
-		printf("    %s\n", name);
+		రాయి("    %-*s", info->వెడల్పు, name);
+		రాయి(fmt, arg);
+		రాయి("\n");
+	} లేకపోతే
+		రాయి("    %s\n", name);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int add_local_to_show_info(struct string_list_item *branch_item, void *cb_data)
+స్థిర పూర్ణాంకం కూడు_local_గమ్యం_show_info(నిర్మాణం string_list_అంశం *branch_అంశం, శూన్య *cb_దత్తాంశం)
 {
-	struct show_info *show_info = cb_data;
-	struct ref_states *states = &show_info->states;
-	struct branch_info *branch_info = branch_item->util;
-	struct string_list_item *item;
-	int n;
+	నిర్మాణం show_info *show_info = cb_దత్తాంశం;
+	నిర్మాణం ref_స్థితులు *స్థితులు = &show_info->స్థితులు;
+	నిర్మాణం branch_info *branch_info = branch_అంశం->util;
+	నిర్మాణం string_list_అంశం *అంశం;
+	పూర్ణాంకం n;
 
-	if (!branch_info->merge.nr || !branch_info->remote_name ||
-	    strcmp(states->remote->name, branch_info->remote_name))
-		return 0;
-	if ((n = strlen(branch_item->string)) > show_info->width)
-		show_info->width = n;
-	if (branch_info->rebase >= REBASE_TRUE)
+	ఒకవేళ (!branch_info->విలీనం.nr || !branch_info->remote_name ||
+	    strcmp(స్థితులు->remote->name, branch_info->remote_name))
+		తిరిగి 0;
+	ఒకవేళ ((n = అక్షరశ్రేణి_పొడవు(branch_అంశం->string)) > show_info->వెడల్పు)
+		show_info->వెడల్పు = n;
+	ఒకవేళ (branch_info->rebase >= REBASE_TRUE)
 		show_info->any_rebase = 1;
 
-	item = string_list_insert(&show_info->list, branch_item->string);
-	item->util = branch_info;
+	అంశం = string_list_చొప్పించు(&show_info->list, branch_అంశం->string);
+	అంశం->util = branch_info;
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int show_local_info_item(struct string_list_item *item, void *cb_data)
+స్థిర పూర్ణాంకం show_local_info_అంశం(నిర్మాణం string_list_అంశం *అంశం, శూన్య *cb_దత్తాంశం)
 {
-	struct show_info *show_info = cb_data;
-	struct branch_info *branch_info = item->util;
-	struct string_list *merge = &branch_info->merge;
-	int width = show_info->width + 4;
+	నిర్మాణం show_info *show_info = cb_దత్తాంశం;
+	నిర్మాణం branch_info *branch_info = అంశం->util;
+	నిర్మాణం string_list *విలీనం = &branch_info->విలీనం;
+	పూర్ణాంకం వెడల్పు = show_info->వెడల్పు + 4;
 
-	if (branch_info->rebase >= REBASE_TRUE && branch_info->merge.nr > 1) {
+	ఒకవేళ (branch_info->rebase >= REBASE_TRUE && branch_info->విలీనం.nr > 1) {
 		error(_("invalid branch.%s.merge; cannot rebase onto > 1 branch"),
-			item->string);
-		return 0;
+			అంశం->string);
+		తిరిగి 0;
 	}
 
-	printf("    %-*s ", show_info->width, item->string);
-	if (branch_info->rebase >= REBASE_TRUE) {
-		const char *msg;
-		if (branch_info->rebase == REBASE_INTERACTIVE)
-			msg = _("rebases interactively onto remote %s");
-		else if (branch_info->rebase == REBASE_MERGES)
-			msg = _("rebases interactively (with merges) onto "
+	రాయి("    %-*s ", show_info->వెడల్పు, అంశం->string);
+	ఒకవేళ (branch_info->rebase >= REBASE_TRUE) {
+		స్థిరరాశి అక్షరం *సందేశం;
+		ఒకవేళ (branch_info->rebase == REBASE_INTERACTIVE)
+			సందేశం = _("rebases interactively onto remote %s");
+		లేకపోతే ఒకవేళ (branch_info->rebase == REBASE_MERGES)
+			సందేశం = _("rebases interactively (with merges) onto "
 				"remote %s");
-		else
-			msg = _("rebases onto remote %s");
-		printf_ln(msg, merge->items[0].string);
-		return 0;
-	} else if (show_info->any_rebase) {
-		printf_ln(_(" merges with remote %s"), merge->items[0].string);
-		width++;
-	} else {
-		printf_ln(_("merges with remote %s"), merge->items[0].string);
+		లేకపోతే
+			సందేశం = _("rebases onto remote %s");
+		printf_ln(సందేశం, విలీనం->వస్తువులు[0].string);
+		తిరిగి 0;
+	} లేకపోతే ఒకవేళ (show_info->any_rebase) {
+		printf_ln(_(" merges with remote %s"), విలీనం->వస్తువులు[0].string);
+		వెడల్పు++;
+	} లేకపోతే {
+		printf_ln(_("merges with remote %s"), విలీనం->వస్తువులు[0].string);
 	}
-	for (size_t i = 1; i < merge->nr; i++)
-		printf(_("%-*s    and with remote %s\n"), width, "",
-		       merge->items[i].string);
+	కొరకు (కొలత_t i = 1; i < విలీనం->nr; i++)
+		రాయి(_("%-*s    and with remote %s\n"), వెడల్పు, "",
+		       విలీనం->వస్తువులు[i].string);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int add_push_to_show_info(struct string_list_item *push_item, void *cb_data)
+స్థిర పూర్ణాంకం కూడు_నెట్టు_గమ్యం_show_info(నిర్మాణం string_list_అంశం *నెట్టు_అంశం, శూన్య *cb_దత్తాంశం)
 {
-	struct show_info *show_info = cb_data;
-	struct push_info *push_info = push_item->util;
-	struct string_list_item *item;
-	int n;
-	if ((n = strlen(push_item->string)) > show_info->width)
-		show_info->width = n;
-	if ((n = strlen(push_info->dest)) > show_info->width2)
+	నిర్మాణం show_info *show_info = cb_దత్తాంశం;
+	నిర్మాణం నెట్టు_info *నెట్టు_info = నెట్టు_అంశం->util;
+	నిర్మాణం string_list_అంశం *అంశం;
+	పూర్ణాంకం n;
+	ఒకవేళ ((n = అక్షరశ్రేణి_పొడవు(నెట్టు_అంశం->string)) > show_info->వెడల్పు)
+		show_info->వెడల్పు = n;
+	ఒకవేళ ((n = అక్షరశ్రేణి_పొడవు(నెట్టు_info->dest)) > show_info->width2)
 		show_info->width2 = n;
-	item = string_list_append(&show_info->list, push_item->string);
-	item->util = push_item->util;
-	return 0;
+	అంశం = string_list_append(&show_info->list, నెట్టు_అంశం->string);
+	అంశం->util = నెట్టు_అంశం->util;
+	తిరిగి 0;
 }
 
 /*
  * Sorting comparison for a string list that has push_info
  * structs in its util field
  */
-static int cmp_string_with_push(const void *va, const void *vb)
+స్థిర పూర్ణాంకం cmp_string_with_నెట్టు(స్థిరరాశి శూన్య *va, స్థిరరాశి శూన్య *vb)
 {
-	const struct string_list_item *a = va;
-	const struct string_list_item *b = vb;
-	const struct push_info *a_push = a->util;
-	const struct push_info *b_push = b->util;
-	int cmp = strcmp(a->string, b->string);
-	return cmp ? cmp : strcmp(a_push->dest, b_push->dest);
+	స్థిరరాశి నిర్మాణం string_list_అంశం *a = va;
+	స్థిరరాశి నిర్మాణం string_list_అంశం *b = vb;
+	స్థిరరాశి నిర్మాణం నెట్టు_info *a_నెట్టు = a->util;
+	స్థిరరాశి నిర్మాణం నెట్టు_info *b_నెట్టు = b->util;
+	పూర్ణాంకం cmp = strcmp(a->string, b->string);
+	తిరిగి cmp ? cmp : strcmp(a_నెట్టు->dest, b_నెట్టు->dest);
 }
 
-static int show_push_info_item(struct string_list_item *item, void *cb_data)
+స్థిర పూర్ణాంకం show_నెట్టు_info_అంశం(నిర్మాణం string_list_అంశం *అంశం, శూన్య *cb_దత్తాంశం)
 {
-	struct show_info *show_info = cb_data;
-	struct push_info *push_info = item->util;
-	const char *src = item->string, *status = NULL;
+	నిర్మాణం show_info *show_info = cb_దత్తాంశం;
+	నిర్మాణం నెట్టు_info *నెట్టు_info = అంశం->util;
+	స్థిరరాశి అక్షరం *src = అంశం->string, *స్థితి_2 = ఖాళీ;
 
-	switch (push_info->status) {
-	case PUSH_STATUS_CREATE:
-		status = _("create");
-		break;
-	case PUSH_STATUS_DELETE:
-		status = _("delete");
+	ఎంపిక (నెట్టు_info->స్థితి_2) {
+	స్థితి నెట్టు_స్థితి_CREATE:
+		స్థితి_2 = _("create");
+		ఆపు;
+	స్థితి నెట్టు_స్థితి_DELETE:
+		స్థితి_2 = _("delete");
 		src = _("(none)");
-		break;
-	case PUSH_STATUS_UPTODATE:
-		status = _("up to date");
-		break;
-	case PUSH_STATUS_FASTFORWARD:
-		status = _("fast-forwardable");
-		break;
-	case PUSH_STATUS_OUTOFDATE:
-		status = _("local out of date");
-		break;
-	case PUSH_STATUS_NOTQUERIED:
-		break;
+		ఆపు;
+	స్థితి నెట్టు_స్థితి_UPTODATE:
+		స్థితి_2 = _("up to date");
+		ఆపు;
+	స్థితి నెట్టు_స్థితి_FASTFORWARD:
+		స్థితి_2 = _("fast-forwardable");
+		ఆపు;
+	స్థితి నెట్టు_స్థితి_OUTOFDATE:
+		స్థితి_2 = _("local out of date");
+		ఆపు;
+	స్థితి నెట్టు_స్థితి_NOTQUERIED:
+		ఆపు;
 	}
-	if (status) {
-		if (push_info->forced)
-			printf_ln(_("    %-*s forces to %-*s (%s)"), show_info->width, src,
-			       show_info->width2, push_info->dest, status);
-		else
-			printf_ln(_("    %-*s pushes to %-*s (%s)"), show_info->width, src,
-			       show_info->width2, push_info->dest, status);
-	} else {
-		if (push_info->forced)
-			printf_ln(_("    %-*s forces to %s"), show_info->width, src,
-			       push_info->dest);
-		else
-			printf_ln(_("    %-*s pushes to %s"), show_info->width, src,
-			       push_info->dest);
+	ఒకవేళ (స్థితి_2) {
+		ఒకవేళ (నెట్టు_info->forced)
+			printf_ln(_("    %-*s forces to %-*s (%s)"), show_info->వెడల్పు, src,
+			       show_info->width2, నెట్టు_info->dest, స్థితి_2);
+		లేకపోతే
+			printf_ln(_("    %-*s pushes to %-*s (%s)"), show_info->వెడల్పు, src,
+			       show_info->width2, నెట్టు_info->dest, స్థితి_2);
+	} లేకపోతే {
+		ఒకవేళ (నెట్టు_info->forced)
+			printf_ln(_("    %-*s forces to %s"), show_info->వెడల్పు, src,
+			       నెట్టు_info->dest);
+		లేకపోతే
+			printf_ln(_("    %-*s pushes to %s"), show_info->వెడల్పు, src,
+			       నెట్టు_info->dest);
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static int get_one_entry(struct remote *remote, void *priv)
+స్థిర పూర్ణాంకం get_one_నమోదు(నిర్మాణం remote *remote, శూన్య *priv)
 {
-	struct string_list *list = priv;
-	struct strbuf remote_info_buf = STRBUF_INIT;
-	struct strvec *url;
+	నిర్మాణం string_list *list = priv;
+	నిర్మాణం strbuf remote_info_buf = STRBUF_INIT;
+	నిర్మాణం strvec *url;
 
-	if (remote->url.nr > 0) {
-		struct strbuf promisor_config = STRBUF_INIT;
-		const char *partial_clone_filter = NULL;
+	ఒకవేళ (remote->url.nr > 0) {
+		నిర్మాణం strbuf promisor_config = STRBUF_INIT;
+		స్థిరరాశి అక్షరం *partial_clone_filter = ఖాళీ;
 
 		strbuf_addf(&promisor_config, "remote.%s.partialclonefilter", remote->name);
 		strbuf_addf(&remote_info_buf, "%s (fetch)", remote->url.v[0]);
-		if (!repo_config_get_string_tmp(the_repository, promisor_config.buf, &partial_clone_filter))
+		ఒకవేళ (!repo_config_get_string_tmp(the_repository, promisor_config.buf, &partial_clone_filter))
 			strbuf_addf(&remote_info_buf, " [%s]", partial_clone_filter);
 
 		strbuf_release(&promisor_config);
 		string_list_append(list, remote->name)->util =
-				strbuf_detach(&remote_info_buf, NULL);
-	} else
-		string_list_append(list, remote->name)->util = NULL;
-	url = push_url_of_remote(remote);
-	for (size_t i = 0; i < url->nr; i++) {
+				strbuf_detach(&remote_info_buf, ఖాళీ);
+	} లేకపోతే
+		string_list_append(list, remote->name)->util = ఖాళీ;
+	url = నెట్టు_url_యొక్క_remote(remote);
+	కొరకు (కొలత_t i = 0; i < url->nr; i++) {
 		strbuf_addf(&remote_info_buf, "%s (push)", url->v[i]);
 		string_list_append(list, remote->name)->util =
-				strbuf_detach(&remote_info_buf, NULL);
+				strbuf_detach(&remote_info_buf, ఖాళీ);
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int show_all(void)
+స్థిర పూర్ణాంకం show_all(శూన్య)
 {
-	struct string_list list = STRING_LIST_INIT_DUP;
-	int result;
+	నిర్మాణం string_list list = STRING_LIST_INIT_DUP;
+	పూర్ణాంకం ఫలితం;
 
-	result = for_each_remote(get_one_entry, &list);
+	ఫలితం = for_each_remote(get_one_నమోదు, &list);
 
-	if (!result) {
-		string_list_sort(&list);
-		for (size_t i = 0; i < list.nr; i++) {
-			struct string_list_item *item = list.items + i;
-			if (verbose)
-				printf("%s\t%s\n", item->string,
-					item->util ? (const char *)item->util : "");
-			else {
-				if (i && !strcmp((item - 1)->string, item->string))
-					continue;
-				printf("%s\n", item->string);
+	ఒకవేళ (!ఫలితం) {
+		string_list_క్రమీకరించు(&list);
+		కొరకు (కొలత_t i = 0; i < list.nr; i++) {
+			నిర్మాణం string_list_అంశం *అంశం = list.వస్తువులు + i;
+			ఒకవేళ (verbose)
+				రాయి("%s\t%s\n", అంశం->string,
+					అంశం->util ? (స్థిరరాశి అక్షరం *)అంశం->util : "");
+			లేకపోతే {
+				ఒకవేళ (i && !strcmp((అంశం - 1)->string, అంశం->string))
+					కొనసాగు;
+				రాయి("%s\n", అంశం->string);
 			}
 		}
 	}
 	string_list_clear(&list, 1);
-	return result;
+	తిరిగి ఫలితం;
 }
 
-static int show(int argc, const char **argv, const char *prefix,
-		struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం show(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		నిర్మాణం repository *repo వాడని)
 {
-	int no_query = 0, result = 0, query_flag = 0;
-	struct option options[] = {
-		OPT_BOOL('n', NULL, &no_query, N_("do not query remotes")),
-		OPT_END()
+	పూర్ణాంకం no_query = 0, ఫలితం = 0, query_flag = 0;
+	నిర్మాణం option options[] = {
+		OPT_BOOL('n', ఖాళీ, &no_query, N_("do not query remotes")),
+		OPT_చివర()
 	};
-	struct show_info info = SHOW_INFO_INIT;
+	నిర్మాణం show_info info = SHOW_INFO_INIT;
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     builtin_remote_show_usage,
 			     0);
 
-	if (argc < 1)
-		return show_all();
+	ఒకవేళ (argc < 1)
+		తిరిగి show_all();
 
-	if (!no_query)
-		query_flag = (GET_REF_STATES | GET_HEAD_NAMES | GET_PUSH_REF_STATES);
+	ఒకవేళ (!no_query)
+		query_flag = (GET_REF_స్థితులు | GET_తల_పేర్లు | GET_నెట్టు_REF_స్థితులు);
 
-	for (; argc; argc--, argv++) {
-		size_t i;
-		struct strvec *url;
+	కొరకు (; argc; argc--, argv++) {
+		కొలత_t i;
+		నిర్మాణం strvec *url;
 
-		get_remote_ref_states(*argv, &info.states, query_flag);
+		get_remote_ref_స్థితులు(*argv, &info.స్థితులు, query_flag);
 
 		printf_ln(_("* remote %s"), *argv);
-		printf_ln(_("  Fetch URL: %s"), info.states.remote->url.v[0]);
-		url = push_url_of_remote(info.states.remote);
-		for (i = 0; i < url->nr; i++)
+		printf_ln(_("  Fetch URL: %s"), info.స్థితులు.remote->url.v[0]);
+		url = నెట్టు_url_యొక్క_remote(info.స్థితులు.remote);
+		కొరకు (i = 0; i < url->nr; i++)
 			/*
 			 * TRANSLATORS: the colon ':' should align
 			 * with the one in " Fetch URL: %s"
 			 * translation.
 			 */
 			printf_ln(_("  Push  URL: %s"), url->v[i]);
-		if (!i)
+		ఒకవేళ (!i)
 			printf_ln(_("  Push  URL: %s"), _("(no URL)"));
-		if (no_query)
+		ఒకవేళ (no_query)
 			printf_ln(_("  HEAD branch: %s"), _("(not queried)"));
-		else if (!info.states.heads.nr)
+		లేకపోతే ఒకవేళ (!info.స్థితులు.heads.nr)
 			printf_ln(_("  HEAD branch: %s"), _("(unknown)"));
-		else if (info.states.heads.nr == 1)
-			printf_ln(_("  HEAD branch: %s"), info.states.heads.items[0].string);
-		else {
-			printf(_("  HEAD branch (remote HEAD is ambiguous,"
+		లేకపోతే ఒకవేళ (info.స్థితులు.heads.nr == 1)
+			printf_ln(_("  HEAD branch: %s"), info.స్థితులు.heads.వస్తువులు[0].string);
+		లేకపోతే {
+			రాయి(_("  HEAD branch (remote HEAD is ambiguous,"
 				 " may be one of the following):\n"));
-			for (i = 0; i < info.states.heads.nr; i++)
-				printf("    %s\n", info.states.heads.items[i].string);
+			కొరకు (i = 0; i < info.స్థితులు.heads.nr; i++)
+				రాయి("    %s\n", info.స్థితులు.heads.వస్తువులు[i].string);
 		}
 
 		/* remote branch info */
-		info.width = 0;
-		for_each_string_list(&info.states.new_refs, add_remote_to_show_info, &info);
-		for_each_string_list(&info.states.skipped, add_remote_to_show_info, &info);
-		for_each_string_list(&info.states.tracked, add_remote_to_show_info, &info);
-		for_each_string_list(&info.states.stale, add_remote_to_show_info, &info);
-		if (info.list.nr)
+		info.వెడల్పు = 0;
+		for_each_string_list(&info.స్థితులు.new_refs, కూడు_remote_గమ్యం_show_info, &info);
+		for_each_string_list(&info.స్థితులు.skipped, కూడు_remote_గమ్యం_show_info, &info);
+		for_each_string_list(&info.స్థితులు.tracked, కూడు_remote_గమ్యం_show_info, &info);
+		for_each_string_list(&info.స్థితులు.stale, కూడు_remote_గమ్యం_show_info, &info);
+		ఒకవేళ (info.list.nr)
 			printf_ln(Q_("  Remote branch:%s",
 				     "  Remote branches:%s",
 				     info.list.nr),
 				  no_query ? _(" (status not queried)") : "");
-		for_each_string_list(&info.list, show_remote_info_item, &info);
+		for_each_string_list(&info.list, show_remote_info_అంశం, &info);
 		string_list_clear(&info.list, 0);
 
 		/* git pull info */
-		info.width = 0;
+		info.వెడల్పు = 0;
 		info.any_rebase = 0;
-		for_each_string_list(&branch_list, add_local_to_show_info, &info);
-		if (info.list.nr)
+		for_each_string_list(&branch_list, కూడు_local_గమ్యం_show_info, &info);
+		ఒకవేళ (info.list.nr)
 			printf_ln(Q_("  Local branch configured for 'git pull':",
 				     "  Local branches configured for 'git pull':",
 				     info.list.nr));
-		for_each_string_list(&info.list, show_local_info_item, &info);
+		for_each_string_list(&info.list, show_local_info_అంశం, &info);
 		string_list_clear(&info.list, 0);
 
 		/* git push info */
-		if (info.states.remote->mirror)
+		ఒకవేళ (info.స్థితులు.remote->mirror)
 			printf_ln(_("  Local refs will be mirrored by 'git push'"));
 
-		info.width = info.width2 = 0;
-		for_each_string_list(&info.states.push, add_push_to_show_info, &info);
-		QSORT(info.list.items, info.list.nr, cmp_string_with_push);
-		if (info.list.nr)
+		info.వెడల్పు = info.width2 = 0;
+		for_each_string_list(&info.స్థితులు.నెట్టు, కూడు_నెట్టు_గమ్యం_show_info, &info);
+		QSORT(info.list.వస్తువులు, info.list.nr, cmp_string_with_నెట్టు);
+		ఒకవేళ (info.list.nr)
 			printf_ln(Q_("  Local ref configured for 'git push'%s:",
 				     "  Local refs configured for 'git push'%s:",
 				     info.list.nr),
 				  no_query ? _(" (status not queried)") : "");
-		for_each_string_list(&info.list, show_push_info_item, &info);
+		for_each_string_list(&info.list, show_నెట్టు_info_అంశం, &info);
 		string_list_clear(&info.list, 0);
 
-		free_remote_ref_states(&info.states);
+		free_remote_ref_స్థితులు(&info.స్థితులు);
 	}
 
-	return result;
+	తిరిగి ఫలితం;
 }
 
-static void report_set_head_auto(const char *remote, const char *head_name,
-			struct strbuf *b_local_head, int was_detached) {
-	struct strbuf buf_prefix = STRBUF_INIT;
-	const char *prev_head = NULL;
+స్థిర శూన్య report_సమితి_తల_auto(స్థిరరాశి అక్షరం *remote, స్థిరరాశి అక్షరం *తల_name,
+			నిర్మాణం strbuf *b_local_తల, పూర్ణాంకం was_detached) {
+	నిర్మాణం strbuf buf_ఉపసర్గ = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *prev_తల = ఖాళీ;
 
-	strbuf_addf(&buf_prefix, "refs/remotes/%s/", remote);
-	skip_prefix(b_local_head->buf, buf_prefix.buf, &prev_head);
+	strbuf_addf(&buf_ఉపసర్గ, "refs/remotes/%s/", remote);
+	skip_ఉపసర్గ(b_local_తల->buf, buf_ఉపసర్గ.buf, &prev_తల);
 
-	if (prev_head && !strcmp(prev_head, head_name))
-		printf(_("'%s/HEAD' is unchanged and points to '%s'\n"),
-			remote, head_name);
-	else if (prev_head)
-		printf(_("'%s/HEAD' has changed from '%s' and now points to '%s'\n"),
-			remote, prev_head, head_name);
-	else if (!b_local_head->len)
-		printf(_("'%s/HEAD' is now created and points to '%s'\n"),
-			remote, head_name);
-	else if (was_detached && b_local_head->len)
-		printf(_("'%s/HEAD' was detached at '%s' and now points to '%s'\n"),
-			remote, b_local_head->buf, head_name);
-	else
-		printf(_("'%s/HEAD' used to point to '%s' "
+	ఒకవేళ (prev_తల && !strcmp(prev_తల, తల_name))
+		రాయి(_("'%s/HEAD' is unchanged and points to '%s'\n"),
+			remote, తల_name);
+	లేకపోతే ఒకవేళ (prev_తల)
+		రాయి(_("'%s/HEAD' has changed from '%s' and now points to '%s'\n"),
+			remote, prev_తల, తల_name);
+	లేకపోతే ఒకవేళ (!b_local_తల->len)
+		రాయి(_("'%s/HEAD' is now created and points to '%s'\n"),
+			remote, తల_name);
+	లేకపోతే ఒకవేళ (was_detached && b_local_తల->len)
+		రాయి(_("'%s/HEAD' was detached at '%s' and now points to '%s'\n"),
+			remote, b_local_తల->buf, తల_name);
+	లేకపోతే
+		రాయి(_("'%s/HEAD' used to point to '%s' "
 			"(which is not a remote branch), but now points to '%s'\n"),
-			remote, b_local_head->buf, head_name);
-	strbuf_release(&buf_prefix);
+			remote, b_local_తల->buf, తల_name);
+	strbuf_release(&buf_ఉపసర్గ);
 }
 
-static int set_head(int argc, const char **argv, const char *prefix,
-		    struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం సమితి_తల(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		    నిర్మాణం repository *repo వాడని)
 {
-	int opt_a = 0, opt_d = 0, result = 0, was_detached;
-	struct strbuf b_head = STRBUF_INIT, b_remote_head = STRBUF_INIT,
-		b_local_head = STRBUF_INIT;
-	char *head_name = NULL;
-	struct ref_store *refs = get_main_ref_store(the_repository);
-	struct remote *remote;
+	పూర్ణాంకం opt_a = 0, opt_d = 0, ఫలితం = 0, was_detached;
+	నిర్మాణం strbuf b_తల = STRBUF_INIT, b_remote_తల = STRBUF_INIT,
+		b_local_తల = STRBUF_INIT;
+	అక్షరం *తల_name = ఖాళీ;
+	నిర్మాణం ref_store *refs = get_main_ref_store(the_repository);
+	నిర్మాణం remote *remote;
 
-	struct option options[] = {
+	నిర్మాణం option options[] = {
 		OPT_BOOL('a', "auto", &opt_a,
 			 N_("set refs/remotes/<name>/HEAD according to remote")),
 		OPT_BOOL('d', "delete", &opt_d,
 			 N_("delete refs/remotes/<name>/HEAD")),
-		OPT_END()
+		OPT_చివర()
 	};
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     builtin_remote_sethead_usage, 0);
 
 	/* All modes require at least a remote name. */
-	if (!argc)
+	ఒకవేళ (!argc)
 		usage_with_options(builtin_remote_sethead_usage, options);
 
-	strbuf_addf(&b_head, "refs/remotes/%s/HEAD", argv[0]);
+	strbuf_addf(&b_తల, "refs/remotes/%s/HEAD", argv[0]);
 	remote = remote_get(argv[0]);
 
-	if (!opt_a && !opt_d && argc == 2) {
-		head_name = xstrdup(argv[1]);
-	} else if (opt_a && !opt_d && argc == 1) {
-		struct ref_states states = REF_STATES_INIT;
-		get_remote_ref_states(argv[0], &states, GET_HEAD_NAMES);
-		if (!states.heads.nr)
-			result |= error(_("Cannot determine remote HEAD"));
-		else if (states.heads.nr > 1) {
-			result |= error(_("Multiple remote HEAD branches. "
+	ఒకవేళ (!opt_a && !opt_d && argc == 2) {
+		తల_name = xstrdup(argv[1]);
+	} లేకపోతే ఒకవేళ (opt_a && !opt_d && argc == 1) {
+		నిర్మాణం ref_స్థితులు స్థితులు = REF_స్థితులు_INIT;
+		get_remote_ref_స్థితులు(argv[0], &స్థితులు, GET_తల_పేర్లు);
+		ఒకవేళ (!స్థితులు.heads.nr)
+			ఫలితం |= error(_("Cannot determine remote HEAD"));
+		లేకపోతే ఒకవేళ (స్థితులు.heads.nr > 1) {
+			ఫలితం |= error(_("Multiple remote HEAD branches. "
 					  "Please choose one explicitly with:"));
-			for (size_t i = 0; i < states.heads.nr; i++)
+			కొరకు (కొలత_t i = 0; i < స్థితులు.heads.nr; i++)
 				fprintf(stderr, "  git remote set-head %s %s\n",
-					argv[0], states.heads.items[i].string);
-		} else
-			head_name = xstrdup(states.heads.items[0].string);
-		free_remote_ref_states(&states);
-	} else if (opt_d && !opt_a && argc == 1) {
-		if (refs_delete_ref(refs, NULL, b_head.buf, NULL, REF_NO_DEREF))
-			result |= error(_("Could not delete %s"), b_head.buf);
-	} else
+					argv[0], స్థితులు.heads.వస్తువులు[i].string);
+		} లేకపోతే
+			తల_name = xstrdup(స్థితులు.heads.వస్తువులు[0].string);
+		free_remote_ref_స్థితులు(&స్థితులు);
+	} లేకపోతే ఒకవేళ (opt_d && !opt_a && argc == 1) {
+		ఒకవేళ (refs_delete_ref(refs, ఖాళీ, b_తల.buf, ఖాళీ, REF_NO_DEREF))
+			ఫలితం |= error(_("Could not delete %s"), b_తల.buf);
+	} లేకపోతే
 		usage_with_options(builtin_remote_sethead_usage, options);
 
-	if (!head_name)
-		goto cleanup;
-	strbuf_addf(&b_remote_head, "refs/remotes/%s/%s", argv[0], head_name);
-	if (!refs_ref_exists(refs, b_remote_head.buf)) {
-		result |= error(_("Not a valid ref: %s"), b_remote_head.buf);
-		goto cleanup;
+	ఒకవేళ (!తల_name)
+		వెళ్ళు cleanup;
+	strbuf_addf(&b_remote_తల, "refs/remotes/%s/%s", argv[0], తల_name);
+	ఒకవేళ (!refs_ref_exists(refs, b_remote_తల.buf)) {
+		ఫలితం |= error(_("Not a valid ref: %s"), b_remote_తల.buf);
+		వెళ్ళు cleanup;
 	}
-	was_detached = refs_update_symref_extended(refs, b_head.buf, b_remote_head.buf,
-			"remote set-head", &b_local_head, 0);
-	if (was_detached == -1) {
-		result |= error(_("Could not set up %s"), b_head.buf);
-		goto cleanup;
+	was_detached = refs_update_symref_extended(refs, b_తల.buf, b_remote_తల.buf,
+			"remote set-head", &b_local_తల, 0);
+	ఒకవేళ (was_detached == -1) {
+		ఫలితం |= error(_("Could not set up %s"), b_తల.buf);
+		వెళ్ళు cleanup;
 	}
-	if (opt_a)
-		report_set_head_auto(argv[0], head_name, &b_local_head, was_detached);
-	if (remote->follow_remote_head == FOLLOW_REMOTE_ALWAYS) {
-		struct strbuf config_name = STRBUF_INIT;
+	ఒకవేళ (opt_a)
+		report_సమితి_తల_auto(argv[0], తల_name, &b_local_తల, was_detached);
+	ఒకవేళ (remote->follow_remote_తల == FOLLOW_REMOTE_ALWAYS) {
+		నిర్మాణం strbuf config_name = STRBUF_INIT;
 		strbuf_addf(&config_name,
 			"remote.%s.followremotehead", remote->name);
-		repo_config_set(the_repository, config_name.buf, "warn");
+		repo_config_సమితి(the_repository, config_name.buf, "warn");
 		strbuf_release(&config_name);
 	}
 
 cleanup:
-	free(head_name);
-	strbuf_release(&b_head);
-	strbuf_release(&b_remote_head);
-	strbuf_release(&b_local_head);
-	return result;
+	విడుదల(తల_name);
+	strbuf_release(&b_తల);
+	strbuf_release(&b_remote_తల);
+	strbuf_release(&b_local_తల);
+	తిరిగి ఫలితం;
 }
 
-static int prune_remote(const char *remote, int dry_run)
+స్థిర పూర్ణాంకం prune_remote(స్థిరరాశి అక్షరం *remote, పూర్ణాంకం dry_నిరంతరం)
 {
-	int result = 0;
-	struct ref_states states = REF_STATES_INIT;
-	struct string_list refs_to_prune = STRING_LIST_INIT_NODUP;
-	struct string_list_item *item;
+	పూర్ణాంకం ఫలితం = 0;
+	నిర్మాణం ref_స్థితులు స్థితులు = REF_స్థితులు_INIT;
+	నిర్మాణం string_list refs_గమ్యం_prune = STRING_LIST_INIT_NODUP;
+	నిర్మాణం string_list_అంశం *అంశం;
 
-	get_remote_ref_states(remote, &states, GET_REF_STATES);
+	get_remote_ref_స్థితులు(remote, &స్థితులు, GET_REF_స్థితులు);
 
-	if (!states.stale.nr) {
-		free_remote_ref_states(&states);
-		return 0;
+	ఒకవేళ (!స్థితులు.stale.nr) {
+		free_remote_ref_స్థితులు(&స్థితులు);
+		తిరిగి 0;
 	}
 
 	printf_ln(_("Pruning %s"), remote);
-	printf_ln(_("URL: %s"), states.remote->url.v[0]);
+	printf_ln(_("URL: %s"), స్థితులు.remote->url.v[0]);
 
-	for_each_string_list_item(item, &states.stale)
-		string_list_append(&refs_to_prune, item->util);
-	string_list_sort(&refs_to_prune);
+	for_each_string_list_అంశం(అంశం, &స్థితులు.stale)
+		string_list_append(&refs_గమ్యం_prune, అంశం->util);
+	string_list_క్రమీకరించు(&refs_గమ్యం_prune);
 
-	if (!dry_run)
-		result |= refs_delete_refs(get_main_ref_store(the_repository),
-					   "remote: prune", &refs_to_prune, 0);
+	ఒకవేళ (!dry_నిరంతరం)
+		ఫలితం |= refs_delete_refs(get_main_ref_store(the_repository),
+					   "remote: prune", &refs_గమ్యం_prune, 0);
 
-	for_each_string_list_item(item, &states.stale) {
-		const char *refname = item->util;
+	for_each_string_list_అంశం(అంశం, &స్థితులు.stale) {
+		స్థిరరాశి అక్షరం *refname = అంశం->util;
 
-		if (dry_run)
+		ఒకవేళ (dry_నిరంతరం)
 			printf_ln(_(" * [would prune] %s"),
 			       abbrev_ref(refname, "refs/remotes/"));
-		else
+		లేకపోతే
 			printf_ln(_(" * [pruned] %s"),
 			       abbrev_ref(refname, "refs/remotes/"));
 	}
 
 	refs_warn_dangling_symrefs(get_main_ref_store(the_repository),
-				   stdout, " ", dry_run, &refs_to_prune);
+				   stdout, " ", dry_నిరంతరం, &refs_గమ్యం_prune);
 
-	string_list_clear(&refs_to_prune, 0);
-	free_remote_ref_states(&states);
-	return result;
+	string_list_clear(&refs_గమ్యం_prune, 0);
+	free_remote_ref_స్థితులు(&స్థితులు);
+	తిరిగి ఫలితం;
 }
 
-static int prune(int argc, const char **argv, const char *prefix,
-		 struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం prune(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		 నిర్మాణం repository *repo వాడని)
 {
-	int dry_run = 0, result = 0;
-	struct option options[] = {
-		OPT__DRY_RUN(&dry_run, N_("dry run")),
-		OPT_END()
+	పూర్ణాంకం dry_నిరంతరం = 0, ఫలితం = 0;
+	నిర్మాణం option options[] = {
+		OPT_DRY_నిరంతరం(&dry_నిరంతరం, N_("dry run")),
+		OPT_చివర()
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     builtin_remote_prune_usage, 0);
 
-	if (argc < 1)
+	ఒకవేళ (argc < 1)
 		usage_with_options(builtin_remote_prune_usage, options);
 
-	for (; argc; argc--, argv++)
-		result |= prune_remote(*argv, dry_run);
+	కొరకు (; argc; argc--, argv++)
+		ఫలితం |= prune_remote(*argv, dry_నిరంతరం);
 
-	return result;
+	తిరిగి ఫలితం;
 }
 
-static int get_remote_default(const char *key, const char *value UNUSED,
-			      const struct config_context *ctx UNUSED,
-			      void *priv)
+స్థిర పూర్ణాంకం get_remote_default(స్థిరరాశి అక్షరం *కీలకం, స్థిరరాశి అక్షరం *విలువ వాడని,
+			      స్థిరరాశి నిర్మాణం config_context *ctx వాడని,
+			      శూన్య *priv)
 {
-	if (strcmp(key, "remotes.default") == 0) {
-		int *found = priv;
-		*found = 1;
+	ఒకవేళ (strcmp(కీలకం, "remotes.default") == 0) {
+		పూర్ణాంకం *దొరికింది_2 = priv;
+		*దొరికింది_2 = 1;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static int update(int argc, const char **argv, const char *prefix,
-		  struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం update(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		  నిర్మాణం repository *repo వాడని)
 {
-	int i, prune = -1;
-	struct option options[] = {
+	పూర్ణాంకం i, prune = -1;
+	నిర్మాణం option options[] = {
 		OPT_BOOL('p', "prune", &prune,
 			 N_("prune remotes after fetching")),
-		OPT_END()
+		OPT_చివర()
 	};
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	int default_defined = 0;
+	నిర్మాణం బిడ్డ_process cmd = బిడ్డ_PROCESS_INIT;
+	పూర్ణాంకం default_defined = 0;
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     builtin_remote_update_usage,
 			     PARSE_OPT_KEEP_ARGV0);
 
-	strvec_push(&cmd.args, "fetch");
+	strvec_నెట్టు(&cmd.వాదనలు, "fetch");
 
-	if (prune != -1)
-		strvec_push(&cmd.args, prune ? "--prune" : "--no-prune");
-	if (verbose)
-		strvec_push(&cmd.args, "-v");
-	strvec_push(&cmd.args, "--multiple");
-	if (argc < 2)
-		strvec_push(&cmd.args, "default");
-	for (i = 1; i < argc; i++)
-		strvec_push(&cmd.args, argv[i]);
+	ఒకవేళ (prune != -1)
+		strvec_నెట్టు(&cmd.వాదనలు, prune ? "--prune" : "--no-prune");
+	ఒకవేళ (verbose)
+		strvec_నెట్టు(&cmd.వాదనలు, "-v");
+	strvec_నెట్టు(&cmd.వాదనలు, "--multiple");
+	ఒకవేళ (argc < 2)
+		strvec_నెట్టు(&cmd.వాదనలు, "default");
+	కొరకు (i = 1; i < argc; i++)
+		strvec_నెట్టు(&cmd.వాదనలు, argv[i]);
 
-	if (strcmp(cmd.args.v[cmd.args.nr-1], "default") == 0) {
+	ఒకవేళ (strcmp(cmd.వాదనలు.v[cmd.వాదనలు.nr-1], "default") == 0) {
 		repo_config(the_repository, get_remote_default, &default_defined);
-		if (!default_defined) {
-			strvec_pop(&cmd.args);
-			strvec_push(&cmd.args, "--all");
+		ఒకవేళ (!default_defined) {
+			strvec_తీయి(&cmd.వాదనలు);
+			strvec_నెట్టు(&cmd.వాదనలు, "--all");
 		}
 	}
 
 	cmd.git_cmd = 1;
-	return run_command(&cmd);
+	తిరిగి నిరంతరం_command(&cmd);
 }
 
-static int remove_all_fetch_refspecs(const char *key)
+స్థిర పూర్ణాంకం remove_all_fetch_refspecs(స్థిరరాశి అక్షరం *కీలకం)
 {
-	return repo_config_set_multivar_gently(the_repository, key, NULL, NULL,
+	తిరిగి repo_config_సమితి_multivar_gently(the_repository, కీలకం, ఖాళీ, ఖాళీ,
 					       CONFIG_FLAGS_MULTI_REPLACE);
 }
 
-static void add_branches(struct remote *remote, const char **branches,
-			 const char *key)
+స్థిర శూన్య కూడు_branches(నిర్మాణం remote *remote, స్థిరరాశి అక్షరం **branches,
+			 స్థిరరాశి అక్షరం *కీలకం)
 {
-	const char *remotename = remote->name;
-	int mirror = remote->mirror;
-	struct strbuf refspec = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *remotename = remote->name;
+	పూర్ణాంకం mirror = remote->mirror;
+	నిర్మాణం strbuf refspec = STRBUF_INIT;
 
-	for (; *branches; branches++)
-		add_branch(key, *branches, remotename, mirror, &refspec);
+	కొరకు (; *branches; branches++)
+		కూడు_branch(కీలకం, *branches, remotename, mirror, &refspec);
 
 	strbuf_release(&refspec);
 }
 
-static int set_remote_branches(const char *remotename, const char **branches,
-				int add_mode)
+స్థిర పూర్ణాంకం సమితి_remote_branches(స్థిరరాశి అక్షరం *remotename, స్థిరరాశి అక్షరం **branches,
+				పూర్ణాంకం కూడు_బహుళకం)
 {
-	struct strbuf key = STRBUF_INIT;
-	struct remote *remote;
+	నిర్మాణం strbuf కీలకం = STRBUF_INIT;
+	నిర్మాణం remote *remote;
 
-	strbuf_addf(&key, "remote.%s.fetch", remotename);
+	strbuf_addf(&కీలకం, "remote.%s.fetch", remotename);
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	ఒకవేళ (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
-		exit(2);
+		నిష్క్రమించు(2);
 	}
 
-	if (!add_mode && remove_all_fetch_refspecs(key.buf)) {
-		strbuf_release(&key);
-		return 1;
+	ఒకవేళ (!కూడు_బహుళకం && remove_all_fetch_refspecs(కీలకం.buf)) {
+		strbuf_release(&కీలకం);
+		తిరిగి 1;
 	}
-	add_branches(remote, branches, key.buf);
+	కూడు_branches(remote, branches, కీలకం.buf);
 
-	strbuf_release(&key);
-	return 0;
+	strbuf_release(&కీలకం);
+	తిరిగి 0;
 }
 
-static int set_branches(int argc, const char **argv, const char *prefix,
-			struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం సమితి_branches(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			నిర్మాణం repository *repo వాడని)
 {
-	int add_mode = 0;
-	struct option options[] = {
-		OPT_BOOL('\0', "add", &add_mode, N_("add branch")),
-		OPT_END()
+	పూర్ణాంకం కూడు_బహుళకం = 0;
+	నిర్మాణం option options[] = {
+		OPT_BOOL('\0', "add", &కూడు_బహుళకం, N_("add branch")),
+		OPT_చివర()
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     builtin_remote_setbranches_usage, 0);
-	if (argc == 0) {
+	ఒకవేళ (argc == 0) {
 		error(_("no remote specified"));
 		usage_with_options(builtin_remote_setbranches_usage, options);
 	}
-	argv[argc] = NULL;
+	argv[argc] = ఖాళీ;
 
-	return set_remote_branches(argv[0], argv + 1, add_mode);
+	తిరిగి సమితి_remote_branches(argv[0], argv + 1, కూడు_బహుళకం);
 }
 
-static int get_url(int argc, const char **argv, const char *prefix,
-		   struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం get_url(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		   నిర్మాణం repository *repo వాడని)
 {
-	int push_mode = 0, all_mode = 0;
-	const char *remotename = NULL;
-	struct remote *remote;
-	struct strvec *url;
-	struct option options[] = {
-		OPT_BOOL('\0', "push", &push_mode,
+	పూర్ణాంకం నెట్టు_బహుళకం = 0, all_బహుళకం = 0;
+	స్థిరరాశి అక్షరం *remotename = ఖాళీ;
+	నిర్మాణం remote *remote;
+	నిర్మాణం strvec *url;
+	నిర్మాణం option options[] = {
+		OPT_BOOL('\0', "push", &నెట్టు_బహుళకం,
 			 N_("query push URLs rather than fetch URLs")),
-		OPT_BOOL('\0', "all", &all_mode,
+		OPT_BOOL('\0', "all", &all_బహుళకం,
 			 N_("return all URLs")),
-		OPT_END()
+		OPT_చివర()
 	};
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     builtin_remote_geturl_usage, 0);
 
-	if (argc != 1)
+	ఒకవేళ (argc != 1)
 		usage_with_options(builtin_remote_geturl_usage, options);
 
 	remotename = argv[0];
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	ఒకవేళ (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
-		exit(2);
+		నిష్క్రమించు(2);
 	}
 
-	url = push_mode ? push_url_of_remote(remote) : &remote->url;
+	url = నెట్టు_బహుళకం ? నెట్టు_url_యొక్క_remote(remote) : &remote->url;
 
-	if (all_mode) {
-		for (size_t i = 0; i < url->nr; i++)
+	ఒకవేళ (all_బహుళకం) {
+		కొరకు (కొలత_t i = 0; i < url->nr; i++)
 			printf_ln("%s", url->v[i]);
-	} else {
+	} లేకపోతే {
 		printf_ln("%s", url->v[0]);
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int set_url(int argc, const char **argv, const char *prefix,
-		   struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం సమితి_url(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		   నిర్మాణం repository *repo వాడని)
 {
-	int push_mode = 0, add_mode = 0, delete_mode = 0;
-	int matches = 0, negative_matches = 0;
-	const char *remotename = NULL;
-	const char *newurl = NULL;
-	const char *oldurl = NULL;
-	struct remote *remote;
+	పూర్ణాంకం నెట్టు_బహుళకం = 0, కూడు_బహుళకం = 0, delete_బహుళకం = 0;
+	పూర్ణాంకం matches = 0, negative_matches = 0;
+	స్థిరరాశి అక్షరం *remotename = ఖాళీ;
+	స్థిరరాశి అక్షరం *newurl = ఖాళీ;
+	స్థిరరాశి అక్షరం *oldurl = ఖాళీ;
+	నిర్మాణం remote *remote;
 	regex_t old_regex;
-	struct strvec *urlset;
-	struct strbuf name_buf = STRBUF_INIT;
-	struct option options[] = {
-		OPT_BOOL('\0', "push", &push_mode,
+	నిర్మాణం strvec *urlset;
+	నిర్మాణం strbuf name_buf = STRBUF_INIT;
+	నిర్మాణం option options[] = {
+		OPT_BOOL('\0', "push", &నెట్టు_బహుళకం,
 			 N_("manipulate push URLs")),
-		OPT_BOOL('\0', "add", &add_mode,
+		OPT_BOOL('\0', "add", &కూడు_బహుళకం,
 			 N_("add URL")),
-		OPT_BOOL('\0', "delete", &delete_mode,
+		OPT_BOOL('\0', "delete", &delete_బహుళకం,
 			    N_("delete URLs")),
-		OPT_END()
+		OPT_చివర()
 	};
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     builtin_remote_seturl_usage,
 			     PARSE_OPT_KEEP_ARGV0);
 
-	if (add_mode && delete_mode)
+	ఒకవేళ (కూడు_బహుళకం && delete_బహుళకం)
 		die(_("--add --delete doesn't make sense"));
 
-	if (argc < 3 || argc > 4 || ((add_mode || delete_mode) && argc != 3))
+	ఒకవేళ (argc < 3 || argc > 4 || ((కూడు_బహుళకం || delete_బహుళకం) && argc != 3))
 		usage_with_options(builtin_remote_seturl_usage, options);
 
 	remotename = argv[1];
 	newurl = argv[2];
-	if (argc > 3)
+	ఒకవేళ (argc > 3)
 		oldurl = argv[3];
 
-	if (delete_mode)
+	ఒకవేళ (delete_బహుళకం)
 		oldurl = newurl;
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	ఒకవేళ (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
-		exit(2);
+		నిష్క్రమించు(2);
 	}
 
-	if (push_mode) {
+	ఒకవేళ (నెట్టు_బహుళకం) {
 		strbuf_addf(&name_buf, "remote.%s.pushurl", remotename);
 		urlset = &remote->pushurl;
-	} else {
+	} లేకపోతే {
 		strbuf_addf(&name_buf, "remote.%s.url", remotename);
 		urlset = &remote->url;
 	}
 
 	/* Special cases that add new entry. */
-	if ((!oldurl && !delete_mode) || add_mode) {
-		if (add_mode)
-			repo_config_set_multivar(the_repository, name_buf.buf, newurl,
+	ఒకవేళ ((!oldurl && !delete_బహుళకం) || కూడు_బహుళకం) {
+		ఒకవేళ (కూడు_బహుళకం)
+			repo_config_సమితి_multivar(the_repository, name_buf.buf, newurl,
 						       "^$", 0);
-		else
-			repo_config_set(the_repository, name_buf.buf, newurl);
-		goto out;
+		లేకపోతే
+			repo_config_సమితి(the_repository, name_buf.buf, newurl);
+		వెళ్ళు బహిర్గతం;
 	}
 
 	/* Old URL specified. Demand that one matches. */
-	if (regcomp(&old_regex, oldurl, REG_EXTENDED))
+	ఒకవేళ (regcomp(&old_regex, oldurl, REG_EXTENDED))
 		die(_("Invalid old URL pattern: %s"), oldurl);
 
-	for (size_t i = 0; i < urlset->nr; i++)
-		if (!regexec(&old_regex, urlset->v[i], 0, NULL, 0))
+	కొరకు (కొలత_t i = 0; i < urlset->nr; i++)
+		ఒకవేళ (!regexec(&old_regex, urlset->v[i], 0, ఖాళీ, 0))
 			matches++;
-		else
+		లేకపోతే
 			negative_matches++;
-	if (!delete_mode && !matches)
+	ఒకవేళ (!delete_బహుళకం && !matches)
 		die(_("No such URL found: %s"), oldurl);
-	if (delete_mode && !negative_matches && !push_mode)
+	ఒకవేళ (delete_బహుళకం && !negative_matches && !నెట్టు_బహుళకం)
 		die(_("Will not delete all non-push URLs"));
 
 	regfree(&old_regex);
 
-	if (!delete_mode)
-		repo_config_set_multivar(the_repository, name_buf.buf, newurl, oldurl, 0);
-	else
-		repo_config_set_multivar(the_repository, name_buf.buf, NULL, oldurl,
+	ఒకవేళ (!delete_బహుళకం)
+		repo_config_సమితి_multivar(the_repository, name_buf.buf, newurl, oldurl, 0);
+	లేకపోతే
+		repo_config_సమితి_multivar(the_repository, name_buf.buf, ఖాళీ, oldurl,
 					 CONFIG_FLAGS_MULTI_REPLACE);
-out:
+బహిర్గతం:
 	strbuf_release(&name_buf);
-	return 0;
+	తిరిగి 0;
 }
 
-int cmd_remote(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+పూర్ణాంకం cmd_remote(పూర్ణాంకం argc,
+	       స్థిరరాశి అక్షరం **argv,
+	       స్థిరరాశి అక్షరం *ఉపసర్గ,
+	       నిర్మాణం repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	parse_opt_subcommand_fn *fn = ఖాళీ;
+	నిర్మాణం option options[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose; must be placed before a subcommand")),
-		OPT_SUBCOMMAND("add", &fn, add),
+		OPT_SUBCOMMAND("add", &fn, కూడు),
 		OPT_SUBCOMMAND("rename", &fn, mv),
-		OPT_SUBCOMMAND_F("rm", &fn, rm, NULL, PARSE_OPT_NOCOMPLETE),
+		OPT_SUBCOMMAND_F("rm", &fn, rm, ఖాళీ, PARSE_OPT_NOCOMPLETE),
 		OPT_SUBCOMMAND("remove", &fn, rm),
-		OPT_SUBCOMMAND("set-head", &fn, set_head),
-		OPT_SUBCOMMAND("set-branches", &fn, set_branches),
+		OPT_SUBCOMMAND("set-head", &fn, సమితి_తల),
+		OPT_SUBCOMMAND("set-branches", &fn, సమితి_branches),
 		OPT_SUBCOMMAND("get-url", &fn, get_url),
-		OPT_SUBCOMMAND("set-url", &fn, set_url),
+		OPT_SUBCOMMAND("set-url", &fn, సమితి_url),
 		OPT_SUBCOMMAND("show", &fn, show),
 		OPT_SUBCOMMAND("prune", &fn, prune),
 		OPT_SUBCOMMAND("update", &fn, update),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	argc = parse_options(argc, argv, prefix, options, builtin_remote_usage,
+	argc = parse_options(argc, argv, ఉపసర్గ, options, builtin_remote_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL);
 
-	if (fn) {
-		return !!fn(argc, argv, prefix, repo);
-	} else {
-		if (argc) {
+	ఒకవేళ (fn) {
+		తిరిగి !!fn(argc, argv, ఉపసర్గ, repo);
+	} లేకపోతే {
+		ఒకవేళ (argc) {
 			error(_("unknown subcommand: `%s'"), argv[0]);
 			usage_with_options(builtin_remote_usage, options);
 		}
-		return !!show_all();
+		తిరిగి !!show_all();
 	}
 }

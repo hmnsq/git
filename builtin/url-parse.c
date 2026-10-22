@@ -1,135 +1,135 @@
-#include "builtin.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "url.h"
-#include "urlmatch.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "url.h"
+#అన్తర్భావ "urlmatch.h"
 
-static const char * const builtin_url_parse_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_url_parse_usage[] = {
 	N_("git url-parse [-c <component>] [--] <url>..."),
-	NULL
+	ఖాళీ
 };
 
-static char *component_arg;
+స్థిర అక్షరం *component_arg;
 
-static struct option builtin_url_parse_options[] = {
+స్థిర నిర్మాణం option builtin_url_parse_options[] = {
 	OPT_STRING('c', "component", &component_arg, N_("component"),
 		N_("which URL component to extract")),
-	OPT_END(),
+	OPT_చివర(),
 };
 
-enum url_component {
+గణన url_component {
 	URL_NONE = 0,
 	URL_SCHEME,
 	URL_USER,
 	URL_PASSWORD,
 	URL_HOST,
-	URL_PORT,
-	URL_PATH,
+	URL_పోర్టు,
+	URL_మార్గం,
 };
 
-static void parse_or_die(const char *url, struct url_info *info)
+స్థిర శూన్య parse_or_die(స్థిరరాశి అక్షరం *url, నిర్మాణం url_info *info)
 {
-	if (url_is_local_not_ssh(url)) {
-		if (*url == '/')
+	ఒకవేళ (url_is_local_not_ssh(url)) {
+		ఒకవేళ (*url == '/')
 			die("'%s' is not a URL; if you meant a local "
 			    "repository, use 'file://%s'", url, url);
-		if (has_dos_drive_prefix(url))
+		ఒకవేళ (has_dos_drive_ఉపసర్గ(url))
 			die("'%s' is not a URL; if you meant a local "
 			    "repository, use 'file:///%s'", url, url);
 		die("'%s' is not a URL; if you meant a local repository, "
 		    "use a 'file://' URL with an absolute path", url);
 	}
-	if (!url_parse(url, info))
+	ఒకవేళ (!url_parse(url, info))
 		die("invalid git URL '%s': %s", url, info->err);
 }
 
-static enum url_component get_component_or_die(const char *arg)
+స్థిర గణన url_component get_component_or_die(స్థిరరాశి అక్షరం *arg)
 {
-	if (!strcmp("path", arg))
-		return URL_PATH;
-	if (!strcmp("host", arg))
-		return URL_HOST;
-	if (!strcmp("scheme", arg))
-		return URL_SCHEME;
-	if (!strcmp("user", arg))
-		return URL_USER;
-	if (!strcmp("password", arg))
-		return URL_PASSWORD;
-	if (!strcmp("port", arg))
-		return URL_PORT;
+	ఒకవేళ (!strcmp("path", arg))
+		తిరిగి URL_మార్గం;
+	ఒకవేళ (!strcmp("host", arg))
+		తిరిగి URL_HOST;
+	ఒకవేళ (!strcmp("scheme", arg))
+		తిరిగి URL_SCHEME;
+	ఒకవేళ (!strcmp("user", arg))
+		తిరిగి URL_USER;
+	ఒకవేళ (!strcmp("password", arg))
+		తిరిగి URL_PASSWORD;
+	ఒకవేళ (!strcmp("port", arg))
+		తిరిగి URL_పోర్టు;
 	die("invalid git URL component '%s'", arg);
 }
 
-static char *extract_component(enum url_component component,
-			       struct url_info *info)
+స్థిర అక్షరం *వెలికితీయి_component(గణన url_component component,
+			       నిర్మాణం url_info *info)
 {
-	size_t offset, length;
+	కొలత_t స్థానభ్రంశం, నిడివి;
 
-	switch (component) {
-	case URL_SCHEME:
-		offset = 0;
-		length = info->scheme_len;
-		break;
-	case URL_USER:
-		offset = info->user_off;
-		length = info->user_len;
-		break;
-	case URL_PASSWORD:
-		offset = info->passwd_off;
-		length = info->passwd_len;
-		break;
-	case URL_HOST:
-		offset = info->host_off;
-		length = info->host_len;
-		break;
-	case URL_PORT:
-		offset = info->port_off;
-		length = info->port_len;
-		break;
-	case URL_PATH:
-		offset = info->path_off;
-		length = info->path_len;
-		break;
-	case URL_NONE:
-		return NULL;
+	ఎంపిక (component) {
+	స్థితి URL_SCHEME:
+		స్థానభ్రంశం = 0;
+		నిడివి = info->scheme_len;
+		ఆపు;
+	స్థితి URL_USER:
+		స్థానభ్రంశం = info->user_off;
+		నిడివి = info->user_len;
+		ఆపు;
+	స్థితి URL_PASSWORD:
+		స్థానభ్రంశం = info->passwd_off;
+		నిడివి = info->passwd_len;
+		ఆపు;
+	స్థితి URL_HOST:
+		స్థానభ్రంశం = info->host_off;
+		నిడివి = info->host_len;
+		ఆపు;
+	స్థితి URL_పోర్టు:
+		స్థానభ్రంశం = info->పోర్టు_off;
+		నిడివి = info->పోర్టు_len;
+		ఆపు;
+	స్థితి URL_మార్గం:
+		స్థానభ్రంశం = info->మార్గం_off;
+		నిడివి = info->మార్గం_len;
+		ఆపు;
+	స్థితి URL_NONE:
+		తిరిగి ఖాళీ;
 	}
 
-	return xstrndup(info->url + offset, length);
+	తిరిగి xstrndup(info->url + స్థానభ్రంశం, నిడివి);
 }
 
-int cmd_url_parse(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+పూర్ణాంకం cmd_url_parse(పూర్ణాంకం argc,
+		  స్థిరరాశి అక్షరం **argv,
+		  స్థిరరాశి అక్షరం *ఉపసర్గ,
+		  నిర్మాణం repository *repo వాడని)
 {
-	struct url_info info;
-	enum url_component selected = URL_NONE;
-	char *extracted;
-	int i;
+	నిర్మాణం url_info info;
+	గణన url_component selected = URL_NONE;
+	అక్షరం *extracted;
+	పూర్ణాంకం i;
 
-	argc = parse_options(argc, argv, prefix, builtin_url_parse_options,
+	argc = parse_options(argc, argv, ఉపసర్గ, builtin_url_parse_options,
 			     builtin_url_parse_usage, 0);
 
-	if (argc == 0)
+	ఒకవేళ (argc == 0)
 		usage_with_options(builtin_url_parse_usage,
 				   builtin_url_parse_options);
 
-	if (component_arg)
+	ఒకవేళ (component_arg)
 		selected = get_component_or_die(component_arg);
 
-	for (i = 0; i < argc; i++) {
+	కొరకు (i = 0; i < argc; i++) {
 		parse_or_die(argv[i], &info);
 
-		if (selected != URL_NONE) {
-			extracted = extract_component(selected, &info);
-			if (extracted) {
+		ఒకవేళ (selected != URL_NONE) {
+			extracted = వెలికితీయి_component(selected, &info);
+			ఒకవేళ (extracted) {
 				puts(extracted);
-				free(extracted);
+				విడుదల(extracted);
 			}
 		}
 
-		free(info.url);
+		విడుదల(info.url);
 	}
 
-	return 0;
+	తిరిగి 0;
 }

@@ -2,146 +2,146 @@
  * "git push"
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "branch.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refspec.h"
-#include "run-command.h"
-#include "remote.h"
-#include "transport.h"
-#include "parse-options.h"
-#include "pkt-line.h"
-#include "submodule.h"
-#include "submodule-config.h"
-#include "send-pack.h"
-#include "trace2.h"
-#include "color.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "advice.h"
+#అన్తర్భావ "branch.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "dir.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "refspec.h"
+#అన్తర్భావ "run-command.h"
+#అన్తర్భావ "remote.h"
+#అన్తర్భావ "transport.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "pkt-line.h"
+#అన్తర్భావ "submodule.h"
+#అన్తర్భావ "submodule-config.h"
+#అన్తర్భావ "send-pack.h"
+#అన్తర్భావ "trace2.h"
+#అన్తర్భావ "color.h"
 
-static const char * const push_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి నెట్టు_usage[] = {
 	N_("git push [<options>] [<repository> [<refspec>...]]"),
-	NULL,
+	ఖాళీ,
 };
 
-static enum git_colorbool push_use_color = GIT_COLOR_UNKNOWN;
-static char push_colors[][COLOR_MAXLEN] = {
+స్థిర గణన git_colorbool నెట్టు_use_color = GIT_COLOR_UNKNOWN;
+స్థిర అక్షరం నెట్టు_colors[][COLOR_MAXLEN] = {
 	GIT_COLOR_RESET,
 	GIT_COLOR_RED,	/* ERROR */
 };
 
-enum color_push {
-	PUSH_COLOR_RESET = 0,
-	PUSH_COLOR_ERROR = 1
+గణన color_నెట్టు {
+	నెట్టు_COLOR_RESET = 0,
+	నెట్టు_COLOR_ERROR = 1
 };
 
-static int parse_push_color_slot(const char *slot)
+స్థిర పూర్ణాంకం parse_నెట్టు_color_స్థానం(స్థిరరాశి అక్షరం *స్థానం)
 {
-	if (!strcasecmp(slot, "reset"))
-		return PUSH_COLOR_RESET;
-	if (!strcasecmp(slot, "error"))
-		return PUSH_COLOR_ERROR;
-	return -1;
+	ఒకవేళ (!strcasecmp(స్థానం, "reset"))
+		తిరిగి నెట్టు_COLOR_RESET;
+	ఒకవేళ (!strcasecmp(స్థానం, "error"))
+		తిరిగి నెట్టు_COLOR_ERROR;
+	తిరిగి -1;
 }
 
-static const char *push_get_color(enum color_push ix)
+స్థిర స్థిరరాశి అక్షరం *నెట్టు_get_color(గణన color_నెట్టు ix)
 {
-	if (want_color_stderr(push_use_color))
-		return push_colors[ix];
-	return "";
+	ఒకవేళ (want_color_stderr(నెట్టు_use_color))
+		తిరిగి నెట్టు_colors[ix];
+	తిరిగి "";
 }
 
-static int thin = 1;
-static int deleterefs;
-static const char *receivepack;
-static int verbosity;
-static int progress = -1;
-static int recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
-static enum transport_family family;
+స్థిర పూర్ణాంకం thin = 1;
+స్థిర పూర్ణాంకం deleterefs;
+స్థిర స్థిరరాశి అక్షరం *receivepack;
+స్థిర పూర్ణాంకం verbosity;
+స్థిర పూర్ణాంకం పురోగతి = -1;
+స్థిర పూర్ణాంకం recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
+స్థిర గణన transport_family family;
 
-static struct push_cas_option cas;
+స్థిర నిర్మాణం నెట్టు_cas_option cas;
 
-static struct refspec rs;
+స్థిర నిర్మాణం refspec rs;
 
-static struct string_list push_options_config = STRING_LIST_INIT_DUP;
+స్థిర నిర్మాణం string_list నెట్టు_options_config = STRING_LIST_INIT_DUP;
 
-static void refspec_append_mapped(struct refspec *refspec, const char *ref,
-				  struct remote *remote, struct ref *matched)
+స్థిర శూన్య refspec_append_mapped(నిర్మాణం refspec *refspec, స్థిరరాశి అక్షరం *ref,
+				  నిర్మాణం remote *remote, నిర్మాణం ref *matched)
 {
-	const char *branch_name;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	స్థిరరాశి అక్షరం *branch_name;
+	నిర్మాణం repo_config_విలువలు *cfg = repo_config_విలువలు(the_repository);
 
-	if (remote->push.nr) {
-		struct refspec_item query = {
+	ఒకవేళ (remote->నెట్టు.nr) {
+		నిర్మాణం refspec_అంశం query = {
 			.src = matched->name,
 		};
 
-		if (!refspec_find_match(&remote->push, &query) && query.dst) {
+		ఒకవేళ (!refspec_కనుగొను_సరిపోలిక(&remote->నెట్టు, &query) && query.dst) {
 			refspec_appendf(refspec, "%s%s:%s",
 					query.force ? "+" : "",
 					query.src, query.dst);
-			free(query.dst);
-			return;
+			విడుదల(query.dst);
+			తిరిగి;
 		}
 	}
 
-	if (cfg->push_default == PUSH_DEFAULT_UPSTREAM &&
-	    skip_prefix(matched->name, "refs/heads/", &branch_name)) {
-		struct branch *branch = branch_get(branch_name);
-		if (branch->merge_nr == 1 && branch->merge[0]->src) {
+	ఒకవేళ (cfg->నెట్టు_default == నెట్టు_DEFAULT_UPSTREAM &&
+	    skip_ఉపసర్గ(matched->name, "refs/heads/", &branch_name)) {
+		నిర్మాణం branch *branch = branch_get(branch_name);
+		ఒకవేళ (branch->విలీనం_nr == 1 && branch->విలీనం[0]->src) {
 			refspec_appendf(refspec, "%s:%s",
-					ref, branch->merge[0]->src);
-			return;
+					ref, branch->విలీనం[0]->src);
+			తిరిగి;
 		}
 	}
 
 	refspec_append(refspec, ref);
 }
 
-static void set_refspecs(const char **refs, int nr, struct remote *remote)
+స్థిర శూన్య సమితి_refspecs(స్థిరరాశి అక్షరం **refs, పూర్ణాంకం nr, నిర్మాణం remote *remote)
 {
-	struct ref *local_refs = NULL;
-	int i;
+	నిర్మాణం ref *local_refs = ఖాళీ;
+	పూర్ణాంకం i;
 
-	for (i = 0; i < nr; i++) {
-		const char *ref = refs[i];
-		if (!strcmp("tag", ref)) {
-			if (nr <= ++i)
+	కొరకు (i = 0; i < nr; i++) {
+		స్థిరరాశి అక్షరం *ref = refs[i];
+		ఒకవేళ (!strcmp("tag", ref)) {
+			ఒకవేళ (nr <= ++i)
 				die(_("tag shorthand without <tag>"));
 			ref = refs[i];
-			if (deleterefs)
+			ఒకవేళ (deleterefs)
 				refspec_appendf(&rs, ":refs/tags/%s", ref);
-			else
+			లేకపోతే
 				refspec_appendf(&rs, "refs/tags/%s", ref);
-		} else if (deleterefs) {
-			if (strchr(ref, ':') || !*ref)
+		} లేకపోతే ఒకవేళ (deleterefs) {
+			ఒకవేళ (strchr(ref, ':') || !*ref)
 				die(_("--delete only accepts plain target ref names"));
 			refspec_appendf(&rs, ":%s", ref);
-		} else if (!strchr(ref, ':')) {
-			struct ref *matched = NULL;
+		} లేకపోతే ఒకవేళ (!strchr(ref, ':')) {
+			నిర్మాణం ref *matched = ఖాళీ;
 
 			/* lazily grab local_refs */
-			if (!local_refs)
+			ఒకవేళ (!local_refs)
 				local_refs = get_local_heads();
 
 			/* Does "ref" uniquely name our ref? */
-			if (count_refspec_match(ref, local_refs, &matched) != 1)
+			ఒకవేళ (లెక్క_refspec_సరిపోలిక(ref, local_refs, &matched) != 1)
 				refspec_append(&rs, ref);
-			else
+			లేకపోతే
 				refspec_append_mapped(&rs, ref, remote, matched);
-		} else
+		} లేకపోతే
 			refspec_append(&rs, ref);
 	}
 	free_refs(local_refs);
 }
 
-static NORETURN void die_push_simple(struct branch *branch,
-				     struct remote *remote)
+స్థిర NORETURN శూన్య die_నెట్టు_simple(నిర్మాణం branch *branch,
+				     నిర్మాణం remote *remote)
 {
 	/*
 	 * There's no point in using shorten_unambiguous_ref here,
@@ -151,22 +151,22 @@ static NORETURN void die_push_simple(struct branch *branch,
 	 * upstream to a non-branch, we should probably be showing
 	 * them the big ugly fully qualified ref.
 	 */
-	const char *advice_pushdefault_maybe = "";
-	const char *advice_automergesimple_maybe = "";
-	const char *short_upstream = branch->merge[0]->src;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	స్థిరరాశి అక్షరం *advice_pushdefault_maybe = "";
+	స్థిరరాశి అక్షరం *advice_automergesimple_maybe = "";
+	స్థిరరాశి అక్షరం *short_upstream = branch->విలీనం[0]->src;
+	నిర్మాణం repo_config_విలువలు *cfg = repo_config_విలువలు(the_repository);
 
-	skip_prefix(short_upstream, "refs/heads/", &short_upstream);
+	skip_ఉపసర్గ(short_upstream, "refs/heads/", &short_upstream);
 
 	/*
 	 * Don't show advice for people who explicitly set
 	 * push.default.
 	 */
-	if (cfg->push_default == PUSH_DEFAULT_UNSPECIFIED)
+	ఒకవేళ (cfg->నెట్టు_default == నెట్టు_DEFAULT_UNSPECIFIED)
 		advice_pushdefault_maybe = _("\n"
 				 "To choose either option permanently, "
 				 "see push.default in 'git help config'.\n");
-	if (cfg->branch_track != BRANCH_TRACK_SIMPLE)
+	ఒకవేళ (cfg->branch_track != BRANCH_TRACK_SIMPLE)
 		advice_automergesimple_maybe = _("\n"
 				 "To avoid automatically configuring "
 				 "an upstream branch when its name\n"
@@ -188,23 +188,23 @@ static NORETURN void die_push_simple(struct branch *branch,
 	    advice_automergesimple_maybe);
 }
 
-static const char message_detached_head_die[] =
+స్థిర స్థిరరాశి అక్షరం సందేశం_detached_తల_die[] =
 	N_("You are not currently on a branch.\n"
 	   "To push the history leading to the current (detached HEAD)\n"
 	   "state now, use\n"
 	   "\n"
 	   "    git push %s HEAD:<name-of-remote-branch>\n");
 
-static const char *get_upstream_ref(int flags, struct branch *branch, const char *remote_name)
+స్థిర స్థిరరాశి అక్షరం *get_upstream_ref(పూర్ణాంకం flags, నిర్మాణం branch *branch, స్థిరరాశి అక్షరం *remote_name)
 {
-	if (branch->merge_nr == 0 && (flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
+	ఒకవేళ (branch->విలీనం_nr == 0 && (flags & TRANSPORT_నెట్టు_AUTO_UPSTREAM)) {
 		/* if missing, assume same; set_upstream will be defined later */
-		return branch->refname;
+		తిరిగి branch->refname;
 	}
 
-	if (!branch->merge_nr || !branch->merge || !branch->remote_name) {
-		const char *advice_autosetup_maybe = "";
-		if (!(flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
+	ఒకవేళ (!branch->విలీనం_nr || !branch->విలీనం || !branch->remote_name) {
+		స్థిరరాశి అక్షరం *advice_autosetup_maybe = "";
+		ఒకవేళ (!(flags & TRANSPORT_నెట్టు_AUTO_UPSTREAM)) {
 			advice_autosetup_maybe = _("\n"
 					   "To have this happen automatically for "
 					   "branches without a tracking\n"
@@ -221,61 +221,61 @@ static const char *get_upstream_ref(int flags, struct branch *branch, const char
 		    branch->name,
 		    advice_autosetup_maybe);
 	}
-	if (branch->merge_nr != 1)
+	ఒకవేళ (branch->విలీనం_nr != 1)
 		die(_("The current branch %s has multiple upstream branches, "
 		    "refusing to push."), branch->name);
 
-	return branch->merge[0]->src;
+	తిరిగి branch->విలీనం[0]->src;
 }
 
-static void setup_default_push_refspecs(int *flags, struct remote *remote)
+స్థిర శూన్య అమరిక_default_నెట్టు_refspecs(పూర్ణాంకం *flags, నిర్మాణం remote *remote)
 {
-	struct branch *branch;
-	const char *dst;
-	int same_remote;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	నిర్మాణం branch *branch;
+	స్థిరరాశి అక్షరం *dst;
+	పూర్ణాంకం same_remote;
+	నిర్మాణం repo_config_విలువలు *cfg = repo_config_విలువలు(the_repository);
 
-	switch (cfg->push_default) {
-	case PUSH_DEFAULT_MATCHING:
+	ఎంపిక (cfg->నెట్టు_default) {
+	స్థితి నెట్టు_DEFAULT_MATCHING:
 		refspec_append(&rs, ":");
-		return;
+		తిరిగి;
 
-	case PUSH_DEFAULT_NOTHING:
+	స్థితి నెట్టు_DEFAULT_NOTHING:
 		die(_("You didn't specify any refspecs to push, and "
 		    "push.default is \"nothing\"."));
-		return;
-	default:
-		break;
+		తిరిగి;
+	అప్రమేయ:
+		ఆపు;
 	}
 
-	branch = branch_get(NULL);
-	if (!branch)
-		die(_(message_detached_head_die), remote->name);
+	branch = branch_get(ఖాళీ);
+	ఒకవేళ (!branch)
+		die(_(సందేశం_detached_తల_die), remote->name);
 
 	dst = branch->refname;
-	same_remote = !strcmp(remote->name, remote_for_branch(branch, NULL));
+	same_remote = !strcmp(remote->name, remote_for_branch(branch, ఖాళీ));
 
-	switch (cfg->push_default) {
-	default:
-	case PUSH_DEFAULT_UNSPECIFIED:
-	case PUSH_DEFAULT_SIMPLE:
-		if (!same_remote)
-			break;
-		if (strcmp(branch->refname, get_upstream_ref(*flags, branch, remote->name)))
-			die_push_simple(branch, remote);
-		break;
+	ఎంపిక (cfg->నెట్టు_default) {
+	అప్రమేయ:
+	స్థితి నెట్టు_DEFAULT_UNSPECIFIED:
+	స్థితి నెట్టు_DEFAULT_SIMPLE:
+		ఒకవేళ (!same_remote)
+			ఆపు;
+		ఒకవేళ (strcmp(branch->refname, get_upstream_ref(*flags, branch, remote->name)))
+			die_నెట్టు_simple(branch, remote);
+		ఆపు;
 
-	case PUSH_DEFAULT_UPSTREAM:
-		if (!same_remote)
+	స్థితి నెట్టు_DEFAULT_UPSTREAM:
+		ఒకవేళ (!same_remote)
 			die(_("You are pushing to remote '%s', which is not the upstream of\n"
 			      "your current branch '%s', without telling me what to push\n"
 			      "to update which remote branch."),
 			    remote->name, branch->name);
 		dst = get_upstream_ref(*flags, branch, remote->name);
-		break;
+		ఆపు;
 
-	case PUSH_DEFAULT_CURRENT:
-		break;
+	స్థితి నెట్టు_DEFAULT_CURRENT:
+		ఆపు;
 	}
 
 	/*
@@ -283,496 +283,496 @@ static void setup_default_push_refspecs(int *flags, struct remote *remote)
 	 * no upstream defined, then set it (with options 'simple', 'upstream',
 	 * and 'current').
 	 */
-	if ((*flags & TRANSPORT_PUSH_AUTO_UPSTREAM) && branch->merge_nr == 0)
-		*flags |= TRANSPORT_PUSH_SET_UPSTREAM;
+	ఒకవేళ ((*flags & TRANSPORT_నెట్టు_AUTO_UPSTREAM) && branch->విలీనం_nr == 0)
+		*flags |= TRANSPORT_నెట్టు_సమితి_UPSTREAM;
 
 	refspec_appendf(&rs, "%s:%s", branch->refname, dst);
 }
 
-static const char message_advice_pull_before_push[] =
+స్థిర స్థిరరాశి అక్షరం సందేశం_advice_pull_before_నెట్టు[] =
 	N_("Updates were rejected because the tip of your current branch is behind\n"
 	   "its remote counterpart. If you want to integrate the remote changes,\n"
 	   "use 'git pull' before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static const char message_advice_checkout_pull_push[] =
+స్థిర స్థిరరాశి అక్షరం సందేశం_advice_checkout_pull_నెట్టు[] =
 	N_("Updates were rejected because a pushed branch tip is behind its remote\n"
 	   "counterpart. If you want to integrate the remote changes, use 'git pull'\n"
 	   "before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static const char message_advice_ref_fetch_first[] =
+స్థిర స్థిరరాశి అక్షరం సందేశం_advice_ref_fetch_మొదటి[] =
 	N_("Updates were rejected because the remote contains work that you do not\n"
 	   "have locally. This is usually caused by another repository pushing to\n"
 	   "the same ref. If you want to integrate the remote changes, use\n"
 	   "'git pull' before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static const char message_advice_ref_already_exists[] =
+స్థిర స్థిరరాశి అక్షరం సందేశం_advice_ref_already_exists[] =
 	N_("Updates were rejected because the tag already exists in the remote.");
 
-static const char message_advice_ref_needs_force[] =
+స్థిర స్థిరరాశి అక్షరం సందేశం_advice_ref_needs_force[] =
 	N_("You cannot update a remote ref that points at a non-commit object,\n"
 	   "or update a remote ref to make it point at a non-commit object,\n"
 	   "without using the '--force' option.\n");
 
-static const char message_advice_ref_needs_update[] =
+స్థిర స్థిరరాశి అక్షరం సందేశం_advice_ref_needs_update[] =
 	N_("Updates were rejected because the tip of the remote-tracking branch has\n"
 	   "been updated since the last checkout. If you want to integrate the\n"
 	   "remote changes, use 'git pull' before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static void advise_pull_before_push(void)
+స్థిర శూన్య advise_pull_before_నెట్టు(శూన్య)
 {
-	if (!advice_enabled(ADVICE_PUSH_NON_FF_CURRENT) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
-	advise(_(message_advice_pull_before_push));
+	ఒకవేళ (!advice_enabled(ADVICE_నెట్టు_NON_FF_CURRENT) || !advice_enabled(ADVICE_నెట్టు_UPDATE_REJECTED))
+		తిరిగి;
+	advise(_(సందేశం_advice_pull_before_నెట్టు));
 }
 
-static void advise_checkout_pull_push(void)
+స్థిర శూన్య advise_checkout_pull_నెట్టు(శూన్య)
 {
-	if (!advice_enabled(ADVICE_PUSH_NON_FF_MATCHING) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
-	advise(_(message_advice_checkout_pull_push));
+	ఒకవేళ (!advice_enabled(ADVICE_నెట్టు_NON_FF_MATCHING) || !advice_enabled(ADVICE_నెట్టు_UPDATE_REJECTED))
+		తిరిగి;
+	advise(_(సందేశం_advice_checkout_pull_నెట్టు));
 }
 
-static void advise_ref_already_exists(void)
+స్థిర శూన్య advise_ref_already_exists(శూన్య)
 {
-	if (!advice_enabled(ADVICE_PUSH_ALREADY_EXISTS) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
-	advise(_(message_advice_ref_already_exists));
+	ఒకవేళ (!advice_enabled(ADVICE_నెట్టు_ALREADY_EXISTS) || !advice_enabled(ADVICE_నెట్టు_UPDATE_REJECTED))
+		తిరిగి;
+	advise(_(సందేశం_advice_ref_already_exists));
 }
 
-static void advise_ref_fetch_first(void)
+స్థిర శూన్య advise_ref_fetch_మొదటి(శూన్య)
 {
-	if (!advice_enabled(ADVICE_PUSH_FETCH_FIRST) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
-	advise(_(message_advice_ref_fetch_first));
+	ఒకవేళ (!advice_enabled(ADVICE_నెట్టు_FETCH_మొదటి) || !advice_enabled(ADVICE_నెట్టు_UPDATE_REJECTED))
+		తిరిగి;
+	advise(_(సందేశం_advice_ref_fetch_మొదటి));
 }
 
-static void advise_ref_needs_force(void)
+స్థిర శూన్య advise_ref_needs_force(శూన్య)
 {
-	if (!advice_enabled(ADVICE_PUSH_NEEDS_FORCE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
-	advise(_(message_advice_ref_needs_force));
+	ఒకవేళ (!advice_enabled(ADVICE_నెట్టు_NEEDS_FORCE) || !advice_enabled(ADVICE_నెట్టు_UPDATE_REJECTED))
+		తిరిగి;
+	advise(_(సందేశం_advice_ref_needs_force));
 }
 
-static void advise_ref_needs_update(void)
+స్థిర శూన్య advise_ref_needs_update(శూన్య)
 {
-	if (!advice_enabled(ADVICE_PUSH_REF_NEEDS_UPDATE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
-	advise(_(message_advice_ref_needs_update));
+	ఒకవేళ (!advice_enabled(ADVICE_నెట్టు_REF_NEEDS_UPDATE) || !advice_enabled(ADVICE_నెట్టు_UPDATE_REJECTED))
+		తిరిగి;
+	advise(_(సందేశం_advice_ref_needs_update));
 }
 
-static int push_with_options(struct transport *transport, struct refspec *rs,
-			     int flags)
+స్థిర పూర్ణాంకం నెట్టు_with_options(నిర్మాణం transport *transport, నిర్మాణం refspec *rs,
+			     పూర్ణాంకం flags)
 {
-	int err;
-	unsigned int reject_reasons;
-	char *anon_url = transport_anonymize_url(transport->url);
+	పూర్ణాంకం err;
+	గుర్తులేని పూర్ణాంకం reject_reasons;
+	అక్షరం *anon_url = transport_anonymize_url(transport->url);
 
-	transport_set_verbosity(transport, verbosity, progress);
+	transport_సమితి_verbosity(transport, verbosity, పురోగతి);
 	transport->family = family;
 
-	if (receivepack)
-		transport_set_option(transport,
+	ఒకవేళ (receivepack)
+		transport_సమితి_option(transport,
 				     TRANS_OPT_RECEIVEPACK, receivepack);
-	transport_set_option(transport, TRANS_OPT_THIN, thin ? "yes" : NULL);
+	transport_సమితి_option(transport, TRANS_OPT_THIN, thin ? "yes" : ఖాళీ);
 
-	if (!is_empty_cas(&cas)) {
-		if (!transport->smart_options)
+	ఒకవేళ (!is_ఖాళీలు_cas(&cas)) {
+		ఒకవేళ (!transport->smart_options)
 			die("underlying transport does not support --%s option",
 			    "force-with-lease");
 		transport->smart_options->cas = &cas;
 	}
 
-	if (verbosity > 0)
+	ఒకవేళ (verbosity > 0)
 		fprintf(stderr, _("Pushing to %s\n"), anon_url);
 	trace2_region_enter("push", "transport_push", the_repository);
-	err = transport_push(the_repository, transport,
+	err = transport_నెట్టు(the_repository, transport,
 			     rs, flags, &reject_reasons);
 	trace2_region_leave("push", "transport_push", the_repository);
-	if (err != 0) {
-		fprintf(stderr, "%s", push_get_color(PUSH_COLOR_ERROR));
+	ఒకవేళ (err != 0) {
+		fprintf(stderr, "%s", నెట్టు_get_color(నెట్టు_COLOR_ERROR));
 		error(_("failed to push some refs to '%s'"), anon_url);
-		fprintf(stderr, "%s", push_get_color(PUSH_COLOR_RESET));
+		fprintf(stderr, "%s", నెట్టు_get_color(నెట్టు_COLOR_RESET));
 	}
 
 	err |= transport_disconnect(transport);
-	free(anon_url);
-	if (!err)
-		return 0;
+	విడుదల(anon_url);
+	ఒకవేళ (!err)
+		తిరిగి 0;
 
-	if (reject_reasons & REJECT_NON_FF_HEAD) {
-		advise_pull_before_push();
-	} else if (reject_reasons & REJECT_NON_FF_OTHER) {
-		advise_checkout_pull_push();
-	} else if (reject_reasons & REJECT_ALREADY_EXISTS) {
+	ఒకవేళ (reject_reasons & REJECT_NON_FF_తల) {
+		advise_pull_before_నెట్టు();
+	} లేకపోతే ఒకవేళ (reject_reasons & REJECT_NON_FF_OTHER) {
+		advise_checkout_pull_నెట్టు();
+	} లేకపోతే ఒకవేళ (reject_reasons & REJECT_ALREADY_EXISTS) {
 		advise_ref_already_exists();
-	} else if (reject_reasons & REJECT_FETCH_FIRST) {
-		advise_ref_fetch_first();
-	} else if (reject_reasons & REJECT_NEEDS_FORCE) {
+	} లేకపోతే ఒకవేళ (reject_reasons & REJECT_FETCH_మొదటి) {
+		advise_ref_fetch_మొదటి();
+	} లేకపోతే ఒకవేళ (reject_reasons & REJECT_NEEDS_FORCE) {
 		advise_ref_needs_force();
-	} else if (reject_reasons & REJECT_REF_NEEDS_UPDATE) {
+	} లేకపోతే ఒకవేళ (reject_reasons & REJECT_REF_NEEDS_UPDATE) {
 		advise_ref_needs_update();
 	}
 
-	return 1;
+	తిరిగి 1;
 }
 
-static int do_push(int flags,
-		   const struct string_list *push_options,
-		   struct remote *remote)
+స్థిర పూర్ణాంకం do_నెట్టు(పూర్ణాంకం flags,
+		   స్థిరరాశి నిర్మాణం string_list *నెట్టు_options,
+		   నిర్మాణం remote *remote)
 {
-	int errs;
-	struct strvec *url;
-	struct refspec *push_refspec = &rs;
+	పూర్ణాంకం errs;
+	నిర్మాణం strvec *url;
+	నిర్మాణం refspec *నెట్టు_refspec = &rs;
 
-	if (push_options->nr)
-		flags |= TRANSPORT_PUSH_OPTIONS;
+	ఒకవేళ (నెట్టు_options->nr)
+		flags |= TRANSPORT_నెట్టు_OPTIONS;
 
-	if (!push_refspec->nr && !(flags & TRANSPORT_PUSH_ALL)) {
-		if (remote->push.nr) {
-			push_refspec = &remote->push;
-		} else if (!(flags & TRANSPORT_PUSH_MIRROR))
-			setup_default_push_refspecs(&flags, remote);
+	ఒకవేళ (!నెట్టు_refspec->nr && !(flags & TRANSPORT_నెట్టు_ALL)) {
+		ఒకవేళ (remote->నెట్టు.nr) {
+			నెట్టు_refspec = &remote->నెట్టు;
+		} లేకపోతే ఒకవేళ (!(flags & TRANSPORT_నెట్టు_MIRROR))
+			అమరిక_default_నెట్టు_refspecs(&flags, remote);
 	}
 	errs = 0;
-	url = push_url_of_remote(remote);
-	for (size_t i = 0; i < url->nr; i++) {
-		struct transport *transport =
+	url = నెట్టు_url_యొక్క_remote(remote);
+	కొరకు (కొలత_t i = 0; i < url->nr; i++) {
+		నిర్మాణం transport *transport =
 			transport_get(remote, url->v[i]);
-		if (flags & TRANSPORT_PUSH_OPTIONS)
-			transport->push_options = push_options;
-		if (push_with_options(transport, push_refspec, flags))
+		ఒకవేళ (flags & TRANSPORT_నెట్టు_OPTIONS)
+			transport->నెట్టు_options = నెట్టు_options;
+		ఒకవేళ (నెట్టు_with_options(transport, నెట్టు_refspec, flags))
 			errs++;
 	}
-	return !!errs;
+	తిరిగి !!errs;
 }
 
-static int option_parse_recurse_submodules(const struct option *opt,
-				   const char *arg, int unset)
+స్థిర పూర్ణాంకం option_parse_recurse_submodules(స్థిరరాశి నిర్మాణం option *opt,
+				   స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	int *recurse_submodules = opt->value;
+	పూర్ణాంకం *recurse_submodules = opt->విలువ;
 
-	if (unset)
+	ఒకవేళ (unset)
 		*recurse_submodules = RECURSE_SUBMODULES_OFF;
-	else {
-		if (!strcmp(arg, "only-is-on-demand")) {
-			if (*recurse_submodules == RECURSE_SUBMODULES_ONLY) {
+	లేకపోతే {
+		ఒకవేళ (!strcmp(arg, "only-is-on-demand")) {
+			ఒకవేళ (*recurse_submodules == RECURSE_SUBMODULES_ONLY) {
 				warning(_("recursing into submodule with push.recurseSubmodules=only; using on-demand instead"));
 				*recurse_submodules = RECURSE_SUBMODULES_ON_DEMAND;
 			}
-		} else {
-			*recurse_submodules = parse_push_recurse_submodules_arg(opt->long_name, arg);
+		} లేకపోతే {
+			*recurse_submodules = parse_నెట్టు_recurse_submodules_arg(opt->long_name, arg);
 		}
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
-static void set_push_cert_flags(int *flags, int v)
+స్థిర శూన్య సమితి_నెట్టు_cert_flags(పూర్ణాంకం *flags, పూర్ణాంకం v)
 {
-	switch (v) {
-	case SEND_PACK_PUSH_CERT_NEVER:
-		*flags &= ~(TRANSPORT_PUSH_CERT_ALWAYS | TRANSPORT_PUSH_CERT_IF_ASKED);
-		break;
-	case SEND_PACK_PUSH_CERT_ALWAYS:
-		*flags |= TRANSPORT_PUSH_CERT_ALWAYS;
-		*flags &= ~TRANSPORT_PUSH_CERT_IF_ASKED;
-		break;
-	case SEND_PACK_PUSH_CERT_IF_ASKED:
-		*flags |= TRANSPORT_PUSH_CERT_IF_ASKED;
-		*flags &= ~TRANSPORT_PUSH_CERT_ALWAYS;
-		break;
+	ఎంపిక (v) {
+	స్థితి SEND_PACK_నెట్టు_CERT_NEVER:
+		*flags &= ~(TRANSPORT_నెట్టు_CERT_ALWAYS | TRANSPORT_నెట్టు_CERT_IF_ASKED);
+		ఆపు;
+	స్థితి SEND_PACK_నెట్టు_CERT_ALWAYS:
+		*flags |= TRANSPORT_నెట్టు_CERT_ALWAYS;
+		*flags &= ~TRANSPORT_నెట్టు_CERT_IF_ASKED;
+		ఆపు;
+	స్థితి SEND_PACK_నెట్టు_CERT_IF_ASKED:
+		*flags |= TRANSPORT_నెట్టు_CERT_IF_ASKED;
+		*flags &= ~TRANSPORT_నెట్టు_CERT_ALWAYS;
+		ఆపు;
 	}
 }
 
 
-static int git_push_config(const char *k, const char *v,
-			   const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం git_నెట్టు_config(స్థిరరాశి అక్షరం *k, స్థిరరాశి అక్షరం *v,
+			   స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	const char *slot_name;
-	int *flags = cb;
+	స్థిరరాశి అక్షరం *స్థానం_name;
+	పూర్ణాంకం *flags = cb;
 
-	if (!strcmp(k, "push.followtags")) {
-		if (git_config_bool(k, v))
-			*flags |= TRANSPORT_PUSH_FOLLOW_TAGS;
-		else
-			*flags &= ~TRANSPORT_PUSH_FOLLOW_TAGS;
-		return 0;
-	} else if (!strcmp(k, "push.autosetupremote")) {
-		if (git_config_bool(k, v))
-			*flags |= TRANSPORT_PUSH_AUTO_UPSTREAM;
-		return 0;
-	} else if (!strcmp(k, "push.gpgsign")) {
-		switch (git_parse_maybe_bool(v)) {
-		case 0:
-			set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_NEVER);
-			break;
-		case 1:
-			set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_ALWAYS);
-			break;
-		default:
-			if (!strcasecmp(v, "if-asked"))
-				set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_IF_ASKED);
-			else
-				return error(_("invalid value for '%s'"), k);
+	ఒకవేళ (!strcmp(k, "push.followtags")) {
+		ఒకవేళ (git_config_bool(k, v))
+			*flags |= TRANSPORT_నెట్టు_FOLLOW_ట్యాగులు;
+		లేకపోతే
+			*flags &= ~TRANSPORT_నెట్టు_FOLLOW_ట్యాగులు;
+		తిరిగి 0;
+	} లేకపోతే ఒకవేళ (!strcmp(k, "push.autosetupremote")) {
+		ఒకవేళ (git_config_bool(k, v))
+			*flags |= TRANSPORT_నెట్టు_AUTO_UPSTREAM;
+		తిరిగి 0;
+	} లేకపోతే ఒకవేళ (!strcmp(k, "push.gpgsign")) {
+		ఎంపిక (git_parse_maybe_bool(v)) {
+		స్థితి 0:
+			సమితి_నెట్టు_cert_flags(flags, SEND_PACK_నెట్టు_CERT_NEVER);
+			ఆపు;
+		స్థితి 1:
+			సమితి_నెట్టు_cert_flags(flags, SEND_PACK_నెట్టు_CERT_ALWAYS);
+			ఆపు;
+		అప్రమేయ:
+			ఒకవేళ (!strcasecmp(v, "if-asked"))
+				సమితి_నెట్టు_cert_flags(flags, SEND_PACK_నెట్టు_CERT_IF_ASKED);
+			లేకపోతే
+				తిరిగి error(_("invalid value for '%s'"), k);
 		}
-	} else if (!strcmp(k, "push.recursesubmodules")) {
-		recurse_submodules = parse_push_recurse_submodules_arg(k, v);
-	} else if (!strcmp(k, "submodule.recurse")) {
-		int val = git_config_bool(k, v) ?
+	} లేకపోతే ఒకవేళ (!strcmp(k, "push.recursesubmodules")) {
+		recurse_submodules = parse_నెట్టు_recurse_submodules_arg(k, v);
+	} లేకపోతే ఒకవేళ (!strcmp(k, "submodule.recurse")) {
+		పూర్ణాంకం val = git_config_bool(k, v) ?
 			RECURSE_SUBMODULES_ON_DEMAND : RECURSE_SUBMODULES_OFF;
 		recurse_submodules = val;
-	} else if (!strcmp(k, "push.pushoption")) {
-		return parse_transport_option(k, v, &push_options_config);
-	} else if (!strcmp(k, "color.push")) {
-		push_use_color = git_config_colorbool(k, v);
-		return 0;
-	} else if (skip_prefix(k, "color.push.", &slot_name)) {
-		int slot = parse_push_color_slot(slot_name);
-		if (slot < 0)
-			return 0;
-		if (!v)
-			return config_error_nonbool(k);
-		return color_parse(v, push_colors[slot]);
-	} else if (!strcmp(k, "push.useforceifincludes")) {
-		if (git_config_bool(k, v))
-			*flags |= TRANSPORT_PUSH_FORCE_IF_INCLUDES;
-		else
-			*flags &= ~TRANSPORT_PUSH_FORCE_IF_INCLUDES;
-		return 0;
+	} లేకపోతే ఒకవేళ (!strcmp(k, "push.pushoption")) {
+		తిరిగి parse_transport_option(k, v, &నెట్టు_options_config);
+	} లేకపోతే ఒకవేళ (!strcmp(k, "color.push")) {
+		నెట్టు_use_color = git_config_colorbool(k, v);
+		తిరిగి 0;
+	} లేకపోతే ఒకవేళ (skip_ఉపసర్గ(k, "color.push.", &స్థానం_name)) {
+		పూర్ణాంకం స్థానం = parse_నెట్టు_color_స్థానం(స్థానం_name);
+		ఒకవేళ (స్థానం < 0)
+			తిరిగి 0;
+		ఒకవేళ (!v)
+			తిరిగి config_error_nonbool(k);
+		తిరిగి color_parse(v, నెట్టు_colors[స్థానం]);
+	} లేకపోతే ఒకవేళ (!strcmp(k, "push.useforceifincludes")) {
+		ఒకవేళ (git_config_bool(k, v))
+			*flags |= TRANSPORT_నెట్టు_FORCE_IF_INCLUDES;
+		లేకపోతే
+			*flags &= ~TRANSPORT_నెట్టు_FORCE_IF_INCLUDES;
+		తిరిగి 0;
 	}
 
-	return git_default_config(k, v, ctx, NULL);
+	తిరిగి git_default_config(k, v, ctx, ఖాళీ);
 }
 
-static int push_multiple(struct string_list *list,
-			 const struct string_list *push_options,
-			 int flags,
-			 int tags,
-			 const char **refspecs,
-			 int refspec_nr)
+స్థిర పూర్ణాంకం నెట్టు_గుణిజం(నిర్మాణం string_list *list,
+			 స్థిరరాశి నిర్మాణం string_list *నెట్టు_options,
+			 పూర్ణాంకం flags,
+			 పూర్ణాంకం ట్యాగులు,
+			 స్థిరరాశి అక్షరం **refspecs,
+			 పూర్ణాంకం refspec_nr)
 {
-	int result = 0;
-	size_t i;
-	struct strvec argv = STRVEC_INIT;
+	పూర్ణాంకం ఫలితం = 0;
+	కొలత_t i;
+	నిర్మాణం strvec argv = STRVEC_INIT;
 
-	strvec_push(&argv, "push");
+	strvec_నెట్టు(&argv, "push");
 
-	if (flags & TRANSPORT_PUSH_FORCE)
-		strvec_push(&argv, "--force");
-	if (flags & TRANSPORT_PUSH_DRY_RUN)
-		strvec_push(&argv, "--dry-run");
-	if (flags & TRANSPORT_PUSH_PORCELAIN)
-		strvec_push(&argv, "--porcelain");
-	if (flags & TRANSPORT_PUSH_PRUNE)
-		strvec_push(&argv, "--prune");
-	if (flags & TRANSPORT_PUSH_NO_HOOK)
-		strvec_push(&argv, "--no-verify");
-	if (flags & TRANSPORT_PUSH_FOLLOW_TAGS)
-		strvec_push(&argv, "--follow-tags");
-	if (flags & TRANSPORT_PUSH_SET_UPSTREAM)
-		strvec_push(&argv, "--set-upstream");
-	if (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES)
-		strvec_push(&argv, "--force-if-includes");
-	if (flags & TRANSPORT_PUSH_ALL)
-		strvec_push(&argv, "--all");
-	if (flags & TRANSPORT_PUSH_MIRROR)
-		strvec_push(&argv, "--mirror");
+	ఒకవేళ (flags & TRANSPORT_నెట్టు_FORCE)
+		strvec_నెట్టు(&argv, "--force");
+	ఒకవేళ (flags & TRANSPORT_నెట్టు_DRY_నిరంతరం)
+		strvec_నెట్టు(&argv, "--dry-run");
+	ఒకవేళ (flags & TRANSPORT_నెట్టు_PORCELAIN)
+		strvec_నెట్టు(&argv, "--porcelain");
+	ఒకవేళ (flags & TRANSPORT_నెట్టు_PRUNE)
+		strvec_నెట్టు(&argv, "--prune");
+	ఒకవేళ (flags & TRANSPORT_నెట్టు_NO_HOOK)
+		strvec_నెట్టు(&argv, "--no-verify");
+	ఒకవేళ (flags & TRANSPORT_నెట్టు_FOLLOW_ట్యాగులు)
+		strvec_నెట్టు(&argv, "--follow-tags");
+	ఒకవేళ (flags & TRANSPORT_నెట్టు_సమితి_UPSTREAM)
+		strvec_నెట్టు(&argv, "--set-upstream");
+	ఒకవేళ (flags & TRANSPORT_నెట్టు_FORCE_IF_INCLUDES)
+		strvec_నెట్టు(&argv, "--force-if-includes");
+	ఒకవేళ (flags & TRANSPORT_నెట్టు_ALL)
+		strvec_నెట్టు(&argv, "--all");
+	ఒకవేళ (flags & TRANSPORT_నెట్టు_MIRROR)
+		strvec_నెట్టు(&argv, "--mirror");
 
-	if (flags & TRANSPORT_PUSH_CERT_ALWAYS)
-		strvec_push(&argv, "--signed=yes");
-	else if (flags & TRANSPORT_PUSH_CERT_IF_ASKED)
-		strvec_push(&argv, "--signed=if-asked");
-	if (!thin)
-		strvec_push(&argv, "--no-thin");
+	ఒకవేళ (flags & TRANSPORT_నెట్టు_CERT_ALWAYS)
+		strvec_నెట్టు(&argv, "--signed=yes");
+	లేకపోతే ఒకవేళ (flags & TRANSPORT_నెట్టు_CERT_IF_ASKED)
+		strvec_నెట్టు(&argv, "--signed=if-asked");
+	ఒకవేళ (!thin)
+		strvec_నెట్టు(&argv, "--no-thin");
 
-	if (deleterefs)
-		strvec_push(&argv, "--delete");
+	ఒకవేళ (deleterefs)
+		strvec_నెట్టు(&argv, "--delete");
 
-	if (receivepack)
+	ఒకవేళ (receivepack)
 		strvec_pushf(&argv, "--receive-pack=%s", receivepack);
-	if (verbosity >= 2)
-		strvec_push(&argv, "-v");
-	if (verbosity >= 1)
-		strvec_push(&argv, "-v");
-	else if (verbosity < 0)
-		strvec_push(&argv, "-q");
-	if (progress > 0)
-		strvec_push(&argv, "--progress");
-	else if (progress == 0)
-		strvec_push(&argv, "--no-progress");
+	ఒకవేళ (verbosity >= 2)
+		strvec_నెట్టు(&argv, "-v");
+	ఒకవేళ (verbosity >= 1)
+		strvec_నెట్టు(&argv, "-v");
+	లేకపోతే ఒకవేళ (verbosity < 0)
+		strvec_నెట్టు(&argv, "-q");
+	ఒకవేళ (పురోగతి > 0)
+		strvec_నెట్టు(&argv, "--progress");
+	లేకపోతే ఒకవేళ (పురోగతి == 0)
+		strvec_నెట్టు(&argv, "--no-progress");
 
-	if (family == TRANSPORT_FAMILY_IPV4)
-		strvec_push(&argv, "--ipv4");
-	else if (family == TRANSPORT_FAMILY_IPV6)
-		strvec_push(&argv, "--ipv6");
+	ఒకవేళ (family == TRANSPORT_FAMILY_IPV4)
+		strvec_నెట్టు(&argv, "--ipv4");
+	లేకపోతే ఒకవేళ (family == TRANSPORT_FAMILY_IPV6)
+		strvec_నెట్టు(&argv, "--ipv6");
 
-	if (recurse_submodules == RECURSE_SUBMODULES_CHECK)
-		strvec_push(&argv, "--recurse-submodules=check");
-	else if (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
-		strvec_push(&argv, "--recurse-submodules=on-demand");
-	else if (recurse_submodules == RECURSE_SUBMODULES_ONLY)
-		strvec_push(&argv, "--recurse-submodules=only");
-	else if (recurse_submodules == RECURSE_SUBMODULES_OFF)
-		strvec_push(&argv, "--recurse-submodules=no");
+	ఒకవేళ (recurse_submodules == RECURSE_SUBMODULES_CHECK)
+		strvec_నెట్టు(&argv, "--recurse-submodules=check");
+	లేకపోతే ఒకవేళ (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+		strvec_నెట్టు(&argv, "--recurse-submodules=on-demand");
+	లేకపోతే ఒకవేళ (recurse_submodules == RECURSE_SUBMODULES_ONLY)
+		strvec_నెట్టు(&argv, "--recurse-submodules=only");
+	లేకపోతే ఒకవేళ (recurse_submodules == RECURSE_SUBMODULES_OFF)
+		strvec_నెట్టు(&argv, "--recurse-submodules=no");
 
 
-	if (tags)
-		strvec_push(&argv, "--tags");
+	ఒకవేళ (ట్యాగులు)
+		strvec_నెట్టు(&argv, "--tags");
 
-	for (i = 0; i < push_options->nr; i++)
+	కొరకు (i = 0; i < నెట్టు_options->nr; i++)
 		strvec_pushf(&argv, "--push-option=%s",
-			     push_options->items[i].string);
+			     నెట్టు_options->వస్తువులు[i].string);
 
-	for (i = 0; i < cas.nr; i++) {
-		if (cas.entry[i].use_tracking) {
+	కొరకు (i = 0; i < cas.nr; i++) {
+		ఒకవేళ (cas.నమోదు_2[i].use_tracking) {
 			strvec_pushf(&argv, "--force-with-lease=%s",
-				     cas.entry[i].refname);
-		} else if (!is_null_oid(&cas.entry[i].expect)) {
+				     cas.నమోదు_2[i].refname);
+		} లేకపోతే ఒకవేళ (!is_null_oid(&cas.నమోదు_2[i].expect)) {
 			strvec_pushf(&argv, "--force-with-lease=%s:%s",
-				     cas.entry[i].refname,
-				     oid_to_hex(&cas.entry[i].expect));
-		} else {
-			strvec_push(&argv, "--force-with-lease");
+				     cas.నమోదు_2[i].refname,
+				     oid_గమ్యం_hex(&cas.నమోదు_2[i].expect));
+		} లేకపోతే {
+			strvec_నెట్టు(&argv, "--force-with-lease");
 		}
 	}
 
-	for (i = 0; i < list->nr; i++) {
-		const char *name = list->items[i].string;
-		struct child_process cmd = CHILD_PROCESS_INIT;
-		int j;
+	కొరకు (i = 0; i < list->nr; i++) {
+		స్థిరరాశి అక్షరం *name = list->వస్తువులు[i].string;
+		నిర్మాణం బిడ్డ_process cmd = బిడ్డ_PROCESS_INIT;
+		పూర్ణాంకం j;
 
-		strvec_pushv(&cmd.args, argv.v);
-		strvec_push(&cmd.args, name);
+		strvec_pushv(&cmd.వాదనలు, argv.v);
+		strvec_నెట్టు(&cmd.వాదనలు, name);
 
-		for (j = 0; j < refspec_nr; j++)
-			strvec_push(&cmd.args, refspecs[j]);
+		కొరకు (j = 0; j < refspec_nr; j++)
+			strvec_నెట్టు(&cmd.వాదనలు, refspecs[j]);
 
-		if (verbosity >= 0)
-			printf(_("Pushing to %s\n"), name);
+		ఒకవేళ (verbosity >= 0)
+			రాయి(_("Pushing to %s\n"), name);
 
 		cmd.git_cmd = 1;
-		if (run_command(&cmd)) {
+		ఒకవేళ (నిరంతరం_command(&cmd)) {
 			error(_("could not push to %s"), name);
-			result = 1;
+			ఫలితం = 1;
 		}
 	}
 
 	strvec_clear(&argv);
-	return result;
+	తిరిగి ఫలితం;
 }
 
-static void die_if_repo_looks_like_ref(const char *repo)
+స్థిర శూన్య die_if_repo_looks_like_ref(స్థిరరాశి అక్షరం *repo)
 {
-	const char *slash = strchr(repo, '/');
-	struct strbuf name = STRBUF_INIT;
-	int code;
+	స్థిరరాశి అక్షరం *slash = strchr(repo, '/');
+	నిర్మాణం strbuf name = STRBUF_INIT;
+	పూర్ణాంకం సంకేతం_2;
 
-	if (!slash || !slash[1] || file_exists(repo))
-		return;
+	ఒకవేళ (!slash || !slash[1] || file_exists(repo))
+		తిరిగి;
 
-	strbuf_add(&name, repo, slash - repo);
-	if (!remote_is_configured(remote_get(name.buf), 0)) {
+	strbuf_కూడు(&name, repo, slash - repo);
+	ఒకవేళ (!remote_is_configured(remote_get(name.buf), 0)) {
 		strbuf_release(&name);
-		return;
+		తిరిగి;
 	}
 
-	code = die_message(_("'%s' is not a valid push target"), repo);
-	advise_if_enabled(ADVICE_PUSH_REPO_LOOKS_LIKE_REF,
+	సంకేతం_2 = die_సందేశం(_("'%s' is not a valid push target"), repo);
+	advise_if_enabled(ADVICE_నెట్టు_REPO_LOOKS_LIKE_REF,
 			  _("Did you mean to use: git push %s %s?"),
 			  name.buf, slash + 1);
 	strbuf_release(&name);
-	exit(code);
+	నిష్క్రమించు(సంకేతం_2);
 }
 
-int cmd_push(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repository UNUSED)
+పూర్ణాంకం cmd_నెట్టు(పూర్ణాంకం argc,
+	     స్థిరరాశి అక్షరం **argv,
+	     స్థిరరాశి అక్షరం *ఉపసర్గ,
+	     నిర్మాణం repository *repository వాడని)
 {
-	int flags = 0;
-	int tags = 0;
-	int push_cert = -1;
-	int rc = 0;
-	int base_flags;
-	const char *repo = NULL;	/* default repository */
-	struct string_list push_options_cmdline = STRING_LIST_INIT_DUP;
-	struct string_list remote_group = STRING_LIST_INIT_DUP;
-	struct string_list *push_options;
-	const struct string_list_item *item;
+	పూర్ణాంకం flags = 0;
+	పూర్ణాంకం ట్యాగులు = 0;
+	పూర్ణాంకం నెట్టు_cert = -1;
+	పూర్ణాంకం rc = 0;
+	పూర్ణాంకం పునాది_flags;
+	స్థిరరాశి అక్షరం *repo = ఖాళీ;	/* default repository */
+	నిర్మాణం string_list నెట్టు_options_cmdline = STRING_LIST_INIT_DUP;
+	నిర్మాణం string_list remote_సమూహం = STRING_LIST_INIT_DUP;
+	నిర్మాణం string_list *నెట్టు_options;
+	స్థిరరాశి నిర్మాణం string_list_అంశం *అంశం;
 
-	struct option options[] = {
+	నిర్మాణం option options[] = {
 		OPT__VERBOSITY(&verbosity),
 		OPT_STRING( 0 , "repo", &repo, N_("repository"), N_("repository")),
-		OPT_BIT( 0 , "all", &flags, N_("push all branches"), TRANSPORT_PUSH_ALL),
+		OPT_బిట్టు( 0 , "all", &flags, N_("push all branches"), TRANSPORT_నెట్టు_ALL),
 		OPT_ALIAS( 0 , "branches", "all"),
-		OPT_BIT( 0 , "mirror", &flags, N_("mirror all refs"),
-			    (TRANSPORT_PUSH_MIRROR|TRANSPORT_PUSH_FORCE)),
+		OPT_బిట్టు( 0 , "mirror", &flags, N_("mirror all refs"),
+			    (TRANSPORT_నెట్టు_MIRROR|TRANSPORT_నెట్టు_FORCE)),
 		OPT_BOOL('d', "delete", &deleterefs, N_("delete refs")),
-		OPT_BOOL( 0 , "tags", &tags, N_("push tags (can't be used with --all or --branches or --mirror)")),
-		OPT_BIT('n' , "dry-run", &flags, N_("dry run"), TRANSPORT_PUSH_DRY_RUN),
-		OPT_BIT( 0,  "porcelain", &flags, N_("machine-readable output"), TRANSPORT_PUSH_PORCELAIN),
-		OPT_BIT('f', "force", &flags, N_("force updates"), TRANSPORT_PUSH_FORCE),
+		OPT_BOOL( 0 , "tags", &ట్యాగులు, N_("push tags (can't be used with --all or --branches or --mirror)")),
+		OPT_బిట్టు('n' , "dry-run", &flags, N_("dry run"), TRANSPORT_నెట్టు_DRY_నిరంతరం),
+		OPT_బిట్టు( 0,  "porcelain", &flags, N_("machine-readable output"), TRANSPORT_నెట్టు_PORCELAIN),
+		OPT_బిట్టు('f', "force", &flags, N_("force updates"), TRANSPORT_నెట్టు_FORCE),
 		OPT_CALLBACK_F(0, "force-with-lease", &cas, N_("<refname>:<expect>"),
 			       N_("require old value of ref to be at this value"),
-			       PARSE_OPT_OPTARG | PARSE_OPT_LITERAL_ARGHELP, parseopt_push_cas_option),
-		OPT_BIT(0, TRANS_OPT_FORCE_IF_INCLUDES, &flags,
+			       PARSE_OPT_OPTARG | PARSE_OPT_LITERAL_ARGHELP, parseopt_నెట్టు_cas_option),
+		OPT_బిట్టు(0, TRANS_OPT_FORCE_IF_INCLUDES, &flags,
 			N_("require remote updates to be integrated locally"),
-			TRANSPORT_PUSH_FORCE_IF_INCLUDES),
+			TRANSPORT_నెట్టు_FORCE_IF_INCLUDES),
 		OPT_CALLBACK(0, "recurse-submodules", &recurse_submodules, "(check|on-demand|no)",
 			     N_("control recursive pushing of submodules"), option_parse_recurse_submodules),
 		OPT_BOOL_F( 0 , "thin", &thin, N_("use thin pack"), PARSE_OPT_NOCOMPLETE),
 		OPT_STRING( 0 , "receive-pack", &receivepack, "receive-pack", N_("receive pack program")),
 		OPT_STRING( 0 , "exec", &receivepack, "receive-pack", N_("receive pack program")),
-		OPT_BIT('u', "set-upstream", &flags, N_("set upstream for git pull/status"),
-			TRANSPORT_PUSH_SET_UPSTREAM),
-		OPT_BOOL(0, "progress", &progress, N_("force progress reporting")),
-		OPT_BIT(0, "prune", &flags, N_("prune locally removed refs"),
-			TRANSPORT_PUSH_PRUNE),
-		OPT_BIT(0, "no-verify", &flags, N_("bypass pre-push hook"), TRANSPORT_PUSH_NO_HOOK),
-		OPT_BIT(0, "follow-tags", &flags, N_("push missing but relevant tags"),
-			TRANSPORT_PUSH_FOLLOW_TAGS),
-		OPT_CALLBACK_F(0, "signed", &push_cert, "(yes|no|if-asked)", N_("GPG sign the push"),
-				PARSE_OPT_OPTARG, option_parse_push_signed),
-		OPT_BIT(0, "atomic", &flags, N_("request atomic transaction on remote side"), TRANSPORT_PUSH_ATOMIC),
-		OPT_STRING_LIST('o', "push-option", &push_options_cmdline, N_("server-specific"), N_("option to transmit")),
+		OPT_బిట్టు('u', "set-upstream", &flags, N_("set upstream for git pull/status"),
+			TRANSPORT_నెట్టు_సమితి_UPSTREAM),
+		OPT_BOOL(0, "progress", &పురోగతి, N_("force progress reporting")),
+		OPT_బిట్టు(0, "prune", &flags, N_("prune locally removed refs"),
+			TRANSPORT_నెట్టు_PRUNE),
+		OPT_బిట్టు(0, "no-verify", &flags, N_("bypass pre-push hook"), TRANSPORT_నెట్టు_NO_HOOK),
+		OPT_బిట్టు(0, "follow-tags", &flags, N_("push missing but relevant tags"),
+			TRANSPORT_నెట్టు_FOLLOW_ట్యాగులు),
+		OPT_CALLBACK_F(0, "signed", &నెట్టు_cert, "(yes|no|if-asked)", N_("GPG sign the push"),
+				PARSE_OPT_OPTARG, option_parse_నెట్టు_signed),
+		OPT_బిట్టు(0, "atomic", &flags, N_("request atomic transaction on remote side"), TRANSPORT_నెట్టు_ATOMIC),
+		OPT_STRING_LIST('o', "push-option", &నెట్టు_options_cmdline, N_("server-specific"), N_("option to transmit")),
 		OPT_IPVERSION(&family),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	packet_trace_identity("push");
-	repo_config(the_repository, git_push_config, &flags);
-	argc = parse_options(argc, argv, prefix, options, push_usage, 0);
-	push_options = (push_options_cmdline.nr
-		? &push_options_cmdline
-		: &push_options_config);
-	set_push_cert_flags(&flags, push_cert);
+	packet_trace_తటస్థం("push");
+	repo_config(the_repository, git_నెట్టు_config, &flags);
+	argc = parse_options(argc, argv, ఉపసర్గ, options, నెట్టు_usage, 0);
+	నెట్టు_options = (నెట్టు_options_cmdline.nr
+		? &నెట్టు_options_cmdline
+		: &నెట్టు_options_config);
+	సమితి_నెట్టు_cert_flags(&flags, నెట్టు_cert);
 
-	refspec_init_push(&rs, the_hash_algo);
+	refspec_init_నెట్టు(&rs, the_hash_algo);
 
 	die_for_incompatible_opt4(deleterefs, "--delete",
-				  tags, "--tags",
-				  flags & TRANSPORT_PUSH_ALL, "--all/--branches",
-				  flags & TRANSPORT_PUSH_MIRROR, "--mirror");
-	if (deleterefs && argc < 2)
+				  ట్యాగులు, "--tags",
+				  flags & TRANSPORT_నెట్టు_ALL, "--all/--branches",
+				  flags & TRANSPORT_నెట్టు_MIRROR, "--mirror");
+	ఒకవేళ (deleterefs && argc < 2)
 		die(_("--delete doesn't make sense without any refs"));
 
-	if (recurse_submodules == RECURSE_SUBMODULES_CHECK)
+	ఒకవేళ (recurse_submodules == RECURSE_SUBMODULES_CHECK)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_CHECK;
-	else if (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+	లేకపోతే ఒకవేళ (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_ON_DEMAND;
-	else if (recurse_submodules == RECURSE_SUBMODULES_ONLY)
+	లేకపోతే ఒకవేళ (recurse_submodules == RECURSE_SUBMODULES_ONLY)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_ONLY;
 
-	if (argc > 0)
+	ఒకవేళ (argc > 0)
 		repo = argv[0];
 
-	if (repo) {
-		if (!add_remote_or_group(repo, &remote_group)) {
-			struct remote *r;
+	ఒకవేళ (repo) {
+		ఒకవేళ (!కూడు_remote_or_సమూహం(repo, &remote_సమూహం)) {
+			నిర్మాణం remote *r;
 
 			/*
 			 * Check the advice up front to avoid the remote
@@ -780,7 +780,7 @@ int cmd_push(int argc,
 			 * calls advise_if_enabled() so the hint carries the
 			 * standard "disable this message" instructions.
 			 */
-			if (advice_enabled(ADVICE_PUSH_REPO_LOOKS_LIKE_REF))
+			ఒకవేళ (advice_enabled(ADVICE_నెట్టు_REPO_LOOKS_LIKE_REF))
 				die_if_repo_looks_like_ref(repo);
 
 			/*
@@ -793,13 +793,13 @@ int cmd_push(int argc,
 			 * identically to a named remote.
 			 */
 			r = pushremote_get(repo);
-			if (!r)
+			ఒకవేళ (!r)
 				die(_("bad repository '%s'"), repo);
-			string_list_append(&remote_group, r->name);
+			string_list_append(&remote_సమూహం, r->name);
 		}
-	} else {
-		struct remote *r = pushremote_get(NULL);
-		if (!r)
+	} లేకపోతే {
+		నిర్మాణం remote *r = pushremote_get(ఖాళీ);
+		ఒకవేళ (!r)
 			die(_("No configured push destination.\n"
 			    "Either specify the URL from the command-line or configure a remote repository using\n"
 			    "\n"
@@ -816,17 +816,17 @@ int cmd_push(int argc,
 			    "and then push using the group name\n"
 			    "\n"
 			    "    git push <groupname>\n"));
-		string_list_append(&remote_group, r->name);
+		string_list_append(&remote_సమూహం, r->name);
 	}
 
-	if (!is_empty_cas(&cas) && (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES))
+	ఒకవేళ (!is_ఖాళీలు_cas(&cas) && (flags & TRANSPORT_నెట్టు_FORCE_IF_INCLUDES))
 		cas.use_force_if_includes = 1;
 
-	for_each_string_list_item(item, push_options)
-		if (strchr(item->string, '\n'))
+	for_each_string_list_అంశం(అంశం, నెట్టు_options)
+		ఒకవేళ (strchr(అంశం->string, '\n'))
 			die(_("push options must not have new line characters"));
 
-	if (remote_group.nr == 1) {
+	ఒకవేళ (remote_సమూహం.nr == 1) {
 		/*
 		 * Single remote (the common case): run do_push() directly
 		 * in this process.  The loop runs exactly once.
@@ -838,37 +838,37 @@ int cmd_push(int argc,
 		 * mirror remote cannot bleed TRANSPORT_PUSH_FORCE into any
 		 * subsequent call.
 		 */
-		base_flags = flags;
+		పునాది_flags = flags;
 		{
-			int inner_flags = base_flags;
-			struct remote *r = pushremote_get(remote_group.items[0].string);
-			if (!r)
+			పూర్ణాంకం inner_flags = పునాది_flags;
+			నిర్మాణం remote *r = pushremote_get(remote_సమూహం.వస్తువులు[0].string);
+			ఒకవేళ (!r)
 				die(_("no such remote or remote group: %s"),
-				    remote_group.items[0].string);
+				    remote_సమూహం.వస్తువులు[0].string);
 
-			if (r->mirror)
-				inner_flags |= (TRANSPORT_PUSH_MIRROR|TRANSPORT_PUSH_FORCE);
+			ఒకవేళ (r->mirror)
+				inner_flags |= (TRANSPORT_నెట్టు_MIRROR|TRANSPORT_నెట్టు_FORCE);
 
-			if (inner_flags & TRANSPORT_PUSH_ALL) {
-				if (argc >= 2)
+			ఒకవేళ (inner_flags & TRANSPORT_నెట్టు_ALL) {
+				ఒకవేళ (argc >= 2)
 					die(_("--all can't be combined with refspecs"));
 			}
-			if (inner_flags & TRANSPORT_PUSH_MIRROR) {
-				if (argc >= 2)
+			ఒకవేళ (inner_flags & TRANSPORT_నెట్టు_MIRROR) {
+				ఒకవేళ (argc >= 2)
 					die(_("--mirror can't be combined with refspecs"));
 			}
 
 			refspec_clear(&rs);
-			rs = (struct refspec) REFSPEC_INIT_PUSH(the_hash_algo);
+			rs = (నిర్మాణం refspec) REFSPEC_INIT_నెట్టు(the_hash_algo);
 
-			if (tags)
+			ఒకవేళ (ట్యాగులు)
 				refspec_append(&rs, "refs/tags/*");
-			if (argc > 0)
-				set_refspecs(argv + 1, argc - 1, r);
+			ఒకవేళ (argc > 0)
+				సమితి_refspecs(argv + 1, argc - 1, r);
 
-			rc = do_push(inner_flags, push_options, r);
+			rc = do_నెట్టు(inner_flags, నెట్టు_options, r);
 		}
-	} else {
+	} లేకపోతే {
 		/*
 		 * Multiple remotes: spawn one "git push <remote> [<refspecs>]"
 		 * subprocess per remote, sequentially.
@@ -876,22 +876,22 @@ int cmd_push(int argc,
 		 * Options that only make sense for a single transport connection
 		 * are rejected here.
 		 */
-		if (flags & TRANSPORT_PUSH_ATOMIC)
+		ఒకవేళ (flags & TRANSPORT_నెట్టు_ATOMIC)
 			die(_("--atomic can only be used when pushing to one remote"));
 
-		rc = push_multiple(&remote_group, push_options, flags,
-				   tags,
-				   argc > 1 ? argv + 1 : NULL,
+		rc = నెట్టు_గుణిజం(&remote_సమూహం, నెట్టు_options, flags,
+				   ట్యాగులు,
+				   argc > 1 ? argv + 1 : ఖాళీ,
 				   argc > 1 ? argc - 1 : 0);
 	}
 
-	string_list_clear(&push_options_cmdline, 0);
-	string_list_clear(&push_options_config, 0);
-	string_list_clear(&remote_group, 0);
+	string_list_clear(&నెట్టు_options_cmdline, 0);
+	string_list_clear(&నెట్టు_options_config, 0);
+	string_list_clear(&remote_సమూహం, 0);
 	clear_cas_option(&cas);
 
-	if (rc == -1)
-		usage_with_options(push_usage, options);
-	else
-		return rc;
+	ఒకవేళ (rc == -1)
+		usage_with_options(నెట్టు_usage, options);
+	లేకపోతే
+		తిరిగి rc;
 }

@@ -1,43 +1,43 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "commit.h"
-#include "diff.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "revision.h"
-#include "list-objects.h"
-#include "list-objects-filter-options.h"
-#include "object.h"
-#include "object-name.h"
-#include "object-file.h"
-#include "odb.h"
-#include "pack-bitmap.h"
-#include "parse-options.h"
-#include "log-tree.h"
-#include "graph.h"
-#include "bisect.h"
-#include "progress.h"
-#include "reflog-walk.h"
-#include "oidset.h"
-#include "oidmap.h"
-#include "packfile.h"
-#include "commit-reach.h"
-#include "quote.h"
-#include "strbuf.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "commit.h"
+#అన్తర్భావ "diff.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "revision.h"
+#అన్తర్భావ "list-objects.h"
+#అన్తర్భావ "list-objects-filter-options.h"
+#అన్తర్భావ "object.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "object-file.h"
+#అన్తర్భావ "odb.h"
+#అన్తర్భావ "pack-bitmap.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "log-tree.h"
+#అన్తర్భావ "graph.h"
+#అన్తర్భావ "bisect.h"
+#అన్తర్భావ "progress.h"
+#అన్తర్భావ "reflog-walk.h"
+#అన్తర్భావ "oidset.h"
+#అన్తర్భావ "oidmap.h"
+#అన్తర్భావ "packfile.h"
+#అన్తర్భావ "commit-reach.h"
+#అన్తర్భావ "quote.h"
+#అన్తర్భావ "strbuf.h"
 
-struct rev_list_info {
-	struct rev_info *revs;
-	int flags;
-	int show_timestamp;
-	int hdr_termination;
-	const char *header_prefix;
+నిర్మాణం rev_list_info {
+	నిర్మాణం rev_info *revs;
+	పూర్ణాంకం flags;
+	పూర్ణాంకం show_timestamp;
+	పూర్ణాంకం hdr_termination;
+	స్థిరరాశి అక్షరం *శీర్షిక_ఉపసర్గ;
 };
 
-static const char rev_list_usage[] =
+స్థిర స్థిరరాశి అక్షరం rev_list_usage[] =
 "git rev-list [<options>] <commit>... [--] [<path>...]\n"
 "\n"
 "  limiting output:\n"
@@ -81,130 +81,130 @@ static const char rev_list_usage[] =
 "    --bisect-all"
 ;
 
-static struct progress *progress;
-static unsigned progress_counter;
+స్థిర నిర్మాణం పురోగతి *పురోగతి;
+స్థిర గుర్తులేని పురోగతి_counter;
 
-static struct oidset omitted_objects;
-static int arg_print_omitted; /* print objects omitted by filter */
+స్థిర నిర్మాణం oidset omitted_objects;
+స్థిర పూర్ణాంకం arg_print_omitted; /* print objects omitted by filter */
 
-struct missing_objects_map_entry {
-	struct oidmap_entry entry;
-	char *path;
-	unsigned type;
+నిర్మాణం missing_objects_map_నమోదు {
+	నిర్మాణం oidmap_నమోదు నమోదు_2;
+	అక్షరం *మార్గం;
+	గుర్తులేని type;
 };
 
-static void missing_objects_map_entry_free(void *e)
+స్థిర శూన్య missing_objects_map_నమోదు_free(శూన్య *e)
 {
-	struct missing_objects_map_entry *entry =
-		container_of(e, struct missing_objects_map_entry, entry);
+	నిర్మాణం missing_objects_map_నమోదు *నమోదు_2 =
+		container_యొక్క(e, నిర్మాణం missing_objects_map_నమోదు, నమోదు_2);
 
-	free(entry->path);
-	free(entry);
+	విడుదల(నమోదు_2->మార్గం);
+	విడుదల(నమోదు_2);
 }
 
-static struct oidmap missing_objects;
-enum missing_action {
+స్థిర నిర్మాణం oidmap missing_objects;
+గణన missing_action {
 	MA_ERROR = 0,    /* fail if any missing objects are encountered */
 	MA_ALLOW_ANY,    /* silently allow ALL missing objects */
 	MA_PRINT,        /* print ALL missing objects in special section */
 	MA_PRINT_INFO,   /* same as MA_PRINT but also prints missing object info */
 	MA_ALLOW_PROMISOR, /* silently allow all missing PROMISOR objects */
 };
-static enum missing_action arg_missing_action;
-static int arg_missing_only;
+స్థిర గణన missing_action arg_missing_action;
+స్థిర పూర్ణాంకం arg_missing_only;
 
-static inline int should_collect_missing(void)
+స్థిర అంతఃవరుస పూర్ణాంకం should_collect_missing(శూన్య)
 {
-	return arg_missing_action == MA_PRINT ||
+	తిరిగి arg_missing_action == MA_PRINT ||
 	       arg_missing_action == MA_PRINT_INFO;
 }
 
 /* display only the oid of each object encountered */
-static int arg_show_object_names = 1;
+స్థిర పూర్ణాంకం arg_show_object_పేర్లు = 1;
 
-#define DEFAULT_OIDSET_SIZE     (16*1024)
+#నిర్వచించు DEFAULT_OIDSET_కొలత     (16*1024)
 
-static char line_term = '\n';
-static char info_term = ' ';
+స్థిర అక్షరం పంక్తి_పదం = '\n';
+స్థిర అక్షరం info_పదం = ' ';
 
-static int show_disk_usage;
-static off_t total_disk_usage;
-static int human_readable;
+స్థిర పూర్ణాంకం show_disk_usage;
+స్థిర off_t మొత్తం_disk_usage;
+స్థిర పూర్ణాంకం human_readable;
 
-static off_t get_object_disk_usage(struct object *obj)
+స్థిర off_t get_object_disk_usage(నిర్మాణం object *obj)
 {
-	off_t size;
-	struct object_info oi = OBJECT_INFO_INIT;
-	oi.disk_sizep = &size;
-	if (odb_read_object_info_extended(the_repository->objects,
+	off_t కొలత;
+	నిర్మాణం object_info oi = OBJECT_INFO_INIT;
+	oi.disk_sizep = &కొలత;
+	ఒకవేళ (odb_read_object_info_extended(the_repository->objects,
 					  &obj->oid, &oi, 0) < 0)
-		die(_("unable to get disk usage of %s"), oid_to_hex(&obj->oid));
-	return size;
+		die(_("unable to get disk usage of %s"), oid_గమ్యం_hex(&obj->oid));
+	తిరిగి కొలత;
 }
 
-static void add_missing_object_entry(struct object_id *oid, const char *path,
-				     unsigned type)
+స్థిర శూన్య కూడు_missing_object_నమోదు(నిర్మాణం object_id *oid, స్థిరరాశి అక్షరం *మార్గం,
+				     గుర్తులేని type)
 {
-	struct missing_objects_map_entry *entry;
+	నిర్మాణం missing_objects_map_నమోదు *నమోదు_2;
 
-	if (oidmap_get(&missing_objects, oid))
-		return;
+	ఒకవేళ (oidmap_get(&missing_objects, oid))
+		తిరిగి;
 
-	CALLOC_ARRAY(entry, 1);
-	entry->entry.oid = *oid;
-	entry->type = type;
-	if (path)
-		entry->path = xstrdup(path);
-	oidmap_put(&missing_objects, entry);
+	CALLOC_ARRAY(నమోదు_2, 1);
+	నమోదు_2->నమోదు_2.oid = *oid;
+	నమోదు_2->type = type;
+	ఒకవేళ (మార్గం)
+		నమోదు_2->మార్గం = xstrdup(మార్గం);
+	oidmap_put(&missing_objects, నమోదు_2);
 }
 
-static void print_missing_object(struct missing_objects_map_entry *entry,
-				 int print_missing_info)
+స్థిర శూన్య print_missing_object(నిర్మాణం missing_objects_map_నమోదు *నమోదు_2,
+				 పూర్ణాంకం print_missing_info)
 {
-	struct strbuf sb = STRBUF_INIT;
+	నిర్మాణం strbuf sb = STRBUF_INIT;
 
 	/*
 	 * --missing-only filters present objects out of the walk output.
 	 * It still uses the selected --missing= format for missing ones,
 	 * except the human "?" prefix is omitted (script-friendly OIDs).
 	 */
-	if (arg_missing_only && line_term)
-		printf("%s", oid_to_hex(&entry->entry.oid));
-	else if (line_term)
-		printf("?%s", oid_to_hex(&entry->entry.oid));
-	else
-		printf("%s%cmissing=yes", oid_to_hex(&entry->entry.oid),
-		       info_term);
+	ఒకవేళ (arg_missing_only && పంక్తి_పదం)
+		రాయి("%s", oid_గమ్యం_hex(&నమోదు_2->నమోదు_2.oid));
+	లేకపోతే ఒకవేళ (పంక్తి_పదం)
+		రాయి("?%s", oid_గమ్యం_hex(&నమోదు_2->నమోదు_2.oid));
+	లేకపోతే
+		రాయి("%s%cmissing=yes", oid_గమ్యం_hex(&నమోదు_2->నమోదు_2.oid),
+		       info_పదం);
 
-	if (!print_missing_info) {
-		putchar(line_term);
-		return;
+	ఒకవేళ (!print_missing_info) {
+		అక్షరం_రాయి(పంక్తి_పదం);
+		తిరిగి;
 	}
 
-	if (entry->path && *entry->path) {
-		strbuf_addf(&sb, "%cpath=", info_term);
+	ఒకవేళ (నమోదు_2->మార్గం && *నమోదు_2->మార్గం) {
+		strbuf_addf(&sb, "%cpath=", info_పదం);
 
-		if (line_term) {
-			struct strbuf path = STRBUF_INIT;
+		ఒకవేళ (పంక్తి_పదం) {
+			నిర్మాణం strbuf మార్గం = STRBUF_INIT;
 
-			quote_path(entry->path, NULL, &path, QUOTE_PATH_QUOTE_SP);
-			strbuf_addbuf(&sb, &path);
+			quote_మార్గం(నమోదు_2->మార్గం, ఖాళీ, &మార్గం, QUOTE_మార్గం_QUOTE_SP);
+			strbuf_addbuf(&sb, &మార్గం);
 
-			strbuf_release(&path);
-		} else {
-			strbuf_addstr(&sb, entry->path);
+			strbuf_release(&మార్గం);
+		} లేకపోతే {
+			strbuf_addstr(&sb, నమోదు_2->మార్గం);
 		}
 	}
-	if (entry->type)
-		strbuf_addf(&sb, "%ctype=%s", info_term, type_name(entry->type));
+	ఒకవేళ (నమోదు_2->type)
+		strbuf_addf(&sb, "%ctype=%s", info_పదం, type_name(నమోదు_2->type));
 
-	fwrite(sb.buf, sizeof(char), sb.len, stdout);
-	putchar(line_term);
+	fwrite(sb.buf, పరిమాణం(అక్షరం), sb.len, stdout);
+	అక్షరం_రాయి(పంక్తి_పదం);
 
 	strbuf_release(&sb);
 }
 
-static inline void finish_object__ma(struct object *obj, const char *name)
+స్థిర అంతఃవరుస శూన్య ముగింపు_object_ma(నిర్మాణం object *obj, స్థిరరాశి అక్షరం *name)
 {
 	/*
 	 * Whether or not we try to dynamically fetch missing objects
@@ -212,137 +212,137 @@ static inline void finish_object__ma(struct object *obj, const char *name)
 	 * can either print, allow (ignore), or conditionally allow
 	 * (ignore) them.
 	 */
-	switch (arg_missing_action) {
-	case MA_ERROR:
+	ఎంపిక (arg_missing_action) {
+	స్థితి MA_ERROR:
 		die("missing %s object '%s'",
-		    type_name(obj->type), oid_to_hex(&obj->oid));
-		return;
+		    type_name(obj->type), oid_గమ్యం_hex(&obj->oid));
+		తిరిగి;
 
-	case MA_ALLOW_ANY:
-		return;
+	స్థితి MA_ALLOW_ANY:
+		తిరిగి;
 
-	case MA_PRINT:
-	case MA_PRINT_INFO:
-		add_missing_object_entry(&obj->oid, name, obj->type);
-		return;
+	స్థితి MA_PRINT:
+	స్థితి MA_PRINT_INFO:
+		కూడు_missing_object_నమోదు(&obj->oid, name, obj->type);
+		తిరిగి;
 
-	case MA_ALLOW_PROMISOR:
-		if (is_promisor_object(the_repository, &obj->oid))
-			return;
+	స్థితి MA_ALLOW_PROMISOR:
+		ఒకవేళ (is_promisor_object(the_repository, &obj->oid))
+			తిరిగి;
 		die("unexpected missing %s object '%s'",
-		    type_name(obj->type), oid_to_hex(&obj->oid));
-		return;
+		    type_name(obj->type), oid_గమ్యం_hex(&obj->oid));
+		తిరిగి;
 
-	default:
+	అప్రమేయ:
 		BUG("unhandled missing_action");
-		return;
+		తిరిగి;
 	}
 }
 
-static void finish_commit(struct commit *commit)
+స్థిర శూన్య ముగింపు_commit(నిర్మాణం commit *commit)
 {
 	commit_list_free(commit->parents);
-	commit->parents = NULL;
-	free_commit_buffer(the_repository->parsed_objects,
+	commit->parents = ఖాళీ;
+	free_commit_బఫరు(the_repository->parsed_objects,
 			   commit);
 }
 
-static void show_commit(struct commit *commit, void *data)
+స్థిర శూన్య show_commit(నిర్మాణం commit *commit, శూన్య *దత్తాంశం)
 {
-	struct rev_list_info *info = data;
-	struct rev_info *revs = info->revs;
+	నిర్మాణం rev_list_info *info = దత్తాంశం;
+	నిర్మాణం rev_info *revs = info->revs;
 
-	display_progress(progress, ++progress_counter);
+	display_పురోగతి(పురోగతి, ++పురోగతి_counter);
 
-	if (revs->do_not_die_on_missing_objects &&
-	    oidset_contains(&revs->missing_commits, &commit->object.oid)) {
-		finish_object__ma(&commit->object, NULL);
-		return;
+	ఒకవేళ (revs->do_not_die_on_missing_objects &&
+	    oidset_కలిగియుంది(&revs->missing_commits, &commit->object.oid)) {
+		ముగింపు_object_ma(&commit->object, ఖాళీ);
+		తిరిగి;
 	}
 
-	if (arg_missing_only) {
-		finish_commit(commit);
-		return;
+	ఒకవేళ (arg_missing_only) {
+		ముగింపు_commit(commit);
+		తిరిగి;
 	}
 
-	if (show_disk_usage)
-		total_disk_usage += get_object_disk_usage(&commit->object);
+	ఒకవేళ (show_disk_usage)
+		మొత్తం_disk_usage += get_object_disk_usage(&commit->object);
 
-	if (info->flags & REV_LIST_QUIET) {
-		finish_commit(commit);
-		return;
+	ఒకవేళ (info->flags & REV_LIST_QUIET) {
+		ముగింపు_commit(commit);
+		తిరిగి;
 	}
 
-	graph_show_commit(revs->graph);
+	లేఖాచిత్రం_show_commit(revs->లేఖాచిత్రం);
 
-	if (revs->count) {
-		if (commit->object.flags & PATCHSAME)
-			revs->count_same++;
-		else if (commit->object.flags & SYMMETRIC_LEFT)
-			revs->count_left++;
-		else
-			revs->count_right++;
-		finish_commit(commit);
-		return;
+	ఒకవేళ (revs->లెక్క) {
+		ఒకవేళ (commit->object.flags & PATCHSAME)
+			revs->లెక్క_same++;
+		లేకపోతే ఒకవేళ (commit->object.flags & సౌష్ఠవ_ఎడమ)
+			revs->లెక్క_ఎడమ++;
+		లేకపోతే
+			revs->లెక్క_కుడి++;
+		ముగింపు_commit(commit);
+		తిరిగి;
 	}
 
-	if (info->show_timestamp)
-		printf("%"PRItime" ", commit->date);
-	if (info->header_prefix)
-		fputs(info->header_prefix, stdout);
+	ఒకవేళ (info->show_timestamp)
+		రాయి("%"PRItime" ", commit->date);
+	ఒకవేళ (info->శీర్షిక_ఉపసర్గ)
+		fputs(info->శీర్షిక_ఉపసర్గ, stdout);
 
-	if (revs->include_header) {
-		if (!revs->graph && line_term)
+	ఒకవేళ (revs->include_శీర్షిక) {
+		ఒకవేళ (!revs->లేఖాచిత్రం && పంక్తి_పదం)
 			fputs(get_revision_mark(revs, commit), stdout);
-		if (revs->abbrev_commit && revs->abbrev)
-			fputs(repo_find_unique_abbrev(the_repository, &commit->object.oid, revs->abbrev),
+		ఒకవేళ (revs->abbrev_commit && revs->abbrev)
+			fputs(repo_కనుగొను_unique_abbrev(the_repository, &commit->object.oid, revs->abbrev),
 			      stdout);
-		else
-			fputs(oid_to_hex(&commit->object.oid), stdout);
+		లేకపోతే
+			fputs(oid_గమ్యం_hex(&commit->object.oid), stdout);
 
-		if (!line_term) {
-			if (commit->object.flags & BOUNDARY)
-				printf("%cboundary=yes", info_term);
+		ఒకవేళ (!పంక్తి_పదం) {
+			ఒకవేళ (commit->object.flags & BOUNDARY)
+				రాయి("%cboundary=yes", info_పదం);
 		}
 	}
-	if (revs->print_parents) {
-		struct commit_list *parents = commit->parents;
-		while (parents) {
-			printf(" %s", oid_to_hex(&parents->item->object.oid));
-			parents = parents->next;
+	ఒకవేళ (revs->print_parents) {
+		నిర్మాణం commit_list *parents = commit->parents;
+		అయితే (parents) {
+			రాయి(" %s", oid_గమ్యం_hex(&parents->అంశం->object.oid));
+			parents = parents->తదుపరి;
 		}
 	}
-	if (revs->children.name) {
-		struct commit_list *children;
+	ఒకవేళ (revs->children.name) {
+		నిర్మాణం commit_list *children;
 
 		children = lookup_decoration(&revs->children, &commit->object);
-		while (children) {
-			printf(" %s", oid_to_hex(&children->item->object.oid));
-			children = children->next;
+		అయితే (children) {
+			రాయి(" %s", oid_గమ్యం_hex(&children->అంశం->object.oid));
+			children = children->తదుపరి;
 		}
 	}
 	show_decorations(revs, commit);
-	if (revs->commit_format == CMIT_FMT_ONELINE)
-		putchar(' ');
-	else if (revs->include_header)
-		putchar(line_term);
+	ఒకవేళ (revs->commit_format == CMIT_FMT_ONELINE)
+		అక్షరం_రాయి(' ');
+	లేకపోతే ఒకవేళ (revs->include_శీర్షిక)
+		అక్షరం_రాయి(పంక్తి_పదం);
 
-	if (revs->verbose_header) {
-		struct strbuf buf = STRBUF_INIT;
-		struct pretty_print_context ctx = {0};
+	ఒకవేళ (revs->verbose_శీర్షిక) {
+		నిర్మాణం strbuf buf = STRBUF_INIT;
+		నిర్మాణం pretty_print_context ctx = {0};
 		ctx.abbrev = revs->abbrev;
-		ctx.date_mode = revs->date_mode;
-		ctx.date_mode_explicit = revs->date_mode_explicit;
+		ctx.date_బహుళకం = revs->date_బహుళకం;
+		ctx.date_బహుళకం_explicit = revs->date_బహుళకం_explicit;
 		ctx.fmt = revs->commit_format;
 		ctx.output_encoding = get_log_output_encoding();
 		ctx.color = revs->diffopt.use_color;
 		ctx.rev = revs;
 		pretty_print_commit(&ctx, commit, &buf);
-		if (buf.len) {
-			if (revs->commit_format != CMIT_FMT_ONELINE)
-				graph_show_oneline(revs->graph);
+		ఒకవేళ (buf.len) {
+			ఒకవేళ (revs->commit_format != CMIT_FMT_ONELINE)
+				లేఖాచిత్రం_show_oneline(revs->లేఖాచిత్రం);
 
-			graph_show_commit_msg(revs->graph, stdout, &buf);
+			లేఖాచిత్రం_show_commit_సందేశం(revs->లేఖాచిత్రం, stdout, &buf);
 
 			/*
 			 * Add a newline after the commit message.
@@ -359,58 +359,58 @@ static void show_commit(struct commit *commit, void *data)
 			 * happens with CMIT_FMT_USERFORMAT when the
 			 * format doesn't explicitly end in a newline.)
 			 */
-			if (buf.len && buf.buf[buf.len - 1] == '\n')
-				graph_show_padding(revs->graph);
-			putchar(info->hdr_termination);
-		} else {
+			ఒకవేళ (buf.len && buf.buf[buf.len - 1] == '\n')
+				లేఖాచిత్రం_show_padding(revs->లేఖాచిత్రం);
+			అక్షరం_రాయి(info->hdr_termination);
+		} లేకపోతే {
 			/*
 			 * If the message buffer is empty, just show
 			 * the rest of the graph output for this
 			 * commit.
 			 */
-			if (graph_show_remainder(revs->graph))
-				putchar('\n');
-			if (revs->commit_format == CMIT_FMT_ONELINE)
-				putchar('\n');
+			ఒకవేళ (లేఖాచిత్రం_show_remainder(revs->లేఖాచిత్రం))
+				అక్షరం_రాయి('\n');
+			ఒకవేళ (revs->commit_format == CMIT_FMT_ONELINE)
+				అక్షరం_రాయి('\n');
 		}
 		strbuf_release(&buf);
-	} else {
-		if (graph_show_remainder(revs->graph))
-			putchar('\n');
+	} లేకపోతే {
+		ఒకవేళ (లేఖాచిత్రం_show_remainder(revs->లేఖాచిత్రం))
+			అక్షరం_రాయి('\n');
 	}
 	maybe_flush_or_die(stdout, "stdout");
-	finish_commit(commit);
+	ముగింపు_commit(commit);
 }
 
-static int finish_object(struct object *obj, const char *name, void *cb_data)
+స్థిర పూర్ణాంకం ముగింపు_object(నిర్మాణం object *obj, స్థిరరాశి అక్షరం *name, శూన్య *cb_దత్తాంశం)
 {
-	struct rev_list_info *info = cb_data;
-	if (odb_read_object_info_extended(the_repository->objects,
-					  &obj->oid, NULL, 0) < 0) {
-		finish_object__ma(obj, name);
-		return 1;
+	నిర్మాణం rev_list_info *info = cb_దత్తాంశం;
+	ఒకవేళ (odb_read_object_info_extended(the_repository->objects,
+					  &obj->oid, ఖాళీ, 0) < 0) {
+		ముగింపు_object_ma(obj, name);
+		తిరిగి 1;
 	}
-	if (info->revs->verify_objects && !obj->parsed && obj->type != OBJ_COMMIT)
+	ఒకవేళ (info->revs->verify_objects && !obj->parsed && obj->type != OBJ_COMMIT)
 		parse_object(the_repository, &obj->oid);
-	return 0;
+	తిరిగి 0;
 }
 
-static void show_object(struct object *obj, const char *name, void *cb_data)
+స్థిర శూన్య show_object(నిర్మాణం object *obj, స్థిరరాశి అక్షరం *name, శూన్య *cb_దత్తాంశం)
 {
-	struct rev_list_info *info = cb_data;
-	struct rev_info *revs = info->revs;
+	నిర్మాణం rev_list_info *info = cb_దత్తాంశం;
+	నిర్మాణం rev_info *revs = info->revs;
 
-	if (finish_object(obj, name, cb_data))
-		return;
-	display_progress(progress, ++progress_counter);
-	if (arg_missing_only)
-		return;
-	if (show_disk_usage)
-		total_disk_usage += get_object_disk_usage(obj);
-	if (info->flags & REV_LIST_QUIET)
-		return;
+	ఒకవేళ (ముగింపు_object(obj, name, cb_దత్తాంశం))
+		తిరిగి;
+	display_పురోగతి(పురోగతి, ++పురోగతి_counter);
+	ఒకవేళ (arg_missing_only)
+		తిరిగి;
+	ఒకవేళ (show_disk_usage)
+		మొత్తం_disk_usage += get_object_disk_usage(obj);
+	ఒకవేళ (info->flags & REV_LIST_QUIET)
+		తిరిగి;
 
-	if (revs->count) {
+	ఒకవేళ (revs->లెక్క) {
 		/*
 		 * The object count is always accumulated in the .count_right
 		 * field for traversal that is not a left-right traversal,
@@ -418,53 +418,53 @@ static void show_object(struct object *obj, const char *name, void *cb_data)
 		 * wants to count non-commit objects, which is handled by
 		 * the show_object() callback, does not ask for .left_right.
 		 */
-		revs->count_right++;
-		return;
+		revs->లెక్క_కుడి++;
+		తిరిగి;
 	}
 
-	printf("%s", oid_to_hex(&obj->oid));
+	రాయి("%s", oid_గమ్యం_hex(&obj->oid));
 
-	if (arg_show_object_names) {
-		if (line_term) {
-			putchar(info_term);
-			for (const char *p = name; *p && *p != '\n'; p++)
-				putchar(*p);
-		} else if (*name) {
-			printf("%cpath=%s", info_term, name);
+	ఒకవేళ (arg_show_object_పేర్లు) {
+		ఒకవేళ (పంక్తి_పదం) {
+			అక్షరం_రాయి(info_పదం);
+			కొరకు (స్థిరరాశి అక్షరం *p = name; *p && *p != '\n'; p++)
+				అక్షరం_రాయి(*p);
+		} లేకపోతే ఒకవేళ (*name) {
+			రాయి("%cpath=%s", info_పదం, name);
 		}
 	}
 
-	putchar(line_term);
+	అక్షరం_రాయి(పంక్తి_పదం);
 }
 
-static void show_edge(struct commit *commit)
+స్థిర శూన్య show_అంచు(నిర్మాణం commit *commit)
 {
-	printf("-%s\n", oid_to_hex(&commit->object.oid));
+	రాయి("-%s\n", oid_గమ్యం_hex(&commit->object.oid));
 }
 
-static void print_var_str(const char *var, const char *val)
+స్థిర శూన్య print_var_str(స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *val)
 {
-	printf("%s='%s'\n", var, val);
+	రాయి("%s='%s'\n", var, val);
 }
 
-static void print_var_int(const char *var, int val)
+స్థిర శూన్య print_var_int(స్థిరరాశి అక్షరం *var, పూర్ణాంకం val)
 {
-	printf("%s=%d\n", var, val);
+	రాయి("%s=%d\n", var, val);
 }
 
-static int show_bisect_vars(struct rev_list_info *info, int reaches, int all)
+స్థిర పూర్ణాంకం show_bisect_vars(నిర్మాణం rev_list_info *info, పూర్ణాంకం reaches, పూర్ణాంకం all)
 {
-	int cnt, flags = info->flags;
-	char hex[GIT_MAX_HEXSZ + 1] = "";
-	struct commit_list *tried;
-	struct rev_info *revs = info->revs;
+	పూర్ణాంకం cnt, flags = info->flags;
+	అక్షరం hex[GIT_MAX_HEXSZ + 1] = "";
+	నిర్మాణం commit_list *tried;
+	నిర్మాణం rev_info *revs = info->revs;
 
-	if (!revs->commits)
-		return 1;
+	ఒకవేళ (!revs->commits)
+		తిరిగి 1;
 
 	revs->commits = filter_skipped(revs->commits, &tried,
 				       flags & BISECT_SHOW_ALL,
-				       NULL, NULL);
+				       ఖాళీ, ఖాళీ);
 
 	/*
 	 * revs->commits can reach "reaches" commits among
@@ -476,15 +476,15 @@ static int show_bisect_vars(struct rev_list_info *info, int reaches, int all)
 	 * to test, as we already know one bad one.
 	 */
 	cnt = all - reaches;
-	if (cnt < reaches)
+	ఒకవేళ (cnt < reaches)
 		cnt = reaches;
 
-	if (revs->commits)
-		oid_to_hex_r(hex, &revs->commits->item->object.oid);
+	ఒకవేళ (revs->commits)
+		oid_గమ్యం_hex_r(hex, &revs->commits->అంశం->object.oid);
 
-	if (flags & BISECT_SHOW_ALL) {
+	ఒకవేళ (flags & BISECT_SHOW_ALL) {
 		traverse_commit_list(revs, show_commit, show_object, info);
-		printf("------\n");
+		రాయి("------\n");
 	}
 
 	print_var_str("bisect_rev", hex);
@@ -492,168 +492,168 @@ static int show_bisect_vars(struct rev_list_info *info, int reaches, int all)
 	print_var_int("bisect_good", all - reaches - 1);
 	print_var_int("bisect_bad", reaches - 1);
 	print_var_int("bisect_all", all);
-	print_var_int("bisect_steps", estimate_bisect_steps(all));
+	print_var_int("bisect_steps", estimate_bisect_అడుగులు(all));
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int show_object_fast(
-	const struct object_id *oid,
-	enum object_type type UNUSED,
-	int exclude UNUSED,
-	uint32_t name_hash UNUSED,
-	struct packed_git *found_pack UNUSED,
-	off_t found_offset UNUSED,
-	void *payload UNUSED)
+స్థిర పూర్ణాంకం show_object_fast(
+	స్థిరరాశి నిర్మాణం object_id *oid,
+	గణన object_type type వాడని,
+	పూర్ణాంకం exclude వాడని,
+	uint32_t name_hash వాడని,
+	నిర్మాణం packed_git *దొరికింది_pack వాడని,
+	off_t దొరికింది_స్థానభ్రంశం వాడని,
+	శూన్య *payload వాడని)
 {
-	fprintf(stdout, "%s\n", oid_to_hex(oid));
-	return 0;
+	fprintf(stdout, "%s\n", oid_గమ్యం_hex(oid));
+	తిరిగి 0;
 }
 
-static void print_disk_usage(off_t size)
+స్థిర శూన్య print_disk_usage(off_t కొలత)
 {
-	struct strbuf sb = STRBUF_INIT;
-	if (human_readable)
-		strbuf_humanise_bytes(&sb, size);
-	else
-		strbuf_addf(&sb, "%"PRIuMAX, (uintmax_t)size);
+	నిర్మాణం strbuf sb = STRBUF_INIT;
+	ఒకవేళ (human_readable)
+		strbuf_humanise_బైట్లు(&sb, కొలత);
+	లేకపోతే
+		strbuf_addf(&sb, "%"PRIuMAX, (uintmax_t)కొలత);
 	puts(sb.buf);
 	strbuf_release(&sb);
 }
 
-static inline int parse_missing_action_value(struct repository *repo,
-					     const char *value)
+స్థిర అంతఃవరుస పూర్ణాంకం parse_missing_action_విలువ(నిర్మాణం repository *repo,
+					     స్థిరరాశి అక్షరం *విలువ)
 {
-	if (!strcmp(value, "error")) {
+	ఒకవేళ (!strcmp(విలువ, "error")) {
 		arg_missing_action = MA_ERROR;
-		return 1;
+		తిరిగి 1;
 	}
 
-	if (!strcmp(value, "allow-any")) {
+	ఒకవేళ (!strcmp(విలువ, "allow-any")) {
 		arg_missing_action = MA_ALLOW_ANY;
 		repo->fetch_if_missing = 0;
-		return 1;
+		తిరిగి 1;
 	}
 
-	if (!strcmp(value, "print")) {
+	ఒకవేళ (!strcmp(విలువ, "print")) {
 		arg_missing_action = MA_PRINT;
 		repo->fetch_if_missing = 0;
-		return 1;
+		తిరిగి 1;
 	}
 
-	if (!strcmp(value, "print-info")) {
+	ఒకవేళ (!strcmp(విలువ, "print-info")) {
 		arg_missing_action = MA_PRINT_INFO;
 		repo->fetch_if_missing = 0;
-		return 1;
+		తిరిగి 1;
 	}
 
-	if (!strcmp(value, "allow-promisor")) {
+	ఒకవేళ (!strcmp(విలువ, "allow-promisor")) {
 		arg_missing_action = MA_ALLOW_PROMISOR;
 		repo->fetch_if_missing = 0;
-		return 1;
+		తిరిగి 1;
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int try_bitmap_count(struct rev_info *revs,
-			    int filter_provided_objects)
+స్థిర పూర్ణాంకం try_bitmap_లెక్క(నిర్మాణం rev_info *revs,
+			    పూర్ణాంకం filter_provided_objects)
 {
-	uint32_t commit_count = 0,
-		 tag_count = 0,
-		 tree_count = 0,
-		 blob_count = 0;
-	int max_count;
-	struct bitmap_index *bitmap_git;
+	uint32_t commit_లెక్క = 0,
+		 ట్యాగ్_లెక్క = 0,
+		 వృక్షం_లెక్క = 0,
+		 blob_లెక్క = 0;
+	పూర్ణాంకం max_లెక్క;
+	నిర్మాణం bitmap_సూచీ *bitmap_git;
 
 	/* This function only handles counting, not general traversal. */
-	if (!revs->count)
-		return -1;
+	ఒకవేళ (!revs->లెక్క)
+		తిరిగి -1;
 
 	/*
 	 * A bitmap result can't know left/right, etc, because we don't
 	 * actually traverse.
 	 */
-	if (revs->left_right || revs->cherry_mark)
-		return -1;
+	ఒకవేళ (revs->ఎడమ_కుడి || revs->cherry_mark)
+		తిరిగి -1;
 
 	/*
 	 * If we're counting reachable objects, we can't handle a max count of
 	 * commits to traverse, since we don't know which objects go with which
 	 * commit.
 	 */
-	if (revs->max_count >= 0 &&
-	    (revs->tag_objects || revs->tree_objects || revs->blob_objects))
-		return -1;
+	ఒకవేళ (revs->max_లెక్క >= 0 &&
+	    (revs->ట్యాగ్_objects || revs->వృక్షం_objects || revs->blob_objects))
+		తిరిగి -1;
 
 	/*
 	 * This must be saved before doing any walking, since the revision
 	 * machinery will count it down to zero while traversing.
 	 */
-	max_count = revs->max_count;
+	max_లెక్క = revs->max_లెక్క;
 
 	bitmap_git = prepare_bitmap_walk(revs, filter_provided_objects);
-	if (!bitmap_git)
-		return -1;
+	ఒకవేళ (!bitmap_git)
+		తిరిగి -1;
 
-	count_bitmap_commit_list(bitmap_git, &commit_count,
-				 revs->tree_objects ? &tree_count : NULL,
-				 revs->blob_objects ? &blob_count : NULL,
-				 revs->tag_objects ? &tag_count : NULL);
-	if (max_count >= 0 && max_count < commit_count)
-		commit_count = max_count;
+	లెక్క_bitmap_commit_list(bitmap_git, &commit_లెక్క,
+				 revs->వృక్షం_objects ? &వృక్షం_లెక్క : ఖాళీ,
+				 revs->blob_objects ? &blob_లెక్క : ఖాళీ,
+				 revs->ట్యాగ్_objects ? &ట్యాగ్_లెక్క : ఖాళీ);
+	ఒకవేళ (max_లెక్క >= 0 && max_లెక్క < commit_లెక్క)
+		commit_లెక్క = max_లెక్క;
 
-	printf("%d\n", commit_count + tree_count + blob_count + tag_count);
-	free_bitmap_index(bitmap_git);
-	return 0;
+	రాయి("%d\n", commit_లెక్క + వృక్షం_లెక్క + blob_లెక్క + ట్యాగ్_లెక్క);
+	free_bitmap_సూచీ(bitmap_git);
+	తిరిగి 0;
 }
 
-static int try_bitmap_traversal(struct rev_info *revs,
-				int filter_provided_objects)
+స్థిర పూర్ణాంకం try_bitmap_traversal(నిర్మాణం rev_info *revs,
+				పూర్ణాంకం filter_provided_objects)
 {
-	struct bitmap_index *bitmap_git;
+	నిర్మాణం bitmap_సూచీ *bitmap_git;
 
 	/*
 	 * We can't use a bitmap result with a traversal limit, since the set
 	 * of commits we'd get would be essentially random.
 	 */
-	if (revs->max_count >= 0)
-		return -1;
+	ఒకవేళ (revs->max_లెక్క >= 0)
+		తిరిగి -1;
 
 	/*
 	 * We can't know which commits were left/right in a single traversal,
 	 * and we don't yet know how to traverse them separately.
 	 */
-	if (revs->left_right)
-		return -1;
+	ఒకవేళ (revs->ఎడమ_కుడి)
+		తిరిగి -1;
 
 	bitmap_git = prepare_bitmap_walk(revs, filter_provided_objects);
-	if (!bitmap_git)
-		return -1;
+	ఒకవేళ (!bitmap_git)
+		తిరిగి -1;
 
 	traverse_bitmap_commit_list(bitmap_git, revs, &show_object_fast);
-	free_bitmap_index(bitmap_git);
-	return 0;
+	free_bitmap_సూచీ(bitmap_git);
+	తిరిగి 0;
 }
 
-static int try_bitmap_disk_usage(struct rev_info *revs,
-				 int filter_provided_objects)
+స్థిర పూర్ణాంకం try_bitmap_disk_usage(నిర్మాణం rev_info *revs,
+				 పూర్ణాంకం filter_provided_objects)
 {
-	struct bitmap_index *bitmap_git;
-	off_t size_from_bitmap;
+	నిర్మాణం bitmap_సూచీ *bitmap_git;
+	off_t కొలత_from_bitmap;
 
-	if (!show_disk_usage)
-		return -1;
+	ఒకవేళ (!show_disk_usage)
+		తిరిగి -1;
 
 	bitmap_git = prepare_bitmap_walk(revs, filter_provided_objects);
-	if (!bitmap_git)
-		return -1;
+	ఒకవేళ (!bitmap_git)
+		తిరిగి -1;
 
-	size_from_bitmap = get_disk_usage_from_bitmap(bitmap_git, revs);
-	print_disk_usage(size_from_bitmap);
+	కొలత_from_bitmap = get_disk_usage_from_bitmap(bitmap_git, revs);
+	print_disk_usage(కొలత_from_bitmap);
 
-	free_bitmap_index(bitmap_git);
-	return 0;
+	free_bitmap_సూచీ(bitmap_git);
+	తిరిగి 0;
 }
 
 /*
@@ -663,47 +663,47 @@ static int try_bitmap_disk_usage(struct rev_info *revs,
  *
  * If this algorithm doesn't apply, then no changes are made to revs.
  */
-static void prepare_maximal_independent(struct rev_info *revs)
+స్థిర శూన్య prepare_maximal_independent(నిర్మాణం rev_info *revs)
 {
-	struct commit_list *c;
+	నిర్మాణం commit_list *c;
 
-	if (!revs->maximal_only)
-		return;
+	ఒకవేళ (!revs->maximal_only)
+		తిరిగి;
 
-	for (c = revs->commits; c; c = c->next) {
-		if (c->item->object.flags & UNINTERESTING)
-			return;
+	కొరకు (c = revs->commits; c; c = c->తదుపరి) {
+		ఒకవేళ (c->అంశం->object.flags & UNINTERESTING)
+			తిరిగి;
 	}
 
-	if (revs->limited ||
-	    revs->topo_order ||
-	    revs->first_parent_only ||
-	    revs->reverse ||
-	    revs->max_count >= 0 ||
-	    revs->skip_count >= 0 ||
+	ఒకవేళ (revs->limited ||
+	    revs->topo_క్రమం ||
+	    revs->మొదటి_మాతృ_only ||
+	    revs->తిరగేయి ||
+	    revs->max_లెక్క >= 0 ||
+	    revs->skip_లెక్క >= 0 ||
 	    revs->min_age != (timestamp_t)-1 ||
 	    revs->max_age != (timestamp_t)-1 ||
 	    revs->min_parents > 0 ||
 	    revs->max_parents >= 0 ||
-	    revs->prune_data.nr ||
-	    revs->count ||
-	    revs->left_right ||
+	    revs->prune_దత్తాంశం.nr ||
+	    revs->లెక్క ||
+	    revs->ఎడమ_కుడి ||
 	    revs->boundary ||
-	    revs->tag_objects ||
-	    revs->tree_objects ||
+	    revs->ట్యాగ్_objects ||
+	    revs->వృక్షం_objects ||
 	    revs->blob_objects ||
 	    revs->filter.choice ||
 	    revs->reflog_info ||
 	    revs->diff ||
-	    revs->grep_filter.pattern_list ||
-	    revs->grep_filter.header_list ||
-	    revs->verbose_header ||
+	    revs->grep_filter.నమూనా_list ||
+	    revs->grep_filter.శీర్షిక_list ||
+	    revs->verbose_శీర్షిక ||
 	    revs->print_parents ||
-	    revs->edge_hint ||
+	    revs->అంచు_hint ||
 	    revs->unpacked ||
 	    revs->no_kept_objects ||
-	    revs->line_level_traverse)
-		return;
+	    revs->పంక్తి_level_traverse)
+		తిరిగి;
 
 	reduce_heads_replace(&revs->commits);
 
@@ -711,32 +711,32 @@ static void prepare_maximal_independent(struct rev_info *revs)
 	revs->no_walk = 1;
 }
 
-int cmd_rev_list(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo)
+పూర్ణాంకం cmd_rev_list(పూర్ణాంకం argc,
+		 స్థిరరాశి అక్షరం **argv,
+		 స్థిరరాశి అక్షరం *ఉపసర్గ,
+		 నిర్మాణం repository *repo)
 {
-	struct rev_info revs;
-	struct rev_list_info info;
-	struct setup_revision_opt s_r_opt = {
+	నిర్మాణం rev_info revs;
+	నిర్మాణం rev_list_info info;
+	నిర్మాణం అమరిక_revision_opt s_r_opt = {
 		.allow_exclude_promisor_objects = 1,
 	};
-	int i;
-	int bisect_list = 0;
-	int bisect_show_vars = 0;
-	int bisect_find_all = 0;
-	int use_bitmap_index = 0;
-	int filter_provided_objects = 0;
-	const char *show_progress = NULL;
-	int ret = 0;
+	పూర్ణాంకం i;
+	పూర్ణాంకం bisect_list = 0;
+	పూర్ణాంకం bisect_show_vars = 0;
+	పూర్ణాంకం bisect_కనుగొను_all = 0;
+	పూర్ణాంకం use_bitmap_సూచీ = 0;
+	పూర్ణాంకం filter_provided_objects = 0;
+	స్థిరరాశి అక్షరం *show_పురోగతి = ఖాళీ;
+	పూర్ణాంకం ret = 0;
 
 	show_usage_if_asked(argc, argv, rev_list_usage);
 
-	repo_config(the_repository, git_default_config, NULL);
-	repo_init_revisions(the_repository, &revs, prefix);
+	repo_config(the_repository, git_default_config, ఖాళీ);
+	repo_init_revisions(the_repository, &revs, ఉపసర్గ);
 	revs.abbrev = DEFAULT_ABBREV;
 	revs.commit_format = CMIT_FMT_UNSPECIFIED;
-	revs.include_header = 1;
+	revs.include_శీర్షిక = 1;
 
 	/*
 	 * Scan the argument list before invoking setup_revisions(), so that we
@@ -764,121 +764,121 @@ int cmd_rev_list(int argc,
 	 * the `--missing=...` and `--exclude-promisor-objects`
 	 * options below.
 	 */
-	for (i = 1; i < argc; i++) {
-		const char *arg = argv[i];
-		if (!strcmp(arg, "--exclude-promisor-objects")) {
+	కొరకు (i = 1; i < argc; i++) {
+		స్థిరరాశి అక్షరం *arg = argv[i];
+		ఒకవేళ (!strcmp(arg, "--exclude-promisor-objects")) {
 			repo->fetch_if_missing = 0;
 			revs.exclude_promisor_objects = 1;
-		} else if (skip_prefix(arg, "--missing=", &arg)) {
-			parse_missing_action_value(repo, arg);
-		} else if (!strcmp(arg, "--missing-only")) {
+		} లేకపోతే ఒకవేళ (skip_ఉపసర్గ(arg, "--missing=", &arg)) {
+			parse_missing_action_విలువ(repo, arg);
+		} లేకపోతే ఒకవేళ (!strcmp(arg, "--missing-only")) {
 			arg_missing_only = 1;
-		} else if (!strcmp(arg, "-z")) {
-			line_term = '\0';
-			info_term = '\0';
+		} లేకపోతే ఒకవేళ (!strcmp(arg, "-z")) {
+			పంక్తి_పదం = '\0';
+			info_పదం = '\0';
 		}
 	}
 
-	if (arg_missing_only && !should_collect_missing())
+	ఒకవేళ (arg_missing_only && !should_collect_missing())
 		die(_("--missing-only requires --missing=print or --missing=print-info"));
 
 	die_for_incompatible_opt2(revs.exclude_promisor_objects,
 				  "--exclude_promisor_objects",
 				  arg_missing_action, "--missing");
 
-	if (arg_missing_action)
+	ఒకవేళ (arg_missing_action)
 		revs.do_not_die_on_missing_objects = 1;
 
-	argc = setup_revisions(argc, argv, &revs, &s_r_opt);
+	argc = అమరిక_revisions(argc, argv, &revs, &s_r_opt);
 
-	memset(&info, 0, sizeof(info));
+	memset(&info, 0, పరిమాణం(info));
 	info.revs = &revs;
-	if (revs.bisect)
+	ఒకవేళ (revs.bisect)
 		bisect_list = 1;
 
-	if (revs.diffopt.flags.quick)
+	ఒకవేళ (revs.diffopt.flags.శీఘ్ర)
 		info.flags |= REV_LIST_QUIET;
-	for (i = 1 ; i < argc; i++) {
-		const char *arg = argv[i];
+	కొరకు (i = 1 ; i < argc; i++) {
+		స్థిరరాశి అక్షరం *arg = argv[i];
 
-		if (!strcmp(arg, "--header")) {
-			revs.verbose_header = 1;
-			continue;
+		ఒకవేళ (!strcmp(arg, "--header")) {
+			revs.verbose_శీర్షిక = 1;
+			కొనసాగు;
 		}
-		if (!strcmp(arg, "--timestamp")) {
+		ఒకవేళ (!strcmp(arg, "--timestamp")) {
 			info.show_timestamp = 1;
-			continue;
+			కొనసాగు;
 		}
-		if (!strcmp(arg, "--bisect")) {
+		ఒకవేళ (!strcmp(arg, "--bisect")) {
 			bisect_list = 1;
-			continue;
+			కొనసాగు;
 		}
-		if (!strcmp(arg, "--bisect-all")) {
+		ఒకవేళ (!strcmp(arg, "--bisect-all")) {
 			bisect_list = 1;
-			bisect_find_all = 1;
+			bisect_కనుగొను_all = 1;
 			info.flags |= BISECT_SHOW_ALL;
 			revs.show_decorations = 1;
-			continue;
+			కొనసాగు;
 		}
-		if (!strcmp(arg, "--bisect-vars")) {
+		ఒకవేళ (!strcmp(arg, "--bisect-vars")) {
 			bisect_list = 1;
 			bisect_show_vars = 1;
-			continue;
+			కొనసాగు;
 		}
-		if (!strcmp(arg, "--use-bitmap-index")) {
-			use_bitmap_index = 1;
-			continue;
+		ఒకవేళ (!strcmp(arg, "--use-bitmap-index")) {
+			use_bitmap_సూచీ = 1;
+			కొనసాగు;
 		}
-		if (!strcmp(arg, "--test-bitmap")) {
+		ఒకవేళ (!strcmp(arg, "--test-bitmap")) {
 			test_bitmap_walk(&revs);
-			goto cleanup;
+			వెళ్ళు cleanup;
 		}
-		if (skip_prefix(arg, "--progress=", &arg)) {
-			show_progress = arg;
-			continue;
+		ఒకవేళ (skip_ఉపసర్గ(arg, "--progress=", &arg)) {
+			show_పురోగతి = arg;
+			కొనసాగు;
 		}
-		if (!strcmp(arg, "--filter-provided-objects")) {
+		ఒకవేళ (!strcmp(arg, "--filter-provided-objects")) {
 			filter_provided_objects = 1;
-			continue;
+			కొనసాగు;
 		}
-		if (!strcmp(arg, "--filter-print-omitted")) {
+		ఒకవేళ (!strcmp(arg, "--filter-print-omitted")) {
 			arg_print_omitted = 1;
-			continue;
+			కొనసాగు;
 		}
 
-		if (!strcmp(arg, "--exclude-promisor-objects"))
-			continue; /* already handled above */
-		if (skip_prefix(arg, "--missing=", &arg))
-			continue; /* already handled above */
+		ఒకవేళ (!strcmp(arg, "--exclude-promisor-objects"))
+			కొనసాగు; /* already handled above */
+		ఒకవేళ (skip_ఉపసర్గ(arg, "--missing=", &arg))
+			కొనసాగు; /* already handled above */
 
-		if (!strcmp(arg, ("--no-object-names"))) {
-			arg_show_object_names = 0;
-			continue;
+		ఒకవేళ (!strcmp(arg, ("--no-object-names"))) {
+			arg_show_object_పేర్లు = 0;
+			కొనసాగు;
 		}
 
-		if (!strcmp(arg, ("--object-names"))) {
-			arg_show_object_names = 1;
-			continue;
+		ఒకవేళ (!strcmp(arg, ("--object-names"))) {
+			arg_show_object_పేర్లు = 1;
+			కొనసాగు;
 		}
 
-		if (!strcmp(arg, ("--commit-header"))) {
-			revs.include_header = 1;
-			continue;
+		ఒకవేళ (!strcmp(arg, ("--commit-header"))) {
+			revs.include_శీర్షిక = 1;
+			కొనసాగు;
 		}
 
-		if (!strcmp(arg, ("--no-commit-header"))) {
-			revs.include_header = 0;
-			continue;
+		ఒకవేళ (!strcmp(arg, ("--no-commit-header"))) {
+			revs.include_శీర్షిక = 0;
+			కొనసాగు;
 		}
 
-		if (skip_prefix(arg, "--disk-usage", &arg)) {
-			if (*arg == '=') {
-				if (!strcmp(++arg, "human")) {
+		ఒకవేళ (skip_ఉపసర్గ(arg, "--disk-usage", &arg)) {
+			ఒకవేళ (*arg == '=') {
+				ఒకవేళ (!strcmp(++arg, "human")) {
 					human_readable = 1;
-				} else
+				} లేకపోతే
 					die(_("invalid value for '%s': '%s', the only allowed format is '%s'"),
 					    "--disk-usage=<format>", arg, "human");
-			} else if (*arg) {
+			} లేకపోతే ఒకవేళ (*arg) {
 				/*
 				 * Arguably should goto a label to continue chain of ifs?
 				 * Doesn't matter unless we try to add --disk-usage-foo
@@ -888,11 +888,11 @@ int cmd_rev_list(int argc,
 			}
 			show_disk_usage = 1;
 			info.flags |= REV_LIST_QUIET;
-			continue;
+			కొనసాగు;
 		}
 
-		if (!strcmp(arg, "--missing-only"))
-			continue;
+		ఒకవేళ (!strcmp(arg, "--missing-only"))
+			కొనసాగు;
 
 		usage(rev_list_usage);
 
@@ -903,162 +903,162 @@ int cmd_rev_list(int argc,
 	 * is not an inherent limitation and support may be implemented in the
 	 * future.
 	 */
-	if (!line_term) {
-		if (revs.graph || revs.verbose_header || show_disk_usage ||
-		    info.show_timestamp || info.header_prefix || bisect_list ||
-		    use_bitmap_index || revs.edge_hint || revs.left_right ||
+	ఒకవేళ (!పంక్తి_పదం) {
+		ఒకవేళ (revs.లేఖాచిత్రం || revs.verbose_శీర్షిక || show_disk_usage ||
+		    info.show_timestamp || info.శీర్షిక_ఉపసర్గ || bisect_list ||
+		    use_bitmap_సూచీ || revs.అంచు_hint || revs.ఎడమ_కుడి ||
 		    revs.cherry_mark)
 			die(_("-z option used with unsupported option"));
 	}
 
-	if (revs.commit_format != CMIT_FMT_USERFORMAT)
-		revs.include_header = 1;
-	if (revs.commit_format != CMIT_FMT_UNSPECIFIED) {
+	ఒకవేళ (revs.commit_format != CMIT_FMT_USERFORMAT)
+		revs.include_శీర్షిక = 1;
+	ఒకవేళ (revs.commit_format != CMIT_FMT_UNSPECIFIED) {
 		/* The command line has a --pretty  */
 		info.hdr_termination = '\n';
-		if (revs.commit_format == CMIT_FMT_ONELINE || !revs.include_header)
-			info.header_prefix = "";
-		else
-			info.header_prefix = "commit ";
+		ఒకవేళ (revs.commit_format == CMIT_FMT_ONELINE || !revs.include_శీర్షిక)
+			info.శీర్షిక_ఉపసర్గ = "";
+		లేకపోతే
+			info.శీర్షిక_ఉపసర్గ = "commit ";
 	}
-	else if (revs.verbose_header)
+	లేకపోతే ఒకవేళ (revs.verbose_శీర్షిక)
 		/* Only --header was specified */
 		revs.commit_format = CMIT_FMT_RAW;
 
-	if ((!revs.commits && reflog_walk_empty(revs.reflog_info) &&
-	     (!(revs.tag_objects || revs.tree_objects || revs.blob_objects) &&
+	ఒకవేళ ((!revs.commits && reflog_walk_ఖాళీలు(revs.reflog_info) &&
+	     (!(revs.ట్యాగ్_objects || revs.వృక్షం_objects || revs.blob_objects) &&
 	      !revs.pending.nr) &&
-	     !revs.rev_input_given && !revs.read_from_stdin) ||
+	     !revs.rev_ఆదానం_given && !revs.read_from_stdin) ||
 	    revs.diff)
 		usage(rev_list_usage);
 
-	if (revs.show_notes)
+	ఒకవేళ (revs.show_notes)
 		die(_("rev-list does not support display of notes"));
 
-	if (revs.count &&
-	    (revs.tag_objects || revs.tree_objects || revs.blob_objects) &&
-	    (revs.left_right || revs.cherry_mark))
+	ఒకవేళ (revs.లెక్క &&
+	    (revs.ట్యాగ్_objects || revs.వృక్షం_objects || revs.blob_objects) &&
+	    (revs.ఎడమ_కుడి || revs.cherry_mark))
 		die(_("marked counting and '%s' cannot be used together"), "--objects");
 
 	die_for_incompatible_opt2(arg_missing_only, "--missing-only",
-				  revs.count, "--count");
+				  revs.లెక్క, "--count");
 	die_for_incompatible_opt2(arg_missing_only, "--missing-only",
 				  show_disk_usage, "--disk-usage");
 
-	save_commit_buffer = (revs.verbose_header ||
-			      revs.grep_filter.pattern_list ||
-			      revs.grep_filter.header_list);
-	if (bisect_list)
+	save_commit_బఫరు = (revs.verbose_శీర్షిక ||
+			      revs.grep_filter.నమూనా_list ||
+			      revs.grep_filter.శీర్షిక_list);
+	ఒకవేళ (bisect_list)
 		revs.limited = 1;
 
-	if (show_progress)
-		progress = start_delayed_progress(the_repository,
-						  show_progress, 0);
+	ఒకవేళ (show_పురోగతి)
+		పురోగతి = ప్రారంభం_delayed_పురోగతి(the_repository,
+						  show_పురోగతి, 0);
 
-	if (use_bitmap_index) {
-		if (!try_bitmap_count(&revs, filter_provided_objects))
-			goto cleanup;
-		if (!try_bitmap_disk_usage(&revs, filter_provided_objects))
-			goto cleanup;
-		if (!try_bitmap_traversal(&revs, filter_provided_objects))
-			goto cleanup;
+	ఒకవేళ (use_bitmap_సూచీ) {
+		ఒకవేళ (!try_bitmap_లెక్క(&revs, filter_provided_objects))
+			వెళ్ళు cleanup;
+		ఒకవేళ (!try_bitmap_disk_usage(&revs, filter_provided_objects))
+			వెళ్ళు cleanup;
+		ఒకవేళ (!try_bitmap_traversal(&revs, filter_provided_objects))
+			వెళ్ళు cleanup;
 	}
 
-	if (prepare_revision_walk(&revs))
+	ఒకవేళ (prepare_revision_walk(&revs))
 		die("revision walk setup failed");
 
 	prepare_maximal_independent(&revs);
 
-	if (revs.tree_objects)
-		mark_edges_uninteresting(&revs, show_edge, 0);
+	ఒకవేళ (revs.వృక్షం_objects)
+		mark_అంచులు_uninteresting(&revs, show_అంచు, 0);
 
-	if (bisect_list) {
-		int reaches, all;
-		unsigned bisect_flags = 0;
+	ఒకవేళ (bisect_list) {
+		పూర్ణాంకం reaches, all;
+		గుర్తులేని bisect_flags = 0;
 
-		if (bisect_find_all)
-			bisect_flags |= FIND_BISECTION_ALL;
+		ఒకవేళ (bisect_కనుగొను_all)
+			bisect_flags |= కనుగొను_BISECTION_ALL;
 
-		if (revs.first_parent_only)
-			bisect_flags |= FIND_BISECTION_FIRST_PARENT_ONLY;
+		ఒకవేళ (revs.మొదటి_మాతృ_only)
+			bisect_flags |= కనుగొను_BISECTION_మొదటి_మాతృ_ONLY;
 
-		find_bisection(&revs.commits, &reaches, &all, bisect_flags);
+		కనుగొను_bisection(&revs.commits, &reaches, &all, bisect_flags);
 
-		if (bisect_show_vars) {
+		ఒకవేళ (bisect_show_vars) {
 			ret = show_bisect_vars(&info, reaches, all);
-			goto cleanup;
+			వెళ్ళు cleanup;
 		}
 	}
 
-	if (filter_provided_objects) {
-		struct commit_list *c;
-		for (i = 0; i < revs.pending.nr; i++) {
-			struct object_array_entry *pending = revs.pending.objects + i;
-			pending->item->flags |= NOT_USER_GIVEN;
+	ఒకవేళ (filter_provided_objects) {
+		నిర్మాణం commit_list *c;
+		కొరకు (i = 0; i < revs.pending.nr; i++) {
+			నిర్మాణం object_array_నమోదు *pending = revs.pending.objects + i;
+			pending->అంశం->flags |= NOT_USER_GIVEN;
 		}
-		for (c = revs.commits; c; c = c->next)
-			c->item->object.flags |= NOT_USER_GIVEN;
+		కొరకు (c = revs.commits; c; c = c->తదుపరి)
+			c->అంశం->object.flags |= NOT_USER_GIVEN;
 	}
 
-	if (arg_print_omitted)
-		oidset_init(&omitted_objects, DEFAULT_OIDSET_SIZE);
-	if (should_collect_missing()) {
-		struct oidset_iter iter;
-		struct object_id *oid;
+	ఒకవేళ (arg_print_omitted)
+		oidset_init(&omitted_objects, DEFAULT_OIDSET_కొలత);
+	ఒకవేళ (should_collect_missing()) {
+		నిర్మాణం oidset_iter iter;
+		నిర్మాణం object_id *oid;
 
-		oidmap_init(&missing_objects, DEFAULT_OIDSET_SIZE);
+		oidmap_init(&missing_objects, DEFAULT_OIDSET_కొలత);
 		oidset_iter_init(&revs.missing_commits, &iter);
 
 		/* Add missing tips */
-		while ((oid = oidset_iter_next(&iter)))
-			add_missing_object_entry(oid, NULL, 0);
+		అయితే ((oid = oidset_iter_తదుపరి(&iter)))
+			కూడు_missing_object_నమోదు(oid, ఖాళీ, 0);
 
 		oidset_clear(&revs.missing_commits);
 	}
 
 	traverse_commit_list_filtered(
 		&revs, show_commit, show_object, &info,
-		(arg_print_omitted ? &omitted_objects : NULL));
+		(arg_print_omitted ? &omitted_objects : ఖాళీ));
 
-	if (arg_print_omitted) {
-		struct oidset_iter iter;
-		struct object_id *oid;
+	ఒకవేళ (arg_print_omitted) {
+		నిర్మాణం oidset_iter iter;
+		నిర్మాణం object_id *oid;
 		oidset_iter_init(&omitted_objects, &iter);
-		while ((oid = oidset_iter_next(&iter)))
-			printf("~%s\n", oid_to_hex(oid));
+		అయితే ((oid = oidset_iter_తదుపరి(&iter)))
+			రాయి("~%s\n", oid_గమ్యం_hex(oid));
 		oidset_clear(&omitted_objects);
 	}
-	if (should_collect_missing()) {
-		struct missing_objects_map_entry *entry;
-		struct oidmap_iter iter;
+	ఒకవేళ (should_collect_missing()) {
+		నిర్మాణం missing_objects_map_నమోదు *నమోదు_2;
+		నిర్మాణం oidmap_iter iter;
 
 		oidmap_iter_init(&missing_objects, &iter);
 
-		while ((entry = oidmap_iter_next(&iter))) {
-			print_missing_object(entry, arg_missing_action ==
+		అయితే ((నమోదు_2 = oidmap_iter_తదుపరి(&iter))) {
+			print_missing_object(నమోదు_2, arg_missing_action ==
 							    MA_PRINT_INFO);
 		}
 
-		oidmap_clear_with_free(&missing_objects, missing_objects_map_entry_free);
+		oidmap_clear_with_free(&missing_objects, missing_objects_map_నమోదు_free);
 	}
 
-	stop_progress(&progress);
+	stop_పురోగతి(&పురోగతి);
 
-	if (revs.count) {
-		if (revs.left_right && revs.cherry_mark)
-			printf("%d\t%d\t%d\n", revs.count_left, revs.count_right, revs.count_same);
-		else if (revs.left_right)
-			printf("%d\t%d\n", revs.count_left, revs.count_right);
-		else if (revs.cherry_mark)
-			printf("%d\t%d\n", revs.count_left + revs.count_right, revs.count_same);
-		else
-			printf("%d\n", revs.count_left + revs.count_right);
+	ఒకవేళ (revs.లెక్క) {
+		ఒకవేళ (revs.ఎడమ_కుడి && revs.cherry_mark)
+			రాయి("%d\t%d\t%d\n", revs.లెక్క_ఎడమ, revs.లెక్క_కుడి, revs.లెక్క_same);
+		లేకపోతే ఒకవేళ (revs.ఎడమ_కుడి)
+			రాయి("%d\t%d\n", revs.లెక్క_ఎడమ, revs.లెక్క_కుడి);
+		లేకపోతే ఒకవేళ (revs.cherry_mark)
+			రాయి("%d\t%d\n", revs.లెక్క_ఎడమ + revs.లెక్క_కుడి, revs.లెక్క_same);
+		లేకపోతే
+			రాయి("%d\n", revs.లెక్క_ఎడమ + revs.లెక్క_కుడి);
 	}
 
-	if (show_disk_usage)
-		print_disk_usage(total_disk_usage);
+	ఒకవేళ (show_disk_usage)
+		print_disk_usage(మొత్తం_disk_usage);
 
 cleanup:
 	release_revisions(&revs);
-	return ret;
+	తిరిగి ret;
 }

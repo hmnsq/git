@@ -1,102 +1,102 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "pretty.h"
-#include "refs.h"
-#include "color.h"
-#include "strvec.h"
-#include "object-name.h"
-#include "parse-options.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hash.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "pretty.h"
+#అన్తర్భావ "refs.h"
+#అన్తర్భావ "color.h"
+#అన్తర్భావ "strvec.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "parse-options.h"
 
-#include "dir.h"
-#include "commit-slab.h"
-#include "date.h"
-#include "wildmatch.h"
-#include "prio-queue.h"
+#అన్తర్భావ "dir.h"
+#అన్తర్భావ "commit-slab.h"
+#అన్తర్భావ "date.h"
+#అన్తర్భావ "wildmatch.h"
+#అన్తర్భావ "prio-queue.h"
 
-static const char*const show_branch_usage[] = {
+స్థిర స్థిరరాశి అక్షరం*స్థిరరాశి show_branch_usage[] = {
     N_("git show-branch [-a | --all] [-r | --remotes] [--topo-order | --date-order]\n"
        "                [--current] [--color[=<when>] | --no-color] [--sparse]\n"
        "                [--more=<n> | --list | --independent | --merge-base]\n"
        "                [--no-name | --sha1-name] [--topics]\n"
        "                [(<rev> | <glob>)...]"),
     N_("git show-branch (-g | --reflog)[=<n>[,<base>]] [--list] [<ref>]"),
-    NULL
+    ఖాళీ
 };
 
-static enum git_colorbool showbranch_use_color = GIT_COLOR_UNKNOWN;
+స్థిర గణన git_colorbool showbranch_use_color = GIT_COLOR_UNKNOWN;
 
-static struct strvec default_args = STRVEC_INIT;
+స్థిర నిర్మాణం strvec default_వాదనలు = STRVEC_INIT;
 
 /*
  * TODO: convert this use of commit->object.flags to commit-slab
  * instead to store a pointer to ref name directly. Then use the same
  * UNINTERESTING definition from revision.h here.
  */
-#define UNINTERESTING	01
+#నిర్వచించు UNINTERESTING	01
 
-#define REV_SHIFT	 2
-#define MAX_REVS	(FLAG_BITS - REV_SHIFT) /* should not exceed bits_per_int - REV_SHIFT */
+#నిర్వచించు REV_జరుపు	 2
+#నిర్వచించు MAX_REVS	(FLAG_బిట్లు - REV_జరుపు) /* should not exceed bits_per_int - REV_SHIFT */
 
-#define DEFAULT_REFLOG	4
+#నిర్వచించు DEFAULT_REFLOG	4
 
-static const char *get_color_code(int idx)
+స్థిర స్థిరరాశి అక్షరం *get_color_సంకేతం(పూర్ణాంకం idx)
 {
-	if (want_color(showbranch_use_color))
-		return column_colors_ansi[idx % column_colors_ansi_max];
-	return "";
+	ఒకవేళ (want_color(showbranch_use_color))
+		తిరిగి స్తంభం_colors_ansi[idx % స్తంభం_colors_ansi_max];
+	తిరిగి "";
 }
 
-static const char *get_color_reset_code(void)
+స్థిర స్థిరరాశి అక్షరం *get_color_reset_సంకేతం(శూన్య)
 {
-	if (want_color(showbranch_use_color))
-		return GIT_COLOR_RESET;
-	return "";
+	ఒకవేళ (want_color(showbranch_use_color))
+		తిరిగి GIT_COLOR_RESET;
+	తిరిగి "";
 }
 
-static struct commit *interesting(struct prio_queue *queue)
+స్థిర నిర్మాణం commit *interesting(నిర్మాణం prio_వరుస *వరుస)
 {
-	struct commit *commit;
-	prio_queue_for_each(queue, commit) {
-		if (!(commit->object.flags & UNINTERESTING))
-			return commit;
+	నిర్మాణం commit *commit;
+	prio_వరుస_for_each(వరుస, commit) {
+		ఒకవేళ (!(commit->object.flags & UNINTERESTING))
+			తిరిగి commit;
 	}
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
-struct commit_name {
-	const char *head_name; /* which head's ancestor? */
-	int generation; /* how many parents away from head_name */
+నిర్మాణం commit_name {
+	స్థిరరాశి అక్షరం *తల_name; /* which head's ancestor? */
+	పూర్ణాంకం generation; /* how many parents away from head_name */
 };
 
-define_commit_slab(commit_name_slab, struct commit_name *);
-static struct commit_name_slab name_slab;
+define_commit_slab(commit_name_slab, నిర్మాణం commit_name *);
+స్థిర నిర్మాణం commit_name_slab name_slab;
 
-static struct commit_name *commit_to_name(struct commit *commit)
+స్థిర నిర్మాణం commit_name *commit_గమ్యం_name(నిర్మాణం commit *commit)
 {
-	return *commit_name_slab_at(&name_slab, commit);
+	తిరిగి *commit_name_slab_at(&name_slab, commit);
 }
 
 
 /* Name the commit as nth generation ancestor of head_name;
  * we count only the first-parent relationship for naming purposes.
  */
-static void name_commit(struct commit *commit, const char *head_name, int nth)
+స్థిర శూన్య name_commit(నిర్మాణం commit *commit, స్థిరరాశి అక్షరం *తల_name, పూర్ణాంకం nth)
 {
-	struct commit_name *name;
+	నిర్మాణం commit_name *name;
 
 	name = *commit_name_slab_at(&name_slab, commit);
-	if (!name) {
-		name = xmalloc(sizeof(*name));
+	ఒకవేళ (!name) {
+		name = xmalloc(పరిమాణం(*name));
 		*commit_name_slab_at(&name_slab, commit) = name;
 	}
-	name->head_name = head_name;
+	name->తల_name = తల_name;
 	name->generation = nth;
 }
 
@@ -105,156 +105,156 @@ static void name_commit(struct commit *commit, const char *head_name, int nth)
  * commit is nth generation ancestor of, if that generation
  * number is better than the name it already has.
  */
-static void name_parent(struct commit *commit, struct commit *parent)
+స్థిర శూన్య name_మాతృ(నిర్మాణం commit *commit, నిర్మాణం commit *మాతృ)
 {
-	struct commit_name *commit_name = commit_to_name(commit);
-	struct commit_name *parent_name = commit_to_name(parent);
-	if (!commit_name)
-		return;
-	if (!parent_name ||
-	    commit_name->generation + 1 < parent_name->generation)
-		name_commit(parent, commit_name->head_name,
+	నిర్మాణం commit_name *commit_name = commit_గమ్యం_name(commit);
+	నిర్మాణం commit_name *మాతృ_name = commit_గమ్యం_name(మాతృ);
+	ఒకవేళ (!commit_name)
+		తిరిగి;
+	ఒకవేళ (!మాతృ_name ||
+	    commit_name->generation + 1 < మాతృ_name->generation)
+		name_commit(మాతృ, commit_name->తల_name,
 			    commit_name->generation + 1);
 }
 
-static int name_first_parent_chain(struct commit *c)
+స్థిర పూర్ణాంకం name_మొదటి_మాతృ_chain(నిర్మాణం commit *c)
 {
-	int i = 0;
-	while (c) {
-		struct commit *p;
-		if (!commit_to_name(c))
-			break;
-		if (!c->parents)
-			break;
-		p = c->parents->item;
-		if (!commit_to_name(p)) {
-			name_parent(c, p);
+	పూర్ణాంకం i = 0;
+	అయితే (c) {
+		నిర్మాణం commit *p;
+		ఒకవేళ (!commit_గమ్యం_name(c))
+			ఆపు;
+		ఒకవేళ (!c->parents)
+			ఆపు;
+		p = c->parents->అంశం;
+		ఒకవేళ (!commit_గమ్యం_name(p)) {
+			name_మాతృ(c, p);
 			i++;
 		}
-		else
-			break;
+		లేకపోతే
+			ఆపు;
 		c = p;
 	}
-	return i;
+	తిరిగి i;
 }
 
-static void name_commits(struct commit_list *list,
-			 struct commit **rev,
-			 char **ref_name,
-			 int num_rev)
+స్థిర శూన్య name_commits(నిర్మాణం commit_list *list,
+			 నిర్మాణం commit **rev,
+			 అక్షరం **ref_name,
+			 పూర్ణాంకం అంకె_rev)
 {
-	struct commit_list *cl;
-	struct commit *c;
-	int i;
+	నిర్మాణం commit_list *cl;
+	నిర్మాణం commit *c;
+	పూర్ణాంకం i;
 
 	/* First give names to the given heads */
-	for (cl = list; cl; cl = cl->next) {
-		c = cl->item;
-		if (commit_to_name(c))
-			continue;
-		for (i = 0; i < num_rev; i++) {
-			if (rev[i] == c) {
+	కొరకు (cl = list; cl; cl = cl->తదుపరి) {
+		c = cl->అంశం;
+		ఒకవేళ (commit_గమ్యం_name(c))
+			కొనసాగు;
+		కొరకు (i = 0; i < అంకె_rev; i++) {
+			ఒకవేళ (rev[i] == c) {
 				name_commit(c, ref_name[i], 0);
-				break;
+				ఆపు;
 			}
 		}
 	}
 
 	/* Then commits on the first parent ancestry chain */
-	do {
+	చేయి {
 		i = 0;
-		for (cl = list; cl; cl = cl->next) {
-			i += name_first_parent_chain(cl->item);
+		కొరకు (cl = list; cl; cl = cl->తదుపరి) {
+			i += name_మొదటి_మాతృ_chain(cl->అంశం);
 		}
-	} while (i);
+	} అయితే (i);
 
 	/* Finally, any unnamed commits */
-	do {
+	చేయి {
 		i = 0;
-		for (cl = list; cl; cl = cl->next) {
-			struct commit_list *parents;
-			struct commit_name *n;
-			int nth;
-			c = cl->item;
-			if (!commit_to_name(c))
-				continue;
-			n = commit_to_name(c);
+		కొరకు (cl = list; cl; cl = cl->తదుపరి) {
+			నిర్మాణం commit_list *parents;
+			నిర్మాణం commit_name *n;
+			పూర్ణాంకం nth;
+			c = cl->అంశం;
+			ఒకవేళ (!commit_గమ్యం_name(c))
+				కొనసాగు;
+			n = commit_గమ్యం_name(c);
 			parents = c->parents;
 			nth = 0;
-			while (parents) {
-				struct commit *p = parents->item;
-				struct strbuf newname = STRBUF_INIT;
-				parents = parents->next;
+			అయితే (parents) {
+				నిర్మాణం commit *p = parents->అంశం;
+				నిర్మాణం strbuf newname = STRBUF_INIT;
+				parents = parents->తదుపరి;
 				nth++;
-				if (commit_to_name(p))
-					continue;
-				switch (n->generation) {
-				case 0:
-					strbuf_addstr(&newname, n->head_name);
-					break;
-				case 1:
-					strbuf_addf(&newname, "%s^", n->head_name);
-					break;
-				default:
+				ఒకవేళ (commit_గమ్యం_name(p))
+					కొనసాగు;
+				ఎంపిక (n->generation) {
+				స్థితి 0:
+					strbuf_addstr(&newname, n->తల_name);
+					ఆపు;
+				స్థితి 1:
+					strbuf_addf(&newname, "%s^", n->తల_name);
+					ఆపు;
+				అప్రమేయ:
 					strbuf_addf(&newname, "%s~%d",
-						    n->head_name, n->generation);
-					break;
+						    n->తల_name, n->generation);
+					ఆపు;
 				}
-				if (nth == 1)
+				ఒకవేళ (nth == 1)
 					strbuf_addch(&newname, '^');
-				else
+				లేకపోతే
 					strbuf_addf(&newname, "^%d", nth);
-				name_commit(p, strbuf_detach(&newname, NULL), 0);
+				name_commit(p, strbuf_detach(&newname, ఖాళీ), 0);
 				i++;
-				name_first_parent_chain(p);
+				name_మొదటి_మాతృ_chain(p);
 			}
 		}
-	} while (i);
+	} అయితే (i);
 }
 
-static int mark_seen(struct commit *commit, struct commit_list **seen_p)
+స్థిర పూర్ణాంకం mark_చూసిన(నిర్మాణం commit *commit, నిర్మాణం commit_list **చూసిన_p)
 {
-	if (!commit->object.flags) {
-		commit_list_insert(commit, seen_p);
-		return 1;
+	ఒకవేళ (!commit->object.flags) {
+		commit_list_చొప్పించు(commit, చూసిన_p);
+		తిరిగి 1;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static void join_revs(struct prio_queue *queue,
-		      struct commit_list **seen_p,
-		      int num_rev, int extra)
+స్థిర శూన్య join_revs(నిర్మాణం prio_వరుస *వరుస,
+		      నిర్మాణం commit_list **చూసిన_p,
+		      పూర్ణాంకం అంకె_rev, పూర్ణాంకం extra)
 {
-	int all_mask = ((1u << (REV_SHIFT + num_rev)) - 1);
-	int all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
-	struct commit *commit;
+	పూర్ణాంకం all_ముసుగు = ((1u << (REV_జరుపు + అంకె_rev)) - 1);
+	పూర్ణాంకం all_revs = all_ముసుగు & ~((1u << REV_జరుపు) - 1);
+	నిర్మాణం commit *commit;
 
-	while ((commit = prio_queue_peek(queue))) {
-		struct commit_list *parents;
-		int still_interesting = !!interesting(queue);
-		int flags = commit->object.flags & all_mask;
+	అయితే ((commit = prio_వరుస_peek(వరుస))) {
+		నిర్మాణం commit_list *parents;
+		పూర్ణాంకం still_interesting = !!interesting(వరుస);
+		పూర్ణాంకం flags = commit->object.flags & all_ముసుగు;
 
-		if (!still_interesting && extra <= 0)
-			break;
+		ఒకవేళ (!still_interesting && extra <= 0)
+			ఆపు;
 
-		prio_queue_get(queue);
+		prio_వరుస_get(వరుస);
 
-		mark_seen(commit, seen_p);
-		if ((flags & all_revs) == all_revs)
+		mark_చూసిన(commit, చూసిన_p);
+		ఒకవేళ ((flags & all_revs) == all_revs)
 			flags |= UNINTERESTING;
 		parents = commit->parents;
 
-		while (parents) {
-			struct commit *p = parents->item;
-			int this_flag = p->object.flags;
-			parents = parents->next;
-			if ((this_flag & flags) == flags)
-				continue;
+		అయితే (parents) {
+			నిర్మాణం commit *p = parents->అంశం;
+			పూర్ణాంకం this_flag = p->object.flags;
+			parents = parents->తదుపరి;
+			ఒకవేళ ((this_flag & flags) == flags)
+				కొనసాగు;
 			repo_parse_commit(the_repository, p);
-			if (mark_seen(p, seen_p) && !still_interesting)
+			ఒకవేళ (mark_చూసిన(p, చూసిన_p) && !still_interesting)
 				extra--;
 			p->object.flags |= flags;
-			prio_queue_put(queue, p);
+			prio_వరుస_put(వరుస, p);
 		}
 	}
 
@@ -265,16 +265,16 @@ static void join_revs(struct prio_queue *queue,
 	 * seen_p list.  Mark anything that can be reached from
 	 * uninteresting commits not interesting.
 	 */
-	for (;;) {
-		int changed = 0;
-		struct commit_list *s;
-		for (s = *seen_p; s; s = s->next) {
-			struct commit *c = s->item;
-			struct commit_list *parents;
+	కొరకు (;;) {
+		పూర్ణాంకం మారింది = 0;
+		నిర్మాణం commit_list *s;
+		కొరకు (s = *చూసిన_p; s; s = s->తదుపరి) {
+			నిర్మాణం commit *c = s->అంశం;
+			నిర్మాణం commit_list *parents;
 
-			if (((c->object.flags & all_revs) != all_revs) &&
+			ఒకవేళ (((c->object.flags & all_revs) != all_revs) &&
 			    !(c->object.flags & UNINTERESTING))
-				continue;
+				కొనసాగు;
 
 			/* The current commit is either a merge base or
 			 * already uninteresting one.  Mark its parents
@@ -283,383 +283,383 @@ static void join_revs(struct prio_queue *queue,
 			 * here.
 			 */
 			parents = c->parents;
-			while (parents) {
-				struct commit *p = parents->item;
-				parents = parents->next;
-				if (!(p->object.flags & UNINTERESTING)) {
+			అయితే (parents) {
+				నిర్మాణం commit *p = parents->అంశం;
+				parents = parents->తదుపరి;
+				ఒకవేళ (!(p->object.flags & UNINTERESTING)) {
 					p->object.flags |= UNINTERESTING;
-					changed = 1;
+					మారింది = 1;
 				}
 			}
 		}
-		if (!changed)
-			break;
+		ఒకవేళ (!మారింది)
+			ఆపు;
 	}
 }
 
-static void show_one_commit(struct commit *commit, int no_name)
+స్థిర శూన్య show_one_commit(నిర్మాణం commit *commit, పూర్ణాంకం no_name)
 {
-	struct strbuf pretty = STRBUF_INIT;
-	const char *pretty_str = "(unavailable)";
-	struct commit_name *name = commit_to_name(commit);
+	నిర్మాణం strbuf pretty = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *pretty_str = "(unavailable)";
+	నిర్మాణం commit_name *name = commit_గమ్యం_name(commit);
 
-	if (commit->object.parsed) {
+	ఒకవేళ (commit->object.parsed) {
 		pp_commit_easy(CMIT_FMT_ONELINE, commit, &pretty);
 		pretty_str = pretty.buf;
 	}
-	skip_prefix(pretty_str, "[PATCH] ", &pretty_str);
+	skip_ఉపసర్గ(pretty_str, "[PATCH] ", &pretty_str);
 
-	if (!no_name) {
-		if (name && name->head_name) {
-			printf("[%s", name->head_name);
-			if (name->generation) {
-				if (name->generation == 1)
-					printf("^");
-				else
-					printf("~%d", name->generation);
+	ఒకవేళ (!no_name) {
+		ఒకవేళ (name && name->తల_name) {
+			రాయి("[%s", name->తల_name);
+			ఒకవేళ (name->generation) {
+				ఒకవేళ (name->generation == 1)
+					రాయి("^");
+				లేకపోతే
+					రాయి("~%d", name->generation);
 			}
-			printf("] ");
+			రాయి("] ");
 		}
-		else
-			printf("[%s] ",
-			       repo_find_unique_abbrev(the_repository, &commit->object.oid,
+		లేకపోతే
+			రాయి("[%s] ",
+			       repo_కనుగొను_unique_abbrev(the_repository, &commit->object.oid,
 						       DEFAULT_ABBREV));
 	}
 	puts(pretty_str);
 	strbuf_release(&pretty);
 }
 
-static char *ref_name[MAX_REVS + 1];
-static int ref_name_cnt;
+స్థిర అక్షరం *ref_name[MAX_REVS + 1];
+స్థిర పూర్ణాంకం ref_name_cnt;
 
-static const char *find_digit_prefix(const char *s, int *v)
+స్థిర స్థిరరాశి అక్షరం *కనుగొను_digit_ఉపసర్గ(స్థిరరాశి అక్షరం *s, పూర్ణాంకం *v)
 {
-	const char *p;
-	int ver;
-	char ch;
+	స్థిరరాశి అక్షరం *p;
+	పూర్ణాంకం ver;
+	అక్షరం ch;
 
-	for (p = s, ver = 0;
+	కొరకు (p = s, ver = 0;
 	     '0' <= (ch = *p) && ch <= '9';
 	     p++)
 		ver = ver * 10 + ch - '0';
 	*v = ver;
-	return p;
+	తిరిగి p;
 }
 
 
-static int version_cmp(const char *a, const char *b)
+స్థిర పూర్ణాంకం సంస్కరణ_cmp(స్థిరరాశి అక్షరం *a, స్థిరరాశి అక్షరం *b)
 {
-	while (1) {
-		int va, vb;
+	అయితే (1) {
+		పూర్ణాంకం va, vb;
 
-		a = find_digit_prefix(a, &va);
-		b = find_digit_prefix(b, &vb);
-		if (va != vb)
-			return va - vb;
+		a = కనుగొను_digit_ఉపసర్గ(a, &va);
+		b = కనుగొను_digit_ఉపసర్గ(b, &vb);
+		ఒకవేళ (va != vb)
+			తిరిగి va - vb;
 
-		while (1) {
-			int ca = *a;
-			int cb = *b;
-			if ('0' <= ca && ca <= '9')
+		అయితే (1) {
+			పూర్ణాంకం ca = *a;
+			పూర్ణాంకం cb = *b;
+			ఒకవేళ ('0' <= ca && ca <= '9')
 				ca = 0;
-			if ('0' <= cb && cb <= '9')
+			ఒకవేళ ('0' <= cb && cb <= '9')
 				cb = 0;
-			if (ca != cb)
-				return ca - cb;
-			if (!ca)
-				break;
+			ఒకవేళ (ca != cb)
+				తిరిగి ca - cb;
+			ఒకవేళ (!ca)
+				ఆపు;
 			a++;
 			b++;
 		}
-		if (!*a && !*b)
-			return 0;
+		ఒకవేళ (!*a && !*b)
+			తిరిగి 0;
 	}
 }
 
-static int compare_ref_name(const void *a_, const void *b_)
+స్థిర పూర్ణాంకం compare_ref_name(స్థిరరాశి శూన్య *a_, స్థిరరాశి శూన్య *b_)
 {
-	const char * const*a = a_, * const*b = b_;
-	return version_cmp(*a, *b);
+	స్థిరరాశి అక్షరం * స్థిరరాశి*a = a_, * స్థిరరాశి*b = b_;
+	తిరిగి సంస్కరణ_cmp(*a, *b);
 }
 
-static void sort_ref_range(int bottom, int top)
+స్థిర శూన్య క్రమీకరించు_ref_range(పూర్ణాంకం bottom, పూర్ణాంకం శిఖరం)
 {
-	QSORT(ref_name + bottom, top - bottom, compare_ref_name);
+	QSORT(ref_name + bottom, శిఖరం - bottom, compare_ref_name);
 }
 
-static int append_ref(const char *refname, const struct object_id *oid,
-		      int allow_dups)
+స్థిర పూర్ణాంకం append_ref(స్థిరరాశి అక్షరం *refname, స్థిరరాశి నిర్మాణం object_id *oid,
+		      పూర్ణాంకం allow_dups)
 {
-	struct commit *commit = lookup_commit_reference_gently(the_repository,
+	నిర్మాణం commit *commit = lookup_commit_reference_gently(the_repository,
 							       oid, 1);
-	int i;
+	పూర్ణాంకం i;
 
-	if (!commit)
-		return 0;
+	ఒకవేళ (!commit)
+		తిరిగి 0;
 
-	if (!allow_dups) {
+	ఒకవేళ (!allow_dups) {
 		/* Avoid adding the same thing twice */
-		for (i = 0; i < ref_name_cnt; i++)
-			if (!strcmp(refname, ref_name[i]))
-				return 0;
+		కొరకు (i = 0; i < ref_name_cnt; i++)
+			ఒకవేళ (!strcmp(refname, ref_name[i]))
+				తిరిగి 0;
 	}
-	if (MAX_REVS <= ref_name_cnt) {
+	ఒకవేళ (MAX_REVS <= ref_name_cnt) {
 		warning(Q_("ignoring %s; cannot handle more than %d ref",
 			   "ignoring %s; cannot handle more than %d refs",
 			   MAX_REVS), refname, MAX_REVS);
-		return 0;
+		తిరిగి 0;
 	}
 	ref_name[ref_name_cnt++] = xstrdup(refname);
-	ref_name[ref_name_cnt] = NULL;
-	return 0;
+	ref_name[ref_name_cnt] = ఖాళీ;
+	తిరిగి 0;
 }
 
-static int append_head_ref(const struct reference *ref, void *cb_data UNUSED)
+స్థిర పూర్ణాంకం append_తల_ref(స్థిరరాశి నిర్మాణం reference *ref, శూన్య *cb_దత్తాంశం వాడని)
 {
-	struct object_id tmp;
-	int ofs = 11;
-	if (!starts_with(ref->name, "refs/heads/"))
-		return 0;
+	నిర్మాణం object_id tmp;
+	పూర్ణాంకం ofs = 11;
+	ఒకవేళ (!starts_with(ref->name, "refs/heads/"))
+		తిరిగి 0;
 	/* If both heads/foo and tags/foo exists, get_sha1 would
 	 * get confused.
 	 */
-	if (repo_get_oid(the_repository, ref->name + ofs, &tmp) || !oideq(&tmp, ref->oid))
+	ఒకవేళ (repo_get_oid(the_repository, ref->name + ofs, &tmp) || !oideq(&tmp, ref->oid))
 		ofs = 5;
-	return append_ref(ref->name + ofs, ref->oid, 0);
+	తిరిగి append_ref(ref->name + ofs, ref->oid, 0);
 }
 
-static int append_remote_ref(const struct reference *ref, void *cb_data UNUSED)
+స్థిర పూర్ణాంకం append_remote_ref(స్థిరరాశి నిర్మాణం reference *ref, శూన్య *cb_దత్తాంశం వాడని)
 {
-	struct object_id tmp;
-	int ofs = 13;
-	if (!starts_with(ref->name, "refs/remotes/"))
-		return 0;
+	నిర్మాణం object_id tmp;
+	పూర్ణాంకం ofs = 13;
+	ఒకవేళ (!starts_with(ref->name, "refs/remotes/"))
+		తిరిగి 0;
 	/* If both heads/foo and tags/foo exists, get_sha1 would
 	 * get confused.
 	 */
-	if (repo_get_oid(the_repository, ref->name + ofs, &tmp) || !oideq(&tmp, ref->oid))
+	ఒకవేళ (repo_get_oid(the_repository, ref->name + ofs, &tmp) || !oideq(&tmp, ref->oid))
 		ofs = 5;
-	return append_ref(ref->name + ofs, ref->oid, 0);
+	తిరిగి append_ref(ref->name + ofs, ref->oid, 0);
 }
 
-static int append_tag_ref(const char *refname, const struct object_id *oid,
-			  int flag UNUSED, void *cb_data UNUSED)
+స్థిర పూర్ణాంకం append_ట్యాగ్_ref(స్థిరరాశి అక్షరం *refname, స్థిరరాశి నిర్మాణం object_id *oid,
+			  పూర్ణాంకం flag వాడని, శూన్య *cb_దత్తాంశం వాడని)
 {
-	if (!starts_with(refname, "refs/tags/"))
-		return 0;
-	return append_ref(refname + 5, oid, 0);
+	ఒకవేళ (!starts_with(refname, "refs/tags/"))
+		తిరిగి 0;
+	తిరిగి append_ref(refname + 5, oid, 0);
 }
 
-static const char *match_ref_pattern = NULL;
-static int match_ref_slash = 0;
+స్థిర స్థిరరాశి అక్షరం *సరిపోలిక_ref_నమూనా = ఖాళీ;
+స్థిర పూర్ణాంకం సరిపోలిక_ref_slash = 0;
 
-static int append_matching_ref(const struct reference *ref, void *cb_data)
+స్థిర పూర్ణాంకం append_matching_ref(స్థిరరాశి నిర్మాణం reference *ref, శూన్య *cb_దత్తాంశం)
 {
 	/* we want to allow pattern hold/<asterisk> to show all
 	 * branches under refs/heads/hold/, and v0.99.9? to show
 	 * refs/tags/v0.99.9a and friends.
 	 */
-	const char *tail;
-	int slash = count_slashes(ref->name);
-	for (tail = ref->name; *tail && match_ref_slash < slash; )
-		if (*tail++ == '/')
+	స్థిరరాశి అక్షరం *తోక;
+	పూర్ణాంకం slash = లెక్క_slashes(ref->name);
+	కొరకు (తోక = ref->name; *తోక && సరిపోలిక_ref_slash < slash; )
+		ఒకవేళ (*తోక++ == '/')
 			slash--;
-	if (!*tail)
-		return 0;
-	if (wildmatch(match_ref_pattern, tail, 0))
-		return 0;
-	if (starts_with(ref->name, "refs/heads/"))
-		return append_head_ref(ref, cb_data);
-	if (starts_with(ref->name, "refs/tags/"))
-		return append_tag_ref(ref->name, ref->oid, ref->flags, cb_data);
-	return append_ref(ref->name, ref->oid, 0);
+	ఒకవేళ (!*తోక)
+		తిరిగి 0;
+	ఒకవేళ (wildmatch(సరిపోలిక_ref_నమూనా, తోక, 0))
+		తిరిగి 0;
+	ఒకవేళ (starts_with(ref->name, "refs/heads/"))
+		తిరిగి append_తల_ref(ref, cb_దత్తాంశం);
+	ఒకవేళ (starts_with(ref->name, "refs/tags/"))
+		తిరిగి append_ట్యాగ్_ref(ref->name, ref->oid, ref->flags, cb_దత్తాంశం);
+	తిరిగి append_ref(ref->name, ref->oid, 0);
 }
 
-static void snarf_refs(int head, int remotes)
+స్థిర శూన్య snarf_refs(పూర్ణాంకం తల, పూర్ణాంకం remotes)
 {
-	if (head) {
-		int orig_cnt = ref_name_cnt;
+	ఒకవేళ (తల) {
+		పూర్ణాంకం orig_cnt = ref_name_cnt;
 
 		refs_for_each_ref(get_main_ref_store(the_repository),
-				  append_head_ref, NULL);
-		sort_ref_range(orig_cnt, ref_name_cnt);
+				  append_తల_ref, ఖాళీ);
+		క్రమీకరించు_ref_range(orig_cnt, ref_name_cnt);
 	}
-	if (remotes) {
-		int orig_cnt = ref_name_cnt;
+	ఒకవేళ (remotes) {
+		పూర్ణాంకం orig_cnt = ref_name_cnt;
 
 		refs_for_each_ref(get_main_ref_store(the_repository),
-				  append_remote_ref, NULL);
-		sort_ref_range(orig_cnt, ref_name_cnt);
+				  append_remote_ref, ఖాళీ);
+		క్రమీకరించు_ref_range(orig_cnt, ref_name_cnt);
 	}
 }
 
-static int rev_is_head(const char *head, const char *name)
+స్థిర పూర్ణాంకం rev_is_తల(స్థిరరాశి అక్షరం *తల, స్థిరరాశి అక్షరం *name)
 {
-	if (!head)
-		return 0;
-	skip_prefix(head, "refs/heads/", &head);
-	if (!skip_prefix(name, "refs/heads/", &name))
-		skip_prefix(name, "heads/", &name);
-	return !strcmp(head, name);
+	ఒకవేళ (!తల)
+		తిరిగి 0;
+	skip_ఉపసర్గ(తల, "refs/heads/", &తల);
+	ఒకవేళ (!skip_ఉపసర్గ(name, "refs/heads/", &name))
+		skip_ఉపసర్గ(name, "heads/", &name);
+	తిరిగి !strcmp(తల, name);
 }
 
-static int show_merge_base(const struct commit_list *seen, int num_rev)
+స్థిర పూర్ణాంకం show_విలీనం_పునాది(స్థిరరాశి నిర్మాణం commit_list *చూసిన, పూర్ణాంకం అంకె_rev)
 {
-	int all_mask = ((1u << (REV_SHIFT + num_rev)) - 1);
-	int all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
-	int exit_status = 1;
+	పూర్ణాంకం all_ముసుగు = ((1u << (REV_జరుపు + అంకె_rev)) - 1);
+	పూర్ణాంకం all_revs = all_ముసుగు & ~((1u << REV_జరుపు) - 1);
+	పూర్ణాంకం exit_స్థితి = 1;
 
-	for (const struct commit_list *s = seen; s; s = s->next) {
-		struct commit *commit = s->item;
-		int flags = commit->object.flags & all_mask;
-		if (!(flags & UNINTERESTING) &&
+	కొరకు (స్థిరరాశి నిర్మాణం commit_list *s = చూసిన; s; s = s->తదుపరి) {
+		నిర్మాణం commit *commit = s->అంశం;
+		పూర్ణాంకం flags = commit->object.flags & all_ముసుగు;
+		ఒకవేళ (!(flags & UNINTERESTING) &&
 		    ((flags & all_revs) == all_revs)) {
-			puts(oid_to_hex(&commit->object.oid));
-			exit_status = 0;
+			puts(oid_గమ్యం_hex(&commit->object.oid));
+			exit_స్థితి = 0;
 			commit->object.flags |= UNINTERESTING;
 		}
 	}
-	return exit_status;
+	తిరిగి exit_స్థితి;
 }
 
-static int show_independent(struct commit **rev,
-			    int num_rev,
-			    unsigned int *rev_mask)
+స్థిర పూర్ణాంకం show_independent(నిర్మాణం commit **rev,
+			    పూర్ణాంకం అంకె_rev,
+			    గుర్తులేని పూర్ణాంకం *rev_ముసుగు)
 {
-	int i;
+	పూర్ణాంకం i;
 
-	for (i = 0; i < num_rev; i++) {
-		struct commit *commit = rev[i];
-		unsigned int flag = rev_mask[i];
+	కొరకు (i = 0; i < అంకె_rev; i++) {
+		నిర్మాణం commit *commit = rev[i];
+		గుర్తులేని పూర్ణాంకం flag = rev_ముసుగు[i];
 
-		if (commit->object.flags == flag)
-			puts(oid_to_hex(&commit->object.oid));
+		ఒకవేళ (commit->object.flags == flag)
+			puts(oid_గమ్యం_hex(&commit->object.oid));
 		commit->object.flags |= UNINTERESTING;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static void append_one_rev(const char *av)
+స్థిర శూన్య append_one_rev(స్థిరరాశి అక్షరం *av)
 {
-	struct object_id revkey;
-	if (!repo_get_oid(the_repository, av, &revkey)) {
+	నిర్మాణం object_id revkey;
+	ఒకవేళ (!repo_get_oid(the_repository, av, &revkey)) {
 		append_ref(av, &revkey, 0);
-		return;
+		తిరిగి;
 	}
-	if (strpbrk(av, "*?[")) {
+	ఒకవేళ (strpbrk(av, "*?[")) {
 		/* glob style match */
-		int saved_matches = ref_name_cnt;
+		పూర్ణాంకం saved_matches = ref_name_cnt;
 
-		match_ref_pattern = av;
-		match_ref_slash = count_slashes(av);
+		సరిపోలిక_ref_నమూనా = av;
+		సరిపోలిక_ref_slash = లెక్క_slashes(av);
 		refs_for_each_ref(get_main_ref_store(the_repository),
-				  append_matching_ref, NULL);
-		if (saved_matches == ref_name_cnt &&
+				  append_matching_ref, ఖాళీ);
+		ఒకవేళ (saved_matches == ref_name_cnt &&
 		    ref_name_cnt < MAX_REVS)
 			error(_("no matching refs with %s"), av);
-		sort_ref_range(saved_matches, ref_name_cnt);
-		return;
+		క్రమీకరించు_ref_range(saved_matches, ref_name_cnt);
+		తిరిగి;
 	}
 	die("bad sha1 reference %s", av);
 }
 
-static int git_show_branch_config(const char *var, const char *value,
-				  const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం git_show_branch_config(స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *విలువ,
+				  స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	if (!strcmp(var, "showbranch.default")) {
-		if (!value)
-			return config_error_nonbool(var);
+	ఒకవేళ (!strcmp(var, "showbranch.default")) {
+		ఒకవేళ (!విలువ)
+			తిరిగి config_error_nonbool(var);
 		/*
 		 * default_arg is now passed to parse_options(), so we need to
 		 * mimic the real argv a bit better.
 		 */
-		if (!default_args.nr)
-			strvec_push(&default_args, "show-branch");
-		strvec_push(&default_args, value);
-		return 0;
+		ఒకవేళ (!default_వాదనలు.nr)
+			strvec_నెట్టు(&default_వాదనలు, "show-branch");
+		strvec_నెట్టు(&default_వాదనలు, విలువ);
+		తిరిగి 0;
 	}
 
-	if (!strcmp(var, "color.showbranch")) {
-		showbranch_use_color = git_config_colorbool(var, value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "color.showbranch")) {
+		showbranch_use_color = git_config_colorbool(var, విలువ);
+		తిరిగి 0;
 	}
 
-	if (git_color_config(var, value, cb) < 0)
-		return -1;
+	ఒకవేళ (git_color_config(var, విలువ, cb) < 0)
+		తిరిగి -1;
 
-	return git_default_config(var, value, ctx, cb);
+	తిరిగి git_default_config(var, విలువ, ctx, cb);
 }
 
-static int omit_in_dense(struct commit *commit, struct commit **rev, int n)
+స్థిర పూర్ణాంకం omit_లోపల_dense(నిర్మాణం commit *commit, నిర్మాణం commit **rev, పూర్ణాంకం n)
 {
 	/* If the commit is tip of the named branches, do not
 	 * omit it.
 	 * Otherwise, if it is a merge that is reachable from only one
 	 * tip, it is not that interesting.
 	 */
-	int i, flag, count;
-	for (i = 0; i < n; i++)
-		if (rev[i] == commit)
-			return 0;
+	పూర్ణాంకం i, flag, లెక్క;
+	కొరకు (i = 0; i < n; i++)
+		ఒకవేళ (rev[i] == commit)
+			తిరిగి 0;
 	flag = commit->object.flags;
-	for (i = count = 0; i < n; i++) {
-		if (flag & (1u << (i + REV_SHIFT)))
-			count++;
+	కొరకు (i = లెక్క = 0; i < n; i++) {
+		ఒకవేళ (flag & (1u << (i + REV_జరుపు)))
+			లెక్క++;
 	}
-	if (count == 1)
-		return 1;
-	return 0;
+	ఒకవేళ (లెక్క == 1)
+		తిరిగి 1;
+	తిరిగి 0;
 }
 
-static int reflog = 0;
+స్థిర పూర్ణాంకం reflog = 0;
 
-static int parse_reflog_param(const struct option *opt, const char *arg,
-			      int unset)
+స్థిర పూర్ణాంకం parse_reflog_param(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg,
+			      పూర్ణాంకం unset)
 {
-	char *ep;
-	const char **base = (const char **)opt->value;
+	అక్షరం *ep;
+	స్థిరరాశి అక్షరం **పునాది = (స్థిరరాశి అక్షరం **)opt->విలువ;
 	BUG_ON_OPT_NEG(unset);
-	if (!arg)
+	ఒకవేళ (!arg)
 		arg = "";
 	reflog = strtoul(arg, &ep, 10);
-	if (*ep == ',')
-		*base = ep + 1;
-	else if (*ep)
-		return error("unrecognized reflog param '%s'", arg);
-	else
-		*base = NULL;
-	if (reflog <= 0)
+	ఒకవేళ (*ep == ',')
+		*పునాది = ep + 1;
+	లేకపోతే ఒకవేళ (*ep)
+		తిరిగి error("unrecognized reflog param '%s'", arg);
+	లేకపోతే
+		*పునాది = ఖాళీ;
+	ఒకవేళ (reflog <= 0)
 		reflog = DEFAULT_REFLOG;
-	return 0;
+	తిరిగి 0;
 }
 
-int cmd_show_branch(int ac,
-		const char **av,
-		const char *prefix,
-		struct repository *repo UNUSED)
+పూర్ణాంకం cmd_show_branch(పూర్ణాంకం ac,
+		స్థిరరాశి అక్షరం **av,
+		స్థిరరాశి అక్షరం *ఉపసర్గ,
+		నిర్మాణం repository *repo వాడని)
 {
-	struct commit *rev[MAX_REVS], *commit;
-	char *reflog_msg[MAX_REVS] = {0};
-	struct commit_list *seen = NULL;
-	struct prio_queue queue = { compare_commits_by_commit_date };
-	unsigned int rev_mask[MAX_REVS];
-	int num_rev, i, extra = 0;
-	int all_heads = 0, all_remotes = 0;
-	int all_mask, all_revs;
-	enum rev_sort_order sort_order = REV_SORT_IN_GRAPH_ORDER;
-	char *head;
-	struct object_id head_oid;
-	int merge_base = 0;
-	int independent = 0;
-	int no_name = 0;
-	int sha1_name = 0;
-	int shown_merge_point = 0;
-	int with_current_branch = 0;
-	int head_at = -1;
-	int topics = 0;
-	int sparse = 0;
-	const char *reflog_base = NULL;
-	struct option builtin_show_branch_options[] = {
+	నిర్మాణం commit *rev[MAX_REVS], *commit;
+	అక్షరం *reflog_సందేశం[MAX_REVS] = {0};
+	నిర్మాణం commit_list *చూసిన = ఖాళీ;
+	నిర్మాణం prio_వరుస వరుస = { compare_commits_by_commit_date };
+	గుర్తులేని పూర్ణాంకం rev_ముసుగు[MAX_REVS];
+	పూర్ణాంకం అంకె_rev, i, extra = 0;
+	పూర్ణాంకం all_heads = 0, all_remotes = 0;
+	పూర్ణాంకం all_ముసుగు, all_revs;
+	గణన rev_క్రమీకరించు_క్రమం క్రమీకరించు_క్రమం = REV_క్రమీకరించు_లోపల_లేఖాచిత్రం_క్రమం;
+	అక్షరం *తల;
+	నిర్మాణం object_id తల_oid;
+	పూర్ణాంకం విలీనం_పునాది = 0;
+	పూర్ణాంకం independent = 0;
+	పూర్ణాంకం no_name = 0;
+	పూర్ణాంకం sha1_name = 0;
+	పూర్ణాంకం shown_విలీనం_బిందువు = 0;
+	పూర్ణాంకం with_current_branch = 0;
+	పూర్ణాంకం తల_at = -1;
+	పూర్ణాంకం topics = 0;
+	పూర్ణాంకం sparse = 0;
+	స్థిరరాశి అక్షరం *reflog_పునాది = ఖాళీ;
+	నిర్మాణం option builtin_show_branch_options[] = {
 		OPT_BOOL('a', "all", &all_heads,
 			 N_("show remote-tracking and local branches")),
 		OPT_BOOL('r', "remotes", &all_remotes,
@@ -669,68 +669,68 @@ int cmd_show_branch(int ac,
 		{
 			.type = OPTION_INTEGER,
 			.long_name = "more",
-			.value = &extra,
-			.precision = sizeof(extra),
+			.విలువ = &extra,
+			.precision = పరిమాణం(extra),
 			.argh = N_("n"),
 			.help = N_("show <n> more commits after the common ancestor"),
 			.flags = PARSE_OPT_OPTARG,
 			.defval = 1,
 		},
-		OPT_SET_INT(0, "list", &extra, N_("synonym to more=-1"), -1),
+		OPT_సమితి_INT(0, "list", &extra, N_("synonym to more=-1"), -1),
 		OPT_BOOL(0, "no-name", &no_name, N_("suppress naming strings")),
 		OPT_BOOL(0, "current", &with_current_branch,
 			 N_("include the current branch")),
 		OPT_BOOL(0, "sha1-name", &sha1_name,
 			 N_("name commits with their object names")),
-		OPT_BOOL(0, "merge-base", &merge_base,
+		OPT_BOOL(0, "merge-base", &విలీనం_పునాది,
 			 N_("show possible merge bases")),
 		OPT_BOOL(0, "independent", &independent,
 			    N_("show refs unreachable from any other ref")),
-		OPT_SET_INT_F(0, "topo-order", &sort_order,
+		OPT_సమితి_INT_F(0, "topo-order", &క్రమీకరించు_క్రమం,
 			      N_("show commits in topological order"),
-			      REV_SORT_IN_GRAPH_ORDER, PARSE_OPT_NONEG),
+			      REV_క్రమీకరించు_లోపల_లేఖాచిత్రం_క్రమం, PARSE_OPT_NONEG),
 		OPT_BOOL(0, "topics", &topics,
 			 N_("show only commits not on the first branch")),
-		OPT_SET_INT(0, "sparse", &sparse,
+		OPT_సమితి_INT(0, "sparse", &sparse,
 			    N_("show merges reachable from only one tip"), 1),
-		OPT_SET_INT_F(0, "date-order", &sort_order,
+		OPT_సమితి_INT_F(0, "date-order", &క్రమీకరించు_క్రమం,
 			      N_("topologically sort, maintaining date order "
 				 "where possible"),
-			      REV_SORT_BY_COMMIT_DATE, PARSE_OPT_NONEG),
-		OPT_CALLBACK_F('g', "reflog", &reflog_base, N_("<n>[,<base>]"),
+			      REV_క్రమీకరించు_BY_COMMIT_DATE, PARSE_OPT_NONEG),
+		OPT_CALLBACK_F('g', "reflog", &reflog_పునాది, N_("<n>[,<base>]"),
 			    N_("show <n> most recent ref-log entries starting at "
 			       "base"),
 			    PARSE_OPT_OPTARG | PARSE_OPT_NONEG,
 			    parse_reflog_param),
-		OPT_END()
+		OPT_చివర()
 	};
-	const char **args_copy = NULL;
-	int ret;
+	స్థిరరాశి అక్షరం **వాదనలు_copy = ఖాళీ;
+	పూర్ణాంకం ret;
 
 	init_commit_name_slab(&name_slab);
 
-	repo_config(the_repository, git_show_branch_config, NULL);
+	repo_config(the_repository, git_show_branch_config, ఖాళీ);
 
 	/* If nothing is specified, try the default first */
-	if (ac == 1 && default_args.nr) {
-		DUP_ARRAY(args_copy, default_args.v, default_args.nr);
-		ac = default_args.nr;
-		av = args_copy;
+	ఒకవేళ (ac == 1 && default_వాదనలు.nr) {
+		DUP_ARRAY(వాదనలు_copy, default_వాదనలు.v, default_వాదనలు.nr);
+		ac = default_వాదనలు.nr;
+		av = వాదనలు_copy;
 	}
 
-	ac = parse_options(ac, av, prefix, builtin_show_branch_options,
+	ac = parse_options(ac, av, ఉపసర్గ, builtin_show_branch_options,
 			   show_branch_usage, PARSE_OPT_STOP_AT_NON_OPTION);
-	if (all_heads)
+	ఒకవేళ (all_heads)
 		all_remotes = 1;
 
-	if (extra || reflog) {
+	ఒకవేళ (extra || reflog) {
 		/* "listing" mode is incompatible with
 		 * independent nor merge-base modes.
 		 */
-		if (independent || merge_base)
+		ఒకవేళ (independent || విలీనం_పునాది)
 			usage_with_options(show_branch_usage,
 					   builtin_show_branch_options);
-		if (reflog && ((0 < extra) || all_heads || all_remotes))
+		ఒకవేళ (reflog && ((0 < extra) || all_heads || all_remotes))
 			/*
 			 * Asking for --more in reflog mode does not
 			 * make sense.  --list is Ok.
@@ -741,270 +741,270 @@ int cmd_show_branch(int ac,
 				"--all/--remotes/--independent/--merge-base");
 	}
 
-	if (with_current_branch && reflog)
+	ఒకవేళ (with_current_branch && reflog)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--reflog", "--current");
 
 	/* If nothing is specified, show all branches by default */
-	if (ac <= topics && all_heads + all_remotes == 0)
+	ఒకవేళ (ac <= topics && all_heads + all_remotes == 0)
 		all_heads = 1;
 
-	if (reflog) {
-		struct object_id oid;
-		char *ref;
-		int base = 0;
-		unsigned int flags = 0;
+	ఒకవేళ (reflog) {
+		నిర్మాణం object_id oid;
+		అక్షరం *ref;
+		పూర్ణాంకం పునాది = 0;
+		గుర్తులేని పూర్ణాంకం flags = 0;
 
-		if (ac == 0) {
-			static const char *fake_av[2];
+		ఒకవేళ (ac == 0) {
+			స్థిర స్థిరరాశి అక్షరం *fake_av[2];
 
 			fake_av[0] = refs_resolve_refdup(get_main_ref_store(the_repository),
 							 "HEAD",
 							 RESOLVE_REF_READING,
 							 &oid,
-							 NULL);
-			fake_av[1] = NULL;
+							 ఖాళీ);
+			fake_av[1] = ఖాళీ;
 			av = fake_av;
 			ac = 1;
-			if (!*av)
+			ఒకవేళ (!*av)
 				die(_("no branches given, and HEAD is not valid"));
 		}
-		if (ac != 1)
+		ఒకవేళ (ac != 1)
 			die(_("--reflog option needs one branch name"));
 
-		if (MAX_REVS < reflog)
+		ఒకవేళ (MAX_REVS < reflog)
 			die(Q_("only %d entry can be shown at one time.",
 			       "only %d entries can be shown at one time.",
 			       MAX_REVS), MAX_REVS);
-		if (!repo_dwim_ref(the_repository, *av, strlen(*av), &oid,
+		ఒకవేళ (!repo_dwim_ref(the_repository, *av, అక్షరశ్రేణి_పొడవు(*av), &oid,
 				   &ref, 0))
 			die(_("no such ref %s"), *av);
 
 		/* Has the base been specified? */
-		if (reflog_base) {
-			char *ep;
-			base = strtoul(reflog_base, &ep, 10);
-			if (*ep) {
+		ఒకవేళ (reflog_పునాది) {
+			అక్షరం *ep;
+			పునాది = strtoul(reflog_పునాది, &ep, 10);
+			ఒకవేళ (*ep) {
 				/* Ah, that is a date spec... */
 				timestamp_t at;
-				at = approxidate(reflog_base);
+				at = approxidate(reflog_పునాది);
 				read_ref_at(get_main_ref_store(the_repository),
-					    ref, flags, at, -1, &oid, NULL,
-					    NULL, NULL, &base);
+					    ref, flags, at, -1, &oid, ఖాళీ,
+					    ఖాళీ, ఖాళీ, &పునాది);
 			}
 		}
 
-		for (i = 0; i < reflog; i++) {
-			char *logmsg = NULL;
-			char *nth_desc;
-			const char *msg;
-			char *end;
+		కొరకు (i = 0; i < reflog; i++) {
+			అక్షరం *logmsg = ఖాళీ;
+			అక్షరం *nth_desc;
+			స్థిరరాశి అక్షరం *సందేశం;
+			అక్షరం *చివర;
 			timestamp_t timestamp;
-			int tz;
+			పూర్ణాంకం tz;
 
-			if (read_ref_at(get_main_ref_store(the_repository),
-					ref, flags, 0, base + i, &oid, &logmsg,
-					&timestamp, &tz, NULL)) {
-				free(logmsg);
+			ఒకవేళ (read_ref_at(get_main_ref_store(the_repository),
+					ref, flags, 0, పునాది + i, &oid, &logmsg,
+					&timestamp, &tz, ఖాళీ)) {
+				విడుదల(logmsg);
 				reflog = i;
-				break;
+				ఆపు;
 			}
 
-			end = strchr(logmsg, '\n');
-			if (end)
-				*end = '\0';
+			చివర = strchr(logmsg, '\n');
+			ఒకవేళ (చివర)
+				*చివర = '\0';
 
-			msg = (*logmsg == '\0') ? "(none)" : logmsg;
-			reflog_msg[i] = xstrfmt("(%s) %s",
+			సందేశం = (*logmsg == '\0') ? "(none)" : logmsg;
+			reflog_సందేశం[i] = xstrfmt("(%s) %s",
 						show_date(timestamp, tz,
-							  DATE_MODE(RELATIVE)),
-						msg);
-			free(logmsg);
+							  DATE_బహుళకం(RELATIVE)),
+						సందేశం);
+			విడుదల(logmsg);
 
-			nth_desc = xstrfmt("%s@{%d}", *av, base+i);
+			nth_desc = xstrfmt("%s@{%d}", *av, పునాది+i);
 			append_ref(nth_desc, &oid, 1);
-			free(nth_desc);
+			విడుదల(nth_desc);
 		}
-		free(ref);
+		విడుదల(ref);
 	}
-	else {
-		while (0 < ac) {
+	లేకపోతే {
+		అయితే (0 < ac) {
 			append_one_rev(*av);
 			ac--; av++;
 		}
-		if (all_heads + all_remotes)
+		ఒకవేళ (all_heads + all_remotes)
 			snarf_refs(all_heads, all_remotes);
 	}
 
-	head = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
+	తల = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
 				   RESOLVE_REF_READING,
-				   &head_oid, NULL);
+				   &తల_oid, ఖాళీ);
 
-	if (with_current_branch && head) {
-		int has_head = 0;
-		for (i = 0; !has_head && i < ref_name_cnt; i++) {
+	ఒకవేళ (with_current_branch && తల) {
+		పూర్ణాంకం has_తల = 0;
+		కొరకు (i = 0; !has_తల && i < ref_name_cnt; i++) {
 			/* We are only interested in adding the branch
 			 * HEAD points at.
 			 */
-			if (rev_is_head(head, ref_name[i]))
-				has_head++;
+			ఒకవేళ (rev_is_తల(తల, ref_name[i]))
+				has_తల++;
 		}
-		if (!has_head) {
-			const char *name = head;
-			skip_prefix(name, "refs/heads/", &name);
+		ఒకవేళ (!has_తల) {
+			స్థిరరాశి అక్షరం *name = తల;
+			skip_ఉపసర్గ(name, "refs/heads/", &name);
 			append_one_rev(name);
 		}
 	}
 
-	if (!ref_name_cnt) {
+	ఒకవేళ (!ref_name_cnt) {
 		fprintf(stderr, "No revs to be shown.\n");
 		ret = 0;
-		goto out;
+		వెళ్ళు బహిర్గతం;
 	}
 
-	for (num_rev = 0; ref_name[num_rev]; num_rev++) {
-		struct object_id revkey;
-		unsigned int flag = 1u << (num_rev + REV_SHIFT);
+	కొరకు (అంకె_rev = 0; ref_name[అంకె_rev]; అంకె_rev++) {
+		నిర్మాణం object_id revkey;
+		గుర్తులేని పూర్ణాంకం flag = 1u << (అంకె_rev + REV_జరుపు);
 
-		if (MAX_REVS <= num_rev)
+		ఒకవేళ (MAX_REVS <= అంకె_rev)
 			die(Q_("cannot handle more than %d rev.",
 			       "cannot handle more than %d revs.",
 			       MAX_REVS), MAX_REVS);
-		if (repo_get_oid(the_repository, ref_name[num_rev], &revkey))
-			die(_("'%s' is not a valid ref."), ref_name[num_rev]);
+		ఒకవేళ (repo_get_oid(the_repository, ref_name[అంకె_rev], &revkey))
+			die(_("'%s' is not a valid ref."), ref_name[అంకె_rev]);
 		commit = lookup_commit_reference(the_repository, &revkey);
-		if (!commit)
+		ఒకవేళ (!commit)
 			die(_("cannot find commit %s (%s)"),
-			    ref_name[num_rev], oid_to_hex(&revkey));
+			    ref_name[అంకె_rev], oid_గమ్యం_hex(&revkey));
 		repo_parse_commit(the_repository, commit);
-		mark_seen(commit, &seen);
+		mark_చూసిన(commit, &చూసిన);
 
 		/* rev#0 uses bit REV_SHIFT, rev#1 uses bit REV_SHIFT+1,
 		 * and so on.  REV_SHIFT bits from bit 0 are used for
 		 * internal bookkeeping.
 		 */
 		commit->object.flags |= flag;
-		if (commit->object.flags == flag)
-			prio_queue_put(&queue, commit);
-		rev[num_rev] = commit;
+		ఒకవేళ (commit->object.flags == flag)
+			prio_వరుస_put(&వరుస, commit);
+		rev[అంకె_rev] = commit;
 	}
-	for (i = 0; i < num_rev; i++)
-		rev_mask[i] = rev[i]->object.flags;
+	కొరకు (i = 0; i < అంకె_rev; i++)
+		rev_ముసుగు[i] = rev[i]->object.flags;
 
-	if (0 <= extra)
-		join_revs(&queue, &seen, num_rev, extra);
+	ఒకవేళ (0 <= extra)
+		join_revs(&వరుస, &చూసిన, అంకె_rev, extra);
 
-	commit_list_sort_by_date(&seen);
+	commit_list_క్రమీకరించు_by_date(&చూసిన);
 
-	if (merge_base) {
-		ret = show_merge_base(seen, num_rev);
-		goto out;
+	ఒకవేళ (విలీనం_పునాది) {
+		ret = show_విలీనం_పునాది(చూసిన, అంకె_rev);
+		వెళ్ళు బహిర్గతం;
 	}
 
-	if (independent) {
-		ret = show_independent(rev, num_rev, rev_mask);
-		goto out;
+	ఒకవేళ (independent) {
+		ret = show_independent(rev, అంకె_rev, rev_ముసుగు);
+		వెళ్ళు బహిర్గతం;
 	}
 
 	/* Show list; --more=-1 means list-only */
-	if (1 < num_rev || extra < 0) {
-		for (i = 0; i < num_rev; i++) {
-			int j;
-			int is_head = rev_is_head(head, ref_name[i]) &&
-				      oideq(&head_oid, &rev[i]->object.oid);
-			if (extra < 0)
-				printf("%c [%s] ",
-				       is_head ? '*' : ' ', ref_name[i]);
-			else {
-				for (j = 0; j < i; j++)
-					putchar(' ');
-				printf("%s%c%s [%s] ",
-				       get_color_code(i),
-				       is_head ? '*' : '!',
-				       get_color_reset_code(), ref_name[i]);
+	ఒకవేళ (1 < అంకె_rev || extra < 0) {
+		కొరకు (i = 0; i < అంకె_rev; i++) {
+			పూర్ణాంకం j;
+			పూర్ణాంకం is_తల = rev_is_తల(తల, ref_name[i]) &&
+				      oideq(&తల_oid, &rev[i]->object.oid);
+			ఒకవేళ (extra < 0)
+				రాయి("%c [%s] ",
+				       is_తల ? '*' : ' ', ref_name[i]);
+			లేకపోతే {
+				కొరకు (j = 0; j < i; j++)
+					అక్షరం_రాయి(' ');
+				రాయి("%s%c%s [%s] ",
+				       get_color_సంకేతం(i),
+				       is_తల ? '*' : '!',
+				       get_color_reset_సంకేతం(), ref_name[i]);
 			}
 
-			if (!reflog) {
+			ఒకవేళ (!reflog) {
 				/* header lines never need name */
 				show_one_commit(rev[i], 1);
 			}
-			else
-				puts(reflog_msg[i]);
+			లేకపోతే
+				puts(reflog_సందేశం[i]);
 
-			if (is_head)
-				head_at = i;
+			ఒకవేళ (is_తల)
+				తల_at = i;
 		}
-		if (0 <= extra) {
-			for (i = 0; i < num_rev; i++)
-				putchar('-');
-			putchar('\n');
+		ఒకవేళ (0 <= extra) {
+			కొరకు (i = 0; i < అంకె_rev; i++)
+				అక్షరం_రాయి('-');
+			అక్షరం_రాయి('\n');
 		}
 	}
-	if (extra < 0) {
+	ఒకవేళ (extra < 0) {
 		ret = 0;
-		goto out;
+		వెళ్ళు బహిర్గతం;
 	}
 
 	/* Sort topologically */
-	sort_in_topological_order(&seen, sort_order);
+	క్రమీకరించు_లోపల_topological_క్రమం(&చూసిన, క్రమీకరించు_క్రమం);
 
 	/* Give names to commits */
-	if (!sha1_name && !no_name)
-		name_commits(seen, rev, ref_name, num_rev);
+	ఒకవేళ (!sha1_name && !no_name)
+		name_commits(చూసిన, rev, ref_name, అంకె_rev);
 
-	all_mask = ((1u << (REV_SHIFT + num_rev)) - 1);
-	all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
+	all_ముసుగు = ((1u << (REV_జరుపు + అంకె_rev)) - 1);
+	all_revs = all_ముసుగు & ~((1u << REV_జరుపు) - 1);
 
-	for (struct commit_list *l = seen; l; l = l->next) {
-		struct commit *commit = l->item;
-		int this_flag = commit->object.flags;
-		int is_merge_point = ((this_flag & all_revs) == all_revs);
+	కొరకు (నిర్మాణం commit_list *l = చూసిన; l; l = l->తదుపరి) {
+		నిర్మాణం commit *commit = l->అంశం;
+		పూర్ణాంకం this_flag = commit->object.flags;
+		పూర్ణాంకం is_విలీనం_బిందువు = ((this_flag & all_revs) == all_revs);
 
-		shown_merge_point |= is_merge_point;
+		shown_విలీనం_బిందువు |= is_విలీనం_బిందువు;
 
-		if (1 < num_rev) {
-			int is_merge = !!(commit->parents &&
-					  commit->parents->next);
-			if (topics &&
-			    !is_merge_point &&
-			    (this_flag & (1u << REV_SHIFT)))
-				continue;
-			if (!sparse && is_merge &&
-			    omit_in_dense(commit, rev, num_rev))
-				continue;
-			for (i = 0; i < num_rev; i++) {
-				int mark;
-				if (!(this_flag & (1u << (i + REV_SHIFT))))
+		ఒకవేళ (1 < అంకె_rev) {
+			పూర్ణాంకం is_విలీనం = !!(commit->parents &&
+					  commit->parents->తదుపరి);
+			ఒకవేళ (topics &&
+			    !is_విలీనం_బిందువు &&
+			    (this_flag & (1u << REV_జరుపు)))
+				కొనసాగు;
+			ఒకవేళ (!sparse && is_విలీనం &&
+			    omit_లోపల_dense(commit, rev, అంకె_rev))
+				కొనసాగు;
+			కొరకు (i = 0; i < అంకె_rev; i++) {
+				పూర్ణాంకం mark;
+				ఒకవేళ (!(this_flag & (1u << (i + REV_జరుపు))))
 					mark = ' ';
-				else if (is_merge)
+				లేకపోతే ఒకవేళ (is_విలీనం)
 					mark = '-';
-				else if (i == head_at)
+				లేకపోతే ఒకవేళ (i == తల_at)
 					mark = '*';
-				else
+				లేకపోతే
 					mark = '+';
-				if (mark == ' ')
-					putchar(mark);
-				else
-					printf("%s%c%s",
-					       get_color_code(i),
-					       mark, get_color_reset_code());
+				ఒకవేళ (mark == ' ')
+					అక్షరం_రాయి(mark);
+				లేకపోతే
+					రాయి("%s%c%s",
+					       get_color_సంకేతం(i),
+					       mark, get_color_reset_సంకేతం());
 			}
-			putchar(' ');
+			అక్షరం_రాయి(' ');
 		}
 		show_one_commit(commit, no_name);
 
-		if (shown_merge_point && --extra < 0)
-			break;
+		ఒకవేళ (shown_విలీనం_బిందువు && --extra < 0)
+			ఆపు;
 	}
 
 	ret = 0;
 
-out:
-	for (size_t i = 0; i < ARRAY_SIZE(reflog_msg); i++)
-		free(reflog_msg[i]);
-	commit_list_free(seen);
-	clear_prio_queue(&queue);
-	free(args_copy);
-	free(head);
-	return ret;
+బహిర్గతం:
+	కొరకు (కొలత_t i = 0; i < ARRAY_కొలత(reflog_సందేశం); i++)
+		విడుదల(reflog_సందేశం[i]);
+	commit_list_free(చూసిన);
+	clear_prio_వరుస(&వరుస);
+	విడుదల(వాదనలు_copy);
+	విడుదల(తల);
+	తిరిగి ret;
 }

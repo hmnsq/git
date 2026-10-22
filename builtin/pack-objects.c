@@ -1,77 +1,77 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "config.h"
-#include "attr.h"
-#include "object.h"
-#include "commit.h"
-#include "tag.h"
-#include "delta.h"
-#include "pack.h"
-#include "pack-revindex.h"
-#include "csum-file.h"
-#include "tree-walk.h"
-#include "diff.h"
-#include "revision.h"
-#include "list-objects.h"
-#include "list-objects-filter-options.h"
-#include "pack-objects.h"
-#include "progress.h"
-#include "refs.h"
-#include "thread-utils.h"
-#include "pack-bitmap.h"
-#include "delta-islands.h"
-#include "reachable.h"
-#include "oid-array.h"
-#include "strvec.h"
-#include "strmap.h"
-#include "list.h"
-#include "packfile.h"
-#include "object-file.h"
-#include "object-file-convert.h"
-#include "odb.h"
-#include "odb/streaming.h"
-#include "replace-object.h"
-#include "dir.h"
-#include "midx.h"
-#include "trace2.h"
-#include "shallow.h"
-#include "promisor-remote.h"
-#include "pack-mtimes.h"
-#include "parse-options.h"
-#include "pkt-line.h"
-#include "blob.h"
-#include "tree.h"
-#include "path-walk.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "attr.h"
+#అన్తర్భావ "object.h"
+#అన్తర్భావ "commit.h"
+#అన్తర్భావ "tag.h"
+#అన్తర్భావ "delta.h"
+#అన్తర్భావ "pack.h"
+#అన్తర్భావ "pack-revindex.h"
+#అన్తర్భావ "csum-file.h"
+#అన్తర్భావ "tree-walk.h"
+#అన్తర్భావ "diff.h"
+#అన్తర్భావ "revision.h"
+#అన్తర్భావ "list-objects.h"
+#అన్తర్భావ "list-objects-filter-options.h"
+#అన్తర్భావ "pack-objects.h"
+#అన్తర్భావ "progress.h"
+#అన్తర్భావ "refs.h"
+#అన్తర్భావ "thread-utils.h"
+#అన్తర్భావ "pack-bitmap.h"
+#అన్తర్భావ "delta-islands.h"
+#అన్తర్భావ "reachable.h"
+#అన్తర్భావ "oid-array.h"
+#అన్తర్భావ "strvec.h"
+#అన్తర్భావ "strmap.h"
+#అన్తర్భావ "list.h"
+#అన్తర్భావ "packfile.h"
+#అన్తర్భావ "object-file.h"
+#అన్తర్భావ "object-file-convert.h"
+#అన్తర్భావ "odb.h"
+#అన్తర్భావ "odb/streaming.h"
+#అన్తర్భావ "replace-object.h"
+#అన్తర్భావ "dir.h"
+#అన్తర్భావ "midx.h"
+#అన్తర్భావ "trace2.h"
+#అన్తర్భావ "shallow.h"
+#అన్తర్భావ "promisor-remote.h"
+#అన్తర్భావ "pack-mtimes.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "pkt-line.h"
+#అన్తర్భావ "blob.h"
+#అన్తర్భావ "tree.h"
+#అన్తర్భావ "path-walk.h"
 
 /*
  * Objects we are going to pack are collected in the `to_pack` structure.
  * It contains an array (dynamically expanded) of the object data, and a map
  * that can resolve SHA1s to their position in the array.
  */
-static struct packing_data to_pack;
+స్థిర నిర్మాణం packing_దత్తాంశం గమ్యం_pack;
 
-static inline struct object_entry *oe_delta(
-		const struct packing_data *pack,
-		const struct object_entry *e)
+స్థిర అంతఃవరుస నిర్మాణం object_నమోదు *oe_delta(
+		స్థిరరాశి నిర్మాణం packing_దత్తాంశం *pack,
+		స్థిరరాశి నిర్మాణం object_నమోదు *e)
 {
-	if (!e->delta_idx)
-		return NULL;
-	if (e->ext_base)
-		return &pack->ext_bases[e->delta_idx - 1];
-	else
-		return &pack->objects[e->delta_idx - 1];
+	ఒకవేళ (!e->delta_idx)
+		తిరిగి ఖాళీ;
+	ఒకవేళ (e->ext_పునాది)
+		తిరిగి &pack->ext_bases[e->delta_idx - 1];
+	లేకపోతే
+		తిరిగి &pack->objects[e->delta_idx - 1];
 }
 
-static inline size_t oe_delta_size(struct packing_data *pack,
-				   const struct object_entry *e)
+స్థిర అంతఃవరుస కొలత_t oe_delta_కొలత(నిర్మాణం packing_దత్తాంశం *pack,
+				   స్థిరరాశి నిర్మాణం object_నమోదు *e)
 {
-	if (e->delta_size_valid)
-		return e->delta_size_;
+	ఒకవేళ (e->delta_కొలత_valid)
+		తిరిగి e->delta_కొలత;
 
 	/*
 	 * pack->delta_size[] can't be NULL because oe_set_delta_size()
@@ -81,115 +81,115 @@ static inline size_t oe_delta_size(struct packing_data *pack,
 	 * delta_size_valid is also false), then the caller must never
 	 * call oe_delta_size().
 	 */
-	return pack->delta_size[e - pack->objects];
+	తిరిగి pack->delta_కొలత_2[e - pack->objects];
 }
 
-size_t oe_get_size_slow(struct packing_data *pack,
-			const struct object_entry *e);
+కొలత_t oe_get_కొలత_slow(నిర్మాణం packing_దత్తాంశం *pack,
+			స్థిరరాశి నిర్మాణం object_నమోదు *e);
 
-static inline size_t oe_size(struct packing_data *pack,
-			     const struct object_entry *e)
+స్థిర అంతఃవరుస కొలత_t oe_కొలత(నిర్మాణం packing_దత్తాంశం *pack,
+			     స్థిరరాశి నిర్మాణం object_నమోదు *e)
 {
-	if (e->size_valid)
-		return e->size_;
+	ఒకవేళ (e->కొలత_valid)
+		తిరిగి e->కొలత_2;
 
-	return oe_get_size_slow(pack, e);
+	తిరిగి oe_get_కొలత_slow(pack, e);
 }
 
-static inline void oe_set_delta(struct packing_data *pack,
-				struct object_entry *e,
-				struct object_entry *delta)
+స్థిర అంతఃవరుస శూన్య oe_సమితి_delta(నిర్మాణం packing_దత్తాంశం *pack,
+				నిర్మాణం object_నమోదు *e,
+				నిర్మాణం object_నమోదు *delta)
 {
-	if (delta)
+	ఒకవేళ (delta)
 		e->delta_idx = (delta - pack->objects) + 1;
-	else
+	లేకపోతే
 		e->delta_idx = 0;
 }
 
-static inline struct object_entry *oe_delta_sibling(
-		const struct packing_data *pack,
-		const struct object_entry *e)
+స్థిర అంతఃవరుస నిర్మాణం object_నమోదు *oe_delta_sibling(
+		స్థిరరాశి నిర్మాణం packing_దత్తాంశం *pack,
+		స్థిరరాశి నిర్మాణం object_నమోదు *e)
 {
-	if (e->delta_sibling_idx)
-		return &pack->objects[e->delta_sibling_idx - 1];
-	return NULL;
+	ఒకవేళ (e->delta_sibling_idx)
+		తిరిగి &pack->objects[e->delta_sibling_idx - 1];
+	తిరిగి ఖాళీ;
 }
 
-static inline struct object_entry *oe_delta_child(
-		const struct packing_data *pack,
-		const struct object_entry *e)
+స్థిర అంతఃవరుస నిర్మాణం object_నమోదు *oe_delta_బిడ్డ(
+		స్థిరరాశి నిర్మాణం packing_దత్తాంశం *pack,
+		స్థిరరాశి నిర్మాణం object_నమోదు *e)
 {
-	if (e->delta_child_idx)
-		return &pack->objects[e->delta_child_idx - 1];
-	return NULL;
+	ఒకవేళ (e->delta_బిడ్డ_idx)
+		తిరిగి &pack->objects[e->delta_బిడ్డ_idx - 1];
+	తిరిగి ఖాళీ;
 }
 
-static inline void oe_set_delta_child(struct packing_data *pack,
-				      struct object_entry *e,
-				      struct object_entry *delta)
+స్థిర అంతఃవరుస శూన్య oe_సమితి_delta_బిడ్డ(నిర్మాణం packing_దత్తాంశం *pack,
+				      నిర్మాణం object_నమోదు *e,
+				      నిర్మాణం object_నమోదు *delta)
 {
-	if (delta)
-		e->delta_child_idx = (delta - pack->objects) + 1;
-	else
-		e->delta_child_idx = 0;
+	ఒకవేళ (delta)
+		e->delta_బిడ్డ_idx = (delta - pack->objects) + 1;
+	లేకపోతే
+		e->delta_బిడ్డ_idx = 0;
 }
 
-static inline void oe_set_delta_sibling(struct packing_data *pack,
-					struct object_entry *e,
-					struct object_entry *delta)
+స్థిర అంతఃవరుస శూన్య oe_సమితి_delta_sibling(నిర్మాణం packing_దత్తాంశం *pack,
+					నిర్మాణం object_నమోదు *e,
+					నిర్మాణం object_నమోదు *delta)
 {
-	if (delta)
+	ఒకవేళ (delta)
 		e->delta_sibling_idx = (delta - pack->objects) + 1;
-	else
+	లేకపోతే
 		e->delta_sibling_idx = 0;
 }
 
-static inline void oe_set_size(struct packing_data *pack,
-			       struct object_entry *e,
-			       size_t size)
+స్థిర అంతఃవరుస శూన్య oe_సమితి_కొలత(నిర్మాణం packing_దత్తాంశం *pack,
+			       నిర్మాణం object_నమోదు *e,
+			       కొలత_t కొలత)
 {
-	if (size < pack->oe_size_limit) {
-		e->size_ = size;
-		e->size_valid = 1;
-	} else {
-		e->size_valid = 0;
-		if (oe_get_size_slow(pack, e) != size)
+	ఒకవేళ (కొలత < pack->oe_కొలత_హద్దు) {
+		e->కొలత_2 = కొలత;
+		e->కొలత_valid = 1;
+	} లేకపోతే {
+		e->కొలత_valid = 0;
+		ఒకవేళ (oe_get_కొలత_slow(pack, e) != కొలత)
 			BUG("'size' is supposed to be the object size!");
 	}
 }
 
-static inline void oe_set_delta_size(struct packing_data *pack,
-				     struct object_entry *e,
-				     size_t size)
+స్థిర అంతఃవరుస శూన్య oe_సమితి_delta_కొలత(నిర్మాణం packing_దత్తాంశం *pack,
+				     నిర్మాణం object_నమోదు *e,
+				     కొలత_t కొలత)
 {
-	if (size < pack->oe_delta_size_limit) {
-		e->delta_size_ = size;
-		e->delta_size_valid = 1;
-	} else {
-		packing_data_lock(pack);
-		if (!pack->delta_size)
-			ALLOC_ARRAY(pack->delta_size, pack->nr_alloc);
-		packing_data_unlock(pack);
+	ఒకవేళ (కొలత < pack->oe_delta_కొలత_హద్దు) {
+		e->delta_కొలత = కొలత;
+		e->delta_కొలత_valid = 1;
+	} లేకపోతే {
+		packing_దత్తాంశం_తాళం(pack);
+		ఒకవేళ (!pack->delta_కొలత_2)
+			ALLOC_ARRAY(pack->delta_కొలత_2, pack->nr_alloc);
+		packing_దత్తాంశం_unlock(pack);
 
-		pack->delta_size[e - pack->objects] = size;
-		e->delta_size_valid = 0;
+		pack->delta_కొలత_2[e - pack->objects] = కొలత;
+		e->delta_కొలత_valid = 0;
 	}
 }
 
-#define IN_PACK(obj) oe_in_pack(&to_pack, obj)
-#define SIZE(obj) oe_size(&to_pack, obj)
-#define SET_SIZE(obj,size) oe_set_size(&to_pack, obj, size)
-#define DELTA_SIZE(obj) oe_delta_size(&to_pack, obj)
-#define DELTA(obj) oe_delta(&to_pack, obj)
-#define DELTA_CHILD(obj) oe_delta_child(&to_pack, obj)
-#define DELTA_SIBLING(obj) oe_delta_sibling(&to_pack, obj)
-#define SET_DELTA(obj, val) oe_set_delta(&to_pack, obj, val)
-#define SET_DELTA_EXT(obj, oid) oe_set_delta_ext(&to_pack, obj, oid)
-#define SET_DELTA_SIZE(obj, val) oe_set_delta_size(&to_pack, obj, val)
-#define SET_DELTA_CHILD(obj, val) oe_set_delta_child(&to_pack, obj, val)
-#define SET_DELTA_SIBLING(obj, val) oe_set_delta_sibling(&to_pack, obj, val)
+#నిర్వచించు లోపల_PACK(obj) oe_లోపల_pack(&గమ్యం_pack, obj)
+#నిర్వచించు కొలత_3(obj) oe_కొలత(&గమ్యం_pack, obj)
+#నిర్వచించు సమితి_కొలత(obj,కొలత) oe_సమితి_కొలత(&గమ్యం_pack, obj, కొలత)
+#నిర్వచించు DELTA_కొలత(obj) oe_delta_కొలత(&గమ్యం_pack, obj)
+#నిర్వచించు DELTA(obj) oe_delta(&గమ్యం_pack, obj)
+#నిర్వచించు DELTA_బిడ్డ(obj) oe_delta_బిడ్డ(&గమ్యం_pack, obj)
+#నిర్వచించు DELTA_SIBLING(obj) oe_delta_sibling(&గమ్యం_pack, obj)
+#నిర్వచించు సమితి_DELTA(obj, val) oe_సమితి_delta(&గమ్యం_pack, obj, val)
+#నిర్వచించు సమితి_DELTA_EXT(obj, oid) oe_సమితి_delta_ext(&గమ్యం_pack, obj, oid)
+#నిర్వచించు సమితి_DELTA_కొలత(obj, val) oe_సమితి_delta_కొలత(&గమ్యం_pack, obj, val)
+#నిర్వచించు సమితి_DELTA_బిడ్డ(obj, val) oe_సమితి_delta_బిడ్డ(&గమ్యం_pack, obj, val)
+#నిర్వచించు సమితి_DELTA_SIBLING(obj, val) oe_సమితి_delta_sibling(&గమ్యం_pack, obj, val)
 
-static const char *const pack_usage[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి pack_usage[] = {
 	N_("git pack-objects [-q | --progress | --all-progress] [--all-progress-implied]\n"
 	   "                 [--no-reuse-delta] [--delta-base-offset] [--non-empty]\n"
 	   "                 [--local] [--incremental] [--window=<n>] [--depth=<n>]\n"
@@ -198,728 +198,728 @@ static const char *const pack_usage[] = {
 	   "                 [--stdout [--filter=<filter-spec>] | <base-name>]\n"
 	   "                 [--shallow] [--keep-true-parents] [--[no-]sparse]\n"
 	   "                 [--name-hash-version=<n>] [--path-walk] < <object-list>"),
-	NULL
+	ఖాళీ
 };
 
-static struct pack_idx_entry **written_list;
-static uint32_t nr_result, nr_written, nr_seen;
-static struct bitmap_index *bitmap_git;
-static uint32_t write_layer;
+స్థిర నిర్మాణం pack_idx_నమోదు **written_list;
+స్థిర uint32_t nr_ఫలితం, nr_written, nr_చూసిన;
+స్థిర నిర్మాణం bitmap_సూచీ *bitmap_git;
+స్థిర uint32_t write_layer;
 
-static int non_empty;
-static int reuse_delta = 1, reuse_object = 1;
-static int keep_unreachable, unpack_unreachable, include_tag;
-static timestamp_t unpack_unreachable_expiration;
-static int pack_loose_unreachable;
-static int cruft;
-static int shallow = 0;
-static timestamp_t cruft_expiration;
-static int local;
-static int have_non_local_packs;
-static int incremental;
-static int ignore_packed_keep_on_disk;
-static int ignore_packed_keep_in_core;
-static int ignore_packed_keep_in_core_open;
-static int ignore_packed_keep_in_core_has_cruft;
-static int allow_ofs_delta;
-static struct pack_idx_option pack_idx_opts;
-static const char *base_name;
-static int progress = 1;
-static int window = 10;
-static unsigned long pack_size_limit;
-static int depth = 50;
-static int delta_search_threads;
-static int pack_to_stdout;
-static int sparse;
-static int thin;
-static int path_walk = -1;
-static int num_preferred_base;
-static struct progress *progress_state;
+స్థిర పూర్ణాంకం non_ఖాళీలు;
+స్థిర పూర్ణాంకం reuse_delta = 1, reuse_object = 1;
+స్థిర పూర్ణాంకం keep_unreachable, unpack_unreachable, include_ట్యాగ్;
+స్థిర timestamp_t unpack_unreachable_expiration;
+స్థిర పూర్ణాంకం pack_loose_unreachable;
+స్థిర పూర్ణాంకం cruft;
+స్థిర పూర్ణాంకం shallow = 0;
+స్థిర timestamp_t cruft_expiration;
+స్థిర పూర్ణాంకం local;
+స్థిర పూర్ణాంకం have_non_local_packs;
+స్థిర పూర్ణాంకం incremental;
+స్థిర పూర్ణాంకం ignore_packed_keep_on_disk;
+స్థిర పూర్ణాంకం ignore_packed_keep_లోపల_core;
+స్థిర పూర్ణాంకం ignore_packed_keep_లోపల_core_open;
+స్థిర పూర్ణాంకం ignore_packed_keep_లోపల_core_has_cruft;
+స్థిర పూర్ణాంకం allow_ofs_delta;
+స్థిర నిర్మాణం pack_idx_option pack_idx_opts;
+స్థిర స్థిరరాశి అక్షరం *పునాది_name;
+స్థిర పూర్ణాంకం పురోగతి = 1;
+స్థిర పూర్ణాంకం కిటికీ = 10;
+స్థిర గుర్తులేని దీర్ఘ pack_కొలత_హద్దు;
+స్థిర పూర్ణాంకం లోతు = 50;
+స్థిర పూర్ణాంకం delta_శోధన_దారాలు;
+స్థిర పూర్ణాంకం pack_గమ్యం_stdout;
+స్థిర పూర్ణాంకం sparse;
+స్థిర పూర్ణాంకం thin;
+స్థిర పూర్ణాంకం మార్గం_walk = -1;
+స్థిర పూర్ణాంకం అంకె_preferred_పునాది;
+స్థిర నిర్మాణం పురోగతి *పురోగతి_state;
 
-static struct bitmapped_pack *reuse_packfiles;
-static size_t reuse_packfiles_nr;
-static size_t reuse_packfiles_used_nr;
-static uint32_t reuse_packfile_objects;
-static struct bitmap *reuse_packfile_bitmap;
+స్థిర నిర్మాణం bitmapped_pack *reuse_packfiles;
+స్థిర కొలత_t reuse_packfiles_nr;
+స్థిర కొలత_t reuse_packfiles_వాడిన_nr;
+స్థిర uint32_t reuse_packfile_objects;
+స్థిర నిర్మాణం bitmap *reuse_packfile_bitmap;
 
-static int use_bitmap_index_default = 1;
-static int use_bitmap_index = -1;
-static enum {
+స్థిర పూర్ణాంకం use_bitmap_సూచీ_default = 1;
+స్థిర పూర్ణాంకం use_bitmap_సూచీ = -1;
+స్థిర గణన {
 	NO_PACK_REUSE = 0,
 	SINGLE_PACK_REUSE,
 	MULTI_PACK_REUSE,
 } allow_pack_reuse = SINGLE_PACK_REUSE;
-static enum {
+స్థిర గణన {
 	WRITE_BITMAP_FALSE = 0,
 	WRITE_BITMAP_QUIET,
 	WRITE_BITMAP_TRUE,
-} write_bitmap_index;
-static uint16_t write_bitmap_options = BITMAP_OPT_HASH_CACHE;
+} write_bitmap_సూచీ;
+స్థిర uint16_t write_bitmap_options = BITMAP_OPT_HASH_CACHE;
 
-static int exclude_promisor_objects;
-static int exclude_promisor_objects_best_effort;
+స్థిర పూర్ణాంకం exclude_promisor_objects;
+స్థిర పూర్ణాంకం exclude_promisor_objects_ఉత్తమ_effort;
 
-static int use_delta_islands;
+స్థిర పూర్ణాంకం use_delta_islands;
 
-static size_t delta_cache_size = 0;
-static size_t max_delta_cache_size = DEFAULT_DELTA_CACHE_SIZE;
-static unsigned long cache_max_small_delta_size = 1000;
+స్థిర కొలత_t delta_cache_కొలత = 0;
+స్థిర కొలత_t max_delta_cache_కొలత = DEFAULT_DELTA_CACHE_కొలత;
+స్థిర గుర్తులేని దీర్ఘ cache_max_small_delta_కొలత = 1000;
 
-static unsigned long window_memory_limit = 0;
+స్థిర గుర్తులేని దీర్ఘ కిటికీ_జ్ఞాపకం_హద్దు = 0;
 
-static struct string_list uri_protocols = STRING_LIST_INIT_NODUP;
+స్థిర నిర్మాణం string_list uri_protocols = STRING_LIST_INIT_NODUP;
 
-enum missing_action {
+గణన missing_action {
 	MA_ERROR = 0,      /* fail if any missing objects are encountered */
 	MA_ALLOW_ANY,      /* silently allow ALL missing objects */
 	MA_ALLOW_PROMISOR, /* silently allow all missing PROMISOR objects */
 };
-static enum missing_action arg_missing_action;
-static show_object_fn fn_show_object;
+స్థిర గణన missing_action arg_missing_action;
+స్థిర show_object_fn fn_show_object;
 
-struct configured_exclusion {
-	struct oidmap_entry e;
-	char *pack_hash_hex;
-	char *uri;
+నిర్మాణం configured_exclusion {
+	నిర్మాణం oidmap_నమోదు e;
+	అక్షరం *pack_hash_hex;
+	అక్షరం *uri;
 };
-static struct oidmap configured_exclusions;
+స్థిర నిర్మాణం oidmap configured_exclusions;
 
-static struct oidset excluded_by_config;
-static int name_hash_version = -1;
+స్థిర నిర్మాణం oidset excluded_by_config;
+స్థిర పూర్ణాంకం name_hash_సంస్కరణ = -1;
 
-enum stdin_packs_mode {
-	STDIN_PACKS_MODE_NONE,
-	STDIN_PACKS_MODE_STANDARD,
-	STDIN_PACKS_MODE_FOLLOW,
+గణన stdin_packs_బహుళకం {
+	STDIN_PACKS_బహుళకం_NONE,
+	STDIN_PACKS_బహుళకం_STANDARD,
+	STDIN_PACKS_బహుళకం_FOLLOW,
 };
 
 /**
  * Check whether the name_hash_version chosen by user input is appropriate,
  * and also validate whether it is compatible with other features.
  */
-static void validate_name_hash_version(void)
+స్థిర శూన్య validate_name_hash_సంస్కరణ(శూన్య)
 {
-	if (name_hash_version < 1 || name_hash_version > 2)
-		die(_("invalid --name-hash-version option: %d"), name_hash_version);
-	if (write_bitmap_index && name_hash_version != 1) {
+	ఒకవేళ (name_hash_సంస్కరణ < 1 || name_hash_సంస్కరణ > 2)
+		die(_("invalid --name-hash-version option: %d"), name_hash_సంస్కరణ);
+	ఒకవేళ (write_bitmap_సూచీ && name_hash_సంస్కరణ != 1) {
 		warning(_("currently, --write-bitmap-index requires --name-hash-version=1"));
-		name_hash_version = 1;
+		name_hash_సంస్కరణ = 1;
 	}
 }
 
-static inline uint32_t pack_name_hash_fn(const char *name)
+స్థిర అంతఃవరుస uint32_t pack_name_hash_fn(స్థిరరాశి అక్షరం *name)
 {
-	static int seen_version = -1;
+	స్థిర పూర్ణాంకం చూసిన_సంస్కరణ = -1;
 
-	if (seen_version < 0)
-		seen_version = name_hash_version;
-	else if (seen_version != name_hash_version)
+	ఒకవేళ (చూసిన_సంస్కరణ < 0)
+		చూసిన_సంస్కరణ = name_hash_సంస్కరణ;
+	లేకపోతే ఒకవేళ (చూసిన_సంస్కరణ != name_hash_సంస్కరణ)
 		BUG("name hash version changed from %d to %d mid-process",
-		    seen_version, name_hash_version);
+		    చూసిన_సంస్కరణ, name_hash_సంస్కరణ);
 
-	switch (name_hash_version) {
-	case 1:
-		return pack_name_hash(name);
+	ఎంపిక (name_hash_సంస్కరణ) {
+	స్థితి 1:
+		తిరిగి pack_name_hash(name);
 
-	case 2:
-		return pack_name_hash_v2((const unsigned char *)name);
+	స్థితి 2:
+		తిరిగి pack_name_hash_v2((స్థిరరాశి గుర్తులేని అక్షరం *)name);
 
-	default:
-		BUG("invalid name-hash version: %d", name_hash_version);
+	అప్రమేయ:
+		BUG("invalid name-hash version: %d", name_hash_సంస్కరణ);
 	}
 }
 
 /*
  * stats
  */
-static uint32_t written, written_delta;
-static uint32_t reused, reused_delta;
+స్థిర uint32_t written, written_delta;
+స్థిర uint32_t reused, reused_delta;
 
 /*
  * Indexed commits
  */
-static struct commit **indexed_commits;
-static unsigned int indexed_commits_nr;
-static unsigned int indexed_commits_alloc;
+స్థిర నిర్మాణం commit **సూచీకృత_commits;
+స్థిర గుర్తులేని పూర్ణాంకం సూచీకృత_commits_nr;
+స్థిర గుర్తులేని పూర్ణాంకం సూచీకృత_commits_alloc;
 
-static void index_commit_for_bitmap(struct commit *commit)
+స్థిర శూన్య సూచీ_commit_for_bitmap(నిర్మాణం commit *commit)
 {
-	if (indexed_commits_nr >= indexed_commits_alloc) {
-		indexed_commits_alloc = (indexed_commits_alloc + 32) * 2;
-		REALLOC_ARRAY(indexed_commits, indexed_commits_alloc);
+	ఒకవేళ (సూచీకృత_commits_nr >= సూచీకృత_commits_alloc) {
+		సూచీకృత_commits_alloc = (సూచీకృత_commits_alloc + 32) * 2;
+		REALLOC_ARRAY(సూచీకృత_commits, సూచీకృత_commits_alloc);
 	}
 
-	indexed_commits[indexed_commits_nr++] = commit;
+	సూచీకృత_commits[సూచీకృత_commits_nr++] = commit;
 }
 
-static void *get_delta(struct object_entry *entry)
+స్థిర శూన్య *get_delta(నిర్మాణం object_నమోదు *నమోదు_2)
 {
-	unsigned long size, base_size;
-	size_t delta_size;
-	void *buf, *base_buf, *delta_buf;
-	enum object_type type;
-	size_t size_st = 0, base_size_st = 0;
+	గుర్తులేని దీర్ఘ కొలత, పునాది_కొలత;
+	కొలత_t delta_కొలత_2;
+	శూన్య *buf, *పునాది_buf, *delta_buf;
+	గణన object_type type;
+	కొలత_t కొలత_st = 0, పునాది_కొలత_st = 0;
 
-	buf = odb_read_object(the_repository->objects, &entry->idx.oid,
-			      &type, &size_st);
-	size = cast_size_t_to_ulong(size_st);
-	if (!buf)
-		die(_("unable to read %s"), oid_to_hex(&entry->idx.oid));
-	base_buf = odb_read_object(the_repository->objects,
-				   &DELTA(entry)->idx.oid, &type,
-				   &base_size_st);
-	base_size = cast_size_t_to_ulong(base_size_st);
-	if (!base_buf)
+	buf = odb_read_object(the_repository->objects, &నమోదు_2->idx.oid,
+			      &type, &కొలత_st);
+	కొలత = cast_కొలత_t_గమ్యం_ulong(కొలత_st);
+	ఒకవేళ (!buf)
+		die(_("unable to read %s"), oid_గమ్యం_hex(&నమోదు_2->idx.oid));
+	పునాది_buf = odb_read_object(the_repository->objects,
+				   &DELTA(నమోదు_2)->idx.oid, &type,
+				   &పునాది_కొలత_st);
+	పునాది_కొలత = cast_కొలత_t_గమ్యం_ulong(పునాది_కొలత_st);
+	ఒకవేళ (!పునాది_buf)
 		die("unable to read %s",
-		    oid_to_hex(&DELTA(entry)->idx.oid));
-	delta_buf = diff_delta(base_buf, base_size,
-			       buf, size, &delta_size, 0);
+		    oid_గమ్యం_hex(&DELTA(నమోదు_2)->idx.oid));
+	delta_buf = diff_delta(పునాది_buf, పునాది_కొలత,
+			       buf, కొలత, &delta_కొలత_2, 0);
 	/*
 	 * We successfully computed this delta once but dropped it for
 	 * memory reasons. Something is very wrong if this time we
 	 * recompute and create a different delta.
 	 */
-	if (!delta_buf || delta_size != DELTA_SIZE(entry))
+	ఒకవేళ (!delta_buf || delta_కొలత_2 != DELTA_కొలత(నమోదు_2))
 		BUG("delta size changed");
-	free(buf);
-	free(base_buf);
-	return delta_buf;
+	విడుదల(buf);
+	విడుదల(పునాది_buf);
+	తిరిగి delta_buf;
 }
 
-static unsigned long do_compress(void **pptr, unsigned long size)
+స్థిర గుర్తులేని దీర్ఘ do_compress(శూన్య **pptr, గుర్తులేని దీర్ఘ కొలత)
 {
-	git_zstream stream;
-	void *in, *out;
-	unsigned long maxsize;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	git_zstream ప్రవాహం;
+	శూన్య *లోపల, *బహిర్గతం;
+	గుర్తులేని దీర్ఘ maxsize;
+	నిర్మాణం repo_config_విలువలు *cfg = repo_config_విలువలు(the_repository);
 
-	git_deflate_init(&stream, cfg->pack_compression_level);
-	maxsize = git_deflate_bound(&stream, size);
+	git_deflate_init(&ప్రవాహం, cfg->pack_compression_level);
+	maxsize = git_deflate_bound(&ప్రవాహం, కొలత);
 
-	in = *pptr;
-	out = xmalloc(maxsize);
-	*pptr = out;
+	లోపల = *pptr;
+	బహిర్గతం = xmalloc(maxsize);
+	*pptr = బహిర్గతం;
 
-	stream.next_in = in;
-	stream.avail_in = size;
-	stream.next_out = out;
-	stream.avail_out = maxsize;
-	while (git_deflate(&stream, Z_FINISH) == Z_OK)
+	ప్రవాహం.తదుపరి_లోపల = లోపల;
+	ప్రవాహం.avail_లోపల = కొలత;
+	ప్రవాహం.తదుపరి_బహిర్గతం = బహిర్గతం;
+	ప్రవాహం.avail_బహిర్గతం = maxsize;
+	అయితే (git_deflate(&ప్రవాహం, Z_ముగింపు) == Z_OK)
 		; /* nothing */
-	git_deflate_end(&stream);
+	git_deflate_చివర(&ప్రవాహం);
 
-	free(in);
-	return stream.total_out;
+	విడుదల(లోపల);
+	తిరిగి ప్రవాహం.మొత్తం_బహిర్గతం;
 }
 
-static unsigned long write_large_blob_data(struct odb_stream *st, struct hashfile *f,
-					   const struct object_id *oid)
+స్థిర గుర్తులేని దీర్ఘ write_large_blob_దత్తాంశం(నిర్మాణం odb_ప్రవాహం *st, నిర్మాణం hashfile *f,
+					   స్థిరరాశి నిర్మాణం object_id *oid)
 {
-	git_zstream stream;
-	unsigned char ibuf[1024 * 16];
-	unsigned char obuf[1024 * 16];
-	unsigned long olen = 0;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	git_zstream ప్రవాహం;
+	గుర్తులేని అక్షరం ibuf[1024 * 16];
+	గుర్తులేని అక్షరం obuf[1024 * 16];
+	గుర్తులేని దీర్ఘ olen = 0;
+	నిర్మాణం repo_config_విలువలు *cfg = repo_config_విలువలు(the_repository);
 
-	git_deflate_init(&stream, cfg->pack_compression_level);
+	git_deflate_init(&ప్రవాహం, cfg->pack_compression_level);
 
-	for (;;) {
+	కొరకు (;;) {
 		ssize_t readlen;
-		int zret = Z_OK;
-		readlen = odb_stream_read(st, ibuf, sizeof(ibuf));
-		if (readlen == -1)
-			die(_("unable to read %s"), oid_to_hex(oid));
+		పూర్ణాంకం zret = Z_OK;
+		readlen = odb_ప్రవాహం_read(st, ibuf, పరిమాణం(ibuf));
+		ఒకవేళ (readlen == -1)
+			die(_("unable to read %s"), oid_గమ్యం_hex(oid));
 
-		stream.next_in = ibuf;
-		stream.avail_in = readlen;
-		while ((stream.avail_in || readlen == 0) &&
+		ప్రవాహం.తదుపరి_లోపల = ibuf;
+		ప్రవాహం.avail_లోపల = readlen;
+		అయితే ((ప్రవాహం.avail_లోపల || readlen == 0) &&
 		       (zret == Z_OK || zret == Z_BUF_ERROR)) {
-			stream.next_out = obuf;
-			stream.avail_out = sizeof(obuf);
-			zret = git_deflate(&stream, readlen ? 0 : Z_FINISH);
-			hashwrite(f, obuf, stream.next_out - obuf);
-			olen += stream.next_out - obuf;
+			ప్రవాహం.తదుపరి_బహిర్గతం = obuf;
+			ప్రవాహం.avail_బహిర్గతం = పరిమాణం(obuf);
+			zret = git_deflate(&ప్రవాహం, readlen ? 0 : Z_ముగింపు);
+			hashwrite(f, obuf, ప్రవాహం.తదుపరి_బహిర్గతం - obuf);
+			olen += ప్రవాహం.తదుపరి_బహిర్గతం - obuf;
 		}
-		if (stream.avail_in)
+		ఒకవేళ (ప్రవాహం.avail_లోపల)
 			die(_("deflate error (%d)"), zret);
-		if (readlen == 0) {
-			if (zret != Z_STREAM_END)
+		ఒకవేళ (readlen == 0) {
+			ఒకవేళ (zret != Z_ప్రవాహం_చివర)
 				die(_("deflate error (%d)"), zret);
-			break;
+			ఆపు;
 		}
 	}
-	git_deflate_end(&stream);
-	return olen;
+	git_deflate_చివర(&ప్రవాహం);
+	తిరిగి olen;
 }
 
 /*
  * we are going to reuse the existing object data as is.  make
  * sure it is not corrupt.
  */
-static int check_pack_inflate(struct packed_git *p,
-		struct pack_window **w_curs,
-		off_t offset,
+స్థిర పూర్ణాంకం check_pack_inflate(నిర్మాణం packed_git *p,
+		నిర్మాణం pack_కిటికీ **w_curs,
+		off_t స్థానభ్రంశం,
 		off_t len,
-		size_t expect)
+		కొలత_t expect)
 {
-	git_zstream stream;
-	unsigned char fakebuf[4096], *in;
-	int st;
+	git_zstream ప్రవాహం;
+	గుర్తులేని అక్షరం fakebuf[4096], *లోపల;
+	పూర్ణాంకం st;
 
-	memset(&stream, 0, sizeof(stream));
-	git_inflate_init(&stream);
-	do {
-		in = use_pack(p, w_curs, offset, &stream.avail_in);
-		stream.next_in = in;
-		stream.next_out = fakebuf;
-		stream.avail_out = sizeof(fakebuf);
-		st = git_inflate(&stream, Z_FINISH);
-		offset += stream.next_in - in;
-	} while (st == Z_OK || st == Z_BUF_ERROR);
-	git_inflate_end(&stream);
-	return (st == Z_STREAM_END &&
-		stream.total_out == expect &&
-		stream.total_in == len) ? 0 : -1;
+	memset(&ప్రవాహం, 0, పరిమాణం(ప్రవాహం));
+	git_inflate_init(&ప్రవాహం);
+	చేయి {
+		లోపల = use_pack(p, w_curs, స్థానభ్రంశం, &ప్రవాహం.avail_లోపల);
+		ప్రవాహం.తదుపరి_లోపల = లోపల;
+		ప్రవాహం.తదుపరి_బహిర్గతం = fakebuf;
+		ప్రవాహం.avail_బహిర్గతం = పరిమాణం(fakebuf);
+		st = git_inflate(&ప్రవాహం, Z_ముగింపు);
+		స్థానభ్రంశం += ప్రవాహం.తదుపరి_లోపల - లోపల;
+	} అయితే (st == Z_OK || st == Z_BUF_ERROR);
+	git_inflate_చివర(&ప్రవాహం);
+	తిరిగి (st == Z_ప్రవాహం_చివర &&
+		ప్రవాహం.మొత్తం_బహిర్గతం == expect &&
+		ప్రవాహం.మొత్తం_లోపల == len) ? 0 : -1;
 }
 
-static void copy_pack_data(struct hashfile *f,
-		struct packed_git *p,
-		struct pack_window **w_curs,
-		off_t offset,
+స్థిర శూన్య copy_pack_దత్తాంశం(నిర్మాణం hashfile *f,
+		నిర్మాణం packed_git *p,
+		నిర్మాణం pack_కిటికీ **w_curs,
+		off_t స్థానభ్రంశం,
 		off_t len)
 {
-	unsigned char *in;
-	size_t avail;
+	గుర్తులేని అక్షరం *లోపల;
+	కొలత_t avail;
 
-	while (len) {
-		in = use_pack(p, w_curs, offset, &avail);
-		if (avail > len)
-			avail = (unsigned long)len;
-		hashwrite(f, in, avail);
-		offset += avail;
+	అయితే (len) {
+		లోపల = use_pack(p, w_curs, స్థానభ్రంశం, &avail);
+		ఒకవేళ (avail > len)
+			avail = (గుర్తులేని దీర్ఘ)len;
+		hashwrite(f, లోపల, avail);
+		స్థానభ్రంశం += avail;
 		len -= avail;
 	}
 }
 
-static inline int oe_size_greater_than(struct packing_data *pack,
-				       const struct object_entry *lhs,
-				       size_t rhs)
+స్థిర అంతఃవరుస పూర్ణాంకం oe_కొలత_greater_than(నిర్మాణం packing_దత్తాంశం *pack,
+				       స్థిరరాశి నిర్మాణం object_నమోదు *lhs,
+				       కొలత_t rhs)
 {
-	if (lhs->size_valid)
-		return lhs->size_ > rhs;
-	if (rhs < pack->oe_size_limit) /* rhs < 2^x <= lhs ? */
-		return 1;
-	return oe_get_size_slow(pack, lhs) > rhs;
+	ఒకవేళ (lhs->కొలత_valid)
+		తిరిగి lhs->కొలత_2 > rhs;
+	ఒకవేళ (rhs < pack->oe_కొలత_హద్దు) /* rhs < 2^x <= lhs ? */
+		తిరిగి 1;
+	తిరిగి oe_get_కొలత_slow(pack, lhs) > rhs;
 }
 
 /* Return 0 if we will bust the pack-size limit */
-static unsigned long write_no_reuse_object(struct hashfile *f, struct object_entry *entry,
-					   unsigned long limit, int usable_delta)
+స్థిర గుర్తులేని దీర్ఘ write_no_reuse_object(నిర్మాణం hashfile *f, నిర్మాణం object_నమోదు *నమోదు_2,
+					   గుర్తులేని దీర్ఘ హద్దు, పూర్ణాంకం usable_delta)
 {
-	unsigned long size, datalen;
-	unsigned char header[MAX_PACK_OBJECT_HEADER],
-		      dheader[MAX_PACK_OBJECT_HEADER];
-	unsigned hdrlen;
-	enum object_type type;
-	void *buf;
-	struct odb_stream *st = NULL;
-	const unsigned hashsz = the_hash_algo->rawsz;
+	గుర్తులేని దీర్ఘ కొలత, datalen;
+	గుర్తులేని అక్షరం శీర్షిక[MAX_PACK_OBJECT_శీర్షిక],
+		      dheader[MAX_PACK_OBJECT_శీర్షిక];
+	గుర్తులేని hdrlen;
+	గణన object_type type;
+	శూన్య *buf;
+	నిర్మాణం odb_ప్రవాహం *st = ఖాళీ;
+	స్థిరరాశి గుర్తులేని hashsz = the_hash_algo->rawsz;
 
-	if (!usable_delta) {
-		if (oe_type(entry) == OBJ_BLOB &&
-		    oe_size_greater_than(&to_pack, entry,
-					 repo_settings_get_big_file_threshold(the_repository)) &&
-		    (st = odb_stream_from_object(the_repository->objects, &entry->idx.oid,
-						 NULL)) != NULL) {
-			buf = NULL;
+	ఒకవేళ (!usable_delta) {
+		ఒకవేళ (oe_type(నమోదు_2) == OBJ_BLOB &&
+		    oe_కొలత_greater_than(&గమ్యం_pack, నమోదు_2,
+					 repo_settings_get_big_file_పరిమితి(the_repository)) &&
+		    (st = odb_ప్రవాహం_from_object(the_repository->objects, &నమోదు_2->idx.oid,
+						 ఖాళీ)) != ఖాళీ) {
+			buf = ఖాళీ;
 			type = st->type;
-			size = st->size;
-		} else {
-			size_t size_st = 0;
+			కొలత = st->కొలత;
+		} లేకపోతే {
+			కొలత_t కొలత_st = 0;
 			buf = odb_read_object(the_repository->objects,
-					      &entry->idx.oid, &type,
-					      &size_st);
-			size = cast_size_t_to_ulong(size_st);
-			if (!buf)
+					      &నమోదు_2->idx.oid, &type,
+					      &కొలత_st);
+			కొలత = cast_కొలత_t_గమ్యం_ulong(కొలత_st);
+			ఒకవేళ (!buf)
 				die(_("unable to read %s"),
-				    oid_to_hex(&entry->idx.oid));
+				    oid_గమ్యం_hex(&నమోదు_2->idx.oid));
 		}
 		/*
 		 * make sure no cached delta data remains from a
 		 * previous attempt before a pack split occurred.
 		 */
-		FREE_AND_NULL(entry->delta_data);
-		entry->z_delta_size = 0;
-	} else if (entry->delta_data) {
-		size = DELTA_SIZE(entry);
-		buf = entry->delta_data;
-		entry->delta_data = NULL;
-		type = (allow_ofs_delta && DELTA(entry)->idx.offset) ?
+		FREE_AND_NULL(నమోదు_2->delta_దత్తాంశం);
+		నమోదు_2->z_delta_కొలత = 0;
+	} లేకపోతే ఒకవేళ (నమోదు_2->delta_దత్తాంశం) {
+		కొలత = DELTA_కొలత(నమోదు_2);
+		buf = నమోదు_2->delta_దత్తాంశం;
+		నమోదు_2->delta_దత్తాంశం = ఖాళీ;
+		type = (allow_ofs_delta && DELTA(నమోదు_2)->idx.స్థానభ్రంశం) ?
 			OBJ_OFS_DELTA : OBJ_REF_DELTA;
-	} else {
-		buf = get_delta(entry);
-		size = DELTA_SIZE(entry);
-		type = (allow_ofs_delta && DELTA(entry)->idx.offset) ?
+	} లేకపోతే {
+		buf = get_delta(నమోదు_2);
+		కొలత = DELTA_కొలత(నమోదు_2);
+		type = (allow_ofs_delta && DELTA(నమోదు_2)->idx.స్థానభ్రంశం) ?
 			OBJ_OFS_DELTA : OBJ_REF_DELTA;
 	}
 
-	if (st)	/* large blob case, just assume we don't compress well */
-		datalen = size;
-	else if (entry->z_delta_size)
-		datalen = entry->z_delta_size;
-	else
-		datalen = do_compress(&buf, size);
+	ఒకవేళ (st)	/* large blob case, just assume we don't compress well */
+		datalen = కొలత;
+	లేకపోతే ఒకవేళ (నమోదు_2->z_delta_కొలత)
+		datalen = నమోదు_2->z_delta_కొలత;
+	లేకపోతే
+		datalen = do_compress(&buf, కొలత);
 
 	/*
 	 * The object header is a byte of 'type' followed by zero or
 	 * more bytes of length.
 	 */
-	hdrlen = encode_in_pack_object_header(header, sizeof(header),
-					      type, size);
+	hdrlen = encode_లోపల_pack_object_శీర్షిక(శీర్షిక, పరిమాణం(శీర్షిక),
+					      type, కొలత);
 
-	if (type == OBJ_OFS_DELTA) {
+	ఒకవేళ (type == OBJ_OFS_DELTA) {
 		/*
 		 * Deltas with relative base contain an additional
 		 * encoding of the relative offset for the delta
 		 * base from this object's position in the pack.
 		 */
-		off_t ofs = entry->idx.offset - DELTA(entry)->idx.offset;
-		unsigned pos = sizeof(dheader) - 1;
+		off_t ofs = నమోదు_2->idx.స్థానభ్రంశం - DELTA(నమోదు_2)->idx.స్థానభ్రంశం;
+		గుర్తులేని pos = పరిమాణం(dheader) - 1;
 		dheader[pos] = ofs & 127;
-		while (ofs >>= 7)
+		అయితే (ofs >>= 7)
 			dheader[--pos] = 128 | (--ofs & 127);
-		if (limit && hdrlen + sizeof(dheader) - pos + datalen + hashsz >= limit) {
-			if (st)
-				odb_stream_close(st);
-			free(buf);
-			return 0;
+		ఒకవేళ (హద్దు && hdrlen + పరిమాణం(dheader) - pos + datalen + hashsz >= హద్దు) {
+			ఒకవేళ (st)
+				odb_ప్రవాహం_close(st);
+			విడుదల(buf);
+			తిరిగి 0;
 		}
-		hashwrite(f, header, hdrlen);
-		hashwrite(f, dheader + pos, sizeof(dheader) - pos);
-		hdrlen += sizeof(dheader) - pos;
-	} else if (type == OBJ_REF_DELTA) {
+		hashwrite(f, శీర్షిక, hdrlen);
+		hashwrite(f, dheader + pos, పరిమాణం(dheader) - pos);
+		hdrlen += పరిమాణం(dheader) - pos;
+	} లేకపోతే ఒకవేళ (type == OBJ_REF_DELTA) {
 		/*
 		 * Deltas with a base reference contain
 		 * additional bytes for the base object ID.
 		 */
-		if (limit && hdrlen + hashsz + datalen + hashsz >= limit) {
-			if (st)
-				odb_stream_close(st);
-			free(buf);
-			return 0;
+		ఒకవేళ (హద్దు && hdrlen + hashsz + datalen + hashsz >= హద్దు) {
+			ఒకవేళ (st)
+				odb_ప్రవాహం_close(st);
+			విడుదల(buf);
+			తిరిగి 0;
 		}
-		hashwrite(f, header, hdrlen);
-		hashwrite(f, DELTA(entry)->idx.oid.hash, hashsz);
+		hashwrite(f, శీర్షిక, hdrlen);
+		hashwrite(f, DELTA(నమోదు_2)->idx.oid.hash, hashsz);
 		hdrlen += hashsz;
-	} else {
-		if (limit && hdrlen + datalen + hashsz >= limit) {
-			if (st)
-				odb_stream_close(st);
-			free(buf);
-			return 0;
+	} లేకపోతే {
+		ఒకవేళ (హద్దు && hdrlen + datalen + hashsz >= హద్దు) {
+			ఒకవేళ (st)
+				odb_ప్రవాహం_close(st);
+			విడుదల(buf);
+			తిరిగి 0;
 		}
-		hashwrite(f, header, hdrlen);
+		hashwrite(f, శీర్షిక, hdrlen);
 	}
-	if (st) {
-		datalen = write_large_blob_data(st, f, &entry->idx.oid);
-		odb_stream_close(st);
-	} else {
+	ఒకవేళ (st) {
+		datalen = write_large_blob_దత్తాంశం(st, f, &నమోదు_2->idx.oid);
+		odb_ప్రవాహం_close(st);
+	} లేకపోతే {
 		hashwrite(f, buf, datalen);
-		free(buf);
+		విడుదల(buf);
 	}
 
-	return hdrlen + datalen;
+	తిరిగి hdrlen + datalen;
 }
 
 /* Return 0 if we will bust the pack-size limit */
-static off_t write_reuse_object(struct hashfile *f, struct object_entry *entry,
-				unsigned long limit, int usable_delta)
+స్థిర off_t write_reuse_object(నిర్మాణం hashfile *f, నిర్మాణం object_నమోదు *నమోదు_2,
+				గుర్తులేని దీర్ఘ హద్దు, పూర్ణాంకం usable_delta)
 {
-	struct packed_git *p = IN_PACK(entry);
-	struct pack_window *w_curs = NULL;
+	నిర్మాణం packed_git *p = లోపల_PACK(నమోదు_2);
+	నిర్మాణం pack_కిటికీ *w_curs = ఖాళీ;
 	uint32_t pos;
-	off_t offset, cur;
-	enum object_type type = oe_type(entry);
-	enum object_type in_pack_type;
+	off_t స్థానభ్రంశం, cur;
+	గణన object_type type = oe_type(నమోదు_2);
+	గణన object_type లోపల_pack_type;
 	off_t datalen;
-	unsigned char header[MAX_PACK_OBJECT_HEADER],
-		      dheader[MAX_PACK_OBJECT_HEADER];
-	unsigned hdrlen;
-	const unsigned hashsz = the_hash_algo->rawsz;
-	size_t entry_size;
+	గుర్తులేని అక్షరం శీర్షిక[MAX_PACK_OBJECT_శీర్షిక],
+		      dheader[MAX_PACK_OBJECT_శీర్షిక];
+	గుర్తులేని hdrlen;
+	స్థిరరాశి గుర్తులేని hashsz = the_hash_algo->rawsz;
+	కొలత_t నమోదు_కొలత;
 
-	cur = entry->in_pack_offset;
-	in_pack_type = unpack_object_header(p, &w_curs, &cur, &entry_size);
-	if (in_pack_type < 0)
+	cur = నమోదు_2->లోపల_pack_స్థానభ్రంశం;
+	లోపల_pack_type = unpack_object_శీర్షిక(p, &w_curs, &cur, &నమోదు_కొలత);
+	ఒకవేళ (లోపల_pack_type < 0)
 		die(_("write_reuse_object: unable to parse object header of %s"),
-		    oid_to_hex(&entry->idx.oid));
+		    oid_గమ్యం_hex(&నమోదు_2->idx.oid));
 
-	if (DELTA(entry))
-		type = (allow_ofs_delta && DELTA(entry)->idx.offset) ?
+	ఒకవేళ (DELTA(నమోదు_2))
+		type = (allow_ofs_delta && DELTA(నమోదు_2)->idx.స్థానభ్రంశం) ?
 			OBJ_OFS_DELTA : OBJ_REF_DELTA;
-	hdrlen = encode_in_pack_object_header(header, sizeof(header),
-					      type, entry_size);
+	hdrlen = encode_లోపల_pack_object_శీర్షిక(శీర్షిక, పరిమాణం(శీర్షిక),
+					      type, నమోదు_కొలత);
 
-	offset = entry->in_pack_offset;
-	if (offset_to_pack_pos(p, offset, &pos) < 0)
+	స్థానభ్రంశం = నమోదు_2->లోపల_pack_స్థానభ్రంశం;
+	ఒకవేళ (స్థానభ్రంశం_గమ్యం_pack_pos(p, స్థానభ్రంశం, &pos) < 0)
 		die(_("write_reuse_object: could not locate %s, expected at "
 		      "offset %"PRIuMAX" in pack %s"),
-		    oid_to_hex(&entry->idx.oid), (uintmax_t)offset,
+		    oid_గమ్యం_hex(&నమోదు_2->idx.oid), (uintmax_t)స్థానభ్రంశం,
 		    p->pack_name);
-	datalen = pack_pos_to_offset(p, pos + 1) - offset;
-	if (!pack_to_stdout && p->index_version > 1 &&
-	    check_pack_crc(p, &w_curs, offset, datalen,
-			   pack_pos_to_index(p, pos))) {
+	datalen = pack_pos_గమ్యం_స్థానభ్రంశం(p, pos + 1) - స్థానభ్రంశం;
+	ఒకవేళ (!pack_గమ్యం_stdout && p->సూచీ_సంస్కరణ > 1 &&
+	    check_pack_చక్రీయ_తనిఖీ(p, &w_curs, స్థానభ్రంశం, datalen,
+			   pack_pos_గమ్యం_సూచీ(p, pos))) {
 		error(_("bad packed object CRC for %s"),
-		      oid_to_hex(&entry->idx.oid));
+		      oid_గమ్యం_hex(&నమోదు_2->idx.oid));
 		unuse_pack(&w_curs);
-		return write_no_reuse_object(f, entry, limit, usable_delta);
+		తిరిగి write_no_reuse_object(f, నమోదు_2, హద్దు, usable_delta);
 	}
 
-	offset += entry->in_pack_header_size;
-	datalen -= entry->in_pack_header_size;
+	స్థానభ్రంశం += నమోదు_2->లోపల_pack_శీర్షిక_కొలత;
+	datalen -= నమోదు_2->లోపల_pack_శీర్షిక_కొలత;
 
-	if (!pack_to_stdout && p->index_version == 1 &&
-	    check_pack_inflate(p, &w_curs, offset, datalen, entry_size)) {
+	ఒకవేళ (!pack_గమ్యం_stdout && p->సూచీ_సంస్కరణ == 1 &&
+	    check_pack_inflate(p, &w_curs, స్థానభ్రంశం, datalen, నమోదు_కొలత)) {
 		error(_("corrupt packed object for %s"),
-		      oid_to_hex(&entry->idx.oid));
+		      oid_గమ్యం_hex(&నమోదు_2->idx.oid));
 		unuse_pack(&w_curs);
-		return write_no_reuse_object(f, entry, limit, usable_delta);
+		తిరిగి write_no_reuse_object(f, నమోదు_2, హద్దు, usable_delta);
 	}
 
-	if (type == OBJ_OFS_DELTA) {
-		off_t ofs = entry->idx.offset - DELTA(entry)->idx.offset;
-		unsigned pos = sizeof(dheader) - 1;
+	ఒకవేళ (type == OBJ_OFS_DELTA) {
+		off_t ofs = నమోదు_2->idx.స్థానభ్రంశం - DELTA(నమోదు_2)->idx.స్థానభ్రంశం;
+		గుర్తులేని pos = పరిమాణం(dheader) - 1;
 		dheader[pos] = ofs & 127;
-		while (ofs >>= 7)
+		అయితే (ofs >>= 7)
 			dheader[--pos] = 128 | (--ofs & 127);
-		if (limit && hdrlen + sizeof(dheader) - pos + datalen + hashsz >= limit) {
+		ఒకవేళ (హద్దు && hdrlen + పరిమాణం(dheader) - pos + datalen + hashsz >= హద్దు) {
 			unuse_pack(&w_curs);
-			return 0;
+			తిరిగి 0;
 		}
-		hashwrite(f, header, hdrlen);
-		hashwrite(f, dheader + pos, sizeof(dheader) - pos);
-		hdrlen += sizeof(dheader) - pos;
+		hashwrite(f, శీర్షిక, hdrlen);
+		hashwrite(f, dheader + pos, పరిమాణం(dheader) - pos);
+		hdrlen += పరిమాణం(dheader) - pos;
 		reused_delta++;
-	} else if (type == OBJ_REF_DELTA) {
-		if (limit && hdrlen + hashsz + datalen + hashsz >= limit) {
+	} లేకపోతే ఒకవేళ (type == OBJ_REF_DELTA) {
+		ఒకవేళ (హద్దు && hdrlen + hashsz + datalen + hashsz >= హద్దు) {
 			unuse_pack(&w_curs);
-			return 0;
+			తిరిగి 0;
 		}
-		hashwrite(f, header, hdrlen);
-		hashwrite(f, DELTA(entry)->idx.oid.hash, hashsz);
+		hashwrite(f, శీర్షిక, hdrlen);
+		hashwrite(f, DELTA(నమోదు_2)->idx.oid.hash, hashsz);
 		hdrlen += hashsz;
 		reused_delta++;
-	} else {
-		if (limit && hdrlen + datalen + hashsz >= limit) {
+	} లేకపోతే {
+		ఒకవేళ (హద్దు && hdrlen + datalen + hashsz >= హద్దు) {
 			unuse_pack(&w_curs);
-			return 0;
+			తిరిగి 0;
 		}
-		hashwrite(f, header, hdrlen);
+		hashwrite(f, శీర్షిక, hdrlen);
 	}
-	copy_pack_data(f, p, &w_curs, offset, datalen);
+	copy_pack_దత్తాంశం(f, p, &w_curs, స్థానభ్రంశం, datalen);
 	unuse_pack(&w_curs);
 	reused++;
-	return hdrlen + datalen;
+	తిరిగి hdrlen + datalen;
 }
 
 /* Return 0 if we will bust the pack-size limit */
-static off_t write_object(struct hashfile *f,
-			  struct object_entry *entry,
-			  off_t write_offset)
+స్థిర off_t write_object(నిర్మాణం hashfile *f,
+			  నిర్మాణం object_నమోదు *నమోదు_2,
+			  off_t write_స్థానభ్రంశం)
 {
-	unsigned long limit;
+	గుర్తులేని దీర్ఘ హద్దు;
 	off_t len;
-	int usable_delta, to_reuse;
+	పూర్ణాంకం usable_delta, గమ్యం_reuse;
 
-	if (!pack_to_stdout)
-		crc32_begin(f);
+	ఒకవేళ (!pack_గమ్యం_stdout)
+		చక్రీయ_తనిఖీ_32_begin(f);
 
 	/* apply size limit if limited packsize and not first object */
-	if (!pack_size_limit || !nr_written)
-		limit = 0;
-	else if (pack_size_limit <= write_offset)
+	ఒకవేళ (!pack_కొలత_హద్దు || !nr_written)
+		హద్దు = 0;
+	లేకపోతే ఒకవేళ (pack_కొలత_హద్దు <= write_స్థానభ్రంశం)
 		/*
 		 * the earlier object did not fit the limit; avoid
 		 * mistaking this with unlimited (i.e. limit = 0).
 		 */
-		limit = 1;
-	else
-		limit = pack_size_limit - write_offset;
+		హద్దు = 1;
+	లేకపోతే
+		హద్దు = pack_కొలత_హద్దు - write_స్థానభ్రంశం;
 
-	if (!DELTA(entry))
+	ఒకవేళ (!DELTA(నమోదు_2))
 		usable_delta = 0;	/* no delta */
-	else if (!pack_size_limit)
+	లేకపోతే ఒకవేళ (!pack_కొలత_హద్దు)
 	       usable_delta = 1;	/* unlimited packfile */
-	else if (DELTA(entry)->idx.offset == (off_t)-1)
+	లేకపోతే ఒకవేళ (DELTA(నమోదు_2)->idx.స్థానభ్రంశం == (off_t)-1)
 		usable_delta = 0;	/* base was written to another pack */
-	else if (DELTA(entry)->idx.offset)
+	లేకపోతే ఒకవేళ (DELTA(నమోదు_2)->idx.స్థానభ్రంశం)
 		usable_delta = 1;	/* base already exists in this pack */
-	else
+	లేకపోతే
 		usable_delta = 0;	/* base could end up in another pack */
 
-	if (!reuse_object)
-		to_reuse = 0;	/* explicit */
-	else if (!IN_PACK(entry))
-		to_reuse = 0;	/* can't reuse what we don't have */
-	else if (oe_type(entry) == OBJ_REF_DELTA ||
-		 oe_type(entry) == OBJ_OFS_DELTA)
+	ఒకవేళ (!reuse_object)
+		గమ్యం_reuse = 0;	/* explicit */
+	లేకపోతే ఒకవేళ (!లోపల_PACK(నమోదు_2))
+		గమ్యం_reuse = 0;	/* can't reuse what we don't have */
+	లేకపోతే ఒకవేళ (oe_type(నమోదు_2) == OBJ_REF_DELTA ||
+		 oe_type(నమోదు_2) == OBJ_OFS_DELTA)
 				/* check_object() decided it for us ... */
-		to_reuse = usable_delta;
+		గమ్యం_reuse = usable_delta;
 				/* ... but pack split may override that */
-	else if (oe_type(entry) != entry->in_pack_type)
-		to_reuse = 0;	/* pack has delta which is unusable */
-	else if (DELTA(entry))
-		to_reuse = 0;	/* we want to pack afresh */
-	else
-		to_reuse = 1;	/* we have it in-pack undeltified,
+	లేకపోతే ఒకవేళ (oe_type(నమోదు_2) != నమోదు_2->లోపల_pack_type)
+		గమ్యం_reuse = 0;	/* pack has delta which is unusable */
+	లేకపోతే ఒకవేళ (DELTA(నమోదు_2))
+		గమ్యం_reuse = 0;	/* we want to pack afresh */
+	లేకపోతే
+		గమ్యం_reuse = 1;	/* we have it in-pack undeltified,
 				 * and we do not need to deltify it.
 				 */
 
-	if (!to_reuse)
-		len = write_no_reuse_object(f, entry, limit, usable_delta);
-	else
-		len = write_reuse_object(f, entry, limit, usable_delta);
-	if (!len)
-		return 0;
+	ఒకవేళ (!గమ్యం_reuse)
+		len = write_no_reuse_object(f, నమోదు_2, హద్దు, usable_delta);
+	లేకపోతే
+		len = write_reuse_object(f, నమోదు_2, హద్దు, usable_delta);
+	ఒకవేళ (!len)
+		తిరిగి 0;
 
-	if (usable_delta)
+	ఒకవేళ (usable_delta)
 		written_delta++;
 	written++;
-	if (!pack_to_stdout)
-		entry->idx.crc32 = crc32_end(f);
-	return len;
+	ఒకవేళ (!pack_గమ్యం_stdout)
+		నమోదు_2->idx.చక్రీయ_తనిఖీ_32 = చక్రీయ_తనిఖీ_32_చివర(f);
+	తిరిగి len;
 }
 
-enum write_one_status {
+గణన write_one_స్థితి {
 	WRITE_ONE_SKIP = -1, /* already written */
 	WRITE_ONE_BREAK = 0, /* writing this will bust the limit; not written */
-	WRITE_ONE_WRITTEN = 1, /* normal */
+	WRITE_ONE_WRITTEN = 1, /*సాధారణ*/
 	WRITE_ONE_RECURSIVE = 2 /* already scheduled to be written */
 };
 
-static enum write_one_status write_one(struct hashfile *f,
-				       struct object_entry *e,
-				       off_t *offset)
+స్థిర గణన write_one_స్థితి write_one(నిర్మాణం hashfile *f,
+				       నిర్మాణం object_నమోదు *e,
+				       off_t *స్థానభ్రంశం)
 {
-	off_t size;
-	int recursing;
+	off_t కొలత;
+	పూర్ణాంకం recursing;
 
 	/*
 	 * we set offset to 1 (which is an impossible value) to mark
 	 * the fact that this object is involved in "write its base
 	 * first before writing a deltified object" recursion.
 	 */
-	recursing = (e->idx.offset == 1);
-	if (recursing) {
+	recursing = (e->idx.స్థానభ్రంశం == 1);
+	ఒకవేళ (recursing) {
 		warning(_("recursive delta detected for object %s"),
-			oid_to_hex(&e->idx.oid));
-		return WRITE_ONE_RECURSIVE;
-	} else if (e->idx.offset || e->preferred_base) {
+			oid_గమ్యం_hex(&e->idx.oid));
+		తిరిగి WRITE_ONE_RECURSIVE;
+	} లేకపోతే ఒకవేళ (e->idx.స్థానభ్రంశం || e->preferred_పునాది) {
 		/* offset is non zero if object is written already. */
-		return WRITE_ONE_SKIP;
+		తిరిగి WRITE_ONE_SKIP;
 	}
 
 	/* if we are deltified, write out base object first. */
-	if (DELTA(e)) {
-		e->idx.offset = 1; /* now recurse */
-		switch (write_one(f, DELTA(e), offset)) {
-		case WRITE_ONE_RECURSIVE:
+	ఒకవేళ (DELTA(e)) {
+		e->idx.స్థానభ్రంశం = 1; /* now recurse */
+		ఎంపిక (write_one(f, DELTA(e), స్థానభ్రంశం)) {
+		స్థితి WRITE_ONE_RECURSIVE:
 			/* we cannot depend on this one */
-			SET_DELTA(e, NULL);
-			break;
-		default:
-			break;
-		case WRITE_ONE_BREAK:
-			e->idx.offset = recursing;
-			return WRITE_ONE_BREAK;
+			సమితి_DELTA(e, ఖాళీ);
+			ఆపు;
+		అప్రమేయ:
+			ఆపు;
+		స్థితి WRITE_ONE_BREAK:
+			e->idx.స్థానభ్రంశం = recursing;
+			తిరిగి WRITE_ONE_BREAK;
 		}
 	}
 
-	e->idx.offset = *offset;
-	size = write_object(f, e, *offset);
-	if (!size) {
-		e->idx.offset = recursing;
-		return WRITE_ONE_BREAK;
+	e->idx.స్థానభ్రంశం = *స్థానభ్రంశం;
+	కొలత = write_object(f, e, *స్థానభ్రంశం);
+	ఒకవేళ (!కొలత) {
+		e->idx.స్థానభ్రంశం = recursing;
+		తిరిగి WRITE_ONE_BREAK;
 	}
 	written_list[nr_written++] = &e->idx;
 
 	/* make sure off_t is sufficiently large not to wrap */
-	if (signed_add_overflows(*offset, size))
+	ఒకవేళ (signed_కూడు_overflows(*స్థానభ్రంశం, కొలత))
 		die(_("pack too large for current definition of off_t"));
-	*offset += size;
-	return WRITE_ONE_WRITTEN;
+	*స్థానభ్రంశం += కొలత;
+	తిరిగి WRITE_ONE_WRITTEN;
 }
 
-static int mark_tagged(const struct reference *ref, void *cb_data UNUSED)
+స్థిర పూర్ణాంకం mark_tagged(స్థిరరాశి నిర్మాణం reference *ref, శూన్య *cb_దత్తాంశం వాడని)
 {
-	struct object_id peeled;
-	struct object_entry *entry = packlist_find(&to_pack, ref->oid);
+	నిర్మాణం object_id peeled;
+	నిర్మాణం object_నమోదు *నమోదు_2 = packlist_కనుగొను(&గమ్యం_pack, ref->oid);
 
-	if (entry)
-		entry->tagged = 1;
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
-		entry = packlist_find(&to_pack, &peeled);
-		if (entry)
-			entry->tagged = 1;
+	ఒకవేళ (నమోదు_2)
+		నమోదు_2->tagged = 1;
+	ఒకవేళ (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
+		నమోదు_2 = packlist_కనుగొను(&గమ్యం_pack, &peeled);
+		ఒకవేళ (నమోదు_2)
+			నమోదు_2->tagged = 1;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static inline unsigned char oe_layer(struct packing_data *pack,
-				     struct object_entry *e)
+స్థిర అంతఃవరుస గుర్తులేని అక్షరం oe_layer(నిర్మాణం packing_దత్తాంశం *pack,
+				     నిర్మాణం object_నమోదు *e)
 {
-	if (!pack->layer)
-		return 0;
-	return pack->layer[e - pack->objects];
+	ఒకవేళ (!pack->layer)
+		తిరిగి 0;
+	తిరిగి pack->layer[e - pack->objects];
 }
 
-static inline void add_to_write_order(struct object_entry **wo,
-			       unsigned int *endp,
-			       struct object_entry *e)
+స్థిర అంతఃవరుస శూన్య కూడు_గమ్యం_write_క్రమం(నిర్మాణం object_నమోదు **wo,
+			       గుర్తులేని పూర్ణాంకం *endp,
+			       నిర్మాణం object_నమోదు *e)
 {
-	if (e->filled || oe_layer(&to_pack, e) != write_layer)
-		return;
+	ఒకవేళ (e->filled || oe_layer(&గమ్యం_pack, e) != write_layer)
+		తిరిగి;
 	wo[(*endp)++] = e;
 	e->filled = 1;
 }
 
-static void add_descendants_to_write_order(struct object_entry **wo,
-					   unsigned int *endp,
-					   struct object_entry *e)
+స్థిర శూన్య కూడు_descendants_గమ్యం_write_క్రమం(నిర్మాణం object_నమోదు **wo,
+					   గుర్తులేని పూర్ణాంకం *endp,
+					   నిర్మాణం object_నమోదు *e)
 {
-	int add_to_order = 1;
-	while (e) {
-		if (add_to_order) {
-			struct object_entry *s;
+	పూర్ణాంకం కూడు_గమ్యం_క్రమం = 1;
+	అయితే (e) {
+		ఒకవేళ (కూడు_గమ్యం_క్రమం) {
+			నిర్మాణం object_నమోదు *s;
 			/* add this node... */
-			add_to_write_order(wo, endp, e);
+			కూడు_గమ్యం_write_క్రమం(wo, endp, e);
 			/* all its siblings... */
-			for (s = DELTA_SIBLING(e); s; s = DELTA_SIBLING(s)) {
-				add_to_write_order(wo, endp, s);
+			కొరకు (s = DELTA_SIBLING(e); s; s = DELTA_SIBLING(s)) {
+				కూడు_గమ్యం_write_క్రమం(wo, endp, s);
 			}
 		}
 		/* drop down a level to add left subtree nodes if possible */
-		if (DELTA_CHILD(e)) {
-			add_to_order = 1;
-			e = DELTA_CHILD(e);
-		} else {
-			add_to_order = 0;
+		ఒకవేళ (DELTA_బిడ్డ(e)) {
+			కూడు_గమ్యం_క్రమం = 1;
+			e = DELTA_బిడ్డ(e);
+		} లేకపోతే {
+			కూడు_గమ్యం_క్రమం = 0;
 			/* our sibling might have some children, it is next */
-			if (DELTA_SIBLING(e)) {
+			ఒకవేళ (DELTA_SIBLING(e)) {
 				e = DELTA_SIBLING(e);
-				continue;
+				కొనసాగు;
 			}
 			/* go back to our parent node */
 			e = DELTA(e);
-			while (e && !DELTA_SIBLING(e)) {
+			అయితే (e && !DELTA_SIBLING(e)) {
 				/* we're on the right side of a subtree, keep
 				 * going up until we can go right again */
 				e = DELTA(e);
 			}
-			if (!e) {
+			ఒకవేళ (!e) {
 				/* done- we hit our original root node */
-				return;
+				తిరిగి;
 			}
 			/* pass it off to sibling at this level */
 			e = DELTA_SIBLING(e);
@@ -927,78 +927,78 @@ static void add_descendants_to_write_order(struct object_entry **wo,
 	};
 }
 
-static void add_family_to_write_order(struct object_entry **wo,
-				      unsigned int *endp,
-				      struct object_entry *e)
+స్థిర శూన్య కూడు_family_గమ్యం_write_క్రమం(నిర్మాణం object_నమోదు **wo,
+				      గుర్తులేని పూర్ణాంకం *endp,
+				      నిర్మాణం object_నమోదు *e)
 {
-	struct object_entry *root;
+	నిర్మాణం object_నమోదు *మూలం;
 
-	for (root = e; DELTA(root); root = DELTA(root))
+	కొరకు (మూలం = e; DELTA(మూలం); మూలం = DELTA(మూలం))
 		; /* nothing */
-	add_descendants_to_write_order(wo, endp, root);
+	కూడు_descendants_గమ్యం_write_క్రమం(wo, endp, మూలం);
 }
 
-static void compute_layer_order(struct object_entry **wo, unsigned int *wo_end)
+స్థిర శూన్య compute_layer_క్రమం(నిర్మాణం object_నమోదు **wo, గుర్తులేని పూర్ణాంకం *wo_చివర)
 {
-	unsigned int i, last_untagged;
-	struct object_entry *objects = to_pack.objects;
+	గుర్తులేని పూర్ణాంకం i, చివరి_untagged;
+	నిర్మాణం object_నమోదు *objects = గమ్యం_pack.objects;
 
-	for (i = 0; i < to_pack.nr_objects; i++) {
-		if (objects[i].tagged)
-			break;
-		add_to_write_order(wo, wo_end, &objects[i]);
+	కొరకు (i = 0; i < గమ్యం_pack.nr_objects; i++) {
+		ఒకవేళ (objects[i].tagged)
+			ఆపు;
+		కూడు_గమ్యం_write_క్రమం(wo, wo_చివర, &objects[i]);
 	}
-	last_untagged = i;
+	చివరి_untagged = i;
 
 	/*
 	 * Then fill all the tagged tips.
 	 */
-	for (; i < to_pack.nr_objects; i++) {
-		if (objects[i].tagged)
-			add_to_write_order(wo, wo_end, &objects[i]);
+	కొరకు (; i < గమ్యం_pack.nr_objects; i++) {
+		ఒకవేళ (objects[i].tagged)
+			కూడు_గమ్యం_write_క్రమం(wo, wo_చివర, &objects[i]);
 	}
 
 	/*
 	 * And then all remaining commits and tags.
 	 */
-	for (i = last_untagged; i < to_pack.nr_objects; i++) {
-		if (oe_type(&objects[i]) != OBJ_COMMIT &&
-		    oe_type(&objects[i]) != OBJ_TAG)
-			continue;
-		add_to_write_order(wo, wo_end, &objects[i]);
+	కొరకు (i = చివరి_untagged; i < గమ్యం_pack.nr_objects; i++) {
+		ఒకవేళ (oe_type(&objects[i]) != OBJ_COMMIT &&
+		    oe_type(&objects[i]) != OBJ_ట్యాగ్)
+			కొనసాగు;
+		కూడు_గమ్యం_write_క్రమం(wo, wo_చివర, &objects[i]);
 	}
 
 	/*
 	 * And then all the trees.
 	 */
-	for (i = last_untagged; i < to_pack.nr_objects; i++) {
-		if (oe_type(&objects[i]) != OBJ_TREE)
-			continue;
-		add_to_write_order(wo, wo_end, &objects[i]);
+	కొరకు (i = చివరి_untagged; i < గమ్యం_pack.nr_objects; i++) {
+		ఒకవేళ (oe_type(&objects[i]) != OBJ_వృక్షం)
+			కొనసాగు;
+		కూడు_గమ్యం_write_క్రమం(wo, wo_చివర, &objects[i]);
 	}
 
 	/*
 	 * Finally all the rest in really tight order
 	 */
-	for (i = last_untagged; i < to_pack.nr_objects; i++) {
-		if (!objects[i].filled && oe_layer(&to_pack, &objects[i]) == write_layer)
-			add_family_to_write_order(wo, wo_end, &objects[i]);
+	కొరకు (i = చివరి_untagged; i < గమ్యం_pack.nr_objects; i++) {
+		ఒకవేళ (!objects[i].filled && oe_layer(&గమ్యం_pack, &objects[i]) == write_layer)
+			కూడు_family_గమ్యం_write_క్రమం(wo, wo_చివర, &objects[i]);
 	}
 }
 
-static struct object_entry **compute_write_order(void)
+స్థిర నిర్మాణం object_నమోదు **compute_write_క్రమం(శూన్య)
 {
 	uint32_t max_layers = 1;
-	unsigned int i, wo_end;
+	గుర్తులేని పూర్ణాంకం i, wo_చివర;
 
-	struct object_entry **wo;
-	struct object_entry *objects = to_pack.objects;
+	నిర్మాణం object_నమోదు **wo;
+	నిర్మాణం object_నమోదు *objects = గమ్యం_pack.objects;
 
-	for (i = 0; i < to_pack.nr_objects; i++) {
+	కొరకు (i = 0; i < గమ్యం_pack.nr_objects; i++) {
 		objects[i].tagged = 0;
 		objects[i].filled = 0;
-		SET_DELTA_CHILD(&objects[i], NULL);
-		SET_DELTA_SIBLING(&objects[i], NULL);
+		సమితి_DELTA_బిడ్డ(&objects[i], ఖాళీ);
+		సమితి_DELTA_SIBLING(&objects[i], ఖాళీ);
 	}
 
 	/*
@@ -1006,37 +1006,37 @@ static struct object_entry **compute_write_order(void)
 	 * Make sure delta_sibling is sorted in the original
 	 * recency order.
 	 */
-	for (i = to_pack.nr_objects; i > 0;) {
-		struct object_entry *e = &objects[--i];
-		if (!DELTA(e))
-			continue;
+	కొరకు (i = గమ్యం_pack.nr_objects; i > 0;) {
+		నిర్మాణం object_నమోదు *e = &objects[--i];
+		ఒకవేళ (!DELTA(e))
+			కొనసాగు;
 		/* Mark me as the first child */
-		e->delta_sibling_idx = DELTA(e)->delta_child_idx;
-		SET_DELTA_CHILD(DELTA(e), e);
+		e->delta_sibling_idx = DELTA(e)->delta_బిడ్డ_idx;
+		సమితి_DELTA_బిడ్డ(DELTA(e), e);
 	}
 
 	/*
 	 * Mark objects that are at the tip of tags.
 	 */
-	refs_for_each_tag_ref(get_main_ref_store(the_repository), mark_tagged,
-			      NULL);
+	refs_for_each_ట్యాగ్_ref(get_main_ref_store(the_repository), mark_tagged,
+			      ఖాళీ);
 
-	if (use_delta_islands) {
-		max_layers = compute_pack_layers(&to_pack);
+	ఒకవేళ (use_delta_islands) {
+		max_layers = compute_pack_layers(&గమ్యం_pack);
 		free_island_marks();
 	}
 
-	ALLOC_ARRAY(wo, to_pack.nr_objects);
-	wo_end = 0;
+	ALLOC_ARRAY(wo, గమ్యం_pack.nr_objects);
+	wo_చివర = 0;
 
-	for (; write_layer < max_layers; ++write_layer)
-		compute_layer_order(wo, &wo_end);
+	కొరకు (; write_layer < max_layers; ++write_layer)
+		compute_layer_క్రమం(wo, &wo_చివర);
 
-	if (wo_end != to_pack.nr_objects)
+	ఒకవేళ (wo_చివర != గమ్యం_pack.nr_objects)
 		die(_("ordered %u objects, expected %"PRIu32),
-		    wo_end, to_pack.nr_objects);
+		    wo_చివర, గమ్యం_pack.nr_objects);
 
-	return wo;
+	తిరిగి wo;
 }
 
 
@@ -1046,7 +1046,7 @@ static struct object_entry **compute_write_order(void)
  * packfile.
  */
 
-static struct reused_chunk {
+స్థిర నిర్మాణం reused_chunk {
 	/* The offset of the first object of this chunk in the original
 	 * packfile. */
 	off_t original;
@@ -1054,18 +1054,18 @@ static struct reused_chunk {
 	 * this chunk in the generated packfile. */
 	off_t difference;
 } *reused_chunks;
-static int reused_chunks_nr;
-static int reused_chunks_alloc;
+స్థిర పూర్ణాంకం reused_chunks_nr;
+స్థిర పూర్ణాంకం reused_chunks_alloc;
 
-static void record_reused_object(off_t where, off_t offset)
+స్థిర శూన్య రికార్డు_reused_object(off_t where, off_t స్థానభ్రంశం)
 {
-	if (reused_chunks_nr && reused_chunks[reused_chunks_nr-1].difference == offset)
-		return;
+	ఒకవేళ (reused_chunks_nr && reused_chunks[reused_chunks_nr-1].difference == స్థానభ్రంశం)
+		తిరిగి;
 
 	ALLOC_GROW(reused_chunks, reused_chunks_nr + 1,
 		   reused_chunks_alloc);
 	reused_chunks[reused_chunks_nr].original = where;
-	reused_chunks[reused_chunks_nr].difference = offset;
+	reused_chunks[reused_chunks_nr].difference = స్థానభ్రంశం;
 	reused_chunks_nr++;
 }
 
@@ -1075,16 +1075,16 @@ static void record_reused_object(off_t where, off_t offset)
  * chunk that contains it (which implicitly ends at the start
  * of the next chunk.
  */
-static off_t find_reused_offset(off_t where)
+స్థిర off_t కనుగొను_reused_స్థానభ్రంశం(off_t where)
 {
-	int lo = 0, hi = reused_chunks_nr;
-	while (lo < hi) {
-		int mi = lo + ((hi - lo) / 2);
-		if (where == reused_chunks[mi].original)
-			return reused_chunks[mi].difference;
-		if (where < reused_chunks[mi].original)
+	పూర్ణాంకం lo = 0, hi = reused_chunks_nr;
+	అయితే (lo < hi) {
+		పూర్ణాంకం mi = lo + ((hi - lo) / 2);
+		ఒకవేళ (where == reused_chunks[mi].original)
+			తిరిగి reused_chunks[mi].difference;
+		ఒకవేళ (where < reused_chunks[mi].original)
 			hi = mi;
-		else
+		లేకపోతే
 			lo = mi + 1;
 	}
 
@@ -1092,99 +1092,99 @@ static off_t find_reused_offset(off_t where)
 	 * The first chunk starts at zero, so we can't have gone below
 	 * there.
 	 */
-	assert(lo);
-	return reused_chunks[lo-1].difference;
+	ప్రతిజ్ఞా(lo);
+	తిరిగి reused_chunks[lo-1].difference;
 }
 
-static void write_reused_pack_one(struct packed_git *reuse_packfile,
-				  size_t pos, struct hashfile *out,
-				  off_t pack_start,
-				  struct pack_window **w_curs)
+స్థిర శూన్య write_reused_pack_one(నిర్మాణం packed_git *reuse_packfile,
+				  కొలత_t pos, నిర్మాణం hashfile *బహిర్గతం,
+				  off_t pack_ప్రారంభం,
+				  నిర్మాణం pack_కిటికీ **w_curs)
 {
-	off_t offset, next, cur;
-	enum object_type type;
-	size_t size;
+	off_t స్థానభ్రంశం, తదుపరి, cur;
+	గణన object_type type;
+	కొలత_t కొలత;
 
-	offset = pack_pos_to_offset(reuse_packfile, pos);
-	next = pack_pos_to_offset(reuse_packfile, pos + 1);
+	స్థానభ్రంశం = pack_pos_గమ్యం_స్థానభ్రంశం(reuse_packfile, pos);
+	తదుపరి = pack_pos_గమ్యం_స్థానభ్రంశం(reuse_packfile, pos + 1);
 
-	record_reused_object(offset,
-			     offset - (hashfile_total(out) - pack_start));
+	రికార్డు_reused_object(స్థానభ్రంశం,
+			     స్థానభ్రంశం - (hashfile_మొత్తం(బహిర్గతం) - pack_ప్రారంభం));
 
-	cur = offset;
-	type = unpack_object_header(reuse_packfile, w_curs, &cur, &size);
-	assert(type >= 0);
+	cur = స్థానభ్రంశం;
+	type = unpack_object_శీర్షిక(reuse_packfile, w_curs, &cur, &కొలత);
+	ప్రతిజ్ఞా(type >= 0);
 
-	if (type == OBJ_OFS_DELTA) {
-		off_t base_offset;
+	ఒకవేళ (type == OBJ_OFS_DELTA) {
+		off_t పునాది_స్థానభ్రంశం;
 		off_t fixup;
 
-		unsigned char header[MAX_PACK_OBJECT_HEADER];
-		unsigned len;
+		గుర్తులేని అక్షరం శీర్షిక[MAX_PACK_OBJECT_శీర్షిక];
+		గుర్తులేని len;
 
-		base_offset = get_delta_base(reuse_packfile, w_curs, &cur, type, offset);
-		assert(base_offset != 0);
+		పునాది_స్థానభ్రంశం = get_delta_పునాది(reuse_packfile, w_curs, &cur, type, స్థానభ్రంశం);
+		ప్రతిజ్ఞా(పునాది_స్థానభ్రంశం != 0);
 
 		/* Convert to REF_DELTA if we must... */
-		if (!allow_ofs_delta) {
-			uint32_t base_pos;
-			struct object_id base_oid;
+		ఒకవేళ (!allow_ofs_delta) {
+			uint32_t పునాది_pos;
+			నిర్మాణం object_id పునాది_oid;
 
-			if (offset_to_pack_pos(reuse_packfile, base_offset, &base_pos) < 0)
+			ఒకవేళ (స్థానభ్రంశం_గమ్యం_pack_pos(reuse_packfile, పునాది_స్థానభ్రంశం, &పునాది_pos) < 0)
 				die(_("expected object at offset %"PRIuMAX" "
 				      "in pack %s"),
-				    (uintmax_t)base_offset,
+				    (uintmax_t)పునాది_స్థానభ్రంశం,
 				    reuse_packfile->pack_name);
 
-			nth_packed_object_id(&base_oid, reuse_packfile,
-					     pack_pos_to_index(reuse_packfile, base_pos));
+			nth_packed_object_id(&పునాది_oid, reuse_packfile,
+					     pack_pos_గమ్యం_సూచీ(reuse_packfile, పునాది_pos));
 
-			len = encode_in_pack_object_header(header, sizeof(header),
-							   OBJ_REF_DELTA, size);
-			hashwrite(out, header, len);
-			hashwrite(out, base_oid.hash, the_hash_algo->rawsz);
-			copy_pack_data(out, reuse_packfile, w_curs, cur, next - cur);
-			return;
+			len = encode_లోపల_pack_object_శీర్షిక(శీర్షిక, పరిమాణం(శీర్షిక),
+							   OBJ_REF_DELTA, కొలత);
+			hashwrite(బహిర్గతం, శీర్షిక, len);
+			hashwrite(బహిర్గతం, పునాది_oid.hash, the_hash_algo->rawsz);
+			copy_pack_దత్తాంశం(బహిర్గతం, reuse_packfile, w_curs, cur, తదుపరి - cur);
+			తిరిగి;
 		}
 
 		/* Otherwise see if we need to rewrite the offset... */
-		fixup = find_reused_offset(offset) -
-			find_reused_offset(base_offset);
-		if (fixup) {
-			unsigned char ofs_header[MAX_PACK_OBJECT_HEADER];
-			unsigned i, ofs_len;
-			off_t ofs = offset - base_offset - fixup;
+		fixup = కనుగొను_reused_స్థానభ్రంశం(స్థానభ్రంశం) -
+			కనుగొను_reused_స్థానభ్రంశం(పునాది_స్థానభ్రంశం);
+		ఒకవేళ (fixup) {
+			గుర్తులేని అక్షరం ofs_శీర్షిక[MAX_PACK_OBJECT_శీర్షిక];
+			గుర్తులేని i, ofs_len;
+			off_t ofs = స్థానభ్రంశం - పునాది_స్థానభ్రంశం - fixup;
 
-			len = encode_in_pack_object_header(header, sizeof(header),
-							   OBJ_OFS_DELTA, size);
+			len = encode_లోపల_pack_object_శీర్షిక(శీర్షిక, పరిమాణం(శీర్షిక),
+							   OBJ_OFS_DELTA, కొలత);
 
-			i = sizeof(ofs_header) - 1;
-			ofs_header[i] = ofs & 127;
-			while (ofs >>= 7)
-				ofs_header[--i] = 128 | (--ofs & 127);
+			i = పరిమాణం(ofs_శీర్షిక) - 1;
+			ofs_శీర్షిక[i] = ofs & 127;
+			అయితే (ofs >>= 7)
+				ofs_శీర్షిక[--i] = 128 | (--ofs & 127);
 
-			ofs_len = sizeof(ofs_header) - i;
+			ofs_len = పరిమాణం(ofs_శీర్షిక) - i;
 
-			hashwrite(out, header, len);
-			hashwrite(out, ofs_header + sizeof(ofs_header) - ofs_len, ofs_len);
-			copy_pack_data(out, reuse_packfile, w_curs, cur, next - cur);
-			return;
+			hashwrite(బహిర్గతం, శీర్షిక, len);
+			hashwrite(బహిర్గతం, ofs_శీర్షిక + పరిమాణం(ofs_శీర్షిక) - ofs_len, ofs_len);
+			copy_pack_దత్తాంశం(బహిర్గతం, reuse_packfile, w_curs, cur, తదుపరి - cur);
+			తిరిగి;
 		}
 
 		/* ...otherwise we have no fixup, and can write it verbatim */
 	}
 
-	copy_pack_data(out, reuse_packfile, w_curs, offset, next - offset);
+	copy_pack_దత్తాంశం(బహిర్గతం, reuse_packfile, w_curs, స్థానభ్రంశం, తదుపరి - స్థానభ్రంశం);
 }
 
-static size_t write_reused_pack_verbatim(struct bitmapped_pack *reuse_packfile,
-					 struct hashfile *out,
-					 struct pack_window **w_curs)
+స్థిర కొలత_t write_reused_pack_verbatim(నిర్మాణం bitmapped_pack *reuse_packfile,
+					 నిర్మాణం hashfile *బహిర్గతం,
+					 నిర్మాణం pack_కిటికీ **w_curs)
 {
-	size_t pos = 0;
-	size_t end;
+	కొలత_t pos = 0;
+	కొలత_t చివర;
 
-	if (reuse_packfile->bitmap_pos) {
+	ఒకవేళ (reuse_packfile->bitmap_pos) {
 		/*
 		 * We can't reuse whole chunks verbatim out of
 		 * non-preferred packs since we can't guarantee that
@@ -1202,7 +1202,7 @@ static size_t write_reused_pack_verbatim(struct bitmapped_pack *reuse_packfile,
 		 * write_reused_pack(), which inspects and reuses
 		 * individual bits.
 		 */
-		return reuse_packfile->bitmap_pos / BITS_IN_EWORD;
+		తిరిగి reuse_packfile->bitmap_pos / బిట్లు_లోపల_EWORD;
 	}
 
 	/*
@@ -1214,58 +1214,58 @@ static size_t write_reused_pack_verbatim(struct bitmapped_pack *reuse_packfile,
 	 * contains fewer than BITS_IN_EWORD objects), then we'll
 	 * inspect bits one-by-one in write_reused_pack().
 	 */
-	end = reuse_packfile->bitmap_nr / BITS_IN_EWORD;
-	if (reuse_packfile_bitmap->word_alloc < end)
+	చివర = reuse_packfile->bitmap_nr / బిట్లు_లోపల_EWORD;
+	ఒకవేళ (reuse_packfile_bitmap->మాట_alloc < చివర)
 		BUG("fewer words than expected in reuse_packfile_bitmap");
 
-	while (pos < end && reuse_packfile_bitmap->words[pos] == (eword_t)~0)
+	అయితే (pos < చివర && reuse_packfile_bitmap->పదాలు[pos] == (eword_t)~0)
 		pos++;
 
-	if (pos) {
-		off_t to_write;
+	ఒకవేళ (pos) {
+		off_t గమ్యం_write;
 
-		written = (pos * BITS_IN_EWORD);
-		to_write = pack_pos_to_offset(reuse_packfile->p, written)
-			- sizeof(struct pack_header);
+		written = (pos * బిట్లు_లోపల_EWORD);
+		గమ్యం_write = pack_pos_గమ్యం_స్థానభ్రంశం(reuse_packfile->p, written)
+			- పరిమాణం(నిర్మాణం pack_శీర్షిక);
 
 		/* We're recording one chunk, not one object. */
-		record_reused_object(sizeof(struct pack_header), 0);
-		hashflush(out);
-		copy_pack_data(out, reuse_packfile->p, w_curs,
-			sizeof(struct pack_header), to_write);
+		రికార్డు_reused_object(పరిమాణం(నిర్మాణం pack_శీర్షిక), 0);
+		hashflush(బహిర్గతం);
+		copy_pack_దత్తాంశం(బహిర్గతం, reuse_packfile->p, w_curs,
+			పరిమాణం(నిర్మాణం pack_శీర్షిక), గమ్యం_write);
 
-		display_progress(progress_state, written);
+		display_పురోగతి(పురోగతి_state, written);
 	}
-	return pos;
+	తిరిగి pos;
 }
 
-static void write_reused_pack(struct bitmapped_pack *reuse_packfile,
-			      struct hashfile *f)
+స్థిర శూన్య write_reused_pack(నిర్మాణం bitmapped_pack *reuse_packfile,
+			      నిర్మాణం hashfile *f)
 {
-	size_t i = reuse_packfile->bitmap_pos / BITS_IN_EWORD;
-	uint32_t offset;
-	off_t pack_start = hashfile_total(f) - sizeof(struct pack_header);
-	struct pack_window *w_curs = NULL;
+	కొలత_t i = reuse_packfile->bitmap_pos / బిట్లు_లోపల_EWORD;
+	uint32_t స్థానభ్రంశం;
+	off_t pack_ప్రారంభం = hashfile_మొత్తం(f) - పరిమాణం(నిర్మాణం pack_శీర్షిక);
+	నిర్మాణం pack_కిటికీ *w_curs = ఖాళీ;
 
-	if (allow_ofs_delta)
+	ఒకవేళ (allow_ofs_delta)
 		i = write_reused_pack_verbatim(reuse_packfile, f, &w_curs);
 
-	for (; i < reuse_packfile_bitmap->word_alloc; ++i) {
-		eword_t word = reuse_packfile_bitmap->words[i];
-		size_t pos = (i * BITS_IN_EWORD);
+	కొరకు (; i < reuse_packfile_bitmap->మాట_alloc; ++i) {
+		eword_t మాట = reuse_packfile_bitmap->పదాలు[i];
+		కొలత_t pos = (i * బిట్లు_లోపల_EWORD);
 
-		for (offset = 0; offset < BITS_IN_EWORD; ++offset) {
+		కొరకు (స్థానభ్రంశం = 0; స్థానభ్రంశం < బిట్లు_లోపల_EWORD; ++స్థానభ్రంశం) {
 			uint32_t pack_pos;
-			if ((word >> offset) == 0)
-				break;
+			ఒకవేళ ((మాట >> స్థానభ్రంశం) == 0)
+				ఆపు;
 
-			offset += ewah_bit_ctz64(word >> offset);
-			if (pos + offset < reuse_packfile->bitmap_pos)
-				continue;
-			if (pos + offset >= reuse_packfile->bitmap_pos + reuse_packfile->bitmap_nr)
-				goto done;
+			స్థానభ్రంశం += ewah_బిట్టు_ctz64(మాట >> స్థానభ్రంశం);
+			ఒకవేళ (pos + స్థానభ్రంశం < reuse_packfile->bitmap_pos)
+				కొనసాగు;
+			ఒకవేళ (pos + స్థానభ్రంశం >= reuse_packfile->bitmap_pos + reuse_packfile->bitmap_nr)
+				వెళ్ళు పూర్తి;
 
-			if (reuse_packfile->bitmap_pos) {
+			ఒకవేళ (reuse_packfile->bitmap_pos) {
 				/*
 				 * When doing multi-pack reuse on a
 				 * non-preferred pack, translate bit positions
@@ -1273,84 +1273,84 @@ static void write_reused_pack(struct bitmapped_pack *reuse_packfile,
 				 * pack-relative positions before attempting
 				 * reuse.
 				 */
-				struct multi_pack_index *m = reuse_packfile->from_midx;
+				నిర్మాణం multi_pack_సూచీ *m = reuse_packfile->from_midx;
 				uint32_t midx_pos;
 				off_t pack_ofs;
 
-				if (!m)
+				ఒకవేళ (!m)
 					BUG("non-zero bitmap position without MIDX");
 
-				midx_pos = pack_pos_to_midx(m, pos + offset);
-				pack_ofs = nth_midxed_offset(m, midx_pos);
+				midx_pos = pack_pos_గమ్యం_midx(m, pos + స్థానభ్రంశం);
+				pack_ofs = nth_midxed_స్థానభ్రంశం(m, midx_pos);
 
-				if (offset_to_pack_pos(reuse_packfile->p,
+				ఒకవేళ (స్థానభ్రంశం_గమ్యం_pack_pos(reuse_packfile->p,
 						       pack_ofs, &pack_pos) < 0)
 					BUG("could not find expected object at offset %"PRIuMAX" in pack %s",
 					    (uintmax_t)pack_ofs,
 					    pack_basename(reuse_packfile->p));
-			} else {
+			} లేకపోతే {
 				/*
 				 * Can use bit positions directly, even for MIDX
 				 * bitmaps. See comment in try_partial_reuse()
 				 * for why.
 				 */
-				pack_pos = pos + offset;
+				pack_pos = pos + స్థానభ్రంశం;
 			}
 
 			write_reused_pack_one(reuse_packfile->p, pack_pos, f,
-					      pack_start, &w_curs);
-			display_progress(progress_state, ++written);
+					      pack_ప్రారంభం, &w_curs);
+			display_పురోగతి(పురోగతి_state, ++written);
 		}
 	}
 
-done:
+పూర్తి:
 	unuse_pack(&w_curs);
 }
 
-static void write_excluded_by_configs(void)
+స్థిర శూన్య write_excluded_by_configs(శూన్య)
 {
-	struct oidset_iter iter;
-	const struct object_id *oid;
+	నిర్మాణం oidset_iter iter;
+	స్థిరరాశి నిర్మాణం object_id *oid;
 
 	oidset_iter_init(&excluded_by_config, &iter);
-	while ((oid = oidset_iter_next(&iter))) {
-		struct configured_exclusion *ex =
+	అయితే ((oid = oidset_iter_తదుపరి(&iter))) {
+		నిర్మాణం configured_exclusion *ex =
 			oidmap_get(&configured_exclusions, oid);
 
-		if (!ex)
+		ఒకవేళ (!ex)
 			BUG("configured exclusion wasn't configured");
-		write_in_full(1, ex->pack_hash_hex, strlen(ex->pack_hash_hex));
-		write_in_full(1, " ", 1);
-		write_in_full(1, ex->uri, strlen(ex->uri));
-		write_in_full(1, "\n", 1);
+		write_లోపల_నిండిన(1, ex->pack_hash_hex, అక్షరశ్రేణి_పొడవు(ex->pack_hash_hex));
+		write_లోపల_నిండిన(1, " ", 1);
+		write_లోపల_నిండిన(1, ex->uri, అక్షరశ్రేణి_పొడవు(ex->uri));
+		write_లోపల_నిండిన(1, "\n", 1);
 	}
 }
 
-static const char no_split_warning[] = N_(
+స్థిర స్థిరరాశి అక్షరం no_విభజించు_warning[] = N_(
 "disabling bitmap writing, packs are split due to pack.packSizeLimit"
 );
 
-static void write_pack_file(void)
+స్థిర శూన్య write_pack_file(శూన్య)
 {
 	uint32_t i = 0, j;
-	struct hashfile *f;
-	off_t offset;
-	uint32_t nr_remaining = nr_result;
-	time_t last_mtime = 0;
-	struct object_entry **write_order;
-	off_t bytes_written = 0;
+	నిర్మాణం hashfile *f;
+	off_t స్థానభ్రంశం;
+	uint32_t nr_మిగిలిన = nr_ఫలితం;
+	సమయం_t చివరి_mtime = 0;
+	నిర్మాణం object_నమోదు **write_క్రమం;
+	off_t బైట్లు_written = 0;
 
-	if (progress > pack_to_stdout)
-		progress_state = start_progress(the_repository,
-						_("Writing objects"), nr_result);
-	ALLOC_ARRAY(written_list, to_pack.nr_objects);
-	write_order = compute_write_order();
+	ఒకవేళ (పురోగతి > pack_గమ్యం_stdout)
+		పురోగతి_state = ప్రారంభం_పురోగతి(the_repository,
+						_("Writing objects"), nr_ఫలితం);
+	ALLOC_ARRAY(written_list, గమ్యం_pack.nr_objects);
+	write_క్రమం = compute_write_క్రమం();
 
-	do {
-		unsigned char hash[GIT_MAX_RAWSZ];
-		char *pack_tmp_name = NULL;
+	చేయి {
+		గుర్తులేని అక్షరం hash[GIT_MAX_RAWSZ];
+		అక్షరం *pack_tmp_name = ఖాళీ;
 
-		if (pack_to_stdout) {
+		ఒకవేళ (pack_గమ్యం_stdout) {
 			/*
 			 * This command is most often invoked via
 			 * git-upload-pack(1), which will typically chunk data
@@ -1360,40 +1360,40 @@ static void write_pack_file(void)
 			 * Note that we need to subtract one though to
 			 * accommodate for the sideband byte.
 			 */
-			struct hashfd_options opts = {
-				.progress = progress_state,
-				.buffer_len = LARGE_PACKET_DATA_MAX - 1,
+			నిర్మాణం hashfd_options opts = {
+				.పురోగతి = పురోగతి_state,
+				.బఫరు_len = LARGE_PACKET_దత్తాంశం_MAX - 1,
 			};
 			f = hashfd_ext(the_repository->hash_algo, 1,
 				       "<stdout>", &opts);
-		} else {
+		} లేకపోతే {
 			f = create_tmp_packfile(the_repository, &pack_tmp_name);
 		}
 
-		offset = write_pack_header(f, nr_remaining);
+		స్థానభ్రంశం = write_pack_శీర్షిక(f, nr_మిగిలిన);
 
-		if (reuse_packfiles_nr) {
-			assert(pack_to_stdout);
-			for (j = 0; j < reuse_packfiles_nr; j++) {
+		ఒకవేళ (reuse_packfiles_nr) {
+			ప్రతిజ్ఞా(pack_గమ్యం_stdout);
+			కొరకు (j = 0; j < reuse_packfiles_nr; j++) {
 				reused_chunks_nr = 0;
 				write_reused_pack(&reuse_packfiles[j], f);
-				if (reused_chunks_nr)
-					reuse_packfiles_used_nr++;
+				ఒకవేళ (reused_chunks_nr)
+					reuse_packfiles_వాడిన_nr++;
 			}
-			offset = hashfile_total(f);
+			స్థానభ్రంశం = hashfile_మొత్తం(f);
 		}
 
 		nr_written = 0;
-		for (; i < to_pack.nr_objects; i++) {
-			struct object_entry *e = write_order[i];
-			if (write_one(f, e, &offset) == WRITE_ONE_BREAK)
-				break;
-			display_progress(progress_state, written);
+		కొరకు (; i < గమ్యం_pack.nr_objects; i++) {
+			నిర్మాణం object_నమోదు *e = write_క్రమం[i];
+			ఒకవేళ (write_one(f, e, &స్థానభ్రంశం) == WRITE_ONE_BREAK)
+				ఆపు;
+			display_పురోగతి(పురోగతి_state, written);
 		}
 
-		bytes_written += hashfile_total(f) +
+		బైట్లు_written += hashfile_మొత్తం(f) +
 			the_repository->hash_algo->rawsz;
-		if (pack_to_stdout) {
+		ఒకవేళ (pack_గమ్యం_stdout) {
 			/*
 			 * We never fsync when writing to stdout since we may
 			 * not be writing to an actual pack file. For instance,
@@ -1402,33 +1402,33 @@ static void write_pack_file(void)
 			 * synchronization with the reader on some platforms.
 			 */
 			finalize_hashfile(f, hash, FSYNC_COMPONENT_NONE,
-					  CSUM_HASH_IN_STREAM | CSUM_CLOSE);
-		} else if (nr_written == nr_remaining) {
+					  CSUM_HASH_లోపల_ప్రవాహం | CSUM_CLOSE);
+		} లేకపోతే ఒకవేళ (nr_written == nr_మిగిలిన) {
 			finalize_hashfile(f, hash, FSYNC_COMPONENT_PACK,
-					  CSUM_HASH_IN_STREAM | CSUM_FSYNC | CSUM_CLOSE);
-		} else {
+					  CSUM_HASH_లోపల_ప్రవాహం | CSUM_FSYNC | CSUM_CLOSE);
+		} లేకపోతే {
 			/*
 			 * If we wrote the wrong number of entries in the
 			 * header, rewrite it like in fast-import.
 			 */
 
-			int fd = finalize_hashfile(f, hash, FSYNC_COMPONENT_PACK, 0);
-			fixup_pack_header_footer(the_hash_algo, fd, hash,
+			పూర్ణాంకం fd = finalize_hashfile(f, hash, FSYNC_COMPONENT_PACK, 0);
+			fixup_pack_శీర్షిక_footer(the_hash_algo, fd, hash,
 						 pack_tmp_name, nr_written,
-						 hash, offset);
+						 hash, స్థానభ్రంశం);
 			close(fd);
-			if (write_bitmap_index) {
-				if (write_bitmap_index != WRITE_BITMAP_QUIET)
-					warning(_(no_split_warning));
-				write_bitmap_index = 0;
+			ఒకవేళ (write_bitmap_సూచీ) {
+				ఒకవేళ (write_bitmap_సూచీ != WRITE_BITMAP_QUIET)
+					warning(_(no_విభజించు_warning));
+				write_bitmap_సూచీ = 0;
 			}
 		}
 
-		if (!pack_to_stdout) {
-			struct stat st;
-			struct strbuf tmpname = STRBUF_INIT;
-			struct bitmap_writer bitmap_writer;
-			char *idx_tmp_name = NULL;
+		ఒకవేళ (!pack_గమ్యం_stdout) {
+			నిర్మాణం stat st;
+			నిర్మాణం strbuf tmpname = STRBUF_INIT;
+			నిర్మాణం bitmap_writer bitmap_writer;
+			అక్షరం *idx_tmp_name = ఖాళీ;
 
 			/*
 			 * Packs are runtime accessed in their mtime
@@ -1437,97 +1437,97 @@ static void write_pack_file(void)
 			 * packs then we should modify the mtime of later ones
 			 * to preserve this property.
 			 */
-			if (stat(pack_tmp_name, &st) < 0) {
+			ఒకవేళ (stat(pack_tmp_name, &st) < 0) {
 				warning_errno(_("failed to stat %s"), pack_tmp_name);
-			} else if (!last_mtime) {
-				last_mtime = st.st_mtime;
-			} else {
-				struct utimbuf utb;
+			} లేకపోతే ఒకవేళ (!చివరి_mtime) {
+				చివరి_mtime = st.st_mtime;
+			} లేకపోతే {
+				నిర్మాణం utimbuf utb;
 				utb.actime = st.st_atime;
-				utb.modtime = --last_mtime;
-				if (utime(pack_tmp_name, &utb) < 0)
+				utb.modtime = --చివరి_mtime;
+				ఒకవేళ (utime(pack_tmp_name, &utb) < 0)
 					warning_errno(_("failed utime() on %s"), pack_tmp_name);
 			}
 
-			strbuf_addf(&tmpname, "%s-%s.", base_name,
-				    hash_to_hex(hash));
+			strbuf_addf(&tmpname, "%s-%s.", పునాది_name,
+				    hash_గమ్యం_hex(hash));
 
-			if (write_bitmap_index) {
+			ఒకవేళ (write_bitmap_సూచీ) {
 				bitmap_writer_init(&bitmap_writer,
-						   the_repository, &to_pack,
-						   NULL);
-				bitmap_writer_set_checksum(&bitmap_writer, hash);
-				bitmap_writer_build_type_index(&bitmap_writer,
+						   the_repository, &గమ్యం_pack,
+						   ఖాళీ);
+				bitmap_writer_సమితి_checksum(&bitmap_writer, hash);
+				bitmap_writer_build_type_సూచీ(&bitmap_writer,
 							       written_list);
 			}
 
-			if (cruft)
+			ఒకవేళ (cruft)
 				pack_idx_opts.flags |= WRITE_MTIMES;
 
 			stage_tmp_packfiles(the_repository, &tmpname,
 					    pack_tmp_name, written_list,
-					    nr_written, &to_pack,
+					    nr_written, &గమ్యం_pack,
 					    &pack_idx_opts, hash,
 					    &idx_tmp_name);
 
-			if (write_bitmap_index) {
-				size_t tmpname_len = tmpname.len;
+			ఒకవేళ (write_bitmap_సూచీ) {
+				కొలత_t tmpname_len = tmpname.len;
 
 				strbuf_addstr(&tmpname, "bitmap");
-				stop_progress(&progress_state);
+				stop_పురోగతి(&పురోగతి_state);
 
-				bitmap_writer_show_progress(&bitmap_writer,
-							    progress);
+				bitmap_writer_show_పురోగతి(&bitmap_writer,
+							    పురోగతి);
 				bitmap_writer_select_commits(&bitmap_writer,
-							     indexed_commits,
-							     indexed_commits_nr);
-				if (bitmap_writer_build(&bitmap_writer) < 0)
+							     సూచీకృత_commits,
+							     సూచీకృత_commits_nr);
+				ఒకవేళ (bitmap_writer_build(&bitmap_writer) < 0)
 					die(_("failed to write bitmap index"));
-				bitmap_writer_finish(&bitmap_writer,
+				bitmap_writer_ముగింపు(&bitmap_writer,
 						     written_list,
 						     tmpname.buf, write_bitmap_options);
 				bitmap_writer_free(&bitmap_writer);
-				write_bitmap_index = 0;
+				write_bitmap_సూచీ = 0;
 				strbuf_setlen(&tmpname, tmpname_len);
 			}
 
 			rename_tmp_packfile_idx(the_repository, &tmpname, &idx_tmp_name);
 
-			free(idx_tmp_name);
+			విడుదల(idx_tmp_name);
 			strbuf_release(&tmpname);
-			free(pack_tmp_name);
-			puts(hash_to_hex(hash));
+			విడుదల(pack_tmp_name);
+			puts(hash_గమ్యం_hex(hash));
 		}
 
 		/* mark written objects as written to previous pack */
-		for (j = 0; j < nr_written; j++) {
-			written_list[j]->offset = (off_t)-1;
+		కొరకు (j = 0; j < nr_written; j++) {
+			written_list[j]->స్థానభ్రంశం = (off_t)-1;
 		}
-		nr_remaining -= nr_written;
-	} while (nr_remaining && i < to_pack.nr_objects);
+		nr_మిగిలిన -= nr_written;
+	} అయితే (nr_మిగిలిన && i < గమ్యం_pack.nr_objects);
 
-	free(written_list);
-	free(write_order);
-	stop_progress(&progress_state);
-	if (written != nr_result)
+	విడుదల(written_list);
+	విడుదల(write_క్రమం);
+	stop_పురోగతి(&పురోగతి_state);
+	ఒకవేళ (written != nr_ఫలితం)
 		die(_("wrote %"PRIu32" objects while expecting %"PRIu32),
-		    written, nr_result);
-	trace2_data_intmax("pack-objects", the_repository,
-			   "write_pack_file/wrote", nr_result);
-	trace2_data_intmax("pack-objects", the_repository,
-			   "write_pack_file/wrote_bytes", bytes_written);
+		    written, nr_ఫలితం);
+	trace2_దత్తాంశం_intmax("pack-objects", the_repository,
+			   "write_pack_file/wrote", nr_ఫలితం);
+	trace2_దత్తాంశం_intmax("pack-objects", the_repository,
+			   "write_pack_file/wrote_bytes", బైట్లు_written);
 }
 
-static int no_try_delta(const char *path)
+స్థిర పూర్ణాంకం no_try_delta(స్థిరరాశి అక్షరం *మార్గం)
 {
-	static struct attr_check *check;
+	స్థిర నిర్మాణం attr_check *check;
 
-	if (!check)
-		check = attr_check_initl("delta", NULL);
-	git_check_attr(the_repository->index, path, check);
-	if (ATTR_FALSE(check->items[0].value))
-		return 1;
-	return 0;
+	ఒకవేళ (!check)
+		check = attr_check_initl("delta", ఖాళీ);
+	git_check_attr(the_repository->సూచీ, మార్గం, check);
+	ఒకవేళ (ATTR_FALSE(check->వస్తువులు[0].విలువ))
+		తిరిగి 1;
+	తిరిగి 0;
 }
 
 /*
@@ -1540,45 +1540,45 @@ static int no_try_delta(const char *path)
  * found the item, since that saves us from having to look it up again a
  * few lines later when we want to add the new entry.
  */
-static int have_duplicate_entry(const struct object_id *oid,
-				int exclude)
+స్థిర పూర్ణాంకం have_duplicate_నమోదు(స్థిరరాశి నిర్మాణం object_id *oid,
+				పూర్ణాంకం exclude)
 {
-	struct object_entry *entry;
+	నిర్మాణం object_నమోదు *నమోదు_2;
 
-	if (reuse_packfile_bitmap &&
-	    bitmap_walk_contains(bitmap_git, reuse_packfile_bitmap, oid))
-		return 1;
+	ఒకవేళ (reuse_packfile_bitmap &&
+	    bitmap_walk_కలిగియుంది(bitmap_git, reuse_packfile_bitmap, oid))
+		తిరిగి 1;
 
-	entry = packlist_find(&to_pack, oid);
-	if (!entry)
-		return 0;
+	నమోదు_2 = packlist_కనుగొను(&గమ్యం_pack, oid);
+	ఒకవేళ (!నమోదు_2)
+		తిరిగి 0;
 
-	if (exclude) {
-		if (!entry->preferred_base)
-			nr_result--;
-		entry->preferred_base = 1;
+	ఒకవేళ (exclude) {
+		ఒకవేళ (!నమోదు_2->preferred_పునాది)
+			nr_ఫలితం--;
+		నమోదు_2->preferred_పునాది = 1;
 	}
 
-	return 1;
+	తిరిగి 1;
 }
 
-static int want_cruft_object_mtime(struct repository *r,
-				   const struct object_id *oid,
-				   unsigned flags, uint32_t mtime)
+స్థిర పూర్ణాంకం want_cruft_object_mtime(నిర్మాణం repository *r,
+				   స్థిరరాశి నిర్మాణం object_id *oid,
+				   గుర్తులేని flags, uint32_t mtime)
 {
-	struct odb_source_files *files = odb_source_files_downcast(r->objects->source);
+	నిర్మాణం odb_ఆధారం_files *files = odb_ఆధారం_files_downcast(r->objects->ఆధారం);
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-		struct packed_git **cache = packfile_store_get_kept_pack_cache(dir->packed, flags);
+	కొరకు (నిర్మాణం odb_files_dir *dir = files->dirs; dir; dir = dir->తదుపరి) {
+		నిర్మాణం packed_git **cache = packfile_store_get_kept_pack_cache(dir->packed, flags);
 
-		for (; *cache; cache++) {
-			struct packed_git *p = *cache;
+		కొరకు (; *cache; cache++) {
+			నిర్మాణం packed_git *p = *cache;
 			off_t ofs;
 			uint32_t candidate_mtime;
 
-			ofs = find_pack_entry_one(oid, p);
-			if (!ofs)
-				continue;
+			ofs = కనుగొను_pack_నమోదు_one(oid, p);
+			ఒకవేళ (!ofs)
+				కొనసాగు;
 
 			/*
 			 * We have a copy of the object 'oid' in a non-cruft
@@ -1586,8 +1586,8 @@ static int want_cruft_object_mtime(struct repository *r,
 			 * regardless of what the existing copy's mtime is since
 			 * it is outside of a cruft pack.
 			 */
-			if (!p->is_cruft)
-				return 0;
+			ఒకవేళ (!p->is_cruft)
+				తిరిగి 0;
 
 			/*
 			 * If we have a copy of the object 'oid' in a cruft
@@ -1595,12 +1595,12 @@ static int want_cruft_object_mtime(struct repository *r,
 			 * that object, or, if that can't be loaded, assume the
 			 * pack's mtime itself.
 			 */
-			if (!load_pack_mtimes(p)) {
+			ఒకవేళ (!ఎక్కించు_pack_mtimes(p)) {
 				uint32_t pos;
-				if (offset_to_pack_pos(p, ofs, &pos) < 0)
-					continue;
+				ఒకవేళ (స్థానభ్రంశం_గమ్యం_pack_pos(p, ofs, &pos) < 0)
+					కొనసాగు;
 				candidate_mtime = nth_packed_mtime(p, pos);
-			} else {
+			} లేకపోతే {
 				candidate_mtime = p->mtime;
 			}
 
@@ -1610,24 +1610,24 @@ static int want_cruft_object_mtime(struct repository *r,
 			 * we are considering. We can thus avoid packing an
 			 * additional copy of that object.
 			 */
-			if (mtime <= candidate_mtime)
-				return 0;
+			ఒకవేళ (mtime <= candidate_mtime)
+				తిరిగి 0;
 		}
 	}
 
-	return -1;
+	తిరిగి -1;
 }
 
-static int want_found_object(const struct object_id *oid, int exclude,
-			     struct packed_git *p, uint32_t mtime)
+స్థిర పూర్ణాంకం want_దొరికింది_object(స్థిరరాశి నిర్మాణం object_id *oid, పూర్ణాంకం exclude,
+			     నిర్మాణం packed_git *p, uint32_t mtime)
 {
-	if (exclude)
-		return 1;
-	if (incremental)
-		return 0;
+	ఒకవేళ (exclude)
+		తిరిగి 1;
+	ఒకవేళ (incremental)
+		తిరిగి 0;
 
-	if (!is_pack_valid(p))
-		return -1;
+	ఒకవేళ (!is_pack_valid(p))
+		తిరిగి -1;
 
 	/*
 	 * When asked to do --local (do not include an object that appears in a
@@ -1648,14 +1648,14 @@ static int want_found_object(const struct object_id *oid, int exclude,
 	 * Objects in packs borrowed from elsewhere are discarded regardless of
 	 * if they appear in other packs that weren't borrowed.
 	 */
-	if (local && !p->pack_local)
-		return 0;
+	ఒకవేళ (local && !p->pack_local)
+		తిరిగి 0;
 
 	/*
 	 * Then handle .keep first, as we have a fast(er) path there.
 	 */
-	if (ignore_packed_keep_on_disk || ignore_packed_keep_in_core ||
-	    ignore_packed_keep_in_core_open) {
+	ఒకవేళ (ignore_packed_keep_on_disk || ignore_packed_keep_లోపల_core ||
+	    ignore_packed_keep_లోపల_core_open) {
 		/*
 		 * Set the flags for the kept-pack cache to be the ones we want
 		 * to ignore.
@@ -1664,38 +1664,38 @@ static int want_found_object(const struct object_id *oid, int exclude,
 		 * then we want to search through the on-disk keep and ignore
 		 * the in-core ones.
 		 */
-		unsigned flags = 0;
-		if (ignore_packed_keep_on_disk)
+		గుర్తులేని flags = 0;
+		ఒకవేళ (ignore_packed_keep_on_disk)
 			flags |= KEPT_PACK_ON_DISK;
-		if (ignore_packed_keep_in_core)
-			flags |= KEPT_PACK_IN_CORE;
-		if (ignore_packed_keep_in_core_open)
-			flags |= KEPT_PACK_IN_CORE_OPEN;
+		ఒకవేళ (ignore_packed_keep_లోపల_core)
+			flags |= KEPT_PACK_లోపల_CORE;
+		ఒకవేళ (ignore_packed_keep_లోపల_core_open)
+			flags |= KEPT_PACK_లోపల_CORE_OPEN;
 
 		/*
 		 * If the object is in a pack that we want to ignore, *and* we
 		 * don't have any cruft packs that are being retained, we can
 		 * abort quickly.
 		 */
-		if (!ignore_packed_keep_in_core_has_cruft) {
-			if (ignore_packed_keep_on_disk && p->pack_keep)
-				return 0;
-			if (ignore_packed_keep_in_core && p->pack_keep_in_core)
-				return 0;
-			if (ignore_packed_keep_in_core_open && p->pack_keep_in_core_open)
-				return 0;
-			if (has_object_kept_pack(p->repo, oid, flags))
-				return 0;
-		} else {
+		ఒకవేళ (!ignore_packed_keep_లోపల_core_has_cruft) {
+			ఒకవేళ (ignore_packed_keep_on_disk && p->pack_keep)
+				తిరిగి 0;
+			ఒకవేళ (ignore_packed_keep_లోపల_core && p->pack_keep_లోపల_core)
+				తిరిగి 0;
+			ఒకవేళ (ignore_packed_keep_లోపల_core_open && p->pack_keep_లోపల_core_open)
+				తిరిగి 0;
+			ఒకవేళ (has_object_kept_pack(p->repo, oid, flags))
+				తిరిగి 0;
+		} లేకపోతే {
 			/*
 			 * But if there is at least one cruft pack which
 			 * is being kept, we only want to include the
 			 * provided object if it has a strictly greater
 			 * mtime than any existing cruft copy.
 			 */
-			if (!want_cruft_object_mtime(p->repo, oid, flags,
+			ఒకవేళ (!want_cruft_object_mtime(p->repo, oid, flags,
 						     mtime))
-				return 0;
+				తిరిగి 0;
 		}
 	}
 
@@ -1704,37 +1704,37 @@ static int want_found_object(const struct object_id *oid, int exclude,
 	 * keep-packs, or the object is not in one. Keep checking other
 	 * conditions...
 	 */
-	if (!local || !have_non_local_packs)
-		return 1;
+	ఒకవేళ (!local || !have_non_local_packs)
+		తిరిగి 1;
 
 	/* we don't know yet; keep looking for more packs */
-	return -1;
+	తిరిగి -1;
 }
 
-static int want_object_in_pack_one(struct packed_git *p,
-				   const struct object_id *oid,
-				   int exclude,
-				   struct packed_git **found_pack,
-				   off_t *found_offset,
-				   uint32_t found_mtime)
+స్థిర పూర్ణాంకం want_object_లోపల_pack_one(నిర్మాణం packed_git *p,
+				   స్థిరరాశి నిర్మాణం object_id *oid,
+				   పూర్ణాంకం exclude,
+				   నిర్మాణం packed_git **దొరికింది_pack,
+				   off_t *దొరికింది_స్థానభ్రంశం,
+				   uint32_t దొరికింది_mtime)
 {
-	off_t offset;
+	off_t స్థానభ్రంశం;
 
-	if (p == *found_pack)
-		offset = *found_offset;
-	else
-		offset = find_pack_entry_one(oid, p);
+	ఒకవేళ (p == *దొరికింది_pack)
+		స్థానభ్రంశం = *దొరికింది_స్థానభ్రంశం;
+	లేకపోతే
+		స్థానభ్రంశం = కనుగొను_pack_నమోదు_one(oid, p);
 
-	if (offset) {
-		if (!*found_pack) {
-			if (!is_pack_valid(p))
-				return -1;
-			*found_offset = offset;
-			*found_pack = p;
+	ఒకవేళ (స్థానభ్రంశం) {
+		ఒకవేళ (!*దొరికింది_pack) {
+			ఒకవేళ (!is_pack_valid(p))
+				తిరిగి -1;
+			*దొరికింది_స్థానభ్రంశం = స్థానభ్రంశం;
+			*దొరికింది_pack = p;
 		}
-		return want_found_object(oid, exclude, p, found_mtime);
+		తిరిగి want_దొరికింది_object(oid, exclude, p, దొరికింది_mtime);
 	}
-	return -1;
+	తిరిగి -1;
 }
 
 /*
@@ -1746,25 +1746,25 @@ static int want_object_in_pack_one(struct packed_git *p,
  * function finds if there is any pack that has the object and returns the pack
  * and its offset in these variables.
  */
-static int want_object_in_pack_mtime(const struct object_id *oid,
-				     int exclude,
-				     struct packed_git **found_pack,
-				     off_t *found_offset,
-				     uint32_t found_mtime)
+స్థిర పూర్ణాంకం want_object_లోపల_pack_mtime(స్థిరరాశి నిర్మాణం object_id *oid,
+				     పూర్ణాంకం exclude,
+				     నిర్మాణం packed_git **దొరికింది_pack,
+				     off_t *దొరికింది_స్థానభ్రంశం,
+				     uint32_t దొరికింది_mtime)
 {
-	struct odb_source_files *files =
-		odb_source_files_downcast(the_repository->objects->source);
-	int want;
-	struct packfile_list_entry *e;
+	నిర్మాణం odb_ఆధారం_files *files =
+		odb_ఆధారం_files_downcast(the_repository->objects->ఆధారం);
+	పూర్ణాంకం want;
+	నిర్మాణం packfile_list_నమోదు *e;
 
-	if (!exclude && local) {
+	ఒకవేళ (!exclude && local) {
 		/*
 		 * Note that we start iterating at `dirs->next` so that we
 		 * skip the local object directory.
 		 */
-		for (struct odb_files_dir *dir = files->dirs->next; dir; dir = dir->next)
-			if (!odb_source_read_object_info(&dir->loose->base, oid, NULL, 0, NULL))
-				return 0;
+		కొరకు (నిర్మాణం odb_files_dir *dir = files->dirs->తదుపరి; dir; dir = dir->తదుపరి)
+			ఒకవేళ (!odb_ఆధారం_read_object_info(&dir->loose->పునాది, oid, ఖాళీ, 0, ఖాళీ))
+				తిరిగి 0;
 	}
 
 	/*
@@ -1772,412 +1772,412 @@ static int want_object_in_pack_mtime(const struct object_id *oid,
 	 * pack - in the usual case when neither --local was given nor .keep files
 	 * are present we will determine the answer right now.
 	 */
-	if (*found_pack) {
-		want = want_found_object(oid, exclude, *found_pack,
-					 found_mtime);
-		if (want != -1)
-			return want;
+	ఒకవేళ (*దొరికింది_pack) {
+		want = want_దొరికింది_object(oid, exclude, *దొరికింది_pack,
+					 దొరికింది_mtime);
+		ఒకవేళ (want != -1)
+			తిరిగి want;
 
-		*found_pack = NULL;
-		*found_offset = 0;
+		*దొరికింది_pack = ఖాళీ;
+		*దొరికింది_స్థానభ్రంశం = 0;
 	}
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-		struct multi_pack_index *m = get_multi_pack_index(dir->packed);
-		struct pack_entry e;
+	కొరకు (నిర్మాణం odb_files_dir *dir = files->dirs; dir; dir = dir->తదుపరి) {
+		నిర్మాణం multi_pack_సూచీ *m = get_multi_pack_సూచీ(dir->packed);
+		నిర్మాణం pack_నమోదు e;
 
-		if (m && midx_fill_entry(m, oid, &e, NULL) == MIDX_FILL_HIT) {
-			want = want_object_in_pack_one(e.p, oid, exclude, found_pack, found_offset, found_mtime);
-			if (want != -1)
-				return want;
+		ఒకవేళ (m && midx_fill_నమోదు(m, oid, &e, ఖాళీ) == MIDX_FILL_తగిలింది) {
+			want = want_object_లోపల_pack_one(e.p, oid, exclude, దొరికింది_pack, దొరికింది_స్థానభ్రంశం, దొరికింది_mtime);
+			ఒకవేళ (want != -1)
+				తిరిగి want;
 		}
 	}
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-		for (e = dir->packed->packs.head; e; e = e->next) {
-			struct packed_git *p = e->pack;
-			want = want_object_in_pack_one(p, oid, exclude, found_pack, found_offset, found_mtime);
-			if (!exclude && want > 0)
+	కొరకు (నిర్మాణం odb_files_dir *dir = files->dirs; dir; dir = dir->తదుపరి) {
+		కొరకు (e = dir->packed->packs.తల; e; e = e->తదుపరి) {
+			నిర్మాణం packed_git *p = e->pack;
+			want = want_object_లోపల_pack_one(p, oid, exclude, దొరికింది_pack, దొరికింది_స్థానభ్రంశం, దొరికింది_mtime);
+			ఒకవేళ (!exclude && want > 0)
 				packfile_list_prepend(&dir->packed->packs, p);
-			if (want != -1)
-				return want;
+			ఒకవేళ (want != -1)
+				తిరిగి want;
 		}
 	}
 
-	if (uri_protocols.nr) {
-		struct configured_exclusion *ex =
+	ఒకవేళ (uri_protocols.nr) {
+		నిర్మాణం configured_exclusion *ex =
 			oidmap_get(&configured_exclusions, oid);
-		int i;
-		const char *p;
+		పూర్ణాంకం i;
+		స్థిరరాశి అక్షరం *p;
 
-		if (ex) {
-			for (i = 0; i < uri_protocols.nr; i++) {
-				if (skip_prefix(ex->uri,
-						uri_protocols.items[i].string,
+		ఒకవేళ (ex) {
+			కొరకు (i = 0; i < uri_protocols.nr; i++) {
+				ఒకవేళ (skip_ఉపసర్గ(ex->uri,
+						uri_protocols.వస్తువులు[i].string,
 						&p) &&
 				    *p == ':') {
-					oidset_insert(&excluded_by_config, oid);
-					return 0;
+					oidset_చొప్పించు(&excluded_by_config, oid);
+					తిరిగి 0;
 				}
 			}
 		}
 	}
 
-	return 1;
+	తిరిగి 1;
 }
 
-static inline int want_object_in_pack(const struct object_id *oid,
-				      int exclude,
-				      struct packed_git **found_pack,
-				      off_t *found_offset)
+స్థిర అంతఃవరుస పూర్ణాంకం want_object_లోపల_pack(స్థిరరాశి నిర్మాణం object_id *oid,
+				      పూర్ణాంకం exclude,
+				      నిర్మాణం packed_git **దొరికింది_pack,
+				      off_t *దొరికింది_స్థానభ్రంశం)
 {
-	return want_object_in_pack_mtime(oid, exclude, found_pack, found_offset,
+	తిరిగి want_object_లోపల_pack_mtime(oid, exclude, దొరికింది_pack, దొరికింది_స్థానభ్రంశం,
 					 0);
 }
 
-static struct object_entry *create_object_entry(const struct object_id *oid,
-						enum object_type type,
+స్థిర నిర్మాణం object_నమోదు *create_object_నమోదు(స్థిరరాశి నిర్మాణం object_id *oid,
+						గణన object_type type,
 						uint32_t hash,
-						int exclude,
-						int no_try_delta,
-						struct packed_git *found_pack,
-						off_t found_offset)
+						పూర్ణాంకం exclude,
+						పూర్ణాంకం no_try_delta,
+						నిర్మాణం packed_git *దొరికింది_pack,
+						off_t దొరికింది_స్థానభ్రంశం)
 {
-	struct object_entry *entry;
+	నిర్మాణం object_నమోదు *నమోదు_2;
 
-	entry = packlist_alloc(&to_pack, oid);
-	entry->hash = hash;
-	oe_set_type(entry, type);
-	if (exclude)
-		entry->preferred_base = 1;
-	else
-		nr_result++;
-	if (found_pack) {
-		oe_set_in_pack(&to_pack, entry, found_pack);
-		entry->in_pack_offset = found_offset;
+	నమోదు_2 = packlist_alloc(&గమ్యం_pack, oid);
+	నమోదు_2->hash = hash;
+	oe_సమితి_type(నమోదు_2, type);
+	ఒకవేళ (exclude)
+		నమోదు_2->preferred_పునాది = 1;
+	లేకపోతే
+		nr_ఫలితం++;
+	ఒకవేళ (దొరికింది_pack) {
+		oe_సమితి_లోపల_pack(&గమ్యం_pack, నమోదు_2, దొరికింది_pack);
+		నమోదు_2->లోపల_pack_స్థానభ్రంశం = దొరికింది_స్థానభ్రంశం;
 	}
 
-	entry->no_try_delta = no_try_delta;
+	నమోదు_2->no_try_delta = no_try_delta;
 
-	return entry;
+	తిరిగి నమోదు_2;
 }
 
-static const char no_closure_warning[] = N_(
+స్థిర స్థిరరాశి అక్షరం no_సంవృతం_warning[] = N_(
 "disabling bitmap writing, as some objects are not being packed"
 );
 
-static void add_object_entry(const struct object_id *oid, enum object_type type,
-			     const char *name, int exclude)
+స్థిర శూన్య కూడు_object_నమోదు(స్థిరరాశి నిర్మాణం object_id *oid, గణన object_type type,
+			     స్థిరరాశి అక్షరం *name, పూర్ణాంకం exclude)
 {
-	struct packed_git *found_pack = NULL;
-	off_t found_offset = 0;
+	నిర్మాణం packed_git *దొరికింది_pack = ఖాళీ;
+	off_t దొరికింది_స్థానభ్రంశం = 0;
 
-	display_progress(progress_state, ++nr_seen);
+	display_పురోగతి(పురోగతి_state, ++nr_చూసిన);
 
-	if (have_duplicate_entry(oid, exclude))
-		return;
+	ఒకవేళ (have_duplicate_నమోదు(oid, exclude))
+		తిరిగి;
 
-	if (!want_object_in_pack(oid, exclude, &found_pack, &found_offset)) {
+	ఒకవేళ (!want_object_లోపల_pack(oid, exclude, &దొరికింది_pack, &దొరికింది_స్థానభ్రంశం)) {
 		/* The pack is missing an object, so it will not have closure */
-		if (write_bitmap_index) {
-			if (write_bitmap_index != WRITE_BITMAP_QUIET)
-				warning(_(no_closure_warning));
-			write_bitmap_index = 0;
+		ఒకవేళ (write_bitmap_సూచీ) {
+			ఒకవేళ (write_bitmap_సూచీ != WRITE_BITMAP_QUIET)
+				warning(_(no_సంవృతం_warning));
+			write_bitmap_సూచీ = 0;
 		}
-		return;
+		తిరిగి;
 	}
 
-	create_object_entry(oid, type, pack_name_hash_fn(name),
+	create_object_నమోదు(oid, type, pack_name_hash_fn(name),
 			    exclude, name && no_try_delta(name),
-			    found_pack, found_offset);
+			    దొరికింది_pack, దొరికింది_స్థానభ్రంశం);
 }
 
-static int add_object_entry_from_bitmap(const struct object_id *oid,
-					enum object_type type,
-					int flags UNUSED, uint32_t name_hash,
-					struct packed_git *pack, off_t offset,
-					void *payload UNUSED)
+స్థిర పూర్ణాంకం కూడు_object_నమోదు_from_bitmap(స్థిరరాశి నిర్మాణం object_id *oid,
+					గణన object_type type,
+					పూర్ణాంకం flags వాడని, uint32_t name_hash,
+					నిర్మాణం packed_git *pack, off_t స్థానభ్రంశం,
+					శూన్య *payload వాడని)
 {
-	display_progress(progress_state, ++nr_seen);
+	display_పురోగతి(పురోగతి_state, ++nr_చూసిన);
 
-	if (have_duplicate_entry(oid, 0))
-		return 0;
+	ఒకవేళ (have_duplicate_నమోదు(oid, 0))
+		తిరిగి 0;
 
-	if (!want_object_in_pack(oid, 0, &pack, &offset))
-		return 0;
+	ఒకవేళ (!want_object_లోపల_pack(oid, 0, &pack, &స్థానభ్రంశం))
+		తిరిగి 0;
 
-	create_object_entry(oid, type, name_hash, 0, 0, pack, offset);
-	return 0;
+	create_object_నమోదు(oid, type, name_hash, 0, 0, pack, స్థానభ్రంశం);
+	తిరిగి 0;
 }
 
-struct pbase_tree_cache {
-	struct object_id oid;
-	int ref;
-	int temporary;
-	void *tree_data;
-	unsigned long tree_size;
+నిర్మాణం pbase_వృక్షం_cache {
+	నిర్మాణం object_id oid;
+	పూర్ణాంకం ref;
+	పూర్ణాంకం temporary;
+	శూన్య *వృక్షం_దత్తాంశం;
+	గుర్తులేని దీర్ఘ వృక్షం_కొలత;
 };
 
-static struct pbase_tree_cache *(pbase_tree_cache[256]);
-static int pbase_tree_cache_ix(const struct object_id *oid)
+స్థిర నిర్మాణం pbase_వృక్షం_cache *(pbase_వృక్షం_cache[256]);
+స్థిర పూర్ణాంకం pbase_వృక్షం_cache_ix(స్థిరరాశి నిర్మాణం object_id *oid)
 {
-	return oid->hash[0] % ARRAY_SIZE(pbase_tree_cache);
+	తిరిగి oid->hash[0] % ARRAY_కొలత(pbase_వృక్షం_cache);
 }
-static int pbase_tree_cache_ix_incr(int ix)
+స్థిర పూర్ణాంకం pbase_వృక్షం_cache_ix_incr(పూర్ణాంకం ix)
 {
-	return (ix+1) % ARRAY_SIZE(pbase_tree_cache);
+	తిరిగి (ix+1) % ARRAY_కొలత(pbase_వృక్షం_cache);
 }
 
-static struct pbase_tree {
-	struct pbase_tree *next;
+స్థిర నిర్మాణం pbase_వృక్షం {
+	నిర్మాణం pbase_వృక్షం *తదుపరి;
 	/* This is a phony "cache" entry; we are not
 	 * going to evict it or find it through _get()
 	 * mechanism -- this is for the toplevel node that
 	 * would almost always change with any commit.
 	 */
-	struct pbase_tree_cache pcache;
-} *pbase_tree;
+	నిర్మాణం pbase_వృక్షం_cache pcache;
+} *pbase_వృక్షం;
 
-static struct pbase_tree_cache *pbase_tree_get(const struct object_id *oid)
+స్థిర నిర్మాణం pbase_వృక్షం_cache *pbase_వృక్షం_get(స్థిరరాశి నిర్మాణం object_id *oid)
 {
-	struct pbase_tree_cache *ent, *nent;
-	void *data;
-	unsigned long size;
-	size_t size_st = 0;
-	enum object_type type;
-	int neigh;
-	int my_ix = pbase_tree_cache_ix(oid);
-	int available_ix = -1;
+	నిర్మాణం pbase_వృక్షం_cache *ent, *nent;
+	శూన్య *దత్తాంశం;
+	గుర్తులేని దీర్ఘ కొలత;
+	కొలత_t కొలత_st = 0;
+	గణన object_type type;
+	పూర్ణాంకం neigh;
+	పూర్ణాంకం my_ix = pbase_వృక్షం_cache_ix(oid);
+	పూర్ణాంకం అందుబాటు_ix = -1;
 
 	/* pbase-tree-cache acts as a limited hashtable.
 	 * your object will be found at your index or within a few
 	 * slots after that slot if it is cached.
 	 */
-	for (neigh = 0; neigh < 8; neigh++) {
-		ent = pbase_tree_cache[my_ix];
-		if (ent && oideq(&ent->oid, oid)) {
+	కొరకు (neigh = 0; neigh < 8; neigh++) {
+		ent = pbase_వృక్షం_cache[my_ix];
+		ఒకవేళ (ent && oideq(&ent->oid, oid)) {
 			ent->ref++;
-			return ent;
+			తిరిగి ent;
 		}
-		else if (((available_ix < 0) && (!ent || !ent->ref)) ||
-			 ((0 <= available_ix) &&
-			  (!ent && pbase_tree_cache[available_ix])))
-			available_ix = my_ix;
-		if (!ent)
-			break;
-		my_ix = pbase_tree_cache_ix_incr(my_ix);
+		లేకపోతే ఒకవేళ (((అందుబాటు_ix < 0) && (!ent || !ent->ref)) ||
+			 ((0 <= అందుబాటు_ix) &&
+			  (!ent && pbase_వృక్షం_cache[అందుబాటు_ix])))
+			అందుబాటు_ix = my_ix;
+		ఒకవేళ (!ent)
+			ఆపు;
+		my_ix = pbase_వృక్షం_cache_ix_incr(my_ix);
 	}
 
 	/* Did not find one.  Either we got a bogus request or
 	 * we need to read and perhaps cache.
 	 */
-	data = odb_read_object(the_repository->objects, oid, &type, &size_st);
-	size = cast_size_t_to_ulong(size_st);
-	if (!data)
-		return NULL;
-	if (type != OBJ_TREE) {
-		free(data);
-		return NULL;
+	దత్తాంశం = odb_read_object(the_repository->objects, oid, &type, &కొలత_st);
+	కొలత = cast_కొలత_t_గమ్యం_ulong(కొలత_st);
+	ఒకవేళ (!దత్తాంశం)
+		తిరిగి ఖాళీ;
+	ఒకవేళ (type != OBJ_వృక్షం) {
+		విడుదల(దత్తాంశం);
+		తిరిగి ఖాళీ;
 	}
 
 	/* We need to either cache or return a throwaway copy */
 
-	if (available_ix < 0)
-		ent = NULL;
-	else {
-		ent = pbase_tree_cache[available_ix];
-		my_ix = available_ix;
+	ఒకవేళ (అందుబాటు_ix < 0)
+		ent = ఖాళీ;
+	లేకపోతే {
+		ent = pbase_వృక్షం_cache[అందుబాటు_ix];
+		my_ix = అందుబాటు_ix;
 	}
 
-	if (!ent) {
-		nent = xmalloc(sizeof(*nent));
-		nent->temporary = (available_ix < 0);
+	ఒకవేళ (!ent) {
+		nent = xmalloc(పరిమాణం(*nent));
+		nent->temporary = (అందుబాటు_ix < 0);
 	}
-	else {
+	లేకపోతే {
 		/* evict and reuse */
-		free(ent->tree_data);
+		విడుదల(ent->వృక్షం_దత్తాంశం);
 		nent = ent;
 	}
 	oidcpy(&nent->oid, oid);
-	nent->tree_data = data;
-	nent->tree_size = size;
+	nent->వృక్షం_దత్తాంశం = దత్తాంశం;
+	nent->వృక్షం_కొలత = కొలత;
 	nent->ref = 1;
-	if (!nent->temporary)
-		pbase_tree_cache[my_ix] = nent;
-	return nent;
+	ఒకవేళ (!nent->temporary)
+		pbase_వృక్షం_cache[my_ix] = nent;
+	తిరిగి nent;
 }
 
-static void pbase_tree_put(struct pbase_tree_cache *cache)
+స్థిర శూన్య pbase_వృక్షం_put(నిర్మాణం pbase_వృక్షం_cache *cache)
 {
-	if (!cache->temporary) {
+	ఒకవేళ (!cache->temporary) {
 		cache->ref--;
-		return;
+		తిరిగి;
 	}
-	free(cache->tree_data);
-	free(cache);
+	విడుదల(cache->వృక్షం_దత్తాంశం);
+	విడుదల(cache);
 }
 
-static size_t name_cmp_len(const char *name)
+స్థిర కొలత_t name_cmp_len(స్థిరరాశి అక్షరం *name)
 {
-	return strcspn(name, "\n/");
+	తిరిగి strcspn(name, "\n/");
 }
 
-static void add_pbase_object(struct tree_desc *tree,
-			     const char *name,
-			     size_t cmplen,
-			     const char *fullname)
+స్థిర శూన్య కూడు_pbase_object(నిర్మాణం వృక్షం_desc *వృక్షం,
+			     స్థిరరాశి అక్షరం *name,
+			     కొలత_t cmplen,
+			     స్థిరరాశి అక్షరం *fullname)
 {
-	struct name_entry entry;
-	int cmp;
+	నిర్మాణం name_నమోదు నమోదు_2;
+	పూర్ణాంకం cmp;
 
-	while (tree_entry(tree,&entry)) {
-		if (S_ISGITLINK(entry.mode))
-			continue;
-		cmp = tree_entry_len(&entry) != cmplen ? 1 :
-		      memcmp(name, entry.path, cmplen);
-		if (cmp > 0)
-			continue;
-		if (cmp < 0)
-			return;
-		if (name[cmplen] != '/') {
-			add_object_entry(&entry.oid,
-					 object_type(entry.mode),
+	అయితే (వృక్షం_నమోదు(వృక్షం,&నమోదు_2)) {
+		ఒకవేళ (S_ISGITLINK(నమోదు_2.బహుళకం))
+			కొనసాగు;
+		cmp = వృక్షం_నమోదు_len(&నమోదు_2) != cmplen ? 1 :
+		      memcmp(name, నమోదు_2.మార్గం, cmplen);
+		ఒకవేళ (cmp > 0)
+			కొనసాగు;
+		ఒకవేళ (cmp < 0)
+			తిరిగి;
+		ఒకవేళ (name[cmplen] != '/') {
+			కూడు_object_నమోదు(&నమోదు_2.oid,
+					 object_type(నమోదు_2.బహుళకం),
 					 fullname, 1);
-			return;
+			తిరిగి;
 		}
-		if (S_ISDIR(entry.mode)) {
-			struct tree_desc sub;
-			struct pbase_tree_cache *tree;
-			const char *down = name+cmplen+1;
-			size_t downlen = name_cmp_len(down);
+		ఒకవేళ (S_ISDIR(నమోదు_2.బహుళకం)) {
+			నిర్మాణం వృక్షం_desc sub;
+			నిర్మాణం pbase_వృక్షం_cache *వృక్షం;
+			స్థిరరాశి అక్షరం *కిందికి = name+cmplen+1;
+			కొలత_t downlen = name_cmp_len(కిందికి);
 
-			tree = pbase_tree_get(&entry.oid);
-			if (!tree)
-				return;
-			init_tree_desc(&sub, &tree->oid,
-				       tree->tree_data, tree->tree_size);
+			వృక్షం = pbase_వృక్షం_get(&నమోదు_2.oid);
+			ఒకవేళ (!వృక్షం)
+				తిరిగి;
+			init_వృక్షం_desc(&sub, &వృక్షం->oid,
+				       వృక్షం->వృక్షం_దత్తాంశం, వృక్షం->వృక్షం_కొలత);
 
-			add_pbase_object(&sub, down, downlen, fullname);
-			pbase_tree_put(tree);
+			కూడు_pbase_object(&sub, కిందికి, downlen, fullname);
+			pbase_వృక్షం_put(వృక్షం);
 		}
 	}
 }
 
-static unsigned *done_pbase_paths;
-static int done_pbase_paths_num;
-static int done_pbase_paths_alloc;
-static int done_pbase_path_pos(unsigned hash)
+స్థిర గుర్తులేని *పూర్తి_pbase_paths;
+స్థిర పూర్ణాంకం పూర్తి_pbase_paths_అంకె;
+స్థిర పూర్ణాంకం పూర్తి_pbase_paths_alloc;
+స్థిర పూర్ణాంకం పూర్తి_pbase_మార్గం_pos(గుర్తులేని hash)
 {
-	int lo = 0;
-	int hi = done_pbase_paths_num;
-	while (lo < hi) {
-		int mi = lo + (hi - lo) / 2;
-		if (done_pbase_paths[mi] == hash)
-			return mi;
-		if (done_pbase_paths[mi] < hash)
+	పూర్ణాంకం lo = 0;
+	పూర్ణాంకం hi = పూర్తి_pbase_paths_అంకె;
+	అయితే (lo < hi) {
+		పూర్ణాంకం mi = lo + (hi - lo) / 2;
+		ఒకవేళ (పూర్తి_pbase_paths[mi] == hash)
+			తిరిగి mi;
+		ఒకవేళ (పూర్తి_pbase_paths[mi] < hash)
 			hi = mi;
-		else
+		లేకపోతే
 			lo = mi + 1;
 	}
-	return -lo-1;
+	తిరిగి -lo-1;
 }
 
-static int check_pbase_path(unsigned hash)
+స్థిర పూర్ణాంకం check_pbase_మార్గం(గుర్తులేని hash)
 {
-	int pos = done_pbase_path_pos(hash);
-	if (0 <= pos)
-		return 1;
+	పూర్ణాంకం pos = పూర్తి_pbase_మార్గం_pos(hash);
+	ఒకవేళ (0 <= pos)
+		తిరిగి 1;
 	pos = -pos - 1;
-	ALLOC_GROW(done_pbase_paths,
-		   done_pbase_paths_num + 1,
-		   done_pbase_paths_alloc);
-	done_pbase_paths_num++;
-	if (pos < done_pbase_paths_num)
-		MOVE_ARRAY(done_pbase_paths + pos + 1, done_pbase_paths + pos,
-			   done_pbase_paths_num - pos - 1);
-	done_pbase_paths[pos] = hash;
-	return 0;
+	ALLOC_GROW(పూర్తి_pbase_paths,
+		   పూర్తి_pbase_paths_అంకె + 1,
+		   పూర్తి_pbase_paths_alloc);
+	పూర్తి_pbase_paths_అంకె++;
+	ఒకవేళ (pos < పూర్తి_pbase_paths_అంకె)
+		MOVE_ARRAY(పూర్తి_pbase_paths + pos + 1, పూర్తి_pbase_paths + pos,
+			   పూర్తి_pbase_paths_అంకె - pos - 1);
+	పూర్తి_pbase_paths[pos] = hash;
+	తిరిగి 0;
 }
 
-static void add_preferred_base_object(const char *name)
+స్థిర శూన్య కూడు_preferred_పునాది_object(స్థిరరాశి అక్షరం *name)
 {
-	struct pbase_tree *it;
-	size_t cmplen;
-	unsigned hash = pack_name_hash_fn(name);
+	నిర్మాణం pbase_వృక్షం *it;
+	కొలత_t cmplen;
+	గుర్తులేని hash = pack_name_hash_fn(name);
 
-	if (!num_preferred_base || check_pbase_path(hash))
-		return;
+	ఒకవేళ (!అంకె_preferred_పునాది || check_pbase_మార్గం(hash))
+		తిరిగి;
 
 	cmplen = name_cmp_len(name);
-	for (it = pbase_tree; it; it = it->next) {
-		if (cmplen == 0) {
-			add_object_entry(&it->pcache.oid, OBJ_TREE, NULL, 1);
+	కొరకు (it = pbase_వృక్షం; it; it = it->తదుపరి) {
+		ఒకవేళ (cmplen == 0) {
+			కూడు_object_నమోదు(&it->pcache.oid, OBJ_వృక్షం, ఖాళీ, 1);
 		}
-		else {
-			struct tree_desc tree;
-			init_tree_desc(&tree, &it->pcache.oid,
-				       it->pcache.tree_data, it->pcache.tree_size);
-			add_pbase_object(&tree, name, cmplen, name);
+		లేకపోతే {
+			నిర్మాణం వృక్షం_desc వృక్షం;
+			init_వృక్షం_desc(&వృక్షం, &it->pcache.oid,
+				       it->pcache.వృక్షం_దత్తాంశం, it->pcache.వృక్షం_కొలత);
+			కూడు_pbase_object(&వృక్షం, name, cmplen, name);
 		}
 	}
 }
 
-static void add_preferred_base(struct object_id *oid)
+స్థిర శూన్య కూడు_preferred_పునాది(నిర్మాణం object_id *oid)
 {
-	struct pbase_tree *it;
-	void *data;
-	unsigned long size;
-	size_t size_st = 0;
-	struct object_id tree_oid;
+	నిర్మాణం pbase_వృక్షం *it;
+	శూన్య *దత్తాంశం;
+	గుర్తులేని దీర్ఘ కొలత;
+	కొలత_t కొలత_st = 0;
+	నిర్మాణం object_id వృక్షం_oid;
 
-	if (window <= num_preferred_base++)
-		return;
+	ఒకవేళ (కిటికీ <= అంకె_preferred_పునాది++)
+		తిరిగి;
 
-	data = odb_read_object_peeled(the_repository->objects, oid,
-				      OBJ_TREE, &size_st, &tree_oid);
-	size = cast_size_t_to_ulong(size_st);
-	if (!data)
-		return;
+	దత్తాంశం = odb_read_object_peeled(the_repository->objects, oid,
+				      OBJ_వృక్షం, &కొలత_st, &వృక్షం_oid);
+	కొలత = cast_కొలత_t_గమ్యం_ulong(కొలత_st);
+	ఒకవేళ (!దత్తాంశం)
+		తిరిగి;
 
-	for (it = pbase_tree; it; it = it->next) {
-		if (oideq(&it->pcache.oid, &tree_oid)) {
-			free(data);
-			return;
+	కొరకు (it = pbase_వృక్షం; it; it = it->తదుపరి) {
+		ఒకవేళ (oideq(&it->pcache.oid, &వృక్షం_oid)) {
+			విడుదల(దత్తాంశం);
+			తిరిగి;
 		}
 	}
 
 	CALLOC_ARRAY(it, 1);
-	it->next = pbase_tree;
-	pbase_tree = it;
+	it->తదుపరి = pbase_వృక్షం;
+	pbase_వృక్షం = it;
 
-	oidcpy(&it->pcache.oid, &tree_oid);
-	it->pcache.tree_data = data;
-	it->pcache.tree_size = size;
+	oidcpy(&it->pcache.oid, &వృక్షం_oid);
+	it->pcache.వృక్షం_దత్తాంశం = దత్తాంశం;
+	it->pcache.వృక్షం_కొలత = కొలత;
 }
 
-static void cleanup_preferred_base(void)
+స్థిర శూన్య cleanup_preferred_పునాది(శూన్య)
 {
-	struct pbase_tree *it;
-	unsigned i;
+	నిర్మాణం pbase_వృక్షం *it;
+	గుర్తులేని i;
 
-	it = pbase_tree;
-	pbase_tree = NULL;
-	while (it) {
-		struct pbase_tree *tmp = it;
-		it = tmp->next;
-		free(tmp->pcache.tree_data);
-		free(tmp);
+	it = pbase_వృక్షం;
+	pbase_వృక్షం = ఖాళీ;
+	అయితే (it) {
+		నిర్మాణం pbase_వృక్షం *tmp = it;
+		it = tmp->తదుపరి;
+		విడుదల(tmp->pcache.వృక్షం_దత్తాంశం);
+		విడుదల(tmp);
 	}
 
-	for (i = 0; i < ARRAY_SIZE(pbase_tree_cache); i++) {
-		if (!pbase_tree_cache[i])
-			continue;
-		free(pbase_tree_cache[i]->tree_data);
-		FREE_AND_NULL(pbase_tree_cache[i]);
+	కొరకు (i = 0; i < ARRAY_కొలత(pbase_వృక్షం_cache); i++) {
+		ఒకవేళ (!pbase_వృక్షం_cache[i])
+			కొనసాగు;
+		విడుదల(pbase_వృక్షం_cache[i]->వృక్షం_దత్తాంశం);
+		FREE_AND_NULL(pbase_వృక్షం_cache[i]);
 	}
 
-	FREE_AND_NULL(done_pbase_paths);
-	done_pbase_paths_num = done_pbase_paths_alloc = 0;
+	FREE_AND_NULL(పూర్తి_pbase_paths);
+	పూర్తి_pbase_paths_అంకె = పూర్తి_pbase_paths_alloc = 0;
 }
 
 /*
@@ -2191,22 +2191,22 @@ static void cleanup_preferred_base(void)
  * deltify other objects against, in order to avoid
  * circular deltas.
  */
-static int can_reuse_delta(const struct object_id *base_oid,
-			   struct object_entry *delta,
-			   struct object_entry **base_out)
+స్థిర పూర్ణాంకం can_reuse_delta(స్థిరరాశి నిర్మాణం object_id *పునాది_oid,
+			   నిర్మాణం object_నమోదు *delta,
+			   నిర్మాణం object_నమోదు **పునాది_బహిర్గతం)
 {
-	struct object_entry *base;
+	నిర్మాణం object_నమోదు *పునాది;
 
 	/*
 	 * First see if we're already sending the base (or it's explicitly in
 	 * our "excluded" list).
 	 */
-	base = packlist_find(&to_pack, base_oid);
-	if (base) {
-		if (!in_same_island(&delta->idx.oid, &base->idx.oid))
-			return 0;
-		*base_out = base;
-		return 1;
+	పునాది = packlist_కనుగొను(&గమ్యం_pack, పునాది_oid);
+	ఒకవేళ (పునాది) {
+		ఒకవేళ (!లోపల_same_island(&delta->idx.oid, &పునాది->idx.oid))
+			తిరిగి 0;
+		*పునాది_బహిర్గతం = పునాది;
+		తిరిగి 1;
 	}
 
 	/*
@@ -2214,150 +2214,150 @@ static int can_reuse_delta(const struct object_id *base_oid,
 	 * even if it was buried too deep in history to make it into the
 	 * packing list.
 	 */
-	if (thin && bitmap_has_oid_in_uninteresting(bitmap_git, base_oid)) {
-		if (use_delta_islands) {
-			if (!in_same_island(&delta->idx.oid, base_oid))
-				return 0;
+	ఒకవేళ (thin && bitmap_has_oid_లోపల_uninteresting(bitmap_git, పునాది_oid)) {
+		ఒకవేళ (use_delta_islands) {
+			ఒకవేళ (!లోపల_same_island(&delta->idx.oid, పునాది_oid))
+				తిరిగి 0;
 		}
-		*base_out = NULL;
-		return 1;
+		*పునాది_బహిర్గతం = ఖాళీ;
+		తిరిగి 1;
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
-static void prefetch_to_pack(uint32_t object_index_start) {
-	struct oid_array to_fetch = OID_ARRAY_INIT;
+స్థిర శూన్య prefetch_గమ్యం_pack(uint32_t object_సూచీ_ప్రారంభం) {
+	నిర్మాణం oid_array గమ్యం_fetch = OID_ARRAY_INIT;
 	uint32_t i;
 
-	for (i = object_index_start; i < to_pack.nr_objects; i++) {
-		struct object_entry *entry = to_pack.objects + i;
+	కొరకు (i = object_సూచీ_ప్రారంభం; i < గమ్యం_pack.nr_objects; i++) {
+		నిర్మాణం object_నమోదు *నమోదు_2 = గమ్యం_pack.objects + i;
 
-		if (!odb_read_object_info_extended(the_repository->objects,
-						   &entry->idx.oid,
-						   NULL,
+		ఒకవేళ (!odb_read_object_info_extended(the_repository->objects,
+						   &నమోదు_2->idx.oid,
+						   ఖాళీ,
 						   OBJECT_INFO_FOR_PREFETCH))
-			continue;
-		oid_array_append(&to_fetch, &entry->idx.oid);
+			కొనసాగు;
+		oid_array_append(&గమ్యం_fetch, &నమోదు_2->idx.oid);
 	}
-	promisor_remote_get_direct(the_repository,
-				   to_fetch.oid, to_fetch.nr);
-	oid_array_clear(&to_fetch);
+	promisor_remote_get_ప్రత్యక్ష(the_repository,
+				   గమ్యం_fetch.oid, గమ్యం_fetch.nr);
+	oid_array_clear(&గమ్యం_fetch);
 }
 
-static void check_object(struct object_entry *entry, uint32_t object_index)
+స్థిర శూన్య check_object(నిర్మాణం object_నమోదు *నమోదు_2, uint32_t object_సూచీ)
 {
-	size_t canonical_size;
-	enum object_type type;
-	struct object_info oi = {.typep = &type, .sizep = &canonical_size};
+	కొలత_t canonical_కొలత;
+	గణన object_type type;
+	నిర్మాణం object_info oi = {.typep = &type, .sizep = &canonical_కొలత};
 
-	if (IN_PACK(entry)) {
-		struct packed_git *p = IN_PACK(entry);
-		struct pack_window *w_curs = NULL;
-		int have_base = 0;
-		struct object_id base_ref;
-		struct object_entry *base_entry;
-		size_t used, used_0, avail;
+	ఒకవేళ (లోపల_PACK(నమోదు_2)) {
+		నిర్మాణం packed_git *p = లోపల_PACK(నమోదు_2);
+		నిర్మాణం pack_కిటికీ *w_curs = ఖాళీ;
+		పూర్ణాంకం have_పునాది = 0;
+		నిర్మాణం object_id పునాది_ref;
+		నిర్మాణం object_నమోదు *పునాది_నమోదు;
+		కొలత_t వాడిన_2, వాడిన_0, avail;
 		off_t ofs;
-		unsigned char *buf, c;
-		enum object_type type;
-		size_t in_pack_size;
+		గుర్తులేని అక్షరం *buf, c;
+		గణన object_type type;
+		కొలత_t లోపల_pack_కొలత;
 
-		buf = use_pack(p, &w_curs, entry->in_pack_offset, &avail);
+		buf = use_pack(p, &w_curs, నమోదు_2->లోపల_pack_స్థానభ్రంశం, &avail);
 
 		/*
 		 * We want in_pack_type even if we do not reuse delta
 		 * since non-delta representations could still be reused.
 		 */
-		used = unpack_object_header_buffer(buf, avail,
+		వాడిన_2 = unpack_object_శీర్షిక_బఫరు(buf, avail,
 						   &type,
-						   &in_pack_size);
-		if (used == 0)
-			goto give_up;
+						   &లోపల_pack_కొలత);
+		ఒకవేళ (వాడిన_2 == 0)
+			వెళ్ళు give_పైకి;
 
-		if (type < 0)
+		ఒకవేళ (type < 0)
 			BUG("invalid type %d", type);
-		entry->in_pack_type = type;
+		నమోదు_2->లోపల_pack_type = type;
 
 		/*
 		 * Determine if this is a delta and if so whether we can
 		 * reuse it or not.  Otherwise let's find out as cheaply as
 		 * possible what the actual type and size for this object is.
 		 */
-		switch (entry->in_pack_type) {
-		default:
+		ఎంపిక (నమోదు_2->లోపల_pack_type) {
+		అప్రమేయ:
 			/* Not a delta hence we've already got all we need. */
-			oe_set_type(entry, entry->in_pack_type);
-			SET_SIZE(entry, in_pack_size);
-			entry->in_pack_header_size = used;
-			if (oe_type(entry) < OBJ_COMMIT || oe_type(entry) > OBJ_BLOB)
-				goto give_up;
+			oe_సమితి_type(నమోదు_2, నమోదు_2->లోపల_pack_type);
+			సమితి_కొలత(నమోదు_2, లోపల_pack_కొలత);
+			నమోదు_2->లోపల_pack_శీర్షిక_కొలత = వాడిన_2;
+			ఒకవేళ (oe_type(నమోదు_2) < OBJ_COMMIT || oe_type(నమోదు_2) > OBJ_BLOB)
+				వెళ్ళు give_పైకి;
 			unuse_pack(&w_curs);
-			return;
-		case OBJ_REF_DELTA:
-			if (reuse_delta && !entry->preferred_base) {
-				oidread(&base_ref,
+			తిరిగి;
+		స్థితి OBJ_REF_DELTA:
+			ఒకవేళ (reuse_delta && !నమోదు_2->preferred_పునాది) {
+				oidread(&పునాది_ref,
 					use_pack(p, &w_curs,
-						 entry->in_pack_offset + used,
-						 NULL),
+						 నమోదు_2->లోపల_pack_స్థానభ్రంశం + వాడిన_2,
+						 ఖాళీ),
 					the_repository->hash_algo);
-				have_base = 1;
+				have_పునాది = 1;
 			}
-			entry->in_pack_header_size = used + the_hash_algo->rawsz;
-			break;
-		case OBJ_OFS_DELTA:
+			నమోదు_2->లోపల_pack_శీర్షిక_కొలత = వాడిన_2 + the_hash_algo->rawsz;
+			ఆపు;
+		స్థితి OBJ_OFS_DELTA:
 			buf = use_pack(p, &w_curs,
-				       entry->in_pack_offset + used, NULL);
-			used_0 = 0;
-			c = buf[used_0++];
+				       నమోదు_2->లోపల_pack_స్థానభ్రంశం + వాడిన_2, ఖాళీ);
+			వాడిన_0 = 0;
+			c = buf[వాడిన_0++];
 			ofs = c & 127;
-			while (c & 128) {
+			అయితే (c & 128) {
 				ofs += 1;
-				if (!ofs || MSB(ofs, 7)) {
+				ఒకవేళ (!ofs || MSB(ofs, 7)) {
 					error(_("delta base offset overflow in pack for %s"),
-					      oid_to_hex(&entry->idx.oid));
-					goto give_up;
+					      oid_గమ్యం_hex(&నమోదు_2->idx.oid));
+					వెళ్ళు give_పైకి;
 				}
-				c = buf[used_0++];
+				c = buf[వాడిన_0++];
 				ofs = (ofs << 7) + (c & 127);
 			}
-			ofs = entry->in_pack_offset - ofs;
-			if (ofs <= 0 || ofs >= entry->in_pack_offset) {
+			ofs = నమోదు_2->లోపల_pack_స్థానభ్రంశం - ofs;
+			ఒకవేళ (ofs <= 0 || ofs >= నమోదు_2->లోపల_pack_స్థానభ్రంశం) {
 				error(_("delta base offset out of bound for %s"),
-				      oid_to_hex(&entry->idx.oid));
-				goto give_up;
+				      oid_గమ్యం_hex(&నమోదు_2->idx.oid));
+				వెళ్ళు give_పైకి;
 			}
-			if (reuse_delta && !entry->preferred_base) {
+			ఒకవేళ (reuse_delta && !నమోదు_2->preferred_పునాది) {
 				uint32_t pos;
-				if (offset_to_pack_pos(p, ofs, &pos) < 0)
-					goto give_up;
-				if (!nth_packed_object_id(&base_ref, p,
-							  pack_pos_to_index(p, pos)))
-					have_base = 1;
+				ఒకవేళ (స్థానభ్రంశం_గమ్యం_pack_pos(p, ofs, &pos) < 0)
+					వెళ్ళు give_పైకి;
+				ఒకవేళ (!nth_packed_object_id(&పునాది_ref, p,
+							  pack_pos_గమ్యం_సూచీ(p, pos)))
+					have_పునాది = 1;
 			}
-			entry->in_pack_header_size = used + used_0;
-			break;
+			నమోదు_2->లోపల_pack_శీర్షిక_కొలత = వాడిన_2 + వాడిన_0;
+			ఆపు;
 		}
 
-		if (have_base &&
-		    can_reuse_delta(&base_ref, entry, &base_entry)) {
-			oe_set_type(entry, entry->in_pack_type);
-			SET_SIZE(entry, in_pack_size); /* delta size */
-			SET_DELTA_SIZE(entry, in_pack_size);
+		ఒకవేళ (have_పునాది &&
+		    can_reuse_delta(&పునాది_ref, నమోదు_2, &పునాది_నమోదు)) {
+			oe_సమితి_type(నమోదు_2, నమోదు_2->లోపల_pack_type);
+			సమితి_కొలత(నమోదు_2, లోపల_pack_కొలత); /* delta size */
+			సమితి_DELTA_కొలత(నమోదు_2, లోపల_pack_కొలత);
 
-			if (base_entry) {
-				SET_DELTA(entry, base_entry);
-				entry->delta_sibling_idx = base_entry->delta_child_idx;
-				SET_DELTA_CHILD(base_entry, entry);
-			} else {
-				SET_DELTA_EXT(entry, &base_ref);
+			ఒకవేళ (పునాది_నమోదు) {
+				సమితి_DELTA(నమోదు_2, పునాది_నమోదు);
+				నమోదు_2->delta_sibling_idx = పునాది_నమోదు->delta_బిడ్డ_idx;
+				సమితి_DELTA_బిడ్డ(పునాది_నమోదు, నమోదు_2);
+			} లేకపోతే {
+				సమితి_DELTA_EXT(నమోదు_2, &పునాది_ref);
 			}
 
 			unuse_pack(&w_curs);
-			return;
+			తిరిగి;
 		}
 
-		if (oe_type(entry)) {
+		ఒకవేళ (oe_type(నమోదు_2)) {
 			off_t delta_pos;
 
 			/*
@@ -2365,14 +2365,14 @@ static void check_object(struct object_entry *entry, uint32_t object_index)
 			 * final object type is.  Let's extract the actual
 			 * object size from the delta header.
 			 */
-			delta_pos = entry->in_pack_offset + entry->in_pack_header_size;
-			canonical_size = get_size_from_delta(p, &w_curs,
+			delta_pos = నమోదు_2->లోపల_pack_స్థానభ్రంశం + నమోదు_2->లోపల_pack_శీర్షిక_కొలత;
+			canonical_కొలత = get_కొలత_from_delta(p, &w_curs,
 							     delta_pos);
-			if (canonical_size == 0)
-				goto give_up;
-			SET_SIZE(entry, canonical_size);
+			ఒకవేళ (canonical_కొలత == 0)
+				వెళ్ళు give_పైకి;
+			సమితి_కొలత(నమోదు_2, canonical_కొలత);
 			unuse_pack(&w_curs);
-			return;
+			తిరిగి;
 		}
 
 		/*
@@ -2380,25 +2380,25 @@ static void check_object(struct object_entry *entry, uint32_t object_index)
 		 * with odb_read_object_info() to find about the object type
 		 * at this point...
 		 */
-		give_up:
+		give_పైకి:
 		unuse_pack(&w_curs);
 	}
 
-	if (odb_read_object_info_extended(the_repository->objects, &entry->idx.oid, &oi,
+	ఒకవేళ (odb_read_object_info_extended(the_repository->objects, &నమోదు_2->idx.oid, &oi,
 					  OBJECT_INFO_SKIP_FETCH_OBJECT | OBJECT_INFO_LOOKUP_REPLACE) < 0) {
-		if (repo_has_promisor_remote(the_repository)) {
-			prefetch_to_pack(object_index);
-			if (odb_read_object_info_extended(the_repository->objects, &entry->idx.oid, &oi,
+		ఒకవేళ (repo_has_promisor_remote(the_repository)) {
+			prefetch_గమ్యం_pack(object_సూచీ);
+			ఒకవేళ (odb_read_object_info_extended(the_repository->objects, &నమోదు_2->idx.oid, &oi,
 							  OBJECT_INFO_SKIP_FETCH_OBJECT | OBJECT_INFO_LOOKUP_REPLACE) < 0)
 				type = -1;
-		} else {
+		} లేకపోతే {
 			type = -1;
 		}
 	}
-	oe_set_type(entry, type);
-	if (entry->type_valid) {
-		SET_SIZE(entry, canonical_size);
-	} else {
+	oe_సమితి_type(నమోదు_2, type);
+	ఒకవేళ (నమోదు_2->type_valid) {
+		సమితి_కొలత(నమోదు_2, canonical_కొలత);
+	} లేకపోతే {
 		/*
 		 * Bad object type is checked in prepare_pack().  This is
 		 * to permit a missing preferred base object to be ignored
@@ -2408,23 +2408,23 @@ static void check_object(struct object_entry *entry, uint32_t object_index)
 	}
 }
 
-static int pack_offset_sort(const void *_a, const void *_b)
+స్థిర పూర్ణాంకం pack_స్థానభ్రంశం_క్రమీకరించు(స్థిరరాశి శూన్య *_a, స్థిరరాశి శూన్య *_b)
 {
-	const struct object_entry *a = *(struct object_entry **)_a;
-	const struct object_entry *b = *(struct object_entry **)_b;
-	const struct packed_git *a_in_pack = IN_PACK(a);
-	const struct packed_git *b_in_pack = IN_PACK(b);
+	స్థిరరాశి నిర్మాణం object_నమోదు *a = *(నిర్మాణం object_నమోదు **)_a;
+	స్థిరరాశి నిర్మాణం object_నమోదు *b = *(నిర్మాణం object_నమోదు **)_b;
+	స్థిరరాశి నిర్మాణం packed_git *a_లోపల_pack = లోపల_PACK(a);
+	స్థిరరాశి నిర్మాణం packed_git *b_లోపల_pack = లోపల_PACK(b);
 
 	/* avoid filesystem trashing with loose objects */
-	if (!a_in_pack && !b_in_pack)
-		return oidcmp(&a->idx.oid, &b->idx.oid);
+	ఒకవేళ (!a_లోపల_pack && !b_లోపల_pack)
+		తిరిగి oidcmp(&a->idx.oid, &b->idx.oid);
 
-	if (a_in_pack < b_in_pack)
-		return -1;
-	if (a_in_pack > b_in_pack)
-		return 1;
-	return a->in_pack_offset < b->in_pack_offset ? -1 :
-			(a->in_pack_offset > b->in_pack_offset);
+	ఒకవేళ (a_లోపల_pack < b_లోపల_pack)
+		తిరిగి -1;
+	ఒకవేళ (a_లోపల_pack > b_లోపల_pack)
+		తిరిగి 1;
+	తిరిగి a->లోపల_pack_స్థానభ్రంశం < b->లోపల_pack_స్థానభ్రంశం ? -1 :
+			(a->లోపల_pack_స్థానభ్రంశం > b->లోపల_pack_స్థానభ్రంశం);
 }
 
 /*
@@ -2440,40 +2440,40 @@ static int pack_offset_sort(const void *_a, const void *_b)
  *
  *   3. Resetting our delta depth, as we are now a base object.
  */
-static void drop_reused_delta(struct object_entry *entry)
+స్థిర శూన్య drop_reused_delta(నిర్మాణం object_నమోదు *నమోదు_2)
 {
-	unsigned *idx = &to_pack.objects[entry->delta_idx - 1].delta_child_idx;
-	struct object_info oi = OBJECT_INFO_INIT;
-	enum object_type type;
-	size_t size;
+	గుర్తులేని *idx = &గమ్యం_pack.objects[నమోదు_2->delta_idx - 1].delta_బిడ్డ_idx;
+	నిర్మాణం object_info oi = OBJECT_INFO_INIT;
+	గణన object_type type;
+	కొలత_t కొలత;
 
-	while (*idx) {
-		struct object_entry *oe = &to_pack.objects[*idx - 1];
+	అయితే (*idx) {
+		నిర్మాణం object_నమోదు *oe = &గమ్యం_pack.objects[*idx - 1];
 
-		if (oe == entry)
+		ఒకవేళ (oe == నమోదు_2)
 			*idx = oe->delta_sibling_idx;
-		else
+		లేకపోతే
 			idx = &oe->delta_sibling_idx;
 	}
-	SET_DELTA(entry, NULL);
-	entry->depth = 0;
+	సమితి_DELTA(నమోదు_2, ఖాళీ);
+	నమోదు_2->లోతు = 0;
 
-	oi.sizep = &size;
+	oi.sizep = &కొలత;
 	oi.typep = &type;
-	if (packed_object_info(NULL, IN_PACK(entry), entry->in_pack_offset, &oi) < 0) {
+	ఒకవేళ (packed_object_info(ఖాళీ, లోపల_PACK(నమోదు_2), నమోదు_2->లోపల_pack_స్థానభ్రంశం, &oi) < 0) {
 		/*
 		 * We failed to get the info from this pack for some reason;
 		 * fall back to odb_read_object_info, which may find another copy.
 		 * And if that fails, the error will be recorded in oe_type(entry)
 		 * and dealt with in prepare_pack().
 		 */
-		oe_set_type(entry,
+		oe_సమితి_type(నమోదు_2,
 			    odb_read_object_info(the_repository->objects,
-						 &entry->idx.oid, &size));
-	} else {
-		oe_set_type(entry, type);
+						 &నమోదు_2->idx.oid, &కొలత));
+	} లేకపోతే {
+		oe_సమితి_type(నమోదు_2, type);
 	}
-	SET_SIZE(entry, size);
+	సమితి_కొలత(నమోదు_2, కొలత);
 }
 
 /*
@@ -2484,7 +2484,7 @@ static void drop_reused_delta(struct object_entry *entry)
  * We also detect too-long reused chains that would violate our --depth
  * limit.
  */
-static void break_delta_chains(struct object_entry *entry)
+స్థిర శూన్య break_delta_chains(నిర్మాణం object_నమోదు *నమోదు_2)
 {
 	/*
 	 * The actual depth of each object we will write is stored as an int,
@@ -2492,20 +2492,20 @@ static void break_delta_chains(struct object_entry *entry)
 	 * changes based no that limit, we may potentially go as deep as the
 	 * number of objects, which is elsewhere bounded to a uint32_t.
 	 */
-	uint32_t total_depth;
-	struct object_entry *cur, *next;
+	uint32_t మొత్తం_లోతు;
+	నిర్మాణం object_నమోదు *cur, *తదుపరి;
 
-	for (cur = entry, total_depth = 0;
+	కొరకు (cur = నమోదు_2, మొత్తం_లోతు = 0;
 	     cur;
-	     cur = DELTA(cur), total_depth++) {
-		if (cur->dfs_state == DFS_DONE) {
+	     cur = DELTA(cur), మొత్తం_లోతు++) {
+		ఒకవేళ (cur->dfs_state == DFS_పూర్తి) {
 			/*
 			 * We've already seen this object and know it isn't
 			 * part of a cycle. We do need to append its depth
 			 * to our count.
 			 */
-			total_depth += cur->depth;
-			break;
+			మొత్తం_లోతు += cur->లోతు;
+			ఆపు;
 		}
 
 		/*
@@ -2513,7 +2513,7 @@ static void break_delta_chains(struct object_entry *entry)
 		 * other cruft which made its way into the state variable)
 		 * is a bug.
 		 */
-		if (cur->dfs_state != DFS_NONE)
+		ఒకవేళ (cur->dfs_state != DFS_NONE)
 			BUG("confusing delta dfs state in first pass: %d",
 			    cur->dfs_state);
 
@@ -2522,9 +2522,9 @@ static void break_delta_chains(struct object_entry *entry)
 		 * it's not a delta, we're done traversing, but we'll mark it
 		 * done to save time on future traversals.
 		 */
-		if (!DELTA(cur)) {
-			cur->dfs_state = DFS_DONE;
-			break;
+		ఒకవేళ (!DELTA(cur)) {
+			cur->dfs_state = DFS_పూర్తి;
+			ఆపు;
 		}
 
 		/*
@@ -2544,11 +2544,11 @@ static void break_delta_chains(struct object_entry *entry)
 		 * If we instead cut D->B, then the depth of A is correct at 3.
 		 * We keep all commits in the chain that we examined.
 		 */
-		cur->dfs_state = DFS_ACTIVE;
-		if (DELTA(cur)->dfs_state == DFS_ACTIVE) {
+		cur->dfs_state = DFS_చురుకైన;
+		ఒకవేళ (DELTA(cur)->dfs_state == DFS_చురుకైన) {
 			drop_reused_delta(cur);
-			cur->dfs_state = DFS_DONE;
-			break;
+			cur->dfs_state = DFS_పూర్తి;
+			ఆపు;
 		}
 	}
 
@@ -2559,8 +2559,8 @@ static void break_delta_chains(struct object_entry *entry)
 	 * delta, we need to keep going to look for more depth cuts. So we need
 	 * an extra "next" pointer to keep going after we reset cur->delta.
 	 */
-	for (cur = entry; cur; cur = next) {
-		next = DELTA(cur);
+	కొరకు (cur = నమోదు_2; cur; cur = తదుపరి) {
+		తదుపరి = DELTA(cur);
 
 		/*
 		 * We should have a chain of zero or more ACTIVE states down to
@@ -2568,9 +2568,9 @@ static void break_delta_chains(struct object_entry *entry)
 		 * has no bases, or we've already handled them in a previous
 		 * call.
 		 */
-		if (cur->dfs_state == DFS_DONE)
-			break;
-		else if (cur->dfs_state != DFS_ACTIVE)
+		ఒకవేళ (cur->dfs_state == DFS_పూర్తి)
+			ఆపు;
+		లేకపోతే ఒకవేళ (cur->dfs_state != DFS_చురుకైన)
 			BUG("confusing delta dfs state in second pass: %d",
 			    cur->dfs_state);
 
@@ -2592,48 +2592,48 @@ static void break_delta_chains(struct object_entry *entry)
 		 * entry whose final depth is supposed to be zero, we snip it
 		 * from its delta base, thereby making it so.
 		 */
-		cur->depth = (total_depth--) % (depth + 1);
-		if (!cur->depth)
+		cur->లోతు = (మొత్తం_లోతు--) % (లోతు + 1);
+		ఒకవేళ (!cur->లోతు)
 			drop_reused_delta(cur);
 
-		cur->dfs_state = DFS_DONE;
+		cur->dfs_state = DFS_పూర్తి;
 	}
 }
 
-static void get_object_details(void)
+స్థిర శూన్య get_object_details(శూన్య)
 {
 	uint32_t i;
-	struct object_entry **sorted_by_offset;
+	నిర్మాణం object_నమోదు **sorted_by_స్థానభ్రంశం;
 
-	if (progress)
-		progress_state = start_progress(the_repository,
+	ఒకవేళ (పురోగతి)
+		పురోగతి_state = ప్రారంభం_పురోగతి(the_repository,
 						_("Counting objects"),
-						to_pack.nr_objects);
+						గమ్యం_pack.nr_objects);
 
-	CALLOC_ARRAY(sorted_by_offset, to_pack.nr_objects);
-	for (i = 0; i < to_pack.nr_objects; i++)
-		sorted_by_offset[i] = to_pack.objects + i;
-	QSORT(sorted_by_offset, to_pack.nr_objects, pack_offset_sort);
+	CALLOC_ARRAY(sorted_by_స్థానభ్రంశం, గమ్యం_pack.nr_objects);
+	కొరకు (i = 0; i < గమ్యం_pack.nr_objects; i++)
+		sorted_by_స్థానభ్రంశం[i] = గమ్యం_pack.objects + i;
+	QSORT(sorted_by_స్థానభ్రంశం, గమ్యం_pack.nr_objects, pack_స్థానభ్రంశం_క్రమీకరించు);
 
-	for (i = 0; i < to_pack.nr_objects; i++) {
-		struct object_entry *entry = sorted_by_offset[i];
-		check_object(entry, i);
-		if (entry->type_valid &&
-		    oe_size_greater_than(&to_pack, entry,
-					 repo_settings_get_big_file_threshold(the_repository)))
-			entry->no_try_delta = 1;
-		display_progress(progress_state, i + 1);
+	కొరకు (i = 0; i < గమ్యం_pack.nr_objects; i++) {
+		నిర్మాణం object_నమోదు *నమోదు_2 = sorted_by_స్థానభ్రంశం[i];
+		check_object(నమోదు_2, i);
+		ఒకవేళ (నమోదు_2->type_valid &&
+		    oe_కొలత_greater_than(&గమ్యం_pack, నమోదు_2,
+					 repo_settings_get_big_file_పరిమితి(the_repository)))
+			నమోదు_2->no_try_delta = 1;
+		display_పురోగతి(పురోగతి_state, i + 1);
 	}
-	stop_progress(&progress_state);
+	stop_పురోగతి(&పురోగతి_state);
 
 	/*
 	 * This must happen in a second pass, since we rely on the delta
 	 * information for the whole list being completed.
 	 */
-	for (i = 0; i < to_pack.nr_objects; i++)
-		break_delta_chains(&to_pack.objects[i]);
+	కొరకు (i = 0; i < గమ్యం_pack.nr_objects; i++)
+		break_delta_chains(&గమ్యం_pack.objects[i]);
 
-	free(sorted_by_offset);
+	విడుదల(sorted_by_స్థానభ్రంశం);
 }
 
 /*
@@ -2645,74 +2645,74 @@ static void get_object_details(void)
  * one.  The deepest deltas are therefore the oldest objects which are
  * less susceptible to be accessed often.
  */
-static int type_size_sort(const void *_a, const void *_b)
+స్థిర పూర్ణాంకం type_కొలత_క్రమీకరించు(స్థిరరాశి శూన్య *_a, స్థిరరాశి శూన్య *_b)
 {
-	const struct object_entry *a = *(struct object_entry **)_a;
-	const struct object_entry *b = *(struct object_entry **)_b;
-	const enum object_type a_type = oe_type(a);
-	const enum object_type b_type = oe_type(b);
-	const unsigned long a_size = SIZE(a);
-	const unsigned long b_size = SIZE(b);
+	స్థిరరాశి నిర్మాణం object_నమోదు *a = *(నిర్మాణం object_నమోదు **)_a;
+	స్థిరరాశి నిర్మాణం object_నమోదు *b = *(నిర్మాణం object_నమోదు **)_b;
+	స్థిరరాశి గణన object_type a_type = oe_type(a);
+	స్థిరరాశి గణన object_type b_type = oe_type(b);
+	స్థిరరాశి గుర్తులేని దీర్ఘ a_కొలత = కొలత_3(a);
+	స్థిరరాశి గుర్తులేని దీర్ఘ b_కొలత = కొలత_3(b);
 
-	if (a_type > b_type)
-		return -1;
-	if (a_type < b_type)
-		return 1;
-	if (a->hash > b->hash)
-		return -1;
-	if (a->hash < b->hash)
-		return 1;
-	if (a->preferred_base > b->preferred_base)
-		return -1;
-	if (a->preferred_base < b->preferred_base)
-		return 1;
-	if (use_delta_islands) {
-		const int island_cmp = island_delta_cmp(&a->idx.oid, &b->idx.oid);
-		if (island_cmp)
-			return island_cmp;
+	ఒకవేళ (a_type > b_type)
+		తిరిగి -1;
+	ఒకవేళ (a_type < b_type)
+		తిరిగి 1;
+	ఒకవేళ (a->hash > b->hash)
+		తిరిగి -1;
+	ఒకవేళ (a->hash < b->hash)
+		తిరిగి 1;
+	ఒకవేళ (a->preferred_పునాది > b->preferred_పునాది)
+		తిరిగి -1;
+	ఒకవేళ (a->preferred_పునాది < b->preferred_పునాది)
+		తిరిగి 1;
+	ఒకవేళ (use_delta_islands) {
+		స్థిరరాశి పూర్ణాంకం island_cmp = island_delta_cmp(&a->idx.oid, &b->idx.oid);
+		ఒకవేళ (island_cmp)
+			తిరిగి island_cmp;
 	}
-	if (a_size > b_size)
-		return -1;
-	if (a_size < b_size)
-		return 1;
-	return a < b ? -1 : (a > b);  /* newest first */
+	ఒకవేళ (a_కొలత > b_కొలత)
+		తిరిగి -1;
+	ఒకవేళ (a_కొలత < b_కొలత)
+		తిరిగి 1;
+	తిరిగి a < b ? -1 : (a > b);  /* newest first */
 }
 
-struct unpacked {
-	struct object_entry *entry;
-	void *data;
-	struct delta_index *index;
-	unsigned depth;
+నిర్మాణం unpacked {
+	నిర్మాణం object_నమోదు *నమోదు_2;
+	శూన్య *దత్తాంశం;
+	నిర్మాణం delta_సూచీ *సూచీ;
+	గుర్తులేని లోతు;
 };
 
-static int delta_cacheable(size_t src_size, size_t trg_size,
-			   size_t delta_size)
+స్థిర పూర్ణాంకం delta_cacheable(కొలత_t src_కొలత, కొలత_t trg_కొలత,
+			   కొలత_t delta_కొలత_2)
 {
-	if (max_delta_cache_size && delta_cache_size + delta_size > max_delta_cache_size)
-		return 0;
+	ఒకవేళ (max_delta_cache_కొలత && delta_cache_కొలత + delta_కొలత_2 > max_delta_cache_కొలత)
+		తిరిగి 0;
 
-	if (delta_size < cache_max_small_delta_size)
-		return 1;
+	ఒకవేళ (delta_కొలత_2 < cache_max_small_delta_కొలత)
+		తిరిగి 1;
 
 	/* cache delta, if objects are large enough compared to delta size */
-	if ((src_size >> 20) + (trg_size >> 21) > (delta_size >> 10))
-		return 1;
+	ఒకవేళ ((src_కొలత >> 20) + (trg_కొలత >> 21) > (delta_కొలత_2 >> 10))
+		తిరిగి 1;
 
-	return 0;
+	తిరిగి 0;
 }
 
 /* Protect delta_cache_size */
-static pthread_mutex_t cache_mutex;
-#define cache_lock()		pthread_mutex_lock(&cache_mutex)
-#define cache_unlock()		pthread_mutex_unlock(&cache_mutex)
+స్థిర pthread_mutex_t cache_mutex;
+#నిర్వచించు cache_తాళం()		pthread_mutex_తాళం(&cache_mutex)
+#నిర్వచించు cache_unlock()		pthread_mutex_unlock(&cache_mutex)
 
 /*
  * Protect object list partitioning (e.g. struct thread_param) and
  * progress_state
  */
-static pthread_mutex_t progress_mutex;
-#define progress_lock()		pthread_mutex_lock(&progress_mutex)
-#define progress_unlock()	pthread_mutex_unlock(&progress_mutex)
+స్థిర pthread_mutex_t పురోగతి_mutex;
+#నిర్వచించు పురోగతి_తాళం()		pthread_mutex_తాళం(&పురోగతి_mutex)
+#నిర్వచించు పురోగతి_unlock()	pthread_mutex_unlock(&పురోగతి_mutex)
 
 /*
  * Access to struct object_entry is unprotected since each thread owns
@@ -2721,40 +2721,40 @@ static pthread_mutex_t progress_mutex;
  * progress_mutex for protection.
  */
 
-static inline int oe_size_less_than(struct packing_data *pack,
-				    const struct object_entry *lhs,
-				    size_t rhs)
+స్థిర అంతఃవరుస పూర్ణాంకం oe_కొలత_less_than(నిర్మాణం packing_దత్తాంశం *pack,
+				    స్థిరరాశి నిర్మాణం object_నమోదు *lhs,
+				    కొలత_t rhs)
 {
-	if (lhs->size_valid)
-		return lhs->size_ < rhs;
-	if (rhs < pack->oe_size_limit) /* rhs < 2^x <= lhs ? */
-		return 0;
-	return oe_get_size_slow(pack, lhs) < rhs;
+	ఒకవేళ (lhs->కొలత_valid)
+		తిరిగి lhs->కొలత_2 < rhs;
+	ఒకవేళ (rhs < pack->oe_కొలత_హద్దు) /* rhs < 2^x <= lhs ? */
+		తిరిగి 0;
+	తిరిగి oe_get_కొలత_slow(pack, lhs) < rhs;
 }
 
-static inline void oe_set_tree_depth(struct packing_data *pack,
-				     struct object_entry *e,
-				     unsigned int tree_depth)
+స్థిర అంతఃవరుస శూన్య oe_సమితి_వృక్షం_లోతు(నిర్మాణం packing_దత్తాంశం *pack,
+				     నిర్మాణం object_నమోదు *e,
+				     గుర్తులేని పూర్ణాంకం వృక్షం_లోతు)
 {
-	if (!pack->tree_depth)
-		CALLOC_ARRAY(pack->tree_depth, pack->nr_alloc);
-	pack->tree_depth[e - pack->objects] = tree_depth;
+	ఒకవేళ (!pack->వృక్షం_లోతు)
+		CALLOC_ARRAY(pack->వృక్షం_లోతు, pack->nr_alloc);
+	pack->వృక్షం_లోతు[e - pack->objects] = వృక్షం_లోతు;
 }
 
-static void record_tree_depth(const struct object_id *oid, const char *name)
+స్థిర శూన్య రికార్డు_వృక్షం_లోతు(స్థిరరాశి నిర్మాణం object_id *oid, స్థిరరాశి అక్షరం *name)
 {
-	const char *p;
-	unsigned depth;
-	struct object_entry *ent;
+	స్థిరరాశి అక్షరం *p;
+	గుర్తులేని లోతు;
+	నిర్మాణం object_నమోదు *ent;
 
 	/* the empty string is a root tree, which is depth 0 */
-	depth = *name ? 1 : 0;
-	for (p = strchr(name, '/'); p; p = strchr(p + 1, '/'))
-		depth++;
+	లోతు = *name ? 1 : 0;
+	కొరకు (p = strchr(name, '/'); p; p = strchr(p + 1, '/'))
+		లోతు++;
 
-	ent = packlist_find(&to_pack, oid);
-	if (ent && depth > oe_tree_depth(&to_pack, ent))
-		oe_set_tree_depth(&to_pack, ent, depth);
+	ent = packlist_కనుగొను(&గమ్యం_pack, oid);
+	ఒకవేళ (ent && లోతు > oe_వృక్షం_లోతు(&గమ్యం_pack, ent))
+		oe_సమితి_వృక్షం_లోతు(&గమ్యం_pack, ent, లోతు);
 }
 
 /*
@@ -2762,57 +2762,57 @@ static void record_tree_depth(const struct object_id *oid, const char *name)
  * reconstruction (so non-deltas are true object sizes, but deltas
  * return the size of the delta data).
  */
-size_t oe_get_size_slow(struct packing_data *pack,
-			const struct object_entry *e)
+కొలత_t oe_get_కొలత_slow(నిర్మాణం packing_దత్తాంశం *pack,
+			స్థిరరాశి నిర్మాణం object_నమోదు *e)
 {
-	struct packed_git *p;
-	struct pack_window *w_curs;
-	unsigned char *buf;
-	enum object_type type;
-	size_t used, avail, size;
+	నిర్మాణం packed_git *p;
+	నిర్మాణం pack_కిటికీ *w_curs;
+	గుర్తులేని అక్షరం *buf;
+	గణన object_type type;
+	కొలత_t వాడిన_2, avail, కొలత;
 
-	if (e->type_ != OBJ_OFS_DELTA && e->type_ != OBJ_REF_DELTA) {
-		size_t sz;
-		packing_data_lock(&to_pack);
-		if (odb_read_object_info(the_repository->objects,
+	ఒకవేళ (e->type_ != OBJ_OFS_DELTA && e->type_ != OBJ_REF_DELTA) {
+		కొలత_t sz;
+		packing_దత్తాంశం_తాళం(&గమ్యం_pack);
+		ఒకవేళ (odb_read_object_info(the_repository->objects,
 					 &e->idx.oid, &sz) < 0)
 			die(_("unable to get size of %s"),
-			    oid_to_hex(&e->idx.oid));
-		packing_data_unlock(&to_pack);
-		return sz;
+			    oid_గమ్యం_hex(&e->idx.oid));
+		packing_దత్తాంశం_unlock(&గమ్యం_pack);
+		తిరిగి sz;
 	}
 
-	p = oe_in_pack(pack, e);
-	if (!p)
+	p = oe_లోపల_pack(pack, e);
+	ఒకవేళ (!p)
 		BUG("when e->type is a delta, it must belong to a pack");
 
-	packing_data_lock(&to_pack);
-	w_curs = NULL;
-	buf = use_pack(p, &w_curs, e->in_pack_offset, &avail);
-	used = unpack_object_header_buffer(buf, avail, &type, &size);
-	if (used == 0)
+	packing_దత్తాంశం_తాళం(&గమ్యం_pack);
+	w_curs = ఖాళీ;
+	buf = use_pack(p, &w_curs, e->లోపల_pack_స్థానభ్రంశం, &avail);
+	వాడిన_2 = unpack_object_శీర్షిక_బఫరు(buf, avail, &type, &కొలత);
+	ఒకవేళ (వాడిన_2 == 0)
 		die(_("unable to parse object header of %s"),
-		    oid_to_hex(&e->idx.oid));
+		    oid_గమ్యం_hex(&e->idx.oid));
 
 	unuse_pack(&w_curs);
-	packing_data_unlock(&to_pack);
-	return size;
+	packing_దత్తాంశం_unlock(&గమ్యం_pack);
+	తిరిగి కొలత;
 }
 
-static int try_delta(struct unpacked *trg, struct unpacked *src,
-		     unsigned max_depth, size_t *mem_usage)
+స్థిర పూర్ణాంకం try_delta(నిర్మాణం unpacked *trg, నిర్మాణం unpacked *src,
+		     గుర్తులేని max_లోతు, కొలత_t *mem_usage)
 {
-	struct object_entry *trg_entry = trg->entry;
-	struct object_entry *src_entry = src->entry;
-	unsigned long trg_size, src_size, sizediff, max_size, sz;
-	size_t delta_size;
-	unsigned ref_depth;
-	enum object_type type;
-	void *delta_buf;
+	నిర్మాణం object_నమోదు *trg_నమోదు = trg->నమోదు_2;
+	నిర్మాణం object_నమోదు *src_నమోదు = src->నమోదు_2;
+	గుర్తులేని దీర్ఘ trg_కొలత, src_కొలత, sizediff, max_కొలత, sz;
+	కొలత_t delta_కొలత_2;
+	గుర్తులేని ref_లోతు;
+	గణన object_type type;
+	శూన్య *delta_buf;
 
 	/* Don't bother doing diffs between different types */
-	if (oe_type(trg_entry) != oe_type(src_entry))
-		return -1;
+	ఒకవేళ (oe_type(trg_నమోదు) != oe_type(src_నమోదు))
+		తిరిగి -1;
 
 	/*
 	 * We do not bother to try a delta that we discarded on an
@@ -2822,110 +2822,110 @@ static int try_delta(struct unpacked *trg, struct unpacked *src,
 	 * it, we will still save the transfer cost, as we already know
 	 * the other side has it and we won't send src_entry at all.
 	 */
-	if (reuse_delta && IN_PACK(trg_entry) &&
-	    IN_PACK(trg_entry) == IN_PACK(src_entry) &&
-	    !src_entry->preferred_base &&
-	    trg_entry->in_pack_type != OBJ_REF_DELTA &&
-	    trg_entry->in_pack_type != OBJ_OFS_DELTA)
-		return 0;
+	ఒకవేళ (reuse_delta && లోపల_PACK(trg_నమోదు) &&
+	    లోపల_PACK(trg_నమోదు) == లోపల_PACK(src_నమోదు) &&
+	    !src_నమోదు->preferred_పునాది &&
+	    trg_నమోదు->లోపల_pack_type != OBJ_REF_DELTA &&
+	    trg_నమోదు->లోపల_pack_type != OBJ_OFS_DELTA)
+		తిరిగి 0;
 
 	/* Let's not bust the allowed depth. */
-	if (src->depth >= max_depth)
-		return 0;
+	ఒకవేళ (src->లోతు >= max_లోతు)
+		తిరిగి 0;
 
 	/* Now some size filtering heuristics. */
-	trg_size = SIZE(trg_entry);
-	if (!DELTA(trg_entry)) {
-		max_size = trg_size/2 - the_hash_algo->rawsz;
-		ref_depth = 1;
-	} else {
-		max_size = DELTA_SIZE(trg_entry);
-		ref_depth = trg->depth;
+	trg_కొలత = కొలత_3(trg_నమోదు);
+	ఒకవేళ (!DELTA(trg_నమోదు)) {
+		max_కొలత = trg_కొలత/2 - the_hash_algo->rawsz;
+		ref_లోతు = 1;
+	} లేకపోతే {
+		max_కొలత = DELTA_కొలత(trg_నమోదు);
+		ref_లోతు = trg->లోతు;
 	}
-	max_size = (uint64_t)max_size * (max_depth - src->depth) /
-						(max_depth - ref_depth + 1);
-	if (max_size == 0)
-		return 0;
-	src_size = SIZE(src_entry);
-	sizediff = src_size < trg_size ? trg_size - src_size : 0;
-	if (sizediff >= max_size)
-		return 0;
-	if (trg_size < src_size / 32)
-		return 0;
+	max_కొలత = (uint64_t)max_కొలత * (max_లోతు - src->లోతు) /
+						(max_లోతు - ref_లోతు + 1);
+	ఒకవేళ (max_కొలత == 0)
+		తిరిగి 0;
+	src_కొలత = కొలత_3(src_నమోదు);
+	sizediff = src_కొలత < trg_కొలత ? trg_కొలత - src_కొలత : 0;
+	ఒకవేళ (sizediff >= max_కొలత)
+		తిరిగి 0;
+	ఒకవేళ (trg_కొలత < src_కొలత / 32)
+		తిరిగి 0;
 
-	if (!in_same_island(&trg->entry->idx.oid, &src->entry->idx.oid))
-		return 0;
+	ఒకవేళ (!లోపల_same_island(&trg->నమోదు_2->idx.oid, &src->నమోదు_2->idx.oid))
+		తిరిగి 0;
 
 	/* Load data if not already done */
-	if (!trg->data) {
-		size_t sz_st = 0;
-		packing_data_lock(&to_pack);
-		trg->data = odb_read_object(the_repository->objects,
-					    &trg_entry->idx.oid, &type,
+	ఒకవేళ (!trg->దత్తాంశం) {
+		కొలత_t sz_st = 0;
+		packing_దత్తాంశం_తాళం(&గమ్యం_pack);
+		trg->దత్తాంశం = odb_read_object(the_repository->objects,
+					    &trg_నమోదు->idx.oid, &type,
 					    &sz_st);
-		sz = cast_size_t_to_ulong(sz_st);
-		packing_data_unlock(&to_pack);
-		if (!trg->data)
+		sz = cast_కొలత_t_గమ్యం_ulong(sz_st);
+		packing_దత్తాంశం_unlock(&గమ్యం_pack);
+		ఒకవేళ (!trg->దత్తాంశం)
 			die(_("object %s cannot be read"),
-			    oid_to_hex(&trg_entry->idx.oid));
-		if (sz != trg_size)
+			    oid_గమ్యం_hex(&trg_నమోదు->idx.oid));
+		ఒకవేళ (sz != trg_కొలత)
 			die(_("object %s inconsistent object length (%"PRIuMAX" vs %"PRIuMAX")"),
-			    oid_to_hex(&trg_entry->idx.oid), (uintmax_t)sz,
-			    (uintmax_t)trg_size);
+			    oid_గమ్యం_hex(&trg_నమోదు->idx.oid), (uintmax_t)sz,
+			    (uintmax_t)trg_కొలత);
 		*mem_usage += sz;
 	}
-	if (!src->data) {
-		size_t sz_st = 0;
-		packing_data_lock(&to_pack);
-		src->data = odb_read_object(the_repository->objects,
-					    &src_entry->idx.oid, &type,
+	ఒకవేళ (!src->దత్తాంశం) {
+		కొలత_t sz_st = 0;
+		packing_దత్తాంశం_తాళం(&గమ్యం_pack);
+		src->దత్తాంశం = odb_read_object(the_repository->objects,
+					    &src_నమోదు->idx.oid, &type,
 					    &sz_st);
-		sz = cast_size_t_to_ulong(sz_st);
-		packing_data_unlock(&to_pack);
-		if (!src->data) {
-			if (src_entry->preferred_base) {
-				static int warned = 0;
-				if (!warned++)
+		sz = cast_కొలత_t_గమ్యం_ulong(sz_st);
+		packing_దత్తాంశం_unlock(&గమ్యం_pack);
+		ఒకవేళ (!src->దత్తాంశం) {
+			ఒకవేళ (src_నమోదు->preferred_పునాది) {
+				స్థిర పూర్ణాంకం warned = 0;
+				ఒకవేళ (!warned++)
 					warning(_("object %s cannot be read"),
-						oid_to_hex(&src_entry->idx.oid));
+						oid_గమ్యం_hex(&src_నమోదు->idx.oid));
 				/*
 				 * Those objects are not included in the
 				 * resulting pack.  Be resilient and ignore
 				 * them if they can't be read, in case the
 				 * pack could be created nevertheless.
 				 */
-				return 0;
+				తిరిగి 0;
 			}
 			die(_("object %s cannot be read"),
-			    oid_to_hex(&src_entry->idx.oid));
+			    oid_గమ్యం_hex(&src_నమోదు->idx.oid));
 		}
-		if (sz != src_size)
+		ఒకవేళ (sz != src_కొలత)
 			die(_("object %s inconsistent object length (%"PRIuMAX" vs %"PRIuMAX")"),
-			    oid_to_hex(&src_entry->idx.oid), (uintmax_t)sz,
-			    (uintmax_t)src_size);
+			    oid_గమ్యం_hex(&src_నమోదు->idx.oid), (uintmax_t)sz,
+			    (uintmax_t)src_కొలత);
 		*mem_usage += sz;
 	}
-	if (!src->index) {
-		src->index = create_delta_index(src->data, src_size);
-		if (!src->index) {
-			static int warned = 0;
-			if (!warned++)
+	ఒకవేళ (!src->సూచీ) {
+		src->సూచీ = create_delta_సూచీ(src->దత్తాంశం, src_కొలత);
+		ఒకవేళ (!src->సూచీ) {
+			స్థిర పూర్ణాంకం warned = 0;
+			ఒకవేళ (!warned++)
 				warning(_("suboptimal pack - out of memory"));
-			return 0;
+			తిరిగి 0;
 		}
-		*mem_usage += sizeof_delta_index(src->index);
+		*mem_usage += sizeof_delta_సూచీ(src->సూచీ);
 	}
 
-	delta_buf = create_delta(src->index, trg->data, trg_size, &delta_size, max_size);
-	if (!delta_buf)
-		return 0;
+	delta_buf = create_delta(src->సూచీ, trg->దత్తాంశం, trg_కొలత, &delta_కొలత_2, max_కొలత);
+	ఒకవేళ (!delta_buf)
+		తిరిగి 0;
 
-	if (DELTA(trg_entry)) {
+	ఒకవేళ (DELTA(trg_నమోదు)) {
 		/* Prefer only shallower same-sized deltas. */
-		if (delta_size == DELTA_SIZE(trg_entry) &&
-		    src->depth + 1 >= trg->depth) {
-			free(delta_buf);
-			return 0;
+		ఒకవేళ (delta_కొలత_2 == DELTA_కొలత(trg_నమోదు) &&
+		    src->లోతు + 1 >= trg->లోతు) {
+			విడుదల(delta_buf);
+			తిరిగి 0;
 		}
 	}
 
@@ -2934,126 +2934,126 @@ static int try_delta(struct unpacked *trg, struct unpacked *src,
 	 * accounting lock.  Compiler will optimize the strangeness
 	 * away when NO_PTHREADS is defined.
 	 */
-	free(trg_entry->delta_data);
-	cache_lock();
-	if (trg_entry->delta_data) {
-		delta_cache_size -= DELTA_SIZE(trg_entry);
-		trg_entry->delta_data = NULL;
+	విడుదల(trg_నమోదు->delta_దత్తాంశం);
+	cache_తాళం();
+	ఒకవేళ (trg_నమోదు->delta_దత్తాంశం) {
+		delta_cache_కొలత -= DELTA_కొలత(trg_నమోదు);
+		trg_నమోదు->delta_దత్తాంశం = ఖాళీ;
 	}
-	if (delta_cacheable(src_size, trg_size, delta_size)) {
-		delta_cache_size += delta_size;
+	ఒకవేళ (delta_cacheable(src_కొలత, trg_కొలత, delta_కొలత_2)) {
+		delta_cache_కొలత += delta_కొలత_2;
 		cache_unlock();
-		trg_entry->delta_data = xrealloc(delta_buf, delta_size);
-	} else {
+		trg_నమోదు->delta_దత్తాంశం = xrealloc(delta_buf, delta_కొలత_2);
+	} లేకపోతే {
 		cache_unlock();
-		free(delta_buf);
+		విడుదల(delta_buf);
 	}
 
-	SET_DELTA(trg_entry, src_entry);
-	SET_DELTA_SIZE(trg_entry, delta_size);
-	trg->depth = src->depth + 1;
+	సమితి_DELTA(trg_నమోదు, src_నమోదు);
+	సమితి_DELTA_కొలత(trg_నమోదు, delta_కొలత_2);
+	trg->లోతు = src->లోతు + 1;
 
-	return 1;
+	తిరిగి 1;
 }
 
-static unsigned int check_delta_limit(struct object_entry *me, unsigned int n)
+స్థిర గుర్తులేని పూర్ణాంకం check_delta_హద్దు(నిర్మాణం object_నమోదు *me, గుర్తులేని పూర్ణాంకం n)
 {
-	struct object_entry *child = DELTA_CHILD(me);
-	unsigned int m = n;
-	while (child) {
-		const unsigned int c = check_delta_limit(child, n + 1);
-		if (m < c)
+	నిర్మాణం object_నమోదు *బిడ్డ = DELTA_బిడ్డ(me);
+	గుర్తులేని పూర్ణాంకం m = n;
+	అయితే (బిడ్డ) {
+		స్థిరరాశి గుర్తులేని పూర్ణాంకం c = check_delta_హద్దు(బిడ్డ, n + 1);
+		ఒకవేళ (m < c)
 			m = c;
-		child = DELTA_SIBLING(child);
+		బిడ్డ = DELTA_SIBLING(బిడ్డ);
 	}
-	return m;
+	తిరిగి m;
 }
 
-static size_t free_unpacked(struct unpacked *n)
+స్థిర కొలత_t free_unpacked(నిర్మాణం unpacked *n)
 {
-	size_t freed_mem = sizeof_delta_index(n->index);
-	free_delta_index(n->index);
-	n->index = NULL;
-	if (n->data) {
-		freed_mem += SIZE(n->entry);
-		FREE_AND_NULL(n->data);
+	కొలత_t freed_mem = sizeof_delta_సూచీ(n->సూచీ);
+	free_delta_సూచీ(n->సూచీ);
+	n->సూచీ = ఖాళీ;
+	ఒకవేళ (n->దత్తాంశం) {
+		freed_mem += కొలత_3(n->నమోదు_2);
+		FREE_AND_NULL(n->దత్తాంశం);
 	}
-	n->entry = NULL;
-	n->depth = 0;
-	return freed_mem;
+	n->నమోదు_2 = ఖాళీ;
+	n->లోతు = 0;
+	తిరిగి freed_mem;
 }
 
-static void find_deltas(struct object_entry **list, unsigned *list_size,
-			int window, int depth, unsigned *processed)
+స్థిర శూన్య కనుగొను_deltas(నిర్మాణం object_నమోదు **list, గుర్తులేని *list_కొలత,
+			పూర్ణాంకం కిటికీ, పూర్ణాంకం లోతు, గుర్తులేని *processed)
 {
-	uint32_t i, idx = 0, count = 0;
-	struct unpacked *array;
-	size_t mem_usage = 0;
+	uint32_t i, idx = 0, లెక్క = 0;
+	నిర్మాణం unpacked *array;
+	కొలత_t mem_usage = 0;
 
-	CALLOC_ARRAY(array, window);
+	CALLOC_ARRAY(array, కిటికీ);
 
-	for (;;) {
-		struct object_entry *entry;
-		struct unpacked *n = array + idx;
-		int j, max_depth, best_base = -1;
+	కొరకు (;;) {
+		నిర్మాణం object_నమోదు *నమోదు_2;
+		నిర్మాణం unpacked *n = array + idx;
+		పూర్ణాంకం j, max_లోతు, ఉత్తమ_పునాది = -1;
 
-		progress_lock();
-		if (!*list_size) {
-			progress_unlock();
-			break;
+		పురోగతి_తాళం();
+		ఒకవేళ (!*list_కొలత) {
+			పురోగతి_unlock();
+			ఆపు;
 		}
-		entry = *list++;
-		(*list_size)--;
-		if (!entry->preferred_base) {
+		నమోదు_2 = *list++;
+		(*list_కొలత)--;
+		ఒకవేళ (!నమోదు_2->preferred_పునాది) {
 			(*processed)++;
-			display_progress(progress_state, *processed);
+			display_పురోగతి(పురోగతి_state, *processed);
 		}
-		progress_unlock();
+		పురోగతి_unlock();
 
 		mem_usage -= free_unpacked(n);
-		n->entry = entry;
+		n->నమోదు_2 = నమోదు_2;
 
-		while (window_memory_limit &&
-		       mem_usage > window_memory_limit &&
-		       count > 1) {
-			const uint32_t tail = (idx + window - count) % window;
-			mem_usage -= free_unpacked(array + tail);
-			count--;
+		అయితే (కిటికీ_జ్ఞాపకం_హద్దు &&
+		       mem_usage > కిటికీ_జ్ఞాపకం_హద్దు &&
+		       లెక్క > 1) {
+			స్థిరరాశి uint32_t తోక = (idx + కిటికీ - లెక్క) % కిటికీ;
+			mem_usage -= free_unpacked(array + తోక);
+			లెక్క--;
 		}
 
 		/* We do not compute delta to *create* objects we are not
 		 * going to pack.
 		 */
-		if (entry->preferred_base)
-			goto next;
+		ఒకవేళ (నమోదు_2->preferred_పునాది)
+			వెళ్ళు తదుపరి;
 
 		/*
 		 * If the current object is at pack edge, take the depth the
 		 * objects that depend on the current object into account
 		 * otherwise they would become too deep.
 		 */
-		max_depth = depth;
-		if (DELTA_CHILD(entry)) {
-			max_depth -= check_delta_limit(entry, 0);
-			if (max_depth <= 0)
-				goto next;
+		max_లోతు = లోతు;
+		ఒకవేళ (DELTA_బిడ్డ(నమోదు_2)) {
+			max_లోతు -= check_delta_హద్దు(నమోదు_2, 0);
+			ఒకవేళ (max_లోతు <= 0)
+				వెళ్ళు తదుపరి;
 		}
 
-		j = window;
-		while (--j > 0) {
-			int ret;
+		j = కిటికీ;
+		అయితే (--j > 0) {
+			పూర్ణాంకం ret;
 			uint32_t other_idx = idx + j;
-			struct unpacked *m;
-			if (other_idx >= window)
-				other_idx -= window;
+			నిర్మాణం unpacked *m;
+			ఒకవేళ (other_idx >= కిటికీ)
+				other_idx -= కిటికీ;
 			m = array + other_idx;
-			if (!m->entry)
-				break;
-			ret = try_delta(n, m, max_depth, &mem_usage);
-			if (ret < 0)
-				break;
-			else if (ret > 0)
-				best_base = other_idx;
+			ఒకవేళ (!m->నమోదు_2)
+				ఆపు;
+			ret = try_delta(n, m, max_లోతు, &mem_usage);
+			ఒకవేళ (ret < 0)
+				ఆపు;
+			లేకపోతే ఒకవేళ (ret > 0)
+				ఉత్తమ_పునాది = other_idx;
 		}
 
 		/*
@@ -3070,19 +3070,19 @@ static void find_deltas(struct object_entry **list, unsigned *list_size,
 		 * instead, as we can afford spending more time compressing
 		 * between writes at that moment.
 		 */
-		if (entry->delta_data && !pack_to_stdout) {
-			unsigned long size;
+		ఒకవేళ (నమోదు_2->delta_దత్తాంశం && !pack_గమ్యం_stdout) {
+			గుర్తులేని దీర్ఘ కొలత;
 
-			size = do_compress(&entry->delta_data, DELTA_SIZE(entry));
-			if (size < (1U << OE_Z_DELTA_BITS)) {
-				entry->z_delta_size = size;
-				cache_lock();
-				delta_cache_size -= DELTA_SIZE(entry);
-				delta_cache_size += entry->z_delta_size;
+			కొలత = do_compress(&నమోదు_2->delta_దత్తాంశం, DELTA_కొలత(నమోదు_2));
+			ఒకవేళ (కొలత < (1U << OE_Z_DELTA_బిట్లు)) {
+				నమోదు_2->z_delta_కొలత = కొలత;
+				cache_తాళం();
+				delta_cache_కొలత -= DELTA_కొలత(నమోదు_2);
+				delta_cache_కొలత += నమోదు_2->z_delta_కొలత;
 				cache_unlock();
-			} else {
-				FREE_AND_NULL(entry->delta_data);
-				entry->z_delta_size = 0;
+			} లేకపోతే {
+				FREE_AND_NULL(నమోదు_2->delta_దత్తాంశం);
+				నమోదు_2->z_delta_కొలత = 0;
 			}
 		}
 
@@ -3090,39 +3090,39 @@ static void find_deltas(struct object_entry **list, unsigned *list_size,
 		 * depth, leaving it in the window is pointless.  we
 		 * should evict it first.
 		 */
-		if (DELTA(entry) && max_depth <= n->depth)
-			continue;
+		ఒకవేళ (DELTA(నమోదు_2) && max_లోతు <= n->లోతు)
+			కొనసాగు;
 
 		/*
 		 * Move the best delta base up in the window, after the
 		 * currently deltified object, to keep it longer.  It will
 		 * be the first base object to be attempted next.
 		 */
-		if (DELTA(entry)) {
-			struct unpacked swap = array[best_base];
-			int dist = (window + idx - best_base) % window;
-			int dst = best_base;
-			while (dist--) {
-				int src = (dst + 1) % window;
+		ఒకవేళ (DELTA(నమోదు_2)) {
+			నిర్మాణం unpacked మార్పిడి_2 = array[ఉత్తమ_పునాది];
+			పూర్ణాంకం dist = (కిటికీ + idx - ఉత్తమ_పునాది) % కిటికీ;
+			పూర్ణాంకం dst = ఉత్తమ_పునాది;
+			అయితే (dist--) {
+				పూర్ణాంకం src = (dst + 1) % కిటికీ;
 				array[dst] = array[src];
 				dst = src;
 			}
-			array[dst] = swap;
+			array[dst] = మార్పిడి_2;
 		}
 
-		next:
+		తదుపరి:
 		idx++;
-		if (count + 1 < window)
-			count++;
-		if (idx >= window)
+		ఒకవేళ (లెక్క + 1 < కిటికీ)
+			లెక్క++;
+		ఒకవేళ (idx >= కిటికీ)
 			idx = 0;
 	}
 
-	for (i = 0; i < window; ++i) {
-		free_delta_index(array[i].index);
-		free(array[i].data);
+	కొరకు (i = 0; i < కిటికీ; ++i) {
+		free_delta_సూచీ(array[i].సూచీ);
+		విడుదల(array[i].దత్తాంశం);
 	}
-	free(array);
+	విడుదల(array);
 }
 
 /*
@@ -3141,55 +3141,55 @@ static void find_deltas(struct object_entry **list, unsigned *list_size,
  * most work left to hand it to the idle worker.
  */
 
-struct thread_params {
+నిర్మాణం thread_params {
 	pthread_t thread;
-	struct object_entry **list;
-	struct packing_region *regions;
-	unsigned list_size;
-	unsigned remaining;
-	int window;
-	int depth;
-	int working;
-	int data_ready;
+	నిర్మాణం object_నమోదు **list;
+	నిర్మాణం packing_region *regions;
+	గుర్తులేని list_కొలత;
+	గుర్తులేని మిగిలిన;
+	పూర్ణాంకం కిటికీ;
+	పూర్ణాంకం లోతు;
+	పూర్ణాంకం working;
+	పూర్ణాంకం దత్తాంశం_ready;
 	pthread_mutex_t mutex;
 	pthread_cond_t cond;
-	unsigned *processed;
+	గుర్తులేని *processed;
 };
 
-static pthread_cond_t progress_cond;
+స్థిర pthread_cond_t పురోగతి_cond;
 
 /*
  * Mutex and conditional variable can't be statically-initialized on Windows.
  */
-static void init_threaded_search(void)
+స్థిర శూన్య init_threaded_శోధన(శూన్య)
 {
-	pthread_mutex_init(&cache_mutex, NULL);
-	pthread_mutex_init(&progress_mutex, NULL);
-	pthread_cond_init(&progress_cond, NULL);
+	pthread_mutex_init(&cache_mutex, ఖాళీ);
+	pthread_mutex_init(&పురోగతి_mutex, ఖాళీ);
+	pthread_cond_init(&పురోగతి_cond, ఖాళీ);
 }
 
-static void cleanup_threaded_search(void)
+స్థిర శూన్య cleanup_threaded_శోధన(శూన్య)
 {
-	pthread_cond_destroy(&progress_cond);
+	pthread_cond_destroy(&పురోగతి_cond);
 	pthread_mutex_destroy(&cache_mutex);
-	pthread_mutex_destroy(&progress_mutex);
+	pthread_mutex_destroy(&పురోగతి_mutex);
 }
 
-static void *threaded_find_deltas(void *arg)
+స్థిర శూన్య *threaded_కనుగొను_deltas(శూన్య *arg)
 {
-	struct thread_params *me = arg;
+	నిర్మాణం thread_params *me = arg;
 
-	progress_lock();
-	while (me->remaining) {
-		progress_unlock();
+	పురోగతి_తాళం();
+	అయితే (me->మిగిలిన) {
+		పురోగతి_unlock();
 
-		find_deltas(me->list, &me->remaining,
-			    me->window, me->depth, me->processed);
+		కనుగొను_deltas(me->list, &me->మిగిలిన,
+			    me->కిటికీ, me->లోతు, me->processed);
 
-		progress_lock();
+		పురోగతి_తాళం();
 		me->working = 0;
-		pthread_cond_signal(&progress_cond);
-		progress_unlock();
+		pthread_cond_signal(&పురోగతి_cond);
+		పురోగతి_unlock();
 
 		/*
 		 * We must not set ->data_ready before we wait on the
@@ -3199,76 +3199,76 @@ static void *threaded_find_deltas(void *arg)
 		 * was initialized to 0 before this thread was spawned
 		 * and we reset it to 0 right away.
 		 */
-		pthread_mutex_lock(&me->mutex);
-		while (!me->data_ready)
+		pthread_mutex_తాళం(&me->mutex);
+		అయితే (!me->దత్తాంశం_ready)
 			pthread_cond_wait(&me->cond, &me->mutex);
-		me->data_ready = 0;
+		me->దత్తాంశం_ready = 0;
 		pthread_mutex_unlock(&me->mutex);
 
-		progress_lock();
+		పురోగతి_తాళం();
 	}
-	progress_unlock();
+	పురోగతి_unlock();
 	/* leave ->working 1 so that this doesn't get more work assigned */
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
-static void ll_find_deltas(struct object_entry **list, unsigned list_size,
-			   int window, int depth, unsigned *processed)
+స్థిర శూన్య ll_కనుగొను_deltas(నిర్మాణం object_నమోదు **list, గుర్తులేని list_కొలత,
+			   పూర్ణాంకం కిటికీ, పూర్ణాంకం లోతు, గుర్తులేని *processed)
 {
-	struct thread_params *p;
-	int i, ret, active_threads = 0;
+	నిర్మాణం thread_params *p;
+	పూర్ణాంకం i, ret, చురుకైన_దారాలు = 0;
 
-	init_threaded_search();
+	init_threaded_శోధన();
 
-	if (delta_search_threads <= 1) {
-		find_deltas(list, &list_size, window, depth, processed);
-		cleanup_threaded_search();
-		return;
+	ఒకవేళ (delta_శోధన_దారాలు <= 1) {
+		కనుగొను_deltas(list, &list_కొలత, కిటికీ, లోతు, processed);
+		cleanup_threaded_శోధన();
+		తిరిగి;
 	}
-	if (progress > pack_to_stdout)
+	ఒకవేళ (పురోగతి > pack_గమ్యం_stdout)
 		fprintf_ln(stderr, _("Delta compression using up to %d threads"),
-			   delta_search_threads);
-	CALLOC_ARRAY(p, delta_search_threads);
+			   delta_శోధన_దారాలు);
+	CALLOC_ARRAY(p, delta_శోధన_దారాలు);
 
 	/* Partition the work amongst work threads. */
-	for (i = 0; i < delta_search_threads; i++) {
-		unsigned sub_size = list_size / (delta_search_threads - i);
+	కొరకు (i = 0; i < delta_శోధన_దారాలు; i++) {
+		గుర్తులేని sub_కొలత = list_కొలత / (delta_శోధన_దారాలు - i);
 
 		/* don't use too small segments or no deltas will be found */
-		if (sub_size < 2*window && i+1 < delta_search_threads)
-			sub_size = 0;
+		ఒకవేళ (sub_కొలత < 2*కిటికీ && i+1 < delta_శోధన_దారాలు)
+			sub_కొలత = 0;
 
-		p[i].window = window;
-		p[i].depth = depth;
+		p[i].కిటికీ = కిటికీ;
+		p[i].లోతు = లోతు;
 		p[i].processed = processed;
 		p[i].working = 1;
-		p[i].data_ready = 0;
+		p[i].దత్తాంశం_ready = 0;
 
 		/* try to split chunks on "path" boundaries */
-		while (sub_size && sub_size < list_size &&
-		       list[sub_size]->hash &&
-		       list[sub_size]->hash == list[sub_size-1]->hash)
-			sub_size++;
+		అయితే (sub_కొలత && sub_కొలత < list_కొలత &&
+		       list[sub_కొలత]->hash &&
+		       list[sub_కొలత]->hash == list[sub_కొలత-1]->hash)
+			sub_కొలత++;
 
 		p[i].list = list;
-		p[i].list_size = sub_size;
-		p[i].remaining = sub_size;
+		p[i].list_కొలత = sub_కొలత;
+		p[i].మిగిలిన = sub_కొలత;
 
-		list += sub_size;
-		list_size -= sub_size;
+		list += sub_కొలత;
+		list_కొలత -= sub_కొలత;
 	}
 
 	/* Start work threads. */
-	for (i = 0; i < delta_search_threads; i++) {
-		if (!p[i].list_size)
-			continue;
-		pthread_mutex_init(&p[i].mutex, NULL);
-		pthread_cond_init(&p[i].cond, NULL);
-		ret = pthread_create(&p[i].thread, NULL,
-				     threaded_find_deltas, &p[i]);
-		if (ret)
+	కొరకు (i = 0; i < delta_శోధన_దారాలు; i++) {
+		ఒకవేళ (!p[i].list_కొలత)
+			కొనసాగు;
+		pthread_mutex_init(&p[i].mutex, ఖాళీ);
+		pthread_cond_init(&p[i].cond, ఖాళీ);
+		ret = pthread_create(&p[i].thread, ఖాళీ,
+				     threaded_కనుగొను_deltas, &p[i]);
+		ఒకవేళ (ret)
 			die(_("unable to create thread: %s"), strerror(ret));
-		active_threads++;
+		చురుకైన_దారాలు++;
 	}
 
 	/*
@@ -3279,78 +3279,78 @@ static void ll_find_deltas(struct object_entry **list, unsigned list_size,
 	 * until the remaining object list segments are simply too short
 	 * to be worth splitting anymore.
 	 */
-	while (active_threads) {
-		struct thread_params *target = NULL;
-		struct thread_params *victim = NULL;
-		unsigned sub_size = 0;
+	అయితే (చురుకైన_దారాలు) {
+		నిర్మాణం thread_params *లక్ష్యం = ఖాళీ;
+		నిర్మాణం thread_params *victim = ఖాళీ;
+		గుర్తులేని sub_కొలత = 0;
 
-		progress_lock();
-		for (;;) {
-			for (i = 0; !target && i < delta_search_threads; i++)
-				if (!p[i].working)
-					target = &p[i];
-			if (target)
-				break;
-			pthread_cond_wait(&progress_cond, &progress_mutex);
+		పురోగతి_తాళం();
+		కొరకు (;;) {
+			కొరకు (i = 0; !లక్ష్యం && i < delta_శోధన_దారాలు; i++)
+				ఒకవేళ (!p[i].working)
+					లక్ష్యం = &p[i];
+			ఒకవేళ (లక్ష్యం)
+				ఆపు;
+			pthread_cond_wait(&పురోగతి_cond, &పురోగతి_mutex);
 		}
 
-		for (i = 0; i < delta_search_threads; i++)
-			if (p[i].remaining > 2*window &&
-			    (!victim || victim->remaining < p[i].remaining))
+		కొరకు (i = 0; i < delta_శోధన_దారాలు; i++)
+			ఒకవేళ (p[i].మిగిలిన > 2*కిటికీ &&
+			    (!victim || victim->మిగిలిన < p[i].మిగిలిన))
 				victim = &p[i];
-		if (victim) {
-			sub_size = victim->remaining / 2;
-			list = victim->list + victim->list_size - sub_size;
-			while (sub_size && list[0]->hash &&
+		ఒకవేళ (victim) {
+			sub_కొలత = victim->మిగిలిన / 2;
+			list = victim->list + victim->list_కొలత - sub_కొలత;
+			అయితే (sub_కొలత && list[0]->hash &&
 			       list[0]->hash == list[-1]->hash) {
 				list++;
-				sub_size--;
+				sub_కొలత--;
 			}
-			if (!sub_size) {
+			ఒకవేళ (!sub_కొలత) {
 				/*
 				 * It is possible for some "paths" to have
 				 * so many objects that no hash boundary
 				 * might be found.  Let's just steal the
 				 * exact half in that case.
 				 */
-				sub_size = victim->remaining / 2;
-				list -= sub_size;
+				sub_కొలత = victim->మిగిలిన / 2;
+				list -= sub_కొలత;
 			}
-			target->list = list;
-			victim->list_size -= sub_size;
-			victim->remaining -= sub_size;
+			లక్ష్యం->list = list;
+			victim->list_కొలత -= sub_కొలత;
+			victim->మిగిలిన -= sub_కొలత;
 		}
-		target->list_size = sub_size;
-		target->remaining = sub_size;
-		target->working = 1;
-		progress_unlock();
+		లక్ష్యం->list_కొలత = sub_కొలత;
+		లక్ష్యం->మిగిలిన = sub_కొలత;
+		లక్ష్యం->working = 1;
+		పురోగతి_unlock();
 
-		pthread_mutex_lock(&target->mutex);
-		target->data_ready = 1;
-		pthread_cond_signal(&target->cond);
-		pthread_mutex_unlock(&target->mutex);
+		pthread_mutex_తాళం(&లక్ష్యం->mutex);
+		లక్ష్యం->దత్తాంశం_ready = 1;
+		pthread_cond_signal(&లక్ష్యం->cond);
+		pthread_mutex_unlock(&లక్ష్యం->mutex);
 
-		if (!sub_size) {
-			pthread_join(target->thread, NULL);
-			pthread_cond_destroy(&target->cond);
-			pthread_mutex_destroy(&target->mutex);
-			active_threads--;
+		ఒకవేళ (!sub_కొలత) {
+			pthread_join(లక్ష్యం->thread, ఖాళీ);
+			pthread_cond_destroy(&లక్ష్యం->cond);
+			pthread_mutex_destroy(&లక్ష్యం->mutex);
+			చురుకైన_దారాలు--;
 		}
 	}
-	cleanup_threaded_search();
-	free(p);
+	cleanup_threaded_శోధన();
+	విడుదల(p);
 }
 
-static int obj_is_packed(const struct object_id *oid)
+స్థిర పూర్ణాంకం obj_is_packed(స్థిరరాశి నిర్మాణం object_id *oid)
 {
-	return packlist_find(&to_pack, oid) ||
+	తిరిగి packlist_కనుగొను(&గమ్యం_pack, oid) ||
 		(reuse_packfile_bitmap &&
-		 bitmap_walk_contains(bitmap_git, reuse_packfile_bitmap, oid));
+		 bitmap_walk_కలిగియుంది(bitmap_git, reuse_packfile_bitmap, oid));
 }
 
-static void add_tag_chain(const struct object_id *oid)
+స్థిర శూన్య కూడు_ట్యాగ్_chain(స్థిరరాశి నిర్మాణం object_id *oid)
 {
-	struct tag *tag;
+	నిర్మాణం ట్యాగ్ *ట్యాగ్;
 
 	/*
 	 * We catch duplicates already in add_object_entry(), but we'd
@@ -3359,128 +3359,128 @@ static void add_tag_chain(const struct object_id *oid)
 	 * it was included via bitmaps, we would not have parsed it
 	 * previously).
 	 */
-	if (obj_is_packed(oid))
-		return;
+	ఒకవేళ (obj_is_packed(oid))
+		తిరిగి;
 
-	tag = lookup_tag(the_repository, oid);
-	while (1) {
-		if (!tag || parse_tag(the_repository, tag) || !tag->tagged)
+	ట్యాగ్ = lookup_ట్యాగ్(the_repository, oid);
+	అయితే (1) {
+		ఒకవేళ (!ట్యాగ్ || parse_ట్యాగ్(the_repository, ట్యాగ్) || !ట్యాగ్->tagged)
 			die(_("unable to pack objects reachable from tag %s"),
-			    oid_to_hex(oid));
+			    oid_గమ్యం_hex(oid));
 
-		add_object_entry(&tag->object.oid, OBJ_TAG, NULL, 0);
+		కూడు_object_నమోదు(&ట్యాగ్->object.oid, OBJ_ట్యాగ్, ఖాళీ, 0);
 
-		if (tag->tagged->type != OBJ_TAG)
-			return;
+		ఒకవేళ (ట్యాగ్->tagged->type != OBJ_ట్యాగ్)
+			తిరిగి;
 
-		tag = (struct tag *)tag->tagged;
+		ట్యాగ్ = (నిర్మాణం ట్యాగ్ *)ట్యాగ్->tagged;
 	}
 }
 
-static int add_ref_tag(const struct reference *ref, void *cb_data UNUSED)
+స్థిర పూర్ణాంకం కూడు_ref_ట్యాగ్(స్థిరరాశి నిర్మాణం reference *ref, శూన్య *cb_దత్తాంశం వాడని)
 {
-	struct object_id peeled;
+	నిర్మాణం object_id peeled;
 
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled) &&
+	ఒకవేళ (!reference_get_peeled_oid(the_repository, ref, &peeled) &&
 	    obj_is_packed(&peeled))
-		add_tag_chain(ref->oid);
-	return 0;
+		కూడు_ట్యాగ్_chain(ref->oid);
+	తిరిగి 0;
 }
 
-static int should_attempt_deltas(struct object_entry *entry)
+స్థిర పూర్ణాంకం should_attempt_deltas(నిర్మాణం object_నమోదు *నమోదు_2)
 {
-	if (DELTA(entry))
+	ఒకవేళ (DELTA(నమోదు_2))
 		/* This happens if we decided to reuse existing
 		 * delta from a pack. "reuse_delta &&" is implied.
 		 */
-		return 0;
+		తిరిగి 0;
 
-	if (!entry->type_valid ||
-	    oe_size_less_than(&to_pack, entry, 50))
-		return 0;
+	ఒకవేళ (!నమోదు_2->type_valid ||
+	    oe_కొలత_less_than(&గమ్యం_pack, నమోదు_2, 50))
+		తిరిగి 0;
 
-	if (entry->no_try_delta)
-		return 0;
+	ఒకవేళ (నమోదు_2->no_try_delta)
+		తిరిగి 0;
 
-	if (!entry->preferred_base) {
-		if (oe_type(entry) < 0)
+	ఒకవేళ (!నమోదు_2->preferred_పునాది) {
+		ఒకవేళ (oe_type(నమోదు_2) < 0)
 			die(_("unable to get type of object %s"),
-				oid_to_hex(&entry->idx.oid));
-	} else if (oe_type(entry) < 0) {
+				oid_గమ్యం_hex(&నమోదు_2->idx.oid));
+	} లేకపోతే ఒకవేళ (oe_type(నమోదు_2) < 0) {
 		/*
 		 * This object is not found, but we
 		 * don't have to include it anyway.
 		 */
-		return 0;
+		తిరిగి 0;
 	}
 
-	return 1;
+	తిరిగి 1;
 }
 
-static void find_deltas_for_region(struct object_entry *list,
-				   struct packing_region *region,
-				   unsigned int *processed)
+స్థిర శూన్య కనుగొను_deltas_for_region(నిర్మాణం object_నమోదు *list,
+				   నిర్మాణం packing_region *region,
+				   గుర్తులేని పూర్ణాంకం *processed)
 {
-	struct object_entry **delta_list;
-	unsigned int delta_list_nr = 0;
+	నిర్మాణం object_నమోదు **delta_list;
+	గుర్తులేని పూర్ణాంకం delta_list_nr = 0;
 
 	ALLOC_ARRAY(delta_list, region->nr);
-	for (size_t i = 0; i < region->nr; i++) {
-		struct object_entry *entry = list + region->start + i;
-		if (should_attempt_deltas(entry))
-			delta_list[delta_list_nr++] = entry;
+	కొరకు (కొలత_t i = 0; i < region->nr; i++) {
+		నిర్మాణం object_నమోదు *నమోదు_2 = list + region->ప్రారంభం + i;
+		ఒకవేళ (should_attempt_deltas(నమోదు_2))
+			delta_list[delta_list_nr++] = నమోదు_2;
 	}
 
-	QSORT(delta_list, delta_list_nr, type_size_sort);
-	find_deltas(delta_list, &delta_list_nr, window, depth, processed);
-	free(delta_list);
+	QSORT(delta_list, delta_list_nr, type_కొలత_క్రమీకరించు);
+	కనుగొను_deltas(delta_list, &delta_list_nr, కిటికీ, లోతు, processed);
+	విడుదల(delta_list);
 }
 
-static void find_deltas_by_region(struct object_entry *list,
-				  struct packing_region *regions,
-				  size_t start, size_t nr)
+స్థిర శూన్య కనుగొను_deltas_by_region(నిర్మాణం object_నమోదు *list,
+				  నిర్మాణం packing_region *regions,
+				  కొలత_t ప్రారంభం, కొలత_t nr)
 {
-	unsigned int processed = 0;
-	size_t progress_nr;
+	గుర్తులేని పూర్ణాంకం processed = 0;
+	కొలత_t పురోగతి_nr;
 
-	if (!nr)
-		return;
+	ఒకవేళ (!nr)
+		తిరిగి;
 
-	progress_nr = regions[nr - 1].start + regions[nr - 1].nr;
+	పురోగతి_nr = regions[nr - 1].ప్రారంభం + regions[nr - 1].nr;
 
-	if (progress)
-		progress_state = start_progress(the_repository,
+	ఒకవేళ (పురోగతి)
+		పురోగతి_state = ప్రారంభం_పురోగతి(the_repository,
 						_("Compressing objects by path"),
-						progress_nr);
+						పురోగతి_nr);
 
-	while (nr--)
-		find_deltas_for_region(list,
-				       &regions[start++],
+	అయితే (nr--)
+		కనుగొను_deltas_for_region(list,
+				       &regions[ప్రారంభం++],
 				       &processed);
 
-	display_progress(progress_state, progress_nr);
-	stop_progress(&progress_state);
+	display_పురోగతి(పురోగతి_state, పురోగతి_nr);
+	stop_పురోగతి(&పురోగతి_state);
 }
 
-static void *threaded_find_deltas_by_path(void *arg)
+స్థిర శూన్య *threaded_కనుగొను_deltas_by_మార్గం(శూన్య *arg)
 {
-	struct thread_params *me = arg;
+	నిర్మాణం thread_params *me = arg;
 
-	progress_lock();
-	while (me->remaining) {
-		while (me->remaining) {
-			progress_unlock();
-			find_deltas_for_region(to_pack.objects,
+	పురోగతి_తాళం();
+	అయితే (me->మిగిలిన) {
+		అయితే (me->మిగిలిన) {
+			పురోగతి_unlock();
+			కనుగొను_deltas_for_region(గమ్యం_pack.objects,
 					       me->regions,
 					       me->processed);
-			progress_lock();
-			me->remaining--;
+			పురోగతి_తాళం();
+			me->మిగిలిన--;
 			me->regions++;
 		}
 
 		me->working = 0;
-		pthread_cond_signal(&progress_cond);
-		progress_unlock();
+		pthread_cond_signal(&పురోగతి_cond);
+		పురోగతి_unlock();
 
 		/*
 		 * We must not set ->data_ready before we wait on the
@@ -3490,80 +3490,80 @@ static void *threaded_find_deltas_by_path(void *arg)
 		 * was initialized to 0 before this thread was spawned
 		 * and we reset it to 0 right away.
 		 */
-		pthread_mutex_lock(&me->mutex);
-		while (!me->data_ready)
+		pthread_mutex_తాళం(&me->mutex);
+		అయితే (!me->దత్తాంశం_ready)
 			pthread_cond_wait(&me->cond, &me->mutex);
-		me->data_ready = 0;
+		me->దత్తాంశం_ready = 0;
 		pthread_mutex_unlock(&me->mutex);
 
-		progress_lock();
+		పురోగతి_తాళం();
 	}
-	progress_unlock();
+	పురోగతి_unlock();
 	/* leave ->working 1 so that this doesn't get more work assigned */
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
-static void ll_find_deltas_by_region(struct object_entry *list,
-				     struct packing_region *regions,
-				     uint32_t start, uint32_t nr)
+స్థిర శూన్య ll_కనుగొను_deltas_by_region(నిర్మాణం object_నమోదు *list,
+				     నిర్మాణం packing_region *regions,
+				     uint32_t ప్రారంభం, uint32_t nr)
 {
-	struct thread_params *p;
-	int i, ret, active_threads = 0;
-	unsigned int processed = 0;
-	uint32_t progress_nr;
-	init_threaded_search();
+	నిర్మాణం thread_params *p;
+	పూర్ణాంకం i, ret, చురుకైన_దారాలు = 0;
+	గుర్తులేని పూర్ణాంకం processed = 0;
+	uint32_t పురోగతి_nr;
+	init_threaded_శోధన();
 
-	if (!nr)
-		return;
+	ఒకవేళ (!nr)
+		తిరిగి;
 
-	progress_nr =  regions[nr - 1].start + regions[nr - 1].nr;
-	if (delta_search_threads <= 1) {
-		find_deltas_by_region(list, regions, start, nr);
-		cleanup_threaded_search();
-		return;
+	పురోగతి_nr =  regions[nr - 1].ప్రారంభం + regions[nr - 1].nr;
+	ఒకవేళ (delta_శోధన_దారాలు <= 1) {
+		కనుగొను_deltas_by_region(list, regions, ప్రారంభం, nr);
+		cleanup_threaded_శోధన();
+		తిరిగి;
 	}
 
-	if (progress > pack_to_stdout)
+	ఒకవేళ (పురోగతి > pack_గమ్యం_stdout)
 		fprintf_ln(stderr,
 			   Q_("Path-based delta compression using up to %d thread",
 			      "Path-based delta compression using up to %d threads",
-			      delta_search_threads),
-			   delta_search_threads);
-	CALLOC_ARRAY(p, delta_search_threads);
+			      delta_శోధన_దారాలు),
+			   delta_శోధన_దారాలు);
+	CALLOC_ARRAY(p, delta_శోధన_దారాలు);
 
-	if (progress)
-		progress_state = start_progress(the_repository,
+	ఒకవేళ (పురోగతి)
+		పురోగతి_state = ప్రారంభం_పురోగతి(the_repository,
 						_("Compressing objects by path"),
-						progress_nr);
+						పురోగతి_nr);
 	/* Partition the work amongst work threads. */
-	for (i = 0; i < delta_search_threads; i++) {
-		unsigned sub_size = nr / (delta_search_threads - i);
+	కొరకు (i = 0; i < delta_శోధన_దారాలు; i++) {
+		గుర్తులేని sub_కొలత = nr / (delta_శోధన_దారాలు - i);
 
-		p[i].window = window;
-		p[i].depth = depth;
+		p[i].కిటికీ = కిటికీ;
+		p[i].లోతు = లోతు;
 		p[i].processed = &processed;
 		p[i].working = 1;
-		p[i].data_ready = 0;
+		p[i].దత్తాంశం_ready = 0;
 
 		p[i].regions = regions;
-		p[i].list_size = sub_size;
-		p[i].remaining = sub_size;
+		p[i].list_కొలత = sub_కొలత;
+		p[i].మిగిలిన = sub_కొలత;
 
-		regions += sub_size;
-		nr -= sub_size;
+		regions += sub_కొలత;
+		nr -= sub_కొలత;
 	}
 
 	/* Start work threads. */
-	for (i = 0; i < delta_search_threads; i++) {
-		if (!p[i].list_size)
-			continue;
-		pthread_mutex_init(&p[i].mutex, NULL);
-		pthread_cond_init(&p[i].cond, NULL);
-		ret = pthread_create(&p[i].thread, NULL,
-				     threaded_find_deltas_by_path, &p[i]);
-		if (ret)
+	కొరకు (i = 0; i < delta_శోధన_దారాలు; i++) {
+		ఒకవేళ (!p[i].list_కొలత)
+			కొనసాగు;
+		pthread_mutex_init(&p[i].mutex, ఖాళీ);
+		pthread_cond_init(&p[i].cond, ఖాళీ);
+		ret = pthread_create(&p[i].thread, ఖాళీ,
+				     threaded_కనుగొను_deltas_by_మార్గం, &p[i]);
+		ఒకవేళ (ret)
 			die(_("unable to create thread: %s"), strerror(ret));
-		active_threads++;
+		చురుకైన_దారాలు++;
 	}
 
 	/*
@@ -3574,63 +3574,63 @@ static void ll_find_deltas_by_region(struct object_entry *list,
 	 * until the remaining object list segments are simply too short
 	 * to be worth splitting anymore.
 	 */
-	while (active_threads) {
-		struct thread_params *target = NULL;
-		struct thread_params *victim = NULL;
-		unsigned sub_size = 0;
+	అయితే (చురుకైన_దారాలు) {
+		నిర్మాణం thread_params *లక్ష్యం = ఖాళీ;
+		నిర్మాణం thread_params *victim = ఖాళీ;
+		గుర్తులేని sub_కొలత = 0;
 
-		progress_lock();
-		for (;;) {
-			for (i = 0; !target && i < delta_search_threads; i++)
-				if (!p[i].working)
-					target = &p[i];
-			if (target)
-				break;
-			pthread_cond_wait(&progress_cond, &progress_mutex);
+		పురోగతి_తాళం();
+		కొరకు (;;) {
+			కొరకు (i = 0; !లక్ష్యం && i < delta_శోధన_దారాలు; i++)
+				ఒకవేళ (!p[i].working)
+					లక్ష్యం = &p[i];
+			ఒకవేళ (లక్ష్యం)
+				ఆపు;
+			pthread_cond_wait(&పురోగతి_cond, &పురోగతి_mutex);
 		}
 
-		for (i = 0; i < delta_search_threads; i++)
-			if (p[i].remaining > 2*window &&
-			    (!victim || victim->remaining < p[i].remaining))
+		కొరకు (i = 0; i < delta_శోధన_దారాలు; i++)
+			ఒకవేళ (p[i].మిగిలిన > 2*కిటికీ &&
+			    (!victim || victim->మిగిలిన < p[i].మిగిలిన))
 				victim = &p[i];
-		if (victim) {
-			sub_size = victim->remaining / 2;
-			target->regions = victim->regions + victim->remaining - sub_size;
-			victim->list_size -= sub_size;
-			victim->remaining -= sub_size;
+		ఒకవేళ (victim) {
+			sub_కొలత = victim->మిగిలిన / 2;
+			లక్ష్యం->regions = victim->regions + victim->మిగిలిన - sub_కొలత;
+			victim->list_కొలత -= sub_కొలత;
+			victim->మిగిలిన -= sub_కొలత;
 		}
-		target->list_size = sub_size;
-		target->remaining = sub_size;
-		target->working = 1;
-		progress_unlock();
+		లక్ష్యం->list_కొలత = sub_కొలత;
+		లక్ష్యం->మిగిలిన = sub_కొలత;
+		లక్ష్యం->working = 1;
+		పురోగతి_unlock();
 
-		pthread_mutex_lock(&target->mutex);
-		target->data_ready = 1;
-		pthread_cond_signal(&target->cond);
-		pthread_mutex_unlock(&target->mutex);
+		pthread_mutex_తాళం(&లక్ష్యం->mutex);
+		లక్ష్యం->దత్తాంశం_ready = 1;
+		pthread_cond_signal(&లక్ష్యం->cond);
+		pthread_mutex_unlock(&లక్ష్యం->mutex);
 
-		if (!sub_size) {
-			pthread_join(target->thread, NULL);
-			pthread_cond_destroy(&target->cond);
-			pthread_mutex_destroy(&target->mutex);
-			active_threads--;
+		ఒకవేళ (!sub_కొలత) {
+			pthread_join(లక్ష్యం->thread, ఖాళీ);
+			pthread_cond_destroy(&లక్ష్యం->cond);
+			pthread_mutex_destroy(&లక్ష్యం->mutex);
+			చురుకైన_దారాలు--;
 		}
 	}
-	cleanup_threaded_search();
-	free(p);
+	cleanup_threaded_శోధన();
+	విడుదల(p);
 
-	display_progress(progress_state, progress_nr);
-	stop_progress(&progress_state);
+	display_పురోగతి(పురోగతి_state, పురోగతి_nr);
+	stop_పురోగతి(&పురోగతి_state);
 }
 
-static void prepare_pack(int window, int depth)
+స్థిర శూన్య prepare_pack(పూర్ణాంకం కిటికీ, పూర్ణాంకం లోతు)
 {
-	struct object_entry **delta_list;
+	నిర్మాణం object_నమోదు **delta_list;
 	uint32_t i, nr_deltas;
-	unsigned n;
+	గుర్తులేని n;
 
-	if (use_delta_islands)
-		resolve_tree_islands(the_repository, progress, &to_pack);
+	ఒకవేళ (use_delta_islands)
+		resolve_వృక్షం_islands(the_repository, పురోగతి, &గమ్యం_pack);
 
 	get_object_details();
 
@@ -3641,187 +3641,187 @@ static void prepare_pack(int window, int depth)
 	 * should validate everything they get anyway so no need to incur
 	 * the additional cost here in that case.
 	 */
-	if (!pack_to_stdout)
-		do_check_packed_object_crc = 1;
+	ఒకవేళ (!pack_గమ్యం_stdout)
+		do_check_packed_object_చక్రీయ_తనిఖీ = 1;
 
-	if (!to_pack.nr_objects || !window || !depth)
-		return;
+	ఒకవేళ (!గమ్యం_pack.nr_objects || !కిటికీ || !లోతు)
+		తిరిగి;
 
-	if (path_walk)
-		ll_find_deltas_by_region(to_pack.objects, to_pack.regions,
-					 0, to_pack.nr_regions);
+	ఒకవేళ (మార్గం_walk)
+		ll_కనుగొను_deltas_by_region(గమ్యం_pack.objects, గమ్యం_pack.regions,
+					 0, గమ్యం_pack.nr_regions);
 
-	ALLOC_ARRAY(delta_list, to_pack.nr_objects);
+	ALLOC_ARRAY(delta_list, గమ్యం_pack.nr_objects);
 	nr_deltas = n = 0;
 
-	for (i = 0; i < to_pack.nr_objects; i++) {
-		struct object_entry *entry = to_pack.objects + i;
+	కొరకు (i = 0; i < గమ్యం_pack.nr_objects; i++) {
+		నిర్మాణం object_నమోదు *నమోదు_2 = గమ్యం_pack.objects + i;
 
-		if (!should_attempt_deltas(entry))
-			continue;
+		ఒకవేళ (!should_attempt_deltas(నమోదు_2))
+			కొనసాగు;
 
-		if (!entry->preferred_base)
+		ఒకవేళ (!నమోదు_2->preferred_పునాది)
 			nr_deltas++;
 
-		delta_list[n++] = entry;
+		delta_list[n++] = నమోదు_2;
 	}
 
-	if (nr_deltas && n > 1) {
-		unsigned nr_done = 0;
+	ఒకవేళ (nr_deltas && n > 1) {
+		గుర్తులేని nr_పూర్తి = 0;
 
-		if (progress)
-			progress_state = start_progress(the_repository,
+		ఒకవేళ (పురోగతి)
+			పురోగతి_state = ప్రారంభం_పురోగతి(the_repository,
 							_("Compressing objects"),
 							nr_deltas);
-		QSORT(delta_list, n, type_size_sort);
-		ll_find_deltas(delta_list, n, window+1, depth, &nr_done);
-		stop_progress(&progress_state);
-		if (nr_done != nr_deltas)
+		QSORT(delta_list, n, type_కొలత_క్రమీకరించు);
+		ll_కనుగొను_deltas(delta_list, n, కిటికీ+1, లోతు, &nr_పూర్తి);
+		stop_పురోగతి(&పురోగతి_state);
+		ఒకవేళ (nr_పూర్తి != nr_deltas)
 			die(_("inconsistency with delta count"));
 	}
-	free(delta_list);
+	విడుదల(delta_list);
 }
 
-static int git_pack_config(const char *k, const char *v,
-			   const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం git_pack_config(స్థిరరాశి అక్షరం *k, స్థిరరాశి అక్షరం *v,
+			   స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	if (!strcmp(k, "pack.window")) {
-		window = git_config_int(k, v, ctx->kvi);
-		return 0;
+	ఒకవేళ (!strcmp(k, "pack.window")) {
+		కిటికీ = git_config_int(k, v, ctx->kvi);
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "pack.windowmemory")) {
-		window_memory_limit = git_config_ulong(k, v, ctx->kvi);
-		return 0;
+	ఒకవేళ (!strcmp(k, "pack.windowmemory")) {
+		కిటికీ_జ్ఞాపకం_హద్దు = git_config_ulong(k, v, ctx->kvi);
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "pack.depth")) {
-		depth = git_config_int(k, v, ctx->kvi);
-		return 0;
+	ఒకవేళ (!strcmp(k, "pack.depth")) {
+		లోతు = git_config_int(k, v, ctx->kvi);
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "pack.deltacachesize")) {
-		max_delta_cache_size = git_config_size_t(k, v, ctx->kvi);
-		return 0;
+	ఒకవేళ (!strcmp(k, "pack.deltacachesize")) {
+		max_delta_cache_కొలత = git_config_కొలత_t(k, v, ctx->kvi);
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "pack.deltacachelimit")) {
-		cache_max_small_delta_size = git_config_int(k, v, ctx->kvi);
-		return 0;
+	ఒకవేళ (!strcmp(k, "pack.deltacachelimit")) {
+		cache_max_small_delta_కొలత = git_config_int(k, v, ctx->kvi);
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "pack.writebitmaphashcache")) {
-		if (git_config_bool(k, v))
+	ఒకవేళ (!strcmp(k, "pack.writebitmaphashcache")) {
+		ఒకవేళ (git_config_bool(k, v))
 			write_bitmap_options |= BITMAP_OPT_HASH_CACHE;
-		else
+		లేకపోతే
 			write_bitmap_options &= ~BITMAP_OPT_HASH_CACHE;
 	}
 
-	if (!strcmp(k, "pack.writebitmaplookuptable")) {
-		if (git_config_bool(k, v))
-			write_bitmap_options |= BITMAP_OPT_LOOKUP_TABLE;
-		else
-			write_bitmap_options &= ~BITMAP_OPT_LOOKUP_TABLE;
+	ఒకవేళ (!strcmp(k, "pack.writebitmaplookuptable")) {
+		ఒకవేళ (git_config_bool(k, v))
+			write_bitmap_options |= BITMAP_OPT_LOOKUP_పట్టిక;
+		లేకపోతే
+			write_bitmap_options &= ~BITMAP_OPT_LOOKUP_పట్టిక;
 	}
 
-	if (!strcmp(k, "pack.usebitmaps")) {
-		use_bitmap_index_default = git_config_bool(k, v);
-		return 0;
+	ఒకవేళ (!strcmp(k, "pack.usebitmaps")) {
+		use_bitmap_సూచీ_default = git_config_bool(k, v);
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "pack.allowpackreuse")) {
-		int res = git_parse_maybe_bool_text(v);
-		if (res < 0) {
-			if (!strcasecmp(v, "single"))
+	ఒకవేళ (!strcmp(k, "pack.allowpackreuse")) {
+		పూర్ణాంకం res = git_parse_maybe_bool_పాఠ్యం(v);
+		ఒకవేళ (res < 0) {
+			ఒకవేళ (!strcasecmp(v, "single"))
 				allow_pack_reuse = SINGLE_PACK_REUSE;
-			else if (!strcasecmp(v, "multi"))
+			లేకపోతే ఒకవేళ (!strcasecmp(v, "multi"))
 				allow_pack_reuse = MULTI_PACK_REUSE;
-			else
+			లేకపోతే
 				die(_("invalid pack.allowPackReuse value: '%s'"), v);
-		} else if (res) {
+		} లేకపోతే ఒకవేళ (res) {
 			allow_pack_reuse = SINGLE_PACK_REUSE;
-		} else {
+		} లేకపోతే {
 			allow_pack_reuse = NO_PACK_REUSE;
 		}
-		return 0;
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "pack.threads")) {
-		delta_search_threads = git_config_int(k, v, ctx->kvi);
-		if (delta_search_threads < 0)
+	ఒకవేళ (!strcmp(k, "pack.threads")) {
+		delta_శోధన_దారాలు = git_config_int(k, v, ctx->kvi);
+		ఒకవేళ (delta_శోధన_దారాలు < 0)
 			die(_("invalid number of threads specified (%d)"),
-			    delta_search_threads);
-		if (!HAVE_THREADS && delta_search_threads != 1) {
+			    delta_శోధన_దారాలు);
+		ఒకవేళ (!HAVE_దారాలు && delta_శోధన_దారాలు != 1) {
 			warning(_("no threads support, ignoring %s"), k);
-			delta_search_threads = 0;
+			delta_శోధన_దారాలు = 0;
 		}
-		return 0;
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "pack.indexversion")) {
-		pack_idx_opts.version = git_config_int(k, v, ctx->kvi);
-		if (pack_idx_opts.version > 2)
+	ఒకవేళ (!strcmp(k, "pack.indexversion")) {
+		pack_idx_opts.సంస్కరణ = git_config_int(k, v, ctx->kvi);
+		ఒకవేళ (pack_idx_opts.సంస్కరణ > 2)
 			die(_("bad pack.indexVersion=%"PRIu32),
-			    pack_idx_opts.version);
-		return 0;
+			    pack_idx_opts.సంస్కరణ);
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "pack.writereverseindex")) {
-		if (git_config_bool(k, v))
+	ఒకవేళ (!strcmp(k, "pack.writereverseindex")) {
+		ఒకవేళ (git_config_bool(k, v))
 			pack_idx_opts.flags |= WRITE_REV;
-		else
+		లేకపోతే
 			pack_idx_opts.flags &= ~WRITE_REV;
-		return 0;
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "uploadpack.blobpackfileuri")) {
-		struct configured_exclusion *ex;
-		const char *oid_end, *pack_end;
+	ఒకవేళ (!strcmp(k, "uploadpack.blobpackfileuri")) {
+		నిర్మాణం configured_exclusion *ex;
+		స్థిరరాశి అక్షరం *oid_చివర, *pack_చివర;
 		/*
 		 * Stores the pack hash. This is not a true object ID, but is
 		 * of the same form.
 		 */
-		struct object_id pack_hash;
+		నిర్మాణం object_id pack_hash;
 
-		if (!v)
-			return config_error_nonbool(k);
+		ఒకవేళ (!v)
+			తిరిగి config_error_nonbool(k);
 
-		ex = xmalloc(sizeof(*ex));
-		if (parse_oid_hex(v, &ex->e.oid, &oid_end) ||
-		    *oid_end != ' ' ||
-		    parse_oid_hex(oid_end + 1, &pack_hash, &pack_end) ||
-		    *pack_end != ' ')
+		ex = xmalloc(పరిమాణం(*ex));
+		ఒకవేళ (parse_oid_hex(v, &ex->e.oid, &oid_చివర) ||
+		    *oid_చివర != ' ' ||
+		    parse_oid_hex(oid_చివర + 1, &pack_hash, &pack_చివర) ||
+		    *pack_చివర != ' ')
 			die(_("value of uploadpack.blobpackfileuri must be "
 			      "of the form '<object-hash> <pack-hash> <uri>' (got '%s')"), v);
-		if (oidmap_get(&configured_exclusions, &ex->e.oid))
+		ఒకవేళ (oidmap_get(&configured_exclusions, &ex->e.oid))
 			die(_("object already configured in another "
 			      "uploadpack.blobpackfileuri (got '%s')"), v);
-		ex->pack_hash_hex = xcalloc(1, pack_end - oid_end);
-		memcpy(ex->pack_hash_hex, oid_end + 1, pack_end - oid_end - 1);
-		ex->uri = xstrdup(pack_end + 1);
+		ex->pack_hash_hex = xcalloc(1, pack_చివర - oid_చివర);
+		జ్ఞాపకం_నకలు(ex->pack_hash_hex, oid_చివర + 1, pack_చివర - oid_చివర - 1);
+		ex->uri = xstrdup(pack_చివర + 1);
 		oidmap_put(&configured_exclusions, ex);
 	}
-	return git_default_config(k, v, ctx, cb);
+	తిరిగి git_default_config(k, v, ctx, cb);
 }
 
 /* Counters for trace2 output when in --stdin-packs mode. */
-static int stdin_packs_found_nr;
-static int stdin_packs_hints_nr;
+స్థిర పూర్ణాంకం stdin_packs_దొరికింది_nr;
+స్థిర పూర్ణాంకం stdin_packs_hints_nr;
 
-static int add_object_entry_from_pack(const struct object_id *oid,
-				      struct packed_git *p,
+స్థిర పూర్ణాంకం కూడు_object_నమోదు_from_pack(స్థిరరాశి నిర్మాణం object_id *oid,
+				      నిర్మాణం packed_git *p,
 				      uint32_t pos,
-				      void *_data)
+				      శూన్య *దత్తాంశం_2)
 {
 	off_t ofs;
-	struct object_info oi = OBJECT_INFO_INIT;
-	enum object_type type = OBJ_NONE;
+	నిర్మాణం object_info oi = OBJECT_INFO_INIT;
+	గణన object_type type = OBJ_NONE;
 
-	display_progress(progress_state, ++nr_seen);
+	display_పురోగతి(పురోగతి_state, ++nr_చూసిన);
 
-	if (have_duplicate_entry(oid, 0))
-		return 0;
+	ఒకవేళ (have_duplicate_నమోదు(oid, 0))
+		తిరిగి 0;
 
-	stdin_packs_found_nr++;
+	stdin_packs_దొరికింది_nr++;
 
-	ofs = nth_packed_object_offset(p, pos);
+	ofs = nth_packed_object_స్థానభ్రంశం(p, pos);
 
 	oi.typep = &type;
-	if (packed_object_info(NULL, p, ofs, &oi) < 0) {
+	ఒకవేళ (packed_object_info(ఖాళీ, p, ofs, &oi) < 0) {
 		die(_("could not get type of object %s in pack %s"),
-		    oid_to_hex(oid), p->pack_name);
-	} else if (type == OBJ_COMMIT) {
-		struct rev_info *revs = _data;
+		    oid_గమ్యం_hex(oid), p->pack_name);
+	} లేకపోతే ఒకవేళ (type == OBJ_COMMIT) {
+		నిర్మాణం rev_info *revs = దత్తాంశం_2;
 		/*
 		 * commits in included packs are used as starting points
 		 * for the subsequent revision walk
@@ -3834,30 +3834,30 @@ static int add_object_entry_from_pack(const struct object_id *oid,
 		 * However, we'll only add those objects to the packing
 		 * list after checking `want_object_in_pack()` below.
 		 */
-		add_pending_oid(revs, NULL, oid, 0);
+		కూడు_pending_oid(revs, ఖాళీ, oid, 0);
 	}
 
-	if (!want_object_in_pack(oid, 0, &p, &ofs))
-		return 0;
+	ఒకవేళ (!want_object_లోపల_pack(oid, 0, &p, &ofs))
+		తిరిగి 0;
 
-	create_object_entry(oid, type, 0, 0, 0, p, ofs);
+	create_object_నమోదు(oid, type, 0, 0, 0, p, ofs);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static void show_object_pack_hint(struct object *object, const char *name,
-				  void *data)
+స్థిర శూన్య show_object_pack_hint(నిర్మాణం object *object, స్థిరరాశి అక్షరం *name,
+				  శూన్య *దత్తాంశం)
 {
-	enum stdin_packs_mode mode = *(enum stdin_packs_mode *)data;
-	if (mode == STDIN_PACKS_MODE_FOLLOW) {
-		if (object->type == OBJ_BLOB &&
+	గణన stdin_packs_బహుళకం బహుళకం = *(గణన stdin_packs_బహుళకం *)దత్తాంశం;
+	ఒకవేళ (బహుళకం == STDIN_PACKS_బహుళకం_FOLLOW) {
+		ఒకవేళ (object->type == OBJ_BLOB &&
 		    !odb_has_object(the_repository->objects, &object->oid, 0))
-			return;
-		add_object_entry(&object->oid, object->type, name, 0);
-	} else {
-		struct object_entry *oe = packlist_find(&to_pack, &object->oid);
-		if (!oe)
-			return;
+			తిరిగి;
+		కూడు_object_నమోదు(&object->oid, object->type, name, 0);
+	} లేకపోతే {
+		నిర్మాణం object_నమోదు *oe = packlist_కనుగొను(&గమ్యం_pack, &object->oid);
+		ఒకవేళ (!oe)
+			తిరిగి;
 
 		/*
 		 * Our 'to_pack' list was constructed by iterating all
@@ -3876,13 +3876,13 @@ static void show_object_pack_hint(struct object *object, const char *name,
 	}
 }
 
-static void show_commit_pack_hint(struct commit *commit, void *data)
+స్థిర శూన్య show_commit_pack_hint(నిర్మాణం commit *commit, శూన్య *దత్తాంశం)
 {
-	enum stdin_packs_mode mode = *(enum stdin_packs_mode *)data;
+	గణన stdin_packs_బహుళకం బహుళకం = *(గణన stdin_packs_బహుళకం *)దత్తాంశం;
 
-	if (mode == STDIN_PACKS_MODE_FOLLOW) {
-		show_object_pack_hint((struct object *)commit, "", data);
-		return;
+	ఒకవేళ (బహుళకం == STDIN_PACKS_బహుళకం_FOLLOW) {
+		show_object_pack_hint((నిర్మాణం object *)commit, "", దత్తాంశం);
+		తిరిగి;
 	}
 
 	/* nothing to do; commits don't have a namehash */
@@ -3908,59 +3908,59 @@ static void show_commit_pack_hint(struct commit *commit, void *data)
  * STDIN_PACK_EXCLUDE_OPEN are used as traversal tips when invoked
  * with --stdin-packs=follow.
  */
-enum stdin_pack_info_kind {
+గణన stdin_pack_info_రకం {
 	STDIN_PACK_INCLUDE = (1<<0),
 	STDIN_PACK_EXCLUDE_CLOSED = (1<<1),
 	STDIN_PACK_EXCLUDE_OPEN = (1<<2),
 };
 
-struct stdin_pack_info {
-	struct packed_git *p;
-	enum stdin_pack_info_kind kind;
+నిర్మాణం stdin_pack_info {
+	నిర్మాణం packed_git *p;
+	గణన stdin_pack_info_రకం రకం;
 };
 
-static int pack_mtime_cmp(const void *_a, const void *_b)
+స్థిర పూర్ణాంకం pack_mtime_cmp(స్థిరరాశి శూన్య *_a, స్థిరరాశి శూన్య *_b)
 {
-	struct stdin_pack_info *a = ((const struct string_list_item*)_a)->util;
-	struct stdin_pack_info *b = ((const struct string_list_item*)_b)->util;
+	నిర్మాణం stdin_pack_info *a = ((స్థిరరాశి నిర్మాణం string_list_అంశం*)_a)->util;
+	నిర్మాణం stdin_pack_info *b = ((స్థిరరాశి నిర్మాణం string_list_అంశం*)_b)->util;
 
 	/*
 	 * order packs by descending mtime so that objects are laid out
 	 * roughly as newest-to-oldest
 	 */
-	if (a->p->mtime < b->p->mtime)
-		return 1;
-	else if (b->p->mtime < a->p->mtime)
-		return -1;
-	else
-		return 0;
+	ఒకవేళ (a->p->mtime < b->p->mtime)
+		తిరిగి 1;
+	లేకపోతే ఒకవేళ (b->p->mtime < a->p->mtime)
+		తిరిగి -1;
+	లేకపోతే
+		తిరిగి 0;
 }
 
-static int stdin_packs_include_check_obj(struct object *obj, void *data UNUSED)
+స్థిర పూర్ణాంకం stdin_packs_include_check_obj(నిర్మాణం object *obj, శూన్య *దత్తాంశం వాడని)
 {
-	return !has_object_kept_pack(to_pack.repo, &obj->oid,
-				     KEPT_PACK_IN_CORE);
+	తిరిగి !has_object_kept_pack(గమ్యం_pack.repo, &obj->oid,
+				     KEPT_PACK_లోపల_CORE);
 }
 
-static int stdin_packs_include_check(struct commit *commit, void *data)
+స్థిర పూర్ణాంకం stdin_packs_include_check(నిర్మాణం commit *commit, శూన్య *దత్తాంశం)
 {
-	return stdin_packs_include_check_obj((struct object *)commit, data);
+	తిరిగి stdin_packs_include_check_obj((నిర్మాణం object *)commit, దత్తాంశం);
 }
 
-static void stdin_packs_add_pack_entries(struct strmap *packs,
-					 struct rev_info *revs)
+స్థిర శూన్య stdin_packs_కూడు_pack_entries(నిర్మాణం strmap *packs,
+					 నిర్మాణం rev_info *revs)
 {
-	struct string_list keys = STRING_LIST_INIT_NODUP;
-	struct string_list_item *item;
-	struct hashmap_iter iter;
-	struct strmap_entry *entry;
+	నిర్మాణం string_list కీలకాలు = STRING_LIST_INIT_NODUP;
+	నిర్మాణం string_list_అంశం *అంశం;
+	నిర్మాణం hashmap_iter iter;
+	నిర్మాణం strmap_నమోదు *నమోదు_2;
 
-	strmap_for_each_entry(packs, &iter, entry) {
-		struct stdin_pack_info *info = entry->value;
-		if (!info->p)
-			die(_("could not find pack '%s'"), entry->key);
+	strmap_for_each_నమోదు(packs, &iter, నమోదు_2) {
+		నిర్మాణం stdin_pack_info *info = నమోదు_2->విలువ;
+		ఒకవేళ (!info->p)
+			die(_("could not find pack '%s'"), నమోదు_2->కీలకం);
 
-		string_list_append(&keys, entry->key)->util = info;
+		string_list_append(&కీలకాలు, నమోదు_2->కీలకం)->util = info;
 	}
 
 	/*
@@ -3968,12 +3968,12 @@ static void stdin_packs_add_pack_entries(struct strmap *packs,
 	 * string_list_item's ->util pointer, which string_list_sort() does not
 	 * provide.
 	 */
-	QSORT(keys.items, keys.nr, pack_mtime_cmp);
+	QSORT(కీలకాలు.వస్తువులు, కీలకాలు.nr, pack_mtime_cmp);
 
-	for_each_string_list_item(item, &keys) {
-		struct stdin_pack_info *info = item->util;
+	for_each_string_list_అంశం(అంశం, &కీలకాలు) {
+		నిర్మాణం stdin_pack_info *info = అంశం->util;
 
-		if (info->kind & STDIN_PACK_EXCLUDE_OPEN) {
+		ఒకవేళ (info->రకం & STDIN_PACK_EXCLUDE_OPEN) {
 			/*
 			 * When open-excluded packs ("!") are present, stop
 			 * the parent walk at closed-excluded ("^") packs.
@@ -3984,59 +3984,59 @@ static void stdin_packs_add_pack_entries(struct strmap *packs,
 			revs->include_check_obj = stdin_packs_include_check_obj;
 		}
 
-		if ((info->kind & STDIN_PACK_INCLUDE) ||
-		    (info->kind & STDIN_PACK_EXCLUDE_OPEN))
-			for_each_object_in_pack(info->p,
-						add_object_entry_from_pack,
+		ఒకవేళ ((info->రకం & STDIN_PACK_INCLUDE) ||
+		    (info->రకం & STDIN_PACK_EXCLUDE_OPEN))
+			for_each_object_లోపల_pack(info->p,
+						కూడు_object_నమోదు_from_pack,
 						revs,
-						ODB_FOR_EACH_OBJECT_PACK_ORDER);
+						ODB_FOR_EACH_OBJECT_PACK_క్రమం);
 	}
 
-	string_list_clear(&keys, 0);
+	string_list_clear(&కీలకాలు, 0);
 }
 
-static void stdin_packs_read_input(struct rev_info *revs,
-				   enum stdin_packs_mode mode)
+స్థిర శూన్య stdin_packs_read_ఆదానం(నిర్మాణం rev_info *revs,
+				   గణన stdin_packs_బహుళకం బహుళకం)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strmap packs = STRMAP_INIT;
-	struct packed_git *p;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
+	నిర్మాణం strmap packs = STRMAP_INIT;
+	నిర్మాణం packed_git *p;
 
-	while (strbuf_getline(&buf, stdin) != EOF) {
-		struct stdin_pack_info *info;
-		enum stdin_pack_info_kind kind = STDIN_PACK_INCLUDE;
-		const char *key = buf.buf;
+	అయితే (strbuf_getline(&buf, stdin) != EOF) {
+		నిర్మాణం stdin_pack_info *info;
+		గణన stdin_pack_info_రకం రకం = STDIN_PACK_INCLUDE;
+		స్థిరరాశి అక్షరం *కీలకం = buf.buf;
 
-		if (!*key)
-			continue;
-		else if (*key == '^')
-			kind = STDIN_PACK_EXCLUDE_CLOSED;
-		else if (*key == '!' && mode == STDIN_PACKS_MODE_FOLLOW)
-			kind = STDIN_PACK_EXCLUDE_OPEN;
+		ఒకవేళ (!*కీలకం)
+			కొనసాగు;
+		లేకపోతే ఒకవేళ (*కీలకం == '^')
+			రకం = STDIN_PACK_EXCLUDE_CLOSED;
+		లేకపోతే ఒకవేళ (*కీలకం == '!' && బహుళకం == STDIN_PACKS_బహుళకం_FOLLOW)
+			రకం = STDIN_PACK_EXCLUDE_OPEN;
 
-		if (kind != STDIN_PACK_INCLUDE)
-			key++;
+		ఒకవేళ (రకం != STDIN_PACK_INCLUDE)
+			కీలకం++;
 
-		info = strmap_get(&packs, key);
-		if (!info) {
+		info = strmap_get(&packs, కీలకం);
+		ఒకవేళ (!info) {
 			CALLOC_ARRAY(info, 1);
-			strmap_put(&packs, key, info);
+			strmap_put(&packs, కీలకం, info);
 		}
 
-		info->kind |= kind;
+		info->రకం |= రకం;
 
 		strbuf_reset(&buf);
 	}
 
 	repo_for_each_pack(the_repository, p) {
-		struct stdin_pack_info *info;
+		నిర్మాణం stdin_pack_info *info;
 
 		info = strmap_get(&packs, pack_basename(p));
-		if (!info)
-			continue;
+		ఒకవేళ (!info)
+			కొనసాగు;
 
-		if (info->kind & STDIN_PACK_INCLUDE) {
-			if (exclude_promisor_objects && p->pack_promisor)
+		ఒకవేళ (info->రకం & STDIN_PACK_INCLUDE) {
+			ఒకవేళ (exclude_promisor_objects && p->pack_promisor)
 				die(_("packfile %s is a promisor but --exclude-promisor-objects was given"), p->pack_name);
 
 			/*
@@ -4045,21 +4045,21 @@ static void stdin_packs_read_input(struct rev_info *revs,
 			 * later on in e.g.  pack_mtime_cmp(), excluded
 			 * packs are handled below.
 			 */
-			if (!is_pack_valid(p))
+			ఒకవేళ (!is_pack_valid(p))
 				die(_("packfile %s cannot be accessed"), p->pack_name);
 		}
 
-		if (info->kind & STDIN_PACK_EXCLUDE_CLOSED) {
+		ఒకవేళ (info->రకం & STDIN_PACK_EXCLUDE_CLOSED) {
 			/*
 			 * Marking excluded packs as kept in-core so
 			 * that later calls to add_object_entry()
 			 * discards any objects that are also found in
 			 * excluded packs.
 			 */
-			p->pack_keep_in_core = 1;
+			p->pack_keep_లోపల_core = 1;
 		}
 
-		if (info->kind & STDIN_PACK_EXCLUDE_OPEN) {
+		ఒకవేళ (info->రకం & STDIN_PACK_EXCLUDE_OPEN) {
 			/*
 			 * Marking excluded open packs as kept in-core
 			 * (open) for the same reason as we marked
@@ -4070,25 +4070,25 @@ static void stdin_packs_read_input(struct rev_info *revs,
 			 * are not guaranteed to have closure.
 			 *
 			 */
-			p->pack_keep_in_core_open = 1;
+			p->pack_keep_లోపల_core_open = 1;
 		}
 
 		info->p = p;
 	}
 
-	stdin_packs_add_pack_entries(&packs, revs);
+	stdin_packs_కూడు_pack_entries(&packs, revs);
 
 	strbuf_release(&buf);
 	strmap_clear(&packs, 1);
 }
 
-static void add_unreachable_loose_objects(struct rev_info *revs);
+స్థిర శూన్య కూడు_unreachable_loose_objects(నిర్మాణం rev_info *revs);
 
-static void read_stdin_packs(struct repository *repo,
-			     enum stdin_packs_mode mode, int rev_list_unpacked)
+స్థిర శూన్య read_stdin_packs(నిర్మాణం repository *repo,
+			     గణన stdin_packs_బహుళకం బహుళకం, పూర్ణాంకం rev_list_unpacked)
 {
-	int prev_fetch_if_missing = repo->fetch_if_missing;
-	struct rev_info revs;
+	పూర్ణాంకం prev_fetch_if_missing = repo->fetch_if_missing;
+	నిర్మాణం rev_info revs;
 
 	/*
 	 * The revision walk may hit objects that are promised, only. As the
@@ -4097,7 +4097,7 @@ static void read_stdin_packs(struct repository *repo,
 	 */
 	repo->fetch_if_missing = 0;
 
-	repo_init_revisions(repo, &revs, NULL);
+	repo_init_revisions(repo, &revs, ఖాళీ);
 	/*
 	 * Use a revision walk to fill in the namehash of objects in the include
 	 * packs. To save time, we'll avoid traversing through objects that are
@@ -4108,69 +4108,69 @@ static void read_stdin_packs(struct repository *repo,
 	 * an optimization during delta selection.
 	 */
 	revs.no_kept_objects = 1;
-	revs.keep_pack_cache_flags |= KEPT_PACK_IN_CORE;
+	revs.keep_pack_cache_flags |= KEPT_PACK_లోపల_CORE;
 	revs.blob_objects = 1;
-	revs.tree_objects = 1;
-	revs.tag_objects = 1;
+	revs.వృక్షం_objects = 1;
+	revs.ట్యాగ్_objects = 1;
 	revs.ignore_missing_links = 1;
 	revs.exclude_promisor_objects = exclude_promisor_objects;
 
 	/* avoids adding objects in excluded packs */
-	ignore_packed_keep_in_core = 1;
-	if (mode == STDIN_PACKS_MODE_FOLLOW) {
+	ignore_packed_keep_లోపల_core = 1;
+	ఒకవేళ (బహుళకం == STDIN_PACKS_బహుళకం_FOLLOW) {
 		/*
 		 * In '--stdin-packs=follow' mode, additionally ignore
 		 * objects in excluded-open packs to prevent them from
 		 * appearing in the resulting pack.
 		 */
-		ignore_packed_keep_in_core_open = 1;
+		ignore_packed_keep_లోపల_core_open = 1;
 	}
-	stdin_packs_read_input(&revs, mode);
-	if (rev_list_unpacked)
-		add_unreachable_loose_objects(&revs);
+	stdin_packs_read_ఆదానం(&revs, బహుళకం);
+	ఒకవేళ (rev_list_unpacked)
+		కూడు_unreachable_loose_objects(&revs);
 
-	if (prepare_revision_walk(&revs))
+	ఒకవేళ (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
 	traverse_commit_list(&revs,
 			     show_commit_pack_hint,
 			     show_object_pack_hint,
-			     &mode);
+			     &బహుళకం);
 
 	release_revisions(&revs);
 
-	trace2_data_intmax("pack-objects", the_repository, "stdin_packs_found",
-			   stdin_packs_found_nr);
-	trace2_data_intmax("pack-objects", the_repository, "stdin_packs_hints",
+	trace2_దత్తాంశం_intmax("pack-objects", the_repository, "stdin_packs_found",
+			   stdin_packs_దొరికింది_nr);
+	trace2_దత్తాంశం_intmax("pack-objects", the_repository, "stdin_packs_hints",
 			   stdin_packs_hints_nr);
 
 	repo->fetch_if_missing = prev_fetch_if_missing;
 }
 
-static void add_cruft_object_entry(const struct object_id *oid, enum object_type type,
-				   struct packed_git *pack, off_t offset,
-				   const char *name, uint32_t mtime)
+స్థిర శూన్య కూడు_cruft_object_నమోదు(స్థిరరాశి నిర్మాణం object_id *oid, గణన object_type type,
+				   నిర్మాణం packed_git *pack, off_t స్థానభ్రంశం,
+				   స్థిరరాశి అక్షరం *name, uint32_t mtime)
 {
-	struct object_entry *entry;
+	నిర్మాణం object_నమోదు *నమోదు_2;
 
-	display_progress(progress_state, ++nr_seen);
+	display_పురోగతి(పురోగతి_state, ++nr_చూసిన);
 
-	entry = packlist_find(&to_pack, oid);
-	if (entry) {
-		if (name) {
-			entry->hash = pack_name_hash_fn(name);
-			entry->no_try_delta = no_try_delta(name);
+	నమోదు_2 = packlist_కనుగొను(&గమ్యం_pack, oid);
+	ఒకవేళ (నమోదు_2) {
+		ఒకవేళ (name) {
+			నమోదు_2->hash = pack_name_hash_fn(name);
+			నమోదు_2->no_try_delta = no_try_delta(name);
 		}
-	} else {
-		if (!want_object_in_pack_mtime(oid, 0, &pack, &offset, mtime))
-			return;
-		if (!pack && type == OBJ_BLOB) {
-			struct odb_source_files *files =
-				odb_source_files_downcast(the_repository->objects->source);
-			int found = 0;
+	} లేకపోతే {
+		ఒకవేళ (!want_object_లోపల_pack_mtime(oid, 0, &pack, &స్థానభ్రంశం, mtime))
+			తిరిగి;
+		ఒకవేళ (!pack && type == OBJ_BLOB) {
+			నిర్మాణం odb_ఆధారం_files *files =
+				odb_ఆధారం_files_downcast(the_repository->objects->ఆధారం);
+			పూర్ణాంకం దొరికింది_2 = 0;
 
-			for (struct odb_files_dir *dir = files->dirs; !found && dir; dir = dir->next)
-				if (!odb_source_read_object_info(&dir->loose->base, oid, NULL, 0, NULL))
-					found = 1;
+			కొరకు (నిర్మాణం odb_files_dir *dir = files->dirs; !దొరికింది_2 && dir; dir = dir->తదుపరి)
+				ఒకవేళ (!odb_ఆధారం_read_object_info(&dir->loose->పునాది, oid, ఖాళీ, 0, ఖాళీ))
+					దొరికింది_2 = 1;
 
 			/*
 			 * If a traversed tree has a missing blob then we want
@@ -4185,21 +4185,21 @@ static void add_cruft_object_entry(const struct object_id *oid, enum object_type
 			 * limited to "ensure non-tip blobs which don't exist in
 			 * packs do exist via loose objects". Confused?
 			 */
-			if (!found)
-				return;
+			ఒకవేళ (!దొరికింది_2)
+				తిరిగి;
 		}
 
-		entry = create_object_entry(oid, type, pack_name_hash_fn(name),
+		నమోదు_2 = create_object_నమోదు(oid, type, pack_name_hash_fn(name),
 					    0, name && no_try_delta(name),
-					    pack, offset);
+					    pack, స్థానభ్రంశం);
 	}
 
-	if (mtime > oe_cruft_mtime(&to_pack, entry))
-		oe_set_cruft_mtime(&to_pack, entry, mtime);
-	return;
+	ఒకవేళ (mtime > oe_cruft_mtime(&గమ్యం_pack, నమోదు_2))
+		oe_సమితి_cruft_mtime(&గమ్యం_pack, నమోదు_2, mtime);
+	తిరిగి;
 }
 
-static void show_cruft_object(struct object *obj, const char *name, void *data UNUSED)
+స్థిర శూన్య show_cruft_object(నిర్మాణం object *obj, స్థిరరాశి అక్షరం *name, శూన్య *దత్తాంశం వాడని)
 {
 	/*
 	 * if we did not record it earlier, it's at least as old as our
@@ -4211,69 +4211,69 @@ static void show_cruft_object(struct object *obj, const char *name, void *data U
 	 * if obj does appear in the packing list, this call is a noop (or may
 	 * set the namehash).
 	 */
-	add_cruft_object_entry(&obj->oid, obj->type, NULL, 0, name, cruft_expiration);
+	కూడు_cruft_object_నమోదు(&obj->oid, obj->type, ఖాళీ, 0, name, cruft_expiration);
 }
 
-static void show_cruft_commit(struct commit *commit, void *data)
+స్థిర శూన్య show_cruft_commit(నిర్మాణం commit *commit, శూన్య *దత్తాంశం)
 {
-	show_cruft_object((struct object*)commit, NULL, data);
+	show_cruft_object((నిర్మాణం object*)commit, ఖాళీ, దత్తాంశం);
 }
 
-static int cruft_include_check_obj(struct object *obj, void *data UNUSED)
+స్థిర పూర్ణాంకం cruft_include_check_obj(నిర్మాణం object *obj, శూన్య *దత్తాంశం వాడని)
 {
-	return !has_object_kept_pack(to_pack.repo, &obj->oid, KEPT_PACK_IN_CORE);
+	తిరిగి !has_object_kept_pack(గమ్యం_pack.repo, &obj->oid, KEPT_PACK_లోపల_CORE);
 }
 
-static int cruft_include_check(struct commit *commit, void *data)
+స్థిర పూర్ణాంకం cruft_include_check(నిర్మాణం commit *commit, శూన్య *దత్తాంశం)
 {
-	return cruft_include_check_obj((struct object*)commit, data);
+	తిరిగి cruft_include_check_obj((నిర్మాణం object*)commit, దత్తాంశం);
 }
 
-static void set_cruft_mtime(const struct object *object,
-			    struct packed_git *pack,
-			    off_t offset, time_t mtime)
+స్థిర శూన్య సమితి_cruft_mtime(స్థిరరాశి నిర్మాణం object *object,
+			    నిర్మాణం packed_git *pack,
+			    off_t స్థానభ్రంశం, సమయం_t mtime)
 {
-	add_cruft_object_entry(&object->oid, object->type, pack, offset, NULL,
+	కూడు_cruft_object_నమోదు(&object->oid, object->type, pack, స్థానభ్రంశం, ఖాళీ,
 			       mtime);
 }
 
-static void mark_pack_kept_in_core(struct string_list *packs, unsigned keep)
+స్థిర శూన్య mark_pack_kept_లోపల_core(నిర్మాణం string_list *packs, గుర్తులేని keep)
 {
-	struct string_list_item *item = NULL;
-	for_each_string_list_item(item, packs) {
-		struct packed_git *p = item->util;
-		if (!p)
-			die(_("could not find pack '%s'"), item->string);
-		if (p->is_cruft && keep)
-			ignore_packed_keep_in_core_has_cruft = 1;
-		p->pack_keep_in_core = keep;
+	నిర్మాణం string_list_అంశం *అంశం = ఖాళీ;
+	for_each_string_list_అంశం(అంశం, packs) {
+		నిర్మాణం packed_git *p = అంశం->util;
+		ఒకవేళ (!p)
+			die(_("could not find pack '%s'"), అంశం->string);
+		ఒకవేళ (p->is_cruft && keep)
+			ignore_packed_keep_లోపల_core_has_cruft = 1;
+		p->pack_keep_లోపల_core = keep;
 	}
 }
 
-static void add_objects_in_unpacked_packs(void);
+స్థిర శూన్య కూడు_objects_లోపల_unpacked_packs(శూన్య);
 
-static void enumerate_cruft_objects(void)
+స్థిర శూన్య enumerate_cruft_objects(శూన్య)
 {
-	if (progress)
-		progress_state = start_progress(the_repository,
+	ఒకవేళ (పురోగతి)
+		పురోగతి_state = ప్రారంభం_పురోగతి(the_repository,
 						_("Enumerating cruft objects"), 0);
 
-	add_objects_in_unpacked_packs();
-	add_unreachable_loose_objects(NULL);
+	కూడు_objects_లోపల_unpacked_packs();
+	కూడు_unreachable_loose_objects(ఖాళీ);
 
-	stop_progress(&progress_state);
+	stop_పురోగతి(&పురోగతి_state);
 }
 
-static void enumerate_and_traverse_cruft_objects(struct string_list *fresh_packs)
+స్థిర శూన్య enumerate_and_traverse_cruft_objects(నిర్మాణం string_list *fresh_packs)
 {
-	struct packed_git *p;
-	struct rev_info revs;
-	int ret;
+	నిర్మాణం packed_git *p;
+	నిర్మాణం rev_info revs;
+	పూర్ణాంకం ret;
 
-	repo_init_revisions(the_repository, &revs, NULL);
+	repo_init_revisions(the_repository, &revs, ఖాళీ);
 
-	revs.tag_objects = 1;
-	revs.tree_objects = 1;
+	revs.ట్యాగ్_objects = 1;
+	revs.వృక్షం_objects = 1;
 	revs.blob_objects = 1;
 
 	revs.include_check = cruft_include_check;
@@ -4281,14 +4281,14 @@ static void enumerate_and_traverse_cruft_objects(struct string_list *fresh_packs
 
 	revs.ignore_missing_links = 1;
 
-	if (progress)
-		progress_state = start_progress(the_repository,
+	ఒకవేళ (పురోగతి)
+		పురోగతి_state = ప్రారంభం_పురోగతి(the_repository,
 						_("Enumerating cruft objects"), 0);
-	ret = add_unseen_recent_objects_to_traversal(&revs, cruft_expiration,
-						     set_cruft_mtime, 1);
-	stop_progress(&progress_state);
+	ret = కూడు_unseen_recent_objects_గమ్యం_traversal(&revs, cruft_expiration,
+						     సమితి_cruft_mtime, 1);
+	stop_పురోగతి(&పురోగతి_state);
 
-	if (ret)
+	ఒకవేళ (ret)
 		die(_("unable to add cruft objects"));
 
 	/*
@@ -4296,54 +4296,54 @@ static void enumerate_and_traverse_cruft_objects(struct string_list *fresh_packs
 	 * unknown packs do not halt the reachability traversal early.
 	 */
 	repo_for_each_pack(the_repository, p)
-		p->pack_keep_in_core = 0;
-	mark_pack_kept_in_core(fresh_packs, 1);
+		p->pack_keep_లోపల_core = 0;
+	mark_pack_kept_లోపల_core(fresh_packs, 1);
 
-	if (prepare_revision_walk(&revs))
+	ఒకవేళ (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
-	if (progress)
-		progress_state = start_progress(the_repository,
+	ఒకవేళ (పురోగతి)
+		పురోగతి_state = ప్రారంభం_పురోగతి(the_repository,
 						_("Traversing cruft objects"), 0);
-	nr_seen = 0;
-	traverse_commit_list(&revs, show_cruft_commit, show_cruft_object, NULL);
+	nr_చూసిన = 0;
+	traverse_commit_list(&revs, show_cruft_commit, show_cruft_object, ఖాళీ);
 
-	stop_progress(&progress_state);
+	stop_పురోగతి(&పురోగతి_state);
 	release_revisions(&revs);
 }
 
-static void read_cruft_objects(void)
+స్థిర శూన్య read_cruft_objects(శూన్య)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct string_list discard_packs = STRING_LIST_INIT_DUP;
-	struct string_list fresh_packs = STRING_LIST_INIT_DUP;
-	struct packed_git *p;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
+	నిర్మాణం string_list discard_packs = STRING_LIST_INIT_DUP;
+	నిర్మాణం string_list fresh_packs = STRING_LIST_INIT_DUP;
+	నిర్మాణం packed_git *p;
 
-	ignore_packed_keep_in_core = 1;
+	ignore_packed_keep_లోపల_core = 1;
 
-	while (strbuf_getline(&buf, stdin) != EOF) {
-		if (!buf.len)
-			continue;
+	అయితే (strbuf_getline(&buf, stdin) != EOF) {
+		ఒకవేళ (!buf.len)
+			కొనసాగు;
 
-		if (*buf.buf == '-')
+		ఒకవేళ (*buf.buf == '-')
 			string_list_append(&discard_packs, buf.buf + 1);
-		else
+		లేకపోతే
 			string_list_append(&fresh_packs, buf.buf);
 	}
 
-	string_list_sort(&discard_packs);
-	string_list_sort(&fresh_packs);
+	string_list_క్రమీకరించు(&discard_packs);
+	string_list_క్రమీకరించు(&fresh_packs);
 
 	repo_for_each_pack(the_repository, p) {
-		const char *pack_name = pack_basename(p);
-		struct string_list_item *item;
+		స్థిరరాశి అక్షరం *pack_name = pack_basename(p);
+		నిర్మాణం string_list_అంశం *అంశం;
 
-		item = string_list_lookup(&fresh_packs, pack_name);
-		if (!item)
-			item = string_list_lookup(&discard_packs, pack_name);
+		అంశం = string_list_lookup(&fresh_packs, pack_name);
+		ఒకవేళ (!అంశం)
+			అంశం = string_list_lookup(&discard_packs, pack_name);
 
-		if (item) {
-			item->util = p;
-		} else {
+		ఒకవేళ (అంశం) {
+			అంశం->util = p;
+		} లేకపోతే {
 			/*
 			 * This pack wasn't mentioned in either the "fresh" or
 			 * "discard" list, so the caller didn't know about it.
@@ -4353,16 +4353,16 @@ static void read_cruft_objects(void)
 			 * unmark it before starting the traversal so it doesn't
 			 * halt the traversal early.
 			 */
-			p->pack_keep_in_core = 1;
+			p->pack_keep_లోపల_core = 1;
 		}
 	}
 
-	mark_pack_kept_in_core(&fresh_packs, 1);
-	mark_pack_kept_in_core(&discard_packs, 0);
+	mark_pack_kept_లోపల_core(&fresh_packs, 1);
+	mark_pack_kept_లోపల_core(&discard_packs, 0);
 
-	if (cruft_expiration)
+	ఒకవేళ (cruft_expiration)
 		enumerate_and_traverse_cruft_objects(&fresh_packs);
-	else
+	లేకపోతే
 		enumerate_cruft_objects();
 
 	strbuf_release(&buf);
@@ -4370,195 +4370,195 @@ static void read_cruft_objects(void)
 	string_list_clear(&fresh_packs, 0);
 }
 
-static void read_object_list_from_stdin(void)
+స్థిర శూన్య read_object_list_from_stdin(శూన్య)
 {
-	char line[GIT_MAX_HEXSZ + 1 + PATH_MAX + 2];
-	struct object_id oid;
-	const char *p;
+	అక్షరం పంక్తి[GIT_MAX_HEXSZ + 1 + మార్గం_MAX + 2];
+	నిర్మాణం object_id oid;
+	స్థిరరాశి అక్షరం *p;
 
-	for (;;) {
-		if (!fgets(line, sizeof(line), stdin)) {
-			if (feof(stdin))
-				break;
-			if (!ferror(stdin))
+	కొరకు (;;) {
+		ఒకవేళ (!fgets(పంక్తి, పరిమాణం(పంక్తి), stdin)) {
+			ఒకవేళ (feof(stdin))
+				ఆపు;
+			ఒకవేళ (!ferror(stdin))
 				BUG("fgets returned NULL, not EOF, not error!");
-			if (errno != EINTR)
+			ఒకవేళ (errno != EINTR)
 				die_errno("fgets");
 			clearerr(stdin);
-			continue;
+			కొనసాగు;
 		}
-		if (line[0] == '-') {
-			if (get_oid_hex(line+1, &oid))
+		ఒకవేళ (పంక్తి[0] == '-') {
+			ఒకవేళ (get_oid_hex(పంక్తి+1, &oid))
 				die(_("expected edge object ID, got garbage:\n %s"),
-				    line);
-			add_preferred_base(&oid);
-			continue;
+				    పంక్తి);
+			కూడు_preferred_పునాది(&oid);
+			కొనసాగు;
 		}
-		if (parse_oid_hex(line, &oid, &p))
-			die(_("expected object ID, got garbage:\n %s"), line);
+		ఒకవేళ (parse_oid_hex(పంక్తి, &oid, &p))
+			die(_("expected object ID, got garbage:\n %s"), పంక్తి);
 
-		add_preferred_base_object(p + 1);
-		add_object_entry(&oid, OBJ_NONE, p + 1, 0);
+		కూడు_preferred_పునాది_object(p + 1);
+		కూడు_object_నమోదు(&oid, OBJ_NONE, p + 1, 0);
 	}
 }
 
-static void show_commit(struct commit *commit, void *data UNUSED)
+స్థిర శూన్య show_commit(నిర్మాణం commit *commit, శూన్య *దత్తాంశం వాడని)
 {
-	add_object_entry(&commit->object.oid, OBJ_COMMIT, NULL, 0);
+	కూడు_object_నమోదు(&commit->object.oid, OBJ_COMMIT, ఖాళీ, 0);
 
-	if (write_bitmap_index)
-		index_commit_for_bitmap(commit);
+	ఒకవేళ (write_bitmap_సూచీ)
+		సూచీ_commit_for_bitmap(commit);
 
-	if (use_delta_islands)
+	ఒకవేళ (use_delta_islands)
 		propagate_island_marks(the_repository, commit);
 }
 
-static void show_object(struct object *obj, const char *name,
-			void *data UNUSED)
+స్థిర శూన్య show_object(నిర్మాణం object *obj, స్థిరరాశి అక్షరం *name,
+			శూన్య *దత్తాంశం వాడని)
 {
-	add_preferred_base_object(name);
-	add_object_entry(&obj->oid, obj->type, name, 0);
+	కూడు_preferred_పునాది_object(name);
+	కూడు_object_నమోదు(&obj->oid, obj->type, name, 0);
 
-	if (use_delta_islands)
-		record_tree_depth(&obj->oid, name);
+	ఒకవేళ (use_delta_islands)
+		రికార్డు_వృక్షం_లోతు(&obj->oid, name);
 }
 
-static void show_object__ma_allow_any(struct object *obj, const char *name, void *data)
+స్థిర శూన్య show_object__ma_allow_any(నిర్మాణం object *obj, స్థిరరాశి అక్షరం *name, శూన్య *దత్తాంశం)
 {
-	assert(arg_missing_action == MA_ALLOW_ANY);
+	ప్రతిజ్ఞా(arg_missing_action == MA_ALLOW_ANY);
 
 	/*
 	 * Quietly ignore ALL missing objects.  This avoids problems with
 	 * staging them now and getting an odd error later.
 	 */
-	if (!odb_has_object(the_repository->objects, &obj->oid, 0))
-		return;
+	ఒకవేళ (!odb_has_object(the_repository->objects, &obj->oid, 0))
+		తిరిగి;
 
-	show_object(obj, name, data);
+	show_object(obj, name, దత్తాంశం);
 }
 
-static void show_object__ma_allow_promisor(struct object *obj, const char *name, void *data)
+స్థిర శూన్య show_object__ma_allow_promisor(నిర్మాణం object *obj, స్థిరరాశి అక్షరం *name, శూన్య *దత్తాంశం)
 {
-	assert(arg_missing_action == MA_ALLOW_PROMISOR);
+	ప్రతిజ్ఞా(arg_missing_action == MA_ALLOW_PROMISOR);
 
 	/*
 	 * Quietly ignore EXPECTED missing objects.  This avoids problems with
 	 * staging them now and getting an odd error later.
 	 */
-	if (!odb_has_object(the_repository->objects, &obj->oid, 0) &&
-	    is_promisor_object(to_pack.repo, &obj->oid))
-		return;
+	ఒకవేళ (!odb_has_object(the_repository->objects, &obj->oid, 0) &&
+	    is_promisor_object(గమ్యం_pack.repo, &obj->oid))
+		తిరిగి;
 
-	show_object(obj, name, data);
+	show_object(obj, name, దత్తాంశం);
 }
 
-static int option_parse_missing_action(const struct option *opt,
-				       const char *arg, int unset)
+స్థిర పూర్ణాంకం option_parse_missing_action(స్థిరరాశి నిర్మాణం option *opt,
+				       స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	struct repository *repo = opt->value;
+	నిర్మాణం repository *repo = opt->విలువ;
 
-	assert(arg);
-	assert(!unset);
+	ప్రతిజ్ఞా(arg);
+	ప్రతిజ్ఞా(!unset);
 
-	if (!strcmp(arg, "error")) {
+	ఒకవేళ (!strcmp(arg, "error")) {
 		arg_missing_action = MA_ERROR;
 		fn_show_object = show_object;
-		return 0;
+		తిరిగి 0;
 	}
 
-	if (!strcmp(arg, "allow-any")) {
+	ఒకవేళ (!strcmp(arg, "allow-any")) {
 		arg_missing_action = MA_ALLOW_ANY;
 		repo->fetch_if_missing = 0;
 		fn_show_object = show_object__ma_allow_any;
-		return 0;
+		తిరిగి 0;
 	}
 
-	if (!strcmp(arg, "allow-promisor")) {
+	ఒకవేళ (!strcmp(arg, "allow-promisor")) {
 		arg_missing_action = MA_ALLOW_PROMISOR;
 		repo->fetch_if_missing = 0;
 		fn_show_object = show_object__ma_allow_promisor;
-		return 0;
+		తిరిగి 0;
 	}
 
 	die(_("invalid value for '%s': '%s'"), "--missing", arg);
-	return 0;
+	తిరిగి 0;
 }
 
-static void show_edge(struct commit *commit)
+స్థిర శూన్య show_అంచు(నిర్మాణం commit *commit)
 {
-	add_preferred_base(&commit->object.oid);
+	కూడు_preferred_పునాది(&commit->object.oid);
 }
 
-static int add_object_in_unpacked_pack(const struct object_id *oid,
-				       struct object_info *oi,
-				       void *data UNUSED)
+స్థిర పూర్ణాంకం కూడు_object_లోపల_unpacked_pack(స్థిరరాశి నిర్మాణం object_id *oid,
+				       నిర్మాణం object_info *oi,
+				       శూన్య *దత్తాంశం వాడని)
 {
-	if (cruft) {
-		add_cruft_object_entry(oid, OBJ_NONE, oi->source_infop->u.packed.pack,
-				       oi->source_infop->u.packed.offset, NULL,
+	ఒకవేళ (cruft) {
+		కూడు_cruft_object_నమోదు(oid, OBJ_NONE, oi->ఆధారం_infop->u.packed.pack,
+				       oi->ఆధారం_infop->u.packed.స్థానభ్రంశం, ఖాళీ,
 				       *oi->mtimep);
-	} else {
-		add_object_entry(oid, OBJ_NONE, "", 0);
+	} లేకపోతే {
+		కూడు_object_నమోదు(oid, OBJ_NONE, "", 0);
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static void add_objects_in_unpacked_packs(void)
+స్థిర శూన్య కూడు_objects_లోపల_unpacked_packs(శూన్య)
 {
-	struct odb_source_files *files =
-		odb_source_files_downcast(to_pack.repo->objects->source);
-	time_t mtime;
-	struct odb_for_each_object_options opts = {
-		.flags = ODB_FOR_EACH_OBJECT_PACK_ORDER |
+	నిర్మాణం odb_ఆధారం_files *files =
+		odb_ఆధారం_files_downcast(గమ్యం_pack.repo->objects->ఆధారం);
+	సమయం_t mtime;
+	నిర్మాణం odb_for_each_object_options opts = {
+		.flags = ODB_FOR_EACH_OBJECT_PACK_క్రమం |
 			 ODB_FOR_EACH_OBJECT_LOCAL_ONLY |
-			 ODB_FOR_EACH_OBJECT_SKIP_IN_CORE_KEPT_PACKS |
+			 ODB_FOR_EACH_OBJECT_SKIP_లోపల_CORE_KEPT_PACKS |
 			 ODB_FOR_EACH_OBJECT_SKIP_ON_DISK_KEPT_PACKS,
 	};
-	struct odb_source_info source_info;
-	struct object_info oi = {
+	నిర్మాణం odb_ఆధారం_info ఆధారం_info;
+	నిర్మాణం object_info oi = {
 		.mtimep = &mtime,
-		.source_infop = &source_info,
+		.ఆధారం_infop = &ఆధారం_info,
 	};
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-		if (!dir->local)
-			continue;
+	కొరకు (నిర్మాణం odb_files_dir *dir = files->dirs; dir; dir = dir->తదుపరి) {
+		ఒకవేళ (!dir->local)
+			కొనసాగు;
 
-		if (odb_source_for_each_object(&dir->packed->base, &oi,
-					       add_object_in_unpacked_pack, NULL, &opts))
+		ఒకవేళ (odb_ఆధారం_for_each_object(&dir->packed->పునాది, &oi,
+					       కూడు_object_లోపల_unpacked_pack, ఖాళీ, &opts))
 			die(_("cannot open pack index"));
 	}
 }
 
-static int add_loose_object(const struct object_id *oid, const char *path,
-			    void *data)
+స్థిర పూర్ణాంకం కూడు_loose_object(స్థిరరాశి నిర్మాణం object_id *oid, స్థిరరాశి అక్షరం *మార్గం,
+			    శూన్య *దత్తాంశం)
 {
-	struct rev_info *revs = data;
-	enum object_type type = odb_read_object_info(the_repository->objects, oid, NULL);
+	నిర్మాణం rev_info *revs = దత్తాంశం;
+	గణన object_type type = odb_read_object_info(the_repository->objects, oid, ఖాళీ);
 
-	if (type < 0) {
-		warning(_("loose object at %s could not be examined"), path);
-		return 0;
+	ఒకవేళ (type < 0) {
+		warning(_("loose object at %s could not be examined"), మార్గం);
+		తిరిగి 0;
 	}
 
-	if (cruft) {
-		struct stat st;
-		if (stat(path, &st) < 0) {
-			if (errno == ENOENT)
-				return 0;
-			return error_errno("unable to stat %s", oid_to_hex(oid));
+	ఒకవేళ (cruft) {
+		నిర్మాణం stat st;
+		ఒకవేళ (stat(మార్గం, &st) < 0) {
+			ఒకవేళ (errno == ENOENT)
+				తిరిగి 0;
+			తిరిగి error_errno("unable to stat %s", oid_గమ్యం_hex(oid));
 		}
 
-		add_cruft_object_entry(oid, type, NULL, 0, NULL,
+		కూడు_cruft_object_నమోదు(oid, type, ఖాళీ, 0, ఖాళీ,
 				       st.st_mtime);
-	} else {
-		add_object_entry(oid, type, "", 0);
+	} లేకపోతే {
+		కూడు_object_నమోదు(oid, type, "", 0);
 	}
 
-	if (revs && type == OBJ_COMMIT)
-		add_pending_oid(revs, NULL, oid, 0);
+	ఒకవేళ (revs && type == OBJ_COMMIT)
+		కూడు_pending_oid(revs, ఖాళీ, oid, 0);
 
-	return 0;
+	తిరిగి 0;
 }
 
 /*
@@ -4566,36 +4566,36 @@ static int add_loose_object(const struct object_id *oid, const char *path,
  * add_object_entry will weed out duplicates, so we just add every
  * loose object we find.
  */
-static void add_unreachable_loose_objects(struct rev_info *revs)
+స్థిర శూన్య కూడు_unreachable_loose_objects(నిర్మాణం rev_info *revs)
 {
-	for_each_loose_file_in_source(the_repository->objects->source,
-				      add_loose_object, NULL, NULL, revs);
+	for_each_loose_file_లోపల_ఆధారం(the_repository->objects->ఆధారం,
+				      కూడు_loose_object, ఖాళీ, ఖాళీ, revs);
 }
 
-static int has_sha1_pack_kept_or_nonlocal(const struct object_id *oid)
+స్థిర పూర్ణాంకం has_sha1_pack_kept_or_nonlocal(స్థిరరాశి నిర్మాణం object_id *oid)
 {
-	static struct packed_git *last_found = NULL;
-	struct packed_git *p;
+	స్థిర నిర్మాణం packed_git *చివరి_దొరికింది = ఖాళీ;
+	నిర్మాణం packed_git *p;
 
-	if (last_found && find_pack_entry_one(oid, last_found))
-		return 1;
+	ఒకవేళ (చివరి_దొరికింది && కనుగొను_pack_నమోదు_one(oid, చివరి_దొరికింది))
+		తిరిగి 1;
 
 	repo_for_each_pack(the_repository, p) {
 		/*
 		 * We have already checked `last_found`, so there is no need to
 		 * re-check here.
 		 */
-		if (p == last_found)
-			continue;
+		ఒకవేళ (p == చివరి_దొరికింది)
+			కొనసాగు;
 
-		if ((!p->pack_local || p->pack_keep || p->pack_keep_in_core) &&
-		    find_pack_entry_one(oid, p)) {
-			last_found = p;
-			return 1;
+		ఒకవేళ ((!p->pack_local || p->pack_keep || p->pack_keep_లోపల_core) &&
+		    కనుగొను_pack_నమోదు_one(oid, p)) {
+			చివరి_దొరికింది = p;
+			తిరిగి 1;
 		}
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
 /*
@@ -4605,83 +4605,83 @@ static int has_sha1_pack_kept_or_nonlocal(const struct object_id *oid)
  *
  * This is filled by get_object_list.
  */
-static struct oid_array recent_objects;
+స్థిర నిర్మాణం oid_array recent_objects;
 
-static int loosened_object_can_be_discarded(const struct object_id *oid,
+స్థిర పూర్ణాంకం loosened_object_can_be_discarded(స్థిరరాశి నిర్మాణం object_id *oid,
 					    timestamp_t mtime)
 {
-	if (!unpack_unreachable_expiration)
-		return 0;
-	if (mtime > unpack_unreachable_expiration)
-		return 0;
-	if (oid_array_lookup(&recent_objects, oid) >= 0)
-		return 0;
-	return 1;
+	ఒకవేళ (!unpack_unreachable_expiration)
+		తిరిగి 0;
+	ఒకవేళ (mtime > unpack_unreachable_expiration)
+		తిరిగి 0;
+	ఒకవేళ (oid_array_lookup(&recent_objects, oid) >= 0)
+		తిరిగి 0;
+	తిరిగి 1;
 }
 
-static int force_object_loose(struct odb_source *source,
-			      const struct object_id *oid,
-			      const time_t *mtime)
+స్థిర పూర్ణాంకం force_object_loose(నిర్మాణం odb_ఆధారం *ఆధారం,
+			      స్థిరరాశి నిర్మాణం object_id *oid,
+			      స్థిరరాశి సమయం_t *mtime)
 {
-	struct odb_source_files *files = odb_source_files_downcast(source);
-	const struct git_hash_algo *compat = source->odb->repo->compat_hash_algo;
-	struct object_info oi = OBJECT_INFO_INIT;
-	struct object_id compat_oid, *compat_oid_p = NULL;
-	enum object_type type;
-	void *buf = NULL;
-	size_t len;
-	int ret;
+	నిర్మాణం odb_ఆధారం_files *files = odb_ఆధారం_files_downcast(ఆధారం);
+	స్థిరరాశి నిర్మాణం git_hash_algo *compat = ఆధారం->odb->repo->compat_hash_algo;
+	నిర్మాణం object_info oi = OBJECT_INFO_INIT;
+	నిర్మాణం object_id compat_oid, *compat_oid_p = ఖాళీ;
+	గణన object_type type;
+	శూన్య *buf = ఖాళీ;
+	కొలత_t len;
+	పూర్ణాంకం ret;
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next)
-		if (!odb_source_read_object_info(&dir->loose->base, oid, NULL, 0, NULL))
-			return 0;
+	కొరకు (నిర్మాణం odb_files_dir *dir = files->dirs; dir; dir = dir->తదుపరి)
+		ఒకవేళ (!odb_ఆధారం_read_object_info(&dir->loose->పునాది, oid, ఖాళీ, 0, ఖాళీ))
+			తిరిగి 0;
 
 	oi.typep = &type;
 	oi.sizep = &len;
 	oi.contentp = &buf;
-	if (odb_read_object_info_extended(source->odb, oid, &oi, 0)) {
-		ret = error(_("cannot read object for %s"), oid_to_hex(oid));
-		goto out;
+	ఒకవేళ (odb_read_object_info_extended(ఆధారం->odb, oid, &oi, 0)) {
+		ret = error(_("cannot read object for %s"), oid_గమ్యం_hex(oid));
+		వెళ్ళు బహిర్గతం;
 	}
 
-	if (compat) {
-		if (repo_oid_to_algop(source->odb->repo, oid, compat, &compat_oid)) {
+	ఒకవేళ (compat) {
+		ఒకవేళ (repo_oid_గమ్యం_algop(ఆధారం->odb->repo, oid, compat, &compat_oid)) {
 			ret = error(_("cannot map object %s to %s"),
-				    oid_to_hex(oid), compat->name);
-			goto out;
+				    oid_గమ్యం_hex(oid), compat->name);
+			వెళ్ళు బహిర్గతం;
 		}
 
 		compat_oid_p = &compat_oid;
 	}
 
-	ret = odb_source_write_object(&files->dirs->loose->base, buf, len, type, oid,
+	ret = odb_ఆధారం_write_object(&files->dirs->loose->పునాది, buf, len, type, oid,
 				      compat_oid_p, mtime, 0);
 
-out:
-	free(buf);
-	return ret;
+బహిర్గతం:
+	విడుదల(buf);
+	తిరిగి ret;
 }
 
-static void loosen_unused_packed_objects(void)
+స్థిర శూన్య loosen_వాడని_packed_objects(శూన్య)
 {
-	struct packed_git *p;
+	నిర్మాణం packed_git *p;
 	uint32_t i;
 	uint32_t loosened_objects_nr = 0;
-	struct object_id oid;
+	నిర్మాణం object_id oid;
 
 	repo_for_each_pack(the_repository, p) {
-		if (!p->pack_local || p->pack_keep || p->pack_keep_in_core)
-			continue;
+		ఒకవేళ (!p->pack_local || p->pack_keep || p->pack_keep_లోపల_core)
+			కొనసాగు;
 
-		if (open_pack_index(p))
+		ఒకవేళ (open_pack_సూచీ(p))
 			die(_("cannot open pack index"));
 
-		for (i = 0; i < p->num_objects; i++) {
+		కొరకు (i = 0; i < p->అంకె_objects; i++) {
 			nth_packed_object_id(&oid, p, i);
-			if (!packlist_find(&to_pack, &oid) &&
+			ఒకవేళ (!packlist_కనుగొను(&గమ్యం_pack, &oid) &&
 			    !has_sha1_pack_kept_or_nonlocal(&oid) &&
 			    !loosened_object_can_be_discarded(&oid, p->mtime)) {
-				if (force_object_loose(the_repository->objects->source,
+				ఒకవేళ (force_object_loose(the_repository->objects->ఆధారం,
 						       &oid, &p->mtime))
 					die(_("unable to force loose object"));
 				loosened_objects_nr++;
@@ -4689,7 +4689,7 @@ static void loosen_unused_packed_objects(void)
 		}
 	}
 
-	trace2_data_intmax("pack-objects", the_repository,
+	trace2_దత్తాంశం_intmax("pack-objects", the_repository,
 			   "loosen_unused_packed_objects/loosened", loosened_objects_nr);
 }
 
@@ -4698,20 +4698,20 @@ static void loosen_unused_packed_objects(void)
  * reader of the pack might not understand, and which would therefore prevent
  * blind reuse of what we have on disk.
  */
-static int pack_options_allow_reuse(void)
+స్థిర పూర్ణాంకం pack_options_allow_reuse(శూన్య)
 {
-	return allow_pack_reuse != NO_PACK_REUSE &&
-	       pack_to_stdout &&
+	తిరిగి allow_pack_reuse != NO_PACK_REUSE &&
+	       pack_గమ్యం_stdout &&
 	       !ignore_packed_keep_on_disk &&
-	       !ignore_packed_keep_in_core &&
+	       !ignore_packed_keep_లోపల_core &&
 	       (!local || !have_non_local_packs) &&
 	       !incremental;
 }
 
-static int get_object_list_from_bitmap(struct rev_info *revs)
+స్థిర పూర్ణాంకం get_object_list_from_bitmap(నిర్మాణం rev_info *revs)
 {
-	if (!(bitmap_git = prepare_bitmap_walk(revs, 0)))
-		return -1;
+	ఒకవేళ (!(bitmap_git = prepare_bitmap_walk(revs, 0)))
+		తిరిగి -1;
 
 	/*
 	 * For now, force the name-hash version to be 1 since that
@@ -4720,108 +4720,108 @@ static int get_object_list_from_bitmap(struct rev_info *revs)
 	 * allowing readers to know the version that was used during
 	 * the bitmap write.
 	 */
-	name_hash_version = 1;
+	name_hash_సంస్కరణ = 1;
 
-	if (pack_options_allow_reuse())
+	ఒకవేళ (pack_options_allow_reuse())
 		reuse_partial_packfile_from_bitmap(bitmap_git,
 						   &reuse_packfiles,
 						   &reuse_packfiles_nr,
 						   &reuse_packfile_bitmap,
 						   allow_pack_reuse == MULTI_PACK_REUSE);
 
-	if (reuse_packfiles) {
+	ఒకవేళ (reuse_packfiles) {
 		reuse_packfile_objects = bitmap_popcount(reuse_packfile_bitmap);
-		if (!reuse_packfile_objects)
+		ఒకవేళ (!reuse_packfile_objects)
 			BUG("expected non-empty reuse bitmap");
 
-		nr_result += reuse_packfile_objects;
-		nr_seen += reuse_packfile_objects;
-		display_progress(progress_state, nr_seen);
+		nr_ఫలితం += reuse_packfile_objects;
+		nr_చూసిన += reuse_packfile_objects;
+		display_పురోగతి(పురోగతి_state, nr_చూసిన);
 	}
 
 	traverse_bitmap_commit_list(bitmap_git, revs,
-				    &add_object_entry_from_bitmap);
-	return 0;
+				    &కూడు_object_నమోదు_from_bitmap);
+	తిరిగి 0;
 }
 
-static void record_recent_object(struct object *obj,
-				 const char *name UNUSED,
-				 void *data UNUSED)
+స్థిర శూన్య రికార్డు_recent_object(నిర్మాణం object *obj,
+				 స్థిరరాశి అక్షరం *name వాడని,
+				 శూన్య *దత్తాంశం వాడని)
 {
 	oid_array_append(&recent_objects, &obj->oid);
 }
 
-static void record_recent_commit(struct commit *commit, void *data UNUSED)
+స్థిర శూన్య రికార్డు_recent_commit(నిర్మాణం commit *commit, శూన్య *దత్తాంశం వాడని)
 {
 	oid_array_append(&recent_objects, &commit->object.oid);
 }
 
-static int mark_bitmap_preferred_tip(const struct reference *ref, void *data UNUSED)
+స్థిర పూర్ణాంకం mark_bitmap_preferred_tip(స్థిరరాశి నిర్మాణం reference *ref, శూన్య *దత్తాంశం వాడని)
 {
-	const struct object_id *maybe_peeled = ref->oid;
-	struct object_id peeled;
-	struct object *object;
+	స్థిరరాశి నిర్మాణం object_id *maybe_peeled = ref->oid;
+	నిర్మాణం object_id peeled;
+	నిర్మాణం object *object;
 
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled))
+	ఒకవేళ (!reference_get_peeled_oid(the_repository, ref, &peeled))
 		maybe_peeled = &peeled;
 
 	object = parse_object_or_die(the_repository, maybe_peeled, ref->name);
-	if (object->type == OBJ_COMMIT)
+	ఒకవేళ (object->type == OBJ_COMMIT)
 		object->flags |= NEEDS_BITMAP;
 
-	return 0;
+	తిరిగి 0;
 }
 
-static inline int is_oid_uninteresting(struct repository *repo,
-				       struct object_id *oid)
+స్థిర అంతఃవరుస పూర్ణాంకం is_oid_uninteresting(నిర్మాణం repository *repo,
+				       నిర్మాణం object_id *oid)
 {
-	struct object *o = lookup_object(repo, oid);
-	return !o || (o->flags & UNINTERESTING);
+	నిర్మాణం object *o = lookup_object(repo, oid);
+	తిరిగి !o || (o->flags & UNINTERESTING);
 }
 
-static int add_objects_by_path(const char *path,
-			       struct oid_array *oids,
-			       enum object_type type,
-			       void *data)
+స్థిర పూర్ణాంకం కూడు_objects_by_మార్గం(స్థిరరాశి అక్షరం *మార్గం,
+			       నిర్మాణం oid_array *oids,
+			       గణన object_type type,
+			       శూన్య *దత్తాంశం)
 {
-	size_t oe_start = to_pack.nr_objects;
-	size_t oe_end;
-	unsigned int *processed = data;
+	కొలత_t oe_ప్రారంభం = గమ్యం_pack.nr_objects;
+	కొలత_t oe_చివర;
+	గుర్తులేని పూర్ణాంకం *processed = దత్తాంశం;
 
 	/*
 	 * First, add all objects to the packing data, including the ones
 	 * marked UNINTERESTING (translated to 'exclude') as they can be
 	 * used as delta bases.
 	 */
-	for (size_t i = 0; i < oids->nr; i++) {
-		int exclude;
-		struct object_info oi = OBJECT_INFO_INIT;
-		struct object_id *oid = &oids->oid[i];
+	కొరకు (కొలత_t i = 0; i < oids->nr; i++) {
+		పూర్ణాంకం exclude;
+		నిర్మాణం object_info oi = OBJECT_INFO_INIT;
+		నిర్మాణం object_id *oid = &oids->oid[i];
 
 		/* Skip objects that do not exist locally. */
-		if ((exclude_promisor_objects || arg_missing_action != MA_ERROR) &&
+		ఒకవేళ ((exclude_promisor_objects || arg_missing_action != MA_ERROR) &&
 		    odb_read_object_info_extended(the_repository->objects, oid, &oi,
 						  OBJECT_INFO_FOR_PREFETCH) < 0)
-			continue;
+			కొనసాగు;
 
 		exclude = is_oid_uninteresting(the_repository, oid);
 
-		if (exclude && !thin)
-			continue;
+		ఒకవేళ (exclude && !thin)
+			కొనసాగు;
 
-		add_object_entry(oid, type, path, exclude);
+		కూడు_object_నమోదు(oid, type, మార్గం, exclude);
 
-		if (type == OBJ_COMMIT) {
-			struct commit *commit;
+		ఒకవేళ (type == OBJ_COMMIT) {
+			నిర్మాణం commit *commit;
 
-			if (!write_bitmap_index && !use_delta_islands)
-				continue;
+			ఒకవేళ (!write_bitmap_సూచీ && !use_delta_islands)
+				కొనసాగు;
 
 			commit = lookup_commit(the_repository, oid);
-			if (!commit)
-				die(_("could not find commit %s"), oid_to_hex(oid));
-			if (write_bitmap_index)
-				index_commit_for_bitmap(commit);
+			ఒకవేళ (!commit)
+				die(_("could not find commit %s"), oid_గమ్యం_hex(oid));
+			ఒకవేళ (write_bitmap_సూచీ)
+				సూచీ_commit_for_bitmap(commit);
 			/*
 			 * Skip island propagation for boundary commits.
 			 * The regular traversal's show_commit() is only
@@ -4830,42 +4830,42 @@ static int add_objects_by_path(const char *path,
 			 * would only be a no-op anyway (boundary commits
 			 * are not in island_marks).
 			 */
-			if (use_delta_islands && !exclude)
+			ఒకవేళ (use_delta_islands && !exclude)
 				propagate_island_marks(the_repository, commit);
-		} else if (type == OBJ_TREE && use_delta_islands) {
-			record_tree_depth(oid, path);
+		} లేకపోతే ఒకవేళ (type == OBJ_వృక్షం && use_delta_islands) {
+			రికార్డు_వృక్షం_లోతు(oid, మార్గం);
 		}
 	}
 
-	oe_end = to_pack.nr_objects;
+	oe_చివర = గమ్యం_pack.nr_objects;
 
 	/* We can skip delta calculations if it is a no-op. */
-	if (oe_end == oe_start || !window)
-		return 0;
+	ఒకవేళ (oe_చివర == oe_ప్రారంభం || !కిటికీ)
+		తిరిగి 0;
 
-	ALLOC_GROW(to_pack.regions,
-		   to_pack.nr_regions + 1,
-		   to_pack.nr_regions_alloc);
+	ALLOC_GROW(గమ్యం_pack.regions,
+		   గమ్యం_pack.nr_regions + 1,
+		   గమ్యం_pack.nr_regions_alloc);
 
-	to_pack.regions[to_pack.nr_regions].start = oe_start;
-	to_pack.regions[to_pack.nr_regions].nr = oe_end - oe_start;
-	to_pack.nr_regions++;
+	గమ్యం_pack.regions[గమ్యం_pack.nr_regions].ప్రారంభం = oe_ప్రారంభం;
+	గమ్యం_pack.regions[గమ్యం_pack.nr_regions].nr = oe_చివర - oe_ప్రారంభం;
+	గమ్యం_pack.nr_regions++;
 
 	*processed += oids->nr;
-	display_progress(progress_state, *processed);
+	display_పురోగతి(పురోగతి_state, *processed);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int get_object_list_path_walk(struct rev_info *revs)
+స్థిర పూర్ణాంకం get_object_list_మార్గం_walk(నిర్మాణం rev_info *revs)
 {
-	struct path_walk_info info = PATH_WALK_INFO_INIT;
-	unsigned int processed = 0;
-	int result;
+	నిర్మాణం మార్గం_walk_info info = మార్గం_WALK_INFO_INIT;
+	గుర్తులేని పూర్ణాంకం processed = 0;
+	పూర్ణాంకం ఫలితం;
 
 	info.revs = revs;
-	info.path_fn = add_objects_by_path;
-	info.path_fn_data = &processed;
+	info.మార్గం_fn = కూడు_objects_by_మార్గం;
+	info.మార్గం_fn_దత్తాంశం = &processed;
 
 	/*
 	 * Path-walk needs boundary commits to discover thin-pack bases, but
@@ -4881,29 +4881,29 @@ static int get_object_list_path_walk(struct rev_info *revs)
 	 * base objects.
 	 */
 	info.prune_all_uninteresting = sparse;
-	info.edge_aggressive = shallow;
+	info.అంచు_aggressive = shallow;
 
 	trace2_region_enter("pack-objects", "path-walk", revs->repo);
-	result = walk_objects_by_path(&info);
+	ఫలితం = walk_objects_by_మార్గం(&info);
 	trace2_region_leave("pack-objects", "path-walk", revs->repo);
 
-	path_walk_info_clear(&info);
+	మార్గం_walk_info_clear(&info);
 
-	return result;
+	తిరిగి ఫలితం;
 }
 
-static void get_object_list(struct rev_info *revs, struct strvec *argv)
+స్థిర శూన్య get_object_list(నిర్మాణం rev_info *revs, నిర్మాణం strvec *argv)
 {
-	struct setup_revision_opt s_r_opt = {
+	నిర్మాణం అమరిక_revision_opt s_r_opt = {
 		.allow_exclude_promisor_objects = 1,
 	};
-	struct repo_config_values *cfg = repo_config_values(the_repository);
-	char line[1000];
-	int flags = 0;
-	int save_warning;
+	నిర్మాణం repo_config_విలువలు *cfg = repo_config_విలువలు(the_repository);
+	అక్షరం పంక్తి[1000];
+	పూర్ణాంకం flags = 0;
+	పూర్ణాంకం save_warning;
 
-	save_commit_buffer = 0;
-	setup_revisions_from_strvec(argv, revs, &s_r_opt);
+	save_commit_బఫరు = 0;
+	అమరిక_revisions_from_strvec(argv, revs, &s_r_opt);
 
 	/* make sure shallows are read */
 	is_repository_shallow(the_repository);
@@ -4911,246 +4911,246 @@ static void get_object_list(struct rev_info *revs, struct strvec *argv)
 	save_warning = cfg->warn_on_object_refname_ambiguity;
 	cfg->warn_on_object_refname_ambiguity = 0;
 
-	while (fgets(line, sizeof(line), stdin) != NULL) {
-		int len = strlen(line);
-		if (len && line[len - 1] == '\n')
-			line[--len] = 0;
-		if (!len)
-			break;
-		if (*line == '-') {
-			if (!strcmp(line, "--not")) {
+	అయితే (fgets(పంక్తి, పరిమాణం(పంక్తి), stdin) != ఖాళీ) {
+		పూర్ణాంకం len = అక్షరశ్రేణి_పొడవు(పంక్తి);
+		ఒకవేళ (len && పంక్తి[len - 1] == '\n')
+			పంక్తి[--len] = 0;
+		ఒకవేళ (!len)
+			ఆపు;
+		ఒకవేళ (*పంక్తి == '-') {
+			ఒకవేళ (!strcmp(పంక్తి, "--not")) {
 				flags ^= UNINTERESTING;
-				write_bitmap_index = 0;
-				continue;
+				write_bitmap_సూచీ = 0;
+				కొనసాగు;
 			}
-			if (starts_with(line, "--shallow ")) {
-				struct object_id oid;
-				if (get_oid_hex(line + 10, &oid))
-					die("not an object name '%s'", line + 10);
-				register_shallow(the_repository, &oid);
-				use_bitmap_index = 0;
-				continue;
+			ఒకవేళ (starts_with(పంక్తి, "--shallow ")) {
+				నిర్మాణం object_id oid;
+				ఒకవేళ (get_oid_hex(పంక్తి + 10, &oid))
+					die("not an object name '%s'", పంక్తి + 10);
+				రిజిస్టరు_shallow(the_repository, &oid);
+				use_bitmap_సూచీ = 0;
+				కొనసాగు;
 			}
-			die(_("not a rev '%s'"), line);
+			die(_("not a rev '%s'"), పంక్తి);
 		}
-		if (handle_revision_arg(line, revs, flags, REVARG_CANNOT_BE_FILENAME))
-			die(_("bad revision '%s'"), line);
+		ఒకవేళ (handle_revision_arg(పంక్తి, revs, flags, REVARG_CANNOT_BE_FILENAME))
+			die(_("bad revision '%s'"), పంక్తి);
 	}
 
 	cfg->warn_on_object_refname_ambiguity = save_warning;
 
-	if (use_bitmap_index && !get_object_list_from_bitmap(revs))
-		return;
+	ఒకవేళ (use_bitmap_సూచీ && !get_object_list_from_bitmap(revs))
+		తిరిగి;
 
-	if (use_delta_islands)
-		load_delta_islands(the_repository, progress);
+	ఒకవేళ (use_delta_islands)
+		ఎక్కించు_delta_islands(the_repository, పురోగతి);
 
-	if (write_bitmap_index)
+	ఒకవేళ (write_bitmap_సూచీ)
 		for_each_preferred_bitmap_tip(the_repository, mark_bitmap_preferred_tip,
-					      NULL);
+					      ఖాళీ);
 
-	if (!fn_show_object)
+	ఒకవేళ (!fn_show_object)
 		fn_show_object = show_object;
 
-	if (path_walk) {
-		if (get_object_list_path_walk(revs)) {
+	ఒకవేళ (మార్గం_walk) {
+		ఒకవేళ (get_object_list_మార్గం_walk(revs)) {
 			warning(_("failed to pack objects via path-walk"));
-			path_walk = 0;
+			మార్గం_walk = 0;
 		}
 	}
 
-	if (!path_walk) {
-		if (prepare_revision_walk(revs))
+	ఒకవేళ (!మార్గం_walk) {
+		ఒకవేళ (prepare_revision_walk(revs))
 			die(_("revision walk setup failed"));
-		mark_edges_uninteresting(revs, show_edge, sparse);
+		mark_అంచులు_uninteresting(revs, show_అంచు, sparse);
 		traverse_commit_list(revs,
 				show_commit, fn_show_object,
-				NULL);
+				ఖాళీ);
 	}
 
-	if (unpack_unreachable_expiration) {
+	ఒకవేళ (unpack_unreachable_expiration) {
 		revs->ignore_missing_links = 1;
-		if (add_unseen_recent_objects_to_traversal(revs,
-				unpack_unreachable_expiration, NULL, 0))
+		ఒకవేళ (కూడు_unseen_recent_objects_గమ్యం_traversal(revs,
+				unpack_unreachable_expiration, ఖాళీ, 0))
 			die(_("unable to add recent objects"));
-		if (prepare_revision_walk(revs))
+		ఒకవేళ (prepare_revision_walk(revs))
 			die(_("revision walk setup failed"));
-		traverse_commit_list(revs, record_recent_commit,
-				     record_recent_object, NULL);
+		traverse_commit_list(revs, రికార్డు_recent_commit,
+				     రికార్డు_recent_object, ఖాళీ);
 	}
 
-	if (keep_unreachable)
-		add_objects_in_unpacked_packs();
-	if (pack_loose_unreachable)
-		add_unreachable_loose_objects(NULL);
-	if (unpack_unreachable)
-		loosen_unused_packed_objects();
+	ఒకవేళ (keep_unreachable)
+		కూడు_objects_లోపల_unpacked_packs();
+	ఒకవేళ (pack_loose_unreachable)
+		కూడు_unreachable_loose_objects(ఖాళీ);
+	ఒకవేళ (unpack_unreachable)
+		loosen_వాడని_packed_objects();
 
 	oid_array_clear(&recent_objects);
 }
 
-static void add_extra_kept_packs(const struct string_list *names)
+స్థిర శూన్య కూడు_extra_kept_packs(స్థిరరాశి నిర్మాణం string_list *పేర్లు)
 {
-	struct packed_git *p;
+	నిర్మాణం packed_git *p;
 
-	if (!names->nr)
-		return;
+	ఒకవేళ (!పేర్లు->nr)
+		తిరిగి;
 
 	repo_for_each_pack(the_repository, p) {
-		const char *name = basename(p->pack_name);
-		int i;
+		స్థిరరాశి అక్షరం *name = basename(p->pack_name);
+		పూర్ణాంకం i;
 
-		if (!p->pack_local)
-			continue;
+		ఒకవేళ (!p->pack_local)
+			కొనసాగు;
 
-		for (i = 0; i < names->nr; i++)
-			if (!fspathcmp(name, names->items[i].string))
-				break;
+		కొరకు (i = 0; i < పేర్లు->nr; i++)
+			ఒకవేళ (!fspathcmp(name, పేర్లు->వస్తువులు[i].string))
+				ఆపు;
 
-		if (i < names->nr) {
-			p->pack_keep_in_core = 1;
-			ignore_packed_keep_in_core = 1;
-			continue;
+		ఒకవేళ (i < పేర్లు->nr) {
+			p->pack_keep_లోపల_core = 1;
+			ignore_packed_keep_లోపల_core = 1;
+			కొనసాగు;
 		}
 	}
 }
 
-static int option_parse_quiet(const struct option *opt, const char *arg,
-			      int unset)
+స్థిర పూర్ణాంకం option_parse_quiet(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg,
+			      పూర్ణాంకం unset)
 {
-	int *val = opt->value;
+	పూర్ణాంకం *val = opt->విలువ;
 
 	BUG_ON_OPT_ARG(arg);
 
-	if (!unset)
+	ఒకవేళ (!unset)
 		*val = 0;
-	else if (!*val)
+	లేకపోతే ఒకవేళ (!*val)
 		*val = 1;
-	return 0;
+	తిరిగి 0;
 }
 
-static int option_parse_index_version(const struct option *opt,
-				      const char *arg, int unset)
+స్థిర పూర్ణాంకం option_parse_సూచీ_సంస్కరణ(స్థిరరాశి నిర్మాణం option *opt,
+				      స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	struct pack_idx_option *popts = opt->value;
-	char *c;
-	const char *val = arg;
+	నిర్మాణం pack_idx_option *popts = opt->విలువ;
+	అక్షరం *c;
+	స్థిరరాశి అక్షరం *val = arg;
 
 	BUG_ON_OPT_NEG(unset);
 
-	popts->version = strtoul(val, &c, 10);
-	if (popts->version > 2)
+	popts->సంస్కరణ = strtoul(val, &c, 10);
+	ఒకవేళ (popts->సంస్కరణ > 2)
 		die(_("unsupported index version %s"), val);
-	if (*c == ',' && c[1])
-		popts->off32_limit = strtoul(c+1, &c, 0);
-	if (*c || popts->off32_limit & 0x80000000)
+	ఒకవేళ (*c == ',' && c[1])
+		popts->off32_హద్దు = strtoul(c+1, &c, 0);
+	ఒకవేళ (*c || popts->off32_హద్దు & 0x80000000)
 		die(_("bad index version '%s'"), val);
-	return 0;
+	తిరిగి 0;
 }
 
-static int option_parse_unpack_unreachable(const struct option *opt UNUSED,
-					   const char *arg, int unset)
+స్థిర పూర్ణాంకం option_parse_unpack_unreachable(స్థిరరాశి నిర్మాణం option *opt వాడని,
+					   స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	if (unset) {
+	ఒకవేళ (unset) {
 		unpack_unreachable = 0;
 		unpack_unreachable_expiration = 0;
 	}
-	else {
+	లేకపోతే {
 		unpack_unreachable = 1;
-		if (arg)
+		ఒకవేళ (arg)
 			unpack_unreachable_expiration = approxidate(arg);
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static int option_parse_cruft_expiration(const struct option *opt UNUSED,
-					 const char *arg, int unset)
+స్థిర పూర్ణాంకం option_parse_cruft_expiration(స్థిరరాశి నిర్మాణం option *opt వాడని,
+					 స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	if (unset) {
+	ఒకవేళ (unset) {
 		cruft = 0;
 		cruft_expiration = 0;
-	} else {
+	} లేకపోతే {
 		cruft = 1;
-		if (arg)
+		ఒకవేళ (arg)
 			cruft_expiration = approxidate(arg);
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static int is_not_in_promisor_pack_obj(struct object *obj, void *data UNUSED)
+స్థిర పూర్ణాంకం is_not_లోపల_promisor_pack_obj(నిర్మాణం object *obj, శూన్య *దత్తాంశం వాడని)
 {
-	struct odb_source_info source_info;
-	struct object_info info = {
-		.source_infop = &source_info,
+	నిర్మాణం odb_ఆధారం_info ఆధారం_info;
+	నిర్మాణం object_info info = {
+		.ఆధారం_infop = &ఆధారం_info,
 	};
 
-	if (odb_read_object_info_extended(the_repository->objects, &obj->oid, &info, 0))
+	ఒకవేళ (odb_read_object_info_extended(the_repository->objects, &obj->oid, &info, 0))
 		BUG("should_include_obj should only be called on existing objects");
-	return source_info.source->type != ODB_SOURCE_PACKED || !source_info.u.packed.pack->pack_promisor;
+	తిరిగి ఆధారం_info.ఆధారం->type != ODB_ఆధారం_PACKED || !ఆధారం_info.u.packed.pack->pack_promisor;
 }
 
-static int is_not_in_promisor_pack(struct commit *commit, void *data) {
-	return is_not_in_promisor_pack_obj((struct object *) commit, data);
+స్థిర పూర్ణాంకం is_not_లోపల_promisor_pack(నిర్మాణం commit *commit, శూన్య *దత్తాంశం) {
+	తిరిగి is_not_లోపల_promisor_pack_obj((నిర్మాణం object *) commit, దత్తాంశం);
 }
 
-static int parse_stdin_packs_mode(const struct option *opt, const char *arg,
-				  int unset)
+స్థిర పూర్ణాంకం parse_stdin_packs_బహుళకం(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg,
+				  పూర్ణాంకం unset)
 {
-	enum stdin_packs_mode *mode = opt->value;
+	గణన stdin_packs_బహుళకం *బహుళకం = opt->విలువ;
 
-	if (unset)
-		*mode = STDIN_PACKS_MODE_NONE;
-	else if (!arg || !*arg)
-		*mode = STDIN_PACKS_MODE_STANDARD;
-	else if (!strcmp(arg, "follow"))
-		*mode = STDIN_PACKS_MODE_FOLLOW;
-	else
+	ఒకవేళ (unset)
+		*బహుళకం = STDIN_PACKS_బహుళకం_NONE;
+	లేకపోతే ఒకవేళ (!arg || !*arg)
+		*బహుళకం = STDIN_PACKS_బహుళకం_STANDARD;
+	లేకపోతే ఒకవేళ (!strcmp(arg, "follow"))
+		*బహుళకం = STDIN_PACKS_బహుళకం_FOLLOW;
+	లేకపోతే
 		die(_("invalid value for '%s': '%s'"), opt->long_name, arg);
 
-	return 0;
+	తిరిగి 0;
 }
 
-int cmd_pack_objects(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo)
+పూర్ణాంకం cmd_pack_objects(పూర్ణాంకం argc,
+		     స్థిరరాశి అక్షరం **argv,
+		     స్థిరరాశి అక్షరం *ఉపసర్గ,
+		     నిర్మాణం repository *repo)
 {
-	int use_internal_rev_list = 0;
-	int all_progress_implied = 0;
-	struct strvec rp = STRVEC_INIT;
-	int rev_list_unpacked = 0, rev_list_all = 0, rev_list_reflog = 0;
-	int rev_list_index = 0;
-	enum stdin_packs_mode stdin_packs = STDIN_PACKS_MODE_NONE;
-	struct string_list keep_pack_list = STRING_LIST_INIT_NODUP;
-	struct list_objects_filter_options filter_options =
+	పూర్ణాంకం use_అంతర్గత_rev_list = 0;
+	పూర్ణాంకం all_పురోగతి_implied = 0;
+	నిర్మాణం strvec rp = STRVEC_INIT;
+	పూర్ణాంకం rev_list_unpacked = 0, rev_list_all = 0, rev_list_reflog = 0;
+	పూర్ణాంకం rev_list_సూచీ = 0;
+	గణన stdin_packs_బహుళకం stdin_packs = STDIN_PACKS_బహుళకం_NONE;
+	నిర్మాణం string_list keep_pack_list = STRING_LIST_INIT_NODUP;
+	నిర్మాణం list_objects_filter_options filter_options =
 		LIST_OBJECTS_FILTER_INIT;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	నిర్మాణం repo_config_విలువలు *cfg = repo_config_విలువలు(the_repository);
 
-	struct option pack_objects_options[] = {
-		OPT_CALLBACK_F('q', "quiet", &progress, NULL,
+	నిర్మాణం option pack_objects_options[] = {
+		OPT_CALLBACK_F('q', "quiet", &పురోగతి, ఖాళీ,
 			       N_("do not show progress meter"),
 			       PARSE_OPT_NOARG, option_parse_quiet),
-		OPT_SET_INT(0, "progress", &progress,
+		OPT_సమితి_INT(0, "progress", &పురోగతి,
 			    N_("show progress meter"), 1),
-		OPT_SET_INT(0, "all-progress", &progress,
+		OPT_సమితి_INT(0, "all-progress", &పురోగతి,
 			    N_("show progress meter during object writing phase"), 2),
 		OPT_BOOL(0, "all-progress-implied",
-			 &all_progress_implied,
+			 &all_పురోగతి_implied,
 			 N_("similar to --all-progress when progress meter is shown")),
 		OPT_CALLBACK_F(0, "index-version", &pack_idx_opts, N_("<version>[,<offset>]"),
 		  N_("write the pack index file in the specified idx format version"),
-		  PARSE_OPT_NONEG, option_parse_index_version),
-		OPT_UNSIGNED(0, "max-pack-size", &pack_size_limit,
+		  PARSE_OPT_NONEG, option_parse_సూచీ_సంస్కరణ),
+		OPT_UNSIGNED(0, "max-pack-size", &pack_కొలత_హద్దు,
 			     N_("maximum size of each output pack file")),
 		OPT_BOOL(0, "local", &local,
 			 N_("ignore borrowed objects from alternate object store")),
 		OPT_BOOL(0, "incremental", &incremental,
 			 N_("ignore packed objects")),
-		OPT_INTEGER(0, "window", &window,
+		OPT_INTEGER(0, "window", &కిటికీ,
 			    N_("limit pack window by objects")),
-		OPT_UNSIGNED(0, "window-memory", &window_memory_limit,
+		OPT_UNSIGNED(0, "window-memory", &కిటికీ_జ్ఞాపకం_హద్దు,
 			     N_("limit pack window by memory in addition to object limit")),
-		OPT_INTEGER(0, "depth", &depth,
+		OPT_INTEGER(0, "depth", &లోతు,
 			    N_("maximum length of delta chain allowed in the resulting pack")),
 		OPT_BOOL(0, "reuse-delta", &reuse_delta,
 			 N_("reuse existing deltas")),
@@ -5158,47 +5158,47 @@ int cmd_pack_objects(int argc,
 			 N_("reuse existing objects")),
 		OPT_BOOL(0, "delta-base-offset", &allow_ofs_delta,
 			 N_("use OFS_DELTA objects")),
-		OPT_INTEGER(0, "threads", &delta_search_threads,
+		OPT_INTEGER(0, "threads", &delta_శోధన_దారాలు,
 			    N_("use threads when searching for best delta matches")),
-		OPT_BOOL(0, "non-empty", &non_empty,
+		OPT_BOOL(0, "non-empty", &non_ఖాళీలు,
 			 N_("do not create an empty pack output")),
-		OPT_BOOL(0, "revs", &use_internal_rev_list,
+		OPT_BOOL(0, "revs", &use_అంతర్గత_rev_list,
 			 N_("read revision arguments from standard input")),
-		OPT_SET_INT_F(0, "unpacked", &rev_list_unpacked,
+		OPT_సమితి_INT_F(0, "unpacked", &rev_list_unpacked,
 			      N_("limit the objects to those that are not yet packed"),
 			      1, PARSE_OPT_NONEG),
-		OPT_SET_INT_F(0, "all", &rev_list_all,
+		OPT_సమితి_INT_F(0, "all", &rev_list_all,
 			      N_("include objects reachable from any reference"),
 			      1, PARSE_OPT_NONEG),
-		OPT_SET_INT_F(0, "reflog", &rev_list_reflog,
+		OPT_సమితి_INT_F(0, "reflog", &rev_list_reflog,
 			      N_("include objects referred by reflog entries"),
 			      1, PARSE_OPT_NONEG),
-		OPT_SET_INT_F(0, "indexed-objects", &rev_list_index,
+		OPT_సమితి_INT_F(0, "indexed-objects", &rev_list_సూచీ,
 			      N_("include objects referred to by the index"),
 			      1, PARSE_OPT_NONEG),
 		OPT_CALLBACK_F(0, "stdin-packs", &stdin_packs, N_("mode"),
 			     N_("read packs from stdin"),
-			     PARSE_OPT_OPTARG, parse_stdin_packs_mode),
-		OPT_BOOL(0, "stdout", &pack_to_stdout,
+			     PARSE_OPT_OPTARG, parse_stdin_packs_బహుళకం),
+		OPT_BOOL(0, "stdout", &pack_గమ్యం_stdout,
 			 N_("output pack to stdout")),
-		OPT_BOOL(0, "include-tag", &include_tag,
+		OPT_BOOL(0, "include-tag", &include_ట్యాగ్,
 			 N_("include tag objects that refer to objects to be packed")),
 		OPT_BOOL(0, "keep-unreachable", &keep_unreachable,
 			 N_("keep unreachable objects")),
 		OPT_BOOL(0, "pack-loose-unreachable", &pack_loose_unreachable,
 			 N_("pack loose unreachable objects")),
-		OPT_CALLBACK_F(0, "unpack-unreachable", NULL, N_("time"),
+		OPT_CALLBACK_F(0, "unpack-unreachable", ఖాళీ, N_("time"),
 		  N_("unpack unreachable objects newer than <time>"),
 		  PARSE_OPT_OPTARG, option_parse_unpack_unreachable),
 		OPT_BOOL(0, "cruft", &cruft, N_("create a cruft pack")),
-		OPT_CALLBACK_F(0, "cruft-expiration", NULL, N_("time"),
+		OPT_CALLBACK_F(0, "cruft-expiration", ఖాళీ, N_("time"),
 		  N_("expire cruft objects older than <time>"),
 		  PARSE_OPT_OPTARG, option_parse_cruft_expiration),
 		OPT_BOOL(0, "sparse", &sparse,
 			 N_("use the sparse reachability algorithm")),
 		OPT_BOOL(0, "thin", &thin,
 			 N_("create thin packs")),
-		OPT_BOOL(0, "path-walk", &path_walk,
+		OPT_BOOL(0, "path-walk", &మార్గం_walk,
 			 N_("use the path-walk API to walk objects when possible")),
 		OPT_BOOL(0, "shallow", &shallow,
 			 N_("create packs suitable for shallow fetches")),
@@ -5210,13 +5210,13 @@ int cmd_pack_objects(int argc,
 			    N_("pack compression level")),
 		OPT_BOOL(0, "keep-true-parents", &grafts_keep_true_parents,
 			 N_("do not hide commits by grafts")),
-		OPT_BOOL(0, "use-bitmap-index", &use_bitmap_index,
+		OPT_BOOL(0, "use-bitmap-index", &use_bitmap_సూచీ,
 			 N_("use a bitmap index if available to speed up counting objects")),
-		OPT_SET_INT(0, "write-bitmap-index", &write_bitmap_index,
+		OPT_సమితి_INT(0, "write-bitmap-index", &write_bitmap_సూచీ,
 			    N_("write a bitmap index together with the pack index"),
 			    WRITE_BITMAP_TRUE),
-		OPT_SET_INT_F(0, "write-bitmap-index-quiet",
-			      &write_bitmap_index,
+		OPT_సమితి_INT_F(0, "write-bitmap-index-quiet",
+			      &write_bitmap_సూచీ,
 			      N_("write a bitmap index if possible"),
 			      WRITE_BITMAP_QUIET, PARSE_OPT_HIDDEN),
 		OPT_PARSE_LIST_OBJECTS_FILTER(&filter_options),
@@ -5226,175 +5226,175 @@ int cmd_pack_objects(int argc,
 		OPT_BOOL(0, "exclude-promisor-objects", &exclude_promisor_objects,
 			 N_("do not pack objects in promisor packfiles")),
 		OPT_BOOL(0, "exclude-promisor-objects-best-effort",
-			 &exclude_promisor_objects_best_effort,
+			 &exclude_promisor_objects_ఉత్తమ_effort,
 			 N_("implies --missing=allow-any")),
 		OPT_BOOL(0, "delta-islands", &use_delta_islands,
 			 N_("respect islands during delta compression")),
 		OPT_STRING_LIST(0, "uri-protocol", &uri_protocols,
 				N_("protocol"),
 				N_("exclude any configured uploadpack.blobpackfileuri with this protocol")),
-		OPT_INTEGER(0, "name-hash-version", &name_hash_version,
+		OPT_INTEGER(0, "name-hash-version", &name_hash_సంస్కరణ,
 			 N_("use the specified name-hash function to group similar objects")),
-		OPT_END(),
+		OPT_చివర(),
 	};
 
-	if (DFS_NUM_STATES > (1 << OE_DFS_STATE_BITS))
+	ఒకవేళ (DFS_అంకె_స్థితులు > (1 << OE_DFS_STATE_బిట్లు))
 		BUG("too many dfs states, increase OE_DFS_STATE_BITS");
 
 	disable_replace_refs();
 
 	sparse = git_env_bool("GIT_TEST_PACK_SPARSE", -1);
-	if (the_repository->gitdir) {
+	ఒకవేళ (the_repository->gitdir) {
 		prepare_repo_settings(the_repository);
-		if (sparse < 0)
+		ఒకవేళ (sparse < 0)
 			sparse = the_repository->settings.pack_use_sparse;
-		if (the_repository->settings.pack_use_multi_pack_reuse)
+		ఒకవేళ (the_repository->settings.pack_use_multi_pack_reuse)
 			allow_pack_reuse = MULTI_PACK_REUSE;
 	}
 
 	reset_pack_idx_option(&pack_idx_opts);
 	pack_idx_opts.flags |= WRITE_REV;
-	repo_config(the_repository, git_pack_config, NULL);
-	if (git_env_bool(GIT_TEST_NO_WRITE_REV_INDEX, 0))
+	repo_config(the_repository, git_pack_config, ఖాళీ);
+	ఒకవేళ (git_env_bool(GIT_TEST_NO_WRITE_REV_సూచీ, 0))
 		pack_idx_opts.flags &= ~WRITE_REV;
 
-	progress = isatty(2);
-	argc = parse_options(argc, argv, prefix, pack_objects_options,
+	పురోగతి = isatty(2);
+	argc = parse_options(argc, argv, ఉపసర్గ, pack_objects_options,
 			     pack_usage, 0);
 
-	if (argc) {
-		base_name = argv[0];
+	ఒకవేళ (argc) {
+		పునాది_name = argv[0];
 		argc--;
 	}
-	if (pack_to_stdout != !base_name || argc)
+	ఒకవేళ (pack_గమ్యం_stdout != !పునాది_name || argc)
 		usage_with_options(pack_usage, pack_objects_options);
 
-	if (path_walk < 0) {
-		if (use_bitmap_index > 0 ||
-		    !use_internal_rev_list)
-			path_walk = 0;
-		else if (the_repository->gitdir &&
-			 the_repository->settings.pack_use_path_walk)
-			path_walk = 1;
-		else
-			path_walk = git_env_bool("GIT_TEST_PACK_PATH_WALK", 0);
+	ఒకవేళ (మార్గం_walk < 0) {
+		ఒకవేళ (use_bitmap_సూచీ > 0 ||
+		    !use_అంతర్గత_rev_list)
+			మార్గం_walk = 0;
+		లేకపోతే ఒకవేళ (the_repository->gitdir &&
+			 the_repository->settings.pack_use_మార్గం_walk)
+			మార్గం_walk = 1;
+		లేకపోతే
+			మార్గం_walk = git_env_bool("GIT_TEST_PACK_PATH_WALK", 0);
 	}
 
-	if (depth < 0)
-		depth = 0;
-	if (depth >= (1 << OE_DEPTH_BITS)) {
+	ఒకవేళ (లోతు < 0)
+		లోతు = 0;
+	ఒకవేళ (లోతు >= (1 << OE_లోతు_బిట్లు)) {
 		warning(_("delta chain depth %d is too deep, forcing %d"),
-			depth, (1 << OE_DEPTH_BITS) - 1);
-		depth = (1 << OE_DEPTH_BITS) - 1;
+			లోతు, (1 << OE_లోతు_బిట్లు) - 1);
+		లోతు = (1 << OE_లోతు_బిట్లు) - 1;
 	}
-	if (cache_max_small_delta_size >= (1U << OE_Z_DELTA_BITS)) {
+	ఒకవేళ (cache_max_small_delta_కొలత >= (1U << OE_Z_DELTA_బిట్లు)) {
 		warning(_("pack.deltaCacheLimit is too high, forcing %d"),
-			(1U << OE_Z_DELTA_BITS) - 1);
-		cache_max_small_delta_size = (1U << OE_Z_DELTA_BITS) - 1;
+			(1U << OE_Z_DELTA_బిట్లు) - 1);
+		cache_max_small_delta_కొలత = (1U << OE_Z_DELTA_బిట్లు) - 1;
 	}
-	if (window < 0)
-		window = 0;
+	ఒకవేళ (కిటికీ < 0)
+		కిటికీ = 0;
 
-	strvec_push(&rp, "pack-objects");
+	strvec_నెట్టు(&rp, "pack-objects");
 
-	if (path_walk) {
-		const char *option = NULL;
-		if (!path_walk_filter_compatible(&filter_options))
+	ఒకవేళ (మార్గం_walk) {
+		స్థిరరాశి అక్షరం *option = ఖాళీ;
+		ఒకవేళ (!మార్గం_walk_filter_compatible(&filter_options))
 			option = "--filter";
 
-		if (option) {
+		ఒకవేళ (option) {
 			warning(_("cannot use %s with %s"),
 				option, "--path-walk");
-			path_walk = 0;
+			మార్గం_walk = 0;
 		}
 	}
-	if (path_walk) {
-		strvec_push(&rp, "--objects");
-	} else if (thin) {
-		use_internal_rev_list = 1;
-		strvec_push(&rp, shallow
+	ఒకవేళ (మార్గం_walk) {
+		strvec_నెట్టు(&rp, "--objects");
+	} లేకపోతే ఒకవేళ (thin) {
+		use_అంతర్గత_rev_list = 1;
+		strvec_నెట్టు(&rp, shallow
 				? "--objects-edge-aggressive"
 				: "--objects-edge");
-	} else
-		strvec_push(&rp, "--objects");
+	} లేకపోతే
+		strvec_నెట్టు(&rp, "--objects");
 
-	if (rev_list_all) {
-		use_internal_rev_list = 1;
-		strvec_push(&rp, "--all");
+	ఒకవేళ (rev_list_all) {
+		use_అంతర్గత_rev_list = 1;
+		strvec_నెట్టు(&rp, "--all");
 	}
-	if (rev_list_reflog) {
-		use_internal_rev_list = 1;
-		strvec_push(&rp, "--reflog");
+	ఒకవేళ (rev_list_reflog) {
+		use_అంతర్గత_rev_list = 1;
+		strvec_నెట్టు(&rp, "--reflog");
 	}
-	if (rev_list_index) {
-		use_internal_rev_list = 1;
-		strvec_push(&rp, "--indexed-objects");
+	ఒకవేళ (rev_list_సూచీ) {
+		use_అంతర్గత_rev_list = 1;
+		strvec_నెట్టు(&rp, "--indexed-objects");
 	}
-	if (rev_list_unpacked && !stdin_packs) {
-		use_internal_rev_list = 1;
-		strvec_push(&rp, "--unpacked");
+	ఒకవేళ (rev_list_unpacked && !stdin_packs) {
+		use_అంతర్గత_rev_list = 1;
+		strvec_నెట్టు(&rp, "--unpacked");
 	}
 
 	die_for_incompatible_opt2(exclude_promisor_objects,
 				  "--exclude-promisor-objects",
-				  exclude_promisor_objects_best_effort,
+				  exclude_promisor_objects_ఉత్తమ_effort,
 				  "--exclude-promisor-objects-best-effort");
-	if (exclude_promisor_objects) {
+	ఒకవేళ (exclude_promisor_objects) {
 		repo->fetch_if_missing = 0;
 
 		/* --stdin-packs handles promisor objects separately. */
-		if (!stdin_packs) {
-			use_internal_rev_list = 1;
-			strvec_push(&rp, "--exclude-promisor-objects");
+		ఒకవేళ (!stdin_packs) {
+			use_అంతర్గత_rev_list = 1;
+			strvec_నెట్టు(&rp, "--exclude-promisor-objects");
 		}
-	} else if (exclude_promisor_objects_best_effort) {
-		use_internal_rev_list = 1;
+	} లేకపోతే ఒకవేళ (exclude_promisor_objects_ఉత్తమ_effort) {
+		use_అంతర్గత_rev_list = 1;
 		arg_missing_action = MA_ALLOW_ANY;
 		repo->fetch_if_missing = 0;
 		fn_show_object = show_object__ma_allow_any;
 		/* revs configured below */
 	}
-	if (unpack_unreachable || keep_unreachable || pack_loose_unreachable)
-		use_internal_rev_list = 1;
+	ఒకవేళ (unpack_unreachable || keep_unreachable || pack_loose_unreachable)
+		use_అంతర్గత_rev_list = 1;
 
-	if (!reuse_object)
+	ఒకవేళ (!reuse_object)
 		reuse_delta = 0;
-	if (cfg->pack_compression_level == -1)
+	ఒకవేళ (cfg->pack_compression_level == -1)
 		cfg->pack_compression_level = Z_DEFAULT_COMPRESSION;
-	else if (cfg->pack_compression_level < 0 || cfg->pack_compression_level > Z_BEST_COMPRESSION)
+	లేకపోతే ఒకవేళ (cfg->pack_compression_level < 0 || cfg->pack_compression_level > Z_ఉత్తమ_COMPRESSION)
 		die(_("bad pack compression level %d"), cfg->pack_compression_level);
 
-	if (!delta_search_threads)	/* --threads=0 means autodetect */
-		delta_search_threads = online_cpus();
+	ఒకవేళ (!delta_శోధన_దారాలు)	/* --threads=0 means autodetect */
+		delta_శోధన_దారాలు = online_cpus();
 
-	if (!HAVE_THREADS && delta_search_threads != 1)
+	ఒకవేళ (!HAVE_దారాలు && delta_శోధన_దారాలు != 1)
 		warning(_("no threads support, ignoring --threads"));
-	if (!pack_to_stdout && !pack_size_limit)
-		pack_size_limit = pack_size_limit_cfg;
-	if (pack_to_stdout && pack_size_limit)
+	ఒకవేళ (!pack_గమ్యం_stdout && !pack_కొలత_హద్దు)
+		pack_కొలత_హద్దు = pack_కొలత_హద్దు_cfg;
+	ఒకవేళ (pack_గమ్యం_stdout && pack_కొలత_హద్దు)
 		die(_("--max-pack-size cannot be used to build a pack for transfer"));
-	if (pack_size_limit && pack_size_limit < 1024*1024) {
+	ఒకవేళ (pack_కొలత_హద్దు && pack_కొలత_హద్దు < 1024*1024) {
 		warning(_("minimum pack size limit is 1 MiB"));
-		pack_size_limit = 1024*1024;
+		pack_కొలత_హద్దు = 1024*1024;
 	}
 
-	if (!pack_to_stdout && thin)
+	ఒకవేళ (!pack_గమ్యం_stdout && thin)
 		die(_("--thin cannot be used to build an indexable pack"));
 
 	die_for_incompatible_opt2(keep_unreachable, "--keep-unreachable",
 				  unpack_unreachable, "--unpack-unreachable");
-	if (!rev_list_all || !rev_list_reflog || !rev_list_index)
+	ఒకవేళ (!rev_list_all || !rev_list_reflog || !rev_list_సూచీ)
 		unpack_unreachable_expiration = 0;
 
 	die_for_incompatible_opt2(stdin_packs, "--stdin-packs",
 				  filter_options.choice, "--filter");
 
 
-	if (stdin_packs && use_internal_rev_list)
+	ఒకవేళ (stdin_packs && use_అంతర్గత_rev_list)
 		die(_("cannot use internal rev list with --stdin-packs"));
 
-	if (cruft) {
-		if (use_internal_rev_list)
+	ఒకవేళ (cruft) {
+		ఒకవేళ (use_అంతర్గత_rev_list)
 			die(_("cannot use internal rev list with --cruft"));
 		die_for_incompatible_opt2(stdin_packs, "--stdin-packs",
 					  cruft, "--cruft");
@@ -5409,95 +5409,95 @@ int cmd_pack_objects(int argc,
 	 * - to use more robust pack-generation codepath (avoiding possible
 	 *   bugs in bitmap code and possible bitmap index corruption).
 	 */
-	if (!pack_to_stdout)
-		use_bitmap_index_default = 0;
+	ఒకవేళ (!pack_గమ్యం_stdout)
+		use_bitmap_సూచీ_default = 0;
 
-	if (use_bitmap_index < 0)
-		use_bitmap_index = use_bitmap_index_default;
+	ఒకవేళ (use_bitmap_సూచీ < 0)
+		use_bitmap_సూచీ = use_bitmap_సూచీ_default;
 
 	/* "hard" reasons not to use bitmaps; these just won't work at all */
-	if (!use_internal_rev_list || (!pack_to_stdout && write_bitmap_index) || is_repository_shallow(the_repository))
-		use_bitmap_index = 0;
+	ఒకవేళ (!use_అంతర్గత_rev_list || (!pack_గమ్యం_stdout && write_bitmap_సూచీ) || is_repository_shallow(the_repository))
+		use_bitmap_సూచీ = 0;
 
-	if (pack_to_stdout || !rev_list_all)
-		write_bitmap_index = 0;
+	ఒకవేళ (pack_గమ్యం_stdout || !rev_list_all)
+		write_bitmap_సూచీ = 0;
 
-	if (name_hash_version < 0)
-		name_hash_version = (int)git_env_ulong("GIT_TEST_NAME_HASH_VERSION", 1);
+	ఒకవేళ (name_hash_సంస్కరణ < 0)
+		name_hash_సంస్కరణ = (పూర్ణాంకం)git_env_ulong("GIT_TEST_NAME_HASH_VERSION", 1);
 
-	validate_name_hash_version();
+	validate_name_hash_సంస్కరణ();
 
-	if (use_delta_islands)
-		strvec_push(&rp, "--topo-order");
+	ఒకవేళ (use_delta_islands)
+		strvec_నెట్టు(&rp, "--topo-order");
 
-	if (progress && all_progress_implied)
-		progress = 2;
+	ఒకవేళ (పురోగతి && all_పురోగతి_implied)
+		పురోగతి = 2;
 
-	add_extra_kept_packs(&keep_pack_list);
-	if (ignore_packed_keep_on_disk) {
-		struct packed_git *p;
+	కూడు_extra_kept_packs(&keep_pack_list);
+	ఒకవేళ (ignore_packed_keep_on_disk) {
+		నిర్మాణం packed_git *p;
 
 		repo_for_each_pack(the_repository, p)
-			if (p->pack_local && p->pack_keep)
-				break;
-		if (!p) /* no keep-able packs found */
+			ఒకవేళ (p->pack_local && p->pack_keep)
+				ఆపు;
+		ఒకవేళ (!p) /* no keep-able packs found */
 			ignore_packed_keep_on_disk = 0;
 	}
-	if (local) {
+	ఒకవేళ (local) {
 		/*
 		 * unlike ignore_packed_keep_on_disk above, we do not
 		 * want to unset "local" based on looking at packs, as
 		 * it also covers non-local objects
 		 */
-		struct packed_git *p;
+		నిర్మాణం packed_git *p;
 
 		repo_for_each_pack(the_repository, p) {
-			if (!p->pack_local) {
+			ఒకవేళ (!p->pack_local) {
 				have_non_local_packs = 1;
-				break;
+				ఆపు;
 			}
 		}
 	}
 
 	trace2_region_enter("pack-objects", "enumerate-objects",
 			    the_repository);
-	prepare_packing_data(the_repository, &to_pack);
+	prepare_packing_దత్తాంశం(the_repository, &గమ్యం_pack);
 
-	if (progress && !cruft)
-		progress_state = start_progress(the_repository,
+	ఒకవేళ (పురోగతి && !cruft)
+		పురోగతి_state = ప్రారంభం_పురోగతి(the_repository,
 						_("Enumerating objects"), 0);
-	if (stdin_packs) {
+	ఒకవేళ (stdin_packs) {
 		read_stdin_packs(repo, stdin_packs, rev_list_unpacked);
-	} else if (cruft) {
+	} లేకపోతే ఒకవేళ (cruft) {
 		read_cruft_objects();
-	} else if (!use_internal_rev_list) {
+	} లేకపోతే ఒకవేళ (!use_అంతర్గత_rev_list) {
 		read_object_list_from_stdin();
-	} else {
-		struct rev_info revs;
+	} లేకపోతే {
+		నిర్మాణం rev_info revs;
 
-		repo_init_revisions(the_repository, &revs, NULL);
+		repo_init_revisions(the_repository, &revs, ఖాళీ);
 		list_objects_filter_copy(&revs.filter, &filter_options);
-		if (exclude_promisor_objects_best_effort) {
-			revs.include_check = is_not_in_promisor_pack;
-			revs.include_check_obj = is_not_in_promisor_pack_obj;
+		ఒకవేళ (exclude_promisor_objects_ఉత్తమ_effort) {
+			revs.include_check = is_not_లోపల_promisor_pack;
+			revs.include_check_obj = is_not_లోపల_promisor_pack_obj;
 		}
 		get_object_list(&revs, &rp);
 		release_revisions(&revs);
 	}
-	cleanup_preferred_base();
-	if (include_tag && nr_result)
-		refs_for_each_tag_ref(get_main_ref_store(the_repository),
-				      add_ref_tag, NULL);
-	stop_progress(&progress_state);
+	cleanup_preferred_పునాది();
+	ఒకవేళ (include_ట్యాగ్ && nr_ఫలితం)
+		refs_for_each_ట్యాగ్_ref(get_main_ref_store(the_repository),
+				      కూడు_ref_ట్యాగ్, ఖాళీ);
+	stop_పురోగతి(&పురోగతి_state);
 	trace2_region_leave("pack-objects", "enumerate-objects",
 			    the_repository);
 
-	if (non_empty && !nr_result)
-		goto cleanup;
-	if (nr_result) {
+	ఒకవేళ (non_ఖాళీలు && !nr_ఫలితం)
+		వెళ్ళు cleanup;
+	ఒకవేళ (nr_ఫలితం) {
 		trace2_region_enter("pack-objects", "prepare-pack",
 				    the_repository);
-		prepare_pack(window, depth);
+		prepare_pack(కిటికీ, లోతు);
 		trace2_region_leave("pack-objects", "prepare-pack",
 				    the_repository);
 	}
@@ -5507,27 +5507,27 @@ int cmd_pack_objects(int argc,
 	write_pack_file();
 	trace2_region_leave("pack-objects", "write-pack-file", the_repository);
 
-	if (progress)
+	ఒకవేళ (పురోగతి)
 		fprintf_ln(stderr,
 			   _("Total %"PRIu32" (delta %"PRIu32"),"
 			     " reused %"PRIu32" (delta %"PRIu32"),"
 			     " pack-reused %"PRIu32" (from %"PRIuMAX")"),
 			   written, written_delta, reused, reused_delta,
 			   reuse_packfile_objects,
-			   (uintmax_t)reuse_packfiles_used_nr);
+			   (uintmax_t)reuse_packfiles_వాడిన_nr);
 
-	trace2_data_intmax("pack-objects", the_repository, "written", written);
-	trace2_data_intmax("pack-objects", the_repository, "written/delta", written_delta);
-	trace2_data_intmax("pack-objects", the_repository, "reused", reused);
-	trace2_data_intmax("pack-objects", the_repository, "reused/delta", reused_delta);
-	trace2_data_intmax("pack-objects", the_repository, "pack-reused", reuse_packfile_objects);
-	trace2_data_intmax("pack-objects", the_repository, "packs-reused", reuse_packfiles_used_nr);
+	trace2_దత్తాంశం_intmax("pack-objects", the_repository, "written", written);
+	trace2_దత్తాంశం_intmax("pack-objects", the_repository, "written/delta", written_delta);
+	trace2_దత్తాంశం_intmax("pack-objects", the_repository, "reused", reused);
+	trace2_దత్తాంశం_intmax("pack-objects", the_repository, "reused/delta", reused_delta);
+	trace2_దత్తాంశం_intmax("pack-objects", the_repository, "pack-reused", reuse_packfile_objects);
+	trace2_దత్తాంశం_intmax("pack-objects", the_repository, "packs-reused", reuse_packfiles_వాడిన_nr);
 
 cleanup:
-	clear_packing_data(&to_pack);
+	clear_packing_దత్తాంశం(&గమ్యం_pack);
 	list_objects_filter_release(&filter_options);
 	string_list_clear(&keep_pack_list, 0);
 	strvec_clear(&rp);
 
-	return 0;
+	తిరిగి 0;
 }

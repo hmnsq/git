@@ -1,155 +1,155 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "refs.h"
-#include "stash.h"
-#include "lockfile.h"
-#include "cache-tree.h"
-#include "unpack-trees.h"
-#include "merge-ort-wrappers.h"
-#include "strvec.h"
-#include "run-command.h"
-#include "dir.h"
-#include "entry.h"
-#include "preload-index.h"
-#include "read-cache.h"
-#include "repository.h"
-#include "rerere.h"
-#include "revision.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "log-tree.h"
-#include "diffcore.h"
-#include "reflog.h"
-#include "reflog-walk.h"
-#include "add-interactive.h"
-#include "commit.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "abspath.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hash.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "refs.h"
+#అన్తర్భావ "stash.h"
+#అన్తర్భావ "lockfile.h"
+#అన్తర్భావ "cache-tree.h"
+#అన్తర్భావ "unpack-trees.h"
+#అన్తర్భావ "merge-ort-wrappers.h"
+#అన్తర్భావ "strvec.h"
+#అన్తర్భావ "run-command.h"
+#అన్తర్భావ "dir.h"
+#అన్తర్భావ "entry.h"
+#అన్తర్భావ "preload-index.h"
+#అన్తర్భావ "read-cache.h"
+#అన్తర్భావ "repository.h"
+#అన్తర్భావ "rerere.h"
+#అన్తర్భావ "revision.h"
+#అన్తర్భావ "setup.h"
+#అన్తర్భావ "sparse-index.h"
+#అన్తర్భావ "log-tree.h"
+#అన్తర్భావ "diffcore.h"
+#అన్తర్భావ "reflog.h"
+#అన్తర్భావ "reflog-walk.h"
+#అన్తర్భావ "add-interactive.h"
+#అన్తర్భావ "commit.h"
 
-#define INCLUDE_ALL_FILES 2
+#నిర్వచించు INCLUDE_ALL_FILES 2
 
-#define BUILTIN_STASH_LIST_USAGE \
+#నిర్వచించు BUILTIN_STASH_LIST_USAGE \
 	N_("git stash list [<log-options>]")
-#define BUILTIN_STASH_SHOW_USAGE \
+#నిర్వచించు BUILTIN_STASH_SHOW_USAGE \
 	N_("git stash show [-u | --include-untracked | --only-untracked] [<diff-options>] [<stash>]")
-#define BUILTIN_STASH_DROP_USAGE \
+#నిర్వచించు BUILTIN_STASH_DROP_USAGE \
 	N_("git stash drop [-q | --quiet] [<stash>]")
-#define BUILTIN_STASH_POP_USAGE \
+#నిర్వచించు BUILTIN_STASH_తీయి_USAGE \
 	N_("git stash pop [--index] [-q | --quiet] [<stash>]")
-#define BUILTIN_STASH_APPLY_USAGE \
+#నిర్వచించు BUILTIN_STASH_APPLY_USAGE \
 	N_("git stash apply [--index] [-q | --quiet] [--label-ours=<label>] [--label-theirs=<label>] [--label-base=<label>] [<stash>]")
-#define BUILTIN_STASH_BRANCH_USAGE \
+#నిర్వచించు BUILTIN_STASH_BRANCH_USAGE \
 	N_("git stash branch <branchname> [<stash>]")
-#define BUILTIN_STASH_STORE_USAGE \
+#నిర్వచించు BUILTIN_STASH_STORE_USAGE \
 	N_("git stash store [(-m | --message) <message>] [-q | --quiet] <commit>")
-#define BUILTIN_STASH_PUSH_USAGE \
+#నిర్వచించు BUILTIN_STASH_నెట్టు_USAGE \
 	N_("git stash [push] [-p | --patch] [-S | --staged] [-k | --[no-]keep-index] [-q | --quiet]\n" \
 	   "          [-u | --include-untracked] [-a | --all] [(-m | --message) <message>]\n" \
 	   "          [--pathspec-from-file=<file> [--pathspec-file-nul]]\n" \
 	   "          [--] [<pathspec>...]")
-#define BUILTIN_STASH_SAVE_USAGE \
+#నిర్వచించు BUILTIN_STASH_SAVE_USAGE \
 	N_("git stash save [-p | --patch] [-S | --staged] [-k | --[no-]keep-index] [-q | --quiet]\n" \
 	   "          [-u | --include-untracked] [-a | --all] [<message>]")
-#define BUILTIN_STASH_CREATE_USAGE \
+#నిర్వచించు BUILTIN_STASH_CREATE_USAGE \
 	N_("git stash create [<message>]")
-#define BUILTIN_STASH_EXPORT_USAGE \
+#నిర్వచించు BUILTIN_STASH_EXPORT_USAGE \
 	N_("git stash export (--print | --to-ref <ref>) [<stash>...]")
-#define BUILTIN_STASH_IMPORT_USAGE \
+#నిర్వచించు BUILTIN_STASH_IMPORT_USAGE \
 	N_("git stash import <commit>")
-#define BUILTIN_STASH_CLEAR_USAGE \
+#నిర్వచించు BUILTIN_STASH_CLEAR_USAGE \
 	"git stash clear"
 
-static const char * const git_stash_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_stash_usage[] = {
 	BUILTIN_STASH_LIST_USAGE,
 	BUILTIN_STASH_SHOW_USAGE,
 	BUILTIN_STASH_DROP_USAGE,
-	BUILTIN_STASH_POP_USAGE,
+	BUILTIN_STASH_తీయి_USAGE,
 	BUILTIN_STASH_APPLY_USAGE,
 	BUILTIN_STASH_BRANCH_USAGE,
-	BUILTIN_STASH_PUSH_USAGE,
+	BUILTIN_STASH_నెట్టు_USAGE,
 	BUILTIN_STASH_SAVE_USAGE,
 	BUILTIN_STASH_CLEAR_USAGE,
 	BUILTIN_STASH_CREATE_USAGE,
 	BUILTIN_STASH_STORE_USAGE,
 	BUILTIN_STASH_EXPORT_USAGE,
 	BUILTIN_STASH_IMPORT_USAGE,
-	NULL
+	ఖాళీ
 };
 
-static const char * const git_stash_list_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_stash_list_usage[] = {
 	BUILTIN_STASH_LIST_USAGE,
-	NULL
+	ఖాళీ
 };
 
-static const char * const git_stash_show_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_stash_show_usage[] = {
 	BUILTIN_STASH_SHOW_USAGE,
-	NULL
+	ఖాళీ
 };
 
-static const char * const git_stash_drop_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_stash_drop_usage[] = {
 	BUILTIN_STASH_DROP_USAGE,
-	NULL
+	ఖాళీ
 };
 
-static const char * const git_stash_pop_usage[] = {
-	BUILTIN_STASH_POP_USAGE,
-	NULL
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_stash_తీయి_usage[] = {
+	BUILTIN_STASH_తీయి_USAGE,
+	ఖాళీ
 };
 
-static const char * const git_stash_apply_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_stash_apply_usage[] = {
 	BUILTIN_STASH_APPLY_USAGE,
-	NULL
+	ఖాళీ
 };
 
-static const char * const git_stash_branch_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_stash_branch_usage[] = {
 	BUILTIN_STASH_BRANCH_USAGE,
-	NULL
+	ఖాళీ
 };
 
-static const char * const git_stash_clear_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_stash_clear_usage[] = {
 	BUILTIN_STASH_CLEAR_USAGE,
-	NULL
+	ఖాళీ
 };
 
-static const char * const git_stash_store_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_stash_store_usage[] = {
 	BUILTIN_STASH_STORE_USAGE,
-	NULL
+	ఖాళీ
 };
 
-static const char * const git_stash_push_usage[] = {
-	BUILTIN_STASH_PUSH_USAGE,
-	NULL
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_stash_నెట్టు_usage[] = {
+	BUILTIN_STASH_నెట్టు_USAGE,
+	ఖాళీ
 };
 
-static const char * const git_stash_save_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_stash_save_usage[] = {
 	BUILTIN_STASH_SAVE_USAGE,
-	NULL
+	ఖాళీ
 };
 
-static const char * const git_stash_export_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_stash_export_usage[] = {
 	BUILTIN_STASH_EXPORT_USAGE,
-	NULL
+	ఖాళీ
 };
 
-static const char * const git_stash_import_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_stash_import_usage[] = {
 	BUILTIN_STASH_IMPORT_USAGE,
-	NULL
+	ఖాళీ
 };
 
-static const char ref_stash[] = "refs/stash";
-static struct strbuf stash_index_path = STRBUF_INIT;
+స్థిర స్థిరరాశి అక్షరం ref_stash[] = "refs/stash";
+స్థిర నిర్మాణం strbuf stash_సూచీ_మార్గం = STRBUF_INIT;
 
-static int show_stat = 1;
-static int show_patch;
-static int show_include_untracked;
-static int use_index;
+స్థిర పూర్ణాంకం show_stat = 1;
+స్థిర పూర్ణాంకం show_patch;
+స్థిర పూర్ణాంకం show_include_untracked;
+స్థిర పూర్ణాంకం use_సూచీ;
 
 /*
  * w_commit is set to the commit containing the working tree
@@ -162,298 +162,298 @@ static int use_index;
  * i_tree is set to the index tree
  * u_tree is set to the untracked files tree
  */
-struct stash_info {
-	struct object_id w_commit;
-	struct object_id b_commit;
-	struct object_id i_commit;
-	struct object_id u_commit;
-	struct object_id c_commit;
-	struct object_id w_tree;
-	struct object_id b_tree;
-	struct object_id i_tree;
-	struct object_id u_tree;
-	struct strbuf revision;
-	int is_stash_ref;
-	int has_u;
+నిర్మాణం stash_info {
+	నిర్మాణం object_id w_commit;
+	నిర్మాణం object_id b_commit;
+	నిర్మాణం object_id i_commit;
+	నిర్మాణం object_id u_commit;
+	నిర్మాణం object_id c_commit;
+	నిర్మాణం object_id w_వృక్షం;
+	నిర్మాణం object_id b_వృక్షం;
+	నిర్మాణం object_id i_వృక్షం;
+	నిర్మాణం object_id u_వృక్షం;
+	నిర్మాణం strbuf revision;
+	పూర్ణాంకం is_stash_ref;
+	పూర్ణాంకం has_u;
 };
 
-#define STASH_INFO_INIT { \
+#నిర్వచించు STASH_INFO_INIT { \
 	.revision = STRBUF_INIT, \
 }
 
-static void free_stash_info(struct stash_info *info)
+స్థిర శూన్య free_stash_info(నిర్మాణం stash_info *info)
 {
 	strbuf_release(&info->revision);
 }
 
-static int check_stash_topology(struct repository *r, struct commit *stash)
+స్థిర పూర్ణాంకం check_stash_topology(నిర్మాణం repository *r, నిర్మాణం commit *stash)
 {
-	struct commit *p1, *p2, *p3 = NULL;
+	నిర్మాణం commit *p1, *p2, *p3 = ఖాళీ;
 
 	/* stash must have two or three parents */
-	if (!stash->parents || !stash->parents->next ||
-			(stash->parents->next->next && stash->parents->next->next->next))
-		return -1;
-	p1 = stash->parents->item;
-	p2 = stash->parents->next->item;
-	if (stash->parents->next->next)
-		p3 = stash->parents->next->next->item;
-	if (repo_parse_commit(r, p1) || repo_parse_commit(r, p2) ||
+	ఒకవేళ (!stash->parents || !stash->parents->తదుపరి ||
+			(stash->parents->తదుపరి->తదుపరి && stash->parents->తదుపరి->తదుపరి->తదుపరి))
+		తిరిగి -1;
+	p1 = stash->parents->అంశం;
+	p2 = stash->parents->తదుపరి->అంశం;
+	ఒకవేళ (stash->parents->తదుపరి->తదుపరి)
+		p3 = stash->parents->తదుపరి->తదుపరి->అంశం;
+	ఒకవేళ (repo_parse_commit(r, p1) || repo_parse_commit(r, p2) ||
 			(p3 && repo_parse_commit(r, p3)))
-		return -1;
+		తిరిగి -1;
 	/* p2 must have a single parent, p3 must have no parents */
-	if (!p2->parents || p2->parents->next || (p3 && p3->parents))
-		return -1;
-	if (repo_parse_commit(r, p2->parents->item))
-		return -1;
+	ఒకవేళ (!p2->parents || p2->parents->తదుపరి || (p3 && p3->parents))
+		తిరిగి -1;
+	ఒకవేళ (repo_parse_commit(r, p2->parents->అంశం))
+		తిరిగి -1;
 	/* p2^1 must equal p1 */
-	if (!oideq(&p1->object.oid, &p2->parents->item->object.oid))
-		return -1;
+	ఒకవేళ (!oideq(&p1->object.oid, &p2->parents->అంశం->object.oid))
+		తిరిగి -1;
 
-	return 0;
+	తిరిగి 0;
 }
 
-static void assert_stash_like(struct stash_info *info, const char *revision)
+స్థిర శూన్య assert_stash_like(నిర్మాణం stash_info *info, స్థిరరాశి అక్షరం *revision)
 {
-	if (get_oidf(&info->b_commit, "%s^1", revision) ||
-	    get_oidf(&info->w_tree, "%s:", revision) ||
-	    get_oidf(&info->b_tree, "%s^1:", revision) ||
-	    get_oidf(&info->i_tree, "%s^2:", revision))
+	ఒకవేళ (get_oidf(&info->b_commit, "%s^1", revision) ||
+	    get_oidf(&info->w_వృక్షం, "%s:", revision) ||
+	    get_oidf(&info->b_వృక్షం, "%s^1:", revision) ||
+	    get_oidf(&info->i_వృక్షం, "%s^2:", revision))
 		die(_("'%s' is not a stash-like commit"), revision);
 }
 
-static int parse_stash_revision(struct strbuf *revision, const char *commit, int quiet)
+స్థిర పూర్ణాంకం parse_stash_revision(నిర్మాణం strbuf *revision, స్థిరరాశి అక్షరం *commit, పూర్ణాంకం quiet)
 {
 	strbuf_reset(revision);
-	if (!commit) {
-		if (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash)) {
-			if (!quiet)
+	ఒకవేళ (!commit) {
+		ఒకవేళ (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash)) {
+			ఒకవేళ (!quiet)
 				fprintf_ln(stderr, _("No stash entries found."));
-			return -1;
+			తిరిగి -1;
 		}
 
 		strbuf_addf(revision, "%s@{0}", ref_stash);
-	} else if (strspn(commit, "0123456789") == strlen(commit)) {
+	} లేకపోతే ఒకవేళ (strspn(commit, "0123456789") == అక్షరశ్రేణి_పొడవు(commit)) {
 		strbuf_addf(revision, "%s@{%s}", ref_stash, commit);
-	} else {
+	} లేకపోతే {
 		strbuf_addstr(revision, commit);
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static int get_stash_info(struct stash_info *info, int argc, const char **argv)
+స్థిర పూర్ణాంకం get_stash_info(నిర్మాణం stash_info *info, పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv)
 {
-	int ret;
-	char *end_of_rev;
-	char *expanded_ref;
-	const char *revision;
-	const char *commit = NULL;
-	struct object_id dummy;
-	struct strbuf symbolic = STRBUF_INIT;
+	పూర్ణాంకం ret;
+	అక్షరం *చివర_యొక్క_rev;
+	అక్షరం *expanded_ref;
+	స్థిరరాశి అక్షరం *revision;
+	స్థిరరాశి అక్షరం *commit = ఖాళీ;
+	నిర్మాణం object_id dummy;
+	నిర్మాణం strbuf symbolic = STRBUF_INIT;
 
-	if (argc > 1) {
-		int i;
-		struct strbuf refs_msg = STRBUF_INIT;
+	ఒకవేళ (argc > 1) {
+		పూర్ణాంకం i;
+		నిర్మాణం strbuf refs_సందేశం = STRBUF_INIT;
 
-		for (i = 0; i < argc; i++)
-			strbuf_addf(&refs_msg, " '%s'", argv[i]);
+		కొరకు (i = 0; i < argc; i++)
+			strbuf_addf(&refs_సందేశం, " '%s'", argv[i]);
 
 		fprintf_ln(stderr, _("Too many revisions specified:%s"),
-			   refs_msg.buf);
-		strbuf_release(&refs_msg);
+			   refs_సందేశం.buf);
+		strbuf_release(&refs_సందేశం);
 
-		return -1;
+		తిరిగి -1;
 	}
 
-	if (argc == 1)
+	ఒకవేళ (argc == 1)
 		commit = argv[0];
 
 	strbuf_init(&info->revision, 0);
-	if (parse_stash_revision(&info->revision, commit, 0)) {
-		return -1;
+	ఒకవేళ (parse_stash_revision(&info->revision, commit, 0)) {
+		తిరిగి -1;
 	}
 
 	revision = info->revision.buf;
 
-	if (repo_get_oid(the_repository, revision, &info->w_commit))
-		return error(_("%s is not a valid reference"), revision);
+	ఒకవేళ (repo_get_oid(the_repository, revision, &info->w_commit))
+		తిరిగి error(_("%s is not a valid reference"), revision);
 
 	assert_stash_like(info, revision);
 
-	info->has_u = !get_oidf(&info->u_tree, "%s^3:", revision);
+	info->has_u = !get_oidf(&info->u_వృక్షం, "%s^3:", revision);
 
-	end_of_rev = strchrnul(revision, '@');
-	strbuf_add(&symbolic, revision, end_of_rev - revision);
+	చివర_యొక్క_rev = strchrnul(revision, '@');
+	strbuf_కూడు(&symbolic, revision, చివర_యొక్క_rev - revision);
 
 	ret = repo_dwim_ref(the_repository, symbolic.buf, symbolic.len,
 			    &dummy, &expanded_ref, 0);
 	strbuf_release(&symbolic);
-	switch (ret) {
-	case 0: /* Not found, but valid ref */
+	ఎంపిక (ret) {
+	స్థితి 0: /* Not found, but valid ref */
 		info->is_stash_ref = 0;
-		break;
-	case 1:
+		ఆపు;
+	స్థితి 1:
 		info->is_stash_ref = !strcmp(expanded_ref, ref_stash);
-		break;
-	default: /* Invalid or ambiguous */
-		break;
+		ఆపు;
+	అప్రమేయ: /* Invalid or ambiguous */
+		ఆపు;
 	}
 
-	free(expanded_ref);
-	return !(ret == 0 || ret == 1);
+	విడుదల(expanded_ref);
+	తిరిగి !(ret == 0 || ret == 1);
 }
 
-static int do_clear_stash(void)
+స్థిర పూర్ణాంకం do_clear_stash(శూన్య)
 {
-	struct object_id obj;
-	if (repo_get_oid(the_repository, ref_stash, &obj))
-		return 0;
+	నిర్మాణం object_id obj;
+	ఒకవేళ (repo_get_oid(the_repository, ref_stash, &obj))
+		తిరిగి 0;
 
-	return refs_delete_ref(get_main_ref_store(the_repository), NULL,
+	తిరిగి refs_delete_ref(get_main_ref_store(the_repository), ఖాళీ,
 			       ref_stash, &obj, 0);
 }
 
-static int clear_stash(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం clear_stash(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		       నిర్మాణం repository *repo వాడని)
 {
-	struct option options[] = {
-		OPT_END()
+	నిర్మాణం option options[] = {
+		OPT_చివర()
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     git_stash_clear_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (argc)
-		return error(_("git stash clear with arguments is "
+	ఒకవేళ (argc)
+		తిరిగి error(_("git stash clear with arguments is "
 			       "unimplemented"));
 
-	return do_clear_stash();
+	తిరిగి do_clear_stash();
 }
 
-static int reset_tree(struct object_id *i_tree, int update, int reset)
+స్థిర పూర్ణాంకం reset_వృక్షం(నిర్మాణం object_id *i_వృక్షం, పూర్ణాంకం update, పూర్ణాంకం reset)
 {
-	int nr_trees = 1;
-	struct unpack_trees_options opts;
-	struct tree_desc t[MAX_UNPACK_TREES];
-	struct tree *tree;
-	struct lock_file lock_file = LOCK_INIT;
+	పూర్ణాంకం nr_trees = 1;
+	నిర్మాణం unpack_trees_options opts;
+	నిర్మాణం వృక్షం_desc t[MAX_UNPACK_TREES];
+	నిర్మాణం వృక్షం *వృక్షం;
+	నిర్మాణం తాళం_file తాళం_file = తాళం_INIT;
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL))
-		return -1;
+	repo_read_సూచీ_preload(the_repository, ఖాళీ, 0);
+	ఒకవేళ (refresh_సూచీ(the_repository->సూచీ, REFRESH_QUIET, ఖాళీ, ఖాళీ, ఖాళీ))
+		తిరిగి -1;
 
-	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
+	repo_hold_locked_సూచీ(the_repository, &తాళం_file, తాళం_DIE_ON_ERROR);
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, పరిమాణం(opts));
 
-	tree = repo_parse_tree_indirect(the_repository, i_tree);
-	if (repo_parse_tree(the_repository, tree))
-		return -1;
+	వృక్షం = repo_parse_వృక్షం_పరోక్ష(the_repository, i_వృక్షం);
+	ఒకవేళ (repo_parse_వృక్షం(the_repository, వృక్షం))
+		తిరిగి -1;
 
-	init_tree_desc(t, &tree->object.oid, tree->buffer, tree->size);
+	init_వృక్షం_desc(t, &వృక్షం->object.oid, వృక్షం->బఫరు, వృక్షం->కొలత);
 
-	opts.head_idx = 1;
-	opts.src_index = the_repository->index;
-	opts.dst_index = the_repository->index;
-	opts.merge = 1;
+	opts.తల_idx = 1;
+	opts.src_సూచీ = the_repository->సూచీ;
+	opts.dst_సూచీ = the_repository->సూచీ;
+	opts.విలీనం = 1;
 	opts.reset = reset ? UNPACK_RESET_PROTECT_UNTRACKED : 0;
 	opts.update = update;
-	if (update)
+	ఒకవేళ (update)
 		opts.preserve_ignored = 0; /* FIXME: !overwrite_ignore */
-	opts.fn = oneway_merge;
+	opts.fn = oneway_విలీనం;
 
-	if (unpack_trees(nr_trees, t, &opts))
-		return -1;
+	ఒకవేళ (unpack_trees(nr_trees, t, &opts))
+		తిరిగి -1;
 
-	if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
-		return error(_("unable to write new index file"));
+	ఒకవేళ (write_locked_సూచీ(the_repository->సూచీ, &తాళం_file, COMMIT_తాళం))
+		తిరిగి error(_("unable to write new index file"));
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int create_index_from_tree(const struct object_id *tree_id,
-				  const char *index_path)
+స్థిర పూర్ణాంకం create_సూచీ_from_వృక్షం(స్థిరరాశి నిర్మాణం object_id *వృక్షం_id,
+				  స్థిరరాశి అక్షరం *సూచీ_మార్గం)
 {
-	int nr_trees = 1;
-	int ret = 0;
-	struct unpack_trees_options opts;
-	struct tree_desc t[MAX_UNPACK_TREES];
-	struct tree *tree;
-	struct index_state dst_istate = INDEX_STATE_INIT(the_repository);
-	struct lock_file lock_file = LOCK_INIT;
+	పూర్ణాంకం nr_trees = 1;
+	పూర్ణాంకం ret = 0;
+	నిర్మాణం unpack_trees_options opts;
+	నిర్మాణం వృక్షం_desc t[MAX_UNPACK_TREES];
+	నిర్మాణం వృక్షం *వృక్షం;
+	నిర్మాణం సూచీ_state dst_istate = సూచీ_STATE_INIT(the_repository);
+	నిర్మాణం తాళం_file తాళం_file = తాళం_INIT;
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL);
+	repo_read_సూచీ_preload(the_repository, ఖాళీ, 0);
+	refresh_సూచీ(the_repository->సూచీ, REFRESH_QUIET, ఖాళీ, ఖాళీ, ఖాళీ);
 
-	hold_lock_file_for_update(&lock_file, index_path, LOCK_DIE_ON_ERROR);
+	hold_తాళం_file_for_update(&తాళం_file, సూచీ_మార్గం, తాళం_DIE_ON_ERROR);
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, పరిమాణం(opts));
 
-	tree = repo_parse_tree_indirect(the_repository, tree_id);
-	if (!tree || repo_parse_tree(the_repository, tree)) {
+	వృక్షం = repo_parse_వృక్షం_పరోక్ష(the_repository, వృక్షం_id);
+	ఒకవేళ (!వృక్షం || repo_parse_వృక్షం(the_repository, వృక్షం)) {
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	init_tree_desc(t, &tree->object.oid, tree->buffer, tree->size);
+	init_వృక్షం_desc(t, &వృక్షం->object.oid, వృక్షం->బఫరు, వృక్షం->కొలత);
 
-	opts.head_idx = 1;
-	opts.src_index = the_repository->index;
-	opts.dst_index = &dst_istate;
-	opts.merge = 1;
+	opts.తల_idx = 1;
+	opts.src_సూచీ = the_repository->సూచీ;
+	opts.dst_సూచీ = &dst_istate;
+	opts.విలీనం = 1;
 	opts.reset = UNPACK_RESET_PROTECT_UNTRACKED;
-	opts.fn = oneway_merge;
+	opts.fn = oneway_విలీనం;
 
-	if (unpack_trees(nr_trees, t, &opts)) {
+	ఒకవేళ (unpack_trees(nr_trees, t, &opts)) {
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	if (write_locked_index(&dst_istate, &lock_file, COMMIT_LOCK)) {
+	ఒకవేళ (write_locked_సూచీ(&dst_istate, &తాళం_file, COMMIT_తాళం)) {
 		ret = error(_("unable to write new index file"));
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-done:
-	release_index(&dst_istate);
-	if (ret)
-		rollback_lock_file(&lock_file);
-	return ret;
+పూర్తి:
+	release_సూచీ(&dst_istate);
+	ఒకవేళ (ret)
+		rollback_తాళం_file(&తాళం_file);
+	తిరిగి ret;
 }
 
-static int is_path_a_directory(const char *path)
+స్థిర పూర్ణాంకం is_మార్గం_a_directory(స్థిరరాశి అక్షరం *మార్గం)
 {
 	/*
 	 * This function differs from abspath.c:is_directory() in that
 	 * here we use lstat() instead of stat(); we do not want to
 	 * follow symbolic links here.
 	 */
-	struct stat st;
-	return (!lstat(path, &st) && S_ISDIR(st.st_mode));
+	నిర్మాణం stat st;
+	తిరిగి (!lstat(మార్గం, &st) && S_ISDIR(st.st_బహుళకం));
 }
 
-static void add_diff_to_buf(struct diff_queue_struct *q,
-			    struct diff_options *options UNUSED,
-			    void *data)
+స్థిర శూన్య కూడు_diff_గమ్యం_buf(నిర్మాణం diff_వరుస_struct *q,
+			    నిర్మాణం diff_options *options వాడని,
+			    శూన్య *దత్తాంశం)
 {
-	int i;
+	పూర్ణాంకం i;
 
-	for (i = 0; i < q->nr; i++) {
-		if (is_path_a_directory(q->queue[i]->one->path))
-			continue;
+	కొరకు (i = 0; i < q->nr; i++) {
+		ఒకవేళ (is_మార్గం_a_directory(q->వరుస[i]->one->మార్గం))
+			కొనసాగు;
 
-		strbuf_addstr(data, q->queue[i]->one->path);
+		strbuf_addstr(దత్తాంశం, q->వరుస[i]->one->మార్గం);
 
 		/* NUL-terminate: will be fed to update-index -z */
-		strbuf_addch(data, '\0');
+		strbuf_addch(దత్తాంశం, '\0');
 	}
 }
 
-static int restore_untracked(struct object_id *u_tree)
+స్థిర పూర్ణాంకం restore_untracked(నిర్మాణం object_id *u_వృక్షం)
 {
-	int res;
-	struct child_process cp = CHILD_PROCESS_INIT;
+	పూర్ణాంకం res;
+	నిర్మాణం బిడ్డ_process cp = బిడ్డ_PROCESS_INIT;
 
 	/*
 	 * We need to run restore files from a given index, but without
@@ -461,27 +461,27 @@ static int restore_untracked(struct object_id *u_tree)
 	 * run_command to fork processes that will not interfere.
 	 */
 	cp.git_cmd = 1;
-	strvec_push(&cp.args, "read-tree");
-	strvec_push(&cp.args, oid_to_hex(u_tree));
+	strvec_నెట్టు(&cp.వాదనలు, "read-tree");
+	strvec_నెట్టు(&cp.వాదనలు, oid_గమ్యం_hex(u_వృక్షం));
 	strvec_pushf(&cp.env, "GIT_INDEX_FILE=%s",
-		     stash_index_path.buf);
-	if (run_command(&cp)) {
-		remove_path(stash_index_path.buf);
-		return -1;
+		     stash_సూచీ_మార్గం.buf);
+	ఒకవేళ (నిరంతరం_command(&cp)) {
+		remove_మార్గం(stash_సూచీ_మార్గం.buf);
+		తిరిగి -1;
 	}
 
-	child_process_init(&cp);
+	బిడ్డ_process_init(&cp);
 	cp.git_cmd = 1;
-	strvec_pushl(&cp.args, "checkout-index", "--all", NULL);
+	strvec_pushl(&cp.వాదనలు, "checkout-index", "--all", ఖాళీ);
 	strvec_pushf(&cp.env, "GIT_INDEX_FILE=%s",
-		     stash_index_path.buf);
+		     stash_సూచీ_మార్గం.buf);
 
-	res = run_command(&cp);
-	remove_path(stash_index_path.buf);
-	return res;
+	res = నిరంతరం_command(&cp);
+	remove_మార్గం(stash_సూచీ_మార్గం.buf);
+	తిరిగి res;
 }
 
-static void unstage_changes_unless_new(struct object_id *orig_tree)
+స్థిర శూన్య unstage_changes_unless_new(నిర్మాణం object_id *orig_వృక్షం)
 {
 	/*
 	 * When we enter this function, there has been a clean merge of
@@ -494,41 +494,41 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 	 * it to the worktree before unstaging.
 	 */
 
-	struct checkout state = CHECKOUT_INIT;
-	struct diff_options diff_opts;
-	struct lock_file lock = LOCK_INIT;
-	int i;
+	నిర్మాణం checkout state = CHECKOUT_INIT;
+	నిర్మాణం diff_options diff_opts;
+	నిర్మాణం తాళం_file తాళం = తాళం_INIT;
+	పూర్ణాంకం i;
 
 	/* If any entries have skip_worktree set, we'll have to check 'em out */
 	state.force = 1;
 	state.quiet = 1;
 	state.refresh_cache = 1;
-	state.istate = the_repository->index;
+	state.istate = the_repository->సూచీ;
 
 	/*
 	 * Step 1: get a difference between orig_tree (which corresponding
 	 * to the index before a merge was run) and the current index
 	 * (reflecting the changes brought in by the merge).
 	 */
-	repo_diff_setup(the_repository, &diff_opts);
+	repo_diff_అమరిక(the_repository, &diff_opts);
 	diff_opts.flags.recursive = 1;
 	diff_opts.detect_rename = 0;
 	diff_opts.output_format = DIFF_FORMAT_NO_OUTPUT;
-	diff_setup_done(&diff_opts);
+	diff_అమరిక_పూర్తి(&diff_opts);
 
-	do_diff_cache(orig_tree, &diff_opts);
+	do_diff_cache(orig_వృక్షం, &diff_opts);
 	diffcore_std(&diff_opts);
 
 	/* Iterate over the paths that changed due to the merge... */
-	for (i = 0; i < diff_queued_diff.nr; i++) {
-		struct diff_filepair *p;
-		struct cache_entry *ce;
-		int pos;
+	కొరకు (i = 0; i < diff_queued_diff.nr; i++) {
+		నిర్మాణం diff_filepair *p;
+		నిర్మాణం cache_నమోదు *ce;
+		పూర్ణాంకం pos;
 
 		/* Look up the path's position in the current index. */
-		p = diff_queued_diff.queue[i];
-		pos = index_name_pos(the_repository->index, p->two->path,
-				     strlen(p->two->path));
+		p = diff_queued_diff.వరుస[i];
+		pos = సూచీ_name_pos(the_repository->సూచీ, p->two->మార్గం,
+				     అక్షరశ్రేణి_పొడవు(p->two->మార్గం));
 
 		/*
 		 * Step 2: Place changes in the working tree
@@ -538,51 +538,51 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 		 * path, but left it out of the working tree, then clear the
 		 * SKIP_WORKTREE bit and write it to the working tree.
 		 */
-		if (pos >= 0 && ce_skip_worktree(the_repository->index->cache[pos])) {
-			struct stat st;
+		ఒకవేళ (pos >= 0 && ce_skip_worktree(the_repository->సూచీ->cache[pos])) {
+			నిర్మాణం stat st;
 
-			ce = the_repository->index->cache[pos];
-			if (!lstat(ce->name, &st)) {
+			ce = the_repository->సూచీ->cache[pos];
+			ఒకవేళ (!lstat(ce->name, &st)) {
 				/* Conflicting path present; relocate it */
-				struct strbuf new_path = STRBUF_INIT;
-				int fd;
+				నిర్మాణం strbuf new_మార్గం = STRBUF_INIT;
+				పూర్ణాంకం fd;
 
-				strbuf_addf(&new_path,
+				strbuf_addf(&new_మార్గం,
 					    "%s.stash.XXXXXX", ce->name);
-				fd = xmkstemp(new_path.buf);
+				fd = xmkstemp(new_మార్గం.buf);
 				close(fd);
-				printf(_("WARNING: Untracked file in way of "
+				రాయి(_("WARNING: Untracked file in way of "
 					 "tracked file!  Renaming\n "
 					 "           %s -> %s\n"
 					 "         to make room.\n"),
-				       ce->name, new_path.buf);
-				if (rename(ce->name, new_path.buf))
+				       ce->name, new_మార్గం.buf);
+				ఒకవేళ (rename(ce->name, new_మార్గం.buf))
 					die("Failed to move %s to %s",
-					    ce->name, new_path.buf);
-				strbuf_release(&new_path);
+					    ce->name, new_మార్గం.buf);
+				strbuf_release(&new_మార్గం);
 			}
-			checkout_entry(ce, &state, NULL, NULL);
+			checkout_నమోదు(ce, &state, ఖాళీ, ఖాళీ);
 			ce->ce_flags &= ~CE_SKIP_WORKTREE;
 		}
 
 		/*
 		 * Step 3: "unstage" changes, as long as they are still tracked
 		 */
-		if (p->one->oid_valid) {
+		ఒకవేళ (p->one->oid_valid) {
 			/*
 			 * Path existed in orig_tree; restore index entry
 			 * from that tree in order to "unstage" the changes.
 			 */
-			int option = ADD_CACHE_OK_TO_REPLACE;
-			if (pos < 0)
-				option = ADD_CACHE_OK_TO_ADD;
+			పూర్ణాంకం option = కూడు_CACHE_OK_గమ్యం_REPLACE;
+			ఒకవేళ (pos < 0)
+				option = కూడు_CACHE_OK_గమ్యం_కూడు;
 
-			ce = make_cache_entry(the_repository->index,
-					      p->one->mode,
+			ce = make_cache_నమోదు(the_repository->సూచీ,
+					      p->one->బహుళకం,
 					      &p->one->oid,
-					      p->one->path,
+					      p->one->మార్గం,
 					      0, 0);
-			add_index_entry(the_repository->index, ce, option);
+			కూడు_సూచీ_నమోదు(the_repository->సూచీ, ce, option);
 		}
 	}
 	diff_flush(&diff_opts);
@@ -590,89 +590,89 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 	/*
 	 * Step 4: write the new index to disk
 	 */
-	repo_hold_locked_index(the_repository, &lock, LOCK_DIE_ON_ERROR);
-	if (write_locked_index(the_repository->index, &lock,
-			       COMMIT_LOCK | SKIP_IF_UNCHANGED))
+	repo_hold_locked_సూచీ(the_repository, &తాళం, తాళం_DIE_ON_ERROR);
+	ఒకవేళ (write_locked_సూచీ(the_repository->సూచీ, &తాళం,
+			       COMMIT_తాళం | SKIP_IF_UNCHANGED))
 		die(_("could not write index"));
 }
 
-static enum stash_apply_result do_apply_stash(const char *prefix,
-					      struct stash_info *info,
-					      int index, int quiet,
-					      const char *label_ours,
-					      const char *label_theirs,
-					      const char *label_base)
+స్థిర గణన stash_apply_ఫలితం do_apply_stash(స్థిరరాశి అక్షరం *ఉపసర్గ,
+					      నిర్మాణం stash_info *info,
+					      పూర్ణాంకం సూచీ, పూర్ణాంకం quiet,
+					      స్థిరరాశి అక్షరం *label_ours,
+					      స్థిరరాశి అక్షరం *label_theirs,
+					      స్థిరరాశి అక్షరం *label_పునాది)
 {
-	int clean, ret;
-	int has_index = index;
-	struct merge_options o;
-	struct object_id c_tree;
-	struct object_id index_tree;
-	struct tree *head, *merge, *merge_base;
-	struct lock_file lock = LOCK_INIT;
+	పూర్ణాంకం clean, ret;
+	పూర్ణాంకం has_సూచీ = సూచీ;
+	నిర్మాణం విలీనం_options o;
+	నిర్మాణం object_id c_వృక్షం;
+	నిర్మాణం object_id సూచీ_వృక్షం;
+	నిర్మాణం వృక్షం *తల, *విలీనం, *విలీనం_పునాది;
+	నిర్మాణం తాళం_file తాళం = తాళం_INIT;
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
-					 NULL, NULL, NULL))
-		return error(_("could not write index"));
+	repo_read_సూచీ_preload(the_repository, ఖాళీ, 0);
+	ఒకవేళ (repo_refresh_and_write_సూచీ(the_repository, REFRESH_QUIET, 0, 0,
+					 ఖాళీ, ఖాళీ, ఖాళీ))
+		తిరిగి error(_("could not write index"));
 
-	if (write_index_as_tree(&c_tree, the_repository->index,
-				repo_get_index_file(the_repository), 0, NULL))
-		return error(_("cannot apply a stash in the middle of a merge"));
+	ఒకవేళ (write_సూచీ_as_వృక్షం(&c_వృక్షం, the_repository->సూచీ,
+				repo_get_సూచీ_file(the_repository), 0, ఖాళీ))
+		తిరిగి error(_("cannot apply a stash in the middle of a merge"));
 
-	init_ui_merge_options(&o, the_repository);
+	init_ui_విలీనం_options(&o, the_repository);
 
-	if (quiet)
+	ఒకవేళ (quiet)
 		o.verbosity = 0;
 
-	if (index) {
-		if (oideq(&info->b_tree, &info->i_tree) ||
-		    oideq(&c_tree, &info->i_tree)) {
-			has_index = 0;
-		} else {
-			struct merge_result result = { 0 };
+	ఒకవేళ (సూచీ) {
+		ఒకవేళ (oideq(&info->b_వృక్షం, &info->i_వృక్షం) ||
+		    oideq(&c_వృక్షం, &info->i_వృక్షం)) {
+			has_సూచీ = 0;
+		} లేకపోతే {
+			నిర్మాణం విలీనం_ఫలితం ఫలితం = { 0 };
 
 			o.branch1 = "Current index";
 			o.branch2 = "Stashed index changes";
 			o.ancestor = "Stash base";
 
-			head = lookup_tree(o.repo, &c_tree);
-			merge = lookup_tree(o.repo, &info->i_tree);
-			merge_base = lookup_tree(o.repo, &info->b_tree);
+			తల = lookup_వృక్షం(o.repo, &c_వృక్షం);
+			విలీనం = lookup_వృక్షం(o.repo, &info->i_వృక్షం);
+			విలీనం_పునాది = lookup_వృక్షం(o.repo, &info->b_వృక్షం);
 
-			merge_incore_nonrecursive(&o, merge_base, head, merge,
-						  &result);
+			విలీనం_incore_nonrecursive(&o, విలీనం_పునాది, తల, విలీనం,
+						  &ఫలితం);
 
-			if (result.clean < 0) {
-				merge_finalize(&o, &result);
-				return error(_("index merge failed"));
-			} else if (!result.clean) {
-				merge_finalize(&o, &result);
-				return error(_("conflicts in index. "
+			ఒకవేళ (ఫలితం.clean < 0) {
+				విలీనం_finalize(&o, &ఫలితం);
+				తిరిగి error(_("index merge failed"));
+			} లేకపోతే ఒకవేళ (!ఫలితం.clean) {
+				విలీనం_finalize(&o, &ఫలితం);
+				తిరిగి error(_("conflicts in index. "
 					       "Try without --index."));
-			} else {
-				oidcpy(&index_tree, &result.tree->object.oid);
-				merge_finalize(&o, &result);
+			} లేకపోతే {
+				oidcpy(&సూచీ_వృక్షం, &ఫలితం.వృక్షం->object.oid);
+				విలీనం_finalize(&o, &ఫలితం);
 			}
 		}
 	}
 
 	o.branch1 = label_ours ? label_ours : "Updated upstream";
 	o.branch2 = label_theirs ? label_theirs : "Stashed changes";
-	o.ancestor = label_base ? label_base : "Stash base";
+	o.ancestor = label_పునాది ? label_పునాది : "Stash base";
 
-	if (oideq(&info->b_tree, &c_tree))
+	ఒకవేళ (oideq(&info->b_వృక్షం, &c_వృక్షం))
 		o.branch1 = "Version stash was based on";
 
-	if (o.verbosity >= 3)
+	ఒకవేళ (o.verbosity >= 3)
 		printf_ln(_("Merging %s with %s"), o.branch1, o.branch2);
 
-	head = lookup_tree(o.repo, &c_tree);
-	merge = lookup_tree(o.repo, &info->w_tree);
-	merge_base = lookup_tree(o.repo, &info->b_tree);
+	తల = lookup_వృక్షం(o.repo, &c_వృక్షం);
+	విలీనం = lookup_వృక్షం(o.repo, &info->w_వృక్షం);
+	విలీనం_పునాది = lookup_వృక్షం(o.repo, &info->b_వృక్షం);
 
-	repo_hold_locked_index(o.repo, &lock, LOCK_DIE_ON_ERROR);
-	clean = merge_ort_nonrecursive(&o, head, merge, merge_base);
+	repo_hold_locked_సూచీ(o.repo, &తాళం, తాళం_DIE_ON_ERROR);
+	clean = విలీనం_ort_nonrecursive(&o, తల, విలీనం, విలీనం_పునాది);
 
 	/*
 	 * If 'clean' >= 0, reverse the value for 'ret' so 'ret' is 0 when the
@@ -681,34 +681,34 @@ static enum stash_apply_result do_apply_stash(const char *prefix,
 	 */
 	ret = clean >= 0 ? !clean : clean;
 
-	if (ret < 0)
-		rollback_lock_file(&lock);
-	else if (write_locked_index(o.repo->index, &lock,
-				      COMMIT_LOCK | SKIP_IF_UNCHANGED))
+	ఒకవేళ (ret < 0)
+		rollback_తాళం_file(&తాళం);
+	లేకపోతే ఒకవేళ (write_locked_సూచీ(o.repo->సూచీ, &తాళం,
+				      COMMIT_తాళం | SKIP_IF_UNCHANGED))
 		ret = error(_("could not write index"));
 
-	if (ret) {
+	ఒకవేళ (ret) {
 		repo_rerere(the_repository, 0);
 
-		if (index)
+		ఒకవేళ (సూచీ)
 			fprintf_ln(stderr, _("Index was not unstashed."));
 
-		goto restore_untracked;
+		వెళ్ళు restore_untracked;
 	}
 
-	if (has_index) {
-		if (reset_tree(&index_tree, 0, 0))
+	ఒకవేళ (has_సూచీ) {
+		ఒకవేళ (reset_వృక్షం(&సూచీ_వృక్షం, 0, 0))
 			ret = -1;
-	} else {
-		unstage_changes_unless_new(&c_tree);
+	} లేకపోతే {
+		unstage_changes_unless_new(&c_వృక్షం);
 	}
 
 restore_untracked:
-	if (info->has_u && restore_untracked(&info->u_tree))
+	ఒకవేళ (info->has_u && restore_untracked(&info->u_వృక్షం))
 		ret = error(_("could not restore untracked files from stash"));
 
-	if (!quiet) {
-		struct child_process cp = CHILD_PROCESS_INIT;
+	ఒకవేళ (!quiet) {
+		నిర్మాణం బిడ్డ_process cp = బిడ్డ_PROCESS_INIT;
 
 		/*
 		 * Status is quite simple and could be replaced with calls to
@@ -716,445 +716,445 @@ restore_untracked:
 		 * require more tests.
 		 */
 		cp.git_cmd = 1;
-		cp.dir = prefix;
-		strvec_pushf(&cp.env, GIT_WORK_TREE_ENVIRONMENT"=%s",
-			     absolute_path(repo_get_work_tree(the_repository)));
+		cp.dir = ఉపసర్గ;
+		strvec_pushf(&cp.env, GIT_WORK_వృక్షం_ENVIRONMENT"=%s",
+			     absolute_మార్గం(repo_get_work_వృక్షం(the_repository)));
 		strvec_pushf(&cp.env, GIT_DIR_ENVIRONMENT"=%s",
-			     absolute_path(repo_get_git_dir(the_repository)));
-		strvec_push(&cp.args, "status");
-		run_command(&cp);
+			     absolute_మార్గం(repo_get_git_dir(the_repository)));
+		strvec_నెట్టు(&cp.వాదనలు, "status");
+		నిరంతరం_command(&cp);
 	}
 
-	return ret;
+	తిరిగి ret;
 }
 
-static int apply_stash(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం apply_stash(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		       నిర్మాణం repository *repo వాడని)
 {
-	int ret = -1;
-	int quiet = 0;
-	int index = use_index;
-	const char *label_ours = NULL, *label_theirs = NULL, *label_base = NULL;
-	struct stash_info info = STASH_INFO_INIT;
-	struct option options[] = {
+	పూర్ణాంకం ret = -1;
+	పూర్ణాంకం quiet = 0;
+	పూర్ణాంకం సూచీ = use_సూచీ;
+	స్థిరరాశి అక్షరం *label_ours = ఖాళీ, *label_theirs = ఖాళీ, *label_పునాది = ఖాళీ;
+	నిర్మాణం stash_info info = STASH_INFO_INIT;
+	నిర్మాణం option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet, only report errors")),
-		OPT_BOOL(0, "index", &index,
+		OPT_BOOL(0, "index", &సూచీ,
 			 N_("attempt to recreate the index")),
 		OPT_STRING(0, "label-ours", &label_ours, N_("label"),
 			   N_("label for the upstream side in conflict markers")),
 		OPT_STRING(0, "label-theirs", &label_theirs, N_("label"),
 			   N_("label for the stashed side in conflict markers")),
-		OPT_STRING(0, "label-base", &label_base, N_("label"),
+		OPT_STRING(0, "label-base", &label_పునాది, N_("label"),
 			   N_("label for the base in diff3 conflict markers")),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     git_stash_apply_usage, 0);
 
-	if (get_stash_info(&info, argc, argv))
-		goto cleanup;
+	ఒకవేళ (get_stash_info(&info, argc, argv))
+		వెళ్ళు cleanup;
 
-	ret = do_apply_stash(prefix, &info, index, quiet,
-			     label_ours, label_theirs, label_base);
+	ret = do_apply_stash(ఉపసర్గ, &info, సూచీ, quiet,
+			     label_ours, label_theirs, label_పునాది);
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	తిరిగి ret;
 }
 
-static int reject_reflog_ent(const char *refname UNUSED,
-			     struct object_id *ooid UNUSED,
-			     struct object_id *noid UNUSED,
-			     const char *email UNUSED,
-			     timestamp_t timestamp UNUSED,
-			     int tz UNUSED, const char *message UNUSED,
-			     void *cb_data UNUSED)
+స్థిర పూర్ణాంకం reject_reflog_ent(స్థిరరాశి అక్షరం *refname వాడని,
+			     నిర్మాణం object_id *ooid వాడని,
+			     నిర్మాణం object_id *noid వాడని,
+			     స్థిరరాశి అక్షరం *email వాడని,
+			     timestamp_t timestamp వాడని,
+			     పూర్ణాంకం tz వాడని, స్థిరరాశి అక్షరం *సందేశం_2 వాడని,
+			     శూన్య *cb_దత్తాంశం వాడని)
 {
-	return 1;
+	తిరిగి 1;
 }
 
-static int reflog_is_empty(const char *refname)
+స్థిర పూర్ణాంకం reflog_is_ఖాళీలు(స్థిరరాశి అక్షరం *refname)
 {
-	return !refs_for_each_reflog_ent(get_main_ref_store(the_repository),
-					 refname, reject_reflog_ent, NULL);
+	తిరిగి !refs_for_each_reflog_ent(get_main_ref_store(the_repository),
+					 refname, reject_reflog_ent, ఖాళీ);
 }
 
-static int do_drop_stash(struct stash_info *info, int quiet)
+స్థిర పూర్ణాంకం do_drop_stash(నిర్మాణం stash_info *info, పూర్ణాంకం quiet)
 {
-	if (!reflog_delete(info->revision.buf,
+	ఒకవేళ (!reflog_delete(info->revision.buf,
 			   EXPIRE_REFLOGS_REWRITE | EXPIRE_REFLOGS_UPDATE_REF,
 			   0)) {
-		if (!quiet)
+		ఒకవేళ (!quiet)
 			printf_ln(_("Dropped %s (%s)"), info->revision.buf,
-				  oid_to_hex(&info->w_commit));
-	} else {
-		return error(_("%s: Could not drop stash entry"),
+				  oid_గమ్యం_hex(&info->w_commit));
+	} లేకపోతే {
+		తిరిగి error(_("%s: Could not drop stash entry"),
 			     info->revision.buf);
 	}
 
-	if (reflog_is_empty(ref_stash))
+	ఒకవేళ (reflog_is_ఖాళీలు(ref_stash))
 		do_clear_stash();
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int get_stash_info_assert(struct stash_info *info, int argc,
-				 const char **argv)
+స్థిర పూర్ణాంకం get_stash_info_assert(నిర్మాణం stash_info *info, పూర్ణాంకం argc,
+				 స్థిరరాశి అక్షరం **argv)
 {
-	int ret = get_stash_info(info, argc, argv);
+	పూర్ణాంకం ret = get_stash_info(info, argc, argv);
 
-	if (ret < 0)
-		return ret;
+	ఒకవేళ (ret < 0)
+		తిరిగి ret;
 
-	if (!info->is_stash_ref)
-		return error(_("'%s' is not a stash reference"), info->revision.buf);
+	ఒకవేళ (!info->is_stash_ref)
+		తిరిగి error(_("'%s' is not a stash reference"), info->revision.buf);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int drop_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం drop_stash(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		      నిర్మాణం repository *repo వాడని)
 {
-	int ret = -1;
-	int quiet = 0;
-	struct stash_info info = STASH_INFO_INIT;
-	struct option options[] = {
+	పూర్ణాంకం ret = -1;
+	పూర్ణాంకం quiet = 0;
+	నిర్మాణం stash_info info = STASH_INFO_INIT;
+	నిర్మాణం option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet, only report errors")),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     git_stash_drop_usage, 0);
 
-	if (get_stash_info_assert(&info, argc, argv))
-		goto cleanup;
+	ఒకవేళ (get_stash_info_assert(&info, argc, argv))
+		వెళ్ళు cleanup;
 
 	ret = do_drop_stash(&info, quiet);
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	తిరిగి ret;
 }
 
-static int pop_stash(int argc, const char **argv, const char *prefix,
-		     struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం తీయి_stash(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		     నిర్మాణం repository *repo వాడని)
 {
-	int ret = -1;
-	int index = use_index;
-	int quiet = 0;
-	struct stash_info info = STASH_INFO_INIT;
-	struct option options[] = {
+	పూర్ణాంకం ret = -1;
+	పూర్ణాంకం సూచీ = use_సూచీ;
+	పూర్ణాంకం quiet = 0;
+	నిర్మాణం stash_info info = STASH_INFO_INIT;
+	నిర్మాణం option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet, only report errors")),
-		OPT_BOOL(0, "index", &index,
+		OPT_BOOL(0, "index", &సూచీ,
 			 N_("attempt to recreate the index")),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
-			     git_stash_pop_usage, 0);
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
+			     git_stash_తీయి_usage, 0);
 
-	if (get_stash_info_assert(&info, argc, argv))
-		goto cleanup;
+	ఒకవేళ (get_stash_info_assert(&info, argc, argv))
+		వెళ్ళు cleanup;
 
-	if ((ret = do_apply_stash(prefix, &info, index, quiet,
-				  NULL, NULL, NULL)))
+	ఒకవేళ ((ret = do_apply_stash(ఉపసర్గ, &info, సూచీ, quiet,
+				  ఖాళీ, ఖాళీ, ఖాళీ)))
 		printf_ln(_("The stash entry is kept in case "
 			    "you need it again."));
-	else
+	లేకపోతే
 		ret = do_drop_stash(&info, quiet);
 
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	తిరిగి ret;
 }
 
-static int branch_stash(int argc, const char **argv, const char *prefix,
-			struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం branch_stash(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			నిర్మాణం repository *repo వాడని)
 {
-	int ret = -1;
-	const char *branch = NULL;
-	struct stash_info info = STASH_INFO_INIT;
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct option options[] = {
-		OPT_END()
+	పూర్ణాంకం ret = -1;
+	స్థిరరాశి అక్షరం *branch = ఖాళీ;
+	నిర్మాణం stash_info info = STASH_INFO_INIT;
+	నిర్మాణం బిడ్డ_process cp = బిడ్డ_PROCESS_INIT;
+	నిర్మాణం option options[] = {
+		OPT_చివర()
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     git_stash_branch_usage, 0);
 
-	if (!argc) {
+	ఒకవేళ (!argc) {
 		fprintf_ln(stderr, _("No branch name specified"));
-		return -1;
+		తిరిగి -1;
 	}
 
 	branch = argv[0];
 
-	if (get_stash_info(&info, argc - 1, argv + 1))
-		goto cleanup;
+	ఒకవేళ (get_stash_info(&info, argc - 1, argv + 1))
+		వెళ్ళు cleanup;
 
 	cp.git_cmd = 1;
-	strvec_pushl(&cp.args, "checkout", "-b", NULL);
-	strvec_push(&cp.args, branch);
-	strvec_push(&cp.args, oid_to_hex(&info.b_commit));
-	ret = run_command(&cp);
-	if (!ret)
-		ret = do_apply_stash(prefix, &info, 1, 0,
-				     NULL, NULL, NULL);
-	if (!ret && info.is_stash_ref)
+	strvec_pushl(&cp.వాదనలు, "checkout", "-b", ఖాళీ);
+	strvec_నెట్టు(&cp.వాదనలు, branch);
+	strvec_నెట్టు(&cp.వాదనలు, oid_గమ్యం_hex(&info.b_commit));
+	ret = నిరంతరం_command(&cp);
+	ఒకవేళ (!ret)
+		ret = do_apply_stash(ఉపసర్గ, &info, 1, 0,
+				     ఖాళీ, ఖాళీ, ఖాళీ);
+	ఒకవేళ (!ret && info.is_stash_ref)
 		ret = do_drop_stash(&info, 0);
 
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	తిరిగి ret;
 }
 
-static int list_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం list_stash(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		      నిర్మాణం repository *repo వాడని)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct option options[] = {
-		OPT_END()
+	నిర్మాణం బిడ్డ_process cp = బిడ్డ_PROCESS_INIT;
+	నిర్మాణం option options[] = {
+		OPT_చివర()
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     git_stash_list_usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT);
 
-	if (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash))
-		return 0;
+	ఒకవేళ (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash))
+		తిరిగి 0;
 
 	cp.git_cmd = 1;
-	strvec_pushl(&cp.args, "log", "--format=%gd: %gs", "-g",
-		     "--first-parent", NULL);
-	strvec_pushv(&cp.args, argv);
-	strvec_push(&cp.args, ref_stash);
-	strvec_push(&cp.args, "--");
-	return run_command(&cp);
+	strvec_pushl(&cp.వాదనలు, "log", "--format=%gd: %gs", "-g",
+		     "--first-parent", ఖాళీ);
+	strvec_pushv(&cp.వాదనలు, argv);
+	strvec_నెట్టు(&cp.వాదనలు, ref_stash);
+	strvec_నెట్టు(&cp.వాదనలు, "--");
+	తిరిగి నిరంతరం_command(&cp);
 }
 
-static int git_stash_config(const char *var, const char *value,
-			    const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం git_stash_config(స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *విలువ,
+			    స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	if (!strcmp(var, "stash.showstat")) {
-		show_stat = git_config_bool(var, value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "stash.showstat")) {
+		show_stat = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "stash.showpatch")) {
-		show_patch = git_config_bool(var, value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "stash.showpatch")) {
+		show_patch = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "stash.showincludeuntracked")) {
-		show_include_untracked = git_config_bool(var, value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "stash.showincludeuntracked")) {
+		show_include_untracked = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "stash.index")) {
-		use_index = git_config_bool(var, value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "stash.index")) {
+		use_సూచీ = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
-	return git_diff_basic_config(var, value, ctx, cb);
+	తిరిగి git_diff_basic_config(var, విలువ, ctx, cb);
 }
 
-static void diff_include_untracked(const struct stash_info *info, struct diff_options *diff_opt)
+స్థిర శూన్య diff_include_untracked(స్థిరరాశి నిర్మాణం stash_info *info, నిర్మాణం diff_options *diff_opt)
 {
-	const struct object_id *oid[] = { &info->w_commit, &info->u_tree };
-	struct tree *tree[ARRAY_SIZE(oid)];
-	struct tree_desc tree_desc[ARRAY_SIZE(oid)];
-	struct unpack_trees_options unpack_tree_opt = { 0 };
+	స్థిరరాశి నిర్మాణం object_id *oid[] = { &info->w_commit, &info->u_వృక్షం };
+	నిర్మాణం వృక్షం *వృక్షం[ARRAY_కొలత(oid)];
+	నిర్మాణం వృక్షం_desc వృక్షం_desc[ARRAY_కొలత(oid)];
+	నిర్మాణం unpack_trees_options unpack_వృక్షం_opt = { 0 };
 
-	for (size_t i = 0; i < ARRAY_SIZE(oid); i++) {
-		tree[i] = repo_parse_tree_indirect(the_repository, oid[i]);
-		if (repo_parse_tree(the_repository, tree[i]) < 0)
+	కొరకు (కొలత_t i = 0; i < ARRAY_కొలత(oid); i++) {
+		వృక్షం[i] = repo_parse_వృక్షం_పరోక్ష(the_repository, oid[i]);
+		ఒకవేళ (repo_parse_వృక్షం(the_repository, వృక్షం[i]) < 0)
 			die(_("failed to parse tree"));
-		init_tree_desc(&tree_desc[i], &tree[i]->object.oid,
-			       tree[i]->buffer, tree[i]->size);
+		init_వృక్షం_desc(&వృక్షం_desc[i], &వృక్షం[i]->object.oid,
+			       వృక్షం[i]->బఫరు, వృక్షం[i]->కొలత);
 	}
 
-	unpack_tree_opt.head_idx = -1;
-	unpack_tree_opt.src_index = the_repository->index;
-	unpack_tree_opt.dst_index = the_repository->index;
-	unpack_tree_opt.merge = 1;
-	unpack_tree_opt.fn = stash_worktree_untracked_merge;
+	unpack_వృక్షం_opt.తల_idx = -1;
+	unpack_వృక్షం_opt.src_సూచీ = the_repository->సూచీ;
+	unpack_వృక్షం_opt.dst_సూచీ = the_repository->సూచీ;
+	unpack_వృక్షం_opt.విలీనం = 1;
+	unpack_వృక్షం_opt.fn = stash_worktree_untracked_విలీనం;
 
-	if (unpack_trees(ARRAY_SIZE(tree_desc), tree_desc, &unpack_tree_opt))
+	ఒకవేళ (unpack_trees(ARRAY_కొలత(వృక్షం_desc), వృక్షం_desc, &unpack_వృక్షం_opt))
 		die(_("failed to unpack trees"));
 
 	do_diff_cache(&info->b_commit, diff_opt);
 }
 
-static int show_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం show_stash(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		      నిర్మాణం repository *repo వాడని)
 {
-	int i;
-	int ret = -1;
-	struct stash_info info = STASH_INFO_INIT;
-	struct rev_info rev;
-	struct strvec stash_args = STRVEC_INIT;
-	struct strvec revision_args = STRVEC_INIT;
-	enum {
+	పూర్ణాంకం i;
+	పూర్ణాంకం ret = -1;
+	నిర్మాణం stash_info info = STASH_INFO_INIT;
+	నిర్మాణం rev_info rev;
+	నిర్మాణం strvec stash_వాదనలు = STRVEC_INIT;
+	నిర్మాణం strvec revision_వాదనలు = STRVEC_INIT;
+	గణన {
 		UNTRACKED_NONE,
 		UNTRACKED_INCLUDE,
 		UNTRACKED_ONLY
 	} show_untracked = show_include_untracked ? UNTRACKED_INCLUDE : UNTRACKED_NONE;
-	struct option options[] = {
-		OPT_SET_INT('u', "include-untracked", &show_untracked,
+	నిర్మాణం option options[] = {
+		OPT_సమితి_INT('u', "include-untracked", &show_untracked,
 			    N_("include untracked files in the stash"),
 			    UNTRACKED_INCLUDE),
-		OPT_SET_INT_F(0, "only-untracked", &show_untracked,
+		OPT_సమితి_INT_F(0, "only-untracked", &show_untracked,
 			      N_("only show untracked files in the stash"),
 			      UNTRACKED_ONLY, PARSE_OPT_NONEG),
-		OPT_END()
+		OPT_చివర()
 	};
-	int do_usage = 0;
+	పూర్ణాంకం do_usage = 0;
 
 	init_diff_ui_defaults();
-	repo_config(the_repository, git_diff_ui_config, NULL);
-	repo_init_revisions(the_repository, &rev, prefix);
+	repo_config(the_repository, git_diff_ui_config, ఖాళీ);
+	repo_init_revisions(the_repository, &rev, ఉపసర్గ);
 
-	argc = parse_options(argc, argv, prefix, options, git_stash_show_usage,
+	argc = parse_options(argc, argv, ఉపసర్గ, options, git_stash_show_usage,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT |
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	strvec_push(&revision_args, argv[0]);
-	for (i = 1; i < argc; i++) {
-		if (argv[i][0] != '-')
-			strvec_push(&stash_args, argv[i]);
-		else
-			strvec_push(&revision_args, argv[i]);
+	strvec_నెట్టు(&revision_వాదనలు, argv[0]);
+	కొరకు (i = 1; i < argc; i++) {
+		ఒకవేళ (argv[i][0] != '-')
+			strvec_నెట్టు(&stash_వాదనలు, argv[i]);
+		లేకపోతే
+			strvec_నెట్టు(&revision_వాదనలు, argv[i]);
 	}
 
-	if (get_stash_info(&info, stash_args.nr, stash_args.v))
-		goto cleanup;
+	ఒకవేళ (get_stash_info(&info, stash_వాదనలు.nr, stash_వాదనలు.v))
+		వెళ్ళు cleanup;
 
 	/*
 	 * The config settings are applied only if there are not passed
 	 * any options.
 	 */
-	if (revision_args.nr == 1) {
-		if (show_stat)
+	ఒకవేళ (revision_వాదనలు.nr == 1) {
+		ఒకవేళ (show_stat)
 			rev.diffopt.output_format = DIFF_FORMAT_DIFFSTAT;
 
-		if (show_patch)
+		ఒకవేళ (show_patch)
 			rev.diffopt.output_format |= DIFF_FORMAT_PATCH;
 
-		if (!show_stat && !show_patch) {
+		ఒకవేళ (!show_stat && !show_patch) {
 			ret = 0;
-			goto cleanup;
+			వెళ్ళు cleanup;
 		}
 	}
 
-	setup_revisions_from_strvec(&revision_args, &rev, NULL);
-	if (revision_args.nr > 1)
-		goto usage;
-	if (!rev.diffopt.output_format) {
+	అమరిక_revisions_from_strvec(&revision_వాదనలు, &rev, ఖాళీ);
+	ఒకవేళ (revision_వాదనలు.nr > 1)
+		వెళ్ళు usage;
+	ఒకవేళ (!rev.diffopt.output_format) {
 		rev.diffopt.output_format = DIFF_FORMAT_PATCH;
-		diff_setup_done(&rev.diffopt);
+		diff_అమరిక_పూర్తి(&rev.diffopt);
 	}
 
 	rev.diffopt.flags.recursive = 1;
-	setup_diff_pager(&rev.diffopt);
-	switch (show_untracked) {
-	case UNTRACKED_NONE:
-		diff_tree_oid(&info.b_commit, &info.w_commit, "", &rev.diffopt);
-		break;
-	case UNTRACKED_ONLY:
-		if (info.has_u)
-			diff_root_tree_oid(&info.u_tree, "", &rev.diffopt);
-		break;
-	case UNTRACKED_INCLUDE:
-		if (info.has_u)
+	అమరిక_diff_pager(&rev.diffopt);
+	ఎంపిక (show_untracked) {
+	స్థితి UNTRACKED_NONE:
+		diff_వృక్షం_oid(&info.b_commit, &info.w_commit, "", &rev.diffopt);
+		ఆపు;
+	స్థితి UNTRACKED_ONLY:
+		ఒకవేళ (info.has_u)
+			diff_మూలం_వృక్షం_oid(&info.u_వృక్షం, "", &rev.diffopt);
+		ఆపు;
+	స్థితి UNTRACKED_INCLUDE:
+		ఒకవేళ (info.has_u)
 			diff_include_untracked(&info, &rev.diffopt);
-		else
-			diff_tree_oid(&info.b_commit, &info.w_commit, "", &rev.diffopt);
-		break;
+		లేకపోతే
+			diff_వృక్షం_oid(&info.b_commit, &info.w_commit, "", &rev.diffopt);
+		ఆపు;
 	}
-	log_tree_diff_flush(&rev);
+	log_వృక్షం_diff_flush(&rev);
 
-	ret = diff_result_code(&rev);
+	ret = diff_ఫలితం_సంకేతం(&rev);
 
 cleanup:
-	strvec_clear(&revision_args);
-	strvec_clear(&stash_args);
+	strvec_clear(&revision_వాదనలు);
+	strvec_clear(&stash_వాదనలు);
 	free_stash_info(&info);
 	release_revisions(&rev);
-	if (do_usage)
+	ఒకవేళ (do_usage)
 		usage_with_options(git_stash_show_usage, options);
-	return ret;
+	తిరిగి ret;
 usage:
 	do_usage = 1;
-	goto cleanup;
+	వెళ్ళు cleanup;
 }
 
-static int do_store_stash(const struct object_id *w_commit, const char *stash_msg,
-			  int quiet)
+స్థిర పూర్ణాంకం do_store_stash(స్థిరరాశి నిర్మాణం object_id *w_commit, స్థిరరాశి అక్షరం *stash_సందేశం,
+			  పూర్ణాంకం quiet)
 {
-	struct stash_info info;
-	char revision[GIT_MAX_HEXSZ];
+	నిర్మాణం stash_info info;
+	అక్షరం revision[GIT_MAX_HEXSZ];
 
-	oid_to_hex_r(revision, w_commit);
+	oid_గమ్యం_hex_r(revision, w_commit);
 	assert_stash_like(&info, revision);
 
-	if (!stash_msg)
-		stash_msg = "Created via \"git stash store\".";
+	ఒకవేళ (!stash_సందేశం)
+		stash_సందేశం = "Created via \"git stash store\".";
 
-	if (refs_update_ref(get_main_ref_store(the_repository), stash_msg, ref_stash, w_commit, NULL,
+	ఒకవేళ (refs_update_ref(get_main_ref_store(the_repository), stash_సందేశం, ref_stash, w_commit, ఖాళీ,
 			    REF_FORCE_CREATE_REFLOG,
 			    quiet ? UPDATE_REFS_QUIET_ON_ERR :
-			    UPDATE_REFS_MSG_ON_ERR)) {
-		if (!quiet) {
+			    UPDATE_REFS_సందేశం_ON_ERR)) {
+		ఒకవేళ (!quiet) {
 			fprintf_ln(stderr, _("Cannot update %s with %s"),
-				   ref_stash, oid_to_hex(w_commit));
+				   ref_stash, oid_గమ్యం_hex(w_commit));
 		}
-		return -1;
+		తిరిగి -1;
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int store_stash(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం store_stash(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		       నిర్మాణం repository *repo వాడని)
 {
-	int quiet = 0;
-	const char *stash_msg = NULL;
-	struct object_id obj;
-	struct option options[] = {
+	పూర్ణాంకం quiet = 0;
+	స్థిరరాశి అక్షరం *stash_సందేశం = ఖాళీ;
+	నిర్మాణం object_id obj;
+	నిర్మాణం option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet")),
-		OPT_STRING('m', "message", &stash_msg, "message",
+		OPT_STRING('m', "message", &stash_సందేశం, "message",
 			   N_("stash message")),
-		OPT_END()
+		OPT_చివర()
 	};
-	int ret;
+	పూర్ణాంకం ret;
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     git_stash_store_usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT);
 
-	if (argc != 1) {
-		if (!quiet)
+	ఒకవేళ (argc != 1) {
+		ఒకవేళ (!quiet)
 			fprintf_ln(stderr, _("\"git stash store\" requires one "
 					     "<commit> argument"));
-		return -1;
+		తిరిగి -1;
 	}
 
-	if (repo_get_oid_with_flags(the_repository, argv[0], &obj,
+	ఒకవేళ (repo_get_oid_with_flags(the_repository, argv[0], &obj,
 				    quiet ? GET_OID_QUIETLY : 0)) {
-		if (!quiet)
+		ఒకవేళ (!quiet)
 			fprintf_ln(stderr, _("Cannot update %s with %s"),
 					     ref_stash, argv[0]);
 		ret = -1;
-		goto out;
+		వెళ్ళు బహిర్గతం;
 	}
 
-	ret = do_store_stash(&obj, stash_msg, quiet);
+	ret = do_store_stash(&obj, stash_సందేశం, quiet);
 
-out:
-	return ret;
+బహిర్గతం:
+	తిరిగి ret;
 }
 
-static void add_pathspecs(struct strvec *args,
-			  const struct pathspec *ps) {
-	int i;
+స్థిర శూన్య కూడు_pathspecs(నిర్మాణం strvec *వాదనలు,
+			  స్థిరరాశి నిర్మాణం pathspec *ps) {
+	పూర్ణాంకం i;
 
-	for (i = 0; i < ps->nr; i++)
-		strvec_push(args, ps->items[i].original);
+	కొరకు (i = 0; i < ps->nr; i++)
+		strvec_నెట్టు(వాదనలు, ps->వస్తువులు[i].original);
 }
 
 /*
@@ -1164,27 +1164,27 @@ static void add_pathspecs(struct strvec *args,
  * = 0 if there are not any untracked files
  * > 0 if there are untracked files
  */
-static int get_untracked_files(const struct pathspec *ps, int include_untracked,
-			       struct strbuf *untracked_files)
+స్థిర పూర్ణాంకం get_untracked_files(స్థిరరాశి నిర్మాణం pathspec *ps, పూర్ణాంకం include_untracked,
+			       నిర్మాణం strbuf *untracked_files)
 {
-	int i;
-	int found = 0;
-	struct dir_struct dir = DIR_INIT;
+	పూర్ణాంకం i;
+	పూర్ణాంకం దొరికింది_2 = 0;
+	నిర్మాణం dir_struct dir = DIR_INIT;
 
-	if (include_untracked != INCLUDE_ALL_FILES)
-		setup_standard_excludes(&dir);
+	ఒకవేళ (include_untracked != INCLUDE_ALL_FILES)
+		అమరిక_standard_excludes(&dir);
 
-	fill_directory(&dir, the_repository->index, ps);
-	for (i = 0; i < dir.nr; i++) {
-		struct dir_entry *ent = dir.entries[i];
-		found++;
+	fill_directory(&dir, the_repository->సూచీ, ps);
+	కొరకు (i = 0; i < dir.nr; i++) {
+		నిర్మాణం dir_నమోదు *ent = dir.entries[i];
+		దొరికింది_2++;
 		strbuf_addstr(untracked_files, ent->name);
 		/* NUL-terminate: will be fed to update-index -z */
 		strbuf_addch(untracked_files, '\0');
 	}
 
 	dir_clear(&dir);
-	return found;
+	తిరిగి దొరికింది_2;
 }
 
 /*
@@ -1194,593 +1194,593 @@ static int get_untracked_files(const struct pathspec *ps, int include_untracked,
  * = 0 if there are no changes.
  * > 0 if there are changes.
  */
-static int check_changes_tracked_files(const struct pathspec *ps)
+స్థిర పూర్ణాంకం check_changes_tracked_files(స్థిరరాశి నిర్మాణం pathspec *ps)
 {
-	struct rev_info rev;
-	struct object_id dummy;
-	int ret = 0;
+	నిర్మాణం rev_info rev;
+	నిర్మాణం object_id dummy;
+	పూర్ణాంకం ret = 0;
 
 	/* No initial commit. */
-	if (repo_get_oid(the_repository, "HEAD", &dummy))
-		return -1;
+	ఒకవేళ (repo_get_oid(the_repository, "HEAD", &dummy))
+		తిరిగి -1;
 
-	if (repo_read_index(the_repository) < 0)
-		return -1;
+	ఒకవేళ (repo_read_సూచీ(the_repository) < 0)
+		తిరిగి -1;
 
-	repo_init_revisions(the_repository, &rev, NULL);
-	copy_pathspec(&rev.prune_data, ps);
+	repo_init_revisions(the_repository, &rev, ఖాళీ);
+	copy_pathspec(&rev.prune_దత్తాంశం, ps);
 
-	rev.diffopt.flags.quick = 1;
+	rev.diffopt.flags.శీఘ్ర = 1;
 	rev.diffopt.flags.ignore_submodules = 1;
 	rev.abbrev = 0;
 
-	add_head_to_pending(&rev);
-	diff_setup_done(&rev.diffopt);
+	కూడు_తల_గమ్యం_pending(&rev);
+	diff_అమరిక_పూర్తి(&rev.diffopt);
 
-	run_diff_index(&rev, DIFF_INDEX_CACHED);
-	if (diff_result_code(&rev)) {
+	నిరంతరం_diff_సూచీ(&rev, DIFF_సూచీ_CACHED);
+	ఒకవేళ (diff_ఫలితం_సంకేతం(&rev)) {
 		ret = 1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	run_diff_files(&rev, 0);
-	if (diff_result_code(&rev)) {
+	నిరంతరం_diff_files(&rev, 0);
+	ఒకవేళ (diff_ఫలితం_సంకేతం(&rev)) {
 		ret = 1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-done:
+పూర్తి:
 	release_revisions(&rev);
-	return ret;
+	తిరిగి ret;
 }
 
 /*
  * The function will fill `untracked_files` with the names of untracked files
  * It will return 1 if there were any changes and 0 if there were not.
  */
-static int check_changes(const struct pathspec *ps, int include_untracked,
-			 struct strbuf *untracked_files)
+స్థిర పూర్ణాంకం check_changes(స్థిరరాశి నిర్మాణం pathspec *ps, పూర్ణాంకం include_untracked,
+			 నిర్మాణం strbuf *untracked_files)
 {
-	int ret = 0;
-	if (check_changes_tracked_files(ps))
+	పూర్ణాంకం ret = 0;
+	ఒకవేళ (check_changes_tracked_files(ps))
 		ret = 1;
 
-	if (include_untracked && get_untracked_files(ps, include_untracked,
+	ఒకవేళ (include_untracked && get_untracked_files(ps, include_untracked,
 						     untracked_files))
 		ret = 1;
 
-	return ret;
+	తిరిగి ret;
 }
 
-static int save_untracked_files(struct stash_info *info, struct strbuf *msg,
-				struct strbuf *files)
+స్థిర పూర్ణాంకం save_untracked_files(నిర్మాణం stash_info *info, నిర్మాణం strbuf *సందేశం,
+				నిర్మాణం strbuf *files)
 {
-	int ret = 0;
-	struct strbuf untracked_msg = STRBUF_INIT;
-	struct child_process cp_upd_index = CHILD_PROCESS_INIT;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
+	పూర్ణాంకం ret = 0;
+	నిర్మాణం strbuf untracked_సందేశం = STRBUF_INIT;
+	నిర్మాణం బిడ్డ_process cp_upd_సూచీ = బిడ్డ_PROCESS_INIT;
+	నిర్మాణం సూచీ_state istate = సూచీ_STATE_INIT(the_repository);
 
-	cp_upd_index.git_cmd = 1;
-	strvec_pushl(&cp_upd_index.args, "update-index", "-z", "--add",
-		     "--remove", "--stdin", NULL);
-	strvec_pushf(&cp_upd_index.env, "GIT_INDEX_FILE=%s",
-			 stash_index_path.buf);
+	cp_upd_సూచీ.git_cmd = 1;
+	strvec_pushl(&cp_upd_సూచీ.వాదనలు, "update-index", "-z", "--add",
+		     "--remove", "--stdin", ఖాళీ);
+	strvec_pushf(&cp_upd_సూచీ.env, "GIT_INDEX_FILE=%s",
+			 stash_సూచీ_మార్గం.buf);
 
-	strbuf_addf(&untracked_msg, "untracked files on %s\n", msg->buf);
-	if (pipe_command(&cp_upd_index, files->buf, files->len, NULL, 0,
-			 NULL, 0)) {
+	strbuf_addf(&untracked_సందేశం, "untracked files on %s\n", సందేశం->buf);
+	ఒకవేళ (pipe_command(&cp_upd_సూచీ, files->buf, files->len, ఖాళీ, 0,
+			 ఖాళీ, 0)) {
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	if (write_index_as_tree(&info->u_tree, &istate, stash_index_path.buf, 0,
-				NULL)) {
+	ఒకవేళ (write_సూచీ_as_వృక్షం(&info->u_వృక్షం, &istate, stash_సూచీ_మార్గం.buf, 0,
+				ఖాళీ)) {
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	if (commit_tree(untracked_msg.buf, untracked_msg.len,
-			&info->u_tree, NULL, &info->u_commit, NULL, NULL)) {
+	ఒకవేళ (commit_వృక్షం(untracked_సందేశం.buf, untracked_సందేశం.len,
+			&info->u_వృక్షం, ఖాళీ, &info->u_commit, ఖాళీ, ఖాళీ)) {
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-done:
-	release_index(&istate);
-	strbuf_release(&untracked_msg);
-	remove_path(stash_index_path.buf);
-	return ret;
+పూర్తి:
+	release_సూచీ(&istate);
+	strbuf_release(&untracked_సందేశం);
+	remove_మార్గం(stash_సూచీ_మార్గం.buf);
+	తిరిగి ret;
 }
 
-static int stash_staged(struct stash_info *info, struct strbuf *out_patch,
-			int quiet)
+స్థిర పూర్ణాంకం stash_staged(నిర్మాణం stash_info *info, నిర్మాణం strbuf *బహిర్గతం_patch,
+			పూర్ణాంకం quiet)
 {
-	int ret = 0;
-	struct child_process cp_diff_tree = CHILD_PROCESS_INIT;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
+	పూర్ణాంకం ret = 0;
+	నిర్మాణం బిడ్డ_process cp_diff_వృక్షం = బిడ్డ_PROCESS_INIT;
+	నిర్మాణం సూచీ_state istate = సూచీ_STATE_INIT(the_repository);
 
-	if (write_index_as_tree(&info->w_tree, &istate, the_repository->index_file,
-				0, NULL)) {
+	ఒకవేళ (write_సూచీ_as_వృక్షం(&info->w_వృక్షం, &istate, the_repository->సూచీ_file,
+				0, ఖాళీ)) {
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	cp_diff_tree.git_cmd = 1;
-	strvec_pushl(&cp_diff_tree.args, "diff-tree", "-p", "--binary",
+	cp_diff_వృక్షం.git_cmd = 1;
+	strvec_pushl(&cp_diff_వృక్షం.వాదనలు, "diff-tree", "-p", "--binary",
 		     "--no-color",
-		     "-U1", "HEAD", oid_to_hex(&info->w_tree), "--", NULL);
-	if (pipe_command(&cp_diff_tree, NULL, 0, out_patch, 0, NULL, 0)) {
+		     "-U1", "HEAD", oid_గమ్యం_hex(&info->w_వృక్షం), "--", ఖాళీ);
+	ఒకవేళ (pipe_command(&cp_diff_వృక్షం, ఖాళీ, 0, బహిర్గతం_patch, 0, ఖాళీ, 0)) {
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	if (!out_patch->len) {
-		if (!quiet)
+	ఒకవేళ (!బహిర్గతం_patch->len) {
+		ఒకవేళ (!quiet)
 			fprintf_ln(stderr, _("No staged changes"));
 		ret = 1;
 	}
 
-done:
-	release_index(&istate);
-	return ret;
+పూర్తి:
+	release_సూచీ(&istate);
+	తిరిగి ret;
 }
 
-static int stash_patch(struct stash_info *info, const struct pathspec *ps,
-		       struct strbuf *out_patch, int quiet,
-		       struct interactive_options *interactive_opts)
+స్థిర పూర్ణాంకం stash_patch(నిర్మాణం stash_info *info, స్థిరరాశి నిర్మాణం pathspec *ps,
+		       నిర్మాణం strbuf *బహిర్గతం_patch, పూర్ణాంకం quiet,
+		       నిర్మాణం interactive_options *interactive_opts)
 {
-	int ret = 0;
-	struct child_process cp_diff_tree = CHILD_PROCESS_INIT;
-	struct commit *head_commit;
-	const struct object_id *head_tree;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
-	char *old_index_env = NULL, *old_repo_index_file;
+	పూర్ణాంకం ret = 0;
+	నిర్మాణం బిడ్డ_process cp_diff_వృక్షం = బిడ్డ_PROCESS_INIT;
+	నిర్మాణం commit *తల_commit;
+	స్థిరరాశి నిర్మాణం object_id *తల_వృక్షం;
+	నిర్మాణం సూచీ_state istate = సూచీ_STATE_INIT(the_repository);
+	అక్షరం *old_సూచీ_env = ఖాళీ, *old_repo_సూచీ_file;
 
-	remove_path(stash_index_path.buf);
+	remove_మార్గం(stash_సూచీ_మార్గం.buf);
 
-	head_commit = lookup_commit(the_repository, &info->b_commit);
-	if (!head_commit || repo_parse_commit(the_repository, head_commit)) {
+	తల_commit = lookup_commit(the_repository, &info->b_commit);
+	ఒకవేళ (!తల_commit || repo_parse_commit(the_repository, తల_commit)) {
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
-	head_tree = get_commit_tree_oid(head_commit);
-	if (!head_tree) {
+	తల_వృక్షం = get_commit_వృక్షం_oid(తల_commit);
+	ఒకవేళ (!తల_వృక్షం) {
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	if (create_index_from_tree(head_tree, stash_index_path.buf)) {
+	ఒకవేళ (create_సూచీ_from_వృక్షం(తల_వృక్షం, stash_సూచీ_మార్గం.buf)) {
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
 	/* Find out what the user wants. */
-	old_repo_index_file = the_repository->index_file;
-	the_repository->index_file = stash_index_path.buf;
-	old_index_env = xstrdup_or_null(getenv(INDEX_ENVIRONMENT));
-	setenv(INDEX_ENVIRONMENT, the_repository->index_file, 1);
+	old_repo_సూచీ_file = the_repository->సూచీ_file;
+	the_repository->సూచీ_file = stash_సూచీ_మార్గం.buf;
+	old_సూచీ_env = xstrdup_or_null(getenv(సూచీ_ENVIRONMENT));
+	setenv(సూచీ_ENVIRONMENT, the_repository->సూచీ_file, 1);
 
-	ret = !!run_add_p(the_repository, ADD_P_STASH, interactive_opts, NULL, ps, 0);
+	ret = !!నిరంతరం_కూడు_p(the_repository, కూడు_P_STASH, interactive_opts, ఖాళీ, ps, 0);
 
-	the_repository->index_file = old_repo_index_file;
-	if (old_index_env && *old_index_env)
-		setenv(INDEX_ENVIRONMENT, old_index_env, 1);
-	else
-		unsetenv(INDEX_ENVIRONMENT);
-	FREE_AND_NULL(old_index_env);
+	the_repository->సూచీ_file = old_repo_సూచీ_file;
+	ఒకవేళ (old_సూచీ_env && *old_సూచీ_env)
+		setenv(సూచీ_ENVIRONMENT, old_సూచీ_env, 1);
+	లేకపోతే
+		unsetenv(సూచీ_ENVIRONMENT);
+	FREE_AND_NULL(old_సూచీ_env);
 
 	/* State of the working tree. */
-	if (write_index_as_tree(&info->w_tree, &istate, stash_index_path.buf, 0,
-				NULL)) {
+	ఒకవేళ (write_సూచీ_as_వృక్షం(&info->w_వృక్షం, &istate, stash_సూచీ_మార్గం.buf, 0,
+				ఖాళీ)) {
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	cp_diff_tree.git_cmd = 1;
-	strvec_pushl(&cp_diff_tree.args, "diff-tree", "-p", "-U1", "HEAD",
+	cp_diff_వృక్షం.git_cmd = 1;
+	strvec_pushl(&cp_diff_వృక్షం.వాదనలు, "diff-tree", "-p", "-U1", "HEAD",
 		     "--no-color",
-		     oid_to_hex(&info->w_tree), "--", NULL);
-	if (pipe_command(&cp_diff_tree, NULL, 0, out_patch, 0, NULL, 0)) {
+		     oid_గమ్యం_hex(&info->w_వృక్షం), "--", ఖాళీ);
+	ఒకవేళ (pipe_command(&cp_diff_వృక్షం, ఖాళీ, 0, బహిర్గతం_patch, 0, ఖాళీ, 0)) {
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	if (!out_patch->len) {
-		if (!quiet)
+	ఒకవేళ (!బహిర్గతం_patch->len) {
+		ఒకవేళ (!quiet)
 			fprintf_ln(stderr, _("No changes selected"));
 		ret = 1;
 	}
 
-done:
-	release_index(&istate);
-	remove_path(stash_index_path.buf);
-	return ret;
+పూర్తి:
+	release_సూచీ(&istate);
+	remove_మార్గం(stash_సూచీ_మార్గం.buf);
+	తిరిగి ret;
 }
 
-static int stash_working_tree(struct stash_info *info, const struct pathspec *ps)
+స్థిర పూర్ణాంకం stash_working_వృక్షం(నిర్మాణం stash_info *info, స్థిరరాశి నిర్మాణం pathspec *ps)
 {
-	int ret = 0;
-	struct rev_info rev;
-	struct child_process cp_upd_index = CHILD_PROCESS_INIT;
-	struct strbuf diff_output = STRBUF_INIT;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
+	పూర్ణాంకం ret = 0;
+	నిర్మాణం rev_info rev;
+	నిర్మాణం బిడ్డ_process cp_upd_సూచీ = బిడ్డ_PROCESS_INIT;
+	నిర్మాణం strbuf diff_output = STRBUF_INIT;
+	నిర్మాణం సూచీ_state istate = సూచీ_STATE_INIT(the_repository);
 
-	repo_init_revisions(the_repository, &rev, NULL);
-	copy_pathspec(&rev.prune_data, ps);
+	repo_init_revisions(the_repository, &rev, ఖాళీ);
+	copy_pathspec(&rev.prune_దత్తాంశం, ps);
 
-	set_alternate_index_output(stash_index_path.buf);
-	if (reset_tree(&info->i_tree, 0, 0)) {
+	సమితి_alternate_సూచీ_output(stash_సూచీ_మార్గం.buf);
+	ఒకవేళ (reset_వృక్షం(&info->i_వృక్షం, 0, 0)) {
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
-	set_alternate_index_output(NULL);
+	సమితి_alternate_సూచీ_output(ఖాళీ);
 
 	rev.diffopt.output_format = DIFF_FORMAT_CALLBACK;
-	rev.diffopt.format_callback = add_diff_to_buf;
-	rev.diffopt.format_callback_data = &diff_output;
+	rev.diffopt.format_callback = కూడు_diff_గమ్యం_buf;
+	rev.diffopt.format_callback_దత్తాంశం = &diff_output;
 
-	if (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
+	ఒకవేళ (repo_read_సూచీ_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	add_pending_object(&rev, parse_object(the_repository, &info->b_commit),
+	కూడు_pending_object(&rev, parse_object(the_repository, &info->b_commit),
 			   "");
-	run_diff_index(&rev, 0);
+	నిరంతరం_diff_సూచీ(&rev, 0);
 
-	cp_upd_index.git_cmd = 1;
-	strvec_pushl(&cp_upd_index.args, "update-index",
+	cp_upd_సూచీ.git_cmd = 1;
+	strvec_pushl(&cp_upd_సూచీ.వాదనలు, "update-index",
 		     "--ignore-skip-worktree-entries",
-		     "-z", "--add", "--remove", "--stdin", NULL);
-	strvec_pushf(&cp_upd_index.env, "GIT_INDEX_FILE=%s",
-		     stash_index_path.buf);
+		     "-z", "--add", "--remove", "--stdin", ఖాళీ);
+	strvec_pushf(&cp_upd_సూచీ.env, "GIT_INDEX_FILE=%s",
+		     stash_సూచీ_మార్గం.buf);
 
-	if (pipe_command(&cp_upd_index, diff_output.buf, diff_output.len,
-			 NULL, 0, NULL, 0)) {
+	ఒకవేళ (pipe_command(&cp_upd_సూచీ, diff_output.buf, diff_output.len,
+			 ఖాళీ, 0, ఖాళీ, 0)) {
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	if (write_index_as_tree(&info->w_tree, &istate, stash_index_path.buf, 0,
-				NULL)) {
+	ఒకవేళ (write_సూచీ_as_వృక్షం(&info->w_వృక్షం, &istate, stash_సూచీ_మార్గం.buf, 0,
+				ఖాళీ)) {
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-done:
-	release_index(&istate);
+పూర్తి:
+	release_సూచీ(&istate);
 	release_revisions(&rev);
 	strbuf_release(&diff_output);
-	remove_path(stash_index_path.buf);
-	return ret;
+	remove_మార్గం(stash_సూచీ_మార్గం.buf);
+	తిరిగి ret;
 }
 
-static int do_create_stash(const struct pathspec *ps, struct strbuf *stash_msg_buf,
-			   int include_untracked, int patch_mode,
-			   struct interactive_options *interactive_opts,
-			   int only_staged, struct stash_info *info, struct strbuf *patch,
-			   int quiet)
+స్థిర పూర్ణాంకం do_create_stash(స్థిరరాశి నిర్మాణం pathspec *ps, నిర్మాణం strbuf *stash_సందేశం_buf,
+			   పూర్ణాంకం include_untracked, పూర్ణాంకం patch_బహుళకం,
+			   నిర్మాణం interactive_options *interactive_opts,
+			   పూర్ణాంకం only_staged, నిర్మాణం stash_info *info, నిర్మాణం strbuf *patch,
+			   పూర్ణాంకం quiet)
 {
-	int ret = 0;
-	int flags = 0;
-	int untracked_commit_option = 0;
-	const char *head_short_sha1 = NULL;
-	const char *branch_ref = NULL;
-	const char *branch_name = "(no branch)";
-	char *branch_name_buf = NULL;
-	struct commit *head_commit = NULL;
-	struct commit_list *parents = NULL;
-	struct strbuf msg = STRBUF_INIT;
-	struct strbuf commit_tree_label = STRBUF_INIT;
-	struct strbuf untracked_files = STRBUF_INIT;
+	పూర్ణాంకం ret = 0;
+	పూర్ణాంకం flags = 0;
+	పూర్ణాంకం untracked_commit_option = 0;
+	స్థిరరాశి అక్షరం *తల_short_sha1 = ఖాళీ;
+	స్థిరరాశి అక్షరం *branch_ref = ఖాళీ;
+	స్థిరరాశి అక్షరం *branch_name = "(no branch)";
+	అక్షరం *branch_name_buf = ఖాళీ;
+	నిర్మాణం commit *తల_commit = ఖాళీ;
+	నిర్మాణం commit_list *parents = ఖాళీ;
+	నిర్మాణం strbuf సందేశం = STRBUF_INIT;
+	నిర్మాణం strbuf commit_వృక్షం_label = STRBUF_INIT;
+	నిర్మాణం strbuf untracked_files = STRBUF_INIT;
 
 	prepare_fallback_ident("git stash", "git@stash");
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
-					 NULL, NULL, NULL) < 0) {
+	repo_read_సూచీ_preload(the_repository, ఖాళీ, 0);
+	ఒకవేళ (repo_refresh_and_write_సూచీ(the_repository, REFRESH_QUIET, 0, 0,
+					 ఖాళీ, ఖాళీ, ఖాళీ) < 0) {
 		ret = error(_("could not write index"));
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	if (repo_get_oid(the_repository, "HEAD", &info->b_commit)) {
-		if (!quiet)
+	ఒకవేళ (repo_get_oid(the_repository, "HEAD", &info->b_commit)) {
+		ఒకవేళ (!quiet)
 			fprintf_ln(stderr, _("You do not have "
 					     "the initial commit yet"));
 		ret = -1;
-		goto done;
-	} else {
-		head_commit = lookup_commit(the_repository, &info->b_commit);
+		వెళ్ళు పూర్తి;
+	} లేకపోతే {
+		తల_commit = lookup_commit(the_repository, &info->b_commit);
 	}
 
-	if (!check_changes(ps, include_untracked, &untracked_files)) {
+	ఒకవేళ (!check_changes(ps, include_untracked, &untracked_files)) {
 		ret = 1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
 	branch_ref = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
-					     "HEAD", 0, NULL, &flags);
+					     "HEAD", 0, ఖాళీ, &flags);
 
-	if (flags & REF_ISSYMREF) {
-		if (skip_prefix(branch_ref, "refs/heads/", &branch_name))
+	ఒకవేళ (flags & REF_ISSYMREF) {
+		ఒకవేళ (skip_ఉపసర్గ(branch_ref, "refs/heads/", &branch_name))
 			branch_name = branch_name_buf = xstrdup(branch_name);
 	}
 
-	head_short_sha1 = repo_find_unique_abbrev(the_repository,
-						  &head_commit->object.oid,
+	తల_short_sha1 = repo_కనుగొను_unique_abbrev(the_repository,
+						  &తల_commit->object.oid,
 						  DEFAULT_ABBREV);
-	strbuf_addf(&msg, "%s: %s ", branch_name, head_short_sha1);
-	pp_commit_easy(CMIT_FMT_ONELINE, head_commit, &msg);
+	strbuf_addf(&సందేశం, "%s: %s ", branch_name, తల_short_sha1);
+	pp_commit_easy(CMIT_FMT_ONELINE, తల_commit, &సందేశం);
 
-	strbuf_addf(&commit_tree_label, "index on %s\n", msg.buf);
-	commit_list_insert(head_commit, &parents);
-	if (write_index_as_tree(&info->i_tree, the_repository->index,
-				repo_get_index_file(the_repository), 0, NULL) ||
-	    commit_tree(commit_tree_label.buf, commit_tree_label.len,
-			&info->i_tree, parents, &info->i_commit, NULL, NULL)) {
-		if (!quiet)
+	strbuf_addf(&commit_వృక్షం_label, "index on %s\n", సందేశం.buf);
+	commit_list_చొప్పించు(తల_commit, &parents);
+	ఒకవేళ (write_సూచీ_as_వృక్షం(&info->i_వృక్షం, the_repository->సూచీ,
+				repo_get_సూచీ_file(the_repository), 0, ఖాళీ) ||
+	    commit_వృక్షం(commit_వృక్షం_label.buf, commit_వృక్షం_label.len,
+			&info->i_వృక్షం, parents, &info->i_commit, ఖాళీ, ఖాళీ)) {
+		ఒకవేళ (!quiet)
 			fprintf_ln(stderr, _("Cannot save the current "
 					     "index state"));
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
 	commit_list_free(parents);
-	parents = NULL;
+	parents = ఖాళీ;
 
-	if (include_untracked) {
-		if (save_untracked_files(info, &msg, &untracked_files)) {
-			if (!quiet)
+	ఒకవేళ (include_untracked) {
+		ఒకవేళ (save_untracked_files(info, &సందేశం, &untracked_files)) {
+			ఒకవేళ (!quiet)
 				fprintf_ln(stderr, _("Cannot save "
 						     "the untracked files"));
 			ret = -1;
-			goto done;
+			వెళ్ళు పూర్తి;
 		}
 		untracked_commit_option = 1;
 	}
-	if (patch_mode) {
+	ఒకవేళ (patch_బహుళకం) {
 		ret = stash_patch(info, ps, patch, quiet, interactive_opts);
-		if (ret < 0) {
-			if (!quiet)
+		ఒకవేళ (ret < 0) {
+			ఒకవేళ (!quiet)
 				fprintf_ln(stderr, _("Cannot save the current "
 						     "worktree state"));
-			goto done;
-		} else if (ret > 0) {
-			goto done;
+			వెళ్ళు పూర్తి;
+		} లేకపోతే ఒకవేళ (ret > 0) {
+			వెళ్ళు పూర్తి;
 		}
-	} else if (only_staged) {
+	} లేకపోతే ఒకవేళ (only_staged) {
 		ret = stash_staged(info, patch, quiet);
-		if (ret < 0) {
-			if (!quiet)
+		ఒకవేళ (ret < 0) {
+			ఒకవేళ (!quiet)
 				fprintf_ln(stderr, _("Cannot save the current "
 						     "staged state"));
-			goto done;
-		} else if (ret > 0) {
-			goto done;
+			వెళ్ళు పూర్తి;
+		} లేకపోతే ఒకవేళ (ret > 0) {
+			వెళ్ళు పూర్తి;
 		}
-	} else {
-		if (stash_working_tree(info, ps)) {
-			if (!quiet)
+	} లేకపోతే {
+		ఒకవేళ (stash_working_వృక్షం(info, ps)) {
+			ఒకవేళ (!quiet)
 				fprintf_ln(stderr, _("Cannot save the current "
 						     "worktree state"));
 			ret = -1;
-			goto done;
+			వెళ్ళు పూర్తి;
 		}
 	}
 
-	if (!stash_msg_buf->len)
-		strbuf_addf(stash_msg_buf, "WIP on %s", msg.buf);
-	else
-		strbuf_insertf(stash_msg_buf, 0, "On %s: ", branch_name);
+	ఒకవేళ (!stash_సందేశం_buf->len)
+		strbuf_addf(stash_సందేశం_buf, "WIP on %s", సందేశం.buf);
+	లేకపోతే
+		strbuf_insertf(stash_సందేశం_buf, 0, "On %s: ", branch_name);
 
-	if (untracked_commit_option)
-		commit_list_insert(lookup_commit(the_repository,
+	ఒకవేళ (untracked_commit_option)
+		commit_list_చొప్పించు(lookup_commit(the_repository,
 						 &info->u_commit),
 				   &parents);
-	commit_list_insert(lookup_commit(the_repository, &info->i_commit),
+	commit_list_చొప్పించు(lookup_commit(the_repository, &info->i_commit),
 			   &parents);
-	commit_list_insert(head_commit, &parents);
+	commit_list_చొప్పించు(తల_commit, &parents);
 
-	if (commit_tree(stash_msg_buf->buf, stash_msg_buf->len, &info->w_tree,
-			parents, &info->w_commit, NULL, NULL)) {
-		if (!quiet)
+	ఒకవేళ (commit_వృక్షం(stash_సందేశం_buf->buf, stash_సందేశం_buf->len, &info->w_వృక్షం,
+			parents, &info->w_commit, ఖాళీ, ఖాళీ)) {
+		ఒకవేళ (!quiet)
 			fprintf_ln(stderr, _("Cannot record "
 					     "working tree state"));
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-done:
-	strbuf_release(&commit_tree_label);
-	strbuf_release(&msg);
+పూర్తి:
+	strbuf_release(&commit_వృక్షం_label);
+	strbuf_release(&సందేశం);
 	strbuf_release(&untracked_files);
 	commit_list_free(parents);
-	free(branch_name_buf);
-	return ret;
+	విడుదల(branch_name_buf);
+	తిరిగి ret;
 }
 
-static int create_stash(int argc, const char **argv, const char *prefix UNUSED,
-			struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం create_stash(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ వాడని,
+			నిర్మాణం repository *repo వాడని)
 {
-	int ret;
-	struct strbuf stash_msg_buf = STRBUF_INIT;
-	struct stash_info info = STASH_INFO_INIT;
-	struct pathspec ps;
+	పూర్ణాంకం ret;
+	నిర్మాణం strbuf stash_సందేశం_buf = STRBUF_INIT;
+	నిర్మాణం stash_info info = STASH_INFO_INIT;
+	నిర్మాణం pathspec ps;
 
 	/* Starting with argv[1], since argv[0] is "create" */
-	strbuf_join_argv(&stash_msg_buf, argc - 1, ++argv, ' ');
+	strbuf_join_argv(&stash_సందేశం_buf, argc - 1, ++argv, ' ');
 
-	memset(&ps, 0, sizeof(ps));
-	if (!check_changes_tracked_files(&ps))
-		return 0;
+	memset(&ps, 0, పరిమాణం(ps));
+	ఒకవేళ (!check_changes_tracked_files(&ps))
+		తిరిగి 0;
 
-	ret = do_create_stash(&ps, &stash_msg_buf, 0, 0, NULL, 0, &info,
-			      NULL, 0);
-	if (!ret)
-		printf_ln("%s", oid_to_hex(&info.w_commit));
+	ret = do_create_stash(&ps, &stash_సందేశం_buf, 0, 0, ఖాళీ, 0, &info,
+			      ఖాళీ, 0);
+	ఒకవేళ (!ret)
+		printf_ln("%s", oid_గమ్యం_hex(&info.w_commit));
 
 	free_stash_info(&info);
-	strbuf_release(&stash_msg_buf);
-	return ret;
+	strbuf_release(&stash_సందేశం_buf);
+	తిరిగి ret;
 }
 
-static int do_push_stash(const struct pathspec *ps, const char *stash_msg, int quiet,
-			 int keep_index, int patch_mode,
-			 struct interactive_options *interactive_opts,
-			 int include_untracked, int only_staged)
+స్థిర పూర్ణాంకం do_నెట్టు_stash(స్థిరరాశి నిర్మాణం pathspec *ps, స్థిరరాశి అక్షరం *stash_సందేశం, పూర్ణాంకం quiet,
+			 పూర్ణాంకం keep_సూచీ, పూర్ణాంకం patch_బహుళకం,
+			 నిర్మాణం interactive_options *interactive_opts,
+			 పూర్ణాంకం include_untracked, పూర్ణాంకం only_staged)
 {
-	int ret = 0;
-	struct stash_info info = STASH_INFO_INIT;
-	struct strbuf patch = STRBUF_INIT;
-	struct strbuf stash_msg_buf = STRBUF_INIT;
-	struct strbuf untracked_files = STRBUF_INIT;
-	struct strbuf out = STRBUF_INIT;
+	పూర్ణాంకం ret = 0;
+	నిర్మాణం stash_info info = STASH_INFO_INIT;
+	నిర్మాణం strbuf patch = STRBUF_INIT;
+	నిర్మాణం strbuf stash_సందేశం_buf = STRBUF_INIT;
+	నిర్మాణం strbuf untracked_files = STRBUF_INIT;
+	నిర్మాణం strbuf బహిర్గతం = STRBUF_INIT;
 
-	if (patch_mode && keep_index == -1)
-		keep_index = 1;
+	ఒకవేళ (patch_బహుళకం && keep_సూచీ == -1)
+		keep_సూచీ = 1;
 
-	if (patch_mode && include_untracked) {
+	ఒకవేళ (patch_బహుళకం && include_untracked) {
 		fprintf_ln(stderr, _("Can't use --patch and --include-untracked"
 				     " or --all at the same time"));
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
 	/* --patch overrides --staged */
-	if (patch_mode)
+	ఒకవేళ (patch_బహుళకం)
 		only_staged = 0;
 
-	if (only_staged && include_untracked) {
+	ఒకవేళ (only_staged && include_untracked) {
 		fprintf_ln(stderr, _("Can't use --staged and --include-untracked"
 				     " or --all at the same time"));
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (!include_untracked && ps->nr) {
-		char *ps_matched = xcalloc(ps->nr, 1);
+	repo_read_సూచీ_preload(the_repository, ఖాళీ, 0);
+	ఒకవేళ (!include_untracked && ps->nr) {
+		అక్షరం *ps_matched = xcalloc(ps->nr, 1);
 
-		if (pathspec_needs_expanded_index(the_repository->index, ps))
-			ensure_full_index(the_repository->index);
-		for (size_t i = 0; i < the_repository->index->cache_nr; i++)
-			ce_path_match(the_repository->index, the_repository->index->cache[i], ps,
+		ఒకవేళ (pathspec_needs_expanded_సూచీ(the_repository->సూచీ, ps))
+			ensure_నిండిన_సూచీ(the_repository->సూచీ);
+		కొరకు (కొలత_t i = 0; i < the_repository->సూచీ->cache_nr; i++)
+			ce_మార్గం_సరిపోలిక(the_repository->సూచీ, the_repository->సూచీ->cache[i], ps,
 				      ps_matched);
 
-		if (report_path_error(ps_matched, ps)) {
+		ఒకవేళ (report_మార్గం_error(ps_matched, ps)) {
 			fprintf_ln(stderr, _("Did you forget to 'git add'?"));
 			ret = -1;
-			free(ps_matched);
-			goto done;
+			విడుదల(ps_matched);
+			వెళ్ళు పూర్తి;
 		}
-		free(ps_matched);
+		విడుదల(ps_matched);
 	}
 
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
-					 NULL, NULL, NULL)) {
+	ఒకవేళ (repo_refresh_and_write_సూచీ(the_repository, REFRESH_QUIET, 0, 0,
+					 ఖాళీ, ఖాళీ, ఖాళీ)) {
 		ret = error(_("could not write index"));
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	if (!check_changes(ps, include_untracked, &untracked_files)) {
-		if (!quiet)
+	ఒకవేళ (!check_changes(ps, include_untracked, &untracked_files)) {
+		ఒకవేళ (!quiet)
 			printf_ln(_("No local changes to save"));
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	if (!refs_reflog_exists(get_main_ref_store(the_repository), ref_stash) && do_clear_stash()) {
+	ఒకవేళ (!refs_reflog_exists(get_main_ref_store(the_repository), ref_stash) && do_clear_stash()) {
 		ret = -1;
-		if (!quiet)
+		ఒకవేళ (!quiet)
 			fprintf_ln(stderr, _("Cannot initialize stash"));
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	if (stash_msg)
-		strbuf_addstr(&stash_msg_buf, stash_msg);
-	if (do_create_stash(ps, &stash_msg_buf, include_untracked, patch_mode,
+	ఒకవేళ (stash_సందేశం)
+		strbuf_addstr(&stash_సందేశం_buf, stash_సందేశం);
+	ఒకవేళ (do_create_stash(ps, &stash_సందేశం_buf, include_untracked, patch_బహుళకం,
 			    interactive_opts, only_staged, &info, &patch, quiet)) {
 		ret = -1;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	if (do_store_stash(&info.w_commit, stash_msg_buf.buf, 1)) {
+	ఒకవేళ (do_store_stash(&info.w_commit, stash_సందేశం_buf.buf, 1)) {
 		ret = -1;
-		if (!quiet)
+		ఒకవేళ (!quiet)
 			fprintf_ln(stderr, _("Cannot save the current status"));
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	if (!quiet)
+	ఒకవేళ (!quiet)
 		printf_ln(_("Saved working directory and index state %s"),
-			  stash_msg_buf.buf);
+			  stash_సందేశం_buf.buf);
 
-	if (!(patch_mode || only_staged)) {
-		if (include_untracked && !ps->nr) {
-			struct child_process cp = CHILD_PROCESS_INIT;
+	ఒకవేళ (!(patch_బహుళకం || only_staged)) {
+		ఒకవేళ (include_untracked && !ps->nr) {
+			నిర్మాణం బిడ్డ_process cp = బిడ్డ_PROCESS_INIT;
 
 			cp.git_cmd = 1;
-			if (startup_info->original_cwd) {
+			ఒకవేళ (startup_info->original_cwd) {
 				cp.dir = startup_info->original_cwd;
 				strvec_pushf(&cp.env, "%s=%s",
-					     GIT_WORK_TREE_ENVIRONMENT,
+					     GIT_WORK_వృక్షం_ENVIRONMENT,
 					     the_repository->worktree);
 			}
-			strvec_pushl(&cp.args, "clean", "--force",
-				     "--quiet", "-d", ":/", NULL);
-			if (include_untracked == INCLUDE_ALL_FILES)
-				strvec_push(&cp.args, "-x");
-			if (run_command(&cp)) {
+			strvec_pushl(&cp.వాదనలు, "clean", "--force",
+				     "--quiet", "-d", ":/", ఖాళీ);
+			ఒకవేళ (include_untracked == INCLUDE_ALL_FILES)
+				strvec_నెట్టు(&cp.వాదనలు, "-x");
+			ఒకవేళ (నిరంతరం_command(&cp)) {
 				ret = -1;
-				goto done;
+				వెళ్ళు పూర్తి;
 			}
 		}
-		discard_index(the_repository->index);
-		if (ps->nr) {
-			struct child_process cp_add = CHILD_PROCESS_INIT;
-			struct child_process cp_diff = CHILD_PROCESS_INIT;
-			struct child_process cp_apply = CHILD_PROCESS_INIT;
+		discard_సూచీ(the_repository->సూచీ);
+		ఒకవేళ (ps->nr) {
+			నిర్మాణం బిడ్డ_process cp_కూడు = బిడ్డ_PROCESS_INIT;
+			నిర్మాణం బిడ్డ_process cp_diff = బిడ్డ_PROCESS_INIT;
+			నిర్మాణం బిడ్డ_process cp_apply = బిడ్డ_PROCESS_INIT;
 
-			cp_add.git_cmd = 1;
-			strvec_push(&cp_add.args, "add");
-			if (!include_untracked)
-				strvec_push(&cp_add.args, "-u");
-			if (include_untracked == INCLUDE_ALL_FILES)
-				strvec_push(&cp_add.args, "--force");
-			strvec_push(&cp_add.args, "--");
-			add_pathspecs(&cp_add.args, ps);
-			if (run_command(&cp_add)) {
+			cp_కూడు.git_cmd = 1;
+			strvec_నెట్టు(&cp_కూడు.వాదనలు, "add");
+			ఒకవేళ (!include_untracked)
+				strvec_నెట్టు(&cp_కూడు.వాదనలు, "-u");
+			ఒకవేళ (include_untracked == INCLUDE_ALL_FILES)
+				strvec_నెట్టు(&cp_కూడు.వాదనలు, "--force");
+			strvec_నెట్టు(&cp_కూడు.వాదనలు, "--");
+			కూడు_pathspecs(&cp_కూడు.వాదనలు, ps);
+			ఒకవేళ (నిరంతరం_command(&cp_కూడు)) {
 				ret = -1;
-				goto done;
+				వెళ్ళు పూర్తి;
 			}
 
 			cp_diff.git_cmd = 1;
-			strvec_pushl(&cp_diff.args, "diff-index", "-p",
+			strvec_pushl(&cp_diff.వాదనలు, "diff-index", "-p",
 				     "--no-color",
 				     "--cached", "--binary", "HEAD", "--",
-				     NULL);
-			add_pathspecs(&cp_diff.args, ps);
-			if (pipe_command(&cp_diff, NULL, 0, &out, 0, NULL, 0)) {
+				     ఖాళీ);
+			కూడు_pathspecs(&cp_diff.వాదనలు, ps);
+			ఒకవేళ (pipe_command(&cp_diff, ఖాళీ, 0, &బహిర్గతం, 0, ఖాళీ, 0)) {
 				ret = -1;
-				goto done;
+				వెళ్ళు పూర్తి;
 			}
 
 			cp_apply.git_cmd = 1;
-			strvec_pushl(&cp_apply.args, "apply", "--index",
-				     "-R", NULL);
-			if (pipe_command(&cp_apply, out.buf, out.len, NULL, 0,
-					 NULL, 0)) {
+			strvec_pushl(&cp_apply.వాదనలు, "apply", "--index",
+				     "-R", ఖాళీ);
+			ఒకవేళ (pipe_command(&cp_apply, బహిర్గతం.buf, బహిర్గతం.len, ఖాళీ, 0,
+					 ఖాళీ, 0)) {
 				ret = -1;
-				goto done;
+				వెళ్ళు పూర్తి;
 			}
-		} else {
-			struct child_process cp = CHILD_PROCESS_INIT;
+		} లేకపోతే {
+			నిర్మాణం బిడ్డ_process cp = బిడ్డ_PROCESS_INIT;
 			cp.git_cmd = 1;
 			/* BUG: this nukes untracked files in the way */
-			strvec_pushl(&cp.args, "reset", "--hard", "-q",
-				     "--no-recurse-submodules", NULL);
-			if (run_command(&cp)) {
+			strvec_pushl(&cp.వాదనలు, "reset", "--hard", "-q",
+				     "--no-recurse-submodules", ఖాళీ);
+			ఒకవేళ (నిరంతరం_command(&cp)) {
 				ret = -1;
-				goto done;
+				వెళ్ళు పూర్తి;
 			}
 		}
 
@@ -1804,81 +1804,81 @@ static int do_push_stash(const struct pathspec *ps, const char *stash_msg, int q
 		 * because running it on an empty tree will cause it to fail
 		 * due to the pathspec not matching anything.
 		 */
-		if (keep_index == 1 && !is_null_oid(&info.i_tree) &&
-		    !is_empty_tree_oid(&info.i_tree, the_repository->hash_algo)) {
-			struct child_process cp = CHILD_PROCESS_INIT;
+		ఒకవేళ (keep_సూచీ == 1 && !is_null_oid(&info.i_వృక్షం) &&
+		    !is_ఖాళీలు_వృక్షం_oid(&info.i_వృక్షం, the_repository->hash_algo)) {
+			నిర్మాణం బిడ్డ_process cp = బిడ్డ_PROCESS_INIT;
 
 			cp.git_cmd = 1;
-			strvec_pushl(&cp.args, "checkout", "--no-overlay",
-				     oid_to_hex(&info.i_tree), "--", NULL);
-			if (!ps->nr)
-				strvec_push(&cp.args, ":/");
-			else
-				add_pathspecs(&cp.args, ps);
-			if (run_command(&cp)) {
+			strvec_pushl(&cp.వాదనలు, "checkout", "--no-overlay",
+				     oid_గమ్యం_hex(&info.i_వృక్షం), "--", ఖాళీ);
+			ఒకవేళ (!ps->nr)
+				strvec_నెట్టు(&cp.వాదనలు, ":/");
+			లేకపోతే
+				కూడు_pathspecs(&cp.వాదనలు, ps);
+			ఒకవేళ (నిరంతరం_command(&cp)) {
 				ret = -1;
-				goto done;
+				వెళ్ళు పూర్తి;
 			}
 		}
-		goto done;
-	} else {
-		struct child_process cp = CHILD_PROCESS_INIT;
+		వెళ్ళు పూర్తి;
+	} లేకపోతే {
+		నిర్మాణం బిడ్డ_process cp = బిడ్డ_PROCESS_INIT;
 
 		cp.git_cmd = 1;
-		strvec_pushl(&cp.args, "apply", "-R", NULL);
+		strvec_pushl(&cp.వాదనలు, "apply", "-R", ఖాళీ);
 
-		if (pipe_command(&cp, patch.buf, patch.len, NULL, 0, NULL, 0)) {
-			if (!quiet)
+		ఒకవేళ (pipe_command(&cp, patch.buf, patch.len, ఖాళీ, 0, ఖాళీ, 0)) {
+			ఒకవేళ (!quiet)
 				fprintf_ln(stderr, _("Cannot remove "
 						     "worktree changes"));
 			ret = -1;
-			goto done;
+			వెళ్ళు పూర్తి;
 		}
 
-		if (keep_index < 1) {
-			struct child_process cp = CHILD_PROCESS_INIT;
+		ఒకవేళ (keep_సూచీ < 1) {
+			నిర్మాణం బిడ్డ_process cp = బిడ్డ_PROCESS_INIT;
 
 			cp.git_cmd = 1;
-			strvec_pushl(&cp.args, "reset", "-q", "--refresh", "--",
-				     NULL);
-			add_pathspecs(&cp.args, ps);
-			if (run_command(&cp)) {
+			strvec_pushl(&cp.వాదనలు, "reset", "-q", "--refresh", "--",
+				     ఖాళీ);
+			కూడు_pathspecs(&cp.వాదనలు, ps);
+			ఒకవేళ (నిరంతరం_command(&cp)) {
 				ret = -1;
-				goto done;
+				వెళ్ళు పూర్తి;
 			}
 		}
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-done:
+పూర్తి:
 	strbuf_release(&patch);
-	strbuf_release(&out);
+	strbuf_release(&బహిర్గతం);
 	free_stash_info(&info);
-	strbuf_release(&stash_msg_buf);
+	strbuf_release(&stash_సందేశం_buf);
 	strbuf_release(&untracked_files);
-	return ret;
+	తిరిగి ret;
 }
 
-static int push_stash(int argc, const char **argv, const char *prefix,
-		      int push_assumed)
+స్థిర పూర్ణాంకం నెట్టు_stash(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		      పూర్ణాంకం నెట్టు_assumed)
 {
-	int force_assume = 0;
-	int keep_index = -1;
-	int only_staged = 0;
-	int patch_mode = 0;
-	int include_untracked = 0;
-	int quiet = 0;
-	int pathspec_file_nul = 0;
-	const char *stash_msg = NULL;
-	char *pathspec_from_file = NULL;
-	struct pathspec ps;
-	struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-	struct option options[] = {
-		OPT_BOOL('k', "keep-index", &keep_index,
+	పూర్ణాంకం force_assume = 0;
+	పూర్ణాంకం keep_సూచీ = -1;
+	పూర్ణాంకం only_staged = 0;
+	పూర్ణాంకం patch_బహుళకం = 0;
+	పూర్ణాంకం include_untracked = 0;
+	పూర్ణాంకం quiet = 0;
+	పూర్ణాంకం pathspec_file_nul = 0;
+	స్థిరరాశి అక్షరం *stash_సందేశం = ఖాళీ;
+	అక్షరం *pathspec_from_file = ఖాళీ;
+	నిర్మాణం pathspec ps;
+	నిర్మాణం interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+	నిర్మాణం option options[] = {
+		OPT_BOOL('k', "keep-index", &keep_సూచీ,
 			 N_("keep index")),
 		OPT_BOOL('S', "staged", &only_staged,
 			 N_("stash staged changes only")),
-		OPT_BOOL('p', "patch", &patch_mode,
+		OPT_BOOL('p', "patch", &patch_బహుళకం,
 			 N_("stash in patch mode")),
 		OPT_BOOL(0, "auto-advance", &interactive_opts.auto_advance,
 			 N_("auto advance to the next file when selecting hunks interactively")),
@@ -1887,105 +1887,105 @@ static int push_stash(int argc, const char **argv, const char *prefix,
 		OPT__QUIET(&quiet, N_("quiet mode")),
 		OPT_BOOL('u', "include-untracked", &include_untracked,
 			 N_("include untracked files in stash")),
-		OPT_SET_INT('a', "all", &include_untracked,
+		OPT_సమితి_INT('a', "all", &include_untracked,
 			    N_("include ignore files"), INCLUDE_ALL_FILES),
-		OPT_STRING('m', "message", &stash_msg, N_("message"),
+		OPT_STRING('m', "message", &stash_సందేశం, N_("message"),
 			   N_("stash message")),
 		OPT_PATHSPEC_FROM_FILE(&pathspec_from_file),
 		OPT_PATHSPEC_FILE_NUL(&pathspec_file_nul),
-		OPT_END()
+		OPT_చివర()
 	};
-	int ret;
+	పూర్ణాంకం ret;
 
-	if (argc) {
-		int flags = PARSE_OPT_KEEP_DASHDASH;
+	ఒకవేళ (argc) {
+		పూర్ణాంకం flags = PARSE_OPT_KEEP_DASHDASH;
 
-		if (push_assumed)
+		ఒకవేళ (నెట్టు_assumed)
 			flags |= PARSE_OPT_STOP_AT_NON_OPTION;
 
-		argc = parse_options(argc, argv, prefix, options,
-				     push_assumed ? git_stash_usage :
-				     git_stash_push_usage, flags);
-		force_assume |= patch_mode;
+		argc = parse_options(argc, argv, ఉపసర్గ, options,
+				     నెట్టు_assumed ? git_stash_usage :
+				     git_stash_నెట్టు_usage, flags);
+		force_assume |= patch_బహుళకం;
 	}
 
-	if (argc) {
-		if (!strcmp(argv[0], "--")) {
+	ఒకవేళ (argc) {
+		ఒకవేళ (!strcmp(argv[0], "--")) {
 			argc--;
 			argv++;
-		} else if (push_assumed && !force_assume) {
+		} లేకపోతే ఒకవేళ (నెట్టు_assumed && !force_assume) {
 			die("subcommand wasn't specified; 'push' can't be assumed due to unexpected token '%s'",
 			    argv[0]);
 		}
 	}
 
-	parse_pathspec(&ps, 0, PATHSPEC_PREFER_FULL | PATHSPEC_PREFIX_ORIGIN,
-		       prefix, argv);
+	parse_pathspec(&ps, 0, PATHSPEC_PREFER_నిండిన | PATHSPEC_ఉపసర్గ_ORIGIN,
+		       ఉపసర్గ, argv);
 
-	if (pathspec_from_file) {
-		if (patch_mode)
+	ఒకవేళ (pathspec_from_file) {
+		ఒకవేళ (patch_బహుళకం)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--patch");
 
-		if (only_staged)
+		ఒకవేళ (only_staged)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--staged");
 
-		if (ps.nr)
+		ఒకవేళ (ps.nr)
 			die(_("'%s' and pathspec arguments cannot be used together"), "--pathspec-from-file");
 
 		parse_pathspec_file(&ps, 0,
-				    PATHSPEC_PREFER_FULL | PATHSPEC_PREFIX_ORIGIN,
-				    prefix, pathspec_from_file, pathspec_file_nul);
-	} else if (pathspec_file_nul) {
+				    PATHSPEC_PREFER_నిండిన | PATHSPEC_ఉపసర్గ_ORIGIN,
+				    ఉపసర్గ, pathspec_from_file, pathspec_file_nul);
+	} లేకపోతే ఒకవేళ (pathspec_file_nul) {
 		die(_("the option '%s' requires '%s'"), "--pathspec-file-nul", "--pathspec-from-file");
 	}
 
-	if (!patch_mode) {
-		if (interactive_opts.context != -1)
+	ఒకవేళ (!patch_బహుళకం) {
+		ఒకవేళ (interactive_opts.context != -1)
 			die(_("the option '%s' requires '%s'"), "--unified", "--patch");
-		if (interactive_opts.interhunkcontext != -1)
+		ఒకవేళ (interactive_opts.interhunkcontext != -1)
 			die(_("the option '%s' requires '%s'"), "--inter-hunk-context", "--patch");
-		if (!interactive_opts.auto_advance)
+		ఒకవేళ (!interactive_opts.auto_advance)
 			die(_("the option '%s' requires '%s'"), "--no-auto-advance", "--patch");
 	}
 
-	if (interactive_opts.context < -1)
+	ఒకవేళ (interactive_opts.context < -1)
 		die(_("'%s' cannot be negative"), "--unified");
-	if (interactive_opts.interhunkcontext < -1)
+	ఒకవేళ (interactive_opts.interhunkcontext < -1)
 		die(_("'%s' cannot be negative"), "--inter-hunk-context");
 
-	ret = do_push_stash(&ps, stash_msg, quiet, keep_index, patch_mode,
+	ret = do_నెట్టు_stash(&ps, stash_సందేశం, quiet, keep_సూచీ, patch_బహుళకం,
 			    &interactive_opts, include_untracked, only_staged);
 
 	clear_pathspec(&ps);
-	free(pathspec_from_file);
-	return ret;
+	విడుదల(pathspec_from_file);
+	తిరిగి ret;
 }
 
-static int push_stash_unassumed(int argc, const char **argv, const char *prefix,
-				struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం నెట్టు_stash_unassumed(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+				నిర్మాణం repository *repo వాడని)
 {
-	return push_stash(argc, argv, prefix, 0);
+	తిరిగి నెట్టు_stash(argc, argv, ఉపసర్గ, 0);
 }
 
-static int save_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం save_stash(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		      నిర్మాణం repository *repo వాడని)
 {
-	int keep_index = -1;
-	int only_staged = 0;
-	int patch_mode = 0;
-	int include_untracked = 0;
-	int quiet = 0;
-	int ret = 0;
-	const char *stash_msg = NULL;
-	struct pathspec ps;
-	struct strbuf stash_msg_buf = STRBUF_INIT;
-	struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-	struct option options[] = {
-		OPT_BOOL('k', "keep-index", &keep_index,
+	పూర్ణాంకం keep_సూచీ = -1;
+	పూర్ణాంకం only_staged = 0;
+	పూర్ణాంకం patch_బహుళకం = 0;
+	పూర్ణాంకం include_untracked = 0;
+	పూర్ణాంకం quiet = 0;
+	పూర్ణాంకం ret = 0;
+	స్థిరరాశి అక్షరం *stash_సందేశం = ఖాళీ;
+	నిర్మాణం pathspec ps;
+	నిర్మాణం strbuf stash_సందేశం_buf = STRBUF_INIT;
+	నిర్మాణం interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+	నిర్మాణం option options[] = {
+		OPT_BOOL('k', "keep-index", &keep_సూచీ,
 			 N_("keep index")),
 		OPT_BOOL('S', "staged", &only_staged,
 			 N_("stash staged changes only")),
-		OPT_BOOL('p', "patch", &patch_mode,
+		OPT_BOOL('p', "patch", &patch_బహుళకం,
 			 N_("stash in patch mode")),
 		OPT_BOOL(0, "auto-advance", &interactive_opts.auto_advance,
 			 N_("auto advance to the next file when selecting hunks interactively")),
@@ -1994,297 +1994,297 @@ static int save_stash(int argc, const char **argv, const char *prefix,
 		OPT__QUIET(&quiet, N_("quiet mode")),
 		OPT_BOOL('u', "include-untracked", &include_untracked,
 			 N_("include untracked files in stash")),
-		OPT_SET_INT('a', "all", &include_untracked,
+		OPT_సమితి_INT('a', "all", &include_untracked,
 			    N_("include ignore files"), INCLUDE_ALL_FILES),
-		OPT_STRING('m', "message", &stash_msg, "message",
+		OPT_STRING('m', "message", &stash_సందేశం, "message",
 			   N_("stash message")),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     git_stash_save_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (argc)
-		stash_msg = strbuf_join_argv(&stash_msg_buf, argc, argv, ' ');
+	ఒకవేళ (argc)
+		stash_సందేశం = strbuf_join_argv(&stash_సందేశం_buf, argc, argv, ' ');
 
-	memset(&ps, 0, sizeof(ps));
+	memset(&ps, 0, పరిమాణం(ps));
 
-	if (interactive_opts.context < -1)
+	ఒకవేళ (interactive_opts.context < -1)
 		die(_("'%s' cannot be negative"), "--unified");
-	if (interactive_opts.interhunkcontext < -1)
+	ఒకవేళ (interactive_opts.interhunkcontext < -1)
 		die(_("'%s' cannot be negative"), "--inter-hunk-context");
 
-	if (!patch_mode) {
-		if (interactive_opts.context != -1)
+	ఒకవేళ (!patch_బహుళకం) {
+		ఒకవేళ (interactive_opts.context != -1)
 			die(_("the option '%s' requires '%s'"), "--unified", "--patch");
-		if (interactive_opts.interhunkcontext != -1)
+		ఒకవేళ (interactive_opts.interhunkcontext != -1)
 			die(_("the option '%s' requires '%s'"), "--inter-hunk-context", "--patch");
-		if (!interactive_opts.auto_advance)
+		ఒకవేళ (!interactive_opts.auto_advance)
 			die(_("the option '%s' requires '%s'"), "--no-auto-advance", "--patch");
 	}
 
-	ret = do_push_stash(&ps, stash_msg, quiet, keep_index,
-			    patch_mode, &interactive_opts, include_untracked,
+	ret = do_నెట్టు_stash(&ps, stash_సందేశం, quiet, keep_సూచీ,
+			    patch_బహుళకం, &interactive_opts, include_untracked,
 			    only_staged);
 
-	strbuf_release(&stash_msg_buf);
-	return ret;
+	strbuf_release(&stash_సందేశం_buf);
+	తిరిగి ret;
 }
 
-static int write_commit_with_parents(struct repository *r,
-				     struct object_id *out,
-				     const struct object_id *oid,
-				     struct commit_list *parents)
+స్థిర పూర్ణాంకం write_commit_with_parents(నిర్మాణం repository *r,
+				     నిర్మాణం object_id *బహిర్గతం,
+				     స్థిరరాశి నిర్మాణం object_id *oid,
+				     నిర్మాణం commit_list *parents)
 {
-	size_t author_len, committer_len;
-	struct commit *this;
-	const char *orig_author, *orig_committer;
-	char *author = NULL, *committer = NULL;
-	const char *buffer;
-	unsigned long bufsize;
-	const char *p;
-	struct strbuf msg = STRBUF_INIT;
-	int ret = 0;
-	struct ident_split id;
+	కొలత_t author_len, committer_len;
+	నిర్మాణం commit *this;
+	స్థిరరాశి అక్షరం *orig_author, *orig_committer;
+	అక్షరం *author = ఖాళీ, *committer = ఖాళీ;
+	స్థిరరాశి అక్షరం *బఫరు;
+	గుర్తులేని దీర్ఘ bufsize;
+	స్థిరరాశి అక్షరం *p;
+	నిర్మాణం strbuf సందేశం = STRBUF_INIT;
+	పూర్ణాంకం ret = 0;
+	నిర్మాణం ident_విభజించు id;
 
 	this = lookup_commit_reference(r, oid);
-	buffer = repo_get_commit_buffer(r, this, &bufsize);
-	orig_author = find_commit_header(buffer, "author", &author_len);
-	orig_committer = find_commit_header(buffer, "committer", &committer_len);
+	బఫరు = repo_get_commit_బఫరు(r, this, &bufsize);
+	orig_author = కనుగొను_commit_శీర్షిక(బఫరు, "author", &author_len);
+	orig_committer = కనుగొను_commit_శీర్షిక(బఫరు, "committer", &committer_len);
 
-	if (!orig_author || !orig_committer) {
-		ret = error(_("cannot parse commit %s"), oid_to_hex(oid));
-		goto out;
+	ఒకవేళ (!orig_author || !orig_committer) {
+		ret = error(_("cannot parse commit %s"), oid_గమ్యం_hex(oid));
+		వెళ్ళు బహిర్గతం;
 	}
 
-	if (split_ident_line(&id, orig_author, author_len) < 0 ||
-	    split_ident_line(&id, orig_committer, committer_len) < 0) {
-		ret = error(_("invalid author or committer for %s"), oid_to_hex(oid));
-		goto out;
+	ఒకవేళ (విభజించు_ident_పంక్తి(&id, orig_author, author_len) < 0 ||
+	    విభజించు_ident_పంక్తి(&id, orig_committer, committer_len) < 0) {
+		ret = error(_("invalid author or committer for %s"), oid_గమ్యం_hex(oid));
+		వెళ్ళు బహిర్గతం;
 	}
 
-	p = strstr(buffer, "\n\n");
-	strbuf_addstr(&msg, "git stash: ");
+	p = అక్షరశ్రేణి_శోధన(బఫరు, "\n\n");
+	strbuf_addstr(&సందేశం, "git stash: ");
 
-	if (p)
-		strbuf_add(&msg, p + 2, bufsize - (p + 2 - buffer));
-	strbuf_complete_line(&msg);
+	ఒకవేళ (p)
+		strbuf_కూడు(&సందేశం, p + 2, bufsize - (p + 2 - బఫరు));
+	strbuf_complete_పంక్తి(&సందేశం);
 
 	author = xmemdupz(orig_author, author_len);
 	committer = xmemdupz(orig_committer, committer_len);
 
-	if (commit_tree_extended(msg.buf, msg.len,
-				 r->hash_algo->empty_tree, parents,
-				 out, author, committer,
-				 NULL, NULL)) {
+	ఒకవేళ (commit_వృక్షం_extended(సందేశం.buf, సందేశం.len,
+				 r->hash_algo->ఖాళీలు_వృక్షం, parents,
+				 బహిర్గతం, author, committer,
+				 ఖాళీ, ఖాళీ)) {
 		ret = error(_("could not write commit"));
-		goto out;
+		వెళ్ళు బహిర్గతం;
 	}
-out:
-	strbuf_release(&msg);
-	repo_unuse_commit_buffer(r, this, buffer);
-	free(author);
-	free(committer);
-	return ret;
+బహిర్గతం:
+	strbuf_release(&సందేశం);
+	repo_unuse_commit_బఫరు(r, this, బఫరు);
+	విడుదల(author);
+	విడుదల(committer);
+	తిరిగి ret;
 }
 
-static int do_import_stash(struct repository *r, const char *rev)
+స్థిర పూర్ణాంకం do_import_stash(నిర్మాణం repository *r, స్థిరరాశి అక్షరం *rev)
 {
-	struct object_id chain;
-	int res = 0;
-	const char *buffer = NULL;
-	unsigned long bufsize;
-	struct commit *this = NULL;
-	struct commit_list *items = NULL, *cur;
-	char *msg = NULL;
+	నిర్మాణం object_id chain;
+	పూర్ణాంకం res = 0;
+	స్థిరరాశి అక్షరం *బఫరు = ఖాళీ;
+	గుర్తులేని దీర్ఘ bufsize;
+	నిర్మాణం commit *this = ఖాళీ;
+	నిర్మాణం commit_list *వస్తువులు = ఖాళీ, *cur;
+	అక్షరం *సందేశం = ఖాళీ;
 
-	if (repo_get_oid(r, rev, &chain))
-		return error(_("not a valid revision: %s"), rev);
+	ఒకవేళ (repo_get_oid(r, rev, &chain))
+		తిరిగి error(_("not a valid revision: %s"), rev);
 
 	this = lookup_commit_reference(r, &chain);
-	if (!this)
-		return error(_("not a commit: %s"), rev);
+	ఒకవేళ (!this)
+		తిరిగి error(_("not a commit: %s"), rev);
 
 	/*
 	 * Walk the commit history, finding each stash entry, and load data into
 	 * the array.
 	 */
-	for (;;) {
-		const char *author, *committer;
-		size_t author_len, committer_len;
-		const char *p;
-		const char *expected = "git stash <git@stash> 1000684800 +0000";
-		const char *prefix = "git stash: ";
-		struct commit *stash;
-		struct tree *tree = repo_get_commit_tree(r, this);
+	కొరకు (;;) {
+		స్థిరరాశి అక్షరం *author, *committer;
+		కొలత_t author_len, committer_len;
+		స్థిరరాశి అక్షరం *p;
+		స్థిరరాశి అక్షరం *expected = "git stash <git@stash> 1000684800 +0000";
+		స్థిరరాశి అక్షరం *ఉపసర్గ = "git stash: ";
+		నిర్మాణం commit *stash;
+		నిర్మాణం వృక్షం *వృక్షం = repo_get_commit_వృక్షం(r, this);
 
-		if (!tree ||
-		    !oideq(&tree->object.oid, r->hash_algo->empty_tree) ||
+		ఒకవేళ (!వృక్షం ||
+		    !oideq(&వృక్షం->object.oid, r->hash_algo->ఖాళీలు_వృక్షం) ||
 		    (this->parents &&
-		     (!this->parents->next || this->parents->next->next))) {
+		     (!this->parents->తదుపరి || this->parents->తదుపరి->తదుపరి))) {
 			res = error(_("%s is not a valid exported stash commit"),
-					oid_to_hex(&this->object.oid));
-			goto out;
+					oid_గమ్యం_hex(&this->object.oid));
+			వెళ్ళు బహిర్గతం;
 		}
 
-		buffer = repo_get_commit_buffer(r, this, &bufsize);
+		బఫరు = repo_get_commit_బఫరు(r, this, &bufsize);
 
-		if (!this->parents) {
+		ఒకవేళ (!this->parents) {
 			/*
 			 * We don't have any parents.  Make sure this is our
 			 * root commit.
 			 */
-			author = find_commit_header(buffer, "author", &author_len);
-			committer = find_commit_header(buffer, "committer", &committer_len);
+			author = కనుగొను_commit_శీర్షిక(బఫరు, "author", &author_len);
+			committer = కనుగొను_commit_శీర్షిక(బఫరు, "committer", &committer_len);
 
-			if (!author || !committer) {
-				error(_("cannot parse commit %s"), oid_to_hex(&this->object.oid));
-				goto out;
+			ఒకవేళ (!author || !committer) {
+				error(_("cannot parse commit %s"), oid_గమ్యం_hex(&this->object.oid));
+				వెళ్ళు బహిర్గతం;
 			}
 
-			if (author_len != strlen(expected) ||
-			    committer_len != strlen(expected) ||
+			ఒకవేళ (author_len != అక్షరశ్రేణి_పొడవు(expected) ||
+			    committer_len != అక్షరశ్రేణి_పొడవు(expected) ||
 			    memcmp(author, expected, author_len) ||
 			    memcmp(committer, expected, committer_len)) {
-				res = error(_("found root commit %s with invalid data"), oid_to_hex(&this->object.oid));
-				goto out;
+				res = error(_("found root commit %s with invalid data"), oid_గమ్యం_hex(&this->object.oid));
+				వెళ్ళు బహిర్గతం;
 			}
-			break;
+			ఆపు;
 		}
 
-		p = strstr(buffer, "\n\n");
-		if (!p) {
-			res = error(_("cannot parse commit %s"), oid_to_hex(&this->object.oid));
-			goto out;
+		p = అక్షరశ్రేణి_శోధన(బఫరు, "\n\n");
+		ఒకవేళ (!p) {
+			res = error(_("cannot parse commit %s"), oid_గమ్యం_hex(&this->object.oid));
+			వెళ్ళు బహిర్గతం;
 		}
 
 		p += 2;
-		if (((size_t)(bufsize - (p - buffer)) < strlen(prefix)) ||
-		    memcmp(prefix, p, strlen(prefix))) {
-			res = error(_("found stash commit %s without expected prefix"), oid_to_hex(&this->object.oid));
-			goto out;
+		ఒకవేళ (((కొలత_t)(bufsize - (p - బఫరు)) < అక్షరశ్రేణి_పొడవు(ఉపసర్గ)) ||
+		    memcmp(ఉపసర్గ, p, అక్షరశ్రేణి_పొడవు(ఉపసర్గ))) {
+			res = error(_("found stash commit %s without expected prefix"), oid_గమ్యం_hex(&this->object.oid));
+			వెళ్ళు బహిర్గతం;
 		}
 
-		stash = this->parents->next->item;
+		stash = this->parents->తదుపరి->అంశం;
 
-		if (repo_parse_commit(r, this->parents->item) ||
+		ఒకవేళ (repo_parse_commit(r, this->parents->అంశం) ||
 		    repo_parse_commit(r, stash)) {
 			res = error(_("cannot parse parents of commit: %s"),
-					oid_to_hex(&this->object.oid));
-			goto out;
+					oid_గమ్యం_hex(&this->object.oid));
+			వెళ్ళు బహిర్గతం;
 		}
 
-		if (check_stash_topology(r, stash)) {
+		ఒకవేళ (check_stash_topology(r, stash)) {
 			res = error(_("%s does not look like a stash commit"),
-					oid_to_hex(&stash->object.oid));
-			goto out;
+					oid_గమ్యం_hex(&stash->object.oid));
+			వెళ్ళు బహిర్గతం;
 		}
 
-		repo_unuse_commit_buffer(r, this, buffer);
-		buffer = NULL;
-		items = commit_list_insert(stash, &items);
-		this = this->parents->item;
+		repo_unuse_commit_బఫరు(r, this, బఫరు);
+		బఫరు = ఖాళీ;
+		వస్తువులు = commit_list_చొప్పించు(stash, &వస్తువులు);
+		this = this->parents->అంశం;
 	}
 
 	/*
 	 * Now, walk each entry, adding it to the stash as a normal stash
 	 * commit.
 	 */
-	for (cur = items; cur; cur = cur->next) {
-		const char *p;
-		struct object_id *oid;
+	కొరకు (cur = వస్తువులు; cur; cur = cur->తదుపరి) {
+		స్థిరరాశి అక్షరం *p;
+		నిర్మాణం object_id *oid;
 
-		this = cur->item;
+		this = cur->అంశం;
 		oid = &this->object.oid;
-		buffer = repo_get_commit_buffer(r, this, &bufsize);
-		if (!buffer) {
-			res = error(_("cannot read commit buffer for %s"), oid_to_hex(oid));
-			goto out;
+		బఫరు = repo_get_commit_బఫరు(r, this, &bufsize);
+		ఒకవేళ (!బఫరు) {
+			res = error(_("cannot read commit buffer for %s"), oid_గమ్యం_hex(oid));
+			వెళ్ళు బహిర్గతం;
 		}
 
-		p = strstr(buffer, "\n\n");
-		if (!p) {
-			res = error(_("cannot parse commit %s"), oid_to_hex(oid));
-			goto out;
+		p = అక్షరశ్రేణి_శోధన(బఫరు, "\n\n");
+		ఒకవేళ (!p) {
+			res = error(_("cannot parse commit %s"), oid_గమ్యం_hex(oid));
+			వెళ్ళు బహిర్గతం;
 		}
 
 		p += 2;
-		msg = xmemdupz(p, bufsize - (p - buffer));
-		repo_unuse_commit_buffer(r, this, buffer);
-		buffer = NULL;
+		సందేశం = xmemdupz(p, bufsize - (p - బఫరు));
+		repo_unuse_commit_బఫరు(r, this, బఫరు);
+		బఫరు = ఖాళీ;
 
-		if (do_store_stash(oid, msg, 1)) {
-			res = error(_("cannot save the stash for %s"), oid_to_hex(oid));
-			goto out;
+		ఒకవేళ (do_store_stash(oid, సందేశం, 1)) {
+			res = error(_("cannot save the stash for %s"), oid_గమ్యం_hex(oid));
+			వెళ్ళు బహిర్గతం;
 		}
-		FREE_AND_NULL(msg);
+		FREE_AND_NULL(సందేశం);
 	}
-out:
-	if (this && buffer)
-		repo_unuse_commit_buffer(r, this, buffer);
-	commit_list_free(items);
-	free(msg);
+బహిర్గతం:
+	ఒకవేళ (this && బఫరు)
+		repo_unuse_commit_బఫరు(r, this, బఫరు);
+	commit_list_free(వస్తువులు);
+	విడుదల(సందేశం);
 
-	return res;
+	తిరిగి res;
 }
 
-static int import_stash(int argc, const char **argv, const char *prefix,
-			struct repository *repo)
+స్థిర పూర్ణాంకం import_stash(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			నిర్మాణం repository *repo)
 {
-	struct option options[] = {
-		OPT_END()
+	నిర్మాణం option options[] = {
+		OPT_చివర()
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     git_stash_import_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (argc != 1)
-		usage_msg_opt("a revision is required", git_stash_import_usage, options);
+	ఒకవేళ (argc != 1)
+		usage_సందేశం_opt("a revision is required", git_stash_import_usage, options);
 
-	return do_import_stash(repo, argv[0]);
+	తిరిగి do_import_stash(repo, argv[0]);
 }
 
-struct stash_entry_data {
-	struct repository *r;
-	struct commit_list **items;
-	size_t count;
+నిర్మాణం stash_నమోదు_దత్తాంశం {
+	నిర్మాణం repository *r;
+	నిర్మాణం commit_list **వస్తువులు;
+	కొలత_t లెక్క;
 };
 
-static int collect_stash_entries(const char *refname UNUSED,
-				 struct object_id *old_oid UNUSED,
-				 struct object_id *new_oid,
-				 const char *committer UNUSED,
-				 timestamp_t timestamp UNUSED,
-				 int tz UNUSED, const char *msg UNUSED,
-				 void *cb_data)
+స్థిర పూర్ణాంకం collect_stash_entries(స్థిరరాశి అక్షరం *refname వాడని,
+				 నిర్మాణం object_id *old_oid వాడని,
+				 నిర్మాణం object_id *new_oid,
+				 స్థిరరాశి అక్షరం *committer వాడని,
+				 timestamp_t timestamp వాడని,
+				 పూర్ణాంకం tz వాడని, స్థిరరాశి అక్షరం *సందేశం వాడని,
+				 శూన్య *cb_దత్తాంశం)
 {
-	struct stash_entry_data *data = cb_data;
-	struct commit *stash;
+	నిర్మాణం stash_నమోదు_దత్తాంశం *దత్తాంశం = cb_దత్తాంశం;
+	నిర్మాణం commit *stash;
 
-	data->count++;
-	stash = lookup_commit_reference(data->r, new_oid);
-	if (!stash || check_stash_topology(data->r, stash)) {
-		return error(_("%s does not look like a stash commit"),
-			     oid_to_hex(new_oid));
+	దత్తాంశం->లెక్క++;
+	stash = lookup_commit_reference(దత్తాంశం->r, new_oid);
+	ఒకవేళ (!stash || check_stash_topology(దత్తాంశం->r, stash)) {
+		తిరిగి error(_("%s does not look like a stash commit"),
+			     oid_గమ్యం_hex(new_oid));
 	}
-	data->items = commit_list_append(stash, data->items);
-	return 0;
+	దత్తాంశం->వస్తువులు = commit_list_append(stash, దత్తాంశం->వస్తువులు);
+	తిరిగి 0;
 }
 
-static int do_export_stash(struct repository *r,
-			   const char *ref,
-			   int argc,
-			   const char **argv)
+స్థిర పూర్ణాంకం do_export_stash(నిర్మాణం repository *r,
+			   స్థిరరాశి అక్షరం *ref,
+			   పూర్ణాంకం argc,
+			   స్థిరరాశి అక్షరం **argv)
 {
-	struct object_id base;
-	struct commit *prev;
-	struct commit_list *items = NULL, **iter = &items, *cur;
-	int res = 0;
-	int i;
-	struct strbuf revision = STRBUF_INIT;
-	const char *author, *committer;
+	నిర్మాణం object_id పునాది;
+	నిర్మాణం commit *prev;
+	నిర్మాణం commit_list *వస్తువులు = ఖాళీ, **iter = &వస్తువులు, *cur;
+	పూర్ణాంకం res = 0;
+	పూర్ణాంకం i;
+	నిర్మాణం strbuf revision = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *author, *committer;
 
 	/*
 	 * This is an arbitrary, fixed date, specifically the one used by git
@@ -2297,49 +2297,49 @@ static int do_export_stash(struct repository *r,
 			      "2001-09-17T00:00:00Z", 0);
 
 	/* First, we create a single empty commit. */
-	if (commit_tree_extended("", 0, r->hash_algo->empty_tree, NULL,
-				 &base, author, committer, NULL, NULL))
-		return error(_("unable to write base commit"));
+	ఒకవేళ (commit_వృక్షం_extended("", 0, r->hash_algo->ఖాళీలు_వృక్షం, ఖాళీ,
+				 &పునాది, author, committer, ఖాళీ, ఖాళీ))
+		తిరిగి error(_("unable to write base commit"));
 
-	prev = lookup_commit_reference(r, &base);
+	prev = lookup_commit_reference(r, &పునాది);
 
-	if (argc) {
+	ఒకవేళ (argc) {
 		/*
 		 * Find each specified stash, and load data into the array.
 		 */
-		for (i = 0; i < argc; i++) {
-			struct object_id oid;
-			struct commit *stash;
+		కొరకు (i = 0; i < argc; i++) {
+			నిర్మాణం object_id oid;
+			నిర్మాణం commit *stash;
 
-			if (parse_stash_revision(&revision, argv[i], 1) ||
+			ఒకవేళ (parse_stash_revision(&revision, argv[i], 1) ||
 			    repo_get_oid_with_flags(r, revision.buf, &oid,
 						    GET_OID_QUIETLY |
 						    GET_OID_GENTLY)) {
 				res = error(_("unable to find stash entry %s"), argv[i]);
-				goto out;
+				వెళ్ళు బహిర్గతం;
 			}
 
 			stash = lookup_commit_reference(r, &oid);
-			if (!stash || check_stash_topology(r, stash)) {
+			ఒకవేళ (!stash || check_stash_topology(r, stash)) {
 				res = error(_("%s does not look like a stash commit"),
 						revision.buf);
-				goto out;
+				వెళ్ళు బహిర్గతం;
 			}
 			iter = commit_list_append(stash, iter);
 		}
-	} else {
+	} లేకపోతే {
 		/*
 		 * Walk the reflog, finding each stash entry, and load data into the
 		 * array.
 		 */
-		struct stash_entry_data cb_data = {
-			.r = r, .items = iter,
+		నిర్మాణం stash_నమోదు_దత్తాంశం cb_దత్తాంశం = {
+			.r = r, .వస్తువులు = iter,
 		};
-		if (refs_for_each_reflog_ent_reverse(get_main_ref_store(r),
+		ఒకవేళ (refs_for_each_reflog_ent_తిరగేయి(get_main_ref_store(r),
 						     "refs/stash",
 						     collect_stash_entries,
-						     &cb_data) && cb_data.count)
-			goto out;
+						     &cb_దత్తాంశం) && cb_దత్తాంశం.లెక్క)
+			వెళ్ళు బహిర్గతం;
 	}
 
 	/*
@@ -2347,112 +2347,112 @@ static int do_export_stash(struct repository *r,
 	 * but where their first parents form a chain to our original empty
 	 * base commit.
 	 */
-	items = commit_list_reverse(items);
-	for (cur = items; cur; cur = cur->next) {
-		struct commit_list *parents = NULL;
-		struct commit_list **next = &parents;
-		struct object_id out;
-		struct commit *stash = cur->item;
+	వస్తువులు = commit_list_తిరగేయి(వస్తువులు);
+	కొరకు (cur = వస్తువులు; cur; cur = cur->తదుపరి) {
+		నిర్మాణం commit_list *parents = ఖాళీ;
+		నిర్మాణం commit_list **తదుపరి = &parents;
+		నిర్మాణం object_id బహిర్గతం;
+		నిర్మాణం commit *stash = cur->అంశం;
 
-		next = commit_list_append(prev, next);
-		next = commit_list_append(stash, next);
-		res = write_commit_with_parents(r, &out, &stash->object.oid, parents);
+		తదుపరి = commit_list_append(prev, తదుపరి);
+		తదుపరి = commit_list_append(stash, తదుపరి);
+		res = write_commit_with_parents(r, &బహిర్గతం, &stash->object.oid, parents);
 		commit_list_free(parents);
-		if (res)
-			goto out;
-		prev = lookup_commit_reference(r, &out);
+		ఒకవేళ (res)
+			వెళ్ళు బహిర్గతం;
+		prev = lookup_commit_reference(r, &బహిర్గతం);
 	}
-	if (ref)
-		refs_update_ref(get_main_ref_store(r), NULL, ref,
-				&prev->object.oid, NULL, 0, UPDATE_REFS_DIE_ON_ERR);
-	else
-		puts(oid_to_hex(&prev->object.oid));
-out:
+	ఒకవేళ (ref)
+		refs_update_ref(get_main_ref_store(r), ఖాళీ, ref,
+				&prev->object.oid, ఖాళీ, 0, UPDATE_REFS_DIE_ON_ERR);
+	లేకపోతే
+		puts(oid_గమ్యం_hex(&prev->object.oid));
+బహిర్గతం:
 	strbuf_release(&revision);
-	commit_list_free(items);
+	commit_list_free(వస్తువులు);
 
-	return res;
+	తిరిగి res;
 }
 
-enum export_action {
+గణన export_action {
 	ACTION_NONE,
 	ACTION_PRINT,
-	ACTION_TO_REF,
+	ACTION_గమ్యం_REF,
 };
 
-static int export_stash(int argc,
-			const char **argv,
-			const char *prefix,
-			struct repository *repo)
+స్థిర పూర్ణాంకం export_stash(పూర్ణాంకం argc,
+			స్థిరరాశి అక్షరం **argv,
+			స్థిరరాశి అక్షరం *ఉపసర్గ,
+			నిర్మాణం repository *repo)
 {
-	const char *ref = NULL;
-	enum export_action action = ACTION_NONE;
-	struct option options[] = {
+	స్థిరరాశి అక్షరం *ref = ఖాళీ;
+	గణన export_action action = ACTION_NONE;
+	నిర్మాణం option options[] = {
 		OPT_CMDMODE(0, "print", &action,
 			    N_("print the object ID instead of writing it to a ref"),
 			    ACTION_PRINT),
 		OPT_STRING(0, "to-ref", &ref, "ref",
 			    N_("save the data to the given ref")),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     git_stash_export_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (ref && action == ACTION_NONE)
-		action = ACTION_TO_REF;
+	ఒకవేళ (ref && action == ACTION_NONE)
+		action = ACTION_గమ్యం_REF;
 
-	if (action == ACTION_NONE || (ref && action == ACTION_PRINT))
-		return error(_("exactly one of --print and --to-ref is required"));
+	ఒకవేళ (action == ACTION_NONE || (ref && action == ACTION_PRINT))
+		తిరిగి error(_("exactly one of --print and --to-ref is required"));
 
-	return do_export_stash(repo, ref, argc, argv);
+	తిరిగి do_export_stash(repo, ref, argc, argv);
 }
 
-int cmd_stash(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo)
+పూర్ణాంకం cmd_stash(పూర్ణాంకం argc,
+	      స్థిరరాశి అక్షరం **argv,
+	      స్థిరరాశి అక్షరం *ఉపసర్గ,
+	      నిర్మాణం repository *repo)
 {
 	pid_t pid = getpid();
-	const char *index_file;
-	struct strvec args = STRVEC_INIT;
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	స్థిరరాశి అక్షరం *సూచీ_file;
+	నిర్మాణం strvec వాదనలు = STRVEC_INIT;
+	parse_opt_subcommand_fn *fn = ఖాళీ;
+	నిర్మాణం option options[] = {
 		OPT_SUBCOMMAND("apply", &fn, apply_stash),
 		OPT_SUBCOMMAND("clear", &fn, clear_stash),
 		OPT_SUBCOMMAND("drop", &fn, drop_stash),
-		OPT_SUBCOMMAND("pop", &fn, pop_stash),
+		OPT_SUBCOMMAND("pop", &fn, తీయి_stash),
 		OPT_SUBCOMMAND("branch", &fn, branch_stash),
 		OPT_SUBCOMMAND("list", &fn, list_stash),
 		OPT_SUBCOMMAND("show", &fn, show_stash),
 		OPT_SUBCOMMAND("store", &fn, store_stash),
 		OPT_SUBCOMMAND("create", &fn, create_stash),
-		OPT_SUBCOMMAND("push", &fn, push_stash_unassumed),
+		OPT_SUBCOMMAND("push", &fn, నెట్టు_stash_unassumed),
 		OPT_SUBCOMMAND("export", &fn, export_stash),
 		OPT_SUBCOMMAND("import", &fn, import_stash),
-		OPT_SUBCOMMAND_F("save", &fn, save_stash, NULL, PARSE_OPT_NOCOMPLETE),
-		OPT_END()
+		OPT_SUBCOMMAND_F("save", &fn, save_stash, ఖాళీ, PARSE_OPT_NOCOMPLETE),
+		OPT_చివర()
 	};
-	const char **args_copy;
-	int ret;
+	స్థిరరాశి అక్షరం **వాదనలు_copy;
+	పూర్ణాంకం ret;
 
-	repo_config(the_repository, git_stash_config, NULL);
+	repo_config(the_repository, git_stash_config, ఖాళీ);
 
-	argc = parse_options(argc, argv, prefix, options, git_stash_usage,
+	argc = parse_options(argc, argv, ఉపసర్గ, options, git_stash_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL |
 			     PARSE_OPT_KEEP_UNKNOWN_OPT |
 			     PARSE_OPT_KEEP_DASHDASH);
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_నిండిన_సూచీ = 0;
 
-	index_file = repo_get_index_file(the_repository);
-	strbuf_addf(&stash_index_path, "%s.stash.%" PRIuMAX, index_file,
+	సూచీ_file = repo_get_సూచీ_file(the_repository);
+	strbuf_addf(&stash_సూచీ_మార్గం, "%s.stash.%" PRIuMAX, సూచీ_file,
 		    (uintmax_t)pid);
 
-	if (fn) {
-		ret = fn(argc, argv, prefix, repo);
+	ఒకవేళ (fn) {
+		ret = fn(argc, argv, ఉపసర్గ, repo);
 
 		/*
 		 * The subcommand implementations return 0 on success, a
@@ -2461,26 +2461,26 @@ int cmd_stash(int argc,
 		 * Map failures to 128, the status die() uses, so that
 		 * exit status 1 unambiguously indicates conflicts.
 		 */
-		if (ret < 0)
-			return 128;
-		return ret;
-	} else if (!argc) {
-		return !!push_stash_unassumed(0, NULL, prefix, repo);
+		ఒకవేళ (ret < 0)
+			తిరిగి 128;
+		తిరిగి ret;
+	} లేకపోతే ఒకవేళ (!argc) {
+		తిరిగి !!నెట్టు_stash_unassumed(0, ఖాళీ, ఉపసర్గ, repo);
 	}
 
 	/* Assume 'stash push' */
-	strvec_push(&args, "push");
-	strvec_pushv(&args, argv);
+	strvec_నెట్టు(&వాదనలు, "push");
+	strvec_pushv(&వాదనలు, argv);
 
 	/*
 	 * `push_stash()` ends up modifying the array, which causes memory
 	 * leaks if we didn't copy the array here.
 	 */
-	DUP_ARRAY(args_copy, args.v, args.nr);
+	DUP_ARRAY(వాదనలు_copy, వాదనలు.v, వాదనలు.nr);
 
-	ret = !!push_stash(args.nr, args_copy, prefix, 1);
+	ret = !!నెట్టు_stash(వాదనలు.nr, వాదనలు_copy, ఉపసర్గ, 1);
 
-	strvec_clear(&args);
-	free(args_copy);
-	return ret;
+	strvec_clear(&వాదనలు);
+	విడుదల(వాదనలు_copy);
+	తిరిగి ret;
 }

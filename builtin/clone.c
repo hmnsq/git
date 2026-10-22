@@ -8,45 +8,45 @@
  * Clone a repository into a different directory that does not yet exist.
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
+#అన్తర్భావ "builtin.h"
 
-#include "abspath.h"
-#include "advice.h"
-#include "config.h"
-#include "copy.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "lockfile.h"
-#include "parse-options.h"
-#include "refs.h"
-#include "refspec.h"
-#include "object-file.h"
-#include "odb.h"
-#include "tree.h"
-#include "tree-walk.h"
-#include "unpack-trees.h"
-#include "transport.h"
-#include "strbuf.h"
-#include "dir.h"
-#include "dir-iterator.h"
-#include "iterator.h"
-#include "sigchain.h"
-#include "branch.h"
-#include "remote.h"
-#include "run-command.h"
-#include "setup.h"
-#include "connected.h"
-#include "packfile.h"
-#include "path.h"
-#include "pkt-line.h"
-#include "list-objects-filter-options.h"
-#include "hook.h"
-#include "bundle.h"
-#include "bundle-uri.h"
+#అన్తర్భావ "abspath.h"
+#అన్తర్భావ "advice.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "copy.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "lockfile.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "refs.h"
+#అన్తర్భావ "refspec.h"
+#అన్తర్భావ "object-file.h"
+#అన్తర్భావ "odb.h"
+#అన్తర్భావ "tree.h"
+#అన్తర్భావ "tree-walk.h"
+#అన్తర్భావ "unpack-trees.h"
+#అన్తర్భావ "transport.h"
+#అన్తర్భావ "strbuf.h"
+#అన్తర్భావ "dir.h"
+#అన్తర్భావ "dir-iterator.h"
+#అన్తర్భావ "iterator.h"
+#అన్తర్భావ "sigchain.h"
+#అన్తర్భావ "branch.h"
+#అన్తర్భావ "remote.h"
+#అన్తర్భావ "run-command.h"
+#అన్తర్భావ "setup.h"
+#అన్తర్భావ "connected.h"
+#అన్తర్భావ "packfile.h"
+#అన్తర్భావ "path.h"
+#అన్తర్భావ "pkt-line.h"
+#అన్తర్భావ "list-objects-filter-options.h"
+#అన్తర్భావ "hook.h"
+#అన్తర్భావ "bundle.h"
+#అన్తర్భావ "bundle-uri.h"
 
 /*
  * Overall FIXMEs:
@@ -57,131 +57,131 @@
  *
  */
 
-struct clone_opts {
-	int wants_head;
-	int detach;
+నిర్మాణం clone_opts {
+	పూర్ణాంకం కోరుతుంది_తల;
+	పూర్ణాంకం detach;
 };
-#define CLONE_OPTS_INIT { \
-	.wants_head = 1 /* default enabled */ \
+#నిర్వచించు CLONE_OPTS_INIT { \
+	.కోరుతుంది_తల = 1 /* default enabled */ \
 }
 
-static int option_no_checkout, option_bare, option_mirror, option_single_branch = -1;
-static int option_local = -1, option_no_hardlinks, option_shared;
-static int option_tags = 1; /* default enabled */
-static int option_shallow_submodules;
-static int config_reject_shallow = -1;    /* unspecified */
-static char *remote_name = NULL;
-static char *option_branch = NULL;
-static int option_verbosity;
-static struct string_list option_required_reference = STRING_LIST_INIT_NODUP;
-static struct string_list option_optional_reference = STRING_LIST_INIT_NODUP;
-static int max_jobs = -1;
-static struct string_list option_recurse_submodules = STRING_LIST_INIT_NODUP;
-static int config_filter_submodules = -1;    /* unspecified */
-static int option_remote_submodules;
+స్థిర పూర్ణాంకం option_no_checkout, option_bare, option_mirror, option_single_branch = -1;
+స్థిర పూర్ణాంకం option_local = -1, option_no_hardlinks, option_shared;
+స్థిర పూర్ణాంకం option_ట్యాగులు = 1; /* default enabled */
+స్థిర పూర్ణాంకం option_shallow_submodules;
+స్థిర పూర్ణాంకం config_reject_shallow = -1;    /* unspecified */
+స్థిర అక్షరం *remote_name = ఖాళీ;
+స్థిర అక్షరం *option_branch = ఖాళీ;
+స్థిర పూర్ణాంకం option_verbosity;
+స్థిర నిర్మాణం string_list option_required_reference = STRING_LIST_INIT_NODUP;
+స్థిర నిర్మాణం string_list option_optional_reference = STRING_LIST_INIT_NODUP;
+స్థిర పూర్ణాంకం max_jobs = -1;
+స్థిర నిర్మాణం string_list option_recurse_submodules = STRING_LIST_INIT_NODUP;
+స్థిర పూర్ణాంకం config_filter_submodules = -1;    /* unspecified */
+స్థిర పూర్ణాంకం option_remote_submodules;
 
-static int recurse_submodules_cb(const struct option *opt,
-				 const char *arg, int unset)
+స్థిర పూర్ణాంకం recurse_submodules_cb(స్థిరరాశి నిర్మాణం option *opt,
+				 స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	if (unset)
-		string_list_clear((struct string_list *)opt->value, 0);
-	else if (arg)
-		string_list_append((struct string_list *)opt->value, arg);
-	else
-		string_list_append((struct string_list *)opt->value,
-				   (const char *)opt->defval);
+	ఒకవేళ (unset)
+		string_list_clear((నిర్మాణం string_list *)opt->విలువ, 0);
+	లేకపోతే ఒకవేళ (arg)
+		string_list_append((నిర్మాణం string_list *)opt->విలువ, arg);
+	లేకపోతే
+		string_list_append((నిర్మాణం string_list *)opt->విలువ,
+				   (స్థిరరాశి అక్షరం *)opt->defval);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static const char *get_repo_path_1(struct strbuf *path, int *is_bundle)
+స్థిర స్థిరరాశి అక్షరం *get_repo_మార్గం_1(నిర్మాణం strbuf *మార్గం, పూర్ణాంకం *is_bundle)
 {
-	static const char *suffix[] = { "/.git", "", ".git/.git", ".git" };
-	static const char *bundle_suffix[] = { ".bundle", "" };
-	size_t baselen = path->len;
-	struct stat st;
-	int i;
+	స్థిర స్థిరరాశి అక్షరం *suffix[] = { "/.git", "", ".git/.git", ".git" };
+	స్థిర స్థిరరాశి అక్షరం *bundle_suffix[] = { ".bundle", "" };
+	కొలత_t baselen = మార్గం->len;
+	నిర్మాణం stat st;
+	పూర్ణాంకం i;
 
-	for (i = 0; i < ARRAY_SIZE(suffix); i++) {
-		strbuf_setlen(path, baselen);
-		strbuf_addstr(path, suffix[i]);
-		if (stat(path->buf, &st))
-			continue;
-		if (S_ISDIR(st.st_mode) && is_git_directory(path->buf)) {
+	కొరకు (i = 0; i < ARRAY_కొలత(suffix); i++) {
+		strbuf_setlen(మార్గం, baselen);
+		strbuf_addstr(మార్గం, suffix[i]);
+		ఒకవేళ (stat(మార్గం->buf, &st))
+			కొనసాగు;
+		ఒకవేళ (S_ISDIR(st.st_బహుళకం) && is_git_directory(మార్గం->buf)) {
 			*is_bundle = 0;
-			return path->buf;
-		} else if (S_ISREG(st.st_mode) && st.st_size > 8) {
+			తిరిగి మార్గం->buf;
+		} లేకపోతే ఒకవేళ (S_ISREG(st.st_బహుళకం) && st.st_కొలత > 8) {
 			/* Is it a "gitfile"? */
-			char signature[8];
-			const char *dst;
-			int len, fd = open(path->buf, O_RDONLY);
-			if (fd < 0)
-				continue;
-			len = read_in_full(fd, signature, 8);
+			అక్షరం signature[8];
+			స్థిరరాశి అక్షరం *dst;
+			పూర్ణాంకం len, fd = open(మార్గం->buf, O_RDONLY);
+			ఒకవేళ (fd < 0)
+				కొనసాగు;
+			len = read_లోపల_నిండిన(fd, signature, 8);
 			close(fd);
-			if (len != 8 || strncmp(signature, "gitdir: ", 8))
-				continue;
-			dst = read_gitfile(path->buf);
-			if (dst) {
+			ఒకవేళ (len != 8 || అక్షరశ్రేణి_పోలిక(signature, "gitdir: ", 8))
+				కొనసాగు;
+			dst = read_gitfile(మార్గం->buf);
+			ఒకవేళ (dst) {
 				*is_bundle = 0;
-				return dst;
+				తిరిగి dst;
 			}
 		}
 	}
 
-	for (i = 0; i < ARRAY_SIZE(bundle_suffix); i++) {
-		strbuf_setlen(path, baselen);
-		strbuf_addstr(path, bundle_suffix[i]);
-		if (!stat(path->buf, &st) && S_ISREG(st.st_mode)) {
+	కొరకు (i = 0; i < ARRAY_కొలత(bundle_suffix); i++) {
+		strbuf_setlen(మార్గం, baselen);
+		strbuf_addstr(మార్గం, bundle_suffix[i]);
+		ఒకవేళ (!stat(మార్గం->buf, &st) && S_ISREG(st.st_బహుళకం)) {
 			*is_bundle = 1;
-			return path->buf;
+			తిరిగి మార్గం->buf;
 		}
 	}
 
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
-static char *get_repo_path(const char *repo, int *is_bundle)
+స్థిర అక్షరం *get_repo_మార్గం(స్థిరరాశి అక్షరం *repo, పూర్ణాంకం *is_bundle)
 {
-	struct strbuf path = STRBUF_INIT;
-	const char *raw;
-	char *canon;
+	నిర్మాణం strbuf మార్గం = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *raw;
+	అక్షరం *canon;
 
-	strbuf_addstr(&path, repo);
-	raw = get_repo_path_1(&path, is_bundle);
-	canon = raw ? absolute_pathdup(raw) : NULL;
-	strbuf_release(&path);
-	return canon;
+	strbuf_addstr(&మార్గం, repo);
+	raw = get_repo_మార్గం_1(&మార్గం, is_bundle);
+	canon = raw ? absolute_pathdup(raw) : ఖాళీ;
+	strbuf_release(&మార్గం);
+	తిరిగి canon;
 }
 
-struct collect_alternates_data {
-	struct strvec *alternates;
+నిర్మాణం collect_alternates_దత్తాంశం {
+	నిర్మాణం strvec *alternates;
 	bool required;
 };
 
-static int collect_one_alternate(struct string_list_item *item, void *cb_data)
+స్థిర పూర్ణాంకం collect_one_alternate(నిర్మాణం string_list_అంశం *అంశం, శూన్య *cb_దత్తాంశం)
 {
-	struct collect_alternates_data *data = cb_data;
-	struct strbuf err = STRBUF_INIT;
-	char *ref_git = compute_alternate_path(item->string, &err);
+	నిర్మాణం collect_alternates_దత్తాంశం *దత్తాంశం = cb_దత్తాంశం;
+	నిర్మాణం strbuf err = STRBUF_INIT;
+	అక్షరం *ref_git = compute_alternate_మార్గం(అంశం->string, &err);
 
-	if (!ref_git) {
-		if (data->required)
+	ఒకవేళ (!ref_git) {
+		ఒకవేళ (దత్తాంశం->required)
 			die("%s", err.buf);
-		else
+		లేకపోతే
 			fprintf(stderr,
 				_("info: Could not add alternate for '%s': %s\n"),
-				item->string, err.buf);
-	} else {
-		strvec_pushf(data->alternates, "%s/objects", ref_git);
+				అంశం->string, err.buf);
+	} లేకపోతే {
+		strvec_pushf(దత్తాంశం->alternates, "%s/objects", ref_git);
 	}
 
 	strbuf_release(&err);
-	free(ref_git);
-	return 0;
+	విడుదల(ref_git);
+	తిరిగి 0;
 }
 
-static void read_alternates(struct strvec *alternates, const char *src_repo)
+స్థిర శూన్య read_alternates(నిర్మాణం strvec *alternates, స్థిరరాశి అక్షరం *src_repo)
 {
 	/*
 	 * Read from the source objects/info/alternates file
@@ -195,93 +195,93 @@ static void read_alternates(struct strvec *alternates, const char *src_repo)
 	 * to turn entries with paths relative to the original
 	 * absolute, so that they can be used in the new repository.
 	 */
-	FILE *in;
-	struct strbuf path = STRBUF_INIT;
-	struct strbuf line = STRBUF_INIT;
+	FILE *లోపల;
+	నిర్మాణం strbuf మార్గం = STRBUF_INIT;
+	నిర్మాణం strbuf పంక్తి = STRBUF_INIT;
 
-	strbuf_addf(&path, "%s/objects/info/alternates", src_repo);
+	strbuf_addf(&మార్గం, "%s/objects/info/alternates", src_repo);
 
-	in = fopen(path.buf, "r");
-	if (!in) {
-		if (errno == ENOENT)
-			goto out;
-		die_errno("could not read alternates file '%s'", path.buf);
+	లోపల = fopen(మార్గం.buf, "r");
+	ఒకవేళ (!లోపల) {
+		ఒకవేళ (errno == ENOENT)
+			వెళ్ళు బహిర్గతం;
+		die_errno("could not read alternates file '%s'", మార్గం.buf);
 	}
 
-	while (strbuf_getline(&line, in) != EOF) {
-		char *abs_path;
-		if (!line.len || line.buf[0] == '#')
-			continue;
-		if (is_absolute_path(line.buf)) {
-			strvec_push(alternates, line.buf);
-			continue;
+	అయితే (strbuf_getline(&పంక్తి, లోపల) != EOF) {
+		అక్షరం *abs_మార్గం;
+		ఒకవేళ (!పంక్తి.len || పంక్తి.buf[0] == '#')
+			కొనసాగు;
+		ఒకవేళ (is_absolute_మార్గం(పంక్తి.buf)) {
+			strvec_నెట్టు(alternates, పంక్తి.buf);
+			కొనసాగు;
 		}
-		abs_path = mkpathdup("%s/objects/%s", src_repo, line.buf);
-		if (!normalize_path_copy(abs_path, abs_path))
-			strvec_push(alternates, abs_path);
-		else
+		abs_మార్గం = mkpathdup("%s/objects/%s", src_repo, పంక్తి.buf);
+		ఒకవేళ (!normalize_మార్గం_copy(abs_మార్గం, abs_మార్గం))
+			strvec_నెట్టు(alternates, abs_మార్గం);
+		లేకపోతే
 			warning("skipping invalid relative alternate: %s/%s",
-				src_repo, line.buf);
-		free(abs_path);
+				src_repo, పంక్తి.buf);
+		విడుదల(abs_మార్గం);
 	}
 
-out:
-	strbuf_release(&path);
-	strbuf_release(&line);
-	if (in)
-		fclose(in);
+బహిర్గతం:
+	strbuf_release(&మార్గం);
+	strbuf_release(&పంక్తి);
+	ఒకవేళ (లోపల)
+		fclose(లోపల);
 }
 
-static void collect_alternates(struct strvec *alternates,
-			       const char *local_source_repo)
+స్థిర శూన్య collect_alternates(నిర్మాణం strvec *alternates,
+			       స్థిరరాశి అక్షరం *local_ఆధారం_repo)
 {
-	if (option_required_reference.nr || option_optional_reference.nr) {
-		struct collect_alternates_data data = {
+	ఒకవేళ (option_required_reference.nr || option_optional_reference.nr) {
+		నిర్మాణం collect_alternates_దత్తాంశం దత్తాంశం = {
 			.alternates = alternates,
 			.required = true,
 		};
 
 		for_each_string_list(&option_required_reference,
-				     collect_one_alternate, &data);
-		data.required = false;
+				     collect_one_alternate, &దత్తాంశం);
+		దత్తాంశం.required = false;
 		for_each_string_list(&option_optional_reference,
-				     collect_one_alternate, &data);
+				     collect_one_alternate, &దత్తాంశం);
 	}
 
-	if (local_source_repo) {
-		struct strbuf commondir = STRBUF_INIT;
+	ఒకవేళ (local_ఆధారం_repo) {
+		నిర్మాణం strbuf commondir = STRBUF_INIT;
 
-		get_common_dir(&commondir, local_source_repo);
-		if (option_shared)
+		get_common_dir(&commondir, local_ఆధారం_repo);
+		ఒకవేళ (option_shared)
 			strvec_pushf(alternates, "%s/objects", commondir.buf);
-		else
+		లేకపోతే
 			read_alternates(alternates, commondir.buf);
 
 		strbuf_release(&commondir);
 	}
 }
 
-static void mkdir_if_missing(const char *pathname, mode_t mode)
+స్థిర శూన్య mkdir_if_missing(స్థిరరాశి అక్షరం *pathname, బహుళకం_t బహుళకం)
 {
-	struct stat st;
+	నిర్మాణం stat st;
 
-	if (!mkdir(pathname, mode))
-		return;
+	ఒకవేళ (!mkdir(pathname, బహుళకం))
+		తిరిగి;
 
-	if (errno != EEXIST)
+	ఒకవేళ (errno != EEXIST)
 		die_errno(_("failed to create directory '%s'"), pathname);
-	else if (stat(pathname, &st))
+	లేకపోతే ఒకవేళ (stat(pathname, &st))
 		die_errno(_("failed to stat '%s'"), pathname);
-	else if (!S_ISDIR(st.st_mode))
+	లేకపోతే ఒకవేళ (!S_ISDIR(st.st_బహుళకం))
 		die(_("%s exists and is not a directory"), pathname);
 }
 
-static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
-				   const char *src_repo)
+స్థిర శూన్య copy_or_link_directory(నిర్మాణం strbuf *src, నిర్మాణం strbuf *dest,
+				   స్థిరరాశి అక్షరం *src_repo)
 {
-	int src_len, dest_len;
-	struct dir_iterator *iter;
-	int iter_status;
+	పూర్ణాంకం src_len, dest_len;
+	నిర్మాణం dir_iterator *iter;
+	పూర్ణాంకం iter_స్థితి;
 
 	/*
 	 * Refuse copying directories by default which aren't owned by us. The
@@ -295,18 +295,18 @@ static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
 	 * operation as the hardlinked files can be rewritten at will by the
 	 * potentially-untrusted user. We thus refuse to do so by default.
 	 */
-	die_upon_dubious_ownership(NULL, NULL, src_repo);
+	die_upon_dubious_ownership(ఖాళీ, ఖాళీ, src_repo);
 
 	mkdir_if_missing(dest->buf, 0777);
 
 	iter = dir_iterator_begin(src->buf, DIR_ITERATOR_PEDANTIC);
 
-	if (!iter) {
-		if (errno == ENOTDIR) {
-			int saved_errno = errno;
-			struct stat st;
+	ఒకవేళ (!iter) {
+		ఒకవేళ (errno == ENOTDIR) {
+			పూర్ణాంకం saved_errno = errno;
+			నిర్మాణం stat st;
 
-			if (!lstat(src->buf, &st) && S_ISLNK(st.st_mode))
+			ఒకవేళ (!lstat(src->buf, &st) && S_ISLNK(st.st_బహుళకం))
 				die(_("'%s' is a symlink, refusing to clone with --local"),
 				    src->buf);
 			errno = saved_errno;
@@ -319,30 +319,30 @@ static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
 	strbuf_addch(dest, '/');
 	dest_len = dest->len;
 
-	while ((iter_status = dir_iterator_advance(iter)) == ITER_OK) {
+	అయితే ((iter_స్థితి = dir_iterator_advance(iter)) == ITER_OK) {
 		strbuf_setlen(src, src_len);
-		strbuf_addstr(src, iter->relative_path);
+		strbuf_addstr(src, iter->relative_మార్గం);
 		strbuf_setlen(dest, dest_len);
-		strbuf_addstr(dest, iter->relative_path);
+		strbuf_addstr(dest, iter->relative_మార్గం);
 
-		if (S_ISLNK(iter->st.st_mode))
+		ఒకవేళ (S_ISLNK(iter->st.st_బహుళకం))
 			die(_("symlink '%s' exists, refusing to clone with --local"),
-			    iter->relative_path);
+			    iter->relative_మార్గం);
 
-		if (S_ISDIR(iter->st.st_mode)) {
+		ఒకవేళ (S_ISDIR(iter->st.st_బహుళకం)) {
 			mkdir_if_missing(dest->buf, 0777);
-			continue;
+			కొనసాగు;
 		}
 
 		/* Alternates were already handled earlier. */
-		if (!fspathcmp(iter->relative_path, "info/alternates"))
-			continue;
+		ఒకవేళ (!fspathcmp(iter->relative_మార్గం, "info/alternates"))
+			కొనసాగు;
 
-		if (unlink(dest->buf) && errno != ENOENT)
+		ఒకవేళ (unlink(dest->buf) && errno != ENOENT)
 			die_errno(_("failed to unlink '%s'"), dest->buf);
-		if (!option_no_hardlinks) {
-			if (!link(src->buf, dest->buf)) {
-				struct stat st;
+		ఒకవేళ (!option_no_hardlinks) {
+			ఒకవేళ (!link(src->buf, dest->buf)) {
+				నిర్మాణం stat st;
 
 				/*
 				 * Sanity-check whether the created hardlink
@@ -350,27 +350,27 @@ static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
 				 * catches time-of-check-time-of-use bugs in
 				 * case the source file was meanwhile swapped.
 				 */
-				if (lstat(dest->buf, &st))
+				ఒకవేళ (lstat(dest->buf, &st))
 					die(_("hardlink cannot be checked at '%s'"), dest->buf);
-				if (st.st_mode != iter->st.st_mode ||
+				ఒకవేళ (st.st_బహుళకం != iter->st.st_బహుళకం ||
 				    st.st_ino != iter->st.st_ino ||
 				    st.st_dev != iter->st.st_dev ||
-				    st.st_size != iter->st.st_size ||
+				    st.st_కొలత != iter->st.st_కొలత ||
 				    st.st_uid != iter->st.st_uid ||
 				    st.st_gid != iter->st.st_gid)
 					die(_("hardlink different from source at '%s'"), dest->buf);
 
-				continue;
+				కొనసాగు;
 			}
-			if (option_local > 0)
+			ఒకవేళ (option_local > 0)
 				die_errno(_("failed to create link '%s'"), dest->buf);
 			option_no_hardlinks = 1;
 		}
-		if (copy_file_with_time(the_repository, dest->buf, src->buf, 0666))
+		ఒకవేళ (copy_file_with_సమయం(the_repository, dest->buf, src->buf, 0666))
 			die_errno(_("failed to copy file to '%s'"), dest->buf);
 	}
 
-	if (iter_status != ITER_DONE) {
+	ఒకవేళ (iter_స్థితి != ITER_పూర్తి) {
 		strbuf_setlen(src, src_len);
 		die(_("failed to iterate over '%s'"), src->buf);
 	}
@@ -378,11 +378,11 @@ static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
 	dir_iterator_free(iter);
 }
 
-static void clone_local(const char *src_repo, const char *dest_repo)
+స్థిర శూన్య clone_local(స్థిరరాశి అక్షరం *src_repo, స్థిరరాశి అక్షరం *dest_repo)
 {
-	if (!option_shared) {
-		struct strbuf src = STRBUF_INIT;
-		struct strbuf dest = STRBUF_INIT;
+	ఒకవేళ (!option_shared) {
+		నిర్మాణం strbuf src = STRBUF_INIT;
+		నిర్మాణం strbuf dest = STRBUF_INIT;
 		get_common_dir(&src, src_repo);
 		get_common_dir(&dest, dest_repo);
 		strbuf_addstr(&src, "/objects");
@@ -392,258 +392,258 @@ static void clone_local(const char *src_repo, const char *dest_repo)
 		strbuf_release(&dest);
 	}
 
-	if (0 <= option_verbosity)
+	ఒకవేళ (0 <= option_verbosity)
 		fprintf(stderr, _("done.\n"));
 }
 
-static const char *junk_work_tree;
-static int junk_work_tree_flags;
-static const char *junk_git_dir;
-static int junk_git_dir_flags;
-static enum {
+స్థిర స్థిరరాశి అక్షరం *junk_work_వృక్షం;
+స్థిర పూర్ణాంకం junk_work_వృక్షం_flags;
+స్థిర స్థిరరాశి అక్షరం *junk_git_dir;
+స్థిర పూర్ణాంకం junk_git_dir_flags;
+స్థిర గణన {
 	JUNK_LEAVE_NONE,
 	JUNK_LEAVE_REPO,
 	JUNK_LEAVE_ALL
-} junk_mode = JUNK_LEAVE_NONE;
+} junk_బహుళకం = JUNK_LEAVE_NONE;
 
-static const char junk_leave_repo_msg[] =
+స్థిర స్థిరరాశి అక్షరం junk_leave_repo_సందేశం[] =
 N_("Clone succeeded, but checkout failed.\n"
    "You can inspect what was checked out with 'git status'\n"
    "and retry with 'git restore --source=HEAD :/'\n");
 
-static void remove_junk(void)
+స్థిర శూన్య remove_junk(శూన్య)
 {
-	struct strbuf sb = STRBUF_INIT;
+	నిర్మాణం strbuf sb = STRBUF_INIT;
 
-	switch (junk_mode) {
-	case JUNK_LEAVE_REPO:
-		warning("%s", _(junk_leave_repo_msg));
+	ఎంపిక (junk_బహుళకం) {
+	స్థితి JUNK_LEAVE_REPO:
+		warning("%s", _(junk_leave_repo_సందేశం));
 		/* fall-through */
-	case JUNK_LEAVE_ALL:
-		return;
-	default:
+	స్థితి JUNK_LEAVE_ALL:
+		తిరిగి;
+	అప్రమేయ:
 		/* proceed to removal */
-		break;
+		ఆపు;
 	}
 
-	if (junk_git_dir) {
+	ఒకవేళ (junk_git_dir) {
 		strbuf_addstr(&sb, junk_git_dir);
 		remove_dir_recursively(&sb, junk_git_dir_flags);
 		strbuf_reset(&sb);
 	}
-	if (junk_work_tree) {
-		strbuf_addstr(&sb, junk_work_tree);
-		remove_dir_recursively(&sb, junk_work_tree_flags);
+	ఒకవేళ (junk_work_వృక్షం) {
+		strbuf_addstr(&sb, junk_work_వృక్షం);
+		remove_dir_recursively(&sb, junk_work_వృక్షం_flags);
 	}
 	strbuf_release(&sb);
 }
 
-static void remove_junk_on_signal(int signo)
+స్థిర శూన్య remove_junk_on_signal(పూర్ణాంకం signo)
 {
 	remove_junk();
-	sigchain_pop(signo);
-	raise(signo);
+	sigchain_తీయి(signo);
+	లేపు(signo);
 }
 
-static struct ref *find_remote_branch(const struct ref *refs, const char *branch)
+స్థిర నిర్మాణం ref *కనుగొను_remote_branch(స్థిరరాశి నిర్మాణం ref *refs, స్థిరరాశి అక్షరం *branch)
 {
-	struct ref *ref;
-	struct strbuf head = STRBUF_INIT;
-	strbuf_addstr(&head, "refs/heads/");
-	strbuf_addstr(&head, branch);
-	ref = find_ref_by_name(refs, head.buf);
-	strbuf_release(&head);
+	నిర్మాణం ref *ref;
+	నిర్మాణం strbuf తల = STRBUF_INIT;
+	strbuf_addstr(&తల, "refs/heads/");
+	strbuf_addstr(&తల, branch);
+	ref = కనుగొను_ref_by_name(refs, తల.buf);
+	strbuf_release(&తల);
 
-	if (ref)
-		return ref;
+	ఒకవేళ (ref)
+		తిరిగి ref;
 
-	strbuf_addstr(&head, "refs/tags/");
-	strbuf_addstr(&head, branch);
-	ref = find_ref_by_name(refs, head.buf);
-	strbuf_release(&head);
+	strbuf_addstr(&తల, "refs/tags/");
+	strbuf_addstr(&తల, branch);
+	ref = కనుగొను_ref_by_name(refs, తల.buf);
+	strbuf_release(&తల);
 
-	return ref;
+	తిరిగి ref;
 }
 
-static struct ref *wanted_peer_refs(struct clone_opts *opts,
-				    const struct ref *refs,
-				    struct refspec *refspec)
+స్థిర నిర్మాణం ref *wanted_peer_refs(నిర్మాణం clone_opts *opts,
+				    స్థిరరాశి నిర్మాణం ref *refs,
+				    నిర్మాణం refspec *refspec)
 {
-	struct ref *local_refs = NULL;
-	struct ref **tail = &local_refs;
-	struct ref *to_free = NULL;
+	నిర్మాణం ref *local_refs = ఖాళీ;
+	నిర్మాణం ref **తోక = &local_refs;
+	నిర్మాణం ref *గమ్యం_free = ఖాళీ;
 
-	if (opts->wants_head) {
-		struct ref *head = copy_ref(find_ref_by_name(refs, "HEAD"));
-		if (head)
-			tail_link_ref(head, &tail);
-		if (option_single_branch)
-			refs = to_free =
-				guess_remote_head(head, refs,
-						  REMOTE_GUESS_HEAD_QUIET);
-	} else if (option_single_branch) {
-		local_refs = NULL;
-		tail = &local_refs;
-		refs = to_free = copy_ref(find_remote_branch(refs, option_branch));
+	ఒకవేళ (opts->కోరుతుంది_తల) {
+		నిర్మాణం ref *తల = copy_ref(కనుగొను_ref_by_name(refs, "HEAD"));
+		ఒకవేళ (తల)
+			తోక_link_ref(తల, &తోక);
+		ఒకవేళ (option_single_branch)
+			refs = గమ్యం_free =
+				guess_remote_తల(తల, refs,
+						  REMOTE_GUESS_తల_QUIET);
+	} లేకపోతే ఒకవేళ (option_single_branch) {
+		local_refs = ఖాళీ;
+		తోక = &local_refs;
+		refs = గమ్యం_free = copy_ref(కనుగొను_remote_branch(refs, option_branch));
 	}
 
-	for (size_t i = 0; i < refspec->nr; i++)
-		get_fetch_map(refs, &refspec->items[i], &tail, 0);
+	కొరకు (కొలత_t i = 0; i < refspec->nr; i++)
+		get_fetch_map(refs, &refspec->వస్తువులు[i], &తోక, 0);
 
-	free_one_ref(to_free);
+	free_one_ref(గమ్యం_free);
 
-	return local_refs;
+	తిరిగి local_refs;
 }
 
-static void write_remote_refs(const struct ref *local_refs)
+స్థిర శూన్య write_remote_refs(స్థిరరాశి నిర్మాణం ref *local_refs)
 {
-	const struct ref *r;
+	స్థిరరాశి నిర్మాణం ref *r;
 
-	struct ref_transaction *t;
-	struct strbuf err = STRBUF_INIT;
+	నిర్మాణం ref_transaction *t;
+	నిర్మాణం strbuf err = STRBUF_INIT;
 
 	t = ref_store_transaction_begin(get_main_ref_store(the_repository),
 					REF_TRANSACTION_FLAG_INITIAL, &err);
-	if (!t)
+	ఒకవేళ (!t)
 		die("%s", err.buf);
 
-	for (r = local_refs; r; r = r->next) {
-		if (!r->peer_ref)
-			continue;
-		if (ref_transaction_create(t, r->peer_ref->name, &r->old_oid,
-					   NULL, 0, NULL, &err))
+	కొరకు (r = local_refs; r; r = r->తదుపరి) {
+		ఒకవేళ (!r->peer_ref)
+			కొనసాగు;
+		ఒకవేళ (ref_transaction_create(t, r->peer_ref->name, &r->old_oid,
+					   ఖాళీ, 0, ఖాళీ, &err))
 			die("%s", err.buf);
 	}
 
-	if (ref_transaction_commit(t, &err))
+	ఒకవేళ (ref_transaction_commit(t, &err))
 		die("%s", err.buf);
 
 	strbuf_release(&err);
 	ref_transaction_free(t);
 }
 
-static void write_followtags(const struct ref *refs, const char *msg)
+స్థిర శూన్య write_followtags(స్థిరరాశి నిర్మాణం ref *refs, స్థిరరాశి అక్షరం *సందేశం)
 {
-	const struct ref *ref;
-	for (ref = refs; ref; ref = ref->next) {
-		if (!starts_with(ref->name, "refs/tags/"))
-			continue;
-		if (ends_with(ref->name, "^{}"))
-			continue;
-		if (!odb_has_object(the_repository->objects, &ref->old_oid, 0))
-			continue;
-		refs_update_ref(get_main_ref_store(the_repository), msg,
-				ref->name, &ref->old_oid, NULL, 0,
+	స్థిరరాశి నిర్మాణం ref *ref;
+	కొరకు (ref = refs; ref; ref = ref->తదుపరి) {
+		ఒకవేళ (!starts_with(ref->name, "refs/tags/"))
+			కొనసాగు;
+		ఒకవేళ (చివర్లు_with(ref->name, "^{}"))
+			కొనసాగు;
+		ఒకవేళ (!odb_has_object(the_repository->objects, &ref->old_oid, 0))
+			కొనసాగు;
+		refs_update_ref(get_main_ref_store(the_repository), సందేశం,
+				ref->name, &ref->old_oid, ఖాళీ, 0,
 				UPDATE_REFS_DIE_ON_ERR);
 	}
 }
 
-static const struct object_id *iterate_ref_map(void *cb_data)
+స్థిర స్థిరరాశి నిర్మాణం object_id *iterate_ref_map(శూన్య *cb_దత్తాంశం)
 {
-	struct ref **rm = cb_data;
-	struct ref *ref = *rm;
+	నిర్మాణం ref **rm = cb_దత్తాంశం;
+	నిర్మాణం ref *ref = *rm;
 
 	/*
 	 * Skip anything missing a peer_ref, which we are not
 	 * actually going to write a ref for.
 	 */
-	while (ref && !ref->peer_ref)
-		ref = ref->next;
-	if (!ref)
-		return NULL;
+	అయితే (ref && !ref->peer_ref)
+		ref = ref->తదుపరి;
+	ఒకవేళ (!ref)
+		తిరిగి ఖాళీ;
 
-	*rm = ref->next;
-	return &ref->old_oid;
+	*rm = ref->తదుపరి;
+	తిరిగి &ref->old_oid;
 }
 
-static void update_remote_refs(const struct ref *refs,
-			       const struct ref *mapped_refs,
-			       const struct ref *remote_head_points_at,
-			       const char *branch_top,
-			       const char *msg,
-			       struct transport *transport,
-			       int check_connectivity)
+స్థిర శూన్య update_remote_refs(స్థిరరాశి నిర్మాణం ref *refs,
+			       స్థిరరాశి నిర్మాణం ref *mapped_refs,
+			       స్థిరరాశి నిర్మాణం ref *remote_తల_points_at,
+			       స్థిరరాశి అక్షరం *branch_శిఖరం,
+			       స్థిరరాశి అక్షరం *సందేశం,
+			       నిర్మాణం transport *transport,
+			       పూర్ణాంకం check_connectivity)
 {
-	const struct ref *rm = mapped_refs;
+	స్థిరరాశి నిర్మాణం ref *rm = mapped_refs;
 
-	if (check_connectivity) {
-		struct check_connected_options opt = CHECK_CONNECTED_INIT;
+	ఒకవేళ (check_connectivity) {
+		నిర్మాణం check_connected_options opt = CHECK_CONNECTED_INIT;
 
 		opt.transport = transport;
-		opt.progress = transport->progress;
+		opt.పురోగతి = transport->పురోగతి;
 
-		if (check_connected(iterate_ref_map, &rm, &opt))
+		ఒకవేళ (check_connected(iterate_ref_map, &rm, &opt))
 			die(_("remote did not send all necessary objects"));
 	}
 
-	if (refs) {
+	ఒకవేళ (refs) {
 		write_remote_refs(mapped_refs);
-		if (option_single_branch && option_tags)
-			write_followtags(refs, msg);
+		ఒకవేళ (option_single_branch && option_ట్యాగులు)
+			write_followtags(refs, సందేశం);
 	}
 
-	if (remote_head_points_at && remote_head_points_at->peer_ref && !option_bare) {
-		struct strbuf head_ref = STRBUF_INIT;
-		strbuf_addstr(&head_ref, branch_top);
-		strbuf_addstr(&head_ref, "HEAD");
-		if (refs_update_symref(get_main_ref_store(the_repository), head_ref.buf,
-				       remote_head_points_at->peer_ref->name,
-				       msg) < 0)
-			die(_("unable to update %s"), head_ref.buf);
-		strbuf_release(&head_ref);
+	ఒకవేళ (remote_తల_points_at && remote_తల_points_at->peer_ref && !option_bare) {
+		నిర్మాణం strbuf తల_ref = STRBUF_INIT;
+		strbuf_addstr(&తల_ref, branch_శిఖరం);
+		strbuf_addstr(&తల_ref, "HEAD");
+		ఒకవేళ (refs_update_symref(get_main_ref_store(the_repository), తల_ref.buf,
+				       remote_తల_points_at->peer_ref->name,
+				       సందేశం) < 0)
+			die(_("unable to update %s"), తల_ref.buf);
+		strbuf_release(&తల_ref);
 	}
 }
 
-static void update_head(struct clone_opts *opts, const struct ref *our, const struct ref *remote,
-			const char *unborn, const char *msg)
+స్థిర శూన్య update_తల(నిర్మాణం clone_opts *opts, స్థిరరాశి నిర్మాణం ref *our, స్థిరరాశి నిర్మాణం ref *remote,
+			స్థిరరాశి అక్షరం *unborn, స్థిరరాశి అక్షరం *సందేశం)
 {
-	const char *head;
-	if (our && !opts->detach && skip_prefix(our->name, "refs/heads/", &head)) {
+	స్థిరరాశి అక్షరం *తల;
+	ఒకవేళ (our && !opts->detach && skip_ఉపసర్గ(our->name, "refs/heads/", &తల)) {
 		/* Local default branch link */
-		if (refs_update_symref(get_main_ref_store(the_repository), "HEAD", our->name, NULL) < 0)
+		ఒకవేళ (refs_update_symref(get_main_ref_store(the_repository), "HEAD", our->name, ఖాళీ) < 0)
 			die(_("unable to update HEAD"));
-		if (!option_bare) {
+		ఒకవేళ (!option_bare) {
 			refs_update_ref(get_main_ref_store(the_repository),
-					msg, "HEAD", &our->old_oid, NULL, 0,
+					సందేశం, "HEAD", &our->old_oid, ఖాళీ, 0,
 					UPDATE_REFS_DIE_ON_ERR);
-			install_branch_config(0, head, remote_name, our->name);
+			install_branch_config(0, తల, remote_name, our->name);
 		}
-	} else if (our) {
-		struct commit *c = lookup_commit_or_die(&our->old_oid,
+	} లేకపోతే ఒకవేళ (our) {
+		నిర్మాణం commit *c = lookup_commit_or_die(&our->old_oid,
 							our->name);
 
 		/* --branch specifies a non-branch (i.e. tags), detach HEAD */
-		refs_update_ref(get_main_ref_store(the_repository), msg,
-				"HEAD", &c->object.oid, NULL, REF_NO_DEREF,
+		refs_update_ref(get_main_ref_store(the_repository), సందేశం,
+				"HEAD", &c->object.oid, ఖాళీ, REF_NO_DEREF,
 				UPDATE_REFS_DIE_ON_ERR);
-	} else if (remote) {
+	} లేకపోతే ఒకవేళ (remote) {
 		/*
 		 * We know remote HEAD points to a non-branch, or
 		 * HEAD points to a branch but we don't know which one.
 		 * Detach HEAD in all these cases.
 		 */
-		refs_update_ref(get_main_ref_store(the_repository), msg,
-				"HEAD", &remote->old_oid, NULL, REF_NO_DEREF,
+		refs_update_ref(get_main_ref_store(the_repository), సందేశం,
+				"HEAD", &remote->old_oid, ఖాళీ, REF_NO_DEREF,
 				UPDATE_REFS_DIE_ON_ERR);
-	} else if (unborn && skip_prefix(unborn, "refs/heads/", &head)) {
+	} లేకపోతే ఒకవేళ (unborn && skip_ఉపసర్గ(unborn, "refs/heads/", &తల)) {
 		/*
 		 * Unborn head from remote; same as "our" case above except
 		 * that we have no ref to update.
 		 */
-		if (refs_update_symref(get_main_ref_store(the_repository), "HEAD", unborn, NULL) < 0)
+		ఒకవేళ (refs_update_symref(get_main_ref_store(the_repository), "HEAD", unborn, ఖాళీ) < 0)
 			die(_("unable to update HEAD"));
-		if (!option_bare)
-			install_branch_config(0, head, remote_name, unborn);
+		ఒకవేళ (!option_bare)
+			install_branch_config(0, తల, remote_name, unborn);
 	}
 }
 
-static int git_sparse_checkout_init(const char *repo)
+స్థిర పూర్ణాంకం git_sparse_checkout_init(స్థిరరాశి అక్షరం *repo)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	int result = 0;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	నిర్మాణం బిడ్డ_process cmd = బిడ్డ_PROCESS_INIT;
+	పూర్ణాంకం ఫలితం = 0;
+	నిర్మాణం repo_config_విలువలు *cfg = repo_config_విలువలు(the_repository);
 
-	strvec_pushl(&cmd.args, "-C", repo, "sparse-checkout", "set", NULL);
+	strvec_pushl(&cmd.వాదనలు, "-C", repo, "sparse-checkout", "set", ఖాళీ);
 
 	/*
 	 * We must apply the setting in the current process
@@ -652,193 +652,193 @@ static int git_sparse_checkout_init(const char *repo)
 	cfg->apply_sparse_checkout = 1;
 
 	cmd.git_cmd = 1;
-	if (run_command(&cmd)) {
+	ఒకవేళ (నిరంతరం_command(&cmd)) {
 		error(_("failed to initialize sparse-checkout"));
-		result = 1;
+		ఫలితం = 1;
 	}
 
-	return result;
+	తిరిగి ఫలితం;
 }
 
-static int checkout(int submodule_progress,
-		    struct list_objects_filter_options *filter_options,
-		    int filter_submodules,
-		    enum ref_storage_format ref_storage_format)
+స్థిర పూర్ణాంకం checkout(పూర్ణాంకం submodule_పురోగతి,
+		    నిర్మాణం list_objects_filter_options *filter_options,
+		    పూర్ణాంకం filter_submodules,
+		    గణన ref_storage_format ref_storage_format)
 {
-	struct object_id oid;
-	char *head;
-	struct lock_file lock_file = LOCK_INIT;
-	struct unpack_trees_options opts;
-	struct tree *tree;
-	struct tree_desc t;
-	int err = 0;
-	struct run_hooks_opt hook_opt = RUN_HOOKS_OPT_INIT_FORCE_SERIAL;
+	నిర్మాణం object_id oid;
+	అక్షరం *తల;
+	నిర్మాణం తాళం_file తాళం_file = తాళం_INIT;
+	నిర్మాణం unpack_trees_options opts;
+	నిర్మాణం వృక్షం *వృక్షం;
+	నిర్మాణం వృక్షం_desc t;
+	పూర్ణాంకం err = 0;
+	నిర్మాణం నిరంతరం_hooks_opt hook_opt = నిరంతరం_HOOKS_OPT_INIT_FORCE_SERIAL;
 
-	if (option_no_checkout)
-		return 0;
+	ఒకవేళ (option_no_checkout)
+		తిరిగి 0;
 
-	head = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
-				   RESOLVE_REF_READING, &oid, NULL);
-	if (!head) {
+	తల = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
+				   RESOLVE_REF_READING, &oid, ఖాళీ);
+	ఒకవేళ (!తల) {
 		warning(_("remote HEAD refers to nonexistent ref, "
 			  "unable to checkout"));
-		return 0;
+		తిరిగి 0;
 	}
-	if (!strcmp(head, "HEAD")) {
-		if (advice_enabled(ADVICE_DETACHED_HEAD))
-			detach_advice(oid_to_hex(&oid));
-		FREE_AND_NULL(head);
-	} else {
-		if (!starts_with(head, "refs/heads/"))
+	ఒకవేళ (!strcmp(తల, "HEAD")) {
+		ఒకవేళ (advice_enabled(ADVICE_DETACHED_తల))
+			detach_advice(oid_గమ్యం_hex(&oid));
+		FREE_AND_NULL(తల);
+	} లేకపోతే {
+		ఒకవేళ (!starts_with(తల, "refs/heads/"))
 			die(_("HEAD not found below refs/heads!"));
 	}
 
 	/* We need to be in the new work tree for the checkout */
-	setup_work_tree(the_repository);
+	అమరిక_work_వృక్షం(the_repository);
 
-	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
+	repo_hold_locked_సూచీ(the_repository, &తాళం_file, తాళం_DIE_ON_ERROR);
 
-	memset(&opts, 0, sizeof opts);
+	memset(&opts, 0, పరిమాణం opts);
 	opts.update = 1;
-	opts.merge = 1;
+	opts.విలీనం = 1;
 	opts.clone = 1;
 	opts.preserve_ignored = 0;
-	opts.fn = oneway_merge;
+	opts.fn = oneway_విలీనం;
 	opts.verbose_update = (option_verbosity >= 0);
-	opts.src_index = the_repository->index;
-	opts.dst_index = the_repository->index;
-	init_checkout_metadata(&opts.meta, head, &oid, NULL);
+	opts.src_సూచీ = the_repository->సూచీ;
+	opts.dst_సూచీ = the_repository->సూచీ;
+	init_checkout_metadata(&opts.meta, తల, &oid, ఖాళీ);
 
-	tree = repo_parse_tree_indirect(the_repository, &oid);
-	if (!tree)
-		die(_("unable to parse commit %s"), oid_to_hex(&oid));
-	if (repo_parse_tree(the_repository, tree) < 0)
-		exit(128);
-	init_tree_desc(&t, &tree->object.oid, tree->buffer, tree->size);
-	if (unpack_trees(1, &t, &opts) < 0)
+	వృక్షం = repo_parse_వృక్షం_పరోక్ష(the_repository, &oid);
+	ఒకవేళ (!వృక్షం)
+		die(_("unable to parse commit %s"), oid_గమ్యం_hex(&oid));
+	ఒకవేళ (repo_parse_వృక్షం(the_repository, వృక్షం) < 0)
+		నిష్క్రమించు(128);
+	init_వృక్షం_desc(&t, &వృక్షం->object.oid, వృక్షం->బఫరు, వృక్షం->కొలత);
+	ఒకవేళ (unpack_trees(1, &t, &opts) < 0)
 		die(_("unable to checkout working tree"));
 
-	free(head);
+	విడుదల(తల);
 
-	if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+	ఒకవేళ (write_locked_సూచీ(the_repository->సూచీ, &తాళం_file, COMMIT_తాళం))
 		die(_("unable to write new index file"));
 
-	strvec_pushl(&hook_opt.args, oid_to_hex(null_oid(the_hash_algo)),
-		     oid_to_hex(&oid), "1", NULL);
-	err |= run_hooks_opt(the_repository, "post-checkout", &hook_opt);
+	strvec_pushl(&hook_opt.వాదనలు, oid_గమ్యం_hex(null_oid(the_hash_algo)),
+		     oid_గమ్యం_hex(&oid), "1", ఖాళీ);
+	err |= నిరంతరం_hooks_opt(the_repository, "post-checkout", &hook_opt);
 
-	if (!err && (option_recurse_submodules.nr > 0)) {
-		struct child_process cmd = CHILD_PROCESS_INIT;
-		strvec_pushl(&cmd.args, "submodule", "update", "--require-init",
-			     "--recursive", NULL);
+	ఒకవేళ (!err && (option_recurse_submodules.nr > 0)) {
+		నిర్మాణం బిడ్డ_process cmd = బిడ్డ_PROCESS_INIT;
+		strvec_pushl(&cmd.వాదనలు, "submodule", "update", "--require-init",
+			     "--recursive", ఖాళీ);
 
-		if (option_shallow_submodules == 1)
-			strvec_push(&cmd.args, "--depth=1");
+		ఒకవేళ (option_shallow_submodules == 1)
+			strvec_నెట్టు(&cmd.వాదనలు, "--depth=1");
 
-		if (max_jobs != -1)
-			strvec_pushf(&cmd.args, "--jobs=%d", max_jobs);
+		ఒకవేళ (max_jobs != -1)
+			strvec_pushf(&cmd.వాదనలు, "--jobs=%d", max_jobs);
 
-		if (submodule_progress)
-			strvec_push(&cmd.args, "--progress");
+		ఒకవేళ (submodule_పురోగతి)
+			strvec_నెట్టు(&cmd.వాదనలు, "--progress");
 
-		if (option_verbosity < 0)
-			strvec_push(&cmd.args, "--quiet");
+		ఒకవేళ (option_verbosity < 0)
+			strvec_నెట్టు(&cmd.వాదనలు, "--quiet");
 
-		if (option_remote_submodules) {
-			strvec_push(&cmd.args, "--remote");
-			strvec_push(&cmd.args, "--no-fetch");
+		ఒకవేళ (option_remote_submodules) {
+			strvec_నెట్టు(&cmd.వాదనలు, "--remote");
+			strvec_నెట్టు(&cmd.వాదనలు, "--no-fetch");
 		}
 
-		if (ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
-			strvec_pushf(&cmd.args, "--ref-storage-format=%s",
-				     ref_storage_format_to_name(ref_storage_format));
+		ఒకవేళ (ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
+			strvec_pushf(&cmd.వాదనలు, "--ref-storage-format=%s",
+				     ref_storage_format_గమ్యం_name(ref_storage_format));
 
-		if (filter_submodules && filter_options->choice)
-			strvec_pushf(&cmd.args, "--filter=%s",
+		ఒకవేళ (filter_submodules && filter_options->choice)
+			strvec_pushf(&cmd.వాదనలు, "--filter=%s",
 				     expand_list_objects_filter_spec(filter_options));
 
-		if (option_single_branch >= 0)
-			strvec_push(&cmd.args, option_single_branch ?
+		ఒకవేళ (option_single_branch >= 0)
+			strvec_నెట్టు(&cmd.వాదనలు, option_single_branch ?
 					       "--single-branch" :
 					       "--no-single-branch");
 
 		cmd.git_cmd = 1;
-		err = run_command(&cmd);
+		err = నిరంతరం_command(&cmd);
 	}
 
-	return err;
+	తిరిగి err;
 }
 
-static int git_clone_config(const char *k, const char *v,
-			    const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం git_clone_config(స్థిరరాశి అక్షరం *k, స్థిరరాశి అక్షరం *v,
+			    స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	if (!strcmp(k, "clone.defaultremotename")) {
-		if (!v)
-			return config_error_nonbool(k);
-		free(remote_name);
+	ఒకవేళ (!strcmp(k, "clone.defaultremotename")) {
+		ఒకవేళ (!v)
+			తిరిగి config_error_nonbool(k);
+		విడుదల(remote_name);
 		remote_name = xstrdup(v);
 	}
-	if (!strcmp(k, "clone.rejectshallow"))
+	ఒకవేళ (!strcmp(k, "clone.rejectshallow"))
 		config_reject_shallow = git_config_bool(k, v);
-	if (!strcmp(k, "clone.filtersubmodules"))
+	ఒకవేళ (!strcmp(k, "clone.filtersubmodules"))
 		config_filter_submodules = git_config_bool(k, v);
 
-	return git_default_config(k, v, ctx, cb);
+	తిరిగి git_default_config(k, v, ctx, cb);
 }
 
-static int write_one_config(const char *key, const char *value,
-			    const struct config_context *ctx,
-			    void *data)
+స్థిర పూర్ణాంకం write_one_config(స్థిరరాశి అక్షరం *కీలకం, స్థిరరాశి అక్షరం *విలువ,
+			    స్థిరరాశి నిర్మాణం config_context *ctx,
+			    శూన్య *దత్తాంశం)
 {
 	/*
 	 * give git_clone_config a chance to write config values back to the
 	 * environment, since repo_config_set_multivar_gently only deals with
 	 * config-file writes
 	 */
-	int apply_failed = git_clone_config(key, value, ctx, data);
-	if (apply_failed)
-		return apply_failed;
+	పూర్ణాంకం apply_failed = git_clone_config(కీలకం, విలువ, ctx, దత్తాంశం);
+	ఒకవేళ (apply_failed)
+		తిరిగి apply_failed;
 
-	return repo_config_set_multivar_gently(the_repository, key,
-					       value ? value : "true",
+	తిరిగి repo_config_సమితి_multivar_gently(the_repository, కీలకం,
+					       విలువ ? విలువ : "true",
 					       CONFIG_REGEX_NONE, 0);
 }
 
-static void write_config(struct string_list *config)
+స్థిర శూన్య write_config(నిర్మాణం string_list *config)
 {
-	int i;
+	పూర్ణాంకం i;
 
-	for (i = 0; i < config->nr; i++) {
-		if (git_config_parse_parameter(config->items[i].string,
-					       write_one_config, NULL) < 0)
+	కొరకు (i = 0; i < config->nr; i++) {
+		ఒకవేళ (git_config_parse_parameter(config->వస్తువులు[i].string,
+					       write_one_config, ఖాళీ) < 0)
 			die(_("unable to write parameters to config file"));
 	}
 }
 
-static void write_refspec_config(const char *src_ref_prefix,
-		const struct ref *our_head_points_at,
-		const struct ref *remote_head_points_at,
-		struct strbuf *branch_top)
+స్థిర శూన్య write_refspec_config(స్థిరరాశి అక్షరం *src_ref_ఉపసర్గ,
+		స్థిరరాశి నిర్మాణం ref *our_తల_points_at,
+		స్థిరరాశి నిర్మాణం ref *remote_తల_points_at,
+		నిర్మాణం strbuf *branch_శిఖరం)
 {
-	struct strbuf key = STRBUF_INIT;
-	struct strbuf value = STRBUF_INIT;
+	నిర్మాణం strbuf కీలకం = STRBUF_INIT;
+	నిర్మాణం strbuf విలువ = STRBUF_INIT;
 
-	if (option_mirror || !option_bare) {
-		if (option_single_branch && !option_mirror) {
-			if (option_branch) {
-				if (starts_with(our_head_points_at->name, "refs/tags/"))
-					strbuf_addf(&value, "+%s:%s", our_head_points_at->name,
-						our_head_points_at->name);
-				else
-					strbuf_addf(&value, "+%s:%s%s", our_head_points_at->name,
-						branch_top->buf, option_branch);
-			} else if (remote_head_points_at) {
-				const char *head = remote_head_points_at->name;
-				if (!skip_prefix(head, "refs/heads/", &head))
+	ఒకవేళ (option_mirror || !option_bare) {
+		ఒకవేళ (option_single_branch && !option_mirror) {
+			ఒకవేళ (option_branch) {
+				ఒకవేళ (starts_with(our_తల_points_at->name, "refs/tags/"))
+					strbuf_addf(&విలువ, "+%s:%s", our_తల_points_at->name,
+						our_తల_points_at->name);
+				లేకపోతే
+					strbuf_addf(&విలువ, "+%s:%s%s", our_తల_points_at->name,
+						branch_శిఖరం->buf, option_branch);
+			} లేకపోతే ఒకవేళ (remote_తల_points_at) {
+				స్థిరరాశి అక్షరం *తల = remote_తల_points_at->name;
+				ఒకవేళ (!skip_ఉపసర్గ(తల, "refs/heads/", &తల))
 					BUG("remote HEAD points at non-head?");
 
-				strbuf_addf(&value, "+%s:%s%s", remote_head_points_at->name,
-						branch_top->buf, head);
+				strbuf_addf(&విలువ, "+%s:%s%s", remote_తల_points_at->name,
+						branch_శిఖరం->buf, తల);
 			}
 			/*
 			 * otherwise, the next "git fetch" will
@@ -846,107 +846,107 @@ static void write_refspec_config(const char *src_ref_prefix,
 			 * any remote-tracking branch, which is what
 			 * we want.
 			 */
-		} else {
-			strbuf_addf(&value, "+%s*:%s*", src_ref_prefix, branch_top->buf);
+		} లేకపోతే {
+			strbuf_addf(&విలువ, "+%s*:%s*", src_ref_ఉపసర్గ, branch_శిఖరం->buf);
 		}
 		/* Configure the remote */
-		if (value.len) {
-			strbuf_addf(&key, "remote.%s.fetch", remote_name);
-			repo_config_set_multivar(the_repository, key.buf, value.buf, "^$", 0);
-			strbuf_reset(&key);
+		ఒకవేళ (విలువ.len) {
+			strbuf_addf(&కీలకం, "remote.%s.fetch", remote_name);
+			repo_config_సమితి_multivar(the_repository, కీలకం.buf, విలువ.buf, "^$", 0);
+			strbuf_reset(&కీలకం);
 
-			if (option_mirror) {
-				strbuf_addf(&key, "remote.%s.mirror", remote_name);
-				repo_config_set(the_repository, key.buf, "true");
-				strbuf_reset(&key);
+			ఒకవేళ (option_mirror) {
+				strbuf_addf(&కీలకం, "remote.%s.mirror", remote_name);
+				repo_config_సమితి(the_repository, కీలకం.buf, "true");
+				strbuf_reset(&కీలకం);
 			}
 		}
 	}
 
-	strbuf_release(&key);
-	strbuf_release(&value);
+	strbuf_release(&కీలకం);
+	strbuf_release(&విలువ);
 }
 
-static void dissociate_from_references(void)
+స్థిర శూన్య dissociate_from_references(శూన్య)
 {
-	char *alternates = repo_git_path(the_repository, "objects/info/alternates");
+	అక్షరం *alternates = repo_git_మార్గం(the_repository, "objects/info/alternates");
 
-	if (!access(alternates, F_OK)) {
-		struct child_process cmd = CHILD_PROCESS_INIT;
+	ఒకవేళ (!access(alternates, F_OK)) {
+		నిర్మాణం బిడ్డ_process cmd = బిడ్డ_PROCESS_INIT;
 
 		cmd.git_cmd = 1;
 		cmd.no_stdin = 1;
-		strvec_pushl(&cmd.args, "repack", "-a", "-d", NULL);
-		if (run_command(&cmd))
+		strvec_pushl(&cmd.వాదనలు, "repack", "-a", "-d", ఖాళీ);
+		ఒకవేళ (నిరంతరం_command(&cmd))
 			die(_("cannot repack to clean up"));
-		if (unlink(alternates) && errno != ENOENT)
+		ఒకవేళ (unlink(alternates) && errno != ENOENT)
 			die_errno(_("cannot unlink temporary alternates file"));
 	}
-	free(alternates);
+	విడుదల(alternates);
 }
 
-static int path_exists(const char *path)
+స్థిర పూర్ణాంకం మార్గం_exists(స్థిరరాశి అక్షరం *మార్గం)
 {
-	struct stat sb;
-	return !stat(path, &sb);
+	నిర్మాణం stat sb;
+	తిరిగి !stat(మార్గం, &sb);
 }
 
-int cmd_clone(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repository UNUSED)
+పూర్ణాంకం cmd_clone(పూర్ణాంకం argc,
+	      స్థిరరాశి అక్షరం **argv,
+	      స్థిరరాశి అక్షరం *ఉపసర్గ,
+	      నిర్మాణం repository *repository వాడని)
 {
-	int is_bundle = 0, is_local;
-	int reject_shallow = 0;
-	const char *repo_name, *repo, *work_tree, *git_dir;
-	char *repo_to_free = NULL;
-	char *path = NULL, *dir, *display_repo = NULL;
-	int dest_exists, real_dest_exists = 0;
-	const struct ref *refs, *remote_head;
-	struct ref *remote_head_points_at = NULL;
-	const struct ref *our_head_points_at;
-	char *unborn_head = NULL;
-	struct ref *mapped_refs = NULL;
-	const struct ref *ref;
-	struct strbuf key = STRBUF_INIT;
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf branch_top = STRBUF_INIT, reflog_msg = STRBUF_INIT;
-	struct transport *transport = NULL;
-	const char *src_ref_prefix = "refs/heads/";
-	struct remote *remote;
-	int err = 0, complete_refs_before_fetch = 1;
-	int submodule_progress;
-	int filter_submodules = 0;
-	int hash_algo;
-	enum ref_storage_format ref_storage_format = REF_STORAGE_FORMAT_UNKNOWN;
-	const int do_not_override_repo_unix_permissions = -1;
-	int option_reject_shallow = -1; /* unspecified */
-	int deepen = 0;
-	char *option_template = NULL, *option_depth = NULL, *option_since = NULL;
-	char *option_origin = NULL;
-	struct string_list option_not = STRING_LIST_INIT_NODUP;
-	const char *real_git_dir = NULL;
-	const char *ref_storage_format_uri = NULL;
-	const char *option_upload_pack = "git-upload-pack";
-	int option_progress = -1;
-	int option_sparse_checkout = 0;
-	enum transport_family family = TRANSPORT_FAMILY_ALL;
-	struct string_list option_config = STRING_LIST_INIT_DUP;
-	int option_dissociate = 0;
-	struct list_objects_filter_options filter_options = LIST_OBJECTS_FILTER_INIT;
-	int option_filter_submodules = -1; /* unspecified */
-	struct string_list server_options = STRING_LIST_INIT_NODUP;
-	const char *bundle_uri = NULL;
-	char *option_rev = NULL;
+	పూర్ణాంకం is_bundle = 0, is_local;
+	పూర్ణాంకం reject_shallow = 0;
+	స్థిరరాశి అక్షరం *repo_name, *repo, *work_వృక్షం, *git_dir;
+	అక్షరం *repo_గమ్యం_free = ఖాళీ;
+	అక్షరం *మార్గం = ఖాళీ, *dir, *display_repo = ఖాళీ;
+	పూర్ణాంకం dest_exists, real_dest_exists = 0;
+	స్థిరరాశి నిర్మాణం ref *refs, *remote_తల;
+	నిర్మాణం ref *remote_తల_points_at = ఖాళీ;
+	స్థిరరాశి నిర్మాణం ref *our_తల_points_at;
+	అక్షరం *unborn_తల = ఖాళీ;
+	నిర్మాణం ref *mapped_refs = ఖాళీ;
+	స్థిరరాశి నిర్మాణం ref *ref;
+	నిర్మాణం strbuf కీలకం = STRBUF_INIT;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
+	నిర్మాణం strbuf branch_శిఖరం = STRBUF_INIT, reflog_సందేశం = STRBUF_INIT;
+	నిర్మాణం transport *transport = ఖాళీ;
+	స్థిరరాశి అక్షరం *src_ref_ఉపసర్గ = "refs/heads/";
+	నిర్మాణం remote *remote;
+	పూర్ణాంకం err = 0, complete_refs_before_fetch = 1;
+	పూర్ణాంకం submodule_పురోగతి;
+	పూర్ణాంకం filter_submodules = 0;
+	పూర్ణాంకం hash_algo;
+	గణన ref_storage_format ref_storage_format = REF_STORAGE_FORMAT_UNKNOWN;
+	స్థిరరాశి పూర్ణాంకం do_not_override_repo_unix_permissions = -1;
+	పూర్ణాంకం option_reject_shallow = -1; /* unspecified */
+	పూర్ణాంకం deepen = 0;
+	అక్షరం *option_template = ఖాళీ, *option_లోతు = ఖాళీ, *option_since = ఖాళీ;
+	అక్షరం *option_origin = ఖాళీ;
+	నిర్మాణం string_list option_not = STRING_LIST_INIT_NODUP;
+	స్థిరరాశి అక్షరం *real_git_dir = ఖాళీ;
+	స్థిరరాశి అక్షరం *ref_storage_format_uri = ఖాళీ;
+	స్థిరరాశి అక్షరం *option_upload_pack = "git-upload-pack";
+	పూర్ణాంకం option_పురోగతి = -1;
+	పూర్ణాంకం option_sparse_checkout = 0;
+	గణన transport_family family = TRANSPORT_FAMILY_ALL;
+	నిర్మాణం string_list option_config = STRING_LIST_INIT_DUP;
+	పూర్ణాంకం option_dissociate = 0;
+	నిర్మాణం list_objects_filter_options filter_options = LIST_OBJECTS_FILTER_INIT;
+	పూర్ణాంకం option_filter_submodules = -1; /* unspecified */
+	నిర్మాణం string_list server_options = STRING_LIST_INIT_NODUP;
+	స్థిరరాశి అక్షరం *bundle_uri = ఖాళీ;
+	అక్షరం *option_rev = ఖాళీ;
 
-	struct clone_opts opts = CLONE_OPTS_INIT;
+	నిర్మాణం clone_opts opts = CLONE_OPTS_INIT;
 
-	struct transport_ls_refs_options transport_ls_refs_options =
+	నిర్మాణం transport_ls_refs_options transport_ls_refs_options =
 		TRANSPORT_LS_REFS_OPTIONS_INIT;
 
-	struct option builtin_clone_options[] = {
+	నిర్మాణం option builtin_clone_options[] = {
 		OPT__VERBOSITY(&option_verbosity),
-		OPT_BOOL(0, "progress", &option_progress,
+		OPT_BOOL(0, "progress", &option_పురోగతి,
 			 N_("force progress reporting")),
 		OPT_BOOL(0, "reject-shallow", &option_reject_shallow,
 			 N_("don't clone shallow repository")),
@@ -966,7 +966,7 @@ int cmd_clone(int argc,
 		{
 			.type = OPTION_CALLBACK,
 			.long_name = "recurse-submodules",
-			.value = &option_recurse_submodules,
+			.విలువ = &option_recurse_submodules,
 			.argh = N_("pathspec"),
 			.help = N_("initialize submodules in the clone"),
 			.flags = PARSE_OPT_OPTARG,
@@ -992,7 +992,7 @@ int cmd_clone(int argc,
 			   N_("clone single revision <rev> and check out")),
 		OPT_STRING('u', "upload-pack", &option_upload_pack, N_("path"),
 			   N_("path to git-upload-pack on the remote")),
-		OPT_STRING(0, "depth", &option_depth, N_("depth"),
+		OPT_STRING(0, "depth", &option_లోతు, N_("depth"),
 			   N_("create a shallow clone of that depth")),
 		OPT_STRING(0, "shallow-since", &option_since, N_("time"),
 			   N_("create a shallow clone since a specific time")),
@@ -1000,7 +1000,7 @@ int cmd_clone(int argc,
 				N_("deepen history of shallow clone, excluding ref")),
 		OPT_BOOL(0, "single-branch", &option_single_branch,
 			 N_("clone only one branch, HEAD or --branch")),
-		OPT_BOOL(0, "tags", &option_tags,
+		OPT_BOOL(0, "tags", &option_ట్యాగులు,
 			 N_("clone tags, and make later fetches not to follow them")),
 		OPT_BOOL(0, "shallow-submodules", &option_shallow_submodules,
 			 N_("any cloned submodules will be shallow")),
@@ -1023,180 +1023,180 @@ int cmd_clone(int argc,
 			 N_("initialize sparse-checkout file to include only files at root")),
 		OPT_STRING(0, "bundle-uri", &bundle_uri,
 			   N_("uri"), N_("a URI for downloading bundles before fetching from origin remote")),
-		OPT_END()
+		OPT_చివర()
 	};
-	struct strvec alternates = STRVEC_INIT;
+	నిర్మాణం strvec alternates = STRVEC_INIT;
 
-	const char * const builtin_clone_usage[] = {
+	స్థిరరాశి అక్షరం * స్థిరరాశి builtin_clone_usage[] = {
 		N_("git clone [<options>] [--] <repo> [<dir>]"),
-		NULL
+		ఖాళీ
 	};
 
 	filter_options.allow_auto_filter = 1;
 
-	packet_trace_identity("clone");
+	packet_trace_తటస్థం("clone");
 
-	repo_config(the_repository, git_clone_config, NULL);
+	repo_config(the_repository, git_clone_config, ఖాళీ);
 
-	argc = parse_options(argc, argv, prefix, builtin_clone_options,
+	argc = parse_options(argc, argv, ఉపసర్గ, builtin_clone_options,
 			     builtin_clone_usage, 0);
 
-	if (argc > 2)
-		usage_msg_opt(_("Too many arguments."),
+	ఒకవేళ (argc > 2)
+		usage_సందేశం_opt(_("Too many arguments."),
 			builtin_clone_usage, builtin_clone_options);
 
-	if (argc == 0)
-		usage_msg_opt(_("You must specify a repository to clone."),
+	ఒకవేళ (argc == 0)
+		usage_సందేశం_opt(_("You must specify a repository to clone."),
 			builtin_clone_usage, builtin_clone_options);
 
-	if (option_depth || option_since || option_not.nr)
+	ఒకవేళ (option_లోతు || option_since || option_not.nr)
 		deepen = 1;
-	if (option_single_branch == -1)
+	ఒకవేళ (option_single_branch == -1)
 		option_single_branch = deepen ? 1 : 0;
 
-	if (ref_storage_format_uri) {
-		ref_storage_format = ref_storage_format_by_uri(ref_storage_format_uri, NULL);
-		if (ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
+	ఒకవేళ (ref_storage_format_uri) {
+		ref_storage_format = ref_storage_format_by_uri(ref_storage_format_uri, ఖాళీ);
+		ఒకవేళ (ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
 			die(_("unknown ref storage format '%s'"), ref_storage_format_uri);
 	}
 
-	if (option_mirror) {
+	ఒకవేళ (option_mirror) {
 		option_bare = 1;
-		option_tags = 0;
+		option_ట్యాగులు = 0;
 	}
 
-	if (option_bare) {
-		if (real_git_dir)
+	ఒకవేళ (option_bare) {
+		ఒకవేళ (real_git_dir)
 			die(_("options '%s' and '%s' cannot be used together"), "--bare", "--separate-git-dir");
 		option_no_checkout = 1;
 	}
 
-	if (bundle_uri && deepen)
+	ఒకవేళ (bundle_uri && deepen)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--bundle-uri",
 		    "--depth/--shallow-since/--shallow-exclude");
 
 	repo_name = argv[0];
 
-	path = get_repo_path(repo_name, &is_bundle);
-	if (path) {
-		FREE_AND_NULL(path);
-		repo = repo_to_free = absolute_pathdup(repo_name);
-	} else if (strchr(repo_name, ':')) {
+	మార్గం = get_repo_మార్గం(repo_name, &is_bundle);
+	ఒకవేళ (మార్గం) {
+		FREE_AND_NULL(మార్గం);
+		repo = repo_గమ్యం_free = absolute_pathdup(repo_name);
+	} లేకపోతే ఒకవేళ (strchr(repo_name, ':')) {
 		repo = repo_name;
 		display_repo = transport_anonymize_url(repo);
-	} else
+	} లేకపోతే
 		die(_("repository '%s' does not exist"), repo_name);
 
 	/* no need to be strict, transport_set_option() will validate it again */
-	if (option_depth && atoi(option_depth) < 1)
-		die(_("depth %s is not a positive number"), option_depth);
+	ఒకవేళ (option_లోతు && atoi(option_లోతు) < 1)
+		die(_("depth %s is not a positive number"), option_లోతు);
 
-	if (argc == 2)
+	ఒకవేళ (argc == 2)
 		dir = xstrdup(argv[1]);
-	else
+	లేకపోతే
 		dir = git_url_basename(repo_name, is_bundle, option_bare);
 	strip_dir_trailing_slashes(dir);
 
-	dest_exists = path_exists(dir);
-	if (dest_exists && !is_empty_dir(dir))
+	dest_exists = మార్గం_exists(dir);
+	ఒకవేళ (dest_exists && !is_ఖాళీలు_dir(dir))
 		die(_("destination path '%s' already exists and is not "
 			"an empty directory."), dir);
 
-	if (real_git_dir) {
-		real_dest_exists = path_exists(real_git_dir);
-		if (real_dest_exists && !is_empty_dir(real_git_dir))
+	ఒకవేళ (real_git_dir) {
+		real_dest_exists = మార్గం_exists(real_git_dir);
+		ఒకవేళ (real_dest_exists && !is_ఖాళీలు_dir(real_git_dir))
 			die(_("repository path '%s' already exists and is not "
 				"an empty directory."), real_git_dir);
 	}
 
 
-	strbuf_addf(&reflog_msg, "clone: from %s",
+	strbuf_addf(&reflog_సందేశం, "clone: from %s",
 		    display_repo ? display_repo : repo);
-	free(display_repo);
+	విడుదల(display_repo);
 
-	if (option_bare)
-		work_tree = NULL;
-	else {
-		work_tree = getenv("GIT_WORK_TREE");
-		if (work_tree && path_exists(work_tree))
-			die(_("working tree '%s' already exists."), work_tree);
+	ఒకవేళ (option_bare)
+		work_వృక్షం = ఖాళీ;
+	లేకపోతే {
+		work_వృక్షం = getenv("GIT_WORK_TREE");
+		ఒకవేళ (work_వృక్షం && మార్గం_exists(work_వృక్షం))
+			die(_("working tree '%s' already exists."), work_వృక్షం);
 	}
 
-	if (option_bare || work_tree)
+	ఒకవేళ (option_bare || work_వృక్షం)
 		git_dir = xstrdup(dir);
-	else {
-		work_tree = dir;
+	లేకపోతే {
+		work_వృక్షం = dir;
 		git_dir = mkpathdup("%s/.git", dir);
 	}
 
 	atexit(remove_junk);
-	sigchain_push_common(remove_junk_on_signal);
+	sigchain_నెట్టు_common(remove_junk_on_signal);
 
-	if (!option_bare) {
-		if (safe_create_leading_directories_const(the_repository, work_tree) < 0)
+	ఒకవేళ (!option_bare) {
+		ఒకవేళ (సురక్షిత_create_leading_directories_const(the_repository, work_వృక్షం) < 0)
 			die_errno(_("could not create leading directories of '%s'"),
-				  work_tree);
-		if (dest_exists)
-			junk_work_tree_flags |= REMOVE_DIR_KEEP_TOPLEVEL;
-		else if (mkdir(work_tree, 0777))
+				  work_వృక్షం);
+		ఒకవేళ (dest_exists)
+			junk_work_వృక్షం_flags |= REMOVE_DIR_KEEP_TOPLEVEL;
+		లేకపోతే ఒకవేళ (mkdir(work_వృక్షం, 0777))
 			die_errno(_("could not create work tree dir '%s'"),
-				  work_tree);
-		junk_work_tree = work_tree;
+				  work_వృక్షం);
+		junk_work_వృక్షం = work_వృక్షం;
 	}
 
-	if (real_git_dir) {
-		if (real_dest_exists)
+	ఒకవేళ (real_git_dir) {
+		ఒకవేళ (real_dest_exists)
 			junk_git_dir_flags |= REMOVE_DIR_KEEP_TOPLEVEL;
 		junk_git_dir = real_git_dir;
-	} else {
-		if (dest_exists)
+	} లేకపోతే {
+		ఒకవేళ (dest_exists)
 			junk_git_dir_flags |= REMOVE_DIR_KEEP_TOPLEVEL;
 		junk_git_dir = git_dir;
 	}
-	if (safe_create_leading_directories_const(the_repository, git_dir) < 0)
+	ఒకవేళ (సురక్షిత_create_leading_directories_const(the_repository, git_dir) < 0)
 		die(_("could not create leading directories of '%s'"), git_dir);
 
-	if (0 <= option_verbosity) {
-		if (option_bare)
+	ఒకవేళ (0 <= option_verbosity) {
+		ఒకవేళ (option_bare)
 			fprintf(stderr, _("Cloning into bare repository '%s'...\n"), dir);
-		else
+		లేకపోతే
 			fprintf(stderr, _("Cloning into '%s'...\n"), dir);
 	}
 
-	if (option_recurse_submodules.nr > 0) {
-		struct string_list_item *item;
-		struct strbuf sb = STRBUF_INIT;
-		int val;
+	ఒకవేళ (option_recurse_submodules.nr > 0) {
+		నిర్మాణం string_list_అంశం *అంశం;
+		నిర్మాణం strbuf sb = STRBUF_INIT;
+		పూర్ణాంకం val;
 
 		/* remove duplicates */
-		string_list_sort_u(&option_recurse_submodules, 0);
+		string_list_క్రమీకరించు_u(&option_recurse_submodules, 0);
 
 		/*
 		 * NEEDSWORK: In a multi-working-tree world, this needs to be
 		 * set in the per-worktree config.
 		 */
-		for_each_string_list_item(item, &option_recurse_submodules) {
+		for_each_string_list_అంశం(అంశం, &option_recurse_submodules) {
 			strbuf_addf(&sb, "submodule.active=%s",
-				    item->string);
+				    అంశం->string);
 			string_list_append(&option_config, sb.buf);
 			strbuf_reset(&sb);
 		}
 
-		if (!repo_config_get_bool(the_repository, "submodule.stickyRecursiveClone", &val) &&
+		ఒకవేళ (!repo_config_get_bool(the_repository, "submodule.stickyRecursiveClone", &val) &&
 		    val)
 			string_list_append(&option_config, "submodule.recurse=true");
 
-		if (option_required_reference.nr &&
+		ఒకవేళ (option_required_reference.nr &&
 		    option_optional_reference.nr)
 			die(_("clone --recursive is not compatible with "
 			      "both --reference and --reference-if-able"));
-		else if (option_required_reference.nr) {
+		లేకపోతే ఒకవేళ (option_required_reference.nr) {
 			string_list_append(&option_config,
 				"submodule.alternateLocation=superproject");
 			string_list_append(&option_config,
 				"submodule.alternateErrorStrategy=die");
-		} else if (option_optional_reference.nr) {
+		} లేకపోతే ఒకవేళ (option_optional_reference.nr) {
 			string_list_append(&option_config,
 				"submodule.alternateLocation=superproject");
 			string_list_append(&option_config,
@@ -1212,12 +1212,12 @@ int cmd_clone(int argc,
 	 * repository, and reference backends may persist that information into
 	 * their on-disk data structures.
 	 */
-	create_repository(the_repository, git_dir, real_git_dir, work_tree,
+	create_repository(the_repository, git_dir, real_git_dir, work_వృక్షం,
 			  option_template, GIT_HASH_UNKNOWN, ref_storage_format_uri,
-			  do_not_override_repo_unix_permissions, NULL);
+			  do_not_override_repo_unix_permissions, ఖాళీ);
 
-	if (real_git_dir) {
-		free((char *)git_dir);
+	ఒకవేళ (real_git_dir) {
+		విడుదల((అక్షరం *)git_dir);
 		git_dir = real_git_dir;
 	}
 
@@ -1255,10 +1255,10 @@ int cmd_clone(int argc,
 	 *
 	 * This is sufficient for Git commands to discover the Git directory.
 	 */
-	initialize_repository_version(the_repository, GIT_HASH_UNKNOWN,
+	initialize_repository_సంస్కరణ(the_repository, GIT_HASH_UNKNOWN,
 				      the_repository->ref_storage_format, 1);
 
-	refs_create_refdir_stubs(the_repository, git_dir, NULL);
+	refs_create_refdir_stubs(the_repository, git_dir, ఖాళీ);
 
 	/*
 	 * additional config can be injected with -c, make sure it's included
@@ -1270,24 +1270,24 @@ int cmd_clone(int argc,
 	 * re-read config after init_db and write_config to pick up any config
 	 * injected by --template and --config, respectively.
 	 */
-	repo_config(the_repository, git_clone_config, NULL);
+	repo_config(the_repository, git_clone_config, ఖాళీ);
 
 	/*
 	 * If option_reject_shallow is specified from CLI option,
 	 * ignore config_reject_shallow from git_clone_config.
 	 */
-	if (config_reject_shallow != -1)
+	ఒకవేళ (config_reject_shallow != -1)
 		reject_shallow = config_reject_shallow;
-	if (option_reject_shallow != -1)
+	ఒకవేళ (option_reject_shallow != -1)
 		reject_shallow = option_reject_shallow;
 
 	/*
 	 * If option_filter_submodules is specified from CLI option,
 	 * ignore config_filter_submodules from git_clone_config.
 	 */
-	if (config_filter_submodules != -1)
+	ఒకవేళ (config_filter_submodules != -1)
 		filter_submodules = config_filter_submodules;
-	if (option_filter_submodules != -1)
+	ఒకవేళ (option_filter_submodules != -1)
 		filter_submodules = option_filter_submodules;
 
 	/*
@@ -1295,10 +1295,10 @@ int cmd_clone(int argc,
 	 * filter flags (but not with filter configs, as those should be
 	 * set-and-forget).
 	 */
-	if (option_filter_submodules > 0 && !filter_options.choice)
+	ఒకవేళ (option_filter_submodules > 0 && !filter_options.choice)
 		die(_("the option '%s' requires '%s'"),
 		    "--also-filter-submodules", "--filter");
-	if (option_filter_submodules > 0 && !option_recurse_submodules.nr)
+	ఒకవేళ (option_filter_submodules > 0 && !option_recurse_submodules.nr)
 		die(_("the option '%s' requires '%s'"),
 		    "--also-filter-submodules", "--recurse-submodules");
 
@@ -1306,148 +1306,148 @@ int cmd_clone(int argc,
 	 * apply the remote name provided by --origin only after this second
 	 * call to git_config, to ensure it overrides all config-based values.
 	 */
-	if (option_origin) {
-		free(remote_name);
+	ఒకవేళ (option_origin) {
+		విడుదల(remote_name);
 		remote_name = xstrdup(option_origin);
 	}
 
-	if (!remote_name)
+	ఒకవేళ (!remote_name)
 		remote_name = xstrdup("origin");
 
-	if (!valid_remote_name(remote_name))
+	ఒకవేళ (!valid_remote_name(remote_name))
 		die(_("'%s' is not a valid remote name"), remote_name);
 
-	if (option_bare) {
-		if (option_mirror)
-			src_ref_prefix = "refs/";
-		strbuf_addstr(&branch_top, src_ref_prefix);
+	ఒకవేళ (option_bare) {
+		ఒకవేళ (option_mirror)
+			src_ref_ఉపసర్గ = "refs/";
+		strbuf_addstr(&branch_శిఖరం, src_ref_ఉపసర్గ);
 
-		repo_config_set(the_repository, "core.bare", "true");
-	} else if (!option_rev) {
-		strbuf_addf(&branch_top, "refs/remotes/%s/", remote_name);
+		repo_config_సమితి(the_repository, "core.bare", "true");
+	} లేకపోతే ఒకవేళ (!option_rev) {
+		strbuf_addf(&branch_శిఖరం, "refs/remotes/%s/", remote_name);
 	}
 
-	strbuf_addf(&key, "remote.%s.url", remote_name);
-	repo_config_set(the_repository, key.buf, repo);
-	strbuf_reset(&key);
+	strbuf_addf(&కీలకం, "remote.%s.url", remote_name);
+	repo_config_సమితి(the_repository, కీలకం.buf, repo);
+	strbuf_reset(&కీలకం);
 
-	if (!option_tags) {
-		strbuf_addf(&key, "remote.%s.tagOpt", remote_name);
-		repo_config_set(the_repository, key.buf, "--no-tags");
-		strbuf_reset(&key);
+	ఒకవేళ (!option_ట్యాగులు) {
+		strbuf_addf(&కీలకం, "remote.%s.tagOpt", remote_name);
+		repo_config_సమితి(the_repository, కీలకం.buf, "--no-tags");
+		strbuf_reset(&కీలకం);
 	}
 
 	remote = remote_get_early(remote_name);
 
-	if (!option_rev)
-		refspec_appendf(&remote->fetch, "+%s*:%s*", src_ref_prefix,
-				branch_top.buf);
+	ఒకవేళ (!option_rev)
+		refspec_appendf(&remote->fetch, "+%s*:%s*", src_ref_ఉపసర్గ,
+				branch_శిఖరం.buf);
 
-	path = get_repo_path(remote->url.v[0], &is_bundle);
-	is_local = option_local != 0 && path && !is_bundle;
-	if (is_local) {
-		if (option_depth)
+	మార్గం = get_repo_మార్గం(remote->url.v[0], &is_bundle);
+	is_local = option_local != 0 && మార్గం && !is_bundle;
+	ఒకవేళ (is_local) {
+		ఒకవేళ (option_లోతు)
 			warning(_("--depth is ignored in local clones; use file:// instead."));
-		if (option_since)
+		ఒకవేళ (option_since)
 			warning(_("--shallow-since is ignored in local clones; use file:// instead."));
-		if (option_not.nr)
+		ఒకవేళ (option_not.nr)
 			warning(_("--shallow-exclude is ignored in local clones; use file:// instead."));
-		if (filter_options.choice)
+		ఒకవేళ (filter_options.choice)
 			warning(_("--filter is ignored in local clones; use file:// instead."));
-		if (!access(mkpath("%s/shallow", path), F_OK)) {
-			if (reject_shallow)
+		ఒకవేళ (!access(mkpath("%s/shallow", మార్గం), F_OK)) {
+			ఒకవేళ (reject_shallow)
 				die(_("source repository is shallow, reject to clone."));
-			if (option_local > 0)
+			ఒకవేళ (option_local > 0)
 				warning(_("source repository is shallow, ignoring --local"));
 			is_local = 0;
 		}
 	}
-	if (option_local > 0 && !is_local)
+	ఒకవేళ (option_local > 0 && !is_local)
 		warning(_("--local is ignored"));
 
-	collect_alternates(&alternates, is_local ? path : NULL);
+	collect_alternates(&alternates, is_local ? మార్గం : ఖాళీ);
 	create_object_database(the_repository, &alternates);
 
-	transport = transport_get(remote, path ? path : remote->url.v[0]);
-	transport_set_verbosity(transport, option_verbosity, option_progress);
+	transport = transport_get(remote, మార్గం ? మార్గం : remote->url.v[0]);
+	transport_సమితి_verbosity(transport, option_verbosity, option_పురోగతి);
 	transport->family = family;
 	transport->cloning = 1;
 
-	if (is_bundle) {
-		struct bundle_header header = BUNDLE_HEADER_INIT;
-		int fd = read_bundle_header(path, &header);
-		int has_filter = header.filter.choice != LOFC_DISABLED;
+	ఒకవేళ (is_bundle) {
+		నిర్మాణం bundle_శీర్షిక శీర్షిక = BUNDLE_శీర్షిక_INIT;
+		పూర్ణాంకం fd = read_bundle_శీర్షిక(మార్గం, &శీర్షిక);
+		పూర్ణాంకం has_filter = శీర్షిక.filter.choice != LOFC_DISABLED;
 
-		if (fd > 0)
+		ఒకవేళ (fd > 0)
 			close(fd);
-		bundle_header_release(&header);
-		if (has_filter)
+		bundle_శీర్షిక_release(&శీర్షిక);
+		ఒకవేళ (has_filter)
 			die(_("cannot clone from filtered bundle"));
 	}
 
-	transport_set_option(transport, TRANS_OPT_KEEP, "yes");
+	transport_సమితి_option(transport, TRANS_OPT_KEEP, "yes");
 
 	die_for_incompatible_opt2(!!option_rev, "--revision",
 				  !!option_branch, "--branch");
 	die_for_incompatible_opt2(!!option_rev, "--revision",
 				  option_mirror, "--mirror");
 
-	if (reject_shallow)
-		transport_set_option(transport, TRANS_OPT_REJECT_SHALLOW, "1");
-	if (option_depth)
-		transport_set_option(transport, TRANS_OPT_DEPTH,
-				     option_depth);
-	if (option_since)
-		transport_set_option(transport, TRANS_OPT_DEEPEN_SINCE,
+	ఒకవేళ (reject_shallow)
+		transport_సమితి_option(transport, TRANS_OPT_REJECT_SHALLOW, "1");
+	ఒకవేళ (option_లోతు)
+		transport_సమితి_option(transport, TRANS_OPT_లోతు,
+				     option_లోతు);
+	ఒకవేళ (option_since)
+		transport_సమితి_option(transport, TRANS_OPT_DEEPEN_SINCE,
 				     option_since);
-	if (option_not.nr)
-		transport_set_option(transport, TRANS_OPT_DEEPEN_NOT,
-				     (const char *)&option_not);
-	if (option_single_branch) {
-		transport_set_option(transport, TRANS_OPT_FOLLOWTAGS, "1");
+	ఒకవేళ (option_not.nr)
+		transport_సమితి_option(transport, TRANS_OPT_DEEPEN_NOT,
+				     (స్థిరరాశి అక్షరం *)&option_not);
+	ఒకవేళ (option_single_branch) {
+		transport_సమితి_option(transport, TRANS_OPT_FOLLOWTAGS, "1");
 
-		if (option_branch)
-			opts.wants_head = 0;
+		ఒకవేళ (option_branch)
+			opts.కోరుతుంది_తల = 0;
 	}
 
-	if (option_upload_pack)
-		transport_set_option(transport, TRANS_OPT_UPLOADPACK,
+	ఒకవేళ (option_upload_pack)
+		transport_సమితి_option(transport, TRANS_OPT_UPLOADPACK,
 				     option_upload_pack);
 
-	if (server_options.nr)
+	ఒకవేళ (server_options.nr)
 		transport->server_options = &server_options;
 
-	if (filter_options.choice) {
-		const char *spec =
+	ఒకవేళ (filter_options.choice) {
+		స్థిరరాశి అక్షరం *spec =
 			expand_list_objects_filter_spec(&filter_options);
-		transport_set_option(transport, TRANS_OPT_LIST_OBJECTS_FILTER,
+		transport_సమితి_option(transport, TRANS_OPT_LIST_OBJECTS_FILTER,
 				     spec);
-		transport_set_option(transport, TRANS_OPT_FROM_PROMISOR, "1");
+		transport_సమితి_option(transport, TRANS_OPT_FROM_PROMISOR, "1");
 	}
 
-	if (transport->smart_options && !deepen && !filter_options.choice)
+	ఒకవేళ (transport->smart_options && !deepen && !filter_options.choice)
 		transport->smart_options->check_self_contained_and_connected = 1;
 
-	if (option_rev) {
-		option_tags = 0;
+	ఒకవేళ (option_rev) {
+		option_ట్యాగులు = 0;
 		option_single_branch = 0;
-		opts.wants_head = 0;
+		opts.కోరుతుంది_తల = 0;
 		opts.detach = 1;
 
 		refspec_append(&remote->fetch, option_rev);
 	}
 
-	if (option_tags || option_branch)
+	ఒకవేళ (option_ట్యాగులు || option_branch)
 		/*
 		 * Add tags refspec when user asked for tags (implicitly) or
 		 * specified --branch, whose argument might be a tag.
 		 */
-		refspec_append(&remote->fetch, TAG_REFSPEC);
+		refspec_append(&remote->fetch, ట్యాగ్_REFSPEC);
 
 	refspec_ref_prefixes(&remote->fetch,
 			     &transport_ls_refs_options.ref_prefixes);
-	if (option_branch)
-		expand_ref_prefix(&transport_ls_refs_options.ref_prefixes,
+	ఒకవేళ (option_branch)
+		expand_ref_ఉపసర్గ(&transport_ls_refs_options.ref_prefixes,
 				  option_branch);
 
 	/*
@@ -1458,8 +1458,8 @@ int cmd_clone(int argc,
 	 * ref_prefixes will be empty so we fall back to asking about HEAD to
 	 * reduce traffic from the server.
 	 */
-	if (opts.wants_head || transport_ls_refs_options.ref_prefixes.nr == 0)
-		strvec_push(&transport_ls_refs_options.ref_prefixes, "HEAD");
+	ఒకవేళ (opts.కోరుతుంది_తల || transport_ls_refs_options.ref_prefixes.nr == 0)
+		strvec_నెట్టు(&transport_ls_refs_options.ref_prefixes, "HEAD");
 
 	refs = transport_get_remote_refs(transport, &transport_ls_refs_options);
 
@@ -1468,78 +1468,78 @@ int cmd_clone(int argc,
 	 * ours to the same thing.
 	 */
 	hash_algo = hash_algo_by_ptr(transport_get_hash_algo(transport));
-	initialize_repository_version(the_repository, hash_algo, the_repository->ref_storage_format, 1);
-	repo_set_hash_algo(the_repository, hash_algo);
-	create_reference_database(the_repository, NULL, 1);
+	initialize_repository_సంస్కరణ(the_repository, hash_algo, the_repository->ref_storage_format, 1);
+	repo_సమితి_hash_algo(the_repository, hash_algo);
+	create_reference_database(the_repository, ఖాళీ, 1);
 	startup_info->have_repository = 1;
 
 	/*
 	 * Before fetching from the remote, download and install bundle
 	 * data from the --bundle-uri option.
 	 */
-	if (bundle_uri) {
-		struct remote_state *state;
-		int has_heuristic = 0;
+	ఒకవేళ (bundle_uri) {
+		నిర్మాణం remote_state *state;
+		పూర్ణాంకం has_heuristic = 0;
 
 		/*
 		 * We need to save the remote state as our remote's lifetime is
 		 * tied to it.
 		 */
 		state = the_repository->remote_state;
-		the_repository->remote_state = NULL;
+		the_repository->remote_state = ఖాళీ;
 		repo_clear(the_repository);
 
 		/* At this point, we need the_repository to match the cloned repo. */
-		if (repo_init(the_repository, git_dir, work_tree))
+		ఒకవేళ (repo_init(the_repository, git_dir, work_వృక్షం))
 			warning(_("failed to initialize the repo, skipping bundle URI"));
-		else if (fetch_bundle_uri(the_repository, bundle_uri, &has_heuristic))
+		లేకపోతే ఒకవేళ (fetch_bundle_uri(the_repository, bundle_uri, &has_heuristic))
 			warning(_("failed to fetch objects from bundle URI '%s'"),
 				bundle_uri);
-		else if (has_heuristic)
-			repo_config_set_gently(the_repository, "fetch.bundleuri", bundle_uri);
+		లేకపోతే ఒకవేళ (has_heuristic)
+			repo_config_సమితి_gently(the_repository, "fetch.bundleuri", bundle_uri);
 
 		remote_state_clear(the_repository->remote_state);
-		free(the_repository->remote_state);
+		విడుదల(the_repository->remote_state);
 		the_repository->remote_state = state;
-	} else {
+	} లేకపోతే {
 		/*
 		* Populate transport->got_remote_bundle_uri and
 		* transport->bundle_uri. We might get nothing.
 		*/
 		transport_get_remote_bundle_uri(transport);
 
-		if (transport->bundles &&
-		    hashmap_get_size(&transport->bundles->bundles)) {
-			struct remote_state *state;
+		ఒకవేళ (transport->bundles &&
+		    hashmap_get_కొలత(&transport->bundles->bundles)) {
+			నిర్మాణం remote_state *state;
 
 			/*
 			 * We need to save the remote state as our remote's
 			 * lifetime is tied to it.
 			 */
 			state = the_repository->remote_state;
-			the_repository->remote_state = NULL;
+			the_repository->remote_state = ఖాళీ;
 			repo_clear(the_repository);
 
 			/* At this point, we need the_repository to match the cloned repo. */
-			if (repo_init(the_repository, git_dir, work_tree))
+			ఒకవేళ (repo_init(the_repository, git_dir, work_వృక్షం))
 				warning(_("failed to initialize the repo, skipping bundle URI"));
-			else if (fetch_bundle_list(the_repository,
+			లేకపోతే ఒకవేళ (fetch_bundle_list(the_repository,
 						   transport->bundles))
 				warning(_("failed to fetch advertised bundles"));
 
 			remote_state_clear(the_repository->remote_state);
-			free(the_repository->remote_state);
+			విడుదల(the_repository->remote_state);
 			the_repository->remote_state = state;
-		} else {
+		} లేకపోతే {
 			clear_bundle_list(transport->bundles);
 			FREE_AND_NULL(transport->bundles);
 		}
 	}
 
-	if (refs)
+	ఒకవేళ (refs)
 		mapped_refs = wanted_peer_refs(&opts, refs, &remote->fetch);
 
-	if (mapped_refs) {
+	ఒకవేళ (mapped_refs) {
 		/*
 		 * transport_get_remote_refs() may return refs with null sha-1
 		 * in mapped_refs (see struct transport->get_refs_list
@@ -1550,52 +1550,52 @@ int cmd_clone(int argc,
 		 * return reliable ref set, we can delay cloning until after
 		 * remote HEAD check.
 		 */
-		for (ref = refs; ref; ref = ref->next)
-			if (is_null_oid(&ref->old_oid)) {
+		కొరకు (ref = refs; ref; ref = ref->తదుపరి)
+			ఒకవేళ (is_null_oid(&ref->old_oid)) {
 				complete_refs_before_fetch = 0;
-				break;
+				ఆపు;
 			}
 
-		if (!is_local && !complete_refs_before_fetch) {
-			if (transport_fetch_refs(transport, mapped_refs))
+		ఒకవేళ (!is_local && !complete_refs_before_fetch) {
+			ఒకవేళ (transport_fetch_refs(transport, mapped_refs))
 				die(_("remote transport reported error"));
 		}
 	}
 
-	remote_head = find_ref_by_name(refs, "HEAD");
-	remote_head_points_at = guess_remote_head(remote_head, mapped_refs,
-						  REMOTE_GUESS_HEAD_QUIET);
+	remote_తల = కనుగొను_ref_by_name(refs, "HEAD");
+	remote_తల_points_at = guess_remote_తల(remote_తల, mapped_refs,
+						  REMOTE_GUESS_తల_QUIET);
 
-	if (option_branch) {
-		our_head_points_at = find_remote_branch(mapped_refs, option_branch);
-		if (!our_head_points_at)
+	ఒకవేళ (option_branch) {
+		our_తల_points_at = కనుగొను_remote_branch(mapped_refs, option_branch);
+		ఒకవేళ (!our_తల_points_at)
 			die(_("Remote branch %s not found in upstream %s"),
 			    option_branch, remote_name);
-	} else if (option_rev) {
-		our_head_points_at = mapped_refs;
-		if (!our_head_points_at)
+	} లేకపోతే ఒకవేళ (option_rev) {
+		our_తల_points_at = mapped_refs;
+		ఒకవేళ (!our_తల_points_at)
 			die(_("Remote revision %s not found in upstream %s"),
 			    option_rev, remote_name);
-	} else if (remote_head_points_at) {
-		our_head_points_at = remote_head_points_at;
-	} else if (remote_head) {
-		our_head_points_at = NULL;
-	} else {
-		char *to_free = NULL;
-		const char *branch;
+	} లేకపోతే ఒకవేళ (remote_తల_points_at) {
+		our_తల_points_at = remote_తల_points_at;
+	} లేకపోతే ఒకవేళ (remote_తల) {
+		our_తల_points_at = ఖాళీ;
+	} లేకపోతే {
+		అక్షరం *గమ్యం_free = ఖాళీ;
+		స్థిరరాశి అక్షరం *branch;
 
-		if (!mapped_refs) {
+		ఒకవేళ (!mapped_refs) {
 			warning(_("You appear to have cloned an empty repository."));
 			option_no_checkout = 1;
 		}
 
-		if (transport_ls_refs_options.unborn_head_target &&
-		    skip_prefix(transport_ls_refs_options.unborn_head_target,
+		ఒకవేళ (transport_ls_refs_options.unborn_తల_లక్ష్యం &&
+		    skip_ఉపసర్గ(transport_ls_refs_options.unborn_తల_లక్ష్యం,
 				"refs/heads/", &branch)) {
-			unborn_head  = xstrdup(transport_ls_refs_options.unborn_head_target);
-		} else {
-			branch = to_free = repo_default_branch_name(the_repository, 0);
-			unborn_head = xstrfmt("refs/heads/%s", branch);
+			unborn_తల  = xstrdup(transport_ls_refs_options.unborn_తల_లక్ష్యం);
+		} లేకపోతే {
+			branch = గమ్యం_free = repo_default_branch_name(the_repository, 0);
+			unborn_తల = xstrfmt("refs/heads/%s", branch);
 		}
 
 		/*
@@ -1609,30 +1609,30 @@ int cmd_clone(int argc,
 		 * But for an empty repo, find_remote_branch() can never find
 		 * a match.
 		 */
-		our_head_points_at = find_remote_branch(mapped_refs, branch);
+		our_తల_points_at = కనుగొను_remote_branch(mapped_refs, branch);
 
-		free(to_free);
+		విడుదల(గమ్యం_free);
 	}
 
-	if (!option_rev)
-		write_refspec_config(src_ref_prefix, our_head_points_at,
-				     remote_head_points_at, &branch_top);
+	ఒకవేళ (!option_rev)
+		write_refspec_config(src_ref_ఉపసర్గ, our_తల_points_at,
+				     remote_తల_points_at, &branch_శిఖరం);
 
-	if (filter_options.choice)
-		partial_clone_register(remote_name, &filter_options);
+	ఒకవేళ (filter_options.choice)
+		partial_clone_రిజిస్టరు(remote_name, &filter_options);
 
-	if (is_local)
-		clone_local(path, git_dir);
-	else if (mapped_refs && complete_refs_before_fetch) {
-		if (transport_fetch_refs(transport, mapped_refs))
+	ఒకవేళ (is_local)
+		clone_local(మార్గం, git_dir);
+	లేకపోతే ఒకవేళ (mapped_refs && complete_refs_before_fetch) {
+		ఒకవేళ (transport_fetch_refs(transport, mapped_refs))
 			die(_("remote transport reported error"));
 	}
 
-	update_remote_refs(refs, mapped_refs, remote_head_points_at,
-			   branch_top.buf, reflog_msg.buf, transport,
+	update_remote_refs(refs, mapped_refs, remote_తల_points_at,
+			   branch_శిఖరం.buf, reflog_సందేశం.buf, transport,
 			   !is_local);
 
-	update_head(&opts, our_head_points_at, remote_head, unborn_head, reflog_msg.buf);
+	update_తల(&opts, our_తల_points_at, remote_తల, unborn_తల, reflog_సందేశం.buf);
 
 	/*
 	 * We want to show progress for recursive submodule clones iff
@@ -1640,21 +1640,21 @@ int cmd_clone(int argc,
 	 * the final decision for this flag, so we need to rescue the value
 	 * before we free the transport.
 	 */
-	submodule_progress = transport->progress;
+	submodule_పురోగతి = transport->పురోగతి;
 
 	transport_unlock_pack(transport, 0);
 	transport_disconnect(transport);
 
-	if (option_dissociate) {
+	ఒకవేళ (option_dissociate) {
 		odb_close(the_repository->objects);
 		dissociate_from_references();
 	}
 
-	if (option_sparse_checkout && git_sparse_checkout_init(dir))
-		return 1;
+	ఒకవేళ (option_sparse_checkout && git_sparse_checkout_init(dir))
+		తిరిగి 1;
 
-	junk_mode = JUNK_LEAVE_REPO;
-	err = checkout(submodule_progress,
+	junk_బహుళకం = JUNK_LEAVE_REPO;
+	err = checkout(submodule_పురోగతి,
 		       &filter_options,
 		       filter_submodules,
 		       ref_storage_format);
@@ -1666,19 +1666,19 @@ int cmd_clone(int argc,
 	string_list_clear(&server_options, 0);
 	strvec_clear(&alternates);
 
-	free(remote_name);
-	strbuf_release(&reflog_msg);
-	strbuf_release(&branch_top);
+	విడుదల(remote_name);
+	strbuf_release(&reflog_సందేశం);
+	strbuf_release(&branch_శిఖరం);
 	strbuf_release(&buf);
-	strbuf_release(&key);
+	strbuf_release(&కీలకం);
 	free_refs(mapped_refs);
-	free_refs(remote_head_points_at);
-	free(unborn_head);
-	free(dir);
-	free(path);
-	free(repo_to_free);
-	junk_mode = JUNK_LEAVE_ALL;
+	free_refs(remote_తల_points_at);
+	విడుదల(unborn_తల);
+	విడుదల(dir);
+	విడుదల(మార్గం);
+	విడుదల(repo_గమ్యం_free);
+	junk_బహుళకం = JUNK_LEAVE_ALL;
 
 	transport_ls_refs_options_release(&transport_ls_refs_options);
-	return err;
+	తిరిగి err;
 }

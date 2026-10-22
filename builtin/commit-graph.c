@@ -1,241 +1,241 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "commit.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "parse-options.h"
-#include "commit-graph.h"
-#include "odb.h"
-#include "odb/source.h"
-#include "odb/source-files.h"
-#include "progress.h"
-#include "replace-object.h"
-#include "strbuf.h"
-#include "tag.h"
-#include "trace2.h"
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "commit.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "commit-graph.h"
+#అన్తర్భావ "odb.h"
+#అన్తర్భావ "odb/source.h"
+#అన్తర్భావ "odb/source-files.h"
+#అన్తర్భావ "progress.h"
+#అన్తర్భావ "replace-object.h"
+#అన్తర్భావ "strbuf.h"
+#అన్తర్భావ "tag.h"
+#అన్తర్భావ "trace2.h"
 
-#define BUILTIN_COMMIT_GRAPH_VERIFY_USAGE \
+#నిర్వచించు BUILTIN_COMMIT_లేఖాచిత్రం_VERIFY_USAGE \
 	N_("git commit-graph verify [--object-dir <dir>] [--shallow] [--[no-]progress]")
 
-#define BUILTIN_COMMIT_GRAPH_WRITE_USAGE \
+#నిర్వచించు BUILTIN_COMMIT_లేఖాచిత్రం_WRITE_USAGE \
 	N_("git commit-graph write [--object-dir <dir>] [--append]\n" \
 	   "                       [--split[=<strategy>]] [--reachable | --stdin-packs | --stdin-commits]\n" \
 	   "                       [--changed-paths] [--[no-]max-new-filters <n>] [--[no-]progress]\n" \
 	   "                       <split-options>")
 
-static const char * const builtin_commit_graph_verify_usage[] = {
-	BUILTIN_COMMIT_GRAPH_VERIFY_USAGE,
-	NULL
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_commit_లేఖాచిత్రం_verify_usage[] = {
+	BUILTIN_COMMIT_లేఖాచిత్రం_VERIFY_USAGE,
+	ఖాళీ
 };
 
-static const char * const builtin_commit_graph_write_usage[] = {
-	BUILTIN_COMMIT_GRAPH_WRITE_USAGE,
-	NULL
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_commit_లేఖాచిత్రం_write_usage[] = {
+	BUILTIN_COMMIT_లేఖాచిత్రం_WRITE_USAGE,
+	ఖాళీ
 };
 
-static char const * const builtin_commit_graph_usage[] = {
-	BUILTIN_COMMIT_GRAPH_VERIFY_USAGE,
-	BUILTIN_COMMIT_GRAPH_WRITE_USAGE,
-	NULL,
+స్థిర అక్షరం స్థిరరాశి * స్థిరరాశి builtin_commit_లేఖాచిత్రం_usage[] = {
+	BUILTIN_COMMIT_లేఖాచిత్రం_VERIFY_USAGE,
+	BUILTIN_COMMIT_లేఖాచిత్రం_WRITE_USAGE,
+	ఖాళీ,
 };
 
-static struct opts_commit_graph {
-	const char *obj_dir;
-	int reachable;
-	int stdin_packs;
-	int stdin_commits;
-	int append;
-	int split;
-	int shallow;
-	int progress;
-	int enable_changed_paths;
+స్థిర నిర్మాణం opts_commit_లేఖాచిత్రం {
+	స్థిరరాశి అక్షరం *obj_dir;
+	పూర్ణాంకం reachable;
+	పూర్ణాంకం stdin_packs;
+	పూర్ణాంకం stdin_commits;
+	పూర్ణాంకం append;
+	పూర్ణాంకం విభజించు;
+	పూర్ణాంకం shallow;
+	పూర్ణాంకం పురోగతి;
+	పూర్ణాంకం enable_మారింది_paths;
 } opts;
 
-static struct option common_opts[] = {
+స్థిర నిర్మాణం option common_opts[] = {
 	OPT_STRING(0, "object-dir", &opts.obj_dir,
 		   N_("dir"),
 		   N_("the object directory to store the graph")),
-	OPT_END()
+	OPT_చివర()
 };
 
-static struct option *add_common_options(struct option *to)
+స్థిర నిర్మాణం option *కూడు_common_options(నిర్మాణం option *గమ్యం)
 {
-	return parse_options_concat(common_opts, to);
+	తిరిగి parse_options_concat(common_opts, గమ్యం);
 }
 
-static int graph_verify(int argc, const char **argv, const char *prefix,
-			struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం లేఖాచిత్రం_verify(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			నిర్మాణం repository *repo వాడని)
 {
-	struct commit_graph *graph = NULL;
-	struct odb_files_dir *dir = NULL;
-	char *graph_name;
-	char *chain_name;
-	enum { OPENED_NONE, OPENED_GRAPH, OPENED_CHAIN } opened = OPENED_NONE;
-	int fd;
-	struct stat st;
-	int flags = 0;
-	int incomplete_chain = 0;
-	int ret;
+	నిర్మాణం commit_లేఖాచిత్రం *లేఖాచిత్రం = ఖాళీ;
+	నిర్మాణం odb_files_dir *dir = ఖాళీ;
+	అక్షరం *లేఖాచిత్రం_name;
+	అక్షరం *chain_name;
+	గణన { OPENED_NONE, OPENED_లేఖాచిత్రం, OPENED_CHAIN } opened = OPENED_NONE;
+	పూర్ణాంకం fd;
+	నిర్మాణం stat st;
+	పూర్ణాంకం flags = 0;
+	పూర్ణాంకం incomplete_chain = 0;
+	పూర్ణాంకం ret;
 
-	static struct option builtin_commit_graph_verify_options[] = {
+	స్థిర నిర్మాణం option builtin_commit_లేఖాచిత్రం_verify_options[] = {
 		OPT_BOOL(0, "shallow", &opts.shallow,
 			 N_("if the commit-graph is split, only verify the tip file")),
-		OPT_BOOL(0, "progress", &opts.progress,
+		OPT_BOOL(0, "progress", &opts.పురోగతి,
 			 N_("force progress reporting")),
-		OPT_END(),
+		OPT_చివర(),
 	};
-	struct option *options = add_common_options(builtin_commit_graph_verify_options);
+	నిర్మాణం option *options = కూడు_common_options(builtin_commit_లేఖాచిత్రం_verify_options);
 
-	trace2_cmd_mode("verify");
+	trace2_cmd_బహుళకం("verify");
 
-	opts.progress = isatty(2);
-	argc = parse_options(argc, argv, prefix,
+	opts.పురోగతి = isatty(2);
+	argc = parse_options(argc, argv, ఉపసర్గ,
 			     options,
-			     builtin_commit_graph_verify_usage, 0);
-	if (argc)
-		usage_with_options(builtin_commit_graph_verify_usage, options);
+			     builtin_commit_లేఖాచిత్రం_verify_usage, 0);
+	ఒకవేళ (argc)
+		usage_with_options(builtin_commit_లేఖాచిత్రం_verify_usage, options);
 
-	if (!opts.obj_dir)
+	ఒకవేళ (!opts.obj_dir)
 		opts.obj_dir = repo_get_object_directory(the_repository);
-	if (opts.shallow)
-		flags |= COMMIT_GRAPH_VERIFY_SHALLOW;
-	if (opts.progress)
-		flags |= COMMIT_GRAPH_WRITE_PROGRESS;
+	ఒకవేళ (opts.shallow)
+		flags |= COMMIT_లేఖాచిత్రం_VERIFY_SHALLOW;
+	ఒకవేళ (opts.పురోగతి)
+		flags |= COMMIT_లేఖాచిత్రం_WRITE_పురోగతి;
 
-	dir = odb_source_files_find_dir(the_repository->objects, opts.obj_dir);
-	if (!dir)
+	dir = odb_ఆధారం_files_కనుగొను_dir(the_repository->objects, opts.obj_dir);
+	ఒకవేళ (!dir)
 		die(_("could not find object directory matching %s"), opts.obj_dir);
 
-	graph_name = get_commit_graph_filename(dir->abspath);
-	chain_name = get_commit_graph_chain_filename(dir->abspath);
-	if (open_commit_graph(graph_name, &fd, &st))
-		opened = OPENED_GRAPH;
-	else if (errno != ENOENT)
-		die_errno(_("Could not open commit-graph '%s'"), graph_name);
-	else if (open_commit_graph_chain(chain_name, &fd, &st,
+	లేఖాచిత్రం_name = get_commit_లేఖాచిత్రం_filename(dir->abspath);
+	chain_name = get_commit_లేఖాచిత్రం_chain_filename(dir->abspath);
+	ఒకవేళ (open_commit_లేఖాచిత్రం(లేఖాచిత్రం_name, &fd, &st))
+		opened = OPENED_లేఖాచిత్రం;
+	లేకపోతే ఒకవేళ (errno != ENOENT)
+		die_errno(_("Could not open commit-graph '%s'"), లేఖాచిత్రం_name);
+	లేకపోతే ఒకవేళ (open_commit_లేఖాచిత్రం_chain(chain_name, &fd, &st,
 					 the_repository->hash_algo))
 		opened = OPENED_CHAIN;
-	else if (errno != ENOENT)
+	లేకపోతే ఒకవేళ (errno != ENOENT)
 		die_errno(_("could not open commit-graph chain '%s'"), chain_name);
 
-	FREE_AND_NULL(graph_name);
+	FREE_AND_NULL(లేఖాచిత్రం_name);
 	FREE_AND_NULL(chain_name);
 	FREE_AND_NULL(options);
 
-	if (opened == OPENED_NONE)
-		return 0;
-	else if (opened == OPENED_GRAPH)
-		graph = load_commit_graph_one_fd_st(the_repository, dir->abspath, fd, &st);
-	else
-		graph = load_commit_graph_chain_fd_st(the_repository->objects, fd, &st,
+	ఒకవేళ (opened == OPENED_NONE)
+		తిరిగి 0;
+	లేకపోతే ఒకవేళ (opened == OPENED_లేఖాచిత్రం)
+		లేఖాచిత్రం = ఎక్కించు_commit_లేఖాచిత్రం_one_fd_st(the_repository, dir->abspath, fd, &st);
+	లేకపోతే
+		లేఖాచిత్రం = ఎక్కించు_commit_లేఖాచిత్రం_chain_fd_st(the_repository->objects, fd, &st,
 						      &incomplete_chain);
 
-	if (!graph)
-		return 1;
+	ఒకవేళ (!లేఖాచిత్రం)
+		తిరిగి 1;
 
-	ret = verify_commit_graph(graph, flags);
-	free_commit_graph(graph);
+	ret = verify_commit_లేఖాచిత్రం(లేఖాచిత్రం, flags);
+	free_commit_లేఖాచిత్రం(లేఖాచిత్రం);
 
-	if (incomplete_chain) {
+	ఒకవేళ (incomplete_chain) {
 		error("one or more commit-graph chain files could not be loaded");
 		ret |= 1;
 	}
 
-	return ret;
+	తిరిగి ret;
 }
 
-extern int read_replace_refs;
-static struct commit_graph_opts write_opts;
+బాహ్య పూర్ణాంకం read_replace_refs;
+స్థిర నిర్మాణం commit_లేఖాచిత్రం_opts write_opts;
 
-static int write_option_parse_split(const struct option *opt, const char *arg,
-				    int unset)
+స్థిర పూర్ణాంకం write_option_parse_విభజించు(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg,
+				    పూర్ణాంకం unset)
 {
-	enum commit_graph_split_flags *flags = opt->value;
+	గణన commit_లేఖాచిత్రం_విభజించు_flags *flags = opt->విలువ;
 
 	BUG_ON_OPT_NEG(unset);
 
-	opts.split = 1;
-	if (!arg)
-		return 0;
+	opts.విభజించు = 1;
+	ఒకవేళ (!arg)
+		తిరిగి 0;
 
-	if (!strcmp(arg, "no-merge"))
-		*flags = COMMIT_GRAPH_SPLIT_MERGE_PROHIBITED;
-	else if (!strcmp(arg, "replace"))
-		*flags = COMMIT_GRAPH_SPLIT_REPLACE;
-	else
+	ఒకవేళ (!strcmp(arg, "no-merge"))
+		*flags = COMMIT_లేఖాచిత్రం_విభజించు_విలీనం_PROHIBITED;
+	లేకపోతే ఒకవేళ (!strcmp(arg, "replace"))
+		*flags = COMMIT_లేఖాచిత్రం_విభజించు_REPLACE;
+	లేకపోతే
 		die(_("unrecognized --split argument, %s"), arg);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int read_one_commit(struct oidset *commits, struct progress *progress,
-			   const char *hash)
+స్థిర పూర్ణాంకం read_one_commit(నిర్మాణం oidset *commits, నిర్మాణం పురోగతి *పురోగతి,
+			   స్థిరరాశి అక్షరం *hash)
 {
-	struct object *result;
-	struct object_id oid;
-	const char *end;
+	నిర్మాణం object *ఫలితం;
+	నిర్మాణం object_id oid;
+	స్థిరరాశి అక్షరం *చివర;
 
-	if (parse_oid_hex(hash, &oid, &end))
-		return error(_("unexpected non-hex object ID: %s"), hash);
+	ఒకవేళ (parse_oid_hex(hash, &oid, &చివర))
+		తిరిగి error(_("unexpected non-hex object ID: %s"), hash);
 
-	result = deref_tag(the_repository, parse_object(the_repository, &oid),
-			   NULL, 0);
-	if (!result)
-		return error(_("invalid object: %s"), hash);
-	else if (object_as_type(result, OBJ_COMMIT, 1))
-		oidset_insert(commits, &result->oid);
+	ఫలితం = deref_ట్యాగ్(the_repository, parse_object(the_repository, &oid),
+			   ఖాళీ, 0);
+	ఒకవేళ (!ఫలితం)
+		తిరిగి error(_("invalid object: %s"), hash);
+	లేకపోతే ఒకవేళ (object_as_type(ఫలితం, OBJ_COMMIT, 1))
+		oidset_చొప్పించు(commits, &ఫలితం->oid);
 
-	display_progress(progress, oidset_size(commits));
+	display_పురోగతి(పురోగతి, oidset_కొలత(commits));
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int write_option_max_new_filters(const struct option *opt,
-					const char *arg,
-					int unset)
+స్థిర పూర్ణాంకం write_option_max_new_filters(స్థిరరాశి నిర్మాణం option *opt,
+					స్థిరరాశి అక్షరం *arg,
+					పూర్ణాంకం unset)
 {
-	int *to = opt->value;
-	if (unset)
-		*to = -1;
-	else {
-		const char *s;
-		*to = strtol(arg, (char **)&s, 10);
-		if (*s)
-			return error(_("option `%s' expects a numerical value"),
+	పూర్ణాంకం *గమ్యం = opt->విలువ;
+	ఒకవేళ (unset)
+		*గమ్యం = -1;
+	లేకపోతే {
+		స్థిరరాశి అక్షరం *s;
+		*గమ్యం = strtol(arg, (అక్షరం **)&s, 10);
+		ఒకవేళ (*s)
+			తిరిగి error(_("option `%s' expects a numerical value"),
 				     "max-new-filters");
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static int git_commit_graph_write_config(const char *var, const char *value,
-					 const struct config_context *ctx,
-					 void *cb UNUSED)
+స్థిర పూర్ణాంకం git_commit_లేఖాచిత్రం_write_config(స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *విలువ,
+					 స్థిరరాశి నిర్మాణం config_context *ctx,
+					 శూన్య *cb వాడని)
 {
-	if (!strcmp(var, "commitgraph.maxnewfilters"))
-		write_opts.max_new_filters = git_config_int(var, value, ctx->kvi);
-	else if (!strcmp(var, "commitgraph.changedpaths"))
-		opts.enable_changed_paths = git_config_bool(var, value) ? 1 : -1;
+	ఒకవేళ (!strcmp(var, "commitgraph.maxnewfilters"))
+		write_opts.max_new_filters = git_config_int(var, విలువ, ctx->kvi);
+	లేకపోతే ఒకవేళ (!strcmp(var, "commitgraph.changedpaths"))
+		opts.enable_మారింది_paths = git_config_bool(var, విలువ) ? 1 : -1;
 	/*
 	 * No need to fall-back to 'git_default_config', since this was already
 	 * called in 'cmd_commit_graph()'.
 	 */
-	return 0;
+	తిరిగి 0;
 }
 
-static int graph_write(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం లేఖాచిత్రం_write(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		       నిర్మాణం repository *repo వాడని)
 {
-	struct string_list pack_indexes = STRING_LIST_INIT_DUP;
-	struct strbuf buf = STRBUF_INIT;
-	struct oidset commits = OIDSET_INIT;
-	struct odb_files_dir *dir = NULL;
-	int result = 0;
-	enum commit_graph_write_flags flags = 0;
-	struct progress *progress = NULL;
+	నిర్మాణం string_list pack_indexes = STRING_LIST_INIT_DUP;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
+	నిర్మాణం oidset commits = OIDSET_INIT;
+	నిర్మాణం odb_files_dir *dir = ఖాళీ;
+	పూర్ణాంకం ఫలితం = 0;
+	గణన commit_లేఖాచిత్రం_write_flags flags = 0;
+	నిర్మాణం పురోగతి *పురోగతి = ఖాళీ;
 
-	static struct option builtin_commit_graph_write_options[] = {
+	స్థిర నిర్మాణం option builtin_commit_లేఖాచిత్రం_write_options[] = {
 		OPT_BOOL(0, "reachable", &opts.reachable,
 			N_("start walk at all refs")),
 		OPT_BOOL(0, "stdin-packs", &opts.stdin_packs,
@@ -244,138 +244,138 @@ static int graph_write(int argc, const char **argv, const char *prefix,
 			N_("start walk at commits listed by stdin")),
 		OPT_BOOL(0, "append", &opts.append,
 			N_("include all commits already in the commit-graph file")),
-		OPT_BOOL(0, "changed-paths", &opts.enable_changed_paths,
+		OPT_BOOL(0, "changed-paths", &opts.enable_మారింది_paths,
 			N_("enable computation for changed paths")),
-		OPT_CALLBACK_F(0, "split", &write_opts.split_flags, NULL,
+		OPT_CALLBACK_F(0, "split", &write_opts.విభజించు_flags, ఖాళీ,
 			N_("allow writing an incremental commit-graph file"),
 			PARSE_OPT_OPTARG | PARSE_OPT_NONEG,
-			write_option_parse_split),
+			write_option_parse_విభజించు),
 		OPT_INTEGER(0, "max-commits", &write_opts.max_commits,
 			N_("maximum number of commits in a non-base split commit-graph")),
-		OPT_INTEGER(0, "size-multiple", &write_opts.size_multiple,
+		OPT_INTEGER(0, "size-multiple", &write_opts.కొలత_గుణిజం,
 			N_("maximum ratio between two levels of a split commit-graph")),
-		OPT_EXPIRY_DATE(0, "expire-time", &write_opts.expire_time,
+		OPT_EXPIRY_DATE(0, "expire-time", &write_opts.expire_సమయం,
 			N_("only expire files older than a given date-time")),
 		OPT_CALLBACK_F(0, "max-new-filters", &write_opts.max_new_filters,
-			NULL, N_("maximum number of changed-path Bloom filters to compute"),
+			ఖాళీ, N_("maximum number of changed-path Bloom filters to compute"),
 			0, write_option_max_new_filters),
-		OPT_BOOL(0, "progress", &opts.progress,
+		OPT_BOOL(0, "progress", &opts.పురోగతి,
 			 N_("force progress reporting")),
-		OPT_END(),
+		OPT_చివర(),
 	};
-	struct option *options = add_common_options(builtin_commit_graph_write_options);
+	నిర్మాణం option *options = కూడు_common_options(builtin_commit_లేఖాచిత్రం_write_options);
 
-	opts.progress = isatty(2);
-	opts.enable_changed_paths = -1;
-	write_opts.size_multiple = 2;
+	opts.పురోగతి = isatty(2);
+	opts.enable_మారింది_paths = -1;
+	write_opts.కొలత_గుణిజం = 2;
 	write_opts.max_commits = 0;
-	write_opts.expire_time = 0;
+	write_opts.expire_సమయం = 0;
 	write_opts.max_new_filters = -1;
 
-	trace2_cmd_mode("write");
+	trace2_cmd_బహుళకం("write");
 
-	repo_config(the_repository, git_commit_graph_write_config, &opts);
+	repo_config(the_repository, git_commit_లేఖాచిత్రం_write_config, &opts);
 
-	argc = parse_options(argc, argv, prefix,
+	argc = parse_options(argc, argv, ఉపసర్గ,
 			     options,
-			     builtin_commit_graph_write_usage, 0);
-	if (argc)
-		usage_with_options(builtin_commit_graph_write_usage, options);
+			     builtin_commit_లేఖాచిత్రం_write_usage, 0);
+	ఒకవేళ (argc)
+		usage_with_options(builtin_commit_లేఖాచిత్రం_write_usage, options);
 
-	if (opts.reachable + opts.stdin_packs + opts.stdin_commits > 1)
+	ఒకవేళ (opts.reachable + opts.stdin_packs + opts.stdin_commits > 1)
 		die(_("use at most one of --reachable, --stdin-commits, or --stdin-packs"));
-	if (!opts.obj_dir)
+	ఒకవేళ (!opts.obj_dir)
 		opts.obj_dir = repo_get_object_directory(the_repository);
-	if (opts.append)
-		flags |= COMMIT_GRAPH_WRITE_APPEND;
-	if (opts.split)
-		flags |= COMMIT_GRAPH_WRITE_SPLIT;
-	if (opts.progress)
-		flags |= COMMIT_GRAPH_WRITE_PROGRESS;
-	if (!opts.enable_changed_paths)
-		flags |= COMMIT_GRAPH_NO_WRITE_BLOOM_FILTERS;
-	if (opts.enable_changed_paths == 1 ||
-	    git_env_bool(GIT_TEST_COMMIT_GRAPH_CHANGED_PATHS, 0))
-		flags |= COMMIT_GRAPH_WRITE_BLOOM_FILTERS;
+	ఒకవేళ (opts.append)
+		flags |= COMMIT_లేఖాచిత్రం_WRITE_APPEND;
+	ఒకవేళ (opts.విభజించు)
+		flags |= COMMIT_లేఖాచిత్రం_WRITE_విభజించు;
+	ఒకవేళ (opts.పురోగతి)
+		flags |= COMMIT_లేఖాచిత్రం_WRITE_పురోగతి;
+	ఒకవేళ (!opts.enable_మారింది_paths)
+		flags |= COMMIT_లేఖాచిత్రం_NO_WRITE_BLOOM_FILTERS;
+	ఒకవేళ (opts.enable_మారింది_paths == 1 ||
+	    git_env_bool(GIT_TEST_COMMIT_లేఖాచిత్రం_మారింది_PATHS, 0))
+		flags |= COMMIT_లేఖాచిత్రం_WRITE_BLOOM_FILTERS;
 
-	dir = odb_source_files_find_dir(the_repository->objects, opts.obj_dir);
-	if (!dir)
+	dir = odb_ఆధారం_files_కనుగొను_dir(the_repository->objects, opts.obj_dir);
+	ఒకవేళ (!dir)
 		die(_("could not find object directory matching %s"), opts.obj_dir);
 
-	if (opts.reachable) {
-		if (write_commit_graph_reachable(the_repository, dir->abspath, flags, &write_opts))
-			result = 1;
-		goto cleanup;
+	ఒకవేళ (opts.reachable) {
+		ఒకవేళ (write_commit_లేఖాచిత్రం_reachable(the_repository, dir->abspath, flags, &write_opts))
+			ఫలితం = 1;
+		వెళ్ళు cleanup;
 	}
 
-	if (opts.stdin_packs) {
-		struct strbuf packname = STRBUF_INIT;
-		size_t dirlen;
+	ఒకవేళ (opts.stdin_packs) {
+		నిర్మాణం strbuf packname = STRBUF_INIT;
+		కొలత_t dirlen;
 
 		strbuf_addf(&packname, "%s/pack/", dir->abspath);
 		dirlen = packname.len;
 
-		while (strbuf_getline(&buf, stdin) != EOF) {
+		అయితే (strbuf_getline(&buf, stdin) != EOF) {
 			strbuf_setlen(&packname, dirlen);
 			strbuf_addbuf(&packname, &buf);
 			string_list_append(&pack_indexes, packname.buf);
 		}
 
 		strbuf_release(&packname);
-	} else if (opts.stdin_commits) {
+	} లేకపోతే ఒకవేళ (opts.stdin_commits) {
 		oidset_init(&commits, 0);
-		if (opts.progress)
-			progress = start_delayed_progress(
+		ఒకవేళ (opts.పురోగతి)
+			పురోగతి = ప్రారంభం_delayed_పురోగతి(
 				the_repository,
 				_("Collecting commits from input"), 0);
 
-		while (strbuf_getline(&buf, stdin) != EOF) {
-			if (read_one_commit(&commits, progress, buf.buf)) {
-				result = 1;
-				stop_progress(&progress);
-				goto cleanup;
+		అయితే (strbuf_getline(&buf, stdin) != EOF) {
+			ఒకవేళ (read_one_commit(&commits, పురోగతి, buf.buf)) {
+				ఫలితం = 1;
+				stop_పురోగతి(&పురోగతి);
+				వెళ్ళు cleanup;
 			}
 		}
 
-		stop_progress(&progress);
+		stop_పురోగతి(&పురోగతి);
 	}
 
-	if (write_commit_graph(the_repository, dir->abspath,
-			       opts.stdin_packs ? &pack_indexes : NULL,
-			       opts.stdin_commits ? &commits : NULL,
+	ఒకవేళ (write_commit_లేఖాచిత్రం(the_repository, dir->abspath,
+			       opts.stdin_packs ? &pack_indexes : ఖాళీ,
+			       opts.stdin_commits ? &commits : ఖాళీ,
 			       flags,
 			       &write_opts))
-		result = 1;
+		ఫలితం = 1;
 
 cleanup:
 	FREE_AND_NULL(options);
 	string_list_clear(&pack_indexes, 0);
 	strbuf_release(&buf);
 	oidset_clear(&commits);
-	return result;
+	తిరిగి ఫలితం;
 }
 
-int cmd_commit_graph(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo)
+పూర్ణాంకం cmd_commit_లేఖాచిత్రం(పూర్ణాంకం argc,
+		     స్థిరరాశి అక్షరం **argv,
+		     స్థిరరాశి అక్షరం *ఉపసర్గ,
+		     నిర్మాణం repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option builtin_commit_graph_options[] = {
-		OPT_SUBCOMMAND("verify", &fn, graph_verify),
-		OPT_SUBCOMMAND("write", &fn, graph_write),
-		OPT_END(),
+	parse_opt_subcommand_fn *fn = ఖాళీ;
+	నిర్మాణం option builtin_commit_లేఖాచిత్రం_options[] = {
+		OPT_SUBCOMMAND("verify", &fn, లేఖాచిత్రం_verify),
+		OPT_SUBCOMMAND("write", &fn, లేఖాచిత్రం_write),
+		OPT_చివర(),
 	};
-	struct option *options = parse_options_concat(builtin_commit_graph_options, common_opts);
+	నిర్మాణం option *options = parse_options_concat(builtin_commit_లేఖాచిత్రం_options, common_opts);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ఖాళీ);
 
 	disable_replace_refs();
-	save_commit_buffer = 0;
+	save_commit_బఫరు = 0;
 
-	argc = parse_options(argc, argv, prefix, options,
-			     builtin_commit_graph_usage, 0);
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
+			     builtin_commit_లేఖాచిత్రం_usage, 0);
 	FREE_AND_NULL(options);
 
-	return fn(argc, argv, prefix, repo);
+	తిరిగి fn(argc, argv, ఉపసర్గ, repo);
 }

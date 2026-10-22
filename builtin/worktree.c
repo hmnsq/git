@@ -1,425 +1,425 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "advice.h"
-#include "checkout.h"
-#include "config.h"
-#include "copy.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "path.h"
-#include "strvec.h"
-#include "branch.h"
-#include "read-cache-ll.h"
-#include "refs.h"
-#include "remote.h"
-#include "run-command.h"
-#include "hook.h"
-#include "sigchain.h"
-#include "submodule.h"
-#include "utf8.h"
-#include "worktree.h"
-#include "quote.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "abspath.h"
+#అన్తర్భావ "advice.h"
+#అన్తర్భావ "checkout.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "copy.h"
+#అన్తర్భావ "dir.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "object-file.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "path.h"
+#అన్తర్భావ "strvec.h"
+#అన్తర్భావ "branch.h"
+#అన్తర్భావ "read-cache-ll.h"
+#అన్తర్భావ "refs.h"
+#అన్తర్భావ "remote.h"
+#అన్తర్భావ "run-command.h"
+#అన్తర్భావ "hook.h"
+#అన్తర్భావ "sigchain.h"
+#అన్తర్భావ "submodule.h"
+#అన్తర్భావ "utf8.h"
+#అన్తర్భావ "worktree.h"
+#అన్తర్భావ "quote.h"
 
-#define BUILTIN_WORKTREE_ADD_USAGE \
+#నిర్వచించు BUILTIN_WORKTREE_కూడు_USAGE \
 	N_("git worktree add [-f] [--detach] [--checkout] [--lock [--reason <string>]]\n" \
 	   "                 [--orphan] [(-b | -B) <new-branch>] <path> [<commit-ish>]")
 
-#define BUILTIN_WORKTREE_LIST_USAGE \
+#నిర్వచించు BUILTIN_WORKTREE_LIST_USAGE \
 	N_("git worktree list [-v | --porcelain [-z]]")
-#define BUILTIN_WORKTREE_LOCK_USAGE \
+#నిర్వచించు BUILTIN_WORKTREE_తాళం_USAGE \
 	N_("git worktree lock [--reason <string>] <worktree>")
-#define BUILTIN_WORKTREE_MOVE_USAGE \
+#నిర్వచించు BUILTIN_WORKTREE_MOVE_USAGE \
 	N_("git worktree move <worktree> <new-path>")
-#define BUILTIN_WORKTREE_PRUNE_USAGE \
+#నిర్వచించు BUILTIN_WORKTREE_PRUNE_USAGE \
 	N_("git worktree prune [-n] [-v] [--expire <expire>]")
-#define BUILTIN_WORKTREE_REMOVE_USAGE \
+#నిర్వచించు BUILTIN_WORKTREE_REMOVE_USAGE \
 	N_("git worktree remove [-f] <worktree>")
-#define BUILTIN_WORKTREE_REPAIR_USAGE \
+#నిర్వచించు BUILTIN_WORKTREE_REPAIR_USAGE \
 	N_("git worktree repair [<path>...]")
-#define BUILTIN_WORKTREE_UNLOCK_USAGE \
+#నిర్వచించు BUILTIN_WORKTREE_UNLOCK_USAGE \
 	N_("git worktree unlock <worktree>")
 
-#define WORKTREE_ADD_DWIM_ORPHAN_INFER_TEXT \
+#నిర్వచించు WORKTREE_కూడు_DWIM_ORPHAN_INFER_పాఠ్యం \
 	_("No possible source branch, inferring '--orphan'")
 
-#define WORKTREE_ADD_ORPHAN_WITH_DASH_B_HINT_TEXT \
+#నిర్వచించు WORKTREE_కూడు_ORPHAN_WITH_DASH_B_HINT_పాఠ్యం \
 	_("If you meant to create a worktree containing a new unborn branch\n" \
 	"(branch with no commits) for this repository, you can do so\n" \
 	"using the --orphan flag:\n" \
 	"\n" \
 	"    git worktree add --orphan -b %s %s\n")
 
-#define WORKTREE_ADD_ORPHAN_NO_DASH_B_HINT_TEXT \
+#నిర్వచించు WORKTREE_కూడు_ORPHAN_NO_DASH_B_HINT_పాఠ్యం \
 	_("If you meant to create a worktree containing a new unborn branch\n" \
 	"(branch with no commits) for this repository, you can do so\n" \
 	"using the --orphan flag:\n" \
 	"\n" \
 	"    git worktree add --orphan %s\n")
 
-static const char * const git_worktree_usage[] = {
-	BUILTIN_WORKTREE_ADD_USAGE,
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_worktree_usage[] = {
+	BUILTIN_WORKTREE_కూడు_USAGE,
 	BUILTIN_WORKTREE_LIST_USAGE,
-	BUILTIN_WORKTREE_LOCK_USAGE,
+	BUILTIN_WORKTREE_తాళం_USAGE,
 	BUILTIN_WORKTREE_MOVE_USAGE,
 	BUILTIN_WORKTREE_PRUNE_USAGE,
 	BUILTIN_WORKTREE_REMOVE_USAGE,
 	BUILTIN_WORKTREE_REPAIR_USAGE,
 	BUILTIN_WORKTREE_UNLOCK_USAGE,
-	NULL
+	ఖాళీ
 };
 
-static const char * const git_worktree_add_usage[] = {
-	BUILTIN_WORKTREE_ADD_USAGE,
-	NULL,
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_worktree_కూడు_usage[] = {
+	BUILTIN_WORKTREE_కూడు_USAGE,
+	ఖాళీ,
 };
 
-static const char * const git_worktree_list_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_worktree_list_usage[] = {
 	BUILTIN_WORKTREE_LIST_USAGE,
-	NULL
+	ఖాళీ
 };
 
-static const char * const git_worktree_lock_usage[] = {
-	BUILTIN_WORKTREE_LOCK_USAGE,
-	NULL
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_worktree_తాళం_usage[] = {
+	BUILTIN_WORKTREE_తాళం_USAGE,
+	ఖాళీ
 };
 
-static const char * const git_worktree_move_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_worktree_move_usage[] = {
 	BUILTIN_WORKTREE_MOVE_USAGE,
-	NULL
+	ఖాళీ
 };
 
-static const char * const git_worktree_prune_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_worktree_prune_usage[] = {
 	BUILTIN_WORKTREE_PRUNE_USAGE,
-	NULL
+	ఖాళీ
 };
 
-static const char * const git_worktree_remove_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_worktree_remove_usage[] = {
 	BUILTIN_WORKTREE_REMOVE_USAGE,
-	NULL
+	ఖాళీ
 };
 
-static const char * const git_worktree_repair_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_worktree_repair_usage[] = {
 	BUILTIN_WORKTREE_REPAIR_USAGE,
-	NULL
+	ఖాళీ
 };
 
-static const char * const git_worktree_unlock_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_worktree_unlock_usage[] = {
 	BUILTIN_WORKTREE_UNLOCK_USAGE,
-	NULL
+	ఖాళీ
 };
 
-struct add_opts {
-	int force;
-	int detach;
-	int quiet;
-	int checkout;
-	int orphan;
-	int relative_paths;
-	const char *keep_locked;
+నిర్మాణం కూడు_opts {
+	పూర్ణాంకం force;
+	పూర్ణాంకం detach;
+	పూర్ణాంకం quiet;
+	పూర్ణాంకం checkout;
+	పూర్ణాంకం orphan;
+	పూర్ణాంకం relative_paths;
+	స్థిరరాశి అక్షరం *keep_locked;
 };
 
-static int show_only;
-static int verbose;
-static int guess_remote;
-static int use_relative_paths;
-static timestamp_t expire;
+స్థిర పూర్ణాంకం show_only;
+స్థిర పూర్ణాంకం verbose;
+స్థిర పూర్ణాంకం guess_remote;
+స్థిర పూర్ణాంకం use_relative_paths;
+స్థిర timestamp_t expire;
 
-static int git_worktree_config(const char *var, const char *value,
-			       const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం git_worktree_config(స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *విలువ,
+			       స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	if (!strcmp(var, "worktree.guessremote")) {
-		guess_remote = git_config_bool(var, value);
-		return 0;
-	} else if (!strcmp(var, "worktree.userelativepaths")) {
-		use_relative_paths = git_config_bool(var, value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "worktree.guessremote")) {
+		guess_remote = git_config_bool(var, విలువ);
+		తిరిగి 0;
+	} లేకపోతే ఒకవేళ (!strcmp(var, "worktree.userelativepaths")) {
+		use_relative_paths = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	తిరిగి git_default_config(var, విలువ, ctx, cb);
 }
 
-static int delete_git_dir(const char *id)
+స్థిర పూర్ణాంకం delete_git_dir(స్థిరరాశి అక్షరం *id)
 {
-	struct strbuf sb = STRBUF_INIT;
-	int ret;
+	నిర్మాణం strbuf sb = STRBUF_INIT;
+	పూర్ణాంకం ret;
 
-	repo_common_path_append(the_repository, &sb, "worktrees/%s", id);
+	repo_common_మార్గం_append(the_repository, &sb, "worktrees/%s", id);
 	ret = remove_dir_recursively(&sb, 0);
-	if (ret < 0 && errno == ENOTDIR)
+	ఒకవేళ (ret < 0 && errno == ENOTDIR)
 		ret = unlink(sb.buf);
-	if (ret)
+	ఒకవేళ (ret)
 		error_errno(_("failed to delete '%s'"), sb.buf);
 	strbuf_release(&sb);
-	return ret;
+	తిరిగి ret;
 }
 
-static void delete_worktrees_dir_if_empty(void)
+స్థిర శూన్య delete_worktrees_dir_if_ఖాళీలు(శూన్య)
 {
-	char *path = repo_git_path(the_repository, "worktrees");
-	rmdir(path); /* ignore failed removal */
-	free(path);
+	అక్షరం *మార్గం = repo_git_మార్గం(the_repository, "worktrees");
+	rmdir(మార్గం); /* ignore failed removal */
+	విడుదల(మార్గం);
 }
 
-static void prune_worktree(const char *id, const char *reason)
+స్థిర శూన్య prune_worktree(స్థిరరాశి అక్షరం *id, స్థిరరాశి అక్షరం *reason)
 {
-	if (show_only || verbose)
+	ఒకవేళ (show_only || verbose)
 		fprintf_ln(stderr, _("Removing %s/%s: %s"), "worktrees", id, reason);
-	if (!show_only)
+	ఒకవేళ (!show_only)
 		delete_git_dir(id);
 }
 
-static int prune_cmp(const void *a, const void *b)
+స్థిర పూర్ణాంకం prune_cmp(స్థిరరాశి శూన్య *a, స్థిరరాశి శూన్య *b)
 {
-	const struct string_list_item *x = a;
-	const struct string_list_item *y = b;
-	int c;
+	స్థిరరాశి నిర్మాణం string_list_అంశం *x = a;
+	స్థిరరాశి నిర్మాణం string_list_అంశం *y = b;
+	పూర్ణాంకం c;
 
-	if ((c = fspathcmp(x->string, y->string)))
-	    return c;
+	ఒకవేళ ((c = fspathcmp(x->string, y->string)))
+	    తిరిగి c;
 	/*
 	 * paths same; prune_dupes() removes all but the first worktree entry
 	 * having the same path, so sort main worktree ('util' is NULL) above
 	 * linked worktrees ('util' not NULL) since main worktree can't be
 	 * removed
 	 */
-	if (!x->util)
-		return -1;
-	if (!y->util)
-		return 1;
+	ఒకవేళ (!x->util)
+		తిరిగి -1;
+	ఒకవేళ (!y->util)
+		తిరిగి 1;
 	/* paths same; sort by .git/worktrees/<id> */
-	return strcmp(x->util, y->util);
+	తిరిగి strcmp(x->util, y->util);
 }
 
-static void prune_dups(struct string_list *l)
+స్థిర శూన్య prune_dups(నిర్మాణం string_list *l)
 {
-	int i;
+	పూర్ణాంకం i;
 
-	QSORT(l->items, l->nr, prune_cmp);
-	for (i = 1; i < l->nr; i++) {
-		if (!fspathcmp(l->items[i].string, l->items[i - 1].string))
-			prune_worktree(l->items[i].util, "duplicate entry");
+	QSORT(l->వస్తువులు, l->nr, prune_cmp);
+	కొరకు (i = 1; i < l->nr; i++) {
+		ఒకవేళ (!fspathcmp(l->వస్తువులు[i].string, l->వస్తువులు[i - 1].string))
+			prune_worktree(l->వస్తువులు[i].util, "duplicate entry");
 	}
 }
 
-static void prune_worktrees(void)
+స్థిర శూన్య prune_worktrees(శూన్య)
 {
-	struct strbuf reason = STRBUF_INIT;
-	struct strbuf main_path = STRBUF_INIT;
-	struct string_list kept = STRING_LIST_INIT_DUP;
-	char *path;
+	నిర్మాణం strbuf reason = STRBUF_INIT;
+	నిర్మాణం strbuf main_మార్గం = STRBUF_INIT;
+	నిర్మాణం string_list kept = STRING_LIST_INIT_DUP;
+	అక్షరం *మార్గం;
 	DIR *dir;
-	struct dirent *d;
+	నిర్మాణం dirent *d;
 
-	path = repo_git_path(the_repository, "worktrees");
-	dir = opendir(path);
-	free(path);
-	if (!dir)
-		return;
-	while ((d = readdir_skip_dot_and_dotdot(dir)) != NULL) {
-		char *path;
+	మార్గం = repo_git_మార్గం(the_repository, "worktrees");
+	dir = opendir(మార్గం);
+	విడుదల(మార్గం);
+	ఒకవేళ (!dir)
+		తిరిగి;
+	అయితే ((d = readdir_skip_dot_and_dotdot(dir)) != ఖాళీ) {
+		అక్షరం *మార్గం;
 		strbuf_reset(&reason);
-		if (should_prune_worktree(the_repository, d->d_name, &reason, &path, expire))
+		ఒకవేళ (should_prune_worktree(the_repository, d->d_name, &reason, &మార్గం, expire))
 			prune_worktree(d->d_name, reason.buf);
-		else if (path)
-			string_list_append_nodup(&kept, path)->util = xstrdup(d->d_name);
+		లేకపోతే ఒకవేళ (మార్గం)
+			string_list_append_nodup(&kept, మార్గం)->util = xstrdup(d->d_name);
 	}
 	closedir(dir);
 
-	strbuf_add_absolute_path(&main_path, repo_get_common_dir(the_repository));
+	strbuf_కూడు_absolute_మార్గం(&main_మార్గం, repo_get_common_dir(the_repository));
 	/* massage main worktree absolute path to match 'gitdir' content */
-	strbuf_strip_suffix(&main_path, "/.");
-	string_list_append_nodup(&kept, strbuf_detach(&main_path, NULL));
+	strbuf_strip_suffix(&main_మార్గం, "/.");
+	string_list_append_nodup(&kept, strbuf_detach(&main_మార్గం, ఖాళీ));
 	prune_dups(&kept);
 	string_list_clear(&kept, 1);
 
-	if (!show_only)
-		delete_worktrees_dir_if_empty();
+	ఒకవేళ (!show_only)
+		delete_worktrees_dir_if_ఖాళీలు();
 	strbuf_release(&reason);
 }
 
-static int prune(int ac, const char **av, const char *prefix,
-		 struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం prune(పూర్ణాంకం ac, స్థిరరాశి అక్షరం **av, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		 నిర్మాణం repository *repo వాడని)
 {
-	struct option options[] = {
-		OPT__DRY_RUN(&show_only, N_("do not remove, show only")),
+	నిర్మాణం option options[] = {
+		OPT_DRY_నిరంతరం(&show_only, N_("do not remove, show only")),
 		OPT__VERBOSE(&verbose, N_("report pruned working trees")),
 		OPT_EXPIRY_DATE(0, "expire", &expire,
 				N_("prune missing working trees older than <time>")),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	expire = TIME_MAX;
-	ac = parse_options(ac, av, prefix, options, git_worktree_prune_usage,
+	expire = సమయం_MAX;
+	ac = parse_options(ac, av, ఉపసర్గ, options, git_worktree_prune_usage,
 			   0);
-	if (ac)
+	ఒకవేళ (ac)
 		usage_with_options(git_worktree_prune_usage, options);
 	prune_worktrees();
-	return 0;
+	తిరిగి 0;
 }
 
-static char *junk_work_tree;
-static char *junk_git_dir;
-static int is_junk;
-static pid_t junk_pid;
+స్థిర అక్షరం *junk_work_వృక్షం;
+స్థిర అక్షరం *junk_git_dir;
+స్థిర పూర్ణాంకం is_junk;
+స్థిర pid_t junk_pid;
 
-static void remove_junk(void)
+స్థిర శూన్య remove_junk(శూన్య)
 {
-	struct strbuf sb = STRBUF_INIT;
-	if (!is_junk || getpid() != junk_pid)
-		return;
-	if (junk_git_dir) {
+	నిర్మాణం strbuf sb = STRBUF_INIT;
+	ఒకవేళ (!is_junk || getpid() != junk_pid)
+		తిరిగి;
+	ఒకవేళ (junk_git_dir) {
 		strbuf_addstr(&sb, junk_git_dir);
 		remove_dir_recursively(&sb, 0);
 		strbuf_reset(&sb);
 	}
-	if (junk_work_tree) {
-		strbuf_addstr(&sb, junk_work_tree);
+	ఒకవేళ (junk_work_వృక్షం) {
+		strbuf_addstr(&sb, junk_work_వృక్షం);
 		remove_dir_recursively(&sb, 0);
 	}
 	strbuf_release(&sb);
 }
 
-static void remove_junk_on_signal(int signo)
+స్థిర శూన్య remove_junk_on_signal(పూర్ణాంకం signo)
 {
 	remove_junk();
-	sigchain_pop(signo);
-	raise(signo);
+	sigchain_తీయి(signo);
+	లేపు(signo);
 }
 
-static char *worktree_basename_dup(const char *path)
+స్థిర అక్షరం *worktree_basename_dup(స్థిరరాశి అక్షరం *మార్గం)
 {
-	const char *name;
-	int len;
+	స్థిరరాశి అక్షరం *name;
+	పూర్ణాంకం len;
 
-	len = strlen(path);
-	while (len && is_dir_sep(path[len - 1]))
+	len = అక్షరశ్రేణి_పొడవు(మార్గం);
+	అయితే (len && is_dir_sep(మార్గం[len - 1]))
 		len--;
 
-	name = path + len;
-	while (name > path && !is_dir_sep(name[-1]))
+	name = మార్గం + len;
+	అయితే (name > మార్గం && !is_dir_sep(name[-1]))
 		name--;
 
-	return xmemdupz(name, path + len - name);
+	తిరిగి xmemdupz(name, మార్గం + len - name);
 }
 
 /* check that path is viable location for worktree */
-static void check_candidate_path(const char *path,
-				 int force,
-				 struct worktree **worktrees,
-				 const char *cmd)
+స్థిర శూన్య check_candidate_మార్గం(స్థిరరాశి అక్షరం *మార్గం,
+				 పూర్ణాంకం force,
+				 నిర్మాణం worktree **worktrees,
+				 స్థిరరాశి అక్షరం *cmd)
 {
-	struct worktree *wt;
-	int locked;
+	నిర్మాణం worktree *wt;
+	పూర్ణాంకం locked;
 
-	if (file_exists(path) && !is_empty_dir(path))
-		die(_("'%s' already exists"), path);
+	ఒకవేళ (file_exists(మార్గం) && !is_ఖాళీలు_dir(మార్గం))
+		die(_("'%s' already exists"), మార్గం);
 
-	wt = find_worktree_by_path(worktrees, path);
-	if (!wt)
-		return;
+	wt = కనుగొను_worktree_by_మార్గం(worktrees, మార్గం);
+	ఒకవేళ (!wt)
+		తిరిగి;
 
-	locked = !!worktree_lock_reason(wt);
-	if ((!locked && force) || (locked && force > 1)) {
-		if (delete_git_dir(wt->id))
-		    die(_("unusable worktree destination '%s'"), path);
-		return;
+	locked = !!worktree_తాళం_reason(wt);
+	ఒకవేళ ((!locked && force) || (locked && force > 1)) {
+		ఒకవేళ (delete_git_dir(wt->id))
+		    die(_("unusable worktree destination '%s'"), మార్గం);
+		తిరిగి;
 	}
 
-	if (locked)
-		die(_("'%s' is a missing but locked worktree;\nuse '%s -f -f' to override, or 'unlock' and 'prune' or 'remove' to clear"), path, cmd);
-	else
-		die(_("'%s' is a missing but already registered worktree;\nuse '%s -f' to override, or 'prune' or 'remove' to clear"), path, cmd);
+	ఒకవేళ (locked)
+		die(_("'%s' is a missing but locked worktree;\nuse '%s -f -f' to override, or 'unlock' and 'prune' or 'remove' to clear"), మార్గం, cmd);
+	లేకపోతే
+		die(_("'%s' is a missing but already registered worktree;\nuse '%s -f' to override, or 'prune' or 'remove' to clear"), మార్గం, cmd);
 }
 
-static void copy_sparse_checkout(const char *worktree_git_dir)
+స్థిర శూన్య copy_sparse_checkout(స్థిరరాశి అక్షరం *worktree_git_dir)
 {
-	char *from_file = repo_git_path(the_repository, "info/sparse-checkout");
-	char *to_file = xstrfmt("%s/info/sparse-checkout", worktree_git_dir);
+	అక్షరం *from_file = repo_git_మార్గం(the_repository, "info/sparse-checkout");
+	అక్షరం *గమ్యం_file = xstrfmt("%s/info/sparse-checkout", worktree_git_dir);
 
-	if (file_exists(from_file)) {
-		if (safe_create_leading_directories(the_repository, to_file) ||
-			copy_file(the_repository, to_file, from_file, 0666))
+	ఒకవేళ (file_exists(from_file)) {
+		ఒకవేళ (సురక్షిత_create_leading_directories(the_repository, గమ్యం_file) ||
+			copy_file(the_repository, గమ్యం_file, from_file, 0666))
 			error(_("failed to copy '%s' to '%s'; sparse-checkout may not work correctly"),
-				from_file, to_file);
+				from_file, గమ్యం_file);
 	}
 
-	free(from_file);
-	free(to_file);
+	విడుదల(from_file);
+	విడుదల(గమ్యం_file);
 }
 
-static void copy_filtered_worktree_config(const char *worktree_git_dir)
+స్థిర శూన్య copy_filtered_worktree_config(స్థిరరాశి అక్షరం *worktree_git_dir)
 {
-	char *from_file = repo_git_path(the_repository, "config.worktree");
-	char *to_file = xstrfmt("%s/config.worktree", worktree_git_dir);
+	అక్షరం *from_file = repo_git_మార్గం(the_repository, "config.worktree");
+	అక్షరం *గమ్యం_file = xstrfmt("%s/config.worktree", worktree_git_dir);
 
-	if (file_exists(from_file)) {
-		struct config_set cs = { { 0 } };
-		int bare;
+	ఒకవేళ (file_exists(from_file)) {
+		నిర్మాణం config_సమితి cs = { { 0 } };
+		పూర్ణాంకం bare;
 
-		if (safe_create_leading_directories(the_repository, to_file) ||
-			copy_file(the_repository, to_file, from_file, 0666)) {
+		ఒకవేళ (సురక్షిత_create_leading_directories(the_repository, గమ్యం_file) ||
+			copy_file(the_repository, గమ్యం_file, from_file, 0666)) {
 			error(_("failed to copy worktree config from '%s' to '%s'"),
-				from_file, to_file);
-			goto worktree_copy_cleanup;
+				from_file, గమ్యం_file);
+			వెళ్ళు worktree_copy_cleanup;
 		}
 
 		git_configset_init(&cs);
-		git_configset_add_file(&cs, from_file);
+		git_configset_కూడు_file(&cs, from_file);
 
-		if (!git_configset_get_bool(&cs, "core.bare", &bare) &&
+		ఒకవేళ (!git_configset_get_bool(&cs, "core.bare", &bare) &&
 			bare &&
-			repo_config_set_multivar_in_file_gently(the_repository,
-				to_file, "core.bare", NULL, "true", NULL, 0))
+			repo_config_సమితి_multivar_లోపల_file_gently(the_repository,
+				గమ్యం_file, "core.bare", ఖాళీ, "true", ఖాళీ, 0))
 			error(_("failed to unset '%s' in '%s'"),
-				"core.bare", to_file);
-		if (!git_configset_get(&cs, "core.worktree") &&
-			repo_config_set_in_file_gently(the_repository, to_file,
-						       "core.worktree", NULL, NULL))
+				"core.bare", గమ్యం_file);
+		ఒకవేళ (!git_configset_get(&cs, "core.worktree") &&
+			repo_config_సమితి_లోపల_file_gently(the_repository, గమ్యం_file,
+						       "core.worktree", ఖాళీ, ఖాళీ))
 			error(_("failed to unset '%s' in '%s'"),
-				"core.worktree", to_file);
+				"core.worktree", గమ్యం_file);
 
 		git_configset_clear(&cs);
 	}
 
 worktree_copy_cleanup:
-	free(from_file);
-	free(to_file);
+	విడుదల(from_file);
+	విడుదల(గమ్యం_file);
 }
 
-static int checkout_worktree(const struct add_opts *opts,
-			     struct strvec *child_env)
+స్థిర పూర్ణాంకం checkout_worktree(స్థిరరాశి నిర్మాణం కూడు_opts *opts,
+			     నిర్మాణం strvec *బిడ్డ_env)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process cp = బిడ్డ_PROCESS_INIT;
 	cp.git_cmd = 1;
-	strvec_pushl(&cp.args, "reset", "--hard", "--no-recurse-submodules", NULL);
-	if (opts->quiet)
-		strvec_push(&cp.args, "--quiet");
-	strvec_pushv(&cp.env, child_env->v);
-	return run_command(&cp);
+	strvec_pushl(&cp.వాదనలు, "reset", "--hard", "--no-recurse-submodules", ఖాళీ);
+	ఒకవేళ (opts->quiet)
+		strvec_నెట్టు(&cp.వాదనలు, "--quiet");
+	strvec_pushv(&cp.env, బిడ్డ_env->v);
+	తిరిగి నిరంతరం_command(&cp);
 }
 
-static int make_worktree_orphan(const char * ref, const struct add_opts *opts,
-				struct strvec *child_env)
+స్థిర పూర్ణాంకం make_worktree_orphan(స్థిరరాశి అక్షరం * ref, స్థిరరాశి నిర్మాణం కూడు_opts *opts,
+				నిర్మాణం strvec *బిడ్డ_env)
 {
-	struct strbuf symref = STRBUF_INIT;
-	struct child_process cp = CHILD_PROCESS_INIT;
+	నిర్మాణం strbuf symref = STRBUF_INIT;
+	నిర్మాణం బిడ్డ_process cp = బిడ్డ_PROCESS_INIT;
 
 	validate_new_branchname(ref, &symref, 0);
-	strvec_pushl(&cp.args, "symbolic-ref", "HEAD", symref.buf, NULL);
-	if (opts->quiet)
-		strvec_push(&cp.args, "--quiet");
-	strvec_pushv(&cp.env, child_env->v);
+	strvec_pushl(&cp.వాదనలు, "symbolic-ref", "HEAD", symref.buf, ఖాళీ);
+	ఒకవేళ (opts->quiet)
+		strvec_నెట్టు(&cp.వాదనలు, "--quiet");
+	strvec_pushv(&cp.env, బిడ్డ_env->v);
 	strbuf_release(&symref);
 	cp.git_cmd = 1;
-	return run_command(&cp);
+	తిరిగి నిరంతరం_command(&cp);
 }
 
 /*
@@ -430,81 +430,81 @@ static int make_worktree_orphan(const char * ref, const struct add_opts *opts,
  * Create the necessary folder structure to facilitate the same. But to ensure
  * that the former path is still considered a Git directory, add stubs.
  */
-static void setup_alternate_ref_dir(struct worktree *wt, const char *wt_git_path)
+స్థిర శూన్య అమరిక_alternate_ref_dir(నిర్మాణం worktree *wt, స్థిరరాశి అక్షరం *wt_git_మార్గం)
 {
-	struct strbuf sb = STRBUF_INIT;
-	char *path;
+	నిర్మాణం strbuf sb = STRBUF_INIT;
+	అక్షరం *మార్గం;
 
-	path = wt->repo->ref_storage_payload;
-	if (!path)
-		return;
+	మార్గం = wt->repo->ref_storage_payload;
+	ఒకవేళ (!మార్గం)
+		తిరిగి;
 
-	if (!is_absolute_path(path))
+	ఒకవేళ (!is_absolute_మార్గం(మార్గం))
 		strbuf_addf(&sb, "%s/", wt->repo->commondir);
 
-	strbuf_addf(&sb, "%s/worktrees", path);
-	safe_create_dir(wt->repo, sb.buf, 1);
+	strbuf_addf(&sb, "%s/worktrees", మార్గం);
+	సురక్షిత_create_dir(wt->repo, sb.buf, 1);
 	strbuf_addf(&sb, "/%s", wt->id);
-	safe_create_dir(wt->repo, sb.buf, 1);
+	సురక్షిత_create_dir(wt->repo, sb.buf, 1);
 	strbuf_reset(&sb);
 
 	strbuf_addf(&sb, "this worktree stores references in %s/worktrees/%s",
-		    path, wt->id);
-	refs_create_refdir_stubs(wt->repo, wt_git_path, sb.buf);
+		    మార్గం, wt->id);
+	refs_create_refdir_stubs(wt->repo, wt_git_మార్గం, sb.buf);
 
 	strbuf_release(&sb);
 }
 
-static int add_worktree(const char *path, const char *refname,
-			const struct add_opts *opts)
+స్థిర పూర్ణాంకం కూడు_worktree(స్థిరరాశి అక్షరం *మార్గం, స్థిరరాశి అక్షరం *refname,
+			స్థిరరాశి నిర్మాణం కూడు_opts *opts)
 {
-	struct strbuf sb_git = STRBUF_INIT, sb_repo = STRBUF_INIT;
-	struct strbuf sb = STRBUF_INIT;
-	const char *name;
-	char *name_to_free = NULL;
-	struct strvec child_env = STRVEC_INIT;
-	unsigned int counter = 0;
-	int len, ret;
-	struct strbuf symref = STRBUF_INIT;
-	struct commit *commit = NULL;
-	int is_branch = 0;
-	struct strbuf sb_name = STRBUF_INIT;
-	struct worktree **worktrees, *wt = NULL;
-	struct ref_store *wt_refs;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	నిర్మాణం strbuf sb_git = STRBUF_INIT, sb_repo = STRBUF_INIT;
+	నిర్మాణం strbuf sb = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *name;
+	అక్షరం *name_గమ్యం_free = ఖాళీ;
+	నిర్మాణం strvec బిడ్డ_env = STRVEC_INIT;
+	గుర్తులేని పూర్ణాంకం counter = 0;
+	పూర్ణాంకం len, ret;
+	నిర్మాణం strbuf symref = STRBUF_INIT;
+	నిర్మాణం commit *commit = ఖాళీ;
+	పూర్ణాంకం is_branch = 0;
+	నిర్మాణం strbuf sb_name = STRBUF_INIT;
+	నిర్మాణం worktree **worktrees, *wt = ఖాళీ;
+	నిర్మాణం ref_store *wt_refs;
+	నిర్మాణం repo_config_విలువలు *cfg = repo_config_విలువలు(the_repository);
 
 	worktrees = get_worktrees(the_repository);
-	check_candidate_path(path, opts->force, worktrees, "add");
+	check_candidate_మార్గం(మార్గం, opts->force, worktrees, "add");
 	free_worktrees(worktrees);
-	worktrees = NULL;
+	worktrees = ఖాళీ;
 
 	/* is 'refname' a branch or commit? */
-	if (!opts->detach && !check_branch_ref(the_repository, &symref, refname) &&
+	ఒకవేళ (!opts->detach && !check_branch_ref(the_repository, &symref, refname) &&
 	    refs_ref_exists(get_main_ref_store(the_repository), symref.buf)) {
 		is_branch = 1;
-		if (!opts->force)
-			die_if_checked_out(symref.buf, 0);
+		ఒకవేళ (!opts->force)
+			die_if_checked_బహిర్గతం(symref.buf, 0);
 	}
 	commit = lookup_commit_reference_by_name(refname);
-	if (!commit && !opts->orphan)
+	ఒకవేళ (!commit && !opts->orphan)
 		die(_("invalid reference: %s"), refname);
 
-	name = name_to_free = worktree_basename_dup(path);
-	if (!*name)
-		die(_("invalid path '%s'"), path);
+	name = name_గమ్యం_free = worktree_basename_dup(మార్గం);
+	ఒకవేళ (!*name)
+		die(_("invalid path '%s'"), మార్గం);
 	sanitize_refname_component(name, &sb_name);
-	if (!sb_name.len)
+	ఒకవేళ (!sb_name.len)
 		BUG("How come '%s' becomes empty after sanitization?", name);
 	name = sb_name.buf;
-	repo_git_path_replace(the_repository, &sb_repo, "worktrees/%s", name);
+	repo_git_మార్గం_replace(the_repository, &sb_repo, "worktrees/%s", name);
 	len = sb_repo.len;
-	if (safe_create_leading_directories_const(the_repository, sb_repo.buf))
+	ఒకవేళ (సురక్షిత_create_leading_directories_const(the_repository, sb_repo.buf))
 		die_errno(_("could not create leading directories of '%s'"),
 			  sb_repo.buf);
 
-	while (mkdir(sb_repo.buf, 0777)) {
+	అయితే (mkdir(sb_repo.buf, 0777)) {
 		counter++;
-		if ((errno != EEXIST) || !counter /* overflow */)
+		ఒకవేళ ((errno != EEXIST) || !counter /*అధికప్రవాహం*/)
 			die_errno(_("could not create directory of '%s'"),
 				  sb_repo.buf);
 		strbuf_setlen(&sb_repo, len);
@@ -514,7 +514,7 @@ static int add_worktree(const char *path, const char *refname,
 
 	junk_pid = getpid();
 	atexit(remove_junk);
-	sigchain_push_common(remove_junk_on_signal);
+	sigchain_నెట్టు_common(remove_junk_on_signal);
 
 	junk_git_dir = xstrdup(sb_repo.buf);
 	is_junk = 1;
@@ -524,16 +524,16 @@ static int add_worktree(const char *path, const char *refname,
 	 * after the preparation is over.
 	 */
 	strbuf_addf(&sb, "%s/locked", sb_repo.buf);
-	if (opts->keep_locked)
+	ఒకవేళ (opts->keep_locked)
 		write_file(sb.buf, "%s", opts->keep_locked);
-	else
+	లేకపోతే
 		write_file(sb.buf, _("initializing"));
 
-	strbuf_addf(&sb_git, "%s/.git", path);
-	if (safe_create_leading_directories_const(the_repository, sb_git.buf))
+	strbuf_addf(&sb_git, "%s/.git", మార్గం);
+	ఒకవేళ (సురక్షిత_create_leading_directories_const(the_repository, sb_git.buf))
 		die_errno(_("could not create leading directories of '%s'"),
 			  sb_git.buf);
-	junk_work_tree = xstrdup(path);
+	junk_work_వృక్షం = xstrdup(మార్గం);
 
 	strbuf_reset(&sb);
 	strbuf_addf(&sb, "%s/gitdir", sb_repo.buf);
@@ -547,30 +547,30 @@ static int add_worktree(const char *path, const char *refname,
 	 * Set up the ref store of the worktree and create the HEAD reference.
 	 */
 	wt = get_linked_worktree(the_repository, name, 1);
-	if (!wt) {
+	ఒకవేళ (!wt) {
 		ret = error(_("could not find created worktree '%s'"), name);
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
-	setup_alternate_ref_dir(wt, sb_repo.buf);
+	అమరిక_alternate_ref_dir(wt, sb_repo.buf);
 	wt_refs = get_worktree_ref_store(wt);
 
 	ret = ref_store_create_on_disk(wt_refs, REF_STORE_CREATE_ON_DISK_IS_WORKTREE, &sb);
-	if (ret)
-		goto done;
+	ఒకవేళ (ret)
+		వెళ్ళు పూర్తి;
 
-	if (!is_branch && commit)
-		ret = refs_update_ref(wt_refs, NULL, "HEAD", &commit->object.oid,
-				      NULL, 0, UPDATE_REFS_MSG_ON_ERR);
-	else
-		ret = refs_update_symref(wt_refs, "HEAD", symref.buf, NULL);
-	if (ret)
-		goto done;
+	ఒకవేళ (!is_branch && commit)
+		ret = refs_update_ref(wt_refs, ఖాళీ, "HEAD", &commit->object.oid,
+				      ఖాళీ, 0, UPDATE_REFS_సందేశం_ON_ERR);
+	లేకపోతే
+		ret = refs_update_symref(wt_refs, "HEAD", symref.buf, ఖాళీ);
+	ఒకవేళ (ret)
+		వెళ్ళు పూర్తి;
 
 	/*
 	 * If the current worktree has sparse-checkout enabled, then copy
 	 * the sparse-checkout patterns from the current worktree.
 	 */
-	if (cfg->apply_sparse_checkout)
+	ఒకవేళ (cfg->apply_sparse_checkout)
 		copy_sparse_checkout(sb_repo.buf);
 
 	/*
@@ -578,26 +578,26 @@ static int add_worktree(const char *path, const char *refname,
 	 * values from the current worktree into the new one, that way the
 	 * new worktree behaves the same as this one.
 	 */
-	if (the_repository->repository_format_worktree_config)
+	ఒకవేళ (the_repository->repository_format_worktree_config)
 		copy_filtered_worktree_config(sb_repo.buf);
 
-	strvec_pushf(&child_env, "%s=%s", GIT_DIR_ENVIRONMENT, sb_git.buf);
-	strvec_pushf(&child_env, "%s=%s", GIT_WORK_TREE_ENVIRONMENT, path);
+	strvec_pushf(&బిడ్డ_env, "%s=%s", GIT_DIR_ENVIRONMENT, sb_git.buf);
+	strvec_pushf(&బిడ్డ_env, "%s=%s", GIT_WORK_వృక్షం_ENVIRONMENT, మార్గం);
 
-	if (opts->orphan &&
-	    (ret = make_worktree_orphan(refname, opts, &child_env)))
-		goto done;
+	ఒకవేళ (opts->orphan &&
+	    (ret = make_worktree_orphan(refname, opts, &బిడ్డ_env)))
+		వెళ్ళు పూర్తి;
 
-	if (opts->checkout &&
-	    (ret = checkout_worktree(opts, &child_env)))
-		goto done;
+	ఒకవేళ (opts->checkout &&
+	    (ret = checkout_worktree(opts, &బిడ్డ_env)))
+		వెళ్ళు పూర్తి;
 
 	is_junk = 0;
-	FREE_AND_NULL(junk_work_tree);
+	FREE_AND_NULL(junk_work_వృక్షం);
 	FREE_AND_NULL(junk_git_dir);
 
-done:
-	if (ret || !opts->keep_locked) {
+పూర్తి:
+	ఒకవేళ (ret || !opts->keep_locked) {
 		strbuf_reset(&sb);
 		strbuf_addf(&sb, "%s/locked", sb_repo.buf);
 		unlink_or_warn(sb.buf);
@@ -607,58 +607,58 @@ done:
 	 * Hook failure does not warrant worktree deletion, so run hook after
 	 * is_junk is cleared, but do return appropriate code when hook fails.
 	 */
-	if (!ret && opts->checkout && !opts->orphan) {
-		struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT_FORCE_SERIAL;
+	ఒకవేళ (!ret && opts->checkout && !opts->orphan) {
+		నిర్మాణం నిరంతరం_hooks_opt opt = నిరంతరం_HOOKS_OPT_INIT_FORCE_SERIAL;
 
-		strvec_pushl(&opt.env, "GIT_DIR", "GIT_WORK_TREE", NULL);
-		strvec_pushl(&opt.args,
-			     oid_to_hex(null_oid(the_hash_algo)),
-			     oid_to_hex(&commit->object.oid),
+		strvec_pushl(&opt.env, "GIT_DIR", "GIT_WORK_TREE", ఖాళీ);
+		strvec_pushl(&opt.వాదనలు,
+			     oid_గమ్యం_hex(null_oid(the_hash_algo)),
+			     oid_గమ్యం_hex(&commit->object.oid),
 			     "1",
-			     NULL);
-		opt.dir = path;
+			     ఖాళీ);
+		opt.dir = మార్గం;
 
-		ret = run_hooks_opt(the_repository, "post-checkout", &opt);
+		ret = నిరంతరం_hooks_opt(the_repository, "post-checkout", &opt);
 	}
 
-	strvec_clear(&child_env);
+	strvec_clear(&బిడ్డ_env);
 	strbuf_release(&sb);
 	strbuf_release(&symref);
 	strbuf_release(&sb_repo);
 	strbuf_release(&sb_git);
 	strbuf_release(&sb_name);
 	free_worktree(wt);
-	free(name_to_free);
-	return ret;
+	విడుదల(name_గమ్యం_free);
+	తిరిగి ret;
 }
 
-static void print_preparing_worktree_line(int detach,
-					  const char *branch,
-					  const char *new_branch,
-					  int force_new_branch)
+స్థిర శూన్య print_preparing_worktree_పంక్తి(పూర్ణాంకం detach,
+					  స్థిరరాశి అక్షరం *branch,
+					  స్థిరరాశి అక్షరం *new_branch,
+					  పూర్ణాంకం force_new_branch)
 {
-	if (force_new_branch) {
-		struct commit *commit = lookup_commit_reference_by_name(new_branch);
-		if (!commit)
+	ఒకవేళ (force_new_branch) {
+		నిర్మాణం commit *commit = lookup_commit_reference_by_name(new_branch);
+		ఒకవేళ (!commit)
 			fprintf_ln(stderr, _("Preparing worktree (new branch '%s')"), new_branch);
-		else
+		లేకపోతే
 			fprintf_ln(stderr, _("Preparing worktree (resetting branch '%s'; was at %s)"),
 				  new_branch,
-				  repo_find_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV));
-	} else if (new_branch) {
+				  repo_కనుగొను_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV));
+	} లేకపోతే ఒకవేళ (new_branch) {
 		fprintf_ln(stderr, _("Preparing worktree (new branch '%s')"), new_branch);
-	} else {
-		struct strbuf s = STRBUF_INIT;
-		if (!detach && !check_branch_ref(the_repository, &s, branch) &&
+	} లేకపోతే {
+		నిర్మాణం strbuf s = STRBUF_INIT;
+		ఒకవేళ (!detach && !check_branch_ref(the_repository, &s, branch) &&
 		    refs_ref_exists(get_main_ref_store(the_repository), s.buf))
 			fprintf_ln(stderr, _("Preparing worktree (checking out '%s')"),
 				  branch);
-		else {
-			struct commit *commit = lookup_commit_reference_by_name(branch);
-			if (!commit)
+		లేకపోతే {
+			నిర్మాణం commit *commit = lookup_commit_reference_by_name(branch);
+			ఒకవేళ (!commit)
 				BUG("unreachable: invalid reference: %s", branch);
 			fprintf_ln(stderr, _("Preparing worktree (detached HEAD %s)"),
-				  repo_find_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV));
+				  repo_కనుగొను_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV));
 		}
 		strbuf_release(&s);
 	}
@@ -670,9 +670,9 @@ static void print_preparing_worktree_line(int detach,
  *
  * Returns 0 on failure and non-zero on success.
  */
-static int first_valid_ref(const struct reference *ref UNUSED, void *cb_data UNUSED)
+స్థిర పూర్ణాంకం మొదటి_valid_ref(స్థిరరాశి నిర్మాణం reference *ref వాడని, శూన్య *cb_దత్తాంశం వాడని)
 {
-	return 1;
+	తిరిగి 1;
 }
 
 /**
@@ -687,16 +687,16 @@ static int first_valid_ref(const struct reference *ref UNUSED, void *cb_data UNU
  *
  * Returns 1 if any of the previous checks are true, otherwise returns 0.
  */
-static int can_use_local_refs(const struct add_opts *opts)
+స్థిర పూర్ణాంకం can_use_local_refs(స్థిరరాశి నిర్మాణం కూడు_opts *opts)
 {
-	if (refs_head_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
-		return 1;
-	} else if (refs_for_each_branch_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
-		if (!opts->quiet)
+	ఒకవేళ (refs_తల_ref(get_main_ref_store(the_repository), మొదటి_valid_ref, ఖాళీ)) {
+		తిరిగి 1;
+	} లేకపోతే ఒకవేళ (refs_for_each_branch_ref(get_main_ref_store(the_repository), మొదటి_valid_ref, ఖాళీ)) {
+		ఒకవేళ (!opts->quiet)
 			warning(_("HEAD points to an invalid (or orphaned) reference.\n"));
-		return 1;
+		తిరిగి 1;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
 /**
@@ -712,17 +712,17 @@ static int can_use_local_refs(const struct add_opts *opts)
  *
  * Returns 1 if checks 1. and 2. are true, otherwise 0.
  */
-static int can_use_remote_refs(const struct add_opts *opts)
+స్థిర పూర్ణాంకం can_use_remote_refs(స్థిరరాశి నిర్మాణం కూడు_opts *opts)
 {
-	if (!guess_remote) {
-		return 0;
-	} else if (refs_for_each_remote_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
-		return 1;
-	} else if (!opts->force && remote_get(NULL)) {
+	ఒకవేళ (!guess_remote) {
+		తిరిగి 0;
+	} లేకపోతే ఒకవేళ (refs_for_each_remote_ref(get_main_ref_store(the_repository), మొదటి_valid_ref, ఖాళీ)) {
+		తిరిగి 1;
+	} లేకపోతే ఒకవేళ (!opts->force && remote_get(ఖాళీ)) {
 		die(_("No local or remote refs exist despite at least one remote\n"
 		      "present, stopping; use 'add -f' to override or fetch a remote first"));
 	}
-	return 0;
+	తిరిగి 0;
 }
 
 /**
@@ -743,34 +743,34 @@ static int can_use_remote_refs(const struct add_opts *opts)
  * checked and the repo is in a state that looks like the user added a remote
  * but forgot to fetch (and did not override the warning with -f).
  */
-static int dwim_orphan(const struct add_opts *opts, int opt_track, int remote)
+స్థిర పూర్ణాంకం dwim_orphan(స్థిరరాశి నిర్మాణం కూడు_opts *opts, పూర్ణాంకం opt_track, పూర్ణాంకం remote)
 {
-	if (can_use_local_refs(opts)) {
-		return 0;
-	} else if (remote && can_use_remote_refs(opts)) {
-		return 0;
-	} else if (!opts->quiet) {
-		fprintf_ln(stderr, WORKTREE_ADD_DWIM_ORPHAN_INFER_TEXT);
+	ఒకవేళ (can_use_local_refs(opts)) {
+		తిరిగి 0;
+	} లేకపోతే ఒకవేళ (remote && can_use_remote_refs(opts)) {
+		తిరిగి 0;
+	} లేకపోతే ఒకవేళ (!opts->quiet) {
+		fprintf_ln(stderr, WORKTREE_కూడు_DWIM_ORPHAN_INFER_పాఠ్యం);
 	}
 
-	if (opt_track) {
+	ఒకవేళ (opt_track) {
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--track");
-	} else if (!opts->checkout) {
+	} లేకపోతే ఒకవేళ (!opts->checkout) {
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--no-checkout");
 	}
-	return 1;
+	తిరిగి 1;
 }
 
-static void advise_disambiguating_remotes(const char *path, const char *branch,
-					  const struct string_list *matched_remote_names)
+స్థిర శూన్య advise_disambiguating_remotes(స్థిరరాశి అక్షరం *మార్గం, స్థిరరాశి అక్షరం *branch,
+					  స్థిరరాశి నిర్మాణం string_list *matched_remote_పేర్లు)
 {
-	struct string_list_item *item;
+	నిర్మాణం string_list_అంశం *అంశం;
 
 	advise(_("Branch name '%s' appears in multiple remotes:"), branch);
-	for_each_string_list_item(item, matched_remote_names) {
-		advise(_("  %s"), item->string);
+	for_each_string_list_అంశం(అంశం, matched_remote_పేర్లు) {
+		advise(_("  %s"), అంశం->string);
 	}
 	advise(_("If you meant to create a worktree from a remote tracking branch on\n"
 		 "<remote>, you can do so by:\n"
@@ -779,583 +779,583 @@ static void advise_disambiguating_remotes(const char *path, const char *branch,
 		 "\n"
 		 "If you'd like to always prefer some remote, e.g. 'origin',\n"
 		 "consider setting checkout.defaultRemote=origin in your config."),
-	       branch, path, branch);
+	       branch, మార్గం, branch);
 }
 
-static char *dwim_branch(const struct add_opts *opts, const char *path, char **new_branch)
+స్థిర అక్షరం *dwim_branch(స్థిరరాశి నిర్మాణం కూడు_opts *opts, స్థిరరాశి అక్షరం *మార్గం, అక్షరం **new_branch)
 {
-	int branch_exists;
-	char *branchname = worktree_basename_dup(path);
-	struct strbuf ref = STRBUF_INIT;
+	పూర్ణాంకం branch_exists;
+	అక్షరం *branchname = worktree_basename_dup(మార్గం);
+	నిర్మాణం strbuf ref = STRBUF_INIT;
 
 	branch_exists = !check_branch_ref(the_repository, &ref, branchname) &&
 			refs_ref_exists(get_main_ref_store(the_repository),
 					ref.buf);
 	strbuf_release(&ref);
-	if (branch_exists)
-		return branchname;
+	ఒకవేళ (branch_exists)
+		తిరిగి branchname;
 
 	*new_branch = branchname;
-	if (guess_remote) {
-		struct object_id oid;
-		char *remote;
-		int num_matches = 0;
-		struct string_list matched_remote_names = STRING_LIST_INIT_DUP;
+	ఒకవేళ (guess_remote) {
+		నిర్మాణం object_id oid;
+		అక్షరం *remote;
+		పూర్ణాంకం అంకె_matches = 0;
+		నిర్మాణం string_list matched_remote_పేర్లు = STRING_LIST_INIT_DUP;
 
-		remote = unique_tracking_name(*new_branch, &oid, &num_matches,
-					      &matched_remote_names);
-		if (!remote && num_matches > 1) {
-			if (!opts->quiet &&
+		remote = unique_tracking_name(*new_branch, &oid, &అంకె_matches,
+					      &matched_remote_పేర్లు);
+		ఒకవేళ (!remote && అంకె_matches > 1) {
+			ఒకవేళ (!opts->quiet &&
 			    advice_enabled(ADVICE_CHECKOUT_AMBIGUOUS_REMOTE_BRANCH_NAME))
-				advise_disambiguating_remotes(path, *new_branch,
-							      &matched_remote_names);
+				advise_disambiguating_remotes(మార్గం, *new_branch,
+							      &matched_remote_పేర్లు);
 			die(_("'%s' matched multiple (%d) remote tracking branches"),
-			    *new_branch, num_matches);
+			    *new_branch, అంకె_matches);
 		}
-		string_list_clear(&matched_remote_names, 0);
-		return remote;
+		string_list_clear(&matched_remote_పేర్లు, 0);
+		తిరిగి remote;
 	}
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
-static int add(int ac, const char **av, const char *prefix,
-	       struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం కూడు(పూర్ణాంకం ac, స్థిరరాశి అక్షరం **av, స్థిరరాశి అక్షరం *ఉపసర్గ,
+	       నిర్మాణం repository *repo వాడని)
 {
-	struct add_opts opts;
-	const char *new_branch_force = NULL;
-	char *path;
-	const char *branch;
-	char *branch_to_free = NULL;
-	char *new_branch_to_free = NULL;
-	const char *new_branch = NULL;
-	char *opt_track = NULL;
-	const char *lock_reason = NULL;
-	int keep_locked = 0;
-	int used_new_branch_options;
-	struct option options[] = {
+	నిర్మాణం కూడు_opts opts;
+	స్థిరరాశి అక్షరం *new_branch_force = ఖాళీ;
+	అక్షరం *మార్గం;
+	స్థిరరాశి అక్షరం *branch;
+	అక్షరం *branch_గమ్యం_free = ఖాళీ;
+	అక్షరం *new_branch_గమ్యం_free = ఖాళీ;
+	స్థిరరాశి అక్షరం *new_branch = ఖాళీ;
+	అక్షరం *opt_track = ఖాళీ;
+	స్థిరరాశి అక్షరం *తాళం_reason = ఖాళీ;
+	పూర్ణాంకం keep_locked = 0;
+	పూర్ణాంకం వాడిన_new_branch_options;
+	నిర్మాణం option options[] = {
 		OPT__FORCE(&opts.force,
 			   N_("checkout <branch> even if already checked out in other worktree"),
 			   PARSE_OPT_NOCOMPLETE),
-		OPT_STRING('b', NULL, &new_branch, N_("branch"),
+		OPT_STRING('b', ఖాళీ, &new_branch, N_("branch"),
 			   N_("create a new branch")),
-		OPT_STRING('B', NULL, &new_branch_force, N_("branch"),
+		OPT_STRING('B', ఖాళీ, &new_branch_force, N_("branch"),
 			   N_("create or reset a branch")),
 		OPT_BOOL(0, "orphan", &opts.orphan, N_("create unborn branch")),
 		OPT_BOOL('d', "detach", &opts.detach, N_("detach HEAD at named commit")),
 		OPT_BOOL(0, "checkout", &opts.checkout, N_("populate the new working tree")),
 		OPT_BOOL(0, "lock", &keep_locked, N_("keep the new working tree locked")),
-		OPT_STRING(0, "reason", &lock_reason, N_("string"),
+		OPT_STRING(0, "reason", &తాళం_reason, N_("string"),
 			   N_("reason for locking")),
 		OPT__QUIET(&opts.quiet, N_("suppress progress reporting")),
-		OPT_PASSTHRU(0, "track", &opt_track, NULL,
+		OPT_PASSTHRU(0, "track", &opt_track, ఖాళీ,
 			     N_("set up tracking mode (see git-branch(1))"),
 			     PARSE_OPT_NOARG | PARSE_OPT_OPTARG),
 		OPT_BOOL(0, "guess-remote", &guess_remote,
 			 N_("try to match the new branch name with a remote-tracking branch")),
 		OPT_BOOL(0, "relative-paths", &opts.relative_paths,
 			 N_("use relative paths for worktrees")),
-		OPT_END()
+		OPT_చివర()
 	};
-	int ret;
+	పూర్ణాంకం ret;
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, పరిమాణం(opts));
 	opts.checkout = 1;
 	opts.relative_paths = use_relative_paths;
-	ac = parse_options(ac, av, prefix, options, git_worktree_add_usage, 0);
-	if (!!opts.detach + !!new_branch + !!new_branch_force > 1)
+	ac = parse_options(ac, av, ఉపసర్గ, options, git_worktree_కూడు_usage, 0);
+	ఒకవేళ (!!opts.detach + !!new_branch + !!new_branch_force > 1)
 		die(_("options '%s', '%s', and '%s' cannot be used together"), "-b", "-B", "--detach");
-	if (opts.detach && opts.orphan)
+	ఒకవేళ (opts.detach && opts.orphan)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--detach");
-	if (opts.orphan && opt_track)
+	ఒకవేళ (opts.orphan && opt_track)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--track");
-	if (opts.orphan && !opts.checkout)
+	ఒకవేళ (opts.orphan && !opts.checkout)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--no-checkout");
-	if (opts.orphan && ac == 2)
+	ఒకవేళ (opts.orphan && ac == 2)
 		die(_("option '%s' and commit-ish cannot be used together"),
 		    "--orphan");
-	if (lock_reason && !keep_locked)
+	ఒకవేళ (తాళం_reason && !keep_locked)
 		die(_("the option '%s' requires '%s'"), "--reason", "--lock");
-	if (lock_reason)
-		opts.keep_locked = lock_reason;
-	else if (keep_locked)
+	ఒకవేళ (తాళం_reason)
+		opts.keep_locked = తాళం_reason;
+	లేకపోతే ఒకవేళ (keep_locked)
 		opts.keep_locked = _("added with --lock");
 
-	if (ac < 1 || ac > 2)
-		usage_with_options(git_worktree_add_usage, options);
+	ఒకవేళ (ac < 1 || ac > 2)
+		usage_with_options(git_worktree_కూడు_usage, options);
 
-	path = prefix_filename(prefix, av[0]);
+	మార్గం = ఉపసర్గ_filename(ఉపసర్గ, av[0]);
 	branch = ac < 2 ? "HEAD" : av[1];
-	used_new_branch_options = new_branch || new_branch_force;
+	వాడిన_new_branch_options = new_branch || new_branch_force;
 
-	if (!strcmp(branch, "-"))
+	ఒకవేళ (!strcmp(branch, "-"))
 		branch = "@{-1}";
 
-	if (new_branch_force) {
-		struct strbuf symref = STRBUF_INIT;
+	ఒకవేళ (new_branch_force) {
+		నిర్మాణం strbuf symref = STRBUF_INIT;
 
 		new_branch = new_branch_force;
 
-		if (!opts.force &&
+		ఒకవేళ (!opts.force &&
 		    !check_branch_ref(the_repository, &symref, new_branch) &&
 		    refs_ref_exists(get_main_ref_store(the_repository), symref.buf))
-			die_if_checked_out(symref.buf, 0);
+			die_if_checked_బహిర్గతం(symref.buf, 0);
 		strbuf_release(&symref);
 	}
 
-	if (opts.orphan && !new_branch) {
-		new_branch = new_branch_to_free = worktree_basename_dup(path);
-	} else if (opts.orphan) {
+	ఒకవేళ (opts.orphan && !new_branch) {
+		new_branch = new_branch_గమ్యం_free = worktree_basename_dup(మార్గం);
+	} లేకపోతే ఒకవేళ (opts.orphan) {
 		; /* no-op */
-	} else if (opts.detach) {
+	} లేకపోతే ఒకవేళ (opts.detach) {
 		/* Check HEAD */
-		if (!strcmp(branch, "HEAD"))
+		ఒకవేళ (!strcmp(branch, "HEAD"))
 			can_use_local_refs(&opts);
-	} else if (ac < 2 && new_branch) {
+	} లేకపోతే ఒకవేళ (ac < 2 && new_branch) {
 		/* DWIM: Infer --orphan when repo has no refs. */
 		opts.orphan = dwim_orphan(&opts, !!opt_track, 0);
-	} else if (ac < 2) {
+	} లేకపోతే ఒకవేళ (ac < 2) {
 		/* DWIM: Guess branch name from path. */
-		char *s = dwim_branch(&opts, path, &new_branch_to_free);
-		if (s)
-			branch = branch_to_free = s;
-		new_branch = new_branch_to_free;
+		అక్షరం *s = dwim_branch(&opts, మార్గం, &new_branch_గమ్యం_free);
+		ఒకవేళ (s)
+			branch = branch_గమ్యం_free = s;
+		new_branch = new_branch_గమ్యం_free;
 
 		/* DWIM: Infer --orphan when repo has no refs. */
 		opts.orphan = (!s) && dwim_orphan(&opts, !!opt_track, 1);
-	} else if (ac == 2 && new_branch) {
-		if (!strcmp(branch, "HEAD"))
+	} లేకపోతే ఒకవేళ (ac == 2 && new_branch) {
+		ఒకవేళ (!strcmp(branch, "HEAD"))
 			can_use_local_refs(&opts);
-	} else if (ac == 2) {
-		struct commit *commit;
+	} లేకపోతే ఒకవేళ (ac == 2) {
+		నిర్మాణం commit *commit;
 
 		commit = lookup_commit_reference_by_name(branch);
-		if (!commit) {
-			struct object_id oid;
-			char *remote;
-			int num_matches = 0;
-			struct string_list matched_remote_names = STRING_LIST_INIT_DUP;
+		ఒకవేళ (!commit) {
+			నిర్మాణం object_id oid;
+			అక్షరం *remote;
+			పూర్ణాంకం అంకె_matches = 0;
+			నిర్మాణం string_list matched_remote_పేర్లు = STRING_LIST_INIT_DUP;
 
-			remote = unique_tracking_name(branch, &oid, &num_matches,
-						      &matched_remote_names);
-			if (remote) {
+			remote = unique_tracking_name(branch, &oid, &అంకె_matches,
+						      &matched_remote_పేర్లు);
+			ఒకవేళ (remote) {
 				new_branch = branch;
-				branch = new_branch_to_free = remote;
-			} else if (num_matches > 1) {
-				if (!opts.quiet &&
+				branch = new_branch_గమ్యం_free = remote;
+			} లేకపోతే ఒకవేళ (అంకె_matches > 1) {
+				ఒకవేళ (!opts.quiet &&
 				    advice_enabled(ADVICE_CHECKOUT_AMBIGUOUS_REMOTE_BRANCH_NAME))
-					advise_disambiguating_remotes(path, branch,
-								      &matched_remote_names);
+					advise_disambiguating_remotes(మార్గం, branch,
+								      &matched_remote_పేర్లు);
 				die(_("'%s' matched multiple (%d) remote tracking branches"),
-				    branch, num_matches);
+				    branch, అంకె_matches);
 			}
-			string_list_clear(&matched_remote_names, 0);
+			string_list_clear(&matched_remote_పేర్లు, 0);
 		}
 
-		if (!strcmp(branch, "HEAD"))
+		ఒకవేళ (!strcmp(branch, "HEAD"))
 			can_use_local_refs(&opts);
 
 	}
 
-	if (!opts.orphan && !lookup_commit_reference_by_name(branch)) {
-		int attempt_hint = !opts.quiet && (ac < 2);
-		if (attempt_hint && used_new_branch_options) {
-			advise_if_enabled(ADVICE_WORKTREE_ADD_ORPHAN,
-				WORKTREE_ADD_ORPHAN_WITH_DASH_B_HINT_TEXT,
-				new_branch, path);
-		} else if (attempt_hint) {
-			advise_if_enabled(ADVICE_WORKTREE_ADD_ORPHAN,
-				WORKTREE_ADD_ORPHAN_NO_DASH_B_HINT_TEXT, path);
+	ఒకవేళ (!opts.orphan && !lookup_commit_reference_by_name(branch)) {
+		పూర్ణాంకం attempt_hint = !opts.quiet && (ac < 2);
+		ఒకవేళ (attempt_hint && వాడిన_new_branch_options) {
+			advise_if_enabled(ADVICE_WORKTREE_కూడు_ORPHAN,
+				WORKTREE_కూడు_ORPHAN_WITH_DASH_B_HINT_పాఠ్యం,
+				new_branch, మార్గం);
+		} లేకపోతే ఒకవేళ (attempt_hint) {
+			advise_if_enabled(ADVICE_WORKTREE_కూడు_ORPHAN,
+				WORKTREE_కూడు_ORPHAN_NO_DASH_B_HINT_పాఠ్యం, మార్గం);
 		}
 		die(_("invalid reference: %s"), branch);
 	}
 
-	if (!opts.quiet)
-		print_preparing_worktree_line(opts.detach, branch, new_branch, !!new_branch_force);
+	ఒకవేళ (!opts.quiet)
+		print_preparing_worktree_పంక్తి(opts.detach, branch, new_branch, !!new_branch_force);
 
-	if (opts.orphan) {
+	ఒకవేళ (opts.orphan) {
 		branch = new_branch;
-	} else if (new_branch) {
-		struct child_process cp = CHILD_PROCESS_INIT;
+	} లేకపోతే ఒకవేళ (new_branch) {
+		నిర్మాణం బిడ్డ_process cp = బిడ్డ_PROCESS_INIT;
 		cp.git_cmd = 1;
-		strvec_push(&cp.args, "branch");
-		if (new_branch_force)
-			strvec_push(&cp.args, "--force");
-		if (opts.quiet)
-			strvec_push(&cp.args, "--quiet");
-		strvec_push(&cp.args, new_branch);
-		strvec_push(&cp.args, branch);
-		if (opt_track)
-			strvec_push(&cp.args, opt_track);
-		if (run_command(&cp)) {
+		strvec_నెట్టు(&cp.వాదనలు, "branch");
+		ఒకవేళ (new_branch_force)
+			strvec_నెట్టు(&cp.వాదనలు, "--force");
+		ఒకవేళ (opts.quiet)
+			strvec_నెట్టు(&cp.వాదనలు, "--quiet");
+		strvec_నెట్టు(&cp.వాదనలు, new_branch);
+		strvec_నెట్టు(&cp.వాదనలు, branch);
+		ఒకవేళ (opt_track)
+			strvec_నెట్టు(&cp.వాదనలు, opt_track);
+		ఒకవేళ (నిరంతరం_command(&cp)) {
 			ret = -1;
-			goto cleanup;
+			వెళ్ళు cleanup;
 		}
 		branch = new_branch;
-	} else if (opt_track) {
+	} లేకపోతే ఒకవేళ (opt_track) {
 		die(_("--[no-]track can only be used if a new branch is created"));
 	}
 
-	ret = add_worktree(path, branch, &opts);
+	ret = కూడు_worktree(మార్గం, branch, &opts);
 cleanup:
-	free(path);
-	free(opt_track);
-	free(branch_to_free);
-	free(new_branch_to_free);
-	return ret;
+	విడుదల(మార్గం);
+	విడుదల(opt_track);
+	విడుదల(branch_గమ్యం_free);
+	విడుదల(new_branch_గమ్యం_free);
+	తిరిగి ret;
 }
 
-static void show_worktree_porcelain(struct worktree *wt, int line_terminator)
+స్థిర శూన్య show_worktree_porcelain(నిర్మాణం worktree *wt, పూర్ణాంకం పంక్తి_terminator)
 {
-	const char *reason;
+	స్థిరరాశి అక్షరం *reason;
 
-	printf("worktree %s%c", wt->path, line_terminator);
-	if (wt->is_bare)
-		printf("bare%c", line_terminator);
-	else {
-		printf("HEAD %s%c", oid_to_hex(&wt->head_oid), line_terminator);
-		if (wt->is_detached)
-			printf("detached%c", line_terminator);
-		else if (wt->head_ref)
-			printf("branch %s%c", wt->head_ref, line_terminator);
+	రాయి("worktree %s%c", wt->మార్గం, పంక్తి_terminator);
+	ఒకవేళ (wt->is_bare)
+		రాయి("bare%c", పంక్తి_terminator);
+	లేకపోతే {
+		రాయి("HEAD %s%c", oid_గమ్యం_hex(&wt->తల_oid), పంక్తి_terminator);
+		ఒకవేళ (wt->is_detached)
+			రాయి("detached%c", పంక్తి_terminator);
+		లేకపోతే ఒకవేళ (wt->తల_ref)
+			రాయి("branch %s%c", wt->తల_ref, పంక్తి_terminator);
 	}
 
-	reason = worktree_lock_reason(wt);
-	if (reason) {
+	reason = worktree_తాళం_reason(wt);
+	ఒకవేళ (reason) {
 		fputs("locked", stdout);
-		if (*reason) {
+		ఒకవేళ (*reason) {
 			fputc(' ', stdout);
-			write_name_quoted(reason, stdout, line_terminator);
-		} else {
-			fputc(line_terminator, stdout);
+			write_name_quoted(reason, stdout, పంక్తి_terminator);
+		} లేకపోతే {
+			fputc(పంక్తి_terminator, stdout);
 		}
 	}
 
 	reason = worktree_prune_reason(wt, expire);
-	if (reason)
-		printf("prunable %s%c", reason, line_terminator);
+	ఒకవేళ (reason)
+		రాయి("prunable %s%c", reason, పంక్తి_terminator);
 
-	fputc(line_terminator, stdout);
+	fputc(పంక్తి_terminator, stdout);
 }
 
-struct worktree_display {
-	char *path;
-	int width;
+నిర్మాణం worktree_display {
+	అక్షరం *మార్గం;
+	పూర్ణాంకం వెడల్పు;
 };
 
-static void show_worktree(struct worktree *wt, struct worktree_display *display,
-			  int path_maxwidth, int abbrev_len)
+స్థిర శూన్య show_worktree(నిర్మాణం worktree *wt, నిర్మాణం worktree_display *display,
+			  పూర్ణాంకం మార్గం_maxwidth, పూర్ణాంకం abbrev_len)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *reason;
+	నిర్మాణం strbuf sb = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *reason;
 
-	strbuf_addf(&sb, "%s%*s", display->path, 1 + path_maxwidth - display->width, "");
-	if (wt->is_bare)
+	strbuf_addf(&sb, "%s%*s", display->మార్గం, 1 + మార్గం_maxwidth - display->వెడల్పు, "");
+	ఒకవేళ (wt->is_bare)
 		strbuf_addstr(&sb, "(bare)");
-	else {
+	లేకపోతే {
 		strbuf_addf(&sb, "%-*s ", abbrev_len,
-				repo_find_unique_abbrev(the_repository, &wt->head_oid, DEFAULT_ABBREV));
-		if (wt->is_detached)
+				repo_కనుగొను_unique_abbrev(the_repository, &wt->తల_oid, DEFAULT_ABBREV));
+		ఒకవేళ (wt->is_detached)
 			strbuf_addstr(&sb, "(detached HEAD)");
-		else if (wt->head_ref) {
-			char *ref = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
-								 wt->head_ref,
+		లేకపోతే ఒకవేళ (wt->తల_ref) {
+			అక్షరం *ref = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
+								 wt->తల_ref,
 								 0);
 			strbuf_addf(&sb, "[%s]", ref);
-			free(ref);
-		} else
+			విడుదల(ref);
+		} లేకపోతే
 			strbuf_addstr(&sb, "(error)");
 	}
 
-	reason = worktree_lock_reason(wt);
-	if (verbose && reason && *reason)
+	reason = worktree_తాళం_reason(wt);
+	ఒకవేళ (verbose && reason && *reason)
 		strbuf_addf(&sb, "\n\tlocked: %s", reason);
-	else if (reason)
+	లేకపోతే ఒకవేళ (reason)
 		strbuf_addstr(&sb, " locked");
 
 	reason = worktree_prune_reason(wt, expire);
-	if (verbose && reason)
+	ఒకవేళ (verbose && reason)
 		strbuf_addf(&sb, "\n\tprunable: %s", reason);
-	else if (reason)
+	లేకపోతే ఒకవేళ (reason)
 		strbuf_addstr(&sb, " prunable");
 
-	printf("%s\n", sb.buf);
+	రాయి("%s\n", sb.buf);
 	strbuf_release(&sb);
 }
 
-static void measure_widths(struct worktree **wt, int *abbrev,
-			   struct worktree_display **d, int *maxwidth)
+స్థిర శూన్య measure_widths(నిర్మాణం worktree **wt, పూర్ణాంకం *abbrev,
+			   నిర్మాణం worktree_display **d, పూర్ణాంకం *maxwidth)
 {
-	int i, display_alloc = 0;
-	struct worktree_display *display = NULL;
-	struct strbuf buf = STRBUF_INIT;
+	పూర్ణాంకం i, display_alloc = 0;
+	నిర్మాణం worktree_display *display = ఖాళీ;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
 
-	for (i = 0; wt[i]; i++) {
-		int sha1_len;
+	కొరకు (i = 0; wt[i]; i++) {
+		పూర్ణాంకం sha1_len;
 		ALLOC_GROW(display, i + 1, display_alloc);
-		quote_path(wt[i]->path, NULL, &buf, 0);
-		display[i].width = utf8_strwidth(buf.buf);
-		display[i].path = strbuf_detach(&buf, NULL);
+		quote_మార్గం(wt[i]->మార్గం, ఖాళీ, &buf, 0);
+		display[i].వెడల్పు = utf8_strwidth(buf.buf);
+		display[i].మార్గం = strbuf_detach(&buf, ఖాళీ);
 
-		if (display[i].width > *maxwidth)
-			*maxwidth = display[i].width;
-		sha1_len = strlen(repo_find_unique_abbrev(the_repository, &wt[i]->head_oid, *abbrev));
-		if (sha1_len > *abbrev)
+		ఒకవేళ (display[i].వెడల్పు > *maxwidth)
+			*maxwidth = display[i].వెడల్పు;
+		sha1_len = అక్షరశ్రేణి_పొడవు(repo_కనుగొను_unique_abbrev(the_repository, &wt[i]->తల_oid, *abbrev));
+		ఒకవేళ (sha1_len > *abbrev)
 			*abbrev = sha1_len;
 	}
 	*d = display;
 }
 
-static int pathcmp(const void *a_, const void *b_)
+స్థిర పూర్ణాంకం pathcmp(స్థిరరాశి శూన్య *a_, స్థిరరాశి శూన్య *b_)
 {
-	const struct worktree *const *a = a_;
-	const struct worktree *const *b = b_;
-	return fspathcmp((*a)->path, (*b)->path);
+	స్థిరరాశి నిర్మాణం worktree *స్థిరరాశి *a = a_;
+	స్థిరరాశి నిర్మాణం worktree *స్థిరరాశి *b = b_;
+	తిరిగి fspathcmp((*a)->మార్గం, (*b)->మార్గం);
 }
 
-static void pathsort(struct worktree **wt)
+స్థిర శూన్య pathsort(నిర్మాణం worktree **wt)
 {
-	int n = 0;
-	struct worktree **p = wt;
+	పూర్ణాంకం n = 0;
+	నిర్మాణం worktree **p = wt;
 
-	while (*p++)
+	అయితే (*p++)
 		n++;
 	QSORT(wt, n, pathcmp);
 }
 
-static int list(int ac, const char **av, const char *prefix,
-		struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం list(పూర్ణాంకం ac, స్థిరరాశి అక్షరం **av, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		నిర్మాణం repository *repo వాడని)
 {
-	int porcelain = 0;
-	int line_terminator = '\n';
+	పూర్ణాంకం porcelain = 0;
+	పూర్ణాంకం పంక్తి_terminator = '\n';
 
-	struct option options[] = {
+	నిర్మాణం option options[] = {
 		OPT_BOOL(0, "porcelain", &porcelain, N_("machine-readable output")),
 		OPT__VERBOSE(&verbose, N_("show extended annotations and reasons, if available")),
 		OPT_EXPIRY_DATE(0, "expire", &expire,
 				N_("add 'prunable' annotation to missing worktrees older than <time>")),
-		OPT_SET_INT('z', NULL, &line_terminator,
+		OPT_సమితి_INT('z', ఖాళీ, &పంక్తి_terminator,
 			    N_("terminate records with a NUL character"), '\0'),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	expire = TIME_MAX;
-	ac = parse_options(ac, av, prefix, options, git_worktree_list_usage, 0);
-	if (ac)
+	expire = సమయం_MAX;
+	ac = parse_options(ac, av, ఉపసర్గ, options, git_worktree_list_usage, 0);
+	ఒకవేళ (ac)
 		usage_with_options(git_worktree_list_usage, options);
-	else if (verbose && porcelain)
+	లేకపోతే ఒకవేళ (verbose && porcelain)
 		die(_("options '%s' and '%s' cannot be used together"), "--verbose", "--porcelain");
-	else if (!line_terminator && !porcelain)
+	లేకపోతే ఒకవేళ (!పంక్తి_terminator && !porcelain)
 		die(_("the option '%s' requires '%s'"), "-z", "--porcelain");
-	else {
-		struct worktree **worktrees = get_worktrees(the_repository);
-		int path_maxwidth = 0, abbrev = DEFAULT_ABBREV, i;
-		struct worktree_display *display = NULL;
+	లేకపోతే {
+		నిర్మాణం worktree **worktrees = get_worktrees(the_repository);
+		పూర్ణాంకం మార్గం_maxwidth = 0, abbrev = DEFAULT_ABBREV, i;
+		నిర్మాణం worktree_display *display = ఖాళీ;
 
 		/* sort worktrees by path but keep main worktree at top */
 		pathsort(worktrees + 1);
 
-		if (!porcelain)
+		ఒకవేళ (!porcelain)
 			measure_widths(worktrees, &abbrev,
-				       &display, &path_maxwidth);
+				       &display, &మార్గం_maxwidth);
 
-		for (i = 0; worktrees[i]; i++) {
-			if (porcelain)
+		కొరకు (i = 0; worktrees[i]; i++) {
+			ఒకవేళ (porcelain)
 				show_worktree_porcelain(worktrees[i],
-							line_terminator);
-			else
+							పంక్తి_terminator);
+			లేకపోతే
 				show_worktree(worktrees[i],
-					      &display[i], path_maxwidth, abbrev);
+					      &display[i], మార్గం_maxwidth, abbrev);
 		}
-		for (i = 0; display && worktrees[i]; i++)
-			free(display[i].path);
-		free(display);
+		కొరకు (i = 0; display && worktrees[i]; i++)
+			విడుదల(display[i].మార్గం);
+		విడుదల(display);
 		free_worktrees(worktrees);
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static int lock_worktree(int ac, const char **av, const char *prefix,
-			 struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం తాళం_worktree(పూర్ణాంకం ac, స్థిరరాశి అక్షరం **av, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			 నిర్మాణం repository *repo వాడని)
 {
-	const char *reason = "", *old_reason;
-	struct option options[] = {
+	స్థిరరాశి అక్షరం *reason = "", *old_reason;
+	నిర్మాణం option options[] = {
 		OPT_STRING(0, "reason", &reason, N_("string"),
 			   N_("reason for locking")),
-		OPT_END()
+		OPT_చివర()
 	};
-	struct worktree **worktrees, *wt;
-	char *path;
+	నిర్మాణం worktree **worktrees, *wt;
+	అక్షరం *మార్గం;
 
-	ac = parse_options(ac, av, prefix, options, git_worktree_lock_usage, 0);
-	if (ac != 1)
-		usage_with_options(git_worktree_lock_usage, options);
+	ac = parse_options(ac, av, ఉపసర్గ, options, git_worktree_తాళం_usage, 0);
+	ఒకవేళ (ac != 1)
+		usage_with_options(git_worktree_తాళం_usage, options);
 
 	worktrees = get_worktrees(the_repository);
-	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	wt = కనుగొను_worktree(worktrees, ఉపసర్గ, av[0]);
+	ఒకవేళ (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	ఒకవేళ (is_main_worktree(wt))
 		die(_("The main working tree cannot be locked or unlocked"));
 
-	old_reason = worktree_lock_reason(wt);
-	if (old_reason) {
-		if (*old_reason)
+	old_reason = worktree_తాళం_reason(wt);
+	ఒకవేళ (old_reason) {
+		ఒకవేళ (*old_reason)
 			die(_("'%s' is already locked, reason: %s"),
 			    av[0], old_reason);
 		die(_("'%s' is already locked"), av[0]);
 	}
 
-	path = repo_common_path(the_repository, "worktrees/%s/locked", wt->id);
-	write_file(path, "%s", reason);
+	మార్గం = repo_common_మార్గం(the_repository, "worktrees/%s/locked", wt->id);
+	write_file(మార్గం, "%s", reason);
 
 	free_worktrees(worktrees);
-	free(path);
-	return 0;
+	విడుదల(మార్గం);
+	తిరిగి 0;
 }
 
-static int unlock_worktree(int ac, const char **av, const char *prefix,
-			   struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం unlock_worktree(పూర్ణాంకం ac, స్థిరరాశి అక్షరం **av, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			   నిర్మాణం repository *repo వాడని)
 {
-	struct option options[] = {
-		OPT_END()
+	నిర్మాణం option options[] = {
+		OPT_చివర()
 	};
-	struct worktree **worktrees, *wt;
-	char *path;
-	int ret;
+	నిర్మాణం worktree **worktrees, *wt;
+	అక్షరం *మార్గం;
+	పూర్ణాంకం ret;
 
-	ac = parse_options(ac, av, prefix, options, git_worktree_unlock_usage, 0);
-	if (ac != 1)
+	ac = parse_options(ac, av, ఉపసర్గ, options, git_worktree_unlock_usage, 0);
+	ఒకవేళ (ac != 1)
 		usage_with_options(git_worktree_unlock_usage, options);
 
 	worktrees = get_worktrees(the_repository);
-	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	wt = కనుగొను_worktree(worktrees, ఉపసర్గ, av[0]);
+	ఒకవేళ (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	ఒకవేళ (is_main_worktree(wt))
 		die(_("The main working tree cannot be locked or unlocked"));
-	if (!worktree_lock_reason(wt))
+	ఒకవేళ (!worktree_తాళం_reason(wt))
 		die(_("'%s' is not locked"), av[0]);
 
-	path = repo_common_path(the_repository, "worktrees/%s/locked", wt->id);
-	ret = unlink_or_warn(path);
+	మార్గం = repo_common_మార్గం(the_repository, "worktrees/%s/locked", wt->id);
+	ret = unlink_or_warn(మార్గం);
 
 	free_worktrees(worktrees);
-	free(path);
-	return ret;
+	విడుదల(మార్గం);
+	తిరిగి ret;
 }
 
-static void validate_no_submodules(const struct worktree *wt)
+స్థిర శూన్య validate_no_submodules(స్థిరరాశి నిర్మాణం worktree *wt)
 {
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
-	struct strbuf path = STRBUF_INIT;
-	int i, found_submodules = 0;
-	char *wt_gitdir;
+	నిర్మాణం సూచీ_state istate = సూచీ_STATE_INIT(the_repository);
+	నిర్మాణం strbuf మార్గం = STRBUF_INIT;
+	పూర్ణాంకం i, దొరికింది_submodules = 0;
+	అక్షరం *wt_gitdir;
 
 	wt_gitdir = get_worktree_git_dir(wt);
 
-	if (is_directory(worktree_git_path(wt, "modules"))) {
+	ఒకవేళ (is_directory(worktree_git_మార్గం(wt, "modules"))) {
 		/*
 		 * There could be false positives, e.g. the "modules"
 		 * directory exists but is empty. But it's a rare case and
 		 * this simpler check is probably good enough for now.
 		 */
-		found_submodules = 1;
-	} else if (read_index_from(&istate, worktree_git_path(wt, "index"),
+		దొరికింది_submodules = 1;
+	} లేకపోతే ఒకవేళ (read_సూచీ_from(&istate, worktree_git_మార్గం(wt, "index"),
 				   wt_gitdir) > 0) {
-		for (i = 0; i < istate.cache_nr; i++) {
-			struct cache_entry *ce = istate.cache[i];
-			int err;
+		కొరకు (i = 0; i < istate.cache_nr; i++) {
+			నిర్మాణం cache_నమోదు *ce = istate.cache[i];
+			పూర్ణాంకం err;
 
-			if (!S_ISGITLINK(ce->ce_mode))
-				continue;
+			ఒకవేళ (!S_ISGITLINK(ce->ce_బహుళకం))
+				కొనసాగు;
 
-			strbuf_reset(&path);
-			strbuf_addf(&path, "%s/%s", wt->path, ce->name);
-			if (!is_submodule_populated_gently(path.buf, &err))
-				continue;
+			strbuf_reset(&మార్గం);
+			strbuf_addf(&మార్గం, "%s/%s", wt->మార్గం, ce->name);
+			ఒకవేళ (!is_submodule_populated_gently(మార్గం.buf, &err))
+				కొనసాగు;
 
-			found_submodules = 1;
-			break;
+			దొరికింది_submodules = 1;
+			ఆపు;
 		}
 	}
-	discard_index(&istate);
-	strbuf_release(&path);
-	free(wt_gitdir);
+	discard_సూచీ(&istate);
+	strbuf_release(&మార్గం);
+	విడుదల(wt_gitdir);
 
-	if (found_submodules)
+	ఒకవేళ (దొరికింది_submodules)
 		die(_("working trees containing submodules cannot be moved or removed"));
 }
 
-static int move_worktree(int ac, const char **av, const char *prefix,
-			 struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం move_worktree(పూర్ణాంకం ac, స్థిరరాశి అక్షరం **av, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			 నిర్మాణం repository *repo వాడని)
 {
-	int force = 0;
-	struct option options[] = {
+	పూర్ణాంకం force = 0;
+	నిర్మాణం option options[] = {
 		OPT__FORCE(&force,
 			 N_("force move even if worktree is dirty or locked"),
 			 PARSE_OPT_NOCOMPLETE),
 		OPT_BOOL(0, "relative-paths", &use_relative_paths,
 			 N_("use relative paths for worktrees")),
-		OPT_END()
+		OPT_చివర()
 	};
-	struct worktree **worktrees, *wt;
-	struct strbuf dst = STRBUF_INIT;
-	struct strbuf errmsg = STRBUF_INIT;
-	const char *reason = NULL;
-	char *path;
+	నిర్మాణం worktree **worktrees, *wt;
+	నిర్మాణం strbuf dst = STRBUF_INIT;
+	నిర్మాణం strbuf errmsg = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *reason = ఖాళీ;
+	అక్షరం *మార్గం;
 
-	ac = parse_options(ac, av, prefix, options, git_worktree_move_usage,
+	ac = parse_options(ac, av, ఉపసర్గ, options, git_worktree_move_usage,
 			   0);
-	if (ac != 2)
+	ఒకవేళ (ac != 2)
 		usage_with_options(git_worktree_move_usage, options);
 
-	path = prefix_filename(prefix, av[1]);
-	strbuf_addstr(&dst, path);
-	free(path);
+	మార్గం = ఉపసర్గ_filename(ఉపసర్గ, av[1]);
+	strbuf_addstr(&dst, మార్గం);
+	విడుదల(మార్గం);
 
 	worktrees = get_worktrees(the_repository);
-	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	wt = కనుగొను_worktree(worktrees, ఉపసర్గ, av[0]);
+	ఒకవేళ (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	ఒకవేళ (is_main_worktree(wt))
 		die(_("'%s' is a main working tree"), av[0]);
-	if (is_directory(dst.buf)) {
-		const char *sep = find_last_dir_sep(wt->path);
+	ఒకవేళ (is_directory(dst.buf)) {
+		స్థిరరాశి అక్షరం *sep = కనుగొను_చివరి_dir_sep(wt->మార్గం);
 
-		if (!sep)
+		ఒకవేళ (!sep)
 			die(_("could not figure out destination name from '%s'"),
-			    wt->path);
+			    wt->మార్గం);
 		strbuf_trim_trailing_dir_sep(&dst);
 		strbuf_addstr(&dst, sep);
 	}
-	check_candidate_path(dst.buf, force, worktrees, "move");
+	check_candidate_మార్గం(dst.buf, force, worktrees, "move");
 
 	validate_no_submodules(wt);
 
-	if (force < 2)
-		reason = worktree_lock_reason(wt);
-	if (reason) {
-		if (*reason)
+	ఒకవేళ (force < 2)
+		reason = worktree_తాళం_reason(wt);
+	ఒకవేళ (reason) {
+		ఒకవేళ (*reason)
 			die(_("cannot move a locked working tree, lock reason: %s\nuse 'move -f -f' to override or unlock first"),
 			    reason);
 		die(_("cannot move a locked working tree;\nuse 'move -f -f' to override or unlock first"));
 	}
-	if (validate_worktree(wt, &errmsg, 0))
+	ఒకవేళ (validate_worktree(wt, &errmsg, 0))
 		die(_("validation failed, cannot move working tree: %s"),
 		    errmsg.buf);
 	strbuf_release(&errmsg);
 
-	if (rename(wt->path, dst.buf) == -1)
-		die_errno(_("failed to move '%s' to '%s'"), wt->path, dst.buf);
+	ఒకవేళ (rename(wt->మార్గం, dst.buf) == -1)
+		die_errno(_("failed to move '%s' to '%s'"), wt->మార్గం, dst.buf);
 
 	update_worktree_location(wt, dst.buf, use_relative_paths);
 
 	strbuf_release(&dst);
 	free_worktrees(worktrees);
-	return 0;
+	తిరిగి 0;
 }
 
 /*
@@ -1369,12 +1369,12 @@ static int move_worktree(int ac, const char **av, const char *prefix,
  * it's absolutely safe to do so from _our_ point of view because we
  * know better.
  */
-static void check_clean_worktree(struct worktree *wt,
-				 const char *original_path)
+స్థిర శూన్య check_clean_worktree(నిర్మాణం worktree *wt,
+				 స్థిరరాశి అక్షరం *original_మార్గం)
 {
-	struct child_process cp;
-	char buf[1];
-	int ret;
+	నిర్మాణం బిడ్డ_process cp;
+	అక్షరం buf[1];
+	పూర్ణాంకం ret;
 
 	/*
 	 * Until we sort this out, all submodules are "dirty" and
@@ -1382,160 +1382,160 @@ static void check_clean_worktree(struct worktree *wt,
 	 */
 	validate_no_submodules(wt);
 
-	child_process_init(&cp);
+	బిడ్డ_process_init(&cp);
 	strvec_pushf(&cp.env, "%s=%s/.git",
-		     GIT_DIR_ENVIRONMENT, wt->path);
+		     GIT_DIR_ENVIRONMENT, wt->మార్గం);
 	strvec_pushf(&cp.env, "%s=%s",
-		     GIT_WORK_TREE_ENVIRONMENT, wt->path);
-	strvec_pushl(&cp.args, "status",
+		     GIT_WORK_వృక్షం_ENVIRONMENT, wt->మార్గం);
+	strvec_pushl(&cp.వాదనలు, "status",
 		     "--porcelain", "--ignore-submodules=none",
-		     NULL);
+		     ఖాళీ);
 	cp.git_cmd = 1;
-	cp.dir = wt->path;
-	cp.out = -1;
-	ret = start_command(&cp);
-	if (ret)
+	cp.dir = wt->మార్గం;
+	cp.బహిర్గతం = -1;
+	ret = ప్రారంభం_command(&cp);
+	ఒకవేళ (ret)
 		die_errno(_("failed to run 'git status' on '%s'"),
-			  original_path);
-	ret = xread(cp.out, buf, sizeof(buf));
-	if (ret)
+			  original_మార్గం);
+	ret = xread(cp.బహిర్గతం, buf, పరిమాణం(buf));
+	ఒకవేళ (ret)
 		die(_("'%s' contains modified or untracked files, use --force to delete it"),
-		    original_path);
-	close(cp.out);
-	ret = finish_command(&cp);
-	if (ret)
+		    original_మార్గం);
+	close(cp.బహిర్గతం);
+	ret = ముగింపు_command(&cp);
+	ఒకవేళ (ret)
 		die_errno(_("failed to run 'git status' on '%s', code %d"),
-			  original_path, ret);
+			  original_మార్గం, ret);
 }
 
-static int delete_git_work_tree(struct worktree *wt)
+స్థిర పూర్ణాంకం delete_git_work_వృక్షం(నిర్మాణం worktree *wt)
 {
-	struct strbuf sb = STRBUF_INIT;
-	int ret = 0;
+	నిర్మాణం strbuf sb = STRBUF_INIT;
+	పూర్ణాంకం ret = 0;
 
-	strbuf_addstr(&sb, wt->path);
-	if (remove_dir_recursively(&sb, 0)) {
+	strbuf_addstr(&sb, wt->మార్గం);
+	ఒకవేళ (remove_dir_recursively(&sb, 0)) {
 		error_errno(_("failed to delete '%s'"), sb.buf);
 		ret = -1;
 	}
 	strbuf_release(&sb);
-	return ret;
+	తిరిగి ret;
 }
 
-static int remove_worktree(int ac, const char **av, const char *prefix,
-			   struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం remove_worktree(పూర్ణాంకం ac, స్థిరరాశి అక్షరం **av, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			   నిర్మాణం repository *repo వాడని)
 {
-	int force = 0;
-	struct option options[] = {
+	పూర్ణాంకం force = 0;
+	నిర్మాణం option options[] = {
 		OPT__FORCE(&force,
 			 N_("force removal even if worktree is dirty or locked"),
 			 PARSE_OPT_NOCOMPLETE),
-		OPT_END()
+		OPT_చివర()
 	};
-	struct worktree **worktrees, *wt;
-	struct strbuf errmsg = STRBUF_INIT;
-	const char *reason = NULL;
-	int ret = 0;
+	నిర్మాణం worktree **worktrees, *wt;
+	నిర్మాణం strbuf errmsg = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *reason = ఖాళీ;
+	పూర్ణాంకం ret = 0;
 
-	ac = parse_options(ac, av, prefix, options, git_worktree_remove_usage, 0);
-	if (ac != 1)
+	ac = parse_options(ac, av, ఉపసర్గ, options, git_worktree_remove_usage, 0);
+	ఒకవేళ (ac != 1)
 		usage_with_options(git_worktree_remove_usage, options);
 
 	worktrees = get_worktrees(the_repository);
-	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	wt = కనుగొను_worktree(worktrees, ఉపసర్గ, av[0]);
+	ఒకవేళ (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	ఒకవేళ (is_main_worktree(wt))
 		die(_("'%s' is a main working tree"), av[0]);
-	if (force < 2)
-		reason = worktree_lock_reason(wt);
-	if (reason) {
-		if (*reason)
+	ఒకవేళ (force < 2)
+		reason = worktree_తాళం_reason(wt);
+	ఒకవేళ (reason) {
+		ఒకవేళ (*reason)
 			die(_("cannot remove a locked working tree, lock reason: %s\nuse 'remove -f -f' to override or unlock first"),
 			    reason);
 		die(_("cannot remove a locked working tree;\nuse 'remove -f -f' to override or unlock first"));
 	}
-	if (validate_worktree(wt, &errmsg, WT_VALIDATE_WORKTREE_MISSING_OK))
+	ఒకవేళ (validate_worktree(wt, &errmsg, WT_VALIDATE_WORKTREE_MISSING_OK))
 		die(_("validation failed, cannot remove working tree: %s"),
 		    errmsg.buf);
 	strbuf_release(&errmsg);
 
-	if (file_exists(wt->path)) {
-		if (!force)
+	ఒకవేళ (file_exists(wt->మార్గం)) {
+		ఒకవేళ (!force)
 			check_clean_worktree(wt, av[0]);
 
-		ret |= delete_git_work_tree(wt);
+		ret |= delete_git_work_వృక్షం(wt);
 	}
 	/*
 	 * continue on even if ret is non-zero, there's no going back
 	 * from here.
 	 */
 	ret |= delete_git_dir(wt->id);
-	delete_worktrees_dir_if_empty();
+	delete_worktrees_dir_if_ఖాళీలు();
 
 	free_worktrees(worktrees);
-	return ret;
+	తిరిగి ret;
 }
 
-static void report_repair(int iserr, const char *path, const char *msg, void *cb_data)
+స్థిర శూన్య report_repair(పూర్ణాంకం iserr, స్థిరరాశి అక్షరం *మార్గం, స్థిరరాశి అక్షరం *సందేశం, శూన్య *cb_దత్తాంశం)
 {
-	if (!iserr) {
-		fprintf_ln(stderr, _("repair: %s: %s"), msg, path);
-	} else {
-		int *exit_status = (int *)cb_data;
-		fprintf_ln(stderr, _("error: %s: %s"), msg, path);
-		*exit_status = 1;
+	ఒకవేళ (!iserr) {
+		fprintf_ln(stderr, _("repair: %s: %s"), సందేశం, మార్గం);
+	} లేకపోతే {
+		పూర్ణాంకం *exit_స్థితి = (పూర్ణాంకం *)cb_దత్తాంశం;
+		fprintf_ln(stderr, _("error: %s: %s"), సందేశం, మార్గం);
+		*exit_స్థితి = 1;
 	}
 }
 
-static int repair(int ac, const char **av, const char *prefix,
-		  struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం repair(పూర్ణాంకం ac, స్థిరరాశి అక్షరం **av, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		  నిర్మాణం repository *repo వాడని)
 {
-	const char **p;
-	const char *self[] = { ".", NULL };
-	struct option options[] = {
+	స్థిరరాశి అక్షరం **p;
+	స్థిరరాశి అక్షరం *self[] = { ".", ఖాళీ };
+	నిర్మాణం option options[] = {
 		OPT_BOOL(0, "relative-paths", &use_relative_paths,
 			 N_("use relative paths for worktrees")),
-		OPT_END()
+		OPT_చివర()
 	};
-	int rc = 0;
+	పూర్ణాంకం rc = 0;
 
-	ac = parse_options(ac, av, prefix, options, git_worktree_repair_usage, 0);
+	ac = parse_options(ac, av, ఉపసర్గ, options, git_worktree_repair_usage, 0);
 	p = ac > 0 ? av : self;
-	for (; *p; p++)
-		repair_worktree_at_path(the_repository, *p, report_repair,
+	కొరకు (; *p; p++)
+		repair_worktree_at_మార్గం(the_repository, *p, report_repair,
 					&rc, use_relative_paths);
 	repair_worktrees(the_repository, report_repair, &rc, use_relative_paths);
-	return rc;
+	తిరిగి rc;
 }
 
-int cmd_worktree(int ac,
-		 const char **av,
-		 const char *prefix,
-		 struct repository *repo)
+పూర్ణాంకం cmd_worktree(పూర్ణాంకం ac,
+		 స్థిరరాశి అక్షరం **av,
+		 స్థిరరాశి అక్షరం *ఉపసర్గ,
+		 నిర్మాణం repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
-		OPT_SUBCOMMAND("add", &fn, add),
+	parse_opt_subcommand_fn *fn = ఖాళీ;
+	నిర్మాణం option options[] = {
+		OPT_SUBCOMMAND("add", &fn, కూడు),
 		OPT_SUBCOMMAND("prune", &fn, prune),
 		OPT_SUBCOMMAND("list", &fn, list),
-		OPT_SUBCOMMAND("lock", &fn, lock_worktree),
+		OPT_SUBCOMMAND("lock", &fn, తాళం_worktree),
 		OPT_SUBCOMMAND("unlock", &fn, unlock_worktree),
 		OPT_SUBCOMMAND("move", &fn, move_worktree),
 		OPT_SUBCOMMAND("remove", &fn, remove_worktree),
 		OPT_SUBCOMMAND("repair", &fn, repair),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	repo_config(the_repository, git_worktree_config, NULL);
+	repo_config(the_repository, git_worktree_config, ఖాళీ);
 
-	if (!prefix)
-		prefix = "";
+	ఒకవేళ (!ఉపసర్గ)
+		ఉపసర్గ = "";
 
-	ac = parse_options(ac, av, prefix, options, git_worktree_usage, 0);
+	ac = parse_options(ac, av, ఉపసర్గ, options, git_worktree_usage, 0);
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_నిండిన_సూచీ = 0;
 
-	return fn(ac, av, prefix, repo);
+	తిరిగి fn(ac, av, ఉపసర్గ, repo);
 }

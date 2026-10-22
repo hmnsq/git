@@ -1,79 +1,79 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "fsmonitor-ll.h"
-#include "fsmonitor-ipc.h"
-#include "fsmonitor-settings.h"
-#include "compat/fsmonitor/fsm-health.h"
-#include "compat/fsmonitor/fsm-listen.h"
-#include "fsmonitor--daemon.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "abspath.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "dir.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "fsmonitor-ll.h"
+#అన్తర్భావ "fsmonitor-ipc.h"
+#అన్తర్భావ "fsmonitor-settings.h"
+#అన్తర్భావ "compat/fsmonitor/fsm-health.h"
+#అన్తర్భావ "compat/fsmonitor/fsm-listen.h"
+#అన్తర్భావ "fsmonitor--daemon.h"
 
-#include "simple-ipc.h"
-#include "strmap.h"
-#include "run-command.h"
-#include "trace.h"
-#include "trace2.h"
+#అన్తర్భావ "simple-ipc.h"
+#అన్తర్భావ "strmap.h"
+#అన్తర్భావ "run-command.h"
+#అన్తర్భావ "trace.h"
+#అన్తర్భావ "trace2.h"
 
-static const char * const builtin_fsmonitor__daemon_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_fsmonitor__daemon_usage[] = {
 	N_("git fsmonitor--daemon start [<options>]"),
 	N_("git fsmonitor--daemon run [<options>]"),
 	"git fsmonitor--daemon stop",
 	"git fsmonitor--daemon status",
-	NULL
+	ఖాళీ
 };
 
-#ifdef HAVE_FSMONITOR_DAEMON_BACKEND
+#నిర్వచితమైతే HAVE_FSMONITOR_DAEMON_BACKEND
 /*
  * Global state loaded from config.
  */
-#define FSMONITOR__IPC_THREADS "fsmonitor.ipcthreads"
-static int fsmonitor__ipc_threads = 8;
+#నిర్వచించు FSMONITOR_IPC_దారాలు "fsmonitor.ipcthreads"
+స్థిర పూర్ణాంకం fsmonitor_ipc_దారాలు = 8;
 
-#define FSMONITOR__START_TIMEOUT "fsmonitor.starttimeout"
-static int fsmonitor__start_timeout_sec = 60;
+#నిర్వచించు FSMONITOR_ప్రారంభం_TIMEOUT "fsmonitor.starttimeout"
+స్థిర పూర్ణాంకం fsmonitor_ప్రారంభం_timeout_sec = 60;
 
-#define FSMONITOR__ANNOUNCE_STARTUP "fsmonitor.announcestartup"
-static int fsmonitor__announce_startup = 0;
+#నిర్వచించు FSMONITOR__ANNOUNCE_STARTUP "fsmonitor.announcestartup"
+స్థిర పూర్ణాంకం fsmonitor__announce_startup = 0;
 
-static int fsmonitor_config(const char *var, const char *value,
-			    const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం fsmonitor_config(స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *విలువ,
+			    స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	if (!strcmp(var, FSMONITOR__IPC_THREADS)) {
-		int i = git_config_int(var, value, ctx->kvi);
-		if (i < 1)
-			return error(_("value of '%s' out of range: %d"),
-				     FSMONITOR__IPC_THREADS, i);
-		fsmonitor__ipc_threads = i;
-		return 0;
+	ఒకవేళ (!strcmp(var, FSMONITOR_IPC_దారాలు)) {
+		పూర్ణాంకం i = git_config_int(var, విలువ, ctx->kvi);
+		ఒకవేళ (i < 1)
+			తిరిగి error(_("value of '%s' out of range: %d"),
+				     FSMONITOR_IPC_దారాలు, i);
+		fsmonitor_ipc_దారాలు = i;
+		తిరిగి 0;
 	}
 
-	if (!strcmp(var, FSMONITOR__START_TIMEOUT)) {
-		int i = git_config_int(var, value, ctx->kvi);
-		if (i < 0)
-			return error(_("value of '%s' out of range: %d"),
-				     FSMONITOR__START_TIMEOUT, i);
-		fsmonitor__start_timeout_sec = i;
-		return 0;
+	ఒకవేళ (!strcmp(var, FSMONITOR_ప్రారంభం_TIMEOUT)) {
+		పూర్ణాంకం i = git_config_int(var, విలువ, ctx->kvi);
+		ఒకవేళ (i < 0)
+			తిరిగి error(_("value of '%s' out of range: %d"),
+				     FSMONITOR_ప్రారంభం_TIMEOUT, i);
+		fsmonitor_ప్రారంభం_timeout_sec = i;
+		తిరిగి 0;
 	}
 
-	if (!strcmp(var, FSMONITOR__ANNOUNCE_STARTUP)) {
-		int is_bool;
-		int i = git_config_bool_or_int(var, value, ctx->kvi, &is_bool);
-		if (i < 0)
-			return error(_("value of '%s' not bool or int: %d"),
+	ఒకవేళ (!strcmp(var, FSMONITOR__ANNOUNCE_STARTUP)) {
+		పూర్ణాంకం is_bool;
+		పూర్ణాంకం i = git_config_bool_or_int(var, విలువ, ctx->kvi, &is_bool);
+		ఒకవేళ (i < 0)
+			తిరిగి error(_("value of '%s' not bool or int: %d"),
 				     var, i);
 		fsmonitor__announce_startup = i;
-		return 0;
+		తిరిగి 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	తిరిగి git_default_config(var, విలువ, ctx, cb);
 }
 
 /*
@@ -82,90 +82,90 @@ static int fsmonitor_config(const char *var, const char *value,
  * Send a "quit" command to the `git-fsmonitor--daemon` (if running)
  * and wait for it to shutdown.
  */
-static int do_as_client__send_stop(void)
+స్థిర పూర్ణాంకం do_as_client__send_stop(శూన్య)
 {
-	struct strbuf answer = STRBUF_INIT;
-	int ret;
-	int max_wait_ms = 30000;
-	int elapsed_ms = 0;
+	నిర్మాణం strbuf answer = STRBUF_INIT;
+	పూర్ణాంకం ret;
+	పూర్ణాంకం max_wait_ms = 30000;
+	పూర్ణాంకం elapsed_ms = 0;
 
 	ret = fsmonitor_ipc__send_command("quit", &answer);
 
 	/* The quit command does not return any response data. */
 	strbuf_release(&answer);
 
-	if (ret)
-		return ret;
+	ఒకవేళ (ret)
+		తిరిగి ret;
 
-	trace2_region_enter("fsm_client", "polling-for-daemon-exit", NULL);
-	while (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING) {
-		if (elapsed_ms >= max_wait_ms) {
+	trace2_region_enter("fsm_client", "polling-for-daemon-exit", ఖాళీ);
+	అయితే (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING) {
+		ఒకవేళ (elapsed_ms >= max_wait_ms) {
 			trace2_region_leave("fsm_client",
-					    "polling-for-daemon-exit", NULL);
-			return error(_("daemon did not stop within %d seconds"),
+					    "polling-for-daemon-exit", ఖాళీ);
+			తిరిగి error(_("daemon did not stop within %d seconds"),
 				     max_wait_ms / 1000);
 		}
 		sleep_millisec(50);
 		elapsed_ms += 50;
 	}
-	trace2_region_leave("fsm_client", "polling-for-daemon-exit", NULL);
+	trace2_region_leave("fsm_client", "polling-for-daemon-exit", ఖాళీ);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int do_as_client__status(void)
+స్థిర పూర్ణాంకం do_as_client_స్థితి(శూన్య)
 {
-	enum ipc_active_state state = fsmonitor_ipc__get_state();
+	గణన ipc_చురుకైన_state state = fsmonitor_ipc__get_state();
 
-	switch (state) {
-	case IPC_STATE__LISTENING:
-		printf(_("fsmonitor-daemon is watching '%s'\n"),
+	ఎంపిక (state) {
+	స్థితి IPC_STATE__LISTENING:
+		రాయి(_("fsmonitor-daemon is watching '%s'\n"),
 		       the_repository->worktree);
-		return 0;
+		తిరిగి 0;
 
-	default:
-		printf(_("fsmonitor-daemon is not watching '%s'\n"),
+	అప్రమేయ:
+		రాయి(_("fsmonitor-daemon is not watching '%s'\n"),
 		       the_repository->worktree);
-		return 1;
+		తిరిగి 1;
 	}
 }
 
-enum fsmonitor_cookie_item_result {
+గణన fsmonitor_cookie_అంశం_ఫలితం {
 	FCIR_ERROR = -1, /* could not create cookie file ? */
 	FCIR_INIT,
-	FCIR_SEEN,
+	FCIR_చూసిన,
 	FCIR_ABORT,
 };
 
-struct fsmonitor_cookie_item {
-	struct hashmap_entry entry;
-	char *name;
-	enum fsmonitor_cookie_item_result result;
+నిర్మాణం fsmonitor_cookie_అంశం {
+	నిర్మాణం hashmap_నమోదు నమోదు_2;
+	అక్షరం *name;
+	గణన fsmonitor_cookie_అంశం_ఫలితం ఫలితం;
 };
 
-static int cookies_cmp(const void *data UNUSED,
-		       const struct hashmap_entry *he1,
-		       const struct hashmap_entry *he2, const void *keydata)
+స్థిర పూర్ణాంకం cookies_cmp(స్థిరరాశి శూన్య *దత్తాంశం వాడని,
+		       స్థిరరాశి నిర్మాణం hashmap_నమోదు *he1,
+		       స్థిరరాశి నిర్మాణం hashmap_నమోదు *he2, స్థిరరాశి శూన్య *keydata)
 {
-	const struct fsmonitor_cookie_item *a =
-		container_of(he1, const struct fsmonitor_cookie_item, entry);
-	const struct fsmonitor_cookie_item *b =
-		container_of(he2, const struct fsmonitor_cookie_item, entry);
+	స్థిరరాశి నిర్మాణం fsmonitor_cookie_అంశం *a =
+		container_యొక్క(he1, స్థిరరాశి నిర్మాణం fsmonitor_cookie_అంశం, నమోదు_2);
+	స్థిరరాశి నిర్మాణం fsmonitor_cookie_అంశం *b =
+		container_యొక్క(he2, స్థిరరాశి నిర్మాణం fsmonitor_cookie_అంశం, నమోదు_2);
 
-	return strcmp(a->name, keydata ? keydata : b->name);
+	తిరిగి strcmp(a->name, keydata ? keydata : b->name);
 }
 
-static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
-	struct fsmonitor_daemon_state *state)
+స్థిర గణన fsmonitor_cookie_అంశం_ఫలితం with_తాళం_wait_for_cookie(
+	నిర్మాణం fsmonitor_daemon_state *state)
 {
 	/* assert current thread holding state->main_lock */
 
-	int fd;
-	struct fsmonitor_cookie_item *cookie;
-	struct strbuf cookie_pathname = STRBUF_INIT;
-	struct strbuf cookie_filename = STRBUF_INIT;
-	enum fsmonitor_cookie_item_result result;
-	int my_cookie_seq;
+	పూర్ణాంకం fd;
+	నిర్మాణం fsmonitor_cookie_అంశం *cookie;
+	నిర్మాణం strbuf cookie_pathname = STRBUF_INIT;
+	నిర్మాణం strbuf cookie_filename = STRBUF_INIT;
+	గణన fsmonitor_cookie_అంశం_ఫలితం ఫలితం;
+	పూర్ణాంకం my_cookie_seq;
 
 	CALLOC_ARRAY(cookie, 1);
 
@@ -173,16 +173,16 @@ static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
 
 	strbuf_addf(&cookie_filename, "%i-%i", getpid(), my_cookie_seq);
 
-	strbuf_addbuf(&cookie_pathname, &state->path_cookie_prefix);
+	strbuf_addbuf(&cookie_pathname, &state->మార్గం_cookie_ఉపసర్గ);
 	strbuf_addbuf(&cookie_pathname, &cookie_filename);
 
-	cookie->name = strbuf_detach(&cookie_filename, NULL);
-	cookie->result = FCIR_INIT;
-	hashmap_entry_init(&cookie->entry, strhash(cookie->name));
+	cookie->name = strbuf_detach(&cookie_filename, ఖాళీ);
+	cookie->ఫలితం = FCIR_INIT;
+	hashmap_నమోదు_init(&cookie->నమోదు_2, strhash(cookie->name));
 
-	hashmap_add(&state->cookies, &cookie->entry);
+	hashmap_కూడు(&state->cookies, &cookie->నమోదు_2);
 
-	trace_printf_key(&trace_fsmonitor, "cookie-wait: '%s' '%s'",
+	trace_printf_కీలకం(&trace_fsmonitor, "cookie-wait: '%s' '%s'",
 			 cookie->name, cookie_pathname.buf);
 
 	/*
@@ -190,12 +190,12 @@ static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
 	 * that the listener thread has seen it.
 	 */
 	fd = open(cookie_pathname.buf, O_WRONLY | O_CREAT | O_EXCL, 0600);
-	if (fd < 0) {
+	ఒకవేళ (fd < 0) {
 		error_errno(_("could not create fsmonitor cookie '%s'"),
 			    cookie->name);
 
-		cookie->result = FCIR_ERROR;
-		goto done;
+		cookie->ఫలితం = FCIR_ERROR;
+		వెళ్ళు పూర్తి;
 	}
 
 	/*
@@ -214,88 +214,88 @@ static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
 	 * where inotify watches succeed but events never arrive).
 	 */
 	{
-		struct timeval now;
-		struct timespec ts;
-		int err = 0;
+		నిర్మాణం timeval now;
+		నిర్మాణం timespec ts;
+		పూర్ణాంకం err = 0;
 
-		gettimeofday(&now, NULL);
+		gettimeofday(&now, ఖాళీ);
 		ts.tv_sec = now.tv_sec + 1;
 		ts.tv_nsec = now.tv_usec * 1000;
 
-		while (cookie->result == FCIR_INIT && !err)
+		అయితే (cookie->ఫలితం == FCIR_INIT && !err)
 			err = pthread_cond_timedwait(&state->cookies_cond,
-						     &state->main_lock,
+						     &state->main_తాళం,
 						     &ts);
-		if (err == ETIMEDOUT && cookie->result == FCIR_INIT) {
-			trace_printf_key(&trace_fsmonitor,
+		ఒకవేళ (err == ETIMEDOUT && cookie->ఫలితం == FCIR_INIT) {
+			trace_printf_కీలకం(&trace_fsmonitor,
 					 "cookie_wait timed out");
-			cookie->result = FCIR_ERROR;
+			cookie->ఫలితం = FCIR_ERROR;
 		}
 	}
 
-done:
-	hashmap_remove(&state->cookies, &cookie->entry, NULL);
+పూర్తి:
+	hashmap_remove(&state->cookies, &cookie->నమోదు_2, ఖాళీ);
 
-	result = cookie->result;
+	ఫలితం = cookie->ఫలితం;
 
-	free(cookie->name);
-	free(cookie);
+	విడుదల(cookie->name);
+	విడుదల(cookie);
 	strbuf_release(&cookie_pathname);
 
-	return result;
+	తిరిగి ఫలితం;
 }
 
 /*
  * Mark these cookies as _SEEN and wake up the corresponding client threads.
  */
-static void with_lock__mark_cookies_seen(struct fsmonitor_daemon_state *state,
-					 const struct string_list *cookie_names)
+స్థిర శూన్య with_తాళం_mark_cookies_చూసిన(నిర్మాణం fsmonitor_daemon_state *state,
+					 స్థిరరాశి నిర్మాణం string_list *cookie_పేర్లు)
 {
 	/* assert current thread holding state->main_lock */
 
-	int k;
-	int nr_seen = 0;
+	పూర్ణాంకం k;
+	పూర్ణాంకం nr_చూసిన = 0;
 
-	for (k = 0; k < cookie_names->nr; k++) {
-		struct fsmonitor_cookie_item key;
-		struct fsmonitor_cookie_item *cookie;
+	కొరకు (k = 0; k < cookie_పేర్లు->nr; k++) {
+		నిర్మాణం fsmonitor_cookie_అంశం కీలకం;
+		నిర్మాణం fsmonitor_cookie_అంశం *cookie;
 
-		key.name = cookie_names->items[k].string;
-		hashmap_entry_init(&key.entry, strhash(key.name));
+		కీలకం.name = cookie_పేర్లు->వస్తువులు[k].string;
+		hashmap_నమోదు_init(&కీలకం.నమోదు_2, strhash(కీలకం.name));
 
-		cookie = hashmap_get_entry(&state->cookies, &key, entry, NULL);
-		if (cookie) {
-			trace_printf_key(&trace_fsmonitor, "cookie-seen: '%s'",
+		cookie = hashmap_get_నమోదు(&state->cookies, &కీలకం, నమోదు_2, ఖాళీ);
+		ఒకవేళ (cookie) {
+			trace_printf_కీలకం(&trace_fsmonitor, "cookie-seen: '%s'",
 					 cookie->name);
-			cookie->result = FCIR_SEEN;
-			nr_seen++;
+			cookie->ఫలితం = FCIR_చూసిన;
+			nr_చూసిన++;
 		}
 	}
 
-	if (nr_seen)
-		pthread_cond_broadcast(&state->cookies_cond);
+	ఒకవేళ (nr_చూసిన)
+		pthread_cond_ప్రసారం(&state->cookies_cond);
 }
 
 /*
  * Set _ABORT on all pending cookies and wake up all client threads.
  */
-static void with_lock__abort_all_cookies(struct fsmonitor_daemon_state *state)
+స్థిర శూన్య with_తాళం_abort_all_cookies(నిర్మాణం fsmonitor_daemon_state *state)
 {
 	/* assert current thread holding state->main_lock */
 
-	struct hashmap_iter iter;
-	struct fsmonitor_cookie_item *cookie;
-	int nr_aborted = 0;
+	నిర్మాణం hashmap_iter iter;
+	నిర్మాణం fsmonitor_cookie_అంశం *cookie;
+	పూర్ణాంకం nr_aborted = 0;
 
-	hashmap_for_each_entry(&state->cookies, &iter, cookie, entry) {
-		trace_printf_key(&trace_fsmonitor, "cookie-abort: '%s'",
+	hashmap_for_each_నమోదు(&state->cookies, &iter, cookie, నమోదు_2) {
+		trace_printf_కీలకం(&trace_fsmonitor, "cookie-abort: '%s'",
 				 cookie->name);
-		cookie->result = FCIR_ABORT;
+		cookie->ఫలితం = FCIR_ABORT;
 		nr_aborted++;
 	}
 
-	if (nr_aborted)
-		pthread_cond_broadcast(&state->cookies_cond);
+	ఒకవేళ (nr_aborted)
+		pthread_cond_ప్రసారం(&state->cookies_cond);
 }
 
 /*
@@ -366,57 +366,57 @@ static void with_lock__abort_all_cookies(struct fsmonitor_daemon_state *state)
  * Therefore, clients that present a token with a stale (non-current)
  * token_id will always be given a trivial response.
  */
-struct fsmonitor_token_data {
-	struct strbuf token_id;
-	struct fsmonitor_batch *batch_head;
-	struct fsmonitor_batch *batch_tail;
-	uint64_t client_ref_count;
+నిర్మాణం fsmonitor_token_దత్తాంశం {
+	నిర్మాణం strbuf token_id;
+	నిర్మాణం fsmonitor_batch *batch_తల;
+	నిర్మాణం fsmonitor_batch *batch_తోక;
+	uint64_t client_ref_లెక్క;
 };
 
-struct fsmonitor_batch {
-	struct fsmonitor_batch *next;
+నిర్మాణం fsmonitor_batch {
+	నిర్మాణం fsmonitor_batch *తదుపరి;
 	uint64_t batch_seq_nr;
-	const char **interned_paths;
-	size_t nr, alloc;
-	time_t pinned_time;
+	స్థిరరాశి అక్షరం **interned_paths;
+	కొలత_t nr, alloc;
+	సమయం_t pinned_సమయం;
 };
 
-static struct fsmonitor_token_data *fsmonitor_new_token_data(void)
+స్థిర నిర్మాణం fsmonitor_token_దత్తాంశం *fsmonitor_new_token_దత్తాంశం(శూన్య)
 {
-	static int test_env_value = -1;
-	static uint64_t flush_count = 0;
-	struct fsmonitor_token_data *token;
-	struct fsmonitor_batch *batch;
+	స్థిర పూర్ణాంకం test_env_విలువ = -1;
+	స్థిర uint64_t flush_లెక్క = 0;
+	నిర్మాణం fsmonitor_token_దత్తాంశం *token;
+	నిర్మాణం fsmonitor_batch *batch;
 
 	CALLOC_ARRAY(token, 1);
 	batch = fsmonitor_batch__new();
 
 	strbuf_init(&token->token_id, 0);
-	token->batch_head = batch;
-	token->batch_tail = batch;
-	token->client_ref_count = 0;
+	token->batch_తల = batch;
+	token->batch_తోక = batch;
+	token->client_ref_లెక్క = 0;
 
-	if (test_env_value < 0)
-		test_env_value = git_env_bool("GIT_TEST_FSMONITOR_TOKEN", 0);
+	ఒకవేళ (test_env_విలువ < 0)
+		test_env_విలువ = git_env_bool("GIT_TEST_FSMONITOR_TOKEN", 0);
 
-	if (!test_env_value) {
-		struct timeval tv;
-		struct tm tm;
-		time_t secs;
+	ఒకవేళ (!test_env_విలువ) {
+		నిర్మాణం timeval tv;
+		నిర్మాణం tm tm;
+		సమయం_t secs;
 
-		gettimeofday(&tv, NULL);
+		gettimeofday(&tv, ఖాళీ);
 		secs = tv.tv_sec;
 		gmtime_r(&secs, &tm);
 
 		strbuf_addf(&token->token_id,
 			    "%"PRIu64".%d.%4d%02d%02dT%02d%02d%02d.%06ldZ",
-			    flush_count++,
+			    flush_లెక్క++,
 			    getpid(),
 			    tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
 			    tm.tm_hour, tm.tm_min, tm.tm_sec,
-			    (long)tv.tv_usec);
-	} else {
-		strbuf_addf(&token->token_id, "test_%08x", test_env_value++);
+			    (దీర్ఘ)tv.tv_usec);
+	} లేకపోతే {
+		strbuf_addf(&token->token_id, "test_%08x", test_env_విలువ++);
 	}
 
 	/*
@@ -446,59 +446,59 @@ static struct fsmonitor_token_data *fsmonitor_new_token_data(void)
 	 * reference point set.  Pin batch 0 to force early file system
 	 * events to accumulate.
 	 */
-	if (test_env_value)
-		batch->pinned_time = time(NULL);
+	ఒకవేళ (test_env_విలువ)
+		batch->pinned_సమయం = సమయం(ఖాళీ);
 
-	return token;
+	తిరిగి token;
 }
 
-struct fsmonitor_batch *fsmonitor_batch__new(void)
+నిర్మాణం fsmonitor_batch *fsmonitor_batch__new(శూన్య)
 {
-	struct fsmonitor_batch *batch;
+	నిర్మాణం fsmonitor_batch *batch;
 
 	CALLOC_ARRAY(batch, 1);
 
-	return batch;
+	తిరిగి batch;
 }
 
-void fsmonitor_batch__free_list(struct fsmonitor_batch *batch)
+శూన్య fsmonitor_batch__free_list(నిర్మాణం fsmonitor_batch *batch)
 {
-	while (batch) {
-		struct fsmonitor_batch *next = batch->next;
+	అయితే (batch) {
+		నిర్మాణం fsmonitor_batch *తదుపరి = batch->తదుపరి;
 
 		/*
 		 * The actual strings within the array of this batch
 		 * are interned, so we don't own them.  We only own
 		 * the array.
 		 */
-		free(batch->interned_paths);
-		free(batch);
+		విడుదల(batch->interned_paths);
+		విడుదల(batch);
 
-		batch = next;
+		batch = తదుపరి;
 	}
 }
 
-void fsmonitor_batch__add_path(struct fsmonitor_batch *batch,
-			       const char *path)
+శూన్య fsmonitor_batch_కూడు_మార్గం(నిర్మాణం fsmonitor_batch *batch,
+			       స్థిరరాశి అక్షరం *మార్గం)
 {
-	const char *interned_path = strintern(path);
+	స్థిరరాశి అక్షరం *interned_మార్గం = strintern(మార్గం);
 
-	trace_printf_key(&trace_fsmonitor, "event: %s", interned_path);
+	trace_printf_కీలకం(&trace_fsmonitor, "event: %s", interned_మార్గం);
 
 	ALLOC_GROW(batch->interned_paths, batch->nr + 1, batch->alloc);
-	batch->interned_paths[batch->nr++] = interned_path;
+	batch->interned_paths[batch->nr++] = interned_మార్గం;
 }
 
-static void fsmonitor_batch__combine(struct fsmonitor_batch *batch_dest,
-				     const struct fsmonitor_batch *batch_src)
+స్థిర శూన్య fsmonitor_batch__combine(నిర్మాణం fsmonitor_batch *batch_dest,
+				     స్థిరరాశి నిర్మాణం fsmonitor_batch *batch_src)
 {
-	size_t k;
+	కొలత_t k;
 
 	ALLOC_GROW(batch_dest->interned_paths,
 		   batch_dest->nr + batch_src->nr + 1,
 		   batch_dest->alloc);
 
-	for (k = 0; k < batch_src->nr; k++)
+	కొరకు (k = 0; k < batch_src->nr; k++)
 		batch_dest->interned_paths[batch_dest->nr++] =
 			batch_src->interned_paths[k];
 }
@@ -530,60 +530,60 @@ static void fsmonitor_batch__combine(struct fsmonitor_batch *batch_dest,
  * Return the obsolete portion of the list after we have removed it from
  * the official list so that the caller can free it after leaving the lock.
  */
-#define MY_TIME_DELAY_SECONDS (5 * 60) /* seconds */
+#నిర్వచించు MY_సమయం_DELAY_SECONDS (5 * 60) /* seconds */
 
-static struct fsmonitor_batch *with_lock__truncate_old_batches(
-	struct fsmonitor_daemon_state *state,
-	const struct fsmonitor_batch *batch_marker)
+స్థిర నిర్మాణం fsmonitor_batch *with_తాళం_truncate_old_batches(
+	నిర్మాణం fsmonitor_daemon_state *state,
+	స్థిరరాశి నిర్మాణం fsmonitor_batch *batch_marker)
 {
 	/* assert current thread holding state->main_lock */
 
-	const struct fsmonitor_batch *batch;
-	struct fsmonitor_batch *remainder;
+	స్థిరరాశి నిర్మాణం fsmonitor_batch *batch;
+	నిర్మాణం fsmonitor_batch *remainder;
 
-	if (!batch_marker)
-		return NULL;
+	ఒకవేళ (!batch_marker)
+		తిరిగి ఖాళీ;
 
-	trace_printf_key(&trace_fsmonitor, "Truncate: mark (%"PRIu64",%"PRIu64")",
+	trace_printf_కీలకం(&trace_fsmonitor, "Truncate: mark (%"PRIu64",%"PRIu64")",
 			 batch_marker->batch_seq_nr,
-			 (uint64_t)batch_marker->pinned_time);
+			 (uint64_t)batch_marker->pinned_సమయం);
 
-	for (batch = batch_marker; batch; batch = batch->next) {
-		time_t t;
+	కొరకు (batch = batch_marker; batch; batch = batch->తదుపరి) {
+		సమయం_t t;
 
-		if (!batch->pinned_time) /* an overflow batch */
-			continue;
+		ఒకవేళ (!batch->pinned_సమయం) /* an overflow batch */
+			కొనసాగు;
 
-		t = batch->pinned_time + MY_TIME_DELAY_SECONDS;
-		if (t > batch_marker->pinned_time) /* too close to marker */
-			continue;
+		t = batch->pinned_సమయం + MY_సమయం_DELAY_SECONDS;
+		ఒకవేళ (t > batch_marker->pinned_సమయం) /* too close to marker */
+			కొనసాగు;
 
-		goto truncate_past_here;
+		వెళ్ళు truncate_past_ఇక్కడ;
 	}
 
-	return NULL;
+	తిరిగి ఖాళీ;
 
-truncate_past_here:
-	state->current_token_data->batch_tail = (struct fsmonitor_batch *)batch;
+truncate_past_ఇక్కడ:
+	state->current_token_దత్తాంశం->batch_తోక = (నిర్మాణం fsmonitor_batch *)batch;
 
-	remainder = ((struct fsmonitor_batch *)batch)->next;
-	((struct fsmonitor_batch *)batch)->next = NULL;
+	remainder = ((నిర్మాణం fsmonitor_batch *)batch)->తదుపరి;
+	((నిర్మాణం fsmonitor_batch *)batch)->తదుపరి = ఖాళీ;
 
-	return remainder;
+	తిరిగి remainder;
 }
 
-static void fsmonitor_free_token_data(struct fsmonitor_token_data *token)
+స్థిర శూన్య fsmonitor_free_token_దత్తాంశం(నిర్మాణం fsmonitor_token_దత్తాంశం *token)
 {
-	if (!token)
-		return;
+	ఒకవేళ (!token)
+		తిరిగి;
 
-	assert(token->client_ref_count == 0);
+	ప్రతిజ్ఞా(token->client_ref_లెక్క == 0);
 
 	strbuf_release(&token->token_id);
 
-	fsmonitor_batch__free_list(token->batch_head);
+	fsmonitor_batch__free_list(token->batch_తల);
 
-	free(token);
+	విడుదల(token);
 }
 
 /*
@@ -605,38 +605,38 @@ static void fsmonitor_free_token_data(struct fsmonitor_token_data *token)
  * Either way, the old token data series is no longer associated with
  * our state data.
  */
-static void with_lock__do_force_resync(struct fsmonitor_daemon_state *state)
+స్థిర శూన్య with_తాళం_do_force_resync(నిర్మాణం fsmonitor_daemon_state *state)
 {
 	/* assert current thread holding state->main_lock */
 
-	struct fsmonitor_token_data *free_me = NULL;
-	struct fsmonitor_token_data *new_one = NULL;
+	నిర్మాణం fsmonitor_token_దత్తాంశం *free_me = ఖాళీ;
+	నిర్మాణం fsmonitor_token_దత్తాంశం *new_one = ఖాళీ;
 
-	new_one = fsmonitor_new_token_data();
+	new_one = fsmonitor_new_token_దత్తాంశం();
 
-	if (state->current_token_data->client_ref_count == 0)
-		free_me = state->current_token_data;
-	state->current_token_data = new_one;
+	ఒకవేళ (state->current_token_దత్తాంశం->client_ref_లెక్క == 0)
+		free_me = state->current_token_దత్తాంశం;
+	state->current_token_దత్తాంశం = new_one;
 
-	fsmonitor_free_token_data(free_me);
+	fsmonitor_free_token_దత్తాంశం(free_me);
 
-	with_lock__abort_all_cookies(state);
+	with_తాళం_abort_all_cookies(state);
 }
 
-void fsmonitor_force_resync(struct fsmonitor_daemon_state *state)
+శూన్య fsmonitor_force_resync(నిర్మాణం fsmonitor_daemon_state *state)
 {
-	pthread_mutex_lock(&state->main_lock);
-	with_lock__do_force_resync(state);
-	pthread_mutex_unlock(&state->main_lock);
+	pthread_mutex_తాళం(&state->main_తాళం);
+	with_తాళం_do_force_resync(state);
+	pthread_mutex_unlock(&state->main_తాళం);
 }
 
 /*
  * Format an opaque token string to send to the client.
  */
-static void with_lock__format_response_token(
-	struct strbuf *response_token,
-	const struct strbuf *response_token_id,
-	const struct fsmonitor_batch *batch)
+స్థిర శూన్య with_తాళం_format_response_token(
+	నిర్మాణం strbuf *response_token,
+	స్థిరరాశి నిర్మాణం strbuf *response_token_id,
+	స్థిరరాశి నిర్మాణం fsmonitor_batch *batch)
 {
 	/* assert current thread holding state->main_lock */
 
@@ -649,52 +649,52 @@ static void with_lock__format_response_token(
  * Parse an opaque token from the client.
  * Returns -1 on error.
  */
-static int fsmonitor_parse_client_token(const char *buf_token,
-					struct strbuf *requested_token_id,
+స్థిర పూర్ణాంకం fsmonitor_parse_client_token(స్థిరరాశి అక్షరం *buf_token,
+					నిర్మాణం strbuf *requested_token_id,
 					uint64_t *seq_nr)
 {
-	const char *p;
-	char *p_end;
+	స్థిరరాశి అక్షరం *p;
+	అక్షరం *p_చివర;
 
 	strbuf_reset(requested_token_id);
 	*seq_nr = 0;
 
-	if (!skip_prefix(buf_token, "builtin:", &p))
-		return -1;
+	ఒకవేళ (!skip_ఉపసర్గ(buf_token, "builtin:", &p))
+		తిరిగి -1;
 
-	while (*p && *p != ':')
+	అయితే (*p && *p != ':')
 		strbuf_addch(requested_token_id, *p++);
-	if (!*p++)
-		return -1;
+	ఒకవేళ (!*p++)
+		తిరిగి -1;
 
-	*seq_nr = (uint64_t)strtoumax(p, &p_end, 10);
-	if (*p_end)
-		return -1;
+	*seq_nr = (uint64_t)strtoumax(p, &p_చివర, 10);
+	ఒకవేళ (*p_చివర)
+		తిరిగి -1;
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int do_handle_client(struct fsmonitor_daemon_state *state,
-			    const char *command,
-			    ipc_server_reply_cb *reply,
-			    struct ipc_server_reply_data *reply_data)
+స్థిర పూర్ణాంకం do_handle_client(నిర్మాణం fsmonitor_daemon_state *state,
+			    స్థిరరాశి అక్షరం *command,
+			    ipc_server_జవాబు_cb *జవాబు,
+			    నిర్మాణం ipc_server_జవాబు_దత్తాంశం *జవాబు_దత్తాంశం)
 {
-	struct fsmonitor_token_data *token_data = NULL;
-	struct strbuf response_token = STRBUF_INIT;
-	struct strbuf requested_token_id = STRBUF_INIT;
-	struct strbuf payload = STRBUF_INIT;
+	నిర్మాణం fsmonitor_token_దత్తాంశం *token_దత్తాంశం = ఖాళీ;
+	నిర్మాణం strbuf response_token = STRBUF_INIT;
+	నిర్మాణం strbuf requested_token_id = STRBUF_INIT;
+	నిర్మాణం strbuf payload = STRBUF_INIT;
 	uint64_t requested_oldest_seq_nr = 0;
-	uint64_t total_response_len = 0;
-	const char *p;
-	const struct fsmonitor_batch *batch_head;
-	const struct fsmonitor_batch *batch;
-	struct fsmonitor_batch *remainder = NULL;
-	intmax_t count = 0, duplicates = 0;
-	struct strset shown = STRSET_INIT;
-	int do_trivial = 0;
-	int do_flush = 0;
-	int do_cookie = 0;
-	enum fsmonitor_cookie_item_result cookie_result;
+	uint64_t మొత్తం_response_len = 0;
+	స్థిరరాశి అక్షరం *p;
+	స్థిరరాశి నిర్మాణం fsmonitor_batch *batch_తల;
+	స్థిరరాశి నిర్మాణం fsmonitor_batch *batch;
+	నిర్మాణం fsmonitor_batch *remainder = ఖాళీ;
+	intmax_t లెక్క = 0, duplicates = 0;
+	నిర్మాణం strset shown = STRSET_INIT;
+	పూర్ణాంకం do_trivial = 0;
+	పూర్ణాంకం do_flush = 0;
+	పూర్ణాంకం do_cookie = 0;
+	గణన fsmonitor_cookie_అంశం_ఫలితం cookie_ఫలితం;
 
 	/*
 	 * We expect `command` to be of the form:
@@ -705,7 +705,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 *            | <V2-opaque-fsmonitor-token> NUL
 	 */
 
-	if (!strcmp(command, "quit")) {
+	ఒకవేళ (!strcmp(command, "quit")) {
 		/*
 		 * A client has requested over the socket/pipe that the
 		 * daemon shutdown.
@@ -716,9 +716,9 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		 *
 		 * There is no reply to the client.
 		 */
-		return SIMPLE_IPC_QUIT;
+		తిరిగి SIMPLE_IPC_QUIT;
 
-	} else if (!strcmp(command, "flush")) {
+	} లేకపోతే ఒకవేళ (!strcmp(command, "flush")) {
 		/*
 		 * Flush all of our cached data and generate a new token
 		 * just like if we lost sync with the filesystem.
@@ -728,31 +728,31 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		do_flush = 1;
 		do_trivial = 1;
 
-	} else if (!skip_prefix(command, "builtin:", &p)) {
+	} లేకపోతే ఒకవేళ (!skip_ఉపసర్గ(command, "builtin:", &p)) {
 		/* assume V1 timestamp or garbage */
 
-		char *p_end;
+		అక్షరం *p_చివర;
 
-		strtoumax(command, &p_end, 10);
-		trace_printf_key(&trace_fsmonitor,
-				 ((*p_end) ?
+		strtoumax(command, &p_చివర, 10);
+		trace_printf_కీలకం(&trace_fsmonitor,
+				 ((*p_చివర) ?
 				  "fsmonitor: invalid command line '%s'" :
 				  "fsmonitor: unsupported V1 protocol '%s'"),
 				 command);
 		do_trivial = 1;
 		do_cookie = 1;
 
-	} else {
+	} లేకపోతే {
 		/* We have "builtin:*" */
-		if (fsmonitor_parse_client_token(command, &requested_token_id,
+		ఒకవేళ (fsmonitor_parse_client_token(command, &requested_token_id,
 						 &requested_oldest_seq_nr)) {
-			trace_printf_key(&trace_fsmonitor,
+			trace_printf_కీలకం(&trace_fsmonitor,
 					 "fsmonitor: invalid V2 protocol token '%s'",
 					 command);
 			do_trivial = 1;
 			do_cookie = 1;
 
-		} else {
+		} లేకపోతే {
 			/*
 			 * We have a V2 valid token:
 			 *     "builtin:<token_id>:<seq_nr>"
@@ -761,9 +761,9 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		}
 	}
 
-	pthread_mutex_lock(&state->main_lock);
+	pthread_mutex_తాళం(&state->main_తాళం);
 
-	if (!state->current_token_data)
+	ఒకవేళ (!state->current_token_దత్తాంశం)
 		BUG("fsmonitor state does not have a current token");
 
 	/*
@@ -781,17 +781,17 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 * assume that there might be some very, very recent activity
 	 * on the FS still in flight.
 	 */
-	if (do_cookie) {
-		cookie_result = with_lock__wait_for_cookie(state);
-		if (cookie_result != FCIR_SEEN) {
+	ఒకవేళ (do_cookie) {
+		cookie_ఫలితం = with_తాళం_wait_for_cookie(state);
+		ఒకవేళ (cookie_ఫలితం != FCIR_చూసిన) {
 			error(_("fsmonitor: cookie_result '%d' != SEEN"),
-			      cookie_result);
+			      cookie_ఫలితం);
 			do_trivial = 1;
 		}
 	}
 
-	if (do_flush)
-		with_lock__do_force_resync(state);
+	ఒకవేళ (do_flush)
+		with_తాళం_do_force_resync(state);
 
 	/*
 	 * We mark the current head of the batch list as "pinned" so
@@ -799,9 +799,9 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 * (and prevent any more paths from being added to it) from
 	 * now on.
 	 */
-	token_data = state->current_token_data;
-	batch_head = token_data->batch_head;
-	((struct fsmonitor_batch *)batch_head)->pinned_time = time(NULL);
+	token_దత్తాంశం = state->current_token_దత్తాంశం;
+	batch_తల = token_దత్తాంశం->batch_తల;
+	((నిర్మాణం fsmonitor_batch *)batch_తల)->pinned_సమయం = సమయం(ఖాళీ);
 
 	/*
 	 * FSMonitor Protocol V2 requires that we send a response header
@@ -810,30 +810,30 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 * head batch so that future requests from a client will be relative
 	 * to it.
 	 */
-	with_lock__format_response_token(&response_token,
-					 &token_data->token_id, batch_head);
+	with_తాళం_format_response_token(&response_token,
+					 &token_దత్తాంశం->token_id, batch_తల);
 
-	reply(reply_data, response_token.buf, response_token.len + 1);
-	total_response_len += response_token.len + 1;
+	జవాబు(జవాబు_దత్తాంశం, response_token.buf, response_token.len + 1);
+	మొత్తం_response_len += response_token.len + 1;
 
-	trace2_data_string("fsmonitor", the_repository, "response/token",
+	trace2_దత్తాంశం_string("fsmonitor", the_repository, "response/token",
 			   response_token.buf);
-	trace_printf_key(&trace_fsmonitor, "response token: %s",
+	trace_printf_కీలకం(&trace_fsmonitor, "response token: %s",
 			 response_token.buf);
 
-	if (!do_trivial) {
-		if (strcmp(requested_token_id.buf, token_data->token_id.buf)) {
+	ఒకవేళ (!do_trivial) {
+		ఒకవేళ (strcmp(requested_token_id.buf, token_దత్తాంశం->token_id.buf)) {
 			/*
 			 * The client last spoke to a different daemon
 			 * instance -OR- the daemon had to resync with
 			 * the filesystem (and lost events), so reject.
 			 */
-			trace2_data_string("fsmonitor", the_repository,
+			trace2_దత్తాంశం_string("fsmonitor", the_repository,
 					   "response/token", "different");
 			do_trivial = 1;
 
-		} else if (requested_oldest_seq_nr <
-			   token_data->batch_tail->batch_seq_nr) {
+		} లేకపోతే ఒకవేళ (requested_oldest_seq_nr <
+			   token_దత్తాంశం->batch_తోక->batch_seq_nr) {
 			/*
 			 * The client wants older events than we have for
 			 * this token_id.  This means that the end of our
@@ -841,21 +841,21 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 			 * client a complete snapshot relative to their
 			 * request.
 			 */
-			trace_printf_key(&trace_fsmonitor,
+			trace_printf_కీలకం(&trace_fsmonitor,
 					 "client requested truncated data");
 			do_trivial = 1;
 		}
 	}
 
-	if (do_trivial) {
-		pthread_mutex_unlock(&state->main_lock);
+	ఒకవేళ (do_trivial) {
+		pthread_mutex_unlock(&state->main_తాళం);
 
-		reply(reply_data, "/", 2);
+		జవాబు(జవాబు_దత్తాంశం, "/", 2);
 
-		trace2_data_intmax("fsmonitor", the_repository,
+		trace2_దత్తాంశం_intmax("fsmonitor", the_repository,
 				   "response/trivial", 1);
 
-		goto cleanup;
+		వెళ్ళు cleanup;
 	}
 
 	/*
@@ -870,9 +870,9 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 * AND it allows the listener thread to do a token-reset
 	 * (and install a new `current_token_data`).
 	 */
-	token_data->client_ref_count++;
+	token_దత్తాంశం->client_ref_లెక్క++;
 
-	pthread_mutex_unlock(&state->main_lock);
+	pthread_mutex_unlock(&state->main_తాళం);
 
 	/*
 	 * The client request is relative to the token that they sent,
@@ -886,52 +886,52 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 * hash table.  Currently, we're still comparing the string
 	 * values.
 	 */
-	strset_init_with_options(&shown, NULL, 0);
-	for (batch = batch_head;
+	strset_init_with_options(&shown, ఖాళీ, 0);
+	కొరకు (batch = batch_తల;
 	     batch && batch->batch_seq_nr > requested_oldest_seq_nr;
-	     batch = batch->next) {
-		size_t k;
+	     batch = batch->తదుపరి) {
+		కొలత_t k;
 
-		for (k = 0; k < batch->nr; k++) {
-			const char *s = batch->interned_paths[k];
-			size_t s_len;
+		కొరకు (k = 0; k < batch->nr; k++) {
+			స్థిరరాశి అక్షరం *s = batch->interned_paths[k];
+			కొలత_t s_len;
 
-			if (!strset_add(&shown, s))
+			ఒకవేళ (!strset_కూడు(&shown, s))
 				duplicates++;
-			else {
-				trace_printf_key(&trace_fsmonitor,
+			లేకపోతే {
+				trace_printf_కీలకం(&trace_fsmonitor,
 						 "send[%"PRIuMAX"]: %s",
-						 count, s);
+						 లెక్క, s);
 
 				/* Each path gets written with a trailing NUL */
-				s_len = strlen(s) + 1;
+				s_len = అక్షరశ్రేణి_పొడవు(s) + 1;
 
-				if (payload.len + s_len >=
-				    LARGE_PACKET_DATA_MAX) {
-					reply(reply_data, payload.buf,
+				ఒకవేళ (payload.len + s_len >=
+				    LARGE_PACKET_దత్తాంశం_MAX) {
+					జవాబు(జవాబు_దత్తాంశం, payload.buf,
 					      payload.len);
-					total_response_len += payload.len;
+					మొత్తం_response_len += payload.len;
 					strbuf_reset(&payload);
 				}
 
-				strbuf_add(&payload, s, s_len);
-				count++;
+				strbuf_కూడు(&payload, s, s_len);
+				లెక్క++;
 			}
 		}
 	}
 
-	if (payload.len) {
-		reply(reply_data, payload.buf, payload.len);
-		total_response_len += payload.len;
+	ఒకవేళ (payload.len) {
+		జవాబు(జవాబు_దత్తాంశం, payload.buf, payload.len);
+		మొత్తం_response_len += payload.len;
 	}
 
-	pthread_mutex_lock(&state->main_lock);
+	pthread_mutex_తాళం(&state->main_తాళం);
 
-	if (token_data->client_ref_count > 0)
-		token_data->client_ref_count--;
+	ఒకవేళ (token_దత్తాంశం->client_ref_లెక్క > 0)
+		token_దత్తాంశం->client_ref_లెక్క--;
 
-	if (token_data->client_ref_count == 0) {
-		if (token_data != state->current_token_data) {
+	ఒకవేళ (token_దత్తాంశం->client_ref_లెక్క == 0) {
+		ఒకవేళ (token_దత్తాంశం != state->current_token_దత్తాంశం) {
 			/*
 			 * The listener thread did a token-reset while we were
 			 * walking the batch list.  Therefore, this token is
@@ -939,8 +939,8 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 			 * the last reader thread using this token, we own
 			 * that work.
 			 */
-			fsmonitor_free_token_data(token_data);
-		} else if (batch) {
+			fsmonitor_free_token_దత్తాంశం(token_దత్తాంశం);
+		} లేకపోతే ఒకవేళ (batch) {
 			/*
 			 * We are holding the lock and are the only
 			 * reader of the ref-counted portion of the
@@ -953,19 +953,19 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 			 * end-point sequence number.  See if the tail
 			 * end of the list is obsolete.
 			 */
-			remainder = with_lock__truncate_old_batches(state,
+			remainder = with_తాళం_truncate_old_batches(state,
 								    batch);
 		}
 	}
 
-	pthread_mutex_unlock(&state->main_lock);
+	pthread_mutex_unlock(&state->main_తాళం);
 
-	if (remainder)
+	ఒకవేళ (remainder)
 		fsmonitor_batch__free_list(remainder);
 
-	trace2_data_intmax("fsmonitor", the_repository, "response/length", total_response_len);
-	trace2_data_intmax("fsmonitor", the_repository, "response/count/files", count);
-	trace2_data_intmax("fsmonitor", the_repository, "response/count/duplicates", duplicates);
+	trace2_దత్తాంశం_intmax("fsmonitor", the_repository, "response/length", మొత్తం_response_len);
+	trace2_దత్తాంశం_intmax("fsmonitor", the_repository, "response/count/files", లెక్క);
+	trace2_దత్తాంశం_intmax("fsmonitor", the_repository, "response/count/duplicates", duplicates);
 
 cleanup:
 	strset_clear(&shown);
@@ -973,120 +973,120 @@ cleanup:
 	strbuf_release(&requested_token_id);
 	strbuf_release(&payload);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static ipc_server_application_cb handle_client;
+స్థిర ipc_server_application_cb handle_client;
 
-static int handle_client(void *data,
-			 const char *command, size_t command_len,
-			 ipc_server_reply_cb *reply,
-			 struct ipc_server_reply_data *reply_data)
+స్థిర పూర్ణాంకం handle_client(శూన్య *దత్తాంశం,
+			 స్థిరరాశి అక్షరం *command, కొలత_t command_len,
+			 ipc_server_జవాబు_cb *జవాబు,
+			 నిర్మాణం ipc_server_జవాబు_దత్తాంశం *జవాబు_దత్తాంశం)
 {
-	struct fsmonitor_daemon_state *state = data;
-	int result;
+	నిర్మాణం fsmonitor_daemon_state *state = దత్తాంశం;
+	పూర్ణాంకం ఫలితం;
 
 	/*
 	 * The Simple IPC API now supports {char*, len} arguments, but
 	 * FSMonitor always uses proper null-terminated strings, so
 	 * we can ignore the command_len argument.  (Trust, but verify.)
 	 */
-	if (command_len != strlen(command))
+	ఒకవేళ (command_len != అక్షరశ్రేణి_పొడవు(command))
 		BUG("FSMonitor assumes text messages");
 
-	trace_printf_key(&trace_fsmonitor, "requested token: %s", command);
+	trace_printf_కీలకం(&trace_fsmonitor, "requested token: %s", command);
 
 	trace2_region_enter("fsmonitor", "handle_client", the_repository);
-	trace2_data_string("fsmonitor", the_repository, "request", command);
+	trace2_దత్తాంశం_string("fsmonitor", the_repository, "request", command);
 
-	result = do_handle_client(state, command, reply, reply_data);
+	ఫలితం = do_handle_client(state, command, జవాబు, జవాబు_దత్తాంశం);
 
 	trace2_region_leave("fsmonitor", "handle_client", the_repository);
 
-	return result;
+	తిరిగి ఫలితం;
 }
 
-#define FSMONITOR_DIR           "fsmonitor--daemon"
-#define FSMONITOR_COOKIE_DIR    "cookies"
-#define FSMONITOR_COOKIE_PREFIX (FSMONITOR_DIR "/" FSMONITOR_COOKIE_DIR "/")
+#నిర్వచించు FSMONITOR_DIR           "fsmonitor--daemon"
+#నిర్వచించు FSMONITOR_COOKIE_DIR    "cookies"
+#నిర్వచించు FSMONITOR_COOKIE_ఉపసర్గ (FSMONITOR_DIR "/" FSMONITOR_COOKIE_DIR "/")
 
-enum fsmonitor_path_type fsmonitor_classify_path_workdir_relative(
-	const char *rel)
+గణన fsmonitor_మార్గం_type fsmonitor_classify_మార్గం_workdir_relative(
+	స్థిరరాశి అక్షరం *rel)
 {
-	if (fspathncmp(rel, ".git", 4))
-		return IS_WORKDIR_PATH;
+	ఒకవేళ (fspathncmp(rel, ".git", 4))
+		తిరిగి IS_WORKDIR_మార్గం;
 	rel += 4;
 
-	if (!*rel)
-		return IS_DOT_GIT;
-	if (*rel != '/')
-		return IS_WORKDIR_PATH; /* e.g. .gitignore */
+	ఒకవేళ (!*rel)
+		తిరిగి IS_DOT_GIT;
+	ఒకవేళ (*rel != '/')
+		తిరిగి IS_WORKDIR_మార్గం; /* e.g. .gitignore */
 	rel++;
 
-	if (!fspathncmp(rel, FSMONITOR_COOKIE_PREFIX,
-			strlen(FSMONITOR_COOKIE_PREFIX)))
-		return IS_INSIDE_DOT_GIT_WITH_COOKIE_PREFIX;
+	ఒకవేళ (!fspathncmp(rel, FSMONITOR_COOKIE_ఉపసర్గ,
+			అక్షరశ్రేణి_పొడవు(FSMONITOR_COOKIE_ఉపసర్గ)))
+		తిరిగి IS_INSIDE_DOT_GIT_WITH_COOKIE_ఉపసర్గ;
 
-	return IS_INSIDE_DOT_GIT;
+	తిరిగి IS_INSIDE_DOT_GIT;
 }
 
-enum fsmonitor_path_type fsmonitor_classify_path_gitdir_relative(
-	const char *rel)
+గణన fsmonitor_మార్గం_type fsmonitor_classify_మార్గం_gitdir_relative(
+	స్థిరరాశి అక్షరం *rel)
 {
-	if (!fspathncmp(rel, FSMONITOR_COOKIE_PREFIX,
-			strlen(FSMONITOR_COOKIE_PREFIX)))
-		return IS_INSIDE_GITDIR_WITH_COOKIE_PREFIX;
+	ఒకవేళ (!fspathncmp(rel, FSMONITOR_COOKIE_ఉపసర్గ,
+			అక్షరశ్రేణి_పొడవు(FSMONITOR_COOKIE_ఉపసర్గ)))
+		తిరిగి IS_INSIDE_GITDIR_WITH_COOKIE_ఉపసర్గ;
 
-	return IS_INSIDE_GITDIR;
+	తిరిగి IS_INSIDE_GITDIR;
 }
 
-static enum fsmonitor_path_type try_classify_workdir_abs_path(
-	struct fsmonitor_daemon_state *state,
-	const char *path)
+స్థిర గణన fsmonitor_మార్గం_type try_classify_workdir_abs_మార్గం(
+	నిర్మాణం fsmonitor_daemon_state *state,
+	స్థిరరాశి అక్షరం *మార్గం)
 {
-	const char *rel;
+	స్థిరరాశి అక్షరం *rel;
 
-	if (fspathncmp(path, state->path_worktree_watch.buf,
-		       state->path_worktree_watch.len))
-		return IS_OUTSIDE_CONE;
+	ఒకవేళ (fspathncmp(మార్గం, state->మార్గం_worktree_watch.buf,
+		       state->మార్గం_worktree_watch.len))
+		తిరిగి IS_OUTSIDE_CONE;
 
-	rel = path + state->path_worktree_watch.len;
+	rel = మార్గం + state->మార్గం_worktree_watch.len;
 
-	if (!*rel)
-		return IS_WORKDIR_PATH; /* it is the root dir exactly */
-	if (*rel != '/')
-		return IS_OUTSIDE_CONE;
+	ఒకవేళ (!*rel)
+		తిరిగి IS_WORKDIR_మార్గం; /* it is the root dir exactly */
+	ఒకవేళ (*rel != '/')
+		తిరిగి IS_OUTSIDE_CONE;
 	rel++;
 
-	return fsmonitor_classify_path_workdir_relative(rel);
+	తిరిగి fsmonitor_classify_మార్గం_workdir_relative(rel);
 }
 
-enum fsmonitor_path_type fsmonitor_classify_path_absolute(
-	struct fsmonitor_daemon_state *state,
-	const char *path)
+గణన fsmonitor_మార్గం_type fsmonitor_classify_మార్గం_absolute(
+	నిర్మాణం fsmonitor_daemon_state *state,
+	స్థిరరాశి అక్షరం *మార్గం)
 {
-	const char *rel;
-	enum fsmonitor_path_type t;
+	స్థిరరాశి అక్షరం *rel;
+	గణన fsmonitor_మార్గం_type t;
 
-	t = try_classify_workdir_abs_path(state, path);
-	if (state->nr_paths_watching == 1)
-		return t;
-	if (t != IS_OUTSIDE_CONE)
-		return t;
+	t = try_classify_workdir_abs_మార్గం(state, మార్గం);
+	ఒకవేళ (state->nr_paths_watching == 1)
+		తిరిగి t;
+	ఒకవేళ (t != IS_OUTSIDE_CONE)
+		తిరిగి t;
 
-	if (fspathncmp(path, state->path_gitdir_watch.buf,
-		       state->path_gitdir_watch.len))
-		return IS_OUTSIDE_CONE;
+	ఒకవేళ (fspathncmp(మార్గం, state->మార్గం_gitdir_watch.buf,
+		       state->మార్గం_gitdir_watch.len))
+		తిరిగి IS_OUTSIDE_CONE;
 
-	rel = path + state->path_gitdir_watch.len;
+	rel = మార్గం + state->మార్గం_gitdir_watch.len;
 
-	if (!*rel)
-		return IS_GITDIR; /* it is the <gitdir> exactly */
-	if (*rel != '/')
-		return IS_OUTSIDE_CONE;
+	ఒకవేళ (!*rel)
+		తిరిగి IS_GITDIR; /* it is the <gitdir> exactly */
+	ఒకవేళ (*rel != '/')
+		తిరిగి IS_OUTSIDE_CONE;
 	rel++;
 
-	return fsmonitor_classify_path_gitdir_relative(rel);
+	తిరిగి fsmonitor_classify_మార్గం_gitdir_relative(rel);
 }
 
 /*
@@ -1096,24 +1096,24 @@ enum fsmonitor_path_type fsmonitor_classify_path_absolute(
  * to just keep growing and growing with realloc, so we insert an arbitrary
  * limit.
  */
-#define MY_COMBINE_LIMIT (1024)
+#నిర్వచించు MY_COMBINE_హద్దు (1024)
 
-void fsmonitor_publish(struct fsmonitor_daemon_state *state,
-		       struct fsmonitor_batch *batch,
-		       const struct string_list *cookie_names)
+శూన్య fsmonitor_publish(నిర్మాణం fsmonitor_daemon_state *state,
+		       నిర్మాణం fsmonitor_batch *batch,
+		       స్థిరరాశి నిర్మాణం string_list *cookie_పేర్లు)
 {
-	if (!batch && !cookie_names->nr)
-		return;
+	ఒకవేళ (!batch && !cookie_పేర్లు->nr)
+		తిరిగి;
 
-	pthread_mutex_lock(&state->main_lock);
+	pthread_mutex_తాళం(&state->main_తాళం);
 
-	if (batch) {
-		struct fsmonitor_batch *head;
+	ఒకవేళ (batch) {
+		నిర్మాణం fsmonitor_batch *తల;
 
-		head = state->current_token_data->batch_head;
-		if (!head) {
+		తల = state->current_token_దత్తాంశం->batch_తల;
+		ఒకవేళ (!తల) {
 			BUG("token does not have batch");
-		} else if (head->pinned_time) {
+		} లేకపోతే ఒకవేళ (తల->pinned_సమయం) {
 			/*
 			 * We cannot alter the current batch list
 			 * because:
@@ -1130,17 +1130,17 @@ void fsmonitor_publish(struct fsmonitor_daemon_state *state,
 			 * So, we can only prepend a new batch onto
 			 * the front of the list.
 			 */
-			batch->batch_seq_nr = head->batch_seq_nr + 1;
-			batch->next = head;
-			state->current_token_data->batch_head = batch;
-		} else if (!head->batch_seq_nr) {
+			batch->batch_seq_nr = తల->batch_seq_nr + 1;
+			batch->తదుపరి = తల;
+			state->current_token_దత్తాంశం->batch_తల = batch;
+		} లేకపోతే ఒకవేళ (!తల->batch_seq_nr) {
 			/*
 			 * Batch 0 is unpinned.  See the note in
 			 * `fsmonitor_new_token_data()` about why we
 			 * don't need to accumulate these paths.
 			 */
 			fsmonitor_batch__free_list(batch);
-		} else if (head->nr + batch->nr > MY_COMBINE_LIMIT) {
+		} లేకపోతే ఒకవేళ (తల->nr + batch->nr > MY_COMBINE_హద్దు) {
 			/*
 			 * The head batch in the list has never been
 			 * transmitted to a client, but folding the
@@ -1148,66 +1148,66 @@ void fsmonitor_publish(struct fsmonitor_daemon_state *state,
 			 * exceed our arbitrary limit, so just prepend
 			 * the new batch onto the list.
 			 */
-			batch->batch_seq_nr = head->batch_seq_nr + 1;
-			batch->next = head;
-			state->current_token_data->batch_head = batch;
-		} else {
+			batch->batch_seq_nr = తల->batch_seq_nr + 1;
+			batch->తదుపరి = తల;
+			state->current_token_దత్తాంశం->batch_తల = batch;
+		} లేకపోతే {
 			/*
 			 * We are free to add the paths in the given
 			 * batch onto the end of the current head batch.
 			 */
-			fsmonitor_batch__combine(head, batch);
+			fsmonitor_batch__combine(తల, batch);
 			fsmonitor_batch__free_list(batch);
 		}
 	}
 
-	if (cookie_names->nr)
-		with_lock__mark_cookies_seen(state, cookie_names);
+	ఒకవేళ (cookie_పేర్లు->nr)
+		with_తాళం_mark_cookies_చూసిన(state, cookie_పేర్లు);
 
-	pthread_mutex_unlock(&state->main_lock);
+	pthread_mutex_unlock(&state->main_తాళం);
 }
 
-static void *fsm_health__thread_proc(void *_state)
+స్థిర శూన్య *fsm_health__thread_proc(శూన్య *_state)
 {
-	struct fsmonitor_daemon_state *state = _state;
+	నిర్మాణం fsmonitor_daemon_state *state = _state;
 
-	trace2_thread_start("fsm-health");
+	trace2_thread_ప్రారంభం("fsm-health");
 
 	fsm_health__loop(state);
 
 	trace2_thread_exit();
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
-static void *fsm_listen__thread_proc(void *_state)
+స్థిర శూన్య *fsm_listen__thread_proc(శూన్య *_state)
 {
-	struct fsmonitor_daemon_state *state = _state;
+	నిర్మాణం fsmonitor_daemon_state *state = _state;
 
-	trace2_thread_start("fsm-listen");
+	trace2_thread_ప్రారంభం("fsm-listen");
 
-	trace_printf_key(&trace_fsmonitor, "Watching: worktree '%s'",
-			 state->path_worktree_watch.buf);
-	if (state->nr_paths_watching > 1)
-		trace_printf_key(&trace_fsmonitor, "Watching: gitdir '%s'",
-				 state->path_gitdir_watch.buf);
+	trace_printf_కీలకం(&trace_fsmonitor, "Watching: worktree '%s'",
+			 state->మార్గం_worktree_watch.buf);
+	ఒకవేళ (state->nr_paths_watching > 1)
+		trace_printf_కీలకం(&trace_fsmonitor, "Watching: gitdir '%s'",
+				 state->మార్గం_gitdir_watch.buf);
 
 	fsm_listen__loop(state);
 
-	pthread_mutex_lock(&state->main_lock);
-	if (state->current_token_data &&
-	    state->current_token_data->client_ref_count == 0)
-		fsmonitor_free_token_data(state->current_token_data);
-	state->current_token_data = NULL;
-	pthread_mutex_unlock(&state->main_lock);
+	pthread_mutex_తాళం(&state->main_తాళం);
+	ఒకవేళ (state->current_token_దత్తాంశం &&
+	    state->current_token_దత్తాంశం->client_ref_లెక్క == 0)
+		fsmonitor_free_token_దత్తాంశం(state->current_token_దత్తాంశం);
+	state->current_token_దత్తాంశం = ఖాళీ;
+	pthread_mutex_unlock(&state->main_తాళం);
 
 	trace2_thread_exit();
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
-static int fsmonitor_run_daemon_1(struct fsmonitor_daemon_state *state)
+స్థిర పూర్ణాంకం fsmonitor_నిరంతరం_daemon_1(నిర్మాణం fsmonitor_daemon_state *state)
 {
-	struct ipc_server_opts ipc_opts = {
-		.nr_threads = fsmonitor__ipc_threads,
+	నిర్మాణం ipc_server_opts ipc_opts = {
+		.nr_దారాలు = fsmonitor_ipc_దారాలు,
 
 		/*
 		 * We know that there are no other active threads yet,
@@ -1217,42 +1217,42 @@ static int fsmonitor_run_daemon_1(struct fsmonitor_daemon_state *state)
 		 */
 		.uds_disallow_chdir = 0
 	};
-	int health_started = 0;
-	int listener_started = 0;
-	int err = 0;
+	పూర్ణాంకం health_started = 0;
+	పూర్ణాంకం listener_started = 0;
+	పూర్ణాంకం err = 0;
 
 	/*
 	 * Start the IPC thread pool before the we've started the file
 	 * system event listener thread so that we have the IPC handle
 	 * before we need it.
 	 */
-	if (ipc_server_init_async(&state->ipc_server_data,
-				  state->path_ipc.buf, &ipc_opts,
+	ఒకవేళ (ipc_server_init_async(&state->ipc_server_దత్తాంశం,
+				  state->మార్గం_ipc.buf, &ipc_opts,
 				  handle_client, state))
-		return error_errno(
+		తిరిగి error_errno(
 			_("could not start IPC thread pool on '%s'"),
-			state->path_ipc.buf);
+			state->మార్గం_ipc.buf);
 
 	/*
 	 * Start the fsmonitor listener thread to collect filesystem
 	 * events.
 	 */
-	if (pthread_create(&state->listener_thread, NULL,
+	ఒకవేళ (pthread_create(&state->listener_thread, ఖాళీ,
 			   fsm_listen__thread_proc, state)) {
-		ipc_server_stop_async(state->ipc_server_data);
+		ipc_server_stop_async(state->ipc_server_దత్తాంశం);
 		err = error(_("could not start fsmonitor listener thread"));
-		goto cleanup;
+		వెళ్ళు cleanup;
 	}
 	listener_started = 1;
 
 	/*
 	 * Start the health thread to watch over our process.
 	 */
-	if (pthread_create(&state->health_thread, NULL,
+	ఒకవేళ (pthread_create(&state->health_thread, ఖాళీ,
 			   fsm_health__thread_proc, state)) {
-		ipc_server_stop_async(state->ipc_server_data);
+		ipc_server_stop_async(state->ipc_server_దత్తాంశం);
 		err = error(_("could not start fsmonitor health thread"));
-		goto cleanup;
+		వెళ్ళు cleanup;
 	}
 	health_started = 1;
 
@@ -1266,57 +1266,57 @@ cleanup:
 	 * Wait for the IPC thread pool to shutdown (whether by client
 	 * request, from filesystem activity, or an error).
 	 */
-	ipc_server_await(state->ipc_server_data);
+	ipc_server_await(state->ipc_server_దత్తాంశం);
 
 	/*
 	 * The fsmonitor listener thread may have received a shutdown
 	 * event from the IPC thread pool, but it doesn't hurt to tell
 	 * it again.  And wait for it to shutdown.
 	 */
-	if (listener_started) {
+	ఒకవేళ (listener_started) {
 		fsm_listen__stop_async(state);
-		pthread_join(state->listener_thread, NULL);
+		pthread_join(state->listener_thread, ఖాళీ);
 	}
 
-	if (health_started) {
+	ఒకవేళ (health_started) {
 		fsm_health__stop_async(state);
-		pthread_join(state->health_thread, NULL);
+		pthread_join(state->health_thread, ఖాళీ);
 	}
 
-	if (err)
-		return err;
-	if (state->listen_error_code)
-		return state->listen_error_code;
-	if (state->health_error_code)
-		return state->health_error_code;
-	return 0;
+	ఒకవేళ (err)
+		తిరిగి err;
+	ఒకవేళ (state->listen_error_సంకేతం)
+		తిరిగి state->listen_error_సంకేతం;
+	ఒకవేళ (state->health_error_సంకేతం)
+		తిరిగి state->health_error_సంకేతం;
+	తిరిగి 0;
 }
 
-static int fsmonitor_run_daemon(void)
+స్థిర పూర్ణాంకం fsmonitor_నిరంతరం_daemon(శూన్య)
 {
-	struct fsmonitor_daemon_state state;
-	const char *home;
-	int err;
+	నిర్మాణం fsmonitor_daemon_state state;
+	స్థిరరాశి అక్షరం *home;
+	పూర్ణాంకం err;
 
-	memset(&state, 0, sizeof(state));
+	memset(&state, 0, పరిమాణం(state));
 
-	hashmap_init(&state.cookies, cookies_cmp, NULL, 0);
-	pthread_mutex_init(&state.main_lock, NULL);
-	pthread_cond_init(&state.cookies_cond, NULL);
-	state.listen_error_code = 0;
-	state.health_error_code = 0;
-	state.current_token_data = fsmonitor_new_token_data();
+	hashmap_init(&state.cookies, cookies_cmp, ఖాళీ, 0);
+	pthread_mutex_init(&state.main_తాళం, ఖాళీ);
+	pthread_cond_init(&state.cookies_cond, ఖాళీ);
+	state.listen_error_సంకేతం = 0;
+	state.health_error_సంకేతం = 0;
+	state.current_token_దత్తాంశం = fsmonitor_new_token_దత్తాంశం();
 
 	/* Prepare to (recursively) watch the <worktree-root> directory. */
-	strbuf_init(&state.path_worktree_watch, 0);
-	strbuf_addstr(&state.path_worktree_watch,
-		      absolute_path(repo_get_work_tree(the_repository)));
+	strbuf_init(&state.మార్గం_worktree_watch, 0);
+	strbuf_addstr(&state.మార్గం_worktree_watch,
+		      absolute_మార్గం(repo_get_work_వృక్షం(the_repository)));
 	state.nr_paths_watching = 1;
 
 	strbuf_init(&state.alias.alias, 0);
-	strbuf_init(&state.alias.points_to, 0);
-	if ((err = fsmonitor__get_alias(state.path_worktree_watch.buf, &state.alias)))
-		goto done;
+	strbuf_init(&state.alias.points_గమ్యం, 0);
+	ఒకవేళ ((err = fsmonitor__get_alias(state.మార్గం_worktree_watch.buf, &state.alias)))
+		వెళ్ళు పూర్తి;
 
 	/*
 	 * We create and delete cookie files somewhere inside the .git
@@ -1325,14 +1325,14 @@ static int fsmonitor_run_daemon(void)
 	 * cone of <worktree-root>, so set up a second watch to watch
 	 * the <gitdir> so that we get events for the cookie files.
 	 */
-	strbuf_init(&state.path_gitdir_watch, 0);
-	strbuf_addbuf(&state.path_gitdir_watch, &state.path_worktree_watch);
-	strbuf_addstr(&state.path_gitdir_watch, "/.git");
-	if (!is_directory(state.path_gitdir_watch.buf)) {
-		strbuf_reset(&state.path_gitdir_watch);
-		strbuf_addstr(&state.path_gitdir_watch,
-			      absolute_path(repo_get_git_dir(the_repository)));
-		strbuf_strip_suffix(&state.path_gitdir_watch, "/.");
+	strbuf_init(&state.మార్గం_gitdir_watch, 0);
+	strbuf_addbuf(&state.మార్గం_gitdir_watch, &state.మార్గం_worktree_watch);
+	strbuf_addstr(&state.మార్గం_gitdir_watch, "/.git");
+	ఒకవేళ (!is_directory(state.మార్గం_gitdir_watch.buf)) {
+		strbuf_reset(&state.మార్గం_gitdir_watch);
+		strbuf_addstr(&state.మార్గం_gitdir_watch,
+			      absolute_మార్గం(repo_get_git_dir(the_repository)));
+		strbuf_strip_suffix(&state.మార్గం_gitdir_watch, "/.");
 		state.nr_paths_watching = 2;
 	}
 
@@ -1361,18 +1361,18 @@ static int fsmonitor_run_daemon(void)
 	 * mtime of ".git/" and ".git/foo" from changing when a
 	 * cookie file is created.
 	 */
-	strbuf_init(&state.path_cookie_prefix, 0);
-	strbuf_addbuf(&state.path_cookie_prefix, &state.path_gitdir_watch);
+	strbuf_init(&state.మార్గం_cookie_ఉపసర్గ, 0);
+	strbuf_addbuf(&state.మార్గం_cookie_ఉపసర్గ, &state.మార్గం_gitdir_watch);
 
-	strbuf_addch(&state.path_cookie_prefix, '/');
-	strbuf_addstr(&state.path_cookie_prefix, FSMONITOR_DIR);
-	mkdir(state.path_cookie_prefix.buf, 0777);
+	strbuf_addch(&state.మార్గం_cookie_ఉపసర్గ, '/');
+	strbuf_addstr(&state.మార్గం_cookie_ఉపసర్గ, FSMONITOR_DIR);
+	mkdir(state.మార్గం_cookie_ఉపసర్గ.buf, 0777);
 
-	strbuf_addch(&state.path_cookie_prefix, '/');
-	strbuf_addstr(&state.path_cookie_prefix, FSMONITOR_COOKIE_DIR);
-	mkdir(state.path_cookie_prefix.buf, 0777);
+	strbuf_addch(&state.మార్గం_cookie_ఉపసర్గ, '/');
+	strbuf_addstr(&state.మార్గం_cookie_ఉపసర్గ, FSMONITOR_COOKIE_DIR);
+	mkdir(state.మార్గం_cookie_ఉపసర్గ.buf, 0777);
 
-	strbuf_addch(&state.path_cookie_prefix, '/');
+	strbuf_addch(&state.మార్గం_cookie_ఉపసర్గ, '/');
 
 	/*
 	 * We create a named-pipe or unix domain socket inside of the
@@ -1380,22 +1380,22 @@ static int fsmonitor_run_daemon(void)
 	 * pipe in the NPFS on the absolute path of the git
 	 * directory.)
 	 */
-	strbuf_init(&state.path_ipc, 0);
-	strbuf_addstr(&state.path_ipc,
-		absolute_path(fsmonitor_ipc__get_path(the_repository)));
+	strbuf_init(&state.మార్గం_ipc, 0);
+	strbuf_addstr(&state.మార్గం_ipc,
+		absolute_మార్గం(fsmonitor_ipc_get_మార్గం(the_repository)));
 
 	/*
 	 * Confirm that we can create platform-specific resources for the
 	 * filesystem listener before we bother starting all the threads.
 	 */
-	if (fsm_listen__ctor(&state)) {
+	ఒకవేళ (fsm_listen__ctor(&state)) {
 		err = error(_("could not initialize listener thread"));
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	if (fsm_health__ctor(&state)) {
+	ఒకవేళ (fsm_health__ctor(&state)) {
 		err = error(_("could not initialize health thread"));
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
 	/*
@@ -1412,41 +1412,41 @@ static int fsmonitor_run_daemon(void)
 	 * everything using absolute paths.
 	 */
 	home = getenv("HOME");
-	if (home && *home && chdir(home))
+	ఒకవేళ (home && *home && chdir(home))
 		die_errno(_("could not cd home '%s'"), home);
 
-	err = fsmonitor_run_daemon_1(&state);
+	err = fsmonitor_నిరంతరం_daemon_1(&state);
 
-done:
-	fsmonitor_free_token_data(state.current_token_data);
-	state.current_token_data = NULL;
+పూర్తి:
+	fsmonitor_free_token_దత్తాంశం(state.current_token_దత్తాంశం);
+	state.current_token_దత్తాంశం = ఖాళీ;
 	pthread_cond_destroy(&state.cookies_cond);
-	pthread_mutex_destroy(&state.main_lock);
+	pthread_mutex_destroy(&state.main_తాళం);
 	{
-		struct hashmap_iter iter;
-		struct fsmonitor_cookie_item *cookie;
+		నిర్మాణం hashmap_iter iter;
+		నిర్మాణం fsmonitor_cookie_అంశం *cookie;
 
-		hashmap_for_each_entry(&state.cookies, &iter, cookie, entry)
-			free(cookie->name);
+		hashmap_for_each_నమోదు(&state.cookies, &iter, cookie, నమోదు_2)
+			విడుదల(cookie->name);
 		hashmap_clear_and_free(&state.cookies,
-				       struct fsmonitor_cookie_item, entry);
+				       నిర్మాణం fsmonitor_cookie_అంశం, నమోదు_2);
 	}
 	fsm_listen__dtor(&state);
 	fsm_health__dtor(&state);
 
-	ipc_server_free(state.ipc_server_data);
+	ipc_server_free(state.ipc_server_దత్తాంశం);
 
-	strbuf_release(&state.path_worktree_watch);
-	strbuf_release(&state.path_gitdir_watch);
-	strbuf_release(&state.path_cookie_prefix);
-	strbuf_release(&state.path_ipc);
+	strbuf_release(&state.మార్గం_worktree_watch);
+	strbuf_release(&state.మార్గం_gitdir_watch);
+	strbuf_release(&state.మార్గం_cookie_ఉపసర్గ);
+	strbuf_release(&state.మార్గం_ipc);
 	strbuf_release(&state.alias.alias);
-	strbuf_release(&state.alias.points_to);
+	strbuf_release(&state.alias.points_గమ్యం);
 
-	return err;
+	తిరిగి err;
 }
 
-static int try_to_run_foreground_daemon(int detach_console)
+స్థిర పూర్ణాంకం try_గమ్యం_నిరంతరం_foreground_daemon(పూర్ణాంకం detach_console)
 {
 	/*
 	 * Technically, we don't need to probe for an existing daemon
@@ -1456,20 +1456,20 @@ static int try_to_run_foreground_daemon(int detach_console)
 	 * However, this method gives us a nicer error message for a
 	 * common error case.
 	 */
-	if (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
+	ఒకవేళ (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
 		die(_("fsmonitor--daemon is already running '%s'"),
 		    the_repository->worktree);
 
-	if (fsmonitor__announce_startup) {
+	ఒకవేళ (fsmonitor__announce_startup) {
 		fprintf(stderr, _("running fsmonitor-daemon in '%s'\n"),
 			the_repository->worktree);
 		fflush(stderr);
 	}
 
-	if (detach_console) {
-#ifdef GIT_WINDOWS_NATIVE
+	ఒకవేళ (detach_console) {
+#నిర్వచితమైతే GIT_WINDOWS_NATIVE
 		FreeConsole();
-#else
+#లేకపోతే
 		/*
 		 * Create a new session so that the daemon is detached
 		 * from the parent's process group.  This prevents
@@ -1477,43 +1477,43 @@ static int try_to_run_foreground_daemon(int detach_console)
 		 * from waiting on the daemon when they wait for a
 		 * foreground command that implicitly spawned it.
 		 */
-		if (setsid() == -1)
+		ఒకవేళ (setsid() == -1)
 			warning_errno(_("setsid failed"));
-#endif
+#అయితే_ముగింపు
 	}
 
-	return !!fsmonitor_run_daemon();
+	తిరిగి !!fsmonitor_నిరంతరం_daemon();
 }
 
-static start_bg_wait_cb bg_wait_cb;
+స్థిర ప్రారంభం_bg_wait_cb bg_wait_cb;
 
-static int bg_wait_cb(const struct child_process *cp UNUSED,
-		      void *cb_data UNUSED)
+స్థిర పూర్ణాంకం bg_wait_cb(స్థిరరాశి నిర్మాణం బిడ్డ_process *cp వాడని,
+		      శూన్య *cb_దత్తాంశం వాడని)
 {
-	enum ipc_active_state s = fsmonitor_ipc__get_state();
+	గణన ipc_చురుకైన_state s = fsmonitor_ipc__get_state();
 
-	switch (s) {
-	case IPC_STATE__LISTENING:
+	ఎంపిక (s) {
+	స్థితి IPC_STATE__LISTENING:
 		/* child is "ready" */
-		return 0;
+		తిరిగి 0;
 
-	case IPC_STATE__NOT_LISTENING:
-	case IPC_STATE__PATH_NOT_FOUND:
+	స్థితి IPC_STATE__NOT_LISTENING:
+	స్థితి IPC_STATE_మార్గం_NOT_దొరికింది:
 		/* give child more time */
-		return 1;
+		తిరిగి 1;
 
-	default:
-	case IPC_STATE__INVALID_PATH:
-	case IPC_STATE__OTHER_ERROR:
+	అప్రమేయ:
+	స్థితి IPC_STATE_INVALID_మార్గం:
+	స్థితి IPC_STATE__OTHER_ERROR:
 		/* all the time in world won't help */
-		return -1;
+		తిరిగి -1;
 	}
 }
 
-static int try_to_start_background_daemon(void)
+స్థిర పూర్ణాంకం try_గమ్యం_ప్రారంభం_background_daemon(శూన్య)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
-	enum start_bg_result sbgr;
+	నిర్మాణం బిడ్డ_process cp = బిడ్డ_PROCESS_INIT;
+	గణన ప్రారంభం_bg_ఫలితం sbgr;
 
 	/*
 	 * Before we try to create a background daemon process, see
@@ -1523,11 +1523,11 @@ static int try_to_start_background_daemon(void)
 	 * of creating the background process (and not whether it
 	 * immediately exited).
 	 */
-	if (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
+	ఒకవేళ (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
 		die(_("fsmonitor--daemon is already running '%s'"),
 		    the_repository->worktree);
 
-	if (fsmonitor__announce_startup) {
+	ఒకవేళ (fsmonitor__announce_startup) {
 		fprintf(stderr, _("starting fsmonitor-daemon in '%s'\n"),
 			the_repository->worktree);
 		fflush(stderr);
@@ -1535,68 +1535,68 @@ static int try_to_start_background_daemon(void)
 
 	cp.git_cmd = 1;
 
-	strvec_push(&cp.args, "fsmonitor--daemon");
-	strvec_push(&cp.args, "run");
-	strvec_push(&cp.args, "--detach");
-	strvec_pushf(&cp.args, "--ipc-threads=%d", fsmonitor__ipc_threads);
+	strvec_నెట్టు(&cp.వాదనలు, "fsmonitor--daemon");
+	strvec_నెట్టు(&cp.వాదనలు, "run");
+	strvec_నెట్టు(&cp.వాదనలు, "--detach");
+	strvec_pushf(&cp.వాదనలు, "--ipc-threads=%d", fsmonitor_ipc_దారాలు);
 
 	cp.no_stdin = 1;
 	cp.no_stdout = 1;
 	cp.no_stderr = 1;
 	cp.close_fd_above_stderr = 1;
 
-	sbgr = start_bg_command(&cp, bg_wait_cb, NULL,
-				fsmonitor__start_timeout_sec);
+	sbgr = ప్రారంభం_bg_command(&cp, bg_wait_cb, ఖాళీ,
+				fsmonitor_ప్రారంభం_timeout_sec);
 
-	switch (sbgr) {
-	case SBGR_READY:
-		return 0;
+	ఎంపిక (sbgr) {
+	స్థితి SBGR_READY:
+		తిరిగి 0;
 
-	default:
-	case SBGR_ERROR:
-	case SBGR_CB_ERROR:
-		return error(_("daemon failed to start"));
+	అప్రమేయ:
+	స్థితి SBGR_ERROR:
+	స్థితి SBGR_CB_ERROR:
+		తిరిగి error(_("daemon failed to start"));
 
-	case SBGR_TIMEOUT:
-		return error(_("daemon not online yet"));
+	స్థితి SBGR_TIMEOUT:
+		తిరిగి error(_("daemon not online yet"));
 
-	case SBGR_DIED:
-		return error(_("daemon terminated"));
+	స్థితి SBGR_DIED:
+		తిరిగి error(_("daemon terminated"));
 	}
 }
 
-int cmd_fsmonitor__daemon(int argc,
-			  const char **argv,
-			  const char *prefix,
-			  struct repository *repo UNUSED)
+పూర్ణాంకం cmd_fsmonitor__daemon(పూర్ణాంకం argc,
+			  స్థిరరాశి అక్షరం **argv,
+			  స్థిరరాశి అక్షరం *ఉపసర్గ,
+			  నిర్మాణం repository *repo వాడని)
 {
-	const char *subcmd;
-	enum fsmonitor_reason reason;
-	int detach_console = 0;
+	స్థిరరాశి అక్షరం *subcmd;
+	గణన fsmonitor_reason reason;
+	పూర్ణాంకం detach_console = 0;
 
-	struct option options[] = {
+	నిర్మాణం option options[] = {
 		OPT_BOOL(0, "detach", &detach_console, N_("detach from console")),
 		OPT_INTEGER(0, "ipc-threads",
-			    &fsmonitor__ipc_threads,
+			    &fsmonitor_ipc_దారాలు,
 			    N_("use <n> ipc worker threads")),
 		OPT_INTEGER(0, "start-timeout",
-			    &fsmonitor__start_timeout_sec,
+			    &fsmonitor_ప్రారంభం_timeout_sec,
 			    N_("max seconds to wait for background daemon startup")),
 
-		OPT_END()
+		OPT_చివర()
 	};
 
-	repo_config(the_repository, fsmonitor_config, NULL);
+	repo_config(the_repository, fsmonitor_config, ఖాళీ);
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     builtin_fsmonitor__daemon_usage, 0);
-	if (argc != 1)
+	ఒకవేళ (argc != 1)
 		usage_with_options(builtin_fsmonitor__daemon_usage, options);
 	subcmd = argv[0];
 
-	if (fsmonitor__ipc_threads < 1)
+	ఒకవేళ (fsmonitor_ipc_దారాలు < 1)
 		die(_("invalid 'ipc-threads' value (%d)"),
-		    fsmonitor__ipc_threads);
+		    fsmonitor_ipc_దారాలు);
 
 	prepare_repo_settings(the_repository);
 	/*
@@ -1607,34 +1607,34 @@ int cmd_fsmonitor__daemon(int argc,
 	 * incompatible rather than IPC, so we can use one of the __get
 	 * routines to detect the discrepancy.
 	 */
-	fsm_settings__set_ipc(the_repository);
+	fsm_settings_సమితి_ipc(the_repository);
 
 	reason = fsm_settings__get_reason(the_repository);
-	if (reason > FSMONITOR_REASON_OK)
+	ఒకవేళ (reason > FSMONITOR_REASON_OK)
 		die("%s",
-		    fsm_settings__get_incompatible_msg(the_repository,
+		    fsm_settings_get_incompatible_సందేశం(the_repository,
 						       reason));
 
-	if (!strcmp(subcmd, "start"))
-		return !!try_to_start_background_daemon();
+	ఒకవేళ (!strcmp(subcmd, "start"))
+		తిరిగి !!try_గమ్యం_ప్రారంభం_background_daemon();
 
-	if (!strcmp(subcmd, "run"))
-		return !!try_to_run_foreground_daemon(detach_console);
+	ఒకవేళ (!strcmp(subcmd, "run"))
+		తిరిగి !!try_గమ్యం_నిరంతరం_foreground_daemon(detach_console);
 
-	if (!strcmp(subcmd, "stop"))
-		return !!do_as_client__send_stop();
+	ఒకవేళ (!strcmp(subcmd, "stop"))
+		తిరిగి !!do_as_client__send_stop();
 
-	if (!strcmp(subcmd, "status"))
-		return !!do_as_client__status();
+	ఒకవేళ (!strcmp(subcmd, "status"))
+		తిరిగి !!do_as_client_స్థితి();
 
 	die(_("Unhandled subcommand '%s'"), subcmd);
 }
 
-#else
-int cmd_fsmonitor__daemon(int argc, const char **argv, const char *prefix UNUSED, struct repository *repo UNUSED)
+#లేకపోతే
+పూర్ణాంకం cmd_fsmonitor__daemon(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ వాడని, నిర్మాణం repository *repo వాడని)
 {
-	struct option options[] = {
-		OPT_END()
+	నిర్మాణం option options[] = {
+		OPT_చివర()
 	};
 
 	show_usage_with_options_if_asked(argc, argv,
@@ -1642,4 +1642,4 @@ int cmd_fsmonitor__daemon(int argc, const char **argv, const char *prefix UNUSED
 
 	die(_("fsmonitor--daemon not supported on this platform"));
 }
-#endif
+#అయితే_ముగింపు

@@ -5,46 +5,46 @@
  * Based on git-commit.sh by Junio C Hamano and Linus Torvalds
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "lockfile.h"
-#include "cache-tree.h"
-#include "color.h"
-#include "dir.h"
-#include "editor.h"
-#include "environment.h"
-#include "diff.h"
-#include "commit.h"
-#include "add-interactive.h"
-#include "gettext.h"
-#include "revision.h"
-#include "wt-status.h"
-#include "run-command.h"
-#include "strbuf.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "path.h"
-#include "preload-index.h"
-#include "read-cache.h"
-#include "repository.h"
-#include "string-list.h"
-#include "rerere.h"
-#include "unpack-trees.h"
-#include "column.h"
-#include "sequencer.h"
-#include "sparse-index.h"
-#include "mailmap.h"
-#include "help.h"
-#include "commit-reach.h"
-#include "commit-graph.h"
-#include "pretty.h"
-#include "trailer.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "advice.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "lockfile.h"
+#అన్తర్భావ "cache-tree.h"
+#అన్తర్భావ "color.h"
+#అన్తర్భావ "dir.h"
+#అన్తర్భావ "editor.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "diff.h"
+#అన్తర్భావ "commit.h"
+#అన్తర్భావ "add-interactive.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "revision.h"
+#అన్తర్భావ "wt-status.h"
+#అన్తర్భావ "run-command.h"
+#అన్తర్భావ "strbuf.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "path.h"
+#అన్తర్భావ "preload-index.h"
+#అన్తర్భావ "read-cache.h"
+#అన్తర్భావ "repository.h"
+#అన్తర్భావ "string-list.h"
+#అన్తర్భావ "rerere.h"
+#అన్తర్భావ "unpack-trees.h"
+#అన్తర్భావ "column.h"
+#అన్తర్భావ "sequencer.h"
+#అన్తర్భావ "sparse-index.h"
+#అన్తర్భావ "mailmap.h"
+#అన్తర్భావ "help.h"
+#అన్తర్భావ "commit-reach.h"
+#అన్తర్భావ "commit-graph.h"
+#అన్తర్భావ "pretty.h"
+#అన్తర్భావ "trailer.h"
 
-static const char * const builtin_commit_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_commit_usage[] = {
 	N_("git commit [-a | --interactive | --patch] [-s] [-v] [-u[<mode>]] [--amend]\n"
 	   "           [--dry-run] [(-c | -C | --squash) <commit> | --fixup [(amend|reword):]<commit>]\n"
 	   "           [-F <file> | -m <msg>] [--reset-author] [--allow-empty]\n"
@@ -53,33 +53,33 @@ static const char * const builtin_commit_usage[] = {
 	   "           [-i | -o] [--pathspec-from-file=<file> [--pathspec-file-nul]]\n"
 	   "           [(--trailer <token>[(=|:)<value>])...] [-S[<keyid>]]\n"
 	   "           [--] [<pathspec>...]"),
-	NULL
+	ఖాళీ
 };
 
-static const char * const builtin_status_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_స్థితి_usage[] = {
 	N_("git status [<options>] [--] [<pathspec>...]"),
-	NULL
+	ఖాళీ
 };
 
-static const char empty_amend_advice[] =
+స్థిర స్థిరరాశి అక్షరం ఖాళీలు_amend_advice[] =
 N_("You asked to amend the most recent commit, but doing so would make\n"
 "it empty. You can repeat your command with --allow-empty, or you can\n"
 "remove the commit entirely with \"git reset HEAD^\".\n");
 
-static const char empty_cherry_pick_advice[] =
+స్థిర స్థిరరాశి అక్షరం ఖాళీలు_cherry_pick_advice[] =
 N_("The previous cherry-pick is now empty, possibly due to conflict resolution.\n"
 "If you wish to commit it anyway, use:\n"
 "\n"
 "    git commit --allow-empty\n"
 "\n");
 
-static const char empty_rebase_pick_advice[] =
+స్థిర స్థిరరాశి అక్షరం ఖాళీలు_rebase_pick_advice[] =
 N_("Otherwise, please use 'git rebase --skip'\n");
 
-static const char empty_cherry_pick_advice_single[] =
+స్థిర స్థిరరాశి అక్షరం ఖాళీలు_cherry_pick_advice_single[] =
 N_("Otherwise, please use 'git cherry-pick --skip'\n");
 
-static const char empty_cherry_pick_advice_multi[] =
+స్థిర స్థిరరాశి అక్షరం ఖాళీలు_cherry_pick_advice_multi[] =
 N_("and then use:\n"
 "\n"
 "    git cherry-pick --continue\n"
@@ -90,47 +90,47 @@ N_("and then use:\n"
 "    git cherry-pick --skip\n"
 "\n");
 
-static const char *color_status_slots[] = {
-	[WT_STATUS_HEADER]	  = "header",
-	[WT_STATUS_UPDATED]	  = "updated",
-	[WT_STATUS_CHANGED]	  = "changed",
-	[WT_STATUS_UNTRACKED]	  = "untracked",
-	[WT_STATUS_NOBRANCH]	  = "noBranch",
-	[WT_STATUS_UNMERGED]	  = "unmerged",
-	[WT_STATUS_LOCAL_BRANCH]  = "localBranch",
-	[WT_STATUS_REMOTE_BRANCH] = "remoteBranch",
-	[WT_STATUS_ONBRANCH]	  = "branch",
+స్థిర స్థిరరాశి అక్షరం *color_స్థితి_slots[] = {
+	[WT_స్థితి_శీర్షిక]	  = "header",
+	[WT_స్థితి_UPDATED]	  = "updated",
+	[WT_స్థితి_మారింది]	  = "changed",
+	[WT_స్థితి_UNTRACKED]	  = "untracked",
+	[WT_స్థితి_NOBRANCH]	  = "noBranch",
+	[WT_స్థితి_UNMERGED]	  = "unmerged",
+	[WT_స్థితి_LOCAL_BRANCH]  = "localBranch",
+	[WT_స్థితి_REMOTE_BRANCH] = "remoteBranch",
+	[WT_స్థితి_ONBRANCH]	  = "branch",
 };
 
-static const char *use_message_buffer;
-static struct lock_file index_lock; /* real index */
-static struct lock_file false_lock; /* used only for partial commits */
-static enum {
+స్థిర స్థిరరాశి అక్షరం *use_సందేశం_బఫరు;
+స్థిర నిర్మాణం తాళం_file సూచీ_తాళం; /* real index */
+స్థిర నిర్మాణం తాళం_file false_తాళం; /* used only for partial commits */
+స్థిర గణన {
 	COMMIT_AS_IS = 1,
-	COMMIT_NORMAL,
+	COMMIT_సాధారణ,
 	COMMIT_PARTIAL
 } commit_style;
 
-static const char *force_author;
-static char *logfile;
-static char *template_file;
+స్థిర స్థిరరాశి అక్షరం *force_author;
+స్థిర అక్షరం *logfile;
+స్థిర అక్షరం *template_file;
 /*
  * The _message variables are commit names from which to take
  * the commit message and/or authorship.
  */
-static const char *author_message, *author_message_buffer;
-static const char *edit_message, *use_message;
-static char *fixup_message, *fixup_commit, *squash_message;
-static const char *fixup_prefix;
-static int all, also, interactive, patch_interactive, only, amend, signoff;
-static struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-static int edit_flag = -1; /* unspecified */
-static int quiet, verbose, no_verify, allow_empty, dry_run, renew_authorship;
-static int config_commit_verbose = -1; /* unspecified */
-static int no_post_rewrite, allow_empty_message, pathspec_file_nul;
-static const char *untracked_files_arg, *force_date, *ignore_submodule_arg, *ignored_arg;
-static const char *sign_commit, *pathspec_from_file;
-static struct strvec trailer_args = STRVEC_INIT;
+స్థిర స్థిరరాశి అక్షరం *author_సందేశం, *author_సందేశం_బఫరు;
+స్థిర స్థిరరాశి అక్షరం *edit_సందేశం, *use_సందేశం;
+స్థిర అక్షరం *fixup_సందేశం, *fixup_commit, *squash_సందేశం;
+స్థిర స్థిరరాశి అక్షరం *fixup_ఉపసర్గ;
+స్థిర పూర్ణాంకం all, also, interactive, patch_interactive, only, amend, signoff;
+స్థిర నిర్మాణం interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+స్థిర పూర్ణాంకం edit_flag = -1; /* unspecified */
+స్థిర పూర్ణాంకం quiet, verbose, no_verify, allow_ఖాళీలు, dry_నిరంతరం, renew_authorship;
+స్థిర పూర్ణాంకం config_commit_verbose = -1; /* unspecified */
+స్థిర పూర్ణాంకం no_post_rewrite, allow_ఖాళీలు_సందేశం, pathspec_file_nul;
+స్థిర స్థిరరాశి అక్షరం *untracked_files_arg, *force_date, *ignore_submodule_arg, *ignored_arg;
+స్థిర స్థిరరాశి అక్షరం *sign_commit, *pathspec_from_file;
+స్థిర నిర్మాణం strvec trailer_వాదనలు = STRVEC_INIT;
 
 /*
  * The default commit message cleanup mode will remove the lines
@@ -139,303 +139,303 @@ static struct strvec trailer_args = STRVEC_INIT;
  * if editor is used, and only the whitespaces if the message
  * is specified explicitly.
  */
-static enum commit_msg_cleanup_mode cleanup_mode;
-static char *cleanup_config;
+స్థిర గణన commit_సందేశం_cleanup_బహుళకం cleanup_బహుళకం;
+స్థిర అక్షరం *cleanup_config;
 
-static enum commit_whence whence;
-static int use_editor = 1, include_status = 1;
-static int have_option_m;
-static struct strbuf message = STRBUF_INIT;
+స్థిర గణన commit_whence whence;
+స్థిర పూర్ణాంకం use_editor = 1, include_స్థితి = 1;
+స్థిర పూర్ణాంకం have_option_m;
+స్థిర నిర్మాణం strbuf సందేశం_2 = STRBUF_INIT;
 
-static enum wt_status_format status_format = STATUS_FORMAT_UNSPECIFIED;
+స్థిర గణన wt_స్థితి_format స్థితి_format = స్థితి_FORMAT_UNSPECIFIED;
 
-static int opt_parse_porcelain(const struct option *opt, const char *arg, int unset)
+స్థిర పూర్ణాంకం opt_parse_porcelain(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	enum wt_status_format *value = (enum wt_status_format *)opt->value;
-	if (unset)
-		*value = STATUS_FORMAT_NONE;
-	else if (!arg)
-		*value = STATUS_FORMAT_PORCELAIN;
-	else if (!strcmp(arg, "v1") || !strcmp(arg, "1"))
-		*value = STATUS_FORMAT_PORCELAIN;
-	else if (!strcmp(arg, "v2") || !strcmp(arg, "2"))
-		*value = STATUS_FORMAT_PORCELAIN_V2;
-	else
+	గణన wt_స్థితి_format *విలువ = (గణన wt_స్థితి_format *)opt->విలువ;
+	ఒకవేళ (unset)
+		*విలువ = స్థితి_FORMAT_NONE;
+	లేకపోతే ఒకవేళ (!arg)
+		*విలువ = స్థితి_FORMAT_PORCELAIN;
+	లేకపోతే ఒకవేళ (!strcmp(arg, "v1") || !strcmp(arg, "1"))
+		*విలువ = స్థితి_FORMAT_PORCELAIN;
+	లేకపోతే ఒకవేళ (!strcmp(arg, "v2") || !strcmp(arg, "2"))
+		*విలువ = స్థితి_FORMAT_PORCELAIN_V2;
+	లేకపోతే
 		die("unsupported porcelain version '%s'", arg);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int opt_parse_m(const struct option *opt, const char *arg, int unset)
+స్థిర పూర్ణాంకం opt_parse_m(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	struct strbuf *buf = opt->value;
-	if (unset) {
+	నిర్మాణం strbuf *buf = opt->విలువ;
+	ఒకవేళ (unset) {
 		have_option_m = 0;
 		strbuf_setlen(buf, 0);
-	} else {
+	} లేకపోతే {
 		have_option_m = 1;
-		if (buf->len)
+		ఒకవేళ (buf->len)
 			strbuf_addch(buf, '\n');
 		strbuf_addstr(buf, arg);
-		strbuf_complete_line(buf);
+		strbuf_complete_పంక్తి(buf);
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static int opt_parse_rename_score(const struct option *opt, const char *arg, int unset)
+స్థిర పూర్ణాంకం opt_parse_rename_score(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	const char **value = opt->value;
+	స్థిరరాశి అక్షరం **విలువ = opt->విలువ;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (arg != NULL && *arg == '=')
+	ఒకవేళ (arg != ఖాళీ && *arg == '=')
 		arg = arg + 1;
 
-	*value = arg;
-	return 0;
+	*విలువ = arg;
+	తిరిగి 0;
 }
 
-static void determine_whence(struct wt_status *s)
+స్థిర శూన్య determine_whence(నిర్మాణం wt_స్థితి *s)
 {
-	if (file_exists(git_path_merge_head(the_repository)))
-		whence = FROM_MERGE;
-	else if (!sequencer_determine_whence(the_repository, &whence))
+	ఒకవేళ (file_exists(git_మార్గం_విలీనం_తల(the_repository)))
+		whence = FROM_విలీనం;
+	లేకపోతే ఒకవేళ (!sequencer_determine_whence(the_repository, &whence))
 		whence = FROM_COMMIT;
-	if (s)
+	ఒకవేళ (s)
 		s->whence = whence;
 }
 
-static void status_init_config(struct wt_status *s, config_fn_t fn)
+స్థిర శూన్య స్థితి_init_config(నిర్మాణం wt_స్థితి *s, config_fn_t fn)
 {
-	wt_status_prepare(the_repository, s);
+	wt_స్థితి_prepare(the_repository, s);
 	init_diff_ui_defaults();
 	repo_config(the_repository, fn, s);
 	determine_whence(s);
-	s->hints = advice_enabled(ADVICE_STATUS_HINTS); /* must come after repo_config() */
+	s->hints = advice_enabled(ADVICE_స్థితి_HINTS); /* must come after repo_config() */
 }
 
-static void rollback_index_files(void)
+స్థిర శూన్య rollback_సూచీ_files(శూన్య)
 {
-	switch (commit_style) {
-	case COMMIT_AS_IS:
-		break; /* nothing to do */
-	case COMMIT_NORMAL:
-		rollback_lock_file(&index_lock);
-		break;
-	case COMMIT_PARTIAL:
-		rollback_lock_file(&index_lock);
-		rollback_lock_file(&false_lock);
-		break;
+	ఎంపిక (commit_style) {
+	స్థితి COMMIT_AS_IS:
+		ఆపు; /* nothing to do */
+	స్థితి COMMIT_సాధారణ:
+		rollback_తాళం_file(&సూచీ_తాళం);
+		ఆపు;
+	స్థితి COMMIT_PARTIAL:
+		rollback_తాళం_file(&సూచీ_తాళం);
+		rollback_తాళం_file(&false_తాళం);
+		ఆపు;
 	}
 }
 
-static int commit_index_files(void)
+స్థిర పూర్ణాంకం commit_సూచీ_files(శూన్య)
 {
-	int err = 0;
+	పూర్ణాంకం err = 0;
 
-	switch (commit_style) {
-	case COMMIT_AS_IS:
-		break; /* nothing to do */
-	case COMMIT_NORMAL:
-		err = commit_lock_file(&index_lock);
-		break;
-	case COMMIT_PARTIAL:
-		err = commit_lock_file(&index_lock);
-		rollback_lock_file(&false_lock);
-		break;
+	ఎంపిక (commit_style) {
+	స్థితి COMMIT_AS_IS:
+		ఆపు; /* nothing to do */
+	స్థితి COMMIT_సాధారణ:
+		err = commit_తాళం_file(&సూచీ_తాళం);
+		ఆపు;
+	స్థితి COMMIT_PARTIAL:
+		err = commit_తాళం_file(&సూచీ_తాళం);
+		rollback_తాళం_file(&false_తాళం);
+		ఆపు;
 	}
 
-	return err;
+	తిరిగి err;
 }
 
 /*
  * Take a union of paths in the index and the named tree (typically, "HEAD"),
  * and return the paths that match the given pattern in list.
  */
-static int list_paths(struct string_list *list, const char *with_tree,
-		      const struct pathspec *pattern)
+స్థిర పూర్ణాంకం list_paths(నిర్మాణం string_list *list, స్థిరరాశి అక్షరం *with_వృక్షం,
+		      స్థిరరాశి నిర్మాణం pathspec *నమూనా)
 {
-	int i, ret;
-	char *m;
+	పూర్ణాంకం i, ret;
+	అక్షరం *m;
 
-	if (!pattern->nr)
-		return 0;
+	ఒకవేళ (!నమూనా->nr)
+		తిరిగి 0;
 
-	m = xcalloc(1, pattern->nr);
+	m = xcalloc(1, నమూనా->nr);
 
-	if (with_tree) {
-		char *max_prefix = common_prefix(pattern);
-		overlay_tree_on_index(the_repository->index, with_tree, max_prefix);
-		free(max_prefix);
+	ఒకవేళ (with_వృక్షం) {
+		అక్షరం *max_ఉపసర్గ = common_ఉపసర్గ(నమూనా);
+		overlay_వృక్షం_on_సూచీ(the_repository->సూచీ, with_వృక్షం, max_ఉపసర్గ);
+		విడుదల(max_ఉపసర్గ);
 	}
 
 	/* TODO: audit for interaction with sparse-index. */
-	ensure_full_index(the_repository->index);
-	for (i = 0; i < the_repository->index->cache_nr; i++) {
-		const struct cache_entry *ce = the_repository->index->cache[i];
-		struct string_list_item *item;
+	ensure_నిండిన_సూచీ(the_repository->సూచీ);
+	కొరకు (i = 0; i < the_repository->సూచీ->cache_nr; i++) {
+		స్థిరరాశి నిర్మాణం cache_నమోదు *ce = the_repository->సూచీ->cache[i];
+		నిర్మాణం string_list_అంశం *అంశం;
 
-		if (ce->ce_flags & CE_UPDATE)
-			continue;
-		if (!ce_path_match(the_repository->index, ce, pattern, m))
-			continue;
-		item = string_list_insert(list, ce->name);
-		if (ce_skip_worktree(ce))
-			item->util = item; /* better a valid pointer than a fake one */
+		ఒకవేళ (ce->ce_flags & CE_UPDATE)
+			కొనసాగు;
+		ఒకవేళ (!ce_మార్గం_సరిపోలిక(the_repository->సూచీ, ce, నమూనా, m))
+			కొనసాగు;
+		అంశం = string_list_చొప్పించు(list, ce->name);
+		ఒకవేళ (ce_skip_worktree(ce))
+			అంశం->util = అంశం; /* better a valid pointer than a fake one */
 	}
 
-	ret = report_path_error(m, pattern);
-	free(m);
-	return ret;
+	ret = report_మార్గం_error(m, నమూనా);
+	విడుదల(m);
+	తిరిగి ret;
 }
 
-static void add_remove_files(struct string_list *list)
+స్థిర శూన్య కూడు_remove_files(నిర్మాణం string_list *list)
 {
-	int i;
-	for (i = 0; i < list->nr; i++) {
-		struct stat st;
-		struct string_list_item *p = &(list->items[i]);
+	పూర్ణాంకం i;
+	కొరకు (i = 0; i < list->nr; i++) {
+		నిర్మాణం stat st;
+		నిర్మాణం string_list_అంశం *p = &(list->వస్తువులు[i]);
 
 		/* p->util is skip-worktree */
-		if (p->util)
-			continue;
+		ఒకవేళ (p->util)
+			కొనసాగు;
 
-		if (!lstat(p->string, &st)) {
-			if (add_to_index(the_repository->index, p->string, &st, 0))
+		ఒకవేళ (!lstat(p->string, &st)) {
+			ఒకవేళ (కూడు_గమ్యం_సూచీ(the_repository->సూచీ, p->string, &st, 0))
 				die(_("updating files failed"));
-		} else
-			remove_file_from_index(the_repository->index, p->string);
+		} లేకపోతే
+			remove_file_from_సూచీ(the_repository->సూచీ, p->string);
 	}
 }
 
-static void create_base_index(const struct commit *current_head)
+స్థిర శూన్య create_పునాది_సూచీ(స్థిరరాశి నిర్మాణం commit *current_తల)
 {
-	struct tree *tree;
-	struct unpack_trees_options opts;
-	struct tree_desc t;
+	నిర్మాణం వృక్షం *వృక్షం;
+	నిర్మాణం unpack_trees_options opts;
+	నిర్మాణం వృక్షం_desc t;
 
-	if (!current_head) {
-		discard_index(the_repository->index);
-		return;
+	ఒకవేళ (!current_తల) {
+		discard_సూచీ(the_repository->సూచీ);
+		తిరిగి;
 	}
 
-	memset(&opts, 0, sizeof(opts));
-	opts.head_idx = 1;
-	opts.index_only = 1;
-	opts.merge = 1;
-	opts.src_index = the_repository->index;
-	opts.dst_index = the_repository->index;
+	memset(&opts, 0, పరిమాణం(opts));
+	opts.తల_idx = 1;
+	opts.సూచీ_only = 1;
+	opts.విలీనం = 1;
+	opts.src_సూచీ = the_repository->సూచీ;
+	opts.dst_సూచీ = the_repository->సూచీ;
 
-	opts.fn = oneway_merge;
-	tree = repo_parse_tree_indirect(the_repository,
-					&current_head->object.oid);
-	if (!tree)
+	opts.fn = oneway_విలీనం;
+	వృక్షం = repo_parse_వృక్షం_పరోక్ష(the_repository,
+					&current_తల->object.oid);
+	ఒకవేళ (!వృక్షం)
 		die(_("failed to unpack HEAD tree object"));
-	if (repo_parse_tree(the_repository, tree) < 0)
-		exit(128);
-	init_tree_desc(&t, &tree->object.oid, tree->buffer, tree->size);
-	if (unpack_trees(1, &t, &opts))
-		exit(128); /* We've already reported the error, finish dying */
+	ఒకవేళ (repo_parse_వృక్షం(the_repository, వృక్షం) < 0)
+		నిష్క్రమించు(128);
+	init_వృక్షం_desc(&t, &వృక్షం->object.oid, వృక్షం->బఫరు, వృక్షం->కొలత);
+	ఒకవేళ (unpack_trees(1, &t, &opts))
+		నిష్క్రమించు(128); /* We've already reported the error, finish dying */
 }
 
-static void refresh_cache_or_die(int refresh_flags)
+స్థిర శూన్య refresh_cache_or_die(పూర్ణాంకం refresh_flags)
 {
 	/*
 	 * refresh_flags contains REFRESH_QUIET, so the only errors
 	 * are for unmerged entries.
 	 */
-	if (refresh_index(the_repository->index, refresh_flags | REFRESH_IN_PORCELAIN, NULL, NULL, NULL))
+	ఒకవేళ (refresh_సూచీ(the_repository->సూచీ, refresh_flags | REFRESH_లోపల_PORCELAIN, ఖాళీ, ఖాళీ, ఖాళీ))
 		die_resolve_conflict("commit");
 }
 
-static const char *prepare_index(const char **argv, const char *prefix,
-				 const struct commit *current_head, int is_status)
+స్థిర స్థిరరాశి అక్షరం *prepare_సూచీ(స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+				 స్థిరరాశి నిర్మాణం commit *current_తల, పూర్ణాంకం is_స్థితి)
 {
-	struct string_list partial = STRING_LIST_INIT_DUP;
-	struct pathspec pathspec;
-	int refresh_flags = REFRESH_QUIET;
-	const char *ret;
-	char *path = NULL;
+	నిర్మాణం string_list partial = STRING_LIST_INIT_DUP;
+	నిర్మాణం pathspec pathspec;
+	పూర్ణాంకం refresh_flags = REFRESH_QUIET;
+	స్థిరరాశి అక్షరం *ret;
+	అక్షరం *మార్గం = ఖాళీ;
 
-	if (interactive_opts.context < -1)
+	ఒకవేళ (interactive_opts.context < -1)
 		die(_("'%s' cannot be negative"), "--unified");
-	if (interactive_opts.interhunkcontext < -1)
+	ఒకవేళ (interactive_opts.interhunkcontext < -1)
 		die(_("'%s' cannot be negative"), "--inter-hunk-context");
 
-	if (is_status)
+	ఒకవేళ (is_స్థితి)
 		refresh_flags |= REFRESH_UNMERGED;
 	parse_pathspec(&pathspec, 0,
-		       PATHSPEC_PREFER_FULL,
-		       prefix, argv);
+		       PATHSPEC_PREFER_నిండిన,
+		       ఉపసర్గ, argv);
 
-	if (pathspec_from_file) {
-		if (interactive)
+	ఒకవేళ (pathspec_from_file) {
+		ఒకవేళ (interactive)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--interactive/--patch");
 
-		if (all)
+		ఒకవేళ (all)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "-a");
 
-		if (pathspec.nr)
+		ఒకవేళ (pathspec.nr)
 			die(_("'%s' and pathspec arguments cannot be used together"), "--pathspec-from-file");
 
 		parse_pathspec_file(&pathspec, 0,
-				    PATHSPEC_PREFER_FULL,
-				    prefix, pathspec_from_file, pathspec_file_nul);
-	} else if (pathspec_file_nul) {
+				    PATHSPEC_PREFER_నిండిన,
+				    ఉపసర్గ, pathspec_from_file, pathspec_file_nul);
+	} లేకపోతే ఒకవేళ (pathspec_file_nul) {
 		die(_("the option '%s' requires '%s'"), "--pathspec-file-nul", "--pathspec-from-file");
 	}
 
-	if (!pathspec.nr && (also || (only && !allow_empty &&
-	    (!amend || (fixup_message && strcmp(fixup_prefix, "amend"))))))
+	ఒకవేళ (!pathspec.nr && (also || (only && !allow_ఖాళీలు &&
+	    (!amend || (fixup_సందేశం && strcmp(fixup_ఉపసర్గ, "amend"))))))
 		die(_("No paths with --include/--only does not make sense."));
 
-	if (repo_read_index_preload(the_repository, &pathspec, 0) < 0)
+	ఒకవేళ (repo_read_సూచీ_preload(the_repository, &pathspec, 0) < 0)
 		die(_("index file corrupt"));
 
-	if (interactive) {
-		char *old_index_env = NULL, *old_repo_index_file;
-		repo_hold_locked_index(the_repository, &index_lock,
-				       LOCK_DIE_ON_ERROR);
+	ఒకవేళ (interactive) {
+		అక్షరం *old_సూచీ_env = ఖాళీ, *old_repo_సూచీ_file;
+		repo_hold_locked_సూచీ(the_repository, &సూచీ_తాళం,
+				       తాళం_DIE_ON_ERROR);
 
 		refresh_cache_or_die(refresh_flags);
 
-		if (write_locked_index(the_repository->index, &index_lock, 0))
+		ఒకవేళ (write_locked_సూచీ(the_repository->సూచీ, &సూచీ_తాళం, 0))
 			die(_("unable to create temporary index"));
 
-		old_repo_index_file = the_repository->index_file;
-		the_repository->index_file =
-			(char *)get_lock_file_path(&index_lock);
-		old_index_env = xstrdup_or_null(getenv(INDEX_ENVIRONMENT));
-		setenv(INDEX_ENVIRONMENT, the_repository->index_file, 1);
+		old_repo_సూచీ_file = the_repository->సూచీ_file;
+		the_repository->సూచీ_file =
+			(అక్షరం *)get_తాళం_file_మార్గం(&సూచీ_తాళం);
+		old_సూచీ_env = xstrdup_or_null(getenv(సూచీ_ENVIRONMENT));
+		setenv(సూచీ_ENVIRONMENT, the_repository->సూచీ_file, 1);
 
-		if (interactive_add(the_repository, argv, prefix, patch_interactive, &interactive_opts) != 0)
+		ఒకవేళ (interactive_కూడు(the_repository, argv, ఉపసర్గ, patch_interactive, &interactive_opts) != 0)
 			die(_("interactive add failed"));
 
-		the_repository->index_file = old_repo_index_file;
-		if (old_index_env && *old_index_env)
-			setenv(INDEX_ENVIRONMENT, old_index_env, 1);
-		else
-			unsetenv(INDEX_ENVIRONMENT);
-		FREE_AND_NULL(old_index_env);
+		the_repository->సూచీ_file = old_repo_సూచీ_file;
+		ఒకవేళ (old_సూచీ_env && *old_సూచీ_env)
+			setenv(సూచీ_ENVIRONMENT, old_సూచీ_env, 1);
+		లేకపోతే
+			unsetenv(సూచీ_ENVIRONMENT);
+		FREE_AND_NULL(old_సూచీ_env);
 
-		discard_index(the_repository->index);
-		read_index_from(the_repository->index, get_lock_file_path(&index_lock),
+		discard_సూచీ(the_repository->సూచీ);
+		read_సూచీ_from(the_repository->సూచీ, get_తాళం_file_మార్గం(&సూచీ_తాళం),
 				repo_get_git_dir(the_repository));
-		if (cache_tree_update(the_repository->index, WRITE_TREE_SILENT) == 0) {
-			if (reopen_lock_file(&index_lock) < 0)
+		ఒకవేళ (cache_వృక్షం_update(the_repository->సూచీ, WRITE_వృక్షం_SILENT) == 0) {
+			ఒకవేళ (reopen_తాళం_file(&సూచీ_తాళం) < 0)
 				die(_("unable to write index file"));
-			if (write_locked_index(the_repository->index, &index_lock, 0))
+			ఒకవేళ (write_locked_సూచీ(the_repository->సూచీ, &సూచీ_తాళం, 0))
 				die(_("unable to update temporary index"));
-		} else
+		} లేకపోతే
 			warning(_("Failed to update main cache tree"));
 
-		commit_style = COMMIT_NORMAL;
-		ret = get_lock_file_path(&index_lock);
-		goto out;
-	} else {
-		if (interactive_opts.context != -1)
+		commit_style = COMMIT_సాధారణ;
+		ret = get_తాళం_file_మార్గం(&సూచీ_తాళం);
+		వెళ్ళు బహిర్గతం;
+	} లేకపోతే {
+		ఒకవేళ (interactive_opts.context != -1)
 			die(_("the option '%s' requires '%s'"), "--unified", "--interactive/--patch");
-		if (interactive_opts.interhunkcontext != -1)
+		ఒకవేళ (interactive_opts.interhunkcontext != -1)
 			die(_("the option '%s' requires '%s'"), "--inter-hunk-context", "--interactive/--patch");
 	}
 
@@ -451,23 +451,23 @@ static const char *prepare_index(const char **argv, const char *prefix,
 	 * (A) if all goes well, commit the real index;
 	 * (B) on failure, rollback the real index.
 	 */
-	if (all || (also && pathspec.nr)) {
-		char *ps_matched = xcalloc(pathspec.nr, 1);
-		repo_hold_locked_index(the_repository, &index_lock,
-				       LOCK_DIE_ON_ERROR);
-		add_files_to_cache(the_repository, also ? prefix : NULL,
+	ఒకవేళ (all || (also && pathspec.nr)) {
+		అక్షరం *ps_matched = xcalloc(pathspec.nr, 1);
+		repo_hold_locked_సూచీ(the_repository, &సూచీ_తాళం,
+				       తాళం_DIE_ON_ERROR);
+		కూడు_files_గమ్యం_cache(the_repository, also ? ఉపసర్గ : ఖాళీ,
 				   &pathspec, ps_matched, 0, 0, 0 );
-		if (!all && report_path_error(ps_matched, &pathspec))
-			exit(128);
+		ఒకవేళ (!all && report_మార్గం_error(ps_matched, &pathspec))
+			నిష్క్రమించు(128);
 
 		refresh_cache_or_die(refresh_flags);
-		cache_tree_update(the_repository->index, WRITE_TREE_SILENT);
-		if (write_locked_index(the_repository->index, &index_lock, 0))
+		cache_వృక్షం_update(the_repository->సూచీ, WRITE_వృక్షం_SILENT);
+		ఒకవేళ (write_locked_సూచీ(the_repository->సూచీ, &సూచీ_తాళం, 0))
 			die(_("unable to write new index file"));
-		commit_style = COMMIT_NORMAL;
-		ret = get_lock_file_path(&index_lock);
-		free(ps_matched);
-		goto out;
+		commit_style = COMMIT_సాధారణ;
+		ret = get_తాళం_file_మార్గం(&సూచీ_తాళం);
+		విడుదల(ps_matched);
+		వెళ్ళు బహిర్గతం;
 	}
 
 	/*
@@ -479,19 +479,19 @@ static const char *prepare_index(const char **argv, const char *prefix,
 	 * and create commit from the_index.
 	 * We still need to refresh the index here.
 	 */
-	if (!only && !pathspec.nr) {
-		repo_hold_locked_index(the_repository, &index_lock,
-				       LOCK_DIE_ON_ERROR);
+	ఒకవేళ (!only && !pathspec.nr) {
+		repo_hold_locked_సూచీ(the_repository, &సూచీ_తాళం,
+				       తాళం_DIE_ON_ERROR);
 		refresh_cache_or_die(refresh_flags);
-		if (the_repository->index->cache_changed
-		    || !cache_tree_fully_valid(the_repository->index))
-			cache_tree_update(the_repository->index, WRITE_TREE_SILENT);
-		if (write_locked_index(the_repository->index, &index_lock,
-				       COMMIT_LOCK | SKIP_IF_UNCHANGED))
+		ఒకవేళ (the_repository->సూచీ->cache_మారింది
+		    || !cache_వృక్షం_fully_valid(the_repository->సూచీ))
+			cache_వృక్షం_update(the_repository->సూచీ, WRITE_వృక్షం_SILENT);
+		ఒకవేళ (write_locked_సూచీ(the_repository->సూచీ, &సూచీ_తాళం,
+				       COMMIT_తాళం | SKIP_IF_UNCHANGED))
 			die(_("unable to write new index file"));
 		commit_style = COMMIT_AS_IS;
-		ret = repo_get_index_file(the_repository);
-		goto out;
+		ret = repo_get_సూచీ_file(the_repository);
+		వెళ్ళు బహిర్గతం;
 	}
 
 	/*
@@ -515,325 +515,325 @@ static const char *prepare_index(const char **argv, const char *prefix,
 	 */
 	commit_style = COMMIT_PARTIAL;
 
-	if (whence != FROM_COMMIT) {
-		if (whence == FROM_MERGE)
+	ఒకవేళ (whence != FROM_COMMIT) {
+		ఒకవేళ (whence == FROM_విలీనం)
 			die(_("cannot do a partial commit during a merge."));
-		else if (is_from_cherry_pick(whence))
+		లేకపోతే ఒకవేళ (is_from_cherry_pick(whence))
 			die(_("cannot do a partial commit during a cherry-pick."));
-		else if (is_from_rebase(whence))
+		లేకపోతే ఒకవేళ (is_from_rebase(whence))
 			die(_("cannot do a partial commit during a rebase."));
 	}
 
-	if (list_paths(&partial, !current_head ? NULL : "HEAD", &pathspec))
-		exit(1);
+	ఒకవేళ (list_paths(&partial, !current_తల ? ఖాళీ : "HEAD", &pathspec))
+		నిష్క్రమించు(1);
 
-	discard_index(the_repository->index);
-	if (repo_read_index(the_repository) < 0)
+	discard_సూచీ(the_repository->సూచీ);
+	ఒకవేళ (repo_read_సూచీ(the_repository) < 0)
 		die(_("cannot read the index"));
 
-	repo_hold_locked_index(the_repository, &index_lock, LOCK_DIE_ON_ERROR);
-	add_remove_files(&partial);
-	refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL);
-	cache_tree_update(the_repository->index, WRITE_TREE_SILENT);
-	if (write_locked_index(the_repository->index, &index_lock, 0))
+	repo_hold_locked_సూచీ(the_repository, &సూచీ_తాళం, తాళం_DIE_ON_ERROR);
+	కూడు_remove_files(&partial);
+	refresh_సూచీ(the_repository->సూచీ, REFRESH_QUIET, ఖాళీ, ఖాళీ, ఖాళీ);
+	cache_వృక్షం_update(the_repository->సూచీ, WRITE_వృక్షం_SILENT);
+	ఒకవేళ (write_locked_సూచీ(the_repository->సూచీ, &సూచీ_తాళం, 0))
 		die(_("unable to write new index file"));
 
-	path = repo_git_path(the_repository, "next-index-%"PRIuMAX,
+	మార్గం = repo_git_మార్గం(the_repository, "next-index-%"PRIuMAX,
 			     (uintmax_t) getpid());
-	hold_lock_file_for_update(&false_lock, path,
-				  LOCK_DIE_ON_ERROR);
+	hold_తాళం_file_for_update(&false_తాళం, మార్గం,
+				  తాళం_DIE_ON_ERROR);
 
-	create_base_index(current_head);
-	add_remove_files(&partial);
-	refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL);
+	create_పునాది_సూచీ(current_తల);
+	కూడు_remove_files(&partial);
+	refresh_సూచీ(the_repository->సూచీ, REFRESH_QUIET, ఖాళీ, ఖాళీ, ఖాళీ);
 
-	if (write_locked_index(the_repository->index, &false_lock, 0))
+	ఒకవేళ (write_locked_సూచీ(the_repository->సూచీ, &false_తాళం, 0))
 		die(_("unable to write temporary index file"));
 
-	discard_index(the_repository->index);
-	ret = get_lock_file_path(&false_lock);
-	read_index_from(the_repository->index, ret, repo_get_git_dir(the_repository));
-out:
+	discard_సూచీ(the_repository->సూచీ);
+	ret = get_తాళం_file_మార్గం(&false_తాళం);
+	read_సూచీ_from(the_repository->సూచీ, ret, repo_get_git_dir(the_repository));
+బహిర్గతం:
 	string_list_clear(&partial, 0);
 	clear_pathspec(&pathspec);
-	free(path);
-	return ret;
+	విడుదల(మార్గం);
+	తిరిగి ret;
 }
 
-static int run_status(FILE *fp, const char *index_file, const char *prefix, int nowarn,
-		      struct wt_status *s)
+స్థిర పూర్ణాంకం నిరంతరం_స్థితి(FILE *fp, స్థిరరాశి అక్షరం *సూచీ_file, స్థిరరాశి అక్షరం *ఉపసర్గ, పూర్ణాంకం nowarn,
+		      నిర్మాణం wt_స్థితి *s)
 {
-	struct object_id oid;
+	నిర్మాణం object_id oid;
 
-	if (s->relative_paths)
-		s->prefix = prefix;
+	ఒకవేళ (s->relative_paths)
+		s->ఉపసర్గ = ఉపసర్గ;
 
-	if (amend) {
+	ఒకవేళ (amend) {
 		s->amend = 1;
 		s->reference = "HEAD^1";
 	}
 	s->verbose = verbose;
-	s->index_file = index_file;
+	s->సూచీ_file = సూచీ_file;
 	s->fp = fp;
 	s->nowarn = nowarn;
 	s->is_initial = repo_get_oid(the_repository, s->reference, &oid) ? 1 : 0;
-	if (!s->is_initial)
+	ఒకవేళ (!s->is_initial)
 		oidcpy(&s->oid_commit, &oid);
-	s->status_format = status_format;
+	s->స్థితి_format = స్థితి_format;
 	s->ignore_submodule_arg = ignore_submodule_arg;
 
-	wt_status_collect(s);
-	wt_status_print(s);
-	wt_status_collect_free_buffers(s);
+	wt_స్థితి_collect(s);
+	wt_స్థితి_print(s);
+	wt_స్థితి_collect_free_buffers(s);
 
-	return s->committable;
+	తిరిగి s->committable;
 }
 
-static int is_a_merge(const struct commit *current_head)
+స్థిర పూర్ణాంకం is_a_విలీనం(స్థిరరాశి నిర్మాణం commit *current_తల)
 {
-	return !!(current_head->parents && current_head->parents->next);
+	తిరిగి !!(current_తల->parents && current_తల->parents->తదుపరి);
 }
 
-static void assert_split_ident(struct ident_split *id, const struct strbuf *buf)
+స్థిర శూన్య assert_విభజించు_ident(నిర్మాణం ident_విభజించు *id, స్థిరరాశి నిర్మాణం strbuf *buf)
 {
-	if (split_ident_line(id, buf->buf, buf->len) || !id->date_begin)
+	ఒకవేళ (విభజించు_ident_పంక్తి(id, buf->buf, buf->len) || !id->date_begin)
 		BUG("unable to parse our own ident: %s", buf->buf);
 }
 
-static void export_one(const char *var, const char *s, const char *e, int hack)
+స్థిర శూన్య export_one(స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *s, స్థిరరాశి అక్షరం *e, పూర్ణాంకం hack)
 {
-	struct strbuf buf = STRBUF_INIT;
-	if (hack)
+	నిర్మాణం strbuf buf = STRBUF_INIT;
+	ఒకవేళ (hack)
 		strbuf_addch(&buf, hack);
-	strbuf_add(&buf, s, e - s);
+	strbuf_కూడు(&buf, s, e - s);
 	setenv(var, buf.buf, 1);
 	strbuf_release(&buf);
 }
 
-static int parse_force_date(const char *in, struct strbuf *out)
+స్థిర పూర్ణాంకం parse_force_date(స్థిరరాశి అక్షరం *లోపల, నిర్మాణం strbuf *బహిర్గతం)
 {
-	strbuf_addch(out, '@');
+	strbuf_addch(బహిర్గతం, '@');
 
-	if (parse_date(in, out) < 0) {
-		int errors = 0;
-		unsigned long t = approxidate_careful(in, &errors);
-		if (errors)
-			return -1;
-		strbuf_addf(out, "%lu", t);
+	ఒకవేళ (parse_date(లోపల, బహిర్గతం) < 0) {
+		పూర్ణాంకం errors = 0;
+		గుర్తులేని దీర్ఘ t = approxidate_careful(లోపల, &errors);
+		ఒకవేళ (errors)
+			తిరిగి -1;
+		strbuf_addf(బహిర్గతం, "%lu", t);
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
-static void set_ident_var(char **buf, char *val)
+స్థిర శూన్య సమితి_ident_var(అక్షరం **buf, అక్షరం *val)
 {
-	free(*buf);
+	విడుదల(*buf);
 	*buf = val;
 }
 
-static void determine_author_info(struct strbuf *author_ident)
+స్థిర శూన్య determine_author_info(నిర్మాణం strbuf *author_ident)
 {
-	char *name, *email, *date;
-	struct ident_split author;
+	అక్షరం *name, *email, *date;
+	నిర్మాణం ident_విభజించు author;
 
 	name = xstrdup_or_null(getenv("GIT_AUTHOR_NAME"));
 	email = xstrdup_or_null(getenv("GIT_AUTHOR_EMAIL"));
 	date = xstrdup_or_null(getenv("GIT_AUTHOR_DATE"));
 
-	if (author_message) {
-		struct ident_split ident;
-		size_t len;
-		const char *a;
+	ఒకవేళ (author_సందేశం) {
+		నిర్మాణం ident_విభజించు ident;
+		కొలత_t len;
+		స్థిరరాశి అక్షరం *a;
 
-		a = find_commit_header(author_message_buffer, "author", &len);
-		if (!a)
-			die(_("commit '%s' lacks author header"), author_message);
-		if (split_ident_line(&ident, a, len) < 0)
-			die(_("commit '%s' has malformed author line"), author_message);
+		a = కనుగొను_commit_శీర్షిక(author_సందేశం_బఫరు, "author", &len);
+		ఒకవేళ (!a)
+			die(_("commit '%s' lacks author header"), author_సందేశం);
+		ఒకవేళ (విభజించు_ident_పంక్తి(&ident, a, len) < 0)
+			die(_("commit '%s' has malformed author line"), author_సందేశం);
 
-		set_ident_var(&name, xmemdupz(ident.name_begin, ident.name_end - ident.name_begin));
-		set_ident_var(&email, xmemdupz(ident.mail_begin, ident.mail_end - ident.mail_begin));
+		సమితి_ident_var(&name, xmemdupz(ident.name_begin, ident.name_చివర - ident.name_begin));
+		సమితి_ident_var(&email, xmemdupz(ident.mail_begin, ident.mail_చివర - ident.mail_begin));
 
-		if (ident.date_begin) {
-			struct strbuf date_buf = STRBUF_INIT;
+		ఒకవేళ (ident.date_begin) {
+			నిర్మాణం strbuf date_buf = STRBUF_INIT;
 			strbuf_addch(&date_buf, '@');
-			strbuf_add(&date_buf, ident.date_begin, ident.date_end - ident.date_begin);
+			strbuf_కూడు(&date_buf, ident.date_begin, ident.date_చివర - ident.date_begin);
 			strbuf_addch(&date_buf, ' ');
-			strbuf_add(&date_buf, ident.tz_begin, ident.tz_end - ident.tz_begin);
-			set_ident_var(&date, strbuf_detach(&date_buf, NULL));
+			strbuf_కూడు(&date_buf, ident.tz_begin, ident.tz_చివర - ident.tz_begin);
+			సమితి_ident_var(&date, strbuf_detach(&date_buf, ఖాళీ));
 		}
 	}
 
-	if (force_author) {
-		struct ident_split ident;
+	ఒకవేళ (force_author) {
+		నిర్మాణం ident_విభజించు ident;
 
-		if (split_ident_line(&ident, force_author, strlen(force_author)) < 0)
+		ఒకవేళ (విభజించు_ident_పంక్తి(&ident, force_author, అక్షరశ్రేణి_పొడవు(force_author)) < 0)
 			die(_("malformed --author parameter"));
-		set_ident_var(&name, xmemdupz(ident.name_begin, ident.name_end - ident.name_begin));
-		set_ident_var(&email, xmemdupz(ident.mail_begin, ident.mail_end - ident.mail_begin));
+		సమితి_ident_var(&name, xmemdupz(ident.name_begin, ident.name_చివర - ident.name_begin));
+		సమితి_ident_var(&email, xmemdupz(ident.mail_begin, ident.mail_చివర - ident.mail_begin));
 	}
 
-	if (force_date) {
-		struct strbuf date_buf = STRBUF_INIT;
-		if (parse_force_date(force_date, &date_buf))
+	ఒకవేళ (force_date) {
+		నిర్మాణం strbuf date_buf = STRBUF_INIT;
+		ఒకవేళ (parse_force_date(force_date, &date_buf))
 			die(_("invalid date format: %s"), force_date);
-		set_ident_var(&date, strbuf_detach(&date_buf, NULL));
+		సమితి_ident_var(&date, strbuf_detach(&date_buf, ఖాళీ));
 	}
 
 	strbuf_addstr(author_ident, fmt_ident(name, email, WANT_AUTHOR_IDENT, date,
 				IDENT_STRICT));
-	assert_split_ident(&author, author_ident);
-	export_one("GIT_AUTHOR_NAME", author.name_begin, author.name_end, 0);
-	export_one("GIT_AUTHOR_EMAIL", author.mail_begin, author.mail_end, 0);
-	export_one("GIT_AUTHOR_DATE", author.date_begin, author.tz_end, '@');
-	free(name);
-	free(email);
-	free(date);
+	assert_విభజించు_ident(&author, author_ident);
+	export_one("GIT_AUTHOR_NAME", author.name_begin, author.name_చివర, 0);
+	export_one("GIT_AUTHOR_EMAIL", author.mail_begin, author.mail_చివర, 0);
+	export_one("GIT_AUTHOR_DATE", author.date_begin, author.tz_చివర, '@');
+	విడుదల(name);
+	విడుదల(email);
+	విడుదల(date);
 }
 
-static int author_date_is_interesting(void)
+స్థిర పూర్ణాంకం author_date_is_interesting(శూన్య)
 {
-	return author_message || force_date;
+	తిరిగి author_సందేశం || force_date;
 }
 
-#ifndef WITH_BREAKING_CHANGES
-static void adjust_comment_line_char(const struct strbuf *sb)
+#నిర్వచితం_కాకపోతే WITH_BREAKING_CHANGES
+స్థిర శూన్య adjust_comment_పంక్తి_char(స్థిరరాశి నిర్మాణం strbuf *sb)
 {
-	char candidates[] = "#;@!$%^&|:";
-	char *candidate;
-	const char *p;
-	size_t cutoff;
+	అక్షరం candidates[] = "#;@!$%^&|:";
+	అక్షరం *candidate;
+	స్థిరరాశి అక్షరం *p;
+	కొలత_t cutoff;
 
 	/* Ignore comment chars in trailing comments (e.g., Conflicts:) */
-	cutoff = sb->len - ignored_log_message_bytes(sb->buf, sb->len);
+	cutoff = sb->len - ignored_log_సందేశం_బైట్లు(sb->buf, sb->len);
 
-	if (!memchr(sb->buf, candidates[0], sb->len)) {
-		free(comment_line_str_to_free);
-		comment_line_str = comment_line_str_to_free =
+	ఒకవేళ (!memchr(sb->buf, candidates[0], sb->len)) {
+		విడుదల(comment_పంక్తి_str_గమ్యం_free);
+		comment_పంక్తి_str = comment_పంక్తి_str_గమ్యం_free =
 			xstrfmt("%c", candidates[0]);
-		return;
+		తిరిగి;
 	}
 
 	p = sb->buf;
 	candidate = strchr(candidates, *p);
-	if (candidate)
+	ఒకవేళ (candidate)
 		*candidate = ' ';
-	for (p = sb->buf; p + 1 < sb->buf + cutoff; p++) {
-		if ((p[0] == '\n' || p[0] == '\r') && p[1]) {
+	కొరకు (p = sb->buf; p + 1 < sb->buf + cutoff; p++) {
+		ఒకవేళ ((p[0] == '\n' || p[0] == '\r') && p[1]) {
 			candidate = strchr(candidates, p[1]);
-			if (candidate)
+			ఒకవేళ (candidate)
 				*candidate = ' ';
 		}
 	}
 
-	for (p = candidates; *p == ' '; p++)
+	కొరకు (p = candidates; *p == ' '; p++)
 		;
-	if (!*p)
+	ఒకవేళ (!*p)
 		die(_("unable to select a comment character that is not used\n"
 		      "in the current commit message"));
-	free(comment_line_str_to_free);
-	comment_line_str = comment_line_str_to_free = xstrfmt("%c", *p);
+	విడుదల(comment_పంక్తి_str_గమ్యం_free);
+	comment_పంక్తి_str = comment_పంక్తి_str_గమ్యం_free = xstrfmt("%c", *p);
 }
-#endif /* !WITH_BREAKING_CHANGES */
+#అయితే_ముగింపు /* !WITH_BREAKING_CHANGES */
 
-static void prepare_amend_commit(struct commit *commit, struct strbuf *sb,
-				struct pretty_print_context *ctx)
+స్థిర శూన్య prepare_amend_commit(నిర్మాణం commit *commit, నిర్మాణం strbuf *sb,
+				నిర్మాణం pretty_print_context *ctx)
 {
-	const char *buffer, *subject, *fmt;
+	స్థిరరాశి అక్షరం *బఫరు, *subject, *fmt;
 
-	buffer = repo_get_commit_buffer(the_repository, commit, NULL);
-	find_commit_subject(buffer, &subject);
+	బఫరు = repo_get_commit_బఫరు(the_repository, commit, ఖాళీ);
+	కనుగొను_commit_subject(బఫరు, &subject);
 	/*
 	 * If we amend the 'amend!' commit then we don't want to
 	 * duplicate the subject line.
 	 */
 	fmt = starts_with(subject, "amend!") ? "%b" : "%B";
-	repo_format_commit_message(the_repository, commit, fmt, sb, ctx);
-	repo_unuse_commit_buffer(the_repository, commit, buffer);
+	repo_format_commit_సందేశం(the_repository, commit, fmt, sb, ctx);
+	repo_unuse_commit_బఫరు(the_repository, commit, బఫరు);
 }
 
-static void change_data_free(void *util, const char *str UNUSED)
+స్థిర శూన్య change_దత్తాంశం_free(శూన్య *util, స్థిరరాశి అక్షరం *str వాడని)
 {
-	struct wt_status_change_data *d = util;
-	free(d->rename_source);
-	free(d);
+	నిర్మాణం wt_స్థితి_change_దత్తాంశం *d = util;
+	విడుదల(d->rename_ఆధారం);
+	విడుదల(d);
 }
 
-static int prepare_to_commit(const char *index_file, const char *prefix,
-			     struct commit *current_head,
-			     struct wt_status *s,
-			     struct strbuf *author_ident)
+స్థిర పూర్ణాంకం prepare_గమ్యం_commit(స్థిరరాశి అక్షరం *సూచీ_file, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			     నిర్మాణం commit *current_తల,
+			     నిర్మాణం wt_స్థితి *s,
+			     నిర్మాణం strbuf *author_ident)
 {
-	struct stat statbuf;
-	struct strbuf committer_ident = STRBUF_INIT;
-	int committable;
-	struct strbuf sb = STRBUF_INIT;
-	const char *hook_arg1 = NULL;
-	const char *hook_arg2 = NULL;
-	int clean_message_contents = (cleanup_mode != COMMIT_MSG_CLEANUP_NONE);
-	int old_display_comment_prefix;
-	int invoked_hook;
+	నిర్మాణం stat statbuf;
+	నిర్మాణం strbuf committer_ident = STRBUF_INIT;
+	పూర్ణాంకం committable;
+	నిర్మాణం strbuf sb = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *hook_arg1 = ఖాళీ;
+	స్థిరరాశి అక్షరం *hook_arg2 = ఖాళీ;
+	పూర్ణాంకం clean_సందేశం_contents = (cleanup_బహుళకం != COMMIT_సందేశం_CLEANUP_NONE);
+	పూర్ణాంకం old_display_comment_ఉపసర్గ;
+	పూర్ణాంకం invoked_hook;
 
 	/* This checks and barfs if author is badly specified */
 	determine_author_info(author_ident);
 
-	if (!no_verify && run_commit_hook(use_editor, index_file, &invoked_hook,
-					  "pre-commit", NULL))
-		return 0;
+	ఒకవేళ (!no_verify && నిరంతరం_commit_hook(use_editor, సూచీ_file, &invoked_hook,
+					  "pre-commit", ఖాళీ))
+		తిరిగి 0;
 
-	if (squash_message) {
+	ఒకవేళ (squash_సందేశం) {
 		/*
 		 * Insert the proper subject line before other commit
 		 * message options add their content.
 		 */
-		if (use_message && !strcmp(use_message, squash_message))
+		ఒకవేళ (use_సందేశం && !strcmp(use_సందేశం, squash_సందేశం))
 			strbuf_addstr(&sb, "squash! ");
-		else {
-			struct pretty_print_context ctx = {0};
-			struct commit *c;
-			c = lookup_commit_reference_by_name(squash_message);
-			if (!c)
-				die(_("could not lookup commit '%s'"), squash_message);
+		లేకపోతే {
+			నిర్మాణం pretty_print_context ctx = {0};
+			నిర్మాణం commit *c;
+			c = lookup_commit_reference_by_name(squash_సందేశం);
+			ఒకవేళ (!c)
+				die(_("could not lookup commit '%s'"), squash_సందేశం);
 			ctx.output_encoding = get_commit_output_encoding();
-			repo_format_commit_message(the_repository, c,
+			repo_format_commit_సందేశం(the_repository, c,
 						   "squash! %s\n\n", &sb,
 						   &ctx);
 		}
 	}
 
-	if (have_option_m && !fixup_message) {
-		strbuf_addbuf(&sb, &message);
+	ఒకవేళ (have_option_m && !fixup_సందేశం) {
+		strbuf_addbuf(&sb, &సందేశం_2);
 		hook_arg1 = "message";
-	} else if (logfile && !strcmp(logfile, "-")) {
-		if (isatty(0))
+	} లేకపోతే ఒకవేళ (logfile && !strcmp(logfile, "-")) {
+		ఒకవేళ (isatty(0))
 			fprintf(stderr, _("(reading log message from standard input)\n"));
-		if (strbuf_read(&sb, 0, 0) < 0)
+		ఒకవేళ (strbuf_read(&sb, 0, 0) < 0)
 			die_errno(_("could not read log from standard input"));
 		hook_arg1 = "message";
-	} else if (logfile) {
-		if (strbuf_read_file(&sb, logfile, 0) < 0)
+	} లేకపోతే ఒకవేళ (logfile) {
+		ఒకవేళ (strbuf_read_file(&sb, logfile, 0) < 0)
 			die_errno(_("could not read log file '%s'"),
 				  logfile);
 		hook_arg1 = "message";
-	} else if (use_message) {
-		const char *buffer;
-		buffer = strstr(use_message_buffer, "\n\n");
-		if (buffer)
-			strbuf_addstr(&sb, skip_blank_lines(buffer + 2));
+	} లేకపోతే ఒకవేళ (use_సందేశం) {
+		స్థిరరాశి అక్షరం *బఫరు;
+		బఫరు = అక్షరశ్రేణి_శోధన(use_సందేశం_బఫరు, "\n\n");
+		ఒకవేళ (బఫరు)
+			strbuf_addstr(&sb, skip_blank_పంక్తులు(బఫరు + 2));
 		hook_arg1 = "commit";
-		hook_arg2 = use_message;
-	} else if (fixup_message) {
-		struct pretty_print_context ctx = {0};
-		struct commit *commit;
-		char *fmt;
+		hook_arg2 = use_సందేశం;
+	} లేకపోతే ఒకవేళ (fixup_సందేశం) {
+		నిర్మాణం pretty_print_context ctx = {0};
+		నిర్మాణం commit *commit;
+		అక్షరం *fmt;
 		commit = lookup_commit_reference_by_name(fixup_commit);
-		if (!commit)
+		ఒకవేళ (!commit)
 			die(_("could not lookup commit '%s'"), fixup_commit);
 		ctx.output_encoding = get_commit_output_encoding();
-		fmt = xstrfmt("%s! %%s\n\n", fixup_prefix);
-		repo_format_commit_message(the_repository, commit, fmt, &sb,
+		fmt = xstrfmt("%s! %%s\n\n", fixup_ఉపసర్గ);
+		repo_format_commit_సందేశం(the_repository, commit, fmt, &sb,
 					   &ctx);
-		free(fmt);
+		విడుదల(fmt);
 		hook_arg1 = "message";
 
 		/*
@@ -845,60 +845,60 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 		 * have already errored out while parsing the `git commit`
 		 * options.
 		 */
-		if (have_option_m && !strcmp(fixup_prefix, "fixup"))
-			strbuf_addbuf(&sb, &message);
+		ఒకవేళ (have_option_m && !strcmp(fixup_ఉపసర్గ, "fixup"))
+			strbuf_addbuf(&sb, &సందేశం_2);
 
-		if (!strcmp(fixup_prefix, "amend")) {
-			if (have_option_m)
-				die(_("options '%s' and '%s:%s' cannot be used together"), "-m", "--fixup", fixup_message);
+		ఒకవేళ (!strcmp(fixup_ఉపసర్గ, "amend")) {
+			ఒకవేళ (have_option_m)
+				die(_("options '%s' and '%s:%s' cannot be used together"), "-m", "--fixup", fixup_సందేశం);
 			prepare_amend_commit(commit, &sb, &ctx);
 		}
-	} else if (!stat(git_path_merge_msg(the_repository), &statbuf)) {
-		size_t merge_msg_start;
+	} లేకపోతే ఒకవేళ (!stat(git_మార్గం_విలీనం_సందేశం(the_repository), &statbuf)) {
+		కొలత_t విలీనం_సందేశం_ప్రారంభం;
 
 		/*
 		 * prepend SQUASH_MSG here if it exists and a
 		 * "merge --squash" was originally performed
 		 */
-		if (!stat(git_path_squash_msg(the_repository), &statbuf)) {
-			if (strbuf_read_file(&sb, git_path_squash_msg(the_repository), 0) < 0)
+		ఒకవేళ (!stat(git_మార్గం_squash_సందేశం(the_repository), &statbuf)) {
+			ఒకవేళ (strbuf_read_file(&sb, git_మార్గం_squash_సందేశం(the_repository), 0) < 0)
 				die_errno(_("could not read SQUASH_MSG"));
 			hook_arg1 = "squash";
-		} else
+		} లేకపోతే
 			hook_arg1 = "merge";
 
-		merge_msg_start = sb.len;
-		if (strbuf_read_file(&sb, git_path_merge_msg(the_repository), 0) < 0)
+		విలీనం_సందేశం_ప్రారంభం = sb.len;
+		ఒకవేళ (strbuf_read_file(&sb, git_మార్గం_విలీనం_సందేశం(the_repository), 0) < 0)
 			die_errno(_("could not read MERGE_MSG"));
 
-		if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS &&
-		    wt_status_locate_end(sb.buf + merge_msg_start,
-					 sb.len - merge_msg_start) <
-				sb.len - merge_msg_start)
-			s->added_cut_line = 1;
-	} else if (!stat(git_path_squash_msg(the_repository), &statbuf)) {
-		if (strbuf_read_file(&sb, git_path_squash_msg(the_repository), 0) < 0)
+		ఒకవేళ (cleanup_బహుళకం == COMMIT_సందేశం_CLEANUP_SCISSORS &&
+		    wt_స్థితి_locate_చివర(sb.buf + విలీనం_సందేశం_ప్రారంభం,
+					 sb.len - విలీనం_సందేశం_ప్రారంభం) <
+				sb.len - విలీనం_సందేశం_ప్రారంభం)
+			s->added_cut_పంక్తి = 1;
+	} లేకపోతే ఒకవేళ (!stat(git_మార్గం_squash_సందేశం(the_repository), &statbuf)) {
+		ఒకవేళ (strbuf_read_file(&sb, git_మార్గం_squash_సందేశం(the_repository), 0) < 0)
 			die_errno(_("could not read SQUASH_MSG"));
 		hook_arg1 = "squash";
-	} else if (template_file) {
-		if (strbuf_read_file(&sb, template_file, 0) < 0)
+	} లేకపోతే ఒకవేళ (template_file) {
+		ఒకవేళ (strbuf_read_file(&sb, template_file, 0) < 0)
 			die_errno(_("could not read '%s'"), template_file);
 		hook_arg1 = "template";
-		clean_message_contents = 0;
+		clean_సందేశం_contents = 0;
 	}
 
 	/*
 	 * The remaining cases don't modify the template message, but
 	 * just set the argument(s) to the prepare-commit-msg hook.
 	 */
-	else if (whence == FROM_MERGE)
+	లేకపోతే ఒకవేళ (whence == FROM_విలీనం)
 		hook_arg1 = "merge";
-	else if (is_from_cherry_pick(whence) || whence == FROM_REBASE_PICK) {
+	లేకపోతే ఒకవేళ (is_from_cherry_pick(whence) || whence == FROM_REBASE_PICK) {
 		hook_arg1 = "commit";
 		hook_arg2 = "CHERRY_PICK_HEAD";
 	}
 
-	if (squash_message) {
+	ఒకవేళ (squash_సందేశం) {
 		/*
 		 * If squash_commit was used for the commit subject,
 		 * then we're possibly hijacking other commit log options.
@@ -908,13 +908,13 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 		hook_arg2 = "";
 	}
 
-	s->fp = fopen_for_writing(git_path_commit_editmsg());
-	if (!s->fp)
-		die_errno(_("could not open '%s'"), git_path_commit_editmsg());
+	s->fp = fopen_for_writing(git_మార్గం_commit_editmsg());
+	ఒకవేళ (!s->fp)
+		die_errno(_("could not open '%s'"), git_మార్గం_commit_editmsg());
 
 	/* Ignore status.displayCommentPrefix: we do need comments in COMMIT_EDITMSG. */
-	old_display_comment_prefix = s->display_comment_prefix;
-	s->display_comment_prefix = 1;
+	old_display_comment_ఉపసర్గ = s->display_comment_ఉపసర్గ;
+	s->display_comment_ఉపసర్గ = 1;
 
 	/*
 	 * Most hints are counter-productive when the commit has
@@ -922,34 +922,34 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 	 */
 	s->hints = 0;
 
-	if (clean_message_contents)
-		strbuf_stripspace(&sb, NULL);
+	ఒకవేళ (clean_సందేశం_contents)
+		strbuf_stripspace(&sb, ఖాళీ);
 
-	if (signoff)
-		append_signoff(&sb, ignored_log_message_bytes(sb.buf, sb.len), 0);
+	ఒకవేళ (signoff)
+		append_signoff(&sb, ignored_log_సందేశం_బైట్లు(sb.buf, sb.len), 0);
 
-	if (fwrite(sb.buf, 1, sb.len, s->fp) < sb.len)
+	ఒకవేళ (fwrite(sb.buf, 1, sb.len, s->fp) < sb.len)
 		die_errno(_("could not write commit template"));
 
-#ifndef WITH_BREAKING_CHANGES
-	if (auto_comment_line_char)
-		adjust_comment_line_char(&sb);
-#endif /* !WITH_BREAKING_CHANGES */
+#నిర్వచితం_కాకపోతే WITH_BREAKING_CHANGES
+	ఒకవేళ (auto_comment_పంక్తి_char)
+		adjust_comment_పంక్తి_char(&sb);
+#అయితే_ముగింపు /* !WITH_BREAKING_CHANGES */
 	strbuf_release(&sb);
 
 	/* This checks if committer ident is explicitly given */
 	strbuf_addstr(&committer_ident, git_committer_info(IDENT_STRICT));
-	if (use_editor && include_status) {
-		int ident_shown = 0;
-		enum git_colorbool saved_color_setting;
-		struct ident_split ci, ai;
-		const char *hint_cleanup_all = allow_empty_message ?
+	ఒకవేళ (use_editor && include_స్థితి) {
+		పూర్ణాంకం ident_shown = 0;
+		గణన git_colorbool saved_color_setting;
+		నిర్మాణం ident_విభజించు ci, ai;
+		స్థిరరాశి అక్షరం *hint_cleanup_all = allow_ఖాళీలు_సందేశం ?
 			_("Please enter the commit message for your changes."
 			  " Lines starting\nwith '%s' will be ignored.\n") :
 			_("Please enter the commit message for your changes."
 			  " Lines starting\nwith '%s' will be ignored, and an empty"
 			  " message aborts the commit.\n");
-		const char *hint_cleanup_space = allow_empty_message ?
+		స్థిరరాశి అక్షరం *hint_cleanup_space = allow_ఖాళీలు_సందేశం ?
 			_("Please enter the commit message for your changes."
 			  " Lines starting\n"
 			  "with '%s' will be kept; you may remove them"
@@ -959,12 +959,12 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 			  "with '%s' will be kept; you may remove them"
 			  " yourself if you want to.\n"
 			  "An empty message aborts the commit.\n");
-		if (whence != FROM_COMMIT) {
-			if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS)
-				wt_status_add_cut_line(s);
-			status_printf_ln(
-				s, GIT_COLOR_NORMAL,
-				whence == FROM_MERGE ?
+		ఒకవేళ (whence != FROM_COMMIT) {
+			ఒకవేళ (cleanup_బహుళకం == COMMIT_సందేశం_CLEANUP_SCISSORS)
+				wt_స్థితి_కూడు_cut_పంక్తి(s);
+			స్థితి_printf_ln(
+				s, GIT_COLOR_సాధారణ,
+				whence == FROM_విలీనం ?
 					      _("\n"
 					  "It looks like you may be committing a merge.\n"
 					  "If this is not correct, please run\n"
@@ -978,13 +978,13 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 		}
 
 		fprintf(s->fp, "\n");
-		if (cleanup_mode == COMMIT_MSG_CLEANUP_ALL)
-			status_printf(s, GIT_COLOR_NORMAL, hint_cleanup_all, comment_line_str);
-		else if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS) {
-			if (whence == FROM_COMMIT)
-				wt_status_add_cut_line(s);
-		} else /* COMMIT_MSG_CLEANUP_SPACE, that is. */
-			status_printf(s, GIT_COLOR_NORMAL, hint_cleanup_space, comment_line_str);
+		ఒకవేళ (cleanup_బహుళకం == COMMIT_సందేశం_CLEANUP_ALL)
+			స్థితి_printf(s, GIT_COLOR_సాధారణ, hint_cleanup_all, comment_పంక్తి_str);
+		లేకపోతే ఒకవేళ (cleanup_బహుళకం == COMMIT_సందేశం_CLEANUP_SCISSORS) {
+			ఒకవేళ (whence == FROM_COMMIT)
+				wt_స్థితి_కూడు_cut_పంక్తి(s);
+		} లేకపోతే /* COMMIT_MSG_CLEANUP_SPACE, that is. */
+			స్థితి_printf(s, GIT_COLOR_సాధారణ, hint_cleanup_space, comment_పంక్తి_str);
 
 		/*
 		 * These should never fail because they come from our own
@@ -992,59 +992,59 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 		 * that the name and mail pointers will at least be valid,
 		 * which is enough for our tests and printing here.
 		 */
-		assert_split_ident(&ai, author_ident);
-		assert_split_ident(&ci, &committer_ident);
+		assert_విభజించు_ident(&ai, author_ident);
+		assert_విభజించు_ident(&ci, &committer_ident);
 
-		if (ident_cmp(&ai, &ci))
-			status_printf_ln(s, GIT_COLOR_NORMAL,
+		ఒకవేళ (ident_cmp(&ai, &ci))
+			స్థితి_printf_ln(s, GIT_COLOR_సాధారణ,
 				_("%s"
 				"Author:    %.*s <%.*s>"),
 				ident_shown++ ? "" : "\n",
-				(int)(ai.name_end - ai.name_begin), ai.name_begin,
-				(int)(ai.mail_end - ai.mail_begin), ai.mail_begin);
+				(పూర్ణాంకం)(ai.name_చివర - ai.name_begin), ai.name_begin,
+				(పూర్ణాంకం)(ai.mail_చివర - ai.mail_begin), ai.mail_begin);
 
-		if (author_date_is_interesting())
-			status_printf_ln(s, GIT_COLOR_NORMAL,
+		ఒకవేళ (author_date_is_interesting())
+			స్థితి_printf_ln(s, GIT_COLOR_సాధారణ,
 				_("%s"
 				"Date:      %s"),
 				ident_shown++ ? "" : "\n",
-				show_ident_date(&ai, DATE_MODE(NORMAL)));
+				show_ident_date(&ai, DATE_బహుళకం(సాధారణ)));
 
-		if (!committer_ident_sufficiently_given())
-			status_printf_ln(s, GIT_COLOR_NORMAL,
+		ఒకవేళ (!committer_ident_sufficiently_given())
+			స్థితి_printf_ln(s, GIT_COLOR_సాధారణ,
 				_("%s"
 				"Committer: %.*s <%.*s>"),
 				ident_shown++ ? "" : "\n",
-				(int)(ci.name_end - ci.name_begin), ci.name_begin,
-				(int)(ci.mail_end - ci.mail_begin), ci.mail_begin);
+				(పూర్ణాంకం)(ci.name_చివర - ci.name_begin), ci.name_begin,
+				(పూర్ణాంకం)(ci.mail_చివర - ci.mail_begin), ci.mail_begin);
 
-		status_printf_ln(s, GIT_COLOR_NORMAL, "%s", ""); /* Add new line for clarity */
+		స్థితి_printf_ln(s, GIT_COLOR_సాధారణ, "%s", ""); /* Add new line for clarity */
 
 		saved_color_setting = s->use_color;
 		s->use_color = GIT_COLOR_NEVER;
-		committable = run_status(s->fp, index_file, prefix, 1, s);
+		committable = నిరంతరం_స్థితి(s->fp, సూచీ_file, ఉపసర్గ, 1, s);
 		s->use_color = saved_color_setting;
-		string_list_clear_func(&s->change, change_data_free);
-	} else {
-		struct object_id oid;
-		const char *parent = "HEAD";
+		string_list_clear_func(&s->change, change_దత్తాంశం_free);
+	} లేకపోతే {
+		నిర్మాణం object_id oid;
+		స్థిరరాశి అక్షరం *మాతృ = "HEAD";
 
-		if (!the_repository->index->initialized && repo_read_index(the_repository) < 0)
+		ఒకవేళ (!the_repository->సూచీ->initialized && repo_read_సూచీ(the_repository) < 0)
 			die(_("Cannot read index"));
 
-		if (amend)
-			parent = "HEAD^1";
+		ఒకవేళ (amend)
+			మాతృ = "HEAD^1";
 
-		if (repo_get_oid(the_repository, parent, &oid)) {
-			int i, ita_nr = 0;
+		ఒకవేళ (repo_get_oid(the_repository, మాతృ, &oid)) {
+			పూర్ణాంకం i, ita_nr = 0;
 
 			/* TODO: audit for interaction with sparse-index. */
-			ensure_full_index(the_repository->index);
-			for (i = 0; i < the_repository->index->cache_nr; i++)
-				if (ce_intent_to_add(the_repository->index->cache[i]))
+			ensure_నిండిన_సూచీ(the_repository->సూచీ);
+			కొరకు (i = 0; i < the_repository->సూచీ->cache_nr; i++)
+				ఒకవేళ (ce_intent_గమ్యం_కూడు(the_repository->సూచీ->cache[i]))
 					ita_nr++;
-			committable = the_repository->index->cache_nr > ita_nr;
-		} else {
+			committable = the_repository->సూచీ->cache_nr > ita_nr;
+		} లేకపోతే {
 			/*
 			 * Unless the user did explicitly request a submodule
 			 * ignore mode by passing a command line option we do
@@ -1054,23 +1054,23 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 			 * submodules which were manually staged, which would
 			 * be really confusing.
 			 */
-			struct diff_flags flags = DIFF_FLAGS_INIT;
+			నిర్మాణం diff_flags flags = DIFF_FLAGS_INIT;
 			flags.override_submodule_config = 1;
-			if (ignore_submodule_arg &&
+			ఒకవేళ (ignore_submodule_arg &&
 			    !strcmp(ignore_submodule_arg, "all"))
 				flags.ignore_submodules = 1;
-			committable = index_differs_from(the_repository,
-							 parent, &flags, 1);
+			committable = సూచీ_differs_from(the_repository,
+							 మాతృ, &flags, 1);
 		}
 	}
 	strbuf_release(&committer_ident);
 
 	fclose(s->fp);
 
-	if (trailer_args.nr) {
-		if (amend_file_with_trailers(git_path_commit_editmsg(), &trailer_args))
+	ఒకవేళ (trailer_వాదనలు.nr) {
+		ఒకవేళ (amend_file_with_trailers(git_మార్గం_commit_editmsg(), &trailer_వాదనలు))
 			die(_("unable to pass trailers to --trailers"));
-		strvec_clear(&trailer_args);
+		strvec_clear(&trailer_వాదనలు);
 	}
 
 	/*
@@ -1078,203 +1078,203 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 	 * explicit --allow-empty. In the cherry-pick case, it may be
 	 * empty due to conflict resolution, which the user should okay.
 	 */
-	if (!committable && whence != FROM_MERGE && !allow_empty &&
-	    !(amend && is_a_merge(current_head))) {
-		s->hints = advice_enabled(ADVICE_STATUS_HINTS);
-		s->display_comment_prefix = old_display_comment_prefix;
-		run_status(stdout, index_file, prefix, 0, s);
-		if (amend)
-			fputs(_(empty_amend_advice), stderr);
-		else if (is_from_cherry_pick(whence) ||
+	ఒకవేళ (!committable && whence != FROM_విలీనం && !allow_ఖాళీలు &&
+	    !(amend && is_a_విలీనం(current_తల))) {
+		s->hints = advice_enabled(ADVICE_స్థితి_HINTS);
+		s->display_comment_ఉపసర్గ = old_display_comment_ఉపసర్గ;
+		నిరంతరం_స్థితి(stdout, సూచీ_file, ఉపసర్గ, 0, s);
+		ఒకవేళ (amend)
+			fputs(_(ఖాళీలు_amend_advice), stderr);
+		లేకపోతే ఒకవేళ (is_from_cherry_pick(whence) ||
 			 whence == FROM_REBASE_PICK) {
-			fputs(_(empty_cherry_pick_advice), stderr);
-			if (whence == FROM_CHERRY_PICK_SINGLE)
-				fputs(_(empty_cherry_pick_advice_single), stderr);
-			else if (whence == FROM_CHERRY_PICK_MULTI)
-				fputs(_(empty_cherry_pick_advice_multi), stderr);
-			else
-				fputs(_(empty_rebase_pick_advice), stderr);
+			fputs(_(ఖాళీలు_cherry_pick_advice), stderr);
+			ఒకవేళ (whence == FROM_CHERRY_PICK_SINGLE)
+				fputs(_(ఖాళీలు_cherry_pick_advice_single), stderr);
+			లేకపోతే ఒకవేళ (whence == FROM_CHERRY_PICK_MULTI)
+				fputs(_(ఖాళీలు_cherry_pick_advice_multi), stderr);
+			లేకపోతే
+				fputs(_(ఖాళీలు_rebase_pick_advice), stderr);
 		}
-		return 0;
+		తిరిగి 0;
 	}
 
-	if (!no_verify && invoked_hook) {
+	ఒకవేళ (!no_verify && invoked_hook) {
 		/*
 		 * Re-read the index as the pre-commit-commit hook was invoked
 		 * and could have updated it. We must do this before we invoke
 		 * the editor and after we invoke run_status above.
 		 */
-		discard_index(the_repository->index);
+		discard_సూచీ(the_repository->సూచీ);
 	}
-	read_index_from(the_repository->index, index_file, repo_get_git_dir(the_repository));
+	read_సూచీ_from(the_repository->సూచీ, సూచీ_file, repo_get_git_dir(the_repository));
 
-	if (cache_tree_update(the_repository->index, 0)) {
+	ఒకవేళ (cache_వృక్షం_update(the_repository->సూచీ, 0)) {
 		error(_("Error building trees"));
-		return 0;
+		తిరిగి 0;
 	}
 
-	if (run_commit_hook(use_editor, index_file, NULL, "prepare-commit-msg",
-			    git_path_commit_editmsg(), hook_arg1, hook_arg2, NULL))
-		return 0;
+	ఒకవేళ (నిరంతరం_commit_hook(use_editor, సూచీ_file, ఖాళీ, "prepare-commit-msg",
+			    git_మార్గం_commit_editmsg(), hook_arg1, hook_arg2, ఖాళీ))
+		తిరిగి 0;
 
-	if (use_editor) {
-		struct strvec env = STRVEC_INIT;
+	ఒకవేళ (use_editor) {
+		నిర్మాణం strvec env = STRVEC_INIT;
 
-		strvec_pushf(&env, "GIT_INDEX_FILE=%s", index_file);
-		if (launch_editor(git_path_commit_editmsg(), NULL, env.v)) {
+		strvec_pushf(&env, "GIT_INDEX_FILE=%s", సూచీ_file);
+		ఒకవేళ (launch_editor(git_మార్గం_commit_editmsg(), ఖాళీ, env.v)) {
 			fprintf(stderr,
 			_("Please supply the message using either -m or -F option.\n"));
-			exit(1);
+			నిష్క్రమించు(1);
 		}
 		strvec_clear(&env);
 	}
 
-	if (!no_verify &&
-	    run_commit_hook(use_editor, index_file, NULL, "commit-msg",
-			    git_path_commit_editmsg(), NULL)) {
-		return 0;
+	ఒకవేళ (!no_verify &&
+	    నిరంతరం_commit_hook(use_editor, సూచీ_file, ఖాళీ, "commit-msg",
+			    git_మార్గం_commit_editmsg(), ఖాళీ)) {
+		తిరిగి 0;
 	}
 
-	return 1;
+	తిరిగి 1;
 }
 
-static const char *find_author_by_nickname(const char *name)
+స్థిర స్థిరరాశి అక్షరం *కనుగొను_author_by_nickname(స్థిరరాశి అక్షరం *name)
 {
-	struct rev_info revs;
-	struct commit *commit;
-	struct strbuf buf = STRBUF_INIT;
-	const char *av[20];
-	int ac = 0;
+	నిర్మాణం rev_info revs;
+	నిర్మాణం commit *commit;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *av[20];
+	పూర్ణాంకం ac = 0;
 
-	repo_init_revisions(the_repository, &revs, NULL);
+	repo_init_revisions(the_repository, &revs, ఖాళీ);
 	strbuf_addf(&buf, "--author=%s", name);
 	av[++ac] = "--all";
 	av[++ac] = "-i";
 	av[++ac] = buf.buf;
-	av[++ac] = NULL;
-	setup_revisions(ac, av, &revs, NULL);
-	revs.mailmap = xmalloc(sizeof(struct string_list));
+	av[++ac] = ఖాళీ;
+	అమరిక_revisions(ac, av, &revs, ఖాళీ);
+	revs.mailmap = xmalloc(పరిమాణం(నిర్మాణం string_list));
 	string_list_init_nodup(revs.mailmap);
 	read_mailmap(the_repository, revs.mailmap);
 
-	if (prepare_revision_walk(&revs))
+	ఒకవేళ (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
 	commit = get_revision(&revs);
-	if (commit) {
-		struct pretty_print_context ctx = {0};
-		ctx.date_mode.type = DATE_NORMAL;
+	ఒకవేళ (commit) {
+		నిర్మాణం pretty_print_context ctx = {0};
+		ctx.date_బహుళకం.type = DATE_సాధారణ;
 		strbuf_release(&buf);
-		repo_format_commit_message(the_repository, commit,
+		repo_format_commit_సందేశం(the_repository, commit,
 					   "%aN <%aE>", &buf, &ctx);
 		release_revisions(&revs);
-		return strbuf_detach(&buf, NULL);
+		తిరిగి strbuf_detach(&buf, ఖాళీ);
 	}
 	die(_("--author '%s' is not 'Name <email>' and matches no existing author"), name);
 }
 
-static void handle_ignored_arg(struct wt_status *s)
+స్థిర శూన్య handle_ignored_arg(నిర్మాణం wt_స్థితి *s)
 {
-	if (!ignored_arg)
+	ఒకవేళ (!ignored_arg)
 		; /* default already initialized */
-	else if (!strcmp(ignored_arg, "traditional"))
-		s->show_ignored_mode = SHOW_TRADITIONAL_IGNORED;
-	else if (!strcmp(ignored_arg, "no"))
-		s->show_ignored_mode = SHOW_NO_IGNORED;
-	else if (!strcmp(ignored_arg, "matching"))
-		s->show_ignored_mode = SHOW_MATCHING_IGNORED;
-	else
+	లేకపోతే ఒకవేళ (!strcmp(ignored_arg, "traditional"))
+		s->show_ignored_బహుళకం = SHOW_TRADITIONAL_IGNORED;
+	లేకపోతే ఒకవేళ (!strcmp(ignored_arg, "no"))
+		s->show_ignored_బహుళకం = SHOW_NO_IGNORED;
+	లేకపోతే ఒకవేళ (!strcmp(ignored_arg, "matching"))
+		s->show_ignored_బహుళకం = SHOW_MATCHING_IGNORED;
+	లేకపోతే
 		die(_("Invalid ignored mode '%s'"), ignored_arg);
 }
 
-static enum untracked_status_type parse_untracked_setting_name(const char *u)
+స్థిర గణన untracked_స్థితి_type parse_untracked_setting_name(స్థిరరాశి అక్షరం *u)
 {
 	/*
 	 * Please update $__git_untracked_file_modes in
 	 * git-completion.bash when you add new options
 	 */
-	switch (git_parse_maybe_bool(u)) {
-	case 0:
+	ఎంపిక (git_parse_maybe_bool(u)) {
+	స్థితి 0:
 		u = "no";
-		break;
-	case 1:
+		ఆపు;
+	స్థితి 1:
 		u = "normal";
-		break;
-	default:
-		break;
+		ఆపు;
+	అప్రమేయ:
+		ఆపు;
 	}
 
-	if (!strcmp(u, "no"))
-		return SHOW_NO_UNTRACKED_FILES;
-	else if (!strcmp(u, "normal"))
-		return SHOW_NORMAL_UNTRACKED_FILES;
-	else if (!strcmp(u, "all"))
-		return SHOW_ALL_UNTRACKED_FILES;
-	else
-		return SHOW_UNTRACKED_FILES_ERROR;
+	ఒకవేళ (!strcmp(u, "no"))
+		తిరిగి SHOW_NO_UNTRACKED_FILES;
+	లేకపోతే ఒకవేళ (!strcmp(u, "normal"))
+		తిరిగి SHOW_సాధారణ_UNTRACKED_FILES;
+	లేకపోతే ఒకవేళ (!strcmp(u, "all"))
+		తిరిగి SHOW_ALL_UNTRACKED_FILES;
+	లేకపోతే
+		తిరిగి SHOW_UNTRACKED_FILES_ERROR;
 }
 
-static void handle_untracked_files_arg(struct wt_status *s)
+స్థిర శూన్య handle_untracked_files_arg(నిర్మాణం wt_స్థితి *s)
 {
-	enum untracked_status_type u;
+	గణన untracked_స్థితి_type u;
 
-	if (!untracked_files_arg)
-		return; /* default already initialized */
+	ఒకవేళ (!untracked_files_arg)
+		తిరిగి; /* default already initialized */
 
 	u = parse_untracked_setting_name(untracked_files_arg);
-	if (u == SHOW_UNTRACKED_FILES_ERROR)
+	ఒకవేళ (u == SHOW_UNTRACKED_FILES_ERROR)
 		die(_("Invalid untracked files mode '%s'"),
 		    untracked_files_arg);
 	s->show_untracked_files = u;
 }
 
-static const char *read_commit_message(const char *name)
+స్థిర స్థిరరాశి అక్షరం *read_commit_సందేశం_2(స్థిరరాశి అక్షరం *name)
 {
-	const char *out_enc;
-	struct commit *commit;
+	స్థిరరాశి అక్షరం *బహిర్గతం_enc;
+	నిర్మాణం commit *commit;
 
 	commit = lookup_commit_reference_by_name(name);
-	if (!commit)
+	ఒకవేళ (!commit)
 		die(_("could not lookup commit '%s'"), name);
-	out_enc = get_commit_output_encoding();
-	return repo_logmsg_reencode(the_repository, commit, NULL, out_enc);
+	బహిర్గతం_enc = get_commit_output_encoding();
+	తిరిగి repo_logmsg_reencode(the_repository, commit, ఖాళీ, బహిర్గతం_enc);
 }
 
 /*
  * Enumerate what needs to be propagated when --porcelain
  * is not in effect here.
  */
-static struct status_deferred_config {
-	enum wt_status_format status_format;
-	int show_branch;
-	enum ahead_behind_flags ahead_behind;
-} status_deferred_config = {
-	STATUS_FORMAT_UNSPECIFIED,
+స్థిర నిర్మాణం స్థితి_deferred_config {
+	గణన wt_స్థితి_format స్థితి_format;
+	పూర్ణాంకం show_branch;
+	గణన ahead_behind_flags ahead_behind;
+} స్థితి_deferred_config = {
+	స్థితి_FORMAT_UNSPECIFIED,
 	-1, /* unspecified */
 	AHEAD_BEHIND_UNSPECIFIED,
 };
 
-static void finalize_deferred_config(struct wt_status *s)
+స్థిర శూన్య finalize_deferred_config(నిర్మాణం wt_స్థితి *s)
 {
-	int use_deferred_config = (status_format != STATUS_FORMAT_PORCELAIN &&
-				   status_format != STATUS_FORMAT_PORCELAIN_V2 &&
+	పూర్ణాంకం use_deferred_config = (స్థితి_format != స్థితి_FORMAT_PORCELAIN &&
+				   స్థితి_format != స్థితి_FORMAT_PORCELAIN_V2 &&
 				   !s->null_termination);
 
-	if (s->null_termination) {
-		if (status_format == STATUS_FORMAT_NONE ||
-		    status_format == STATUS_FORMAT_UNSPECIFIED)
-			status_format = STATUS_FORMAT_PORCELAIN;
-		else if (status_format == STATUS_FORMAT_LONG)
+	ఒకవేళ (s->null_termination) {
+		ఒకవేళ (స్థితి_format == స్థితి_FORMAT_NONE ||
+		    స్థితి_format == స్థితి_FORMAT_UNSPECIFIED)
+			స్థితి_format = స్థితి_FORMAT_PORCELAIN;
+		లేకపోతే ఒకవేళ (స్థితి_format == స్థితి_FORMAT_LONG)
 			die(_("options '%s' and '%s' cannot be used together"), "--long", "-z");
 	}
 
-	if (use_deferred_config && status_format == STATUS_FORMAT_UNSPECIFIED)
-		status_format = status_deferred_config.status_format;
-	if (status_format == STATUS_FORMAT_UNSPECIFIED)
-		status_format = STATUS_FORMAT_NONE;
+	ఒకవేళ (use_deferred_config && స్థితి_format == స్థితి_FORMAT_UNSPECIFIED)
+		స్థితి_format = స్థితి_deferred_config.స్థితి_format;
+	ఒకవేళ (స్థితి_format == స్థితి_FORMAT_UNSPECIFIED)
+		స్థితి_format = స్థితి_FORMAT_NONE;
 
-	if (use_deferred_config && s->show_branch < 0)
-		s->show_branch = status_deferred_config.show_branch;
-	if (s->show_branch < 0)
+	ఒకవేళ (use_deferred_config && s->show_branch < 0)
+		s->show_branch = స్థితి_deferred_config.show_branch;
+	ఒకవేళ (s->show_branch < 0)
 		s->show_branch = 0;
 
 	/*
@@ -1284,98 +1284,98 @@ static void finalize_deferred_config(struct wt_status *s)
 	 * config setting.  In all other cases (and porcelain V[12] formats
 	 * in particular), we inherit _FULL for backwards compatibility.
 	 */
-	if (use_deferred_config &&
+	ఒకవేళ (use_deferred_config &&
 	    s->ahead_behind_flags == AHEAD_BEHIND_UNSPECIFIED)
-		s->ahead_behind_flags = status_deferred_config.ahead_behind;
+		s->ahead_behind_flags = స్థితి_deferred_config.ahead_behind;
 
-	if (s->ahead_behind_flags == AHEAD_BEHIND_UNSPECIFIED)
-		s->ahead_behind_flags = AHEAD_BEHIND_FULL;
+	ఒకవేళ (s->ahead_behind_flags == AHEAD_BEHIND_UNSPECIFIED)
+		s->ahead_behind_flags = AHEAD_BEHIND_నిండిన;
 }
 
-static void check_fixup_reword_options(int argc, const char *argv[]) {
-	if (whence != FROM_COMMIT) {
-		if (whence == FROM_MERGE)
+స్థిర శూన్య check_fixup_reword_options(పూర్ణాంకం argc, స్థిరరాశి అక్షరం *argv[]) {
+	ఒకవేళ (whence != FROM_COMMIT) {
+		ఒకవేళ (whence == FROM_విలీనం)
 			die(_("You are in the middle of a merge -- cannot reword."));
-		else if (is_from_cherry_pick(whence))
+		లేకపోతే ఒకవేళ (is_from_cherry_pick(whence))
 			die(_("You are in the middle of a cherry-pick -- cannot reword."));
 	}
-	if (argc)
+	ఒకవేళ (argc)
 		die(_("reword option of '%s' and path '%s' cannot be used together"), "--fixup", *argv);
-	if (patch_interactive || interactive || all || also || only)
+	ఒకవేళ (patch_interactive || interactive || all || also || only)
 		die(_("reword option of '%s' and '%s' cannot be used together"),
 			"--fixup", "--patch/--interactive/--all/--include/--only");
 }
 
-static int parse_and_validate_options(int argc, const char *argv[],
-				      const struct option *options,
-				      const char * const usage[],
-				      const char *prefix,
-				      struct commit *current_head,
-				      struct wt_status *s)
+స్థిర పూర్ణాంకం parse_and_validate_options(పూర్ణాంకం argc, స్థిరరాశి అక్షరం *argv[],
+				      స్థిరరాశి నిర్మాణం option *options,
+				      స్థిరరాశి అక్షరం * స్థిరరాశి usage[],
+				      స్థిరరాశి అక్షరం *ఉపసర్గ,
+				      నిర్మాణం commit *current_తల,
+				      నిర్మాణం wt_స్థితి *s)
 {
-	argc = parse_options(argc, argv, prefix, options, usage, 0);
+	argc = parse_options(argc, argv, ఉపసర్గ, options, usage, 0);
 	finalize_deferred_config(s);
 
-	if (force_author && !strchr(force_author, '>'))
-		force_author = find_author_by_nickname(force_author);
+	ఒకవేళ (force_author && !strchr(force_author, '>'))
+		force_author = కనుగొను_author_by_nickname(force_author);
 
-	if (force_author && renew_authorship)
+	ఒకవేళ (force_author && renew_authorship)
 		die(_("options '%s' and '%s' cannot be used together"), "--reset-author", "--author");
 
-	if (logfile || have_option_m || use_message)
+	ఒకవేళ (logfile || have_option_m || use_సందేశం)
 		use_editor = 0;
 
 	/* Sanity check options */
-	if (amend && !current_head)
+	ఒకవేళ (amend && !current_తల)
 		die(_("You have nothing to amend."));
-	if (amend && whence != FROM_COMMIT) {
-		if (whence == FROM_MERGE)
+	ఒకవేళ (amend && whence != FROM_COMMIT) {
+		ఒకవేళ (whence == FROM_విలీనం)
 			die(_("You are in the middle of a merge -- cannot amend."));
-		else if (is_from_cherry_pick(whence))
+		లేకపోతే ఒకవేళ (is_from_cherry_pick(whence))
 			die(_("You are in the middle of a cherry-pick -- cannot amend."));
-		else if (whence == FROM_REBASE_PICK)
+		లేకపోతే ఒకవేళ (whence == FROM_REBASE_PICK)
 			die(_("You are in the middle of a rebase -- cannot amend."));
 	}
-	if (fixup_message && squash_message)
+	ఒకవేళ (fixup_సందేశం && squash_సందేశం)
 		die(_("options '%s' and '%s' cannot be used together"), "--squash", "--fixup");
-	die_for_incompatible_opt4(!!use_message, "-C",
-				  !!edit_message, "-c",
+	die_for_incompatible_opt4(!!use_సందేశం, "-C",
+				  !!edit_సందేశం, "-c",
 				  !!logfile, "-F",
-				  !!fixup_message, "--fixup");
+				  !!fixup_సందేశం, "--fixup");
 	die_for_incompatible_opt4(have_option_m, "-m",
-				  !!edit_message, "-c",
-				  !!use_message, "-C",
+				  !!edit_సందేశం, "-c",
+				  !!use_సందేశం, "-C",
 				  !!logfile, "-F");
-	if (use_message || edit_message || logfile ||fixup_message || have_option_m)
+	ఒకవేళ (use_సందేశం || edit_సందేశం || logfile ||fixup_సందేశం || have_option_m)
 		FREE_AND_NULL(template_file);
-	if (edit_message)
-		use_message = edit_message;
-	if (amend && !use_message && !fixup_message)
-		use_message = "HEAD";
-	if (!use_message && !is_from_cherry_pick(whence) &&
+	ఒకవేళ (edit_సందేశం)
+		use_సందేశం = edit_సందేశం;
+	ఒకవేళ (amend && !use_సందేశం && !fixup_సందేశం)
+		use_సందేశం = "HEAD";
+	ఒకవేళ (!use_సందేశం && !is_from_cherry_pick(whence) &&
 	    !is_from_rebase(whence) && renew_authorship)
 		die(_("--reset-author can be used only with -C, -c or --amend."));
-	if (use_message) {
-		use_message_buffer = read_commit_message(use_message);
-		if (!renew_authorship) {
-			author_message = use_message;
-			author_message_buffer = use_message_buffer;
+	ఒకవేళ (use_సందేశం) {
+		use_సందేశం_బఫరు = read_commit_సందేశం_2(use_సందేశం);
+		ఒకవేళ (!renew_authorship) {
+			author_సందేశం = use_సందేశం;
+			author_సందేశం_బఫరు = use_సందేశం_బఫరు;
 		}
 	}
-	if ((is_from_cherry_pick(whence) || whence == FROM_REBASE_PICK) &&
+	ఒకవేళ ((is_from_cherry_pick(whence) || whence == FROM_REBASE_PICK) &&
 	    !renew_authorship) {
-		author_message = "CHERRY_PICK_HEAD";
-		author_message_buffer = read_commit_message(author_message);
+		author_సందేశం = "CHERRY_PICK_HEAD";
+		author_సందేశం_బఫరు = read_commit_సందేశం_2(author_సందేశం);
 	}
 
-	if (patch_interactive)
+	ఒకవేళ (patch_interactive)
 		interactive = 1;
 
 	die_for_incompatible_opt4(also, "-i/--include",
 				  only, "-o/--only",
 				  all, "-a/--all",
 				  interactive, "--interactive/-p/--patch");
-	if (fixup_message) {
+	ఒకవేళ (fixup_సందేశం) {
 		/*
 		 * We limit --fixup's suboptions to only alpha characters.
 		 * If the first character after a run of alpha is colon,
@@ -1386,188 +1386,188 @@ static int parse_and_validate_options(int argc, const char *argv[],
 		 *
 		 * Otherwise, we are dealing with --fixup=<commit>.
 		 */
-		char *p = fixup_message;
-		while (isalpha(*p))
+		అక్షరం *p = fixup_సందేశం;
+		అయితే (అక్షరమా(*p))
 			p++;
-		if (p > fixup_message && *p == ':') {
+		ఒకవేళ (p > fixup_సందేశం && *p == ':') {
 			*p = '\0';
 			fixup_commit = p + 1;
-			if (!strcmp("amend", fixup_message) ||
-			    !strcmp("reword", fixup_message)) {
-				fixup_prefix = "amend";
-				allow_empty = 1;
-				if (*fixup_message == 'r') {
+			ఒకవేళ (!strcmp("amend", fixup_సందేశం) ||
+			    !strcmp("reword", fixup_సందేశం)) {
+				fixup_ఉపసర్గ = "amend";
+				allow_ఖాళీలు = 1;
+				ఒకవేళ (*fixup_సందేశం == 'r') {
 					check_fixup_reword_options(argc, argv);
 					only = 1;
 				}
-			} else {
-				die(_("unknown option: --fixup=%s:%s"), fixup_message, fixup_commit);
+			} లేకపోతే {
+				die(_("unknown option: --fixup=%s:%s"), fixup_సందేశం, fixup_commit);
 			}
-		} else {
-			fixup_commit = fixup_message;
-			fixup_prefix = "fixup";
+		} లేకపోతే {
+			fixup_commit = fixup_సందేశం;
+			fixup_ఉపసర్గ = "fixup";
 			use_editor = 0;
 		}
 	}
 
-	if (0 <= edit_flag)
+	ఒకవేళ (0 <= edit_flag)
 		use_editor = edit_flag;
 
 	handle_untracked_files_arg(s);
 
-	if (all && argc > 0)
+	ఒకవేళ (all && argc > 0)
 		die(_("paths '%s ...' with -a does not make sense"),
 		    argv[0]);
 
-	if (status_format != STATUS_FORMAT_NONE)
-		dry_run = 1;
+	ఒకవేళ (స్థితి_format != స్థితి_FORMAT_NONE)
+		dry_నిరంతరం = 1;
 
-	return argc;
+	తిరిగి argc;
 }
 
-static int dry_run_commit(const char **argv, const char *prefix,
-			  const struct commit *current_head, struct wt_status *s)
+స్థిర పూర్ణాంకం dry_నిరంతరం_commit(స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			  స్థిరరాశి నిర్మాణం commit *current_తల, నిర్మాణం wt_స్థితి *s)
 {
-	int committable;
-	const char *index_file;
+	పూర్ణాంకం committable;
+	స్థిరరాశి అక్షరం *సూచీ_file;
 
-	index_file = prepare_index(argv, prefix, current_head, 1);
-	committable = run_status(stdout, index_file, prefix, 0, s);
-	rollback_index_files();
+	సూచీ_file = prepare_సూచీ(argv, ఉపసర్గ, current_తల, 1);
+	committable = నిరంతరం_స్థితి(stdout, సూచీ_file, ఉపసర్గ, 0, s);
+	rollback_సూచీ_files();
 
-	return committable ? 0 : 1;
+	తిరిగి committable ? 0 : 1;
 }
 
-define_list_config_array_extra(color_status_slots, {"added"});
+define_list_config_array_extra(color_స్థితి_slots, {"added"});
 
-static int parse_status_slot(const char *slot)
+స్థిర పూర్ణాంకం parse_స్థితి_స్థానం(స్థిరరాశి అక్షరం *స్థానం)
 {
-	if (!strcasecmp(slot, "added"))
-		return WT_STATUS_UPDATED;
+	ఒకవేళ (!strcasecmp(స్థానం, "added"))
+		తిరిగి WT_స్థితి_UPDATED;
 
-	return LOOKUP_CONFIG(color_status_slots, slot);
+	తిరిగి LOOKUP_CONFIG(color_స్థితి_slots, స్థానం);
 }
 
-static int git_status_config(const char *k, const char *v,
-			     const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం git_స్థితి_config(స్థిరరాశి అక్షరం *k, స్థిరరాశి అక్షరం *v,
+			     స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	struct wt_status *s = cb;
-	const char *slot_name;
+	నిర్మాణం wt_స్థితి *s = cb;
+	స్థిరరాశి అక్షరం *స్థానం_name;
 
-	if (starts_with(k, "column."))
-		return git_column_config(k, v, "status", &s->colopts);
-	if (!strcmp(k, "status.submodulesummary")) {
-		int is_bool;
+	ఒకవేళ (starts_with(k, "column."))
+		తిరిగి git_స్తంభం_config(k, v, "status", &s->colopts);
+	ఒకవేళ (!strcmp(k, "status.submodulesummary")) {
+		పూర్ణాంకం is_bool;
 		s->submodule_summary = git_config_bool_or_int(k, v, ctx->kvi,
 							      &is_bool);
-		if (is_bool && s->submodule_summary)
+		ఒకవేళ (is_bool && s->submodule_summary)
 			s->submodule_summary = -1;
-		return 0;
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "status.short")) {
-		if (git_config_bool(k, v))
-			status_deferred_config.status_format = STATUS_FORMAT_SHORT;
-		else
-			status_deferred_config.status_format = STATUS_FORMAT_NONE;
-		return 0;
+	ఒకవేళ (!strcmp(k, "status.short")) {
+		ఒకవేళ (git_config_bool(k, v))
+			స్థితి_deferred_config.స్థితి_format = స్థితి_FORMAT_SHORT;
+		లేకపోతే
+			స్థితి_deferred_config.స్థితి_format = స్థితి_FORMAT_NONE;
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "status.branch")) {
-		status_deferred_config.show_branch = git_config_bool(k, v);
-		return 0;
+	ఒకవేళ (!strcmp(k, "status.branch")) {
+		స్థితి_deferred_config.show_branch = git_config_bool(k, v);
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "status.aheadbehind")) {
-		status_deferred_config.ahead_behind = git_config_bool(k, v);
-		return 0;
+	ఒకవేళ (!strcmp(k, "status.aheadbehind")) {
+		స్థితి_deferred_config.ahead_behind = git_config_bool(k, v);
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "status.showstash")) {
+	ఒకవేళ (!strcmp(k, "status.showstash")) {
 		s->show_stash = git_config_bool(k, v);
-		return 0;
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "status.color") || !strcmp(k, "color.status")) {
+	ఒకవేళ (!strcmp(k, "status.color") || !strcmp(k, "color.status")) {
 		s->use_color = git_config_colorbool(k, v);
-		return 0;
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "status.displaycommentprefix")) {
-		s->display_comment_prefix = git_config_bool(k, v);
-		return 0;
+	ఒకవేళ (!strcmp(k, "status.displaycommentprefix")) {
+		s->display_comment_ఉపసర్గ = git_config_bool(k, v);
+		తిరిగి 0;
 	}
-	if (skip_prefix(k, "status.color.", &slot_name) ||
-	    skip_prefix(k, "color.status.", &slot_name)) {
-		int slot = parse_status_slot(slot_name);
-		if (slot < 0)
-			return 0;
-		if (!v)
-			return config_error_nonbool(k);
-		return color_parse(v, s->color_palette[slot]);
+	ఒకవేళ (skip_ఉపసర్గ(k, "status.color.", &స్థానం_name) ||
+	    skip_ఉపసర్గ(k, "color.status.", &స్థానం_name)) {
+		పూర్ణాంకం స్థానం = parse_స్థితి_స్థానం(స్థానం_name);
+		ఒకవేళ (స్థానం < 0)
+			తిరిగి 0;
+		ఒకవేళ (!v)
+			తిరిగి config_error_nonbool(k);
+		తిరిగి color_parse(v, s->color_palette[స్థానం]);
 	}
-	if (!strcmp(k, "status.relativepaths")) {
+	ఒకవేళ (!strcmp(k, "status.relativepaths")) {
 		s->relative_paths = git_config_bool(k, v);
-		return 0;
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "status.showuntrackedfiles")) {
-		enum untracked_status_type u;
+	ఒకవేళ (!strcmp(k, "status.showuntrackedfiles")) {
+		గణన untracked_స్థితి_type u;
 
 		u = parse_untracked_setting_name(v);
-		if (u == SHOW_UNTRACKED_FILES_ERROR)
-			return error(_("Invalid untracked files mode '%s'"), v);
+		ఒకవేళ (u == SHOW_UNTRACKED_FILES_ERROR)
+			తిరిగి error(_("Invalid untracked files mode '%s'"), v);
 		s->show_untracked_files = u;
-		return 0;
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "diff.renamelimit")) {
-		if (s->rename_limit == -1)
-			s->rename_limit = git_config_int(k, v, ctx->kvi);
-		return 0;
+	ఒకవేళ (!strcmp(k, "diff.renamelimit")) {
+		ఒకవేళ (s->rename_హద్దు == -1)
+			s->rename_హద్దు = git_config_int(k, v, ctx->kvi);
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "status.renamelimit")) {
-		s->rename_limit = git_config_int(k, v, ctx->kvi);
-		return 0;
+	ఒకవేళ (!strcmp(k, "status.renamelimit")) {
+		s->rename_హద్దు = git_config_int(k, v, ctx->kvi);
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "diff.renames")) {
-		if (s->detect_rename == -1)
+	ఒకవేళ (!strcmp(k, "diff.renames")) {
+		ఒకవేళ (s->detect_rename == -1)
 			s->detect_rename = git_config_rename(k, v);
-		return 0;
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "status.renames")) {
+	ఒకవేళ (!strcmp(k, "status.renames")) {
 		s->detect_rename = git_config_rename(k, v);
-		return 0;
+		తిరిగి 0;
 	}
-	return git_diff_ui_config(k, v, ctx, NULL);
+	తిరిగి git_diff_ui_config(k, v, ctx, ఖాళీ);
 }
 
-int cmd_status(int argc,
-const char **argv,
-const char *prefix,
-struct repository *repo UNUSED)
+పూర్ణాంకం cmd_స్థితి(పూర్ణాంకం argc,
+స్థిరరాశి అక్షరం **argv,
+స్థిరరాశి అక్షరం *ఉపసర్గ,
+నిర్మాణం repository *repo వాడని)
 {
-	static int no_renames = -1;
-	static const char *rename_score_arg = (const char *)-1;
-	static struct wt_status s;
-	unsigned int progress_flag = 0;
-	int fd;
-	struct object_id oid;
-	static struct option builtin_status_options[] = {
+	స్థిర పూర్ణాంకం no_renames = -1;
+	స్థిర స్థిరరాశి అక్షరం *rename_score_arg = (స్థిరరాశి అక్షరం *)-1;
+	స్థిర నిర్మాణం wt_స్థితి s;
+	గుర్తులేని పూర్ణాంకం పురోగతి_flag = 0;
+	పూర్ణాంకం fd;
+	నిర్మాణం object_id oid;
+	స్థిర నిర్మాణం option builtin_స్థితి_options[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose")),
-		OPT_SET_INT('s', "short", &status_format,
-			    N_("show status concisely"), STATUS_FORMAT_SHORT),
+		OPT_సమితి_INT('s', "short", &స్థితి_format,
+			    N_("show status concisely"), స్థితి_FORMAT_SHORT),
 		OPT_BOOL('b', "branch", &s.show_branch,
 			 N_("show branch information")),
 		OPT_BOOL(0, "show-stash", &s.show_stash,
 			 N_("show stash information")),
 		OPT_BOOL(0, "ahead-behind", &s.ahead_behind_flags,
 			 N_("compute full ahead/behind values")),
-		OPT_CALLBACK_F(0, "porcelain", &status_format,
+		OPT_CALLBACK_F(0, "porcelain", &స్థితి_format,
 		  N_("version"), N_("machine-readable output"),
 		  PARSE_OPT_OPTARG, opt_parse_porcelain),
-		OPT_SET_INT(0, "long", &status_format,
+		OPT_సమితి_INT(0, "long", &స్థితి_format,
 			    N_("show status in long format (default)"),
-			    STATUS_FORMAT_LONG),
+			    స్థితి_FORMAT_LONG),
 		OPT_BOOL('z', "null", &s.null_termination,
 			 N_("terminate entries with NUL")),
 		{
 			.type = OPTION_STRING,
 			.short_name = 'u',
 			.long_name = "untracked-files",
-			.value = &untracked_files_arg,
+			.విలువ = &untracked_files_arg,
 			.argh = N_("mode"),
 			.help = N_("show untracked files, optional modes: all, normal, no. (Default: all)"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1576,7 +1576,7 @@ struct repository *repo UNUSED)
 		{
 			.type = OPTION_STRING,
 			.long_name = "ignored",
-			.value = &ignored_arg,
+			.విలువ = &ignored_arg,
 			.argh = N_("mode"),
 			.help = N_("show ignored files, optional modes: traditional, matching, no. (Default: traditional)"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1585,153 +1585,153 @@ struct repository *repo UNUSED)
 		{
 			.type = OPTION_STRING,
 			.long_name = "ignore-submodules",
-			.value = &ignore_submodule_arg,
+			.విలువ = &ignore_submodule_arg,
 			.argh = N_("when"),
 			.help = N_("ignore changes to submodules, optional when: all, dirty, untracked. (Default: all)"),
 			.flags = PARSE_OPT_OPTARG,
 			.defval = (intptr_t)"all",
 		},
-		OPT_COLUMN(0, "column", &s.colopts, N_("list untracked files in columns")),
+		OPT_స్తంభం(0, "column", &s.colopts, N_("list untracked files in columns")),
 		OPT_BOOL(0, "no-renames", &no_renames, N_("do not detect renames")),
 		OPT_CALLBACK_F('M', "find-renames", &rename_score_arg,
 		  N_("n"), N_("detect renames, optionally set similarity index"),
 		  PARSE_OPT_OPTARG | PARSE_OPT_NONEG, opt_parse_rename_score),
-		OPT_END(),
+		OPT_చివర(),
 	};
 
 	show_usage_with_options_if_asked(argc, argv,
-					 builtin_status_usage, builtin_status_options);
+					 builtin_స్థితి_usage, builtin_స్థితి_options);
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_నిండిన_సూచీ = 0;
 
-	status_init_config(&s, git_status_config);
-	argc = parse_options(argc, argv, prefix,
-			     builtin_status_options,
-			     builtin_status_usage, 0);
+	స్థితి_init_config(&s, git_స్థితి_config);
+	argc = parse_options(argc, argv, ఉపసర్గ,
+			     builtin_స్థితి_options,
+			     builtin_స్థితి_usage, 0);
 	finalize_colopts(&s.colopts, -1);
 	finalize_deferred_config(&s);
 
 	handle_untracked_files_arg(&s);
 	handle_ignored_arg(&s);
 
-	if (s.show_ignored_mode == SHOW_MATCHING_IGNORED &&
+	ఒకవేళ (s.show_ignored_బహుళకం == SHOW_MATCHING_IGNORED &&
 	    s.show_untracked_files == SHOW_NO_UNTRACKED_FILES)
 		die(_("Unsupported combination of ignored and untracked-files arguments"));
 
 	parse_pathspec(&s.pathspec, 0,
-		       PATHSPEC_PREFER_FULL,
-		       prefix, argv);
+		       PATHSPEC_PREFER_నిండిన,
+		       ఉపసర్గ, argv);
 
-	if (status_format != STATUS_FORMAT_PORCELAIN &&
-	    status_format != STATUS_FORMAT_PORCELAIN_V2)
-		progress_flag = REFRESH_PROGRESS;
-	repo_read_index(the_repository);
-	refresh_index(the_repository->index,
-		      REFRESH_QUIET|REFRESH_UNMERGED|progress_flag,
-		      &s.pathspec, NULL, NULL);
+	ఒకవేళ (స్థితి_format != స్థితి_FORMAT_PORCELAIN &&
+	    స్థితి_format != స్థితి_FORMAT_PORCELAIN_V2)
+		పురోగతి_flag = REFRESH_పురోగతి;
+	repo_read_సూచీ(the_repository);
+	refresh_సూచీ(the_repository->సూచీ,
+		      REFRESH_QUIET|REFRESH_UNMERGED|పురోగతి_flag,
+		      &s.pathspec, ఖాళీ, ఖాళీ);
 
-	if (use_optional_locks())
-		fd = repo_hold_locked_index(the_repository, &index_lock, 0);
-	else
+	ఒకవేళ (use_optional_locks())
+		fd = repo_hold_locked_సూచీ(the_repository, &సూచీ_తాళం, 0);
+	లేకపోతే
 		fd = -1;
 
 	s.is_initial = repo_get_oid(the_repository, s.reference, &oid) ? 1 : 0;
-	if (!s.is_initial)
+	ఒకవేళ (!s.is_initial)
 		oidcpy(&s.oid_commit, &oid);
 
 	s.ignore_submodule_arg = ignore_submodule_arg;
-	s.status_format = status_format;
+	s.స్థితి_format = స్థితి_format;
 	s.verbose = verbose;
-	if (no_renames != -1)
+	ఒకవేళ (no_renames != -1)
 		s.detect_rename = !no_renames;
-	if ((intptr_t)rename_score_arg != -1) {
-		if (s.detect_rename < DIFF_DETECT_RENAME)
+	ఒకవేళ ((intptr_t)rename_score_arg != -1) {
+		ఒకవేళ (s.detect_rename < DIFF_DETECT_RENAME)
 			s.detect_rename = DIFF_DETECT_RENAME;
-		if (rename_score_arg)
+		ఒకవేళ (rename_score_arg)
 			s.rename_score = parse_rename_score(&rename_score_arg);
 	}
 
-	wt_status_collect(&s);
+	wt_స్థితి_collect(&s);
 
-	if (0 <= fd)
-		repo_update_index_if_able(the_repository, &index_lock);
+	ఒకవేళ (0 <= fd)
+		repo_update_సూచీ_if_able(the_repository, &సూచీ_తాళం);
 
-	if (s.relative_paths)
-		s.prefix = prefix;
+	ఒకవేళ (s.relative_paths)
+		s.ఉపసర్గ = ఉపసర్గ;
 
-	wt_status_print(&s);
-	wt_status_collect_free_buffers(&s);
+	wt_స్థితి_print(&s);
+	wt_స్థితి_collect_free_buffers(&s);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int git_commit_config(const char *k, const char *v,
-			     const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం git_commit_config(స్థిరరాశి అక్షరం *k, స్థిరరాశి అక్షరం *v,
+			     స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	struct wt_status *s = cb;
+	నిర్మాణం wt_స్థితి *s = cb;
 
-	if (!strcmp(k, "commit.template"))
-		return git_config_pathname(&template_file, k, v);
-	if (!strcmp(k, "commit.status")) {
-		include_status = git_config_bool(k, v);
-		return 0;
+	ఒకవేళ (!strcmp(k, "commit.template"))
+		తిరిగి git_config_pathname(&template_file, k, v);
+	ఒకవేళ (!strcmp(k, "commit.status")) {
+		include_స్థితి = git_config_bool(k, v);
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "commit.cleanup")) {
+	ఒకవేళ (!strcmp(k, "commit.cleanup")) {
 		FREE_AND_NULL(cleanup_config);
-		return git_config_string(&cleanup_config, k, v);
+		తిరిగి git_config_string(&cleanup_config, k, v);
 	}
-	if (!strcmp(k, "commit.gpgsign")) {
-		sign_commit = git_config_bool(k, v) ? "" : NULL;
-		return 0;
+	ఒకవేళ (!strcmp(k, "commit.gpgsign")) {
+		sign_commit = git_config_bool(k, v) ? "" : ఖాళీ;
+		తిరిగి 0;
 	}
-	if (!strcmp(k, "commit.verbose")) {
-		int is_bool;
+	ఒకవేళ (!strcmp(k, "commit.verbose")) {
+		పూర్ణాంకం is_bool;
 		config_commit_verbose = git_config_bool_or_int(k, v, ctx->kvi,
 							       &is_bool);
-		return 0;
+		తిరిగి 0;
 	}
 
-	return git_status_config(k, v, ctx, s);
+	తిరిగి git_స్థితి_config(k, v, ctx, s);
 }
 
-int cmd_commit(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+పూర్ణాంకం cmd_commit(పూర్ణాంకం argc,
+	       స్థిరరాశి అక్షరం **argv,
+	       స్థిరరాశి అక్షరం *ఉపసర్గ,
+	       నిర్మాణం repository *repo వాడని)
 {
-	static struct wt_status s;
-	static const char *cleanup_arg = NULL;
-	static struct option builtin_commit_options[] = {
+	స్థిర నిర్మాణం wt_స్థితి s;
+	స్థిర స్థిరరాశి అక్షరం *cleanup_arg = ఖాళీ;
+	స్థిర నిర్మాణం option builtin_commit_options[] = {
 		OPT__QUIET(&quiet, N_("suppress summary after successful commit")),
 		OPT__VERBOSE(&verbose, N_("show diff in commit message template")),
 
-		OPT_GROUP(N_("Commit message options")),
+		OPT_సమూహం(N_("Commit message options")),
 		OPT_FILENAME('F', "file", &logfile, N_("read message from file")),
 		OPT_STRING(0, "author", &force_author, N_("author"), N_("override author for commit")),
 		OPT_STRING(0, "date", &force_date, N_("date"), N_("override date for commit")),
-		OPT_CALLBACK('m', "message", &message, N_("message"), N_("commit message"), opt_parse_m),
-		OPT_STRING('c', "reedit-message", &edit_message, N_("commit"), N_("reuse and edit message from specified commit")),
-		OPT_STRING('C', "reuse-message", &use_message, N_("commit"), N_("reuse message from specified commit")),
+		OPT_CALLBACK('m', "message", &సందేశం_2, N_("message"), N_("commit message"), opt_parse_m),
+		OPT_STRING('c', "reedit-message", &edit_సందేశం, N_("commit"), N_("reuse and edit message from specified commit")),
+		OPT_STRING('C', "reuse-message", &use_సందేశం, N_("commit"), N_("reuse message from specified commit")),
 		/*
 		 * TRANSLATORS: Leave "[(amend|reword):]" as-is,
 		 * and only translate <commit>.
 		 */
-		OPT_STRING(0, "fixup", &fixup_message, N_("[(amend|reword):]commit"), N_("use autosquash formatted message to fixup or amend/reword specified commit")),
-		OPT_STRING(0, "squash", &squash_message, N_("commit"), N_("use autosquash formatted message to squash specified commit")),
+		OPT_STRING(0, "fixup", &fixup_సందేశం, N_("[(amend|reword):]commit"), N_("use autosquash formatted message to fixup or amend/reword specified commit")),
+		OPT_STRING(0, "squash", &squash_సందేశం, N_("commit"), N_("use autosquash formatted message to squash specified commit")),
 		OPT_BOOL(0, "reset-author", &renew_authorship, N_("the commit is authored by me now (used with -C/-c/--amend)")),
-		OPT_STRVEC(0, "trailer", &trailer_args, N_("trailer"),
+		OPT_STRVEC(0, "trailer", &trailer_వాదనలు, N_("trailer"),
 			   N_("add custom trailer(s)")),
 		OPT_BOOL('s', "signoff", &signoff, N_("add a Signed-off-by trailer")),
 		OPT_FILENAME('t', "template", &template_file, N_("use specified template file")),
 		OPT_BOOL('e', "edit", &edit_flag, N_("force edit of commit")),
 		OPT_CLEANUP(&cleanup_arg),
-		OPT_BOOL(0, "status", &include_status, N_("include status in commit message template")),
+		OPT_BOOL(0, "status", &include_స్థితి, N_("include status in commit message template")),
 		{
 			.type = OPTION_STRING,
 			.short_name = 'S',
 			.long_name = "gpg-sign",
-			.value = &sign_commit,
+			.విలువ = &sign_commit,
 			.argh = N_("key-id"),
 			.help = N_("GPG sign commit"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1739,7 +1739,7 @@ int cmd_commit(int argc,
 		},
 		/* end commit message options */
 
-		OPT_GROUP(N_("Commit contents options")),
+		OPT_సమూహం(N_("Commit contents options")),
 		OPT_BOOL('a', "all", &all, N_("commit all changed files")),
 		OPT_BOOL('i', "include", &also, N_("add specified files to index for commit")),
 		OPT_BOOL(0, "interactive", &interactive, N_("interactively add files")),
@@ -1748,17 +1748,17 @@ int cmd_commit(int argc,
 		OPT_DIFF_INTERHUNK_CONTEXT(&interactive_opts.interhunkcontext),
 		OPT_BOOL('o', "only", &only, N_("commit only specified files")),
 		OPT_BOOL('n', "no-verify", &no_verify, N_("bypass pre-commit and commit-msg hooks")),
-		OPT_BOOL(0, "dry-run", &dry_run, N_("show what would be committed")),
-		OPT_SET_INT(0, "short", &status_format, N_("show status concisely"),
-			    STATUS_FORMAT_SHORT),
+		OPT_BOOL(0, "dry-run", &dry_నిరంతరం, N_("show what would be committed")),
+		OPT_సమితి_INT(0, "short", &స్థితి_format, N_("show status concisely"),
+			    స్థితి_FORMAT_SHORT),
 		OPT_BOOL(0, "branch", &s.show_branch, N_("show branch information")),
 		OPT_BOOL(0, "ahead-behind", &s.ahead_behind_flags,
 			 N_("compute full ahead/behind values")),
-		OPT_SET_INT(0, "porcelain", &status_format,
-			    N_("machine-readable output"), STATUS_FORMAT_PORCELAIN),
-		OPT_SET_INT(0, "long", &status_format,
+		OPT_సమితి_INT(0, "porcelain", &స్థితి_format,
+			    N_("machine-readable output"), స్థితి_FORMAT_PORCELAIN),
+		OPT_సమితి_INT(0, "long", &స్థితి_format,
 			    N_("show status in long format (default)"),
-			    STATUS_FORMAT_LONG),
+			    స్థితి_FORMAT_LONG),
 		OPT_BOOL('z', "null", &s.null_termination,
 			 N_("terminate entries with NUL")),
 		OPT_BOOL(0, "amend", &amend, N_("amend previous commit")),
@@ -1767,7 +1767,7 @@ int cmd_commit(int argc,
 			.type = OPTION_STRING,
 			.short_name = 'u',
 			.long_name = "untracked-files",
-			.value = &untracked_files_arg,
+			.విలువ = &untracked_files_arg,
 			.argh = N_("mode"),
 			.help = N_("show untracked files, optional modes: all, normal, no. (Default: all)"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1777,218 +1777,218 @@ int cmd_commit(int argc,
 		OPT_PATHSPEC_FILE_NUL(&pathspec_file_nul),
 		/* end commit contents options */
 
-		OPT_HIDDEN_BOOL(0, "allow-empty", &allow_empty,
+		OPT_HIDDEN_BOOL(0, "allow-empty", &allow_ఖాళీలు,
 				N_("ok to record an empty change")),
-		OPT_HIDDEN_BOOL(0, "allow-empty-message", &allow_empty_message,
+		OPT_HIDDEN_BOOL(0, "allow-empty-message", &allow_ఖాళీలు_సందేశం,
 				N_("ok to record a change with an empty message")),
 
-		OPT_END()
+		OPT_చివర()
 	};
 
-	struct strbuf sb = STRBUF_INIT;
-	struct strbuf author_ident = STRBUF_INIT;
-	const char *index_file, *reflog_msg;
-	struct object_id oid;
-	struct commit_list *parents = NULL;
-	struct stat statbuf;
-	struct commit *current_head = NULL;
-	struct commit_extra_header *extra = NULL;
-	struct strbuf err = STRBUF_INIT;
-	int ret = 0;
+	నిర్మాణం strbuf sb = STRBUF_INIT;
+	నిర్మాణం strbuf author_ident = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *సూచీ_file, *reflog_సందేశం;
+	నిర్మాణం object_id oid;
+	నిర్మాణం commit_list *parents = ఖాళీ;
+	నిర్మాణం stat statbuf;
+	నిర్మాణం commit *current_తల = ఖాళీ;
+	నిర్మాణం commit_extra_శీర్షిక *extra = ఖాళీ;
+	నిర్మాణం strbuf err = STRBUF_INIT;
+	పూర్ణాంకం ret = 0;
 
 	show_usage_with_options_if_asked(argc, argv,
 					 builtin_commit_usage, builtin_commit_options);
 
-#ifndef WITH_BREAKING_CHANGES
+#నిర్వచితం_కాకపోతే WITH_BREAKING_CHANGES
 	warn_on_auto_comment_char = true;
-#endif /* !WITH_BREAKING_CHANGES */
+#అయితే_ముగింపు /* !WITH_BREAKING_CHANGES */
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_నిండిన_సూచీ = 0;
 
-	status_init_config(&s, git_commit_config);
+	స్థితి_init_config(&s, git_commit_config);
 	s.commit_template = 1;
-	status_format = STATUS_FORMAT_NONE; /* Ignore status.short */
+	స్థితి_format = స్థితి_FORMAT_NONE; /* Ignore status.short */
 	s.colopts = 0;
 
-	if (repo_get_oid(the_repository, "HEAD", &oid))
-		current_head = NULL;
-	else {
-		current_head = lookup_commit_or_die(&oid, "HEAD");
-		if (repo_parse_commit(the_repository, current_head))
+	ఒకవేళ (repo_get_oid(the_repository, "HEAD", &oid))
+		current_తల = ఖాళీ;
+	లేకపోతే {
+		current_తల = lookup_commit_or_die(&oid, "HEAD");
+		ఒకవేళ (repo_parse_commit(the_repository, current_తల))
 			die(_("could not parse HEAD commit"));
 	}
 	verbose = -1; /* unspecified */
 	argc = parse_and_validate_options(argc, argv, builtin_commit_options,
 					  builtin_commit_usage,
-					  prefix, current_head, &s);
-	if (trailer_args.nr)
+					  ఉపసర్గ, current_తల, &s);
+	ఒకవేళ (trailer_వాదనలు.nr)
 		trailer_config_init();
 
-	if (verbose == -1)
+	ఒకవేళ (verbose == -1)
 		verbose = (config_commit_verbose < 0) ? 0 : config_commit_verbose;
 
-	if (cleanup_arg) {
-		free(cleanup_config);
+	ఒకవేళ (cleanup_arg) {
+		విడుదల(cleanup_config);
 		cleanup_config = xstrdup(cleanup_arg);
 	}
-	cleanup_mode = get_cleanup_mode(cleanup_config, use_editor);
+	cleanup_బహుళకం = get_cleanup_బహుళకం(cleanup_config, use_editor);
 
-	if (dry_run)
-		return dry_run_commit(argv, prefix, current_head, &s);
-	index_file = prepare_index(argv, prefix, current_head, 0);
+	ఒకవేళ (dry_నిరంతరం)
+		తిరిగి dry_నిరంతరం_commit(argv, ఉపసర్గ, current_తల, &s);
+	సూచీ_file = prepare_సూచీ(argv, ఉపసర్గ, current_తల, 0);
 
 	/* Set up everything for writing the commit object.  This includes
 	   running hooks, writing the trees, and interacting with the user.  */
-	if (!prepare_to_commit(index_file, prefix,
-			       current_head, &s, &author_ident)) {
+	ఒకవేళ (!prepare_గమ్యం_commit(సూచీ_file, ఉపసర్గ,
+			       current_తల, &s, &author_ident)) {
 		ret = 1;
-		rollback_index_files();
-		goto cleanup;
+		rollback_సూచీ_files();
+		వెళ్ళు cleanup;
 	}
 
 	/* Determine parents */
-	reflog_msg = getenv("GIT_REFLOG_ACTION");
-	if (!current_head) {
-		if (!reflog_msg)
-			reflog_msg = "commit (initial)";
-	} else if (amend) {
-		if (!reflog_msg)
-			reflog_msg = "commit (amend)";
-		parents = commit_list_copy(current_head->parents);
-	} else if (whence == FROM_MERGE) {
-		struct strbuf m = STRBUF_INIT;
+	reflog_సందేశం = getenv("GIT_REFLOG_ACTION");
+	ఒకవేళ (!current_తల) {
+		ఒకవేళ (!reflog_సందేశం)
+			reflog_సందేశం = "commit (initial)";
+	} లేకపోతే ఒకవేళ (amend) {
+		ఒకవేళ (!reflog_సందేశం)
+			reflog_సందేశం = "commit (amend)";
+		parents = commit_list_copy(current_తల->parents);
+	} లేకపోతే ఒకవేళ (whence == FROM_విలీనం) {
+		నిర్మాణం strbuf m = STRBUF_INIT;
 		FILE *fp;
-		int allow_fast_forward = 1;
-		struct commit_list **pptr = &parents;
+		పూర్ణాంకం allow_fast_forward = 1;
+		నిర్మాణం commit_list **pptr = &parents;
 
-		if (!reflog_msg)
-			reflog_msg = "commit (merge)";
-		pptr = commit_list_append(current_head, pptr);
-		fp = xfopen(git_path_merge_head(the_repository), "r");
-		while (strbuf_getline_lf(&m, fp) != EOF) {
-			struct commit *parent;
+		ఒకవేళ (!reflog_సందేశం)
+			reflog_సందేశం = "commit (merge)";
+		pptr = commit_list_append(current_తల, pptr);
+		fp = xfopen(git_మార్గం_విలీనం_తల(the_repository), "r");
+		అయితే (strbuf_getline_lf(&m, fp) != EOF) {
+			నిర్మాణం commit *మాతృ;
 
-			parent = get_merge_parent(m.buf);
-			if (!parent)
+			మాతృ = get_విలీనం_మాతృ(m.buf);
+			ఒకవేళ (!మాతృ)
 				die(_("Corrupt MERGE_HEAD file (%s)"), m.buf);
-			pptr = commit_list_append(parent, pptr);
+			pptr = commit_list_append(మాతృ, pptr);
 		}
 		fclose(fp);
 		strbuf_release(&m);
-		if (!stat(git_path_merge_mode(the_repository), &statbuf)) {
-			if (strbuf_read_file(&sb, git_path_merge_mode(the_repository), 0) < 0)
+		ఒకవేళ (!stat(git_మార్గం_విలీనం_బహుళకం(the_repository), &statbuf)) {
+			ఒకవేళ (strbuf_read_file(&sb, git_మార్గం_విలీనం_బహుళకం(the_repository), 0) < 0)
 				die_errno(_("could not read MERGE_MODE"));
-			if (!strcmp(sb.buf, "no-ff"))
+			ఒకవేళ (!strcmp(sb.buf, "no-ff"))
 				allow_fast_forward = 0;
 		}
-		if (allow_fast_forward)
+		ఒకవేళ (allow_fast_forward)
 			reduce_heads_replace(&parents);
-	} else {
-		if (!reflog_msg)
-			reflog_msg = is_from_cherry_pick(whence)
+	} లేకపోతే {
+		ఒకవేళ (!reflog_సందేశం)
+			reflog_సందేశం = is_from_cherry_pick(whence)
 					? "commit (cherry-pick)"
 					: is_from_rebase(whence)
 					? "commit (rebase)"
 					: "commit";
-		commit_list_insert(current_head, &parents);
+		commit_list_చొప్పించు(current_తల, &parents);
 	}
 
 	/* Finally, get the commit message */
 	strbuf_reset(&sb);
-	if (strbuf_read_file(&sb, git_path_commit_editmsg(), 0) < 0) {
-		int saved_errno = errno;
-		rollback_index_files();
+	ఒకవేళ (strbuf_read_file(&sb, git_మార్గం_commit_editmsg(), 0) < 0) {
+		పూర్ణాంకం saved_errno = errno;
+		rollback_సూచీ_files();
 		die(_("could not read commit message: %s"), strerror(saved_errno));
 	}
 
-	cleanup_message(&sb, cleanup_mode, verbose);
+	cleanup_సందేశం(&sb, cleanup_బహుళకం, verbose);
 
-	if (message_is_empty(&sb, cleanup_mode) && !allow_empty_message) {
-		rollback_index_files();
+	ఒకవేళ (సందేశం_is_ఖాళీలు(&sb, cleanup_బహుళకం) && !allow_ఖాళీలు_సందేశం) {
+		rollback_సూచీ_files();
 		fprintf(stderr, _("Aborting commit due to empty commit message.\n"));
-		exit(1);
+		నిష్క్రమించు(1);
 	}
-	if (template_untouched(&sb, template_file, cleanup_mode) && !allow_empty_message) {
-		rollback_index_files();
+	ఒకవేళ (template_untouched(&sb, template_file, cleanup_బహుళకం) && !allow_ఖాళీలు_సందేశం) {
+		rollback_సూచీ_files();
 		fprintf(stderr, _("Aborting commit; you did not edit the message.\n"));
-		exit(1);
+		నిష్క్రమించు(1);
 	}
 
-	if (fixup_message && starts_with(sb.buf, "amend! ") &&
-	    !allow_empty_message) {
-		struct strbuf body = STRBUF_INIT;
-		size_t len = commit_subject_length(sb.buf);
+	ఒకవేళ (fixup_సందేశం && starts_with(sb.buf, "amend! ") &&
+	    !allow_ఖాళీలు_సందేశం) {
+		నిర్మాణం strbuf body = STRBUF_INIT;
+		కొలత_t len = commit_subject_నిడివి(sb.buf);
 		strbuf_addstr(&body, sb.buf + len);
-		if (message_is_empty(&body, cleanup_mode)) {
-			rollback_index_files();
+		ఒకవేళ (సందేశం_is_ఖాళీలు(&body, cleanup_బహుళకం)) {
+			rollback_సూచీ_files();
 			fprintf(stderr, _("Aborting commit due to empty commit message body.\n"));
-			exit(1);
+			నిష్క్రమించు(1);
 		}
 		strbuf_release(&body);
 	}
 
-	if (amend) {
-		const char *exclude_gpgsig[3] = { "gpgsig", "gpgsig-sha256", NULL };
-		extra = read_commit_extra_headers(current_head, exclude_gpgsig);
-	} else {
-		struct commit_extra_header **tail = &extra;
-		append_merge_tag_headers(parents, &tail);
+	ఒకవేళ (amend) {
+		స్థిరరాశి అక్షరం *exclude_gpgsig[3] = { "gpgsig", "gpgsig-sha256", ఖాళీ };
+		extra = read_commit_extra_శీర్షికలు(current_తల, exclude_gpgsig);
+	} లేకపోతే {
+		నిర్మాణం commit_extra_శీర్షిక **తోక = &extra;
+		append_విలీనం_ట్యాగ్_శీర్షికలు(parents, &తోక);
 	}
 
-	if (commit_tree_extended(sb.buf, sb.len, &the_repository->index->cache_tree->oid,
-				 parents, &oid, author_ident.buf, NULL,
+	ఒకవేళ (commit_వృక్షం_extended(sb.buf, sb.len, &the_repository->సూచీ->cache_వృక్షం->oid,
+				 parents, &oid, author_ident.buf, ఖాళీ,
 				 sign_commit, extra)) {
-		rollback_index_files();
+		rollback_సూచీ_files();
 		die(_("failed to write commit object"));
 	}
 
-	if (update_head_with_reflog(current_head, &oid, reflog_msg, &sb,
+	ఒకవేళ (update_తల_with_reflog(current_తల, &oid, reflog_సందేశం, &sb,
 				    &err)) {
-		rollback_index_files();
+		rollback_సూచీ_files();
 		die("%s", err.buf);
 	}
 
 	sequencer_post_commit_cleanup(the_repository, 0);
-	unlink(git_path_merge_head(the_repository));
-	unlink(git_path_merge_msg(the_repository));
-	unlink(git_path_merge_mode(the_repository));
-	unlink(git_path_squash_msg(the_repository));
+	unlink(git_మార్గం_విలీనం_తల(the_repository));
+	unlink(git_మార్గం_విలీనం_సందేశం(the_repository));
+	unlink(git_మార్గం_విలీనం_బహుళకం(the_repository));
+	unlink(git_మార్గం_squash_సందేశం(the_repository));
 
-	if (commit_index_files())
+	ఒకవేళ (commit_సూచీ_files())
 		die(_("repository has been updated, but unable to write\n"
 		      "new index file. Check that disk is not full and quota is\n"
 		      "not exceeded, and then \"git restore --staged :/\" to recover."));
 
-	git_test_write_commit_graph_or_die(the_repository);
+	git_test_write_commit_లేఖాచిత్రం_or_die(the_repository);
 
 	repo_rerere(the_repository, 0);
-	run_auto_maintenance(the_repository, quiet);
-	run_commit_hook(use_editor, repo_get_index_file(the_repository),
-			NULL, "post-commit", NULL);
-	if (amend && !no_post_rewrite) {
-		commit_post_rewrite(the_repository, current_head, &oid);
+	నిరంతరం_auto_maintenance(the_repository, quiet);
+	నిరంతరం_commit_hook(use_editor, repo_get_సూచీ_file(the_repository),
+			ఖాళీ, "post-commit", ఖాళీ);
+	ఒకవేళ (amend && !no_post_rewrite) {
+		commit_post_rewrite(the_repository, current_తల, &oid);
 	}
-	if (!quiet) {
-		unsigned int flags = 0;
+	ఒకవేళ (!quiet) {
+		గుర్తులేని పూర్ణాంకం flags = 0;
 
-		if (!current_head)
+		ఒకవేళ (!current_తల)
 			flags |= SUMMARY_INITIAL_COMMIT;
-		if (author_date_is_interesting())
+		ఒకవేళ (author_date_is_interesting())
 			flags |= SUMMARY_SHOW_AUTHOR_DATE;
-		print_commit_summary(the_repository, prefix,
+		print_commit_summary(the_repository, ఉపసర్గ,
 				     &oid, flags);
 	}
 
 	apply_autostash_ref(the_repository, "MERGE_AUTOSTASH",
-			    NULL, NULL, NULL, NULL);
+			    ఖాళీ, ఖాళీ, ఖాళీ, ఖాళీ);
 
 cleanup:
-	free_commit_extra_headers(extra);
+	free_commit_extra_శీర్షికలు(extra);
 	commit_list_free(parents);
 	strbuf_release(&author_ident);
 	strbuf_release(&err);
 	strbuf_release(&sb);
-	free(logfile);
-	free(template_file);
-	return ret;
+	విడుదల(logfile);
+	విడుదల(template_file);
+	తిరిగి ret;
 }

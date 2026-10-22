@@ -2,14 +2,14 @@
  * GIT - The information manager from hell
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "refs.h"
-#include "setup.h"
-#include "strbuf.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "refs.h"
+#అన్తర్భావ "setup.h"
+#అన్తర్భావ "strbuf.h"
 
-static const char builtin_check_ref_format_usage[] =
+స్థిర స్థిరరాశి అక్షరం builtin_check_ref_format_usage[] =
 "git check-ref-format [--normalize] [<options>] <refname>\n"
 "   or: git check-ref-format --branch <branchname-shorthand>";
 
@@ -20,84 +20,84 @@ static const char builtin_check_ref_format_usage[] =
  * This function is similar to normalize_path_copy(), but stripped down
  * to meet check_ref_format's simpler needs.
  */
-static char *collapse_slashes(const char *refname)
+స్థిర అక్షరం *collapse_slashes(స్థిరరాశి అక్షరం *refname)
 {
-	char *ret = xmallocz(strlen(refname));
-	char ch;
-	char prev = '/';
-	char *cp = ret;
+	అక్షరం *ret = xmallocz(అక్షరశ్రేణి_పొడవు(refname));
+	అక్షరం ch;
+	అక్షరం prev = '/';
+	అక్షరం *cp = ret;
 
-	while ((ch = *refname++) != '\0') {
-		if (prev == '/' && ch == prev)
-			continue;
+	అయితే ((ch = *refname++) != '\0') {
+		ఒకవేళ (prev == '/' && ch == prev)
+			కొనసాగు;
 
 		*cp++ = ch;
 		prev = ch;
 	}
 	*cp = '\0';
-	return ret;
+	తిరిగి ret;
 }
 
-static int check_ref_format_branch(const char *arg)
+స్థిర పూర్ణాంకం check_ref_format_branch(స్థిరరాశి అక్షరం *arg)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *name;
-	int nongit;
+	నిర్మాణం strbuf sb = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *name;
+	పూర్ణాంకం nongit;
 
-	setup_git_directory_gently(the_repository, &nongit);
-	if (check_branch_ref(the_repository, &sb, arg) ||
-	    !skip_prefix(sb.buf, "refs/heads/", &name))
+	అమరిక_git_directory_gently(the_repository, &nongit);
+	ఒకవేళ (check_branch_ref(the_repository, &sb, arg) ||
+	    !skip_ఉపసర్గ(sb.buf, "refs/heads/", &name))
 		die("'%s' is not a valid branch name", arg);
-	printf("%s\n", name);
+	రాయి("%s\n", name);
 	strbuf_release(&sb);
-	return 0;
+	తిరిగి 0;
 }
 
-int cmd_check_ref_format(int argc,
-			 const char **argv,
-			 const char *prefix,
-			 struct repository *repo UNUSED)
+పూర్ణాంకం cmd_check_ref_format(పూర్ణాంకం argc,
+			 స్థిరరాశి అక్షరం **argv,
+			 స్థిరరాశి అక్షరం *ఉపసర్గ,
+			 నిర్మాణం repository *repo వాడని)
 {
-	int i;
-	int normalize = 0;
-	int flags = 0;
-	const char *refname;
-	char *to_free = NULL;
-	int ret = 1;
+	పూర్ణాంకం i;
+	పూర్ణాంకం normalize = 0;
+	పూర్ణాంకం flags = 0;
+	స్థిరరాశి అక్షరం *refname;
+	అక్షరం *గమ్యం_free = ఖాళీ;
+	పూర్ణాంకం ret = 1;
 
-	BUG_ON_NON_EMPTY_PREFIX(prefix);
+	BUG_ON_NON_ఖాళీలు_ఉపసర్గ(ఉపసర్గ);
 
 	show_usage_if_asked(argc, argv,
 			    builtin_check_ref_format_usage);
 
-	if (argc == 3 && !strcmp(argv[1], "--branch"))
-		return check_ref_format_branch(argv[2]);
+	ఒకవేళ (argc == 3 && !strcmp(argv[1], "--branch"))
+		తిరిగి check_ref_format_branch(argv[2]);
 
-	for (i = 1; i < argc && argv[i][0] == '-'; i++) {
-		if (!strcmp(argv[i], "--normalize") || !strcmp(argv[i], "--print"))
+	కొరకు (i = 1; i < argc && argv[i][0] == '-'; i++) {
+		ఒకవేళ (!strcmp(argv[i], "--normalize") || !strcmp(argv[i], "--print"))
 			normalize = 1;
-		else if (!strcmp(argv[i], "--allow-onelevel"))
+		లేకపోతే ఒకవేళ (!strcmp(argv[i], "--allow-onelevel"))
 			flags |= REFNAME_ALLOW_ONELEVEL;
-		else if (!strcmp(argv[i], "--no-allow-onelevel"))
+		లేకపోతే ఒకవేళ (!strcmp(argv[i], "--no-allow-onelevel"))
 			flags &= ~REFNAME_ALLOW_ONELEVEL;
-		else if (!strcmp(argv[i], "--refspec-pattern"))
-			flags |= REFNAME_REFSPEC_PATTERN;
-		else
+		లేకపోతే ఒకవేళ (!strcmp(argv[i], "--refspec-pattern"))
+			flags |= REFNAME_REFSPEC_నమూనా;
+		లేకపోతే
 			usage(builtin_check_ref_format_usage);
 	}
-	if (! (i == argc - 1))
+	ఒకవేళ (! (i == argc - 1))
 		usage(builtin_check_ref_format_usage);
 
 	refname = argv[i];
-	if (normalize)
-		refname = to_free = collapse_slashes(refname);
-	if (check_refname_format(refname, flags))
-		goto cleanup;
-	if (normalize)
-		printf("%s\n", refname);
+	ఒకవేళ (normalize)
+		refname = గమ్యం_free = collapse_slashes(refname);
+	ఒకవేళ (check_refname_format(refname, flags))
+		వెళ్ళు cleanup;
+	ఒకవేళ (normalize)
+		రాయి("%s\n", refname);
 
 	ret = 0;
 cleanup:
-	free(to_free);
-	return ret;
+	విడుదల(గమ్యం_free);
+	తిరిగి ret;
 }

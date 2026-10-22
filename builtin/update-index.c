@@ -4,34 +4,34 @@
  * Copyright (C) Linus Torvalds, 2005
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "lockfile.h"
-#include "quote.h"
-#include "cache-tree.h"
-#include "tree-walk.h"
-#include "object-file.h"
-#include "odb.h"
-#include "odb/transaction.h"
-#include "refs.h"
-#include "resolve-undo.h"
-#include "parse-options.h"
-#include "pathspec.h"
-#include "dir.h"
-#include "read-cache.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "split-index.h"
-#include "symlinks.h"
-#include "fsmonitor.h"
-#include "write-or-die.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hash.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "lockfile.h"
+#అన్తర్భావ "quote.h"
+#అన్తర్భావ "cache-tree.h"
+#అన్తర్భావ "tree-walk.h"
+#అన్తర్భావ "object-file.h"
+#అన్తర్భావ "odb.h"
+#అన్తర్భావ "odb/transaction.h"
+#అన్తర్భావ "refs.h"
+#అన్తర్భావ "resolve-undo.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "pathspec.h"
+#అన్తర్భావ "dir.h"
+#అన్తర్భావ "read-cache.h"
+#అన్తర్భావ "setup.h"
+#అన్తర్భావ "sparse-index.h"
+#అన్తర్భావ "split-index.h"
+#అన్తర్భావ "symlinks.h"
+#అన్తర్భావ "fsmonitor.h"
+#అన్తర్భావ "write-or-die.h"
 
 /*
  * Default to not allowing changes to the list of files. The
@@ -40,22 +40,22 @@
  * like "git update-index *" and suddenly having all the object
  * files be revision controlled.
  */
-static int allow_add;
-static int allow_remove;
-static int allow_replace;
-static int info_only;
-static int force_remove;
-static int verbose;
-static int mark_valid_only;
-static int mark_skip_worktree_only;
-static int mark_fsmonitor_only;
-static int ignore_skip_worktree_entries;
-#define MARK_FLAG 1
-#define UNMARK_FLAG 2
-static struct strbuf mtime_dir = STRBUF_INIT;
+స్థిర పూర్ణాంకం allow_కూడు;
+స్థిర పూర్ణాంకం allow_remove;
+స్థిర పూర్ణాంకం allow_replace;
+స్థిర పూర్ణాంకం info_only;
+స్థిర పూర్ణాంకం force_remove;
+స్థిర పూర్ణాంకం verbose;
+స్థిర పూర్ణాంకం mark_valid_only;
+స్థిర పూర్ణాంకం mark_skip_worktree_only;
+స్థిర పూర్ణాంకం mark_fsmonitor_only;
+స్థిర పూర్ణాంకం ignore_skip_worktree_entries;
+#నిర్వచించు MARK_FLAG 1
+#నిర్వచించు UNMARK_FLAG 2
+స్థిర నిర్మాణం strbuf mtime_dir = STRBUF_INIT;
 
 /* Untracked cache mode */
-enum uc_mode {
+గణన uc_బహుళకం {
 	UC_UNSPECIFIED = -1,
 	UC_DISABLE = 0,
 	UC_ENABLE,
@@ -63,71 +63,71 @@ enum uc_mode {
 	UC_FORCE
 };
 
-__attribute__((format (printf, 1, 2)))
-static void report(const char *fmt, ...)
+__attribute__((format (రాయి, 1, 2)))
+స్థిర శూన్య report(స్థిరరాశి అక్షరం *fmt, ...)
 {
 	va_list vp;
 
-	if (!verbose)
-		return;
+	ఒకవేళ (!verbose)
+		తిరిగి;
 
-	va_start(vp, fmt);
+	va_ప్రారంభం(vp, fmt);
 	vprintf(fmt, vp);
-	putchar('\n');
-	va_end(vp);
+	అక్షరం_రాయి('\n');
+	va_చివర(vp);
 }
 
-static void remove_test_directory(void)
+స్థిర శూన్య remove_test_directory(శూన్య)
 {
-	if (mtime_dir.len)
+	ఒకవేళ (mtime_dir.len)
 		remove_dir_recursively(&mtime_dir, 0);
 }
 
-static const char *get_mtime_path(const char *path)
+స్థిర స్థిరరాశి అక్షరం *get_mtime_మార్గం(స్థిరరాశి అక్షరం *మార్గం)
 {
-	static struct strbuf sb = STRBUF_INIT;
+	స్థిర నిర్మాణం strbuf sb = STRBUF_INIT;
 	strbuf_reset(&sb);
-	strbuf_addf(&sb, "%s/%s", mtime_dir.buf, path);
-	return sb.buf;
+	strbuf_addf(&sb, "%s/%s", mtime_dir.buf, మార్గం);
+	తిరిగి sb.buf;
 }
 
-static void xmkdir(const char *path)
+స్థిర శూన్య xmkdir(స్థిరరాశి అక్షరం *మార్గం)
 {
-	path = get_mtime_path(path);
-	if (mkdir(path, 0700))
-		die_errno(_("failed to create directory %s"), path);
+	మార్గం = get_mtime_మార్గం(మార్గం);
+	ఒకవేళ (mkdir(మార్గం, 0700))
+		die_errno(_("failed to create directory %s"), మార్గం);
 }
 
-static int xstat_mtime_dir(struct stat *st)
+స్థిర పూర్ణాంకం xstat_mtime_dir(నిర్మాణం stat *st)
 {
-	if (stat(mtime_dir.buf, st))
+	ఒకవేళ (stat(mtime_dir.buf, st))
 		die_errno(_("failed to stat %s"), mtime_dir.buf);
-	return 0;
+	తిరిగి 0;
 }
 
-static int create_file(const char *path)
+స్థిర పూర్ణాంకం create_file(స్థిరరాశి అక్షరం *మార్గం)
 {
-	int fd;
-	path = get_mtime_path(path);
-	fd = xopen(path, O_CREAT | O_RDWR, 0644);
-	return fd;
+	పూర్ణాంకం fd;
+	మార్గం = get_mtime_మార్గం(మార్గం);
+	fd = xopen(మార్గం, O_CREAT | O_RDWR, 0644);
+	తిరిగి fd;
 }
 
-static void xunlink(const char *path)
+స్థిర శూన్య xunlink(స్థిరరాశి అక్షరం *మార్గం)
 {
-	path = get_mtime_path(path);
-	if (unlink(path))
-		die_errno(_("failed to delete file %s"), path);
+	మార్గం = get_mtime_మార్గం(మార్గం);
+	ఒకవేళ (unlink(మార్గం))
+		die_errno(_("failed to delete file %s"), మార్గం);
 }
 
-static void xrmdir(const char *path)
+స్థిర శూన్య xrmdir(స్థిరరాశి అక్షరం *మార్గం)
 {
-	path = get_mtime_path(path);
-	if (rmdir(path))
-		die_errno(_("failed to delete directory %s"), path);
+	మార్గం = get_mtime_మార్గం(మార్గం);
+	ఒకవేళ (rmdir(మార్గం))
+		die_errno(_("failed to delete directory %s"), మార్గం);
 }
 
-static void avoid_racy(void)
+స్థిర శూన్య avoid_racy(శూన్య)
 {
 	/*
 	 * not use if we could usleep(10) if core.useNanosec is enabled. The
@@ -137,133 +137,133 @@ static void avoid_racy(void)
 	sleep(1);
 }
 
-static int test_if_untracked_cache_is_supported(void)
+స్థిర పూర్ణాంకం test_if_untracked_cache_is_supported(శూన్య)
 {
-	struct stat st;
-	struct stat_data base;
-	int fd, ret = 0;
-	char *cwd;
+	నిర్మాణం stat st;
+	నిర్మాణం stat_దత్తాంశం పునాది;
+	పూర్ణాంకం fd, ret = 0;
+	అక్షరం *cwd;
 
 	strbuf_addstr(&mtime_dir, "mtime-test-XXXXXX");
-	if (!mkdtemp(mtime_dir.buf))
+	ఒకవేళ (!mkdtemp(mtime_dir.buf))
 		die_errno("Could not make temporary directory");
 
 	cwd = xgetcwd();
 	fprintf(stderr, _("Testing mtime in '%s' "), cwd);
-	free(cwd);
+	విడుదల(cwd);
 
 	atexit(remove_test_directory);
 	xstat_mtime_dir(&st);
-	fill_stat_data(&base, &st);
+	fill_stat_దత్తాంశం(&పునాది, &st);
 	fputc('.', stderr);
 
 	avoid_racy();
 	fd = create_file("newfile");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	ఒకవేళ (!సరిపోలిక_stat_దత్తాంశం(&పునాది, &st)) {
 		close(fd);
 		fputc('\n', stderr);
 		fprintf_ln(stderr,_("directory stat info does not "
 				    "change after adding a new file"));
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
-	fill_stat_data(&base, &st);
+	fill_stat_దత్తాంశం(&పునాది, &st);
 	fputc('.', stderr);
 
 	avoid_racy();
 	xmkdir("new-dir");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	ఒకవేళ (!సరిపోలిక_stat_దత్తాంశం(&పునాది, &st)) {
 		close(fd);
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info does not change "
 				     "after adding a new directory"));
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
-	fill_stat_data(&base, &st);
+	fill_stat_దత్తాంశం(&పునాది, &st);
 	fputc('.', stderr);
 
 	avoid_racy();
 	write_or_die(fd, "data", 4);
 	close(fd);
 	xstat_mtime_dir(&st);
-	if (match_stat_data(&base, &st)) {
+	ఒకవేళ (సరిపోలిక_stat_దత్తాంశం(&పునాది, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info changes "
 				     "after updating a file"));
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 	fputc('.', stderr);
 
 	avoid_racy();
 	close(create_file("new-dir/new"));
 	xstat_mtime_dir(&st);
-	if (match_stat_data(&base, &st)) {
+	ఒకవేళ (సరిపోలిక_stat_దత్తాంశం(&పునాది, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info changes after "
 				     "adding a file inside subdirectory"));
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 	fputc('.', stderr);
 
 	avoid_racy();
 	xunlink("newfile");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	ఒకవేళ (!సరిపోలిక_stat_దత్తాంశం(&పునాది, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info does not "
 				     "change after deleting a file"));
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
-	fill_stat_data(&base, &st);
+	fill_stat_దత్తాంశం(&పునాది, &st);
 	fputc('.', stderr);
 
 	avoid_racy();
 	xunlink("new-dir/new");
 	xrmdir("new-dir");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	ఒకవేళ (!సరిపోలిక_stat_దత్తాంశం(&పునాది, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info does not "
 				     "change after deleting a directory"));
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	if (rmdir(mtime_dir.buf))
+	ఒకవేళ (rmdir(mtime_dir.buf))
 		die_errno(_("failed to delete directory %s"), mtime_dir.buf);
 	fprintf_ln(stderr, _(" OK"));
 	ret = 1;
 
-done:
+పూర్తి:
 	strbuf_release(&mtime_dir);
-	return ret;
+	తిరిగి ret;
 }
 
-static int mark_ce_flags(const char *path, int flag, int mark)
+స్థిర పూర్ణాంకం mark_ce_flags(స్థిరరాశి అక్షరం *మార్గం, పూర్ణాంకం flag, పూర్ణాంకం mark)
 {
-	int namelen = strlen(path);
-	int pos = index_name_pos(the_repository->index, path, namelen);
-	if (0 <= pos) {
-		mark_fsmonitor_invalid(the_repository->index, the_repository->index->cache[pos]);
-		if (mark)
-			the_repository->index->cache[pos]->ce_flags |= flag;
-		else
-			the_repository->index->cache[pos]->ce_flags &= ~flag;
-		the_repository->index->cache[pos]->ce_flags |= CE_UPDATE_IN_BASE;
-		cache_tree_invalidate_path(the_repository->index, path);
-		the_repository->index->cache_changed |= CE_ENTRY_CHANGED;
-		return 0;
+	పూర్ణాంకం namelen = అక్షరశ్రేణి_పొడవు(మార్గం);
+	పూర్ణాంకం pos = సూచీ_name_pos(the_repository->సూచీ, మార్గం, namelen);
+	ఒకవేళ (0 <= pos) {
+		mark_fsmonitor_invalid(the_repository->సూచీ, the_repository->సూచీ->cache[pos]);
+		ఒకవేళ (mark)
+			the_repository->సూచీ->cache[pos]->ce_flags |= flag;
+		లేకపోతే
+			the_repository->సూచీ->cache[pos]->ce_flags &= ~flag;
+		the_repository->సూచీ->cache[pos]->ce_flags |= CE_UPDATE_లోపల_పునాది;
+		cache_వృక్షం_invalidate_మార్గం(the_repository->సూచీ, మార్గం);
+		the_repository->సూచీ->cache_మారింది |= CE_నమోదు_మారింది;
+		తిరిగి 0;
 	}
-	return -1;
+	తిరిగి -1;
 }
 
-static int remove_one_path(const char *path)
+స్థిర పూర్ణాంకం remove_one_మార్గం(స్థిరరాశి అక్షరం *మార్గం)
 {
-	if (!allow_remove)
-		return error("%s: does not exist and --remove not passed", path);
-	if (remove_file_from_index(the_repository->index, path))
-		return error("%s: cannot remove from the index", path);
-	return 0;
+	ఒకవేళ (!allow_remove)
+		తిరిగి error("%s: does not exist and --remove not passed", మార్గం);
+	ఒకవేళ (remove_file_from_సూచీ(the_repository->సూచీ, మార్గం))
+		తిరిగి error("%s: cannot remove from the index", మార్గం);
+	తిరిగి 0;
 }
 
 /*
@@ -273,41 +273,41 @@ static int remove_one_path(const char *path)
  *    succeeds.
  *  - permission error. That's never ok.
  */
-static int process_lstat_error(const char *path, int err)
+స్థిర పూర్ణాంకం process_lstat_error(స్థిరరాశి అక్షరం *మార్గం, పూర్ణాంకం err)
 {
-	if (is_missing_file_error(err))
-		return remove_one_path(path);
-	return error("lstat(\"%s\"): %s", path, strerror(err));
+	ఒకవేళ (is_missing_file_error(err))
+		తిరిగి remove_one_మార్గం(మార్గం);
+	తిరిగి error("lstat(\"%s\"): %s", మార్గం, strerror(err));
 }
 
-static int add_one_path(const struct cache_entry *old, const char *path, int len, struct stat *st)
+స్థిర పూర్ణాంకం కూడు_one_మార్గం(స్థిరరాశి నిర్మాణం cache_నమోదు *old, స్థిరరాశి అక్షరం *మార్గం, పూర్ణాంకం len, నిర్మాణం stat *st)
 {
-	int option;
-	struct cache_entry *ce;
+	పూర్ణాంకం option;
+	నిర్మాణం cache_నమోదు *ce;
 
 	/* Was the old index entry already up-to-date? */
-	if (old && !ce_stage(old) && !ie_match_stat(the_repository->index, old, st, 0))
-		return 0;
+	ఒకవేళ (old && !ce_stage(old) && !ie_సరిపోలిక_stat(the_repository->సూచీ, old, st, 0))
+		తిరిగి 0;
 
-	ce = make_empty_cache_entry(the_repository->index, len);
-	memcpy(ce->name, path, len);
+	ce = make_ఖాళీలు_cache_నమోదు(the_repository->సూచీ, len);
+	జ్ఞాపకం_నకలు(ce->name, మార్గం, len);
 	ce->ce_flags = create_ce_flags(0);
 	ce->ce_namelen = len;
-	fill_stat_cache_info(the_repository->index, ce, st);
-	ce->ce_mode = ce_mode_from_stat(the_repository, old, st->st_mode);
+	fill_stat_cache_info(the_repository->సూచీ, ce, st);
+	ce->ce_బహుళకం = ce_బహుళకం_from_stat(the_repository, old, st->st_బహుళకం);
 
-	if (index_path(the_repository->index, &ce->oid, path, st,
-		       info_only ? 0 : INDEX_WRITE_OBJECT)) {
-		discard_cache_entry(ce);
-		return -1;
+	ఒకవేళ (సూచీ_మార్గం(the_repository->సూచీ, &ce->oid, మార్గం, st,
+		       info_only ? 0 : సూచీ_WRITE_OBJECT)) {
+		discard_cache_నమోదు(ce);
+		తిరిగి -1;
 	}
-	option = allow_add ? ADD_CACHE_OK_TO_ADD : 0;
-	option |= allow_replace ? ADD_CACHE_OK_TO_REPLACE : 0;
-	if (add_index_entry(the_repository->index, ce, option)) {
-		discard_cache_entry(ce);
-		return error("%s: cannot add to the index - missing --add option?", path);
+	option = allow_కూడు ? కూడు_CACHE_OK_గమ్యం_కూడు : 0;
+	option |= allow_replace ? కూడు_CACHE_OK_గమ్యం_REPLACE : 0;
+	ఒకవేళ (కూడు_సూచీ_నమోదు(the_repository->సూచీ, ce, option)) {
+		discard_cache_నమోదు(ce);
+		తిరిగి error("%s: cannot add to the index - missing --add option?", మార్గం);
 	}
-	return 0;
+	తిరిగి 0;
 }
 
 /*
@@ -333,192 +333,192 @@ static int add_one_path(const struct cache_entry *old, const char *path, int len
  *  - it doesn't exist at all in the index, but it is a valid
  *    git directory, and it should be *added* as a gitlink.
  */
-static int process_directory(const char *path, int len, struct stat *st)
+స్థిర పూర్ణాంకం process_directory(స్థిరరాశి అక్షరం *మార్గం, పూర్ణాంకం len, నిర్మాణం stat *st)
 {
-	struct object_id oid;
-	int pos = index_name_pos(the_repository->index, path, len);
+	నిర్మాణం object_id oid;
+	పూర్ణాంకం pos = సూచీ_name_pos(the_repository->సూచీ, మార్గం, len);
 
 	/* Exact match: file or existing gitlink */
-	if (pos >= 0) {
-		const struct cache_entry *ce = the_repository->index->cache[pos];
-		if (S_ISGITLINK(ce->ce_mode)) {
+	ఒకవేళ (pos >= 0) {
+		స్థిరరాశి నిర్మాణం cache_నమోదు *ce = the_repository->సూచీ->cache[pos];
+		ఒకవేళ (S_ISGITLINK(ce->ce_బహుళకం)) {
 
 			/* Do nothing to the index if there is no HEAD! */
-			if (repo_resolve_gitlink_ref(the_repository, path,
+			ఒకవేళ (repo_resolve_gitlink_ref(the_repository, మార్గం,
 						     "HEAD", &oid) < 0)
-				return 0;
+				తిరిగి 0;
 
-			return add_one_path(ce, path, len, st);
+			తిరిగి కూడు_one_మార్గం(ce, మార్గం, len, st);
 		}
 		/* Should this be an unconditional error? */
-		return remove_one_path(path);
+		తిరిగి remove_one_మార్గం(మార్గం);
 	}
 
 	/* Inexact match: is there perhaps a subdirectory match? */
 	pos = -pos-1;
-	while (pos < the_repository->index->cache_nr) {
-		const struct cache_entry *ce = the_repository->index->cache[pos++];
+	అయితే (pos < the_repository->సూచీ->cache_nr) {
+		స్థిరరాశి నిర్మాణం cache_నమోదు *ce = the_repository->సూచీ->cache[pos++];
 
-		if (strncmp(ce->name, path, len))
-			break;
-		if (ce->name[len] > '/')
-			break;
-		if (ce->name[len] < '/')
-			continue;
+		ఒకవేళ (అక్షరశ్రేణి_పోలిక(ce->name, మార్గం, len))
+			ఆపు;
+		ఒకవేళ (ce->name[len] > '/')
+			ఆపు;
+		ఒకవేళ (ce->name[len] < '/')
+			కొనసాగు;
 
 		/* Subdirectory match - error out */
-		return error("%s: is a directory - add individual files instead", path);
+		తిరిగి error("%s: is a directory - add individual files instead", మార్గం);
 	}
 
 	/* No match - should we add it as a gitlink? */
-	if (!repo_resolve_gitlink_ref(the_repository, path, "HEAD", &oid))
-		return add_one_path(NULL, path, len, st);
+	ఒకవేళ (!repo_resolve_gitlink_ref(the_repository, మార్గం, "HEAD", &oid))
+		తిరిగి కూడు_one_మార్గం(ఖాళీ, మార్గం, len, st);
 
 	/* Error out. */
-	return error("%s: is a directory - add files inside instead", path);
+	తిరిగి error("%s: is a directory - add files inside instead", మార్గం);
 }
 
-static int process_path(const char *path, struct stat *st, int stat_errno)
+స్థిర పూర్ణాంకం process_మార్గం(స్థిరరాశి అక్షరం *మార్గం, నిర్మాణం stat *st, పూర్ణాంకం stat_errno)
 {
-	int pos, len;
-	const struct cache_entry *ce;
+	పూర్ణాంకం pos, len;
+	స్థిరరాశి నిర్మాణం cache_నమోదు *ce;
 
-	len = strlen(path);
-	if (has_symlink_leading_path(path, len))
-		return error("'%s' is beyond a symbolic link", path);
+	len = అక్షరశ్రేణి_పొడవు(మార్గం);
+	ఒకవేళ (has_symlink_leading_మార్గం(మార్గం, len))
+		తిరిగి error("'%s' is beyond a symbolic link", మార్గం);
 
-	pos = index_name_pos(the_repository->index, path, len);
-	ce = pos < 0 ? NULL : the_repository->index->cache[pos];
-	if (ce && ce_skip_worktree(ce)) {
+	pos = సూచీ_name_pos(the_repository->సూచీ, మార్గం, len);
+	ce = pos < 0 ? ఖాళీ : the_repository->సూచీ->cache[pos];
+	ఒకవేళ (ce && ce_skip_worktree(ce)) {
 		/*
 		 * working directory version is assumed "good"
 		 * so updating it does not make sense.
 		 * On the other hand, removing it from index should work
 		 */
-		if (!ignore_skip_worktree_entries && allow_remove &&
-		    remove_file_from_index(the_repository->index, path))
-			return error("%s: cannot remove from the index", path);
-		return 0;
+		ఒకవేళ (!ignore_skip_worktree_entries && allow_remove &&
+		    remove_file_from_సూచీ(the_repository->సూచీ, మార్గం))
+			తిరిగి error("%s: cannot remove from the index", మార్గం);
+		తిరిగి 0;
 	}
 
 	/*
 	 * First things first: get the stat information, to decide
 	 * what to do about the pathname!
 	 */
-	if (stat_errno)
-		return process_lstat_error(path, stat_errno);
+	ఒకవేళ (stat_errno)
+		తిరిగి process_lstat_error(మార్గం, stat_errno);
 
-	if (S_ISDIR(st->st_mode))
-		return process_directory(path, len, st);
+	ఒకవేళ (S_ISDIR(st->st_బహుళకం))
+		తిరిగి process_directory(మార్గం, len, st);
 
-	return add_one_path(ce, path, len, st);
+	తిరిగి కూడు_one_మార్గం(ce, మార్గం, len, st);
 }
 
-static int add_cacheinfo(unsigned int mode, const struct object_id *oid,
-			 const char *path, int stage)
+స్థిర పూర్ణాంకం కూడు_cacheinfo(గుర్తులేని పూర్ణాంకం బహుళకం, స్థిరరాశి నిర్మాణం object_id *oid,
+			 స్థిరరాశి అక్షరం *మార్గం, పూర్ణాంకం stage)
 {
-	int len, option;
-	struct cache_entry *ce;
+	పూర్ణాంకం len, option;
+	నిర్మాణం cache_నమోదు *ce;
 
-	if (!verify_path(path, mode))
-		return error("Invalid path '%s'", path);
+	ఒకవేళ (!verify_మార్గం(మార్గం, బహుళకం))
+		తిరిగి error("Invalid path '%s'", మార్గం);
 
-	len = strlen(path);
-	ce = make_empty_cache_entry(the_repository->index, len);
+	len = అక్షరశ్రేణి_పొడవు(మార్గం);
+	ce = make_ఖాళీలు_cache_నమోదు(the_repository->సూచీ, len);
 
 	oidcpy(&ce->oid, oid);
-	memcpy(ce->name, path, len);
+	జ్ఞాపకం_నకలు(ce->name, మార్గం, len);
 	ce->ce_flags = create_ce_flags(stage);
 	ce->ce_namelen = len;
-	ce->ce_mode = create_ce_mode(mode);
-	if (assume_unchanged)
+	ce->ce_బహుళకం = create_ce_బహుళకం(బహుళకం);
+	ఒకవేళ (assume_unchanged)
 		ce->ce_flags |= CE_VALID;
-	option = allow_add ? ADD_CACHE_OK_TO_ADD : 0;
-	option |= allow_replace ? ADD_CACHE_OK_TO_REPLACE : 0;
-	if (add_index_entry(the_repository->index, ce, option))
-		return error("%s: cannot add to the index - missing --add option?",
-			     path);
-	report("add '%s'", path);
-	return 0;
+	option = allow_కూడు ? కూడు_CACHE_OK_గమ్యం_కూడు : 0;
+	option |= allow_replace ? కూడు_CACHE_OK_గమ్యం_REPLACE : 0;
+	ఒకవేళ (కూడు_సూచీ_నమోదు(the_repository->సూచీ, ce, option))
+		తిరిగి error("%s: cannot add to the index - missing --add option?",
+			     మార్గం);
+	report("add '%s'", మార్గం);
+	తిరిగి 0;
 }
 
-static void chmod_path(char flip, const char *path)
+స్థిర శూన్య chmod_మార్గం(అక్షరం flip, స్థిరరాశి అక్షరం *మార్గం)
 {
-	int pos;
-	struct cache_entry *ce;
+	పూర్ణాంకం pos;
+	నిర్మాణం cache_నమోదు *ce;
 
-	pos = index_name_pos(the_repository->index, path, strlen(path));
-	if (pos < 0)
-		goto fail;
-	ce = the_repository->index->cache[pos];
-	if (chmod_index_entry(the_repository->index, ce, flip) < 0)
-		goto fail;
+	pos = సూచీ_name_pos(the_repository->సూచీ, మార్గం, అక్షరశ్రేణి_పొడవు(మార్గం));
+	ఒకవేళ (pos < 0)
+		వెళ్ళు fail;
+	ce = the_repository->సూచీ->cache[pos];
+	ఒకవేళ (chmod_సూచీ_నమోదు(the_repository->సూచీ, ce, flip) < 0)
+		వెళ్ళు fail;
 
-	report("chmod %cx '%s'", flip, path);
-	return;
+	report("chmod %cx '%s'", flip, మార్గం);
+	తిరిగి;
  fail:
-	die("git update-index: cannot chmod %cx '%s'", flip, path);
+	die("git update-index: cannot chmod %cx '%s'", flip, మార్గం);
 }
 
-static void update_one(const char *path)
+స్థిర శూన్య update_one(స్థిరరాశి అక్షరం *మార్గం)
 {
-	int stat_errno = 0;
-	struct stat st;
+	పూర్ణాంకం stat_errno = 0;
+	నిర్మాణం stat st;
 
-	if (mark_valid_only || mark_skip_worktree_only || force_remove ||
+	ఒకవేళ (mark_valid_only || mark_skip_worktree_only || force_remove ||
 	    mark_fsmonitor_only)
-		st.st_mode = 0;
-	else if (lstat(path, &st) < 0) {
-		st.st_mode = 0;
+		st.st_బహుళకం = 0;
+	లేకపోతే ఒకవేళ (lstat(మార్గం, &st) < 0) {
+		st.st_బహుళకం = 0;
 		stat_errno = errno;
 	} /* else stat is valid */
 
-	if (!verify_path(path, st.st_mode)) {
-		fprintf(stderr, "Ignoring path %s\n", path);
-		return;
+	ఒకవేళ (!verify_మార్గం(మార్గం, st.st_బహుళకం)) {
+		fprintf(stderr, "Ignoring path %s\n", మార్గం);
+		తిరిగి;
 	}
-	if (mark_valid_only) {
-		if (mark_ce_flags(path, CE_VALID, mark_valid_only == MARK_FLAG))
-			die("Unable to mark file %s", path);
-		return;
+	ఒకవేళ (mark_valid_only) {
+		ఒకవేళ (mark_ce_flags(మార్గం, CE_VALID, mark_valid_only == MARK_FLAG))
+			die("Unable to mark file %s", మార్గం);
+		తిరిగి;
 	}
-	if (mark_skip_worktree_only) {
-		if (mark_ce_flags(path, CE_SKIP_WORKTREE, mark_skip_worktree_only == MARK_FLAG))
-			die("Unable to mark file %s", path);
-		return;
+	ఒకవేళ (mark_skip_worktree_only) {
+		ఒకవేళ (mark_ce_flags(మార్గం, CE_SKIP_WORKTREE, mark_skip_worktree_only == MARK_FLAG))
+			die("Unable to mark file %s", మార్గం);
+		తిరిగి;
 	}
-	if (mark_fsmonitor_only) {
-		if (mark_ce_flags(path, CE_FSMONITOR_VALID, mark_fsmonitor_only == MARK_FLAG))
-			die("Unable to mark file %s", path);
-		return;
+	ఒకవేళ (mark_fsmonitor_only) {
+		ఒకవేళ (mark_ce_flags(మార్గం, CE_FSMONITOR_VALID, mark_fsmonitor_only == MARK_FLAG))
+			die("Unable to mark file %s", మార్గం);
+		తిరిగి;
 	}
 
-	if (force_remove) {
-		if (remove_file_from_index(the_repository->index, path))
-			die("git update-index: unable to remove %s", path);
-		report("remove '%s'", path);
-		return;
+	ఒకవేళ (force_remove) {
+		ఒకవేళ (remove_file_from_సూచీ(the_repository->సూచీ, మార్గం))
+			die("git update-index: unable to remove %s", మార్గం);
+		report("remove '%s'", మార్గం);
+		తిరిగి;
 	}
-	if (process_path(path, &st, stat_errno))
-		die("Unable to process path %s", path);
-	report("add '%s'", path);
+	ఒకవేళ (process_మార్గం(మార్గం, &st, stat_errno))
+		die("Unable to process path %s", మార్గం);
+	report("add '%s'", మార్గం);
 }
 
-static void read_index_info(int nul_term_line)
+స్థిర శూన్య read_సూచీ_info(పూర్ణాంకం nul_పదం_పంక్తి)
 {
-	const int hexsz = the_hash_algo->hexsz;
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf uq = STRBUF_INIT;
+	స్థిరరాశి పూర్ణాంకం hexsz = the_hash_algo->hexsz;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
+	నిర్మాణం strbuf uq = STRBUF_INIT;
 	strbuf_getline_fn getline_fn;
 
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	while (getline_fn(&buf, stdin) != EOF) {
-		char *ptr, *tab;
-		char *path_name;
-		struct object_id oid;
-		unsigned int mode;
-		unsigned long ul;
-		int stage;
+	getline_fn = nul_పదం_పంక్తి ? strbuf_getline_nul : strbuf_getline_lf;
+	అయితే (getline_fn(&buf, stdin) != EOF) {
+		అక్షరం *ptr, *tab;
+		అక్షరం *మార్గం_name;
+		నిర్మాణం object_id oid;
+		గుర్తులేని పూర్ణాంకం బహుళకం;
+		గుర్తులేని దీర్ఘ ul;
+		పూర్ణాంకం stage;
 
 		/* This reads lines formatted in one of three formats:
 		 *
@@ -538,206 +538,206 @@ static void read_index_info(int nul_term_line)
 		 */
 		errno = 0;
 		ul = strtoul(buf.buf, &ptr, 8);
-		if (ptr == buf.buf || *ptr != ' '
-		    || errno || (unsigned int) ul != ul)
-			goto bad_line;
-		mode = ul;
+		ఒకవేళ (ptr == buf.buf || *ptr != ' '
+		    || errno || (గుర్తులేని పూర్ణాంకం) ul != ul)
+			వెళ్ళు bad_పంక్తి;
+		బహుళకం = ul;
 
 		tab = strchr(ptr, '\t');
-		if (!tab || tab - ptr < hexsz + 1)
-			goto bad_line;
+		ఒకవేళ (!tab || tab - ptr < hexsz + 1)
+			వెళ్ళు bad_పంక్తి;
 
-		if (tab[-2] == ' ' && '0' <= tab[-1] && tab[-1] <= '3') {
+		ఒకవేళ (tab[-2] == ' ' && '0' <= tab[-1] && tab[-1] <= '3') {
 			stage = tab[-1] - '0';
 			ptr = tab + 1; /* point at the head of path */
 			tab = tab - 2; /* point at tail of sha1 */
 		}
-		else {
+		లేకపోతే {
 			stage = 0;
 			ptr = tab + 1; /* point at the head of path */
 		}
 
-		if (get_oid_hex(tab - hexsz, &oid) ||
+		ఒకవేళ (get_oid_hex(tab - hexsz, &oid) ||
 			tab[-(hexsz + 1)] != ' ')
-			goto bad_line;
+			వెళ్ళు bad_పంక్తి;
 
-		path_name = ptr;
-		if (!nul_term_line && path_name[0] == '"') {
+		మార్గం_name = ptr;
+		ఒకవేళ (!nul_పదం_పంక్తి && మార్గం_name[0] == '"') {
 			strbuf_reset(&uq);
-			if (unquote_c_style(&uq, path_name, NULL)) {
+			ఒకవేళ (unquote_c_style(&uq, మార్గం_name, ఖాళీ)) {
 				die("git update-index: bad quoting of path name");
 			}
-			path_name = uq.buf;
+			మార్గం_name = uq.buf;
 		}
 
-		if (!verify_path(path_name, mode)) {
-			fprintf(stderr, "Ignoring path %s\n", path_name);
-			continue;
+		ఒకవేళ (!verify_మార్గం(మార్గం_name, బహుళకం)) {
+			fprintf(stderr, "Ignoring path %s\n", మార్గం_name);
+			కొనసాగు;
 		}
 
-		if (!mode) {
+		ఒకవేళ (!బహుళకం) {
 			/* mode == 0 means there is no such path -- remove */
-			if (remove_file_from_index(the_repository->index, path_name))
+			ఒకవేళ (remove_file_from_సూచీ(the_repository->సూచీ, మార్గం_name))
 				die("git update-index: unable to remove %s",
 				    ptr);
 		}
-		else {
+		లేకపోతే {
 			/* mode ' ' sha1 '\t' name
 			 * ptr[-1] points at tab,
 			 * ptr[-41] is at the beginning of sha1
 			 */
 			ptr[-(hexsz + 2)] = ptr[-1] = 0;
-			if (add_cacheinfo(mode, &oid, path_name, stage))
+			ఒకవేళ (కూడు_cacheinfo(బహుళకం, &oid, మార్గం_name, stage))
 				die("git update-index: unable to update %s",
-				    path_name);
+				    మార్గం_name);
 		}
-		continue;
+		కొనసాగు;
 
-	bad_line:
+	bad_పంక్తి:
 		die("malformed index info %s", buf.buf);
 	}
 	strbuf_release(&buf);
 	strbuf_release(&uq);
 }
 
-static const char * const update_index_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి update_సూచీ_usage[] = {
 	N_("git update-index [<options>] [--] [<file>...]"),
-	NULL
+	ఖాళీ
 };
 
-static struct cache_entry *read_one_ent(const char *which,
-					struct object_id *ent, const char *path,
-					int namelen, int stage)
+స్థిర నిర్మాణం cache_నమోదు *read_one_ent(స్థిరరాశి అక్షరం *which,
+					నిర్మాణం object_id *ent, స్థిరరాశి అక్షరం *మార్గం,
+					పూర్ణాంకం namelen, పూర్ణాంకం stage)
 {
-	unsigned short mode;
-	struct object_id oid;
-	struct cache_entry *ce;
+	గుర్తులేని పొట్టి బహుళకం;
+	నిర్మాణం object_id oid;
+	నిర్మాణం cache_నమోదు *ce;
 
-	if (get_tree_entry(the_repository, ent, path, &oid, &mode)) {
-		if (which)
-			error("%s: not in %s branch.", path, which);
-		return NULL;
+	ఒకవేళ (get_వృక్షం_నమోదు(the_repository, ent, మార్గం, &oid, &బహుళకం)) {
+		ఒకవేళ (which)
+			error("%s: not in %s branch.", మార్గం, which);
+		తిరిగి ఖాళీ;
 	}
-	if (!the_repository->index->sparse_index && mode == S_IFDIR) {
-		if (which)
-			error("%s: not a blob in %s branch.", path, which);
-		return NULL;
+	ఒకవేళ (!the_repository->సూచీ->sparse_సూచీ && బహుళకం == S_IFDIR) {
+		ఒకవేళ (which)
+			error("%s: not a blob in %s branch.", మార్గం, which);
+		తిరిగి ఖాళీ;
 	}
-	ce = make_empty_cache_entry(the_repository->index, namelen);
+	ce = make_ఖాళీలు_cache_నమోదు(the_repository->సూచీ, namelen);
 
 	oidcpy(&ce->oid, &oid);
-	memcpy(ce->name, path, namelen);
+	జ్ఞాపకం_నకలు(ce->name, మార్గం, namelen);
 	ce->ce_flags = create_ce_flags(stage);
 	ce->ce_namelen = namelen;
-	ce->ce_mode = create_ce_mode(mode);
-	return ce;
+	ce->ce_బహుళకం = create_ce_బహుళకం(బహుళకం);
+	తిరిగి ce;
 }
 
-static int unresolve_one(const char *path)
+స్థిర పూర్ణాంకం unresolve_one(స్థిరరాశి అక్షరం *మార్గం)
 {
-	struct string_list_item *item;
-	int res = 0;
+	నిర్మాణం string_list_అంశం *అంశం;
+	పూర్ణాంకం res = 0;
 
-	if (!the_repository->index->resolve_undo)
-		return res;
-	item = string_list_lookup(the_repository->index->resolve_undo, path);
-	if (!item)
-		return res; /* no resolve-undo record for the path */
-	res = unmerge_index_entry(the_repository->index, path, item->util, 0);
-	FREE_AND_NULL(item->util);
-	return res;
+	ఒకవేళ (!the_repository->సూచీ->resolve_undo)
+		తిరిగి res;
+	అంశం = string_list_lookup(the_repository->సూచీ->resolve_undo, మార్గం);
+	ఒకవేళ (!అంశం)
+		తిరిగి res; /* no resolve-undo record for the path */
+	res = unmerge_సూచీ_నమోదు(the_repository->సూచీ, మార్గం, అంశం->util, 0);
+	FREE_AND_NULL(అంశం->util);
+	తిరిగి res;
 }
 
-static int do_unresolve(int ac, const char **av,
-			const char *prefix, int prefix_length)
+స్థిర పూర్ణాంకం do_unresolve(పూర్ణాంకం ac, స్థిరరాశి అక్షరం **av,
+			స్థిరరాశి అక్షరం *ఉపసర్గ, పూర్ణాంకం ఉపసర్గ_నిడివి)
 {
-	int i;
-	int err = 0;
+	పూర్ణాంకం i;
+	పూర్ణాంకం err = 0;
 
-	for (i = 1; i < ac; i++) {
-		const char *arg = av[i];
-		char *p = prefix_path(the_repository, prefix, prefix_length, arg);
+	కొరకు (i = 1; i < ac; i++) {
+		స్థిరరాశి అక్షరం *arg = av[i];
+		అక్షరం *p = ఉపసర్గ_మార్గం(the_repository, ఉపసర్గ, ఉపసర్గ_నిడివి, arg);
 		err |= unresolve_one(p);
-		free(p);
+		విడుదల(p);
 	}
-	return err;
+	తిరిగి err;
 }
 
-static int do_reupdate(const char **paths,
-		       const char *prefix)
+స్థిర పూర్ణాంకం do_reupdate(స్థిరరాశి అక్షరం **paths,
+		       స్థిరరాశి అక్షరం *ఉపసర్గ)
 {
 	/* Read HEAD and run update-index on paths that are
 	 * merged and already different between index and HEAD.
 	 */
-	int pos;
-	int has_head = 1;
-	struct pathspec pathspec;
-	struct object_id head_oid;
+	పూర్ణాంకం pos;
+	పూర్ణాంకం has_తల = 1;
+	నిర్మాణం pathspec pathspec;
+	నిర్మాణం object_id తల_oid;
 
 	parse_pathspec(&pathspec, 0,
 		       PATHSPEC_PREFER_CWD,
-		       prefix, paths);
+		       ఉపసర్గ, paths);
 
-	if (refs_read_ref(get_main_ref_store(the_repository), "HEAD", &head_oid))
+	ఒకవేళ (refs_read_ref(get_main_ref_store(the_repository), "HEAD", &తల_oid))
 		/* If there is no HEAD, that means it is an initial
 		 * commit.  Update everything in the index.
 		 */
-		has_head = 0;
+		has_తల = 0;
  redo:
-	for (pos = 0; pos < the_repository->index->cache_nr; pos++) {
-		const struct cache_entry *ce = the_repository->index->cache[pos];
-		struct cache_entry *old = NULL;
-		int save_nr;
-		char *path;
+	కొరకు (pos = 0; pos < the_repository->సూచీ->cache_nr; pos++) {
+		స్థిరరాశి నిర్మాణం cache_నమోదు *ce = the_repository->సూచీ->cache[pos];
+		నిర్మాణం cache_నమోదు *old = ఖాళీ;
+		పూర్ణాంకం save_nr;
+		అక్షరం *మార్గం;
 
-		if (ce_stage(ce) || !ce_path_match(the_repository->index, ce, &pathspec, NULL))
-			continue;
-		if (has_head)
-			old = read_one_ent(NULL, &head_oid,
+		ఒకవేళ (ce_stage(ce) || !ce_మార్గం_సరిపోలిక(the_repository->సూచీ, ce, &pathspec, ఖాళీ))
+			కొనసాగు;
+		ఒకవేళ (has_తల)
+			old = read_one_ent(ఖాళీ, &తల_oid,
 					   ce->name, ce_namelen(ce), 0);
-		if (old && ce->ce_mode == old->ce_mode &&
+		ఒకవేళ (old && ce->ce_బహుళకం == old->ce_బహుళకం &&
 		    oideq(&ce->oid, &old->oid)) {
-			discard_cache_entry(old);
-			continue; /* unchanged */
+			discard_cache_నమోదు(old);
+			కొనసాగు; /* unchanged */
 		}
 
 		/* At this point, we know the contents of the sparse directory are
 		 * modified with respect to HEAD, so we expand the index and restart
 		 * to process each path individually
 		 */
-		if (S_ISSPARSEDIR(ce->ce_mode)) {
-			ensure_full_index(the_repository->index);
-			goto redo;
+		ఒకవేళ (S_ISSPARSEDIR(ce->ce_బహుళకం)) {
+			ensure_నిండిన_సూచీ(the_repository->సూచీ);
+			వెళ్ళు redo;
 		}
 
 		/* Be careful.  The working tree may not have the
 		 * path anymore, in which case, under 'allow_remove',
 		 * or worse yet 'allow_replace', active_nr may decrease.
 		 */
-		save_nr = the_repository->index->cache_nr;
-		path = xstrdup(ce->name);
-		update_one(path);
-		free(path);
-		discard_cache_entry(old);
-		if (save_nr != the_repository->index->cache_nr)
-			goto redo;
+		save_nr = the_repository->సూచీ->cache_nr;
+		మార్గం = xstrdup(ce->name);
+		update_one(మార్గం);
+		విడుదల(మార్గం);
+		discard_cache_నమోదు(old);
+		ఒకవేళ (save_nr != the_repository->సూచీ->cache_nr)
+			వెళ్ళు redo;
 	}
 	clear_pathspec(&pathspec);
-	return 0;
+	తిరిగి 0;
 }
 
-struct refresh_params {
-	unsigned int flags;
-	int *has_errors;
+నిర్మాణం refresh_params {
+	గుర్తులేని పూర్ణాంకం flags;
+	పూర్ణాంకం *has_errors;
 };
 
-static int refresh(struct refresh_params *o, unsigned int flag)
+స్థిర పూర్ణాంకం refresh(నిర్మాణం refresh_params *o, గుర్తులేని పూర్ణాంకం flag)
 {
-	setup_work_tree(the_repository);
-	repo_read_index(the_repository);
-	*o->has_errors |= refresh_index(the_repository->index, o->flags | flag, NULL,
-					NULL, NULL);
-	if (has_racy_timestamp(the_repository->index)) {
+	అమరిక_work_వృక్షం(the_repository);
+	repo_read_సూచీ(the_repository);
+	*o->has_errors |= refresh_సూచీ(the_repository->సూచీ, o->flags | flag, ఖాళీ,
+					ఖాళీ, ఖాళీ);
+	ఒకవేళ (has_racy_timestamp(the_repository->సూచీ)) {
 		/*
 		 * Even if nothing else has changed, updating the file
 		 * increases the chance that racy timestamps become
@@ -746,215 +746,215 @@ static int refresh(struct refresh_params *o, unsigned int flag)
 		 * refresh_index() as these are no actual errors.
 		 * cmd_status() does the same.
 		 */
-		the_repository->index->cache_changed |= SOMETHING_CHANGED;
+		the_repository->సూచీ->cache_మారింది |= SOMETHING_మారింది;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static int refresh_callback(const struct option *opt,
-				const char *arg, int unset)
+స్థిర పూర్ణాంకం refresh_callback(స్థిరరాశి నిర్మాణం option *opt,
+				స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return refresh(opt->value, 0);
+	తిరిగి refresh(opt->విలువ, 0);
 }
 
-static int really_refresh_callback(const struct option *opt,
-				const char *arg, int unset)
+స్థిర పూర్ణాంకం really_refresh_callback(స్థిరరాశి నిర్మాణం option *opt,
+				స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return refresh(opt->value, REFRESH_REALLY);
+	తిరిగి refresh(opt->విలువ, REFRESH_REALLY);
 }
 
-static int chmod_callback(const struct option *opt,
-				const char *arg, int unset)
+స్థిర పూర్ణాంకం chmod_callback(స్థిరరాశి నిర్మాణం option *opt,
+				స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	char *flip = opt->value;
+	అక్షరం *flip = opt->విలువ;
 	BUG_ON_OPT_NEG(unset);
-	if ((arg[0] != '-' && arg[0] != '+') || arg[1] != 'x' || arg[2])
-		return error("option 'chmod' expects \"+x\" or \"-x\"");
+	ఒకవేళ ((arg[0] != '-' && arg[0] != '+') || arg[1] != 'x' || arg[2])
+		తిరిగి error("option 'chmod' expects \"+x\" or \"-x\"");
 	*flip = arg[0];
-	return 0;
+	తిరిగి 0;
 }
 
-static int resolve_undo_clear_callback(const struct option *opt UNUSED,
-				const char *arg, int unset)
+స్థిర పూర్ణాంకం resolve_undo_clear_callback(స్థిరరాశి నిర్మాణం option *opt వాడని,
+				స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	resolve_undo_clear_index(the_repository->index);
-	return 0;
+	resolve_undo_clear_సూచీ(the_repository->సూచీ);
+	తిరిగి 0;
 }
 
-static int parse_new_style_cacheinfo(const char *arg,
-				     unsigned int *mode,
-				     struct object_id *oid,
-				     const char **path)
+స్థిర పూర్ణాంకం parse_new_style_cacheinfo(స్థిరరాశి అక్షరం *arg,
+				     గుర్తులేని పూర్ణాంకం *బహుళకం,
+				     నిర్మాణం object_id *oid,
+				     స్థిరరాశి అక్షరం **మార్గం)
 {
-	unsigned long ul;
-	char *endp;
-	const char *p;
+	గుర్తులేని దీర్ఘ ul;
+	అక్షరం *endp;
+	స్థిరరాశి అక్షరం *p;
 
-	if (!arg)
-		return -1;
+	ఒకవేళ (!arg)
+		తిరిగి -1;
 
 	errno = 0;
 	ul = strtoul(arg, &endp, 8);
-	if (errno || endp == arg || *endp != ',' || (unsigned int) ul != ul)
-		return -1; /* not a new-style cacheinfo */
-	*mode = ul;
+	ఒకవేళ (errno || endp == arg || *endp != ',' || (గుర్తులేని పూర్ణాంకం) ul != ul)
+		తిరిగి -1; /* not a new-style cacheinfo */
+	*బహుళకం = ul;
 	endp++;
-	if (parse_oid_hex(endp, oid, &p) || *p != ',')
-		return -1;
-	*path = p + 1;
-	return 0;
+	ఒకవేళ (parse_oid_hex(endp, oid, &p) || *p != ',')
+		తిరిగి -1;
+	*మార్గం = p + 1;
+	తిరిగి 0;
 }
 
-static enum parse_opt_result cacheinfo_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt UNUSED,
-	const char *arg, int unset)
+స్థిర గణన parse_opt_ఫలితం cacheinfo_callback(
+	నిర్మాణం parse_opt_ctx_t *ctx, స్థిరరాశి నిర్మాణం option *opt వాడని,
+	స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	struct object_id oid;
-	unsigned int mode;
-	const char *path;
+	నిర్మాణం object_id oid;
+	గుర్తులేని పూర్ణాంకం బహుళకం;
+	స్థిరరాశి అక్షరం *మార్గం;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
-	if (!parse_new_style_cacheinfo(ctx->argv[1], &mode, &oid, &path)) {
-		if (add_cacheinfo(mode, &oid, path, 0))
-			die("git update-index: --cacheinfo cannot add %s", path);
+	ఒకవేళ (!parse_new_style_cacheinfo(ctx->argv[1], &బహుళకం, &oid, &మార్గం)) {
+		ఒకవేళ (కూడు_cacheinfo(బహుళకం, &oid, మార్గం, 0))
+			die("git update-index: --cacheinfo cannot add %s", మార్గం);
 		ctx->argv++;
 		ctx->argc--;
-		return 0;
+		తిరిగి 0;
 	}
-	if (ctx->argc <= 3)
-		return error("option 'cacheinfo' expects <mode>,<sha1>,<path>");
-	if (strtoul_ui(*++ctx->argv, 8, &mode) ||
+	ఒకవేళ (ctx->argc <= 3)
+		తిరిగి error("option 'cacheinfo' expects <mode>,<sha1>,<path>");
+	ఒకవేళ (strtoul_ui(*++ctx->argv, 8, &బహుళకం) ||
 	    get_oid_hex(*++ctx->argv, &oid) ||
-	    add_cacheinfo(mode, &oid, *++ctx->argv, 0))
+	    కూడు_cacheinfo(బహుళకం, &oid, *++ctx->argv, 0))
 		die("git update-index: --cacheinfo cannot add %s", *ctx->argv);
 	ctx->argc -= 3;
-	return 0;
+	తిరిగి 0;
 }
 
-static enum parse_opt_result stdin_cacheinfo_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+స్థిర గణన parse_opt_ఫలితం stdin_cacheinfo_callback(
+	నిర్మాణం parse_opt_ctx_t *ctx, స్థిరరాశి నిర్మాణం option *opt,
+	స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	int *nul_term_line = opt->value;
+	పూర్ణాంకం *nul_పదం_పంక్తి = opt->విలువ;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
-	if (ctx->argc != 1)
-		return error("option '%s' must be the last argument", opt->long_name);
-	allow_add = allow_replace = allow_remove = 1;
-	read_index_info(*nul_term_line);
-	return 0;
+	ఒకవేళ (ctx->argc != 1)
+		తిరిగి error("option '%s' must be the last argument", opt->long_name);
+	allow_కూడు = allow_replace = allow_remove = 1;
+	read_సూచీ_info(*nul_పదం_పంక్తి);
+	తిరిగి 0;
 }
 
-static enum parse_opt_result stdin_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+స్థిర గణన parse_opt_ఫలితం stdin_callback(
+	నిర్మాణం parse_opt_ctx_t *ctx, స్థిరరాశి నిర్మాణం option *opt,
+	స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	int *read_from_stdin = opt->value;
+	పూర్ణాంకం *read_from_stdin = opt->విలువ;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
-	if (ctx->argc != 1)
-		return error("option '%s' must be the last argument", opt->long_name);
+	ఒకవేళ (ctx->argc != 1)
+		తిరిగి error("option '%s' must be the last argument", opt->long_name);
 	*read_from_stdin = 1;
-	return 0;
+	తిరిగి 0;
 }
 
-static enum parse_opt_result unresolve_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+స్థిర గణన parse_opt_ఫలితం unresolve_callback(
+	నిర్మాణం parse_opt_ctx_t *ctx, స్థిరరాశి నిర్మాణం option *opt,
+	స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	int *has_errors = opt->value;
-	const char *prefix = the_repository->prefix;
+	పూర్ణాంకం *has_errors = opt->విలువ;
+	స్థిరరాశి అక్షరం *ఉపసర్గ = the_repository->ఉపసర్గ;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
 	/* consume remaining arguments. */
 	*has_errors = do_unresolve(ctx->argc, ctx->argv,
-				prefix, prefix ? strlen(prefix) : 0);
-	if (*has_errors)
-		the_repository->index->cache_changed = 0;
+				ఉపసర్గ, ఉపసర్గ ? అక్షరశ్రేణి_పొడవు(ఉపసర్గ) : 0);
+	ఒకవేళ (*has_errors)
+		the_repository->సూచీ->cache_మారింది = 0;
 
 	ctx->argv += ctx->argc - 1;
 	ctx->argc = 1;
-	return 0;
+	తిరిగి 0;
 }
 
-static enum parse_opt_result reupdate_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+స్థిర గణన parse_opt_ఫలితం reupdate_callback(
+	నిర్మాణం parse_opt_ctx_t *ctx, స్థిరరాశి నిర్మాణం option *opt,
+	స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	int *has_errors = opt->value;
-	const char *prefix = the_repository->prefix;
+	పూర్ణాంకం *has_errors = opt->విలువ;
+	స్థిరరాశి అక్షరం *ఉపసర్గ = the_repository->ఉపసర్గ;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
 	/* consume remaining arguments. */
-	setup_work_tree(the_repository);
-	*has_errors = do_reupdate(ctx->argv + 1, prefix);
-	if (*has_errors)
-		the_repository->index->cache_changed = 0;
+	అమరిక_work_వృక్షం(the_repository);
+	*has_errors = do_reupdate(ctx->argv + 1, ఉపసర్గ);
+	ఒకవేళ (*has_errors)
+		the_repository->సూచీ->cache_మారింది = 0;
 
 	ctx->argv += ctx->argc - 1;
 	ctx->argc = 1;
-	return 0;
+	తిరిగి 0;
 }
 
-int cmd_update_index(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo UNUSED)
+పూర్ణాంకం cmd_update_సూచీ(పూర్ణాంకం argc,
+		     స్థిరరాశి అక్షరం **argv,
+		     స్థిరరాశి అక్షరం *ఉపసర్గ,
+		     నిర్మాణం repository *repo వాడని)
 {
-	int newfd, entries, has_errors = 0, nul_term_line = 0;
-	enum uc_mode untracked_cache = UC_UNSPECIFIED;
-	int read_from_stdin = 0;
-	int prefix_length = prefix ? strlen(prefix) : 0;
-	int preferred_index_format = 0;
-	char set_executable_bit = 0;
-	struct refresh_params refresh_args = {0, &has_errors};
-	int lock_error = 0;
-	int split_index = -1;
-	int force_write = 0;
-	int fsmonitor = -1;
-	struct lock_file lock_file = LOCK_INIT;
-	struct parse_opt_ctx_t ctx;
+	పూర్ణాంకం newfd, entries, has_errors = 0, nul_పదం_పంక్తి = 0;
+	గణన uc_బహుళకం untracked_cache = UC_UNSPECIFIED;
+	పూర్ణాంకం read_from_stdin = 0;
+	పూర్ణాంకం ఉపసర్గ_నిడివి = ఉపసర్గ ? అక్షరశ్రేణి_పొడవు(ఉపసర్గ) : 0;
+	పూర్ణాంకం preferred_సూచీ_format = 0;
+	అక్షరం సమితి_executable_బిట్టు = 0;
+	నిర్మాణం refresh_params refresh_వాదనలు = {0, &has_errors};
+	పూర్ణాంకం తాళం_error = 0;
+	పూర్ణాంకం విభజించు_సూచీ = -1;
+	పూర్ణాంకం force_write = 0;
+	పూర్ణాంకం fsmonitor = -1;
+	నిర్మాణం తాళం_file తాళం_file = తాళం_INIT;
+	నిర్మాణం parse_opt_ctx_t ctx;
 	strbuf_getline_fn getline_fn;
-	int parseopt_state = PARSE_OPT_UNKNOWN;
-	struct repository *r = the_repository;
-	struct odb_transaction *transaction;
-	struct option options[] = {
-		OPT_BIT('q', NULL, &refresh_args.flags,
+	పూర్ణాంకం parseopt_state = PARSE_OPT_UNKNOWN;
+	నిర్మాణం repository *r = the_repository;
+	నిర్మాణం odb_transaction *transaction;
+	నిర్మాణం option options[] = {
+		OPT_బిట్టు('q', ఖాళీ, &refresh_వాదనలు.flags,
 			N_("continue refresh even when index needs update"),
 			REFRESH_QUIET),
-		OPT_BIT(0, "ignore-submodules", &refresh_args.flags,
+		OPT_బిట్టు(0, "ignore-submodules", &refresh_వాదనలు.flags,
 			N_("refresh: ignore submodules"),
 			REFRESH_IGNORE_SUBMODULES),
-		OPT_SET_INT(0, "add", &allow_add,
+		OPT_సమితి_INT(0, "add", &allow_కూడు,
 			N_("do not ignore new files"), 1),
-		OPT_SET_INT(0, "replace", &allow_replace,
+		OPT_సమితి_INT(0, "replace", &allow_replace,
 			N_("let files replace directories and vice-versa"), 1),
-		OPT_SET_INT(0, "remove", &allow_remove,
+		OPT_సమితి_INT(0, "remove", &allow_remove,
 			N_("notice files missing from worktree"), 1),
-		OPT_BIT(0, "unmerged", &refresh_args.flags,
+		OPT_బిట్టు(0, "unmerged", &refresh_వాదనలు.flags,
 			N_("refresh even if index contains unmerged entries"),
 			REFRESH_UNMERGED),
-		OPT_CALLBACK_F(0, "refresh", &refresh_args, NULL,
+		OPT_CALLBACK_F(0, "refresh", &refresh_వాదనలు, ఖాళీ,
 			N_("refresh stat information"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			refresh_callback),
-		OPT_CALLBACK_F(0, "really-refresh", &refresh_args, NULL,
+		OPT_CALLBACK_F(0, "really-refresh", &refresh_వాదనలు, ఖాళీ,
 			N_("like --refresh, but ignore assume-unchanged setting"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			really_refresh_callback),
@@ -967,58 +967,58 @@ int cmd_update_index(int argc,
 				 PARSE_OPT_NONEG | PARSE_OPT_LITERAL_ARGHELP,
 			.ll_callback = cacheinfo_callback,
 		},
-		OPT_CALLBACK_F(0, "chmod", &set_executable_bit, "(+|-)x",
+		OPT_CALLBACK_F(0, "chmod", &సమితి_executable_బిట్టు, "(+|-)x",
 			N_("override the executable bit of the listed files"),
 			PARSE_OPT_NONEG,
 			chmod_callback),
 		{
-			.type = OPTION_SET_INT,
+			.type = OPTION_సమితి_INT,
 			.long_name = "assume-unchanged",
-			.value = &mark_valid_only,
-			.precision = sizeof(mark_valid_only),
+			.విలువ = &mark_valid_only,
+			.precision = పరిమాణం(mark_valid_only),
 			.help = N_("mark files as \"not changing\""),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = MARK_FLAG,
 		},
 		{
-			.type = OPTION_SET_INT,
+			.type = OPTION_సమితి_INT,
 			.long_name = "no-assume-unchanged",
-			.value = &mark_valid_only,
-			.precision = sizeof(mark_valid_only),
+			.విలువ = &mark_valid_only,
+			.precision = పరిమాణం(mark_valid_only),
 			.help = N_("clear assumed-unchanged bit"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = UNMARK_FLAG,
 		},
 		{
-			.type = OPTION_SET_INT,
+			.type = OPTION_సమితి_INT,
 			.long_name = "skip-worktree",
-			.value = &mark_skip_worktree_only,
-			.precision = sizeof(mark_skip_worktree_only),
+			.విలువ = &mark_skip_worktree_only,
+			.precision = పరిమాణం(mark_skip_worktree_only),
 			.help = N_("mark files as \"index-only\""),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = MARK_FLAG,
 		},
 		{
-			.type = OPTION_SET_INT,
+			.type = OPTION_సమితి_INT,
 			.long_name = "no-skip-worktree",
-			.value = &mark_skip_worktree_only,
-			.precision = sizeof(mark_skip_worktree_only),
+			.విలువ = &mark_skip_worktree_only,
+			.precision = పరిమాణం(mark_skip_worktree_only),
 			.help = N_("clear skip-worktree bit"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = UNMARK_FLAG,
 		},
 		OPT_BOOL(0, "ignore-skip-worktree-entries", &ignore_skip_worktree_entries,
 			 N_("do not touch index-only entries")),
-		OPT_SET_INT(0, "info-only", &info_only,
+		OPT_సమితి_INT(0, "info-only", &info_only,
 			N_("add to index only; do not add content to object database"), 1),
-		OPT_SET_INT(0, "force-remove", &force_remove,
+		OPT_సమితి_INT(0, "force-remove", &force_remove,
 			N_("remove named paths even if present in worktree"), 1),
-		OPT_BOOL('z', NULL, &nul_term_line,
+		OPT_BOOL('z', ఖాళీ, &nul_పదం_పంక్తి,
 			 N_("with --stdin: input lines are terminated by null bytes")),
 		{
 			.type = OPTION_LOWLEVEL_CALLBACK,
 			.long_name = "stdin",
-			.value = &read_from_stdin,
+			.విలువ = &read_from_stdin,
 			.help = N_("read list of paths to be updated from standard input"),
 			.flags = PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			.ll_callback = stdin_callback,
@@ -1026,7 +1026,7 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_LOWLEVEL_CALLBACK,
 			.long_name = "index-info",
-			.value = &nul_term_line,
+			.విలువ = &nul_పదం_పంక్తి,
 			.help = N_("add entries from standard input to the index"),
 			.flags = PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			.ll_callback = stdin_cacheinfo_callback,
@@ -1034,7 +1034,7 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_LOWLEVEL_CALLBACK,
 			.long_name = "unresolve",
-			.value = &has_errors,
+			.విలువ = &has_errors,
 			.help = N_("repopulate stages #2 and #3 for the listed paths"),
 			.flags = PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			.ll_callback = unresolve_callback,
@@ -1043,81 +1043,81 @@ int cmd_update_index(int argc,
 			.type = OPTION_LOWLEVEL_CALLBACK,
 			.short_name = 'g',
 			.long_name = "again",
-			.value = &has_errors,
+			.విలువ = &has_errors,
 			.help = N_("only update entries that differ from HEAD"),
 			.flags = PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			.ll_callback = reupdate_callback,
 		},
-		OPT_BIT(0, "ignore-missing", &refresh_args.flags,
+		OPT_బిట్టు(0, "ignore-missing", &refresh_వాదనలు.flags,
 			N_("ignore files missing from worktree"),
 			REFRESH_IGNORE_MISSING),
-		OPT_SET_INT(0, "verbose", &verbose,
+		OPT_సమితి_INT(0, "verbose", &verbose,
 			N_("report actions to standard output"), 1),
-		OPT_CALLBACK_F(0, "clear-resolve-undo", NULL, NULL,
+		OPT_CALLBACK_F(0, "clear-resolve-undo", ఖాళీ, ఖాళీ,
 			N_("(for porcelains) forget saved unresolved conflicts"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			resolve_undo_clear_callback),
-		OPT_INTEGER(0, "index-version", &preferred_index_format,
+		OPT_INTEGER(0, "index-version", &preferred_సూచీ_format,
 			N_("write index in this format")),
-		OPT_SET_INT(0, "show-index-version", &preferred_index_format,
+		OPT_సమితి_INT(0, "show-index-version", &preferred_సూచీ_format,
 			    N_("report on-disk index format version"), -1),
-		OPT_BOOL(0, "split-index", &split_index,
+		OPT_BOOL(0, "split-index", &విభజించు_సూచీ,
 			N_("enable or disable split index")),
 		OPT_BOOL(0, "untracked-cache", &untracked_cache,
 			N_("enable/disable untracked cache")),
-		OPT_SET_INT(0, "test-untracked-cache", &untracked_cache,
+		OPT_సమితి_INT(0, "test-untracked-cache", &untracked_cache,
 			    N_("test if the filesystem supports untracked cache"), UC_TEST),
-		OPT_SET_INT(0, "force-untracked-cache", &untracked_cache,
+		OPT_సమితి_INT(0, "force-untracked-cache", &untracked_cache,
 			    N_("enable untracked cache without testing the filesystem"), UC_FORCE),
-		OPT_SET_INT(0, "force-write-index", &force_write,
+		OPT_సమితి_INT(0, "force-write-index", &force_write,
 			N_("write out the index even if is not flagged as changed"), 1),
 		OPT_BOOL(0, "fsmonitor", &fsmonitor,
 			N_("enable or disable file system monitor")),
 		{
-			.type = OPTION_SET_INT,
+			.type = OPTION_సమితి_INT,
 			.long_name = "fsmonitor-valid",
-			.value = &mark_fsmonitor_only,
-			.precision = sizeof(mark_fsmonitor_only),
+			.విలువ = &mark_fsmonitor_only,
+			.precision = పరిమాణం(mark_fsmonitor_only),
 			.help = N_("mark files as fsmonitor valid"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = MARK_FLAG,
 		},
 		{
-			.type = OPTION_SET_INT,
+			.type = OPTION_సమితి_INT,
 			.long_name = "no-fsmonitor-valid",
-			.value = &mark_fsmonitor_only,
-			.precision = sizeof(mark_fsmonitor_only),
+			.విలువ = &mark_fsmonitor_only,
+			.precision = పరిమాణం(mark_fsmonitor_only),
 			.help = N_("clear fsmonitor valid bit"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = UNMARK_FLAG,
 		},
-		OPT_END()
+		OPT_చివర()
 	};
 
 	show_usage_with_options_if_asked(argc, argv,
-					 update_index_usage, options);
+					 update_సూచీ_usage, options);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ఖాళీ);
 
 	prepare_repo_settings(r);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_నిండిన_సూచీ = 0;
 
 	/* we will diagnose later if it turns out that we need to update it */
-	newfd = repo_hold_locked_index(the_repository, &lock_file, 0);
-	if (newfd < 0)
-		lock_error = errno;
+	newfd = repo_hold_locked_సూచీ(the_repository, &తాళం_file, 0);
+	ఒకవేళ (newfd < 0)
+		తాళం_error = errno;
 
-	entries = repo_read_index(the_repository);
-	if (entries < 0)
+	entries = repo_read_సూచీ(the_repository);
+	ఒకవేళ (entries < 0)
 		die("cache corrupted");
 
-	the_repository->index->updated_skipworktree = 1;
+	the_repository->సూచీ->updated_skipworktree = 1;
 
 	/*
 	 * Custom copy of parse_options() because we want to handle
 	 * filename arguments as they come.
 	 */
-	parse_options_start(&ctx, argc, argv, prefix,
+	parse_options_ప్రారంభం(&ctx, argc, argv, ఉపసర్గ,
 			    options, PARSE_OPT_STOP_AT_NON_OPTION);
 
 	/*
@@ -1125,25 +1125,25 @@ int cmd_update_index(int argc,
 	 * a batch.
 	 */
 	odb_transaction_begin_or_die(the_repository->objects, &transaction, 0);
-	while (ctx.argc) {
-		if (parseopt_state != PARSE_OPT_DONE)
-			parseopt_state = parse_options_step(&ctx, options,
-							    update_index_usage);
-		if (!ctx.argc)
-			break;
-		switch (parseopt_state) {
-		case PARSE_OPT_HELP:
-			exit(0);
-		case PARSE_OPT_HELP_ERROR:
-		case PARSE_OPT_ERROR:
-			exit(129);
-		case PARSE_OPT_COMPLETE:
-			exit(0);
-		case PARSE_OPT_NON_OPTION:
-		case PARSE_OPT_DONE:
+	అయితే (ctx.argc) {
+		ఒకవేళ (parseopt_state != PARSE_OPT_పూర్తి)
+			parseopt_state = parse_options_అడుగు(&ctx, options,
+							    update_సూచీ_usage);
+		ఒకవేళ (!ctx.argc)
+			ఆపు;
+		ఎంపిక (parseopt_state) {
+		స్థితి PARSE_OPT_HELP:
+			నిష్క్రమించు(0);
+		స్థితి PARSE_OPT_HELP_ERROR:
+		స్థితి PARSE_OPT_ERROR:
+			నిష్క్రమించు(129);
+		స్థితి PARSE_OPT_COMPLETE:
+			నిష్క్రమించు(0);
+		స్థితి PARSE_OPT_NON_OPTION:
+		స్థితి PARSE_OPT_పూర్తి:
 		{
-			const char *path = ctx.argv[0];
-			char *p;
+			స్థిరరాశి అక్షరం *మార్గం = ctx.argv[0];
+			అక్షరం *p;
 
 			/*
 			 * It is possible, though unlikely, that a caller could
@@ -1155,67 +1155,67 @@ int cmd_update_index(int argc,
 			 * update. All further updates are performed outside of
 			 * a transaction.
 			 */
-			if (transaction && verbose) {
+			ఒకవేళ (transaction && verbose) {
 				odb_transaction_commit_and_finalize_or_die(transaction);
-				transaction = NULL;
+				transaction = ఖాళీ;
 			}
 
-			setup_work_tree(the_repository);
-			p = prefix_path(the_repository, prefix, prefix_length, path);
+			అమరిక_work_వృక్షం(the_repository);
+			p = ఉపసర్గ_మార్గం(the_repository, ఉపసర్గ, ఉపసర్గ_నిడివి, మార్గం);
 			update_one(p);
-			if (set_executable_bit)
-				chmod_path(set_executable_bit, p);
-			free(p);
+			ఒకవేళ (సమితి_executable_బిట్టు)
+				chmod_మార్గం(సమితి_executable_బిట్టు, p);
+			విడుదల(p);
 			ctx.argc--;
 			ctx.argv++;
-			break;
+			ఆపు;
 		}
-		case PARSE_OPT_UNKNOWN:
-			if (ctx.argv[0][1] == '-')
+		స్థితి PARSE_OPT_UNKNOWN:
+			ఒకవేళ (ctx.argv[0][1] == '-')
 				error("unknown option '%s'", ctx.argv[0] + 2);
-			else
+			లేకపోతే
 				error("unknown switch '%c'", *ctx.opt);
-			usage_with_options(update_index_usage, options);
+			usage_with_options(update_సూచీ_usage, options);
 		}
 	}
-	argc = parse_options_end(&ctx);
+	argc = parse_options_చివర(&ctx);
 
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	if (preferred_index_format) {
-		if (preferred_index_format < 0) {
-			printf(_("%d\n"), the_repository->index->version);
-		} else if (preferred_index_format < INDEX_FORMAT_LB ||
-			   INDEX_FORMAT_UB < preferred_index_format) {
+	getline_fn = nul_పదం_పంక్తి ? strbuf_getline_nul : strbuf_getline_lf;
+	ఒకవేళ (preferred_సూచీ_format) {
+		ఒకవేళ (preferred_సూచీ_format < 0) {
+			రాయి(_("%d\n"), the_repository->సూచీ->సంస్కరణ);
+		} లేకపోతే ఒకవేళ (preferred_సూచీ_format < సూచీ_FORMAT_LB ||
+			   సూచీ_FORMAT_UB < preferred_సూచీ_format) {
 			die("index-version %d not in range: %d..%d",
-			    preferred_index_format,
-			    INDEX_FORMAT_LB, INDEX_FORMAT_UB);
-		} else {
-			if (the_repository->index->version != preferred_index_format)
-				the_repository->index->cache_changed |= SOMETHING_CHANGED;
+			    preferred_సూచీ_format,
+			    సూచీ_FORMAT_LB, సూచీ_FORMAT_UB);
+		} లేకపోతే {
+			ఒకవేళ (the_repository->సూచీ->సంస్కరణ != preferred_సూచీ_format)
+				the_repository->సూచీ->cache_మారింది |= SOMETHING_మారింది;
 			report(_("index-version: was %d, set to %d"),
-			       the_repository->index->version, preferred_index_format);
-			the_repository->index->version = preferred_index_format;
+			       the_repository->సూచీ->సంస్కరణ, preferred_సూచీ_format);
+			the_repository->సూచీ->సంస్కరణ = preferred_సూచీ_format;
 		}
 	}
 
-	if (read_from_stdin) {
-		struct strbuf buf = STRBUF_INIT;
-		struct strbuf unquoted = STRBUF_INIT;
+	ఒకవేళ (read_from_stdin) {
+		నిర్మాణం strbuf buf = STRBUF_INIT;
+		నిర్మాణం strbuf unquoted = STRBUF_INIT;
 
-		setup_work_tree(the_repository);
-		while (getline_fn(&buf, stdin) != EOF) {
-			char *p;
-			if (!nul_term_line && buf.buf[0] == '"') {
+		అమరిక_work_వృక్షం(the_repository);
+		అయితే (getline_fn(&buf, stdin) != EOF) {
+			అక్షరం *p;
+			ఒకవేళ (!nul_పదం_పంక్తి && buf.buf[0] == '"') {
 				strbuf_reset(&unquoted);
-				if (unquote_c_style(&unquoted, buf.buf, NULL))
+				ఒకవేళ (unquote_c_style(&unquoted, buf.buf, ఖాళీ))
 					die("line is badly quoted");
-				strbuf_swap(&buf, &unquoted);
+				strbuf_మార్పిడి(&buf, &unquoted);
 			}
-			p = prefix_path(the_repository, prefix, prefix_length, buf.buf);
+			p = ఉపసర్గ_మార్గం(the_repository, ఉపసర్గ, ఉపసర్గ_నిడివి, buf.buf);
 			update_one(p);
-			if (set_executable_bit)
-				chmod_path(set_executable_bit, p);
-			free(p);
+			ఒకవేళ (సమితి_executable_బిట్టు)
+				chmod_మార్గం(సమితి_executable_బిట్టు, p);
+			విడుదల(p);
 		}
 		strbuf_release(&unquoted);
 		strbuf_release(&buf);
@@ -1226,54 +1226,54 @@ int cmd_update_index(int argc,
 	 */
 	odb_transaction_commit_and_finalize_or_die(transaction);
 
-	if (split_index > 0) {
-		if (repo_config_get_split_index(the_repository) == 0)
+	ఒకవేళ (విభజించు_సూచీ > 0) {
+		ఒకవేళ (repo_config_get_విభజించు_సూచీ(the_repository) == 0)
 			warning(_("core.splitIndex is set to false; "
 				  "remove or change it, if you really want to "
 				  "enable split index"));
-		if (the_repository->index->split_index)
-			the_repository->index->cache_changed |= SPLIT_INDEX_ORDERED;
-		else
-			add_split_index(the_repository->index);
-	} else if (!split_index) {
-		if (repo_config_get_split_index(the_repository) == 1)
+		ఒకవేళ (the_repository->సూచీ->విభజించు_సూచీ)
+			the_repository->సూచీ->cache_మారింది |= విభజించు_సూచీ_ORDERED;
+		లేకపోతే
+			కూడు_విభజించు_సూచీ(the_repository->సూచీ);
+	} లేకపోతే ఒకవేళ (!విభజించు_సూచీ) {
+		ఒకవేళ (repo_config_get_విభజించు_సూచీ(the_repository) == 1)
 			warning(_("core.splitIndex is set to true; "
 				  "remove or change it, if you really want to "
 				  "disable split index"));
-		remove_split_index(the_repository->index);
+		remove_విభజించు_సూచీ(the_repository->సూచీ);
 	}
 
 	prepare_repo_settings(r);
-	switch (untracked_cache) {
-	case UC_UNSPECIFIED:
-		break;
-	case UC_DISABLE:
-		if (r->settings.core_untracked_cache == UNTRACKED_CACHE_WRITE)
+	ఎంపిక (untracked_cache) {
+	స్థితి UC_UNSPECIFIED:
+		ఆపు;
+	స్థితి UC_DISABLE:
+		ఒకవేళ (r->settings.core_untracked_cache == UNTRACKED_CACHE_WRITE)
 			warning(_("core.untrackedCache is set to true; "
 				  "remove or change it, if you really want to "
 				  "disable the untracked cache"));
-		remove_untracked_cache(the_repository->index);
+		remove_untracked_cache(the_repository->సూచీ);
 		report(_("Untracked cache disabled"));
-		break;
-	case UC_TEST:
-		setup_work_tree(the_repository);
-		return !test_if_untracked_cache_is_supported();
-	case UC_ENABLE:
-	case UC_FORCE:
-		if (r->settings.core_untracked_cache == UNTRACKED_CACHE_REMOVE)
+		ఆపు;
+	స్థితి UC_TEST:
+		అమరిక_work_వృక్షం(the_repository);
+		తిరిగి !test_if_untracked_cache_is_supported();
+	స్థితి UC_ENABLE:
+	స్థితి UC_FORCE:
+		ఒకవేళ (r->settings.core_untracked_cache == UNTRACKED_CACHE_REMOVE)
 			warning(_("core.untrackedCache is set to false; "
 				  "remove or change it, if you really want to "
 				  "enable the untracked cache"));
-		add_untracked_cache(the_repository->index);
-		report(_("Untracked cache enabled for '%s'"), repo_get_work_tree(the_repository));
-		break;
-	default:
+		కూడు_untracked_cache(the_repository->సూచీ);
+		report(_("Untracked cache enabled for '%s'"), repo_get_work_వృక్షం(the_repository));
+		ఆపు;
+	అప్రమేయ:
 		BUG("bad untracked_cache value: %d", untracked_cache);
 	}
 
-	if (fsmonitor > 0) {
-		enum fsmonitor_mode fsm_mode = fsm_settings__get_mode(r);
-		enum fsmonitor_reason reason = fsm_settings__get_reason(r);
+	ఒకవేళ (fsmonitor > 0) {
+		గణన fsmonitor_బహుళకం fsm_బహుళకం = fsm_settings_get_బహుళకం(r);
+		గణన fsmonitor_reason reason = fsm_settings__get_reason(r);
 
 		/*
 		 * The user wants to turn on FSMonitor using the command
@@ -1285,38 +1285,38 @@ int cmd_update_index(int argc,
 		 * whether the file system is compatible so that we can stop
 		 * here with a nice error message.
 		 */
-		if (reason > FSMONITOR_REASON_OK)
+		ఒకవేళ (reason > FSMONITOR_REASON_OK)
 			die("%s",
-			    fsm_settings__get_incompatible_msg(r, reason));
+			    fsm_settings_get_incompatible_సందేశం(r, reason));
 
-		if (fsm_mode == FSMONITOR_MODE_DISABLED) {
+		ఒకవేళ (fsm_బహుళకం == FSMONITOR_బహుళకం_DISABLED) {
 			warning(_("core.fsmonitor is unset; "
 				"set it if you really want to "
 				"enable fsmonitor"));
 		}
-		add_fsmonitor(the_repository->index);
+		కూడు_fsmonitor(the_repository->సూచీ);
 		report(_("fsmonitor enabled"));
-	} else if (!fsmonitor) {
-		enum fsmonitor_mode fsm_mode = fsm_settings__get_mode(r);
-		if (fsm_mode > FSMONITOR_MODE_DISABLED)
+	} లేకపోతే ఒకవేళ (!fsmonitor) {
+		గణన fsmonitor_బహుళకం fsm_బహుళకం = fsm_settings_get_బహుళకం(r);
+		ఒకవేళ (fsm_బహుళకం > FSMONITOR_బహుళకం_DISABLED)
 			warning(_("core.fsmonitor is set; "
 				"remove it if you really want to "
 				"disable fsmonitor"));
-		remove_fsmonitor(the_repository->index);
+		remove_fsmonitor(the_repository->సూచీ);
 		report(_("fsmonitor disabled"));
 	}
 
-	if (the_repository->index->cache_changed || force_write) {
-		if (newfd < 0) {
-			if (refresh_args.flags & REFRESH_QUIET)
-				exit(128);
-			unable_to_lock_die(repo_get_index_file(the_repository), lock_error);
+	ఒకవేళ (the_repository->సూచీ->cache_మారింది || force_write) {
+		ఒకవేళ (newfd < 0) {
+			ఒకవేళ (refresh_వాదనలు.flags & REFRESH_QUIET)
+				నిష్క్రమించు(128);
+			unable_గమ్యం_తాళం_die(repo_get_సూచీ_file(the_repository), తాళం_error);
 		}
-		if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+		ఒకవేళ (write_locked_సూచీ(the_repository->సూచీ, &తాళం_file, COMMIT_తాళం))
 			die("Unable to write new index file");
 	}
 
-	rollback_lock_file(&lock_file);
+	rollback_తాళం_file(&తాళం_file);
 
-	return has_errors ? 1 : 0;
+	తిరిగి has_errors ? 1 : 0;
 }

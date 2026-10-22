@@ -4,75 +4,75 @@
  * Copyright (C) Linus Torvalds, 2005
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "diff.h"
-#include "diff-merges.h"
-#include "commit.h"
-#include "preload-index.h"
-#include "revision.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "diff.h"
+#అన్తర్భావ "diff-merges.h"
+#అన్తర్భావ "commit.h"
+#అన్తర్భావ "preload-index.h"
+#అన్తర్భావ "revision.h"
 
-static const char diff_files_usage[] =
+స్థిర స్థిరరాశి అక్షరం diff_files_usage[] =
 "git diff-files [-q] [-0 | -1 | -2 | -3 | -c | --cc] [<common-diff-options>] [<path>...]"
 "\n"
 COMMON_DIFF_OPTIONS_HELP;
 
-int cmd_diff_files(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+పూర్ణాంకం cmd_diff_files(పూర్ణాంకం argc,
+		   స్థిరరాశి అక్షరం **argv,
+		   స్థిరరాశి అక్షరం *ఉపసర్గ,
+		   నిర్మాణం repository *repo వాడని)
 {
-	struct rev_info rev;
-	int result;
-	unsigned options = 0;
+	నిర్మాణం rev_info rev;
+	పూర్ణాంకం ఫలితం;
+	గుర్తులేని options = 0;
 
 	show_usage_if_asked(argc, argv, diff_files_usage);
 
-	repo_config(the_repository, git_diff_basic_config, NULL); /* no "diff" UI options */
+	repo_config(the_repository, git_diff_basic_config, ఖాళీ); /* no "diff" UI options */
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_నిండిన_సూచీ = 0;
 
-	repo_init_revisions(the_repository, &rev, prefix);
+	repo_init_revisions(the_repository, &rev, ఉపసర్గ);
 	rev.abbrev = 0;
 
 	/*
 	 * Consider "intent-to-add" files as new by default, unless
 	 * explicitly specified in the command line or anywhere else.
 	 */
-	rev.diffopt.ita_invisible_in_index = 1;
+	rev.diffopt.ita_invisible_లోపల_సూచీ = 1;
 
-	prefix = precompose_argv_prefix(argc, argv, prefix);
+	ఉపసర్గ = precompose_argv_ఉపసర్గ(argc, argv, ఉపసర్గ);
 
-	argc = setup_revisions(argc, argv, &rev, NULL);
-	while (1 < argc && argv[1][0] == '-') {
-		if (!strcmp(argv[1], "--base"))
-			rev.max_count = 1;
-		else if (!strcmp(argv[1], "--ours"))
-			rev.max_count = 2;
-		else if (!strcmp(argv[1], "--theirs"))
-			rev.max_count = 3;
-		else if (!strcmp(argv[1], "-q"))
+	argc = అమరిక_revisions(argc, argv, &rev, ఖాళీ);
+	అయితే (1 < argc && argv[1][0] == '-') {
+		ఒకవేళ (!strcmp(argv[1], "--base"))
+			rev.max_లెక్క = 1;
+		లేకపోతే ఒకవేళ (!strcmp(argv[1], "--ours"))
+			rev.max_లెక్క = 2;
+		లేకపోతే ఒకవేళ (!strcmp(argv[1], "--theirs"))
+			rev.max_లెక్క = 3;
+		లేకపోతే ఒకవేళ (!strcmp(argv[1], "-q"))
 			options |= DIFF_SILENT_ON_REMOVED;
-		else
+		లేకపోతే
 			usage(diff_files_usage);
 		argv++; argc--;
 	}
-	if (!rev.diffopt.output_format)
+	ఒకవేళ (!rev.diffopt.output_format)
 		rev.diffopt.output_format = DIFF_FORMAT_RAW;
-	rev.diffopt.rotate_to_strict = 1;
+	rev.diffopt.rotate_గమ్యం_strict = 1;
 
 	/*
 	 * Make sure there are NO revision (i.e. pending object) parameter,
 	 * rev.max_count is reasonable (0 <= n <= 3), and
 	 * there is no other revision filtering parameters.
 	 */
-	if (rev.pending.nr ||
+	ఒకవేళ (rev.pending.nr ||
 	    rev.min_age != -1 || rev.max_age != -1 ||
-	    3 < rev.max_count)
+	    3 < rev.max_లెక్క)
 		usage(diff_files_usage);
 
 	/*
@@ -80,14 +80,14 @@ int cmd_diff_files(int argc,
 	 * was not asked to.  "diff-files -c -p" should not densify
 	 * (the user should ask with "diff-files --cc" explicitly).
 	 */
-	if (rev.max_count == -1 &&
+	ఒకవేళ (rev.max_లెక్క == -1 &&
 	    (rev.diffopt.output_format & DIFF_FORMAT_PATCH))
-		diff_merges_set_dense_combined_if_unset(&rev);
+		diff_merges_సమితి_dense_combined_if_unset(&rev);
 
-	if (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0)
+	ఒకవేళ (repo_read_సూచీ_preload(the_repository, &rev.diffopt.pathspec, 0) < 0)
 		die_errno("repo_read_index_preload");
-	run_diff_files(&rev, options);
-	result = diff_result_code(&rev);
+	నిరంతరం_diff_files(&rev, options);
+	ఫలితం = diff_ఫలితం_సంకేతం(&rev);
 	release_revisions(&rev);
-	return result;
+	తిరిగి ఫలితం;
 }

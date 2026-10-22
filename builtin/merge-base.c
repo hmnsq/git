@@ -1,163 +1,163 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "commit.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "commit-reach.h"
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "commit.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "commit-reach.h"
 
-static int show_merge_base(struct commit **rev, size_t rev_nr, int show_all)
+స్థిర పూర్ణాంకం show_విలీనం_పునాది(నిర్మాణం commit **rev, కొలత_t rev_nr, పూర్ణాంకం show_all)
 {
-	enum merge_base_flags flags = show_all ? MERGE_BASE_FIND_ALL : 0;
-	struct commit_list *result = NULL, *r;
+	గణన విలీనం_పునాది_flags flags = show_all ? విలీనం_పునాది_కనుగొను_ALL : 0;
+	నిర్మాణం commit_list *ఫలితం = ఖాళీ, *r;
 
-	if (repo_get_merge_bases_many_dirty(the_repository, rev[0],
+	ఒకవేళ (repo_get_విలీనం_bases_many_dirty(the_repository, rev[0],
 					    rev_nr - 1, rev + 1,
-					    flags, &result) < 0) {
-		commit_list_free(result);
-		return -1;
+					    flags, &ఫలితం) < 0) {
+		commit_list_free(ఫలితం);
+		తిరిగి -1;
 	}
 
-	if (!result)
-		return 1;
+	ఒకవేళ (!ఫలితం)
+		తిరిగి 1;
 
-	for (r = result; r; r = r->next) {
-		printf("%s\n", oid_to_hex(&r->item->object.oid));
-		if (!show_all)
-			break;
+	కొరకు (r = ఫలితం; r; r = r->తదుపరి) {
+		రాయి("%s\n", oid_గమ్యం_hex(&r->అంశం->object.oid));
+		ఒకవేళ (!show_all)
+			ఆపు;
 	}
 
-	commit_list_free(result);
-	return 0;
+	commit_list_free(ఫలితం);
+	తిరిగి 0;
 }
 
-static const char * const merge_base_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి విలీనం_పునాది_usage[] = {
 	N_("git merge-base [-a | --all] <commit> <commit>..."),
 	N_("git merge-base [-a | --all] --octopus <commit>..."),
 	N_("git merge-base --is-ancestor <commit> <commit>"),
 	N_("git merge-base --independent <commit>..."),
 	N_("git merge-base --fork-point <ref> [<commit>]"),
-	NULL
+	ఖాళీ
 };
 
-static struct commit *get_commit_reference(const char *arg)
+స్థిర నిర్మాణం commit *get_commit_reference(స్థిరరాశి అక్షరం *arg)
 {
-	struct object_id revkey;
-	struct commit *r;
+	నిర్మాణం object_id revkey;
+	నిర్మాణం commit *r;
 
-	if (repo_get_oid(the_repository, arg, &revkey))
+	ఒకవేళ (repo_get_oid(the_repository, arg, &revkey))
 		die("Not a valid object name %s", arg);
 	r = lookup_commit_reference(the_repository, &revkey);
-	if (!r)
+	ఒకవేళ (!r)
 		die("Not a valid commit name %s", arg);
 
-	return r;
+	తిరిగి r;
 }
 
-static int handle_independent(int count, const char **args)
+స్థిర పూర్ణాంకం handle_independent(పూర్ణాంకం లెక్క, స్థిరరాశి అక్షరం **వాదనలు)
 {
-	struct commit_list *revs = NULL, *rev;
-	int i;
+	నిర్మాణం commit_list *revs = ఖాళీ, *rev;
+	పూర్ణాంకం i;
 
-	for (i = count - 1; i >= 0; i--)
-		commit_list_insert(get_commit_reference(args[i]), &revs);
+	కొరకు (i = లెక్క - 1; i >= 0; i--)
+		commit_list_చొప్పించు(get_commit_reference(వాదనలు[i]), &revs);
 
 	reduce_heads_replace(&revs);
 
-	if (!revs)
-		return 1;
+	ఒకవేళ (!revs)
+		తిరిగి 1;
 
-	for (rev = revs; rev; rev = rev->next)
-		printf("%s\n", oid_to_hex(&rev->item->object.oid));
+	కొరకు (rev = revs; rev; rev = rev->తదుపరి)
+		రాయి("%s\n", oid_గమ్యం_hex(&rev->అంశం->object.oid));
 
 	commit_list_free(revs);
-	return 0;
+	తిరిగి 0;
 }
 
-static int handle_octopus(int count, const char **args, int show_all)
+స్థిర పూర్ణాంకం handle_octopus(పూర్ణాంకం లెక్క, స్థిరరాశి అక్షరం **వాదనలు, పూర్ణాంకం show_all)
 {
-	struct commit_list *revs = NULL;
-	struct commit_list *result = NULL, *rev;
-	int i;
+	నిర్మాణం commit_list *revs = ఖాళీ;
+	నిర్మాణం commit_list *ఫలితం = ఖాళీ, *rev;
+	పూర్ణాంకం i;
 
-	for (i = count - 1; i >= 0; i--)
-		commit_list_insert(get_commit_reference(args[i]), &revs);
+	కొరకు (i = లెక్క - 1; i >= 0; i--)
+		commit_list_చొప్పించు(get_commit_reference(వాదనలు[i]), &revs);
 
-	if (get_octopus_merge_bases(revs, &result) < 0) {
+	ఒకవేళ (get_octopus_విలీనం_bases(revs, &ఫలితం) < 0) {
 		commit_list_free(revs);
-		commit_list_free(result);
-		return 128;
+		commit_list_free(ఫలితం);
+		తిరిగి 128;
 	}
 	commit_list_free(revs);
-	reduce_heads_replace(&result);
+	reduce_heads_replace(&ఫలితం);
 
-	if (!result)
-		return 1;
+	ఒకవేళ (!ఫలితం)
+		తిరిగి 1;
 
-	for (rev = result; rev; rev = rev->next) {
-		printf("%s\n", oid_to_hex(&rev->item->object.oid));
-		if (!show_all)
-			break;
+	కొరకు (rev = ఫలితం; rev; rev = rev->తదుపరి) {
+		రాయి("%s\n", oid_గమ్యం_hex(&rev->అంశం->object.oid));
+		ఒకవేళ (!show_all)
+			ఆపు;
 	}
 
-	commit_list_free(result);
-	return 0;
+	commit_list_free(ఫలితం);
+	తిరిగి 0;
 }
 
-static int handle_is_ancestor(int argc, const char **argv)
+స్థిర పూర్ణాంకం handle_is_ancestor(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv)
 {
-	struct commit *one, *two;
-	int ret;
+	నిర్మాణం commit *one, *two;
+	పూర్ణాంకం ret;
 
-	if (argc != 2)
+	ఒకవేళ (argc != 2)
 		die("--is-ancestor takes exactly two commits");
 	one = get_commit_reference(argv[0]);
 	two = get_commit_reference(argv[1]);
-	ret = repo_in_merge_bases(the_repository, one, two);
-	if (ret < 0)
-		exit(128);
-	if (ret)
-		return 0;
-	else
-		return 1;
+	ret = repo_లోపల_విలీనం_bases(the_repository, one, two);
+	ఒకవేళ (ret < 0)
+		నిష్క్రమించు(128);
+	ఒకవేళ (ret)
+		తిరిగి 0;
+	లేకపోతే
+		తిరిగి 1;
 }
 
-static int handle_fork_point(int argc, const char **argv)
+స్థిర పూర్ణాంకం handle_fork_బిందువు(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv)
 {
-	struct object_id oid;
-	struct commit *derived, *fork_point;
-	const char *commitname;
+	నిర్మాణం object_id oid;
+	నిర్మాణం commit *derived, *fork_బిందువు;
+	స్థిరరాశి అక్షరం *commitname;
 
 	commitname = (argc == 2) ? argv[1] : "HEAD";
-	if (repo_get_oid(the_repository, commitname, &oid))
+	ఒకవేళ (repo_get_oid(the_repository, commitname, &oid))
 		die("Not a valid object name: '%s'", commitname);
 
 	derived = lookup_commit_reference(the_repository, &oid);
 
-	fork_point = get_fork_point(argv[0], derived);
+	fork_బిందువు = get_fork_బిందువు(argv[0], derived);
 
-	if (!fork_point)
-		return 1;
+	ఒకవేళ (!fork_బిందువు)
+		తిరిగి 1;
 
-	printf("%s\n", oid_to_hex(&fork_point->object.oid));
-	return 0;
+	రాయి("%s\n", oid_గమ్యం_hex(&fork_బిందువు->object.oid));
+	తిరిగి 0;
 }
 
-int cmd_merge_base(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+పూర్ణాంకం cmd_విలీనం_పునాది(పూర్ణాంకం argc,
+		   స్థిరరాశి అక్షరం **argv,
+		   స్థిరరాశి అక్షరం *ఉపసర్గ,
+		   నిర్మాణం repository *repo వాడని)
 {
-	struct commit **rev;
-	size_t rev_nr = 0;
-	int show_all = 0;
-	int cmdmode = 0;
-	int ret;
+	నిర్మాణం commit **rev;
+	కొలత_t rev_nr = 0;
+	పూర్ణాంకం show_all = 0;
+	పూర్ణాంకం cmdmode = 0;
+	పూర్ణాంకం ret;
 
-	struct option options[] = {
+	నిర్మాణం option options[] = {
 		OPT_BOOL('a', "all", &show_all, N_("output all common ancestors")),
 		OPT_CMDMODE(0, "octopus", &cmdmode,
 			    N_("find ancestors for a single n-way merge"), 'o'),
@@ -167,44 +167,44 @@ int cmd_merge_base(int argc,
 			    N_("is the first one ancestor of the other?"), 'a'),
 		OPT_CMDMODE(0, "fork-point", &cmdmode,
 			    N_("find where <commit> forked from reflog of <ref>"), 'f'),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
-	argc = parse_options(argc, argv, prefix, options, merge_base_usage, 0);
+	repo_config(the_repository, git_default_config, ఖాళీ);
+	argc = parse_options(argc, argv, ఉపసర్గ, options, విలీనం_పునాది_usage, 0);
 
-	if (cmdmode == 'a') {
-		if (argc < 2)
-			usage_with_options(merge_base_usage, options);
-		if (show_all)
+	ఒకవేళ (cmdmode == 'a') {
+		ఒకవేళ (argc < 2)
+			usage_with_options(విలీనం_పునాది_usage, options);
+		ఒకవేళ (show_all)
 			die(_("options '%s' and '%s' cannot be used together"),
 			    "--is-ancestor", "--all");
-		return handle_is_ancestor(argc, argv);
+		తిరిగి handle_is_ancestor(argc, argv);
 	}
 
-	if (cmdmode == 'r' && show_all)
+	ఒకవేళ (cmdmode == 'r' && show_all)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--independent", "--all");
 
-	if (cmdmode == 'o')
-		return handle_octopus(argc, argv, show_all);
+	ఒకవేళ (cmdmode == 'o')
+		తిరిగి handle_octopus(argc, argv, show_all);
 
-	if (cmdmode == 'r')
-		return handle_independent(argc, argv);
+	ఒకవేళ (cmdmode == 'r')
+		తిరిగి handle_independent(argc, argv);
 
-	if (cmdmode == 'f') {
-		if (argc < 1 || 2 < argc)
-			usage_with_options(merge_base_usage, options);
-		return handle_fork_point(argc, argv);
+	ఒకవేళ (cmdmode == 'f') {
+		ఒకవేళ (argc < 1 || 2 < argc)
+			usage_with_options(విలీనం_పునాది_usage, options);
+		తిరిగి handle_fork_బిందువు(argc, argv);
 	}
 
-	if (argc < 2)
-		usage_with_options(merge_base_usage, options);
+	ఒకవేళ (argc < 2)
+		usage_with_options(విలీనం_పునాది_usage, options);
 
 	ALLOC_ARRAY(rev, argc);
-	while (argc-- > 0)
+	అయితే (argc-- > 0)
 		rev[rev_nr++] = get_commit_reference(*argv++);
-	ret = show_merge_base(rev, rev_nr, show_all);
-	free(rev);
-	return ret;
+	ret = show_విలీనం_పునాది(rev, rev_nr, show_all);
+	విడుదల(rev);
+	తిరిగి ret;
 }

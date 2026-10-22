@@ -1,51 +1,51 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "hex.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "object-file.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "odb.h"
 
-static char *create_temp_file(struct object_id *oid)
+స్థిర అక్షరం *create_తాత్కాలిక_file(నిర్మాణం object_id *oid)
 {
-	static char path[50];
-	void *buf;
-	enum object_type type;
-	size_t size;
-	int fd;
+	స్థిర అక్షరం మార్గం[50];
+	శూన్య *buf;
+	గణన object_type type;
+	కొలత_t కొలత;
+	పూర్ణాంకం fd;
 
-	buf = odb_read_object(the_repository->objects, oid, &type, &size);
-	if (!buf || type != OBJ_BLOB)
-		die("unable to read blob object %s", oid_to_hex(oid));
+	buf = odb_read_object(the_repository->objects, oid, &type, &కొలత);
+	ఒకవేళ (!buf || type != OBJ_BLOB)
+		die("unable to read blob object %s", oid_గమ్యం_hex(oid));
 
-	xsnprintf(path, sizeof(path), ".merge_file_XXXXXX");
-	fd = xmkstemp(path);
-	if (write_in_full(fd, buf, size) < 0)
+	xsnprintf(మార్గం, పరిమాణం(మార్గం), ".merge_file_XXXXXX");
+	fd = xmkstemp(మార్గం);
+	ఒకవేళ (write_లోపల_నిండిన(fd, buf, కొలత) < 0)
 		die_errno("unable to write temp-file");
 	close(fd);
-	free(buf);
-	return path;
+	విడుదల(buf);
+	తిరిగి మార్గం;
 }
 
-static const char usage_msg[] =
+స్థిర స్థిరరాశి అక్షరం usage_సందేశం[] =
 "git unpack-file <blob>";
 
-int cmd_unpack_file(int argc,
-		    const char **argv,
-		    const char *prefix UNUSED,
-		    struct repository *repo UNUSED)
+పూర్ణాంకం cmd_unpack_file(పూర్ణాంకం argc,
+		    స్థిరరాశి అక్షరం **argv,
+		    స్థిరరాశి అక్షరం *ఉపసర్గ వాడని,
+		    నిర్మాణం repository *repo వాడని)
 {
-	struct object_id oid;
+	నిర్మాణం object_id oid;
 
-	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 2)
-		usage(usage_msg);
-	if (repo_get_oid(the_repository, argv[1], &oid))
+	show_usage_if_asked(argc, argv, usage_సందేశం);
+	ఒకవేళ (argc != 2)
+		usage(usage_సందేశం);
+	ఒకవేళ (repo_get_oid(the_repository, argv[1], &oid))
 		die("Not a valid object name %s", argv[1]);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ఖాళీ);
 
-	puts(create_temp_file(&oid));
-	return 0;
+	puts(create_తాత్కాలిక_file(&oid));
+	తిరిగి 0;
 }

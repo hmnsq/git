@@ -1,7 +1,7 @@
-#include "builtin.h"
-#include "transport.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "transport.h"
 
-static const char usage_msg[] =
+స్థిర స్థిరరాశి అక్షరం usage_సందేశం[] =
 	"git remote-fd <remote> <url>";
 
 /*
@@ -19,70 +19,70 @@ static const char usage_msg[] =
  *
  */
 
-#define MAXCOMMAND 4096
+#నిర్వచించు MAXCOMMAND 4096
 
-static void command_loop(int input_fd, int output_fd)
+స్థిర శూన్య command_loop(పూర్ణాంకం ఆదానం_fd, పూర్ణాంకం output_fd)
 {
-	char buffer[MAXCOMMAND];
+	అక్షరం బఫరు[MAXCOMMAND];
 
-	while (1) {
-		size_t i;
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+	అయితే (1) {
+		కొలత_t i;
+		ఒకవేళ (!fgets(బఫరు, MAXCOMMAND - 1, stdin)) {
+			ఒకవేళ (ferror(stdin))
 				die("Input error");
-			return;
+			తిరిగి;
 		}
 		/* Strip end of line characters. */
-		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
-			buffer[--i] = 0;
+		i = అక్షరశ్రేణి_పొడవు(బఫరు);
+		అయితే (i > 0 && ఖాళీనా(బఫరు[i - 1]))
+			బఫరు[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
-			printf("*connect\n\n");
+		ఒకవేళ (!strcmp(బఫరు, "capabilities")) {
+			రాయి("*connect\n\n");
 			fflush(stdout);
-		} else if (starts_with(buffer, "connect ")) {
-			printf("\n");
+		} లేకపోతే ఒకవేళ (starts_with(బఫరు, "connect ")) {
+			రాయి("\n");
 			fflush(stdout);
-			if (bidirectional_transfer_loop(input_fd,
+			ఒకవేళ (bidirectional_transfer_loop(ఆదానం_fd,
 				output_fd))
 				die("Copying data between file descriptors failed");
-			return;
-		} else {
-			die("Bad command: %s", buffer);
+			తిరిగి;
+		} లేకపోతే {
+			die("Bad command: %s", బఫరు);
 		}
 	}
 }
 
-int cmd_remote_fd(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+పూర్ణాంకం cmd_remote_fd(పూర్ణాంకం argc,
+		  స్థిరరాశి అక్షరం **argv,
+		  స్థిరరాశి అక్షరం *ఉపసర్గ,
+		  నిర్మాణం repository *repo వాడని)
 {
-	int input_fd = -1;
-	int output_fd = -1;
-	char *end;
+	పూర్ణాంకం ఆదానం_fd = -1;
+	పూర్ణాంకం output_fd = -1;
+	అక్షరం *చివర;
 
-	BUG_ON_NON_EMPTY_PREFIX(prefix);
+	BUG_ON_NON_ఖాళీలు_ఉపసర్గ(ఉపసర్గ);
 
-	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 3)
-		usage(usage_msg);
+	show_usage_if_asked(argc, argv, usage_సందేశం);
+	ఒకవేళ (argc != 3)
+		usage(usage_సందేశం);
 
-	input_fd = (int)strtoul(argv[2], &end, 10);
+	ఆదానం_fd = (పూర్ణాంకం)strtoul(argv[2], &చివర, 10);
 
-	if ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
+	ఒకవేళ ((చివర == argv[2]) || (*చివర != ',' && *చివర != '/' && *చివర))
 		die("Bad URL syntax");
 
-	if (*end == '/' || !*end) {
-		output_fd = input_fd;
-	} else {
-		char *end2;
-		output_fd = (int)strtoul(end + 1, &end2, 10);
+	ఒకవేళ (*చివర == '/' || !*చివర) {
+		output_fd = ఆదానం_fd;
+	} లేకపోతే {
+		అక్షరం *end2;
+		output_fd = (పూర్ణాంకం)strtoul(చివర + 1, &end2, 10);
 
-		if ((end2 == end + 1) || (*end2 != '/' && *end2))
+		ఒకవేళ ((end2 == చివర + 1) || (*end2 != '/' && *end2))
 			die("Bad URL syntax");
 	}
 
-	command_loop(input_fd, output_fd);
-	return 0;
+	command_loop(ఆదానం_fd, output_fd);
+	తిరిగి 0;
 }

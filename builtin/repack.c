@@ -1,225 +1,225 @@
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#నిర్వచించు DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "parse-options.h"
-#include "path.h"
-#include "run-command.h"
-#include "server-info.h"
-#include "string-list.h"
-#include "midx.h"
-#include "packfile.h"
-#include "prune-packed.h"
-#include "promisor-remote.h"
-#include "repack.h"
-#include "shallow.h"
-#include "list-objects-filter-options.h"
-#include "oidset.h"
-#include "hex.h"
-#include "wt-status.h"
-#include "read-cache-ll.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "path.h"
+#అన్తర్భావ "run-command.h"
+#అన్తర్భావ "server-info.h"
+#అన్తర్భావ "string-list.h"
+#అన్తర్భావ "midx.h"
+#అన్తర్భావ "packfile.h"
+#అన్తర్భావ "prune-packed.h"
+#అన్తర్భావ "promisor-remote.h"
+#అన్తర్భావ "repack.h"
+#అన్తర్భావ "shallow.h"
+#అన్తర్భావ "list-objects-filter-options.h"
+#అన్తర్భావ "oidset.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "wt-status.h"
+#అన్తర్భావ "read-cache-ll.h"
 
-#define ALL_INTO_ONE 1
-#define LOOSEN_UNREACHABLE 2
-#define PACK_CRUFT 4
+#నిర్వచించు ALL_INTO_ONE 1
+#నిర్వచించు LOOSEN_UNREACHABLE 2
+#నిర్వచించు PACK_CRUFT 4
 
-#define DELETE_PACK 1
-#define RETAIN_PACK 2
+#నిర్వచించు DELETE_PACK 1
+#నిర్వచించు RETAIN_PACK 2
 
-static int pack_everything;
-static int write_bitmaps = -1;
-static int use_delta_islands;
-static int run_update_server_info = 1;
-static char *packdir, *packtmp_name, *packtmp;
-static int midx_must_contain_cruft = 1;
-static int drop_filtered;
-static int dry_run;
-static int write_bitmaps_given;
+స్థిర పూర్ణాంకం pack_everything;
+స్థిర పూర్ణాంకం write_bitmaps = -1;
+స్థిర పూర్ణాంకం use_delta_islands;
+స్థిర పూర్ణాంకం నిరంతరం_update_server_info = 1;
+స్థిర అక్షరం *packdir, *packtmp_name, *packtmp;
+స్థిర పూర్ణాంకం midx_must_contain_cruft = 1;
+స్థిర పూర్ణాంకం drop_filtered;
+స్థిర పూర్ణాంకం dry_నిరంతరం;
+స్థిర పూర్ణాంకం write_bitmaps_given;
 
-static const char *const git_repack_usage[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి git_repack_usage[] = {
 	N_("git repack [-a] [-A] [-d] [-f] [-F] [-l] [-n] [-q] [-b] [-m]\n"
 	   "[--window=<n>] [--depth=<n>] [--threads=<n>] [--keep-pack=<pack-name>]\n"
 	   "[--write-midx[=<mode>]] [--name-hash-version=<n>] [--path-walk]\n"
 	   "[--filter=<filter-spec>] [--drop-filtered [--dry-run]]"),
-	NULL
+	ఖాళీ
 };
 
-static const char incremental_bitmap_conflict_error[] = N_(
+స్థిర స్థిరరాశి అక్షరం incremental_bitmap_conflict_error[] = N_(
 "Incremental repacks are incompatible with bitmap indexes.  Use\n"
 "--no-write-bitmap-index or disable the pack.writeBitmaps configuration."
 );
 
-#define DEFAULT_MIDX_SPLIT_FACTOR 2
-#define DEFAULT_MIDX_NEW_LAYER_THRESHOLD 8
+#నిర్వచించు DEFAULT_MIDX_విభజించు_గుణకం 2
+#నిర్వచించు DEFAULT_MIDX_NEW_LAYER_పరిమితి 8
 
-struct repack_config_ctx {
-	struct pack_objects_args *po_args;
-	struct pack_objects_args *cruft_po_args;
-	int midx_split_factor;
-	int midx_new_layer_threshold;
+నిర్మాణం repack_config_ctx {
+	నిర్మాణం pack_objects_వాదనలు *po_వాదనలు;
+	నిర్మాణం pack_objects_వాదనలు *cruft_po_వాదనలు;
+	పూర్ణాంకం midx_విభజించు_గుణకం;
+	పూర్ణాంకం midx_new_layer_పరిమితి;
 };
 
-static int repack_config(const char *var, const char *value,
-			 const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం repack_config(స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *విలువ,
+			 స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	struct repack_config_ctx *repack_ctx = cb;
-	struct pack_objects_args *po_args = repack_ctx->po_args;
-	struct pack_objects_args *cruft_po_args = repack_ctx->cruft_po_args;
-	if (!strcmp(var, "repack.usedeltabaseoffset")) {
-		po_args->delta_base_offset = git_config_bool(var, value);
-		return 0;
+	నిర్మాణం repack_config_ctx *repack_ctx = cb;
+	నిర్మాణం pack_objects_వాదనలు *po_వాదనలు = repack_ctx->po_వాదనలు;
+	నిర్మాణం pack_objects_వాదనలు *cruft_po_వాదనలు = repack_ctx->cruft_po_వాదనలు;
+	ఒకవేళ (!strcmp(var, "repack.usedeltabaseoffset")) {
+		po_వాదనలు->delta_పునాది_స్థానభ్రంశం = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "repack.packkeptobjects")) {
-		po_args->pack_kept_objects = git_config_bool(var, value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "repack.packkeptobjects")) {
+		po_వాదనలు->pack_kept_objects = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "repack.writebitmaps") ||
+	ఒకవేళ (!strcmp(var, "repack.writebitmaps") ||
 	    !strcmp(var, "pack.writebitmaps")) {
-		write_bitmaps = git_config_bool(var, value);
-		return 0;
+		write_bitmaps = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "repack.usedeltaislands")) {
-		use_delta_islands = git_config_bool(var, value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "repack.usedeltaislands")) {
+		use_delta_islands = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
-	if (strcmp(var, "repack.updateserverinfo") == 0) {
-		run_update_server_info = git_config_bool(var, value);
-		return 0;
+	ఒకవేళ (strcmp(var, "repack.updateserverinfo") == 0) {
+		నిరంతరం_update_server_info = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "repack.cruftwindow")) {
-		free(cruft_po_args->window);
-		return git_config_string(&cruft_po_args->window, var, value);
+	ఒకవేళ (!strcmp(var, "repack.cruftwindow")) {
+		విడుదల(cruft_po_వాదనలు->కిటికీ);
+		తిరిగి git_config_string(&cruft_po_వాదనలు->కిటికీ, var, విలువ);
 	}
-	if (!strcmp(var, "repack.cruftwindowmemory")) {
-		free(cruft_po_args->window_memory);
-		return git_config_string(&cruft_po_args->window_memory, var, value);
+	ఒకవేళ (!strcmp(var, "repack.cruftwindowmemory")) {
+		విడుదల(cruft_po_వాదనలు->కిటికీ_జ్ఞాపకం);
+		తిరిగి git_config_string(&cruft_po_వాదనలు->కిటికీ_జ్ఞాపకం, var, విలువ);
 	}
-	if (!strcmp(var, "repack.cruftdepth")) {
-		free(cruft_po_args->depth);
-		return git_config_string(&cruft_po_args->depth, var, value);
+	ఒకవేళ (!strcmp(var, "repack.cruftdepth")) {
+		విడుదల(cruft_po_వాదనలు->లోతు);
+		తిరిగి git_config_string(&cruft_po_వాదనలు->లోతు, var, విలువ);
 	}
-	if (!strcmp(var, "repack.cruftthreads")) {
-		free(cruft_po_args->threads);
-		return git_config_string(&cruft_po_args->threads, var, value);
+	ఒకవేళ (!strcmp(var, "repack.cruftthreads")) {
+		విడుదల(cruft_po_వాదనలు->దారాలు);
+		తిరిగి git_config_string(&cruft_po_వాదనలు->దారాలు, var, విలువ);
 	}
-	if (!strcmp(var, "repack.midxmustcontaincruft")) {
-		midx_must_contain_cruft = git_config_bool(var, value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "repack.midxmustcontaincruft")) {
+		midx_must_contain_cruft = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "repack.midxsplitfactor")) {
-		repack_ctx->midx_split_factor = git_config_int(var, value,
+	ఒకవేళ (!strcmp(var, "repack.midxsplitfactor")) {
+		repack_ctx->midx_విభజించు_గుణకం = git_config_int(var, విలువ,
 							       ctx->kvi);
-		return 0;
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "repack.midxnewlayerthreshold")) {
-		repack_ctx->midx_new_layer_threshold = git_config_int(var, value,
+	ఒకవేళ (!strcmp(var, "repack.midxnewlayerthreshold")) {
+		repack_ctx->midx_new_layer_పరిమితి = git_config_int(var, విలువ,
 								      ctx->kvi);
-		return 0;
+		తిరిగి 0;
 	}
-	return git_default_config(var, value, ctx, cb);
+	తిరిగి git_default_config(var, విలువ, ctx, cb);
 }
 
-static int option_parse_write_bitmaps(const struct option *opt, const char *arg,
-				      int unset)
+స్థిర పూర్ణాంకం option_parse_write_bitmaps(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg,
+				      పూర్ణాంకం unset)
 {
-	int *value = opt->value;
+	పూర్ణాంకం *విలువ = opt->విలువ;
 
 	BUG_ON_OPT_ARG(arg);
-	if (unset)
-		*value = 0;
-	else
-		*value = 1;
+	ఒకవేళ (unset)
+		*విలువ = 0;
+	లేకపోతే
+		*విలువ = 1;
 
 	write_bitmaps_given = 1;
-	return 0;
+	తిరిగి 0;
 }
 
-static int option_parse_write_midx(const struct option *opt, const char *arg,
-				   int unset)
+స్థిర పూర్ణాంకం option_parse_write_midx(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg,
+				   పూర్ణాంకం unset)
 {
-	enum repack_write_midx_mode *cfg = opt->value;
+	గణన repack_write_midx_బహుళకం *cfg = opt->విలువ;
 
-	if (unset) {
+	ఒకవేళ (unset) {
 		*cfg = REPACK_WRITE_MIDX_NONE;
-		return 0;
+		తిరిగి 0;
 	}
 
-	if (!arg || !*arg)
+	ఒకవేళ (!arg || !*arg)
 		*cfg = REPACK_WRITE_MIDX_DEFAULT;
-	else if (!strcmp(arg, "incremental"))
+	లేకపోతే ఒకవేళ (!strcmp(arg, "incremental"))
 		*cfg = REPACK_WRITE_MIDX_INCREMENTAL;
-	else
-		return error(_("unknown value for %s: %s"), opt->long_name, arg);
+	లేకపోతే
+		తిరిగి error(_("unknown value for %s: %s"), opt->long_name, arg);
 
-	return 0;
+	తిరిగి 0;
 }
 
-int cmd_repack(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+పూర్ణాంకం cmd_repack(పూర్ణాంకం argc,
+	       స్థిరరాశి అక్షరం **argv,
+	       స్థిరరాశి అక్షరం *ఉపసర్గ,
+	       నిర్మాణం repository *repo)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	struct string_list_item *item;
-	struct string_list names = STRING_LIST_INIT_DUP;
-	struct existing_packs existing = EXISTING_PACKS_INIT;
-	struct oidset drop_oids = OIDSET_INIT;
-	struct pack_geometry geometry = { 0 };
-	struct tempfile *refs_snapshot = NULL;
-	int i, ret;
-	int show_progress;
+	నిర్మాణం బిడ్డ_process cmd = బిడ్డ_PROCESS_INIT;
+	నిర్మాణం string_list_అంశం *అంశం;
+	నిర్మాణం string_list పేర్లు = STRING_LIST_INIT_DUP;
+	నిర్మాణం existing_packs existing = EXISTING_PACKS_INIT;
+	నిర్మాణం oidset drop_oids = OIDSET_INIT;
+	నిర్మాణం pack_geometry geometry = { 0 };
+	నిర్మాణం tempfile *refs_snapshot = ఖాళీ;
+	పూర్ణాంకం i, ret;
+	పూర్ణాంకం show_పురోగతి;
 
 	/* variables to be filled by option parsing */
-	struct repack_config_ctx config_ctx;
-	int delete_redundant = 0;
-	const char *unpack_unreachable = NULL;
-	int keep_unreachable = 0;
-	struct string_list keep_pack_list = STRING_LIST_INIT_NODUP;
-	struct pack_objects_args po_args = PACK_OBJECTS_ARGS_INIT;
-	struct pack_objects_args cruft_po_args = PACK_OBJECTS_ARGS_INIT;
-	enum repack_write_midx_mode write_midx = REPACK_WRITE_MIDX_NONE;
-	const char *cruft_expiration = NULL;
-	const char *expire_to = NULL;
-	const char *filter_to = NULL;
-	const char *opt_window = NULL;
-	const char *opt_window_memory = NULL;
-	const char *opt_depth = NULL;
-	const char *opt_threads = NULL;
-	unsigned long combine_cruft_below_size = 0ul;
+	నిర్మాణం repack_config_ctx config_ctx;
+	పూర్ణాంకం delete_redundant = 0;
+	స్థిరరాశి అక్షరం *unpack_unreachable = ఖాళీ;
+	పూర్ణాంకం keep_unreachable = 0;
+	నిర్మాణం string_list keep_pack_list = STRING_LIST_INIT_NODUP;
+	నిర్మాణం pack_objects_వాదనలు po_వాదనలు = PACK_OBJECTS_వాదనలు_INIT;
+	నిర్మాణం pack_objects_వాదనలు cruft_po_వాదనలు = PACK_OBJECTS_వాదనలు_INIT;
+	గణన repack_write_midx_బహుళకం write_midx = REPACK_WRITE_MIDX_NONE;
+	స్థిరరాశి అక్షరం *cruft_expiration = ఖాళీ;
+	స్థిరరాశి అక్షరం *expire_గమ్యం = ఖాళీ;
+	స్థిరరాశి అక్షరం *filter_గమ్యం = ఖాళీ;
+	స్థిరరాశి అక్షరం *opt_కిటికీ = ఖాళీ;
+	స్థిరరాశి అక్షరం *opt_కిటికీ_జ్ఞాపకం = ఖాళీ;
+	స్థిరరాశి అక్షరం *opt_లోతు = ఖాళీ;
+	స్థిరరాశి అక్షరం *opt_దారాలు = ఖాళీ;
+	గుర్తులేని దీర్ఘ combine_cruft_క్రింద_కొలత = 0ul;
 
-	struct option builtin_repack_options[] = {
-		OPT_BIT('a', NULL, &pack_everything,
+	నిర్మాణం option builtin_repack_options[] = {
+		OPT_బిట్టు('a', ఖాళీ, &pack_everything,
 				N_("pack everything in a single pack"), ALL_INTO_ONE),
-		OPT_BIT('A', NULL, &pack_everything,
+		OPT_బిట్టు('A', ఖాళీ, &pack_everything,
 				N_("same as -a, and turn unreachable objects loose"),
 				   LOOSEN_UNREACHABLE | ALL_INTO_ONE),
-		OPT_BIT(0, "cruft", &pack_everything,
+		OPT_బిట్టు(0, "cruft", &pack_everything,
 				N_("same as -a, pack unreachable cruft objects separately"),
 				   PACK_CRUFT),
 		OPT_STRING(0, "cruft-expiration", &cruft_expiration, N_("approxidate"),
 				N_("with --cruft, expire objects older than this")),
 		OPT_UNSIGNED(0, "combine-cruft-below-size",
-			     &combine_cruft_below_size,
+			     &combine_cruft_క్రింద_కొలత,
 			     N_("with --cruft, only repack cruft packs smaller than this")),
-		OPT_UNSIGNED(0, "max-cruft-size", &cruft_po_args.max_pack_size,
+		OPT_UNSIGNED(0, "max-cruft-size", &cruft_po_వాదనలు.max_pack_కొలత,
 			     N_("with --cruft, limit the size of new cruft packs")),
-		OPT_BOOL('d', NULL, &delete_redundant,
+		OPT_BOOL('d', ఖాళీ, &delete_redundant,
 				N_("remove redundant packs, and run git-prune-packed")),
-		OPT_BOOL('f', NULL, &po_args.no_reuse_delta,
+		OPT_BOOL('f', ఖాళీ, &po_వాదనలు.no_reuse_delta,
 				N_("pass --no-reuse-delta to git-pack-objects")),
-		OPT_BOOL('F', NULL, &po_args.no_reuse_object,
+		OPT_BOOL('F', ఖాళీ, &po_వాదనలు.no_reuse_object,
 				N_("pass --no-reuse-object to git-pack-objects")),
-		OPT_INTEGER(0, "name-hash-version", &po_args.name_hash_version,
+		OPT_INTEGER(0, "name-hash-version", &po_వాదనలు.name_hash_సంస్కరణ,
 				N_("specify the name hash version to use for grouping similar objects by path")),
-		OPT_BOOL(0, "path-walk", &po_args.path_walk,
+		OPT_BOOL(0, "path-walk", &po_వాదనలు.మార్గం_walk,
 				N_("pass --path-walk to git-pack-objects")),
-		OPT_NEGBIT('n', NULL, &run_update_server_info,
+		OPT_NEGBIT('n', ఖాళీ, &నిరంతరం_update_server_info,
 				N_("do not run git-update-server-info"), 1),
-		OPT__QUIET(&po_args.quiet, N_("be quiet")),
-		OPT_BOOL('l', "local", &po_args.local,
+		OPT__QUIET(&po_వాదనలు.quiet, N_("be quiet")),
+		OPT_BOOL('l', "local", &po_వాదనలు.local,
 				N_("pass --local to git-pack-objects")),
-		OPT_CALLBACK_F('b', "write-bitmap-index", &write_bitmaps, NULL,
+		OPT_CALLBACK_F('b', "write-bitmap-index", &write_bitmaps, ఖాళీ,
 				N_("write bitmap index"),
 				PARSE_OPT_NOARG, option_parse_write_bitmaps),
 		OPT_BOOL('i', "delta-islands", &use_delta_islands,
@@ -228,78 +228,78 @@ int cmd_repack(int argc,
 				N_("with -A, do not loosen objects older than this")),
 		OPT_BOOL('k', "keep-unreachable", &keep_unreachable,
 				N_("with -a, repack unreachable objects")),
-		OPT_STRING(0, "window", &opt_window, N_("n"),
+		OPT_STRING(0, "window", &opt_కిటికీ, N_("n"),
 				N_("size of the window used for delta compression")),
-		OPT_STRING(0, "window-memory", &opt_window_memory, N_("bytes"),
+		OPT_STRING(0, "window-memory", &opt_కిటికీ_జ్ఞాపకం, N_("bytes"),
 				N_("same as the above, but limit memory size instead of entries count")),
-		OPT_STRING(0, "depth", &opt_depth, N_("n"),
+		OPT_STRING(0, "depth", &opt_లోతు, N_("n"),
 				N_("limits the maximum delta depth")),
-		OPT_STRING(0, "threads", &opt_threads, N_("n"),
+		OPT_STRING(0, "threads", &opt_దారాలు, N_("n"),
 				N_("limits the maximum number of threads")),
-		OPT_UNSIGNED(0, "max-pack-size", &po_args.max_pack_size,
+		OPT_UNSIGNED(0, "max-pack-size", &po_వాదనలు.max_pack_కొలత,
 			     N_("maximum size of each packfile")),
-		OPT_PARSE_LIST_OBJECTS_FILTER(&po_args.filter_options),
-		OPT_BOOL(0, "pack-kept-objects", &po_args.pack_kept_objects,
+		OPT_PARSE_LIST_OBJECTS_FILTER(&po_వాదనలు.filter_options),
+		OPT_BOOL(0, "pack-kept-objects", &po_వాదనలు.pack_kept_objects,
 				N_("repack objects in packs marked with .keep")),
 		OPT_STRING_LIST(0, "keep-pack", &keep_pack_list, N_("name"),
 				N_("do not repack this pack")),
-		OPT_INTEGER('g', "geometric", &geometry.split_factor,
+		OPT_INTEGER('g', "geometric", &geometry.విభజించు_గుణకం,
 			    N_("find a geometric progression with factor <N>")),
 		OPT_CALLBACK_F(0, "write-midx", &write_midx,
 			   N_("mode"),
 			   N_("write a multi-pack index of the resulting packs"),
 			   PARSE_OPT_OPTARG, option_parse_write_midx),
-		OPT_SET_INT_F('m', NULL, &write_midx,
+		OPT_సమితి_INT_F('m', ఖాళీ, &write_midx,
 			   N_("write a multi-pack index of the resulting packs"),
 			   REPACK_WRITE_MIDX_DEFAULT,
 			   PARSE_OPT_HIDDEN),
-		OPT_STRING(0, "expire-to", &expire_to, N_("dir"),
+		OPT_STRING(0, "expire-to", &expire_గమ్యం, N_("dir"),
 			   N_("pack prefix to store a pack containing pruned objects")),
-		OPT_STRING(0, "filter-to", &filter_to, N_("dir"),
+		OPT_STRING(0, "filter-to", &filter_గమ్యం, N_("dir"),
 			   N_("pack prefix to store a pack containing filtered out objects")),
 		OPT_BOOL(0, "drop-filtered", &drop_filtered,
 				N_("delete filtered out objects (requires --filter)")),
-		OPT_BOOL(0, "dry-run", &dry_run,
+		OPT_BOOL(0, "dry-run", &dry_నిరంతరం,
 				N_("only show which objects would be dropped")),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	list_objects_filter_init(&po_args.filter_options);
+	list_objects_filter_init(&po_వాదనలు.filter_options);
 
-	memset(&config_ctx, 0, sizeof(config_ctx));
-	config_ctx.po_args = &po_args;
-	config_ctx.cruft_po_args = &cruft_po_args;
-	config_ctx.midx_split_factor = DEFAULT_MIDX_SPLIT_FACTOR;
-	config_ctx.midx_new_layer_threshold = DEFAULT_MIDX_NEW_LAYER_THRESHOLD;
+	memset(&config_ctx, 0, పరిమాణం(config_ctx));
+	config_ctx.po_వాదనలు = &po_వాదనలు;
+	config_ctx.cruft_po_వాదనలు = &cruft_po_వాదనలు;
+	config_ctx.midx_విభజించు_గుణకం = DEFAULT_MIDX_విభజించు_గుణకం;
+	config_ctx.midx_new_layer_పరిమితి = DEFAULT_MIDX_NEW_LAYER_పరిమితి;
 
 	repo_config(repo, repack_config, &config_ctx);
 
-	argc = parse_options(argc, argv, prefix, builtin_repack_options,
+	argc = parse_options(argc, argv, ఉపసర్గ, builtin_repack_options,
 				git_repack_usage, 0);
 
-	po_args.window = xstrdup_or_null(opt_window);
-	po_args.window_memory = xstrdup_or_null(opt_window_memory);
-	po_args.depth = xstrdup_or_null(opt_depth);
-	po_args.threads = xstrdup_or_null(opt_threads);
+	po_వాదనలు.కిటికీ = xstrdup_or_null(opt_కిటికీ);
+	po_వాదనలు.కిటికీ_జ్ఞాపకం = xstrdup_or_null(opt_కిటికీ_జ్ఞాపకం);
+	po_వాదనలు.లోతు = xstrdup_or_null(opt_లోతు);
+	po_వాదనలు.దారాలు = xstrdup_or_null(opt_దారాలు);
 
 	die_for_incompatible_opt2(drop_filtered, "--drop-filtered",
-		!!filter_to, "--filter-to");
+		!!filter_గమ్యం, "--filter-to");
 
-	if (dry_run && !drop_filtered)
+	ఒకవేళ (dry_నిరంతరం && !drop_filtered)
 		die(_("--dry-run only takes effect with --drop-filtered"));
 
-	if (drop_filtered) {
-		if (!po_args.filter_options.choice)
+	ఒకవేళ (drop_filtered) {
+		ఒకవేళ (!po_వాదనలు.filter_options.choice)
 			die(_("--drop-filtered requires --filter"));
 
-		if (!(pack_everything & ALL_INTO_ONE))
+		ఒకవేళ (!(pack_everything & ALL_INTO_ONE))
 			die(_("--drop-filtered requires -a"));
 
 		/*
 		 * Only blob:limit=<n> is supported for now. Reject other
 		 * filter choices early, before walking the object database.
 		 */
-		if (po_args.filter_options.choice != LOFC_BLOB_LIMIT)
+		ఒకవేళ (po_వాదనలు.filter_options.choice != LOFC_BLOB_హద్దు)
 			die(_("--drop-filtered only supports --filter=blob:limit=<n> for now"));
 
 		/*
@@ -307,7 +307,7 @@ int cmd_repack(int argc,
 		 * report; a bitmap setting from config is silently overridden
 		 * for the duration of the command.
 		 */
-		if (write_bitmaps_given && write_bitmaps > 0)
+		ఒకవేళ (write_bitmaps_given && write_bitmaps > 0)
 			die(_("options '%s' and '%s' cannot be used together"),
 				"--drop-filtered", "--write-bitmap-index");
 
@@ -316,7 +316,7 @@ int cmd_repack(int argc,
 		 * dropped objects from, so dropping them would be permanent
 		 * data loss.
 		 */
-		if (!repo_has_promisor_remote(repo))
+		ఒకవేళ (!repo_has_promisor_remote(repo))
 			die(_("--drop-filtered requires a promisor remote"));
 
 		/*
@@ -329,21 +329,21 @@ int cmd_repack(int argc,
 		 * safety measure. Bare repositories have no such state, so
 		 * the check is skipped there.
 		 */
-		if (!is_bare_repository(repo)) {
-			struct wt_status_state state = { 0 };
+		ఒకవేళ (!is_bare_repository(repo)) {
+			నిర్మాణం wt_స్థితి_state state = { 0 };
 
-			wt_status_get_state(repo, &state, 0);
-			if (state.merge_in_progress || state.revert_in_progress ||
-			    state.rebase_in_progress || state.bisect_in_progress ||
-			    state.cherry_pick_in_progress || state.am_in_progress ||
-			    state.rebase_interactive_in_progress) {
-				wt_status_state_free_buffers(&state);
+			wt_స్థితి_get_state(repo, &state, 0);
+			ఒకవేళ (state.విలీనం_లోపల_పురోగతి || state.revert_లోపల_పురోగతి ||
+			    state.rebase_లోపల_పురోగతి || state.bisect_లోపల_పురోగతి ||
+			    state.cherry_pick_లోపల_పురోగతి || state.am_లోపల_పురోగతి ||
+			    state.rebase_interactive_లోపల_పురోగతి) {
+				wt_స్థితి_state_free_buffers(&state);
 				die(_("--drop-filtered cannot be used while "
 				      "another operation (merge, rebase, am, "
 				      "cherry-pick, revert, or bisect) is in "
 				      "progress"));
 			}
-			wt_status_state_free_buffers(&state);
+			wt_స్థితి_state_free_buffers(&state);
 		}
 
 		write_bitmaps = 0;
@@ -353,13 +353,13 @@ int cmd_repack(int argc,
 		 * without them and then removing the old packs, so the
 		 * redundant packs must be deleted. Imply -d on a real run.
 		 */
-		if (!dry_run)
+		ఒకవేళ (!dry_నిరంతరం)
 			delete_redundant = 1;
 
-		ret = enumerate_promisor_blobs(repo, &po_args.filter_options, &drop_oids);
+		ret = enumerate_promisor_blobs(repo, &po_వాదనలు.filter_options, &drop_oids);
 
-		if (ret)
-			goto cleanup;
+		ఒకవేళ (ret)
+			వెళ్ళు cleanup;
 
 		/*
 		 * Refuse to drop blobs that the current index references.
@@ -368,56 +368,56 @@ int cmd_repack(int argc,
 		 * nothing. This guard just avoids that churn. Bare
 		 * repositories have no index, so the check is skipped there.
 		 */
-		if (!is_bare_repository(repo) && oidset_size(&drop_oids)) {
-			struct index_state *istate = repo->index;
-			unsigned int i;
+		ఒకవేళ (!is_bare_repository(repo) && oidset_కొలత(&drop_oids)) {
+			నిర్మాణం సూచీ_state *istate = repo->సూచీ;
+			గుర్తులేని పూర్ణాంకం i;
 
-			if (repo_read_index(repo) < 0)
+			ఒకవేళ (repo_read_సూచీ(repo) < 0)
 				die(_("could not read the index"));
 
-			for (i = 0; i < istate->cache_nr; i++) {
-				const struct cache_entry *ce = istate->cache[i];
+			కొరకు (i = 0; i < istate->cache_nr; i++) {
+				స్థిరరాశి నిర్మాణం cache_నమోదు *ce = istate->cache[i];
 
-				if (oidset_contains(&drop_oids, &ce->oid))
+				ఒకవేళ (oidset_కలిగియుంది(&drop_oids, &ce->oid))
 					die(_("cannot drop '%s' (%s): it is referenced by the current index"),
-						ce->name, oid_to_hex(&ce->oid));
+						ce->name, oid_గమ్యం_hex(&ce->oid));
 			}
 		}
 
-		if (dry_run) {
-			struct oidset_iter iter;
-			const struct object_id *oid;
+		ఒకవేళ (dry_నిరంతరం) {
+			నిర్మాణం oidset_iter iter;
+			స్థిరరాశి నిర్మాణం object_id *oid;
 
 			oidset_iter_init(&drop_oids, &iter);
-			while ((oid = oidset_iter_next(&iter)))
-				printf("%s\n", oid_to_hex(oid));
+			అయితే ((oid = oidset_iter_తదుపరి(&iter)))
+				రాయి("%s\n", oid_గమ్యం_hex(oid));
 		}
 	}
 
-	if (delete_redundant && repo->repository_format_precious_objects)
+	ఒకవేళ (delete_redundant && repo->repository_format_precious_objects)
 		die(_("cannot delete packs in a precious-objects repo"));
 
 	die_for_incompatible_opt3(unpack_unreachable || (pack_everything & LOOSEN_UNREACHABLE), "-A",
 				  keep_unreachable, "-k/--keep-unreachable",
 				  pack_everything & PACK_CRUFT, "--cruft");
 
-	if (pack_everything & PACK_CRUFT)
+	ఒకవేళ (pack_everything & PACK_CRUFT)
 		pack_everything |= ALL_INTO_ONE;
 
-	if (write_bitmaps < 0) {
-		if (write_midx == REPACK_WRITE_MIDX_NONE &&
+	ఒకవేళ (write_bitmaps < 0) {
+		ఒకవేళ (write_midx == REPACK_WRITE_MIDX_NONE &&
 		    (!(pack_everything & ALL_INTO_ONE) || !is_bare_repository(repo)))
 			write_bitmaps = 0;
 	}
-	if (po_args.pack_kept_objects < 0)
-		po_args.pack_kept_objects = write_bitmaps > 0 &&
+	ఒకవేళ (po_వాదనలు.pack_kept_objects < 0)
+		po_వాదనలు.pack_kept_objects = write_bitmaps > 0 &&
 			write_midx == REPACK_WRITE_MIDX_NONE;
 
-	if (write_bitmaps && !(pack_everything & ALL_INTO_ONE) &&
+	ఒకవేళ (write_bitmaps && !(pack_everything & ALL_INTO_ONE) &&
 	    write_midx == REPACK_WRITE_MIDX_NONE)
 		die(_(incremental_bitmap_conflict_error));
 
-	if (write_bitmaps && po_args.local &&
+	ఒకవేళ (write_bitmaps && po_వాదనలు.local &&
 	    odb_has_alternates(repo->objects)) {
 		/*
 		 * When asked to do a local repack, but we have
@@ -430,54 +430,54 @@ int cmd_repack(int argc,
 		write_bitmaps = 0;
 	}
 
-	if (config_ctx.midx_split_factor < 2)
+	ఒకవేళ (config_ctx.midx_విభజించు_గుణకం < 2)
 		die(_("invalid value for %s: %d"), "--midx-split-factor",
-		    config_ctx.midx_split_factor);
-	if (config_ctx.midx_new_layer_threshold < 1)
+		    config_ctx.midx_విభజించు_గుణకం);
+	ఒకవేళ (config_ctx.midx_new_layer_పరిమితి < 1)
 		die(_("invalid value for %s: %d"), "--midx-new-layer-threshold",
-		    config_ctx.midx_new_layer_threshold);
+		    config_ctx.midx_new_layer_పరిమితి);
 
-	if (write_midx != REPACK_WRITE_MIDX_NONE && write_bitmaps) {
-		struct strbuf path = STRBUF_INIT;
+	ఒకవేళ (write_midx != REPACK_WRITE_MIDX_NONE && write_bitmaps) {
+		నిర్మాణం strbuf మార్గం = STRBUF_INIT;
 
-		strbuf_addf(&path, "%s/%s_XXXXXX",
+		strbuf_addf(&మార్గం, "%s/%s_XXXXXX",
 			    repo_get_object_directory(repo),
 			    "bitmap-ref-tips");
 
-		refs_snapshot = xmks_tempfile(path.buf);
+		refs_snapshot = xmks_tempfile(మార్గం.buf);
 		midx_snapshot_refs(repo, refs_snapshot);
 
-		strbuf_release(&path);
+		strbuf_release(&మార్గం);
 	}
 
 	packdir = mkpathdup("%s/pack", repo_get_object_directory(repo));
-	packtmp_name = xstrfmt(".tmp-%d-pack", (int)getpid());
+	packtmp_name = xstrfmt(".tmp-%d-pack", (పూర్ణాంకం)getpid());
 	packtmp = mkpathdup("%s/%s", packdir, packtmp_name);
 
 	existing.repo = repo;
 	existing_packs_collect(&existing, &keep_pack_list);
 
-	if (geometry.split_factor) {
-		if (pack_everything)
+	ఒకవేళ (geometry.విభజించు_గుణకం) {
+		ఒకవేళ (pack_everything)
 			die(_("options '%s' and '%s' cannot be used together"), "--geometric", "-A/-a");
-		if (write_midx == REPACK_WRITE_MIDX_INCREMENTAL) {
-			geometry.midx_layer_threshold = config_ctx.midx_new_layer_threshold;
-			geometry.midx_layer_threshold_set = true;
+		ఒకవేళ (write_midx == REPACK_WRITE_MIDX_INCREMENTAL) {
+			geometry.midx_layer_పరిమితి = config_ctx.midx_new_layer_పరిమితి;
+			geometry.midx_layer_పరిమితి_సమితి = true;
 		}
-		pack_geometry_init(&geometry, &existing, &po_args);
-		pack_geometry_split(&geometry);
+		pack_geometry_init(&geometry, &existing, &po_వాదనలు);
+		pack_geometry_విభజించు(&geometry);
 	}
 
-	prepare_pack_objects(&cmd, &po_args, packtmp);
+	prepare_pack_objects(&cmd, &po_వాదనలు, packtmp);
 
-	show_progress = !po_args.quiet && isatty(2);
+	show_పురోగతి = !po_వాదనలు.quiet && isatty(2);
 
-	strvec_push(&cmd.args, "--keep-true-parents");
-	for (i = 0; i < keep_pack_list.nr; i++)
-		strvec_pushf(&cmd.args, "--keep-pack=%s",
-			     keep_pack_list.items[i].string);
-	strvec_push(&cmd.args, "--non-empty");
-	if (!geometry.split_factor) {
+	strvec_నెట్టు(&cmd.వాదనలు, "--keep-true-parents");
+	కొరకు (i = 0; i < keep_pack_list.nr; i++)
+		strvec_pushf(&cmd.వాదనలు, "--keep-pack=%s",
+			     keep_pack_list.వస్తువులు[i].string);
+	strvec_నెట్టు(&cmd.వాదనలు, "--non-empty");
+	ఒకవేళ (!geometry.విభజించు_గుణకం) {
 		/*
 		 * We need to grab all reachable objects, including those that
 		 * are reachable from reflogs and the index.
@@ -488,90 +488,90 @@ int cmd_repack(int argc,
 		 * repacking all the objects in specified packs and loose ones
 		 * (indeed, --stdin-packs is incompatible with these options).
 		 */
-		strvec_push(&cmd.args, "--all");
-		strvec_push(&cmd.args, "--reflog");
-		strvec_push(&cmd.args, "--indexed-objects");
+		strvec_నెట్టు(&cmd.వాదనలు, "--all");
+		strvec_నెట్టు(&cmd.వాదనలు, "--reflog");
+		strvec_నెట్టు(&cmd.వాదనలు, "--indexed-objects");
 	}
-	if (repo_has_promisor_remote(repo))
-		strvec_push(&cmd.args, "--exclude-promisor-objects");
-	if (write_midx == REPACK_WRITE_MIDX_NONE) {
-		if (write_bitmaps > 0)
-			strvec_push(&cmd.args, "--write-bitmap-index");
-		else if (write_bitmaps < 0)
-			strvec_push(&cmd.args, "--write-bitmap-index-quiet");
+	ఒకవేళ (repo_has_promisor_remote(repo))
+		strvec_నెట్టు(&cmd.వాదనలు, "--exclude-promisor-objects");
+	ఒకవేళ (write_midx == REPACK_WRITE_MIDX_NONE) {
+		ఒకవేళ (write_bitmaps > 0)
+			strvec_నెట్టు(&cmd.వాదనలు, "--write-bitmap-index");
+		లేకపోతే ఒకవేళ (write_bitmaps < 0)
+			strvec_నెట్టు(&cmd.వాదనలు, "--write-bitmap-index-quiet");
 	}
-	if (use_delta_islands)
-		strvec_push(&cmd.args, "--delta-islands");
+	ఒకవేళ (use_delta_islands)
+		strvec_నెట్టు(&cmd.వాదనలు, "--delta-islands");
 
-	if (pack_everything & ALL_INTO_ONE) {
-		repack_promisor_objects(repo, &po_args, &names, packtmp,
-			(drop_filtered && !dry_run) ? &drop_oids : NULL);
+	ఒకవేళ (pack_everything & ALL_INTO_ONE) {
+		repack_promisor_objects(repo, &po_వాదనలు, &పేర్లు, packtmp,
+			(drop_filtered && !dry_నిరంతరం) ? &drop_oids : ఖాళీ);
 
-		if (existing_packs_has_non_kept(&existing) &&
+		ఒకవేళ (existing_packs_has_non_kept(&existing) &&
 		    delete_redundant &&
 		    !(pack_everything & PACK_CRUFT)) {
-			for_each_string_list_item(item, &names) {
-				strvec_pushf(&cmd.args, "--keep-pack=%s-%s.pack",
-					     packtmp_name, item->string);
+			for_each_string_list_అంశం(అంశం, &పేర్లు) {
+				strvec_pushf(&cmd.వాదనలు, "--keep-pack=%s-%s.pack",
+					     packtmp_name, అంశం->string);
 			}
-			if (unpack_unreachable) {
-				strvec_pushf(&cmd.args,
+			ఒకవేళ (unpack_unreachable) {
+				strvec_pushf(&cmd.వాదనలు,
 					     "--unpack-unreachable=%s",
 					     unpack_unreachable);
-			} else if (pack_everything & LOOSEN_UNREACHABLE) {
-				strvec_push(&cmd.args,
+			} లేకపోతే ఒకవేళ (pack_everything & LOOSEN_UNREACHABLE) {
+				strvec_నెట్టు(&cmd.వాదనలు,
 					    "--unpack-unreachable");
-			} else if (keep_unreachable) {
-				strvec_push(&cmd.args, "--keep-unreachable");
+			} లేకపోతే ఒకవేళ (keep_unreachable) {
+				strvec_నెట్టు(&cmd.వాదనలు, "--keep-unreachable");
 			}
 		}
 
-		if (keep_unreachable && delete_redundant &&
+		ఒకవేళ (keep_unreachable && delete_redundant &&
 		    !(pack_everything & PACK_CRUFT))
-			strvec_push(&cmd.args, "--pack-loose-unreachable");
-	} else if (geometry.split_factor) {
-		pack_geometry_repack_promisors(repo, &po_args, &geometry,
-					       &names, packtmp);
+			strvec_నెట్టు(&cmd.వాదనలు, "--pack-loose-unreachable");
+	} లేకపోతే ఒకవేళ (geometry.విభజించు_గుణకం) {
+		pack_geometry_repack_promisors(repo, &po_వాదనలు, &geometry,
+					       &పేర్లు, packtmp);
 
-		if (midx_must_contain_cruft)
-			strvec_push(&cmd.args, "--stdin-packs");
-		else
-			strvec_push(&cmd.args, "--stdin-packs=follow");
-		strvec_push(&cmd.args, "--unpacked");
-	} else {
-		strvec_push(&cmd.args, "--unpacked");
-		strvec_push(&cmd.args, "--incremental");
+		ఒకవేళ (midx_must_contain_cruft)
+			strvec_నెట్టు(&cmd.వాదనలు, "--stdin-packs");
+		లేకపోతే
+			strvec_నెట్టు(&cmd.వాదనలు, "--stdin-packs=follow");
+		strvec_నెట్టు(&cmd.వాదనలు, "--unpacked");
+	} లేకపోతే {
+		strvec_నెట్టు(&cmd.వాదనలు, "--unpacked");
+		strvec_నెట్టు(&cmd.వాదనలు, "--incremental");
 	}
 
-	if (po_args.filter_options.choice)
-		strvec_pushf(&cmd.args, "--filter=%s",
-			     expand_list_objects_filter_spec(&po_args.filter_options));
-	else if (filter_to)
+	ఒకవేళ (po_వాదనలు.filter_options.choice)
+		strvec_pushf(&cmd.వాదనలు, "--filter=%s",
+			     expand_list_objects_filter_spec(&po_వాదనలు.filter_options));
+	లేకపోతే ఒకవేళ (filter_గమ్యం)
 		die(_("option '%s' can only be used along with '%s'"), "--filter-to", "--filter");
 
-	if (geometry.split_factor)
-		cmd.in = -1;
-	else
+	ఒకవేళ (geometry.విభజించు_గుణకం)
+		cmd.లోపల = -1;
+	లేకపోతే
 		cmd.no_stdin = 1;
 
-	ret = start_command(&cmd);
-	if (ret)
-		goto cleanup;
+	ret = ప్రారంభం_command(&cmd);
+	ఒకవేళ (ret)
+		వెళ్ళు cleanup;
 
-	if (geometry.split_factor) {
-		FILE *in = xfdopen(cmd.in, "w");
+	ఒకవేళ (geometry.విభజించు_గుణకం) {
+		FILE *లోపల = xfdopen(cmd.లోపల, "w");
 		/*
 		 * The resulting pack should contain all objects in packs that
 		 * are going to be rolled up, but exclude objects in packs which
 		 * are being left alone.
 		 */
-		for (i = 0; i < geometry.split; i++)
-			fprintf(in, "%s\n", pack_basename(geometry.pack[i]));
-		for (i = geometry.split; i < geometry.pack_nr; i++) {
-			const char *basename = pack_basename(geometry.pack[i]);
-			char marker = '^';
+		కొరకు (i = 0; i < geometry.విభజించు; i++)
+			fprintf(లోపల, "%s\n", pack_basename(geometry.pack[i]));
+		కొరకు (i = geometry.విభజించు; i < geometry.pack_nr; i++) {
+			స్థిరరాశి అక్షరం *basename = pack_basename(geometry.pack[i]);
+			అక్షరం marker = '^';
 
-			if (!midx_must_contain_cruft &&
+			ఒకవేళ (!midx_must_contain_cruft &&
 			    !string_list_has_string(&existing.midx_packs,
 						    basename)) {
 				/*
@@ -582,27 +582,27 @@ int cmd_repack(int argc,
 				marker = '!';
 			}
 
-			fprintf(in, "%c%s\n", marker, basename);
+			fprintf(లోపల, "%c%s\n", marker, basename);
 		}
-		fclose(in);
+		fclose(లోపల);
 	}
 
 	{
-		struct write_pack_opts opts = {
+		నిర్మాణం write_pack_opts opts = {
 			.packdir = packdir,
 			.destination = packdir,
 			.packtmp = packtmp,
 		};
-		ret = finish_pack_objects_cmd(repo->hash_algo, &opts, &cmd,
-					      &names);
-		if (ret)
-			goto cleanup;
+		ret = ముగింపు_pack_objects_cmd(repo->hash_algo, &opts, &cmd,
+					      &పేర్లు);
+		ఒకవేళ (ret)
+			వెళ్ళు cleanup;
 	}
 
-	if (!names.nr) {
-		struct odb_source_files *files = odb_source_files_downcast(existing.source);
+	ఒకవేళ (!పేర్లు.nr) {
+		నిర్మాణం odb_ఆధారం_files *files = odb_ఆధారం_files_downcast(existing.ఆధారం);
 
-		if (!po_args.quiet)
+		ఒకవేళ (!po_వాదనలు.quiet)
 			printf_ln(_("Nothing new to pack."));
 		/*
 		 * If we didn't write any new packs, the non-cruft packs
@@ -617,41 +617,41 @@ int cmd_repack(int argc,
 		 * midx_has_unknown_packs() will make the decision for
 		 * us.
 		 */
-		if (!get_multi_pack_index(files->dirs->packed))
+		ఒకవేళ (!get_multi_pack_సూచీ(files->dirs->packed))
 			midx_must_contain_cruft = 1;
 	}
 
-	if (pack_everything & PACK_CRUFT) {
-		struct write_pack_opts opts = {
-			.po_args = &cruft_po_args,
+	ఒకవేళ (pack_everything & PACK_CRUFT) {
+		నిర్మాణం write_pack_opts opts = {
+			.po_వాదనలు = &cruft_po_వాదనలు,
 			.destination = packtmp,
 			.packtmp = packtmp,
 			.packdir = packdir,
 		};
 
-		if (!cruft_po_args.window)
-			cruft_po_args.window = xstrdup_or_null(po_args.window);
-		if (!cruft_po_args.window_memory)
-			cruft_po_args.window_memory = xstrdup_or_null(po_args.window_memory);
-		if (!cruft_po_args.depth)
-			cruft_po_args.depth = xstrdup_or_null(po_args.depth);
-		if (!cruft_po_args.threads)
-			cruft_po_args.threads = xstrdup_or_null(po_args.threads);
-		if (!cruft_po_args.max_pack_size)
-			cruft_po_args.max_pack_size = po_args.max_pack_size;
+		ఒకవేళ (!cruft_po_వాదనలు.కిటికీ)
+			cruft_po_వాదనలు.కిటికీ = xstrdup_or_null(po_వాదనలు.కిటికీ);
+		ఒకవేళ (!cruft_po_వాదనలు.కిటికీ_జ్ఞాపకం)
+			cruft_po_వాదనలు.కిటికీ_జ్ఞాపకం = xstrdup_or_null(po_వాదనలు.కిటికీ_జ్ఞాపకం);
+		ఒకవేళ (!cruft_po_వాదనలు.లోతు)
+			cruft_po_వాదనలు.లోతు = xstrdup_or_null(po_వాదనలు.లోతు);
+		ఒకవేళ (!cruft_po_వాదనలు.దారాలు)
+			cruft_po_వాదనలు.దారాలు = xstrdup_or_null(po_వాదనలు.దారాలు);
+		ఒకవేళ (!cruft_po_వాదనలు.max_pack_కొలత)
+			cruft_po_వాదనలు.max_pack_కొలత = po_వాదనలు.max_pack_కొలత;
 
-		cruft_po_args.local = po_args.local;
-		cruft_po_args.quiet = po_args.quiet;
-		cruft_po_args.delta_base_offset = po_args.delta_base_offset;
-		cruft_po_args.pack_kept_objects = 0;
+		cruft_po_వాదనలు.local = po_వాదనలు.local;
+		cruft_po_వాదనలు.quiet = po_వాదనలు.quiet;
+		cruft_po_వాదనలు.delta_పునాది_స్థానభ్రంశం = po_వాదనలు.delta_పునాది_స్థానభ్రంశం;
+		cruft_po_వాదనలు.pack_kept_objects = 0;
 
 		ret = write_cruft_pack(&opts, cruft_expiration,
-				       combine_cruft_below_size, &names,
+				       combine_cruft_క్రింద_కొలత, &పేర్లు,
 				       &existing);
-		if (ret)
-			goto cleanup;
+		ఒకవేళ (ret)
+			వెళ్ళు cleanup;
 
-		if (delete_redundant && expire_to) {
+		ఒకవేళ (delete_redundant && expire_గమ్యం) {
 			/*
 			 * If `--expire-to` is given with `-d`, it's possible
 			 * that we're about to prune some objects. With cruft
@@ -680,112 +680,112 @@ int cmd_repack(int argc,
 			 * pack, but rather removing all cruft packs from the
 			 * main repository regardless of size.
 			 */
-			opts.destination = expire_to;
-			ret = write_cruft_pack(&opts, NULL, 0ul, &names,
+			opts.destination = expire_గమ్యం;
+			ret = write_cruft_pack(&opts, ఖాళీ, 0ul, &పేర్లు,
 					       &existing);
-			if (ret)
-				goto cleanup;
+			ఒకవేళ (ret)
+				వెళ్ళు cleanup;
 		}
 	}
 
-	if (po_args.filter_options.choice && !drop_filtered) {
-		struct write_pack_opts opts = {
-			.po_args = &po_args,
-			.destination = filter_to,
+	ఒకవేళ (po_వాదనలు.filter_options.choice && !drop_filtered) {
+		నిర్మాణం write_pack_opts opts = {
+			.po_వాదనలు = &po_వాదనలు,
+			.destination = filter_గమ్యం,
 			.packdir = packdir,
 			.packtmp = packtmp,
 		};
 
-		if (!opts.destination)
+		ఒకవేళ (!opts.destination)
 			opts.destination = packtmp;
 
-		ret = write_filtered_pack(&opts, &existing, &names);
-		if (ret)
-			goto cleanup;
+		ret = write_filtered_pack(&opts, &existing, &పేర్లు);
+		ఒకవేళ (ret)
+			వెళ్ళు cleanup;
 	}
 
-	string_list_sort(&names);
+	string_list_క్రమీకరించు(&పేర్లు);
 
 	odb_close(repo->objects);
 
 	/*
 	 * Ok we have prepared all new packfiles.
 	 */
-	for_each_string_list_item(item, &names)
-		generated_pack_install(item->util, item->string, packdir,
+	for_each_string_list_అంశం(అంశం, &పేర్లు)
+		generated_pack_install(అంశం->util, అంశం->string, packdir,
 				       packtmp);
 	/* End of pack replacement. */
 
-	if (delete_redundant && pack_everything & ALL_INTO_ONE) {
-		if (write_midx == REPACK_WRITE_MIDX_INCREMENTAL)
+	ఒకవేళ (delete_redundant && pack_everything & ALL_INTO_ONE) {
+		ఒకవేళ (write_midx == REPACK_WRITE_MIDX_INCREMENTAL)
 			existing_packs_retain_midx_packs(&existing);
-		existing_packs_mark_for_deletion(&existing, &names);
+		existing_packs_mark_for_deletion(&existing, &పేర్లు);
 	}
 
-	if (write_midx != REPACK_WRITE_MIDX_NONE) {
-		struct repack_write_midx_opts opts = {
+	ఒకవేళ (write_midx != REPACK_WRITE_MIDX_NONE) {
+		నిర్మాణం repack_write_midx_opts opts = {
 			.existing = &existing,
 			.geometry = &geometry,
-			.names = &names,
-			.refs_snapshot = refs_snapshot ? get_tempfile_path(refs_snapshot) : NULL,
+			.పేర్లు = &పేర్లు,
+			.refs_snapshot = refs_snapshot ? get_tempfile_మార్గం(refs_snapshot) : ఖాళీ,
 			.packdir = packdir,
-			.show_progress = show_progress,
+			.show_పురోగతి = show_పురోగతి,
 			.write_bitmaps = write_bitmaps > 0,
 			.midx_must_contain_cruft = midx_must_contain_cruft,
-			.midx_split_factor = config_ctx.midx_split_factor,
-			.midx_new_layer_threshold = config_ctx.midx_new_layer_threshold,
-			.mode = write_midx,
+			.midx_విభజించు_గుణకం = config_ctx.midx_విభజించు_గుణకం,
+			.midx_new_layer_పరిమితి = config_ctx.midx_new_layer_పరిమితి,
+			.బహుళకం = write_midx,
 		};
 
 		ret = repack_write_midx(&opts);
-		if (ret)
-			goto cleanup;
+		ఒకవేళ (ret)
+			వెళ్ళు cleanup;
 	}
 
 	odb_reprepare(repo->objects);
 
-	if (delete_redundant) {
-		int opts = 0;
+	ఒకవేళ (delete_redundant) {
+		పూర్ణాంకం opts = 0;
 		bool wrote_incremental_midx = write_midx == REPACK_WRITE_MIDX_INCREMENTAL;
 
 		existing_packs_remove_redundant(&existing, packdir,
 						wrote_incremental_midx);
 
-		if (geometry.split_factor)
-			pack_geometry_remove_redundant(&geometry, &names,
+		ఒకవేళ (geometry.విభజించు_గుణకం)
+			pack_geometry_remove_redundant(&geometry, &పేర్లు,
 						       &existing, packdir,
 						       wrote_incremental_midx);
-		if (show_progress)
+		ఒకవేళ (show_పురోగతి)
 			opts |= PRUNE_PACKED_VERBOSE;
 		prune_packed_objects(opts);
 
-		if (!keep_unreachable &&
+		ఒకవేళ (!keep_unreachable &&
 		    (!(pack_everything & LOOSEN_UNREACHABLE) ||
 		     unpack_unreachable) &&
 		    is_repository_shallow(repo))
-			prune_shallow(PRUNE_QUICK);
+			prune_shallow(PRUNE_శీఘ్ర);
 	}
 
-	if (run_update_server_info)
+	ఒకవేళ (నిరంతరం_update_server_info)
 		update_server_info(repo, 0);
 
-	if (git_env_bool(GIT_TEST_MULTI_PACK_INDEX, 0)) {
-		struct odb_source_files *files = odb_source_files_downcast(existing.source);
-		unsigned flags = 0;
+	ఒకవేళ (git_env_bool(GIT_TEST_MULTI_PACK_సూచీ, 0)) {
+		నిర్మాణం odb_ఆధారం_files *files = odb_ఆధారం_files_downcast(existing.ఆధారం);
+		గుర్తులేని flags = 0;
 
-		if (git_env_bool(GIT_TEST_MULTI_PACK_INDEX_WRITE_INCREMENTAL, 0))
+		ఒకవేళ (git_env_bool(GIT_TEST_MULTI_PACK_సూచీ_WRITE_INCREMENTAL, 0))
 			flags |= MIDX_WRITE_INCREMENTAL;
-		write_midx_file(files->dirs->packed, NULL, NULL, flags);
+		write_midx_file(files->dirs->packed, ఖాళీ, ఖాళీ, flags);
 	}
 
 cleanup:
 	string_list_clear(&keep_pack_list, 0);
-	string_list_clear(&names, 1);
+	string_list_clear(&పేర్లు, 1);
 	oidset_clear(&drop_oids);
 	existing_packs_release(&existing);
 	pack_geometry_release(&geometry);
-	pack_objects_args_release(&po_args);
-	pack_objects_args_release(&cruft_po_args);
+	pack_objects_వాదనలు_release(&po_వాదనలు);
+	pack_objects_వాదనలు_release(&cruft_po_వాదనలు);
 
-	return ret;
+	తిరిగి ret;
 }

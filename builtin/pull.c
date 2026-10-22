@@ -6,31 +6,31 @@
  * Fetch one or more remote refs and merge it/them into the current HEAD.
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "merge.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "run-command.h"
-#include "oid-array.h"
-#include "remote.h"
-#include "dir.h"
-#include "path.h"
-#include "read-cache-ll.h"
-#include "rebase.h"
-#include "refs.h"
-#include "refspec.h"
-#include "submodule.h"
-#include "submodule-config.h"
-#include "wt-status.h"
-#include "commit-reach.h"
-#include "sequencer.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "advice.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "merge.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "run-command.h"
+#అన్తర్భావ "oid-array.h"
+#అన్తర్భావ "remote.h"
+#అన్తర్భావ "dir.h"
+#అన్తర్భావ "path.h"
+#అన్తర్భావ "read-cache-ll.h"
+#అన్తర్భావ "rebase.h"
+#అన్తర్భావ "refs.h"
+#అన్తర్భావ "refspec.h"
+#అన్తర్భావ "submodule.h"
+#అన్తర్భావ "submodule-config.h"
+#అన్తర్భావ "wt-status.h"
+#అన్తర్భావ "commit-reach.h"
+#అన్తర్భావ "sequencer.h"
 
 /**
  * Parses the value of --rebase. If value is a false value, returns
@@ -38,128 +38,128 @@
  * "merges", returns REBASE_MERGES. If value is a invalid value, dies with
  * a fatal error if fatal is true, otherwise returns REBASE_INVALID.
  */
-static enum rebase_type parse_config_rebase(const char *key, const char *value,
-		int fatal)
+స్థిర గణన rebase_type parse_config_rebase(స్థిరరాశి అక్షరం *కీలకం, స్థిరరాశి అక్షరం *విలువ,
+		పూర్ణాంకం fatal)
 {
-	enum rebase_type v = rebase_parse_value(value);
-	if (v != REBASE_INVALID)
-		return v;
+	గణన rebase_type v = rebase_parse_విలువ(విలువ);
+	ఒకవేళ (v != REBASE_INVALID)
+		తిరిగి v;
 
-	if (fatal)
-		die(_("invalid value for '%s': '%s'"), key, value);
-	else
-		error(_("invalid value for '%s': '%s'"), key, value);
+	ఒకవేళ (fatal)
+		die(_("invalid value for '%s': '%s'"), కీలకం, విలువ);
+	లేకపోతే
+		error(_("invalid value for '%s': '%s'"), కీలకం, విలువ);
 
-	return REBASE_INVALID;
+	తిరిగి REBASE_INVALID;
 }
 
 /**
  * Callback for --rebase, which parses arg with parse_config_rebase().
  */
-static int parse_opt_rebase(const struct option *opt, const char *arg, int unset)
+స్థిర పూర్ణాంకం parse_opt_rebase(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	enum rebase_type *value = opt->value;
+	గణన rebase_type *విలువ = opt->విలువ;
 
-	if (arg)
-		*value = parse_config_rebase("--rebase", arg, 0);
-	else
-		*value = unset ? REBASE_FALSE : REBASE_TRUE;
-	return *value == REBASE_INVALID ? -1 : 0;
+	ఒకవేళ (arg)
+		*విలువ = parse_config_rebase("--rebase", arg, 0);
+	లేకపోతే
+		*విలువ = unset ? REBASE_FALSE : REBASE_TRUE;
+	తిరిగి *విలువ == REBASE_INVALID ? -1 : 0;
 }
 
-static const char * const pull_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి pull_usage[] = {
 	N_("git pull [<options>] [<repository> [<refspec>...]]"),
-	NULL
+	ఖాళీ
 };
 
 /* Shared options */
-static int opt_verbosity;
-static const char *opt_progress;
-static int recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
-static int recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
+స్థిర పూర్ణాంకం opt_verbosity;
+స్థిర స్థిరరాశి అక్షరం *opt_పురోగతి;
+స్థిర పూర్ణాంకం recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
+స్థిర పూర్ణాంకం recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
 
 /* Options passed to git-merge or git-rebase */
-static enum rebase_type opt_rebase = -1;
-static const char *opt_diffstat;
-static const char *opt_log;
-static const char *opt_signoff;
-static const char *opt_squash;
-static const char *opt_commit;
-static const char *opt_edit;
-static const char *cleanup_arg;
-static char *opt_ff;
-static const char *opt_verify_signatures;
-static const char *opt_verify;
-static int opt_autostash = -1;
-static int config_rebase_autostash;
-static int config_pull_autostash = -1;
-static int check_trust_level = 1;
-static struct strvec opt_strategies = STRVEC_INIT;
-static struct strvec opt_strategy_opts = STRVEC_INIT;
-static const char *opt_gpg_sign;
-static int opt_allow_unrelated_histories;
+స్థిర గణన rebase_type opt_rebase = -1;
+స్థిర స్థిరరాశి అక్షరం *opt_diffstat;
+స్థిర స్థిరరాశి అక్షరం *opt_log;
+స్థిర స్థిరరాశి అక్షరం *opt_signoff;
+స్థిర స్థిరరాశి అక్షరం *opt_squash;
+స్థిర స్థిరరాశి అక్షరం *opt_commit;
+స్థిర స్థిరరాశి అక్షరం *opt_edit;
+స్థిర స్థిరరాశి అక్షరం *cleanup_arg;
+స్థిర అక్షరం *opt_ff;
+స్థిర స్థిరరాశి అక్షరం *opt_verify_signatures;
+స్థిర స్థిరరాశి అక్షరం *opt_verify;
+స్థిర పూర్ణాంకం opt_autostash = -1;
+స్థిర పూర్ణాంకం config_rebase_autostash;
+స్థిర పూర్ణాంకం config_pull_autostash = -1;
+స్థిర పూర్ణాంకం check_trust_level = 1;
+స్థిర నిర్మాణం strvec opt_strategies = STRVEC_INIT;
+స్థిర నిర్మాణం strvec opt_strategy_opts = STRVEC_INIT;
+స్థిర స్థిరరాశి అక్షరం *opt_gpg_sign;
+స్థిర పూర్ణాంకం opt_allow_unrelated_histories;
 
 /* Options passed to git-fetch */
-static const char *opt_all;
-static const char *opt_append;
-static const char *opt_upload_pack;
-static int opt_force;
-static const char *opt_tags;
-static const char *opt_prune;
-static const char *max_children;
-static int opt_dry_run;
-static const char *opt_keep;
-static const char *opt_depth;
-static const char *opt_unshallow;
-static const char *opt_update_shallow;
-static const char *opt_refmap;
-static const char *opt_ipv4;
-static const char *opt_ipv6;
-static int opt_show_forced_updates = -1;
-static const char *set_upstream;
-static struct strvec opt_fetch = STRVEC_INIT;
+స్థిర స్థిరరాశి అక్షరం *opt_all;
+స్థిర స్థిరరాశి అక్షరం *opt_append;
+స్థిర స్థిరరాశి అక్షరం *opt_upload_pack;
+స్థిర పూర్ణాంకం opt_force;
+స్థిర స్థిరరాశి అక్షరం *opt_ట్యాగులు;
+స్థిర స్థిరరాశి అక్షరం *opt_prune;
+స్థిర స్థిరరాశి అక్షరం *max_children;
+స్థిర పూర్ణాంకం opt_dry_నిరంతరం;
+స్థిర స్థిరరాశి అక్షరం *opt_keep;
+స్థిర స్థిరరాశి అక్షరం *opt_లోతు;
+స్థిర స్థిరరాశి అక్షరం *opt_unshallow;
+స్థిర స్థిరరాశి అక్షరం *opt_update_shallow;
+స్థిర స్థిరరాశి అక్షరం *opt_refmap;
+స్థిర స్థిరరాశి అక్షరం *opt_ipv4;
+స్థిర స్థిరరాశి అక్షరం *opt_ipv6;
+స్థిర పూర్ణాంకం opt_show_forced_updates = -1;
+స్థిర స్థిరరాశి అక్షరం *సమితి_upstream;
+స్థిర నిర్మాణం strvec opt_fetch = STRVEC_INIT;
 
 /**
  * Pushes "-q" or "-v" switches into arr to match the opt_verbosity level.
  */
-static void argv_push_verbosity(struct strvec *arr)
+స్థిర శూన్య argv_నెట్టు_verbosity(నిర్మాణం strvec *arr)
 {
-	int verbosity;
+	పూర్ణాంకం verbosity;
 
-	for (verbosity = opt_verbosity; verbosity > 0; verbosity--)
-		strvec_push(arr, "-v");
+	కొరకు (verbosity = opt_verbosity; verbosity > 0; verbosity--)
+		strvec_నెట్టు(arr, "-v");
 
-	for (verbosity = opt_verbosity; verbosity < 0; verbosity++)
-		strvec_push(arr, "-q");
+	కొరకు (verbosity = opt_verbosity; verbosity < 0; verbosity++)
+		strvec_నెట్టు(arr, "-q");
 }
 
 /**
  * Pushes "-f" switches into arr to match the opt_force level.
  */
-static void argv_push_force(struct strvec *arr)
+స్థిర శూన్య argv_నెట్టు_force(నిర్మాణం strvec *arr)
 {
-	int force = opt_force;
-	while (force-- > 0)
-		strvec_push(arr, "-f");
+	పూర్ణాంకం force = opt_force;
+	అయితే (force-- > 0)
+		strvec_నెట్టు(arr, "-f");
 }
 
 /**
  * Sets the GIT_REFLOG_ACTION environment variable to the concatenation of argv
  */
-static void set_reflog_message(int argc, const char **argv)
+స్థిర శూన్య సమితి_reflog_సందేశం(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv)
 {
-	int i;
-	struct strbuf msg = STRBUF_INIT;
+	పూర్ణాంకం i;
+	నిర్మాణం strbuf సందేశం = STRBUF_INIT;
 
-	for (i = 0; i < argc; i++) {
-		if (i)
-			strbuf_addch(&msg, ' ');
-		strbuf_addstr(&msg, argv[i]);
+	కొరకు (i = 0; i < argc; i++) {
+		ఒకవేళ (i)
+			strbuf_addch(&సందేశం, ' ');
+		strbuf_addstr(&సందేశం, argv[i]);
 	}
 
-	setenv("GIT_REFLOG_ACTION", msg.buf, 0);
+	setenv("GIT_REFLOG_ACTION", సందేశం.buf, 0);
 
-	strbuf_release(&msg);
+	strbuf_release(&సందేశం);
 }
 
 /**
@@ -168,24 +168,24 @@ static void set_reflog_message(int argc, const char **argv)
  * "--ff-only". Otherwise, if pull.ff is set to an invalid value, die with an
  * error.
  */
-static const char *config_get_ff(void)
+స్థిర స్థిరరాశి అక్షరం *config_get_ff(శూన్య)
 {
-	const char *value;
+	స్థిరరాశి అక్షరం *విలువ;
 
-	if (repo_config_get_value(the_repository, "pull.ff", &value))
-		return NULL;
+	ఒకవేళ (repo_config_get_విలువ(the_repository, "pull.ff", &విలువ))
+		తిరిగి ఖాళీ;
 
-	switch (git_parse_maybe_bool(value)) {
-	case 0:
-		return "--no-ff";
-	case 1:
-		return "--ff";
+	ఎంపిక (git_parse_maybe_bool(విలువ)) {
+	స్థితి 0:
+		తిరిగి "--no-ff";
+	స్థితి 1:
+		తిరిగి "--ff";
 	}
 
-	if (!strcmp(value, "only"))
-		return "--ff-only";
+	ఒకవేళ (!strcmp(విలువ, "only"))
+		తిరిగి "--ff-only";
 
-	die(_("invalid value for '%s': '%s'"), "pull.ff", value);
+	die(_("invalid value for '%s': '%s'"), "pull.ff", విలువ);
 }
 
 /**
@@ -195,38 +195,38 @@ static const char *config_get_ff(void)
  * looks for the value of "pull.rebase". If both configuration keys do not
  * exist, returns REBASE_FALSE.
  */
-static enum rebase_type config_get_rebase(int *rebase_unspecified)
+స్థిర గణన rebase_type config_get_rebase(పూర్ణాంకం *rebase_unspecified)
 {
-	struct branch *curr_branch = branch_get("HEAD");
-	const char *value;
+	నిర్మాణం branch *curr_branch = branch_get("HEAD");
+	స్థిరరాశి అక్షరం *విలువ;
 
-	if (curr_branch) {
-		char *key = xstrfmt("branch.%s.rebase", curr_branch->name);
+	ఒకవేళ (curr_branch) {
+		అక్షరం *కీలకం = xstrfmt("branch.%s.rebase", curr_branch->name);
 
-		if (!repo_config_get_value(the_repository, key, &value)) {
-			enum rebase_type ret = parse_config_rebase(key, value, 1);
-			free(key);
-			return ret;
+		ఒకవేళ (!repo_config_get_విలువ(the_repository, కీలకం, &విలువ)) {
+			గణన rebase_type ret = parse_config_rebase(కీలకం, విలువ, 1);
+			విడుదల(కీలకం);
+			తిరిగి ret;
 		}
 
-		free(key);
+		విడుదల(కీలకం);
 	}
 
-	if (!repo_config_get_value(the_repository, "pull.rebase", &value))
-		return parse_config_rebase("pull.rebase", value, 1);
+	ఒకవేళ (!repo_config_get_విలువ(the_repository, "pull.rebase", &విలువ))
+		తిరిగి parse_config_rebase("pull.rebase", విలువ, 1);
 
 	*rebase_unspecified = 1;
 
-	return REBASE_FALSE;
+	తిరిగి REBASE_FALSE;
 }
 
 /**
  * Read config variables.
  */
-static int git_pull_config(const char *var, const char *value,
-			   const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం git_pull_config(స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *విలువ,
+			   స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	if (!strcmp(var, "rebase.autostash")) {
+	ఒకవేళ (!strcmp(var, "rebase.autostash")) {
 		/*
 		 * run_rebase() also reads this option. The reason we handle it here is
 		 * that when pull.rebase is true, a fast-forward may occur without
@@ -235,41 +235,41 @@ static int git_pull_config(const char *var, const char *value,
 		 *
 		 * run_merge() handles merge.autostash, so we don't handle it here.
 		 */
-		config_rebase_autostash = git_config_bool(var, value);
-		return 0;
-	} else if (!strcmp(var, "pull.autostash")) {
-		config_pull_autostash = git_config_bool(var, value);
-		return 0;
-	} else if (!strcmp(var, "submodule.recurse")) {
-		recurse_submodules = git_config_bool(var, value) ?
+		config_rebase_autostash = git_config_bool(var, విలువ);
+		తిరిగి 0;
+	} లేకపోతే ఒకవేళ (!strcmp(var, "pull.autostash")) {
+		config_pull_autostash = git_config_bool(var, విలువ);
+		తిరిగి 0;
+	} లేకపోతే ఒకవేళ (!strcmp(var, "submodule.recurse")) {
+		recurse_submodules = git_config_bool(var, విలువ) ?
 			RECURSE_SUBMODULES_ON : RECURSE_SUBMODULES_OFF;
-		return 0;
-	} else if (!strcmp(var, "gpg.mintrustlevel")) {
+		తిరిగి 0;
+	} లేకపోతే ఒకవేళ (!strcmp(var, "gpg.mintrustlevel")) {
 		check_trust_level = 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	తిరిగి git_default_config(var, విలువ, ctx, cb);
 }
 
 /**
  * Appends merge candidates from FETCH_HEAD that are not marked not-for-merge
  * into merge_heads.
  */
-static void get_merge_heads(struct oid_array *merge_heads)
+స్థిర శూన్య get_విలీనం_heads(నిర్మాణం oid_array *విలీనం_heads)
 {
-	const char *filename = git_path_fetch_head(the_repository);
+	స్థిరరాశి అక్షరం *filename = git_మార్గం_fetch_తల(the_repository);
 	FILE *fp;
-	struct strbuf sb = STRBUF_INIT;
-	struct object_id oid;
+	నిర్మాణం strbuf sb = STRBUF_INIT;
+	నిర్మాణం object_id oid;
 
 	fp = xfopen(filename, "r");
-	while (strbuf_getline_lf(&sb, fp) != EOF) {
-		const char *p;
-		if (parse_oid_hex(sb.buf, &oid, &p))
-			continue;  /* invalid line: does not start with object ID */
-		if (starts_with(p, "\tnot-for-merge\t"))
-			continue;  /* ref is not-for-merge */
-		oid_array_append(merge_heads, &oid);
+	అయితే (strbuf_getline_lf(&sb, fp) != EOF) {
+		స్థిరరాశి అక్షరం *p;
+		ఒకవేళ (parse_oid_hex(sb.buf, &oid, &p))
+			కొనసాగు;  /* invalid line: does not start with object ID */
+		ఒకవేళ (starts_with(p, "\tnot-for-merge\t"))
+			కొనసాగు;  /* ref is not-for-merge */
+		oid_array_append(విలీనం_heads, &oid);
 	}
 	fclose(fp);
 	strbuf_release(&sb);
@@ -279,15 +279,15 @@ static void get_merge_heads(struct oid_array *merge_heads)
  * Used by die_no_merge_candidates() as a for_each_remote() callback to
  * retrieve the name of the remote if the repository only has one remote.
  */
-static int get_only_remote(struct remote *remote, void *cb_data)
+స్థిర పూర్ణాంకం get_only_remote(నిర్మాణం remote *remote, శూన్య *cb_దత్తాంశం)
 {
-	const char **remote_name = cb_data;
+	స్థిరరాశి అక్షరం **remote_name = cb_దత్తాంశం;
 
-	if (*remote_name)
-		return -1;
+	ఒకవేళ (*remote_name)
+		తిరిగి -1;
 
 	*remote_name = remote->name;
-	return 0;
+	తిరిగి 0;
 }
 
 /**
@@ -312,43 +312,43 @@ static int get_only_remote(struct remote *remote, void *cb_data)
  *    branch to merge didn't get fetched. (Either it doesn't exist, or wasn't
  *    part of the configured fetch refspec.)
  */
-static void NORETURN die_no_merge_candidates(const char *repo, const char **refspecs)
+స్థిర శూన్య NORETURN die_no_విలీనం_candidates(స్థిరరాశి అక్షరం *repo, స్థిరరాశి అక్షరం **refspecs)
 {
-	struct branch *curr_branch = branch_get("HEAD");
-	const char *remote = curr_branch ? curr_branch->remote_name : NULL;
+	నిర్మాణం branch *curr_branch = branch_get("HEAD");
+	స్థిరరాశి అక్షరం *remote = curr_branch ? curr_branch->remote_name : ఖాళీ;
 
-	if (*refspecs) {
-		if (opt_rebase)
+	ఒకవేళ (*refspecs) {
+		ఒకవేళ (opt_rebase)
 			fprintf_ln(stderr, _("There is no candidate for rebasing against among the refs that you just fetched."));
-		else
+		లేకపోతే
 			fprintf_ln(stderr, _("There are no candidates for merging among the refs that you just fetched."));
 		fprintf_ln(stderr, _("Generally this means that you provided a wildcard refspec which had no\n"
 					"matches on the remote end."));
-	} else if (repo && curr_branch && (!remote || strcmp(repo, remote))) {
+	} లేకపోతే ఒకవేళ (repo && curr_branch && (!remote || strcmp(repo, remote))) {
 		fprintf_ln(stderr, _("You asked to pull from the remote '%s', but did not specify\n"
 			"a branch. Because this is not the default configured remote\n"
 			"for your current branch, you must specify a branch on the command line."),
 			repo);
-	} else if (!curr_branch) {
+	} లేకపోతే ఒకవేళ (!curr_branch) {
 		fprintf_ln(stderr, _("You are not currently on a branch."));
-		if (opt_rebase)
+		ఒకవేళ (opt_rebase)
 			fprintf_ln(stderr, _("Please specify which branch you want to rebase against."));
-		else
+		లేకపోతే
 			fprintf_ln(stderr, _("Please specify which branch you want to merge with."));
 		fprintf_ln(stderr, _("See git-pull(1) for details."));
 		fprintf(stderr, "\n");
 		fprintf_ln(stderr, "    git pull %s %s", _("<remote>"), _("<branch>"));
 		fprintf(stderr, "\n");
-	} else if (!curr_branch->merge_nr) {
-		const char *remote_name = NULL;
+	} లేకపోతే ఒకవేళ (!curr_branch->విలీనం_nr) {
+		స్థిరరాశి అక్షరం *remote_name = ఖాళీ;
 
-		if (for_each_remote(get_only_remote, &remote_name) || !remote_name)
+		ఒకవేళ (for_each_remote(get_only_remote, &remote_name) || !remote_name)
 			remote_name = _("<remote>");
 
 		fprintf_ln(stderr, _("There is no tracking information for the current branch."));
-		if (opt_rebase)
+		ఒకవేళ (opt_rebase)
 			fprintf_ln(stderr, _("Please specify which branch you want to rebase against."));
-		else
+		లేకపోతే
 			fprintf_ln(stderr, _("Please specify which branch you want to merge with."));
 		fprintf_ln(stderr, _("See git-pull(1) for details."));
 		fprintf(stderr, "\n");
@@ -358,11 +358,11 @@ static void NORETURN die_no_merge_candidates(const char *repo, const char **refs
 		fprintf(stderr, "\n");
 		fprintf_ln(stderr, "    git branch --set-upstream-to=%s/%s %s\n",
 				remote_name, _("<branch>"), curr_branch->name);
-	} else
+	} లేకపోతే
 		fprintf_ln(stderr, _("Your configuration specifies to merge with the ref '%s'\n"
 			"from the remote, but no such ref was fetched."),
-			curr_branch->merge[0]->src);
-	exit(1);
+			curr_branch->విలీనం[0]->src);
+	నిష్క్రమించు(1);
 }
 
 /**
@@ -370,14 +370,14 @@ static void NORETURN die_no_merge_candidates(const char *repo, const char **refs
  * as a string and `refspecs` as a null-terminated array of strings. If `repo`
  * is not provided in argv, it is set to NULL.
  */
-static void parse_repo_refspecs(int argc, const char **argv, const char **repo,
-		const char ***refspecs)
+స్థిర శూన్య parse_repo_refspecs(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం **repo,
+		స్థిరరాశి అక్షరం ***refspecs)
 {
-	if (argc > 0) {
+	ఒకవేళ (argc > 0) {
 		*repo = *argv++;
 		argc--;
-	} else
-		*repo = NULL;
+	} లేకపోతే
+		*repo = ఖాళీ;
 	*refspecs = argv;
 }
 
@@ -385,94 +385,94 @@ static void parse_repo_refspecs(int argc, const char **argv, const char **repo,
  * Runs git-fetch, returning its exit status. `repo` and `refspecs` are the
  * repository and refspecs to fetch, or NULL if they are not provided.
  */
-static int run_fetch(const char *repo, const char **refspecs)
+స్థిర పూర్ణాంకం నిరంతరం_fetch(స్థిరరాశి అక్షరం *repo, స్థిరరాశి అక్షరం **refspecs)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process cmd = బిడ్డ_PROCESS_INIT;
 
-	strvec_pushl(&cmd.args, "fetch", "--update-head-ok", NULL);
+	strvec_pushl(&cmd.వాదనలు, "fetch", "--update-head-ok", ఖాళీ);
 
 	/* Shared options */
-	argv_push_verbosity(&cmd.args);
-	if (opt_progress)
-		strvec_push(&cmd.args, opt_progress);
+	argv_నెట్టు_verbosity(&cmd.వాదనలు);
+	ఒకవేళ (opt_పురోగతి)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_పురోగతి);
 
 	/* Options passed to git-fetch */
-	if (opt_all)
-		strvec_push(&cmd.args, opt_all);
-	if (opt_append)
-		strvec_push(&cmd.args, opt_append);
-	if (opt_upload_pack)
-		strvec_push(&cmd.args, opt_upload_pack);
-	argv_push_force(&cmd.args);
-	if (opt_tags)
-		strvec_push(&cmd.args, opt_tags);
-	if (opt_prune)
-		strvec_push(&cmd.args, opt_prune);
-	if (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
-		switch (recurse_submodules_cli) {
-		case RECURSE_SUBMODULES_ON:
-			strvec_push(&cmd.args, "--recurse-submodules=on");
-			break;
-		case RECURSE_SUBMODULES_OFF:
-			strvec_push(&cmd.args, "--recurse-submodules=no");
-			break;
-		case RECURSE_SUBMODULES_ON_DEMAND:
-			strvec_push(&cmd.args, "--recurse-submodules=on-demand");
-			break;
-		default:
+	ఒకవేళ (opt_all)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_all);
+	ఒకవేళ (opt_append)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_append);
+	ఒకవేళ (opt_upload_pack)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_upload_pack);
+	argv_నెట్టు_force(&cmd.వాదనలు);
+	ఒకవేళ (opt_ట్యాగులు)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_ట్యాగులు);
+	ఒకవేళ (opt_prune)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_prune);
+	ఒకవేళ (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
+		ఎంపిక (recurse_submodules_cli) {
+		స్థితి RECURSE_SUBMODULES_ON:
+			strvec_నెట్టు(&cmd.వాదనలు, "--recurse-submodules=on");
+			ఆపు;
+		స్థితి RECURSE_SUBMODULES_OFF:
+			strvec_నెట్టు(&cmd.వాదనలు, "--recurse-submodules=no");
+			ఆపు;
+		స్థితి RECURSE_SUBMODULES_ON_DEMAND:
+			strvec_నెట్టు(&cmd.వాదనలు, "--recurse-submodules=on-demand");
+			ఆపు;
+		అప్రమేయ:
 			BUG("submodule recursion option not understood");
 		}
-	if (max_children)
-		strvec_push(&cmd.args, max_children);
-	if (opt_dry_run)
-		strvec_push(&cmd.args, "--dry-run");
-	if (opt_keep)
-		strvec_push(&cmd.args, opt_keep);
-	if (opt_depth)
-		strvec_push(&cmd.args, opt_depth);
-	if (opt_unshallow)
-		strvec_push(&cmd.args, opt_unshallow);
-	if (opt_update_shallow)
-		strvec_push(&cmd.args, opt_update_shallow);
-	if (opt_refmap)
-		strvec_push(&cmd.args, opt_refmap);
-	if (opt_ipv4)
-		strvec_push(&cmd.args, opt_ipv4);
-	if (opt_ipv6)
-		strvec_push(&cmd.args, opt_ipv6);
-	if (opt_show_forced_updates > 0)
-		strvec_push(&cmd.args, "--show-forced-updates");
-	else if (opt_show_forced_updates == 0)
-		strvec_push(&cmd.args, "--no-show-forced-updates");
-	if (set_upstream)
-		strvec_push(&cmd.args, set_upstream);
-	strvec_pushv(&cmd.args, opt_fetch.v);
+	ఒకవేళ (max_children)
+		strvec_నెట్టు(&cmd.వాదనలు, max_children);
+	ఒకవేళ (opt_dry_నిరంతరం)
+		strvec_నెట్టు(&cmd.వాదనలు, "--dry-run");
+	ఒకవేళ (opt_keep)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_keep);
+	ఒకవేళ (opt_లోతు)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_లోతు);
+	ఒకవేళ (opt_unshallow)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_unshallow);
+	ఒకవేళ (opt_update_shallow)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_update_shallow);
+	ఒకవేళ (opt_refmap)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_refmap);
+	ఒకవేళ (opt_ipv4)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_ipv4);
+	ఒకవేళ (opt_ipv6)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_ipv6);
+	ఒకవేళ (opt_show_forced_updates > 0)
+		strvec_నెట్టు(&cmd.వాదనలు, "--show-forced-updates");
+	లేకపోతే ఒకవేళ (opt_show_forced_updates == 0)
+		strvec_నెట్టు(&cmd.వాదనలు, "--no-show-forced-updates");
+	ఒకవేళ (సమితి_upstream)
+		strvec_నెట్టు(&cmd.వాదనలు, సమితి_upstream);
+	strvec_pushv(&cmd.వాదనలు, opt_fetch.v);
 
-	if (repo) {
-		strvec_push(&cmd.args, repo);
-		strvec_pushv(&cmd.args, refspecs);
-	} else if (*refspecs)
+	ఒకవేళ (repo) {
+		strvec_నెట్టు(&cmd.వాదనలు, repo);
+		strvec_pushv(&cmd.వాదనలు, refspecs);
+	} లేకపోతే ఒకవేళ (*refspecs)
 		BUG("refspecs without repo?");
 	cmd.git_cmd = 1;
-	cmd.odb_to_close = the_repository->objects;
-	return run_command(&cmd);
+	cmd.odb_గమ్యం_close = the_repository->objects;
+	తిరిగి నిరంతరం_command(&cmd);
 }
 
 /**
  * "Pulls into void" by branching off merge_head.
  */
-static int pull_into_void(const struct object_id *merge_head,
-		const struct object_id *curr_head)
+స్థిర పూర్ణాంకం pull_into_void(స్థిరరాశి నిర్మాణం object_id *విలీనం_తల,
+		స్థిరరాశి నిర్మాణం object_id *curr_తల)
 {
-	if (opt_verify_signatures) {
-		struct commit *commit;
+	ఒకవేళ (opt_verify_signatures) {
+		నిర్మాణం commit *commit;
 
-		commit = lookup_commit(the_repository, merge_head);
-		if (!commit)
+		commit = lookup_commit(the_repository, విలీనం_తల);
+		ఒకవేళ (!commit)
 			die(_("unable to access commit %s"),
-			    oid_to_hex(merge_head));
+			    oid_గమ్యం_hex(విలీనం_తల));
 
-		verify_merge_signature(commit, opt_verbosity,
+		verify_విలీనం_signature(commit, opt_verbosity,
 				       check_trust_level);
 	}
 
@@ -482,92 +482,92 @@ static int pull_into_void(const struct object_id *merge_head,
 	 * index/worktree changes that the user already made on the unborn
 	 * branch.
 	 */
-	if (checkout_fast_forward(the_repository,
-				  the_hash_algo->empty_tree,
-				  merge_head, 0))
-		return 1;
+	ఒకవేళ (checkout_fast_forward(the_repository,
+				  the_hash_algo->ఖాళీలు_వృక్షం,
+				  విలీనం_తల, 0))
+		తిరిగి 1;
 
-	if (refs_update_ref(get_main_ref_store(the_repository), "initial pull", "HEAD", merge_head, curr_head, 0, UPDATE_REFS_DIE_ON_ERR))
-		return 1;
+	ఒకవేళ (refs_update_ref(get_main_ref_store(the_repository), "initial pull", "HEAD", విలీనం_తల, curr_తల, 0, UPDATE_REFS_DIE_ON_ERR))
+		తిరిగి 1;
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int rebase_submodules(void)
+స్థిర పూర్ణాంకం rebase_submodules(శూన్య)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process cp = బిడ్డ_PROCESS_INIT;
 
 	cp.git_cmd = 1;
 	cp.no_stdin = 1;
-	strvec_pushl(&cp.args, "submodule", "update",
-		     "--recursive", "--rebase", NULL);
-	argv_push_verbosity(&cp.args);
+	strvec_pushl(&cp.వాదనలు, "submodule", "update",
+		     "--recursive", "--rebase", ఖాళీ);
+	argv_నెట్టు_verbosity(&cp.వాదనలు);
 
-	return run_command(&cp);
+	తిరిగి నిరంతరం_command(&cp);
 }
 
-static int update_submodules(void)
+స్థిర పూర్ణాంకం update_submodules(శూన్య)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process cp = బిడ్డ_PROCESS_INIT;
 
 	cp.git_cmd = 1;
 	cp.no_stdin = 1;
-	strvec_pushl(&cp.args, "submodule", "update",
-		     "--recursive", "--checkout", NULL);
-	argv_push_verbosity(&cp.args);
+	strvec_pushl(&cp.వాదనలు, "submodule", "update",
+		     "--recursive", "--checkout", ఖాళీ);
+	argv_నెట్టు_verbosity(&cp.వాదనలు);
 
-	return run_command(&cp);
+	తిరిగి నిరంతరం_command(&cp);
 }
 
 /**
  * Runs git-merge, returning its exit status.
  */
-static int run_merge(void)
+స్థిర పూర్ణాంకం నిరంతరం_విలీనం(శూన్య)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process cmd = బిడ్డ_PROCESS_INIT;
 
-	strvec_pushl(&cmd.args, "merge", NULL);
+	strvec_pushl(&cmd.వాదనలు, "merge", ఖాళీ);
 
 	/* Shared options */
-	argv_push_verbosity(&cmd.args);
-	if (opt_progress)
-		strvec_push(&cmd.args, opt_progress);
+	argv_నెట్టు_verbosity(&cmd.వాదనలు);
+	ఒకవేళ (opt_పురోగతి)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_పురోగతి);
 
 	/* Options passed to git-merge */
-	if (opt_diffstat)
-		strvec_push(&cmd.args, opt_diffstat);
-	if (opt_log)
-		strvec_push(&cmd.args, opt_log);
-	if (opt_signoff)
-		strvec_push(&cmd.args, opt_signoff);
-	if (opt_squash)
-		strvec_push(&cmd.args, opt_squash);
-	if (opt_commit)
-		strvec_push(&cmd.args, opt_commit);
-	if (opt_edit)
-		strvec_push(&cmd.args, opt_edit);
-	if (cleanup_arg)
-		strvec_pushf(&cmd.args, "--cleanup=%s", cleanup_arg);
-	if (opt_ff)
-		strvec_push(&cmd.args, opt_ff);
-	if (opt_verify)
-		strvec_push(&cmd.args, opt_verify);
-	if (opt_verify_signatures)
-		strvec_push(&cmd.args, opt_verify_signatures);
-	strvec_pushv(&cmd.args, opt_strategies.v);
-	strvec_pushv(&cmd.args, opt_strategy_opts.v);
-	if (opt_gpg_sign)
-		strvec_push(&cmd.args, opt_gpg_sign);
-	if (opt_autostash == 0)
-		strvec_push(&cmd.args, "--no-autostash");
-	else if (opt_autostash == 1)
-		strvec_push(&cmd.args, "--autostash");
-	if (opt_allow_unrelated_histories > 0)
-		strvec_push(&cmd.args, "--allow-unrelated-histories");
+	ఒకవేళ (opt_diffstat)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_diffstat);
+	ఒకవేళ (opt_log)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_log);
+	ఒకవేళ (opt_signoff)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_signoff);
+	ఒకవేళ (opt_squash)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_squash);
+	ఒకవేళ (opt_commit)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_commit);
+	ఒకవేళ (opt_edit)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_edit);
+	ఒకవేళ (cleanup_arg)
+		strvec_pushf(&cmd.వాదనలు, "--cleanup=%s", cleanup_arg);
+	ఒకవేళ (opt_ff)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_ff);
+	ఒకవేళ (opt_verify)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_verify);
+	ఒకవేళ (opt_verify_signatures)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_verify_signatures);
+	strvec_pushv(&cmd.వాదనలు, opt_strategies.v);
+	strvec_pushv(&cmd.వాదనలు, opt_strategy_opts.v);
+	ఒకవేళ (opt_gpg_sign)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_gpg_sign);
+	ఒకవేళ (opt_autostash == 0)
+		strvec_నెట్టు(&cmd.వాదనలు, "--no-autostash");
+	లేకపోతే ఒకవేళ (opt_autostash == 1)
+		strvec_నెట్టు(&cmd.వాదనలు, "--autostash");
+	ఒకవేళ (opt_allow_unrelated_histories > 0)
+		strvec_నెట్టు(&cmd.వాదనలు, "--allow-unrelated-histories");
 
-	strvec_push(&cmd.args, "FETCH_HEAD");
+	strvec_నెట్టు(&cmd.వాదనలు, "FETCH_HEAD");
 	cmd.git_cmd = 1;
-	return run_command(&cmd);
+	తిరిగి నిరంతరం_command(&cmd);
 }
 
 /**
@@ -577,27 +577,27 @@ static int run_merge(void)
  * remote is not the branch's configured remote or the branch does not have any
  * configured upstream branch.
  */
-static const char *get_upstream_branch(const char *remote)
+స్థిర స్థిరరాశి అక్షరం *get_upstream_branch(స్థిరరాశి అక్షరం *remote)
 {
-	struct remote *rm;
-	struct branch *curr_branch;
-	const char *curr_branch_remote;
+	నిర్మాణం remote *rm;
+	నిర్మాణం branch *curr_branch;
+	స్థిరరాశి అక్షరం *curr_branch_remote;
 
 	rm = remote_get(remote);
-	if (!rm)
-		return NULL;
+	ఒకవేళ (!rm)
+		తిరిగి ఖాళీ;
 
 	curr_branch = branch_get("HEAD");
-	if (!curr_branch)
-		return NULL;
+	ఒకవేళ (!curr_branch)
+		తిరిగి ఖాళీ;
 
-	curr_branch_remote = remote_for_branch(curr_branch, NULL);
-	assert(curr_branch_remote);
+	curr_branch_remote = remote_for_branch(curr_branch, ఖాళీ);
+	ప్రతిజ్ఞా(curr_branch_remote);
 
-	if (strcmp(curr_branch_remote, rm->name))
-		return NULL;
+	ఒకవేళ (strcmp(curr_branch_remote, rm->name))
+		తిరిగి ఖాళీ;
 
-	return branch_get_upstream(curr_branch, NULL);
+	తిరిగి branch_get_upstream(curr_branch, ఖాళీ);
 }
 
 /**
@@ -606,36 +606,36 @@ static const char *get_upstream_branch(const char *remote)
  * FIXME: The current implementation assumes the default mapping of
  * refs/heads/<branch_name> to refs/remotes/<remote_name>/<branch_name>.
  */
-static const char *get_tracking_branch(const char *remote, const char *refspec)
+స్థిర స్థిరరాశి అక్షరం *get_tracking_branch(స్థిరరాశి అక్షరం *remote, స్థిరరాశి అక్షరం *refspec)
 {
-	struct refspec_item spec;
-	const char *spec_src;
-	const char *merge_branch;
+	నిర్మాణం refspec_అంశం spec;
+	స్థిరరాశి అక్షరం *spec_src;
+	స్థిరరాశి అక్షరం *విలీనం_branch;
 
-	if (!refspec_item_init_fetch(&spec, refspec, the_hash_algo))
+	ఒకవేళ (!refspec_అంశం_init_fetch(&spec, refspec, the_hash_algo))
 		die(_("invalid refspec '%s'"), refspec);
 	spec_src = spec.src;
-	if (!*spec_src || !strcmp(spec_src, "HEAD"))
+	ఒకవేళ (!*spec_src || !strcmp(spec_src, "HEAD"))
 		spec_src = "HEAD";
-	else if (skip_prefix(spec_src, "heads/", &spec_src))
+	లేకపోతే ఒకవేళ (skip_ఉపసర్గ(spec_src, "heads/", &spec_src))
 		;
-	else if (skip_prefix(spec_src, "refs/heads/", &spec_src))
+	లేకపోతే ఒకవేళ (skip_ఉపసర్గ(spec_src, "refs/heads/", &spec_src))
 		;
-	else if (starts_with(spec_src, "refs/") ||
+	లేకపోతే ఒకవేళ (starts_with(spec_src, "refs/") ||
 		starts_with(spec_src, "tags/") ||
 		starts_with(spec_src, "remotes/"))
 		spec_src = "";
 
-	if (*spec_src) {
-		if (!strcmp(remote, "."))
-			merge_branch = mkpath("refs/heads/%s", spec_src);
-		else
-			merge_branch = mkpath("refs/remotes/%s/%s", remote, spec_src);
-	} else
-		merge_branch = NULL;
+	ఒకవేళ (*spec_src) {
+		ఒకవేళ (!strcmp(remote, "."))
+			విలీనం_branch = mkpath("refs/heads/%s", spec_src);
+		లేకపోతే
+			విలీనం_branch = mkpath("refs/remotes/%s/%s", remote, spec_src);
+	} లేకపోతే
+		విలీనం_branch = ఖాళీ;
 
-	refspec_item_clear(&spec);
-	return merge_branch;
+	refspec_అంశం_clear(&spec);
+	తిరిగి విలీనం_branch;
 }
 
 /**
@@ -643,76 +643,76 @@ static const char *get_tracking_branch(const char *remote, const char *refspec)
  * current branch forked from its remote-tracking branch. Returns 0 on success,
  * -1 on failure.
  */
-static int get_rebase_fork_point(struct object_id *fork_point, const char *repo,
-		const char *refspec)
+స్థిర పూర్ణాంకం get_rebase_fork_బిందువు(నిర్మాణం object_id *fork_బిందువు, స్థిరరాశి అక్షరం *repo,
+		స్థిరరాశి అక్షరం *refspec)
 {
-	int ret;
-	struct branch *curr_branch;
-	const char *remote_branch;
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct strbuf sb = STRBUF_INIT;
+	పూర్ణాంకం ret;
+	నిర్మాణం branch *curr_branch;
+	స్థిరరాశి అక్షరం *remote_branch;
+	నిర్మాణం బిడ్డ_process cp = బిడ్డ_PROCESS_INIT;
+	నిర్మాణం strbuf sb = STRBUF_INIT;
 
 	curr_branch = branch_get("HEAD");
-	if (!curr_branch)
-		return -1;
+	ఒకవేళ (!curr_branch)
+		తిరిగి -1;
 
-	if (refspec)
+	ఒకవేళ (refspec)
 		remote_branch = get_tracking_branch(repo, refspec);
-	else
+	లేకపోతే
 		remote_branch = get_upstream_branch(repo);
 
-	if (!remote_branch)
-		return -1;
+	ఒకవేళ (!remote_branch)
+		తిరిగి -1;
 
-	strvec_pushl(&cp.args, "merge-base", "--fork-point",
-		     remote_branch, curr_branch->name, NULL);
+	strvec_pushl(&cp.వాదనలు, "merge-base", "--fork-point",
+		     remote_branch, curr_branch->name, ఖాళీ);
 	cp.no_stdin = 1;
 	cp.no_stderr = 1;
 	cp.git_cmd = 1;
 
 	ret = capture_command(&cp, &sb, GIT_MAX_HEXSZ);
-	if (ret)
-		goto cleanup;
+	ఒకవేళ (ret)
+		వెళ్ళు cleanup;
 
-	ret = get_oid_hex(sb.buf, fork_point);
-	if (ret)
-		goto cleanup;
+	ret = get_oid_hex(sb.buf, fork_బిందువు);
+	ఒకవేళ (ret)
+		వెళ్ళు cleanup;
 
 cleanup:
 	strbuf_release(&sb);
-	return ret ? -1 : 0;
+	తిరిగి ret ? -1 : 0;
 }
 
 /**
  * Sets merge_base to the octopus merge base of curr_head, merge_head and
  * fork_point. Returns 0 if a merge base is found, 1 otherwise.
  */
-static int get_octopus_merge_base(struct object_id *merge_base,
-		const struct object_id *curr_head,
-		const struct object_id *merge_head,
-		const struct object_id *fork_point)
+స్థిర పూర్ణాంకం get_octopus_విలీనం_పునాది(నిర్మాణం object_id *విలీనం_పునాది,
+		స్థిరరాశి నిర్మాణం object_id *curr_తల,
+		స్థిరరాశి నిర్మాణం object_id *విలీనం_తల,
+		స్థిరరాశి నిర్మాణం object_id *fork_బిందువు)
 {
-	struct commit_list *revs = NULL, *result = NULL;
+	నిర్మాణం commit_list *revs = ఖాళీ, *ఫలితం = ఖాళీ;
 
-	commit_list_insert(lookup_commit_reference(the_repository, curr_head),
+	commit_list_చొప్పించు(lookup_commit_reference(the_repository, curr_తల),
 			   &revs);
-	commit_list_insert(lookup_commit_reference(the_repository, merge_head),
+	commit_list_చొప్పించు(lookup_commit_reference(the_repository, విలీనం_తల),
 			   &revs);
-	if (!is_null_oid(fork_point))
-		commit_list_insert(lookup_commit_reference(the_repository, fork_point),
+	ఒకవేళ (!is_null_oid(fork_బిందువు))
+		commit_list_చొప్పించు(lookup_commit_reference(the_repository, fork_బిందువు),
 				   &revs);
 
-	if (get_octopus_merge_bases(revs, &result) < 0)
-		exit(128);
+	ఒకవేళ (get_octopus_విలీనం_bases(revs, &ఫలితం) < 0)
+		నిష్క్రమించు(128);
 	commit_list_free(revs);
-	reduce_heads_replace(&result);
+	reduce_heads_replace(&ఫలితం);
 
-	if (!result)
-		return 1;
+	ఒకవేళ (!ఫలితం)
+		తిరిగి 1;
 
-	oidcpy(merge_base, &result->item->object.oid);
-	commit_list_free(result);
-	return 0;
+	oidcpy(విలీనం_పునాది, &ఫలితం->అంశం->object.oid);
+	commit_list_free(ఫలితం);
+	తిరిగి 0;
 }
 
 /**
@@ -720,26 +720,26 @@ static int get_octopus_merge_base(struct object_id *merge_base,
  * fork point calculated by get_rebase_fork_point(), compute the <newbase> and
  * <upstream> arguments to use for the upcoming git-rebase invocation.
  */
-static int get_rebase_newbase_and_upstream(struct object_id *newbase,
-		struct object_id *upstream,
-		const struct object_id *curr_head,
-		const struct object_id *merge_head,
-		const struct object_id *fork_point)
+స్థిర పూర్ణాంకం get_rebase_newbase_and_upstream(నిర్మాణం object_id *newbase,
+		నిర్మాణం object_id *upstream,
+		స్థిరరాశి నిర్మాణం object_id *curr_తల,
+		స్థిరరాశి నిర్మాణం object_id *విలీనం_తల,
+		స్థిరరాశి నిర్మాణం object_id *fork_బిందువు)
 {
-	struct object_id oct_merge_base;
+	నిర్మాణం object_id oct_విలీనం_పునాది;
 
-	if (!get_octopus_merge_base(&oct_merge_base, curr_head, merge_head, fork_point))
-		if (!is_null_oid(fork_point) && oideq(&oct_merge_base, fork_point))
-			fork_point = NULL;
+	ఒకవేళ (!get_octopus_విలీనం_పునాది(&oct_విలీనం_పునాది, curr_తల, విలీనం_తల, fork_బిందువు))
+		ఒకవేళ (!is_null_oid(fork_బిందువు) && oideq(&oct_విలీనం_పునాది, fork_బిందువు))
+			fork_బిందువు = ఖాళీ;
 
-	if (fork_point && !is_null_oid(fork_point))
-		oidcpy(upstream, fork_point);
-	else
-		oidcpy(upstream, merge_head);
+	ఒకవేళ (fork_బిందువు && !is_null_oid(fork_బిందువు))
+		oidcpy(upstream, fork_బిందువు);
+	లేకపోతే
+		oidcpy(upstream, విలీనం_తల);
 
-	oidcpy(newbase, merge_head);
+	oidcpy(newbase, విలీనం_తల);
 
-	return 0;
+	తిరిగి 0;
 }
 
 /**
@@ -747,70 +747,70 @@ static int get_rebase_newbase_and_upstream(struct object_id *newbase,
  * get_rebase_newbase_and_upstream(), runs git-rebase with the
  * appropriate arguments and returns its exit status.
  */
-static int run_rebase(const struct object_id *newbase,
-		const struct object_id *upstream)
+స్థిర పూర్ణాంకం నిరంతరం_rebase(స్థిరరాశి నిర్మాణం object_id *newbase,
+		స్థిరరాశి నిర్మాణం object_id *upstream)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process cmd = బిడ్డ_PROCESS_INIT;
 
-	strvec_push(&cmd.args, "rebase");
+	strvec_నెట్టు(&cmd.వాదనలు, "rebase");
 
 	/* Shared options */
-	argv_push_verbosity(&cmd.args);
+	argv_నెట్టు_verbosity(&cmd.వాదనలు);
 
 	/* Options passed to git-rebase */
-	if (opt_rebase == REBASE_MERGES)
-		strvec_push(&cmd.args, "--rebase-merges");
-	else if (opt_rebase == REBASE_INTERACTIVE)
-		strvec_push(&cmd.args, "--interactive");
-	if (opt_diffstat)
-		strvec_push(&cmd.args, opt_diffstat);
-	strvec_pushv(&cmd.args, opt_strategies.v);
-	strvec_pushv(&cmd.args, opt_strategy_opts.v);
-	if (opt_gpg_sign)
-		strvec_push(&cmd.args, opt_gpg_sign);
-	if (opt_signoff)
-		strvec_push(&cmd.args, opt_signoff);
-	if (opt_autostash == 0)
-		strvec_push(&cmd.args, "--no-autostash");
-	else if (opt_autostash == 1)
-		strvec_push(&cmd.args, "--autostash");
-	if (opt_verify_signatures &&
+	ఒకవేళ (opt_rebase == REBASE_MERGES)
+		strvec_నెట్టు(&cmd.వాదనలు, "--rebase-merges");
+	లేకపోతే ఒకవేళ (opt_rebase == REBASE_INTERACTIVE)
+		strvec_నెట్టు(&cmd.వాదనలు, "--interactive");
+	ఒకవేళ (opt_diffstat)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_diffstat);
+	strvec_pushv(&cmd.వాదనలు, opt_strategies.v);
+	strvec_pushv(&cmd.వాదనలు, opt_strategy_opts.v);
+	ఒకవేళ (opt_gpg_sign)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_gpg_sign);
+	ఒకవేళ (opt_signoff)
+		strvec_నెట్టు(&cmd.వాదనలు, opt_signoff);
+	ఒకవేళ (opt_autostash == 0)
+		strvec_నెట్టు(&cmd.వాదనలు, "--no-autostash");
+	లేకపోతే ఒకవేళ (opt_autostash == 1)
+		strvec_నెట్టు(&cmd.వాదనలు, "--autostash");
+	ఒకవేళ (opt_verify_signatures &&
 	    !strcmp(opt_verify_signatures, "--verify-signatures"))
 		warning(_("ignoring --verify-signatures for rebase"));
 
-	strvec_push(&cmd.args, "--onto");
-	strvec_push(&cmd.args, oid_to_hex(newbase));
+	strvec_నెట్టు(&cmd.వాదనలు, "--onto");
+	strvec_నెట్టు(&cmd.వాదనలు, oid_గమ్యం_hex(newbase));
 
-	strvec_push(&cmd.args, oid_to_hex(upstream));
+	strvec_నెట్టు(&cmd.వాదనలు, oid_గమ్యం_hex(upstream));
 
 	cmd.git_cmd = 1;
-	return run_command(&cmd);
+	తిరిగి నిరంతరం_command(&cmd);
 }
 
-static int get_can_ff(struct object_id *orig_head,
-		      struct oid_array *merge_heads)
+స్థిర పూర్ణాంకం get_can_ff(నిర్మాణం object_id *orig_తల,
+		      నిర్మాణం oid_array *విలీనం_heads)
 {
-	int ret;
-	struct commit_list *list = NULL;
-	struct commit *merge_head, *head;
-	struct object_id *orig_merge_head;
+	పూర్ణాంకం ret;
+	నిర్మాణం commit_list *list = ఖాళీ;
+	నిర్మాణం commit *విలీనం_తల, *తల;
+	నిర్మాణం object_id *orig_విలీనం_తల;
 
-	if (merge_heads->nr > 1)
-		return 0;
+	ఒకవేళ (విలీనం_heads->nr > 1)
+		తిరిగి 0;
 
-	orig_merge_head = &merge_heads->oid[0];
-	head = lookup_commit_reference(the_repository, orig_head);
-	if (!head)
-		return 0;
-	merge_head = lookup_commit_reference(the_repository, orig_merge_head);
-	if (!merge_head)
-		return 0;
-	commit_list_insert(head, &list);
-	ret = repo_is_descendant_of(the_repository, merge_head, list);
+	orig_విలీనం_తల = &విలీనం_heads->oid[0];
+	తల = lookup_commit_reference(the_repository, orig_తల);
+	ఒకవేళ (!తల)
+		తిరిగి 0;
+	విలీనం_తల = lookup_commit_reference(the_repository, orig_విలీనం_తల);
+	ఒకవేళ (!విలీనం_తల)
+		తిరిగి 0;
+	commit_list_చొప్పించు(తల, &list);
+	ret = repo_is_descendant_యొక్క(the_repository, విలీనం_తల, list);
 	commit_list_free(list);
-	if (ret < 0)
-		exit(128);
-	return ret;
+	ఒకవేళ (ret < 0)
+		నిష్క్రమించు(128);
+	తిరిగి ret;
 }
 
 /*
@@ -818,34 +818,34 @@ static int get_can_ff(struct object_id *orig_head,
  * Unfortunately is_descendant_of() cannot be used as it asks
  * if orig_head is a descendant of at least one of them.
  */
-static int already_up_to_date(struct object_id *orig_head,
-			      struct oid_array *merge_heads)
+స్థిర పూర్ణాంకం already_పైకి_గమ్యం_date(నిర్మాణం object_id *orig_తల,
+			      నిర్మాణం oid_array *విలీనం_heads)
 {
-	struct commit *ours;
+	నిర్మాణం commit *ours;
 
-	ours = lookup_commit_reference(the_repository, orig_head);
-	if (!ours)
-		return 0;
-	for (size_t i = 0; i < merge_heads->nr; i++) {
-		struct commit_list *list = NULL;
-		struct commit *theirs;
-		int ok;
+	ours = lookup_commit_reference(the_repository, orig_తల);
+	ఒకవేళ (!ours)
+		తిరిగి 0;
+	కొరకు (కొలత_t i = 0; i < విలీనం_heads->nr; i++) {
+		నిర్మాణం commit_list *list = ఖాళీ;
+		నిర్మాణం commit *theirs;
+		పూర్ణాంకం ok;
 
-		theirs = lookup_commit_reference(the_repository, &merge_heads->oid[i]);
-		if (!theirs)
-			return 0;
-		commit_list_insert(theirs, &list);
-		ok = repo_is_descendant_of(the_repository, ours, list);
+		theirs = lookup_commit_reference(the_repository, &విలీనం_heads->oid[i]);
+		ఒకవేళ (!theirs)
+			తిరిగి 0;
+		commit_list_చొప్పించు(theirs, &list);
+		ok = repo_is_descendant_యొక్క(the_repository, ours, list);
 		commit_list_free(list);
-		if (ok < 0)
-			exit(128);
-		if (!ok)
-			return 0;
+		ఒకవేళ (ok < 0)
+			నిష్క్రమించు(128);
+		ఒకవేళ (!ok)
+			తిరిగి 0;
 	}
-	return 1;
+	తిరిగి 1;
 }
 
-static void show_advice_pull_non_ff(void)
+స్థిర శూన్య show_advice_pull_non_ff(శూన్య)
 {
 	advise(_("You have divergent branches and need to specify how to reconcile them.\n"
 		 "You can do so by running one of the following commands sometime before\n"
@@ -861,23 +861,23 @@ static void show_advice_pull_non_ff(void)
 		 "invocation.\n"));
 }
 
-int cmd_pull(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repository UNUSED)
+పూర్ణాంకం cmd_pull(పూర్ణాంకం argc,
+	     స్థిరరాశి అక్షరం **argv,
+	     స్థిరరాశి అక్షరం *ఉపసర్గ,
+	     నిర్మాణం repository *repository వాడని)
 {
-	const char *repo, **refspecs;
-	struct oid_array merge_heads = OID_ARRAY_INIT;
-	struct object_id orig_head, curr_head;
-	struct object_id rebase_fork_point;
-	int rebase_unspecified = 0;
-	int can_ff;
-	int divergent;
-	int ret;
-	static struct option pull_options[] = {
+	స్థిరరాశి అక్షరం *repo, **refspecs;
+	నిర్మాణం oid_array విలీనం_heads = OID_ARRAY_INIT;
+	నిర్మాణం object_id orig_తల, curr_తల;
+	నిర్మాణం object_id rebase_fork_బిందువు;
+	పూర్ణాంకం rebase_unspecified = 0;
+	పూర్ణాంకం can_ff;
+	పూర్ణాంకం divergent;
+	పూర్ణాంకం ret;
+	స్థిర నిర్మాణం option pull_options[] = {
 		/* Shared options */
 		OPT__VERBOSITY(&opt_verbosity),
-		OPT_PASSTHRU(0, "progress", &opt_progress, NULL,
+		OPT_PASSTHRU(0, "progress", &opt_పురోగతి, ఖాళీ,
 			N_("force progress reporting"),
 			PARSE_OPT_NOARG),
 		OPT_CALLBACK_F(0, "recurse-submodules",
@@ -886,49 +886,49 @@ int cmd_pull(int argc,
 			   PARSE_OPT_OPTARG, option_fetch_parse_recurse_submodules),
 
 		/* Options passed to git-merge or git-rebase */
-		OPT_GROUP(N_("Options related to merging")),
+		OPT_సమూహం(N_("Options related to merging")),
 		OPT_CALLBACK_F('r', "rebase", &opt_rebase,
 			"(false|true|merges|interactive)",
 			N_("incorporate changes by rebasing rather than merging"),
 			PARSE_OPT_OPTARG, parse_opt_rebase),
-		OPT_PASSTHRU('n', NULL, &opt_diffstat, NULL,
+		OPT_PASSTHRU('n', ఖాళీ, &opt_diffstat, ఖాళీ,
 			N_("do not show a diffstat at the end of the merge"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG),
-		OPT_PASSTHRU(0, "stat", &opt_diffstat, NULL,
+		OPT_PASSTHRU(0, "stat", &opt_diffstat, ఖాళీ,
 			N_("show a diffstat at the end of the merge"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "summary", &opt_diffstat, NULL,
+		OPT_PASSTHRU(0, "summary", &opt_diffstat, ఖాళీ,
 			N_("(synonym to --stat)"),
 			PARSE_OPT_NOARG | PARSE_OPT_HIDDEN),
-		OPT_PASSTHRU(0, "compact-summary", &opt_diffstat, NULL,
+		OPT_PASSTHRU(0, "compact-summary", &opt_diffstat, ఖాళీ,
 			N_("show a compact-summary at the end of the merge"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU(0, "log", &opt_log, N_("n"),
 			N_("add (at most <n>) entries from shortlog to merge commit message"),
 			PARSE_OPT_OPTARG),
-		OPT_PASSTHRU(0, "signoff", &opt_signoff, NULL,
+		OPT_PASSTHRU(0, "signoff", &opt_signoff, ఖాళీ,
 			N_("add a Signed-off-by trailer"),
 			PARSE_OPT_OPTARG),
-		OPT_PASSTHRU(0, "squash", &opt_squash, NULL,
+		OPT_PASSTHRU(0, "squash", &opt_squash, ఖాళీ,
 			N_("create a single commit instead of doing a merge"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "commit", &opt_commit, NULL,
+		OPT_PASSTHRU(0, "commit", &opt_commit, ఖాళీ,
 			N_("perform a commit if the merge succeeds (default)"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "edit", &opt_edit, NULL,
+		OPT_PASSTHRU(0, "edit", &opt_edit, ఖాళీ,
 			N_("edit message before committing"),
 			PARSE_OPT_NOARG),
 		OPT_CLEANUP(&cleanup_arg),
-		OPT_PASSTHRU(0, "ff", &opt_ff, NULL,
+		OPT_PASSTHRU(0, "ff", &opt_ff, ఖాళీ,
 			N_("allow fast-forward"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "ff-only", &opt_ff, NULL,
+		OPT_PASSTHRU(0, "ff-only", &opt_ff, ఖాళీ,
 			N_("abort if fast-forward is not possible"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG),
-		OPT_PASSTHRU(0, "verify", &opt_verify, NULL,
+		OPT_PASSTHRU(0, "verify", &opt_verify, ఖాళీ,
 			N_("control use of pre-merge-commit and commit-msg hooks"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "verify-signatures", &opt_verify_signatures, NULL,
+		OPT_PASSTHRU(0, "verify-signatures", &opt_verify_signatures, ఖాళీ,
 			N_("verify that the named commit has a valid GPG signature"),
 			PARSE_OPT_NOARG),
 		OPT_BOOL(0, "autostash", &opt_autostash,
@@ -943,37 +943,37 @@ int cmd_pull(int argc,
 		OPT_PASSTHRU('S', "gpg-sign", &opt_gpg_sign, N_("key-id"),
 			N_("GPG sign commit"),
 			PARSE_OPT_OPTARG),
-		OPT_SET_INT(0, "allow-unrelated-histories",
+		OPT_సమితి_INT(0, "allow-unrelated-histories",
 			    &opt_allow_unrelated_histories,
 			    N_("allow merging unrelated histories"), 1),
 
 		/* Options passed to git-fetch */
-		OPT_GROUP(N_("Options related to fetching")),
-		OPT_PASSTHRU(0, "all", &opt_all, NULL,
+		OPT_సమూహం(N_("Options related to fetching")),
+		OPT_PASSTHRU(0, "all", &opt_all, ఖాళీ,
 			N_("fetch from all remotes"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU('a', "append", &opt_append, NULL,
+		OPT_PASSTHRU('a', "append", &opt_append, ఖాళీ,
 			N_("append to .git/FETCH_HEAD instead of overwriting"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU(0, "upload-pack", &opt_upload_pack, N_("path"),
 			N_("path to upload pack on remote end"),
 			0),
 		OPT__FORCE(&opt_force, N_("force overwrite of local branch"), 0),
-		OPT_PASSTHRU('t', "tags", &opt_tags, NULL,
+		OPT_PASSTHRU('t', "tags", &opt_ట్యాగులు, ఖాళీ,
 			N_("fetch all tags and associated objects"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU('p', "prune", &opt_prune, NULL,
+		OPT_PASSTHRU('p', "prune", &opt_prune, ఖాళీ,
 			N_("prune remote-tracking branches no longer on remote"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU('j', "jobs", &max_children, N_("n"),
 			N_("number of submodules pulled in parallel"),
 			PARSE_OPT_OPTARG),
-		OPT_BOOL(0, "dry-run", &opt_dry_run,
+		OPT_BOOL(0, "dry-run", &opt_dry_నిరంతరం,
 			N_("dry run")),
-		OPT_PASSTHRU('k', "keep", &opt_keep, NULL,
+		OPT_PASSTHRU('k', "keep", &opt_keep, ఖాళీ,
 			N_("keep downloaded pack"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "depth", &opt_depth, N_("depth"),
+		OPT_PASSTHRU(0, "depth", &opt_లోతు, N_("depth"),
 			N_("deepen history of shallow clone"),
 			0),
 		OPT_PASSTHRU_ARGV(0, "shallow-since", &opt_fetch, N_("time"),
@@ -985,10 +985,10 @@ int cmd_pull(int argc,
 		OPT_PASSTHRU_ARGV(0, "deepen", &opt_fetch, N_("n"),
 			N_("deepen history of shallow clone"),
 			0),
-		OPT_PASSTHRU(0, "unshallow", &opt_unshallow, NULL,
+		OPT_PASSTHRU(0, "unshallow", &opt_unshallow, ఖాళీ,
 			N_("convert to a complete repository"),
 			PARSE_OPT_NONEG | PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "update-shallow", &opt_update_shallow, NULL,
+		OPT_PASSTHRU(0, "update-shallow", &opt_update_shallow, ఖాళీ,
 			N_("accept refs that update .git/shallow"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU(0, "refmap", &opt_refmap, N_("refmap"),
@@ -998,10 +998,10 @@ int cmd_pull(int argc,
 			N_("server-specific"),
 			N_("option to transmit"),
 			0),
-		OPT_PASSTHRU('4',  "ipv4", &opt_ipv4, NULL,
+		OPT_PASSTHRU('4',  "ipv4", &opt_ipv4, ఖాళీ,
 			N_("use IPv4 addresses only"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU('6',  "ipv6", &opt_ipv6, NULL,
+		OPT_PASSTHRU('6',  "ipv6", &opt_ipv6, ఖాళీ,
 			N_("use IPv6 addresses only"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU_ARGV(0, "negotiation-restrict", &opt_fetch, N_("revision"),
@@ -1013,39 +1013,39 @@ int cmd_pull(int argc,
 			0),
 		OPT_BOOL(0, "show-forced-updates", &opt_show_forced_updates,
 			 N_("check for forced-updates on all updated branches")),
-		OPT_PASSTHRU(0, "set-upstream", &set_upstream, NULL,
+		OPT_PASSTHRU(0, "set-upstream", &సమితి_upstream, ఖాళీ,
 			N_("set upstream for git pull/fetch"),
 			PARSE_OPT_NOARG),
 
-		OPT_END()
+		OPT_చివర()
 	};
 
-	if (!getenv("GIT_REFLOG_ACTION"))
-		set_reflog_message(argc, argv);
+	ఒకవేళ (!getenv("GIT_REFLOG_ACTION"))
+		సమితి_reflog_సందేశం(argc, argv);
 
-	repo_config(the_repository, git_pull_config, NULL);
-	if (the_repository->gitdir) {
+	repo_config(the_repository, git_pull_config, ఖాళీ);
+	ఒకవేళ (the_repository->gitdir) {
 		prepare_repo_settings(the_repository);
-		the_repository->settings.command_requires_full_index = 0;
+		the_repository->settings.command_requires_నిండిన_సూచీ = 0;
 	}
 
-	argc = parse_options(argc, argv, prefix, pull_options, pull_usage, 0);
-	if (opt_autostash == -1)
+	argc = parse_options(argc, argv, ఉపసర్గ, pull_options, pull_usage, 0);
+	ఒకవేళ (opt_autostash == -1)
 		opt_autostash = config_pull_autostash;
 
-	if (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
+	ఒకవేళ (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
 		recurse_submodules = recurse_submodules_cli;
 
-	if (cleanup_arg)
+	ఒకవేళ (cleanup_arg)
 		/*
 		 * this only checks the validity of cleanup_arg; we don't need
 		 * a valid value for use_editor
 		 */
-		get_cleanup_mode(cleanup_arg, 0);
+		get_cleanup_బహుళకం(cleanup_arg, 0);
 
 	parse_repo_refspecs(argc, argv, &repo, &refspecs);
 
-	if (!opt_ff) {
+	ఒకవేళ (!opt_ff) {
 		opt_ff = xstrdup_or_null(config_get_ff());
 		/*
 		 * A subtle point: opt_ff was set on the line above via
@@ -1058,51 +1058,51 @@ int cmd_pull(int argc,
 		 * "--rebase" can override a config setting of
 		 * pull.ff=only.
 		 */
-		if (opt_rebase >= 0 && opt_ff && !strcmp(opt_ff, "--ff-only")) {
-			free(opt_ff);
+		ఒకవేళ (opt_rebase >= 0 && opt_ff && !strcmp(opt_ff, "--ff-only")) {
+			విడుదల(opt_ff);
 			opt_ff = xstrdup("--ff");
 		}
 	}
 
-	if (opt_rebase < 0)
+	ఒకవేళ (opt_rebase < 0)
 		opt_rebase = config_get_rebase(&rebase_unspecified);
 
-	if (repo_read_index_unmerged(the_repository))
+	ఒకవేళ (repo_read_సూచీ_unmerged(the_repository))
 		die_resolve_conflict("pull");
 
-	if (file_exists(git_path_merge_head(the_repository)))
-		die_conclude_merge();
+	ఒకవేళ (file_exists(git_మార్గం_విలీనం_తల(the_repository)))
+		die_conclude_విలీనం();
 
-	if (repo_get_oid(the_repository, "HEAD", &orig_head))
-		oidclr(&orig_head, the_repository->hash_algo);
+	ఒకవేళ (repo_get_oid(the_repository, "HEAD", &orig_తల))
+		oidclr(&orig_తల, the_repository->hash_algo);
 
-	if (opt_rebase) {
-		if (opt_autostash == -1)
+	ఒకవేళ (opt_rebase) {
+		ఒకవేళ (opt_autostash == -1)
 			opt_autostash = config_rebase_autostash;
 
-		if (is_null_oid(&orig_head) && !is_index_unborn(the_repository->index))
+		ఒకవేళ (is_null_oid(&orig_తల) && !is_సూచీ_unborn(the_repository->సూచీ))
 			die(_("Updating an unborn branch with changes added to the index."));
 
-		if (!opt_autostash)
-			require_clean_work_tree(the_repository,
+		ఒకవేళ (!opt_autostash)
+			require_clean_work_వృక్షం(the_repository,
 				N_("pull with rebase"),
 				_("Please commit or stash them."), 1, 0);
 
-		if (get_rebase_fork_point(&rebase_fork_point, repo, *refspecs))
-			oidclr(&rebase_fork_point, the_repository->hash_algo);
+		ఒకవేళ (get_rebase_fork_బిందువు(&rebase_fork_బిందువు, repo, *refspecs))
+			oidclr(&rebase_fork_బిందువు, the_repository->hash_algo);
 	}
 
-	if (run_fetch(repo, refspecs))
-		return 1;
+	ఒకవేళ (నిరంతరం_fetch(repo, refspecs))
+		తిరిగి 1;
 
-	if (opt_dry_run)
-		return 0;
+	ఒకవేళ (opt_dry_నిరంతరం)
+		తిరిగి 0;
 
-	if (repo_get_oid(the_repository, "HEAD", &curr_head))
-		oidclr(&curr_head, the_repository->hash_algo);
+	ఒకవేళ (repo_get_oid(the_repository, "HEAD", &curr_తల))
+		oidclr(&curr_తల, the_repository->hash_algo);
 
-	if (!is_null_oid(&orig_head) && !is_null_oid(&curr_head) &&
-			!oideq(&orig_head, &curr_head)) {
+	ఒకవేళ (!is_null_oid(&orig_తల) && !is_null_oid(&curr_తల) &&
+			!oideq(&orig_తల, &curr_తల)) {
 		/*
 		 * The fetch involved updating the current branch.
 		 *
@@ -1113,85 +1113,85 @@ int cmd_pull(int argc,
 
 		warning(_("fetch updated the current branch head.\n"
 			"fast-forwarding your working tree from\n"
-			"commit %s."), oid_to_hex(&orig_head));
+			"commit %s."), oid_గమ్యం_hex(&orig_తల));
 
-		if (checkout_fast_forward(the_repository, &orig_head,
-					  &curr_head, 0))
+		ఒకవేళ (checkout_fast_forward(the_repository, &orig_తల,
+					  &curr_తల, 0))
 			die(_("Cannot fast-forward your working tree.\n"
 				"After making sure that you saved anything precious from\n"
 				"$ git diff %s\n"
 				"output, run\n"
 				"$ git reset --hard\n"
-				"to recover."), oid_to_hex(&orig_head));
+				"to recover."), oid_గమ్యం_hex(&orig_తల));
 	}
 
-	get_merge_heads(&merge_heads);
+	get_విలీనం_heads(&విలీనం_heads);
 
-	if (!merge_heads.nr)
-		die_no_merge_candidates(repo, refspecs);
+	ఒకవేళ (!విలీనం_heads.nr)
+		die_no_విలీనం_candidates(repo, refspecs);
 
-	if (is_null_oid(&orig_head)) {
-		if (merge_heads.nr > 1)
+	ఒకవేళ (is_null_oid(&orig_తల)) {
+		ఒకవేళ (విలీనం_heads.nr > 1)
 			die(_("Cannot merge multiple branches into empty head."));
-		ret = pull_into_void(merge_heads.oid, &curr_head);
-		goto cleanup;
+		ret = pull_into_void(విలీనం_heads.oid, &curr_తల);
+		వెళ్ళు cleanup;
 	}
-	if (merge_heads.nr > 1) {
-		if (opt_rebase)
+	ఒకవేళ (విలీనం_heads.nr > 1) {
+		ఒకవేళ (opt_rebase)
 			die(_("Cannot rebase onto multiple branches."));
-		if (opt_ff && !strcmp(opt_ff, "--ff-only"))
+		ఒకవేళ (opt_ff && !strcmp(opt_ff, "--ff-only"))
 			die(_("Cannot fast-forward to multiple branches."));
 	}
 
-	can_ff = get_can_ff(&orig_head, &merge_heads);
-	divergent = !can_ff && !already_up_to_date(&orig_head, &merge_heads);
+	can_ff = get_can_ff(&orig_తల, &విలీనం_heads);
+	divergent = !can_ff && !already_పైకి_గమ్యం_date(&orig_తల, &విలీనం_heads);
 
 	/* ff-only takes precedence over rebase */
-	if (opt_ff && !strcmp(opt_ff, "--ff-only")) {
-		if (divergent)
+	ఒకవేళ (opt_ff && !strcmp(opt_ff, "--ff-only")) {
+		ఒకవేళ (divergent)
 			die_ff_impossible();
 		opt_rebase = REBASE_FALSE;
 	}
 	/* If no action specified and we can't fast forward, then warn. */
-	if (!opt_ff && rebase_unspecified && divergent) {
+	ఒకవేళ (!opt_ff && rebase_unspecified && divergent) {
 		show_advice_pull_non_ff();
 		die(_("Need to specify how to reconcile divergent branches."));
 	}
 
-	if (opt_rebase) {
-		struct object_id newbase;
-		struct object_id upstream;
-		get_rebase_newbase_and_upstream(&newbase, &upstream, &curr_head,
-						merge_heads.oid, &rebase_fork_point);
+	ఒకవేళ (opt_rebase) {
+		నిర్మాణం object_id newbase;
+		నిర్మాణం object_id upstream;
+		get_rebase_newbase_and_upstream(&newbase, &upstream, &curr_తల,
+						విలీనం_heads.oid, &rebase_fork_బిందువు);
 
-		if ((recurse_submodules == RECURSE_SUBMODULES_ON ||
+		ఒకవేళ ((recurse_submodules == RECURSE_SUBMODULES_ON ||
 		     recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND) &&
-		    submodule_touches_in_range(the_repository, &upstream, &curr_head))
+		    submodule_touches_లోపల_range(the_repository, &upstream, &curr_తల))
 			die(_("cannot rebase with locally recorded submodule modifications"));
 
-		if (can_ff) {
+		ఒకవేళ (can_ff) {
 			/* we can fast-forward this without invoking rebase */
-			free(opt_ff);
+			విడుదల(opt_ff);
 			opt_ff = xstrdup("--ff-only");
-			ret = run_merge();
-		} else {
-			ret = run_rebase(&newbase, &upstream);
+			ret = నిరంతరం_విలీనం();
+		} లేకపోతే {
+			ret = నిరంతరం_rebase(&newbase, &upstream);
 		}
 
-		if (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
+		ఒకవేళ (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
 			     recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND))
 			ret = rebase_submodules();
 
-		goto cleanup;
-	} else {
-		ret = run_merge();
-		if (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
+		వెళ్ళు cleanup;
+	} లేకపోతే {
+		ret = నిరంతరం_విలీనం();
+		ఒకవేళ (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
 			     recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND))
 			ret = update_submodules();
-		goto cleanup;
+		వెళ్ళు cleanup;
 	}
 
 cleanup:
-	oid_array_clear(&merge_heads);
-	return ret;
+	oid_array_clear(&విలీనం_heads);
+	తిరిగి ret;
 }

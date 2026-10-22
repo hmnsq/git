@@ -2,93 +2,93 @@
  * "git replay" builtin command
  */
 
-#include "git-compat-util.h"
+#అన్తర్భావ "git-compat-util.h"
 
-#include "builtin.h"
-#include "config.h"
-#include "hex.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "refs.h"
-#include "replay.h"
-#include "revision.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "refs.h"
+#అన్తర్భావ "replay.h"
+#అన్తర్భావ "revision.h"
 
-enum ref_action_mode {
+గణన ref_action_బహుళకం {
 	REF_ACTION_UPDATE,
 	REF_ACTION_PRINT,
 };
 
-static enum ref_action_mode parse_ref_action_mode(const char *ref_action, const char *source)
+స్థిర గణన ref_action_బహుళకం parse_ref_action_బహుళకం(స్థిరరాశి అక్షరం *ref_action, స్థిరరాశి అక్షరం *ఆధారం)
 {
-	if (!ref_action || !strcmp(ref_action, "update"))
-		return REF_ACTION_UPDATE;
-	if (!strcmp(ref_action, "print"))
-		return REF_ACTION_PRINT;
-	die(_("invalid %s value: '%s'"), source, ref_action);
+	ఒకవేళ (!ref_action || !strcmp(ref_action, "update"))
+		తిరిగి REF_ACTION_UPDATE;
+	ఒకవేళ (!strcmp(ref_action, "print"))
+		తిరిగి REF_ACTION_PRINT;
+	die(_("invalid %s value: '%s'"), ఆధారం, ref_action);
 }
 
-static enum ref_action_mode get_ref_action_mode(struct repository *repo, const char *ref_action)
+స్థిర గణన ref_action_బహుళకం get_ref_action_బహుళకం(నిర్మాణం repository *repo, స్థిరరాశి అక్షరం *ref_action)
 {
-	const char *config_value = NULL;
+	స్థిరరాశి అక్షరం *config_విలువ = ఖాళీ;
 
 	/* Command line option takes precedence */
-	if (ref_action)
-		return parse_ref_action_mode(ref_action, "--ref-action");
+	ఒకవేళ (ref_action)
+		తిరిగి parse_ref_action_బహుళకం(ref_action, "--ref-action");
 
 	/* Check config value */
-	if (!repo_config_get_string_tmp(repo, "replay.refAction", &config_value))
-		return parse_ref_action_mode(config_value, "replay.refAction");
+	ఒకవేళ (!repo_config_get_string_tmp(repo, "replay.refAction", &config_విలువ))
+		తిరిగి parse_ref_action_బహుళకం(config_విలువ, "replay.refAction");
 
 	/* Default to update mode */
-	return REF_ACTION_UPDATE;
+	తిరిగి REF_ACTION_UPDATE;
 }
 
-static int handle_ref_update(enum ref_action_mode mode,
-			     struct ref_transaction *transaction,
-			     const char *refname,
-			     const struct object_id *new_oid,
-			     const struct object_id *old_oid,
-			     const char *reflog_msg,
-			     struct strbuf *err)
+స్థిర పూర్ణాంకం handle_ref_update(గణన ref_action_బహుళకం బహుళకం,
+			     నిర్మాణం ref_transaction *transaction,
+			     స్థిరరాశి అక్షరం *refname,
+			     స్థిరరాశి నిర్మాణం object_id *new_oid,
+			     స్థిరరాశి నిర్మాణం object_id *old_oid,
+			     స్థిరరాశి అక్షరం *reflog_సందేశం,
+			     నిర్మాణం strbuf *err)
 {
-	switch (mode) {
-	case REF_ACTION_PRINT:
-		printf("update %s %s %s\n",
+	ఎంపిక (బహుళకం) {
+	స్థితి REF_ACTION_PRINT:
+		రాయి("update %s %s %s\n",
 		       refname,
-		       oid_to_hex(new_oid),
-		       oid_to_hex(old_oid));
-		return 0;
-	case REF_ACTION_UPDATE:
-		return ref_transaction_update(transaction, refname, new_oid, old_oid,
-					      NULL, NULL, 0, reflog_msg, err);
-	default:
-		BUG("unknown ref_action_mode %d", mode);
+		       oid_గమ్యం_hex(new_oid),
+		       oid_గమ్యం_hex(old_oid));
+		తిరిగి 0;
+	స్థితి REF_ACTION_UPDATE:
+		తిరిగి ref_transaction_update(transaction, refname, new_oid, old_oid,
+					      ఖాళీ, ఖాళీ, 0, reflog_సందేశం, err);
+	అప్రమేయ:
+		BUG("unknown ref_action_mode %d", బహుళకం);
 	}
 }
 
-int cmd_replay(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+పూర్ణాంకం cmd_replay(పూర్ణాంకం argc,
+	       స్థిరరాశి అక్షరం **argv,
+	       స్థిరరాశి అక్షరం *ఉపసర్గ,
+	       నిర్మాణం repository *repo)
 {
-	struct replay_revisions_options opts = { 0 };
-	struct replay_result result = { 0 };
-	const char *ref_action = NULL;
-	enum ref_action_mode ref_mode;
-	struct rev_info revs;
-	struct ref_transaction *transaction = NULL;
-	struct strbuf transaction_err = STRBUF_INIT;
-	struct strbuf reflog_msg = STRBUF_INIT;
-	int desired_reverse;
-	int ret = 0;
+	నిర్మాణం replay_revisions_options opts = { 0 };
+	నిర్మాణం replay_ఫలితం ఫలితం = { 0 };
+	స్థిరరాశి అక్షరం *ref_action = ఖాళీ;
+	గణన ref_action_బహుళకం ref_బహుళకం;
+	నిర్మాణం rev_info revs;
+	నిర్మాణం ref_transaction *transaction = ఖాళీ;
+	నిర్మాణం strbuf transaction_err = STRBUF_INIT;
+	నిర్మాణం strbuf reflog_సందేశం = STRBUF_INIT;
+	పూర్ణాంకం desired_తిరగేయి;
+	పూర్ణాంకం ret = 0;
 
-	const char *const replay_usage[] = {
+	స్థిరరాశి అక్షరం *స్థిరరాశి replay_usage[] = {
 		N_("(EXPERIMENTAL!) git replay "
 		   "([--contained] --onto=<newbase> | --advance=<branch> | --revert=<branch>)\n"
 		   "[--ref=<ref>] [--ref-action=<mode>] [--linearize] <revision-range>"),
-		NULL
+		ఖాళీ
 	};
-	struct option replay_options[] = {
+	నిర్మాణం option replay_options[] = {
 		OPT_BOOL(0, "contained", &opts.contained,
 			 N_("update all branches that point at commits in <revision-range>")),
 		OPT_STRING_F(0, "onto", &opts.onto,
@@ -113,14 +113,14 @@ int cmd_replay(int argc,
 			     PARSE_OPT_NONEG),
 		OPT_BOOL(0, "linearize", &opts.linearize,
 			 N_("drop merge commits, replaying only non-merge commits")),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	argc = parse_options(argc, argv, prefix, replay_options, replay_usage,
+	argc = parse_options(argc, argv, ఉపసర్గ, replay_options, replay_usage,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT);
 
 	/* Exactly one mode must be specified */
-	if (!opts.onto && !opts.advance && !opts.revert) {
+	ఒకవేళ (!opts.onto && !opts.advance && !opts.revert) {
 		error(_("exactly one of --onto, --advance, or --revert is required"));
 		usage_with_options(replay_usage, replay_options);
 	}
@@ -138,7 +138,7 @@ int cmd_replay(int argc,
 				  !!opts.contained, "--contained");
 
 	/* Parse ref action mode from command line or config */
-	ref_mode = get_ref_action_mode(repo, ref_action);
+	ref_బహుళకం = get_ref_action_బహుళకం(repo, ref_action);
 
 	/*
 	 * Cherry-pick/rebase need oldest-first ordering so that each
@@ -146,9 +146,9 @@ int cmd_replay(int argc,
 	 * Revert needs newest-first ordering (like git revert) to
 	 * reduce conflicts by peeling off changes from the top.
 	 */
-	desired_reverse = !opts.revert;
+	desired_తిరగేయి = !opts.revert;
 
-	repo_init_revisions(repo, &revs, prefix);
+	repo_init_revisions(repo, &revs, ఉపసర్గ);
 
 	/*
 	 * Set desired values for rev walking options here. If they
@@ -159,105 +159,105 @@ int cmd_replay(int argc,
 	 * some options changing these values if we think they could
 	 * be useful.
 	 */
-	revs.reverse = desired_reverse;
-	revs.sort_order = REV_SORT_IN_GRAPH_ORDER;
-	revs.topo_order = 1;
+	revs.తిరగేయి = desired_తిరగేయి;
+	revs.క్రమీకరించు_క్రమం = REV_క్రమీకరించు_లోపల_లేఖాచిత్రం_క్రమం;
+	revs.topo_క్రమం = 1;
 	revs.simplify_history = 0;
 
-	argc = setup_revisions(argc, argv, &revs, NULL);
-	if (argc > 1) {
+	argc = అమరిక_revisions(argc, argv, &revs, ఖాళీ);
+	ఒకవేళ (argc > 1) {
 		ret = error(_("unrecognized argument: %s"), argv[1]);
-		goto cleanup;
+		వెళ్ళు cleanup;
 	}
 
 	/*
 	 * Detect and warn if we override some user specified rev
 	 * walking options.
 	 */
-	if (revs.reverse != desired_reverse) {
+	ఒకవేళ (revs.తిరగేయి != desired_తిరగేయి) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"reverse");
-		revs.reverse = desired_reverse;
+		revs.తిరగేయి = desired_తిరగేయి;
 	}
-	if (revs.sort_order != REV_SORT_IN_GRAPH_ORDER) {
+	ఒకవేళ (revs.క్రమీకరించు_క్రమం != REV_క్రమీకరించు_లోపల_లేఖాచిత్రం_క్రమం) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"sort_order");
-		revs.sort_order = REV_SORT_IN_GRAPH_ORDER;
+		revs.క్రమీకరించు_క్రమం = REV_క్రమీకరించు_లోపల_లేఖాచిత్రం_క్రమం;
 	}
-	if (revs.topo_order != 1) {
+	ఒకవేళ (revs.topo_క్రమం != 1) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"topo_order");
-		revs.topo_order = 1;
+		revs.topo_క్రమం = 1;
 	}
-	if (revs.simplify_history != 0) {
+	ఒకవేళ (revs.simplify_history != 0) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"simplify_history");
 		revs.simplify_history = 0;
 	}
 
-	ret = replay_revisions(&revs, &opts, &result);
-	if (ret)
-		goto cleanup;
+	ret = replay_revisions(&revs, &opts, &ఫలితం);
+	ఒకవేళ (ret)
+		వెళ్ళు cleanup;
 
 	/* Build reflog message */
-	if (opts.revert) {
-		strbuf_addf(&reflog_msg, "replay --revert %s", opts.revert);
-	} else if (opts.advance) {
-		strbuf_addf(&reflog_msg, "replay --advance %s", opts.advance);
-	} else {
-		struct object_id oid;
-		if (repo_get_oid_committish(repo, opts.onto, &oid))
+	ఒకవేళ (opts.revert) {
+		strbuf_addf(&reflog_సందేశం, "replay --revert %s", opts.revert);
+	} లేకపోతే ఒకవేళ (opts.advance) {
+		strbuf_addf(&reflog_సందేశం, "replay --advance %s", opts.advance);
+	} లేకపోతే {
+		నిర్మాణం object_id oid;
+		ఒకవేళ (repo_get_oid_committish(repo, opts.onto, &oid))
 			BUG("--onto commit should have been resolved beforehand already");
-		strbuf_addf(&reflog_msg, "replay --onto %s", oid_to_hex(&oid));
+		strbuf_addf(&reflog_సందేశం, "replay --onto %s", oid_గమ్యం_hex(&oid));
 	}
 
 	/* Initialize ref transaction if using update mode */
-	if (ref_mode == REF_ACTION_UPDATE) {
+	ఒకవేళ (ref_బహుళకం == REF_ACTION_UPDATE) {
 		transaction = ref_store_transaction_begin(get_main_ref_store(repo),
 							  0, &transaction_err);
-		if (!transaction) {
+		ఒకవేళ (!transaction) {
 			ret = error(_("failed to begin ref transaction: %s"),
 				    transaction_err.buf);
-			goto cleanup;
+			వెళ్ళు cleanup;
 		}
 	}
 
-	for (size_t i = 0; i < result.updates_nr; i++) {
-		ret = handle_ref_update(ref_mode, transaction, result.updates[i].refname,
-					&result.updates[i].new_oid, &result.updates[i].old_oid,
-					reflog_msg.buf, &transaction_err);
-		if (ret) {
+	కొరకు (కొలత_t i = 0; i < ఫలితం.updates_nr; i++) {
+		ret = handle_ref_update(ref_బహుళకం, transaction, ఫలితం.updates[i].refname,
+					&ఫలితం.updates[i].new_oid, &ఫలితం.updates[i].old_oid,
+					reflog_సందేశం.buf, &transaction_err);
+		ఒకవేళ (ret) {
 			ret = error(_("failed to update ref '%s': %s"),
-				    result.updates[i].refname, transaction_err.buf);
-			goto cleanup;
+				    ఫలితం.updates[i].refname, transaction_err.buf);
+			వెళ్ళు cleanup;
 		}
 	}
 
 	/* Commit the ref transaction if we have one */
-	if (transaction) {
-		if (ref_transaction_commit(transaction, &transaction_err)) {
+	ఒకవేళ (transaction) {
+		ఒకవేళ (ref_transaction_commit(transaction, &transaction_err)) {
 			ret = error(_("failed to commit ref transaction: %s"),
 				    transaction_err.buf);
-			goto cleanup;
+			వెళ్ళు cleanup;
 		}
 	}
 
 	ret = 0;
 
 cleanup:
-	if (transaction)
+	ఒకవేళ (transaction)
 		ref_transaction_free(transaction);
-	replay_result_release(&result);
+	replay_ఫలితం_release(&ఫలితం);
 	strbuf_release(&transaction_err);
-	strbuf_release(&reflog_msg);
+	strbuf_release(&reflog_సందేశం);
 	release_revisions(&revs);
 
 	/* Return */
-	if (ret < 0)
-		exit(128);
-	return ret;
+	ఒకవేళ (ret < 0)
+		నిష్క్రమించు(128);
+	తిరిగి ret;
 }

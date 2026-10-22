@@ -3,411 +3,411 @@
  *
  * Copyright (C) Linus Torvalds, 2005
  */
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#అన్తర్భావ "builtin.h"
 
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-name.h"
-#include "odb.h"
-#include "tree.h"
-#include "path.h"
-#include "quote.h"
-#include "parse-options.h"
-#include "pathspec.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "odb.h"
+#అన్తర్భావ "tree.h"
+#అన్తర్భావ "path.h"
+#అన్తర్భావ "quote.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "pathspec.h"
 
-static const char * const ls_tree_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి ls_వృక్షం_usage[] = {
 	N_("git ls-tree [<options>] <tree-ish> [<path>...]"),
-	NULL
+	ఖాళీ
 };
 
-static void expand_objectsize(struct strbuf *line, const struct object_id *oid,
-			      const enum object_type type, unsigned int padded)
+స్థిర శూన్య expand_objectsize(నిర్మాణం strbuf *పంక్తి, స్థిరరాశి నిర్మాణం object_id *oid,
+			      స్థిరరాశి గణన object_type type, గుర్తులేని పూర్ణాంకం padded)
 {
-	static const char padding[] = "       ";
-	size_t min_len = padded ? strlen(padding) : 0;
-	size_t orig_len = line->len;
-	size_t len;
+	స్థిర స్థిరరాశి అక్షరం padding[] = "       ";
+	కొలత_t min_len = padded ? అక్షరశ్రేణి_పొడవు(padding) : 0;
+	కొలత_t orig_len = పంక్తి->len;
+	కొలత_t len;
 
-	if (type == OBJ_BLOB) {
-		size_t size;
-		if (odb_read_object_info(the_repository->objects, oid, &size) < 0)
+	ఒకవేళ (type == OBJ_BLOB) {
+		కొలత_t కొలత;
+		ఒకవేళ (odb_read_object_info(the_repository->objects, oid, &కొలత) < 0)
 			die(_("could not get object info about '%s'"),
-			    oid_to_hex(oid));
-		strbuf_add_uint(line, size);
-	} else {
-		strbuf_addstr(line, "-");
+			    oid_గమ్యం_hex(oid));
+		strbuf_కూడు_uint(పంక్తి, కొలత);
+	} లేకపోతే {
+		strbuf_addstr(పంక్తి, "-");
 	}
-	len = line->len - orig_len;
-	if (len < min_len)
-		strbuf_insert(line, orig_len, padding, min_len - len);
+	len = పంక్తి->len - orig_len;
+	ఒకవేళ (len < min_len)
+		strbuf_చొప్పించు(పంక్తి, orig_len, padding, min_len - len);
 }
 
-struct ls_tree_options {
-	unsigned null_termination:1;
-	int abbrev;
-	enum ls_tree_path_options {
+నిర్మాణం ls_వృక్షం_options {
+	గుర్తులేని null_termination:1;
+	పూర్ణాంకం abbrev;
+	గణన ls_వృక్షం_మార్గం_options {
 		LS_RECURSIVE = 1 << 0,
-		LS_TREE_ONLY = 1 << 1,
+		LS_వృక్షం_ONLY = 1 << 1,
 		LS_SHOW_TREES = 1 << 2,
 	} ls_options;
-	struct pathspec pathspec;
-	const char *prefix;
-	const char *format;
+	నిర్మాణం pathspec pathspec;
+	స్థిరరాశి అక్షరం *ఉపసర్గ;
+	స్థిరరాశి అక్షరం *format;
 };
 
-static int show_recursive(struct ls_tree_options *options, const char *base,
-			  size_t baselen, const char *pathname)
+స్థిర పూర్ణాంకం show_recursive(నిర్మాణం ls_వృక్షం_options *options, స్థిరరాశి అక్షరం *పునాది,
+			  కొలత_t baselen, స్థిరరాశి అక్షరం *pathname)
 {
-	int i;
+	పూర్ణాంకం i;
 
-	if (options->ls_options & LS_RECURSIVE)
-		return 1;
+	ఒకవేళ (options->ls_options & LS_RECURSIVE)
+		తిరిగి 1;
 
-	if (!options->pathspec.nr)
-		return 0;
+	ఒకవేళ (!options->pathspec.nr)
+		తిరిగి 0;
 
-	for (i = 0; i < options->pathspec.nr; i++) {
-		const char *spec = options->pathspec.items[i].match;
-		size_t len, speclen;
+	కొరకు (i = 0; i < options->pathspec.nr; i++) {
+		స్థిరరాశి అక్షరం *spec = options->pathspec.వస్తువులు[i].సరిపోలిక;
+		కొలత_t len, speclen;
 
-		if (strncmp(base, spec, baselen))
-			continue;
-		len = strlen(pathname);
+		ఒకవేళ (అక్షరశ్రేణి_పోలిక(పునాది, spec, baselen))
+			కొనసాగు;
+		len = అక్షరశ్రేణి_పొడవు(pathname);
 		spec += baselen;
-		speclen = strlen(spec);
-		if (speclen <= len)
-			continue;
-		if (spec[len] && spec[len] != '/')
-			continue;
-		if (memcmp(pathname, spec, len))
-			continue;
-		return 1;
+		speclen = అక్షరశ్రేణి_పొడవు(spec);
+		ఒకవేళ (speclen <= len)
+			కొనసాగు;
+		ఒకవేళ (spec[len] && spec[len] != '/')
+			కొనసాగు;
+		ఒకవేళ (memcmp(pathname, spec, len))
+			కొనసాగు;
+		తిరిగి 1;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static int show_tree_fmt(const struct object_id *oid, struct strbuf *base,
-			 const char *pathname, unsigned mode, void *context)
+స్థిర పూర్ణాంకం show_వృక్షం_fmt(స్థిరరాశి నిర్మాణం object_id *oid, నిర్మాణం strbuf *పునాది,
+			 స్థిరరాశి అక్షరం *pathname, గుర్తులేని బహుళకం, శూన్య *context)
 {
-	struct ls_tree_options *options = context;
-	int recurse = 0;
-	struct strbuf sb = STRBUF_INIT;
-	enum object_type type = object_type(mode);
-	const char *format = options->format;
+	నిర్మాణం ls_వృక్షం_options *options = context;
+	పూర్ణాంకం recurse = 0;
+	నిర్మాణం strbuf sb = STRBUF_INIT;
+	గణన object_type type = object_type(బహుళకం);
+	స్థిరరాశి అక్షరం *format = options->format;
 
-	if (type == OBJ_TREE && show_recursive(options, base->buf, base->len, pathname))
-		recurse = READ_TREE_RECURSIVE;
-	if (type == OBJ_TREE && recurse && !(options->ls_options & LS_SHOW_TREES))
-		return recurse;
-	if (type == OBJ_BLOB && (options->ls_options & LS_TREE_ONLY))
-		return 0;
+	ఒకవేళ (type == OBJ_వృక్షం && show_recursive(options, పునాది->buf, పునాది->len, pathname))
+		recurse = READ_వృక్షం_RECURSIVE;
+	ఒకవేళ (type == OBJ_వృక్షం && recurse && !(options->ls_options & LS_SHOW_TREES))
+		తిరిగి recurse;
+	ఒకవేళ (type == OBJ_BLOB && (options->ls_options & LS_వృక్షం_ONLY))
+		తిరిగి 0;
 
-	while (strbuf_expand_step(&sb, &format)) {
-		size_t len;
+	అయితే (strbuf_expand_అడుగు(&sb, &format)) {
+		కొలత_t len;
 
-		if (skip_prefix(format, "%", &format))
+		ఒకవేళ (skip_ఉపసర్గ(format, "%", &format))
 			strbuf_addch(&sb, '%');
-		else if ((len = strbuf_expand_literal(&sb, format)))
+		లేకపోతే ఒకవేళ ((len = strbuf_expand_literal(&sb, format)))
 			format += len;
-		else if (skip_prefix(format, "(objectmode)", &format))
-			strbuf_addf(&sb, "%06o", mode);
-		else if (skip_prefix(format, "(objecttype)", &format))
+		లేకపోతే ఒకవేళ (skip_ఉపసర్గ(format, "(objectmode)", &format))
+			strbuf_addf(&sb, "%06o", బహుళకం);
+		లేకపోతే ఒకవేళ (skip_ఉపసర్గ(format, "(objecttype)", &format))
 			strbuf_addstr(&sb, type_name(type));
-		else if (skip_prefix(format, "(objectsize:padded)", &format))
+		లేకపోతే ఒకవేళ (skip_ఉపసర్గ(format, "(objectsize:padded)", &format))
 			expand_objectsize(&sb, oid, type, 1);
-		else if (skip_prefix(format, "(objectsize)", &format))
+		లేకపోతే ఒకవేళ (skip_ఉపసర్గ(format, "(objectsize)", &format))
 			expand_objectsize(&sb, oid, type, 0);
-		else if (skip_prefix(format, "(objectname)", &format))
-			strbuf_add_unique_abbrev(&sb, oid, options->abbrev);
-		else if (skip_prefix(format, "(path)", &format)) {
-			const char *name;
-			const char *prefix = options->prefix;
-			struct strbuf sbuf = STRBUF_INIT;
-			size_t baselen = base->len;
+		లేకపోతే ఒకవేళ (skip_ఉపసర్గ(format, "(objectname)", &format))
+			strbuf_కూడు_unique_abbrev(&sb, oid, options->abbrev);
+		లేకపోతే ఒకవేళ (skip_ఉపసర్గ(format, "(path)", &format)) {
+			స్థిరరాశి అక్షరం *name;
+			స్థిరరాశి అక్షరం *ఉపసర్గ = options->ఉపసర్గ;
+			నిర్మాణం strbuf sbuf = STRBUF_INIT;
+			కొలత_t baselen = పునాది->len;
 
-			strbuf_addstr(base, pathname);
-			name = relative_path(base->buf, prefix, &sbuf);
-			quote_c_style(name, &sb, NULL, 0);
-			strbuf_setlen(base, baselen);
+			strbuf_addstr(పునాది, pathname);
+			name = relative_మార్గం(పునాది->buf, ఉపసర్గ, &sbuf);
+			quote_c_style(name, &sb, ఖాళీ, 0);
+			strbuf_setlen(పునాది, baselen);
 			strbuf_release(&sbuf);
-		} else
+		} లేకపోతే
 			strbuf_expand_bad_format(format, "ls-tree");
 	}
 	strbuf_addch(&sb, options->null_termination ? '\0' : '\n');
 	fwrite(sb.buf, sb.len, 1, stdout);
 	strbuf_release(&sb);
-	return recurse;
+	తిరిగి recurse;
 }
 
-static int show_tree_common(struct ls_tree_options *options, int *recurse,
-			    struct strbuf *base, const char *pathname,
-			    enum object_type type)
+స్థిర పూర్ణాంకం show_వృక్షం_common(నిర్మాణం ls_వృక్షం_options *options, పూర్ణాంకం *recurse,
+			    నిర్మాణం strbuf *పునాది, స్థిరరాశి అక్షరం *pathname,
+			    గణన object_type type)
 {
-	int ret = -1;
+	పూర్ణాంకం ret = -1;
 	*recurse = 0;
 
-	if (type == OBJ_BLOB) {
-		if (options->ls_options & LS_TREE_ONLY)
+	ఒకవేళ (type == OBJ_BLOB) {
+		ఒకవేళ (options->ls_options & LS_వృక్షం_ONLY)
 			ret = 0;
-	} else if (type == OBJ_TREE &&
-		   show_recursive(options, base->buf, base->len, pathname)) {
-		*recurse = READ_TREE_RECURSIVE;
-		if (!(options->ls_options & LS_SHOW_TREES))
+	} లేకపోతే ఒకవేళ (type == OBJ_వృక్షం &&
+		   show_recursive(options, పునాది->buf, పునాది->len, pathname)) {
+		*recurse = READ_వృక్షం_RECURSIVE;
+		ఒకవేళ (!(options->ls_options & LS_SHOW_TREES))
 			ret = *recurse;
 	}
 
-	return ret;
+	తిరిగి ret;
 }
 
-static void show_tree_common_default_long(struct ls_tree_options *options,
-					  struct strbuf *base,
-					  const char *pathname,
-					  const size_t baselen)
+స్థిర శూన్య show_వృక్షం_common_default_long(నిర్మాణం ls_వృక్షం_options *options,
+					  నిర్మాణం strbuf *పునాది,
+					  స్థిరరాశి అక్షరం *pathname,
+					  స్థిరరాశి కొలత_t baselen)
 {
-	const char *prefix = options->prefix;
+	స్థిరరాశి అక్షరం *ఉపసర్గ = options->ఉపసర్గ;
 
-	strbuf_addstr(base, pathname);
+	strbuf_addstr(పునాది, pathname);
 
-	if (options->null_termination) {
-		struct strbuf sb = STRBUF_INIT;
-		const char *name = relative_path(base->buf, prefix, &sb);
+	ఒకవేళ (options->null_termination) {
+		నిర్మాణం strbuf sb = STRBUF_INIT;
+		స్థిరరాశి అక్షరం *name = relative_మార్గం(పునాది->buf, ఉపసర్గ, &sb);
 
 		fputs(name, stdout);
 		fputc('\0', stdout);
 
 		strbuf_release(&sb);
-	} else {
-		write_name_quoted_relative(base->buf, prefix, stdout, '\n');
+	} లేకపోతే {
+		write_name_quoted_relative(పునాది->buf, ఉపసర్గ, stdout, '\n');
 	}
 
-	strbuf_setlen(base, baselen);
+	strbuf_setlen(పునాది, baselen);
 }
 
-static int show_tree_default(const struct object_id *oid, struct strbuf *base,
-			     const char *pathname, unsigned mode,
-			     void *context)
+స్థిర పూర్ణాంకం show_వృక్షం_default(స్థిరరాశి నిర్మాణం object_id *oid, నిర్మాణం strbuf *పునాది,
+			     స్థిరరాశి అక్షరం *pathname, గుర్తులేని బహుళకం,
+			     శూన్య *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	enum object_type type = object_type(mode);
+	నిర్మాణం ls_వృక్షం_options *options = context;
+	పూర్ణాంకం early;
+	పూర్ణాంకం recurse;
+	గణన object_type type = object_type(బహుళకం);
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_వృక్షం_common(options, &recurse, పునాది, pathname, type);
+	ఒకవేళ (early >= 0)
+		తిరిగి early;
 
-	printf("%06o %s %s\t", mode, type_name(object_type(mode)),
-	       repo_find_unique_abbrev(the_repository, oid, options->abbrev));
-	show_tree_common_default_long(options, base, pathname, base->len);
-	return recurse;
+	రాయి("%06o %s %s\t", బహుళకం, type_name(object_type(బహుళకం)),
+	       repo_కనుగొను_unique_abbrev(the_repository, oid, options->abbrev));
+	show_వృక్షం_common_default_long(options, పునాది, pathname, పునాది->len);
+	తిరిగి recurse;
 }
 
-static int show_tree_long(const struct object_id *oid, struct strbuf *base,
-			  const char *pathname, unsigned mode,
-			  void *context)
+స్థిర పూర్ణాంకం show_వృక్షం_long(స్థిరరాశి నిర్మాణం object_id *oid, నిర్మాణం strbuf *పునాది,
+			  స్థిరరాశి అక్షరం *pathname, గుర్తులేని బహుళకం,
+			  శూన్య *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	char size_text[24];
-	enum object_type type = object_type(mode);
+	నిర్మాణం ls_వృక్షం_options *options = context;
+	పూర్ణాంకం early;
+	పూర్ణాంకం recurse;
+	అక్షరం కొలత_పాఠ్యం[24];
+	గణన object_type type = object_type(బహుళకం);
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_వృక్షం_common(options, &recurse, పునాది, pathname, type);
+	ఒకవేళ (early >= 0)
+		తిరిగి early;
 
-	if (type == OBJ_BLOB) {
-		size_t size;
-		if (odb_read_object_info(the_repository->objects, oid, &size) == OBJ_BAD)
-			xsnprintf(size_text, sizeof(size_text), "BAD");
-		else
-			xsnprintf(size_text, sizeof(size_text),
-				  "%" PRIuMAX, (uintmax_t)size);
-	} else {
-		xsnprintf(size_text, sizeof(size_text), "-");
+	ఒకవేళ (type == OBJ_BLOB) {
+		కొలత_t కొలత;
+		ఒకవేళ (odb_read_object_info(the_repository->objects, oid, &కొలత) == OBJ_BAD)
+			xsnprintf(కొలత_పాఠ్యం, పరిమాణం(కొలత_పాఠ్యం), "BAD");
+		లేకపోతే
+			xsnprintf(కొలత_పాఠ్యం, పరిమాణం(కొలత_పాఠ్యం),
+				  "%" PRIuMAX, (uintmax_t)కొలత);
+	} లేకపోతే {
+		xsnprintf(కొలత_పాఠ్యం, పరిమాణం(కొలత_పాఠ్యం), "-");
 	}
 
-	printf("%06o %s %s %7s\t", mode, type_name(type),
-	       repo_find_unique_abbrev(the_repository, oid, options->abbrev),
-	       size_text);
-	show_tree_common_default_long(options, base, pathname, base->len);
-	return recurse;
+	రాయి("%06o %s %s %7s\t", బహుళకం, type_name(type),
+	       repo_కనుగొను_unique_abbrev(the_repository, oid, options->abbrev),
+	       కొలత_పాఠ్యం);
+	show_వృక్షం_common_default_long(options, పునాది, pathname, పునాది->len);
+	తిరిగి recurse;
 }
 
-static int show_tree_name_only(const struct object_id *oid UNUSED,
-			       struct strbuf *base,
-			       const char *pathname, unsigned mode,
-			       void *context)
+స్థిర పూర్ణాంకం show_వృక్షం_name_only(స్థిరరాశి నిర్మాణం object_id *oid వాడని,
+			       నిర్మాణం strbuf *పునాది,
+			       స్థిరరాశి అక్షరం *pathname, గుర్తులేని బహుళకం,
+			       శూన్య *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	const size_t baselen = base->len;
-	enum object_type type = object_type(mode);
-	const char *prefix;
+	నిర్మాణం ls_వృక్షం_options *options = context;
+	పూర్ణాంకం early;
+	పూర్ణాంకం recurse;
+	స్థిరరాశి కొలత_t baselen = పునాది->len;
+	గణన object_type type = object_type(బహుళకం);
+	స్థిరరాశి అక్షరం *ఉపసర్గ;
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_వృక్షం_common(options, &recurse, పునాది, pathname, type);
+	ఒకవేళ (early >= 0)
+		తిరిగి early;
 
-	prefix = options->prefix;
-	strbuf_addstr(base, pathname);
-	if (options->null_termination) {
-		struct strbuf sb = STRBUF_INIT;
-		const char *name = relative_path(base->buf, prefix, &sb);
+	ఉపసర్గ = options->ఉపసర్గ;
+	strbuf_addstr(పునాది, pathname);
+	ఒకవేళ (options->null_termination) {
+		నిర్మాణం strbuf sb = STRBUF_INIT;
+		స్థిరరాశి అక్షరం *name = relative_మార్గం(పునాది->buf, ఉపసర్గ, &sb);
 
 		fputs(name, stdout);
 		fputc('\0', stdout);
 
 		strbuf_release(&sb);
-	} else {
-		write_name_quoted_relative(base->buf, prefix, stdout, '\n');
+	} లేకపోతే {
+		write_name_quoted_relative(పునాది->buf, ఉపసర్గ, stdout, '\n');
 	}
-	strbuf_setlen(base, baselen);
-	return recurse;
+	strbuf_setlen(పునాది, baselen);
+	తిరిగి recurse;
 }
 
-static int show_tree_object(const struct object_id *oid, struct strbuf *base,
-			    const char *pathname, unsigned mode,
-			    void *context)
+స్థిర పూర్ణాంకం show_వృక్షం_object(స్థిరరాశి నిర్మాణం object_id *oid, నిర్మాణం strbuf *పునాది,
+			    స్థిరరాశి అక్షరం *pathname, గుర్తులేని బహుళకం,
+			    శూన్య *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	enum object_type type = object_type(mode);
-	const char *str;
+	నిర్మాణం ls_వృక్షం_options *options = context;
+	పూర్ణాంకం early;
+	పూర్ణాంకం recurse;
+	గణన object_type type = object_type(బహుళకం);
+	స్థిరరాశి అక్షరం *str;
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_వృక్షం_common(options, &recurse, పునాది, pathname, type);
+	ఒకవేళ (early >= 0)
+		తిరిగి early;
 
-	str = repo_find_unique_abbrev(the_repository, oid, options->abbrev);
-	if (options->null_termination) {
+	str = repo_కనుగొను_unique_abbrev(the_repository, oid, options->abbrev);
+	ఒకవేళ (options->null_termination) {
 		fputs(str, stdout);
 		fputc('\0', stdout);
-	} else  {
+	} లేకపోతే  {
 		puts(str);
 	}
-	return recurse;
+	తిరిగి recurse;
 }
 
-enum ls_tree_cmdmode {
-	MODE_DEFAULT = 0,
-	MODE_LONG,
-	MODE_NAME_ONLY,
-	MODE_NAME_STATUS,
-	MODE_OBJECT_ONLY,
+గణన ls_వృక్షం_cmdmode {
+	బహుళకం_DEFAULT = 0,
+	బహుళకం_LONG,
+	బహుళకం_NAME_ONLY,
+	బహుళకం_NAME_స్థితి,
+	బహుళకం_OBJECT_ONLY,
 };
 
-struct ls_tree_cmdmode_to_fmt {
-	enum ls_tree_cmdmode mode;
-	const char *const fmt;
-	read_tree_fn_t fn;
+నిర్మాణం ls_వృక్షం_cmdmode_గమ్యం_fmt {
+	గణన ls_వృక్షం_cmdmode బహుళకం;
+	స్థిరరాశి అక్షరం *స్థిరరాశి fmt;
+	read_వృక్షం_fn_t fn;
 };
 
-static struct ls_tree_cmdmode_to_fmt ls_tree_cmdmode_format[] = {
+స్థిర నిర్మాణం ls_వృక్షం_cmdmode_గమ్యం_fmt ls_వృక్షం_cmdmode_format[] = {
 	{
-		.mode = MODE_DEFAULT,
+		.బహుళకం = బహుళకం_DEFAULT,
 		.fmt = "%(objectmode) %(objecttype) %(objectname)%x09%(path)",
-		.fn = show_tree_default,
+		.fn = show_వృక్షం_default,
 	},
 	{
-		.mode = MODE_LONG,
+		.బహుళకం = బహుళకం_LONG,
 		.fmt = "%(objectmode) %(objecttype) %(objectname) %(objectsize:padded)%x09%(path)",
-		.fn = show_tree_long,
+		.fn = show_వృక్షం_long,
 	},
 	{
-		.mode = MODE_NAME_ONLY, /* And MODE_NAME_STATUS */
+		.బహుళకం = బహుళకం_NAME_ONLY, /* And MODE_NAME_STATUS */
 		.fmt = "%(path)",
-		.fn = show_tree_name_only,
+		.fn = show_వృక్షం_name_only,
 	},
 	{
-		.mode = MODE_OBJECT_ONLY,
+		.బహుళకం = బహుళకం_OBJECT_ONLY,
 		.fmt = "%(objectname)",
-		.fn = show_tree_object
+		.fn = show_వృక్షం_object
 	},
 	{
 		/* fallback */
-		.fn = show_tree_default,
+		.fn = show_వృక్షం_default,
 	},
 };
 
-int cmd_ls_tree(int argc,
-		const char **argv,
-		const char *prefix,
-		struct repository *repo UNUSED)
+పూర్ణాంకం cmd_ls_వృక్షం(పూర్ణాంకం argc,
+		స్థిరరాశి అక్షరం **argv,
+		స్థిరరాశి అక్షరం *ఉపసర్గ,
+		నిర్మాణం repository *repo వాడని)
 {
-	struct object_id oid;
-	struct tree *tree;
-	int i, full_tree = 0;
-	int full_name = !prefix || !*prefix;
-	read_tree_fn_t fn = NULL;
-	enum ls_tree_cmdmode cmdmode = MODE_DEFAULT;
-	int null_termination = 0;
-	struct ls_tree_options options = { 0 };
-	const struct option ls_tree_options[] = {
-		OPT_BIT('d', NULL, &options.ls_options, N_("only show trees"),
-			LS_TREE_ONLY),
-		OPT_BIT('r', NULL, &options.ls_options, N_("recurse into subtrees"),
+	నిర్మాణం object_id oid;
+	నిర్మాణం వృక్షం *వృక్షం;
+	పూర్ణాంకం i, నిండిన_వృక్షం = 0;
+	పూర్ణాంకం నిండిన_name = !ఉపసర్గ || !*ఉపసర్గ;
+	read_వృక్షం_fn_t fn = ఖాళీ;
+	గణన ls_వృక్షం_cmdmode cmdmode = బహుళకం_DEFAULT;
+	పూర్ణాంకం null_termination = 0;
+	నిర్మాణం ls_వృక్షం_options options = { 0 };
+	స్థిరరాశి నిర్మాణం option ls_వృక్షం_options[] = {
+		OPT_బిట్టు('d', ఖాళీ, &options.ls_options, N_("only show trees"),
+			LS_వృక్షం_ONLY),
+		OPT_బిట్టు('r', ఖాళీ, &options.ls_options, N_("recurse into subtrees"),
 			LS_RECURSIVE),
-		OPT_BIT('t', NULL, &options.ls_options, N_("show trees when recursing"),
+		OPT_బిట్టు('t', ఖాళీ, &options.ls_options, N_("show trees when recursing"),
 			LS_SHOW_TREES),
-		OPT_BOOL('z', NULL, &null_termination,
+		OPT_BOOL('z', ఖాళీ, &null_termination,
 			 N_("terminate entries with NUL byte")),
 		OPT_CMDMODE('l', "long", &cmdmode, N_("include object size"),
-			    MODE_LONG),
+			    బహుళకం_LONG),
 		OPT_CMDMODE(0, "name-only", &cmdmode, N_("list only filenames"),
-			    MODE_NAME_ONLY),
+			    బహుళకం_NAME_ONLY),
 		OPT_CMDMODE(0, "name-status", &cmdmode, N_("list only filenames"),
-			    MODE_NAME_STATUS),
+			    బహుళకం_NAME_స్థితి),
 		OPT_CMDMODE(0, "object-only", &cmdmode, N_("list only objects"),
-			    MODE_OBJECT_ONLY),
-		OPT_BOOL(0, "full-name", &full_name, N_("use full path names")),
-		OPT_BOOL(0, "full-tree", &full_tree,
+			    బహుళకం_OBJECT_ONLY),
+		OPT_BOOL(0, "full-name", &నిండిన_name, N_("use full path names")),
+		OPT_BOOL(0, "full-tree", &నిండిన_వృక్షం,
 			 N_("list entire tree; not just current directory "
 			    "(implies --full-name)")),
 		OPT_STRING_F(0, "format", &options.format, N_("format"),
 					 N_("format to use for the output"),
 					 PARSE_OPT_NONEG),
 		OPT__ABBREV(&options.abbrev),
-		OPT_END()
+		OPT_చివర()
 	};
-	struct ls_tree_cmdmode_to_fmt *m2f = ls_tree_cmdmode_format;
-	int ret;
+	నిర్మాణం ls_వృక్షం_cmdmode_గమ్యం_fmt *m2f = ls_వృక్షం_cmdmode_format;
+	పూర్ణాంకం ret;
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ఖాళీ);
 
-	argc = parse_options(argc, argv, prefix, ls_tree_options,
-			     ls_tree_usage, 0);
+	argc = parse_options(argc, argv, ఉపసర్గ, ls_వృక్షం_options,
+			     ls_వృక్షం_usage, 0);
 	options.null_termination = null_termination;
 
-	if (full_tree)
-		prefix = NULL;
-	options.prefix = full_name ? NULL : prefix;
+	ఒకవేళ (నిండిన_వృక్షం)
+		ఉపసర్గ = ఖాళీ;
+	options.ఉపసర్గ = నిండిన_name ? ఖాళీ : ఉపసర్గ;
 
 	/*
 	 * We wanted to detect conflicts between --name-only and
 	 * --name-status, but once we're done with that subsequent
 	 * code should only need to check the primary name.
 	 */
-	if (cmdmode == MODE_NAME_STATUS)
-		cmdmode = MODE_NAME_ONLY;
+	ఒకవేళ (cmdmode == బహుళకం_NAME_స్థితి)
+		cmdmode = బహుళకం_NAME_ONLY;
 
 	/* -d -r should imply -t, but -d by itself should not have to. */
-	if ( (LS_TREE_ONLY|LS_RECURSIVE) ==
-	    ((LS_TREE_ONLY|LS_RECURSIVE) & options.ls_options))
+	ఒకవేళ ( (LS_వృక్షం_ONLY|LS_RECURSIVE) ==
+	    ((LS_వృక్షం_ONLY|LS_RECURSIVE) & options.ls_options))
 		options.ls_options |= LS_SHOW_TREES;
 
-	if (options.format && cmdmode)
-		usage_msg_opt(
+	ఒకవేళ (options.format && cmdmode)
+		usage_సందేశం_opt(
 			_("--format can't be combined with other format-altering options"),
-			ls_tree_usage, ls_tree_options);
-	if (argc < 1)
-		usage_with_options(ls_tree_usage, ls_tree_options);
-	if (repo_get_oid_with_flags(the_repository, argv[0], &oid,
+			ls_వృక్షం_usage, ls_వృక్షం_options);
+	ఒకవేళ (argc < 1)
+		usage_with_options(ls_వృక్షం_usage, ls_వృక్షం_options);
+	ఒకవేళ (repo_get_oid_with_flags(the_repository, argv[0], &oid,
 				    GET_OID_HASH_ANY))
 		die("Not a valid object name %s", argv[0]);
 
@@ -420,33 +420,33 @@ int cmd_ls_tree(int argc,
 	parse_pathspec(&options.pathspec, PATHSPEC_ALL_MAGIC &
 		       ~(PATHSPEC_FROMTOP | PATHSPEC_LITERAL),
 		       PATHSPEC_PREFER_CWD,
-		       prefix, argv + 1);
-	for (i = 0; i < options.pathspec.nr; i++)
-		options.pathspec.items[i].nowildcard_len = options.pathspec.items[i].len;
+		       ఉపసర్గ, argv + 1);
+	కొరకు (i = 0; i < options.pathspec.nr; i++)
+		options.pathspec.వస్తువులు[i].nowildcard_len = options.pathspec.వస్తువులు[i].len;
 	options.pathspec.has_wildcard = 0;
-	tree = repo_parse_tree_indirect(the_repository, &oid);
-	if (!tree)
+	వృక్షం = repo_parse_వృక్షం_పరోక్ష(the_repository, &oid);
+	ఒకవేళ (!వృక్షం)
 		die("not a tree object");
 	/*
 	 * The generic show_tree_fmt() is slower than show_tree(), so
 	 * take the fast path if possible.
 	 */
-	while (m2f) {
-		if (!m2f->fmt) {
-			fn = options.format ? show_tree_fmt : show_tree_default;
-		} else if (options.format && !strcmp(options.format, m2f->fmt)) {
-			cmdmode = m2f->mode;
+	అయితే (m2f) {
+		ఒకవేళ (!m2f->fmt) {
+			fn = options.format ? show_వృక్షం_fmt : show_వృక్షం_default;
+		} లేకపోతే ఒకవేళ (options.format && !strcmp(options.format, m2f->fmt)) {
+			cmdmode = m2f->బహుళకం;
 			fn = m2f->fn;
-		} else if (!options.format && cmdmode == m2f->mode) {
+		} లేకపోతే ఒకవేళ (!options.format && cmdmode == m2f->బహుళకం) {
 			fn = m2f->fn;
-		} else {
+		} లేకపోతే {
 			m2f++;
-			continue;
+			కొనసాగు;
 		}
-		break;
+		ఆపు;
 	}
 
-	ret = !!read_tree(the_repository, tree, &options.pathspec, fn, &options);
+	ret = !!read_వృక్షం(the_repository, వృక్షం, &options.pathspec, fn, &options);
 	clear_pathspec(&options.pathspec);
-	return ret;
+	తిరిగి ret;
 }

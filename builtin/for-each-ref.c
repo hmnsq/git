@@ -1,124 +1,124 @@
-#include "builtin.h"
-#include "commit.h"
-#include "config.h"
-#include "environment.h"
-#include "for-each-ref.h"
-#include "gettext.h"
-#include "object.h"
-#include "parse-options.h"
-#include "ref-filter.h"
-#include "strbuf.h"
-#include "strvec.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "commit.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "for-each-ref.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "object.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "ref-filter.h"
+#అన్తర్భావ "strbuf.h"
+#అన్తర్భావ "strvec.h"
 
-int for_each_ref_core(int argc, const char **argv, const char *prefix, struct repository *repo, const char *const *usage)
+పూర్ణాంకం for_each_ref_core(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ, నిర్మాణం repository *repo, స్థిరరాశి అక్షరం *స్థిరరాశి *usage)
 {
-	struct ref_sorting *sorting;
-	struct string_list sorting_options = STRING_LIST_INIT_DUP;
-	int icase = 0, include_root_refs = 0, from_stdin = 0;
-	struct ref_filter filter = REF_FILTER_INIT;
-	struct ref_format format = REF_FORMAT_INIT;
-	unsigned int flags = FILTER_REFS_REGULAR;
-	struct strvec vec = STRVEC_INIT;
+	నిర్మాణం ref_క్రమీకరణ *క్రమీకరణ;
+	నిర్మాణం string_list క్రమీకరణ_options = STRING_LIST_INIT_DUP;
+	పూర్ణాంకం icase = 0, include_మూలం_refs = 0, from_stdin = 0;
+	నిర్మాణం ref_filter filter = REF_FILTER_INIT;
+	నిర్మాణం ref_format format = REF_FORMAT_INIT;
+	గుర్తులేని పూర్ణాంకం flags = FILTER_REFS_REGULAR;
+	నిర్మాణం strvec vec = STRVEC_INIT;
 
-	struct option opts[] = {
-		OPT_BIT('s', "shell", &format.quote_style,
+	నిర్మాణం option opts[] = {
+		OPT_బిట్టు('s', "shell", &format.quote_style,
 			N_("quote placeholders suitably for shells"), QUOTE_SHELL),
-		OPT_BIT('p', "perl",  &format.quote_style,
+		OPT_బిట్టు('p', "perl",  &format.quote_style,
 			N_("quote placeholders suitably for perl"), QUOTE_PERL),
-		OPT_BIT(0 , "python", &format.quote_style,
+		OPT_బిట్టు(0 , "python", &format.quote_style,
 			N_("quote placeholders suitably for python"), QUOTE_PYTHON),
-		OPT_BIT(0 , "tcl",  &format.quote_style,
+		OPT_బిట్టు(0 , "tcl",  &format.quote_style,
 			N_("quote placeholders suitably for Tcl"), QUOTE_TCL),
-		OPT_BOOL(0, "omit-empty",  &format.array_opts.omit_empty,
+		OPT_BOOL(0, "omit-empty",  &format.array_opts.omit_ఖాళీలు,
 			N_("do not output a newline after empty formatted refs")),
 
-		OPT_GROUP(""),
-		OPT_INTEGER( 0 , "count", &format.array_opts.max_count, N_("show only <n> matched refs")),
+		OPT_సమూహం(""),
+		OPT_INTEGER( 0 , "count", &format.array_opts.max_లెక్క, N_("show only <n> matched refs")),
 		OPT_STRING(  0 , "format", &format.format, N_("format"), N_("format to use for the output")),
-		OPT_STRING(  0 , "start-after", &filter.start_after, N_("marker"), N_("start iteration after the provided marker")),
+		OPT_STRING(  0 , "start-after", &filter.ప్రారంభం_after, N_("marker"), N_("start iteration after the provided marker")),
 		OPT__COLOR(&format.use_color, N_("respect format colors")),
 		OPT_REF_FILTER_EXCLUDE(&filter),
-		OPT_REF_SORT(&sorting_options),
+		OPT_REF_క్రమీకరించు(&క్రమీకరణ_options),
 		OPT_CALLBACK(0, "points-at", &filter.points_at,
 			     N_("object"), N_("print only refs which points at the given object"),
 			     parse_opt_object_name),
 		OPT_MERGED(&filter, N_("print only refs that are merged")),
 		OPT_NO_MERGED(&filter, N_("print only refs that are not merged")),
-		OPT_CONTAINS(&filter.with_commit, N_("print only refs which contain the commit")),
-		OPT_NO_CONTAINS(&filter.no_commit, N_("print only refs which don't contain the commit")),
+		OPT_కలిగియుంది(&filter.with_commit, N_("print only refs which contain the commit")),
+		OPT_NO_కలిగియుంది(&filter.no_commit, N_("print only refs which don't contain the commit")),
 		OPT_BOOL(0, "ignore-case", &icase, N_("sorting and filtering are case insensitive")),
 		OPT_BOOL(0, "stdin", &from_stdin, N_("read reference patterns from stdin")),
-		OPT_BOOL(0, "include-root-refs", &include_root_refs, N_("also include HEAD ref and pseudorefs")),
-		OPT_END(),
+		OPT_BOOL(0, "include-root-refs", &include_మూలం_refs, N_("also include HEAD ref and pseudorefs")),
+		OPT_చివర(),
 	};
 
 	format.format = "%(objectname) %(objecttype)\t%(refname)";
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ఖాళీ);
 
 	/* Set default (refname) sorting */
-	string_list_append(&sorting_options, "refname");
+	string_list_append(&క్రమీకరణ_options, "refname");
 
-	parse_options(argc, argv, prefix, opts, usage, 0);
-	if (format.array_opts.max_count < 0) {
-		error("invalid --count argument: `%d'", format.array_opts.max_count);
+	parse_options(argc, argv, ఉపసర్గ, opts, usage, 0);
+	ఒకవేళ (format.array_opts.max_లెక్క < 0) {
+		error("invalid --count argument: `%d'", format.array_opts.max_లెక్క);
 		usage_with_options(usage, opts);
 	}
-	if (HAS_MULTI_BITS(format.quote_style)) {
+	ఒకవేళ (HAS_MULTI_బిట్లు(format.quote_style)) {
 		error("more than one quoting style?");
 		usage_with_options(usage, opts);
 	}
-	if (verify_ref_format(&format))
+	ఒకవేళ (verify_ref_format(&format))
 		usage_with_options(usage, opts);
 
-	if (filter.start_after && sorting_options.nr > 1)
+	ఒకవేళ (filter.ప్రారంభం_after && క్రమీకరణ_options.nr > 1)
 		die(_("cannot use --start-after with custom sort options"));
 
-	sorting = ref_sorting_options(&sorting_options);
-	ref_sorting_set_sort_flags_all(sorting, REF_SORTING_ICASE, icase);
+	క్రమీకరణ = ref_క్రమీకరణ_options(&క్రమీకరణ_options);
+	ref_క్రమీకరణ_సమితి_క్రమీకరించు_flags_all(క్రమీకరణ, REF_క్రమీకరణ_ICASE, icase);
 	filter.ignore_case = icase;
 
-	if (from_stdin) {
-		struct strbuf line = STRBUF_INIT;
+	ఒకవేళ (from_stdin) {
+		నిర్మాణం strbuf పంక్తి = STRBUF_INIT;
 
-		if (argv[0])
+		ఒకవేళ (argv[0])
 			die(_("unknown arguments supplied with --stdin"));
 
-		while (strbuf_getline(&line, stdin) != EOF)
-			strvec_push(&vec, line.buf);
+		అయితే (strbuf_getline(&పంక్తి, stdin) != EOF)
+			strvec_నెట్టు(&vec, పంక్తి.buf);
 
-		strbuf_release(&line);
+		strbuf_release(&పంక్తి);
 
 		/* vec.v is NULL-terminated, just like 'argv'. */
 		filter.name_patterns = vec.v;
-	} else {
+	} లేకపోతే {
 		filter.name_patterns = argv;
 	}
 
-	if (filter.start_after && filter.name_patterns && filter.name_patterns[0])
+	ఒకవేళ (filter.ప్రారంభం_after && filter.name_patterns && filter.name_patterns[0])
 		die(_("cannot use --start-after with patterns"));
 
-	if (include_root_refs)
-		flags |= FILTER_REFS_ROOT_REFS | FILTER_REFS_DETACHED_HEAD;
+	ఒకవేళ (include_మూలం_refs)
+		flags |= FILTER_REFS_మూలం_REFS | FILTER_REFS_DETACHED_తల;
 
-	filter.match_as_path = 1;
-	filter_and_format_refs(&filter, flags, sorting, &format);
+	filter.సరిపోలిక_as_మార్గం = 1;
+	filter_and_format_refs(&filter, flags, క్రమీకరణ, &format);
 
 	ref_filter_clear(&filter);
-	ref_sorting_release(sorting);
+	ref_క్రమీకరణ_release(క్రమీకరణ);
 	strvec_clear(&vec);
-	return 0;
+	తిరిగి 0;
 }
 
-int cmd_for_each_ref(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo)
+పూర్ణాంకం cmd_for_each_ref(పూర్ణాంకం argc,
+		     స్థిరరాశి అక్షరం **argv,
+		     స్థిరరాశి అక్షరం *ఉపసర్గ,
+		     నిర్మాణం repository *repo)
 {
-	static char const * const for_each_ref_usage[] = {
+	స్థిర అక్షరం స్థిరరాశి * స్థిరరాశి for_each_ref_usage[] = {
 		N_("git for-each-ref " COMMON_USAGE_FOR_EACH_REF),
-		NULL
+		ఖాళీ
 	};
 
-	return for_each_ref_core(argc, argv, prefix, repo, for_each_ref_usage);
+	తిరిగి for_each_ref_core(argc, argv, ఉపసర్గ, repo, for_each_ref_usage);
 }

@@ -4,74 +4,74 @@
  * Copyright (C) Linus Torvalds, 2005
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "convert.h"
-#include "diff.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "ident.h"
-#include "list-objects-filter-options.h"
-#include "parse-options.h"
-#include "userdiff.h"
-#include "oid-array.h"
-#include "packfile.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
-#include "odb/streaming.h"
-#include "replace-object.h"
-#include "promisor-remote.h"
-#include "mailmap.h"
-#include "write-or-die.h"
-#include "alias.h"
-#include "remote.h"
-#include "transport.h"
-#include "fetch-object-info.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "convert.h"
+#అన్తర్భావ "diff.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "ident.h"
+#అన్తర్భావ "list-objects-filter-options.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "userdiff.h"
+#అన్తర్భావ "oid-array.h"
+#అన్తర్భావ "packfile.h"
+#అన్తర్భావ "object-file.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "odb.h"
+#అన్తర్భావ "odb/streaming.h"
+#అన్తర్భావ "replace-object.h"
+#అన్తర్భావ "promisor-remote.h"
+#అన్తర్భావ "mailmap.h"
+#అన్తర్భావ "write-or-die.h"
+#అన్తర్భావ "alias.h"
+#అన్తర్భావ "remote.h"
+#అన్తర్భావ "transport.h"
+#అన్తర్భావ "fetch-object-info.h"
 
 /*
  * Maximum length for a remote URL. While no universal standard exists,
  * 8K is assumed to be a reasonable limit.
  */
-#define MAX_REMOTE_URL_LEN (8 * 1024)
+#నిర్వచించు MAX_REMOTE_URL_LEN (8 * 1024)
 
 /* Maximum number of objects allowed in a single remote-object-info request. */
-#define MAX_ALLOWED_OBJ_LIMIT 10000
+#నిర్వచించు MAX_ALLOWED_OBJ_హద్దు 10000
 
 /* Maximum input size permitted for the remote-object-info command. */
-#define MAX_REMOTE_OBJ_INFO_LINE \
-	(MAX_REMOTE_URL_LEN + MAX_ALLOWED_OBJ_LIMIT * (GIT_MAX_HEXSZ + 1))
+#నిర్వచించు MAX_REMOTE_OBJ_INFO_పంక్తి \
+	(MAX_REMOTE_URL_LEN + MAX_ALLOWED_OBJ_హద్దు * (GIT_MAX_HEXSZ + 1))
 
-enum batch_mode {
-	BATCH_MODE_CONTENTS,
-	BATCH_MODE_INFO,
-	BATCH_MODE_QUEUE_AND_DISPATCH,
+గణన batch_బహుళకం {
+	BATCH_బహుళకం_CONTENTS,
+	BATCH_బహుళకం_INFO,
+	BATCH_బహుళకం_వరుస_AND_DISPATCH,
 };
 
-struct batch_options {
-	struct list_objects_filter_options objects_filter;
-	int enabled;
-	int follow_symlinks;
-	enum batch_mode batch_mode;
-	int buffer_output;
-	int all_objects;
-	int unordered;
-	int transform_mode; /* may be 'w' or 'c' for --filters or --textconv */
-	char input_delim;
-	char output_delim;
-	const char *format;
+నిర్మాణం batch_options {
+	నిర్మాణం list_objects_filter_options objects_filter;
+	పూర్ణాంకం enabled;
+	పూర్ణాంకం follow_symlinks;
+	గణన batch_బహుళకం batch_బహుళకం;
+	పూర్ణాంకం బఫరు_output;
+	పూర్ణాంకం all_objects;
+	పూర్ణాంకం unordered;
+	పూర్ణాంకం transform_బహుళకం; /* may be 'w' or 'c' for --filters or --textconv */
+	అక్షరం ఆదానం_delim;
+	అక్షరం output_delim;
+	స్థిరరాశి అక్షరం *format;
 };
 
-static const char *force_path;
+స్థిర స్థిరరాశి అక్షరం *force_మార్గం;
 
-static struct string_list mailmap = STRING_LIST_INIT_NODUP;
-static int use_mailmap;
+స్థిర నిర్మాణం string_list mailmap = STRING_LIST_INIT_NODUP;
+స్థిర పూర్ణాంకం use_mailmap;
 
-static char *replace_idents_using_mailmap(char *, size_t *);
+స్థిర అక్షరం *replace_idents_using_mailmap(అక్షరం *, కొలత_t *);
 
 /*
  * The mailmap is initialized with .strdup_strings set to 0,
@@ -79,195 +79,195 @@ static char *replace_idents_using_mailmap(char *, size_t *);
  * not a single mailmap entry is read), so it can be used for
  * lazy loading.
  */
-static void load_mailmap(void)
+స్థిర శూన్య ఎక్కించు_mailmap(శూన్య)
 {
-	if (mailmap.strdup_strings)
-		return;
+	ఒకవేళ (mailmap.strdup_అక్షరశ్రేణులు)
+		తిరిగి;
 
 	read_mailmap(the_repository, &mailmap);
 }
 
-static char *replace_idents_using_mailmap(char *object_buf, size_t *size)
+స్థిర అక్షరం *replace_idents_using_mailmap(అక్షరం *object_buf, కొలత_t *కొలత)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *headers[] = { "author ", "committer ", "tagger ", NULL };
+	నిర్మాణం strbuf sb = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *శీర్షికలు[] = { "author ", "committer ", "tagger ", ఖాళీ };
 
-	strbuf_attach(&sb, object_buf, *size, *size + 1);
-	apply_mailmap_to_header(&sb, headers, &mailmap);
-	*size = sb.len;
-	return strbuf_detach(&sb, NULL);
+	strbuf_attach(&sb, object_buf, *కొలత, *కొలత + 1);
+	apply_mailmap_గమ్యం_శీర్షిక(&sb, శీర్షికలు, &mailmap);
+	*కొలత = sb.len;
+	తిరిగి strbuf_detach(&sb, ఖాళీ);
 }
 
-static int filter_object(const char *path, unsigned mode,
-			 const struct object_id *oid,
-			 char **buf, size_t *size)
+స్థిర పూర్ణాంకం filter_object(స్థిరరాశి అక్షరం *మార్గం, గుర్తులేని బహుళకం,
+			 స్థిరరాశి నిర్మాణం object_id *oid,
+			 అక్షరం **buf, కొలత_t *కొలత)
 {
-	enum object_type type;
+	గణన object_type type;
 
-	*buf = odb_read_object(the_repository->objects, oid, &type, size);
-	if (!*buf)
-		return error(_("cannot read object %s '%s'"),
-			     oid_to_hex(oid), path);
-	if ((type == OBJ_BLOB) && S_ISREG(mode)) {
-		struct strbuf strbuf = STRBUF_INIT;
-		struct checkout_metadata meta;
+	*buf = odb_read_object(the_repository->objects, oid, &type, కొలత);
+	ఒకవేళ (!*buf)
+		తిరిగి error(_("cannot read object %s '%s'"),
+			     oid_గమ్యం_hex(oid), మార్గం);
+	ఒకవేళ ((type == OBJ_BLOB) && S_ISREG(బహుళకం)) {
+		నిర్మాణం strbuf strbuf = STRBUF_INIT;
+		నిర్మాణం checkout_metadata meta;
 
-		init_checkout_metadata(&meta, NULL, NULL, oid);
-		if (convert_to_working_tree(the_repository->index, path, *buf, *size, &strbuf, &meta)) {
-			free(*buf);
-			*size = strbuf.len;
-			*buf = strbuf_detach(&strbuf, NULL);
+		init_checkout_metadata(&meta, ఖాళీ, ఖాళీ, oid);
+		ఒకవేళ (convert_గమ్యం_working_వృక్షం(the_repository->సూచీ, మార్గం, *buf, *కొలత, &strbuf, &meta)) {
+			విడుదల(*buf);
+			*కొలత = strbuf.len;
+			*buf = strbuf_detach(&strbuf, ఖాళీ);
 		}
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int stream_blob(const struct object_id *oid)
+స్థిర పూర్ణాంకం ప్రవాహం_blob(స్థిరరాశి నిర్మాణం object_id *oid)
 {
-	if (odb_stream_blob_to_fd(the_repository->objects, 1, oid, NULL, 0))
-		die("unable to stream %s to stdout", oid_to_hex(oid));
-	return 0;
+	ఒకవేళ (odb_ప్రవాహం_blob_గమ్యం_fd(the_repository->objects, 1, oid, ఖాళీ, 0))
+		die("unable to stream %s to stdout", oid_గమ్యం_hex(oid));
+	తిరిగి 0;
 }
 
-static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
+స్థిర పూర్ణాంకం cat_one_file(పూర్ణాంకం opt, స్థిరరాశి అక్షరం *exp_type, స్థిరరాశి అక్షరం *obj_name)
 {
-	int ret;
-	struct object_id oid;
-	enum object_type type;
-	char *buf;
-	size_t size;
-	struct object_context obj_context = {0};
-	struct object_info oi = OBJECT_INFO_INIT;
-	unsigned flags = OBJECT_INFO_LOOKUP_REPLACE;
-	unsigned get_oid_flags =
-		GET_OID_RECORD_PATH |
-		GET_OID_ONLY_TO_DIE |
+	పూర్ణాంకం ret;
+	నిర్మాణం object_id oid;
+	గణన object_type type;
+	అక్షరం *buf;
+	కొలత_t కొలత;
+	నిర్మాణం object_context obj_context = {0};
+	నిర్మాణం object_info oi = OBJECT_INFO_INIT;
+	గుర్తులేని flags = OBJECT_INFO_LOOKUP_REPLACE;
+	గుర్తులేని get_oid_flags =
+		GET_OID_రికార్డు_మార్గం |
+		GET_OID_ONLY_గమ్యం_DIE |
 		GET_OID_HASH_ANY;
-	const char *path = force_path;
-	const int opt_cw = (opt == 'c' || opt == 'w');
-	if (!path && opt_cw)
-		get_oid_flags |= GET_OID_REQUIRE_PATH;
+	స్థిరరాశి అక్షరం *మార్గం = force_మార్గం;
+	స్థిరరాశి పూర్ణాంకం opt_cw = (opt == 'c' || opt == 'w');
+	ఒకవేళ (!మార్గం && opt_cw)
+		get_oid_flags |= GET_OID_REQUIRE_మార్గం;
 
-	if (get_oid_with_context(the_repository, obj_name, get_oid_flags, &oid,
+	ఒకవేళ (get_oid_with_context(the_repository, obj_name, get_oid_flags, &oid,
 				 &obj_context))
 		die("Not a valid object name %s", obj_name);
 
-	if (!path)
-		path = obj_context.path;
-	if (obj_context.mode == S_IFINVALID)
-		obj_context.mode = 0100644;
+	ఒకవేళ (!మార్గం)
+		మార్గం = obj_context.మార్గం;
+	ఒకవేళ (obj_context.బహుళకం == S_IFINVALID)
+		obj_context.బహుళకం = 0100644;
 
-	buf = NULL;
-	switch (opt) {
-	case 't':
+	buf = ఖాళీ;
+	ఎంపిక (opt) {
+	స్థితి 't':
 		oi.typep = &type;
-		if (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
+		ఒకవేళ (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
 			die("git cat-file: could not get object info");
-		printf("%s\n", type_name(type));
+		రాయి("%s\n", type_name(type));
 		ret = 0;
-		goto cleanup;
+		వెళ్ళు cleanup;
 
-	case 's':
-		oi.sizep = &size;
+	స్థితి 's':
+		oi.sizep = &కొలత;
 
-		if (use_mailmap) {
+		ఒకవేళ (use_mailmap) {
 			oi.typep = &type;
-			oi.contentp = (void**)&buf;
+			oi.contentp = (శూన్య**)&buf;
 		}
 
-		if (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
+		ఒకవేళ (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
 			die("git cat-file: could not get object info");
 
-		if (use_mailmap && (type == OBJ_COMMIT || type == OBJ_TAG))
-			buf = replace_idents_using_mailmap(buf, &size);
+		ఒకవేళ (use_mailmap && (type == OBJ_COMMIT || type == OBJ_ట్యాగ్))
+			buf = replace_idents_using_mailmap(buf, &కొలత);
 
-		printf("%"PRIuMAX"\n", (uintmax_t)size);
+		రాయి("%"PRIuMAX"\n", (uintmax_t)కొలత);
 		ret = 0;
-		goto cleanup;
+		వెళ్ళు cleanup;
 
-	case 'e':
+	స్థితి 'e':
 		ret = !odb_has_object(the_repository->objects, &oid,
 				      ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR);
-		goto cleanup;
+		వెళ్ళు cleanup;
 
-	case 'w':
+	స్థితి 'w':
 
-		if (filter_object(path, obj_context.mode,
-				  &oid, &buf, &size)) {
+		ఒకవేళ (filter_object(మార్గం, obj_context.బహుళకం,
+				  &oid, &buf, &కొలత)) {
 			ret = -1;
-			goto cleanup;
+			వెళ్ళు cleanup;
 		}
-		break;
+		ఆపు;
 
-	case 'c':
+	స్థితి 'c':
 	{
-		unsigned long size_ul = 0;
-		int textconv_ret = textconv_object(the_repository, path,
-						   obj_context.mode, &oid, 1,
-						   &buf, &size_ul);
-		size = size_ul;
-		if (textconv_ret)
-			break;
+		గుర్తులేని దీర్ఘ కొలత_ul = 0;
+		పూర్ణాంకం textconv_ret = textconv_object(the_repository, మార్గం,
+						   obj_context.బహుళకం, &oid, 1,
+						   &buf, &కొలత_ul);
+		కొలత = కొలత_ul;
+		ఒకవేళ (textconv_ret)
+			ఆపు;
 	}
 		/* else fallthrough */
 
-	case 'p':
-		type = odb_read_object_info(the_repository->objects, &oid, NULL);
-		if (type < 0)
+	స్థితి 'p':
+		type = odb_read_object_info(the_repository->objects, &oid, ఖాళీ);
+		ఒకవేళ (type < 0)
 			die("Not a valid object name %s", obj_name);
 
 		/* custom pretty-print here */
-		if (type == OBJ_TREE) {
-			const char *ls_args[3] = { NULL };
-			ls_args[0] =  "ls-tree";
-			ls_args[1] =  obj_name;
-			ret = cmd_ls_tree(2, ls_args, NULL, the_repository);
-			goto cleanup;
+		ఒకవేళ (type == OBJ_వృక్షం) {
+			స్థిరరాశి అక్షరం *ls_వాదనలు[3] = { ఖాళీ };
+			ls_వాదనలు[0] =  "ls-tree";
+			ls_వాదనలు[1] =  obj_name;
+			ret = cmd_ls_వృక్షం(2, ls_వాదనలు, ఖాళీ, the_repository);
+			వెళ్ళు cleanup;
 		}
 
-		if (type == OBJ_BLOB) {
-			ret = stream_blob(&oid);
-			goto cleanup;
+		ఒకవేళ (type == OBJ_BLOB) {
+			ret = ప్రవాహం_blob(&oid);
+			వెళ్ళు cleanup;
 		}
 		buf = odb_read_object(the_repository->objects, &oid,
-				      &type, &size);
-		if (!buf)
+				      &type, &కొలత);
+		ఒకవేళ (!buf)
 			die("Cannot read object %s", obj_name);
 
-		if (use_mailmap)
-			buf = replace_idents_using_mailmap(buf, &size);
+		ఒకవేళ (use_mailmap)
+			buf = replace_idents_using_mailmap(buf, &కొలత);
 
 		/* otherwise just spit out the data */
-		break;
+		ఆపు;
 
-	case 0:
+	స్థితి 0:
 	{
-		enum object_type exp_type_id = type_from_string(exp_type);
+		గణన object_type exp_type_id = type_from_string(exp_type);
 
-		if (exp_type_id == OBJ_BLOB) {
-			struct object_id blob_oid;
-			if (odb_read_object_info(the_repository->objects,
-						 &oid, NULL) == OBJ_TAG) {
-				char *buffer = odb_read_object(the_repository->objects,
-							       &oid, &type, &size);
-				const char *target;
+		ఒకవేళ (exp_type_id == OBJ_BLOB) {
+			నిర్మాణం object_id blob_oid;
+			ఒకవేళ (odb_read_object_info(the_repository->objects,
+						 &oid, ఖాళీ) == OBJ_ట్యాగ్) {
+				అక్షరం *బఫరు = odb_read_object(the_repository->objects,
+							       &oid, &type, &కొలత);
+				స్థిరరాశి అక్షరం *లక్ష్యం;
 
-				if (!buffer)
-					die(_("unable to read %s"), oid_to_hex(&oid));
+				ఒకవేళ (!బఫరు)
+					die(_("unable to read %s"), oid_గమ్యం_hex(&oid));
 
-				if (!skip_prefix(buffer, "object ", &target) ||
-				    get_oid_hex_algop(target, &blob_oid,
+				ఒకవేళ (!skip_ఉపసర్గ(బఫరు, "object ", &లక్ష్యం) ||
+				    get_oid_hex_algop(లక్ష్యం, &blob_oid,
 						      &hash_algos[oid.algo]))
-					die("%s not a valid tag", oid_to_hex(&oid));
-				free(buffer);
-			} else
+					die("%s not a valid tag", oid_గమ్యం_hex(&oid));
+				విడుదల(బఫరు);
+			} లేకపోతే
 				oidcpy(&blob_oid, &oid);
 
-			if (odb_read_object_info(the_repository->objects,
-						 &blob_oid, NULL) == OBJ_BLOB) {
-				ret = stream_blob(&blob_oid);
-				goto cleanup;
+			ఒకవేళ (odb_read_object_info(the_repository->objects,
+						 &blob_oid, ఖాళీ) == OBJ_BLOB) {
+				ret = ప్రవాహం_blob(&blob_oid);
+				వెళ్ళు cleanup;
 			}
 			/*
 			 * we attempted to dereference a tag to a blob
@@ -277,246 +277,246 @@ static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
 			 */
 		}
 		buf = odb_read_object_peeled(the_repository->objects, &oid,
-					     exp_type_id, &size, NULL);
+					     exp_type_id, &కొలత, ఖాళీ);
 
-		if (use_mailmap)
-			buf = replace_idents_using_mailmap(buf, &size);
-		break;
+		ఒకవేళ (use_mailmap)
+			buf = replace_idents_using_mailmap(buf, &కొలత);
+		ఆపు;
 	}
-	default:
+	అప్రమేయ:
 		die("git cat-file: unknown option: %s", exp_type);
 	}
 
-	if (!buf)
+	ఒకవేళ (!buf)
 		die("git cat-file %s: bad file", obj_name);
 
-	write_or_die(1, buf, size);
+	write_or_die(1, buf, కొలత);
 	ret = 0;
 cleanup:
-	free(buf);
+	విడుదల(buf);
 	object_context_release(&obj_context);
-	return ret;
+	తిరిగి ret;
 }
 
-struct expand_data {
-	struct object_id oid;
-	enum object_type type;
-	size_t size;
-	unsigned short mode;
-	off_t disk_size;
-	const char *rest;
-	struct object_id delta_base_oid;
+నిర్మాణం expand_దత్తాంశం {
+	నిర్మాణం object_id oid;
+	గణన object_type type;
+	కొలత_t కొలత;
+	గుర్తులేని పొట్టి బహుళకం;
+	off_t disk_కొలత;
+	స్థిరరాశి అక్షరం *rest;
+	నిర్మాణం object_id delta_పునాది_oid;
 
 	/*
 	 * If mark_query is true, we do not expand anything, but rather
 	 * just mark the object_info with items we wish to query.
 	 */
-	int mark_query;
+	పూర్ణాంకం mark_query;
 
 	/*
 	 * Whether to split the input on whitespace before feeding it to
 	 * get_sha1; this is decided during the mark_query phase based on
 	 * whether we have a %(rest) token in our format.
 	 */
-	int split_on_whitespace;
+	పూర్ణాంకం విభజించు_on_whitespace;
 
 	/*
 	 * After a mark_query run, this object_info is set up to be
 	 * passed to odb_read_object_info_extended. It will point to the data
 	 * elements above, so you can retrieve the response from there.
 	 */
-	struct object_info info;
+	నిర్మాణం object_info info;
 
 	/*
 	 * This flag will be true if the requested batch format and options
 	 * don't require us to call oid_object_info, which can then be
 	 * optimized out.
 	 */
-	unsigned skip_object_info : 1;
+	గుర్తులేని skip_object_info : 1;
 
 	/*
 	 * Flags about when an object info is being fetched from remote.
 	 */
-	unsigned is_remote:1;
+	గుర్తులేని is_remote:1;
 
 	/*
 	 * List of atoms (i.e. "objectsize") that the server supports. Built
 	 * from the server's object-info advertised capabilities.
 	 */
-	struct string_list remote_allowed_atoms;
+	నిర్మాణం string_list remote_allowed_atoms;
 };
 
-#define EXPAND_DATA_INIT  {  \
-	.mode = S_IFINVALID, \
+#నిర్వచించు EXPAND_దత్తాంశం_INIT  {  \
+	.బహుళకం = S_IFINVALID, \
 	.type = OBJ_BAD,     \
 	.remote_allowed_atoms = STRING_LIST_INIT_NODUP, \
 }
 
-static int is_atom(const char *atom, const char *s, int slen)
+స్థిర పూర్ణాంకం is_atom(స్థిరరాశి అక్షరం *atom, స్థిరరాశి అక్షరం *s, పూర్ణాంకం slen)
 {
-	int alen = strlen(atom);
-	return alen == slen && !memcmp(atom, s, alen);
+	పూర్ణాంకం alen = అక్షరశ్రేణి_పొడవు(atom);
+	తిరిగి alen == slen && !memcmp(atom, s, alen);
 }
 
-static int expand_atom(struct strbuf *sb, const char *atom, int len,
-		       struct expand_data *data)
+స్థిర పూర్ణాంకం expand_atom(నిర్మాణం strbuf *sb, స్థిరరాశి అక్షరం *atom, పూర్ణాంకం len,
+		       నిర్మాణం expand_దత్తాంశం *దత్తాంశం)
 {
-	if (data->is_remote) {
-		size_t i;
-		for (i = 0; i < data->remote_allowed_atoms.nr; i++)
-			if (is_atom(data->remote_allowed_atoms.items[i].string,
+	ఒకవేళ (దత్తాంశం->is_remote) {
+		కొలత_t i;
+		కొరకు (i = 0; i < దత్తాంశం->remote_allowed_atoms.nr; i++)
+			ఒకవేళ (is_atom(దత్తాంశం->remote_allowed_atoms.వస్తువులు[i].string,
 				    atom, len))
-				break;
-		if (i == data->remote_allowed_atoms.nr)
-			return 1;
+				ఆపు;
+		ఒకవేళ (i == దత్తాంశం->remote_allowed_atoms.nr)
+			తిరిగి 1;
 	}
 
-	if (is_atom("objectname", atom, len)) {
-		if (!data->mark_query)
-			strbuf_add_oid_hex(sb, &data->oid);
-	} else if (is_atom("objecttype", atom, len)) {
-		if (data->mark_query) {
-			data->info.typep = &data->type;
-		} else {
-			const char *t = type_name(data->type);
+	ఒకవేళ (is_atom("objectname", atom, len)) {
+		ఒకవేళ (!దత్తాంశం->mark_query)
+			strbuf_కూడు_oid_hex(sb, &దత్తాంశం->oid);
+	} లేకపోతే ఒకవేళ (is_atom("objecttype", atom, len)) {
+		ఒకవేళ (దత్తాంశం->mark_query) {
+			దత్తాంశం->info.typep = &దత్తాంశం->type;
+		} లేకపోతే {
+			స్థిరరాశి అక్షరం *t = type_name(దత్తాంశం->type);
 			strbuf_addstr(sb, t ? t : "");
 		}
-	} else if (is_atom("objectsize", atom, len)) {
-		if (data->mark_query)
-			data->info.sizep = &data->size;
-		else
-			strbuf_add_uint(sb, data->size);
-	} else if (is_atom("objectsize:disk", atom, len)) {
-		if (data->mark_query)
-			data->info.disk_sizep = &data->disk_size;
-		else
-			strbuf_add_uint(sb, data->disk_size);
-	} else if (is_atom("rest", atom, len)) {
-		if (data->mark_query)
-			data->split_on_whitespace = 1;
-		else if (data->rest)
-			strbuf_addstr(sb, data->rest);
-	} else if (is_atom("deltabase", atom, len)) {
-		if (data->mark_query)
-			data->info.delta_base_oid = &data->delta_base_oid;
-		else
-			strbuf_add_oid_hex(sb, &data->delta_base_oid);
-	} else if (is_atom("objectmode", atom, len)) {
-		if (!data->mark_query && !(S_IFINVALID == data->mode))
-			strbuf_addf(sb, "%06o", data->mode);
-	} else
-		return 0;
-	return 1;
+	} లేకపోతే ఒకవేళ (is_atom("objectsize", atom, len)) {
+		ఒకవేళ (దత్తాంశం->mark_query)
+			దత్తాంశం->info.sizep = &దత్తాంశం->కొలత;
+		లేకపోతే
+			strbuf_కూడు_uint(sb, దత్తాంశం->కొలత);
+	} లేకపోతే ఒకవేళ (is_atom("objectsize:disk", atom, len)) {
+		ఒకవేళ (దత్తాంశం->mark_query)
+			దత్తాంశం->info.disk_sizep = &దత్తాంశం->disk_కొలత;
+		లేకపోతే
+			strbuf_కూడు_uint(sb, దత్తాంశం->disk_కొలత);
+	} లేకపోతే ఒకవేళ (is_atom("rest", atom, len)) {
+		ఒకవేళ (దత్తాంశం->mark_query)
+			దత్తాంశం->విభజించు_on_whitespace = 1;
+		లేకపోతే ఒకవేళ (దత్తాంశం->rest)
+			strbuf_addstr(sb, దత్తాంశం->rest);
+	} లేకపోతే ఒకవేళ (is_atom("deltabase", atom, len)) {
+		ఒకవేళ (దత్తాంశం->mark_query)
+			దత్తాంశం->info.delta_పునాది_oid = &దత్తాంశం->delta_పునాది_oid;
+		లేకపోతే
+			strbuf_కూడు_oid_hex(sb, &దత్తాంశం->delta_పునాది_oid);
+	} లేకపోతే ఒకవేళ (is_atom("objectmode", atom, len)) {
+		ఒకవేళ (!దత్తాంశం->mark_query && !(S_IFINVALID == దత్తాంశం->బహుళకం))
+			strbuf_addf(sb, "%06o", దత్తాంశం->బహుళకం);
+	} లేకపోతే
+		తిరిగి 0;
+	తిరిగి 1;
 }
 
-static void expand_format(struct strbuf *sb, const char *start,
-			  struct expand_data *data)
+స్థిర శూన్య expand_format(నిర్మాణం strbuf *sb, స్థిరరాశి అక్షరం *ప్రారంభం,
+			  నిర్మాణం expand_దత్తాంశం *దత్తాంశం)
 {
-	while (strbuf_expand_step(sb, &start)) {
-		const char *end;
+	అయితే (strbuf_expand_అడుగు(sb, &ప్రారంభం)) {
+		స్థిరరాశి అక్షరం *చివర;
 
-		if (skip_prefix(start, "%", &start) || *start != '(')
+		ఒకవేళ (skip_ఉపసర్గ(ప్రారంభం, "%", &ప్రారంభం) || *ప్రారంభం != '(')
 			strbuf_addch(sb, '%');
-		else if ((end = strchr(start + 1, ')')) &&
-			 expand_atom(sb, start + 1, end - start - 1, data))
-			start = end + 1;
-		else
-			strbuf_expand_bad_format(start, "cat-file");
+		లేకపోతే ఒకవేళ ((చివర = strchr(ప్రారంభం + 1, ')')) &&
+			 expand_atom(sb, ప్రారంభం + 1, చివర - ప్రారంభం - 1, దత్తాంశం))
+			ప్రారంభం = చివర + 1;
+		లేకపోతే
+			strbuf_expand_bad_format(ప్రారంభం, "cat-file");
 	}
 }
 
-static void batch_write(struct batch_options *opt, const void *data, int len)
+స్థిర శూన్య batch_write(నిర్మాణం batch_options *opt, స్థిరరాశి శూన్య *దత్తాంశం, పూర్ణాంకం len)
 {
-	if (opt->buffer_output) {
-		if (fwrite(data, 1, len, stdout) != len)
+	ఒకవేళ (opt->బఫరు_output) {
+		ఒకవేళ (fwrite(దత్తాంశం, 1, len, stdout) != len)
 			die_errno("unable to write to stdout");
-	} else
-		write_or_die(1, data, len);
+	} లేకపోతే
+		write_or_die(1, దత్తాంశం, len);
 }
 
-static void print_object_or_die(struct batch_options *opt, struct expand_data *data)
+స్థిర శూన్య print_object_or_die(నిర్మాణం batch_options *opt, నిర్మాణం expand_దత్తాంశం *దత్తాంశం)
 {
-	const struct object_id *oid = &data->oid;
+	స్థిరరాశి నిర్మాణం object_id *oid = &దత్తాంశం->oid;
 
-	assert(data->info.typep);
+	ప్రతిజ్ఞా(దత్తాంశం->info.typep);
 
-	if (data->type == OBJ_BLOB) {
-		if (opt->buffer_output)
+	ఒకవేళ (దత్తాంశం->type == OBJ_BLOB) {
+		ఒకవేళ (opt->బఫరు_output)
 			fflush(stdout);
-		if (opt->transform_mode) {
-			char *contents;
-			size_t size;
+		ఒకవేళ (opt->transform_బహుళకం) {
+			అక్షరం *contents;
+			కొలత_t కొలత;
 
-			if (!data->rest)
-				die("missing path for '%s'", oid_to_hex(oid));
+			ఒకవేళ (!దత్తాంశం->rest)
+				die("missing path for '%s'", oid_గమ్యం_hex(oid));
 
-			if (opt->transform_mode == 'w') {
-				if (filter_object(data->rest, 0100644, oid,
-						  &contents, &size))
+			ఒకవేళ (opt->transform_బహుళకం == 'w') {
+				ఒకవేళ (filter_object(దత్తాంశం->rest, 0100644, oid,
+						  &contents, &కొలత))
 					die("could not convert '%s' %s",
-					    oid_to_hex(oid), data->rest);
-			} else if (opt->transform_mode == 'c') {
-				enum object_type type;
-				unsigned long size_ul = 0;
-				if (textconv_object(the_repository,
-						    data->rest, 0100644, oid,
-						    1, &contents, &size_ul))
-					size = size_ul;
-				else
+					    oid_గమ్యం_hex(oid), దత్తాంశం->rest);
+			} లేకపోతే ఒకవేళ (opt->transform_బహుళకం == 'c') {
+				గణన object_type type;
+				గుర్తులేని దీర్ఘ కొలత_ul = 0;
+				ఒకవేళ (textconv_object(the_repository,
+						    దత్తాంశం->rest, 0100644, oid,
+						    1, &contents, &కొలత_ul))
+					కొలత = కొలత_ul;
+				లేకపోతే
 					contents = odb_read_object(the_repository->objects,
-								   oid, &type, &size);
-				if (!contents)
+								   oid, &type, &కొలత);
+				ఒకవేళ (!contents)
 					die("could not convert '%s' %s",
-					    oid_to_hex(oid), data->rest);
-			} else
-				BUG("invalid transform_mode: %c", opt->transform_mode);
-			batch_write(opt, contents, size);
-			free(contents);
-		} else {
-			stream_blob(oid);
+					    oid_గమ్యం_hex(oid), దత్తాంశం->rest);
+			} లేకపోతే
+				BUG("invalid transform_mode: %c", opt->transform_బహుళకం);
+			batch_write(opt, contents, కొలత);
+			విడుదల(contents);
+		} లేకపోతే {
+			ప్రవాహం_blob(oid);
 		}
 	}
-	else {
-		enum object_type type;
-		size_t size;
-		void *contents;
+	లేకపోతే {
+		గణన object_type type;
+		కొలత_t కొలత;
+		శూన్య *contents;
 
 		contents = odb_read_object(the_repository->objects, oid,
-					   &type, &size);
-		if (!contents)
-			die("object %s disappeared", oid_to_hex(oid));
+					   &type, &కొలత);
+		ఒకవేళ (!contents)
+			die("object %s disappeared", oid_గమ్యం_hex(oid));
 
-		if (use_mailmap)
-			contents = replace_idents_using_mailmap(contents, &size);
+		ఒకవేళ (use_mailmap)
+			contents = replace_idents_using_mailmap(contents, &కొలత);
 
-		if (type != data->type)
-			die("object %s changed type!?", oid_to_hex(oid));
-		if (data->info.sizep && size != data->size && !use_mailmap)
-			die("object %s changed size!?", oid_to_hex(oid));
+		ఒకవేళ (type != దత్తాంశం->type)
+			die("object %s changed type!?", oid_గమ్యం_hex(oid));
+		ఒకవేళ (దత్తాంశం->info.sizep && కొలత != దత్తాంశం->కొలత && !use_mailmap)
+			die("object %s changed size!?", oid_గమ్యం_hex(oid));
 
-		batch_write(opt, contents, size);
-		free(contents);
+		batch_write(opt, contents, కొలత);
+		విడుదల(contents);
 	}
 }
 
-static void print_default_format(struct strbuf *scratch, struct expand_data *data,
-				 struct batch_options *opt)
+స్థిర శూన్య print_default_format(నిర్మాణం strbuf *scratch, నిర్మాణం expand_దత్తాంశం *దత్తాంశం,
+				 నిర్మాణం batch_options *opt)
 {
-	strbuf_add_oid_hex(scratch, &data->oid);
+	strbuf_కూడు_oid_hex(scratch, &దత్తాంశం->oid);
 	strbuf_addch(scratch, ' ');
-	strbuf_addstr(scratch, type_name(data->type));
+	strbuf_addstr(scratch, type_name(దత్తాంశం->type));
 	strbuf_addch(scratch, ' ');
-	strbuf_add_uint(scratch, data->size);
+	strbuf_కూడు_uint(scratch, దత్తాంశం->కొలత);
 	strbuf_addch(scratch, opt->output_delim);
 }
 
-static void report_object_status(struct batch_options *opt,
-				 const char *obj_name,
-				 const struct object_id *oid,
-				 const char *status)
+స్థిర శూన్య report_object_స్థితి(నిర్మాణం batch_options *opt,
+				 స్థిరరాశి అక్షరం *obj_name,
+				 స్థిరరాశి నిర్మాణం object_id *oid,
+				 స్థిరరాశి అక్షరం *స్థితి_2)
 {
-	printf("%s %s%c", obj_name ? obj_name : oid_to_hex(oid),
-	       status, opt->output_delim);
+	రాయి("%s %s%c", obj_name ? obj_name : oid_గమ్యం_hex(oid),
+	       స్థితి_2, opt->output_delim);
 	fflush(stdout);
 }
 
@@ -525,503 +525,503 @@ static void report_object_status(struct batch_options *opt,
  * which the object may be accessed (though note that we may also rely on
  * data->oid, too). If "pack" is NULL, then offset is ignored.
  */
-static void batch_object_write(const char *obj_name,
-			       struct strbuf *scratch,
-			       struct batch_options *opt,
-			       struct expand_data *data,
-			       struct packed_git *pack,
-			       off_t offset)
+స్థిర శూన్య batch_object_write(స్థిరరాశి అక్షరం *obj_name,
+			       నిర్మాణం strbuf *scratch,
+			       నిర్మాణం batch_options *opt,
+			       నిర్మాణం expand_దత్తాంశం *దత్తాంశం,
+			       నిర్మాణం packed_git *pack,
+			       off_t స్థానభ్రంశం)
 {
-	if (!data->skip_object_info) {
-		int ret;
+	ఒకవేళ (!దత్తాంశం->skip_object_info) {
+		పూర్ణాంకం ret;
 
-		if (use_mailmap ||
+		ఒకవేళ (use_mailmap ||
 		    opt->objects_filter.choice == LOFC_BLOB_NONE ||
-		    opt->objects_filter.choice == LOFC_BLOB_LIMIT ||
+		    opt->objects_filter.choice == LOFC_BLOB_హద్దు ||
 		    opt->objects_filter.choice == LOFC_OBJECT_TYPE)
-			data->info.typep = &data->type;
-		if (opt->objects_filter.choice == LOFC_BLOB_LIMIT)
-			data->info.sizep = &data->size;
+			దత్తాంశం->info.typep = &దత్తాంశం->type;
+		ఒకవేళ (opt->objects_filter.choice == LOFC_BLOB_హద్దు)
+			దత్తాంశం->info.sizep = &దత్తాంశం->కొలత;
 
-		if (pack)
-			ret = packed_object_info(NULL, pack, offset, &data->info);
-		else
+		ఒకవేళ (pack)
+			ret = packed_object_info(ఖాళీ, pack, స్థానభ్రంశం, &దత్తాంశం->info);
+		లేకపోతే
 			ret = odb_read_object_info_extended(the_repository->objects,
-							    &data->oid, &data->info,
+							    &దత్తాంశం->oid, &దత్తాంశం->info,
 							    OBJECT_INFO_LOOKUP_REPLACE);
-		if (ret < 0) {
-			if (data->mode == S_IFGITLINK)
-				report_object_status(opt, NULL, &data->oid, "submodule");
-			else
-				report_object_status(opt, obj_name, &data->oid, "missing");
-			return;
+		ఒకవేళ (ret < 0) {
+			ఒకవేళ (దత్తాంశం->బహుళకం == S_IFGITLINK)
+				report_object_స్థితి(opt, ఖాళీ, &దత్తాంశం->oid, "submodule");
+			లేకపోతే
+				report_object_స్థితి(opt, obj_name, &దత్తాంశం->oid, "missing");
+			తిరిగి;
 		}
 
-		switch (opt->objects_filter.choice) {
-		case LOFC_DISABLED:
-			break;
-		case LOFC_BLOB_NONE:
-			if (data->type == OBJ_BLOB) {
-				if (!opt->all_objects)
-					report_object_status(opt, obj_name,
-							     &data->oid, "excluded");
-				return;
+		ఎంపిక (opt->objects_filter.choice) {
+		స్థితి LOFC_DISABLED:
+			ఆపు;
+		స్థితి LOFC_BLOB_NONE:
+			ఒకవేళ (దత్తాంశం->type == OBJ_BLOB) {
+				ఒకవేళ (!opt->all_objects)
+					report_object_స్థితి(opt, obj_name,
+							     &దత్తాంశం->oid, "excluded");
+				తిరిగి;
 			}
-			break;
-		case LOFC_BLOB_LIMIT:
-			if (data->type == OBJ_BLOB &&
-			    data->size >= opt->objects_filter.blob_limit_value) {
-				if (!opt->all_objects)
-					report_object_status(opt, obj_name,
-							     &data->oid, "excluded");
-				return;
+			ఆపు;
+		స్థితి LOFC_BLOB_హద్దు:
+			ఒకవేళ (దత్తాంశం->type == OBJ_BLOB &&
+			    దత్తాంశం->కొలత >= opt->objects_filter.blob_హద్దు_విలువ) {
+				ఒకవేళ (!opt->all_objects)
+					report_object_స్థితి(opt, obj_name,
+							     &దత్తాంశం->oid, "excluded");
+				తిరిగి;
 			}
-			break;
-		case LOFC_OBJECT_TYPE:
-			if (data->type != opt->objects_filter.object_type) {
-				if (!opt->all_objects)
-					report_object_status(opt, obj_name,
-							     &data->oid, "excluded");
-				return;
+			ఆపు;
+		స్థితి LOFC_OBJECT_TYPE:
+			ఒకవేళ (దత్తాంశం->type != opt->objects_filter.object_type) {
+				ఒకవేళ (!opt->all_objects)
+					report_object_స్థితి(opt, obj_name,
+							     &దత్తాంశం->oid, "excluded");
+				తిరిగి;
 			}
-			break;
-		default:
+			ఆపు;
+		అప్రమేయ:
 			BUG("unsupported objects filter");
 		}
 
-		if (use_mailmap && (data->type == OBJ_COMMIT || data->type == OBJ_TAG)) {
-			char *buf = NULL;
+		ఒకవేళ (use_mailmap && (దత్తాంశం->type == OBJ_COMMIT || దత్తాంశం->type == OBJ_ట్యాగ్)) {
+			అక్షరం *buf = ఖాళీ;
 
-			buf = odb_read_object(the_repository->objects, &data->oid,
-					      &data->type, &data->size);
-			if (!buf)
-				die(_("unable to read %s"), oid_to_hex(&data->oid));
-			buf = replace_idents_using_mailmap(buf, &data->size);
+			buf = odb_read_object(the_repository->objects, &దత్తాంశం->oid,
+					      &దత్తాంశం->type, &దత్తాంశం->కొలత);
+			ఒకవేళ (!buf)
+				die(_("unable to read %s"), oid_గమ్యం_hex(&దత్తాంశం->oid));
+			buf = replace_idents_using_mailmap(buf, &దత్తాంశం->కొలత);
 
-			free(buf);
+			విడుదల(buf);
 		}
 	}
 
 	strbuf_reset(scratch);
 
-	if (!opt->format) {
-		print_default_format(scratch, data, opt);
-	} else {
-		expand_format(scratch, opt->format, data);
+	ఒకవేళ (!opt->format) {
+		print_default_format(scratch, దత్తాంశం, opt);
+	} లేకపోతే {
+		expand_format(scratch, opt->format, దత్తాంశం);
 		strbuf_addch(scratch, opt->output_delim);
 	}
 
 	batch_write(opt, scratch->buf, scratch->len);
 
-	if (opt->batch_mode == BATCH_MODE_CONTENTS) {
-		print_object_or_die(opt, data);
+	ఒకవేళ (opt->batch_బహుళకం == BATCH_బహుళకం_CONTENTS) {
+		print_object_or_die(opt, దత్తాంశం);
 		batch_write(opt, &opt->output_delim, 1);
 	}
 }
 
-static void batch_one_object(const char *obj_name,
-			     struct strbuf *scratch,
-			     struct batch_options *opt,
-			     struct expand_data *data)
+స్థిర శూన్య batch_one_object(స్థిరరాశి అక్షరం *obj_name,
+			     నిర్మాణం strbuf *scratch,
+			     నిర్మాణం batch_options *opt,
+			     నిర్మాణం expand_దత్తాంశం *దత్తాంశం)
 {
-	struct object_context ctx = {0};
-	int flags =
+	నిర్మాణం object_context ctx = {0};
+	పూర్ణాంకం flags =
 		GET_OID_HASH_ANY |
 		(opt->follow_symlinks ? GET_OID_FOLLOW_SYMLINKS : 0);
-	enum get_oid_result result;
+	గణన get_oid_ఫలితం ఫలితం;
 
-	result = get_oid_with_context(the_repository, obj_name,
-				      flags, &data->oid, &ctx);
-	if (result != FOUND) {
-		switch (result) {
-		case MISSING_OBJECT:
-			report_object_status(opt, obj_name, &data->oid, "missing");
-			break;
-		case SHORT_NAME_AMBIGUOUS:
-			report_object_status(opt, obj_name, &data->oid, "ambiguous");
-			break;
-		case DANGLING_SYMLINK:
-			printf("dangling %"PRIuMAX"%c%s%c",
-			       (uintmax_t)strlen(obj_name),
+	ఫలితం = get_oid_with_context(the_repository, obj_name,
+				      flags, &దత్తాంశం->oid, &ctx);
+	ఒకవేళ (ఫలితం != దొరికింది) {
+		ఎంపిక (ఫలితం) {
+		స్థితి MISSING_OBJECT:
+			report_object_స్థితి(opt, obj_name, &దత్తాంశం->oid, "missing");
+			ఆపు;
+		స్థితి SHORT_NAME_AMBIGUOUS:
+			report_object_స్థితి(opt, obj_name, &దత్తాంశం->oid, "ambiguous");
+			ఆపు;
+		స్థితి DANGLING_SYMLINK:
+			రాయి("dangling %"PRIuMAX"%c%s%c",
+			       (uintmax_t)అక్షరశ్రేణి_పొడవు(obj_name),
 			       opt->output_delim, obj_name, opt->output_delim);
-			break;
-		case SYMLINK_LOOP:
-			printf("loop %"PRIuMAX"%c%s%c",
-			       (uintmax_t)strlen(obj_name),
+			ఆపు;
+		స్థితి SYMLINK_LOOP:
+			రాయి("loop %"PRIuMAX"%c%s%c",
+			       (uintmax_t)అక్షరశ్రేణి_పొడవు(obj_name),
 			       opt->output_delim, obj_name, opt->output_delim);
-			break;
-		case NOT_DIR:
-			printf("notdir %"PRIuMAX"%c%s%c",
-			       (uintmax_t)strlen(obj_name),
+			ఆపు;
+		స్థితి NOT_DIR:
+			రాయి("notdir %"PRIuMAX"%c%s%c",
+			       (uintmax_t)అక్షరశ్రేణి_పొడవు(obj_name),
 			       opt->output_delim, obj_name, opt->output_delim);
-			break;
-		default:
+			ఆపు;
+		అప్రమేయ:
 			BUG("unknown get_sha1_with_context result %d\n",
-			       result);
-			break;
+			       ఫలితం);
+			ఆపు;
 		}
 		fflush(stdout);
 
-		goto out;
+		వెళ్ళు బహిర్గతం;
 	}
 
-	if (ctx.mode == 0) {
-		printf("symlink %"PRIuMAX"%c%s%c",
-		       (uintmax_t)ctx.symlink_path.len,
-		       opt->output_delim, ctx.symlink_path.buf, opt->output_delim);
+	ఒకవేళ (ctx.బహుళకం == 0) {
+		రాయి("symlink %"PRIuMAX"%c%s%c",
+		       (uintmax_t)ctx.symlink_మార్గం.len,
+		       opt->output_delim, ctx.symlink_మార్గం.buf, opt->output_delim);
 		fflush(stdout);
-		goto out;
+		వెళ్ళు బహిర్గతం;
 	}
 
-	data->mode = ctx.mode;
-	batch_object_write(obj_name, scratch, opt, data, NULL, 0);
+	దత్తాంశం->బహుళకం = ctx.బహుళకం;
+	batch_object_write(obj_name, scratch, opt, దత్తాంశం, ఖాళీ, 0);
 
-out:
+బహిర్గతం:
 	object_context_release(&ctx);
 }
 
-static int get_remote_info(int argc,
-			   const char **argv,
-			   struct fetch_object_info_results *results,
-			   struct oid_array *object_info_oids)
+స్థిర పూర్ణాంకం get_remote_info(పూర్ణాంకం argc,
+			   స్థిరరాశి అక్షరం **argv,
+			   నిర్మాణం fetch_object_info_results *results,
+			   నిర్మాణం oid_array *object_info_oids)
 {
-	int retval = 0;
-	struct remote *remote = NULL;
-	struct object_id oid;
-	struct transport *gtransport;
+	పూర్ణాంకం retval = 0;
+	నిర్మాణం remote *remote = ఖాళీ;
+	నిర్మాణం object_id oid;
+	నిర్మాణం transport *gtransport;
 
 	remote = remote_get(argv[0]);
-	if (!remote)
+	ఒకవేళ (!remote)
 		die(_("must supply valid remote when using remote-object-info"));
 
 	oid_array_clear(object_info_oids);
-	for (size_t i = 1; i < argc; i++) {
-		if (get_oid_hex(argv[i], &oid)) {
-			size_t len = strlen(argv[i]);
+	కొరకు (కొలత_t i = 1; i < argc; i++) {
+		ఒకవేళ (get_oid_hex(argv[i], &oid)) {
+			కొలత_t len = అక్షరశ్రేణి_పొడవు(argv[i]);
 
-			if (len < the_hash_algo->hexsz && len >= 4) {
-				size_t j;
-				for (j = 0; j < len; j++)
-					if (!isxdigit(argv[i][j]))
-						break;
-				if (j == len)
+			ఒకవేళ (len < the_hash_algo->hexsz && len >= 4) {
+				కొలత_t j;
+				కొరకు (j = 0; j < len; j++)
+					ఒకవేళ (!isxdigit(argv[i][j]))
+						ఆపు;
+				ఒకవేళ (j == len)
 					die(_("remote-object-info does not support "
 					      "short oids, %d characters required"),
-					    (int)the_hash_algo->hexsz);
+					    (పూర్ణాంకం)the_hash_algo->hexsz);
 			}
 			die(_("not a valid object name '%s'"), argv[i]);
 		}
 		oid_array_append(object_info_oids, &oid);
 	}
 
-	if (!object_info_oids->nr)
+	ఒకవేళ (!object_info_oids->nr)
 		die(_("remote-object-info requires objects"));
 
-	gtransport = transport_get(remote, NULL);
+	gtransport = transport_get(remote, ఖాళీ);
 
-	if (!gtransport->smart_options) {
+	ఒకవేళ (!gtransport->smart_options) {
 		retval = -1;
-		goto cleanup;
+		వెళ్ళు cleanup;
 	}
 
 	retval = transport_fetch_object_info(gtransport, object_info_oids,
 					     results);
 cleanup:
 	transport_disconnect(gtransport);
-	return retval;
+	తిరిగి retval;
 }
 
-struct object_cb_data {
-	struct batch_options *opt;
-	struct expand_data *expand;
-	struct oidset *seen;
-	struct strbuf *scratch;
+నిర్మాణం object_cb_దత్తాంశం {
+	నిర్మాణం batch_options *opt;
+	నిర్మాణం expand_దత్తాంశం *expand;
+	నిర్మాణం oidset *చూసిన;
+	నిర్మాణం strbuf *scratch;
 };
 
-static int batch_object_cb(const struct object_id *oid, void *vdata)
+స్థిర పూర్ణాంకం batch_object_cb(స్థిరరాశి నిర్మాణం object_id *oid, శూన్య *vdata)
 {
-	struct object_cb_data *data = vdata;
-	oidcpy(&data->expand->oid, oid);
-	batch_object_write(NULL, data->scratch, data->opt, data->expand,
-			   NULL, 0);
-	return 0;
+	నిర్మాణం object_cb_దత్తాంశం *దత్తాంశం = vdata;
+	oidcpy(&దత్తాంశం->expand->oid, oid);
+	batch_object_write(ఖాళీ, దత్తాంశం->scratch, దత్తాంశం->opt, దత్తాంశం->expand,
+			   ఖాళీ, 0);
+	తిరిగి 0;
 }
 
-static int collect_object(const struct object_id *oid,
-			  struct packed_git *pack UNUSED,
-			  off_t offset UNUSED,
-			  void *data)
+స్థిర పూర్ణాంకం collect_object(స్థిరరాశి నిర్మాణం object_id *oid,
+			  నిర్మాణం packed_git *pack వాడని,
+			  off_t స్థానభ్రంశం వాడని,
+			  శూన్య *దత్తాంశం)
 {
-	oid_array_append(data, oid);
-	return 0;
+	oid_array_append(దత్తాంశం, oid);
+	తిరిగి 0;
 }
 
-static int batch_unordered_object(const struct object_id *oid,
-				  struct packed_git *pack,
-				  off_t offset,
-				  void *vdata)
+స్థిర పూర్ణాంకం batch_unordered_object(స్థిరరాశి నిర్మాణం object_id *oid,
+				  నిర్మాణం packed_git *pack,
+				  off_t స్థానభ్రంశం,
+				  శూన్య *vdata)
 {
-	struct object_cb_data *data = vdata;
+	నిర్మాణం object_cb_దత్తాంశం *దత్తాంశం = vdata;
 
-	if (oidset_insert(data->seen, oid))
-		return 0;
+	ఒకవేళ (oidset_చొప్పించు(దత్తాంశం->చూసిన, oid))
+		తిరిగి 0;
 
-	oidcpy(&data->expand->oid, oid);
-	batch_object_write(NULL, data->scratch, data->opt, data->expand,
-			   pack, offset);
-	return 0;
+	oidcpy(&దత్తాంశం->expand->oid, oid);
+	batch_object_write(ఖాళీ, దత్తాంశం->scratch, దత్తాంశం->opt, దత్తాంశం->expand,
+			   pack, స్థానభ్రంశం);
+	తిరిగి 0;
 }
 
-typedef void (*parse_cmd_fn_t)(struct batch_options *, const char *,
-			       struct strbuf *, struct expand_data *);
+రకనిర్వచనం శూన్య (*parse_cmd_fn_t)(నిర్మాణం batch_options *, స్థిరరాశి అక్షరం *,
+			       నిర్మాణం strbuf *, నిర్మాణం expand_దత్తాంశం *);
 
-struct queued_cmd {
+నిర్మాణం queued_cmd {
 	parse_cmd_fn_t fn;
-	char *line;
+	అక్షరం *పంక్తి;
 };
 
-static void parse_cmd_contents(struct batch_options *opt,
-			     const char *line,
-			     struct strbuf *output,
-			     struct expand_data *data)
+స్థిర శూన్య parse_cmd_contents(నిర్మాణం batch_options *opt,
+			     స్థిరరాశి అక్షరం *పంక్తి,
+			     నిర్మాణం strbuf *output,
+			     నిర్మాణం expand_దత్తాంశం *దత్తాంశం)
 {
-	enum object_type *saved_typep = data->info.typep;
-	data->info.typep = &data->type;
-	opt->batch_mode = BATCH_MODE_CONTENTS;
-	batch_one_object(line, output, opt, data);
-	data->info.typep = saved_typep;
+	గణన object_type *saved_typep = దత్తాంశం->info.typep;
+	దత్తాంశం->info.typep = &దత్తాంశం->type;
+	opt->batch_బహుళకం = BATCH_బహుళకం_CONTENTS;
+	batch_one_object(పంక్తి, output, opt, దత్తాంశం);
+	దత్తాంశం->info.typep = saved_typep;
 }
 
-static void parse_cmd_info(struct batch_options *opt,
-			   const char *line,
-			   struct strbuf *output,
-			   struct expand_data *data)
+స్థిర శూన్య parse_cmd_info(నిర్మాణం batch_options *opt,
+			   స్థిరరాశి అక్షరం *పంక్తి,
+			   నిర్మాణం strbuf *output,
+			   నిర్మాణం expand_దత్తాంశం *దత్తాంశం)
 {
-	opt->batch_mode = BATCH_MODE_INFO;
-	batch_one_object(line, output, opt, data);
+	opt->batch_బహుళకం = BATCH_బహుళకం_INFO;
+	batch_one_object(పంక్తి, output, opt, దత్తాంశం);
 }
 
-static void parse_cmd_mailmap(struct batch_options *opt UNUSED,
-			      const char *line,
-			      struct strbuf *output UNUSED,
-			      struct expand_data *data UNUSED)
+స్థిర శూన్య parse_cmd_mailmap(నిర్మాణం batch_options *opt వాడని,
+			      స్థిరరాశి అక్షరం *పంక్తి,
+			      నిర్మాణం strbuf *output వాడని,
+			      నిర్మాణం expand_దత్తాంశం *దత్తాంశం వాడని)
 {
-	use_mailmap = git_parse_maybe_bool(line);
+	use_mailmap = git_parse_maybe_bool(పంక్తి);
 
-	if (use_mailmap < 0)
-		die(_("mailmap: invalid boolean '%s'"), line);
+	ఒకవేళ (use_mailmap < 0)
+		die(_("mailmap: invalid boolean '%s'"), పంక్తి);
 
-	if (use_mailmap)
-		load_mailmap();
+	ఒకవేళ (use_mailmap)
+		ఎక్కించు_mailmap();
 }
 
-static void parse_cmd_remote_object_info(struct batch_options *opt,
-					 const char *line, struct strbuf *output,
-					 struct expand_data *data)
+స్థిర శూన్య parse_cmd_remote_object_info(నిర్మాణం batch_options *opt,
+					 స్థిరరాశి అక్షరం *పంక్తి, నిర్మాణం strbuf *output,
+					 నిర్మాణం expand_దత్తాంశం *దత్తాంశం)
 {
-	int count;
-	const char **argv;
-	char *line_to_split;
-	struct fetch_object_info_results results = FETCH_OBJECT_INFO_RESULTS_INIT;
-	struct oid_array object_info_oids = OID_ARRAY_INIT;
+	పూర్ణాంకం లెక్క;
+	స్థిరరాశి అక్షరం **argv;
+	అక్షరం *పంక్తి_గమ్యం_విభజించు;
+	నిర్మాణం fetch_object_info_results results = FETCH_OBJECT_INFO_RESULTS_INIT;
+	నిర్మాణం oid_array object_info_oids = OID_ARRAY_INIT;
 
-	if (strlen(line) >= MAX_REMOTE_OBJ_INFO_LINE)
+	ఒకవేళ (అక్షరశ్రేణి_పొడవు(పంక్తి) >= MAX_REMOTE_OBJ_INFO_పంక్తి)
 		die(_("remote-object-info command too long"));
 
-	line_to_split = xstrdup(line);
-	count = split_cmdline(line_to_split, &argv);
-	if (count < 0)
+	పంక్తి_గమ్యం_విభజించు = xstrdup(పంక్తి);
+	లెక్క = విభజించు_cmdline(పంక్తి_గమ్యం_విభజించు, &argv);
+	ఒకవేళ (లెక్క < 0)
 		die(_("remote-object-info: failed to parse command line: %s"),
-		    split_cmdline_strerror(count));
-	if (count - 1 > MAX_ALLOWED_OBJ_LIMIT)
+		    విభజించు_cmdline_strerror(లెక్క));
+	ఒకవేళ (లెక్క - 1 > MAX_ALLOWED_OBJ_హద్దు)
 		die(_("remote-object-info supports at most %d objects"),
-		    MAX_ALLOWED_OBJ_LIMIT);
+		    MAX_ALLOWED_OBJ_హద్దు);
 
-	if (data->info.sizep)
-		results.wants_size = 1;
-	if (data->info.typep)
-		results.wants_type = 1;
+	ఒకవేళ (దత్తాంశం->info.sizep)
+		results.కోరుతుంది_కొలత = 1;
+	ఒకవేళ (దత్తాంశం->info.typep)
+		results.కోరుతుంది_type = 1;
 
-	if (get_remote_info(count, argv, &results, &object_info_oids))
+	ఒకవేళ (get_remote_info(లెక్క, argv, &results, &object_info_oids))
 		die(_("failed to get object info from the remote: %s"), argv[0]);
 
-	string_list_clear(&data->remote_allowed_atoms, 0);
-	string_list_append(&data->remote_allowed_atoms, "objectname");
-	if (results.sizes)
-		string_list_append(&data->remote_allowed_atoms, "objectsize");
-	if (results.types)
-		string_list_append(&data->remote_allowed_atoms, "objecttype");
+	string_list_clear(&దత్తాంశం->remote_allowed_atoms, 0);
+	string_list_append(&దత్తాంశం->remote_allowed_atoms, "objectname");
+	ఒకవేళ (results.sizes)
+		string_list_append(&దత్తాంశం->remote_allowed_atoms, "objectsize");
+	ఒకవేళ (results.types)
+		string_list_append(&దత్తాంశం->remote_allowed_atoms, "objecttype");
 
-	data->skip_object_info = 1;
-	for (size_t i = 0; i < results.nr; i++) {
-		data->oid = object_info_oids.oid[i];
+	దత్తాంశం->skip_object_info = 1;
+	కొరకు (కొలత_t i = 0; i < results.nr; i++) {
+		దత్తాంశం->oid = object_info_oids.oid[i];
 
-		if (results.unrecognized[i]) {
-			report_object_status(opt, oid_to_hex(&data->oid),
-					     &data->oid, "missing");
-			continue;
+		ఒకవేళ (results.unrecognized[i]) {
+			report_object_స్థితి(opt, oid_గమ్యం_hex(&దత్తాంశం->oid),
+					     &దత్తాంశం->oid, "missing");
+			కొనసాగు;
 		}
 
 		/*
 		 * When reaching here, it means remote-object-info can retrieve
 		 * information from server without downloading them.
 		 */
-		if (results.sizes)
-			data->size = results.sizes[i];
+		ఒకవేళ (results.sizes)
+			దత్తాంశం->కొలత = results.sizes[i];
 
-		if (results.types)
-			data->type = results.types[i];
+		ఒకవేళ (results.types)
+			దత్తాంశం->type = results.types[i];
 
-		opt->batch_mode = BATCH_MODE_INFO;
-		data->is_remote = 1;
-		batch_object_write(argv[i + 1], output, opt, data, NULL, 0);
-		data->is_remote = 0;
+		opt->batch_బహుళకం = BATCH_బహుళకం_INFO;
+		దత్తాంశం->is_remote = 1;
+		batch_object_write(argv[i + 1], output, opt, దత్తాంశం, ఖాళీ, 0);
+		దత్తాంశం->is_remote = 0;
 	}
-	data->skip_object_info = 0;
+	దత్తాంశం->skip_object_info = 0;
 
 	free_fetch_object_info_results(&results);
-	free(line_to_split);
-	free(argv);
+	విడుదల(పంక్తి_గమ్యం_విభజించు);
+	విడుదల(argv);
 	oid_array_clear(&object_info_oids);
 }
 
-static void dispatch_calls(struct batch_options *opt,
-		struct strbuf *output,
-		struct expand_data *data,
-		struct queued_cmd *cmd,
-		size_t nr)
+స్థిర శూన్య dispatch_calls(నిర్మాణం batch_options *opt,
+		నిర్మాణం strbuf *output,
+		నిర్మాణం expand_దత్తాంశం *దత్తాంశం,
+		నిర్మాణం queued_cmd *cmd,
+		కొలత_t nr)
 {
-	if (!opt->buffer_output)
+	ఒకవేళ (!opt->బఫరు_output)
 		die(_("flush is only for --buffer mode"));
 
-	for (size_t i = 0; i < nr; i++)
-		cmd[i].fn(opt, cmd[i].line, output, data);
+	కొరకు (కొలత_t i = 0; i < nr; i++)
+		cmd[i].fn(opt, cmd[i].పంక్తి, output, దత్తాంశం);
 
 	fflush(stdout);
 }
 
-static void free_cmds(struct queued_cmd *cmd, size_t *nr)
+స్థిర శూన్య free_cmds(నిర్మాణం queued_cmd *cmd, కొలత_t *nr)
 {
-	for (size_t i = 0; i < *nr; i++)
-		FREE_AND_NULL(cmd[i].line);
+	కొరకు (కొలత_t i = 0; i < *nr; i++)
+		FREE_AND_NULL(cmd[i].పంక్తి);
 
 	*nr = 0;
 }
 
 
-static const struct parse_cmd {
-	const char *name;
+స్థిర స్థిరరాశి నిర్మాణం parse_cmd {
+	స్థిరరాశి అక్షరం *name;
 	parse_cmd_fn_t fn;
-	unsigned takes_args;
+	గుర్తులేని takes_వాదనలు;
 } commands[] = {
 	{ "contents", parse_cmd_contents, 1 },
-	{ "flush", NULL, 0 },
+	{ "flush", ఖాళీ, 0 },
 	{ "info", parse_cmd_info, 1 },
 	{ "mailmap", parse_cmd_mailmap, 1 },
 	{ "remote-object-info", parse_cmd_remote_object_info, 1 },
 };
 
-static void batch_objects_command(struct batch_options *opt,
-				    struct strbuf *output,
-				    struct expand_data *data)
+స్థిర శూన్య batch_objects_command(నిర్మాణం batch_options *opt,
+				    నిర్మాణం strbuf *output,
+				    నిర్మాణం expand_దత్తాంశం *దత్తాంశం)
 {
-	struct strbuf input = STRBUF_INIT;
-	struct queued_cmd *queued_cmd = NULL;
-	size_t alloc = 0, nr = 0;
+	నిర్మాణం strbuf ఆదానం = STRBUF_INIT;
+	నిర్మాణం queued_cmd *queued_cmd = ఖాళీ;
+	కొలత_t alloc = 0, nr = 0;
 
-	while (strbuf_getdelim_strip_crlf(&input, stdin, opt->input_delim) != EOF) {
-		const struct parse_cmd *cmd = NULL;
-		const char *p = NULL, *cmd_end;
-		struct queued_cmd call = {0};
+	అయితే (strbuf_getdelim_strip_crlf(&ఆదానం, stdin, opt->ఆదానం_delim) != EOF) {
+		స్థిరరాశి నిర్మాణం parse_cmd *cmd = ఖాళీ;
+		స్థిరరాశి అక్షరం *p = ఖాళీ, *cmd_చివర;
+		నిర్మాణం queued_cmd call = {0};
 
-		if (!input.len)
+		ఒకవేళ (!ఆదానం.len)
 			die(_("empty command in input"));
-		if (isspace(*input.buf))
-			die(_("whitespace before command: '%s'"), input.buf);
+		ఒకవేళ (ఖాళీనా(*ఆదానం.buf))
+			die(_("whitespace before command: '%s'"), ఆదానం.buf);
 
-		for (size_t i = 0; i < ARRAY_SIZE(commands); i++) {
-			if (!skip_prefix(input.buf, commands[i].name, &cmd_end))
-				continue;
+		కొరకు (కొలత_t i = 0; i < ARRAY_కొలత(commands); i++) {
+			ఒకవేళ (!skip_ఉపసర్గ(ఆదానం.buf, commands[i].name, &cmd_చివర))
+				కొనసాగు;
 
 			cmd = &commands[i];
-			if (cmd->takes_args) {
-				if (*cmd_end != ' ')
+			ఒకవేళ (cmd->takes_వాదనలు) {
+				ఒకవేళ (*cmd_చివర != ' ')
 					die(_("%s requires arguments"),
 					    commands[i].name);
 
-				p = cmd_end + 1;
-			} else if (*cmd_end) {
+				p = cmd_చివర + 1;
+			} లేకపోతే ఒకవేళ (*cmd_చివర) {
 				die(_("%s takes no arguments"),
 				    commands[i].name);
 			}
 
-			break;
+			ఆపు;
 		}
 
-		if (!cmd)
-			die(_("unknown command: '%s'"), input.buf);
+		ఒకవేళ (!cmd)
+			die(_("unknown command: '%s'"), ఆదానం.buf);
 
-		if (!strcmp(cmd->name, "flush")) {
-			dispatch_calls(opt, output, data, queued_cmd, nr);
+		ఒకవేళ (!strcmp(cmd->name, "flush")) {
+			dispatch_calls(opt, output, దత్తాంశం, queued_cmd, nr);
 			free_cmds(queued_cmd, &nr);
-		} else if (!opt->buffer_output) {
-			cmd->fn(opt, p, output, data);
-		} else {
+		} లేకపోతే ఒకవేళ (!opt->బఫరు_output) {
+			cmd->fn(opt, p, output, దత్తాంశం);
+		} లేకపోతే {
 			ALLOC_GROW(queued_cmd, nr + 1, alloc);
 			call.fn = cmd->fn;
-			call.line = xstrdup_or_null(p);
+			call.పంక్తి = xstrdup_or_null(p);
 			queued_cmd[nr++] = call;
 		}
 	}
 
-	if (opt->buffer_output &&
+	ఒకవేళ (opt->బఫరు_output &&
 	    nr &&
 	    !git_env_bool("GIT_TEST_CAT_FILE_NO_FLUSH_ON_EXIT", 0)) {
-		dispatch_calls(opt, output, data, queued_cmd, nr);
+		dispatch_calls(opt, output, దత్తాంశం, queued_cmd, nr);
 		free_cmds(queued_cmd, &nr);
 	}
 
 	free_cmds(queued_cmd, &nr);
-	free(queued_cmd);
-	strbuf_release(&input);
+	విడుదల(queued_cmd);
+	strbuf_release(&ఆదానం);
 }
 
-#define DEFAULT_FORMAT "%(objectname) %(objecttype) %(objectsize)"
+#నిర్వచించు DEFAULT_FORMAT "%(objectname) %(objecttype) %(objectsize)"
 
-typedef int (*for_each_object_fn)(const struct object_id *oid, struct packed_git *pack,
-				  off_t offset, void *data);
+రకనిర్వచనం పూర్ణాంకం (*for_each_object_fn)(స్థిరరాశి నిర్మాణం object_id *oid, నిర్మాణం packed_git *pack,
+				  off_t స్థానభ్రంశం, శూన్య *దత్తాంశం);
 
-struct for_each_object_payload {
+నిర్మాణం for_each_object_payload {
 	for_each_object_fn callback;
-	void *payload;
+	శూన్య *payload;
 };
 
-static int batch_one_object_oi(const struct object_id *oid,
-			       struct object_info *oi,
-			       void *_payload)
+స్థిర పూర్ణాంకం batch_one_object_oi(స్థిరరాశి నిర్మాణం object_id *oid,
+			       నిర్మాణం object_info *oi,
+			       శూన్య *_payload)
 {
-	struct for_each_object_payload *payload = _payload;
-	if (oi && oi->source_infop->source->type == ODB_SOURCE_PACKED)
-		return payload->callback(oid, oi->source_infop->u.packed.pack,
-					 oi->source_infop->u.packed.offset,
+	నిర్మాణం for_each_object_payload *payload = _payload;
+	ఒకవేళ (oi && oi->ఆధారం_infop->ఆధారం->type == ODB_ఆధారం_PACKED)
+		తిరిగి payload->callback(oid, oi->ఆధారం_infop->u.packed.pack,
+					 oi->ఆధారం_infop->u.packed.స్థానభ్రంశం,
 					 payload->payload);
-	return payload->callback(oid, NULL, 0, payload->payload);
+	తిరిగి payload->callback(oid, ఖాళీ, 0, payload->payload);
 }
 
-static void batch_each_object(struct batch_options *opt,
+స్థిర శూన్య batch_each_object(నిర్మాణం batch_options *opt,
 			      for_each_object_fn callback,
-			      unsigned flags,
-			      void *_payload)
+			      గుర్తులేని flags,
+			      శూన్య *_payload)
 {
-	struct for_each_object_payload payload = {
+	నిర్మాణం for_each_object_payload payload = {
 		.callback = callback,
 		.payload = _payload,
 	};
-	struct odb_source_info source_info;
-	struct object_info oi = {
-		.source_infop = &source_info,
+	నిర్మాణం odb_ఆధారం_info ఆధారం_info;
+	నిర్మాణం object_info oi = {
+		.ఆధారం_infop = &ఆధారం_info,
 	};
-	struct odb_for_each_object_options opts = {
+	నిర్మాణం odb_for_each_object_options opts = {
 		.flags = flags,
 		.filter = &opt->objects_filter,
 	};
@@ -1030,66 +1030,66 @@ static void batch_each_object(struct batch_options *opt,
 				batch_one_object_oi, &payload, &opts);
 }
 
-static int batch_objects(struct batch_options *opt)
+స్థిర పూర్ణాంకం batch_objects(నిర్మాణం batch_options *opt)
 {
-	struct strbuf input = STRBUF_INIT;
-	struct strbuf output = STRBUF_INIT;
-	struct expand_data data = EXPAND_DATA_INIT;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
-	int save_warning;
-	int retval = 0;
+	నిర్మాణం strbuf ఆదానం = STRBUF_INIT;
+	నిర్మాణం strbuf output = STRBUF_INIT;
+	నిర్మాణం expand_దత్తాంశం దత్తాంశం = EXPAND_దత్తాంశం_INIT;
+	నిర్మాణం repo_config_విలువలు *cfg = repo_config_విలువలు(the_repository);
+	పూర్ణాంకం save_warning;
+	పూర్ణాంకం retval = 0;
 
 	/*
 	 * Expand once with our special mark_query flag, which will prime the
 	 * object_info to be handed to odb_read_object_info_extended for each
 	 * object.
 	 */
-	data.mark_query = 1;
+	దత్తాంశం.mark_query = 1;
 	expand_format(&output,
 		      opt->format ? opt->format : DEFAULT_FORMAT,
-		      &data);
-	data.mark_query = 0;
+		      &దత్తాంశం);
+	దత్తాంశం.mark_query = 0;
 	strbuf_release(&output);
-	if (opt->transform_mode)
-		data.split_on_whitespace = 1;
+	ఒకవేళ (opt->transform_బహుళకం)
+		దత్తాంశం.విభజించు_on_whitespace = 1;
 
-	if (opt->format && !strcmp(opt->format, DEFAULT_FORMAT))
-		opt->format = NULL;
+	ఒకవేళ (opt->format && !strcmp(opt->format, DEFAULT_FORMAT))
+		opt->format = ఖాళీ;
 	/*
 	 * If we are printing out the object, then always fill in the type,
 	 * since we will want to decide whether or not to stream.
 	 */
-	if (opt->batch_mode == BATCH_MODE_CONTENTS)
-		data.info.typep = &data.type;
+	ఒకవేళ (opt->batch_బహుళకం == BATCH_బహుళకం_CONTENTS)
+		దత్తాంశం.info.typep = &దత్తాంశం.type;
 
-	if (opt->all_objects) {
-		struct object_cb_data cb;
-		struct object_info empty = OBJECT_INFO_INIT;
+	ఒకవేళ (opt->all_objects) {
+		నిర్మాణం object_cb_దత్తాంశం cb;
+		నిర్మాణం object_info ఖాళీలు = OBJECT_INFO_INIT;
 
-		if (!memcmp(&data.info, &empty, sizeof(empty)) &&
+		ఒకవేళ (!memcmp(&దత్తాంశం.info, &ఖాళీలు, పరిమాణం(ఖాళీలు)) &&
 		    opt->objects_filter.choice == LOFC_DISABLED)
-			data.skip_object_info = 1;
+			దత్తాంశం.skip_object_info = 1;
 
-		if (repo_has_promisor_remote(the_repository))
+		ఒకవేళ (repo_has_promisor_remote(the_repository))
 			warning("This repository uses promisor remotes. Some objects may not be loaded.");
 
 		disable_replace_refs();
 
 		cb.opt = opt;
-		cb.expand = &data;
+		cb.expand = &దత్తాంశం;
 		cb.scratch = &output;
 
-		if (opt->unordered) {
-			struct oidset seen = OIDSET_INIT;
+		ఒకవేళ (opt->unordered) {
+			నిర్మాణం oidset చూసిన = OIDSET_INIT;
 
-			cb.seen = &seen;
+			cb.చూసిన = &చూసిన;
 
 			batch_each_object(opt, batch_unordered_object,
-					  ODB_FOR_EACH_OBJECT_PACK_ORDER, &cb);
+					  ODB_FOR_EACH_OBJECT_PACK_క్రమం, &cb);
 
-			oidset_clear(&seen);
-		} else {
-			struct oid_array sa = OID_ARRAY_INIT;
+			oidset_clear(&చూసిన);
+		} లేకపోతే {
+			నిర్మాణం oid_array sa = OID_ARRAY_INIT;
 
 			batch_each_object(opt, collect_object, 0, &sa);
 			oid_array_for_each_unique(&sa, batch_object_cb, &cb);
@@ -1098,7 +1098,7 @@ static int batch_objects(struct batch_options *opt)
 		}
 
 		strbuf_release(&output);
-		return 0;
+		తిరిగి 0;
 	}
 
 	/*
@@ -1111,92 +1111,92 @@ static int batch_objects(struct batch_options *opt)
 	save_warning = cfg->warn_on_object_refname_ambiguity;
 	cfg->warn_on_object_refname_ambiguity = 0;
 
-	if (opt->batch_mode == BATCH_MODE_QUEUE_AND_DISPATCH) {
-		batch_objects_command(opt, &output, &data);
-		goto cleanup;
+	ఒకవేళ (opt->batch_బహుళకం == BATCH_బహుళకం_వరుస_AND_DISPATCH) {
+		batch_objects_command(opt, &output, &దత్తాంశం);
+		వెళ్ళు cleanup;
 	}
 
-	while (strbuf_getdelim_strip_crlf(&input, stdin, opt->input_delim) != EOF) {
-		if (data.split_on_whitespace) {
+	అయితే (strbuf_getdelim_strip_crlf(&ఆదానం, stdin, opt->ఆదానం_delim) != EOF) {
+		ఒకవేళ (దత్తాంశం.విభజించు_on_whitespace) {
 			/*
 			 * Split at first whitespace, tying off the beginning
 			 * of the string and saving the remainder (or NULL) in
 			 * data.rest.
 			 */
-			char *p = strpbrk(input.buf, " \t");
-			if (p) {
-				while (*p && strchr(" \t", *p))
+			అక్షరం *p = strpbrk(ఆదానం.buf, " \t");
+			ఒకవేళ (p) {
+				అయితే (*p && strchr(" \t", *p))
 					*p++ = '\0';
 			}
-			data.rest = p;
+			దత్తాంశం.rest = p;
 		}
 
-		batch_one_object(input.buf, &output, opt, &data);
+		batch_one_object(ఆదానం.buf, &output, opt, &దత్తాంశం);
 	}
 
  cleanup:
-	strbuf_release(&input);
+	strbuf_release(&ఆదానం);
 	strbuf_release(&output);
-	string_list_clear(&data.remote_allowed_atoms, 0);
+	string_list_clear(&దత్తాంశం.remote_allowed_atoms, 0);
 	cfg->warn_on_object_refname_ambiguity = save_warning;
-	return retval;
+	తిరిగి retval;
 }
 
-static int git_cat_file_config(const char *var, const char *value,
-			       const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం git_cat_file_config(స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *విలువ,
+			       స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	if (userdiff_config(var, value) < 0)
-		return -1;
+	ఒకవేళ (userdiff_config(var, విలువ) < 0)
+		తిరిగి -1;
 
-	return git_default_config(var, value, ctx, cb);
+	తిరిగి git_default_config(var, విలువ, ctx, cb);
 }
 
-static int batch_option_callback(const struct option *opt,
-				 const char *arg,
-				 int unset)
+స్థిర పూర్ణాంకం batch_option_callback(స్థిరరాశి నిర్మాణం option *opt,
+				 స్థిరరాశి అక్షరం *arg,
+				 పూర్ణాంకం unset)
 {
-	struct batch_options *bo = opt->value;
+	నిర్మాణం batch_options *bo = opt->విలువ;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (bo->enabled) {
-		return error(_("only one batch option may be specified"));
+	ఒకవేళ (bo->enabled) {
+		తిరిగి error(_("only one batch option may be specified"));
 	}
 
 	bo->enabled = 1;
 
-	if (!strcmp(opt->long_name, "batch"))
-		bo->batch_mode = BATCH_MODE_CONTENTS;
-	else if (!strcmp(opt->long_name, "batch-check"))
-		bo->batch_mode = BATCH_MODE_INFO;
-	else if (!strcmp(opt->long_name, "batch-command"))
-		bo->batch_mode = BATCH_MODE_QUEUE_AND_DISPATCH;
-	else
+	ఒకవేళ (!strcmp(opt->long_name, "batch"))
+		bo->batch_బహుళకం = BATCH_బహుళకం_CONTENTS;
+	లేకపోతే ఒకవేళ (!strcmp(opt->long_name, "batch-check"))
+		bo->batch_బహుళకం = BATCH_బహుళకం_INFO;
+	లేకపోతే ఒకవేళ (!strcmp(opt->long_name, "batch-command"))
+		bo->batch_బహుళకం = BATCH_బహుళకం_వరుస_AND_DISPATCH;
+	లేకపోతే
 		BUG("%s given to batch-option-callback", opt->long_name);
 
 	bo->format = arg;
 
-	return 0;
+	తిరిగి 0;
 }
 
-int cmd_cat_file(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+పూర్ణాంకం cmd_cat_file(పూర్ణాంకం argc,
+		 స్థిరరాశి అక్షరం **argv,
+		 స్థిరరాశి అక్షరం *ఉపసర్గ,
+		 నిర్మాణం repository *repo వాడని)
 {
-	int opt = 0;
-	int opt_cw = 0;
-	int opt_epts = 0;
-	const char *exp_type = NULL, *obj_name = NULL;
-	struct batch_options batch = {
+	పూర్ణాంకం opt = 0;
+	పూర్ణాంకం opt_cw = 0;
+	పూర్ణాంకం opt_epts = 0;
+	స్థిరరాశి అక్షరం *exp_type = ఖాళీ, *obj_name = ఖాళీ;
+	నిర్మాణం batch_options batch = {
 		.objects_filter = LIST_OBJECTS_FILTER_INIT,
 	};
-	int unknown_type = 0;
-	int input_nul_terminated = 0;
-	int nul_terminated = 0;
-	int ret;
+	పూర్ణాంకం unknown_type = 0;
+	పూర్ణాంకం ఆదానం_nul_terminated = 0;
+	పూర్ణాంకం nul_terminated = 0;
+	పూర్ణాంకం ret;
 
-	const char * const builtin_catfile_usage[] = {
+	స్థిరరాశి అక్షరం * స్థిరరాశి builtin_catfile_usage[] = {
 		N_("git cat-file <type> <object>"),
 		N_("git cat-file (-e | -p | -t | -s) <object>"),
 		N_("git cat-file (--textconv | --filters)\n"
@@ -1204,24 +1204,24 @@ int cmd_cat_file(int argc,
 		N_("git cat-file (--batch | --batch-check | --batch-command) [--batch-all-objects]\n"
 		   "             [--buffer] [--follow-symlinks] [--unordered]\n"
 		   "             [--textconv | --filters] [-Z]"),
-		NULL
+		ఖాళీ
 	};
-	const struct option options[] = {
+	స్థిరరాశి నిర్మాణం option options[] = {
 		/* Simple queries */
-		OPT_GROUP(N_("Check object existence or emit object contents")),
-		OPT_CMDMODE('e', NULL, &opt,
+		OPT_సమూహం(N_("Check object existence or emit object contents")),
+		OPT_CMDMODE('e', ఖాళీ, &opt,
 			    N_("check if <object> exists"), 'e'),
-		OPT_CMDMODE('p', NULL, &opt, N_("pretty-print <object> content"), 'p'),
+		OPT_CMDMODE('p', ఖాళీ, &opt, N_("pretty-print <object> content"), 'p'),
 
-		OPT_GROUP(N_("Emit [broken] object attributes")),
-		OPT_CMDMODE('t', NULL, &opt, N_("show object type (one of 'blob', 'tree', 'commit', 'tag', ...)"), 't'),
-		OPT_CMDMODE('s', NULL, &opt, N_("show object size"), 's'),
+		OPT_సమూహం(N_("Emit [broken] object attributes")),
+		OPT_CMDMODE('t', ఖాళీ, &opt, N_("show object type (one of 'blob', 'tree', 'commit', 'tag', ...)"), 't'),
+		OPT_CMDMODE('s', ఖాళీ, &opt, N_("show object size"), 's'),
 		OPT_HIDDEN_BOOL(0, "allow-unknown-type", &unknown_type,
 			  N_("historical option -- no-op")),
 		OPT_BOOL(0, "use-mailmap", &use_mailmap, N_("use mail map file")),
 		OPT_ALIAS(0, "mailmap", "use-mailmap"),
 		/* Batch mode */
-		OPT_GROUP(N_("Batch objects requested on stdin (or --batch-all-objects)")),
+		OPT_సమూహం(N_("Batch objects requested on stdin (or --batch-all-objects)")),
 		OPT_CALLBACK_F(0, "batch", &batch, N_("format"),
 			N_("show full <object> or <rev> contents"),
 			PARSE_OPT_OPTARG | PARSE_OPT_NONEG,
@@ -1230,9 +1230,9 @@ int cmd_cat_file(int argc,
 			N_("like --batch, but don't emit <contents>"),
 			PARSE_OPT_OPTARG | PARSE_OPT_NONEG,
 			batch_option_callback),
-		OPT_BOOL_F('z', NULL, &input_nul_terminated, N_("stdin is NUL-terminated"),
+		OPT_BOOL_F('z', ఖాళీ, &ఆదానం_nul_terminated, N_("stdin is NUL-terminated"),
 			PARSE_OPT_HIDDEN),
-		OPT_BOOL('Z', NULL, &nul_terminated, N_("stdin and stdout is NUL-terminated")),
+		OPT_BOOL('Z', ఖాళీ, &nul_terminated, N_("stdin and stdout is NUL-terminated")),
 		OPT_CALLBACK_F(0, "batch-command", &batch, N_("format"),
 			N_("read commands from stdin"),
 			PARSE_OPT_OPTARG | PARSE_OPT_NONEG,
@@ -1240,137 +1240,137 @@ int cmd_cat_file(int argc,
 		OPT_CMDMODE(0, "batch-all-objects", &opt,
 			    N_("with --batch[-check]: ignores stdin, batches all known objects"), 'b'),
 		/* Batch-specific options */
-		OPT_GROUP(N_("Change or optimize batch output")),
-		OPT_BOOL(0, "buffer", &batch.buffer_output, N_("buffer --batch output")),
+		OPT_సమూహం(N_("Change or optimize batch output")),
+		OPT_BOOL(0, "buffer", &batch.బఫరు_output, N_("buffer --batch output")),
 		OPT_BOOL(0, "follow-symlinks", &batch.follow_symlinks,
 			 N_("follow in-tree symlinks")),
 		OPT_BOOL(0, "unordered", &batch.unordered,
 			 N_("do not order objects before emitting them")),
 		/* Textconv options, stand-ole*/
-		OPT_GROUP(N_("Emit object (blob or tree) with conversion or filter (stand-alone, or with batch)")),
+		OPT_సమూహం(N_("Emit object (blob or tree) with conversion or filter (stand-alone, or with batch)")),
 		OPT_CMDMODE(0, "textconv", &opt,
 			    N_("run textconv on object's content"), 'c'),
 		OPT_CMDMODE(0, "filters", &opt,
 			    N_("run filters on object's content"), 'w'),
-		OPT_STRING(0, "path", &force_path, N_("blob|tree"),
+		OPT_STRING(0, "path", &force_మార్గం, N_("blob|tree"),
 			   N_("use a <path> for (--textconv | --filters); Not with 'batch'")),
 		OPT_PARSE_LIST_OBJECTS_FILTER(&batch.objects_filter),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	repo_config(the_repository, git_cat_file_config, NULL);
+	repo_config(the_repository, git_cat_file_config, ఖాళీ);
 
-	batch.buffer_output = -1;
+	batch.బఫరు_output = -1;
 
-	argc = parse_options(argc, argv, prefix, options, builtin_catfile_usage, 0);
+	argc = parse_options(argc, argv, ఉపసర్గ, options, builtin_catfile_usage, 0);
 	opt_cw = (opt == 'c' || opt == 'w');
 	opt_epts = (opt == 'e' || opt == 'p' || opt == 't' || opt == 's');
 
-	if (use_mailmap)
-		load_mailmap();
+	ఒకవేళ (use_mailmap)
+		ఎక్కించు_mailmap();
 
-	switch (batch.objects_filter.choice) {
-	case LOFC_DISABLED:
-		break;
-	case LOFC_BLOB_NONE:
-	case LOFC_BLOB_LIMIT:
-	case LOFC_OBJECT_TYPE:
-		if (!batch.enabled)
+	ఎంపిక (batch.objects_filter.choice) {
+	స్థితి LOFC_DISABLED:
+		ఆపు;
+	స్థితి LOFC_BLOB_NONE:
+	స్థితి LOFC_BLOB_హద్దు:
+	స్థితి LOFC_OBJECT_TYPE:
+		ఒకవేళ (!batch.enabled)
 			usage(_("objects filter only supported in batch mode"));
-		break;
-	default:
+		ఆపు;
+	అప్రమేయ:
 		usagef(_("objects filter not supported: '%s'"),
 		       list_object_filter_config_name(batch.objects_filter.choice));
 	}
 
 	/* --batch-all-objects? */
-	if (opt == 'b')
+	ఒకవేళ (opt == 'b')
 		batch.all_objects = 1;
 
 	/* Option compatibility */
-	if (force_path && !opt_cw)
-		usage_msg_optf(_("'%s=<%s>' needs '%s' or '%s'"),
+	ఒకవేళ (force_మార్గం && !opt_cw)
+		usage_సందేశం_optf(_("'%s=<%s>' needs '%s' or '%s'"),
 			       builtin_catfile_usage, options,
 			       "--path", _("path|tree-ish"), "--filters",
 			       "--textconv");
 
 	/* Option compatibility with batch mode */
-	if (batch.enabled)
+	ఒకవేళ (batch.enabled)
 		;
-	else if (batch.follow_symlinks)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+	లేకపోతే ఒకవేళ (batch.follow_symlinks)
+		usage_సందేశం_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "--follow-symlinks");
-	else if (batch.buffer_output >= 0)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+	లేకపోతే ఒకవేళ (batch.బఫరు_output >= 0)
+		usage_సందేశం_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "--buffer");
-	else if (batch.all_objects)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+	లేకపోతే ఒకవేళ (batch.all_objects)
+		usage_సందేశం_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "--batch-all-objects");
-	else if (input_nul_terminated)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+	లేకపోతే ఒకవేళ (ఆదానం_nul_terminated)
+		usage_సందేశం_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "-z");
-	else if (nul_terminated)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+	లేకపోతే ఒకవేళ (nul_terminated)
+		usage_సందేశం_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "-Z");
 
-	batch.input_delim = batch.output_delim = '\n';
-	if (input_nul_terminated)
-		batch.input_delim = '\0';
-	if (nul_terminated)
-		batch.input_delim = batch.output_delim = '\0';
+	batch.ఆదానం_delim = batch.output_delim = '\n';
+	ఒకవేళ (ఆదానం_nul_terminated)
+		batch.ఆదానం_delim = '\0';
+	ఒకవేళ (nul_terminated)
+		batch.ఆదానం_delim = batch.output_delim = '\0';
 
 	/* Batch defaults */
-	if (batch.buffer_output < 0)
-		batch.buffer_output = batch.all_objects;
+	ఒకవేళ (batch.బఫరు_output < 0)
+		batch.బఫరు_output = batch.all_objects;
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_నిండిన_సూచీ = 0;
 
 	/* Return early if we're in batch mode? */
-	if (batch.enabled) {
-		if (opt_cw)
-			batch.transform_mode = opt;
-		else if (opt && opt != 'b')
-			usage_msg_optf(_("'-%c' is incompatible with batch mode"),
+	ఒకవేళ (batch.enabled) {
+		ఒకవేళ (opt_cw)
+			batch.transform_బహుళకం = opt;
+		లేకపోతే ఒకవేళ (opt && opt != 'b')
+			usage_సందేశం_optf(_("'-%c' is incompatible with batch mode"),
 				       builtin_catfile_usage, options, opt);
-		else if (argc)
-			usage_msg_opt(_("batch modes take no arguments"),
+		లేకపోతే ఒకవేళ (argc)
+			usage_సందేశం_opt(_("batch modes take no arguments"),
 				      builtin_catfile_usage, options);
 
 		ret = batch_objects(&batch);
-		goto out;
+		వెళ్ళు బహిర్గతం;
 	}
 
-	if (opt) {
-		if (!argc && opt == 'c')
-			usage_msg_optf(_("<rev> required with '%s'"),
+	ఒకవేళ (opt) {
+		ఒకవేళ (!argc && opt == 'c')
+			usage_సందేశం_optf(_("<rev> required with '%s'"),
 				       builtin_catfile_usage, options,
 				       "--textconv");
-		else if (!argc && opt == 'w')
-			usage_msg_optf(_("<rev> required with '%s'"),
+		లేకపోతే ఒకవేళ (!argc && opt == 'w')
+			usage_సందేశం_optf(_("<rev> required with '%s'"),
 				       builtin_catfile_usage, options,
 				       "--filters");
-		else if (!argc && opt_epts)
-			usage_msg_optf(_("<object> required with '-%c'"),
+		లేకపోతే ఒకవేళ (!argc && opt_epts)
+			usage_సందేశం_optf(_("<object> required with '-%c'"),
 				       builtin_catfile_usage, options, opt);
-		else if (argc == 1)
+		లేకపోతే ఒకవేళ (argc == 1)
 			obj_name = argv[0];
-		else
-			usage_msg_opt(_("too many arguments"), builtin_catfile_usage,
+		లేకపోతే
+			usage_సందేశం_opt(_("too many arguments"), builtin_catfile_usage,
 				      options);
-	} else if (!argc) {
+	} లేకపోతే ఒకవేళ (!argc) {
 		usage_with_options(builtin_catfile_usage, options);
-	} else if (argc != 2) {
-		usage_msg_optf(_("only two arguments allowed in <type> <object> mode, not %d"),
+	} లేకపోతే ఒకవేళ (argc != 2) {
+		usage_సందేశం_optf(_("only two arguments allowed in <type> <object> mode, not %d"),
 			      builtin_catfile_usage, options, argc);
-	} else if (argc) {
+	} లేకపోతే ఒకవేళ (argc) {
 		exp_type = argv[0];
 		obj_name = argv[1];
 	}
 
 	ret = cat_one_file(opt, exp_type, obj_name);
 
-out:
+బహిర్గతం:
 	list_objects_filter_release(&batch.objects_filter);
-	return ret;
+	తిరిగి ret;
 }

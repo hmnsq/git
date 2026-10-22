@@ -4,169 +4,169 @@
  * Copyright (C) 2007 Johannes E. Schindelin
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refs.h"
-#include "refspec.h"
-#include "object-file.h"
-#include "odb.h"
-#include "commit.h"
-#include "object.h"
-#include "tag.h"
-#include "diff.h"
-#include "diffcore.h"
-#include "log-tree.h"
-#include "revision.h"
-#include "decorate.h"
-#include "string-list.h"
-#include "utf8.h"
-#include "parse-options.h"
-#include "quote.h"
-#include "remote.h"
-#include "blob.h"
-#include "gpg-interface.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "refs.h"
+#అన్తర్భావ "refspec.h"
+#అన్తర్భావ "object-file.h"
+#అన్తర్భావ "odb.h"
+#అన్తర్భావ "commit.h"
+#అన్తర్భావ "object.h"
+#అన్తర్భావ "tag.h"
+#అన్తర్భావ "diff.h"
+#అన్తర్భావ "diffcore.h"
+#అన్తర్భావ "log-tree.h"
+#అన్తర్భావ "revision.h"
+#అన్తర్భావ "decorate.h"
+#అన్తర్భావ "string-list.h"
+#అన్తర్భావ "utf8.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "quote.h"
+#అన్తర్భావ "remote.h"
+#అన్తర్భావ "blob.h"
+#అన్తర్భావ "gpg-interface.h"
 
-static const char *const fast_export_usage[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి fast_export_usage[] = {
 	N_("git fast-export [<options>] [<revision-range>] [[--] <path>...]"),
-	NULL
+	ఖాళీ
 };
 
-static int progress;
-static enum sign_mode signed_tag_mode = SIGN_ABORT;
-static enum sign_mode signed_commit_mode = SIGN_STRIP;
-static enum tag_of_filtered_mode { TAG_FILTERING_ABORT, DROP, REWRITE } tag_of_filtered_mode = TAG_FILTERING_ABORT;
-static enum reencode_mode { REENCODE_ABORT, REENCODE_YES, REENCODE_NO } reencode_mode = REENCODE_ABORT;
-static int fake_missing_tagger;
-static int use_done_feature;
-static int no_data;
-static int full_tree;
-static int reference_excluded_commits;
-static int show_original_ids;
-static int mark_tags;
-static struct string_list extra_refs = STRING_LIST_INIT_DUP;
-static struct string_list tag_refs = STRING_LIST_INIT_DUP;
-static struct refspec refspecs;
-static int anonymize;
-static struct hashmap anonymized_seeds;
-static struct revision_sources revision_sources;
+స్థిర పూర్ణాంకం పురోగతి;
+స్థిర గణన sign_బహుళకం signed_ట్యాగ్_బహుళకం = SIGN_ABORT;
+స్థిర గణన sign_బహుళకం signed_commit_బహుళకం = SIGN_STRIP;
+స్థిర గణన ట్యాగ్_యొక్క_filtered_బహుళకం { ట్యాగ్_FILTERING_ABORT, DROP, REWRITE } ట్యాగ్_యొక్క_filtered_బహుళకం = ట్యాగ్_FILTERING_ABORT;
+స్థిర గణన reencode_బహుళకం { REENCODE_ABORT, REENCODE_YES, REENCODE_NO } reencode_బహుళకం = REENCODE_ABORT;
+స్థిర పూర్ణాంకం fake_missing_tagger;
+స్థిర పూర్ణాంకం use_పూర్తి_feature;
+స్థిర పూర్ణాంకం no_దత్తాంశం;
+స్థిర పూర్ణాంకం నిండిన_వృక్షం;
+స్థిర పూర్ణాంకం reference_excluded_commits;
+స్థిర పూర్ణాంకం show_original_ids;
+స్థిర పూర్ణాంకం mark_ట్యాగులు;
+స్థిర నిర్మాణం string_list extra_refs = STRING_LIST_INIT_DUP;
+స్థిర నిర్మాణం string_list ట్యాగ్_refs = STRING_LIST_INIT_DUP;
+స్థిర నిర్మాణం refspec refspecs;
+స్థిర పూర్ణాంకం anonymize;
+స్థిర నిర్మాణం hashmap anonymized_seeds;
+స్థిర నిర్మాణం revision_sources revision_sources;
 
-static int parse_opt_sign_mode(const struct option *opt,
-			       const char *arg, int unset)
+స్థిర పూర్ణాంకం parse_opt_sign_బహుళకం(స్థిరరాశి నిర్మాణం option *opt,
+			       స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	enum sign_mode *val = opt->value;
+	గణన sign_బహుళకం *val = opt->విలువ;
 
-	if (unset)
-		return 0;
+	ఒకవేళ (unset)
+		తిరిగి 0;
 
-	if (parse_sign_mode(arg, val, NULL) || (*val == SIGN_STRIP_IF_INVALID) ||
+	ఒకవేళ (parse_sign_బహుళకం(arg, val, ఖాళీ) || (*val == SIGN_STRIP_IF_INVALID) ||
 	    (*val == SIGN_SIGN_IF_INVALID) || (*val == SIGN_ABORT_IF_INVALID))
-		return error(_("unknown %s mode: %s"), opt->long_name, arg);
+		తిరిగి error(_("unknown %s mode: %s"), opt->long_name, arg);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int parse_opt_tag_of_filtered_mode(const struct option *opt,
-					  const char *arg, int unset)
+స్థిర పూర్ణాంకం parse_opt_ట్యాగ్_యొక్క_filtered_బహుళకం(స్థిరరాశి నిర్మాణం option *opt,
+					  స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	enum tag_of_filtered_mode *val = opt->value;
+	గణన ట్యాగ్_యొక్క_filtered_బహుళకం *val = opt->విలువ;
 
-	if (unset || !strcmp(arg, "abort"))
-		*val = TAG_FILTERING_ABORT;
-	else if (!strcmp(arg, "drop"))
+	ఒకవేళ (unset || !strcmp(arg, "abort"))
+		*val = ట్యాగ్_FILTERING_ABORT;
+	లేకపోతే ఒకవేళ (!strcmp(arg, "drop"))
 		*val = DROP;
-	else if (!strcmp(arg, "rewrite"))
+	లేకపోతే ఒకవేళ (!strcmp(arg, "rewrite"))
 		*val = REWRITE;
-	else
-		return error(_("unknown tag-of-filtered mode: %s"), arg);
-	return 0;
+	లేకపోతే
+		తిరిగి error(_("unknown tag-of-filtered mode: %s"), arg);
+	తిరిగి 0;
 }
 
-static int parse_opt_reencode_mode(const struct option *opt,
-				   const char *arg, int unset)
+స్థిర పూర్ణాంకం parse_opt_reencode_బహుళకం(స్థిరరాశి నిర్మాణం option *opt,
+				   స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	enum reencode_mode *val = opt->value;
+	గణన reencode_బహుళకం *val = opt->విలువ;
 
-	if (unset) {
+	ఒకవేళ (unset) {
 		*val = REENCODE_ABORT;
-		return 0;
+		తిరిగి 0;
 	}
 
-	switch (git_parse_maybe_bool(arg)) {
-	case 0:
+	ఎంపిక (git_parse_maybe_bool(arg)) {
+	స్థితి 0:
 		*val = REENCODE_NO;
-		break;
-	case 1:
+		ఆపు;
+	స్థితి 1:
 		*val = REENCODE_YES;
-		break;
-	default:
-		if (!strcasecmp(arg, "abort"))
+		ఆపు;
+	అప్రమేయ:
+		ఒకవేళ (!strcasecmp(arg, "abort"))
 			*val = REENCODE_ABORT;
-		else
-			return error(_("unknown reencoding mode: %s"), arg);
+		లేకపోతే
+			తిరిగి error(_("unknown reencoding mode: %s"), arg);
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
-static struct decoration idnums;
-static uint32_t last_idnum;
-struct anonymized_entry {
-	struct hashmap_entry hash;
-	char *anon;
-	const char orig[FLEX_ARRAY];
+స్థిర నిర్మాణం decoration idnums;
+స్థిర uint32_t చివరి_idnum;
+నిర్మాణం anonymized_నమోదు {
+	నిర్మాణం hashmap_నమోదు hash;
+	అక్షరం *anon;
+	స్థిరరాశి అక్షరం orig[FLEX_ARRAY];
 };
 
-struct anonymized_entry_key {
-	struct hashmap_entry hash;
-	const char *orig;
-	size_t orig_len;
+నిర్మాణం anonymized_నమోదు_కీలకం {
+	నిర్మాణం hashmap_నమోదు hash;
+	స్థిరరాశి అక్షరం *orig;
+	కొలత_t orig_len;
 };
 
-static int anonymized_entry_cmp(const void *cmp_data UNUSED,
-				const struct hashmap_entry *eptr,
-				const struct hashmap_entry *entry_or_key,
-				const void *keydata)
+స్థిర పూర్ణాంకం anonymized_నమోదు_cmp(స్థిరరాశి శూన్య *cmp_దత్తాంశం వాడని,
+				స్థిరరాశి నిర్మాణం hashmap_నమోదు *eptr,
+				స్థిరరాశి నిర్మాణం hashmap_నమోదు *నమోదు_or_కీలకం,
+				స్థిరరాశి శూన్య *keydata)
 {
-	const struct anonymized_entry *a, *b;
+	స్థిరరాశి నిర్మాణం anonymized_నమోదు *a, *b;
 
-	a = container_of(eptr, const struct anonymized_entry, hash);
-	if (keydata) {
-		const struct anonymized_entry_key *key = keydata;
-		int equal = !xstrncmpz(a->orig, key->orig, key->orig_len);
-		return !equal;
+	a = container_యొక్క(eptr, స్థిరరాశి నిర్మాణం anonymized_నమోదు, hash);
+	ఒకవేళ (keydata) {
+		స్థిరరాశి నిర్మాణం anonymized_నమోదు_కీలకం *కీలకం = keydata;
+		పూర్ణాంకం equal = !xstrncmpz(a->orig, కీలకం->orig, కీలకం->orig_len);
+		తిరిగి !equal;
 	}
 
-	b = container_of(entry_or_key, const struct anonymized_entry, hash);
-	return strcmp(a->orig, b->orig);
+	b = container_యొక్క(నమోదు_or_కీలకం, స్థిరరాశి నిర్మాణం anonymized_నమోదు, hash);
+	తిరిగి strcmp(a->orig, b->orig);
 }
 
-static struct anonymized_entry *add_anonymized_entry(struct hashmap *map,
-						     unsigned hash,
-						     const char *orig, size_t len,
-						     char *anon)
+స్థిర నిర్మాణం anonymized_నమోదు *కూడు_anonymized_నమోదు(నిర్మాణం hashmap *map,
+						     గుర్తులేని hash,
+						     స్థిరరాశి అక్షరం *orig, కొలత_t len,
+						     అక్షరం *anon)
 {
-	struct anonymized_entry *ret, *old;
+	నిర్మాణం anonymized_నమోదు *ret, *old;
 
-	if (!map->cmpfn)
-		hashmap_init(map, anonymized_entry_cmp, NULL, 0);
+	ఒకవేళ (!map->cmpfn)
+		hashmap_init(map, anonymized_నమోదు_cmp, ఖాళీ, 0);
 
 	FLEX_ALLOC_MEM(ret, orig, orig, len);
-	hashmap_entry_init(&ret->hash, hash);
+	hashmap_నమోదు_init(&ret->hash, hash);
 	ret->anon = anon;
-	old = hashmap_put_entry(map, ret, hash);
+	old = hashmap_put_నమోదు(map, ret, hash);
 
-	if (old) {
-		free(old->anon);
-		free(old);
+	ఒకవేళ (old) {
+		విడుదల(old->anon);
+		విడుదల(old);
 	}
 
-	return ret;
+	తిరిగి ret;
 }
 
 /*
@@ -174,30 +174,30 @@ static struct anonymized_entry *add_anonymized_entry(struct hashmap *map,
  * the same anonymized string with another. The actual generation
  * is farmed out to the generate function.
  */
-static const char *anonymize_str(struct hashmap *map,
-				 char *(*generate)(void),
-				 const char *orig, size_t len)
+స్థిర స్థిరరాశి అక్షరం *anonymize_str(నిర్మాణం hashmap *map,
+				 అక్షరం *(*generate)(శూన్య),
+				 స్థిరరాశి అక్షరం *orig, కొలత_t len)
 {
-	struct anonymized_entry_key key;
-	struct anonymized_entry *ret;
+	నిర్మాణం anonymized_నమోదు_కీలకం కీలకం;
+	నిర్మాణం anonymized_నమోదు *ret;
 
-	hashmap_entry_init(&key.hash, memhash(orig, len));
-	key.orig = orig;
-	key.orig_len = len;
+	hashmap_నమోదు_init(&కీలకం.hash, memhash(orig, len));
+	కీలకం.orig = orig;
+	కీలకం.orig_len = len;
 
 	/* First check if it's a token the user configured manually... */
-	ret = hashmap_get_entry(&anonymized_seeds, &key, hash, &key);
+	ret = hashmap_get_నమోదు(&anonymized_seeds, &కీలకం, hash, &కీలకం);
 
 	/* ...otherwise check if we've already seen it in this context... */
-	if (!ret)
-		ret = hashmap_get_entry(map, &key, hash, &key);
+	ఒకవేళ (!ret)
+		ret = hashmap_get_నమోదు(map, &కీలకం, hash, &కీలకం);
 
 	/* ...and finally generate a new mapping if necessary */
-	if (!ret)
-		ret = add_anonymized_entry(map, key.hash.hash,
+	ఒకవేళ (!ret)
+		ret = కూడు_anonymized_నమోదు(map, కీలకం.hash.hash,
 					   orig, len, generate());
 
-	return ret->anon;
+	తిరిగి ret->anon;
 }
 
 /*
@@ -206,72 +206,72 @@ static const char *anonymize_str(struct hashmap *map,
  * The paths are cached via anonymize_mem so that repeated
  * lookups for "a" will yield the same value.
  */
-static void anonymize_path(struct strbuf *out, const char *path,
-			   struct hashmap *map,
-			   char *(*generate)(void))
+స్థిర శూన్య anonymize_మార్గం(నిర్మాణం strbuf *బహిర్గతం, స్థిరరాశి అక్షరం *మార్గం,
+			   నిర్మాణం hashmap *map,
+			   అక్షరం *(*generate)(శూన్య))
 {
-	while (*path) {
-		const char *end_of_component = strchrnul(path, '/');
-		size_t len = end_of_component - path;
-		const char *c = anonymize_str(map, generate, path, len);
-		strbuf_addstr(out, c);
-		path = end_of_component;
-		if (*path)
-			strbuf_addch(out, *path++);
+	అయితే (*మార్గం) {
+		స్థిరరాశి అక్షరం *చివర_యొక్క_component = strchrnul(మార్గం, '/');
+		కొలత_t len = చివర_యొక్క_component - మార్గం;
+		స్థిరరాశి అక్షరం *c = anonymize_str(map, generate, మార్గం, len);
+		strbuf_addstr(బహిర్గతం, c);
+		మార్గం = చివర_యొక్క_component;
+		ఒకవేళ (*మార్గం)
+			strbuf_addch(బహిర్గతం, *మార్గం++);
 	}
 }
 
-static inline void *mark_to_ptr(uint32_t mark)
+స్థిర అంతఃవరుస శూన్య *mark_గమ్యం_ptr(uint32_t mark)
 {
-	return (void *)(uintptr_t)mark;
+	తిరిగి (శూన్య *)(uintptr_t)mark;
 }
 
-static inline uint32_t ptr_to_mark(void * mark)
+స్థిర అంతఃవరుస uint32_t ptr_గమ్యం_mark(శూన్య * mark)
 {
-	return (uint32_t)(uintptr_t)mark;
+	తిరిగి (uint32_t)(uintptr_t)mark;
 }
 
-static inline void mark_object(struct object *object, uint32_t mark)
+స్థిర అంతఃవరుస శూన్య mark_object(నిర్మాణం object *object, uint32_t mark)
 {
-	add_decoration(&idnums, object, mark_to_ptr(mark));
+	కూడు_decoration(&idnums, object, mark_గమ్యం_ptr(mark));
 }
 
-static inline void mark_next_object(struct object *object)
+స్థిర అంతఃవరుస శూన్య mark_తదుపరి_object(నిర్మాణం object *object)
 {
-	mark_object(object, ++last_idnum);
+	mark_object(object, ++చివరి_idnum);
 }
 
-static int get_object_mark(struct object *object)
+స్థిర పూర్ణాంకం get_object_mark(నిర్మాణం object *object)
 {
-	void *decoration = lookup_decoration(&idnums, object);
-	if (!decoration)
-		return 0;
-	return ptr_to_mark(decoration);
+	శూన్య *decoration = lookup_decoration(&idnums, object);
+	ఒకవేళ (!decoration)
+		తిరిగి 0;
+	తిరిగి ptr_గమ్యం_mark(decoration);
 }
 
-static struct commit *rewrite_commit(struct commit *p)
+స్థిర నిర్మాణం commit *rewrite_commit(నిర్మాణం commit *p)
 {
-	for (;;) {
-		if (p->parents && p->parents->next)
-			break;
-		if (p->object.flags & UNINTERESTING)
-			break;
-		if (!(p->object.flags & TREESAME))
-			break;
-		if (!p->parents)
-			return NULL;
-		p = p->parents->item;
+	కొరకు (;;) {
+		ఒకవేళ (p->parents && p->parents->తదుపరి)
+			ఆపు;
+		ఒకవేళ (p->object.flags & UNINTERESTING)
+			ఆపు;
+		ఒకవేళ (!(p->object.flags & TREESAME))
+			ఆపు;
+		ఒకవేళ (!p->parents)
+			తిరిగి ఖాళీ;
+		p = p->parents->అంశం;
 	}
-	return p;
+	తిరిగి p;
 }
 
-static void show_progress(void)
+స్థిర శూన్య show_పురోగతి(శూన్య)
 {
-	static int counter = 0;
-	if (!progress)
-		return;
-	if ((++counter % progress) == 0)
-		printf("progress %d objects\n", counter);
+	స్థిర పూర్ణాంకం counter = 0;
+	ఒకవేళ (!పురోగతి)
+		తిరిగి;
+	ఒకవేళ ((++counter % పురోగతి) == 0)
+		రాయి("progress %d objects\n", counter);
 }
 
 /*
@@ -285,179 +285,179 @@ static void show_progress(void)
  * There's no need to cache this result with anonymize_mem, since
  * we already handle blob content caching with marks.
  */
-static char *anonymize_blob(unsigned long *size)
+స్థిర అక్షరం *anonymize_blob(గుర్తులేని దీర్ఘ *కొలత)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
-	strbuf_addf(&out, "anonymous blob %d", counter++);
-	*size = out.len;
-	return strbuf_detach(&out, NULL);
+	స్థిర పూర్ణాంకం counter;
+	నిర్మాణం strbuf బహిర్గతం = STRBUF_INIT;
+	strbuf_addf(&బహిర్గతం, "anonymous blob %d", counter++);
+	*కొలత = బహిర్గతం.len;
+	తిరిగి strbuf_detach(&బహిర్గతం, ఖాళీ);
 }
 
-static void export_blob(const struct object_id *oid)
+స్థిర శూన్య export_blob(స్థిరరాశి నిర్మాణం object_id *oid)
 {
-	unsigned long size;
-	enum object_type type;
-	char *buf;
-	struct object *object;
-	int eaten;
+	గుర్తులేని దీర్ఘ కొలత;
+	గణన object_type type;
+	అక్షరం *buf;
+	నిర్మాణం object *object;
+	పూర్ణాంకం eaten;
 
-	if (no_data)
-		return;
+	ఒకవేళ (no_దత్తాంశం)
+		తిరిగి;
 
-	if (is_null_oid(oid))
-		return;
+	ఒకవేళ (is_null_oid(oid))
+		తిరిగి;
 
 	object = lookup_object(the_repository, oid);
-	if (object && object->flags & SHOWN)
-		return;
+	ఒకవేళ (object && object->flags & SHOWN)
+		తిరిగి;
 
-	if (anonymize) {
-		buf = anonymize_blob(&size);
-		object = (struct object *)lookup_blob(the_repository, oid);
+	ఒకవేళ (anonymize) {
+		buf = anonymize_blob(&కొలత);
+		object = (నిర్మాణం object *)lookup_blob(the_repository, oid);
 		eaten = 0;
-	} else {
-		size_t size_st = 0;
+	} లేకపోతే {
+		కొలత_t కొలత_st = 0;
 		buf = odb_read_object(the_repository->objects, oid, &type,
-				      &size_st);
-		size = cast_size_t_to_ulong(size_st);
-		if (!buf)
-			die(_("could not read blob %s"), oid_to_hex(oid));
-		if (check_object_signature(the_repository, oid, buf, size,
+				      &కొలత_st);
+		కొలత = cast_కొలత_t_గమ్యం_ulong(కొలత_st);
+		ఒకవేళ (!buf)
+			die(_("could not read blob %s"), oid_గమ్యం_hex(oid));
+		ఒకవేళ (check_object_signature(the_repository, oid, buf, కొలత,
 					   type) < 0)
-			die(_("oid mismatch in blob %s"), oid_to_hex(oid));
-		object = parse_object_buffer(the_repository, oid, type,
-					     size, buf, &eaten);
+			die(_("oid mismatch in blob %s"), oid_గమ్యం_hex(oid));
+		object = parse_object_బఫరు(the_repository, oid, type,
+					     కొలత, buf, &eaten);
 	}
 
-	if (!object)
-		die(_("could not read blob %s"), oid_to_hex(oid));
+	ఒకవేళ (!object)
+		die(_("could not read blob %s"), oid_గమ్యం_hex(oid));
 
-	mark_next_object(object);
+	mark_తదుపరి_object(object);
 
-	printf("blob\nmark :%"PRIu32"\n", last_idnum);
-	if (show_original_ids)
-		printf("original-oid %s\n", oid_to_hex(oid));
-	printf("data %"PRIuMAX"\n", (uintmax_t)size);
-	if (size && fwrite(buf, size, 1, stdout) != 1)
-		die_errno(_("could not write blob '%s'"), oid_to_hex(oid));
-	printf("\n");
+	రాయి("blob\nmark :%"PRIu32"\n", చివరి_idnum);
+	ఒకవేళ (show_original_ids)
+		రాయి("original-oid %s\n", oid_గమ్యం_hex(oid));
+	రాయి("data %"PRIuMAX"\n", (uintmax_t)కొలత);
+	ఒకవేళ (కొలత && fwrite(buf, కొలత, 1, stdout) != 1)
+		die_errno(_("could not write blob '%s'"), oid_గమ్యం_hex(oid));
+	రాయి("\n");
 
-	show_progress();
+	show_పురోగతి();
 
 	object->flags |= SHOWN;
-	if (!eaten)
-		free(buf);
+	ఒకవేళ (!eaten)
+		విడుదల(buf);
 }
 
-static int depth_first(const void *a_, const void *b_)
+స్థిర పూర్ణాంకం లోతు_మొదటి(స్థిరరాశి శూన్య *a_, స్థిరరాశి శూన్య *b_)
 {
-	const struct diff_filepair *a = *((const struct diff_filepair **)a_);
-	const struct diff_filepair *b = *((const struct diff_filepair **)b_);
-	const char *name_a, *name_b;
-	int len_a, len_b, len;
-	int cmp;
+	స్థిరరాశి నిర్మాణం diff_filepair *a = *((స్థిరరాశి నిర్మాణం diff_filepair **)a_);
+	స్థిరరాశి నిర్మాణం diff_filepair *b = *((స్థిరరాశి నిర్మాణం diff_filepair **)b_);
+	స్థిరరాశి అక్షరం *name_a, *name_b;
+	పూర్ణాంకం len_a, len_b, len;
+	పూర్ణాంకం cmp;
 
-	name_a = a->one ? a->one->path : a->two->path;
-	name_b = b->one ? b->one->path : b->two->path;
+	name_a = a->one ? a->one->మార్గం : a->two->మార్గం;
+	name_b = b->one ? b->one->మార్గం : b->two->మార్గం;
 
-	len_a = strlen(name_a);
-	len_b = strlen(name_b);
+	len_a = అక్షరశ్రేణి_పొడవు(name_a);
+	len_b = అక్షరశ్రేణి_పొడవు(name_b);
 	len = (len_a < len_b) ? len_a : len_b;
 
 	/* strcmp will sort 'd' before 'd/e', we want 'd/e' before 'd' */
 	cmp = memcmp(name_a, name_b, len);
-	if (cmp)
-		return cmp;
+	ఒకవేళ (cmp)
+		తిరిగి cmp;
 	cmp = len_b - len_a;
-	if (cmp)
-		return cmp;
+	ఒకవేళ (cmp)
+		తిరిగి cmp;
 	/*
 	 * Move 'R'ename entries last so that all references of the file
 	 * appear in the output before it is renamed (e.g., when a file
 	 * was copied and renamed in the same commit).
 	 */
-	return (a->status == 'R') - (b->status == 'R');
+	తిరిగి (a->స్థితి_2 == 'R') - (b->స్థితి_2 == 'R');
 }
 
-static void print_path_1(const char *path)
+స్థిర శూన్య print_మార్గం_1(స్థిరరాశి అక్షరం *మార్గం)
 {
-	int need_quote = quote_c_style(path, NULL, NULL, 0);
-	if (need_quote)
-		quote_c_style(path, NULL, stdout, 0);
-	else if (strchr(path, ' '))
-		printf("\"%s\"", path);
-	else
-		printf("%s", path);
+	పూర్ణాంకం need_quote = quote_c_style(మార్గం, ఖాళీ, ఖాళీ, 0);
+	ఒకవేళ (need_quote)
+		quote_c_style(మార్గం, ఖాళీ, stdout, 0);
+	లేకపోతే ఒకవేళ (strchr(మార్గం, ' '))
+		రాయి("\"%s\"", మార్గం);
+	లేకపోతే
+		రాయి("%s", మార్గం);
 }
 
-static char *anonymize_path_component(void)
+స్థిర అక్షరం *anonymize_మార్గం_component(శూన్య)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
-	strbuf_addf(&out, "path%d", counter++);
-	return strbuf_detach(&out, NULL);
+	స్థిర పూర్ణాంకం counter;
+	నిర్మాణం strbuf బహిర్గతం = STRBUF_INIT;
+	strbuf_addf(&బహిర్గతం, "path%d", counter++);
+	తిరిగి strbuf_detach(&బహిర్గతం, ఖాళీ);
 }
 
-static void print_path(const char *path)
+స్థిర శూన్య print_మార్గం(స్థిరరాశి అక్షరం *మార్గం)
 {
-	if (!anonymize)
-		print_path_1(path);
-	else {
-		static struct hashmap paths;
-		static struct strbuf anon = STRBUF_INIT;
+	ఒకవేళ (!anonymize)
+		print_మార్గం_1(మార్గం);
+	లేకపోతే {
+		స్థిర నిర్మాణం hashmap paths;
+		స్థిర నిర్మాణం strbuf anon = STRBUF_INIT;
 
-		anonymize_path(&anon, path, &paths, anonymize_path_component);
-		print_path_1(anon.buf);
+		anonymize_మార్గం(&anon, మార్గం, &paths, anonymize_మార్గం_component);
+		print_మార్గం_1(anon.buf);
 		strbuf_reset(&anon);
 	}
 }
 
-static char *generate_fake_oid(void)
+స్థిర అక్షరం *generate_fake_oid(శూన్య)
 {
-	static uint32_t counter = 1; /* avoid null oid */
-	const unsigned hashsz = the_hash_algo->rawsz;
-	struct object_id oid;
-	char *hex = xmallocz(GIT_MAX_HEXSZ);
+	స్థిర uint32_t counter = 1; /* avoid null oid */
+	స్థిరరాశి గుర్తులేని hashsz = the_hash_algo->rawsz;
+	నిర్మాణం object_id oid;
+	అక్షరం *hex = xmallocz(GIT_MAX_HEXSZ);
 
 	oidclr(&oid, the_repository->hash_algo);
 	put_be32(oid.hash + hashsz - 4, counter++);
-	return oid_to_hex_r(hex, &oid);
+	తిరిగి oid_గమ్యం_hex_r(hex, &oid);
 }
 
-static const char *anonymize_oid(const char *oid_hex)
+స్థిర స్థిరరాశి అక్షరం *anonymize_oid(స్థిరరాశి అక్షరం *oid_hex)
 {
-	static struct hashmap objs;
-	size_t len = strlen(oid_hex);
-	return anonymize_str(&objs, generate_fake_oid, oid_hex, len);
+	స్థిర నిర్మాణం hashmap objs;
+	కొలత_t len = అక్షరశ్రేణి_పొడవు(oid_hex);
+	తిరిగి anonymize_str(&objs, generate_fake_oid, oid_hex, len);
 }
 
-static void show_filemodify(struct diff_queue_struct *q,
-			    struct diff_options *options UNUSED, void *data)
+స్థిర శూన్య show_filemodify(నిర్మాణం diff_వరుస_struct *q,
+			    నిర్మాణం diff_options *options వాడని, శూన్య *దత్తాంశం)
 {
-	int i;
-	struct string_list *changed = data;
+	పూర్ణాంకం i;
+	నిర్మాణం string_list *మారింది = దత్తాంశం;
 
 	/*
 	 * Handle files below a directory first, in case they are all deleted
 	 * and the directory changes to a file or symlink.
 	 */
-	QSORT(q->queue, q->nr, depth_first);
+	QSORT(q->వరుస, q->nr, లోతు_మొదటి);
 
-	for (i = 0; i < q->nr; i++) {
-		struct diff_filespec *ospec = q->queue[i]->one;
-		struct diff_filespec *spec = q->queue[i]->two;
+	కొరకు (i = 0; i < q->nr; i++) {
+		నిర్మాణం diff_filespec *ospec = q->వరుస[i]->one;
+		నిర్మాణం diff_filespec *spec = q->వరుస[i]->two;
 
-		switch (q->queue[i]->status) {
-		case DIFF_STATUS_DELETED:
-			printf("D ");
-			print_path(spec->path);
-			string_list_insert(changed, spec->path);
-			putchar('\n');
-			break;
+		ఎంపిక (q->వరుస[i]->స్థితి_2) {
+		స్థితి DIFF_స్థితి_DELETED:
+			రాయి("D ");
+			print_మార్గం(spec->మార్గం);
+			string_list_చొప్పించు(మారింది, spec->మార్గం);
+			అక్షరం_రాయి('\n');
+			ఆపు;
 
-		case DIFF_STATUS_COPIED:
-		case DIFF_STATUS_RENAMED:
+		స్థితి DIFF_స్థితి_COPIED:
+		స్థితి DIFF_స్థితి_RENAMED:
 			/*
 			 * If a change in the file corresponding to ospec->path
 			 * has been observed, we cannot trust its contents
@@ -465,105 +465,105 @@ static void show_filemodify(struct diff_queue_struct *q,
 			 * contents, not the current contents.  So, declare a
 			 * copy or rename only if there was no change observed.
 			 */
-			if (!string_list_has_string(changed, ospec->path)) {
-				printf("%c ", q->queue[i]->status);
-				print_path(ospec->path);
-				putchar(' ');
-				print_path(spec->path);
-				string_list_insert(changed, spec->path);
-				putchar('\n');
+			ఒకవేళ (!string_list_has_string(మారింది, ospec->మార్గం)) {
+				రాయి("%c ", q->వరుస[i]->స్థితి_2);
+				print_మార్గం(ospec->మార్గం);
+				అక్షరం_రాయి(' ');
+				print_మార్గం(spec->మార్గం);
+				string_list_చొప్పించు(మారింది, spec->మార్గం);
+				అక్షరం_రాయి('\n');
 
-				if (oideq(&ospec->oid, &spec->oid) &&
-				    ospec->mode == spec->mode)
-					break;
+				ఒకవేళ (oideq(&ospec->oid, &spec->oid) &&
+				    ospec->బహుళకం == spec->బహుళకం)
+					ఆపు;
 			}
 			/* fallthrough */
 
-		case DIFF_STATUS_TYPE_CHANGED:
-		case DIFF_STATUS_MODIFIED:
-		case DIFF_STATUS_ADDED:
+		స్థితి DIFF_స్థితి_TYPE_మారింది:
+		స్థితి DIFF_స్థితి_MODIFIED:
+		స్థితి DIFF_స్థితి_ADDED:
 			/*
 			 * Links refer to objects in another repositories;
 			 * output the SHA-1 verbatim.
 			 */
-			if (no_data || S_ISGITLINK(spec->mode))
-				printf("M %06o %s ", spec->mode,
+			ఒకవేళ (no_దత్తాంశం || S_ISGITLINK(spec->బహుళకం))
+				రాయి("M %06o %s ", spec->బహుళకం,
 				       anonymize ?
-				       anonymize_oid(oid_to_hex(&spec->oid)) :
-				       oid_to_hex(&spec->oid));
-			else {
-				struct object *object = lookup_object(the_repository,
+				       anonymize_oid(oid_గమ్యం_hex(&spec->oid)) :
+				       oid_గమ్యం_hex(&spec->oid));
+			లేకపోతే {
+				నిర్మాణం object *object = lookup_object(the_repository,
 								      &spec->oid);
-				printf("M %06o :%d ", spec->mode,
+				రాయి("M %06o :%d ", spec->బహుళకం,
 				       get_object_mark(object));
 			}
-			print_path(spec->path);
-			string_list_insert(changed, spec->path);
-			putchar('\n');
-			break;
+			print_మార్గం(spec->మార్గం);
+			string_list_చొప్పించు(మారింది, spec->మార్గం);
+			అక్షరం_రాయి('\n');
+			ఆపు;
 
-		default:
+		అప్రమేయ:
 			die(_("unexpected comparison status '%c' for %s, %s"),
-			    q->queue[i]->status,
-			    ospec->path ? ospec->path : _("none"),
-			    spec->path ? spec->path : _("none"));
+			    q->వరుస[i]->స్థితి_2,
+			    ospec->మార్గం ? ospec->మార్గం : _("none"),
+			    spec->మార్గం ? spec->మార్గం : _("none"));
 		}
 	}
 }
 
-static char *anonymize_ref_component(void)
+స్థిర అక్షరం *anonymize_ref_component(శూన్య)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
-	strbuf_addf(&out, "ref%d", counter++);
-	return strbuf_detach(&out, NULL);
+	స్థిర పూర్ణాంకం counter;
+	నిర్మాణం strbuf బహిర్గతం = STRBUF_INIT;
+	strbuf_addf(&బహిర్గతం, "ref%d", counter++);
+	తిరిగి strbuf_detach(&బహిర్గతం, ఖాళీ);
 }
 
-static const char *anonymize_refname(const char *refname)
+స్థిర స్థిరరాశి అక్షరం *anonymize_refname(స్థిరరాశి అక్షరం *refname)
 {
 	/*
 	 * If any of these prefixes is found, we will leave it intact
 	 * so that tags remain tags and so forth.
 	 */
-	static const char *prefixes[] = {
+	స్థిర స్థిరరాశి అక్షరం *prefixes[] = {
 		"refs/heads/",
 		"refs/tags/",
 		"refs/remotes/",
 		"refs/"
 	};
-	static struct hashmap refs;
-	static struct strbuf anon = STRBUF_INIT;
-	int i;
+	స్థిర నిర్మాణం hashmap refs;
+	స్థిర నిర్మాణం strbuf anon = STRBUF_INIT;
+	పూర్ణాంకం i;
 
 	strbuf_reset(&anon);
-	for (i = 0; i < ARRAY_SIZE(prefixes); i++) {
-		if (skip_prefix(refname, prefixes[i], &refname)) {
+	కొరకు (i = 0; i < ARRAY_కొలత(prefixes); i++) {
+		ఒకవేళ (skip_ఉపసర్గ(refname, prefixes[i], &refname)) {
 			strbuf_addstr(&anon, prefixes[i]);
-			break;
+			ఆపు;
 		}
 	}
 
-	anonymize_path(&anon, refname, &refs, anonymize_ref_component);
-	return anon.buf;
+	anonymize_మార్గం(&anon, refname, &refs, anonymize_ref_component);
+	తిరిగి anon.buf;
 }
 
 /*
  * We do not even bother to cache commit messages, as they are unlikely
  * to be repeated verbatim, and it is not that interesting when they are.
  */
-static char *anonymize_commit_message(void)
+స్థిర అక్షరం *anonymize_commit_సందేశం(శూన్య)
 {
-	static int counter;
-	return xstrfmt("subject %d\n\nbody\n", counter++);
+	స్థిర పూర్ణాంకం counter;
+	తిరిగి xstrfmt("subject %d\n\nbody\n", counter++);
 }
 
-static char *anonymize_ident(void)
+స్థిర అక్షరం *anonymize_ident(శూన్య)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
-	strbuf_addf(&out, "User %d <user%d@example.com>", counter, counter);
+	స్థిర పూర్ణాంకం counter;
+	నిర్మాణం strbuf బహిర్గతం = STRBUF_INIT;
+	strbuf_addf(&బహిర్గతం, "User %d <user%d@example.com>", counter, counter);
 	counter++;
-	return strbuf_detach(&out, NULL);
+	తిరిగి strbuf_detach(&బహిర్గతం, ఖాళీ);
 }
 
 /*
@@ -571,45 +571,45 @@ static char *anonymize_ident(void)
  * but keep timestamps intact, as they influence things like traversal
  * order (and by themselves should not be too revealing).
  */
-static void anonymize_ident_line(const char **beg, const char **end)
+స్థిర శూన్య anonymize_ident_పంక్తి(స్థిరరాశి అక్షరం **beg, స్థిరరాశి అక్షరం **చివర)
 {
-	static struct hashmap idents;
-	static struct strbuf buffers[] = { STRBUF_INIT, STRBUF_INIT };
-	static unsigned which_buffer;
+	స్థిర నిర్మాణం hashmap idents;
+	స్థిర నిర్మాణం strbuf buffers[] = { STRBUF_INIT, STRBUF_INIT };
+	స్థిర గుర్తులేని which_బఫరు;
 
-	struct strbuf *out;
-	struct ident_split split;
-	const char *end_of_header;
+	నిర్మాణం strbuf *బహిర్గతం;
+	నిర్మాణం ident_విభజించు విభజించు;
+	స్థిరరాశి అక్షరం *చివర_యొక్క_శీర్షిక;
 
-	out = &buffers[which_buffer++];
-	which_buffer %= ARRAY_SIZE(buffers);
-	strbuf_reset(out);
+	బహిర్గతం = &buffers[which_బఫరు++];
+	which_బఫరు %= ARRAY_కొలత(buffers);
+	strbuf_reset(బహిర్గతం);
 
 	/* skip "committer", "author", "tagger", etc */
-	end_of_header = strchr(*beg, ' ');
-	if (!end_of_header)
+	చివర_యొక్క_శీర్షిక = strchr(*beg, ' ');
+	ఒకవేళ (!చివర_యొక్క_శీర్షిక)
 		BUG("malformed line fed to anonymize_ident_line: %.*s",
-		    (int)(*end - *beg), *beg);
-	end_of_header++;
-	strbuf_add(out, *beg, end_of_header - *beg);
+		    (పూర్ణాంకం)(*చివర - *beg), *beg);
+	చివర_యొక్క_శీర్షిక++;
+	strbuf_కూడు(బహిర్గతం, *beg, చివర_యొక్క_శీర్షిక - *beg);
 
-	if (!split_ident_line(&split, end_of_header, *end - end_of_header) &&
-	    split.date_begin) {
-		const char *ident;
-		size_t len;
+	ఒకవేళ (!విభజించు_ident_పంక్తి(&విభజించు, చివర_యొక్క_శీర్షిక, *చివర - చివర_యొక్క_శీర్షిక) &&
+	    విభజించు.date_begin) {
+		స్థిరరాశి అక్షరం *ident;
+		కొలత_t len;
 
-		len = split.mail_end - split.name_begin;
+		len = విభజించు.mail_చివర - విభజించు.name_begin;
 		ident = anonymize_str(&idents, anonymize_ident,
-				      split.name_begin, len);
-		strbuf_addstr(out, ident);
-		strbuf_addch(out, ' ');
-		strbuf_add(out, split.date_begin, split.tz_end - split.date_begin);
-	} else {
-		strbuf_addstr(out, "Malformed Ident <malformed@example.com> 0 -0000");
+				      విభజించు.name_begin, len);
+		strbuf_addstr(బహిర్గతం, ident);
+		strbuf_addch(బహిర్గతం, ' ');
+		strbuf_కూడు(బహిర్గతం, విభజించు.date_begin, విభజించు.tz_చివర - విభజించు.date_begin);
+	} లేకపోతే {
+		strbuf_addstr(బహిర్గతం, "Malformed Ident <malformed@example.com> 0 -0000");
 	}
 
-	*beg = out->buf;
-	*end = out->buf + out->len;
+	*beg = బహిర్గతం->buf;
+	*చివర = బహిర్గతం->buf + బహిర్గతం->len;
 }
 
 /*
@@ -624,96 +624,96 @@ static void anonymize_ident_line(const char **beg, const char **end)
  * If the header is found, then *end is set to point at the '\n' in
  * msg that immediately follows the header value.
  */
-static const char *find_commit_multiline_header(const char *msg,
-						const char *key,
-						const char **end)
+స్థిర స్థిరరాశి అక్షరం *కనుగొను_commit_multiline_శీర్షిక(స్థిరరాశి అక్షరం *సందేశం,
+						స్థిరరాశి అక్షరం *కీలకం,
+						స్థిరరాశి అక్షరం **చివర)
 {
-	struct strbuf val = STRBUF_INIT;
-	const char *bol, *eol;
-	size_t len;
+	నిర్మాణం strbuf val = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *bol, *eol;
+	కొలత_t len;
 
-	bol = find_commit_header(msg, key, &len);
-	if (!bol)
-		return NULL;
+	bol = కనుగొను_commit_శీర్షిక(సందేశం, కీలకం, &len);
+	ఒకవేళ (!bol)
+		తిరిగి ఖాళీ;
 	eol = bol + len;
-	strbuf_add(&val, bol, len);
+	strbuf_కూడు(&val, bol, len);
 
-	while (eol[0] == '\n' && eol[1] == ' ') {
+	అయితే (eol[0] == '\n' && eol[1] == ' ') {
 		bol = eol + 2;
 		eol = strchrnul(bol, '\n');
 		strbuf_addch(&val, '\n');
-		strbuf_add(&val, bol, eol - bol);
+		strbuf_కూడు(&val, bol, eol - bol);
 	}
 
-	*end = eol;
-	return strbuf_detach(&val, NULL);
+	*చివర = eol;
+	తిరిగి strbuf_detach(&val, ఖాళీ);
 }
 
-static void print_signature(const char *signature, const char *object_hash)
+స్థిర శూన్య print_signature(స్థిరరాశి అక్షరం *signature, స్థిరరాశి అక్షరం *object_hash)
 {
-	if (!signature)
-		return;
+	ఒకవేళ (!signature)
+		తిరిగి;
 
-	printf("gpgsig %s %s\ndata %u\n%s\n",
+	రాయి("gpgsig %s %s\ndata %u\n%s\n",
 	       object_hash,
 	       get_signature_format(signature),
-	       (unsigned)strlen(signature),
+	       (గుర్తులేని)అక్షరశ్రేణి_పొడవు(signature),
 	       signature);
 }
 
-static const char *append_signatures_for_header(struct string_list *signatures,
-						const char *pos,
-						const char *header,
-						const char *object_hash)
+స్థిర స్థిరరాశి అక్షరం *append_signatures_for_శీర్షిక(నిర్మాణం string_list *signatures,
+						స్థిరరాశి అక్షరం *pos,
+						స్థిరరాశి అక్షరం *శీర్షిక,
+						స్థిరరాశి అక్షరం *object_hash)
 {
-	const char *signature;
-	const char *start = pos;
-	const char *end = pos;
+	స్థిరరాశి అక్షరం *signature;
+	స్థిరరాశి అక్షరం *ప్రారంభం = pos;
+	స్థిరరాశి అక్షరం *చివర = pos;
 
-	while ((signature = find_commit_multiline_header(start + 1,
-							 header,
-							 &end))) {
-		string_list_append(signatures, signature)->util = (void *)object_hash;
-		free((char *)signature);
-		start = end;
+	అయితే ((signature = కనుగొను_commit_multiline_శీర్షిక(ప్రారంభం + 1,
+							 శీర్షిక,
+							 &చివర))) {
+		string_list_append(signatures, signature)->util = (శూన్య *)object_hash;
+		విడుదల((అక్షరం *)signature);
+		ప్రారంభం = చివర;
 	}
 
-	return end;
+	తిరిగి చివర;
 }
 
-static void handle_commit(struct commit *commit, struct rev_info *rev,
-			  struct string_list *paths_of_changed_objects)
+స్థిర శూన్య handle_commit(నిర్మాణం commit *commit, నిర్మాణం rev_info *rev,
+			  నిర్మాణం string_list *paths_యొక్క_మారింది_objects)
 {
-	int saved_output_format = rev->diffopt.output_format;
-	const char *commit_buffer, *commit_buffer_cursor;
-	const char *author, *author_end, *committer, *committer_end;
-	const char *encoding = NULL;
-	size_t encoding_len;
-	struct string_list signatures = STRING_LIST_INIT_DUP;
-	const char *message;
-	char *reencoded = NULL;
-	struct commit_list *p;
-	const char *refname;
-	int i;
+	పూర్ణాంకం saved_output_format = rev->diffopt.output_format;
+	స్థిరరాశి అక్షరం *commit_బఫరు, *commit_బఫరు_cursor;
+	స్థిరరాశి అక్షరం *author, *author_చివర, *committer, *committer_చివర;
+	స్థిరరాశి అక్షరం *encoding = ఖాళీ;
+	కొలత_t encoding_len;
+	నిర్మాణం string_list signatures = STRING_LIST_INIT_DUP;
+	స్థిరరాశి అక్షరం *సందేశం_2;
+	అక్షరం *reencoded = ఖాళీ;
+	నిర్మాణం commit_list *p;
+	స్థిరరాశి అక్షరం *refname;
+	పూర్ణాంకం i;
 
 	rev->diffopt.output_format = DIFF_FORMAT_CALLBACK;
 
 	parse_commit_or_die(commit);
-	commit_buffer_cursor = commit_buffer = repo_get_commit_buffer(the_repository, commit, NULL);
+	commit_బఫరు_cursor = commit_బఫరు = repo_get_commit_బఫరు(the_repository, commit, ఖాళీ);
 
-	author = strstr(commit_buffer_cursor, "\nauthor ");
-	if (!author)
+	author = అక్షరశ్రేణి_శోధన(commit_బఫరు_cursor, "\nauthor ");
+	ఒకవేళ (!author)
 		die(_("could not find author in commit %s"),
-		    oid_to_hex(&commit->object.oid));
+		    oid_గమ్యం_hex(&commit->object.oid));
 	author++;
-	commit_buffer_cursor = author_end = strchrnul(author, '\n');
+	commit_బఫరు_cursor = author_చివర = strchrnul(author, '\n');
 
-	committer = strstr(commit_buffer_cursor, "\ncommitter ");
-	if (!committer)
+	committer = అక్షరశ్రేణి_శోధన(commit_బఫరు_cursor, "\ncommitter ");
+	ఒకవేళ (!committer)
 		die(_("could not find committer in commit %s"),
-		    oid_to_hex(&commit->object.oid));
+		    oid_గమ్యం_hex(&commit->object.oid));
 	committer++;
-	commit_buffer_cursor = committer_end = strchrnul(committer, '\n');
+	commit_బఫరు_cursor = committer_చివర = strchrnul(committer, '\n');
 
 	/*
 	 * find_commit_header() and find_commit_multiline_header() get
@@ -722,40 +722,40 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 	 * pointer to the beginning of the next line.
 	 */
 
-	if (*commit_buffer_cursor == '\n') {
-		encoding = find_commit_header(commit_buffer_cursor + 1, "encoding", &encoding_len);
-		if (encoding)
-			commit_buffer_cursor = encoding + encoding_len;
+	ఒకవేళ (*commit_బఫరు_cursor == '\n') {
+		encoding = కనుగొను_commit_శీర్షిక(commit_బఫరు_cursor + 1, "encoding", &encoding_len);
+		ఒకవేళ (encoding)
+			commit_బఫరు_cursor = encoding + encoding_len;
 	}
 
-	if (*commit_buffer_cursor == '\n') {
-		const char *after_sha1 = append_signatures_for_header(&signatures, commit_buffer_cursor,
+	ఒకవేళ (*commit_బఫరు_cursor == '\n') {
+		స్థిరరాశి అక్షరం *after_sha1 = append_signatures_for_శీర్షిక(&signatures, commit_బఫరు_cursor,
 								      "gpgsig", "sha1");
-		const char *after_sha256 = append_signatures_for_header(&signatures, commit_buffer_cursor,
+		స్థిరరాశి అక్షరం *after_sha256 = append_signatures_for_శీర్షిక(&signatures, commit_బఫరు_cursor,
 									"gpgsig-sha256", "sha256");
-		commit_buffer_cursor = (after_sha1 > after_sha256) ? after_sha1 : after_sha256;
+		commit_బఫరు_cursor = (after_sha1 > after_sha256) ? after_sha1 : after_sha256;
 	}
 
-	message = strstr(commit_buffer_cursor, "\n\n");
-	if (message)
-		message += 2;
+	సందేశం_2 = అక్షరశ్రేణి_శోధన(commit_బఫరు_cursor, "\n\n");
+	ఒకవేళ (సందేశం_2)
+		సందేశం_2 += 2;
 
-	if (commit->parents &&
-	    (get_object_mark(&commit->parents->item->object) != 0 ||
+	ఒకవేళ (commit->parents &&
+	    (get_object_mark(&commit->parents->అంశం->object) != 0 ||
 	     reference_excluded_commits) &&
-	    !full_tree) {
-		parse_commit_or_die(commit->parents->item);
-		diff_tree_oid(get_commit_tree_oid(commit->parents->item),
-			      get_commit_tree_oid(commit), "", &rev->diffopt);
+	    !నిండిన_వృక్షం) {
+		parse_commit_or_die(commit->parents->అంశం);
+		diff_వృక్షం_oid(get_commit_వృక్షం_oid(commit->parents->అంశం),
+			      get_commit_వృక్షం_oid(commit), "", &rev->diffopt);
 	}
-	else
-		diff_root_tree_oid(get_commit_tree_oid(commit),
+	లేకపోతే
+		diff_మూలం_వృక్షం_oid(get_commit_వృక్షం_oid(commit),
 				   "", &rev->diffopt);
 
 	/* Export the referenced blobs, and remember the marks. */
-	for (i = 0; i < diff_queued_diff.nr; i++)
-		if (!S_ISGITLINK(diff_queued_diff.queue[i]->two->mode))
-			export_blob(&diff_queued_diff.queue[i]->two->oid);
+	కొరకు (i = 0; i < diff_queued_diff.nr; i++)
+		ఒకవేళ (!S_ISGITLINK(diff_queued_diff.వరుస[i]->two->బహుళకం))
+			export_blob(&diff_queued_diff.వరుస[i]->two->oid);
 
 	refname = *revision_sources_at(&revision_sources, commit);
 	/*
@@ -765,393 +765,393 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 	 * repo may have enough refs for this to become slow.
 	 */
 	string_list_remove(&extra_refs, refname, 0);
-	if (anonymize) {
+	ఒకవేళ (anonymize) {
 		refname = anonymize_refname(refname);
-		anonymize_ident_line(&committer, &committer_end);
-		anonymize_ident_line(&author, &author_end);
+		anonymize_ident_పంక్తి(&committer, &committer_చివర);
+		anonymize_ident_పంక్తి(&author, &author_చివర);
 	}
 
-	mark_next_object(&commit->object);
-	if (anonymize) {
-		reencoded = anonymize_commit_message();
-	} else if (encoding) {
-		char *buf;
-		switch (reencode_mode) {
-		case REENCODE_YES:
-			buf = xstrfmt("%.*s", (int)encoding_len, encoding);
-			reencoded = reencode_string(message, "UTF-8", buf);
-			free(buf);
-			break;
-		case REENCODE_NO:
-			break;
-		case REENCODE_ABORT:
+	mark_తదుపరి_object(&commit->object);
+	ఒకవేళ (anonymize) {
+		reencoded = anonymize_commit_సందేశం();
+	} లేకపోతే ఒకవేళ (encoding) {
+		అక్షరం *buf;
+		ఎంపిక (reencode_బహుళకం) {
+		స్థితి REENCODE_YES:
+			buf = xstrfmt("%.*s", (పూర్ణాంకం)encoding_len, encoding);
+			reencoded = reencode_string(సందేశం_2, "UTF-8", buf);
+			విడుదల(buf);
+			ఆపు;
+		స్థితి REENCODE_NO:
+			ఆపు;
+		స్థితి REENCODE_ABORT:
 			die(_("encountered commit-specific encoding %.*s in commit "
 			      "%s; use --reencode=[yes|no] to handle it"),
-			    (int)encoding_len, encoding,
-			    oid_to_hex(&commit->object.oid));
+			    (పూర్ణాంకం)encoding_len, encoding,
+			    oid_గమ్యం_hex(&commit->object.oid));
 		}
 	}
-	if (!commit->parents)
-		printf("reset %s\n", refname);
-	printf("commit %s\nmark :%"PRIu32"\n", refname, last_idnum);
-	if (show_original_ids)
-		printf("original-oid %s\n", oid_to_hex(&commit->object.oid));
-	printf("%.*s\n%.*s\n",
-	       (int)(author_end - author), author,
-	       (int)(committer_end - committer), committer);
-	if (signatures.nr) {
-		switch (signed_commit_mode) {
+	ఒకవేళ (!commit->parents)
+		రాయి("reset %s\n", refname);
+	రాయి("commit %s\nmark :%"PRIu32"\n", refname, చివరి_idnum);
+	ఒకవేళ (show_original_ids)
+		రాయి("original-oid %s\n", oid_గమ్యం_hex(&commit->object.oid));
+	రాయి("%.*s\n%.*s\n",
+	       (పూర్ణాంకం)(author_చివర - author), author,
+	       (పూర్ణాంకం)(committer_చివర - committer), committer);
+	ఒకవేళ (signatures.nr) {
+		ఎంపిక (signed_commit_బహుళకం) {
 		/* Exporting modes */
-		case SIGN_WARN_VERBATIM:
+		స్థితి SIGN_WARN_VERBATIM:
 			warning(_("exporting %"PRIuMAX" signature(s) for commit %s"),
-				(uintmax_t)signatures.nr, oid_to_hex(&commit->object.oid));
+				(uintmax_t)signatures.nr, oid_గమ్యం_hex(&commit->object.oid));
 			/* fallthru */
-		case SIGN_VERBATIM:
-			for (size_t i = 0; i < signatures.nr; i++) {
-				struct string_list_item *item = &signatures.items[i];
-				print_signature(item->string, item->util);
+		స్థితి SIGN_VERBATIM:
+			కొరకు (కొలత_t i = 0; i < signatures.nr; i++) {
+				నిర్మాణం string_list_అంశం *అంశం = &signatures.వస్తువులు[i];
+				print_signature(అంశం->string, అంశం->util);
 			}
-			break;
+			ఆపు;
 
 		/* Stripping modes */
-		case SIGN_WARN_STRIP:
+		స్థితి SIGN_WARN_STRIP:
 			warning(_("stripping signature(s) from commit %s"),
-				oid_to_hex(&commit->object.oid));
+				oid_గమ్యం_hex(&commit->object.oid));
 			/* fallthru */
-		case SIGN_STRIP:
-			break;
+		స్థితి SIGN_STRIP:
+			ఆపు;
 
 		/* Aborting modes */
-		case SIGN_ABORT:
+		స్థితి SIGN_ABORT:
 			die(_("encountered signed commit %s; use "
 			      "--signed-commits=<mode> to handle it"),
-			    oid_to_hex(&commit->object.oid));
-		default:
-			BUG("invalid signed_commit_mode value %d", signed_commit_mode);
+			    oid_గమ్యం_hex(&commit->object.oid));
+		అప్రమేయ:
+			BUG("invalid signed_commit_mode value %d", signed_commit_బహుళకం);
 		}
 		string_list_clear(&signatures, 0);
 	}
-	if (!reencoded && encoding)
-		printf("encoding %.*s\n", (int)encoding_len, encoding);
-	printf("data %u\n%s",
-	       (unsigned)(reencoded
-			  ? strlen(reencoded) : message
-			  ? strlen(message) : 0),
-	       reencoded ? reencoded : message ? message : "");
-	free(reencoded);
-	repo_unuse_commit_buffer(the_repository, commit, commit_buffer);
+	ఒకవేళ (!reencoded && encoding)
+		రాయి("encoding %.*s\n", (పూర్ణాంకం)encoding_len, encoding);
+	రాయి("data %u\n%s",
+	       (గుర్తులేని)(reencoded
+			  ? అక్షరశ్రేణి_పొడవు(reencoded) : సందేశం_2
+			  ? అక్షరశ్రేణి_పొడవు(సందేశం_2) : 0),
+	       reencoded ? reencoded : సందేశం_2 ? సందేశం_2 : "");
+	విడుదల(reencoded);
+	repo_unuse_commit_బఫరు(the_repository, commit, commit_బఫరు);
 
-	for (i = 0, p = commit->parents; p; p = p->next) {
-		struct object *obj = &p->item->object;
-		int mark = get_object_mark(obj);
+	కొరకు (i = 0, p = commit->parents; p; p = p->తదుపరి) {
+		నిర్మాణం object *obj = &p->అంశం->object;
+		పూర్ణాంకం mark = get_object_mark(obj);
 
-		if (!mark && !reference_excluded_commits)
-			continue;
-		if (i == 0)
-			printf("from ");
-		else
-			printf("merge ");
-		if (mark)
-			printf(":%d\n", mark);
-		else
-			printf("%s\n",
+		ఒకవేళ (!mark && !reference_excluded_commits)
+			కొనసాగు;
+		ఒకవేళ (i == 0)
+			రాయి("from ");
+		లేకపోతే
+			రాయి("merge ");
+		ఒకవేళ (mark)
+			రాయి(":%d\n", mark);
+		లేకపోతే
+			రాయి("%s\n",
 			       anonymize ?
-			       anonymize_oid(oid_to_hex(&obj->oid)) :
-			       oid_to_hex(&obj->oid));
+			       anonymize_oid(oid_గమ్యం_hex(&obj->oid)) :
+			       oid_గమ్యం_hex(&obj->oid));
 		i++;
 	}
 
-	if (full_tree)
-		printf("deleteall\n");
-	log_tree_diff_flush(rev);
-	string_list_clear(paths_of_changed_objects, 0);
+	ఒకవేళ (నిండిన_వృక్షం)
+		రాయి("deleteall\n");
+	log_వృక్షం_diff_flush(rev);
+	string_list_clear(paths_యొక్క_మారింది_objects, 0);
 	rev->diffopt.output_format = saved_output_format;
 
-	printf("\n");
+	రాయి("\n");
 
-	show_progress();
+	show_పురోగతి();
 }
 
-static char *anonymize_tag(void)
+స్థిర అక్షరం *anonymize_ట్యాగ్(శూన్య)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
-	strbuf_addf(&out, "tag message %d", counter++);
-	return strbuf_detach(&out, NULL);
+	స్థిర పూర్ణాంకం counter;
+	నిర్మాణం strbuf బహిర్గతం = STRBUF_INIT;
+	strbuf_addf(&బహిర్గతం, "tag message %d", counter++);
+	తిరిగి strbuf_detach(&బహిర్గతం, ఖాళీ);
 }
 
 
-static void handle_tag(const char *name, struct tag *tag)
+స్థిర శూన్య handle_ట్యాగ్(స్థిరరాశి అక్షరం *name, నిర్మాణం ట్యాగ్ *ట్యాగ్)
 {
-	size_t size;
-	enum object_type type;
-	char *buf;
-	const char *tagger, *tagger_end, *message;
-	size_t message_size = 0;
-	struct object *tagged;
-	int tagged_mark;
-	struct commit *p;
+	కొలత_t కొలత;
+	గణన object_type type;
+	అక్షరం *buf;
+	స్థిరరాశి అక్షరం *tagger, *tagger_చివర, *సందేశం_2;
+	కొలత_t సందేశం_కొలత = 0;
+	నిర్మాణం object *tagged;
+	పూర్ణాంకం tagged_mark;
+	నిర్మాణం commit *p;
 
 	/* Trees have no identifier in fast-export output, thus we have no way
 	 * to output tags of trees, tags of tags of trees, etc.  Simply omit
 	 * such tags.
 	 */
-	tagged = tag->tagged;
-	while (tagged->type == OBJ_TAG) {
-		tagged = ((struct tag *)tagged)->tagged;
+	tagged = ట్యాగ్->tagged;
+	అయితే (tagged->type == OBJ_ట్యాగ్) {
+		tagged = ((నిర్మాణం ట్యాగ్ *)tagged)->tagged;
 	}
-	if (tagged->type == OBJ_TREE) {
+	ఒకవేళ (tagged->type == OBJ_వృక్షం) {
 		warning(_("omitting tag %s,\nsince tags of trees (or tags "
 			  "of tags of trees, etc.) are not supported."),
-			oid_to_hex(&tag->object.oid));
-		return;
+			oid_గమ్యం_hex(&ట్యాగ్->object.oid));
+		తిరిగి;
 	}
 
-	buf = odb_read_object(the_repository->objects, &tag->object.oid,
-			      &type, &size);
-	if (!buf)
-		die(_("could not read tag %s"), oid_to_hex(&tag->object.oid));
-	message = memmem(buf, size, "\n\n", 2);
-	if (message) {
-		message += 2;
-		message_size = strlen(message);
+	buf = odb_read_object(the_repository->objects, &ట్యాగ్->object.oid,
+			      &type, &కొలత);
+	ఒకవేళ (!buf)
+		die(_("could not read tag %s"), oid_గమ్యం_hex(&ట్యాగ్->object.oid));
+	సందేశం_2 = memmem(buf, కొలత, "\n\n", 2);
+	ఒకవేళ (సందేశం_2) {
+		సందేశం_2 += 2;
+		సందేశం_కొలత = అక్షరశ్రేణి_పొడవు(సందేశం_2);
 	}
-	tagger = memmem(buf, message ? message - buf : size, "\ntagger ", 8);
-	if (!tagger) {
-		if (fake_missing_tagger)
+	tagger = memmem(buf, సందేశం_2 ? సందేశం_2 - buf : కొలత, "\ntagger ", 8);
+	ఒకవేళ (!tagger) {
+		ఒకవేళ (fake_missing_tagger)
 			tagger = "tagger Unspecified Tagger "
 				"<unspecified-tagger> 0 +0000";
-		else
+		లేకపోతే
 			tagger = "";
-		tagger_end = tagger + strlen(tagger);
-	} else {
+		tagger_చివర = tagger + అక్షరశ్రేణి_పొడవు(tagger);
+	} లేకపోతే {
 		tagger++;
-		tagger_end = strchrnul(tagger, '\n');
-		if (anonymize)
-			anonymize_ident_line(&tagger, &tagger_end);
+		tagger_చివర = strchrnul(tagger, '\n');
+		ఒకవేళ (anonymize)
+			anonymize_ident_పంక్తి(&tagger, &tagger_చివర);
 	}
 
-	if (anonymize) {
+	ఒకవేళ (anonymize) {
 		name = anonymize_refname(name);
-		if (message) {
-			static struct hashmap tags;
-			message = anonymize_str(&tags, anonymize_tag,
-						message, message_size);
-			message_size = strlen(message);
+		ఒకవేళ (సందేశం_2) {
+			స్థిర నిర్మాణం hashmap ట్యాగులు;
+			సందేశం_2 = anonymize_str(&ట్యాగులు, anonymize_ట్యాగ్,
+						సందేశం_2, సందేశం_కొలత);
+			సందేశం_కొలత = అక్షరశ్రేణి_పొడవు(సందేశం_2);
 		}
 	}
 
 	/* handle signed tags */
-	if (message) {
-		size_t sig_offset = parse_signed_buffer(message, message_size);
-		if (sig_offset < message_size)
-			switch (signed_tag_mode) {
+	ఒకవేళ (సందేశం_2) {
+		కొలత_t sig_స్థానభ్రంశం = parse_signed_బఫరు(సందేశం_2, సందేశం_కొలత);
+		ఒకవేళ (sig_స్థానభ్రంశం < సందేశం_కొలత)
+			ఎంపిక (signed_ట్యాగ్_బహుళకం) {
 			/* Exporting modes */
-			case SIGN_WARN_VERBATIM:
+			స్థితి SIGN_WARN_VERBATIM:
 				warning(_("exporting signed tag %s"),
-					oid_to_hex(&tag->object.oid));
+					oid_గమ్యం_hex(&ట్యాగ్->object.oid));
 				/* fallthru */
-			case SIGN_VERBATIM:
-				break;
+			స్థితి SIGN_VERBATIM:
+				ఆపు;
 
 			/* Stripping modes */
-			case SIGN_WARN_STRIP:
+			స్థితి SIGN_WARN_STRIP:
 				warning(_("stripping signature from tag %s"),
-					oid_to_hex(&tag->object.oid));
+					oid_గమ్యం_hex(&ట్యాగ్->object.oid));
 				/* fallthru */
-			case SIGN_STRIP:
-				message_size = sig_offset;
-				break;
+			స్థితి SIGN_STRIP:
+				సందేశం_కొలత = sig_స్థానభ్రంశం;
+				ఆపు;
 
 			/* Aborting modes */
-			case SIGN_ABORT:
+			స్థితి SIGN_ABORT:
 				die(_("encountered signed tag %s; use "
 				      "--signed-tags=<mode> to handle it"),
-				    oid_to_hex(&tag->object.oid));
-			default:
-				BUG("invalid signed_commit_mode value %d", signed_commit_mode);
+				    oid_గమ్యం_hex(&ట్యాగ్->object.oid));
+			అప్రమేయ:
+				BUG("invalid signed_commit_mode value %d", signed_commit_బహుళకం);
 			}
 	}
 
 	/* handle tag->tagged having been filtered out due to paths specified */
-	tagged = tag->tagged;
+	tagged = ట్యాగ్->tagged;
 	tagged_mark = get_object_mark(tagged);
-	if (!tagged_mark) {
-		switch (tag_of_filtered_mode) {
-		case TAG_FILTERING_ABORT:
+	ఒకవేళ (!tagged_mark) {
+		ఎంపిక (ట్యాగ్_యొక్క_filtered_బహుళకం) {
+		స్థితి ట్యాగ్_FILTERING_ABORT:
 			die(_("tag %s tags unexported object; use "
 			      "--tag-of-filtered-object=<mode> to handle it"),
-			    oid_to_hex(&tag->object.oid));
-		case DROP:
+			    oid_గమ్యం_hex(&ట్యాగ్->object.oid));
+		స్థితి DROP:
 			/* Ignore this tag altogether */
-			free(buf);
-			return;
-		case REWRITE:
-			if (tagged->type == OBJ_TAG && !mark_tags) {
+			విడుదల(buf);
+			తిరిగి;
+		స్థితి REWRITE:
+			ఒకవేళ (tagged->type == OBJ_ట్యాగ్ && !mark_ట్యాగులు) {
 				die(_("cannot export nested tags unless --mark-tags is specified."));
-			} else if (tagged->type == OBJ_COMMIT) {
-				p = rewrite_commit((struct commit *)tagged);
-				if (!p) {
-					printf("reset %s\nfrom %s\n\n",
-					       name, oid_to_hex(null_oid(the_hash_algo)));
-					free(buf);
-					return;
+			} లేకపోతే ఒకవేళ (tagged->type == OBJ_COMMIT) {
+				p = rewrite_commit((నిర్మాణం commit *)tagged);
+				ఒకవేళ (!p) {
+					రాయి("reset %s\nfrom %s\n\n",
+					       name, oid_గమ్యం_hex(null_oid(the_hash_algo)));
+					విడుదల(buf);
+					తిరిగి;
 				}
 				tagged_mark = get_object_mark(&p->object);
-			} else {
+			} లేకపోతే {
 				/* tagged->type is either OBJ_BLOB or OBJ_TAG */
 				tagged_mark = get_object_mark(tagged);
 			}
 		}
 	}
 
-	if (tagged->type == OBJ_TAG) {
-		printf("reset %s\nfrom %s\n\n",
-		       name, oid_to_hex(null_oid(the_hash_algo)));
+	ఒకవేళ (tagged->type == OBJ_ట్యాగ్) {
+		రాయి("reset %s\nfrom %s\n\n",
+		       name, oid_గమ్యం_hex(null_oid(the_hash_algo)));
 	}
-	skip_prefix(name, "refs/tags/", &name);
-	printf("tag %s\n", name);
-	if (mark_tags) {
-		mark_next_object(&tag->object);
-		printf("mark :%"PRIu32"\n", last_idnum);
+	skip_ఉపసర్గ(name, "refs/tags/", &name);
+	రాయి("tag %s\n", name);
+	ఒకవేళ (mark_ట్యాగులు) {
+		mark_తదుపరి_object(&ట్యాగ్->object);
+		రాయి("mark :%"PRIu32"\n", చివరి_idnum);
 	}
-	if (tagged_mark)
-		printf("from :%d\n", tagged_mark);
-	else
-		printf("from %s\n", oid_to_hex(&tagged->oid));
+	ఒకవేళ (tagged_mark)
+		రాయి("from :%d\n", tagged_mark);
+	లేకపోతే
+		రాయి("from %s\n", oid_గమ్యం_hex(&tagged->oid));
 
-	if (show_original_ids)
-		printf("original-oid %s\n", oid_to_hex(&tag->object.oid));
-	printf("%.*s%sdata %d\n%.*s\n",
-	       (int)(tagger_end - tagger), tagger,
-	       tagger == tagger_end ? "" : "\n",
-	       (int)message_size, (int)message_size, message ? message : "");
-	free(buf);
+	ఒకవేళ (show_original_ids)
+		రాయి("original-oid %s\n", oid_గమ్యం_hex(&ట్యాగ్->object.oid));
+	రాయి("%.*s%sdata %d\n%.*s\n",
+	       (పూర్ణాంకం)(tagger_చివర - tagger), tagger,
+	       tagger == tagger_చివర ? "" : "\n",
+	       (పూర్ణాంకం)సందేశం_కొలత, (పూర్ణాంకం)సందేశం_కొలత, సందేశం_2 ? సందేశం_2 : "");
+	విడుదల(buf);
 }
 
-static struct commit *get_commit(struct rev_cmdline_entry *e, const char *full_name)
+స్థిర నిర్మాణం commit *get_commit(నిర్మాణం rev_cmdline_నమోదు *e, స్థిరరాశి అక్షరం *నిండిన_name)
 {
-	switch (e->item->type) {
-	case OBJ_COMMIT:
-		return (struct commit *)e->item;
-	case OBJ_TAG: {
-		struct tag *tag = (struct tag *)e->item;
+	ఎంపిక (e->అంశం->type) {
+	స్థితి OBJ_COMMIT:
+		తిరిగి (నిర్మాణం commit *)e->అంశం;
+	స్థితి OBJ_ట్యాగ్: {
+		నిర్మాణం ట్యాగ్ *ట్యాగ్ = (నిర్మాణం ట్యాగ్ *)e->అంశం;
 
 		/* handle nested tags */
-		while (tag && tag->object.type == OBJ_TAG) {
-			parse_object(the_repository, &tag->object.oid);
-			string_list_append(&tag_refs, full_name)->util = tag;
-			tag = (struct tag *)tag->tagged;
+		అయితే (ట్యాగ్ && ట్యాగ్->object.type == OBJ_ట్యాగ్) {
+			parse_object(the_repository, &ట్యాగ్->object.oid);
+			string_list_append(&ట్యాగ్_refs, నిండిన_name)->util = ట్యాగ్;
+			ట్యాగ్ = (నిర్మాణం ట్యాగ్ *)ట్యాగ్->tagged;
 		}
-		if (!tag)
+		ఒకవేళ (!ట్యాగ్)
 			die(_("tag %s points nowhere?"), e->name);
-		return (struct commit *)tag;
+		తిరిగి (నిర్మాణం commit *)ట్యాగ్;
 	}
-	default:
-		return NULL;
+	అప్రమేయ:
+		తిరిగి ఖాళీ;
 	}
 }
 
-static void get_tags_and_duplicates(struct rev_cmdline_info *info)
+స్థిర శూన్య get_ట్యాగులు_and_duplicates(నిర్మాణం rev_cmdline_info *info)
 {
-	int i;
+	పూర్ణాంకం i;
 
-	for (i = 0; i < info->nr; i++) {
-		struct rev_cmdline_entry *e = info->rev + i;
-		struct object_id oid;
-		struct commit *commit;
-		char *full_name = NULL;
+	కొరకు (i = 0; i < info->nr; i++) {
+		నిర్మాణం rev_cmdline_నమోదు *e = info->rev + i;
+		నిర్మాణం object_id oid;
+		నిర్మాణం commit *commit;
+		అక్షరం *నిండిన_name = ఖాళీ;
 
-		if (e->flags & UNINTERESTING)
-			continue;
+		ఒకవేళ (e->flags & UNINTERESTING)
+			కొనసాగు;
 
-		if (repo_dwim_ref(the_repository, e->name, strlen(e->name),
-				  &oid, &full_name, 0) != 1) {
-			free(full_name);
-			continue;
+		ఒకవేళ (repo_dwim_ref(the_repository, e->name, అక్షరశ్రేణి_పొడవు(e->name),
+				  &oid, &నిండిన_name, 0) != 1) {
+			విడుదల(నిండిన_name);
+			కొనసాగు;
 		}
 
-		if (refspecs.nr) {
-			char *private;
-			private = apply_refspecs(&refspecs, full_name);
-			if (private) {
-				free(full_name);
-				full_name = private;
+		ఒకవేళ (refspecs.nr) {
+			అక్షరం *అంతరంగ;
+			అంతరంగ = apply_refspecs(&refspecs, నిండిన_name);
+			ఒకవేళ (అంతరంగ) {
+				విడుదల(నిండిన_name);
+				నిండిన_name = అంతరంగ;
 			}
 		}
 
-		commit = get_commit(e, full_name);
-		if (!commit) {
+		commit = get_commit(e, నిండిన_name);
+		ఒకవేళ (!commit) {
 			warning(_("%s: unexpected object of type %s, skipping."),
 				e->name,
-				type_name(e->item->type));
-			free(full_name);
-			continue;
+				type_name(e->అంశం->type));
+			విడుదల(నిండిన_name);
+			కొనసాగు;
 		}
 
-		switch (commit->object.type) {
-		case OBJ_COMMIT:
-			break;
-		case OBJ_BLOB:
+		ఎంపిక (commit->object.type) {
+		స్థితి OBJ_COMMIT:
+			ఆపు;
+		స్థితి OBJ_BLOB:
 			export_blob(&commit->object.oid);
-			free(full_name);
-			continue;
-		default: /* OBJ_TAG (nested tags) is already handled */
+			విడుదల(నిండిన_name);
+			కొనసాగు;
+		అప్రమేయ: /* OBJ_TAG (nested tags) is already handled */
 			warning(_("tag points to object of unexpected type %s, skipping."),
 				type_name(commit->object.type));
-			free(full_name);
-			continue;
+			విడుదల(నిండిన_name);
+			కొనసాగు;
 		}
 
 		/*
 		 * Make sure this ref gets properly updated eventually, whether
 		 * through a commit or manually at the end.
 		 */
-		if (e->item->type != OBJ_TAG)
-			string_list_append(&extra_refs, full_name)->util = commit;
+		ఒకవేళ (e->అంశం->type != OBJ_ట్యాగ్)
+			string_list_append(&extra_refs, నిండిన_name)->util = commit;
 
-		if (!*revision_sources_at(&revision_sources, commit))
-			*revision_sources_at(&revision_sources, commit) = full_name;
-		else
-			free(full_name);
+		ఒకవేళ (!*revision_sources_at(&revision_sources, commit))
+			*revision_sources_at(&revision_sources, commit) = నిండిన_name;
+		లేకపోతే
+			విడుదల(నిండిన_name);
 	}
 
-	string_list_sort_u(&extra_refs, 0);
+	string_list_క్రమీకరించు_u(&extra_refs, 0);
 }
 
-static void handle_tags_and_duplicates(struct string_list *extras)
+స్థిర శూన్య handle_ట్యాగులు_and_duplicates(నిర్మాణం string_list *extras)
 {
-	struct commit *commit;
-	int i;
+	నిర్మాణం commit *commit;
+	పూర్ణాంకం i;
 
-	for (i = extras->nr - 1; i >= 0; i--) {
-		const char *name = extras->items[i].string;
-		struct object *object = extras->items[i].util;
-		int mark;
+	కొరకు (i = extras->nr - 1; i >= 0; i--) {
+		స్థిరరాశి అక్షరం *name = extras->వస్తువులు[i].string;
+		నిర్మాణం object *object = extras->వస్తువులు[i].util;
+		పూర్ణాంకం mark;
 
-		switch (object->type) {
-		case OBJ_TAG:
-			handle_tag(name, (struct tag *)object);
-			break;
-		case OBJ_COMMIT:
-			if (anonymize)
+		ఎంపిక (object->type) {
+		స్థితి OBJ_ట్యాగ్:
+			handle_ట్యాగ్(name, (నిర్మాణం ట్యాగ్ *)object);
+			ఆపు;
+		స్థితి OBJ_COMMIT:
+			ఒకవేళ (anonymize)
 				name = anonymize_refname(name);
 			/* create refs pointing to already seen commits */
-			commit = rewrite_commit((struct commit *)object);
-			if (!commit) {
+			commit = rewrite_commit((నిర్మాణం commit *)object);
+			ఒకవేళ (!commit) {
 				/*
 				 * Neither this object nor any of its
 				 * ancestors touch any relevant paths, so
 				 * it has been filtered to nothing.  Delete
 				 * it.
 				 */
-				printf("reset %s\nfrom %s\n\n",
-				       name, oid_to_hex(null_oid(the_hash_algo)));
-				continue;
+				రాయి("reset %s\nfrom %s\n\n",
+				       name, oid_గమ్యం_hex(null_oid(the_hash_algo)));
+				కొనసాగు;
 			}
 
 			mark = get_object_mark(&commit->object);
-			if (!mark) {
+			ఒకవేళ (!mark) {
 				/*
 				 * Getting here means we have a commit which
 				 * was excluded by a negative refspec (e.g.
@@ -1162,45 +1162,45 @@ static void handle_tags_and_duplicates(struct string_list *extras)
 				 * in its history to be deleted, which basically
 				 * just means deletion of the ref.
 				 */
-				if (!reference_excluded_commits) {
+				ఒకవేళ (!reference_excluded_commits) {
 					/* delete the ref */
-					printf("reset %s\nfrom %s\n\n",
-					       name, oid_to_hex(null_oid(the_hash_algo)));
-					continue;
+					రాయి("reset %s\nfrom %s\n\n",
+					       name, oid_గమ్యం_hex(null_oid(the_hash_algo)));
+					కొనసాగు;
 				}
 				/* set ref to commit using oid, not mark */
-				printf("reset %s\nfrom %s\n\n", name,
-				       oid_to_hex(&commit->object.oid));
-				continue;
+				రాయి("reset %s\nfrom %s\n\n", name,
+				       oid_గమ్యం_hex(&commit->object.oid));
+				కొనసాగు;
 			}
 
-			printf("reset %s\nfrom :%d\n\n", name, mark
+			రాయి("reset %s\nfrom :%d\n\n", name, mark
 			       );
-			show_progress();
-			break;
+			show_పురోగతి();
+			ఆపు;
 		}
 	}
 }
 
-static void export_marks(char *file)
+స్థిర శూన్య export_marks(అక్షరం *file)
 {
-	unsigned int i;
+	గుర్తులేని పూర్ణాంకం i;
 	uint32_t mark;
-	struct decoration_entry *deco = idnums.entries;
+	నిర్మాణం decoration_నమోదు *deco = idnums.entries;
 	FILE *f;
-	int e = 0;
+	పూర్ణాంకం e = 0;
 
 	f = fopen_for_writing(file);
-	if (!f)
+	ఒకవేళ (!f)
 		die_errno(_("unable to open marks file %s for writing."), file);
 
-	for (i = 0; i < idnums.size; i++) {
-		if (deco->base && deco->base->type == 1) {
-			mark = ptr_to_mark(deco->decoration);
-			if (fprintf(f, ":%"PRIu32" %s\n", mark,
-				oid_to_hex(&deco->base->oid)) < 0) {
+	కొరకు (i = 0; i < idnums.కొలత; i++) {
+		ఒకవేళ (deco->పునాది && deco->పునాది->type == 1) {
+			mark = ptr_గమ్యం_mark(deco->decoration);
+			ఒకవేళ (fprintf(f, ":%"PRIu32" %s\n", mark,
+				oid_గమ్యం_hex(&deco->పునాది->oid)) < 0) {
 			    e = 1;
-			    break;
+			    ఆపు;
 			}
 		}
 		deco++;
@@ -1208,57 +1208,57 @@ static void export_marks(char *file)
 
 	e |= ferror(f);
 	e |= fclose(f);
-	if (e)
+	ఒకవేళ (e)
 		error(_("unable to write marks file %s."), file);
 }
 
-static void import_marks(char *input_file, int check_exists)
+స్థిర శూన్య import_marks(అక్షరం *ఆదానం_file, పూర్ణాంకం check_exists)
 {
-	char line[512];
+	అక్షరం పంక్తి[512];
 	FILE *f;
-	struct stat sb;
+	నిర్మాణం stat sb;
 
-	if (check_exists && stat(input_file, &sb))
-		return;
+	ఒకవేళ (check_exists && stat(ఆదానం_file, &sb))
+		తిరిగి;
 
-	f = xfopen(input_file, "r");
-	while (fgets(line, sizeof(line), f)) {
+	f = xfopen(ఆదానం_file, "r");
+	అయితే (fgets(పంక్తి, పరిమాణం(పంక్తి), f)) {
 		uint32_t mark;
-		char *line_end, *mark_end;
-		struct object_id oid;
-		struct object *object;
-		struct commit *commit;
-		enum object_type type;
+		అక్షరం *పంక్తి_చివర, *mark_చివర;
+		నిర్మాణం object_id oid;
+		నిర్మాణం object *object;
+		నిర్మాణం commit *commit;
+		గణన object_type type;
 
-		line_end = strchr(line, '\n');
-		if (line[0] != ':' || !line_end)
-			die(_("corrupt mark line: %s"), line);
-		*line_end = '\0';
+		పంక్తి_చివర = strchr(పంక్తి, '\n');
+		ఒకవేళ (పంక్తి[0] != ':' || !పంక్తి_చివర)
+			die(_("corrupt mark line: %s"), పంక్తి);
+		*పంక్తి_చివర = '\0';
 
-		mark = strtoumax(line + 1, &mark_end, 10);
-		if (!mark || mark_end == line + 1
-			|| *mark_end != ' ' || get_oid_hex(mark_end + 1, &oid))
-			die(_("corrupt mark line: %s"), line);
+		mark = strtoumax(పంక్తి + 1, &mark_చివర, 10);
+		ఒకవేళ (!mark || mark_చివర == పంక్తి + 1
+			|| *mark_చివర != ' ' || get_oid_hex(mark_చివర + 1, &oid))
+			die(_("corrupt mark line: %s"), పంక్తి);
 
-		if (last_idnum < mark)
-			last_idnum = mark;
+		ఒకవేళ (చివరి_idnum < mark)
+			చివరి_idnum = mark;
 
-		type = odb_read_object_info(the_repository->objects, &oid, NULL);
-		if (type < 0)
-			die(_("object not found: %s"), oid_to_hex(&oid));
+		type = odb_read_object_info(the_repository->objects, &oid, ఖాళీ);
+		ఒకవేళ (type < 0)
+			die(_("object not found: %s"), oid_గమ్యం_hex(&oid));
 
-		if (type != OBJ_COMMIT)
+		ఒకవేళ (type != OBJ_COMMIT)
 			/* only commits */
-			continue;
+			కొనసాగు;
 
 		commit = lookup_commit(the_repository, &oid);
-		if (!commit)
-			die(_("not a commit? can't happen: %s"), oid_to_hex(&oid));
+		ఒకవేళ (!commit)
+			die(_("not a commit? can't happen: %s"), oid_గమ్యం_hex(&oid));
 
 		object = &commit->object;
 
-		if (object->flags & SHOWN)
-			error(_("object %s already has a mark"), oid_to_hex(&oid));
+		ఒకవేళ (object->flags & SHOWN)
+			error(_("object %s already has a mark"), oid_గమ్యం_hex(&oid));
 
 		mark_object(object, mark);
 
@@ -1267,74 +1267,74 @@ static void import_marks(char *input_file, int check_exists)
 	fclose(f);
 }
 
-static void handle_deletes(void)
+స్థిర శూన్య handle_deletes(శూన్య)
 {
-	int i;
-	for (i = 0; i < refspecs.nr; i++) {
-		struct refspec_item *refspec = &refspecs.items[i];
-		if (*refspec->src)
-			continue;
+	పూర్ణాంకం i;
+	కొరకు (i = 0; i < refspecs.nr; i++) {
+		నిర్మాణం refspec_అంశం *refspec = &refspecs.వస్తువులు[i];
+		ఒకవేళ (*refspec->src)
+			కొనసాగు;
 
-		printf("reset %s\nfrom %s\n\n",
-				refspec->dst, oid_to_hex(null_oid(the_hash_algo)));
+		రాయి("reset %s\nfrom %s\n\n",
+				refspec->dst, oid_గమ్యం_hex(null_oid(the_hash_algo)));
 	}
 }
 
-static int parse_opt_anonymize_map(const struct option *opt,
-				   const char *arg, int unset)
+స్థిర పూర్ణాంకం parse_opt_anonymize_map(స్థిరరాశి నిర్మాణం option *opt,
+				   స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	struct hashmap *map = opt->value;
-	const char *delim, *value;
-	size_t keylen;
+	నిర్మాణం hashmap *map = opt->విలువ;
+	స్థిరరాశి అక్షరం *delim, *విలువ;
+	కొలత_t keylen;
 
 	BUG_ON_OPT_NEG(unset);
 
 	delim = strchr(arg, ':');
-	if (delim) {
+	ఒకవేళ (delim) {
 		keylen = delim - arg;
-		value = delim + 1;
-	} else {
-		keylen = strlen(arg);
-		value = arg;
+		విలువ = delim + 1;
+	} లేకపోతే {
+		keylen = అక్షరశ్రేణి_పొడవు(arg);
+		విలువ = arg;
 	}
 
-	if (!keylen || !*value)
-		return error(_("--anonymize-map token cannot be empty"));
+	ఒకవేళ (!keylen || !*విలువ)
+		తిరిగి error(_("--anonymize-map token cannot be empty"));
 
-	add_anonymized_entry(map, memhash(arg, keylen), arg, keylen,
-			     xstrdup(value));
+	కూడు_anonymized_నమోదు(map, memhash(arg, keylen), arg, keylen,
+			     xstrdup(విలువ));
 
-	return 0;
+	తిరిగి 0;
 }
 
-int cmd_fast_export(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+పూర్ణాంకం cmd_fast_export(పూర్ణాంకం argc,
+		    స్థిరరాశి అక్షరం **argv,
+		    స్థిరరాశి అక్షరం *ఉపసర్గ,
+		    నిర్మాణం repository *repo వాడని)
 {
-	struct rev_info revs;
-	struct commit *commit;
-	char *export_filename = NULL,
-	     *import_filename = NULL,
-	     *import_filename_if_exists = NULL;
+	నిర్మాణం rev_info revs;
+	నిర్మాణం commit *commit;
+	అక్షరం *export_filename = ఖాళీ,
+	     *import_filename = ఖాళీ,
+	     *import_filename_if_exists = ఖాళీ;
 	uint32_t lastimportid;
-	struct string_list refspecs_list = STRING_LIST_INIT_NODUP;
-	struct string_list paths_of_changed_objects = STRING_LIST_INIT_DUP;
-	struct option options[] = {
-		OPT_INTEGER(0, "progress", &progress,
+	నిర్మాణం string_list refspecs_list = STRING_LIST_INIT_NODUP;
+	నిర్మాణం string_list paths_యొక్క_మారింది_objects = STRING_LIST_INIT_DUP;
+	నిర్మాణం option options[] = {
+		OPT_INTEGER(0, "progress", &పురోగతి,
 			    N_("show progress after <n> objects")),
-		OPT_CALLBACK(0, "signed-tags", &signed_tag_mode, N_("mode"),
+		OPT_CALLBACK(0, "signed-tags", &signed_ట్యాగ్_బహుళకం, N_("mode"),
 			     N_("select handling of signed tags"),
-			     parse_opt_sign_mode),
-		OPT_CALLBACK(0, "signed-commits", &signed_commit_mode, N_("mode"),
+			     parse_opt_sign_బహుళకం),
+		OPT_CALLBACK(0, "signed-commits", &signed_commit_బహుళకం, N_("mode"),
 			     N_("select handling of signed commits"),
-			     parse_opt_sign_mode),
-		OPT_CALLBACK(0, "tag-of-filtered-object", &tag_of_filtered_mode, N_("mode"),
+			     parse_opt_sign_బహుళకం),
+		OPT_CALLBACK(0, "tag-of-filtered-object", &ట్యాగ్_యొక్క_filtered_బహుళకం, N_("mode"),
 			     N_("select handling of tags that tag filtered objects"),
-			     parse_opt_tag_of_filtered_mode),
-		OPT_CALLBACK(0, "reencode", &reencode_mode, N_("mode"),
+			     parse_opt_ట్యాగ్_యొక్క_filtered_బహుళకం),
+		OPT_CALLBACK(0, "reencode", &reencode_బహుళకం, N_("mode"),
 			     N_("select handling of commit messages in an alternate encoding"),
-			     parse_opt_reencode_mode),
+			     parse_opt_reencode_బహుళకం),
 		OPT_STRING(0, "export-marks", &export_filename, N_("file"),
 			     N_("dump marks to this file")),
 		OPT_STRING(0, "import-marks", &import_filename, N_("file"),
@@ -1345,11 +1345,11 @@ int cmd_fast_export(int argc,
 			     N_("import marks from this file if it exists")),
 		OPT_BOOL(0, "fake-missing-tagger", &fake_missing_tagger,
 			 N_("fake a tagger when tags lack one")),
-		OPT_BOOL(0, "full-tree", &full_tree,
+		OPT_BOOL(0, "full-tree", &నిండిన_వృక్షం,
 			 N_("output full tree for each commit")),
-		OPT_BOOL(0, "use-done-feature", &use_done_feature,
+		OPT_BOOL(0, "use-done-feature", &use_పూర్తి_feature,
 			     N_("use the done feature to terminate the stream")),
-		OPT_BOOL(0, "no-data", &no_data, N_("skip output of blob data")),
+		OPT_BOOL(0, "no-data", &no_దత్తాంశం, N_("skip output of blob data")),
 		OPT_STRING_LIST(0, "refspec", &refspecs_list, N_("refspec"),
 			     N_("apply refspec to exported refs")),
 		OPT_BOOL(0, "anonymize", &anonymize, N_("anonymize output")),
@@ -1360,84 +1360,84 @@ int cmd_fast_export(int argc,
 			 &reference_excluded_commits, N_("reference parents which are not in fast-export stream by object id")),
 		OPT_BOOL(0, "show-original-ids", &show_original_ids,
 			    N_("show original object ids of blobs/commits")),
-		OPT_BOOL(0, "mark-tags", &mark_tags,
+		OPT_BOOL(0, "mark-tags", &mark_ట్యాగులు,
 			    N_("label tags with mark ids")),
 
-		OPT_END()
+		OPT_చివర()
 	};
 
-	if (argc == 1)
+	ఒకవేళ (argc == 1)
 		usage_with_options (fast_export_usage, options);
 
 	/* we handle encodings */
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ఖాళీ);
 
 	refspec_init_fetch(&refspecs, the_hash_algo);
 
-	repo_init_revisions(the_repository, &revs, prefix);
+	repo_init_revisions(the_repository, &revs, ఉపసర్గ);
 	init_revision_sources(&revision_sources);
-	revs.topo_order = 1;
+	revs.topo_క్రమం = 1;
 	revs.sources = &revision_sources;
 	revs.rewrite_parents = 1;
-	argc = parse_options(argc, argv, prefix, options, fast_export_usage,
+	argc = parse_options(argc, argv, ఉపసర్గ, options, fast_export_usage,
 			PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT);
-	argc = setup_revisions(argc, argv, &revs, NULL);
-	if (argc > 1)
+	argc = అమరిక_revisions(argc, argv, &revs, ఖాళీ);
+	ఒకవేళ (argc > 1)
 		usage_with_options (fast_export_usage, options);
 
-	if (anonymized_seeds.cmpfn && !anonymize)
+	ఒకవేళ (anonymized_seeds.cmpfn && !anonymize)
 		die(_("the option '%s' requires '%s'"), "--anonymize-map", "--anonymize");
 
-	if (refspecs_list.nr) {
-		int i;
+	ఒకవేళ (refspecs_list.nr) {
+		పూర్ణాంకం i;
 
-		for (i = 0; i < refspecs_list.nr; i++)
-			refspec_append(&refspecs, refspecs_list.items[i].string);
+		కొరకు (i = 0; i < refspecs_list.nr; i++)
+			refspec_append(&refspecs, refspecs_list.వస్తువులు[i].string);
 
 		string_list_clear(&refspecs_list, 1);
 	}
 
-	if (use_done_feature)
-		printf("feature done\n");
+	ఒకవేళ (use_పూర్తి_feature)
+		రాయి("feature done\n");
 
-	if (import_filename && import_filename_if_exists)
+	ఒకవేళ (import_filename && import_filename_if_exists)
 		die(_("options '%s' and '%s' cannot be used together"), "--import-marks", "--import-marks-if-exists");
-	if (import_filename)
+	ఒకవేళ (import_filename)
 		import_marks(import_filename, 0);
-	else if (import_filename_if_exists)
+	లేకపోతే ఒకవేళ (import_filename_if_exists)
 		import_marks(import_filename_if_exists, 1);
-	lastimportid = last_idnum;
+	lastimportid = చివరి_idnum;
 
-	if (import_filename && revs.prune_data.nr)
-		full_tree = 1;
+	ఒకవేళ (import_filename && revs.prune_దత్తాంశం.nr)
+		నిండిన_వృక్షం = 1;
 
-	get_tags_and_duplicates(&revs.cmdline);
+	get_ట్యాగులు_and_duplicates(&revs.cmdline);
 
-	if (prepare_revision_walk(&revs))
+	ఒకవేళ (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
 
-	revs.reverse = 1;
+	revs.తిరగేయి = 1;
 	revs.diffopt.format_callback = show_filemodify;
-	revs.diffopt.format_callback_data = &paths_of_changed_objects;
+	revs.diffopt.format_callback_దత్తాంశం = &paths_యొక్క_మారింది_objects;
 	revs.diffopt.flags.recursive = 1;
 
 	revs.diffopt.no_free = 1;
-	while ((commit = get_revision(&revs)))
-		handle_commit(commit, &revs, &paths_of_changed_objects);
+	అయితే ((commit = get_revision(&revs)))
+		handle_commit(commit, &revs, &paths_యొక్క_మారింది_objects);
 	revs.diffopt.no_free = 0;
 
-	handle_tags_and_duplicates(&extra_refs);
-	handle_tags_and_duplicates(&tag_refs);
+	handle_ట్యాగులు_and_duplicates(&extra_refs);
+	handle_ట్యాగులు_and_duplicates(&ట్యాగ్_refs);
 	handle_deletes();
 
-	if (export_filename && lastimportid != last_idnum)
+	ఒకవేళ (export_filename && lastimportid != చివరి_idnum)
 		export_marks(export_filename);
 
-	if (use_done_feature)
-		printf("done\n");
+	ఒకవేళ (use_పూర్తి_feature)
+		రాయి("done\n");
 
 	refspec_clear(&refspecs);
 	release_revisions(&revs);
 
-	return 0;
+	తిరిగి 0;
 }

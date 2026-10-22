@@ -1,88 +1,88 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "quote.h"
-#include "pathspec.h"
-#include "parse-options.h"
-#include "submodule.h"
-#include "write-or-die.h"
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "dir.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "quote.h"
+#అన్తర్భావ "pathspec.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "submodule.h"
+#అన్తర్భావ "write-or-die.h"
 
-static int quiet, verbose, stdin_paths, show_non_matching, no_index;
-static const char * const check_ignore_usage[] = {
+స్థిర పూర్ణాంకం quiet, verbose, stdin_paths, show_non_matching, no_సూచీ;
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి check_ignore_usage[] = {
 "git check-ignore [<options>] <pathname>...",
 "git check-ignore [<options>] --stdin",
-NULL
+ఖాళీ
 };
 
-static int nul_term_line;
+స్థిర పూర్ణాంకం nul_పదం_పంక్తి;
 
-static const struct option check_ignore_options[] = {
+స్థిర స్థిరరాశి నిర్మాణం option check_ignore_options[] = {
 	OPT__QUIET(&quiet, N_("suppress progress reporting")),
 	OPT__VERBOSE(&verbose, N_("be verbose")),
-	OPT_GROUP(""),
+	OPT_సమూహం(""),
 	OPT_BOOL(0, "stdin", &stdin_paths,
 		 N_("read file names from stdin")),
-	OPT_BOOL('z', NULL, &nul_term_line,
+	OPT_BOOL('z', ఖాళీ, &nul_పదం_పంక్తి,
 		 N_("terminate input and output records by a NUL character")),
 	OPT_BOOL('n', "non-matching", &show_non_matching,
 		 N_("show non-matching input paths")),
-	OPT_BOOL(0, "no-index", &no_index,
+	OPT_BOOL(0, "no-index", &no_సూచీ,
 		 N_("ignore index when checking")),
-	OPT_END()
+	OPT_చివర()
 };
 
-static void output_pattern(const char *path, struct path_pattern *pattern)
+స్థిర శూన్య output_నమూనా(స్థిరరాశి అక్షరం *మార్గం, నిర్మాణం మార్గం_నమూనా *నమూనా)
 {
-	const char *bang  = (pattern && pattern->flags & PATTERN_FLAG_NEGATIVE)  ? "!" : "";
-	const char *slash = (pattern && pattern->flags & PATTERN_FLAG_MUSTBEDIR) ? "/" : "";
-	if (!nul_term_line) {
-		if (!verbose) {
-			write_name_quoted(path, stdout, '\n');
-		} else {
-			if (pattern) {
-				quote_c_style(pattern->pl->src, NULL, stdout, 0);
-				printf(":%d:%s%s%s\t",
-				       pattern->srcpos,
-				       bang, pattern->pattern, slash);
+	స్థిరరాశి అక్షరం *bang  = (నమూనా && నమూనా->flags & నమూనా_FLAG_NEGATIVE)  ? "!" : "";
+	స్థిరరాశి అక్షరం *slash = (నమూనా && నమూనా->flags & నమూనా_FLAG_MUSTBEDIR) ? "/" : "";
+	ఒకవేళ (!nul_పదం_పంక్తి) {
+		ఒకవేళ (!verbose) {
+			write_name_quoted(మార్గం, stdout, '\n');
+		} లేకపోతే {
+			ఒకవేళ (నమూనా) {
+				quote_c_style(నమూనా->pl->src, ఖాళీ, stdout, 0);
+				రాయి(":%d:%s%s%s\t",
+				       నమూనా->srcpos,
+				       bang, నమూనా->నమూనా, slash);
 			}
-			else {
-				printf("::\t");
+			లేకపోతే {
+				రాయి("::\t");
 			}
-			quote_c_style(path, NULL, stdout, 0);
+			quote_c_style(మార్గం, ఖాళీ, stdout, 0);
 			fputc('\n', stdout);
 		}
-	} else {
-		if (!verbose) {
-			printf("%s%c", path, '\0');
-		} else {
-			if (pattern)
-				printf("%s%c%d%c%s%s%s%c%s%c",
-				       pattern->pl->src, '\0',
-				       pattern->srcpos, '\0',
-				       bang, pattern->pattern, slash, '\0',
-				       path, '\0');
-			else
-				printf("%c%c%c%s%c", '\0', '\0', '\0', path, '\0');
+	} లేకపోతే {
+		ఒకవేళ (!verbose) {
+			రాయి("%s%c", మార్గం, '\0');
+		} లేకపోతే {
+			ఒకవేళ (నమూనా)
+				రాయి("%s%c%d%c%s%s%s%c%s%c",
+				       నమూనా->pl->src, '\0',
+				       నమూనా->srcpos, '\0',
+				       bang, నమూనా->నమూనా, slash, '\0',
+				       మార్గం, '\0');
+			లేకపోతే
+				రాయి("%c%c%c%s%c", '\0', '\0', '\0', మార్గం, '\0');
 		}
 	}
 }
 
-static int check_ignore(struct dir_struct *dir,
-			const char *prefix, int argc, const char **argv)
+స్థిర పూర్ణాంకం check_ignore(నిర్మాణం dir_struct *dir,
+			స్థిరరాశి అక్షరం *ఉపసర్గ, పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv)
 {
-	const char *full_path;
-	char *seen;
-	int num_ignored = 0, i;
-	struct path_pattern *pattern;
-	struct pathspec pathspec;
+	స్థిరరాశి అక్షరం *నిండిన_మార్గం;
+	అక్షరం *చూసిన;
+	పూర్ణాంకం అంకె_ignored = 0, i;
+	నిర్మాణం మార్గం_నమూనా *నమూనా;
+	నిర్మాణం pathspec pathspec;
 
-	if (!argc) {
-		if (!quiet)
+	ఒకవేళ (!argc) {
+		ఒకవేళ (!quiet)
 			fprintf(stderr, "no pathspec given.\n");
-		return 0;
+		తిరిగి 0;
 	}
 
 	/*
@@ -91,112 +91,112 @@ static int check_ignore(struct dir_struct *dir,
 	 */
 	parse_pathspec(&pathspec,
 		       PATHSPEC_ALL_MAGIC & ~PATHSPEC_FROMTOP,
-		       PATHSPEC_SYMLINK_LEADING_PATH |
-		       PATHSPEC_KEEP_ORDER,
-		       prefix, argv);
+		       PATHSPEC_SYMLINK_LEADING_మార్గం |
+		       PATHSPEC_KEEP_క్రమం,
+		       ఉపసర్గ, argv);
 
-	die_path_inside_submodule(the_repository->index, &pathspec);
+	die_మార్గం_inside_submodule(the_repository->సూచీ, &pathspec);
 
 	/*
 	 * look for pathspecs matching entries in the index, since these
 	 * should not be ignored, in order to be consistent with
 	 * 'git status', 'git add' etc.
 	 */
-	seen = find_pathspecs_matching_against_index(&pathspec, the_repository->index,
+	చూసిన = కనుగొను_pathspecs_matching_against_సూచీ(&pathspec, the_repository->సూచీ,
 						     PS_HEED_SKIP_WORKTREE);
-	for (i = 0; i < pathspec.nr; i++) {
-		full_path = pathspec.items[i].match;
-		pattern = NULL;
-		if (!seen[i]) {
-			int dtype = DT_UNKNOWN;
-			pattern = last_matching_pattern(dir, the_repository->index,
-							full_path, &dtype);
-			if (!verbose && pattern &&
-			    pattern->flags & PATTERN_FLAG_NEGATIVE)
-				pattern = NULL;
+	కొరకు (i = 0; i < pathspec.nr; i++) {
+		నిండిన_మార్గం = pathspec.వస్తువులు[i].సరిపోలిక;
+		నమూనా = ఖాళీ;
+		ఒకవేళ (!చూసిన[i]) {
+			పూర్ణాంకం dtype = DT_UNKNOWN;
+			నమూనా = చివరి_matching_నమూనా(dir, the_repository->సూచీ,
+							నిండిన_మార్గం, &dtype);
+			ఒకవేళ (!verbose && నమూనా &&
+			    నమూనా->flags & నమూనా_FLAG_NEGATIVE)
+				నమూనా = ఖాళీ;
 		}
-		if (!quiet && (pattern || show_non_matching))
-			output_pattern(pathspec.items[i].original, pattern);
-		if (pattern)
-			num_ignored++;
+		ఒకవేళ (!quiet && (నమూనా || show_non_matching))
+			output_నమూనా(pathspec.వస్తువులు[i].original, నమూనా);
+		ఒకవేళ (నమూనా)
+			అంకె_ignored++;
 	}
-	free(seen);
+	విడుదల(చూసిన);
 	clear_pathspec(&pathspec);
 
-	return num_ignored;
+	తిరిగి అంకె_ignored;
 }
 
-static int check_ignore_stdin_paths(struct dir_struct *dir, const char *prefix)
+స్థిర పూర్ణాంకం check_ignore_stdin_paths(నిర్మాణం dir_struct *dir, స్థిరరాశి అక్షరం *ఉపసర్గ)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf unquoted = STRBUF_INIT;
-	char *pathspec[2] = { NULL, NULL };
+	నిర్మాణం strbuf buf = STRBUF_INIT;
+	నిర్మాణం strbuf unquoted = STRBUF_INIT;
+	అక్షరం *pathspec[2] = { ఖాళీ, ఖాళీ };
 	strbuf_getline_fn getline_fn;
-	int num_ignored = 0;
+	పూర్ణాంకం అంకె_ignored = 0;
 
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	while (getline_fn(&buf, stdin) != EOF) {
-		if (!nul_term_line && buf.buf[0] == '"') {
+	getline_fn = nul_పదం_పంక్తి ? strbuf_getline_nul : strbuf_getline_lf;
+	అయితే (getline_fn(&buf, stdin) != EOF) {
+		ఒకవేళ (!nul_పదం_పంక్తి && buf.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, buf.buf, NULL))
+			ఒకవేళ (unquote_c_style(&unquoted, buf.buf, ఖాళీ))
 				die("line is badly quoted");
-			strbuf_swap(&buf, &unquoted);
+			strbuf_మార్పిడి(&buf, &unquoted);
 		}
 		pathspec[0] = buf.buf;
-		num_ignored += check_ignore(dir, prefix,
-					    1, (const char **)pathspec);
+		అంకె_ignored += check_ignore(dir, ఉపసర్గ,
+					    1, (స్థిరరాశి అక్షరం **)pathspec);
 		maybe_flush_or_die(stdout, "check-ignore to stdout");
 	}
 	strbuf_release(&buf);
 	strbuf_release(&unquoted);
-	return num_ignored;
+	తిరిగి అంకె_ignored;
 }
 
-int cmd_check_ignore(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo UNUSED)
+పూర్ణాంకం cmd_check_ignore(పూర్ణాంకం argc,
+		     స్థిరరాశి అక్షరం **argv,
+		     స్థిరరాశి అక్షరం *ఉపసర్గ,
+		     నిర్మాణం repository *repo వాడని)
 {
-	int num_ignored;
-	struct dir_struct dir = DIR_INIT;
+	పూర్ణాంకం అంకె_ignored;
+	నిర్మాణం dir_struct dir = DIR_INIT;
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ఖాళీ);
 
-	argc = parse_options(argc, argv, prefix, check_ignore_options,
+	argc = parse_options(argc, argv, ఉపసర్గ, check_ignore_options,
 			     check_ignore_usage, 0);
 
-	if (stdin_paths) {
-		if (argc > 0)
+	ఒకవేళ (stdin_paths) {
+		ఒకవేళ (argc > 0)
 			die(_("cannot specify pathnames with --stdin"));
-	} else {
-		if (nul_term_line)
+	} లేకపోతే {
+		ఒకవేళ (nul_పదం_పంక్తి)
 			die(_("-z only makes sense with --stdin"));
-		if (argc == 0)
+		ఒకవేళ (argc == 0)
 			die(_("no path specified"));
 	}
-	if (quiet) {
-		if (argc > 1)
+	ఒకవేళ (quiet) {
+		ఒకవేళ (argc > 1)
 			die(_("--quiet is only valid with a single pathname"));
-		if (verbose)
+		ఒకవేళ (verbose)
 			die(_("cannot have both --quiet and --verbose"));
 	}
-	if (show_non_matching && !verbose)
+	ఒకవేళ (show_non_matching && !verbose)
 		die(_("--non-matching is only valid with --verbose"));
 
 	/* read_cache() is only necessary so we can watch out for submodules. */
-	if (!no_index && repo_read_index(the_repository) < 0)
+	ఒకవేళ (!no_సూచీ && repo_read_సూచీ(the_repository) < 0)
 		die(_("index file corrupt"));
 
-	setup_standard_excludes(&dir);
+	అమరిక_standard_excludes(&dir);
 
-	if (stdin_paths) {
-		num_ignored = check_ignore_stdin_paths(&dir, prefix);
-	} else {
-		num_ignored = check_ignore(&dir, prefix, argc, argv);
+	ఒకవేళ (stdin_paths) {
+		అంకె_ignored = check_ignore_stdin_paths(&dir, ఉపసర్గ);
+	} లేకపోతే {
+		అంకె_ignored = check_ignore(&dir, ఉపసర్గ, argc, argv);
 		maybe_flush_or_die(stdout, "ignore to stdout");
 	}
 
 	dir_clear(&dir);
 
-	return !num_ignored;
+	తిరిగి !అంకె_ignored;
 }

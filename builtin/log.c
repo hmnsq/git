@@ -5,233 +5,233 @@
  *		 2006 Junio Hamano
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refs.h"
-#include "object-name.h"
-#include "odb.h"
-#include "odb/streaming.h"
-#include "pager.h"
-#include "color.h"
-#include "commit.h"
-#include "diff.h"
-#include "diffcore.h"
-#include "diff-merges.h"
-#include "revision.h"
-#include "log-tree.h"
-#include "oid-array.h"
-#include "oidset.h"
-#include "tag.h"
-#include "reflog-walk.h"
-#include "patch-ids.h"
-#include "path.h"
-#include "shortlog.h"
-#include "remote.h"
-#include "string-list.h"
-#include "parse-options.h"
-#include "line-log.h"
-#include "branch.h"
-#include "version.h"
-#include "mailmap.h"
-#include "progress.h"
-#include "commit-slab.h"
-#include "advice.h"
-#include "utf8.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "abspath.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "refs.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "odb.h"
+#అన్తర్భావ "odb/streaming.h"
+#అన్తర్భావ "pager.h"
+#అన్తర్భావ "color.h"
+#అన్తర్భావ "commit.h"
+#అన్తర్భావ "diff.h"
+#అన్తర్భావ "diffcore.h"
+#అన్తర్భావ "diff-merges.h"
+#అన్తర్భావ "revision.h"
+#అన్తర్భావ "log-tree.h"
+#అన్తర్భావ "oid-array.h"
+#అన్తర్భావ "oidset.h"
+#అన్తర్భావ "tag.h"
+#అన్తర్భావ "reflog-walk.h"
+#అన్తర్భావ "patch-ids.h"
+#అన్తర్భావ "path.h"
+#అన్తర్భావ "shortlog.h"
+#అన్తర్భావ "remote.h"
+#అన్తర్భావ "string-list.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "line-log.h"
+#అన్తర్భావ "branch.h"
+#అన్తర్భావ "version.h"
+#అన్తర్భావ "mailmap.h"
+#అన్తర్భావ "progress.h"
+#అన్తర్భావ "commit-slab.h"
+#అన్తర్భావ "advice.h"
+#అన్తర్భావ "utf8.h"
 
-#include "commit-reach.h"
-#include "promisor-remote.h"
-#include "range-diff.h"
-#include "tmp-objdir.h"
-#include "tree.h"
-#include "userdiff.h"
-#include "write-or-die.h"
+#అన్తర్భావ "commit-reach.h"
+#అన్తర్భావ "promisor-remote.h"
+#అన్తర్భావ "range-diff.h"
+#అన్తర్భావ "tmp-objdir.h"
+#అన్తర్భావ "tree.h"
+#అన్తర్భావ "userdiff.h"
+#అన్తర్భావ "write-or-die.h"
 
-#define MAIL_DEFAULT_WRAP 72
-#define COVER_FROM_AUTO_MAX_SUBJECT_LEN 100
-#define FORMAT_PATCH_NAME_MAX_DEFAULT 64
+#నిర్వచించు MAIL_DEFAULT_WRAP 72
+#నిర్వచించు COVER_FROM_AUTO_MAX_SUBJECT_LEN 100
+#నిర్వచించు FORMAT_PATCH_NAME_MAX_DEFAULT 64
 
-static unsigned int force_in_body_from;
-static int stdout_mboxrd;
-static int format_no_prefix;
+స్థిర గుర్తులేని పూర్ణాంకం force_లోపల_body_from;
+స్థిర పూర్ణాంకం stdout_mboxrd;
+స్థిర పూర్ణాంకం format_no_ఉపసర్గ;
 
-static const char * const builtin_log_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_log_usage[] = {
 	N_("git log [<options>] [<revision-range>] [[--] <path>...]"),
 	N_("git show [<options>] <object>..."),
-	NULL
+	ఖాళీ
 };
 
-struct line_opt_callback_data {
-	struct rev_info *rev;
-	const char *prefix;
-	struct string_list args;
+నిర్మాణం పంక్తి_opt_callback_దత్తాంశం {
+	నిర్మాణం rev_info *rev;
+	స్థిరరాశి అక్షరం *ఉపసర్గ;
+	నిర్మాణం string_list వాదనలు;
 };
 
-static int session_is_interactive(void)
+స్థిర పూర్ణాంకం session_is_interactive(శూన్య)
 {
-	return isatty(1) || pager_in_use();
+	తిరిగి isatty(1) || pager_లోపల_use();
 }
 
-static int auto_decoration_style(void)
+స్థిర పూర్ణాంకం auto_decoration_style(శూన్య)
 {
-	return session_is_interactive() ? DECORATE_SHORT_REFS : 0;
+	తిరిగి session_is_interactive() ? DECORATE_SHORT_REFS : 0;
 }
 
-static int parse_decoration_style(const char *value)
+స్థిర పూర్ణాంకం parse_decoration_style(స్థిరరాశి అక్షరం *విలువ)
 {
-	switch (git_parse_maybe_bool(value)) {
-	case 1:
-		return DECORATE_SHORT_REFS;
-	case 0:
-		return 0;
-	default:
-		break;
+	ఎంపిక (git_parse_maybe_bool(విలువ)) {
+	స్థితి 1:
+		తిరిగి DECORATE_SHORT_REFS;
+	స్థితి 0:
+		తిరిగి 0;
+	అప్రమేయ:
+		ఆపు;
 	}
-	if (!strcmp(value, "full"))
-		return DECORATE_FULL_REFS;
-	else if (!strcmp(value, "short"))
-		return DECORATE_SHORT_REFS;
-	else if (!strcmp(value, "auto"))
-		return auto_decoration_style();
+	ఒకవేళ (!strcmp(విలువ, "full"))
+		తిరిగి DECORATE_నిండిన_REFS;
+	లేకపోతే ఒకవేళ (!strcmp(విలువ, "short"))
+		తిరిగి DECORATE_SHORT_REFS;
+	లేకపోతే ఒకవేళ (!strcmp(విలువ, "auto"))
+		తిరిగి auto_decoration_style();
 	/*
 	 * Please update _git_log() in git-completion.bash when you
 	 * add new decoration styles.
 	 */
-	return -1;
+	తిరిగి -1;
 }
 
-struct log_config {
-	int default_abbrev_commit;
-	int default_show_root;
-	int default_follow;
-	int default_show_signature;
-	int default_encode_email_headers;
-	int decoration_style;
-	int decoration_given;
-	int use_mailmap_config;
-	char *fmt_patch_subject_prefix;
-	int fmt_patch_name_max;
-	char *fmt_pretty;
-	char *default_date_mode;
+నిర్మాణం log_config {
+	పూర్ణాంకం default_abbrev_commit;
+	పూర్ణాంకం default_show_మూలం;
+	పూర్ణాంకం default_follow;
+	పూర్ణాంకం default_show_signature;
+	పూర్ణాంకం default_encode_email_శీర్షికలు;
+	పూర్ణాంకం decoration_style;
+	పూర్ణాంకం decoration_given;
+	పూర్ణాంకం use_mailmap_config;
+	అక్షరం *fmt_patch_subject_ఉపసర్గ;
+	పూర్ణాంకం fmt_patch_name_max;
+	అక్షరం *fmt_pretty;
+	అక్షరం *default_date_బహుళకం;
 
-#ifndef WITH_BREAKING_CHANGES
+#నిర్వచితం_కాకపోతే WITH_BREAKING_CHANGES
 	/*
 	 * Note: git_log_config() does not touch this member and that
 	 * is very deliberate.  This member is only to be used to
 	 * resurrect whatchanged that is deprecated.
 	 */
-	int i_still_use_this;
-#endif
+	పూర్ణాంకం i_still_use_this;
+#అయితే_ముగింపు
 };
 
-static void log_config_init(struct log_config *cfg)
+స్థిర శూన్య log_config_init(నిర్మాణం log_config *cfg)
 {
-	memset(cfg, 0, sizeof(*cfg));
-	cfg->default_show_root = 1;
-	cfg->default_encode_email_headers = 1;
+	memset(cfg, 0, పరిమాణం(*cfg));
+	cfg->default_show_మూలం = 1;
+	cfg->default_encode_email_శీర్షికలు = 1;
 	cfg->use_mailmap_config = 1;
-	cfg->fmt_patch_subject_prefix = xstrdup("PATCH");
+	cfg->fmt_patch_subject_ఉపసర్గ = xstrdup("PATCH");
 	cfg->fmt_patch_name_max = FORMAT_PATCH_NAME_MAX_DEFAULT;
 	cfg->decoration_style = auto_decoration_style();
 }
 
-static void log_config_release(struct log_config *cfg)
+స్థిర శూన్య log_config_release(నిర్మాణం log_config *cfg)
 {
-	free(cfg->default_date_mode);
-	free(cfg->fmt_pretty);
-	free(cfg->fmt_patch_subject_prefix);
+	విడుదల(cfg->default_date_బహుళకం);
+	విడుదల(cfg->fmt_pretty);
+	విడుదల(cfg->fmt_patch_subject_ఉపసర్గ);
 }
 
-static int use_default_decoration_filter = 1;
-static struct string_list decorate_refs_exclude = STRING_LIST_INIT_NODUP;
-static struct string_list decorate_refs_exclude_config = STRING_LIST_INIT_NODUP;
-static struct string_list decorate_refs_include = STRING_LIST_INIT_NODUP;
+స్థిర పూర్ణాంకం use_default_decoration_filter = 1;
+స్థిర నిర్మాణం string_list decorate_refs_exclude = STRING_LIST_INIT_NODUP;
+స్థిర నిర్మాణం string_list decorate_refs_exclude_config = STRING_LIST_INIT_NODUP;
+స్థిర నిర్మాణం string_list decorate_refs_include = STRING_LIST_INIT_NODUP;
 
-static int clear_decorations_callback(const struct option *opt UNUSED,
-				      const char *arg, int unset)
+స్థిర పూర్ణాంకం clear_decorations_callback(స్థిరరాశి నిర్మాణం option *opt వాడని,
+				      స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 	string_list_clear(&decorate_refs_include, 0);
 	string_list_clear(&decorate_refs_exclude, 0);
 	use_default_decoration_filter = 0;
-	return 0;
+	తిరిగి 0;
 }
 
-static int decorate_callback(const struct option *opt, const char *arg,
-			     int unset)
+స్థిర పూర్ణాంకం decorate_callback(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg,
+			     పూర్ణాంకం unset)
 {
-	struct log_config *cfg = opt->value;
+	నిర్మాణం log_config *cfg = opt->విలువ;
 
-	if (unset)
+	ఒకవేళ (unset)
 		cfg->decoration_style = 0;
-	else if (arg)
+	లేకపోతే ఒకవేళ (arg)
 		cfg->decoration_style = parse_decoration_style(arg);
-	else
+	లేకపోతే
 		cfg->decoration_style = DECORATE_SHORT_REFS;
 
-	if (cfg->decoration_style < 0)
+	ఒకవేళ (cfg->decoration_style < 0)
 		die(_("invalid --decorate option: %s"), arg);
 
 	cfg->decoration_given = 1;
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int log_line_range_callback(const struct option *option, const char *arg, int unset)
+స్థిర పూర్ణాంకం log_పంక్తి_range_callback(స్థిరరాశి నిర్మాణం option *option, స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	struct line_opt_callback_data *data = option->value;
+	నిర్మాణం పంక్తి_opt_callback_దత్తాంశం *దత్తాంశం = option->విలువ;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!arg)
-		return -1;
+	ఒకవేళ (!arg)
+		తిరిగి -1;
 
-	data->rev->line_level_traverse = 1;
-	string_list_append(&data->args, arg);
+	దత్తాంశం->rev->పంక్తి_level_traverse = 1;
+	string_list_append(&దత్తాంశం->వాదనలు, arg);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static void cmd_log_init_defaults(struct rev_info *rev,
-				  struct log_config *cfg)
+స్థిర శూన్య cmd_log_init_defaults(నిర్మాణం rev_info *rev,
+				  నిర్మాణం log_config *cfg)
 {
-	if (cfg->fmt_pretty)
+	ఒకవేళ (cfg->fmt_pretty)
 		get_commit_format(cfg->fmt_pretty, rev);
-	if (cfg->default_follow)
+	ఒకవేళ (cfg->default_follow)
 		rev->diffopt.flags.default_follow_renames = 1;
-	rev->verbose_header = 1;
+	rev->verbose_శీర్షిక = 1;
 	init_diffstat_widths(&rev->diffopt);
 	rev->diffopt.flags.recursive = 1;
 	rev->diffopt.flags.allow_textconv = 1;
 	rev->abbrev_commit = cfg->default_abbrev_commit;
-	rev->show_root_diff = cfg->default_show_root;
-	rev->subject_prefix = cfg->fmt_patch_subject_prefix;
+	rev->show_మూలం_diff = cfg->default_show_మూలం;
+	rev->subject_ఉపసర్గ = cfg->fmt_patch_subject_ఉపసర్గ;
 	rev->patch_name_max = cfg->fmt_patch_name_max;
 	rev->show_signature = cfg->default_show_signature;
-	rev->encode_email_headers = cfg->default_encode_email_headers;
+	rev->encode_email_శీర్షికలు = cfg->default_encode_email_శీర్షికలు;
 
-	if (cfg->default_date_mode)
-		parse_date_format(cfg->default_date_mode, &rev->date_mode);
+	ఒకవేళ (cfg->default_date_బహుళకం)
+		parse_date_format(cfg->default_date_బహుళకం, &rev->date_బహుళకం);
 }
 
-static void set_default_decoration_filter(struct decoration_filter *decoration_filter)
+స్థిర శూన్య సమితి_default_decoration_filter(నిర్మాణం decoration_filter *decoration_filter)
 {
-	char *value = NULL;
-	struct string_list *include = decoration_filter->include_ref_pattern;
-	const struct string_list *config_exclude;
+	అక్షరం *విలువ = ఖాళీ;
+	నిర్మాణం string_list *include = decoration_filter->include_ref_నమూనా;
+	స్థిరరాశి నిర్మాణం string_list *config_exclude;
 
-	if (!repo_config_get_string_multi(the_repository, "log.excludeDecoration",
+	ఒకవేళ (!repo_config_get_string_multi(the_repository, "log.excludeDecoration",
 					 &config_exclude)) {
-		struct string_list_item *item;
-		for_each_string_list_item(item, config_exclude)
-			string_list_append(decoration_filter->exclude_ref_config_pattern,
-					   item->string);
+		నిర్మాణం string_list_అంశం *అంశం;
+		for_each_string_list_అంశం(అంశం, config_exclude)
+			string_list_append(decoration_filter->exclude_ref_config_నమూనా,
+					   అంశం->string);
 	}
 
 	/*
@@ -239,54 +239,54 @@ static void set_default_decoration_filter(struct decoration_filter *decoration_f
 	 * log.initialDecorationSet=all. Don't ever disable it by config,
 	 * since the command-line takes precedent.
 	 */
-	if (use_default_decoration_filter &&
-	    !repo_config_get_string(the_repository, "log.initialdecorationset", &value) &&
-	    !strcmp("all", value))
+	ఒకవేళ (use_default_decoration_filter &&
+	    !repo_config_get_string(the_repository, "log.initialdecorationset", &విలువ) &&
+	    !strcmp("all", విలువ))
 		use_default_decoration_filter = 0;
-	free(value);
+	విడుదల(విలువ);
 
-	if (!use_default_decoration_filter ||
-	    decoration_filter->exclude_ref_pattern->nr ||
-	    decoration_filter->include_ref_pattern->nr ||
-	    decoration_filter->exclude_ref_config_pattern->nr)
-		return;
+	ఒకవేళ (!use_default_decoration_filter ||
+	    decoration_filter->exclude_ref_నమూనా->nr ||
+	    decoration_filter->include_ref_నమూనా->nr ||
+	    decoration_filter->exclude_ref_config_నమూనా->nr)
+		తిరిగి;
 
 	/*
 	 * No command-line or config options were given, so
 	 * populate with sensible defaults.
 	 */
-	for (size_t i = 0; i < ARRAY_SIZE(ref_namespace); i++) {
-		if (!ref_namespace[i].decoration)
-			continue;
+	కొరకు (కొలత_t i = 0; i < ARRAY_కొలత(ref_namespace); i++) {
+		ఒకవేళ (!ref_namespace[i].decoration)
+			కొనసాగు;
 
 		string_list_append(include, ref_namespace[i].ref);
 	}
 }
 
-static void cmd_log_init_finish(int argc, const char **argv, const char *prefix,
-			 struct rev_info *rev, struct setup_revision_opt *opt,
-			 struct log_config *cfg)
+స్థిర శూన్య cmd_log_init_ముగింపు(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			 నిర్మాణం rev_info *rev, నిర్మాణం అమరిక_revision_opt *opt,
+			 నిర్మాణం log_config *cfg)
 {
-	struct userformat_want w;
-	int quiet = 0, source = 0, mailmap;
-	static struct line_opt_callback_data line_cb = {NULL, NULL, STRING_LIST_INIT_DUP};
-	struct decoration_filter decoration_filter = {
-		.exclude_ref_pattern = &decorate_refs_exclude,
-		.include_ref_pattern = &decorate_refs_include,
-		.exclude_ref_config_pattern = &decorate_refs_exclude_config,
+	నిర్మాణం userformat_want w;
+	పూర్ణాంకం quiet = 0, ఆధారం = 0, mailmap;
+	స్థిర నిర్మాణం పంక్తి_opt_callback_దత్తాంశం పంక్తి_cb = {ఖాళీ, ఖాళీ, STRING_LIST_INIT_DUP};
+	నిర్మాణం decoration_filter decoration_filter = {
+		.exclude_ref_నమూనా = &decorate_refs_exclude,
+		.include_ref_నమూనా = &decorate_refs_include,
+		.exclude_ref_config_నమూనా = &decorate_refs_exclude_config,
 	};
-	static struct revision_sources revision_sources;
+	స్థిర నిర్మాణం revision_sources revision_sources;
 
-	const struct option builtin_log_options[] = {
+	స్థిరరాశి నిర్మాణం option builtin_log_options[] = {
 		OPT__QUIET(&quiet, N_("suppress diff output")),
-		OPT_BOOL(0, "source", &source, N_("show source")),
+		OPT_BOOL(0, "source", &ఆధారం, N_("show source")),
 		OPT_BOOL(0, "use-mailmap", &mailmap, N_("use mail map file")),
-#ifndef WITH_BREAKING_CHANGES
+#నిర్వచితం_కాకపోతే WITH_BREAKING_CHANGES
 		OPT_HIDDEN_BOOL(0, "i-still-use-this", &cfg->i_still_use_this,
 				"<use this deprecated command>"),
-#endif
+#అయితే_ముగింపు
 		OPT_ALIAS(0, "mailmap", "use-mailmap"),
-		OPT_CALLBACK_F(0, "clear-decorations", NULL, NULL,
+		OPT_CALLBACK_F(0, "clear-decorations", ఖాళీ, ఖాళీ,
 			       N_("clear all previously-defined decoration filters"),
 			       PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			       clear_decorations_callback),
@@ -294,76 +294,76 @@ static void cmd_log_init_finish(int argc, const char **argv, const char *prefix,
 				N_("pattern"), N_("only decorate refs that match <pattern>")),
 		OPT_STRING_LIST(0, "decorate-refs-exclude", &decorate_refs_exclude,
 				N_("pattern"), N_("do not decorate refs that match <pattern>")),
-		OPT_CALLBACK_F(0, "decorate", cfg, NULL, N_("decorate options"),
+		OPT_CALLBACK_F(0, "decorate", cfg, ఖాళీ, N_("decorate options"),
 			       PARSE_OPT_OPTARG, decorate_callback),
-		OPT_CALLBACK('L', NULL, &line_cb, "range:file",
+		OPT_CALLBACK('L', ఖాళీ, &పంక్తి_cb, "range:file",
 			     N_("trace the evolution of line range <start>,<end> or function :<funcname> in <file>"),
-			     log_line_range_callback),
-		OPT_END()
+			     log_పంక్తి_range_callback),
+		OPT_చివర()
 	};
 
-	line_cb.rev = rev;
-	line_cb.prefix = prefix;
+	పంక్తి_cb.rev = rev;
+	పంక్తి_cb.ఉపసర్గ = ఉపసర్గ;
 
 	mailmap = cfg->use_mailmap_config;
-	argc = parse_options(argc, argv, prefix,
+	argc = parse_options(argc, argv, ఉపసర్గ,
 			     builtin_log_options, builtin_log_usage,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT |
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (quiet)
+	ఒకవేళ (quiet)
 		rev->diffopt.output_format |= DIFF_FORMAT_NO_OUTPUT;
-	argc = setup_revisions(argc, argv, rev, opt);
+	argc = అమరిక_revisions(argc, argv, rev, opt);
 
 	/* Any arguments at this point are not recognized */
-	if (argc > 1)
+	ఒకవేళ (argc > 1)
 		die(_("unrecognized argument: %s"), argv[1]);
 
-	if (rev->line_level_traverse && rev->prune_data.nr)
+	ఒకవేళ (rev->పంక్తి_level_traverse && rev->prune_దత్తాంశం.nr)
 		die(_("-L<range>:<file> cannot be used with pathspec"));
 
-	memset(&w, 0, sizeof(w));
-	userformat_find_requirements(NULL, &w);
+	memset(&w, 0, పరిమాణం(w));
+	userformat_కనుగొను_requirements(ఖాళీ, &w);
 
-	if (!rev->show_notes_given && (!rev->pretty_given || w.notes))
+	ఒకవేళ (!rev->show_notes_given && (!rev->pretty_given || w.notes))
 		rev->show_notes = 1;
-	if (rev->show_notes)
-		load_display_notes(&rev->notes_opt);
+	ఒకవేళ (rev->show_notes)
+		ఎక్కించు_display_notes(&rev->notes_opt);
 
-	if ((rev->diffopt.pickaxe_opts & DIFF_PICKAXE_KINDS_MASK) ||
+	ఒకవేళ ((rev->diffopt.pickaxe_opts & DIFF_PICKAXE_KINDS_ముసుగు) ||
 	    rev->diffopt.filter || rev->diffopt.flags.follow_renames)
-		rev->always_show_header = 0;
+		rev->always_show_శీర్షిక = 0;
 
-	if (source || w.source) {
+	ఒకవేళ (ఆధారం || w.ఆధారం) {
 		init_revision_sources(&revision_sources);
 		rev->sources = &revision_sources;
 	}
 
-	if (mailmap) {
-		rev->mailmap = xmalloc(sizeof(struct string_list));
+	ఒకవేళ (mailmap) {
+		rev->mailmap = xmalloc(పరిమాణం(నిర్మాణం string_list));
 		string_list_init_nodup(rev->mailmap);
 		read_mailmap(the_repository, rev->mailmap);
 	}
 
-	if (rev->pretty_given && rev->commit_format == CMIT_FMT_RAW) {
+	ఒకవేళ (rev->pretty_given && rev->commit_format == CMIT_FMT_RAW) {
 		/*
 		 * "log --pretty=raw" is special; ignore UI oriented
 		 * configuration variables such as decoration.
 		 */
-		if (!cfg->decoration_given)
+		ఒకవేళ (!cfg->decoration_given)
 			cfg->decoration_style = 0;
-		if (!rev->abbrev_commit_given)
+		ఒకవేళ (!rev->abbrev_commit_given)
 			rev->abbrev_commit = 0;
 	}
 
-	if (rev->commit_format == CMIT_FMT_USERFORMAT) {
-		if (!w.decorate) {
+	ఒకవేళ (rev->commit_format == CMIT_FMT_USERFORMAT) {
+		ఒకవేళ (!w.decorate) {
 			/*
 			 * Disable decoration loading if the format will not
 			 * show them anyway.
 			 */
 			cfg->decoration_style = 0;
-		} else if (!cfg->decoration_style) {
+		} లేకపోతే ఒకవేళ (!cfg->decoration_style) {
 			/*
 			 * If we are going to show them, make sure we do load
 			 * them here, but taking care not to override a
@@ -373,37 +373,37 @@ static void cmd_log_init_finish(int argc, const char **argv, const char *prefix,
 		}
 	}
 
-	if (cfg->decoration_style || rev->simplify_by_decoration) {
-		set_default_decoration_filter(&decoration_filter);
+	ఒకవేళ (cfg->decoration_style || rev->simplify_by_decoration) {
+		సమితి_default_decoration_filter(&decoration_filter);
 
-		if (cfg->decoration_style)
+		ఒకవేళ (cfg->decoration_style)
 			rev->show_decorations = 1;
 
-		load_ref_decorations(&decoration_filter, cfg->decoration_style);
+		ఎక్కించు_ref_decorations(&decoration_filter, cfg->decoration_style);
 	}
 
-	if (rev->line_level_traverse)
-		line_log_init(rev, line_cb.prefix, &line_cb.args);
+	ఒకవేళ (rev->పంక్తి_level_traverse)
+		పంక్తి_log_init(rev, పంక్తి_cb.ఉపసర్గ, &పంక్తి_cb.వాదనలు);
 
-	setup_pager(the_repository);
+	అమరిక_pager(the_repository);
 }
 
-static void cmd_log_init(int argc, const char **argv, const char *prefix,
-			 struct rev_info *rev, struct setup_revision_opt *opt,
-			 struct log_config *cfg)
+స్థిర శూన్య cmd_log_init(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			 నిర్మాణం rev_info *rev, నిర్మాణం అమరిక_revision_opt *opt,
+			 నిర్మాణం log_config *cfg)
 {
 	cmd_log_init_defaults(rev, cfg);
-	cmd_log_init_finish(argc, argv, prefix, rev, opt, cfg);
+	cmd_log_init_ముగింపు(argc, argv, ఉపసర్గ, rev, opt, cfg);
 }
 
-static int cmd_log_walk_no_free(struct rev_info *rev)
+స్థిర పూర్ణాంకం cmd_log_walk_no_free(నిర్మాణం rev_info *rev)
 {
-	struct commit *commit;
-	int saved_nrl = 0;
-	int saved_dcctc = 0;
-	int result;
+	నిర్మాణం commit *commit;
+	పూర్ణాంకం saved_nrl = 0;
+	పూర్ణాంకం saved_dcctc = 0;
+	పూర్ణాంకం ఫలితం;
 
-	if (prepare_revision_walk(rev))
+	ఒకవేళ (prepare_revision_walk(rev))
 		die(_("revision walk setup failed"));
 
 	/*
@@ -411,14 +411,14 @@ static int cmd_log_walk_no_free(struct rev_info *rev)
 	 * and HAS_CHANGES being accumulated in rev->diffopt, so be careful to
 	 * retain that state information if replacing rev->diffopt in this loop
 	 */
-	while ((commit = get_revision(rev)) != NULL) {
-		if (!log_tree_commit(rev, commit) && rev->max_count >= 0)
+	అయితే ((commit = get_revision(rev)) != ఖాళీ) {
+		ఒకవేళ (!log_వృక్షం_commit(rev, commit) && rev->max_లెక్క >= 0)
 			/*
 			 * We decremented max_count in get_revision,
 			 * but we didn't actually show the commit.
 			 */
-			rev->max_count++;
-		if (!rev->reflog_info && !rev->remerge_diff) {
+			rev->max_లెక్క++;
+		ఒకవేళ (!rev->reflog_info && !rev->remerge_diff) {
 			/*
 			 * We may show a given commit multiple times when
 			 * walking the reflogs. Therefore we still need it.
@@ -427,127 +427,127 @@ static int cmd_log_walk_no_free(struct rev_info *rev)
 			 * of * already shown commits to determine merge
 			 * bases when showing remerge diffs.
 			 */
-			free_commit_buffer(the_repository->parsed_objects,
+			free_commit_బఫరు(the_repository->parsed_objects,
 					   commit);
 			commit_list_free(commit->parents);
-			commit->parents = NULL;
+			commit->parents = ఖాళీ;
 		}
-		if (saved_nrl < rev->diffopt.needed_rename_limit)
-			saved_nrl = rev->diffopt.needed_rename_limit;
-		if (rev->diffopt.degraded_cc_to_c)
+		ఒకవేళ (saved_nrl < rev->diffopt.needed_rename_హద్దు)
+			saved_nrl = rev->diffopt.needed_rename_హద్దు;
+		ఒకవేళ (rev->diffopt.degraded_cc_గమ్యం_c)
 			saved_dcctc = 1;
 	}
-	rev->diffopt.degraded_cc_to_c = saved_dcctc;
-	rev->diffopt.needed_rename_limit = saved_nrl;
+	rev->diffopt.degraded_cc_గమ్యం_c = saved_dcctc;
+	rev->diffopt.needed_rename_హద్దు = saved_nrl;
 
-	result = diff_result_code(rev);
-	if (rev->diffopt.output_format & DIFF_FORMAT_CHECKDIFF &&
+	ఫలితం = diff_ఫలితం_సంకేతం(rev);
+	ఒకవేళ (rev->diffopt.output_format & DIFF_FORMAT_CHECKDIFF &&
 	    rev->diffopt.flags.check_failed) {
-		result = 02;
+		ఫలితం = 02;
 	}
-	return result;
+	తిరిగి ఫలితం;
 }
 
-static int cmd_log_walk(struct rev_info *rev)
+స్థిర పూర్ణాంకం cmd_log_walk(నిర్మాణం rev_info *rev)
 {
-	int retval;
+	పూర్ణాంకం retval;
 
 	rev->diffopt.no_free = 1;
 	retval = cmd_log_walk_no_free(rev);
 	rev->diffopt.no_free = 0;
 	diff_free(&rev->diffopt);
-	return retval;
+	తిరిగి retval;
 }
 
-static int git_log_config(const char *var, const char *value,
-			  const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం git_log_config(స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *విలువ,
+			  స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	struct log_config *cfg = cb;
-	const char *slot_name;
+	నిర్మాణం log_config *cfg = cb;
+	స్థిరరాశి అక్షరం *స్థానం_name;
 
-	if (!strcmp(var, "format.pretty")) {
+	ఒకవేళ (!strcmp(var, "format.pretty")) {
 		FREE_AND_NULL(cfg->fmt_pretty);
-		return git_config_string(&cfg->fmt_pretty, var, value);
+		తిరిగి git_config_string(&cfg->fmt_pretty, var, విలువ);
 	}
-	if (!strcmp(var, "format.subjectprefix")) {
-		FREE_AND_NULL(cfg->fmt_patch_subject_prefix);
-		return git_config_string(&cfg->fmt_patch_subject_prefix, var, value);
+	ఒకవేళ (!strcmp(var, "format.subjectprefix")) {
+		FREE_AND_NULL(cfg->fmt_patch_subject_ఉపసర్గ);
+		తిరిగి git_config_string(&cfg->fmt_patch_subject_ఉపసర్గ, var, విలువ);
 	}
-	if (!strcmp(var, "format.filenamemaxlength")) {
-		cfg->fmt_patch_name_max = git_config_int(var, value, ctx->kvi);
-		return 0;
+	ఒకవేళ (!strcmp(var, "format.filenamemaxlength")) {
+		cfg->fmt_patch_name_max = git_config_int(var, విలువ, ctx->kvi);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "format.encodeemailheaders")) {
-		cfg->default_encode_email_headers = git_config_bool(var, value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "format.encodeemailheaders")) {
+		cfg->default_encode_email_శీర్షికలు = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "log.abbrevcommit")) {
-		cfg->default_abbrev_commit = git_config_bool(var, value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "log.abbrevcommit")) {
+		cfg->default_abbrev_commit = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "log.date")) {
-		FREE_AND_NULL(cfg->default_date_mode);
-		return git_config_string(&cfg->default_date_mode, var, value);
+	ఒకవేళ (!strcmp(var, "log.date")) {
+		FREE_AND_NULL(cfg->default_date_బహుళకం);
+		తిరిగి git_config_string(&cfg->default_date_బహుళకం, var, విలువ);
 	}
-	if (!strcmp(var, "log.decorate")) {
-		cfg->decoration_style = parse_decoration_style(value);
-		if (cfg->decoration_style < 0)
+	ఒకవేళ (!strcmp(var, "log.decorate")) {
+		cfg->decoration_style = parse_decoration_style(విలువ);
+		ఒకవేళ (cfg->decoration_style < 0)
 			cfg->decoration_style = 0; /* maybe warn? */
-		return 0;
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "log.diffmerges")) {
-		if (!value)
-			return config_error_nonbool(var);
-		return diff_merges_config(value);
+	ఒకవేళ (!strcmp(var, "log.diffmerges")) {
+		ఒకవేళ (!విలువ)
+			తిరిగి config_error_nonbool(var);
+		తిరిగి diff_merges_config(విలువ);
 	}
-	if (!strcmp(var, "log.showroot")) {
-		cfg->default_show_root = git_config_bool(var, value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "log.showroot")) {
+		cfg->default_show_మూలం = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "log.follow")) {
-		cfg->default_follow = git_config_bool(var, value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "log.follow")) {
+		cfg->default_follow = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
-	if (skip_prefix(var, "color.decorate.", &slot_name))
-		return parse_decorate_color_config(var, slot_name, value);
-	if (!strcmp(var, "log.mailmap")) {
-		cfg->use_mailmap_config = git_config_bool(var, value);
-		return 0;
+	ఒకవేళ (skip_ఉపసర్గ(var, "color.decorate.", &స్థానం_name))
+		తిరిగి parse_decorate_color_config(var, స్థానం_name, విలువ);
+	ఒకవేళ (!strcmp(var, "log.mailmap")) {
+		cfg->use_mailmap_config = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "log.showsignature")) {
-		cfg->default_show_signature = git_config_bool(var, value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "log.showsignature")) {
+		cfg->default_show_signature = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
 
-	return git_diff_ui_config(var, value, ctx, cb);
+	తిరిగి git_diff_ui_config(var, విలువ, ctx, cb);
 }
 
-#ifndef WITH_BREAKING_CHANGES
-int cmd_whatchanged(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+#నిర్వచితం_కాకపోతే WITH_BREAKING_CHANGES
+పూర్ణాంకం cmd_whatchanged(పూర్ణాంకం argc,
+		    స్థిరరాశి అక్షరం **argv,
+		    స్థిరరాశి అక్షరం *ఉపసర్గ,
+		    నిర్మాణం repository *repo వాడని)
 {
-	struct log_config cfg;
-	struct rev_info rev;
-	struct setup_revision_opt opt;
-	int ret;
+	నిర్మాణం log_config cfg;
+	నిర్మాణం rev_info rev;
+	నిర్మాణం అమరిక_revision_opt opt;
+	పూర్ణాంకం ret;
 
 	log_config_init(&cfg);
 	init_diff_ui_defaults();
 	repo_config(the_repository, git_log_config, &cfg);
 
-	repo_init_revisions(the_repository, &rev, prefix);
+	repo_init_revisions(the_repository, &rev, ఉపసర్గ);
 	repo_config(the_repository, grep_config, &rev.grep_filter);
 
 	rev.diff = 1;
 	rev.simplify_history = 0;
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, పరిమాణం(opt));
 	opt.def = "HEAD";
 	opt.revarg_opt = REVARG_COMMITTISH;
-	cmd_log_init(argc, argv, prefix, &rev, &opt, &cfg);
+	cmd_log_init(argc, argv, ఉపసర్గ, &rev, &opt, &cfg);
 
-	if (!cfg.i_still_use_this)
+	ఒకవేళ (!cfg.i_still_use_this)
 		you_still_use_that("git whatchanged",
 				   _("\n"
 				     "hint: You can replace 'git whatchanged <opts>' with:\n"
@@ -556,201 +556,201 @@ int cmd_whatchanged(int argc,
 				     "hint:\tgit config set --global alias.whatchanged 'log --raw --no-merges'\n"
 				     "\n"));
 
-	if (!rev.diffopt.output_format)
+	ఒకవేళ (!rev.diffopt.output_format)
 		rev.diffopt.output_format = DIFF_FORMAT_RAW;
 
 	ret = cmd_log_walk(&rev);
 
 	release_revisions(&rev);
 	log_config_release(&cfg);
-	return ret;
+	తిరిగి ret;
 }
-#endif
+#అయితే_ముగింపు
 
-static void show_tagger(const char *buf, struct rev_info *rev)
+స్థిర శూన్య show_tagger(స్థిరరాశి అక్షరం *buf, నిర్మాణం rev_info *rev)
 {
-	struct strbuf out = STRBUF_INIT;
-	struct pretty_print_context pp = {0};
+	నిర్మాణం strbuf బహిర్గతం = STRBUF_INIT;
+	నిర్మాణం pretty_print_context pp = {0};
 
 	pp.fmt = rev->commit_format;
-	pp.date_mode = rev->date_mode;
-	pp_user_info(&pp, "Tagger", &out, buf, get_log_output_encoding());
-	fprintf(rev->diffopt.file, "%s", out.buf);
-	strbuf_release(&out);
+	pp.date_బహుళకం = rev->date_బహుళకం;
+	pp_user_info(&pp, "Tagger", &బహిర్గతం, buf, get_log_output_encoding());
+	fprintf(rev->diffopt.file, "%s", బహిర్గతం.buf);
+	strbuf_release(&బహిర్గతం);
 }
 
-static int show_blob_object(const struct object_id *oid, struct rev_info *rev, const char *obj_name)
+స్థిర పూర్ణాంకం show_blob_object(స్థిరరాశి నిర్మాణం object_id *oid, నిర్మాణం rev_info *rev, స్థిరరాశి అక్షరం *obj_name)
 {
-	struct object_id oidc;
-	struct object_context obj_context = {0};
-	char *buf;
-	unsigned long size;
+	నిర్మాణం object_id oidc;
+	నిర్మాణం object_context obj_context = {0};
+	అక్షరం *buf;
+	గుర్తులేని దీర్ఘ కొలత;
 
 	fflush(rev->diffopt.file);
-	if (!rev->diffopt.flags.textconv_set_via_cmdline ||
+	ఒకవేళ (!rev->diffopt.flags.textconv_సమితి_ద్వారా_cmdline ||
 	    !rev->diffopt.flags.allow_textconv)
-		return odb_stream_blob_to_fd(the_repository->objects, 1, oid, NULL, 0);
+		తిరిగి odb_ప్రవాహం_blob_గమ్యం_fd(the_repository->objects, 1, oid, ఖాళీ, 0);
 
-	if (get_oid_with_context(the_repository, obj_name,
-				 GET_OID_RECORD_PATH,
+	ఒకవేళ (get_oid_with_context(the_repository, obj_name,
+				 GET_OID_రికార్డు_మార్గం,
 				 &oidc, &obj_context))
 		die(_("not a valid object name %s"), obj_name);
-	if (!obj_context.path ||
-	    !textconv_object(the_repository, obj_context.path,
-			     obj_context.mode, &oidc, 1, &buf, &size)) {
+	ఒకవేళ (!obj_context.మార్గం ||
+	    !textconv_object(the_repository, obj_context.మార్గం,
+			     obj_context.బహుళకం, &oidc, 1, &buf, &కొలత)) {
 		object_context_release(&obj_context);
-		return odb_stream_blob_to_fd(the_repository->objects, 1, oid, NULL, 0);
+		తిరిగి odb_ప్రవాహం_blob_గమ్యం_fd(the_repository->objects, 1, oid, ఖాళీ, 0);
 	}
 
-	if (!buf)
+	ఒకవేళ (!buf)
 		die(_("git show %s: bad file"), obj_name);
 
-	write_or_die(1, buf, size);
+	write_or_die(1, buf, కొలత);
 	object_context_release(&obj_context);
-	free(buf);
-	return 0;
+	విడుదల(buf);
+	తిరిగి 0;
 }
 
-static int show_tag_object(const struct object_id *oid, struct rev_info *rev)
+స్థిర పూర్ణాంకం show_ట్యాగ్_object(స్థిరరాశి నిర్మాణం object_id *oid, నిర్మాణం rev_info *rev)
 {
-	size_t size;
-	enum object_type type;
-	char *buf = odb_read_object(the_repository->objects, oid, &type, &size);
-	unsigned long offset = 0;
+	కొలత_t కొలత;
+	గణన object_type type;
+	అక్షరం *buf = odb_read_object(the_repository->objects, oid, &type, &కొలత);
+	గుర్తులేని దీర్ఘ స్థానభ్రంశం = 0;
 
-	if (!buf)
-		return error(_("could not read object %s"), oid_to_hex(oid));
+	ఒకవేళ (!buf)
+		తిరిగి error(_("could not read object %s"), oid_గమ్యం_hex(oid));
 
-	assert(type == OBJ_TAG);
-	while (offset < size && buf[offset] != '\n') {
-		unsigned long new_offset = offset + 1;
-		const char *ident;
-		while (new_offset < size && buf[new_offset++] != '\n')
+	ప్రతిజ్ఞా(type == OBJ_ట్యాగ్);
+	అయితే (స్థానభ్రంశం < కొలత && buf[స్థానభ్రంశం] != '\n') {
+		గుర్తులేని దీర్ఘ new_స్థానభ్రంశం = స్థానభ్రంశం + 1;
+		స్థిరరాశి అక్షరం *ident;
+		అయితే (new_స్థానభ్రంశం < కొలత && buf[new_స్థానభ్రంశం++] != '\n')
 			; /* do nothing */
-		if (skip_prefix(buf + offset, "tagger ", &ident))
+		ఒకవేళ (skip_ఉపసర్గ(buf + స్థానభ్రంశం, "tagger ", &ident))
 			show_tagger(ident, rev);
-		offset = new_offset;
+		స్థానభ్రంశం = new_స్థానభ్రంశం;
 	}
 
-	if (offset < size)
-		fwrite(buf + offset, size - offset, 1, rev->diffopt.file);
-	free(buf);
-	return 0;
+	ఒకవేళ (స్థానభ్రంశం < కొలత)
+		fwrite(buf + స్థానభ్రంశం, కొలత - స్థానభ్రంశం, 1, rev->diffopt.file);
+	విడుదల(buf);
+	తిరిగి 0;
 }
 
-static int show_tree_object(const struct object_id *oid UNUSED,
-			    struct strbuf *base UNUSED,
-			    const char *pathname, unsigned mode,
-			    void *context)
+స్థిర పూర్ణాంకం show_వృక్షం_object(స్థిరరాశి నిర్మాణం object_id *oid వాడని,
+			    నిర్మాణం strbuf *పునాది వాడని,
+			    స్థిరరాశి అక్షరం *pathname, గుర్తులేని బహుళకం,
+			    శూన్య *context)
 {
 	FILE *file = context;
-	fprintf(file, "%s%s\n", pathname, S_ISDIR(mode) ? "/" : "");
-	return 0;
+	fprintf(file, "%s%s\n", pathname, S_ISDIR(బహుళకం) ? "/" : "");
+	తిరిగి 0;
 }
 
-static void show_setup_revisions_tweak(struct rev_info *rev)
+స్థిర శూన్య show_అమరిక_revisions_tweak(నిర్మాణం rev_info *rev)
 {
-	if (rev->first_parent_only)
-		diff_merges_default_to_first_parent(rev);
-	else
-		diff_merges_default_to_dense_combined(rev);
-	if (!rev->diffopt.output_format)
+	ఒకవేళ (rev->మొదటి_మాతృ_only)
+		diff_merges_default_గమ్యం_మొదటి_మాతృ(rev);
+	లేకపోతే
+		diff_merges_default_గమ్యం_dense_combined(rev);
+	ఒకవేళ (!rev->diffopt.output_format)
 		rev->diffopt.output_format = DIFF_FORMAT_PATCH;
 }
 
-int cmd_show(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo UNUSED)
+పూర్ణాంకం cmd_show(పూర్ణాంకం argc,
+	     స్థిరరాశి అక్షరం **argv,
+	     స్థిరరాశి అక్షరం *ఉపసర్గ,
+	     నిర్మాణం repository *repo వాడని)
 {
-	struct log_config cfg;
-	struct rev_info rev;
-	unsigned int i;
-	struct setup_revision_opt opt;
-	struct pathspec match_all;
-	int ret = 0;
+	నిర్మాణం log_config cfg;
+	నిర్మాణం rev_info rev;
+	గుర్తులేని పూర్ణాంకం i;
+	నిర్మాణం అమరిక_revision_opt opt;
+	నిర్మాణం pathspec సరిపోలిక_all;
+	పూర్ణాంకం ret = 0;
 
 	log_config_init(&cfg);
 	init_diff_ui_defaults();
 	repo_config(the_repository, git_log_config, &cfg);
 
-	if (the_repository->gitdir) {
+	ఒకవేళ (the_repository->gitdir) {
 		prepare_repo_settings(the_repository);
-		the_repository->settings.command_requires_full_index = 0;
+		the_repository->settings.command_requires_నిండిన_సూచీ = 0;
 	}
 
-	memset(&match_all, 0, sizeof(match_all));
-	repo_init_revisions(the_repository, &rev, prefix);
+	memset(&సరిపోలిక_all, 0, పరిమాణం(సరిపోలిక_all));
+	repo_init_revisions(the_repository, &rev, ఉపసర్గ);
 	repo_config(the_repository, grep_config, &rev.grep_filter);
 
 	rev.diff = 1;
-	rev.always_show_header = 1;
+	rev.always_show_శీర్షిక = 1;
 	rev.no_walk = 1;
-	rev.diffopt.stat_width = -1; 	/* Scale to real terminal size */
+	rev.diffopt.stat_వెడల్పు = -1; 	/* Scale to real terminal size */
 
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, పరిమాణం(opt));
 	opt.def = "HEAD";
-	opt.tweak = show_setup_revisions_tweak;
-	cmd_log_init(argc, argv, prefix, &rev, &opt, &cfg);
+	opt.tweak = show_అమరిక_revisions_tweak;
+	cmd_log_init(argc, argv, ఉపసర్గ, &rev, &opt, &cfg);
 
-	if (!rev.no_walk) {
+	ఒకవేళ (!rev.no_walk) {
 		ret = cmd_log_walk(&rev);
 		release_revisions(&rev);
 		log_config_release(&cfg);
-		return ret;
+		తిరిగి ret;
 	}
 
 	rev.diffopt.no_free = 1;
-	for (i = 0; i < rev.pending.nr && !ret; i++) {
-		struct object *o = rev.pending.objects[i].item;
-		const char *name = rev.pending.objects[i].name;
-		switch (o->type) {
-		case OBJ_BLOB:
+	కొరకు (i = 0; i < rev.pending.nr && !ret; i++) {
+		నిర్మాణం object *o = rev.pending.objects[i].అంశం;
+		స్థిరరాశి అక్షరం *name = rev.pending.objects[i].name;
+		ఎంపిక (o->type) {
+		స్థితి OBJ_BLOB:
 			ret = show_blob_object(&o->oid, &rev, name);
-			break;
-		case OBJ_TAG: {
-			struct tag *t = (struct tag *)o;
-			struct object_id *oid = get_tagged_oid(t);
+			ఆపు;
+		స్థితి OBJ_ట్యాగ్: {
+			నిర్మాణం ట్యాగ్ *t = (నిర్మాణం ట్యాగ్ *)o;
+			నిర్మాణం object_id *oid = get_tagged_oid(t);
 
-			if (rev.shown_one)
-				putchar('\n');
+			ఒకవేళ (rev.shown_one)
+				అక్షరం_రాయి('\n');
 			fprintf(rev.diffopt.file, "%stag %s%s\n",
 					diff_get_color_opt(&rev.diffopt, DIFF_COMMIT),
-					t->tag,
+					t->ట్యాగ్,
 					diff_get_color_opt(&rev.diffopt, DIFF_RESET));
-			ret = show_tag_object(&o->oid, &rev);
+			ret = show_ట్యాగ్_object(&o->oid, &rev);
 			rev.shown_one = 1;
-			if (ret)
-				break;
+			ఒకవేళ (ret)
+				ఆపు;
 			o = parse_object(the_repository, oid);
-			if (!o)
+			ఒకవేళ (!o)
 				ret = error(_("could not read object %s"),
-					    oid_to_hex(oid));
-			rev.pending.objects[i].item = o;
+					    oid_గమ్యం_hex(oid));
+			rev.pending.objects[i].అంశం = o;
 			i--;
-			break;
+			ఆపు;
 		}
-		case OBJ_TREE:
-			if (rev.shown_one)
-				putchar('\n');
+		స్థితి OBJ_వృక్షం:
+			ఒకవేళ (rev.shown_one)
+				అక్షరం_రాయి('\n');
 			fprintf(rev.diffopt.file, "%stree %s%s\n\n",
 					diff_get_color_opt(&rev.diffopt, DIFF_COMMIT),
 					name,
 					diff_get_color_opt(&rev.diffopt, DIFF_RESET));
-			read_tree(the_repository, (struct tree *)o,
-				  &match_all, show_tree_object,
+			read_వృక్షం(the_repository, (నిర్మాణం వృక్షం *)o,
+				  &సరిపోలిక_all, show_వృక్షం_object,
 				  rev.diffopt.file);
 			rev.shown_one = 1;
-			break;
-		case OBJ_COMMIT:
+			ఆపు;
+		స్థితి OBJ_COMMIT:
 		{
-			struct object_array old;
-			struct object_array blank = OBJECT_ARRAY_INIT;
+			నిర్మాణం object_array old;
+			నిర్మాణం object_array blank = OBJECT_ARRAY_INIT;
 
-			memcpy(&old, &rev.pending, sizeof(old));
-			memcpy(&rev.pending, &blank, sizeof(rev.pending));
+			జ్ఞాపకం_నకలు(&old, &rev.pending, పరిమాణం(old));
+			జ్ఞాపకం_నకలు(&rev.pending, &blank, పరిమాణం(rev.pending));
 
-			add_object_array(o, name, &rev.pending);
+			కూడు_object_array(o, name, &rev.pending);
 			ret = cmd_log_walk_no_free(&rev);
 
 			/*
@@ -758,10 +758,10 @@ int cmd_show(int argc,
 			 * object_array_clear(&pending). It was
 			 * cleared already in prepare_revision_walk()
 			 */
-			memcpy(&rev.pending, &old, sizeof(rev.pending));
-			break;
+			జ్ఞాపకం_నకలు(&rev.pending, &old, పరిమాణం(rev.pending));
+			ఆపు;
 		}
-		default:
+		అప్రమేయ:
 			ret = error(_("unknown type: %d"), o->type);
 		}
 	}
@@ -771,355 +771,355 @@ int cmd_show(int argc,
 	release_revisions(&rev);
 	log_config_release(&cfg);
 
-	return ret;
+	తిరిగి ret;
 }
 
 /*
  * This is equivalent to "git log -g --abbrev-commit --pretty=oneline"
  */
-int cmd_log_reflog(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+పూర్ణాంకం cmd_log_reflog(పూర్ణాంకం argc,
+		   స్థిరరాశి అక్షరం **argv,
+		   స్థిరరాశి అక్షరం *ఉపసర్గ,
+		   నిర్మాణం repository *repo వాడని)
 {
-	struct log_config cfg;
-	struct rev_info rev;
-	struct setup_revision_opt opt;
-	int ret;
+	నిర్మాణం log_config cfg;
+	నిర్మాణం rev_info rev;
+	నిర్మాణం అమరిక_revision_opt opt;
+	పూర్ణాంకం ret;
 
 	log_config_init(&cfg);
 	init_diff_ui_defaults();
 	repo_config(the_repository, git_log_config, &cfg);
 
-	repo_init_revisions(the_repository, &rev, prefix);
+	repo_init_revisions(the_repository, &rev, ఉపసర్గ);
 	init_reflog_walk(&rev.reflog_info);
 	repo_config(the_repository, grep_config, &rev.grep_filter);
 
-	rev.verbose_header = 1;
-	memset(&opt, 0, sizeof(opt));
+	rev.verbose_శీర్షిక = 1;
+	memset(&opt, 0, పరిమాణం(opt));
 	opt.def = "HEAD";
 	cmd_log_init_defaults(&rev, &cfg);
 	rev.abbrev_commit = 1;
 	rev.commit_format = CMIT_FMT_ONELINE;
 	rev.use_terminator = 1;
-	rev.always_show_header = 1;
-	cmd_log_init_finish(argc, argv, prefix, &rev, &opt, &cfg);
+	rev.always_show_శీర్షిక = 1;
+	cmd_log_init_ముగింపు(argc, argv, ఉపసర్గ, &rev, &opt, &cfg);
 
 	ret = cmd_log_walk(&rev);
 
 	release_revisions(&rev);
 	log_config_release(&cfg);
-	return ret;
+	తిరిగి ret;
 }
 
-static void log_setup_revisions_tweak(struct rev_info *rev)
+స్థిర శూన్య log_అమరిక_revisions_tweak(నిర్మాణం rev_info *rev)
 {
-	if (rev->diffopt.flags.default_follow_renames &&
-	    diff_check_follow_pathspec(&rev->prune_data, 0))
+	ఒకవేళ (rev->diffopt.flags.default_follow_renames &&
+	    diff_check_follow_pathspec(&rev->prune_దత్తాంశం, 0))
 		rev->diffopt.flags.follow_renames = 1;
 
-	if (rev->first_parent_only)
-		diff_merges_default_to_first_parent(rev);
+	ఒకవేళ (rev->మొదటి_మాతృ_only)
+		diff_merges_default_గమ్యం_మొదటి_మాతృ(rev);
 }
 
-int cmd_log(int argc,
-	    const char **argv,
-	    const char *prefix,
-	    struct repository *repo UNUSED)
+పూర్ణాంకం cmd_log(పూర్ణాంకం argc,
+	    స్థిరరాశి అక్షరం **argv,
+	    స్థిరరాశి అక్షరం *ఉపసర్గ,
+	    నిర్మాణం repository *repo వాడని)
 {
-	struct log_config cfg;
-	struct rev_info rev;
-	struct setup_revision_opt opt;
-	int ret;
+	నిర్మాణం log_config cfg;
+	నిర్మాణం rev_info rev;
+	నిర్మాణం అమరిక_revision_opt opt;
+	పూర్ణాంకం ret;
 
 	log_config_init(&cfg);
 	init_diff_ui_defaults();
 	repo_config(the_repository, git_log_config, &cfg);
 
-	repo_init_revisions(the_repository, &rev, prefix);
+	repo_init_revisions(the_repository, &rev, ఉపసర్గ);
 	repo_config(the_repository, grep_config, &rev.grep_filter);
 
-	rev.always_show_header = 1;
-	memset(&opt, 0, sizeof(opt));
+	rev.always_show_శీర్షిక = 1;
+	memset(&opt, 0, పరిమాణం(opt));
 	opt.def = "HEAD";
 	opt.revarg_opt = REVARG_COMMITTISH;
-	opt.tweak = log_setup_revisions_tweak;
-	cmd_log_init(argc, argv, prefix, &rev, &opt, &cfg);
+	opt.tweak = log_అమరిక_revisions_tweak;
+	cmd_log_init(argc, argv, ఉపసర్గ, &rev, &opt, &cfg);
 
 	ret = cmd_log_walk(&rev);
 
 	release_revisions(&rev);
 	log_config_release(&cfg);
-	return ret;
+	తిరిగి ret;
 }
 
 /* format-patch */
 
-enum cover_setting {
+గణన cover_setting {
 	COVER_UNSET,
 	COVER_OFF,
 	COVER_ON,
 	COVER_AUTO
 };
 
-enum thread_level {
+గణన thread_level {
 	THREAD_UNSET,
 	THREAD_SHALLOW,
 	THREAD_DEEP
 };
 
-enum cover_from_description {
+గణన cover_from_description {
 	COVER_FROM_NONE,
-	COVER_FROM_MESSAGE,
+	COVER_FROM_సందేశం,
 	COVER_FROM_SUBJECT,
 	COVER_FROM_AUTO
 };
 
-enum auto_base_setting {
-	AUTO_BASE_NEVER,
-	AUTO_BASE_ALWAYS,
-	AUTO_BASE_WHEN_ABLE
+గణన auto_పునాది_setting {
+	AUTO_పునాది_NEVER,
+	AUTO_పునాది_ALWAYS,
+	AUTO_పునాది_WHEN_ABLE
 };
 
-struct format_config {
-	struct log_config log;
-	enum thread_level thread;
-	int do_signoff;
-	enum auto_base_setting auto_base;
-	char *base_commit;
-	char *from;
-	char *signature;
-	char *signature_file;
-	enum cover_setting config_cover_letter;
-	char *fmt_cover_letter_commit_list;
-	char *config_output_directory;
-	enum cover_from_description cover_from_description_mode;
-	int show_notes;
-	struct display_notes_opt notes_opt;
-	int numbered_cmdline_opt;
-	int numbered;
-	int auto_number;
-	char *default_attach;
-	struct string_list extra_hdr;
-	struct string_list extra_to;
-	struct string_list extra_cc;
-	int keep_subject;
-	int subject_prefix;
-	struct strbuf sprefix;
-	char *fmt_patch_suffix;
+నిర్మాణం format_config {
+	నిర్మాణం log_config సంవర్గమానం;
+	గణన thread_level thread;
+	పూర్ణాంకం do_signoff;
+	గణన auto_పునాది_setting auto_పునాది;
+	అక్షరం *పునాది_commit;
+	అక్షరం *from;
+	అక్షరం *signature;
+	అక్షరం *signature_file;
+	గణన cover_setting config_cover_letter;
+	అక్షరం *fmt_cover_letter_commit_list;
+	అక్షరం *config_output_directory;
+	గణన cover_from_description cover_from_description_బహుళకం;
+	పూర్ణాంకం show_notes;
+	నిర్మాణం display_notes_opt notes_opt;
+	పూర్ణాంకం numbered_cmdline_opt;
+	పూర్ణాంకం numbered;
+	పూర్ణాంకం auto_సంఖ్య;
+	అక్షరం *default_attach;
+	నిర్మాణం string_list extra_hdr;
+	నిర్మాణం string_list extra_గమ్యం;
+	నిర్మాణం string_list extra_cc;
+	పూర్ణాంకం keep_subject;
+	పూర్ణాంకం subject_ఉపసర్గ;
+	నిర్మాణం strbuf sprefix;
+	అక్షరం *fmt_patch_suffix;
 };
 
-static void format_config_init(struct format_config *cfg)
+స్థిర శూన్య format_config_init(నిర్మాణం format_config *cfg)
 {
-	memset(cfg, 0, sizeof(*cfg));
-	log_config_init(&cfg->log);
-	cfg->cover_from_description_mode = COVER_FROM_MESSAGE;
-	cfg->auto_number = 1;
+	memset(cfg, 0, పరిమాణం(*cfg));
+	log_config_init(&cfg->సంవర్గమానం);
+	cfg->cover_from_description_బహుళకం = COVER_FROM_సందేశం;
+	cfg->auto_సంఖ్య = 1;
 	string_list_init_dup(&cfg->extra_hdr);
-	string_list_init_dup(&cfg->extra_to);
+	string_list_init_dup(&cfg->extra_గమ్యం);
 	string_list_init_dup(&cfg->extra_cc);
 	strbuf_init(&cfg->sprefix, 0);
 	cfg->fmt_patch_suffix = xstrdup(".patch");
 }
 
-static void format_config_release(struct format_config *cfg)
+స్థిర శూన్య format_config_release(నిర్మాణం format_config *cfg)
 {
-	log_config_release(&cfg->log);
-	free(cfg->base_commit);
-	free(cfg->from);
-	free(cfg->signature);
-	free(cfg->signature_file);
-	free(cfg->config_output_directory);
-	free(cfg->default_attach);
+	log_config_release(&cfg->సంవర్గమానం);
+	విడుదల(cfg->పునాది_commit);
+	విడుదల(cfg->from);
+	విడుదల(cfg->signature);
+	విడుదల(cfg->signature_file);
+	విడుదల(cfg->config_output_directory);
+	విడుదల(cfg->default_attach);
 	string_list_clear(&cfg->extra_hdr, 0);
-	string_list_clear(&cfg->extra_to, 0);
+	string_list_clear(&cfg->extra_గమ్యం, 0);
 	string_list_clear(&cfg->extra_cc, 0);
 	strbuf_release(&cfg->sprefix);
-	free(cfg->fmt_patch_suffix);
-	free(cfg->fmt_cover_letter_commit_list);
+	విడుదల(cfg->fmt_patch_suffix);
+	విడుదల(cfg->fmt_cover_letter_commit_list);
 }
 
-static enum cover_from_description parse_cover_from_description(const char *arg)
+స్థిర గణన cover_from_description parse_cover_from_description(స్థిరరాశి అక్షరం *arg)
 {
-	if (!arg || !strcmp(arg, "default"))
-		return COVER_FROM_MESSAGE;
-	else if (!strcmp(arg, "none"))
-		return COVER_FROM_NONE;
-	else if (!strcmp(arg, "message"))
-		return COVER_FROM_MESSAGE;
-	else if (!strcmp(arg, "subject"))
-		return COVER_FROM_SUBJECT;
-	else if (!strcmp(arg, "auto"))
-		return COVER_FROM_AUTO;
-	else
+	ఒకవేళ (!arg || !strcmp(arg, "default"))
+		తిరిగి COVER_FROM_సందేశం;
+	లేకపోతే ఒకవేళ (!strcmp(arg, "none"))
+		తిరిగి COVER_FROM_NONE;
+	లేకపోతే ఒకవేళ (!strcmp(arg, "message"))
+		తిరిగి COVER_FROM_సందేశం;
+	లేకపోతే ఒకవేళ (!strcmp(arg, "subject"))
+		తిరిగి COVER_FROM_SUBJECT;
+	లేకపోతే ఒకవేళ (!strcmp(arg, "auto"))
+		తిరిగి COVER_FROM_AUTO;
+	లేకపోతే
 		die(_("%s: invalid cover from description mode"), arg);
 }
 
-static void add_header(struct format_config *cfg, const char *value)
+స్థిర శూన్య కూడు_శీర్షిక(నిర్మాణం format_config *cfg, స్థిరరాశి అక్షరం *విలువ)
 {
-	struct string_list_item *item;
-	int len = strlen(value);
-	while (len && value[len - 1] == '\n')
+	నిర్మాణం string_list_అంశం *అంశం;
+	పూర్ణాంకం len = అక్షరశ్రేణి_పొడవు(విలువ);
+	అయితే (len && విలువ[len - 1] == '\n')
 		len--;
 
-	if (!strncasecmp(value, "to: ", 4)) {
-		item = string_list_append(&cfg->extra_to, value + 4);
+	ఒకవేళ (!strncasecmp(విలువ, "to: ", 4)) {
+		అంశం = string_list_append(&cfg->extra_గమ్యం, విలువ + 4);
 		len -= 4;
-	} else if (!strncasecmp(value, "cc: ", 4)) {
-		item = string_list_append(&cfg->extra_cc, value + 4);
+	} లేకపోతే ఒకవేళ (!strncasecmp(విలువ, "cc: ", 4)) {
+		అంశం = string_list_append(&cfg->extra_cc, విలువ + 4);
 		len -= 4;
-	} else {
-		item = string_list_append(&cfg->extra_hdr, value);
+	} లేకపోతే {
+		అంశం = string_list_append(&cfg->extra_hdr, విలువ);
 	}
 
-	item->string[len] = '\0';
+	అంశం->string[len] = '\0';
 }
 
-static int git_format_config(const char *var, const char *value,
-			     const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం git_format_config(స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *విలువ,
+			     స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	struct format_config *cfg = cb;
+	నిర్మాణం format_config *cfg = cb;
 
-	if (!strcmp(var, "format.headers")) {
-		if (!value)
+	ఒకవేళ (!strcmp(var, "format.headers")) {
+		ఒకవేళ (!విలువ)
 			die(_("format.headers without value"));
-		add_header(cfg, value);
-		return 0;
+		కూడు_శీర్షిక(cfg, విలువ);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "format.suffix")) {
+	ఒకవేళ (!strcmp(var, "format.suffix")) {
 		FREE_AND_NULL(cfg->fmt_patch_suffix);
-		return git_config_string(&cfg->fmt_patch_suffix, var, value);
+		తిరిగి git_config_string(&cfg->fmt_patch_suffix, var, విలువ);
 	}
-	if (!strcmp(var, "format.to")) {
-		if (!value)
-			return config_error_nonbool(var);
-		string_list_append(&cfg->extra_to, value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "format.to")) {
+		ఒకవేళ (!విలువ)
+			తిరిగి config_error_nonbool(var);
+		string_list_append(&cfg->extra_గమ్యం, విలువ);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "format.cc")) {
-		if (!value)
-			return config_error_nonbool(var);
-		string_list_append(&cfg->extra_cc, value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "format.cc")) {
+		ఒకవేళ (!విలువ)
+			తిరిగి config_error_nonbool(var);
+		string_list_append(&cfg->extra_cc, విలువ);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "diff.color") || !strcmp(var, "color.diff") ||
+	ఒకవేళ (!strcmp(var, "diff.color") || !strcmp(var, "color.diff") ||
 	    !strcmp(var, "color.ui") || !strcmp(var, "diff.submodule")) {
-		return 0;
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "format.numbered")) {
-		if (value && !strcasecmp(value, "auto")) {
-			cfg->auto_number = 1;
-			return 0;
+	ఒకవేళ (!strcmp(var, "format.numbered")) {
+		ఒకవేళ (విలువ && !strcasecmp(విలువ, "auto")) {
+			cfg->auto_సంఖ్య = 1;
+			తిరిగి 0;
 		}
-		cfg->numbered = git_config_bool(var, value);
-		cfg->auto_number = cfg->auto_number && cfg->numbered;
-		return 0;
+		cfg->numbered = git_config_bool(var, విలువ);
+		cfg->auto_సంఖ్య = cfg->auto_సంఖ్య && cfg->numbered;
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "format.attach")) {
-		if (value && *value) {
+	ఒకవేళ (!strcmp(var, "format.attach")) {
+		ఒకవేళ (విలువ && *విలువ) {
 			FREE_AND_NULL(cfg->default_attach);
-			cfg->default_attach = xstrdup(value);
-		} else if (value && !*value) {
+			cfg->default_attach = xstrdup(విలువ);
+		} లేకపోతే ఒకవేళ (విలువ && !*విలువ) {
 			FREE_AND_NULL(cfg->default_attach);
-		} else {
+		} లేకపోతే {
 			FREE_AND_NULL(cfg->default_attach);
-			cfg->default_attach = xstrdup(git_version_string);
+			cfg->default_attach = xstrdup(git_సంస్కరణ_string);
 		}
-		return 0;
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "format.thread")) {
-		if (value && !strcasecmp(value, "deep")) {
+	ఒకవేళ (!strcmp(var, "format.thread")) {
+		ఒకవేళ (విలువ && !strcasecmp(విలువ, "deep")) {
 			cfg->thread = THREAD_DEEP;
-			return 0;
+			తిరిగి 0;
 		}
-		if (value && !strcasecmp(value, "shallow")) {
+		ఒకవేళ (విలువ && !strcasecmp(విలువ, "shallow")) {
 			cfg->thread = THREAD_SHALLOW;
-			return 0;
+			తిరిగి 0;
 		}
-		cfg->thread = git_config_bool(var, value) ? THREAD_SHALLOW : THREAD_UNSET;
-		return 0;
+		cfg->thread = git_config_bool(var, విలువ) ? THREAD_SHALLOW : THREAD_UNSET;
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "format.signoff")) {
-		cfg->do_signoff = git_config_bool(var, value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "format.signoff")) {
+		cfg->do_signoff = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "format.signature")) {
+	ఒకవేళ (!strcmp(var, "format.signature")) {
 		FREE_AND_NULL(cfg->signature);
-		return git_config_string(&cfg->signature, var, value);
+		తిరిగి git_config_string(&cfg->signature, var, విలువ);
 	}
-	if (!strcmp(var, "format.signaturefile")) {
+	ఒకవేళ (!strcmp(var, "format.signaturefile")) {
 		FREE_AND_NULL(cfg->signature_file);
-		return git_config_pathname(&cfg->signature_file, var, value);
+		తిరిగి git_config_pathname(&cfg->signature_file, var, విలువ);
 	}
-	if (!strcmp(var, "format.coverletter")) {
-		if (value && !strcasecmp(value, "auto")) {
+	ఒకవేళ (!strcmp(var, "format.coverletter")) {
+		ఒకవేళ (విలువ && !strcasecmp(విలువ, "auto")) {
 			cfg->config_cover_letter = COVER_AUTO;
-			return 0;
+			తిరిగి 0;
 		}
-		cfg->config_cover_letter = git_config_bool(var, value) ? COVER_ON : COVER_OFF;
-		return 0;
+		cfg->config_cover_letter = git_config_bool(var, విలువ) ? COVER_ON : COVER_OFF;
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "format.commitlistformat")) {
+	ఒకవేళ (!strcmp(var, "format.commitlistformat")) {
 		FREE_AND_NULL(cfg->fmt_cover_letter_commit_list);
-		return git_config_string(&cfg->fmt_cover_letter_commit_list, var, value);
+		తిరిగి git_config_string(&cfg->fmt_cover_letter_commit_list, var, విలువ);
 	}
-	if (!strcmp(var, "format.outputdirectory")) {
+	ఒకవేళ (!strcmp(var, "format.outputdirectory")) {
 		FREE_AND_NULL(cfg->config_output_directory);
-		return git_config_string(&cfg->config_output_directory, var, value);
+		తిరిగి git_config_string(&cfg->config_output_directory, var, విలువ);
 	}
-	if (!strcmp(var, "format.useautobase")) {
-		if (value && !strcasecmp(value, "whenAble")) {
-			cfg->auto_base = AUTO_BASE_WHEN_ABLE;
-			return 0;
+	ఒకవేళ (!strcmp(var, "format.useautobase")) {
+		ఒకవేళ (విలువ && !strcasecmp(విలువ, "whenAble")) {
+			cfg->auto_పునాది = AUTO_పునాది_WHEN_ABLE;
+			తిరిగి 0;
 		}
-		cfg->auto_base = git_config_bool(var, value) ? AUTO_BASE_ALWAYS : AUTO_BASE_NEVER;
-		return 0;
+		cfg->auto_పునాది = git_config_bool(var, విలువ) ? AUTO_పునాది_ALWAYS : AUTO_పునాది_NEVER;
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "format.from")) {
-		int b = git_parse_maybe_bool(value);
+	ఒకవేళ (!strcmp(var, "format.from")) {
+		పూర్ణాంకం b = git_parse_maybe_bool(విలువ);
 		FREE_AND_NULL(cfg->from);
-		if (b < 0)
-			cfg->from = xstrdup(value);
-		else if (b)
+		ఒకవేళ (b < 0)
+			cfg->from = xstrdup(విలువ);
+		లేకపోతే ఒకవేళ (b)
 			cfg->from = xstrdup(git_committer_info(IDENT_NO_DATE));
-		return 0;
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "format.forceinbodyfrom")) {
-		force_in_body_from = git_config_bool(var, value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "format.forceinbodyfrom")) {
+		force_లోపల_body_from = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "format.notes")) {
-		int b = git_parse_maybe_bool(value);
-		if (b < 0)
-			enable_ref_display_notes(&cfg->notes_opt, &cfg->show_notes, value);
-		else if (b)
+	ఒకవేళ (!strcmp(var, "format.notes")) {
+		పూర్ణాంకం b = git_parse_maybe_bool(విలువ);
+		ఒకవేళ (b < 0)
+			enable_ref_display_notes(&cfg->notes_opt, &cfg->show_notes, విలువ);
+		లేకపోతే ఒకవేళ (b)
 			enable_default_display_notes(&cfg->notes_opt, &cfg->show_notes);
-		else
+		లేకపోతే
 			disable_display_notes(&cfg->notes_opt, &cfg->show_notes);
-		return 0;
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "format.coverfromdescription")) {
-		cfg->cover_from_description_mode = parse_cover_from_description(value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "format.coverfromdescription")) {
+		cfg->cover_from_description_బహుళకం = parse_cover_from_description(విలువ);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "format.mboxrd")) {
-		stdout_mboxrd = git_config_bool(var, value);
-		return 0;
+	ఒకవేళ (!strcmp(var, "format.mboxrd")) {
+		stdout_mboxrd = git_config_bool(var, విలువ);
+		తిరిగి 0;
 	}
-	if (!strcmp(var, "format.noprefix")) {
-		format_no_prefix = git_parse_maybe_bool(value);
-		if (format_no_prefix < 0) {
-			int status = die_message(
+	ఒకవేళ (!strcmp(var, "format.noprefix")) {
+		format_no_ఉపసర్గ = git_parse_maybe_bool(విలువ);
+		ఒకవేళ (format_no_ఉపసర్గ < 0) {
+			పూర్ణాంకం స్థితి_2 = die_సందేశం(
 				_("bad boolean config value '%s' for '%s'"),
-				value, var);
+				విలువ, var);
 			advise(_("'%s' used to accept any value and "
 				 "treat that as 'true'.\n"
 				 "Now it only accepts boolean values, "
 				 "like what '%s' does.\n"),
 			       var, "diff.noprefix");
-			exit(status);
+			నిష్క్రమించు(స్థితి_2);
 		}
-		return 0;
+		తిరిగి 0;
 	}
 
 	/*
@@ -1128,149 +1128,149 @@ static int git_format_config(const char *var, const char *value,
 	 * diff_ui_config completely, because we do care about some ui options
 	 * like color.
 	 */
-	if (!strcmp(var, "diff.noprefix"))
-		return 0;
+	ఒకవేళ (!strcmp(var, "diff.noprefix"))
+		తిరిగి 0;
 
-	return git_log_config(var, value, ctx, &cfg->log);
+	తిరిగి git_log_config(var, విలువ, ctx, &cfg->సంవర్గమానం);
 }
 
-static const char *output_directory = NULL;
-static int outdir_offset;
+స్థిర స్థిరరాశి అక్షరం *output_directory = ఖాళీ;
+స్థిర పూర్ణాంకం outdir_స్థానభ్రంశం;
 
-static int open_next_file(struct commit *commit, const char *subject,
-			 struct rev_info *rev, int quiet)
+స్థిర పూర్ణాంకం open_తదుపరి_file(నిర్మాణం commit *commit, స్థిరరాశి అక్షరం *subject,
+			 నిర్మాణం rev_info *rev, పూర్ణాంకం quiet)
 {
-	struct strbuf filename = STRBUF_INIT;
+	నిర్మాణం strbuf filename = STRBUF_INIT;
 
-	if (output_directory) {
+	ఒకవేళ (output_directory) {
 		strbuf_addstr(&filename, output_directory);
 		strbuf_complete(&filename, '/');
 	}
 
-	if (rev->numbered_files)
+	ఒకవేళ (rev->numbered_files)
 		strbuf_addf(&filename, "%d", rev->nr);
-	else if (commit)
+	లేకపోతే ఒకవేళ (commit)
 		fmt_output_commit(&filename, commit, rev);
-	else
+	లేకపోతే
 		fmt_output_subject(&filename, subject, rev);
 
-	if (!quiet)
-		printf("%s\n", filename.buf + outdir_offset);
+	ఒకవేళ (!quiet)
+		రాయి("%s\n", filename.buf + outdir_స్థానభ్రంశం);
 
-	if (!(rev->diffopt.file = fopen(filename.buf, "w"))) {
+	ఒకవేళ (!(rev->diffopt.file = fopen(filename.buf, "w"))) {
 		error_errno(_("cannot open patch file %s"), filename.buf);
 		strbuf_release(&filename);
-		return -1;
+		తిరిగి -1;
 	}
 
 	strbuf_release(&filename);
-	return 0;
+	తిరిగి 0;
 }
 
-static void get_patch_ids(struct rev_info *rev, struct patch_ids *ids)
+స్థిర శూన్య get_patch_ids(నిర్మాణం rev_info *rev, నిర్మాణం patch_ids *ids)
 {
-	struct rev_info check_rev;
-	struct commit *commit, *c1, *c2;
-	struct object *o1, *o2;
-	unsigned flags1, flags2;
+	నిర్మాణం rev_info check_rev;
+	నిర్మాణం commit *commit, *c1, *c2;
+	నిర్మాణం object *o1, *o2;
+	గుర్తులేని flags1, flags2;
 
-	if (rev->pending.nr != 2)
+	ఒకవేళ (rev->pending.nr != 2)
 		die(_("need exactly one range"));
 
-	o1 = rev->pending.objects[0].item;
-	o2 = rev->pending.objects[1].item;
+	o1 = rev->pending.objects[0].అంశం;
+	o2 = rev->pending.objects[1].అంశం;
 	flags1 = o1->flags;
 	flags2 = o2->flags;
 	c1 = lookup_commit_reference(the_repository, &o1->oid);
 	c2 = lookup_commit_reference(the_repository, &o2->oid);
 
-	if ((flags1 & UNINTERESTING) == (flags2 & UNINTERESTING))
+	ఒకవేళ ((flags1 & UNINTERESTING) == (flags2 & UNINTERESTING))
 		die(_("not a range"));
 
 	init_patch_ids(the_repository, ids);
 
 	/* given a range a..b get all patch ids for b..a */
-	repo_init_revisions(the_repository, &check_rev, rev->prefix);
+	repo_init_revisions(the_repository, &check_rev, rev->ఉపసర్గ);
 	check_rev.max_parents = 1;
 	o1->flags ^= UNINTERESTING;
 	o2->flags ^= UNINTERESTING;
-	add_pending_object(&check_rev, o1, "o1");
-	add_pending_object(&check_rev, o2, "o2");
-	if (prepare_revision_walk(&check_rev))
+	కూడు_pending_object(&check_rev, o1, "o1");
+	కూడు_pending_object(&check_rev, o2, "o2");
+	ఒకవేళ (prepare_revision_walk(&check_rev))
 		die(_("revision walk setup failed"));
 
-	while ((commit = get_revision(&check_rev)) != NULL) {
-		add_commit_patch_id(commit, ids);
+	అయితే ((commit = get_revision(&check_rev)) != ఖాళీ) {
+		కూడు_commit_patch_id(commit, ids);
 	}
 
 	/* reset for next revision walk */
-	clear_commit_marks(c1, SEEN | UNINTERESTING | SHOWN | ADDED);
-	clear_commit_marks(c2, SEEN | UNINTERESTING | SHOWN | ADDED);
+	clear_commit_marks(c1, చూసిన_2 | UNINTERESTING | SHOWN | ADDED);
+	clear_commit_marks(c2, చూసిన_2 | UNINTERESTING | SHOWN | ADDED);
 	o1->flags = flags1;
 	o2->flags = flags2;
 }
 
-static void gen_message_id(struct rev_info *info, const char *base)
+స్థిర శూన్య gen_సందేశం_id(నిర్మాణం rev_info *info, స్థిరరాశి అక్షరం *పునాది)
 {
-	struct strbuf buf = STRBUF_INIT;
-	strbuf_addf(&buf, "%s.%"PRItime".git.%s", base,
-		    (timestamp_t) time(NULL),
+	నిర్మాణం strbuf buf = STRBUF_INIT;
+	strbuf_addf(&buf, "%s.%"PRItime".git.%s", పునాది,
+		    (timestamp_t) సమయం(ఖాళీ),
 		    git_committer_info(IDENT_NO_NAME|IDENT_NO_DATE|IDENT_STRICT));
-	info->message_id = strbuf_detach(&buf, NULL);
+	info->సందేశం_id = strbuf_detach(&buf, ఖాళీ);
 }
 
-static void print_signature(const char *signature, FILE *file)
+స్థిర శూన్య print_signature(స్థిరరాశి అక్షరం *signature, FILE *file)
 {
-	if (!signature || !*signature)
-		return;
+	ఒకవేళ (!signature || !*signature)
+		తిరిగి;
 
 	fprintf(file, "-- \n%s", signature);
-	if (signature[strlen(signature)-1] != '\n')
+	ఒకవేళ (signature[అక్షరశ్రేణి_పొడవు(signature)-1] != '\n')
 		putc('\n', file);
 	putc('\n', file);
 }
 
-static char *find_branch_name(struct rev_info *rev)
+స్థిర అక్షరం *కనుగొను_branch_name(నిర్మాణం rev_info *rev)
 {
-	struct object_id branch_oid;
-	const struct object_id *tip_oid;
-	const char *ref, *v;
-	char *full_ref, *branch = NULL;
-	int interesting_found = 0;
-	size_t idx;
+	నిర్మాణం object_id branch_oid;
+	స్థిరరాశి నిర్మాణం object_id *tip_oid;
+	స్థిరరాశి అక్షరం *ref, *v;
+	అక్షరం *నిండిన_ref, *branch = ఖాళీ;
+	పూర్ణాంకం interesting_దొరికింది = 0;
+	కొలత_t idx;
 
-	for (size_t i = 0; i < rev->cmdline.nr; i++) {
-		if (rev->cmdline.rev[i].flags & UNINTERESTING)
-			continue;
-		if (interesting_found)
-			return NULL;
-		interesting_found = 1;
+	కొరకు (కొలత_t i = 0; i < rev->cmdline.nr; i++) {
+		ఒకవేళ (rev->cmdline.rev[i].flags & UNINTERESTING)
+			కొనసాగు;
+		ఒకవేళ (interesting_దొరికింది)
+			తిరిగి ఖాళీ;
+		interesting_దొరికింది = 1;
 		idx = i;
 	}
-	if (!interesting_found)
-		return NULL;
+	ఒకవేళ (!interesting_దొరికింది)
+		తిరిగి ఖాళీ;
 	ref = rev->cmdline.rev[idx].name;
-	tip_oid = &rev->cmdline.rev[idx].item->oid;
-	if (repo_dwim_ref(the_repository, ref, strlen(ref), &branch_oid,
-			  &full_ref, 0) &&
-	    skip_prefix(full_ref, "refs/heads/", &v) &&
+	tip_oid = &rev->cmdline.rev[idx].అంశం->oid;
+	ఒకవేళ (repo_dwim_ref(the_repository, ref, అక్షరశ్రేణి_పొడవు(ref), &branch_oid,
+			  &నిండిన_ref, 0) &&
+	    skip_ఉపసర్గ(నిండిన_ref, "refs/heads/", &v) &&
 	    oideq(tip_oid, &branch_oid))
 		branch = xstrdup(v);
-	free(full_ref);
-	return branch;
+	విడుదల(నిండిన_ref);
+	తిరిగి branch;
 }
 
-static void show_diffstat(struct rev_info *rev,
-			  struct commit *origin, struct commit *head)
+స్థిర శూన్య show_diffstat(నిర్మాణం rev_info *rev,
+			  నిర్మాణం commit *origin, నిర్మాణం commit *తల)
 {
-	struct diff_options opts;
+	నిర్మాణం diff_options opts;
 
-	memcpy(&opts, &rev->diffopt, sizeof(opts));
+	జ్ఞాపకం_నకలు(&opts, &rev->diffopt, పరిమాణం(opts));
 	opts.output_format = DIFF_FORMAT_SUMMARY | DIFF_FORMAT_DIFFSTAT;
-	diff_setup_done(&opts);
+	diff_అమరిక_పూర్తి(&opts);
 
-	diff_tree_oid(get_commit_tree_oid(origin),
-		      get_commit_tree_oid(head),
+	diff_వృక్షం_oid(get_commit_వృక్షం_oid(origin),
+		      get_commit_వృక్షం_oid(తల),
 		      "", &opts);
 	diffcore_std(&opts);
 	diff_flush(&opts);
@@ -1278,45 +1278,45 @@ static void show_diffstat(struct rev_info *rev,
 	fprintf(rev->diffopt.file, "\n");
 }
 
-static void read_desc_file(struct strbuf *buf, const char *desc_file)
+స్థిర శూన్య read_desc_file(నిర్మాణం strbuf *buf, స్థిరరాశి అక్షరం *desc_file)
 {
-	if (strbuf_read_file(buf, desc_file, 0) < 0)
+	ఒకవేళ (strbuf_read_file(buf, desc_file, 0) < 0)
 		die_errno(_("unable to read branch description file '%s'"),
 			  desc_file);
 }
 
-static void prepare_cover_text(struct pretty_print_context *pp,
-			       const char *description_file,
-			       const char *branch_name,
-			       struct strbuf *sb,
-			       const char *encoding,
-			       int need_8bit_cte,
-			       const struct format_config *cfg)
+స్థిర శూన్య prepare_cover_పాఠ్యం(నిర్మాణం pretty_print_context *pp,
+			       స్థిరరాశి అక్షరం *description_file,
+			       స్థిరరాశి అక్షరం *branch_name,
+			       నిర్మాణం strbuf *sb,
+			       స్థిరరాశి అక్షరం *encoding,
+			       పూర్ణాంకం need_8bit_cte,
+			       స్థిరరాశి నిర్మాణం format_config *cfg)
 {
-	const char *subject = "*** SUBJECT HERE ***";
-	const char *body = "*** BLURB HERE ***";
-	struct strbuf description_sb = STRBUF_INIT;
-	struct strbuf subject_sb = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *subject = "*** SUBJECT HERE ***";
+	స్థిరరాశి అక్షరం *body = "*** BLURB HERE ***";
+	నిర్మాణం strbuf description_sb = STRBUF_INIT;
+	నిర్మాణం strbuf subject_sb = STRBUF_INIT;
 
-	if (cfg->cover_from_description_mode == COVER_FROM_NONE)
-		goto do_pp;
+	ఒకవేళ (cfg->cover_from_description_బహుళకం == COVER_FROM_NONE)
+		వెళ్ళు do_pp;
 
-	if (description_file && *description_file)
+	ఒకవేళ (description_file && *description_file)
 		read_desc_file(&description_sb, description_file);
-	else if (branch_name && *branch_name)
+	లేకపోతే ఒకవేళ (branch_name && *branch_name)
 		read_branch_desc(&description_sb, branch_name);
-	if (!description_sb.len)
-		goto do_pp;
+	ఒకవేళ (!description_sb.len)
+		వెళ్ళు do_pp;
 
-	if (cfg->cover_from_description_mode == COVER_FROM_SUBJECT ||
-	    cfg->cover_from_description_mode == COVER_FROM_AUTO)
+	ఒకవేళ (cfg->cover_from_description_బహుళకం == COVER_FROM_SUBJECT ||
+	    cfg->cover_from_description_బహుళకం == COVER_FROM_AUTO)
 		body = format_subject(&subject_sb, description_sb.buf, " ");
 
-	if (cfg->cover_from_description_mode == COVER_FROM_MESSAGE ||
-	    (cfg->cover_from_description_mode == COVER_FROM_AUTO &&
+	ఒకవేళ (cfg->cover_from_description_బహుళకం == COVER_FROM_సందేశం ||
+	    (cfg->cover_from_description_బహుళకం == COVER_FROM_AUTO &&
 	     subject_sb.len > COVER_FROM_AUTO_MAX_SUBJECT_LEN))
 		body = description_sb.buf;
-	else
+	లేకపోతే
 		subject = subject_sb.buf;
 
 do_pp:
@@ -1327,722 +1327,722 @@ do_pp:
 	strbuf_release(&subject_sb);
 }
 
-struct rdiff_notes {
+నిర్మాణం rdiff_notes {
 	/*
 	 * True if we want to override the notes behavior
 	 * of 'format-patch'
 	 */
 	bool override;
-	struct string_list notes;
+	నిర్మాణం string_list notes;
 };
 
-static int rdiff_notes_cb(const struct option *option,
-			  const char *arg,
-			  int unset)
+స్థిర పూర్ణాంకం rdiff_notes_cb(స్థిరరాశి నిర్మాణం option *option,
+			  స్థిరరాశి అక్షరం *arg,
+			  పూర్ణాంకం unset)
 {
-	struct option opt = *option;
-	struct rdiff_notes *rdiff_notes = option->value;
+	నిర్మాణం option opt = *option;
+	నిర్మాణం rdiff_notes *rdiff_notes = option->విలువ;
 
 	rdiff_notes->override = 1;
-	opt.value = &rdiff_notes->notes;
-	return parse_opt_string_list(&opt, arg, unset);
+	opt.విలువ = &rdiff_notes->notes;
+	తిరిగి parse_opt_string_list(&opt, arg, unset);
 }
 
-static int get_notes_refs(struct string_list_item *item, void *arg)
+స్థిర పూర్ణాంకం get_notes_refs(నిర్మాణం string_list_అంశం *అంశం, శూన్య *arg)
 {
-	strvec_pushf(arg, "--notes=%s", item->string);
-	return 0;
+	strvec_pushf(arg, "--notes=%s", అంశం->string);
+	తిరిగి 0;
 }
 
-static void get_notes_args(struct rdiff_notes *rdiff_notes,
-			   struct rev_info *rev)
+స్థిర శూన్య get_notes_వాదనలు(నిర్మాణం rdiff_notes *rdiff_notes,
+			   నిర్మాణం rev_info *rev)
 {
-	if (rdiff_notes->override) {
-		if (rdiff_notes->notes.nr)
+	ఒకవేళ (rdiff_notes->override) {
+		ఒకవేళ (rdiff_notes->notes.nr)
 			for_each_string_list(&rdiff_notes->notes,
 					     get_notes_refs,
 					     &rev->rdiff_log_arg);
-		else
-			strvec_push(&rev->rdiff_log_arg, "--no-notes");
-	} else if (!rev->show_notes) {
-		strvec_push(&rev->rdiff_log_arg, "--no-notes");
-	} else if (rev->notes_opt.use_default_notes > 0 ||
+		లేకపోతే
+			strvec_నెట్టు(&rev->rdiff_log_arg, "--no-notes");
+	} లేకపోతే ఒకవేళ (!rev->show_notes) {
+		strvec_నెట్టు(&rev->rdiff_log_arg, "--no-notes");
+	} లేకపోతే ఒకవేళ (rev->notes_opt.use_default_notes > 0 ||
 		   (rev->notes_opt.use_default_notes == -1 &&
 		    !rev->notes_opt.extra_notes_refs.nr)) {
-		strvec_push(&rev->rdiff_log_arg, "--notes");
-	} else {
+		strvec_నెట్టు(&rev->rdiff_log_arg, "--notes");
+	} లేకపోతే {
 		for_each_string_list(&rev->notes_opt.extra_notes_refs,
 				     get_notes_refs,
 				     &rev->rdiff_log_arg);
 	}
 }
 
-static void generate_shortlog_cover_letter(struct shortlog *log,
-					   struct rev_info *rev,
-					   struct commit **list,
-					   int nr)
+స్థిర శూన్య generate_shortlog_cover_letter(నిర్మాణం shortlog *సంవర్గమానం,
+					   నిర్మాణం rev_info *rev,
+					   నిర్మాణం commit **list,
+					   పూర్ణాంకం nr)
 {
-	shortlog_init(log);
-	log->wrap_lines = 1;
-	log->wrap = MAIL_DEFAULT_WRAP;
-	log->in1 = 2;
-	log->in2 = 4;
-	log->file = rev->diffopt.file;
-	log->groups = SHORTLOG_GROUP_AUTHOR;
-	shortlog_finish_setup(log);
-	for (int i = 0; i < nr; i++)
-		shortlog_add_commit(log, list[i]);
+	shortlog_init(సంవర్గమానం);
+	సంవర్గమానం->wrap_పంక్తులు = 1;
+	సంవర్గమానం->wrap = MAIL_DEFAULT_WRAP;
+	సంవర్గమానం->in1 = 2;
+	సంవర్గమానం->in2 = 4;
+	సంవర్గమానం->file = rev->diffopt.file;
+	సంవర్గమానం->groups = SHORTLOG_సమూహం_AUTHOR;
+	shortlog_ముగింపు_అమరిక(సంవర్గమానం);
+	కొరకు (పూర్ణాంకం i = 0; i < nr; i++)
+		shortlog_కూడు_commit(సంవర్గమానం, list[i]);
 
-	shortlog_output(log);
+	shortlog_output(సంవర్గమానం);
 }
 
-static void generate_commit_list_cover(FILE *cover_file, const char *format,
-				       struct commit **list, int n)
+స్థిర శూన్య generate_commit_list_cover(FILE *cover_file, స్థిరరాశి అక్షరం *format,
+				       నిర్మాణం commit **list, పూర్ణాంకం n)
 {
-	struct strbuf commit_line = STRBUF_INIT;
-	struct pretty_print_context ctx = {0};
-	struct rev_info rev = REV_INFO_INIT;
+	నిర్మాణం strbuf commit_పంక్తి = STRBUF_INIT;
+	నిర్మాణం pretty_print_context ctx = {0};
+	నిర్మాణం rev_info rev = REV_INFO_INIT;
 
-	rev.total = n;
+	rev.మొత్తం = n;
 	ctx.rev = &rev;
-	for (int i = 1; i <= n; i++) {
+	కొరకు (పూర్ణాంకం i = 1; i <= n; i++) {
 		rev.nr = i;
-		repo_format_commit_message(the_repository, list[n - i], format,
-				&commit_line, &ctx);
-		fprintf(cover_file, "%s\n", commit_line.buf);
-		strbuf_reset(&commit_line);
+		repo_format_commit_సందేశం(the_repository, list[n - i], format,
+				&commit_పంక్తి, &ctx);
+		fprintf(cover_file, "%s\n", commit_పంక్తి.buf);
+		strbuf_reset(&commit_పంక్తి);
 	}
 	fprintf(cover_file, "\n");
 
-	strbuf_release(&commit_line);
+	strbuf_release(&commit_పంక్తి);
 }
 
-static void make_cover_letter(struct rev_info *rev, int use_separate_file,
-			      struct commit *origin,
-			      int nr, struct commit **list,
-			      const char *description_file,
-			      const char *branch_name,
-			      int quiet,
-			      const struct format_config *cfg,
-			      const char *format)
+స్థిర శూన్య make_cover_letter(నిర్మాణం rev_info *rev, పూర్ణాంకం use_separate_file,
+			      నిర్మాణం commit *origin,
+			      పూర్ణాంకం nr, నిర్మాణం commit **list,
+			      స్థిరరాశి అక్షరం *description_file,
+			      స్థిరరాశి అక్షరం *branch_name,
+			      పూర్ణాంకం quiet,
+			      స్థిరరాశి నిర్మాణం format_config *cfg,
+			      స్థిరరాశి అక్షరం *format)
 {
-	const char *from;
-	struct shortlog log;
-	struct strbuf sb = STRBUF_INIT;
-	int i;
-	const char *encoding = "UTF-8";
-	int need_8bit_cte = 0;
-	struct pretty_print_context pp = {0};
-	struct commit *head = list[0];
-	char *to_free = NULL;
+	స్థిరరాశి అక్షరం *from;
+	నిర్మాణం shortlog సంవర్గమానం;
+	నిర్మాణం strbuf sb = STRBUF_INIT;
+	పూర్ణాంకం i;
+	స్థిరరాశి అక్షరం *encoding = "UTF-8";
+	పూర్ణాంకం need_8bit_cte = 0;
+	నిర్మాణం pretty_print_context pp = {0};
+	నిర్మాణం commit *తల = list[0];
+	అక్షరం *గమ్యం_free = ఖాళీ;
 
-	if (!cmit_fmt_is_mail(rev->commit_format))
+	ఒకవేళ (!cmit_fmt_is_mail(rev->commit_format))
 		die(_("cover letter needs email format"));
 
 	from = cfg->from ? cfg->from : git_committer_info(0);
 
-	if (use_separate_file &&
-	    open_next_file(NULL, rev->numbered_files ? NULL : "cover-letter", rev, quiet))
+	ఒకవేళ (use_separate_file &&
+	    open_తదుపరి_file(ఖాళీ, rev->numbered_files ? ఖాళీ : "cover-letter", rev, quiet))
 		die(_("failed to create cover-letter file"));
 
-	log_write_email_headers(rev, head, &pp.after_subject, &need_8bit_cte, 0);
+	log_write_email_శీర్షికలు(rev, తల, &pp.after_subject, &need_8bit_cte, 0);
 
-	for (i = 0; !need_8bit_cte && i < nr; i++) {
-		const char *buf = repo_get_commit_buffer(the_repository,
-							 list[i], NULL);
-		if (has_non_ascii(buf))
+	కొరకు (i = 0; !need_8bit_cte && i < nr; i++) {
+		స్థిరరాశి అక్షరం *buf = repo_get_commit_బఫరు(the_repository,
+							 list[i], ఖాళీ);
+		ఒకవేళ (has_non_ascii(buf))
 			need_8bit_cte = 1;
-		repo_unuse_commit_buffer(the_repository, list[i], buf);
+		repo_unuse_commit_బఫరు(the_repository, list[i], buf);
 	}
 
-	if (!branch_name)
-		branch_name = to_free = find_branch_name(rev);
+	ఒకవేళ (!branch_name)
+		branch_name = గమ్యం_free = కనుగొను_branch_name(rev);
 
 	pp.fmt = CMIT_FMT_EMAIL;
-	pp.date_mode.type = DATE_RFC2822;
+	pp.date_బహుళకం.type = DATE_RFC2822;
 	pp.rev = rev;
-	pp.encode_email_headers = rev->encode_email_headers;
-	pp_user_info(&pp, NULL, &sb, from, encoding);
-	prepare_cover_text(&pp, description_file, branch_name, &sb,
+	pp.encode_email_శీర్షికలు = rev->encode_email_శీర్షికలు;
+	pp_user_info(&pp, ఖాళీ, &sb, from, encoding);
+	prepare_cover_పాఠ్యం(&pp, description_file, branch_name, &sb,
 			   encoding, need_8bit_cte, cfg);
 	fprintf(rev->diffopt.file, "%s\n", sb.buf);
 
-	free(to_free);
-	free(pp.after_subject);
+	విడుదల(గమ్యం_free);
+	విడుదల(pp.after_subject);
 	strbuf_release(&sb);
 
-	if (skip_prefix(format, "log:", &format))
+	ఒకవేళ (skip_ఉపసర్గ(format, "log:", &format))
 		generate_commit_list_cover(rev->diffopt.file, format, list, nr);
-	else if (!strcmp(format, "shortlog"))
-		generate_shortlog_cover_letter(&log, rev, list, nr);
-	else if (!strcmp(format, "modern"))
+	లేకపోతే ఒకవేళ (!strcmp(format, "shortlog"))
+		generate_shortlog_cover_letter(&సంవర్గమానం, rev, list, nr);
+	లేకపోతే ఒకవేళ (!strcmp(format, "modern"))
 		generate_commit_list_cover(rev->diffopt.file, "%w(72)[%(count)/%(total)] %s",
 					   list, nr);
-	else if (strchr(format, '%'))
+	లేకపోతే ఒకవేళ (strchr(format, '%'))
 		generate_commit_list_cover(rev->diffopt.file, format, list, nr);
-	else
+	లేకపోతే
 		die(_("'%s' is not a valid format string"), format);
 
 	/* We can only do diffstat with a unique reference point */
-	if (origin)
-		show_diffstat(rev, origin, head);
+	ఒకవేళ (origin)
+		show_diffstat(rev, origin, తల);
 
-	if (rev->idiff_oid1) {
+	ఒకవేళ (rev->idiff_oid1) {
 		fprintf_ln(rev->diffopt.file, "%s", rev->idiff_title);
 		show_interdiff(rev->idiff_oid1, rev->idiff_oid2, 0,
 			       &rev->diffopt);
 	}
 
-	if (rev->rdiff1) {
+	ఒకవేళ (rev->rdiff1) {
 		/*
 		 * Pass minimum required diff-options to range-diff; others
 		 * can be added later if deemed desirable.
 		 */
-		struct diff_options opts;
-		struct range_diff_options range_diff_opts = {
-			.creation_factor = rev->creation_factor,
+		నిర్మాణం diff_options opts;
+		నిర్మాణం range_diff_options range_diff_opts = {
+			.creation_గుణకం = rev->creation_గుణకం,
 			.dual_color = 1,
-			.max_memory = RANGE_DIFF_MAX_MEMORY_DEFAULT,
+			.max_జ్ఞాపకం = RANGE_DIFF_MAX_జ్ఞాపకం_DEFAULT,
 			.diffopt = &opts,
 			.log_arg = &rev->rdiff_log_arg
 		};
 
-		repo_diff_setup(the_repository, &opts);
+		repo_diff_అమరిక(the_repository, &opts);
 		opts.file = rev->diffopt.file;
 		opts.use_color = rev->diffopt.use_color;
-		diff_setup_done(&opts);
+		diff_అమరిక_పూర్తి(&opts);
 		fprintf_ln(rev->diffopt.file, "%s", rev->rdiff_title);
 		show_range_diff(rev->rdiff1, rev->rdiff2, &range_diff_opts);
 	}
 }
 
-static char *clean_message_id(const char *msg_id)
+స్థిర అక్షరం *clean_సందేశం_id(స్థిరరాశి అక్షరం *సందేశం_id_2)
 {
-	char ch;
-	const char *a, *z, *m;
+	అక్షరం ch;
+	స్థిరరాశి అక్షరం *a, *z, *m;
 
-	m = msg_id;
-	while ((ch = *m) && (isspace(ch) || (ch == '<')))
+	m = సందేశం_id_2;
+	అయితే ((ch = *m) && (ఖాళీనా(ch) || (ch == '<')))
 		m++;
 	a = m;
-	z = NULL;
-	while ((ch = *m)) {
-		if (!isspace(ch) && (ch != '>'))
+	z = ఖాళీ;
+	అయితే ((ch = *m)) {
+		ఒకవేళ (!ఖాళీనా(ch) && (ch != '>'))
 			z = m;
 		m++;
 	}
-	if (!z)
-		die(_("insane in-reply-to: %s"), msg_id);
-	if (++z == m)
-		return xstrdup(a);
-	return xmemdupz(a, z - a);
+	ఒకవేళ (!z)
+		die(_("insane in-reply-to: %s"), సందేశం_id_2);
+	ఒకవేళ (++z == m)
+		తిరిగి xstrdup(a);
+	తిరిగి xmemdupz(a, z - a);
 }
 
-static const char *set_outdir(const char *prefix, const char *output_directory)
+స్థిర స్థిరరాశి అక్షరం *సమితి_outdir(స్థిరరాశి అక్షరం *ఉపసర్గ, స్థిరరాశి అక్షరం *output_directory)
 {
-	if (output_directory && is_absolute_path(output_directory))
-		return output_directory;
+	ఒకవేళ (output_directory && is_absolute_మార్గం(output_directory))
+		తిరిగి output_directory;
 
-	if (!prefix || !*prefix) {
-		if (output_directory)
-			return output_directory;
+	ఒకవేళ (!ఉపసర్గ || !*ఉపసర్గ) {
+		ఒకవేళ (output_directory)
+			తిరిగి output_directory;
 		/* The user did not explicitly ask for "./" */
-		outdir_offset = 2;
-		return "./";
+		outdir_స్థానభ్రంశం = 2;
+		తిరిగి "./";
 	}
 
-	outdir_offset = strlen(prefix);
-	if (!output_directory)
-		return prefix;
+	outdir_స్థానభ్రంశం = అక్షరశ్రేణి_పొడవు(ఉపసర్గ);
+	ఒకవేళ (!output_directory)
+		తిరిగి ఉపసర్గ;
 
-	return prefix_filename(prefix, output_directory);
+	తిరిగి ఉపసర్గ_filename(ఉపసర్గ, output_directory);
 }
 
-static const char * const builtin_format_patch_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_format_patch_usage[] = {
 	N_("git format-patch [<options>] [<since> | <revision-range>]"),
-	NULL
+	ఖాళీ
 };
 
-struct keep_callback_data {
-	struct format_config *cfg;
-	struct rev_info *revs;
+నిర్మాణం keep_callback_దత్తాంశం {
+	నిర్మాణం format_config *cfg;
+	నిర్మాణం rev_info *revs;
 };
 
-static int keep_callback(const struct option *opt, const char *arg, int unset)
+స్థిర పూర్ణాంకం keep_callback(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	struct keep_callback_data *data = opt->value;
+	నిర్మాణం keep_callback_దత్తాంశం *దత్తాంశం = opt->విలువ;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	data->revs->total = -1;
-	data->cfg->keep_subject = 1;
-	return 0;
+	దత్తాంశం->revs->మొత్తం = -1;
+	దత్తాంశం->cfg->keep_subject = 1;
+	తిరిగి 0;
 }
 
-static int subject_prefix_callback(const struct option *opt, const char *arg,
-			    int unset)
+స్థిర పూర్ణాంకం subject_ఉపసర్గ_callback(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg,
+			    పూర్ణాంకం unset)
 {
-	struct format_config *cfg = opt->value;
+	నిర్మాణం format_config *cfg = opt->విలువ;
 
 	BUG_ON_OPT_NEG(unset);
-	cfg->subject_prefix = 1;
+	cfg->subject_ఉపసర్గ = 1;
 	strbuf_reset(&cfg->sprefix);
 	strbuf_addstr(&cfg->sprefix, arg);
-	return 0;
+	తిరిగి 0;
 }
 
-static int rfc_callback(const struct option *opt, const char *arg,
-			int unset)
+స్థిర పూర్ణాంకం rfc_callback(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg,
+			పూర్ణాంకం unset)
 {
-	const char **rfc = opt->value;
+	స్థిరరాశి అక్షరం **rfc = opt->విలువ;
 
-	*rfc = opt->value;
-	if (unset)
-		*rfc = NULL;
-	else
+	*rfc = opt->విలువ;
+	ఒకవేళ (unset)
+		*rfc = ఖాళీ;
+	లేకపోతే
 		*rfc = arg ? arg : "RFC";
-	return 0;
+	తిరిగి 0;
 }
 
-static int numbered_callback(const struct option *opt, const char *arg,
-			     int unset)
+స్థిర పూర్ణాంకం numbered_callback(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg,
+			     పూర్ణాంకం unset)
 {
-	struct format_config *cfg = opt->value;
+	నిర్మాణం format_config *cfg = opt->విలువ;
 	BUG_ON_OPT_ARG(arg);
 	cfg->numbered = cfg->numbered_cmdline_opt = unset ? 0 : 1;
-	if (unset)
-		cfg->auto_number =  0;
-	return 0;
+	ఒకవేళ (unset)
+		cfg->auto_సంఖ్య =  0;
+	తిరిగి 0;
 }
 
-static int no_numbered_callback(const struct option *opt, const char *arg,
-				int unset)
+స్థిర పూర్ణాంకం no_numbered_callback(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg,
+				పూర్ణాంకం unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	return numbered_callback(opt, arg, 1);
+	తిరిగి numbered_callback(opt, arg, 1);
 }
 
-static int output_directory_callback(const struct option *opt, const char *arg,
-			      int unset)
+స్థిర పూర్ణాంకం output_directory_callback(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg,
+			      పూర్ణాంకం unset)
 {
-	const char **dir = (const char **)opt->value;
+	స్థిరరాశి అక్షరం **dir = (స్థిరరాశి అక్షరం **)opt->విలువ;
 	BUG_ON_OPT_NEG(unset);
-	if (*dir)
+	ఒకవేళ (*dir)
 		die(_("two output directories?"));
 	*dir = arg;
-	return 0;
+	తిరిగి 0;
 }
 
-static int thread_callback(const struct option *opt, const char *arg, int unset)
+స్థిర పూర్ణాంకం thread_callback(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	struct format_config *cfg = opt->value;
+	నిర్మాణం format_config *cfg = opt->విలువ;
 
-	if (unset)
+	ఒకవేళ (unset)
 		cfg->thread = THREAD_UNSET;
-	else if (!arg || !strcmp(arg, "shallow"))
+	లేకపోతే ఒకవేళ (!arg || !strcmp(arg, "shallow"))
 		cfg->thread = THREAD_SHALLOW;
-	else if (!strcmp(arg, "deep"))
+	లేకపోతే ఒకవేళ (!strcmp(arg, "deep"))
 		cfg->thread = THREAD_DEEP;
 	/*
 	 * Please update _git_formatpatch() in git-completion.bash
 	 * when you add new options.
 	 */
-	else
-		return 1;
-	return 0;
+	లేకపోతే
+		తిరిగి 1;
+	తిరిగి 0;
 }
 
-static int attach_callback(const struct option *opt, const char *arg, int unset)
+స్థిర పూర్ణాంకం attach_callback(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	struct rev_info *rev = (struct rev_info *)opt->value;
-	if (unset)
-		rev->mime_boundary = NULL;
-	else if (arg)
+	నిర్మాణం rev_info *rev = (నిర్మాణం rev_info *)opt->విలువ;
+	ఒకవేళ (unset)
+		rev->mime_boundary = ఖాళీ;
+	లేకపోతే ఒకవేళ (arg)
 		rev->mime_boundary = arg;
-	else
-		rev->mime_boundary = git_version_string;
+	లేకపోతే
+		rev->mime_boundary = git_సంస్కరణ_string;
 	rev->no_inline = unset ? 0 : 1;
-	return 0;
+	తిరిగి 0;
 }
 
-static int inline_callback(const struct option *opt, const char *arg, int unset)
+స్థిర పూర్ణాంకం inline_callback(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	struct rev_info *rev = (struct rev_info *)opt->value;
-	if (unset)
-		rev->mime_boundary = NULL;
-	else if (arg)
+	నిర్మాణం rev_info *rev = (నిర్మాణం rev_info *)opt->విలువ;
+	ఒకవేళ (unset)
+		rev->mime_boundary = ఖాళీ;
+	లేకపోతే ఒకవేళ (arg)
 		rev->mime_boundary = arg;
-	else
-		rev->mime_boundary = git_version_string;
+	లేకపోతే
+		rev->mime_boundary = git_సంస్కరణ_string;
 	rev->no_inline = 0;
-	return 0;
+	తిరిగి 0;
 }
 
-static int header_callback(const struct option *opt, const char *arg,
-			   int unset)
+స్థిర పూర్ణాంకం శీర్షిక_callback(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg,
+			   పూర్ణాంకం unset)
 {
-	struct format_config *cfg = opt->value;
+	నిర్మాణం format_config *cfg = opt->విలువ;
 
-	if (unset) {
+	ఒకవేళ (unset) {
 		string_list_clear(&cfg->extra_hdr, 0);
-		string_list_clear(&cfg->extra_to, 0);
+		string_list_clear(&cfg->extra_గమ్యం, 0);
 		string_list_clear(&cfg->extra_cc, 0);
-	} else {
-		add_header(cfg, arg);
+	} లేకపోతే {
+		కూడు_శీర్షిక(cfg, arg);
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static int from_callback(const struct option *opt, const char *arg, int unset)
+స్థిర పూర్ణాంకం from_callback(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	char **from = opt->value;
+	అక్షరం **from = opt->విలువ;
 
-	free(*from);
+	విడుదల(*from);
 
-	if (unset)
-		*from = NULL;
-	else if (arg)
+	ఒకవేళ (unset)
+		*from = ఖాళీ;
+	లేకపోతే ఒకవేళ (arg)
 		*from = xstrdup(arg);
-	else
+	లేకపోతే
 		*from = xstrdup(git_committer_info(IDENT_NO_DATE));
-	return 0;
+	తిరిగి 0;
 }
 
-static int base_callback(const struct option *opt, const char *arg, int unset)
+స్థిర పూర్ణాంకం పునాది_callback(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	struct format_config *cfg = opt->value;
+	నిర్మాణం format_config *cfg = opt->విలువ;
 
-	if (unset) {
-		cfg->auto_base = AUTO_BASE_NEVER;
-		FREE_AND_NULL(cfg->base_commit);
-	} else if (!strcmp(arg, "auto")) {
-		cfg->auto_base = AUTO_BASE_ALWAYS;
-		FREE_AND_NULL(cfg->base_commit);
-	} else {
-		cfg->auto_base = AUTO_BASE_NEVER;
-		cfg->base_commit = xstrdup(arg);
+	ఒకవేళ (unset) {
+		cfg->auto_పునాది = AUTO_పునాది_NEVER;
+		FREE_AND_NULL(cfg->పునాది_commit);
+	} లేకపోతే ఒకవేళ (!strcmp(arg, "auto")) {
+		cfg->auto_పునాది = AUTO_పునాది_ALWAYS;
+		FREE_AND_NULL(cfg->పునాది_commit);
+	} లేకపోతే {
+		cfg->auto_పునాది = AUTO_పునాది_NEVER;
+		cfg->పునాది_commit = xstrdup(arg);
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-struct base_tree_info {
-	struct object_id base_commit;
-	int nr_patch_id, alloc_patch_id;
-	struct object_id *patch_id;
+నిర్మాణం పునాది_వృక్షం_info {
+	నిర్మాణం object_id పునాది_commit;
+	పూర్ణాంకం nr_patch_id, alloc_patch_id;
+	నిర్మాణం object_id *patch_id;
 };
 
-static struct commit *get_base_commit(const struct format_config *cfg,
-				      struct commit **list,
-				      size_t total)
+స్థిర నిర్మాణం commit *get_పునాది_commit(స్థిరరాశి నిర్మాణం format_config *cfg,
+				      నిర్మాణం commit **list,
+				      కొలత_t మొత్తం)
 {
-	struct commit *base = NULL;
-	struct commit **rev;
-	int auto_select, die_on_failure, ret;
-	size_t i = 0, rev_nr = 0;
+	నిర్మాణం commit *పునాది = ఖాళీ;
+	నిర్మాణం commit **rev;
+	పూర్ణాంకం auto_select, die_on_failure, ret;
+	కొలత_t i = 0, rev_nr = 0;
 
-	switch (cfg->auto_base) {
-	case AUTO_BASE_NEVER:
-		if (cfg->base_commit) {
+	ఎంపిక (cfg->auto_పునాది) {
+	స్థితి AUTO_పునాది_NEVER:
+		ఒకవేళ (cfg->పునాది_commit) {
 			auto_select = 0;
 			die_on_failure = 1;
-		} else {
+		} లేకపోతే {
 			/* no base information is requested */
-			return NULL;
+			తిరిగి ఖాళీ;
 		}
-		break;
-	case AUTO_BASE_ALWAYS:
-	case AUTO_BASE_WHEN_ABLE:
-		if (cfg->base_commit) {
+		ఆపు;
+	స్థితి AUTO_పునాది_ALWAYS:
+	స్థితి AUTO_పునాది_WHEN_ABLE:
+		ఒకవేళ (cfg->పునాది_commit) {
 			BUG("requested automatic base selection but a commit was provided");
-		} else {
+		} లేకపోతే {
 			auto_select = 1;
-			die_on_failure = cfg->auto_base == AUTO_BASE_ALWAYS;
+			die_on_failure = cfg->auto_పునాది == AUTO_పునాది_ALWAYS;
 		}
-		break;
-	default:
+		ఆపు;
+	అప్రమేయ:
 		BUG("unexpected automatic base selection method");
 	}
 
-	if (!auto_select) {
-		base = lookup_commit_reference_by_name(cfg->base_commit);
-		if (!base)
-			die(_("unknown commit %s"), cfg->base_commit);
-	} else {
-		struct branch *curr_branch = branch_get(NULL);
-		const char *upstream = branch_get_upstream(curr_branch, NULL);
-		if (upstream) {
-			struct commit_list *base_list = NULL;
-			struct commit *commit;
-			struct object_id oid;
+	ఒకవేళ (!auto_select) {
+		పునాది = lookup_commit_reference_by_name(cfg->పునాది_commit);
+		ఒకవేళ (!పునాది)
+			die(_("unknown commit %s"), cfg->పునాది_commit);
+	} లేకపోతే {
+		నిర్మాణం branch *curr_branch = branch_get(ఖాళీ);
+		స్థిరరాశి అక్షరం *upstream = branch_get_upstream(curr_branch, ఖాళీ);
+		ఒకవేళ (upstream) {
+			నిర్మాణం commit_list *పునాది_list = ఖాళీ;
+			నిర్మాణం commit *commit;
+			నిర్మాణం object_id oid;
 
-			if (repo_get_oid(the_repository, upstream, &oid)) {
-				if (die_on_failure)
+			ఒకవేళ (repo_get_oid(the_repository, upstream, &oid)) {
+				ఒకవేళ (die_on_failure)
 					die(_("failed to resolve '%s' as a valid ref"), upstream);
-				else
-					return NULL;
+				లేకపోతే
+					తిరిగి ఖాళీ;
 			}
 			commit = lookup_commit_or_die(&oid, "upstream base");
-			if (repo_get_merge_bases_many(the_repository,
-						      commit, total,
+			ఒకవేళ (repo_get_విలీనం_bases_many(the_repository,
+						      commit, మొత్తం,
 						      list,
-						      &base_list) < 0 ||
+						      &పునాది_list) < 0 ||
 			    /* There should be one and only one merge base. */
-			    !base_list || base_list->next) {
-				if (die_on_failure) {
+			    !పునాది_list || పునాది_list->తదుపరి) {
+				ఒకవేళ (die_on_failure) {
 					die(_("could not find exact merge base"));
-				} else {
-					commit_list_free(base_list);
-					return NULL;
+				} లేకపోతే {
+					commit_list_free(పునాది_list);
+					తిరిగి ఖాళీ;
 				}
 			}
-			base = base_list->item;
-			commit_list_free(base_list);
-		} else {
-			if (die_on_failure)
+			పునాది = పునాది_list->అంశం;
+			commit_list_free(పునాది_list);
+		} లేకపోతే {
+			ఒకవేళ (die_on_failure)
 				die(_("failed to get upstream, if you want to record base commit automatically,\n"
 				      "please use git branch --set-upstream-to to track a remote branch.\n"
 				      "Or you could specify base commit by --base=<base-commit-id> manually"));
-			else
-				return NULL;
+			లేకపోతే
+				తిరిగి ఖాళీ;
 		}
 	}
 
-	ALLOC_ARRAY(rev, total);
-	for (i = 0; i < total; i++)
+	ALLOC_ARRAY(rev, మొత్తం);
+	కొరకు (i = 0; i < మొత్తం; i++)
 		rev[i] = list[i];
 
-	rev_nr = total;
+	rev_nr = మొత్తం;
 	/*
 	 * Get merge base through pair-wise computations
 	 * and store it in rev[0].
 	 */
-	while (rev_nr > 1) {
-		for (i = 0; i < rev_nr / 2; i++) {
-			struct commit_list *merge_base = NULL;
-			if (repo_get_merge_bases(the_repository,
+	అయితే (rev_nr > 1) {
+		కొరకు (i = 0; i < rev_nr / 2; i++) {
+			నిర్మాణం commit_list *విలీనం_పునాది = ఖాళీ;
+			ఒకవేళ (repo_get_విలీనం_bases(the_repository,
 						 rev[2 * i],
-						 rev[2 * i + 1], &merge_base) < 0 ||
-			    !merge_base || merge_base->next) {
-				if (die_on_failure) {
+						 rev[2 * i + 1], &విలీనం_పునాది) < 0 ||
+			    !విలీనం_పునాది || విలీనం_పునాది->తదుపరి) {
+				ఒకవేళ (die_on_failure) {
 					die(_("failed to find exact merge base"));
-				} else {
-					commit_list_free(merge_base);
-					free(rev);
-					return NULL;
+				} లేకపోతే {
+					commit_list_free(విలీనం_పునాది);
+					విడుదల(rev);
+					తిరిగి ఖాళీ;
 				}
 			}
 
-			rev[i] = merge_base->item;
-			commit_list_free(merge_base);
+			rev[i] = విలీనం_పునాది->అంశం;
+			commit_list_free(విలీనం_పునాది);
 		}
 
-		if (rev_nr % 2)
+		ఒకవేళ (rev_nr % 2)
 			rev[i] = rev[2 * i];
-		rev_nr = DIV_ROUND_UP(rev_nr, 2);
+		rev_nr = DIV_విడత_పైకి(rev_nr, 2);
 	}
 
-	ret = repo_in_merge_bases(the_repository, base, rev[0]);
-	if (ret < 0)
-		exit(128);
-	if (!ret) {
-		if (die_on_failure) {
+	ret = repo_లోపల_విలీనం_bases(the_repository, పునాది, rev[0]);
+	ఒకవేళ (ret < 0)
+		నిష్క్రమించు(128);
+	ఒకవేళ (!ret) {
+		ఒకవేళ (die_on_failure) {
 			die(_("base commit should be the ancestor of revision list"));
-		} else {
-			free(rev);
-			return NULL;
+		} లేకపోతే {
+			విడుదల(rev);
+			తిరిగి ఖాళీ;
 		}
 	}
 
-	for (i = 0; i < total; i++) {
-		if (base == list[i]) {
-			if (die_on_failure) {
+	కొరకు (i = 0; i < మొత్తం; i++) {
+		ఒకవేళ (పునాది == list[i]) {
+			ఒకవేళ (die_on_failure) {
 				die(_("base commit shouldn't be in revision list"));
-			} else {
-				free(rev);
-				return NULL;
+			} లేకపోతే {
+				విడుదల(rev);
+				తిరిగి ఖాళీ;
 			}
 		}
 	}
 
-	free(rev);
-	return base;
+	విడుదల(rev);
+	తిరిగి పునాది;
 }
 
-define_commit_slab(commit_base, int);
+define_commit_slab(commit_పునాది, పూర్ణాంకం);
 
-static void prepare_bases(struct base_tree_info *bases,
-			  struct commit *base,
-			  struct commit **list,
-			  size_t total)
+స్థిర శూన్య prepare_bases(నిర్మాణం పునాది_వృక్షం_info *bases,
+			  నిర్మాణం commit *పునాది,
+			  నిర్మాణం commit **list,
+			  కొలత_t మొత్తం)
 {
-	struct commit *commit;
-	struct rev_info revs;
-	struct diff_options diffopt;
-	struct commit_base commit_base;
+	నిర్మాణం commit *commit;
+	నిర్మాణం rev_info revs;
+	నిర్మాణం diff_options diffopt;
+	నిర్మాణం commit_పునాది commit_పునాది;
 
-	if (!base)
-		return;
+	ఒకవేళ (!పునాది)
+		తిరిగి;
 
-	init_commit_base(&commit_base);
-	repo_diff_setup(the_repository, &diffopt);
+	init_commit_పునాది(&commit_పునాది);
+	repo_diff_అమరిక(the_repository, &diffopt);
 	diffopt.flags.recursive = 1;
-	diff_setup_done(&diffopt);
+	diff_అమరిక_పూర్తి(&diffopt);
 
-	oidcpy(&bases->base_commit, &base->object.oid);
+	oidcpy(&bases->పునాది_commit, &పునాది->object.oid);
 
-	repo_init_revisions(the_repository, &revs, NULL);
+	repo_init_revisions(the_repository, &revs, ఖాళీ);
 	revs.max_parents = 1;
-	revs.topo_order = 1;
-	for (size_t i = 0; i < total; i++) {
+	revs.topo_క్రమం = 1;
+	కొరకు (కొలత_t i = 0; i < మొత్తం; i++) {
 		list[i]->object.flags &= ~UNINTERESTING;
-		add_pending_object(&revs, &list[i]->object, "rev_list");
-		*commit_base_at(&commit_base, list[i]) = 1;
+		కూడు_pending_object(&revs, &list[i]->object, "rev_list");
+		*commit_పునాది_at(&commit_పునాది, list[i]) = 1;
 	}
-	base->object.flags |= UNINTERESTING;
-	add_pending_object(&revs, &base->object, "base");
+	పునాది->object.flags |= UNINTERESTING;
+	కూడు_pending_object(&revs, &పునాది->object, "base");
 
-	if (prepare_revision_walk(&revs))
+	ఒకవేళ (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
 	/*
 	 * Traverse the commits list, get prerequisite patch ids
 	 * and stuff them in bases structure.
 	 */
-	while ((commit = get_revision(&revs)) != NULL) {
-		struct object_id oid;
-		struct object_id *patch_id;
-		if (*commit_base_at(&commit_base, commit))
-			continue;
-		if (commit_patch_id(commit, &diffopt, &oid, 0))
+	అయితే ((commit = get_revision(&revs)) != ఖాళీ) {
+		నిర్మాణం object_id oid;
+		నిర్మాణం object_id *patch_id;
+		ఒకవేళ (*commit_పునాది_at(&commit_పునాది, commit))
+			కొనసాగు;
+		ఒకవేళ (commit_patch_id(commit, &diffopt, &oid, 0))
 			die(_("cannot get patch id"));
 		ALLOC_GROW(bases->patch_id, bases->nr_patch_id + 1, bases->alloc_patch_id);
 		patch_id = bases->patch_id + bases->nr_patch_id;
 		oidcpy(patch_id, &oid);
 		bases->nr_patch_id++;
 	}
-	clear_commit_base(&commit_base);
+	clear_commit_పునాది(&commit_పునాది);
 	release_revisions(&revs);
 }
 
-static void print_bases(struct base_tree_info *bases, FILE *file)
+స్థిర శూన్య print_bases(నిర్మాణం పునాది_వృక్షం_info *bases, FILE *file)
 {
-	int i;
+	పూర్ణాంకం i;
 
 	/* Only do this once, either for the cover or for the first one */
-	if (is_null_oid(&bases->base_commit))
-		return;
+	ఒకవేళ (is_null_oid(&bases->పునాది_commit))
+		తిరిగి;
 
 	/* Show the base commit */
-	fprintf(file, "\nbase-commit: %s\n", oid_to_hex(&bases->base_commit));
+	fprintf(file, "\nbase-commit: %s\n", oid_గమ్యం_hex(&bases->పునాది_commit));
 
 	/* Show the prerequisite patches */
-	for (i = bases->nr_patch_id - 1; i >= 0; i--)
-		fprintf(file, "prerequisite-patch-id: %s\n", oid_to_hex(&bases->patch_id[i]));
+	కొరకు (i = bases->nr_patch_id - 1; i >= 0; i--)
+		fprintf(file, "prerequisite-patch-id: %s\n", oid_గమ్యం_hex(&bases->patch_id[i]));
 
-	free(bases->patch_id);
+	విడుదల(bases->patch_id);
 	bases->nr_patch_id = 0;
 	bases->alloc_patch_id = 0;
-	oidclr(&bases->base_commit, the_repository->hash_algo);
+	oidclr(&bases->పునాది_commit, the_repository->hash_algo);
 }
 
-static const char *diff_title(struct strbuf *sb,
-			      const char *reroll_count,
-			      const char *generic,
-			      const char *rerolled)
+స్థిర స్థిరరాశి అక్షరం *diff_title(నిర్మాణం strbuf *sb,
+			      స్థిరరాశి అక్షరం *reroll_లెక్క,
+			      స్థిరరాశి అక్షరం *generic,
+			      స్థిరరాశి అక్షరం *rerolled)
 {
-	int v;
+	పూర్ణాంకం v;
 
 	/* RFC may be v0, so allow -v1 to diff against v0 */
-	if (reroll_count && !strtol_i(reroll_count, 10, &v) &&
+	ఒకవేళ (reroll_లెక్క && !strtol_i(reroll_లెక్క, 10, &v) &&
 	    v >= 1)
 		strbuf_addf(sb, rerolled, v - 1);
-	else
+	లేకపోతే
 		strbuf_addstr(sb, generic);
-	return sb->buf;
+	తిరిగి sb->buf;
 }
 
-static void infer_range_diff_ranges(struct strbuf *r1,
-				    struct strbuf *r2,
-				    const char *prev,
-				    struct commit *origin,
-				    struct commit *head)
+స్థిర శూన్య infer_range_diff_ranges(నిర్మాణం strbuf *r1,
+				    నిర్మాణం strbuf *r2,
+				    స్థిరరాశి అక్షరం *prev,
+				    నిర్మాణం commit *origin,
+				    నిర్మాణం commit *తల)
 {
-	const char *head_oid = oid_to_hex(&head->object.oid);
-	int prev_is_range = is_range_diff_range(prev);
+	స్థిరరాశి అక్షరం *తల_oid = oid_గమ్యం_hex(&తల->object.oid);
+	పూర్ణాంకం prev_is_range = is_range_diff_range(prev);
 
-	if (prev_is_range)
+	ఒకవేళ (prev_is_range)
 		strbuf_addstr(r1, prev);
-	else
-		strbuf_addf(r1, "%s..%s", head_oid, prev);
+	లేకపోతే
+		strbuf_addf(r1, "%s..%s", తల_oid, prev);
 
-	if (origin)
-		strbuf_addf(r2, "%s..%s", oid_to_hex(&origin->object.oid), head_oid);
-	else if (prev_is_range)
+	ఒకవేళ (origin)
+		strbuf_addf(r2, "%s..%s", oid_గమ్యం_hex(&origin->object.oid), తల_oid);
+	లేకపోతే ఒకవేళ (prev_is_range)
 		die(_("failed to infer range-diff origin of current series"));
-	else {
+	లేకపోతే {
 		warning(_("using '%s' as range-diff origin of current series"), prev);
-		strbuf_addf(r2, "%s..%s", prev, head_oid);
+		strbuf_addf(r2, "%s..%s", prev, తల_oid);
 	}
 }
 
-int cmd_format_patch(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo UNUSED)
+పూర్ణాంకం cmd_format_patch(పూర్ణాంకం argc,
+		     స్థిరరాశి అక్షరం **argv,
+		     స్థిరరాశి అక్షరం *ఉపసర్గ,
+		     నిర్మాణం repository *repo వాడని)
 {
-	struct format_config cfg;
-	struct commit *commit;
-	struct commit_stack list = COMMIT_STACK_INIT;
-	struct rev_info rev;
-	char *to_free = NULL;
-	struct setup_revision_opt s_r_opt;
-	size_t total, i;
-	int use_stdout = 0;
-	int start_number = -1;
-	int just_numbers = 0;
-	int ignore_if_in_upstream = 0;
-	int cover_letter = -1;
-	const char *cover_letter_fmt = NULL;
-	int boundary_count = 0;
-	int no_binary_diff = 0;
-	int zero_commit = 0;
-	struct commit *origin = NULL;
-	const char *in_reply_to = NULL;
-	struct patch_ids ids;
-	struct strbuf buf = STRBUF_INIT;
-	int use_patch_format = 0;
-	int quiet = 0;
-	const char *reroll_count = NULL;
-	char *cover_from_description_arg = NULL;
-	char *description_file = NULL;
-	char *branch_name = NULL;
-	struct base_tree_info bases;
-	struct commit *base;
-	int show_progress = 0;
-	struct progress *progress = NULL;
-	struct oid_array idiff_prev = OID_ARRAY_INIT;
-	struct strbuf idiff_title = STRBUF_INIT;
-	const char *rdiff_prev = NULL;
-	struct strbuf rdiff1 = STRBUF_INIT;
-	struct strbuf rdiff2 = STRBUF_INIT;
-	struct strbuf rdiff_title = STRBUF_INIT;
-	struct rdiff_notes rdiff_notes = {
+	నిర్మాణం format_config cfg;
+	నిర్మాణం commit *commit;
+	నిర్మాణం commit_దొంతర list = COMMIT_దొంతర_INIT;
+	నిర్మాణం rev_info rev;
+	అక్షరం *గమ్యం_free = ఖాళీ;
+	నిర్మాణం అమరిక_revision_opt s_r_opt;
+	కొలత_t మొత్తం, i;
+	పూర్ణాంకం use_stdout = 0;
+	పూర్ణాంకం ప్రారంభం_సంఖ్య = -1;
+	పూర్ణాంకం just_numbers = 0;
+	పూర్ణాంకం ignore_if_లోపల_upstream = 0;
+	పూర్ణాంకం cover_letter = -1;
+	స్థిరరాశి అక్షరం *cover_letter_fmt = ఖాళీ;
+	పూర్ణాంకం boundary_లెక్క = 0;
+	పూర్ణాంకం no_ద్విమాన_diff = 0;
+	పూర్ణాంకం zero_commit = 0;
+	నిర్మాణం commit *origin = ఖాళీ;
+	స్థిరరాశి అక్షరం *లోపల_జవాబు_గమ్యం = ఖాళీ;
+	నిర్మాణం patch_ids ids;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
+	పూర్ణాంకం use_patch_format = 0;
+	పూర్ణాంకం quiet = 0;
+	స్థిరరాశి అక్షరం *reroll_లెక్క = ఖాళీ;
+	అక్షరం *cover_from_description_arg = ఖాళీ;
+	అక్షరం *description_file = ఖాళీ;
+	అక్షరం *branch_name = ఖాళీ;
+	నిర్మాణం పునాది_వృక్షం_info bases;
+	నిర్మాణం commit *పునాది;
+	పూర్ణాంకం show_పురోగతి = 0;
+	నిర్మాణం పురోగతి *పురోగతి = ఖాళీ;
+	నిర్మాణం oid_array idiff_prev = OID_ARRAY_INIT;
+	నిర్మాణం strbuf idiff_title = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *rdiff_prev = ఖాళీ;
+	నిర్మాణం strbuf rdiff1 = STRBUF_INIT;
+	నిర్మాణం strbuf rdiff2 = STRBUF_INIT;
+	నిర్మాణం strbuf rdiff_title = STRBUF_INIT;
+	నిర్మాణం rdiff_notes rdiff_notes = {
 		.notes = STRING_LIST_INIT_NODUP,
 	};
-	const char *rfc = NULL;
-	int creation_factor = -1;
-	const char *signature = git_version_string;
-	char *signature_to_free = NULL;
-	char *signature_file_arg = NULL;
-	struct keep_callback_data keep_callback_data = {
+	స్థిరరాశి అక్షరం *rfc = ఖాళీ;
+	పూర్ణాంకం creation_గుణకం = -1;
+	స్థిరరాశి అక్షరం *signature = git_సంస్కరణ_string;
+	అక్షరం *signature_గమ్యం_free = ఖాళీ;
+	అక్షరం *signature_file_arg = ఖాళీ;
+	నిర్మాణం keep_callback_దత్తాంశం keep_callback_దత్తాంశం = {
 		.cfg = &cfg,
 		.revs = &rev,
 	};
-	const char *fmt_patch_suffix = NULL;
+	స్థిరరాశి అక్షరం *fmt_patch_suffix = ఖాళీ;
 
-	const struct option builtin_format_patch_options[] = {
-		OPT_CALLBACK_F('n', "numbered", &cfg, NULL,
+	స్థిరరాశి నిర్మాణం option builtin_format_patch_options[] = {
+		OPT_CALLBACK_F('n', "numbered", &cfg, ఖాళీ,
 			    N_("use [PATCH n/m] even with a single patch"),
 			    PARSE_OPT_NOARG, numbered_callback),
-		OPT_CALLBACK_F('N', "no-numbered", &cfg, NULL,
+		OPT_CALLBACK_F('N', "no-numbered", &cfg, ఖాళీ,
 			    N_("use [PATCH] even with multiple patches"),
 			    PARSE_OPT_NOARG | PARSE_OPT_NONEG, no_numbered_callback),
 		OPT_BOOL('s', "signoff", &cfg.do_signoff, N_("add a Signed-off-by trailer")),
@@ -2056,11 +2056,11 @@ int cmd_format_patch(int argc,
 			    N_("use simple number sequence for output file names")),
 		OPT_STRING(0, "suffix", &fmt_patch_suffix, N_("sfx"),
 			    N_("use <sfx> instead of '.patch'")),
-		OPT_INTEGER(0, "start-number", &start_number,
+		OPT_INTEGER(0, "start-number", &ప్రారంభం_సంఖ్య,
 			    N_("start numbering patches at <n> instead of 1")),
-		OPT_STRING('v', "reroll-count", &reroll_count, N_("reroll-count"),
+		OPT_STRING('v', "reroll-count", &reroll_లెక్క, N_("reroll-count"),
 			    N_("mark the series as Nth re-roll")),
-		OPT_INTEGER(0, "filename-max-length", &cfg.log.fmt_patch_name_max,
+		OPT_INTEGER(0, "filename-max-length", &cfg.సంవర్గమానం.fmt_patch_name_max,
 			    N_("max length of output filename")),
 		OPT_CALLBACK_F(0, "rfc", &rfc, N_("rfc"),
 			       N_("add <rfc> (default 'RFC') before 'PATCH'"),
@@ -2072,31 +2072,31 @@ int cmd_format_patch(int argc,
 			     N_("use branch description from file")),
 		OPT_CALLBACK_F(0, "subject-prefix", &cfg, N_("prefix"),
 			    N_("use [<prefix>] instead of [PATCH]"),
-			    PARSE_OPT_NONEG, subject_prefix_callback),
+			    PARSE_OPT_NONEG, subject_ఉపసర్గ_callback),
 		OPT_CALLBACK_F('o', "output-directory", &output_directory,
 			    N_("dir"), N_("store resulting files in <dir>"),
 			    PARSE_OPT_NONEG, output_directory_callback),
-		OPT_CALLBACK_F('k', "keep-subject", &keep_callback_data, NULL,
+		OPT_CALLBACK_F('k', "keep-subject", &keep_callback_దత్తాంశం, ఖాళీ,
 			    N_("don't strip/add [PATCH]"),
 			    PARSE_OPT_NOARG | PARSE_OPT_NONEG, keep_callback),
-		OPT_BOOL(0, "no-binary", &no_binary_diff,
+		OPT_BOOL(0, "no-binary", &no_ద్విమాన_diff,
 			 N_("don't output binary diffs")),
 		OPT_BOOL(0, "zero-commit", &zero_commit,
 			 N_("output all-zero hash in From header")),
-		OPT_BOOL(0, "ignore-if-in-upstream", &ignore_if_in_upstream,
+		OPT_BOOL(0, "ignore-if-in-upstream", &ignore_if_లోపల_upstream,
 			 N_("don't include a patch matching a commit upstream")),
-		OPT_SET_INT_F('p', "no-stat", &use_patch_format,
+		OPT_సమితి_INT_F('p', "no-stat", &use_patch_format,
 			      N_("show patch format instead of default (patch + stat)"),
 			      1, PARSE_OPT_NONEG),
-		OPT_GROUP(N_("Messaging")),
+		OPT_సమూహం(N_("Messaging")),
 		OPT_CALLBACK(0, "add-header", &cfg, N_("header"),
-			    N_("add email header"), header_callback),
-		OPT_STRING_LIST(0, "to", &cfg.extra_to, N_("email"), N_("add To: header")),
+			    N_("add email header"), శీర్షిక_callback),
+		OPT_STRING_LIST(0, "to", &cfg.extra_గమ్యం, N_("email"), N_("add To: header")),
 		OPT_STRING_LIST(0, "cc", &cfg.extra_cc, N_("email"), N_("add Cc: header")),
 		OPT_CALLBACK_F(0, "from", &cfg.from, N_("ident"),
 			    N_("set From address to <ident> (or committer ident if absent)"),
 			    PARSE_OPT_OPTARG, from_callback),
-		OPT_STRING(0, "in-reply-to", &in_reply_to, N_("message-id"),
+		OPT_STRING(0, "in-reply-to", &లోపల_జవాబు_గమ్యం, N_("message-id"),
 			    N_("make first mail a reply to <message-id>")),
 		OPT_CALLBACK_F(0, "attach", &rev, N_("boundary"),
 			    N_("attach the patch"), PARSE_OPT_OPTARG,
@@ -2112,11 +2112,11 @@ int cmd_format_patch(int argc,
 			    N_("add a signature")),
 		OPT_CALLBACK_F(0, "base", &cfg, N_("base-commit"),
 			       N_("add prerequisite tree info to the patch series"),
-			       0, base_callback),
+			       0, పునాది_callback),
 		OPT_FILENAME(0, "signature-file", &signature_file_arg,
 				N_("add a signature from a file")),
 		OPT__QUIET(&quiet, N_("don't print the patch filenames")),
-		OPT_BOOL(0, "progress", &show_progress,
+		OPT_BOOL(0, "progress", &show_పురోగతి,
 			 N_("show progress while generating patches")),
 		OPT_CALLBACK(0, "interdiff", &idiff_prev, N_("rev"),
 			     N_("show changes against <rev> in cover letter or single patch"),
@@ -2126,39 +2126,39 @@ int cmd_format_patch(int argc,
 		OPT_CALLBACK_F(0, "range-diff-notes", &rdiff_notes, N_("note"),
 			       N_("override notes behavior for the range diff"),
 			       0, rdiff_notes_cb),
-		OPT_INTEGER(0, "creation-factor", &creation_factor,
+		OPT_INTEGER(0, "creation-factor", &creation_గుణకం,
 			    N_("percentage by which creation is weighted")),
-		OPT_BOOL(0, "force-in-body-from", &force_in_body_from,
+		OPT_BOOL(0, "force-in-body-from", &force_లోపల_body_from,
 			 N_("show in-body From: even if identical to the e-mail header")),
-		OPT_END()
+		OPT_చివర()
 	};
 
 	format_config_init(&cfg);
 	init_diff_ui_defaults();
 	init_display_notes(&cfg.notes_opt);
 	repo_config(the_repository, git_format_config, &cfg);
-	repo_init_revisions(the_repository, &rev, prefix);
+	repo_init_revisions(the_repository, &rev, ఉపసర్గ);
 	repo_config(the_repository, grep_config, &rev.grep_filter);
 
 	rev.show_notes = cfg.show_notes;
-	memcpy(&rev.notes_opt, &cfg.notes_opt, sizeof(cfg.notes_opt));
+	జ్ఞాపకం_నకలు(&rev.notes_opt, &cfg.notes_opt, పరిమాణం(cfg.notes_opt));
 	rev.commit_format = CMIT_FMT_EMAIL;
-	rev.encode_email_headers = cfg.log.default_encode_email_headers;
-	rev.expand_tabs_in_log_default = 0;
-	rev.verbose_header = 1;
+	rev.encode_email_శీర్షికలు = cfg.సంవర్గమానం.default_encode_email_శీర్షికలు;
+	rev.expand_tabs_లోపల_log_default = 0;
+	rev.verbose_శీర్షిక = 1;
 	rev.diff = 1;
 	rev.max_parents = 1;
 	rev.diffopt.flags.recursive = 1;
 	rev.diffopt.no_free = 1;
-	memset(&s_r_opt, 0, sizeof(s_r_opt));
+	memset(&s_r_opt, 0, పరిమాణం(s_r_opt));
 	s_r_opt.def = "HEAD";
 	s_r_opt.revarg_opt = REVARG_COMMITTISH;
 
-	strbuf_addstr(&cfg.sprefix, cfg.log.fmt_patch_subject_prefix);
-	if (format_no_prefix)
-		diff_set_noprefix(&rev.diffopt);
+	strbuf_addstr(&cfg.sprefix, cfg.సంవర్గమానం.fmt_patch_subject_ఉపసర్గ);
+	ఒకవేళ (format_no_ఉపసర్గ)
+		diff_సమితి_noprefix(&rev.diffopt);
 
-	if (cfg.default_attach) {
+	ఒకవేళ (cfg.default_attach) {
 		rev.mime_boundary = cfg.default_attach;
 		rev.no_inline = 1;
 	}
@@ -2168,172 +2168,172 @@ int cmd_format_patch(int argc,
 	 * like "git format-patch -o a123 HEAD^.." may fail; a123 is
 	 * possibly a valid SHA1.
 	 */
-	argc = parse_options(argc, argv, prefix, builtin_format_patch_options,
+	argc = parse_options(argc, argv, ఉపసర్గ, builtin_format_patch_options,
 			     builtin_format_patch_usage,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT |
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	rev.force_in_body_from = force_in_body_from;
+	rev.force_లోపల_body_from = force_లోపల_body_from;
 
-	if (!fmt_patch_suffix)
+	ఒకవేళ (!fmt_patch_suffix)
 		fmt_patch_suffix = cfg.fmt_patch_suffix;
 
 	/* Make sure "0000-$sub.patch" gives non-negative length for $sub */
-	if (cfg.log.fmt_patch_name_max <= cast_size_t_to_int(strlen("0000-") + strlen(fmt_patch_suffix)))
-		cfg.log.fmt_patch_name_max = strlen("0000-") + strlen(fmt_patch_suffix);
+	ఒకవేళ (cfg.సంవర్గమానం.fmt_patch_name_max <= cast_కొలత_t_గమ్యం_int(అక్షరశ్రేణి_పొడవు("0000-") + అక్షరశ్రేణి_పొడవు(fmt_patch_suffix)))
+		cfg.సంవర్గమానం.fmt_patch_name_max = అక్షరశ్రేణి_పొడవు("0000-") + అక్షరశ్రేణి_పొడవు(fmt_patch_suffix);
 
-	if (cover_from_description_arg)
-		cfg.cover_from_description_mode = parse_cover_from_description(cover_from_description_arg);
+	ఒకవేళ (cover_from_description_arg)
+		cfg.cover_from_description_బహుళకం = parse_cover_from_description(cover_from_description_arg);
 
-	if (rfc && rfc[0]) {
-		cfg.subject_prefix = 1;
-		if (rfc[0] == '-')
+	ఒకవేళ (rfc && rfc[0]) {
+		cfg.subject_ఉపసర్గ = 1;
+		ఒకవేళ (rfc[0] == '-')
 			strbuf_addf(&cfg.sprefix, " %s", rfc + 1);
-		else
+		లేకపోతే
 			strbuf_insertf(&cfg.sprefix, 0, "%s ", rfc);
 	}
 
-	if (reroll_count) {
-		strbuf_addf(&cfg.sprefix, " v%s", reroll_count);
-		rev.reroll_count = reroll_count;
+	ఒకవేళ (reroll_లెక్క) {
+		strbuf_addf(&cfg.sprefix, " v%s", reroll_లెక్క);
+		rev.reroll_లెక్క = reroll_లెక్క;
 	}
 
-	rev.subject_prefix = cfg.sprefix.buf;
+	rev.subject_ఉపసర్గ = cfg.sprefix.buf;
 
-	for (i = 0; i < cfg.extra_hdr.nr; i++) {
-		strbuf_addstr(&buf, cfg.extra_hdr.items[i].string);
+	కొరకు (i = 0; i < cfg.extra_hdr.nr; i++) {
+		strbuf_addstr(&buf, cfg.extra_hdr.వస్తువులు[i].string);
 		strbuf_addch(&buf, '\n');
 	}
 
-	if (cfg.extra_to.nr)
+	ఒకవేళ (cfg.extra_గమ్యం.nr)
 		strbuf_addstr(&buf, "To: ");
-	for (i = 0; i < cfg.extra_to.nr; i++) {
-		if (i)
+	కొరకు (i = 0; i < cfg.extra_గమ్యం.nr; i++) {
+		ఒకవేళ (i)
 			strbuf_addstr(&buf, "    ");
-		strbuf_addstr(&buf, cfg.extra_to.items[i].string);
-		if (i + 1 < cfg.extra_to.nr)
+		strbuf_addstr(&buf, cfg.extra_గమ్యం.వస్తువులు[i].string);
+		ఒకవేళ (i + 1 < cfg.extra_గమ్యం.nr)
 			strbuf_addch(&buf, ',');
 		strbuf_addch(&buf, '\n');
 	}
 
-	if (cfg.extra_cc.nr)
+	ఒకవేళ (cfg.extra_cc.nr)
 		strbuf_addstr(&buf, "Cc: ");
-	for (i = 0; i < cfg.extra_cc.nr; i++) {
-		if (i)
+	కొరకు (i = 0; i < cfg.extra_cc.nr; i++) {
+		ఒకవేళ (i)
 			strbuf_addstr(&buf, "    ");
-		strbuf_addstr(&buf, cfg.extra_cc.items[i].string);
-		if (i + 1 < cfg.extra_cc.nr)
+		strbuf_addstr(&buf, cfg.extra_cc.వస్తువులు[i].string);
+		ఒకవేళ (i + 1 < cfg.extra_cc.nr)
 			strbuf_addch(&buf, ',');
 		strbuf_addch(&buf, '\n');
 	}
 
-	rev.extra_headers = to_free = strbuf_detach(&buf, NULL);
+	rev.extra_శీర్షికలు = గమ్యం_free = strbuf_detach(&buf, ఖాళీ);
 
-	if (cfg.from) {
-		if (split_ident_line(&rev.from_ident, cfg.from, strlen(cfg.from)))
+	ఒకవేళ (cfg.from) {
+		ఒకవేళ (విభజించు_ident_పంక్తి(&rev.from_ident, cfg.from, అక్షరశ్రేణి_పొడవు(cfg.from)))
 			die(_("invalid ident line: %s"), cfg.from);
 	}
 
-	if (start_number < 0)
-		start_number = 1;
+	ఒకవేళ (ప్రారంభం_సంఖ్య < 0)
+		ప్రారంభం_సంఖ్య = 1;
 
 	/*
 	 * If numbered is set solely due to format.numbered in config,
 	 * and it would conflict with --keep-subject (-k) from the
 	 * command line, reset "numbered".
 	 */
-	if (cfg.numbered && cfg.keep_subject && !cfg.numbered_cmdline_opt)
+	ఒకవేళ (cfg.numbered && cfg.keep_subject && !cfg.numbered_cmdline_opt)
 		cfg.numbered = 0;
 
-	if (cfg.numbered && cfg.keep_subject)
+	ఒకవేళ (cfg.numbered && cfg.keep_subject)
 		die(_("options '%s' and '%s' cannot be used together"), "-n", "-k");
-	if (cfg.keep_subject && cfg.subject_prefix)
+	ఒకవేళ (cfg.keep_subject && cfg.subject_ఉపసర్గ)
 		die(_("options '%s' and '%s' cannot be used together"), "--subject-prefix/--rfc", "-k");
 	rev.preserve_subject = cfg.keep_subject;
 
-	argc = setup_revisions(argc, argv, &rev, &s_r_opt);
-	if (argc > 1)
+	argc = అమరిక_revisions(argc, argv, &rev, &s_r_opt);
+	ఒకవేళ (argc > 1)
 		die(_("unrecognized argument: %s"), argv[1]);
 
-	if (rev.diffopt.output_format & DIFF_FORMAT_NAME)
+	ఒకవేళ (rev.diffopt.output_format & DIFF_FORMAT_NAME)
 		die(_("--name-only does not make sense"));
-	if (rev.diffopt.output_format & DIFF_FORMAT_NAME_STATUS)
+	ఒకవేళ (rev.diffopt.output_format & DIFF_FORMAT_NAME_స్థితి)
 		die(_("--name-status does not make sense"));
-	if (rev.diffopt.output_format & DIFF_FORMAT_CHECKDIFF)
+	ఒకవేళ (rev.diffopt.output_format & DIFF_FORMAT_CHECKDIFF)
 		die(_("--check does not make sense"));
-	if (rev.remerge_diff)
+	ఒకవేళ (rev.remerge_diff)
 		die(_("--remerge-diff does not make sense"));
 
-	if (!use_patch_format &&
+	ఒకవేళ (!use_patch_format &&
 		(!rev.diffopt.output_format ||
 		 rev.diffopt.output_format == DIFF_FORMAT_PATCH))
 		rev.diffopt.output_format = DIFF_FORMAT_DIFFSTAT | DIFF_FORMAT_SUMMARY;
-	if (!rev.diffopt.stat_width)
-		rev.diffopt.stat_width = MAIL_DEFAULT_WRAP;
+	ఒకవేళ (!rev.diffopt.stat_వెడల్పు)
+		rev.diffopt.stat_వెడల్పు = MAIL_DEFAULT_WRAP;
 
 	/* Always generate a patch */
 	rev.diffopt.output_format |= DIFF_FORMAT_PATCH;
-	rev.always_show_header = 1;
+	rev.always_show_శీర్షిక = 1;
 
 	rev.zero_commit = zero_commit;
-	rev.patch_name_max = cfg.log.fmt_patch_name_max;
+	rev.patch_name_max = cfg.సంవర్గమానం.fmt_patch_name_max;
 
-	if (!rev.diffopt.flags.text && !no_binary_diff)
-		rev.diffopt.flags.binary = 1;
+	ఒకవేళ (!rev.diffopt.flags.పాఠ్యం && !no_ద్విమాన_diff)
+		rev.diffopt.flags.ద్విమాన = 1;
 
-	if (rev.show_notes)
-		load_display_notes(&rev.notes_opt);
+	ఒకవేళ (rev.show_notes)
+		ఎక్కించు_display_notes(&rev.notes_opt);
 
 	die_for_incompatible_opt3(use_stdout, "--stdout",
 				  rev.diffopt.close_file, "--output",
 				  !!output_directory, "--output-directory");
 
-	if (use_stdout && stdout_mboxrd)
+	ఒకవేళ (use_stdout && stdout_mboxrd)
 		rev.commit_format = CMIT_FMT_MBOXRD;
 
-	if (use_stdout) {
-		setup_pager(the_repository);
-	} else if (!rev.diffopt.close_file) {
-		int saved;
+	ఒకవేళ (use_stdout) {
+		అమరిక_pager(the_repository);
+	} లేకపోతే ఒకవేళ (!rev.diffopt.close_file) {
+		పూర్ణాంకం saved;
 
-		if (!output_directory)
+		ఒకవేళ (!output_directory)
 			output_directory = cfg.config_output_directory;
-		output_directory = set_outdir(prefix, output_directory);
+		output_directory = సమితి_outdir(ఉపసర్గ, output_directory);
 
-		if (rev.diffopt.use_color != GIT_COLOR_ALWAYS)
+		ఒకవేళ (rev.diffopt.use_color != GIT_COLOR_ALWAYS)
 			rev.diffopt.use_color = GIT_COLOR_NEVER;
 		/*
 		 * We consider <outdir> as 'outside of gitdir', therefore avoid
 		 * applying adjust_shared_perm in s-c-l-d.
 		 */
 		saved = repo_settings_get_shared_repository(the_repository);
-		repo_settings_set_shared_repository(the_repository, 0);
-		switch (safe_create_leading_directories_const(the_repository, output_directory)) {
-		case SCLD_OK:
-		case SCLD_EXISTS:
-			break;
-		default:
+		repo_settings_సమితి_shared_repository(the_repository, 0);
+		ఎంపిక (సురక్షిత_create_leading_directories_const(the_repository, output_directory)) {
+		స్థితి SCLD_OK:
+		స్థితి SCLD_EXISTS:
+			ఆపు;
+		అప్రమేయ:
 			die(_("could not create leading directories "
 			      "of '%s'"), output_directory);
 		}
-		repo_settings_set_shared_repository(the_repository, saved);
-		if (mkdir(output_directory, 0777) < 0 && errno != EEXIST)
+		repo_settings_సమితి_shared_repository(the_repository, saved);
+		ఒకవేళ (mkdir(output_directory, 0777) < 0 && errno != EEXIST)
 			die_errno(_("could not create directory '%s'"),
 				  output_directory);
 	}
 
-	if (rev.pending.nr == 1) {
-		int check_head = 0;
+	ఒకవేళ (rev.pending.nr == 1) {
+		పూర్ణాంకం check_తల = 0;
 
-		if (rev.max_count < 0 && !rev.show_root_diff) {
+		ఒకవేళ (rev.max_లెక్క < 0 && !rev.show_మూలం_diff) {
 			/*
 			 * This is traditional behaviour of "git format-patch
 			 * origin" that prepares what the origin side still
 			 * does not have.
 			 */
-			rev.pending.objects[0].item->flags |= UNINTERESTING;
-			add_head_to_pending(&rev);
-			check_head = 1;
+			rev.pending.objects[0].అంశం->flags |= UNINTERESTING;
+			కూడు_తల_గమ్యం_pending(&rev);
+			check_తల = 1;
 		}
 		/*
 		 * Otherwise, it is "format-patch -22 HEAD", and/or
@@ -2341,18 +2341,18 @@ int cmd_format_patch(int argc,
 		 * get_revision() to do the usual traversal.
 		 */
 
-		if (!strcmp(rev.pending.objects[0].name, "HEAD"))
-			check_head = 1;
+		ఒకవేళ (!strcmp(rev.pending.objects[0].name, "HEAD"))
+			check_తల = 1;
 
-		if (check_head) {
-			const char *ref, *v;
+		ఒకవేళ (check_తల) {
+			స్థిరరాశి అక్షరం *ref, *v;
 			ref = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
 						      "HEAD",
 						      RESOLVE_REF_READING,
-						      NULL, NULL);
-			if (ref && skip_prefix(ref, "refs/heads/", &v))
+						      ఖాళీ, ఖాళీ);
+			ఒకవేళ (ref && skip_ఉపసర్గ(ref, "refs/heads/", &v))
 				branch_name = xstrdup(v);
-			else
+			లేకపోతే
 				branch_name = xstrdup(""); /* no branch */
 		}
 	}
@@ -2361,87 +2361,87 @@ int cmd_format_patch(int argc,
 	 * We cannot move this anywhere earlier because we do want to
 	 * know if --root was given explicitly from the command line.
 	 */
-	rev.show_root_diff = 1;
+	rev.show_మూలం_diff = 1;
 
-	if (ignore_if_in_upstream) {
+	ఒకవేళ (ignore_if_లోపల_upstream) {
 		/* Don't say anything if head and upstream are the same. */
-		if (rev.pending.nr == 2) {
-			struct object_array_entry *o = rev.pending.objects;
-			if (oideq(&o[0].item->oid, &o[1].item->oid))
-				goto done;
+		ఒకవేళ (rev.pending.nr == 2) {
+			నిర్మాణం object_array_నమోదు *o = rev.pending.objects;
+			ఒకవేళ (oideq(&o[0].అంశం->oid, &o[1].అంశం->oid))
+				వెళ్ళు పూర్తి;
 		}
 		get_patch_ids(&rev, &ids);
 	}
 
-	if (prepare_revision_walk(&rev))
+	ఒకవేళ (prepare_revision_walk(&rev))
 		die(_("revision walk setup failed"));
 	rev.boundary = 1;
-	while ((commit = get_revision(&rev)) != NULL) {
-		if (commit->object.flags & BOUNDARY) {
-			boundary_count++;
-			origin = (boundary_count == 1) ? commit : NULL;
-			continue;
+	అయితే ((commit = get_revision(&rev)) != ఖాళీ) {
+		ఒకవేళ (commit->object.flags & BOUNDARY) {
+			boundary_లెక్క++;
+			origin = (boundary_లెక్క == 1) ? commit : ఖాళీ;
+			కొనసాగు;
 		}
 
-		if (ignore_if_in_upstream && has_commit_patch_id(commit, &ids))
-			continue;
+		ఒకవేళ (ignore_if_లోపల_upstream && has_commit_patch_id(commit, &ids))
+			కొనసాగు;
 
-		commit_stack_push(&list, commit);
+		commit_దొంతర_నెట్టు(&list, commit);
 	}
-	if (!list.nr)
+	ఒకవేళ (!list.nr)
 		/* nothing to do */
-		goto done;
-	total = list.nr;
+		వెళ్ళు పూర్తి;
+	మొత్తం = list.nr;
 
-	if (!cover_letter_fmt) {
+	ఒకవేళ (!cover_letter_fmt) {
 		cover_letter_fmt = cfg.fmt_cover_letter_commit_list;
-		if (!cover_letter_fmt)
+		ఒకవేళ (!cover_letter_fmt)
 			cover_letter_fmt = "shortlog";
-	} else if (cover_letter == -1) {
+	} లేకపోతే ఒకవేళ (cover_letter == -1) {
 		cover_letter = 1;
 	}
 
-	if (cover_letter == -1) {
-		if (cfg.config_cover_letter == COVER_AUTO)
-			cover_letter = (total > 1);
-		else if ((idiff_prev.nr || rdiff_prev) && (total > 1))
+	ఒకవేళ (cover_letter == -1) {
+		ఒకవేళ (cfg.config_cover_letter == COVER_AUTO)
+			cover_letter = (మొత్తం > 1);
+		లేకపోతే ఒకవేళ ((idiff_prev.nr || rdiff_prev) && (మొత్తం > 1))
 			cover_letter = (cfg.config_cover_letter != COVER_OFF);
-		else
+		లేకపోతే
 			cover_letter = (cfg.config_cover_letter == COVER_ON);
 	}
-	if (!cfg.keep_subject && cfg.auto_number && (total > 1 || cover_letter))
+	ఒకవేళ (!cfg.keep_subject && cfg.auto_సంఖ్య && (మొత్తం > 1 || cover_letter))
 		cfg.numbered = 1;
-	if (cfg.numbered)
-		rev.total = total + start_number - 1;
+	ఒకవేళ (cfg.numbered)
+		rev.మొత్తం = మొత్తం + ప్రారంభం_సంఖ్య - 1;
 
-	if (idiff_prev.nr) {
-		if (!cover_letter && total != 1)
+	ఒకవేళ (idiff_prev.nr) {
+		ఒకవేళ (!cover_letter && మొత్తం != 1)
 			die(_("--interdiff requires --cover-letter or single patch"));
 		rev.idiff_oid1 = &idiff_prev.oid[idiff_prev.nr - 1];
-		rev.idiff_oid2 = get_commit_tree_oid(list.items[0]);
-		rev.idiff_title = diff_title(&idiff_title, reroll_count,
+		rev.idiff_oid2 = get_commit_వృక్షం_oid(list.వస్తువులు[0]);
+		rev.idiff_title = diff_title(&idiff_title, reroll_లెక్క,
 					     _("Interdiff:"),
 					     _("Interdiff against v%d:"));
 	}
 
-	if (creation_factor < 0)
-		creation_factor = CREATION_FACTOR_FOR_THE_SAME_SERIES;
-	else if (!rdiff_prev)
+	ఒకవేళ (creation_గుణకం < 0)
+		creation_గుణకం = CREATION_గుణకం_FOR_THE_SAME_SERIES;
+	లేకపోతే ఒకవేళ (!rdiff_prev)
 		die(_("the option '%s' requires '%s'"), "--creation-factor", "--range-diff");
 
-	if (rdiff_prev) {
-		if (!cover_letter && total != 1)
+	ఒకవేళ (rdiff_prev) {
+		ఒకవేళ (!cover_letter && మొత్తం != 1)
 			die(_("--range-diff requires --cover-letter or single patch"));
 
 		infer_range_diff_ranges(&rdiff1, &rdiff2, rdiff_prev,
-					origin, list.items[0]);
+					origin, list.వస్తువులు[0]);
 		rev.rdiff1 = rdiff1.buf;
 		rev.rdiff2 = rdiff2.buf;
-		rev.creation_factor = creation_factor;
-		rev.rdiff_title = diff_title(&rdiff_title, reroll_count,
+		rev.creation_గుణకం = creation_గుణకం;
+		rev.rdiff_title = diff_title(&rdiff_title, reroll_లెక్క,
 					     _("Range-diff:"),
 					     _("Range-diff against v%d:"));
-		get_notes_args(&rdiff_notes, &rev);
+		get_notes_వాదనలు(&rdiff_notes, &rev);
 	}
 
 	/*
@@ -2453,73 +2453,73 @@ int cmd_format_patch(int argc,
 	 *   4. The `format.signatureFile` config.
 	 *   5. Default `git_version_string`.
 	 */
-	if (!signature) {
+	ఒకవేళ (!signature) {
 		; /* --no-signature inhibits all signatures */
-	} else if (signature && signature != git_version_string) {
+	} లేకపోతే ఒకవేళ (signature && signature != git_సంస్కరణ_string) {
 		; /* non-default signature already set */
-	} else if (signature_file_arg || (cfg.signature_file && !cfg.signature)) {
-		struct strbuf buf = STRBUF_INIT;
-		const char *signature_file = signature_file_arg ?
+	} లేకపోతే ఒకవేళ (signature_file_arg || (cfg.signature_file && !cfg.signature)) {
+		నిర్మాణం strbuf buf = STRBUF_INIT;
+		స్థిరరాశి అక్షరం *signature_file = signature_file_arg ?
 			signature_file_arg : cfg.signature_file;
 
-		if (strbuf_read_file(&buf, signature_file, 128) < 0)
+		ఒకవేళ (strbuf_read_file(&buf, signature_file, 128) < 0)
 			die_errno(_("unable to read signature file '%s'"), signature_file);
-		signature = signature_to_free = strbuf_detach(&buf, NULL);
-	} else if (cfg.signature) {
+		signature = signature_గమ్యం_free = strbuf_detach(&buf, ఖాళీ);
+	} లేకపోతే ఒకవేళ (cfg.signature) {
 		signature = cfg.signature;
 	}
 
-	memset(&bases, 0, sizeof(bases));
-	base = get_base_commit(&cfg, list.items, list.nr);
-	if (base) {
+	memset(&bases, 0, పరిమాణం(bases));
+	పునాది = get_పునాది_commit(&cfg, list.వస్తువులు, list.nr);
+	ఒకవేళ (పునాది) {
 		reset_revision_walk();
 		clear_object_flags(the_repository, UNINTERESTING);
-		prepare_bases(&bases, base, list.items, list.nr);
+		prepare_bases(&bases, పునాది, list.వస్తువులు, list.nr);
 	}
 
-	if (in_reply_to || cfg.thread || cover_letter) {
-		rev.ref_message_ids = xmalloc(sizeof(*rev.ref_message_ids));
-		string_list_init_dup(rev.ref_message_ids);
+	ఒకవేళ (లోపల_జవాబు_గమ్యం || cfg.thread || cover_letter) {
+		rev.ref_సందేశం_ids = xmalloc(పరిమాణం(*rev.ref_సందేశం_ids));
+		string_list_init_dup(rev.ref_సందేశం_ids);
 	}
-	if (in_reply_to) {
-		char *msgid = clean_message_id(in_reply_to);
-		string_list_append_nodup(rev.ref_message_ids, msgid);
+	ఒకవేళ (లోపల_జవాబు_గమ్యం) {
+		అక్షరం *msgid = clean_సందేశం_id(లోపల_జవాబు_గమ్యం);
+		string_list_append_nodup(rev.ref_సందేశం_ids, msgid);
 	}
 	rev.numbered_files = just_numbers;
 	rev.patch_suffix = fmt_patch_suffix;
 
-	if (cover_letter) {
-		if (cfg.thread)
-			gen_message_id(&rev, "cover");
+	ఒకవేళ (cover_letter) {
+		ఒకవేళ (cfg.thread)
+			gen_సందేశం_id(&rev, "cover");
 		make_cover_letter(&rev, !!output_directory,
-				  origin, list.nr, list.items,
+				  origin, list.nr, list.వస్తువులు,
 				  description_file, branch_name, quiet, &cfg,
 				  cover_letter_fmt);
 		print_bases(&bases, rev.diffopt.file);
 		print_signature(signature, rev.diffopt.file);
-		total++;
-		start_number--;
+		మొత్తం++;
+		ప్రారంభం_సంఖ్య--;
 		/* interdiff/range-diff in cover-letter; omit from patches */
-		rev.idiff_oid1 = NULL;
-		rev.rdiff1 = NULL;
+		rev.idiff_oid1 = ఖాళీ;
+		rev.rdiff1 = ఖాళీ;
 	}
-	rev.add_signoff = cfg.do_signoff;
+	rev.కూడు_signoff = cfg.do_signoff;
 
-	if (show_progress)
-		progress = start_delayed_progress(the_repository,
-						  _("Generating patches"), total);
-	while (list.nr) {
-		size_t idx = list.nr - 1;
-		int shown;
+	ఒకవేళ (show_పురోగతి)
+		పురోగతి = ప్రారంభం_delayed_పురోగతి(the_repository,
+						  _("Generating patches"), మొత్తం);
+	అయితే (list.nr) {
+		కొలత_t idx = list.nr - 1;
+		పూర్ణాంకం shown;
 
-		display_progress(progress, total - idx);
-		commit = commit_stack_pop(&list);
-		rev.nr = total - idx + (start_number - 1);
+		display_పురోగతి(పురోగతి, మొత్తం - idx);
+		commit = commit_దొంతర_తీయి(&list);
+		rev.nr = మొత్తం - idx + (ప్రారంభం_సంఖ్య - 1);
 
 		/* Make the second and subsequent mails replies to the first */
-		if (cfg.thread) {
+		ఒకవేళ (cfg.thread) {
 			/* Have we already had a message ID? */
-			if (rev.message_id) {
+			ఒకవేళ (rev.సందేశం_id) {
 				/*
 				 * For deep threading: make every mail
 				 * a reply to the previous one, no
@@ -2541,22 +2541,22 @@ int cmd_format_patch(int argc,
 				 * letter is a reply to the
 				 * --in-reply-to, if specified.
 				 */
-				if (cfg.thread == THREAD_SHALLOW
-				    && rev.ref_message_ids->nr > 0
+				ఒకవేళ (cfg.thread == THREAD_SHALLOW
+				    && rev.ref_సందేశం_ids->nr > 0
 				    && (!cover_letter || rev.nr > 1))
-					free(rev.message_id);
-				else
-					string_list_append_nodup(rev.ref_message_ids,
-								 rev.message_id);
+					విడుదల(rev.సందేశం_id);
+				లేకపోతే
+					string_list_append_nodup(rev.ref_సందేశం_ids,
+								 rev.సందేశం_id);
 			}
-			gen_message_id(&rev, oid_to_hex(&commit->object.oid));
+			gen_సందేశం_id(&rev, oid_గమ్యం_hex(&commit->object.oid));
 		}
 
-		if (output_directory &&
-		    open_next_file(rev.numbered_files ? NULL : commit, NULL, &rev, quiet))
+		ఒకవేళ (output_directory &&
+		    open_తదుపరి_file(rev.numbered_files ? ఖాళీ : commit, ఖాళీ, &rev, quiet))
 			die(_("failed to create output files"));
-		shown = log_tree_commit(&rev, commit);
-		free_commit_buffer(the_repository->parsed_objects,
+		shown = log_వృక్షం_commit(&rev, commit);
+		free_commit_బఫరు(the_repository->parsed_objects,
 				   commit);
 
 		/* We put one extra blank line between formatted
@@ -2565,81 +2565,81 @@ int cmd_format_patch(int argc,
 		 * the log; when using one file per patch, we do
 		 * not want the extra blank line.
 		 */
-		if (output_directory)
+		ఒకవేళ (output_directory)
 			rev.shown_one = 0;
-		if (shown) {
+		ఒకవేళ (shown) {
 			print_bases(&bases, rev.diffopt.file);
-			if (rev.mime_boundary)
+			ఒకవేళ (rev.mime_boundary)
 				fprintf(rev.diffopt.file, "\n--%s%s--\n\n\n",
 				       mime_boundary_leader,
 				       rev.mime_boundary);
-			else
+			లేకపోతే
 				print_signature(signature, rev.diffopt.file);
 		}
-		if (output_directory) {
+		ఒకవేళ (output_directory) {
 			fclose(rev.diffopt.file);
-			rev.diffopt.file = NULL;
+			rev.diffopt.file = ఖాళీ;
 		}
 	}
-	stop_progress(&progress);
-	commit_stack_clear(&list);
-	if (ignore_if_in_upstream)
+	stop_పురోగతి(&పురోగతి);
+	commit_దొంతర_clear(&list);
+	ఒకవేళ (ignore_if_లోపల_upstream)
 		free_patch_ids(&ids);
 
-done:
+పూర్తి:
 	oid_array_clear(&idiff_prev);
 	strbuf_release(&idiff_title);
 	strbuf_release(&rdiff1);
 	strbuf_release(&rdiff2);
 	strbuf_release(&rdiff_title);
-	free(description_file);
-	free(signature_file_arg);
-	free(signature_to_free);
-	free(branch_name);
-	free(to_free);
-	free(rev.message_id);
-	if (rev.ref_message_ids)
-		string_list_clear(rev.ref_message_ids, 0);
-	free(rev.ref_message_ids);
+	విడుదల(description_file);
+	విడుదల(signature_file_arg);
+	విడుదల(signature_గమ్యం_free);
+	విడుదల(branch_name);
+	విడుదల(గమ్యం_free);
+	విడుదల(rev.సందేశం_id);
+	ఒకవేళ (rev.ref_సందేశం_ids)
+		string_list_clear(rev.ref_సందేశం_ids, 0);
+	విడుదల(rev.ref_సందేశం_ids);
 	rev.diffopt.no_free = 0;
 	release_revisions(&rev);
 	format_config_release(&cfg);
 	strvec_clear(&rev.rdiff_log_arg);
 	string_list_clear(&rdiff_notes.notes, 0);
-	return 0;
+	తిరిగి 0;
 }
 
-static int add_pending_commit(const char *arg, struct rev_info *revs, int flags)
+స్థిర పూర్ణాంకం కూడు_pending_commit(స్థిరరాశి అక్షరం *arg, నిర్మాణం rev_info *revs, పూర్ణాంకం flags)
 {
-	struct object_id oid;
-	if (repo_get_oid(the_repository, arg, &oid) == 0) {
-		struct commit *commit = lookup_commit_reference(the_repository,
+	నిర్మాణం object_id oid;
+	ఒకవేళ (repo_get_oid(the_repository, arg, &oid) == 0) {
+		నిర్మాణం commit *commit = lookup_commit_reference(the_repository,
 								&oid);
-		if (commit) {
+		ఒకవేళ (commit) {
 			commit->object.flags |= flags;
-			add_pending_object(revs, &commit->object, arg);
-			return 0;
+			కూడు_pending_object(revs, &commit->object, arg);
+			తిరిగి 0;
 		}
 	}
-	return -1;
+	తిరిగి -1;
 }
 
-static const char * const cherry_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి cherry_usage[] = {
 	N_("git cherry [-v] [<upstream> [<head> [<limit>]]]"),
-	NULL
+	ఖాళీ
 };
 
-static void print_commit(char sign, struct commit *commit, int verbose,
-			 int abbrev, FILE *file)
+స్థిర శూన్య print_commit(అక్షరం sign, నిర్మాణం commit *commit, పూర్ణాంకం verbose,
+			 పూర్ణాంకం abbrev, FILE *file)
 {
-	if (!verbose) {
+	ఒకవేళ (!verbose) {
 		fprintf(file, "%c %s\n", sign,
-		       repo_find_unique_abbrev(the_repository, &commit->object.oid, abbrev));
-	} else {
-		struct strbuf buf = STRBUF_INIT;
+		       repo_కనుగొను_unique_abbrev(the_repository, &commit->object.oid, abbrev));
+	} లేకపోతే {
+		నిర్మాణం strbuf buf = STRBUF_INIT;
 		pp_commit_easy(CMIT_FMT_ONELINE, commit, &buf);
 		fprintf(file, "%c %s %s\n", sign,
-		       repo_find_unique_abbrev(the_repository, &commit->object.oid, abbrev),
+		       repo_కనుగొను_unique_abbrev(the_repository, &commit->object.oid, abbrev),
 		       buf.buf);
 		strbuf_release(&buf);
 	}
@@ -2654,55 +2654,55 @@ static void print_commit(char sign, struct commit *commit, int verbose,
  *
  * Clean up with diff_queue_clear() (from diffcore.h).
  */
-static void collect_diff_blob_oids(struct commit *commit,
-				   struct diff_options *opts,
-				   struct oidset *blobs)
+స్థిర శూన్య collect_diff_blob_oids(నిర్మాణం commit *commit,
+				   నిర్మాణం diff_options *opts,
+				   నిర్మాణం oidset *blobs)
 {
-	struct diff_queue_struct *q;
+	నిర్మాణం diff_వరుస_struct *q;
 
 	/*
 	 * Merge commits are filtered out by patch_id_defined() in patch-ids.c,
 	 * so we'll never be called with one.
 	 */
-	assert(!commit->parents || !commit->parents->next);
+	ప్రతిజ్ఞా(!commit->parents || !commit->parents->తదుపరి);
 
-	if (commit->parents)
-		diff_tree_oid(&commit->parents->item->object.oid,
+	ఒకవేళ (commit->parents)
+		diff_వృక్షం_oid(&commit->parents->అంశం->object.oid,
 			      &commit->object.oid, "", opts);
-	else
-		diff_root_tree_oid(&commit->object.oid, "", opts);
+	లేకపోతే
+		diff_మూలం_వృక్షం_oid(&commit->object.oid, "", opts);
 	diffcore_std(opts);
 
 	q = &diff_queued_diff;
-	for (int i = 0; i < q->nr; i++) {
-		struct diff_filepair *p = q->queue[i];
-		struct userdiff_driver *drv;
+	కొరకు (పూర్ణాంకం i = 0; i < q->nr; i++) {
+		నిర్మాణం diff_filepair *p = q->వరుస[i];
+		నిర్మాణం userdiff_driver *drv;
 
 		/* Skip binary files */
-		drv = userdiff_find_by_path(opts->repo->index, p->one->path);
-		if (drv && drv->binary > 0)
-			continue;
+		drv = userdiff_కనుగొను_by_మార్గం(opts->repo->సూచీ, p->one->మార్గం);
+		ఒకవేళ (drv && drv->ద్విమాన > 0)
+			కొనసాగు;
 
-		if (DIFF_FILE_VALID(p->one) &&
+		ఒకవేళ (DIFF_FILE_VALID(p->one) &&
 		    odb_read_object_info_extended(opts->repo->objects,
-						  &p->one->oid, NULL,
+						  &p->one->oid, ఖాళీ,
 						  OBJECT_INFO_FOR_PREFETCH))
-			oidset_insert(blobs, &p->one->oid);
-		if (DIFF_FILE_VALID(p->two) &&
+			oidset_చొప్పించు(blobs, &p->one->oid);
+		ఒకవేళ (DIFF_FILE_VALID(p->two) &&
 		    odb_read_object_info_extended(opts->repo->objects,
-						  &p->two->oid, NULL,
+						  &p->two->oid, ఖాళీ,
 						  OBJECT_INFO_FOR_PREFETCH))
-			oidset_insert(blobs, &p->two->oid);
+			oidset_చొప్పించు(blobs, &p->two->oid);
 	}
-	diff_queue_clear(q);
+	diff_వరుస_clear(q);
 }
 
-static int always_match(const void *cmp_data UNUSED,
-			const struct hashmap_entry *entry1 UNUSED,
-			const struct hashmap_entry *entry2 UNUSED,
-			const void *keydata UNUSED)
+స్థిర పూర్ణాంకం always_సరిపోలిక(స్థిరరాశి శూన్య *cmp_దత్తాంశం వాడని,
+			స్థిరరాశి నిర్మాణం hashmap_నమోదు *entry1 వాడని,
+			స్థిరరాశి నిర్మాణం hashmap_నమోదు *entry2 వాడని,
+			స్థిరరాశి శూన్య *keydata వాడని)
 {
-	return 0;
+	తిరిగి 0;
 }
 
 /*
@@ -2719,33 +2719,33 @@ static int always_match(const void *cmp_data UNUSED,
  * blobs to be read on demand, and we want to prefetch them all at
  * once instead.
  */
-static void prefetch_cherry_blobs(struct repository *repo,
-				  struct commit_list *list,
-				  struct patch_ids *ids)
+స్థిర శూన్య prefetch_cherry_blobs(నిర్మాణం repository *repo,
+				  నిర్మాణం commit_list *list,
+				  నిర్మాణం patch_ids *ids)
 {
-	struct oidset blobs = OIDSET_INIT;
+	నిర్మాణం oidset blobs = OIDSET_INIT;
 	hashmap_cmp_fn original_cmpfn;
 
 	/* Exit if we're not in a partial clone */
-	if (!repo_has_promisor_remote(repo))
-		return;
+	ఒకవేళ (!repo_has_promisor_remote(repo))
+		తిరిగి;
 
 	/* Save original cmpfn, replace with always_match */
 	original_cmpfn = ids->patches.cmpfn;
-	ids->patches.cmpfn = always_match;
+	ids->patches.cmpfn = always_సరిపోలిక;
 
 	/* Find header-only collisions, gather blobs from those commits */
-	for (struct commit_list *l = list; l; l = l->next) {
-		struct commit *c = l->item;
-		bool match_found = false;
-		for (struct patch_id *cur = patch_id_iter_first(c, ids);
+	కొరకు (నిర్మాణం commit_list *l = list; l; l = l->తదుపరి) {
+		నిర్మాణం commit *c = l->అంశం;
+		bool సరిపోలిక_దొరికింది = false;
+		కొరకు (నిర్మాణం patch_id *cur = patch_id_iter_మొదటి(c, ids);
 		     cur;
-		     cur = patch_id_iter_next(cur, ids)) {
-			match_found = true;
+		     cur = patch_id_iter_తదుపరి(cur, ids)) {
+			సరిపోలిక_దొరికింది = true;
 			collect_diff_blob_oids(cur->commit, &ids->diffopts,
 					       &blobs);
 		}
-		if (match_found)
+		ఒకవేళ (సరిపోలిక_దొరికింది)
 			collect_diff_blob_oids(c, &ids->diffopts, &blobs);
 	}
 
@@ -2753,60 +2753,60 @@ static void prefetch_cherry_blobs(struct repository *repo,
 	ids->patches.cmpfn = original_cmpfn;
 
 	/* If we have any blobs to fetch, fetch them */
-	if (oidset_size(&blobs)) {
-		struct oid_array to_fetch = OID_ARRAY_INIT;
-		struct oidset_iter iter;
-		const struct object_id *oid;
+	ఒకవేళ (oidset_కొలత(&blobs)) {
+		నిర్మాణం oid_array గమ్యం_fetch = OID_ARRAY_INIT;
+		నిర్మాణం oidset_iter iter;
+		స్థిరరాశి నిర్మాణం object_id *oid;
 
 		oidset_iter_init(&blobs, &iter);
-		while ((oid = oidset_iter_next(&iter)))
-			oid_array_append(&to_fetch, oid);
+		అయితే ((oid = oidset_iter_తదుపరి(&iter)))
+			oid_array_append(&గమ్యం_fetch, oid);
 
-		promisor_remote_get_direct(repo, to_fetch.oid, to_fetch.nr);
+		promisor_remote_get_ప్రత్యక్ష(repo, గమ్యం_fetch.oid, గమ్యం_fetch.nr);
 
-		oid_array_clear(&to_fetch);
+		oid_array_clear(&గమ్యం_fetch);
 	}
 
 	oidset_clear(&blobs);
 }
 
-int cmd_cherry(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+పూర్ణాంకం cmd_cherry(పూర్ణాంకం argc,
+	       స్థిరరాశి అక్షరం **argv,
+	       స్థిరరాశి అక్షరం *ఉపసర్గ,
+	       నిర్మాణం repository *repo వాడని)
 {
-	struct rev_info revs;
-	struct patch_ids ids;
-	struct commit *commit;
-	struct commit_list *list = NULL;
-	struct branch *current_branch;
-	const char *upstream;
-	const char *head = "HEAD";
-	const char *limit = NULL;
-	int verbose = 0, abbrev = 0;
+	నిర్మాణం rev_info revs;
+	నిర్మాణం patch_ids ids;
+	నిర్మాణం commit *commit;
+	నిర్మాణం commit_list *list = ఖాళీ;
+	నిర్మాణం branch *current_branch;
+	స్థిరరాశి అక్షరం *upstream;
+	స్థిరరాశి అక్షరం *తల = "HEAD";
+	స్థిరరాశి అక్షరం *హద్దు = ఖాళీ;
+	పూర్ణాంకం verbose = 0, abbrev = 0;
 
-	struct option options[] = {
+	నిర్మాణం option options[] = {
 		OPT__ABBREV(&abbrev),
 		OPT__VERBOSE(&verbose, N_("be verbose")),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	argc = parse_options(argc, argv, prefix, options, cherry_usage, 0);
+	argc = parse_options(argc, argv, ఉపసర్గ, options, cherry_usage, 0);
 
-	switch (argc) {
-	case 3:
-		limit = argv[2];
+	ఎంపిక (argc) {
+	స్థితి 3:
+		హద్దు = argv[2];
 		/* FALLTHROUGH */
-	case 2:
-		head = argv[1];
+	స్థితి 2:
+		తల = argv[1];
 		/* FALLTHROUGH */
-	case 1:
+	స్థితి 1:
 		upstream = argv[0];
-		break;
-	default:
-		current_branch = branch_get(NULL);
-		upstream = branch_get_upstream(current_branch, NULL);
-		if (!upstream) {
+		ఆపు;
+	అప్రమేయ:
+		current_branch = branch_get(ఖాళీ);
+		upstream = branch_get_upstream(current_branch, ఖాళీ);
+		ఒకవేళ (!upstream) {
 			fprintf(stderr, _("Could not find a tracked"
 					" remote branch, please"
 					" specify <upstream> manually.\n"));
@@ -2814,45 +2814,45 @@ int cmd_cherry(int argc,
 		}
 	}
 
-	repo_init_revisions(the_repository, &revs, prefix);
+	repo_init_revisions(the_repository, &revs, ఉపసర్గ);
 	revs.max_parents = 1;
 
-	if (add_pending_commit(head, &revs, 0))
-		die(_("unknown commit %s"), head);
-	if (add_pending_commit(upstream, &revs, UNINTERESTING))
+	ఒకవేళ (కూడు_pending_commit(తల, &revs, 0))
+		die(_("unknown commit %s"), తల);
+	ఒకవేళ (కూడు_pending_commit(upstream, &revs, UNINTERESTING))
 		die(_("unknown commit %s"), upstream);
 
 	/* Don't say anything if head and upstream are the same. */
-	if (revs.pending.nr == 2) {
-		struct object_array_entry *o = revs.pending.objects;
-		if (oideq(&o[0].item->oid, &o[1].item->oid))
-			return 0;
+	ఒకవేళ (revs.pending.nr == 2) {
+		నిర్మాణం object_array_నమోదు *o = revs.pending.objects;
+		ఒకవేళ (oideq(&o[0].అంశం->oid, &o[1].అంశం->oid))
+			తిరిగి 0;
 	}
 
 	get_patch_ids(&revs, &ids);
 
-	if (limit && add_pending_commit(limit, &revs, UNINTERESTING))
-		die(_("unknown commit %s"), limit);
+	ఒకవేళ (హద్దు && కూడు_pending_commit(హద్దు, &revs, UNINTERESTING))
+		die(_("unknown commit %s"), హద్దు);
 
 	/* reverse the list of commits */
-	if (prepare_revision_walk(&revs))
+	ఒకవేళ (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
-	while ((commit = get_revision(&revs)) != NULL) {
-		commit_list_insert(commit, &list);
+	అయితే ((commit = get_revision(&revs)) != ఖాళీ) {
+		commit_list_చొప్పించు(commit, &list);
 	}
 
 	prefetch_cherry_blobs(the_repository, list, &ids);
 
-	for (struct commit_list *l = list; l; l = l->next) {
-		char sign = '+';
+	కొరకు (నిర్మాణం commit_list *l = list; l; l = l->తదుపరి) {
+		అక్షరం sign = '+';
 
-		commit = l->item;
-		if (has_commit_patch_id(commit, &ids))
+		commit = l->అంశం;
+		ఒకవేళ (has_commit_patch_id(commit, &ids))
 			sign = '-';
 		print_commit(sign, commit, verbose, abbrev, revs.diffopt.file);
 	}
 
 	commit_list_free(list);
 	free_patch_ids(&ids);
-	return 0;
+	తిరిగి 0;
 }

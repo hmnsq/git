@@ -8,165 +8,165 @@
  * Copyright (c) 2005, 2006 Linus Torvalds and Junio C Hamano
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "lockfile.h"
-#include "object.h"
-#include "pretty.h"
-#include "refs.h"
-#include "diff.h"
-#include "diffcore.h"
-#include "tree.h"
-#include "branch.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "path.h"
-#include "repository.h"
-#include "unpack-trees.h"
-#include "cache-tree.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "submodule.h"
-#include "trace.h"
-#include "trace2.h"
-#include "dir.h"
-#include "add-interactive.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "advice.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hash.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "lockfile.h"
+#అన్తర్భావ "object.h"
+#అన్తర్భావ "pretty.h"
+#అన్తర్భావ "refs.h"
+#అన్తర్భావ "diff.h"
+#అన్తర్భావ "diffcore.h"
+#అన్తర్భావ "tree.h"
+#అన్తర్భావ "branch.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "path.h"
+#అన్తర్భావ "repository.h"
+#అన్తర్భావ "unpack-trees.h"
+#అన్తర్భావ "cache-tree.h"
+#అన్తర్భావ "setup.h"
+#అన్తర్భావ "sparse-index.h"
+#అన్తర్భావ "submodule.h"
+#అన్తర్భావ "trace.h"
+#అన్తర్భావ "trace2.h"
+#అన్తర్భావ "dir.h"
+#అన్తర్భావ "add-interactive.h"
 
-#define REFRESH_INDEX_DELAY_WARNING_IN_MS (2 * 1000)
+#నిర్వచించు REFRESH_సూచీ_DELAY_WARNING_లోపల_MS (2 * 1000)
 
-static const char * const git_reset_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి git_reset_usage[] = {
 	N_("git reset [--mixed | --soft | --hard | --merge | --keep] [-q] [<commit>]"),
 	N_("git reset [-q] [<tree-ish>] [--] <pathspec>..."),
 	N_("git reset [-q] [--pathspec-from-file [--pathspec-file-nul]] [<tree-ish>]"),
 	N_("git reset --patch [<tree-ish>] [--] [<pathspec>...]"),
-	NULL
+	ఖాళీ
 };
 
-enum reset_type { MIXED, SOFT, HARD, MERGE, KEEP, NONE };
-static const char *reset_type_names[] = {
-	N_("mixed"), N_("soft"), N_("hard"), N_("merge"), N_("keep"), NULL
+గణన reset_type { MIXED, SOFT, HARD, విలీనం_2, KEEP, NONE };
+స్థిర స్థిరరాశి అక్షరం *reset_type_పేర్లు[] = {
+	N_("mixed"), N_("soft"), N_("hard"), N_("merge"), N_("keep"), ఖాళీ
 };
 
-static inline int is_merge(void)
+స్థిర అంతఃవరుస పూర్ణాంకం is_విలీనం(శూన్య)
 {
-	return !access(git_path_merge_head(the_repository), F_OK);
+	తిరిగి !access(git_మార్గం_విలీనం_తల(the_repository), F_OK);
 }
 
-static int reset_index(const char *ref, const struct object_id *oid, int reset_type, int quiet)
+స్థిర పూర్ణాంకం reset_సూచీ(స్థిరరాశి అక్షరం *ref, స్థిరరాశి నిర్మాణం object_id *oid, పూర్ణాంకం reset_type, పూర్ణాంకం quiet)
 {
-	int i, nr = 0;
-	struct tree_desc desc[2];
-	struct tree *tree;
-	struct unpack_trees_options opts;
-	int ret = -1;
+	పూర్ణాంకం i, nr = 0;
+	నిర్మాణం వృక్షం_desc desc[2];
+	నిర్మాణం వృక్షం *వృక్షం;
+	నిర్మాణం unpack_trees_options opts;
+	పూర్ణాంకం ret = -1;
 
-	memset(&opts, 0, sizeof(opts));
-	opts.head_idx = 1;
-	opts.src_index = the_repository->index;
-	opts.dst_index = the_repository->index;
-	opts.fn = oneway_merge;
-	opts.merge = 1;
-	init_checkout_metadata(&opts.meta, ref, oid, NULL);
-	if (!quiet)
+	memset(&opts, 0, పరిమాణం(opts));
+	opts.తల_idx = 1;
+	opts.src_సూచీ = the_repository->సూచీ;
+	opts.dst_సూచీ = the_repository->సూచీ;
+	opts.fn = oneway_విలీనం;
+	opts.విలీనం = 1;
+	init_checkout_metadata(&opts.meta, ref, oid, ఖాళీ);
+	ఒకవేళ (!quiet)
 		opts.verbose_update = 1;
-	switch (reset_type) {
-	case KEEP:
-	case MERGE:
+	ఎంపిక (reset_type) {
+	స్థితి KEEP:
+	స్థితి విలీనం_2:
 		opts.update = 1;
 		opts.preserve_ignored = 0; /* FIXME: !overwrite_ignore */
-		break;
-	case HARD:
+		ఆపు;
+	స్థితి HARD:
 		opts.update = 1;
 		opts.reset = UNPACK_RESET_OVERWRITE_UNTRACKED;
-		opts.skip_cache_tree_update = 1;
-		break;
-	case MIXED:
+		opts.skip_cache_వృక్షం_update = 1;
+		ఆపు;
+	స్థితి MIXED:
 		opts.reset = UNPACK_RESET_PROTECT_UNTRACKED;
-		opts.skip_cache_tree_update = 1;
+		opts.skip_cache_వృక్షం_update = 1;
 		/* but opts.update=0, so working tree not updated */
-		break;
-	default:
+		ఆపు;
+	అప్రమేయ:
 		BUG("invalid reset_type passed to reset_index");
 	}
 
-	repo_read_index_unmerged(the_repository);
+	repo_read_సూచీ_unmerged(the_repository);
 
-	if (reset_type == KEEP) {
-		struct object_id head_oid;
-		if (repo_get_oid(the_repository, "HEAD", &head_oid))
-			return error(_("You do not have a valid HEAD."));
-		if (!fill_tree_descriptor(the_repository, desc + nr, &head_oid))
-			return error(_("Failed to find tree of HEAD."));
+	ఒకవేళ (reset_type == KEEP) {
+		నిర్మాణం object_id తల_oid;
+		ఒకవేళ (repo_get_oid(the_repository, "HEAD", &తల_oid))
+			తిరిగి error(_("You do not have a valid HEAD."));
+		ఒకవేళ (!fill_వృక్షం_descriptor(the_repository, desc + nr, &తల_oid))
+			తిరిగి error(_("Failed to find tree of HEAD."));
 		nr++;
-		opts.fn = twoway_merge;
+		opts.fn = twoway_విలీనం;
 	}
 
-	if (!fill_tree_descriptor(the_repository, desc + nr, oid)) {
-		error(_("Failed to find tree of %s."), oid_to_hex(oid));
-		goto out;
+	ఒకవేళ (!fill_వృక్షం_descriptor(the_repository, desc + nr, oid)) {
+		error(_("Failed to find tree of %s."), oid_గమ్యం_hex(oid));
+		వెళ్ళు బహిర్గతం;
 	}
 	nr++;
 
-	if (unpack_trees(nr, desc, &opts))
-		goto out;
+	ఒకవేళ (unpack_trees(nr, desc, &opts))
+		వెళ్ళు బహిర్గతం;
 
-	if (reset_type == MIXED || reset_type == HARD) {
-		tree = repo_parse_tree_indirect(the_repository, oid);
-		if (!tree) {
-			error(_("unable to read tree (%s)"), oid_to_hex(oid));
-			goto out;
+	ఒకవేళ (reset_type == MIXED || reset_type == HARD) {
+		వృక్షం = repo_parse_వృక్షం_పరోక్ష(the_repository, oid);
+		ఒకవేళ (!వృక్షం) {
+			error(_("unable to read tree (%s)"), oid_గమ్యం_hex(oid));
+			వెళ్ళు బహిర్గతం;
 		}
-		prime_cache_tree(the_repository, the_repository->index, tree);
+		ప్రధానసంఖ్య_cache_వృక్షం(the_repository, the_repository->సూచీ, వృక్షం);
 	}
 
 	ret = 0;
 
-out:
-	for (i = 0; i < nr; i++)
-		free((void *)desc[i].buffer);
-	return ret;
+బహిర్గతం:
+	కొరకు (i = 0; i < nr; i++)
+		విడుదల((శూన్య *)desc[i].బఫరు);
+	తిరిగి ret;
 }
 
-static void print_new_head_line(struct commit *commit)
+స్థిర శూన్య print_new_తల_పంక్తి(నిర్మాణం commit *commit)
 {
-	struct strbuf buf = STRBUF_INIT;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
 
-	printf(_("HEAD is now at %s"),
-		repo_find_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV));
+	రాయి(_("HEAD is now at %s"),
+		repo_కనుగొను_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV));
 
 	pp_commit_easy(CMIT_FMT_ONELINE, commit, &buf);
-	if (buf.len > 0)
-		printf(" %s", buf.buf);
-	putchar('\n');
+	ఒకవేళ (buf.len > 0)
+		రాయి(" %s", buf.buf);
+	అక్షరం_రాయి('\n');
 	strbuf_release(&buf);
 }
 
-static void update_index_from_diff(struct diff_queue_struct *q,
-				   struct diff_options *opt UNUSED,
-				   void *data)
+స్థిర శూన్య update_సూచీ_from_diff(నిర్మాణం diff_వరుస_struct *q,
+				   నిర్మాణం diff_options *opt వాడని,
+				   శూన్య *దత్తాంశం)
 {
-	int i;
-	int intent_to_add = *(int *)data;
+	పూర్ణాంకం i;
+	పూర్ణాంకం intent_గమ్యం_కూడు = *(పూర్ణాంకం *)దత్తాంశం;
 
-	for (i = 0; i < q->nr; i++) {
-		int pos;
-		struct diff_filespec *one = q->queue[i]->one;
-		int is_in_reset_tree = one->mode && !is_null_oid(&one->oid);
-		struct cache_entry *ce;
+	కొరకు (i = 0; i < q->nr; i++) {
+		పూర్ణాంకం pos;
+		నిర్మాణం diff_filespec *one = q->వరుస[i]->one;
+		పూర్ణాంకం is_లోపల_reset_వృక్షం = one->బహుళకం && !is_null_oid(&one->oid);
+		నిర్మాణం cache_నమోదు *ce;
 
-		if (!is_in_reset_tree && !intent_to_add) {
-			remove_file_from_index(the_repository->index, one->path);
-			continue;
+		ఒకవేళ (!is_లోపల_reset_వృక్షం && !intent_గమ్యం_కూడు) {
+			remove_file_from_సూచీ(the_repository->సూచీ, one->మార్గం);
+			కొనసాగు;
 		}
 
-		ce = make_cache_entry(the_repository->index, one->mode, &one->oid, one->path,
+		ce = make_cache_నమోదు(the_repository->సూచీ, one->బహుళకం, &one->oid, one->మార్గం,
 				      0, 0);
 
 		/*
@@ -177,80 +177,80 @@ static void update_index_from_diff(struct diff_queue_struct *q,
 		 * if this entry is outside the sparse cone - this is necessary
 		 * to properly construct the reset sparse directory.
 		 */
-		pos = index_name_pos(the_repository->index, one->path, strlen(one->path));
-		if ((pos >= 0 && ce_skip_worktree(the_repository->index->cache[pos])) ||
-		    (pos < 0 && !path_in_sparse_checkout(one->path, the_repository->index)))
+		pos = సూచీ_name_pos(the_repository->సూచీ, one->మార్గం, అక్షరశ్రేణి_పొడవు(one->మార్గం));
+		ఒకవేళ ((pos >= 0 && ce_skip_worktree(the_repository->సూచీ->cache[pos])) ||
+		    (pos < 0 && !మార్గం_లోపల_sparse_checkout(one->మార్గం, the_repository->సూచీ)))
 			ce->ce_flags |= CE_SKIP_WORKTREE;
 
-		if (!ce)
+		ఒకవేళ (!ce)
 			die(_("make_cache_entry failed for path '%s'"),
-			    one->path);
-		if (!is_in_reset_tree) {
-			ce->ce_flags |= CE_INTENT_TO_ADD;
-			set_object_name_for_intent_to_add_entry(ce);
+			    one->మార్గం);
+		ఒకవేళ (!is_లోపల_reset_వృక్షం) {
+			ce->ce_flags |= CE_INTENT_గమ్యం_కూడు;
+			సమితి_object_name_for_intent_గమ్యం_కూడు_నమోదు(ce);
 		}
-		add_index_entry(the_repository->index, ce,
-				ADD_CACHE_OK_TO_ADD | ADD_CACHE_OK_TO_REPLACE);
+		కూడు_సూచీ_నమోదు(the_repository->సూచీ, ce,
+				కూడు_CACHE_OK_గమ్యం_కూడు | కూడు_CACHE_OK_గమ్యం_REPLACE);
 	}
 }
 
-static int read_from_tree(const struct pathspec *pathspec,
-			  struct object_id *tree_oid,
-			  int intent_to_add)
+స్థిర పూర్ణాంకం read_from_వృక్షం(స్థిరరాశి నిర్మాణం pathspec *pathspec,
+			  నిర్మాణం object_id *వృక్షం_oid,
+			  పూర్ణాంకం intent_గమ్యం_కూడు)
 {
-	struct diff_options opt;
+	నిర్మాణం diff_options opt;
 
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, పరిమాణం(opt));
 	copy_pathspec(&opt.pathspec, pathspec);
 	opt.output_format = DIFF_FORMAT_CALLBACK;
-	opt.format_callback = update_index_from_diff;
-	opt.format_callback_data = &intent_to_add;
+	opt.format_callback = update_సూచీ_from_diff;
+	opt.format_callback_దత్తాంశం = &intent_గమ్యం_కూడు;
 	opt.flags.override_submodule_config = 1;
 	opt.flags.recursive = 1;
 	opt.repo = the_repository;
 	opt.change = diff_change;
-	opt.add_remove = diff_addremove;
+	opt.కూడు_remove = diff_addremove;
 
-	if (pathspec->nr && pathspec_needs_expanded_index(the_repository->index, pathspec))
-		ensure_full_index(the_repository->index);
+	ఒకవేళ (pathspec->nr && pathspec_needs_expanded_సూచీ(the_repository->సూచీ, pathspec))
+		ensure_నిండిన_సూచీ(the_repository->సూచీ);
 
-	if (do_diff_cache(tree_oid, &opt))
-		return 1;
+	ఒకవేళ (do_diff_cache(వృక్షం_oid, &opt))
+		తిరిగి 1;
 	diffcore_std(&opt);
 	diff_flush(&opt);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static void set_reflog_message(struct strbuf *sb, const char *action,
-			       const char *rev)
+స్థిర శూన్య సమితి_reflog_సందేశం(నిర్మాణం strbuf *sb, స్థిరరాశి అక్షరం *action,
+			       స్థిరరాశి అక్షరం *rev)
 {
-	const char *rla = getenv("GIT_REFLOG_ACTION");
+	స్థిరరాశి అక్షరం *rla = getenv("GIT_REFLOG_ACTION");
 
 	strbuf_reset(sb);
-	if (rla)
+	ఒకవేళ (rla)
 		strbuf_addf(sb, "%s: %s", rla, action);
-	else if (rev)
+	లేకపోతే ఒకవేళ (rev)
 		strbuf_addf(sb, "reset: moving to %s", rev);
-	else
+	లేకపోతే
 		strbuf_addf(sb, "reset: %s", action);
 }
 
-static void die_if_unmerged_cache(int reset_type)
+స్థిర శూన్య die_if_unmerged_cache(పూర్ణాంకం reset_type)
 {
-	if (is_merge() || unmerged_index(the_repository->index))
+	ఒకవేళ (is_విలీనం() || unmerged_సూచీ(the_repository->సూచీ))
 		die(_("Cannot do a %s reset in the middle of a merge."),
-		    _(reset_type_names[reset_type]));
+		    _(reset_type_పేర్లు[reset_type]));
 
 }
 
-static void parse_args(struct pathspec *pathspec,
-		       const char **argv, const char *prefix,
-		       int patch_mode,
-		       const char **rev_ret)
+స్థిర శూన్య parse_వాదనలు(నిర్మాణం pathspec *pathspec,
+		       స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		       పూర్ణాంకం patch_బహుళకం,
+		       స్థిరరాశి అక్షరం **rev_ret)
 {
-	const char *rev = "HEAD";
-	struct object_id unused;
+	స్థిరరాశి అక్షరం *rev = "HEAD";
+	నిర్మాణం object_id వాడని_2;
 	/*
 	 * Possible arguments are:
 	 *
@@ -263,10 +263,10 @@ static void parse_args(struct pathspec *pathspec,
 	 * At this point, argv points immediately after [-opts].
 	 */
 
-	if (argv[0]) {
-		if (!strcmp(argv[0], "--")) {
+	ఒకవేళ (argv[0]) {
+		ఒకవేళ (!strcmp(argv[0], "--")) {
 			argv++; /* reset to HEAD, possibly with paths */
-		} else if (argv[1] && !strcmp(argv[1], "--")) {
+		} లేకపోతే ఒకవేళ (argv[1] && !strcmp(argv[1], "--")) {
 			rev = argv[0];
 			argv += 2;
 		}
@@ -275,17 +275,17 @@ static void parse_args(struct pathspec *pathspec,
 		 * has to be unambiguous. If there is a single argument, it
 		 * can not be a tree
 		 */
-		else if ((!argv[1] && !repo_get_oid_committish(the_repository, argv[0], &unused)) ||
-			 (argv[1] && !repo_get_oid_treeish(the_repository, argv[0], &unused))) {
+		లేకపోతే ఒకవేళ ((!argv[1] && !repo_get_oid_committish(the_repository, argv[0], &వాడని_2)) ||
+			 (argv[1] && !repo_get_oid_treeish(the_repository, argv[0], &వాడని_2))) {
 			/*
 			 * Ok, argv[0] looks like a commit/tree; it should not
 			 * be a filename.
 			 */
-			verify_non_filename(the_repository, prefix, argv[0]);
+			verify_non_filename(the_repository, ఉపసర్గ, argv[0]);
 			rev = *argv++;
-		} else {
+		} లేకపోతే {
 			/* Otherwise we treat this as a filename */
-			verify_filename(the_repository, prefix, argv[0], 1);
+			verify_filename(the_repository, ఉపసర్గ, argv[0], 1);
 		}
 	}
 
@@ -293,259 +293,259 @@ static void parse_args(struct pathspec *pathspec,
 	*rev_ret = !strcmp("@", rev) ? "HEAD" : rev;
 
 	parse_pathspec(pathspec, 0,
-		       PATHSPEC_PREFER_FULL |
-		       (patch_mode ? PATHSPEC_PREFIX_ORIGIN : 0),
-		       prefix, argv);
+		       PATHSPEC_PREFER_నిండిన |
+		       (patch_బహుళకం ? PATHSPEC_ఉపసర్గ_ORIGIN : 0),
+		       ఉపసర్గ, argv);
 }
 
-static int reset_refs(const char *rev, const struct object_id *oid)
+స్థిర పూర్ణాంకం reset_refs(స్థిరరాశి అక్షరం *rev, స్థిరరాశి నిర్మాణం object_id *oid)
 {
-	int update_ref_status;
-	struct strbuf msg = STRBUF_INIT;
-	struct object_id *orig = NULL, oid_orig,
-		*old_orig = NULL, oid_old_orig;
+	పూర్ణాంకం update_ref_స్థితి;
+	నిర్మాణం strbuf సందేశం = STRBUF_INIT;
+	నిర్మాణం object_id *orig = ఖాళీ, oid_orig,
+		*old_orig = ఖాళీ, oid_old_orig;
 
-	if (!repo_get_oid(the_repository, "ORIG_HEAD", &oid_old_orig))
+	ఒకవేళ (!repo_get_oid(the_repository, "ORIG_HEAD", &oid_old_orig))
 		old_orig = &oid_old_orig;
-	if (!repo_get_oid(the_repository, "HEAD", &oid_orig)) {
+	ఒకవేళ (!repo_get_oid(the_repository, "HEAD", &oid_orig)) {
 		orig = &oid_orig;
-		set_reflog_message(&msg, "updating ORIG_HEAD", NULL);
-		refs_update_ref(get_main_ref_store(the_repository), msg.buf,
+		సమితి_reflog_సందేశం(&సందేశం, "updating ORIG_HEAD", ఖాళీ);
+		refs_update_ref(get_main_ref_store(the_repository), సందేశం.buf,
 				"ORIG_HEAD", orig, old_orig, 0,
-				UPDATE_REFS_MSG_ON_ERR);
-	} else if (old_orig)
-		refs_delete_ref(get_main_ref_store(the_repository), NULL,
+				UPDATE_REFS_సందేశం_ON_ERR);
+	} లేకపోతే ఒకవేళ (old_orig)
+		refs_delete_ref(get_main_ref_store(the_repository), ఖాళీ,
 				"ORIG_HEAD", old_orig, 0);
-	set_reflog_message(&msg, "updating HEAD", rev);
-	update_ref_status = refs_update_ref(get_main_ref_store(the_repository),
-					    msg.buf, "HEAD", oid, orig, 0,
-					    UPDATE_REFS_MSG_ON_ERR);
-	strbuf_release(&msg);
-	return update_ref_status;
+	సమితి_reflog_సందేశం(&సందేశం, "updating HEAD", rev);
+	update_ref_స్థితి = refs_update_ref(get_main_ref_store(the_repository),
+					    సందేశం.buf, "HEAD", oid, orig, 0,
+					    UPDATE_REFS_సందేశం_ON_ERR);
+	strbuf_release(&సందేశం);
+	తిరిగి update_ref_స్థితి;
 }
 
-static int git_reset_config(const char *var, const char *value,
-			    const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం git_reset_config(స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *విలువ,
+			    స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	if (!strcmp(var, "submodule.recurse"))
-		return git_default_submodule_config(var, value, cb);
+	ఒకవేళ (!strcmp(var, "submodule.recurse"))
+		తిరిగి git_default_submodule_config(var, విలువ, cb);
 
-	return git_default_config(var, value, ctx, cb);
+	తిరిగి git_default_config(var, విలువ, ctx, cb);
 }
 
-int cmd_reset(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo UNUSED)
+పూర్ణాంకం cmd_reset(పూర్ణాంకం argc,
+	      స్థిరరాశి అక్షరం **argv,
+	      స్థిరరాశి అక్షరం *ఉపసర్గ,
+	      నిర్మాణం repository *repo వాడని)
 {
-	int reset_type = NONE, update_ref_status = 0, quiet = 0;
-	int no_refresh = 0;
-	int patch_mode = 0, pathspec_file_nul = 0, unborn;
-	const char *rev;
-	char *pathspec_from_file = NULL;
-	struct object_id oid;
-	struct pathspec pathspec;
-	int intent_to_add = 0;
-	struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-	const struct option options[] = {
+	పూర్ణాంకం reset_type = NONE, update_ref_స్థితి = 0, quiet = 0;
+	పూర్ణాంకం no_refresh = 0;
+	పూర్ణాంకం patch_బహుళకం = 0, pathspec_file_nul = 0, unborn;
+	స్థిరరాశి అక్షరం *rev;
+	అక్షరం *pathspec_from_file = ఖాళీ;
+	నిర్మాణం object_id oid;
+	నిర్మాణం pathspec pathspec;
+	పూర్ణాంకం intent_గమ్యం_కూడు = 0;
+	నిర్మాణం interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+	స్థిరరాశి నిర్మాణం option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet, only report errors")),
 		OPT_BOOL(0, "no-refresh", &no_refresh,
 				N_("skip refreshing the index after reset")),
-		OPT_SET_INT_F(0, "mixed", &reset_type,
+		OPT_సమితి_INT_F(0, "mixed", &reset_type,
 			      N_("reset HEAD and index"),
 			      MIXED, PARSE_OPT_NONEG),
-		OPT_SET_INT_F(0, "soft", &reset_type,
+		OPT_సమితి_INT_F(0, "soft", &reset_type,
 			      N_("reset only HEAD"),
 			      SOFT, PARSE_OPT_NONEG),
-		OPT_SET_INT_F(0, "hard", &reset_type,
+		OPT_సమితి_INT_F(0, "hard", &reset_type,
 			      N_("reset HEAD, index and working tree"),
 			      HARD, PARSE_OPT_NONEG),
-		OPT_SET_INT_F(0, "merge", &reset_type,
+		OPT_సమితి_INT_F(0, "merge", &reset_type,
 			      N_("reset HEAD, index and working tree"),
-			      MERGE, PARSE_OPT_NONEG),
-		OPT_SET_INT_F(0, "keep", &reset_type,
+			      విలీనం_2, PARSE_OPT_NONEG),
+		OPT_సమితి_INT_F(0, "keep", &reset_type,
 			      N_("reset HEAD but keep local changes"),
 			      KEEP, PARSE_OPT_NONEG),
-		OPT_CALLBACK_F(0, "recurse-submodules", NULL,
+		OPT_CALLBACK_F(0, "recurse-submodules", ఖాళీ,
 			       "reset", "control recursive updating of submodules",
 			       PARSE_OPT_OPTARG,
 			       option_parse_recurse_submodules_worktree_updater),
-		OPT_BOOL('p', "patch", &patch_mode, N_("select hunks interactively")),
+		OPT_BOOL('p', "patch", &patch_బహుళకం, N_("select hunks interactively")),
 		OPT_BOOL(0, "auto-advance", &interactive_opts.auto_advance,
 			 N_("auto advance to the next file when selecting hunks interactively")),
 		OPT_DIFF_UNIFIED(&interactive_opts.context),
 		OPT_DIFF_INTERHUNK_CONTEXT(&interactive_opts.interhunkcontext),
-		OPT_BOOL('N', "intent-to-add", &intent_to_add,
+		OPT_BOOL('N', "intent-to-add", &intent_గమ్యం_కూడు,
 				N_("record only the fact that removed paths will be added later")),
 		OPT_PATHSPEC_FROM_FILE(&pathspec_from_file),
 		OPT_PATHSPEC_FILE_NUL(&pathspec_file_nul),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	repo_config(the_repository, git_reset_config, NULL);
+	repo_config(the_repository, git_reset_config, ఖాళీ);
 
-	argc = parse_options(argc, argv, prefix, options, git_reset_usage,
+	argc = parse_options(argc, argv, ఉపసర్గ, options, git_reset_usage,
 						PARSE_OPT_KEEP_DASHDASH);
-	parse_args(&pathspec, argv, prefix, patch_mode, &rev);
+	parse_వాదనలు(&pathspec, argv, ఉపసర్గ, patch_బహుళకం, &rev);
 
-	if (pathspec_from_file) {
-		if (patch_mode)
+	ఒకవేళ (pathspec_from_file) {
+		ఒకవేళ (patch_బహుళకం)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--patch");
 
-		if (pathspec.nr)
+		ఒకవేళ (pathspec.nr)
 			die(_("'%s' and pathspec arguments cannot be used together"), "--pathspec-from-file");
 
 		parse_pathspec_file(&pathspec, 0,
-				    PATHSPEC_PREFER_FULL,
-				    prefix, pathspec_from_file, pathspec_file_nul);
-	} else if (pathspec_file_nul) {
+				    PATHSPEC_PREFER_నిండిన,
+				    ఉపసర్గ, pathspec_from_file, pathspec_file_nul);
+	} లేకపోతే ఒకవేళ (pathspec_file_nul) {
 		die(_("the option '%s' requires '%s'"), "--pathspec-file-nul", "--pathspec-from-file");
 	}
 
 	unborn = !strcmp(rev, "HEAD") && repo_get_oid(the_repository, "HEAD",
 						      &oid);
-	if (unborn) {
+	ఒకవేళ (unborn) {
 		/* reset on unborn branch: treat as reset to empty tree */
-		oidcpy(&oid, the_hash_algo->empty_tree);
-	} else if (!pathspec.nr && !patch_mode) {
-		struct commit *commit;
-		if (repo_get_oid_committish(the_repository, rev, &oid))
+		oidcpy(&oid, the_hash_algo->ఖాళీలు_వృక్షం);
+	} లేకపోతే ఒకవేళ (!pathspec.nr && !patch_బహుళకం) {
+		నిర్మాణం commit *commit;
+		ఒకవేళ (repo_get_oid_committish(the_repository, rev, &oid))
 			die(_("Failed to resolve '%s' as a valid revision."), rev);
 		commit = lookup_commit_reference(the_repository, &oid);
-		if (!commit)
+		ఒకవేళ (!commit)
 			die(_("Could not parse object '%s'."), rev);
 		oidcpy(&oid, &commit->object.oid);
-	} else {
-		struct tree *tree;
-		if (repo_get_oid_treeish(the_repository, rev, &oid))
+	} లేకపోతే {
+		నిర్మాణం వృక్షం *వృక్షం;
+		ఒకవేళ (repo_get_oid_treeish(the_repository, rev, &oid))
 			die(_("Failed to resolve '%s' as a valid tree."), rev);
-		tree = repo_parse_tree_indirect(the_repository, &oid);
-		if (!tree)
+		వృక్షం = repo_parse_వృక్షం_పరోక్ష(the_repository, &oid);
+		ఒకవేళ (!వృక్షం)
 			die(_("Could not parse object '%s'."), rev);
-		oidcpy(&oid, &tree->object.oid);
+		oidcpy(&oid, &వృక్షం->object.oid);
 	}
 
-	if (interactive_opts.context < -1)
+	ఒకవేళ (interactive_opts.context < -1)
 		die(_("'%s' cannot be negative"), "--unified");
-	if (interactive_opts.interhunkcontext < -1)
+	ఒకవేళ (interactive_opts.interhunkcontext < -1)
 		die(_("'%s' cannot be negative"), "--inter-hunk-context");
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_నిండిన_సూచీ = 0;
 
-	if (patch_mode) {
-		if (reset_type != NONE)
+	ఒకవేళ (patch_బహుళకం) {
+		ఒకవేళ (reset_type != NONE)
 			die(_("options '%s' and '%s' cannot be used together"), "--patch", "--{hard,mixed,soft}");
-		trace2_cmd_mode("patch-interactive");
-		update_ref_status = !!run_add_p(the_repository, ADD_P_RESET,
+		trace2_cmd_బహుళకం("patch-interactive");
+		update_ref_స్థితి = !!నిరంతరం_కూడు_p(the_repository, కూడు_P_RESET,
 						&interactive_opts, rev, &pathspec, 0);
-		goto cleanup;
-	} else {
-		if (interactive_opts.context != -1)
+		వెళ్ళు cleanup;
+	} లేకపోతే {
+		ఒకవేళ (interactive_opts.context != -1)
 			die(_("the option '%s' requires '%s'"), "--unified", "--patch");
-		if (interactive_opts.interhunkcontext != -1)
+		ఒకవేళ (interactive_opts.interhunkcontext != -1)
 			die(_("the option '%s' requires '%s'"), "--inter-hunk-context", "--patch");
-		if (!interactive_opts.auto_advance)
+		ఒకవేళ (!interactive_opts.auto_advance)
 			die(_("the option '%s' requires '%s'"), "--no-auto-advance", "--patch");
 	}
 
 	/* git reset tree [--] paths... can be used to
 	 * load chosen paths from the tree into the index without
 	 * affecting the working tree nor HEAD. */
-	if (pathspec.nr) {
-		if (reset_type == MIXED)
+	ఒకవేళ (pathspec.nr) {
+		ఒకవేళ (reset_type == MIXED)
 			warning(_("--mixed with paths is deprecated; use 'git reset -- <paths>' instead."));
-		else if (reset_type != NONE)
+		లేకపోతే ఒకవేళ (reset_type != NONE)
 			die(_("Cannot do %s reset with paths."),
-					_(reset_type_names[reset_type]));
+					_(reset_type_పేర్లు[reset_type]));
 	}
-	if (reset_type == NONE)
+	ఒకవేళ (reset_type == NONE)
 		reset_type = MIXED; /* by default */
 
-	if (pathspec.nr)
-		trace2_cmd_mode("path");
-	else
-		trace2_cmd_mode(reset_type_names[reset_type]);
+	ఒకవేళ (pathspec.nr)
+		trace2_cmd_బహుళకం("path");
+	లేకపోతే
+		trace2_cmd_బహుళకం(reset_type_పేర్లు[reset_type]);
 
-	if (reset_type != SOFT && (reset_type != MIXED || repo_get_work_tree(the_repository)))
-		setup_work_tree(the_repository);
+	ఒకవేళ (reset_type != SOFT && (reset_type != MIXED || repo_get_work_వృక్షం(the_repository)))
+		అమరిక_work_వృక్షం(the_repository);
 
-	if (reset_type == MIXED && is_bare_repository(the_repository))
+	ఒకవేళ (reset_type == MIXED && is_bare_repository(the_repository))
 		die(_("%s reset is not allowed in a bare repository"),
-		    _(reset_type_names[reset_type]));
+		    _(reset_type_పేర్లు[reset_type]));
 
-	if (intent_to_add && reset_type != MIXED)
+	ఒకవేళ (intent_గమ్యం_కూడు && reset_type != MIXED)
 		die(_("the option '%s' requires '%s'"), "-N", "--mixed");
 
-	if (repo_read_index(the_repository) < 0)
+	ఒకవేళ (repo_read_సూచీ(the_repository) < 0)
 		die(_("index file corrupt"));
 
 	/* Soft reset does not touch the index file nor the working tree
 	 * at all, but requires them in a good order.  Other resets reset
 	 * the index file to the tree object we are switching to. */
-	if (reset_type == SOFT || reset_type == KEEP)
+	ఒకవేళ (reset_type == SOFT || reset_type == KEEP)
 		die_if_unmerged_cache(reset_type);
 
-	if (reset_type != SOFT) {
-		struct lock_file lock = LOCK_INIT;
-		repo_hold_locked_index(the_repository, &lock,
-				       LOCK_DIE_ON_ERROR);
-		if (reset_type == MIXED) {
-			int flags = quiet ? REFRESH_QUIET : REFRESH_IN_PORCELAIN;
-			if (read_from_tree(&pathspec, &oid, intent_to_add)) {
-				update_ref_status = 1;
-				goto cleanup;
+	ఒకవేళ (reset_type != SOFT) {
+		నిర్మాణం తాళం_file తాళం = తాళం_INIT;
+		repo_hold_locked_సూచీ(the_repository, &తాళం,
+				       తాళం_DIE_ON_ERROR);
+		ఒకవేళ (reset_type == MIXED) {
+			పూర్ణాంకం flags = quiet ? REFRESH_QUIET : REFRESH_లోపల_PORCELAIN;
+			ఒకవేళ (read_from_వృక్షం(&pathspec, &oid, intent_గమ్యం_కూడు)) {
+				update_ref_స్థితి = 1;
+				వెళ్ళు cleanup;
 			}
-			the_repository->index->updated_skipworktree = 1;
-			if (!no_refresh && repo_get_work_tree(the_repository)) {
-				uint64_t t_begin, t_delta_in_ms;
+			the_repository->సూచీ->updated_skipworktree = 1;
+			ఒకవేళ (!no_refresh && repo_get_work_వృక్షం(the_repository)) {
+				uint64_t t_begin, t_delta_లోపల_ms;
 
 				t_begin = getnanotime();
-				refresh_index(the_repository->index, flags, NULL, NULL,
+				refresh_సూచీ(the_repository->సూచీ, flags, ఖాళీ, ఖాళీ,
 					      _("Unstaged changes after reset:"));
-				t_delta_in_ms = (getnanotime() - t_begin) / 1000000;
-				if (!quiet && advice_enabled(ADVICE_RESET_NO_REFRESH_WARNING) && t_delta_in_ms > REFRESH_INDEX_DELAY_WARNING_IN_MS) {
+				t_delta_లోపల_ms = (getnanotime() - t_begin) / 1000000;
+				ఒకవేళ (!quiet && advice_enabled(ADVICE_RESET_NO_REFRESH_WARNING) && t_delta_లోపల_ms > REFRESH_సూచీ_DELAY_WARNING_లోపల_MS) {
 					advise(_("It took %.2f seconds to refresh the index after reset.  You can use\n"
-						 "'--no-refresh' to avoid this."), t_delta_in_ms / 1000.0);
+						 "'--no-refresh' to avoid this."), t_delta_లోపల_ms / 1000.0);
 				}
 			}
-		} else {
-			struct object_id dummy;
-			char *ref = NULL;
-			int err;
+		} లేకపోతే {
+			నిర్మాణం object_id dummy;
+			అక్షరం *ref = ఖాళీ;
+			పూర్ణాంకం err;
 
-			repo_dwim_ref(the_repository, rev, strlen(rev),
+			repo_dwim_ref(the_repository, rev, అక్షరశ్రేణి_పొడవు(rev),
 				      &dummy, &ref, 0);
-			if (ref && !starts_with(ref, "refs/"))
+			ఒకవేళ (ref && !starts_with(ref, "refs/"))
 				FREE_AND_NULL(ref);
 
-			err = reset_index(ref, &oid, reset_type, quiet);
-			if (reset_type == KEEP && !err)
-				err = reset_index(ref, &oid, MIXED, quiet);
-			if (err)
+			err = reset_సూచీ(ref, &oid, reset_type, quiet);
+			ఒకవేళ (reset_type == KEEP && !err)
+				err = reset_సూచీ(ref, &oid, MIXED, quiet);
+			ఒకవేళ (err)
 				die(_("Could not reset index file to revision '%s'."), rev);
-			free(ref);
+			విడుదల(ref);
 		}
 
-		if (write_locked_index(the_repository->index, &lock, COMMIT_LOCK))
+		ఒకవేళ (write_locked_సూచీ(the_repository->సూచీ, &తాళం, COMMIT_తాళం))
 			die(_("Could not write new index file."));
 	}
 
-	if (!pathspec.nr && !unborn) {
+	ఒకవేళ (!pathspec.nr && !unborn) {
 		/* Any resets without paths update HEAD to the head being
 		 * switched to, saving the previous head in ORIG_HEAD before. */
-		update_ref_status = reset_refs(rev, &oid);
+		update_ref_స్థితి = reset_refs(rev, &oid);
 
-		if (reset_type == HARD && !update_ref_status && !quiet)
-			print_new_head_line(lookup_commit_reference(the_repository, &oid));
+		ఒకవేళ (reset_type == HARD && !update_ref_స్థితి && !quiet)
+			print_new_తల_పంక్తి(lookup_commit_reference(the_repository, &oid));
 	}
-	if (!pathspec.nr)
+	ఒకవేళ (!pathspec.nr)
 		remove_branch_state(the_repository, 0);
 
-	discard_index(the_repository->index);
+	discard_సూచీ(the_repository->సూచీ);
 
 cleanup:
 	clear_pathspec(&pathspec);
-	free(pathspec_from_file);
-	return update_ref_status;
+	విడుదల(pathspec_from_file);
+	తిరిగి update_ref_స్థితి;
 }

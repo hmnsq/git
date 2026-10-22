@@ -1,207 +1,207 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "attr.h"
-#include "environment.h"
-#include "gettext.h"
-#include "object-name.h"
-#include "quote.h"
-#include "setup.h"
-#include "parse-options.h"
-#include "write-or-die.h"
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "attr.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "quote.h"
+#అన్తర్భావ "setup.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "write-or-die.h"
 
-static int all_attrs;
-static int cached_attrs;
-static int stdin_paths;
-static char *source;
-static const char * const check_attr_usage[] = {
+స్థిర పూర్ణాంకం all_attrs;
+స్థిర పూర్ణాంకం cached_attrs;
+స్థిర పూర్ణాంకం stdin_paths;
+స్థిర అక్షరం *ఆధారం;
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి check_attr_usage[] = {
 N_("git check-attr [--source <tree-ish>] [-a | --all | <attr>...] [--] <pathname>..."),
 N_("git check-attr --stdin [-z] [--source <tree-ish>] [-a | --all | <attr>...]"),
-NULL
+ఖాళీ
 };
 
-static int nul_term_line;
+స్థిర పూర్ణాంకం nul_పదం_పంక్తి;
 
-static const struct option check_attr_options[] = {
+స్థిర స్థిరరాశి నిర్మాణం option check_attr_options[] = {
 	OPT_BOOL('a', "all", &all_attrs, N_("report all attributes set on file")),
 	OPT_BOOL(0,  "cached", &cached_attrs, N_("use .gitattributes only from the index")),
 	OPT_BOOL(0 , "stdin", &stdin_paths, N_("read file names from stdin")),
-	OPT_BOOL('z', NULL, &nul_term_line,
+	OPT_BOOL('z', ఖాళీ, &nul_పదం_పంక్తి,
 		 N_("terminate input and output records by a NUL character")),
-	OPT_STRING(0, "source", &source, N_("<tree-ish>"), N_("which tree-ish to check attributes at")),
-	OPT_END()
+	OPT_STRING(0, "source", &ఆధారం, N_("<tree-ish>"), N_("which tree-ish to check attributes at")),
+	OPT_చివర()
 };
 
-static void output_attr(struct attr_check *check, const char *file)
+స్థిర శూన్య output_attr(నిర్మాణం attr_check *check, స్థిరరాశి అక్షరం *file)
 {
-	int j;
-	int cnt = check->nr;
+	పూర్ణాంకం j;
+	పూర్ణాంకం cnt = check->nr;
 
-	for (j = 0; j < cnt; j++) {
-		const char *value = check->items[j].value;
+	కొరకు (j = 0; j < cnt; j++) {
+		స్థిరరాశి అక్షరం *విలువ = check->వస్తువులు[j].విలువ;
 
-		if (ATTR_TRUE(value))
-			value = "set";
-		else if (ATTR_FALSE(value))
-			value = "unset";
-		else if (ATTR_UNSET(value))
-			value = "unspecified";
+		ఒకవేళ (ATTR_TRUE(విలువ))
+			విలువ = "set";
+		లేకపోతే ఒకవేళ (ATTR_FALSE(విలువ))
+			విలువ = "unset";
+		లేకపోతే ఒకవేళ (ATTR_UNSET(విలువ))
+			విలువ = "unspecified";
 
-		if (nul_term_line) {
-			printf("%s%c" /* path */
+		ఒకవేళ (nul_పదం_పంక్తి) {
+			రాయి("%s%c" /*మార్గం*/
 			       "%s%c" /* attrname */
 			       "%s%c" /* attrvalue */,
 			       file, 0,
-			       git_attr_name(check->items[j].attr), 0, value, 0);
-		} else {
-			quote_c_style(file, NULL, stdout, 0);
-			printf(": %s: %s\n",
-			       git_attr_name(check->items[j].attr), value);
+			       git_attr_name(check->వస్తువులు[j].attr), 0, విలువ, 0);
+		} లేకపోతే {
+			quote_c_style(file, ఖాళీ, stdout, 0);
+			రాయి(": %s: %s\n",
+			       git_attr_name(check->వస్తువులు[j].attr), విలువ);
 		}
 	}
 }
 
-static void check_attr(const char *prefix, struct attr_check *check,
-		       int collect_all,
-		       const char *file)
+స్థిర శూన్య check_attr(స్థిరరాశి అక్షరం *ఉపసర్గ, నిర్మాణం attr_check *check,
+		       పూర్ణాంకం collect_all,
+		       స్థిరరాశి అక్షరం *file)
 
 {
-	char *full_path =
-		prefix_path(the_repository, prefix, prefix ? strlen(prefix) : 0, file);
+	అక్షరం *నిండిన_మార్గం =
+		ఉపసర్గ_మార్గం(the_repository, ఉపసర్గ, ఉపసర్గ ? అక్షరశ్రేణి_పొడవు(ఉపసర్గ) : 0, file);
 
-	if (collect_all) {
-		git_all_attrs(the_repository->index, full_path, check);
-	} else {
-		git_check_attr(the_repository->index, full_path, check);
+	ఒకవేళ (collect_all) {
+		git_all_attrs(the_repository->సూచీ, నిండిన_మార్గం, check);
+	} లేకపోతే {
+		git_check_attr(the_repository->సూచీ, నిండిన_మార్గం, check);
 	}
 	output_attr(check, file);
 
-	free(full_path);
+	విడుదల(నిండిన_మార్గం);
 }
 
-static void check_attr_stdin_paths(const char *prefix, struct attr_check *check,
-				   int collect_all)
+స్థిర శూన్య check_attr_stdin_paths(స్థిరరాశి అక్షరం *ఉపసర్గ, నిర్మాణం attr_check *check,
+				   పూర్ణాంకం collect_all)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf unquoted = STRBUF_INIT;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
+	నిర్మాణం strbuf unquoted = STRBUF_INIT;
 	strbuf_getline_fn getline_fn;
 
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	while (getline_fn(&buf, stdin) != EOF) {
-		if (!nul_term_line && buf.buf[0] == '"') {
+	getline_fn = nul_పదం_పంక్తి ? strbuf_getline_nul : strbuf_getline_lf;
+	అయితే (getline_fn(&buf, stdin) != EOF) {
+		ఒకవేళ (!nul_పదం_పంక్తి && buf.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, buf.buf, NULL))
+			ఒకవేళ (unquote_c_style(&unquoted, buf.buf, ఖాళీ))
 				die("line is badly quoted");
-			strbuf_swap(&buf, &unquoted);
+			strbuf_మార్పిడి(&buf, &unquoted);
 		}
-		check_attr(prefix, check, collect_all, buf.buf);
+		check_attr(ఉపసర్గ, check, collect_all, buf.buf);
 		maybe_flush_or_die(stdout, "attribute to stdout");
 	}
 	strbuf_release(&buf);
 	strbuf_release(&unquoted);
 }
 
-static NORETURN void error_with_usage(const char *msg)
+స్థిర NORETURN శూన్య error_with_usage(స్థిరరాశి అక్షరం *సందేశం)
 {
-	error("%s", msg);
+	error("%s", సందేశం);
 	usage_with_options(check_attr_usage, check_attr_options);
 }
 
-int cmd_check_attr(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+పూర్ణాంకం cmd_check_attr(పూర్ణాంకం argc,
+		   స్థిరరాశి అక్షరం **argv,
+		   స్థిరరాశి అక్షరం *ఉపసర్గ,
+		   నిర్మాణం repository *repo వాడని)
 {
-	struct attr_check *check;
-	struct object_id initialized_oid;
-	int cnt, i, doubledash, filei;
+	నిర్మాణం attr_check *check;
+	నిర్మాణం object_id initialized_oid;
+	పూర్ణాంకం cnt, i, doubledash, filei;
 
-	if (!is_bare_repository(the_repository))
-		setup_work_tree(the_repository);
+	ఒకవేళ (!is_bare_repository(the_repository))
+		అమరిక_work_వృక్షం(the_repository);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ఖాళీ);
 
-	argc = parse_options(argc, argv, prefix, check_attr_options,
+	argc = parse_options(argc, argv, ఉపసర్గ, check_attr_options,
 			     check_attr_usage, PARSE_OPT_KEEP_DASHDASH);
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_నిండిన_సూచీ = 0;
 
-	if (repo_read_index(the_repository) < 0) {
+	ఒకవేళ (repo_read_సూచీ(the_repository) < 0) {
 		die("invalid cache");
 	}
 
-	if (cached_attrs)
-		git_attr_set_direction(GIT_ATTR_INDEX);
+	ఒకవేళ (cached_attrs)
+		git_attr_సమితి_direction(GIT_ATTR_సూచీ);
 
 	doubledash = -1;
-	for (i = 0; doubledash < 0 && i < argc; i++) {
-		if (!strcmp(argv[i], "--"))
+	కొరకు (i = 0; doubledash < 0 && i < argc; i++) {
+		ఒకవేళ (!strcmp(argv[i], "--"))
 			doubledash = i;
 	}
 
 	/* Process --all and/or attribute arguments: */
-	if (all_attrs) {
-		if (doubledash >= 1)
+	ఒకవేళ (all_attrs) {
+		ఒకవేళ (doubledash >= 1)
 			error_with_usage("Attributes and --all both specified");
 
 		cnt = 0;
 		filei = doubledash + 1;
-	} else if (doubledash == 0) {
+	} లేకపోతే ఒకవేళ (doubledash == 0) {
 		error_with_usage("No attribute specified");
-	} else if (doubledash < 0) {
-		if (!argc)
+	} లేకపోతే ఒకవేళ (doubledash < 0) {
+		ఒకవేళ (!argc)
 			error_with_usage("No attribute specified");
 
-		if (stdin_paths) {
+		ఒకవేళ (stdin_paths) {
 			/* Treat all arguments as attribute names. */
 			cnt = argc;
 			filei = argc;
-		} else {
+		} లేకపోతే {
 			/* Treat exactly one argument as an attribute name. */
 			cnt = 1;
 			filei = 1;
 		}
-	} else {
+	} లేకపోతే {
 		cnt = doubledash;
 		filei = doubledash + 1;
 	}
 
 	/* Check file argument(s): */
-	if (stdin_paths) {
-		if (filei < argc)
+	ఒకవేళ (stdin_paths) {
+		ఒకవేళ (filei < argc)
 			error_with_usage("Can't specify files with --stdin");
-	} else {
-		if (filei >= argc)
+	} లేకపోతే {
+		ఒకవేళ (filei >= argc)
 			error_with_usage("No file specified");
 	}
 
 	check = attr_check_alloc();
-	if (!all_attrs) {
-		for (i = 0; i < cnt; i++) {
-			const struct git_attr *a = git_attr(argv[i]);
+	ఒకవేళ (!all_attrs) {
+		కొరకు (i = 0; i < cnt; i++) {
+			స్థిరరాశి నిర్మాణం git_attr *a = git_attr(argv[i]);
 
-			if (!a)
-				return error("%s: not a valid attribute name",
+			ఒకవేళ (!a)
+				తిరిగి error("%s: not a valid attribute name",
 					     argv[i]);
 			attr_check_append(check, a);
 		}
 	}
 
-	if (source) {
-		if (repo_get_oid_tree(the_repository, source, &initialized_oid))
-			die("%s: not a valid tree-ish source", source);
-		set_git_attr_source(source);
+	ఒకవేళ (ఆధారం) {
+		ఒకవేళ (repo_get_oid_వృక్షం(the_repository, ఆధారం, &initialized_oid))
+			die("%s: not a valid tree-ish source", ఆధారం);
+		సమితి_git_attr_ఆధారం(ఆధారం);
 	}
 
-	if (stdin_paths)
-		check_attr_stdin_paths(prefix, check, all_attrs);
-	else {
-		for (i = filei; i < argc; i++)
-			check_attr(prefix, check, all_attrs, argv[i]);
+	ఒకవేళ (stdin_paths)
+		check_attr_stdin_paths(ఉపసర్గ, check, all_attrs);
+	లేకపోతే {
+		కొరకు (i = filei; i < argc; i++)
+			check_attr(ఉపసర్గ, check, all_attrs, argv[i]);
 		maybe_flush_or_die(stdout, "attribute to stdout");
 	}
 
 	attr_check_free(check);
-	return 0;
+	తిరిగి 0;
 }

@@ -1,46 +1,46 @@
-#include "git-compat-util.h"
-#include "bloom.h"
-#include "builtin.h"
-#include "commit-graph.h"
-#include "commit-slab.h"
-#include "commit.h"
-#include "config.h"
-#include "diff.h"
-#include "diffcore.h"
-#include "environment.h"
-#include "ewah/ewok.h"
-#include "hashmap.h"
-#include "hex.h"
-#include "object-name.h"
-#include "object.h"
-#include "parse-options.h"
-#include "prio-queue.h"
-#include "quote.h"
-#include "repository.h"
-#include "revision.h"
+#అన్తర్భావ "git-compat-util.h"
+#అన్తర్భావ "bloom.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "commit-graph.h"
+#అన్తర్భావ "commit-slab.h"
+#అన్తర్భావ "commit.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "diff.h"
+#అన్తర్భావ "diffcore.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "ewah/ewok.h"
+#అన్తర్భావ "hashmap.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "object.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "prio-queue.h"
+#అన్తర్భావ "quote.h"
+#అన్తర్భావ "repository.h"
+#అన్తర్భావ "revision.h"
 
 /* Remember to update object flag allocation in object.h */
-#define PARENT1 (1u<<16) /* used instead of SEEN */
-#define PARENT2 (1u<<17) /* used instead of BOTTOM, BOUNDARY */
+#నిర్వచించు PARENT1 (1u<<16) /* used instead of SEEN */
+#నిర్వచించు PARENT2 (1u<<17) /* used instead of BOTTOM, BOUNDARY */
 
-struct last_modified_entry {
-	struct hashmap_entry hashent;
-	struct object_id oid;
-	struct bloom_key key;
-	size_t diff_idx;
-	const char path[FLEX_ARRAY];
+నిర్మాణం చివరి_modified_నమోదు {
+	నిర్మాణం hashmap_నమోదు hashent;
+	నిర్మాణం object_id oid;
+	నిర్మాణం bloom_కీలకం కీలకం;
+	కొలత_t diff_idx;
+	స్థిరరాశి అక్షరం మార్గం[FLEX_ARRAY];
 };
 
-static int last_modified_entry_hashcmp(const void *unused UNUSED,
-				       const struct hashmap_entry *hent1,
-				       const struct hashmap_entry *hent2,
-				       const void *path)
+స్థిర పూర్ణాంకం చివరి_modified_నమోదు_hashcmp(స్థిరరాశి శూన్య *వాడని_2 వాడని,
+				       స్థిరరాశి నిర్మాణం hashmap_నమోదు *hent1,
+				       స్థిరరాశి నిర్మాణం hashmap_నమోదు *hent2,
+				       స్థిరరాశి శూన్య *మార్గం)
 {
-	const struct last_modified_entry *ent1 =
-		container_of(hent1, const struct last_modified_entry, hashent);
-	const struct last_modified_entry *ent2 =
-		container_of(hent2, const struct last_modified_entry, hashent);
-	return strcmp(ent1->path, path ? path : ent2->path);
+	స్థిరరాశి నిర్మాణం చివరి_modified_నమోదు *ent1 =
+		container_యొక్క(hent1, స్థిరరాశి నిర్మాణం చివరి_modified_నమోదు, hashent);
+	స్థిరరాశి నిర్మాణం చివరి_modified_నమోదు *ent2 =
+		container_యొక్క(hent2, స్థిరరాశి నిర్మాణం చివరి_modified_నమోదు, hashent);
+	తిరిగి strcmp(ent1->మార్గం, మార్గం ? మార్గం : ent2->మార్గం);
 }
 
 /*
@@ -48,84 +48,84 @@ static int last_modified_entry_hashcmp(const void *unused UNUSED,
  * represents a path in `lm->all_paths`. An active bit indicates the path still
  * needs to be associated to a commit.
  */
-define_commit_slab(active_paths_for_commit, struct bitmap *);
+define_commit_slab(చురుకైన_paths_for_commit, నిర్మాణం bitmap *);
 
-struct last_modified {
-	struct hashmap paths;
-	struct rev_info rev;
+నిర్మాణం చివరి_modified {
+	నిర్మాణం hashmap paths;
+	నిర్మాణం rev_info rev;
 	bool show_trees;
 	bool nul_termination;
-	int max_depth;
+	పూర్ణాంకం max_లోతు;
 
-	const char **all_paths;
-	size_t all_paths_nr;
-	struct active_paths_for_commit active_paths;
+	స్థిరరాశి అక్షరం **all_paths;
+	కొలత_t all_paths_nr;
+	నిర్మాణం చురుకైన_paths_for_commit చురుకైన_paths;
 
 	/* 'scratch' to avoid allocating a bitmap every process_parent() */
-	struct bitmap *scratch;
+	నిర్మాణం bitmap *scratch;
 };
 
-static struct bitmap *active_paths_for(struct last_modified *lm, struct commit *c)
+స్థిర నిర్మాణం bitmap *చురుకైన_paths_for(నిర్మాణం చివరి_modified *lm, నిర్మాణం commit *c)
 {
-	struct bitmap **bitmap = active_paths_for_commit_at(&lm->active_paths, c);
-	if (!*bitmap)
-		*bitmap = bitmap_word_alloc(lm->all_paths_nr / BITS_IN_EWORD + 1);
+	నిర్మాణం bitmap **bitmap = చురుకైన_paths_for_commit_at(&lm->చురుకైన_paths, c);
+	ఒకవేళ (!*bitmap)
+		*bitmap = bitmap_మాట_alloc(lm->all_paths_nr / బిట్లు_లోపల_EWORD + 1);
 
-	return *bitmap;
+	తిరిగి *bitmap;
 }
 
-static void active_paths_free(struct last_modified *lm, struct commit *c)
+స్థిర శూన్య చురుకైన_paths_free(నిర్మాణం చివరి_modified *lm, నిర్మాణం commit *c)
 {
-	struct bitmap **bitmap = active_paths_for_commit_at(&lm->active_paths, c);
-	if (*bitmap) {
+	నిర్మాణం bitmap **bitmap = చురుకైన_paths_for_commit_at(&lm->చురుకైన_paths, c);
+	ఒకవేళ (*bitmap) {
 		bitmap_free(*bitmap);
-		*bitmap = NULL;
+		*bitmap = ఖాళీ;
 	}
 }
 
-static void last_modified_release(struct last_modified *lm)
+స్థిర శూన్య చివరి_modified_release(నిర్మాణం చివరి_modified *lm)
 {
-	struct hashmap_iter iter;
-	struct last_modified_entry *ent;
+	నిర్మాణం hashmap_iter iter;
+	నిర్మాణం చివరి_modified_నమోదు *ent;
 
-	hashmap_for_each_entry(&lm->paths, &iter, ent, hashent)
-		bloom_key_clear(&ent->key);
+	hashmap_for_each_నమోదు(&lm->paths, &iter, ent, hashent)
+		bloom_కీలకం_clear(&ent->కీలకం);
 
-	hashmap_clear_and_free(&lm->paths, struct last_modified_entry, hashent);
+	hashmap_clear_and_free(&lm->paths, నిర్మాణం చివరి_modified_నమోదు, hashent);
 	release_revisions(&lm->rev);
 
-	free(lm->all_paths);
+	విడుదల(lm->all_paths);
 }
 
-struct last_modified_callback_data {
-	struct last_modified *lm;
-	struct commit *commit;
+నిర్మాణం చివరి_modified_callback_దత్తాంశం {
+	నిర్మాణం చివరి_modified *lm;
+	నిర్మాణం commit *commit;
 };
 
-static void add_path_from_diff(struct diff_queue_struct *q,
-			       struct diff_options *opt UNUSED, void *data)
+స్థిర శూన్య కూడు_మార్గం_from_diff(నిర్మాణం diff_వరుస_struct *q,
+			       నిర్మాణం diff_options *opt వాడని, శూన్య *దత్తాంశం)
 {
-	struct last_modified *lm = data;
+	నిర్మాణం చివరి_modified *lm = దత్తాంశం;
 
-	for (int i = 0; i < q->nr; i++) {
-		struct diff_filepair *p = q->queue[i];
-		struct last_modified_entry *ent;
-		const char *path = p->two->path;
+	కొరకు (పూర్ణాంకం i = 0; i < q->nr; i++) {
+		నిర్మాణం diff_filepair *p = q->వరుస[i];
+		నిర్మాణం చివరి_modified_నమోదు *ent;
+		స్థిరరాశి అక్షరం *మార్గం = p->two->మార్గం;
 
-		FLEX_ALLOC_STR(ent, path, path);
+		FLEX_ALLOC_STR(ent, మార్గం, మార్గం);
 		oidcpy(&ent->oid, &p->two->oid);
-		if (lm->rev.bloom_filter_settings)
-			bloom_key_fill(&ent->key, path, strlen(path),
+		ఒకవేళ (lm->rev.bloom_filter_settings)
+			bloom_కీలకం_fill(&ent->కీలకం, మార్గం, అక్షరశ్రేణి_పొడవు(మార్గం),
 				       lm->rev.bloom_filter_settings);
-		hashmap_entry_init(&ent->hashent, strhash(ent->path));
-		hashmap_add(&lm->paths, &ent->hashent);
+		hashmap_నమోదు_init(&ent->hashent, strhash(ent->మార్గం));
+		hashmap_కూడు(&lm->paths, &ent->hashent);
 	}
 }
 
-static int populate_paths_from_revs(struct last_modified *lm)
+స్థిర పూర్ణాంకం populate_paths_from_revs(నిర్మాణం చివరి_modified *lm)
 {
-	int num_interesting = 0, ret = 0;
-	struct diff_options diffopt;
+	పూర్ణాంకం అంకె_interesting = 0, ret = 0;
+	నిర్మాణం diff_options diffopt;
 
 	/*
 	 * Create a copy of `struct diff_options`. In this copy a callback is
@@ -134,95 +134,95 @@ static int populate_paths_from_revs(struct last_modified *lm)
 	 * empty tree. This results in all paths in the target revision being
 	 * listed. After `paths` is populated, we don't need this copy no more.
 	 */
-	memcpy(&diffopt, &lm->rev.diffopt, sizeof(diffopt));
+	జ్ఞాపకం_నకలు(&diffopt, &lm->rev.diffopt, పరిమాణం(diffopt));
 	copy_pathspec(&diffopt.pathspec, &lm->rev.diffopt.pathspec);
 	diffopt.output_format = DIFF_FORMAT_CALLBACK;
-	diffopt.format_callback = add_path_from_diff;
-	diffopt.format_callback_data = lm;
+	diffopt.format_callback = కూడు_మార్గం_from_diff;
+	diffopt.format_callback_దత్తాంశం = lm;
 
-	for (size_t i = 0; i < lm->rev.pending.nr; i++) {
-		struct object_array_entry *obj = lm->rev.pending.objects + i;
+	కొరకు (కొలత_t i = 0; i < lm->rev.pending.nr; i++) {
+		నిర్మాణం object_array_నమోదు *obj = lm->rev.pending.objects + i;
 
-		if (obj->item->flags & UNINTERESTING)
-			continue;
+		ఒకవేళ (obj->అంశం->flags & UNINTERESTING)
+			కొనసాగు;
 
-		if (num_interesting++) {
+		ఒకవేళ (అంకె_interesting++) {
 			ret = error(_("last-modified can only operate on one commit at a time"));
-			goto out;
+			వెళ్ళు బహిర్గతం;
 		}
 
-		if (!repo_peel_to_type(lm->rev.repo, obj->path, 0, obj->item, OBJ_COMMIT)) {
-			ret = error(_("revision argument '%s' is a %s, not a commit-ish"), obj->name, type_name(obj->item->type));
-			goto out;
+		ఒకవేళ (!repo_peel_గమ్యం_type(lm->rev.repo, obj->మార్గం, 0, obj->అంశం, OBJ_COMMIT)) {
+			ret = error(_("revision argument '%s' is a %s, not a commit-ish"), obj->name, type_name(obj->అంశం->type));
+			వెళ్ళు బహిర్గతం;
 		}
 
-		diff_tree_oid(lm->rev.repo->hash_algo->empty_tree,
-			      &obj->item->oid, "", &diffopt);
+		diff_వృక్షం_oid(lm->rev.repo->hash_algo->ఖాళీలు_వృక్షం,
+			      &obj->అంశం->oid, "", &diffopt);
 		diff_flush(&diffopt);
 	}
 
-out:
+బహిర్గతం:
 	clear_pathspec(&diffopt.pathspec);
 
-	return ret;
+	తిరిగి ret;
 }
 
-static void last_modified_emit(struct last_modified *lm,
-			       const char *path, const struct commit *commit)
+స్థిర శూన్య చివరి_modified_emit(నిర్మాణం చివరి_modified *lm,
+			       స్థిరరాశి అక్షరం *మార్గం, స్థిరరాశి నిర్మాణం commit *commit)
 
 {
-	if (commit->object.flags & BOUNDARY)
-		putchar('^');
-	printf("%s\t", oid_to_hex(&commit->object.oid));
+	ఒకవేళ (commit->object.flags & BOUNDARY)
+		అక్షరం_రాయి('^');
+	రాయి("%s\t", oid_గమ్యం_hex(&commit->object.oid));
 
-	if (lm->nul_termination)
-		printf("%s%c", path, '\0');
-	else
-		write_name_quoted(path, stdout, '\n');
+	ఒకవేళ (lm->nul_termination)
+		రాయి("%s%c", మార్గం, '\0');
+	లేకపోతే
+		write_name_quoted(మార్గం, stdout, '\n');
 }
 
-static void mark_path(const char *path, const struct object_id *oid,
-		      struct last_modified_callback_data *data)
+స్థిర శూన్య mark_మార్గం(స్థిరరాశి అక్షరం *మార్గం, స్థిరరాశి నిర్మాణం object_id *oid,
+		      నిర్మాణం చివరి_modified_callback_దత్తాంశం *దత్తాంశం)
 {
-	struct last_modified_entry *ent;
+	నిర్మాణం చివరి_modified_నమోదు *ent;
 
 	/* Is it even a path that we are interested in? */
-	ent = hashmap_get_entry_from_hash(&data->lm->paths, strhash(path), path,
-					  struct last_modified_entry, hashent);
-	if (!ent)
-		return;
+	ent = hashmap_get_నమోదు_from_hash(&దత్తాంశం->lm->paths, strhash(మార్గం), మార్గం,
+					  నిర్మాణం చివరి_modified_నమోదు, hashent);
+	ఒకవేళ (!ent)
+		తిరిగి;
 
 	/*
 	 * Is it arriving at a version of interest, or is it from a side branch
 	 * which did not contribute to the final state?
 	 */
-	if (oid && !oideq(oid, &ent->oid))
-		return;
+	ఒకవేళ (oid && !oideq(oid, &ent->oid))
+		తిరిగి;
 
-	last_modified_emit(data->lm, path, data->commit);
+	చివరి_modified_emit(దత్తాంశం->lm, మార్గం, దత్తాంశం->commit);
 
-	hashmap_remove(&data->lm->paths, &ent->hashent, path);
-	bloom_key_clear(&ent->key);
-	free(ent);
+	hashmap_remove(&దత్తాంశం->lm->paths, &ent->hashent, మార్గం);
+	bloom_కీలకం_clear(&ent->కీలకం);
+	విడుదల(ent);
 }
 
-static void last_modified_diff(struct diff_queue_struct *q,
-			       struct diff_options *opt UNUSED, void *cbdata)
+స్థిర శూన్య చివరి_modified_diff(నిర్మాణం diff_వరుస_struct *q,
+			       నిర్మాణం diff_options *opt వాడని, శూన్య *cbdata)
 {
-	struct last_modified_callback_data *data = cbdata;
+	నిర్మాణం చివరి_modified_callback_దత్తాంశం *దత్తాంశం = cbdata;
 
-	for (int i = 0; i < q->nr; i++) {
-		struct diff_filepair *p = q->queue[i];
-		switch (p->status) {
-		case DIFF_STATUS_DELETED:
+	కొరకు (పూర్ణాంకం i = 0; i < q->nr; i++) {
+		నిర్మాణం diff_filepair *p = q->వరుస[i];
+		ఎంపిక (p->స్థితి_2) {
+		స్థితి DIFF_స్థితి_DELETED:
 			/*
 			 * There's no point in feeding a deletion, as it could
 			 * not have resulted in our current state, which
 			 * actually has the file.
 			 */
-			break;
+			ఆపు;
 
-		default:
+		అప్రమేయ:
 			/*
 			 * Otherwise, we care only that we somehow arrived at
 			 * a final oid state. Note that this covers some
@@ -240,66 +240,66 @@ static void last_modified_diff(struct diff_queue_struct *q,
 			 * the behavior (e.g., to "--follow" the content across
 			 * renames) can come later.
 			 */
-			mark_path(p->two->path, &p->two->oid, data);
-			break;
+			mark_మార్గం(p->two->మార్గం, &p->two->oid, దత్తాంశం);
+			ఆపు;
 		}
 	}
 }
 
-static void pass_to_parent(struct bitmap *c,
-			   struct bitmap *p,
-			   size_t pos)
+స్థిర శూన్య pass_గమ్యం_మాతృ(నిర్మాణం bitmap *c,
+			   నిర్మాణం bitmap *p,
+			   కొలత_t pos)
 {
 	bitmap_unset(c, pos);
-	bitmap_set(p, pos);
+	bitmap_సమితి(p, pos);
 }
 
-static bool maybe_changed_path(struct last_modified *lm,
-			       struct commit *origin,
-			       struct bitmap *active)
+స్థిర bool maybe_మారింది_మార్గం(నిర్మాణం చివరి_modified *lm,
+			       నిర్మాణం commit *origin,
+			       నిర్మాణం bitmap *చురుకైన)
 {
-	struct bloom_filter *filter;
-	struct last_modified_entry *ent;
-	struct hashmap_iter iter;
+	నిర్మాణం bloom_filter *filter;
+	నిర్మాణం చివరి_modified_నమోదు *ent;
+	నిర్మాణం hashmap_iter iter;
 
-	if (!lm->rev.bloom_filter_settings)
-		return true;
+	ఒకవేళ (!lm->rev.bloom_filter_settings)
+		తిరిగి true;
 
-	if (commit_graph_generation(origin) == GENERATION_NUMBER_INFINITY)
-		return true;
+	ఒకవేళ (commit_లేఖాచిత్రం_generation(origin) == GENERATION_సంఖ్య_INFINITY)
+		తిరిగి true;
 
 	filter = get_bloom_filter(lm->rev.repo, origin);
-	if (!filter)
-		return true;
+	ఒకవేళ (!filter)
+		తిరిగి true;
 
-	hashmap_for_each_entry(&lm->paths, &iter, ent, hashent) {
-		if (active && !bitmap_get(active, ent->diff_idx))
-			continue;
+	hashmap_for_each_నమోదు(&lm->paths, &iter, ent, hashent) {
+		ఒకవేళ (చురుకైన && !bitmap_get(చురుకైన, ent->diff_idx))
+			కొనసాగు;
 
-		if (bloom_filter_contains(filter, &ent->key,
+		ఒకవేళ (bloom_filter_కలిగియుంది(filter, &ent->కీలకం,
 					  lm->rev.bloom_filter_settings))
-			return true;
+			తిరిగి true;
 	}
-	return false;
+	తిరిగి false;
 }
 
-static void process_parent(struct last_modified *lm,
-			   struct prio_queue *queue,
-			   struct commit *c, struct bitmap *active_c,
-			   struct commit *parent, int parent_i)
+స్థిర శూన్య process_మాతృ(నిర్మాణం చివరి_modified *lm,
+			   నిర్మాణం prio_వరుస *వరుస,
+			   నిర్మాణం commit *c, నిర్మాణం bitmap *చురుకైన_c,
+			   నిర్మాణం commit *మాతృ, పూర్ణాంకం మాతృ_i)
 {
-	struct bitmap *active_p;
+	నిర్మాణం bitmap *చురుకైన_p;
 
-	if (repo_parse_commit(lm->rev.repo, parent))
-		return;
-	active_p = active_paths_for(lm, parent);
+	ఒకవేళ (repo_parse_commit(lm->rev.repo, మాతృ))
+		తిరిగి;
+	చురుకైన_p = చురుకైన_paths_for(lm, మాతృ);
 
 	/*
 	 * The first time entering this function for this commit (i.e. first parent)
 	 * see if Bloom filters will tell us it's worth to do the diff.
 	 */
-	if (parent_i || maybe_changed_path(lm, c, active_c)) {
-		diff_tree_oid(&parent->object.oid,
+	ఒకవేళ (మాతృ_i || maybe_మారింది_మార్గం(lm, c, చురుకైన_c)) {
+		diff_వృక్షం_oid(&మాతృ->object.oid,
 			      &c->object.oid, "", &lm->rev.diffopt);
 		diffcore_std(&lm->rev.diffopt);
 	}
@@ -311,256 +311,256 @@ static void process_parent(struct last_modified *lm,
 	 * First, collect all paths that are *not* TREESAME in 'scratch'.
 	 * Then, pass paths that *are* TREESAME and active to the parent.
 	 */
-	for (int i = 0; i < diff_queued_diff.nr; i++) {
-		struct diff_filepair *fp = diff_queued_diff.queue[i];
-		const char *path = fp->two->path;
-		struct last_modified_entry *ent =
-			hashmap_get_entry_from_hash(&lm->paths, strhash(path), path,
-						    struct last_modified_entry, hashent);
-		if (ent) {
-			size_t k = ent->diff_idx;
-			if (bitmap_get(active_c, k))
-				bitmap_set(lm->scratch, k);
+	కొరకు (పూర్ణాంకం i = 0; i < diff_queued_diff.nr; i++) {
+		నిర్మాణం diff_filepair *fp = diff_queued_diff.వరుస[i];
+		స్థిరరాశి అక్షరం *మార్గం = fp->two->మార్గం;
+		నిర్మాణం చివరి_modified_నమోదు *ent =
+			hashmap_get_నమోదు_from_hash(&lm->paths, strhash(మార్గం), మార్గం,
+						    నిర్మాణం చివరి_modified_నమోదు, hashent);
+		ఒకవేళ (ent) {
+			కొలత_t k = ent->diff_idx;
+			ఒకవేళ (bitmap_get(చురుకైన_c, k))
+				bitmap_సమితి(lm->scratch, k);
 		}
 	}
-	for (size_t i = 0; i < lm->all_paths_nr; i++) {
-		if (bitmap_get(active_c, i) && !bitmap_get(lm->scratch, i))
-			pass_to_parent(active_c, active_p, i);
+	కొరకు (కొలత_t i = 0; i < lm->all_paths_nr; i++) {
+		ఒకవేళ (bitmap_get(చురుకైన_c, i) && !bitmap_get(lm->scratch, i))
+			pass_గమ్యం_మాతృ(చురుకైన_c, చురుకైన_p, i);
 	}
 
 	/*
 	 * If parent has any active paths, put it on the queue (if not already).
 	 */
-	if (!bitmap_is_empty(active_p) && !(parent->object.flags & PARENT1)) {
-		parent->object.flags |= PARENT1;
-		prio_queue_put(queue, parent);
+	ఒకవేళ (!bitmap_is_ఖాళీలు(చురుకైన_p) && !(మాతృ->object.flags & PARENT1)) {
+		మాతృ->object.flags |= PARENT1;
+		prio_వరుస_put(వరుస, మాతృ);
 	}
-	if (!(parent->object.flags & PARENT1))
-		active_paths_free(lm, parent);
+	ఒకవేళ (!(మాతృ->object.flags & PARENT1))
+		చురుకైన_paths_free(lm, మాతృ);
 
-	MEMZERO_ARRAY(lm->scratch->words, lm->scratch->word_alloc);
-	diff_queue_clear(&diff_queued_diff);
+	MEMZERO_ARRAY(lm->scratch->పదాలు, lm->scratch->మాట_alloc);
+	diff_వరుస_clear(&diff_queued_diff);
 }
 
-static int last_modified_run(struct last_modified *lm)
+స్థిర పూర్ణాంకం చివరి_modified_నిరంతరం(నిర్మాణం చివరి_modified *lm)
 {
-	int max_count, queue_popped = 0;
-	struct commit *c, *n;
-	struct prio_queue queue = { compare_commits_by_gen_then_commit_date };
-	struct prio_queue not_queue = { compare_commits_by_gen_then_commit_date };
-	struct commit_list *list;
-	struct last_modified_callback_data data = { .lm = lm };
+	పూర్ణాంకం max_లెక్క, వరుస_popped = 0;
+	నిర్మాణం commit *c, *n;
+	నిర్మాణం prio_వరుస వరుస = { compare_commits_by_gen_then_commit_date };
+	నిర్మాణం prio_వరుస not_వరుస = { compare_commits_by_gen_then_commit_date };
+	నిర్మాణం commit_list *list;
+	నిర్మాణం చివరి_modified_callback_దత్తాంశం దత్తాంశం = { .lm = lm };
 
 	lm->rev.diffopt.output_format = DIFF_FORMAT_CALLBACK;
-	lm->rev.diffopt.format_callback = last_modified_diff;
-	lm->rev.diffopt.format_callback_data = &data;
+	lm->rev.diffopt.format_callback = చివరి_modified_diff;
+	lm->rev.diffopt.format_callback_దత్తాంశం = &దత్తాంశం;
 	lm->rev.no_walk = 1;
 
 	prepare_revision_walk(&lm->rev);
 
-	max_count = lm->rev.max_count;
+	max_లెక్క = lm->rev.max_లెక్క;
 
-	init_active_paths_for_commit(&lm->active_paths);
-	lm->scratch = bitmap_word_alloc(lm->all_paths_nr);
+	init_చురుకైన_paths_for_commit(&lm->చురుకైన_paths);
+	lm->scratch = bitmap_మాట_alloc(lm->all_paths_nr);
 
 	/*
 	 * lm->rev.commits holds the set of boundary commits for our walk.
 	 *
 	 * Loop through each such commit, and place it in the appropriate queue.
 	 */
-	for (list = lm->rev.commits; list; list = list->next) {
-		struct commit *c = list->item;
+	కొరకు (list = lm->rev.commits; list; list = list->తదుపరి) {
+		నిర్మాణం commit *c = list->అంశం;
 
-		if (c->object.flags & BOTTOM) {
-			prio_queue_put(&not_queue, c);
+		ఒకవేళ (c->object.flags & BOTTOM) {
+			prio_వరుస_put(&not_వరుస, c);
 			c->object.flags |= PARENT2;
-		} else if (!(c->object.flags & PARENT1)) {
+		} లేకపోతే ఒకవేళ (!(c->object.flags & PARENT1)) {
 			/*
 			 * If the commit is a starting point (and hasn't been
 			 * seen yet), then initialize the set of interesting
 			 * paths, too.
 			 */
-			struct bitmap *active;
+			నిర్మాణం bitmap *చురుకైన;
 
-			prio_queue_put(&queue, c);
+			prio_వరుస_put(&వరుస, c);
 			c->object.flags |= PARENT1;
 
-			active = active_paths_for(lm, c);
-			for (size_t i = 0; i < lm->all_paths_nr; i++)
-				bitmap_set(active, i);
+			చురుకైన = చురుకైన_paths_for(lm, c);
+			కొరకు (కొలత_t i = 0; i < lm->all_paths_nr; i++)
+				bitmap_సమితి(చురుకైన, i);
 		}
 	}
 
-	while ((c = prio_queue_get(&queue))) {
-		int parent_i;
-		struct commit_list *p;
-		struct bitmap *active_c = active_paths_for(lm, c);
+	అయితే ((c = prio_వరుస_get(&వరుస))) {
+		పూర్ణాంకం మాతృ_i;
+		నిర్మాణం commit_list *p;
+		నిర్మాణం bitmap *చురుకైన_c = చురుకైన_paths_for(lm, c);
 
-		if ((0 <= max_count && max_count < ++queue_popped) ||
+		ఒకవేళ ((0 <= max_లెక్క && max_లెక్క < ++వరుస_popped) ||
 		    (c->object.flags & PARENT2)) {
 			/*
 			 * Either a boundary commit, or we have already seen too
 			 * many others. Either way, stop here.
 			 */
 			c->object.flags |= PARENT2 | BOUNDARY;
-			data.commit = c;
-			diff_tree_oid(lm->rev.repo->hash_algo->empty_tree,
+			దత్తాంశం.commit = c;
+			diff_వృక్షం_oid(lm->rev.repo->hash_algo->ఖాళీలు_వృక్షం,
 				      &c->object.oid,
 				      "", &lm->rev.diffopt);
 			diff_flush(&lm->rev.diffopt);
-			goto cleanup;
+			వెళ్ళు cleanup;
 		}
 
 		/*
 		 * Otherwise, make sure that 'c' isn't reachable from anything
 		 * in the '--not' queue.
 		 */
-		if (repo_parse_commit(lm->rev.repo, c))
-			goto cleanup;
+		ఒకవేళ (repo_parse_commit(lm->rev.repo, c))
+			వెళ్ళు cleanup;
 
-		while ((n = prio_queue_get(&not_queue))) {
-			struct commit_list *np;
+		అయితే ((n = prio_వరుస_get(&not_వరుస))) {
+			నిర్మాణం commit_list *np;
 
-			if (repo_parse_commit(lm->rev.repo, n))
-				continue;
+			ఒకవేళ (repo_parse_commit(lm->rev.repo, n))
+				కొనసాగు;
 
-			for (np = n->parents; np; np = np->next) {
-				if (!(np->item->object.flags & PARENT2)) {
-					prio_queue_put(&not_queue, np->item);
-					np->item->object.flags |= PARENT2;
+			కొరకు (np = n->parents; np; np = np->తదుపరి) {
+				ఒకవేళ (!(np->అంశం->object.flags & PARENT2)) {
+					prio_వరుస_put(&not_వరుస, np->అంశం);
+					np->అంశం->object.flags |= PARENT2;
 				}
 			}
 
-			if (commit_graph_generation(n) < commit_graph_generation(c))
-				break;
+			ఒకవేళ (commit_లేఖాచిత్రం_generation(n) < commit_లేఖాచిత్రం_generation(c))
+				ఆపు;
 		}
 
 		/*
 		 * Look at each parent and pass on each path that's TREESAME
 		 * with that parent. Stop early when no active paths remain.
 		 */
-		for (p = c->parents, parent_i = 0; p; p = p->next, parent_i++) {
-			process_parent(lm, &queue,
-				       c, active_c,
-				       p->item, parent_i);
+		కొరకు (p = c->parents, మాతృ_i = 0; p; p = p->తదుపరి, మాతృ_i++) {
+			process_మాతృ(lm, &వరుస,
+				       c, చురుకైన_c,
+				       p->అంశం, మాతృ_i);
 
-			if (bitmap_is_empty(active_c))
-				break;
+			ఒకవేళ (bitmap_is_ఖాళీలు(చురుకైన_c))
+				ఆపు;
 		}
 
 		/*
 		 * Paths that remain active, or not TREESAME with any parent,
 		 * were changed by 'c'.
 		 */
-		if (!bitmap_is_empty(active_c))  {
-			data.commit = c;
-			for (size_t i = 0; i < lm->all_paths_nr; i++) {
-				if (bitmap_get(active_c, i))
-					mark_path(lm->all_paths[i], NULL, &data);
+		ఒకవేళ (!bitmap_is_ఖాళీలు(చురుకైన_c))  {
+			దత్తాంశం.commit = c;
+			కొరకు (కొలత_t i = 0; i < lm->all_paths_nr; i++) {
+				ఒకవేళ (bitmap_get(చురుకైన_c, i))
+					mark_మార్గం(lm->all_paths[i], ఖాళీ, &దత్తాంశం);
 			}
 		}
 
 cleanup:
-		active_paths_free(lm, c);
+		చురుకైన_paths_free(lm, c);
 	}
 
-	if (hashmap_get_size(&lm->paths))
+	ఒకవేళ (hashmap_get_కొలత(&lm->paths))
 		BUG("paths remaining beyond boundary in last-modified");
 
-	clear_prio_queue(&not_queue);
-	clear_prio_queue(&queue);
-	clear_active_paths_for_commit(&lm->active_paths);
+	clear_prio_వరుస(&not_వరుస);
+	clear_prio_వరుస(&వరుస);
+	clear_చురుకైన_paths_for_commit(&lm->చురుకైన_paths);
 	bitmap_free(lm->scratch);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int last_modified_init(struct last_modified *lm, struct repository *r,
-			      const char *prefix, int argc, const char **argv)
+స్థిర పూర్ణాంకం చివరి_modified_init(నిర్మాణం చివరి_modified *lm, నిర్మాణం repository *r,
+			      స్థిరరాశి అక్షరం *ఉపసర్గ, పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv)
 {
-	struct hashmap_iter iter;
-	struct last_modified_entry *ent;
+	నిర్మాణం hashmap_iter iter;
+	నిర్మాణం చివరి_modified_నమోదు *ent;
 
-	hashmap_init(&lm->paths, last_modified_entry_hashcmp, NULL, 0);
+	hashmap_init(&lm->paths, చివరి_modified_నమోదు_hashcmp, ఖాళీ, 0);
 
-	repo_init_revisions(r, &lm->rev, prefix);
+	repo_init_revisions(r, &lm->rev, ఉపసర్గ);
 	lm->rev.def = "HEAD";
 	lm->rev.combine_merges = 1;
-	lm->rev.show_root_diff = 1;
+	lm->rev.show_మూలం_diff = 1;
 	lm->rev.boundary = 1;
 	lm->rev.no_commit_id = 1;
 	lm->rev.diff = 1;
-	lm->rev.diffopt.flags.no_recursive_diff_tree_combined = 1;
+	lm->rev.diffopt.flags.no_recursive_diff_వృక్షం_combined = 1;
 	lm->rev.diffopt.flags.recursive = 1;
-	lm->rev.diffopt.flags.tree_in_recursive = lm->show_trees;
-	lm->rev.diffopt.max_depth = lm->max_depth;
-	lm->rev.diffopt.max_depth_valid = lm->max_depth >= 0;
+	lm->rev.diffopt.flags.వృక్షం_లోపల_recursive = lm->show_trees;
+	lm->rev.diffopt.max_లోతు = lm->max_లోతు;
+	lm->rev.diffopt.max_లోతు_valid = lm->max_లోతు >= 0;
 
-	argc = setup_revisions(argc, argv, &lm->rev, NULL);
-	if (argc > 1) {
+	argc = అమరిక_revisions(argc, argv, &lm->rev, ఖాళీ);
+	ఒకవేళ (argc > 1) {
 		error(_("unknown last-modified argument: %s"), argv[1]);
-		return argc;
+		తిరిగి argc;
 	}
 
 	lm->rev.bloom_filter_settings = get_bloom_filter_settings(lm->rev.repo);
 
-	if (populate_paths_from_revs(lm) < 0)
-		return -1;
+	ఒకవేళ (populate_paths_from_revs(lm) < 0)
+		తిరిగి -1;
 
-	CALLOC_ARRAY(lm->all_paths, hashmap_get_size(&lm->paths));
+	CALLOC_ARRAY(lm->all_paths, hashmap_get_కొలత(&lm->paths));
 	lm->all_paths_nr = 0;
-	hashmap_for_each_entry(&lm->paths, &iter, ent, hashent) {
+	hashmap_for_each_నమోదు(&lm->paths, &iter, ent, hashent) {
 		ent->diff_idx = lm->all_paths_nr++;
-		lm->all_paths[ent->diff_idx] = ent->path;
+		lm->all_paths[ent->diff_idx] = ent->మార్గం;
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
-int cmd_last_modified(int argc, const char **argv, const char *prefix,
-		      struct repository *repo)
+పూర్ణాంకం cmd_చివరి_modified(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		      నిర్మాణం repository *repo)
 {
-	int ret;
-	struct last_modified lm = { 0 };
+	పూర్ణాంకం ret;
+	నిర్మాణం చివరి_modified lm = { 0 };
 
-	const char * const last_modified_usage[] = {
+	స్థిరరాశి అక్షరం * స్థిరరాశి చివరి_modified_usage[] = {
 		N_("git last-modified [--recursive] [--show-trees] [--max-depth=<depth>] [-z]\n"
 		   "                  [<revision-range>] [[--] <pathspec>...]"),
-		NULL
+		ఖాళీ
 	};
 
-	struct option last_modified_options[] = {
-		OPT_SET_INT('r', "recursive", &lm.max_depth,
+	నిర్మాణం option చివరి_modified_options[] = {
+		OPT_సమితి_INT('r', "recursive", &lm.max_లోతు,
 			    N_("recurse into subtrees"), -1),
 		OPT_BOOL('t', "show-trees", &lm.show_trees,
 			 N_("show tree entries when recursing into subtrees")),
-		OPT_INTEGER_F(0, "max-depth", &lm.max_depth,
+		OPT_INTEGER_F(0, "max-depth", &lm.max_లోతు,
 			      N_("maximum tree depth to recurse"), PARSE_OPT_NONEG),
-		OPT_BOOL('z', NULL, &lm.nul_termination,
+		OPT_BOOL('z', ఖాళీ, &lm.nul_termination,
 			 N_("lines are separated with NUL character")),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	argc = parse_options(argc, argv, prefix, last_modified_options,
-			     last_modified_usage,
+	argc = parse_options(argc, argv, ఉపసర్గ, చివరి_modified_options,
+			     చివరి_modified_usage,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT |
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ఖాళీ);
 
-	ret = last_modified_init(&lm, repo, prefix, argc, argv);
-	if (ret > 0)
-		usage_with_options(last_modified_usage,
-				   last_modified_options);
-	if (ret)
-		goto out;
+	ret = చివరి_modified_init(&lm, repo, ఉపసర్గ, argc, argv);
+	ఒకవేళ (ret > 0)
+		usage_with_options(చివరి_modified_usage,
+				   చివరి_modified_options);
+	ఒకవేళ (ret)
+		వెళ్ళు బహిర్గతం;
 
-	ret = last_modified_run(&lm);
-	if (ret)
-		goto out;
+	ret = చివరి_modified_నిరంతరం(&lm);
+	ఒకవేళ (ret)
+		వెళ్ళు బహిర్గతం;
 
-out:
-	last_modified_release(&lm);
+బహిర్గతం:
+	చివరి_modified_release(&lm);
 
-	return ret;
+	తిరిగి ret;
 }

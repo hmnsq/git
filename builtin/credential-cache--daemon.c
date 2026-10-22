@@ -1,160 +1,160 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "path.h"
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "abspath.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "path.h"
 
-#ifndef NO_UNIX_SOCKETS
+#నిర్వచితం_కాకపోతే NO_UNIX_SOCKETS
 
-#include "config.h"
-#include "tempfile.h"
-#include "credential.h"
-#include "unix-socket.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "tempfile.h"
+#అన్తర్భావ "credential.h"
+#అన్తర్భావ "unix-socket.h"
 
-struct credential_cache_entry {
-	struct credential item;
+నిర్మాణం credential_cache_నమోదు {
+	నిర్మాణం credential అంశం;
 	timestamp_t expiration;
 };
-static struct credential_cache_entry *entries;
-static int entries_nr;
-static int entries_alloc;
+స్థిర నిర్మాణం credential_cache_నమోదు *entries;
+స్థిర పూర్ణాంకం entries_nr;
+స్థిర పూర్ణాంకం entries_alloc;
 
-static void cache_credential(struct credential *c, int timeout)
+స్థిర శూన్య cache_credential(నిర్మాణం credential *c, పూర్ణాంకం timeout)
 {
-	struct credential_cache_entry *e;
+	నిర్మాణం credential_cache_నమోదు *e;
 
 	ALLOC_GROW(entries, entries_nr + 1, entries_alloc);
 	e = &entries[entries_nr++];
 
 	/* take ownership of pointers */
-	memcpy(&e->item, c, sizeof(*c));
-	memset(c, 0, sizeof(*c));
-	e->expiration = time(NULL) + timeout;
+	జ్ఞాపకం_నకలు(&e->అంశం, c, పరిమాణం(*c));
+	memset(c, 0, పరిమాణం(*c));
+	e->expiration = సమయం(ఖాళీ) + timeout;
 }
 
-static struct credential_cache_entry *lookup_credential(const struct credential *c)
+స్థిర నిర్మాణం credential_cache_నమోదు *lookup_credential(స్థిరరాశి నిర్మాణం credential *c)
 {
-	int i;
-	for (i = 0; i < entries_nr; i++) {
-		struct credential *e = &entries[i].item;
-		if (credential_match(c, e, 0))
-			return &entries[i];
+	పూర్ణాంకం i;
+	కొరకు (i = 0; i < entries_nr; i++) {
+		నిర్మాణం credential *e = &entries[i].అంశం;
+		ఒకవేళ (credential_సరిపోలిక(c, e, 0))
+			తిరిగి &entries[i];
 	}
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
-static void remove_credential(const struct credential *c, int match_password)
+స్థిర శూన్య remove_credential(స్థిరరాశి నిర్మాణం credential *c, పూర్ణాంకం సరిపోలిక_password)
 {
-	struct credential_cache_entry *e;
+	నిర్మాణం credential_cache_నమోదు *e;
 
-	int i;
-	for (i = 0; i < entries_nr; i++) {
+	పూర్ణాంకం i;
+	కొరకు (i = 0; i < entries_nr; i++) {
 		e = &entries[i];
-		if (credential_match(c, &e->item, match_password))
+		ఒకవేళ (credential_సరిపోలిక(c, &e->అంశం, సరిపోలిక_password))
 			e->expiration = 0;
 	}
 }
 
-static timestamp_t check_expirations(void)
+స్థిర timestamp_t check_expirations(శూన్య)
 {
-	static timestamp_t wait_for_entry_until;
-	int i = 0;
-	timestamp_t now = time(NULL);
-	timestamp_t next = TIME_MAX;
+	స్థిర timestamp_t wait_for_నమోదు_until;
+	పూర్ణాంకం i = 0;
+	timestamp_t now = సమయం(ఖాళీ);
+	timestamp_t తదుపరి = సమయం_MAX;
 
 	/*
 	 * Initially give the client 30 seconds to actually contact us
 	 * and store a credential before we decide there's no point in
 	 * keeping the daemon around.
 	 */
-	if (!wait_for_entry_until)
-		wait_for_entry_until = now + 30;
+	ఒకవేళ (!wait_for_నమోదు_until)
+		wait_for_నమోదు_until = now + 30;
 
-	while (i < entries_nr) {
-		if (entries[i].expiration <= now) {
+	అయితే (i < entries_nr) {
+		ఒకవేళ (entries[i].expiration <= now) {
 			entries_nr--;
-			credential_clear(&entries[i].item);
-			if (i != entries_nr)
-				memcpy(&entries[i], &entries[entries_nr], sizeof(*entries));
+			credential_clear(&entries[i].అంశం);
+			ఒకవేళ (i != entries_nr)
+				జ్ఞాపకం_నకలు(&entries[i], &entries[entries_nr], పరిమాణం(*entries));
 			/*
 			 * Stick around 30 seconds in case a new credential
 			 * shows up (e.g., because we just removed a failed
 			 * one, and we will soon get the correct one).
 			 */
-			wait_for_entry_until = now + 30;
+			wait_for_నమోదు_until = now + 30;
 		}
-		else {
-			if (entries[i].expiration < next)
-				next = entries[i].expiration;
+		లేకపోతే {
+			ఒకవేళ (entries[i].expiration < తదుపరి)
+				తదుపరి = entries[i].expiration;
 			i++;
 		}
 	}
 
-	if (!entries_nr) {
-		if (wait_for_entry_until <= now)
-			return 0;
-		next = wait_for_entry_until;
+	ఒకవేళ (!entries_nr) {
+		ఒకవేళ (wait_for_నమోదు_until <= now)
+			తిరిగి 0;
+		తదుపరి = wait_for_నమోదు_until;
 	}
 
-	return next - now;
+	తిరిగి తదుపరి - now;
 }
 
-static int read_request(FILE *fh, struct credential *c,
-			struct strbuf *action, int *timeout)
+స్థిర పూర్ణాంకం read_request(FILE *fh, నిర్మాణం credential *c,
+			నిర్మాణం strbuf *action, పూర్ణాంకం *timeout)
 {
-	static struct strbuf item = STRBUF_INIT;
-	const char *p;
+	స్థిర నిర్మాణం strbuf అంశం = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *p;
 
-	strbuf_getline_lf(&item, fh);
-	if (!skip_prefix(item.buf, "action=", &p))
-		return error("client sent bogus action line: %s", item.buf);
+	strbuf_getline_lf(&అంశం, fh);
+	ఒకవేళ (!skip_ఉపసర్గ(అంశం.buf, "action=", &p))
+		తిరిగి error("client sent bogus action line: %s", అంశం.buf);
 	strbuf_addstr(action, p);
 
-	strbuf_getline_lf(&item, fh);
-	if (!skip_prefix(item.buf, "timeout=", &p))
-		return error("client sent bogus timeout line: %s", item.buf);
+	strbuf_getline_lf(&అంశం, fh);
+	ఒకవేళ (!skip_ఉపసర్గ(అంశం.buf, "timeout=", &p))
+		తిరిగి error("client sent bogus timeout line: %s", అంశం.buf);
 	*timeout = atoi(p);
 
-	credential_set_all_capabilities(c, CREDENTIAL_OP_INITIAL);
+	credential_సమితి_all_capabilities(c, CREDENTIAL_OP_INITIAL);
 
-	if (credential_read(c, fh, CREDENTIAL_OP_HELPER) < 0)
-		return -1;
-	return 0;
+	ఒకవేళ (credential_read(c, fh, CREDENTIAL_OP_HELPER) < 0)
+		తిరిగి -1;
+	తిరిగి 0;
 }
 
-static void serve_one_client(FILE *in, FILE *out)
+స్థిర శూన్య serve_one_client(FILE *లోపల, FILE *బహిర్గతం)
 {
-	struct credential c = CREDENTIAL_INIT;
-	struct strbuf action = STRBUF_INIT;
-	int timeout = -1;
+	నిర్మాణం credential c = CREDENTIAL_INIT;
+	నిర్మాణం strbuf action = STRBUF_INIT;
+	పూర్ణాంకం timeout = -1;
 
-	if (read_request(in, &c, &action, &timeout) < 0)
+	ఒకవేళ (read_request(లోపల, &c, &action, &timeout) < 0)
 		/* ignore error */ ;
-	else if (!strcmp(action.buf, "get")) {
-		struct credential_cache_entry *e = lookup_credential(&c);
-		if (e) {
-			e->item.capa_authtype.request_initial = 1;
-			e->item.capa_authtype.request_helper = 1;
+	లేకపోతే ఒకవేళ (!strcmp(action.buf, "get")) {
+		నిర్మాణం credential_cache_నమోదు *e = lookup_credential(&c);
+		ఒకవేళ (e) {
+			e->అంశం.capa_authtype.request_initial = 1;
+			e->అంశం.capa_authtype.request_helper = 1;
 
-			fprintf(out, "capability[]=authtype\n");
-			if (e->item.username)
-				fprintf(out, "username=%s\n", e->item.username);
-			if (e->item.password)
-				fprintf(out, "password=%s\n", e->item.password);
-			if (credential_has_capability(&c.capa_authtype, CREDENTIAL_OP_RESPONSE) && e->item.authtype)
-				fprintf(out, "authtype=%s\n", e->item.authtype);
-			if (credential_has_capability(&c.capa_authtype, CREDENTIAL_OP_RESPONSE) && e->item.credential)
-				fprintf(out, "credential=%s\n", e->item.credential);
-			if (e->item.password_expiry_utc != TIME_MAX)
-				fprintf(out, "password_expiry_utc=%"PRItime"\n",
-					e->item.password_expiry_utc);
-			if (e->item.oauth_refresh_token)
-				fprintf(out, "oauth_refresh_token=%s\n",
-					e->item.oauth_refresh_token);
+			fprintf(బహిర్గతం, "capability[]=authtype\n");
+			ఒకవేళ (e->అంశం.username)
+				fprintf(బహిర్గతం, "username=%s\n", e->అంశం.username);
+			ఒకవేళ (e->అంశం.password)
+				fprintf(బహిర్గతం, "password=%s\n", e->అంశం.password);
+			ఒకవేళ (credential_has_capability(&c.capa_authtype, CREDENTIAL_OP_RESPONSE) && e->అంశం.authtype)
+				fprintf(బహిర్గతం, "authtype=%s\n", e->అంశం.authtype);
+			ఒకవేళ (credential_has_capability(&c.capa_authtype, CREDENTIAL_OP_RESPONSE) && e->అంశం.credential)
+				fprintf(బహిర్గతం, "credential=%s\n", e->అంశం.credential);
+			ఒకవేళ (e->అంశం.password_expiry_utc != సమయం_MAX)
+				fprintf(బహిర్గతం, "password_expiry_utc=%"PRItime"\n",
+					e->అంశం.password_expiry_utc);
+			ఒకవేళ (e->అంశం.oauth_refresh_token)
+				fprintf(బహిర్గతం, "oauth_refresh_token=%s\n",
+					e->అంశం.oauth_refresh_token);
 		}
 	}
-	else if (!strcmp(action.buf, "exit")) {
+	లేకపోతే ఒకవేళ (!strcmp(action.buf, "exit")) {
 		/*
 		 * It's important that we clean up our socket first, and then
 		 * signal the client only once we have finished the cleanup.
@@ -163,121 +163,121 @@ static void serve_one_client(FILE *in, FILE *out)
 		 * process actually ends, which closes the socket and gives
 		 * them EOF.
 		 */
-		exit(0);
+		నిష్క్రమించు(0);
 	}
-	else if (!strcmp(action.buf, "erase"))
+	లేకపోతే ఒకవేళ (!strcmp(action.buf, "erase"))
 		remove_credential(&c, 1);
-	else if (!strcmp(action.buf, "store")) {
-		if (timeout < 0)
+	లేకపోతే ఒకవేళ (!strcmp(action.buf, "store")) {
+		ఒకవేళ (timeout < 0)
 			warning("cache client didn't specify a timeout");
-		else if ((!c.username || !c.password) && (!c.authtype && !c.credential))
+		లేకపోతే ఒకవేళ ((!c.username || !c.password) && (!c.authtype && !c.credential))
 			warning("cache client gave us a partial credential");
-		else if (c.ephemeral)
+		లేకపోతే ఒకవేళ (c.ephemeral)
 			warning("not storing ephemeral credential");
-		else {
+		లేకపోతే {
 			remove_credential(&c, 0);
 			cache_credential(&c, timeout);
 		}
 	}
-	else
+	లేకపోతే
 		warning("cache client sent unknown action: %s", action.buf);
 
 	credential_clear(&c);
 	strbuf_release(&action);
 }
 
-static int serve_cache_loop(int fd)
+స్థిర పూర్ణాంకం serve_cache_loop(పూర్ణాంకం fd)
 {
-	struct pollfd pfd;
+	నిర్మాణం pollfd pfd;
 	timestamp_t wakeup;
 
 	wakeup = check_expirations();
-	if (!wakeup)
-		return 0;
+	ఒకవేళ (!wakeup)
+		తిరిగి 0;
 
 	pfd.fd = fd;
 	pfd.events = POLLIN;
-	if (poll(&pfd, 1, 1000 * wakeup) < 0) {
-		if (errno != EINTR)
+	ఒకవేళ (poll(&pfd, 1, 1000 * wakeup) < 0) {
+		ఒకవేళ (errno != EINTR)
 			die_errno("poll failed");
-		return 1;
+		తిరిగి 1;
 	}
 
-	if (pfd.revents & POLLIN) {
-		int client, client2;
-		FILE *in, *out;
+	ఒకవేళ (pfd.revents & POLLIN) {
+		పూర్ణాంకం client, client2;
+		FILE *లోపల, *బహిర్గతం;
 
-		client = accept(fd, NULL, NULL);
-		if (client < 0) {
+		client = accept(fd, ఖాళీ, ఖాళీ);
+		ఒకవేళ (client < 0) {
 			warning_errno("accept failed");
-			return 1;
+			తిరిగి 1;
 		}
 		client2 = dup(client);
-		if (client2 < 0) {
+		ఒకవేళ (client2 < 0) {
 			warning_errno("dup failed");
 			close(client);
-			return 1;
+			తిరిగి 1;
 		}
 
-		in = xfdopen(client, "r");
-		out = xfdopen(client2, "w");
-		serve_one_client(in, out);
-		fclose(in);
-		fclose(out);
+		లోపల = xfdopen(client, "r");
+		బహిర్గతం = xfdopen(client2, "w");
+		serve_one_client(లోపల, బహిర్గతం);
+		fclose(లోపల);
+		fclose(బహిర్గతం);
 	}
-	return 1;
+	తిరిగి 1;
 }
 
-static void serve_cache(const char *socket_path, int debug)
+స్థిర శూన్య serve_cache(స్థిరరాశి అక్షరం *socket_మార్గం, పూర్ణాంకం debug)
 {
-	struct unix_stream_listen_opts opts = UNIX_STREAM_LISTEN_OPTS_INIT;
-	int fd;
+	నిర్మాణం unix_ప్రవాహం_listen_opts opts = UNIX_ప్రవాహం_LISTEN_OPTS_INIT;
+	పూర్ణాంకం fd;
 
-	fd = unix_stream_listen(socket_path, &opts);
-	if (fd < 0)
-		die_errno("unable to bind to '%s'", socket_path);
+	fd = unix_ప్రవాహం_listen(socket_మార్గం, &opts);
+	ఒకవేళ (fd < 0)
+		die_errno("unable to bind to '%s'", socket_మార్గం);
 
-	printf("ok\n");
+	రాయి("ok\n");
 	fclose(stdout);
-	if (!debug) {
-		if (!freopen("/dev/null", "w", stderr))
+	ఒకవేళ (!debug) {
+		ఒకవేళ (!freopen("/dev/null", "w", stderr))
 			die_errno("unable to point stderr to /dev/null");
 	}
 
-	while (serve_cache_loop(fd))
+	అయితే (serve_cache_loop(fd))
 		; /* nothing */
 
 	close(fd);
 }
 
-static const char permissions_advice[] = N_(
+స్థిర స్థిరరాశి అక్షరం permissions_advice[] = N_(
 "The permissions on your socket directory are too loose; other\n"
 "users may be able to read your cached credentials. Consider running:\n"
 "\n"
 "	chmod 0700 %s");
-static void init_socket_directory(const char *path)
+స్థిర శూన్య init_socket_directory(స్థిరరాశి అక్షరం *మార్గం)
 {
-	struct stat st;
-	char *path_copy = xstrdup(path);
-	char *dir = dirname(path_copy);
+	నిర్మాణం stat st;
+	అక్షరం *మార్గం_copy = xstrdup(మార్గం);
+	అక్షరం *dir = dirname(మార్గం_copy);
 
-	if (!stat(dir, &st)) {
-		if (st.st_mode & 077)
+	ఒకవేళ (!stat(dir, &st)) {
+		ఒకవేళ (st.st_బహుళకం & 077)
 			die(_(permissions_advice), dir);
-	} else {
+	} లేకపోతే {
 		/*
 		 * We must be sure to create the directory with the correct mode,
 		 * not just chmod it after the fact; otherwise, there is a race
 		 * condition in which somebody can chdir to it, sleep, then try to open
 		 * our protected socket.
 		 */
-		if (safe_create_leading_directories_const(the_repository, dir) < 0)
+		ఒకవేళ (సురక్షిత_create_leading_directories_const(the_repository, dir) < 0)
 			die_errno("unable to create directories for '%s'", dir);
-		if (mkdir(dir, 0700) < 0)
+		ఒకవేళ (mkdir(dir, 0700) < 0)
 			die_errno("unable to mkdir '%s'", dir);
 	}
 
-	if (chdir(dir))
+	ఒకవేళ (chdir(dir))
 		/*
 		 * We don't actually care what our cwd is; we chdir here just to
 		 * be a friendly daemon and avoid tying up our original cwd.
@@ -285,70 +285,70 @@ static void init_socket_directory(const char *path)
 		 */
 		;
 
-	free(path_copy);
+	విడుదల(మార్గం_copy);
 }
 
-int cmd_credential_cache_daemon(int argc,
-				const char **argv,
-				const char *prefix,
-				struct repository *repo UNUSED)
+పూర్ణాంకం cmd_credential_cache_daemon(పూర్ణాంకం argc,
+				స్థిరరాశి అక్షరం **argv,
+				స్థిరరాశి అక్షరం *ఉపసర్గ,
+				నిర్మాణం repository *repo వాడని)
 {
-	struct tempfile *socket_file;
-	const char *socket_path;
-	int ignore_sighup = 0;
-	static const char *usage[] = {
+	నిర్మాణం tempfile *socket_file;
+	స్థిరరాశి అక్షరం *socket_మార్గం;
+	పూర్ణాంకం ignore_sighup = 0;
+	స్థిర స్థిరరాశి అక్షరం *usage[] = {
 		"git credential-cache--daemon [--debug] <socket-path>",
-		NULL
+		ఖాళీ
 	};
-	int debug = 0;
-	const struct option options[] = {
+	పూర్ణాంకం debug = 0;
+	స్థిరరాశి నిర్మాణం option options[] = {
 		OPT_BOOL(0, "debug", &debug,
 			 N_("print debugging messages to stderr")),
-		OPT_END()
+		OPT_చివర()
 	};
 
 	repo_config_get_bool(the_repository, "credentialcache.ignoresighup", &ignore_sighup);
 
-	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	socket_path = argv[0];
+	argc = parse_options(argc, argv, ఉపసర్గ, options, usage, 0);
+	socket_మార్గం = argv[0];
 
-	if (!have_unix_sockets())
+	ఒకవేళ (!have_unix_sockets())
 		die(_("credential-cache--daemon unavailable; no unix socket support"));
-	if (!socket_path)
+	ఒకవేళ (!socket_మార్గం)
 		usage_with_options(usage, options);
 
-	if (!is_absolute_path(socket_path))
+	ఒకవేళ (!is_absolute_మార్గం(socket_మార్గం))
 		die("socket directory must be an absolute path");
 
-	init_socket_directory(socket_path);
-	socket_file = register_tempfile(socket_path);
+	init_socket_directory(socket_మార్గం);
+	socket_file = రిజిస్టరు_tempfile(socket_మార్గం);
 
-	if (ignore_sighup)
-		signal(SIGHUP, SIG_IGN);
+	ఒకవేళ (ignore_sighup)
+		సంకేతం(SIGHUP, SIG_IGN);
 
-	serve_cache(socket_path, debug);
+	serve_cache(socket_మార్గం, debug);
 	delete_tempfile(&socket_file);
 
-	return 0;
+	తిరిగి 0;
 }
 
-#else
+#లేకపోతే
 
-int cmd_credential_cache_daemon(int argc,
-const char **argv,
-const char *prefix,
-struct repository *repo UNUSED)
+పూర్ణాంకం cmd_credential_cache_daemon(పూర్ణాంకం argc,
+స్థిరరాశి అక్షరం **argv,
+స్థిరరాశి అక్షరం *ఉపసర్గ,
+నిర్మాణం repository *repo వాడని)
 {
-	const char * const usage[] = {
+	స్థిరరాశి అక్షరం * స్థిరరాశి usage[] = {
 		"git credential-cache--daemon [--debug] <socket-path>",
 		"",
 		"credential-cache--daemon is disabled in this build of Git",
-		NULL
+		ఖాళీ
 	};
-	struct option options[] = { OPT_END() };
+	నిర్మాణం option options[] = { OPT_చివర() };
 
-	argc = parse_options(argc, argv, prefix, options, usage, 0);
+	argc = parse_options(argc, argv, ఉపసర్గ, options, usage, 0);
 	die(_("credential-cache--daemon unavailable; no unix socket support"));
 }
 
-#endif /* NO_UNIX_SOCKET */
+#అయితే_ముగింపు /* NO_UNIX_SOCKET */

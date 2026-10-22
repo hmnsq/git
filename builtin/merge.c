@@ -6,99 +6,99 @@
  * Based on git-merge.sh by Junio C Hamano.
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
+#అన్తర్భావ "builtin.h"
 
-#include "abspath.h"
-#include "advice.h"
-#include "config.h"
-#include "editor.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "lockfile.h"
-#include "repository.h"
-#include "run-command.h"
-#include "hook.h"
-#include "diff.h"
-#include "diff-merges.h"
-#include "refs.h"
-#include "refspec.h"
-#include "commit.h"
-#include "diffcore.h"
-#include "path.h"
-#include "revision.h"
-#include "unpack-trees.h"
-#include "cache-tree.h"
-#include "dir.h"
-#include "color.h"
-#include "rerere.h"
-#include "help.h"
-#include "merge.h"
-#include "merge-ort-wrappers.h"
-#include "resolve-undo.h"
-#include "remote.h"
-#include "fmt-merge-msg.h"
-#include "sequencer.h"
-#include "string-list.h"
-#include "tag.h"
-#include "alias.h"
-#include "branch.h"
-#include "commit-reach.h"
-#include "wt-status.h"
-#include "commit-graph.h"
+#అన్తర్భావ "abspath.h"
+#అన్తర్భావ "advice.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "editor.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "lockfile.h"
+#అన్తర్భావ "repository.h"
+#అన్తర్భావ "run-command.h"
+#అన్తర్భావ "hook.h"
+#అన్తర్భావ "diff.h"
+#అన్తర్భావ "diff-merges.h"
+#అన్తర్భావ "refs.h"
+#అన్తర్భావ "refspec.h"
+#అన్తర్భావ "commit.h"
+#అన్తర్భావ "diffcore.h"
+#అన్తర్భావ "path.h"
+#అన్తర్భావ "revision.h"
+#అన్తర్భావ "unpack-trees.h"
+#అన్తర్భావ "cache-tree.h"
+#అన్తర్భావ "dir.h"
+#అన్తర్భావ "color.h"
+#అన్తర్భావ "rerere.h"
+#అన్తర్భావ "help.h"
+#అన్తర్భావ "merge.h"
+#అన్తర్భావ "merge-ort-wrappers.h"
+#అన్తర్భావ "resolve-undo.h"
+#అన్తర్భావ "remote.h"
+#అన్తర్భావ "fmt-merge-msg.h"
+#అన్తర్భావ "sequencer.h"
+#అన్తర్భావ "string-list.h"
+#అన్తర్భావ "tag.h"
+#అన్తర్భావ "alias.h"
+#అన్తర్భావ "branch.h"
+#అన్తర్భావ "commit-reach.h"
+#అన్తర్భావ "wt-status.h"
+#అన్తర్భావ "commit-graph.h"
 
-#define DEFAULT_TWOHEAD (1<<0)
-#define DEFAULT_OCTOPUS (1<<1)
-#define NO_FAST_FORWARD (1<<2)
-#define NO_TRIVIAL      (1<<3)
+#నిర్వచించు DEFAULT_TWOHEAD (1<<0)
+#నిర్వచించు DEFAULT_OCTOPUS (1<<1)
+#నిర్వచించు NO_FAST_FORWARD (1<<2)
+#నిర్వచించు NO_TRIVIAL      (1<<3)
 
-struct strategy {
-	const char *name;
-	unsigned attr;
+నిర్మాణం strategy {
+	స్థిరరాశి అక్షరం *name;
+	గుర్తులేని attr;
 };
 
-static const char * const builtin_merge_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_విలీనం_usage[] = {
 	N_("git merge [<options>] [<commit>...]"),
 	"git merge --abort",
 	"git merge --continue",
-	NULL
+	ఖాళీ
 };
 
-#define MERGE_SHOW_DIFFSTAT 1
-#define MERGE_SHOW_COMPACTSUMMARY 2
+#నిర్వచించు విలీనం_SHOW_DIFFSTAT 1
+#నిర్వచించు విలీనం_SHOW_COMPACTSUMMARY 2
 
-static int show_diffstat = MERGE_SHOW_DIFFSTAT, shortlog_len = -1, squash;
-static int option_commit = -1;
-static int option_edit = -1;
-static int allow_trivial = 1, have_message, verify_signatures;
-static int check_trust_level = 1;
-static int overwrite_ignore = 1;
-static struct strbuf merge_msg = STRBUF_INIT;
-static struct strategy **use_strategies;
-static size_t use_strategies_nr, use_strategies_alloc;
-static struct strvec xopts = STRVEC_INIT;
-static const char *branch;
-static char *branch_mergeoptions;
-static int verbosity;
-static int allow_rerere_auto;
-static int abort_current_merge;
-static int quit_current_merge;
-static int continue_current_merge;
-static int allow_unrelated_histories;
-static int show_progress = -1;
-static int default_to_upstream = 1;
-static int signoff;
-static const char *sign_commit;
-static int autostash;
-static int no_verify;
-static char *into_name;
+స్థిర పూర్ణాంకం show_diffstat = విలీనం_SHOW_DIFFSTAT, shortlog_len = -1, squash;
+స్థిర పూర్ణాంకం option_commit = -1;
+స్థిర పూర్ణాంకం option_edit = -1;
+స్థిర పూర్ణాంకం allow_trivial = 1, have_సందేశం, verify_signatures;
+స్థిర పూర్ణాంకం check_trust_level = 1;
+స్థిర పూర్ణాంకం overwrite_ignore = 1;
+స్థిర నిర్మాణం strbuf విలీనం_సందేశం = STRBUF_INIT;
+స్థిర నిర్మాణం strategy **use_strategies;
+స్థిర కొలత_t use_strategies_nr, use_strategies_alloc;
+స్థిర నిర్మాణం strvec xopts = STRVEC_INIT;
+స్థిర స్థిరరాశి అక్షరం *branch;
+స్థిర అక్షరం *branch_mergeoptions;
+స్థిర పూర్ణాంకం verbosity;
+స్థిర పూర్ణాంకం allow_rerere_auto;
+స్థిర పూర్ణాంకం abort_current_విలీనం;
+స్థిర పూర్ణాంకం quit_current_విలీనం;
+స్థిర పూర్ణాంకం continue_current_విలీనం;
+స్థిర పూర్ణాంకం allow_unrelated_histories;
+స్థిర పూర్ణాంకం show_పురోగతి = -1;
+స్థిర పూర్ణాంకం default_గమ్యం_upstream = 1;
+స్థిర పూర్ణాంకం signoff;
+స్థిర స్థిరరాశి అక్షరం *sign_commit;
+స్థిర పూర్ణాంకం autostash;
+స్థిర పూర్ణాంకం no_verify;
+స్థిర అక్షరం *into_name;
 
-static struct strategy all_strategy[] = {
+స్థిర నిర్మాణం strategy all_strategy[] = {
 	{ "recursive",  NO_TRIVIAL },
 	{ "octopus",    DEFAULT_OCTOPUS },
 	{ "ort",        DEFAULT_TWOHEAD | NO_TRIVIAL },
@@ -107,118 +107,118 @@ static struct strategy all_strategy[] = {
 	{ "subtree",    NO_FAST_FORWARD | NO_TRIVIAL },
 };
 
-static char *pull_twohead, *pull_octopus;
+స్థిర అక్షరం *pull_twohead, *pull_octopus;
 
-enum ff_type {
+గణన ff_type {
 	FF_NO,
 	FF_ALLOW,
 	FF_ONLY
 };
 
-static enum ff_type fast_forward = FF_ALLOW;
+స్థిర గణన ff_type fast_forward = FF_ALLOW;
 
-static char *cleanup_arg;
-static enum commit_msg_cleanup_mode cleanup_mode;
+స్థిర అక్షరం *cleanup_arg;
+స్థిర గణన commit_సందేశం_cleanup_బహుళకం cleanup_బహుళకం;
 
-static int option_parse_message(const struct option *opt,
-				const char *arg, int unset)
+స్థిర పూర్ణాంకం option_parse_సందేశం(స్థిరరాశి నిర్మాణం option *opt,
+				స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	struct strbuf *buf = opt->value;
+	నిర్మాణం strbuf *buf = opt->విలువ;
 
-	if (unset)
+	ఒకవేళ (unset)
 		strbuf_setlen(buf, 0);
-	else if (arg) {
+	లేకపోతే ఒకవేళ (arg) {
 		strbuf_addf(buf, "%s%s", buf->len ? "\n\n" : "", arg);
-		have_message = 1;
-	} else
-		return error(_("switch `m' requires a value"));
-	return 0;
+		have_సందేశం = 1;
+	} లేకపోతే
+		తిరిగి error(_("switch `m' requires a value"));
+	తిరిగి 0;
 }
 
-static enum parse_opt_result option_read_message(struct parse_opt_ctx_t *ctx,
-						 const struct option *opt,
-						 const char *arg_not_used,
-						 int unset)
+స్థిర గణన parse_opt_ఫలితం option_read_సందేశం(నిర్మాణం parse_opt_ctx_t *ctx,
+						 స్థిరరాశి నిర్మాణం option *opt,
+						 స్థిరరాశి అక్షరం *arg_not_వాడిన,
+						 పూర్ణాంకం unset)
 {
-	struct strbuf *buf = opt->value;
-	const char *arg;
+	నిర్మాణం strbuf *buf = opt->విలువ;
+	స్థిరరాశి అక్షరం *arg;
 
-	BUG_ON_OPT_ARG(arg_not_used);
-	if (unset)
+	BUG_ON_OPT_ARG(arg_not_వాడిన);
+	ఒకవేళ (unset)
 		BUG("-F cannot be negated");
 
-	if (ctx->opt) {
+	ఒకవేళ (ctx->opt) {
 		arg = ctx->opt;
-		ctx->opt = NULL;
-	} else if (ctx->argc > 1) {
+		ctx->opt = ఖాళీ;
+	} లేకపోతే ఒకవేళ (ctx->argc > 1) {
 		ctx->argc--;
 		arg = *++ctx->argv;
-	} else
-		return error(_("option `%s' requires a value"), opt->long_name);
+	} లేకపోతే
+		తిరిగి error(_("option `%s' requires a value"), opt->long_name);
 
-	if (buf->len)
+	ఒకవేళ (buf->len)
 		strbuf_addch(buf, '\n');
-	if (ctx->prefix && !is_absolute_path(arg))
-		arg = prefix_filename(ctx->prefix, arg);
-	if (strbuf_read_file(buf, arg, 0) < 0)
-		return error(_("could not read file '%s'"), arg);
-	have_message = 1;
+	ఒకవేళ (ctx->ఉపసర్గ && !is_absolute_మార్గం(arg))
+		arg = ఉపసర్గ_filename(ctx->ఉపసర్గ, arg);
+	ఒకవేళ (strbuf_read_file(buf, arg, 0) < 0)
+		తిరిగి error(_("could not read file '%s'"), arg);
+	have_సందేశం = 1;
 
-	return 0;
+	తిరిగి 0;
 }
 
-static struct strategy *get_strategy(const char *name)
+స్థిర నిర్మాణం strategy *get_strategy(స్థిరరాశి అక్షరం *name)
 {
-	int i;
-	struct strategy *ret;
-	static struct cmdnames main_cmds = {0}, other_cmds = {0};
-	static int loaded;
-	char *default_strategy = NULL;
+	పూర్ణాంకం i;
+	నిర్మాణం strategy *ret;
+	స్థిర నిర్మాణం cmdnames main_cmds = {0}, other_cmds = {0};
+	స్థిర పూర్ణాంకం loaded;
+	అక్షరం *default_strategy = ఖాళీ;
 
-	if (!name)
-		return NULL;
+	ఒకవేళ (!name)
+		తిరిగి ఖాళీ;
 
-	if (default_strategy &&
+	ఒకవేళ (default_strategy &&
 	    !strcmp(default_strategy, "ort") &&
 	    !strcmp(name, "recursive")) {
 		name = "ort";
 	}
 
-	for (i = 0; i < ARRAY_SIZE(all_strategy); i++)
-		if (!strcmp(name, all_strategy[i].name))
-			return &all_strategy[i];
+	కొరకు (i = 0; i < ARRAY_కొలత(all_strategy); i++)
+		ఒకవేళ (!strcmp(name, all_strategy[i].name))
+			తిరిగి &all_strategy[i];
 
-	if (!loaded) {
-		struct cmdnames not_strategies = {0};
+	ఒకవేళ (!loaded) {
+		నిర్మాణం cmdnames not_strategies = {0};
 		loaded = 1;
 
-		load_command_list("git-merge-", &main_cmds, &other_cmds);
-		for (i = 0; i < main_cmds.cnt; i++) {
-			int j, found = 0;
-			struct cmdname *ent = main_cmds.names[i];
-			for (j = 0; !found && j < ARRAY_SIZE(all_strategy); j++)
-				if (!xstrncmpz(all_strategy[j].name, ent->name, ent->len))
-					found = 1;
-			if (!found)
-				add_cmdname(&not_strategies, ent->name, ent->len);
+		ఎక్కించు_command_list("git-merge-", &main_cmds, &other_cmds);
+		కొరకు (i = 0; i < main_cmds.cnt; i++) {
+			పూర్ణాంకం j, దొరికింది_2 = 0;
+			నిర్మాణం cmdname *ent = main_cmds.పేర్లు[i];
+			కొరకు (j = 0; !దొరికింది_2 && j < ARRAY_కొలత(all_strategy); j++)
+				ఒకవేళ (!xstrncmpz(all_strategy[j].name, ent->name, ent->len))
+					దొరికింది_2 = 1;
+			ఒకవేళ (!దొరికింది_2)
+				కూడు_cmdname(&not_strategies, ent->name, ent->len);
 		}
 		exclude_cmds(&main_cmds, &not_strategies);
 
 		cmdnames_release(&not_strategies);
 	}
-	if (!is_in_cmdlist(&main_cmds, name) && !is_in_cmdlist(&other_cmds, name)) {
+	ఒకవేళ (!is_లోపల_cmdlist(&main_cmds, name) && !is_లోపల_cmdlist(&other_cmds, name)) {
 		fprintf(stderr, _("Could not find merge strategy '%s'.\n"), name);
 		fprintf(stderr, _("Available strategies are:"));
-		for (i = 0; i < main_cmds.cnt; i++)
-			fprintf(stderr, " %s", main_cmds.names[i]->name);
+		కొరకు (i = 0; i < main_cmds.cnt; i++)
+			fprintf(stderr, " %s", main_cmds.పేర్లు[i]->name);
 		fprintf(stderr, ".\n");
-		if (other_cmds.cnt) {
+		ఒకవేళ (other_cmds.cnt) {
 			fprintf(stderr, _("Available custom strategies are:"));
-			for (i = 0; i < other_cmds.cnt; i++)
-				fprintf(stderr, " %s", other_cmds.names[i]->name);
+			కొరకు (i = 0; i < other_cmds.cnt; i++)
+				fprintf(stderr, " %s", other_cmds.పేర్లు[i]->name);
 			fprintf(stderr, ".\n");
 		}
-		exit(1);
+		నిష్క్రమించు(1);
 	}
 
 	CALLOC_ARRAY(ret, 1);
@@ -227,56 +227,56 @@ static struct strategy *get_strategy(const char *name)
 
 	cmdnames_release(&main_cmds);
 	cmdnames_release(&other_cmds);
-	return ret;
+	తిరిగి ret;
 }
 
-static void append_strategy(struct strategy *s)
+స్థిర శూన్య append_strategy(నిర్మాణం strategy *s)
 {
 	ALLOC_GROW(use_strategies, use_strategies_nr + 1, use_strategies_alloc);
 	use_strategies[use_strategies_nr++] = s;
 }
 
-static int option_parse_strategy(const struct option *opt UNUSED,
-				 const char *name, int unset)
+స్థిర పూర్ణాంకం option_parse_strategy(స్థిరరాశి నిర్మాణం option *opt వాడని,
+				 స్థిరరాశి అక్షరం *name, పూర్ణాంకం unset)
 {
-	if (unset)
-		return 0;
+	ఒకవేళ (unset)
+		తిరిగి 0;
 
 	append_strategy(get_strategy(name));
-	return 0;
+	తిరిగి 0;
 }
 
-static int option_parse_compact_summary(const struct option *opt,
-					const char *name UNUSED, int unset)
+స్థిర పూర్ణాంకం option_parse_compact_summary(స్థిరరాశి నిర్మాణం option *opt,
+					స్థిరరాశి అక్షరం *name వాడని, పూర్ణాంకం unset)
 {
-	int *setting = opt->value;
+	పూర్ణాంకం *setting = opt->విలువ;
 
-	if (unset)
+	ఒకవేళ (unset)
 		*setting = 0;
-	else
-		*setting = MERGE_SHOW_COMPACTSUMMARY;
-	return 0;
+	లేకపోతే
+		*setting = విలీనం_SHOW_COMPACTSUMMARY;
+	తిరిగి 0;
 }
 
-static struct option builtin_merge_options[] = {
-	OPT_SET_INT('n', NULL, &show_diffstat,
+స్థిర నిర్మాణం option builtin_విలీనం_options[] = {
+	OPT_సమితి_INT('n', ఖాళీ, &show_diffstat,
 		N_("do not show a diffstat at the end of the merge"), 0),
 	OPT_BOOL(0, "stat", &show_diffstat,
 		N_("show a diffstat at the end of the merge")),
 	OPT_BOOL(0, "summary", &show_diffstat, N_("(synonym to --stat)")),
-	OPT_CALLBACK_F(0, "compact-summary", &show_diffstat, NULL,
+	OPT_CALLBACK_F(0, "compact-summary", &show_diffstat, ఖాళీ,
 		       N_("show a compact-summary at the end of the merge"),
 		       PARSE_OPT_NOARG,
 		       option_parse_compact_summary),
 	{
 		.type = OPTION_INTEGER,
 		.long_name = "log",
-		.value = &shortlog_len,
-		.precision = sizeof(shortlog_len),
+		.విలువ = &shortlog_len,
+		.precision = పరిమాణం(shortlog_len),
 		.argh = N_("n"),
 		.help = N_("add (at most <n>) entries from shortlog to merge commit message"),
 		.flags = PARSE_OPT_OPTARG,
-		.defval = DEFAULT_MERGE_LOG_LEN,
+		.defval = DEFAULT_విలీనం_LOG_LEN,
 	},
 	OPT_BOOL(0, "squash", &squash,
 		N_("create a single commit instead of doing a merge")),
@@ -285,47 +285,47 @@ static struct option builtin_merge_options[] = {
 	OPT_BOOL('e', "edit", &option_edit,
 		N_("edit message before committing")),
 	OPT_CLEANUP(&cleanup_arg),
-	OPT_SET_INT(0, "ff", &fast_forward, N_("allow fast-forward (default)"), FF_ALLOW),
-	OPT_SET_INT_F(0, "ff-only", &fast_forward,
+	OPT_సమితి_INT(0, "ff", &fast_forward, N_("allow fast-forward (default)"), FF_ALLOW),
+	OPT_సమితి_INT_F(0, "ff-only", &fast_forward,
 		      N_("abort if fast-forward is not possible"),
 		      FF_ONLY, PARSE_OPT_NONEG),
 	OPT_RERERE_AUTOUPDATE(&allow_rerere_auto),
 	OPT_BOOL(0, "verify-signatures", &verify_signatures,
 		N_("verify that the named commit has a valid GPG signature")),
-	OPT_CALLBACK('s', "strategy", NULL, N_("strategy"),
+	OPT_CALLBACK('s', "strategy", ఖాళీ, N_("strategy"),
 		N_("merge strategy to use"), option_parse_strategy),
 	OPT_STRVEC('X', "strategy-option", &xopts, N_("option=value"),
 		N_("option for selected merge strategy")),
-	OPT_CALLBACK('m', "message", &merge_msg, N_("message"),
+	OPT_CALLBACK('m', "message", &విలీనం_సందేశం, N_("message"),
 		N_("merge commit message (for a non-fast-forward merge)"),
-		option_parse_message),
+		option_parse_సందేశం),
 	{
 		.type = OPTION_LOWLEVEL_CALLBACK,
 		.short_name = 'F',
 		.long_name = "file",
-		.value = &merge_msg,
+		.విలువ = &విలీనం_సందేశం,
 		.argh = N_("path"),
 		.help = N_("read message from file"),
 		.flags = PARSE_OPT_NONEG,
-		.ll_callback = option_read_message,
+		.ll_callback = option_read_సందేశం,
 	},
 	OPT_STRING(0, "into-name", &into_name, N_("name"),
 		   N_("use <name> instead of the real target")),
 	OPT__VERBOSITY(&verbosity),
-	OPT_BOOL(0, "abort", &abort_current_merge,
+	OPT_BOOL(0, "abort", &abort_current_విలీనం,
 		N_("abort the current in-progress merge")),
-	OPT_BOOL(0, "quit", &quit_current_merge,
+	OPT_BOOL(0, "quit", &quit_current_విలీనం,
 		N_("--abort but leave index and working tree alone")),
-	OPT_BOOL(0, "continue", &continue_current_merge,
+	OPT_BOOL(0, "continue", &continue_current_విలీనం,
 		N_("continue the current in-progress merge")),
 	OPT_BOOL(0, "allow-unrelated-histories", &allow_unrelated_histories,
 		 N_("allow merging unrelated histories")),
-	OPT_SET_INT(0, "progress", &show_progress, N_("force progress reporting"), 1),
+	OPT_సమితి_INT(0, "progress", &show_పురోగతి, N_("force progress reporting"), 1),
 	{
 		.type = OPTION_STRING,
 		.short_name = 'S',
 		.long_name = "gpg-sign",
-		.value = &sign_commit,
+		.విలువ = &sign_commit,
 		.argh = N_("key-id"),
 		.help = N_("GPG sign commit"),
 		.flags = PARSE_OPT_OPTARG,
@@ -335,356 +335,356 @@ static struct option builtin_merge_options[] = {
 	OPT_BOOL(0, "overwrite-ignore", &overwrite_ignore, N_("update ignored files (default)")),
 	OPT_BOOL(0, "signoff", &signoff, N_("add a Signed-off-by trailer")),
 	OPT_BOOL(0, "no-verify", &no_verify, N_("bypass pre-merge-commit and commit-msg hooks")),
-	OPT_END()
+	OPT_చివర()
 };
 
-static int save_state(struct object_id *stash)
+స్థిర పూర్ణాంకం save_state(నిర్మాణం object_id *stash)
 {
-	int len;
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct strbuf buffer = STRBUF_INIT;
-	struct lock_file lock_file = LOCK_INIT;
-	int fd;
-	int rc = -1;
+	పూర్ణాంకం len;
+	నిర్మాణం బిడ్డ_process cp = బిడ్డ_PROCESS_INIT;
+	నిర్మాణం strbuf బఫరు = STRBUF_INIT;
+	నిర్మాణం తాళం_file తాళం_file = తాళం_INIT;
+	పూర్ణాంకం fd;
+	పూర్ణాంకం rc = -1;
 
-	fd = repo_hold_locked_index(the_repository, &lock_file, 0);
-	refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL);
-	if (0 <= fd)
-		repo_update_index_if_able(the_repository, &lock_file);
-	rollback_lock_file(&lock_file);
+	fd = repo_hold_locked_సూచీ(the_repository, &తాళం_file, 0);
+	refresh_సూచీ(the_repository->సూచీ, REFRESH_QUIET, ఖాళీ, ఖాళీ, ఖాళీ);
+	ఒకవేళ (0 <= fd)
+		repo_update_సూచీ_if_able(the_repository, &తాళం_file);
+	rollback_తాళం_file(&తాళం_file);
 
-	strvec_pushl(&cp.args, "stash", "create", NULL);
-	cp.out = -1;
+	strvec_pushl(&cp.వాదనలు, "stash", "create", ఖాళీ);
+	cp.బహిర్గతం = -1;
 	cp.git_cmd = 1;
 
-	if (start_command(&cp))
+	ఒకవేళ (ప్రారంభం_command(&cp))
 		die(_("could not run stash."));
-	len = strbuf_read(&buffer, cp.out, 1024);
-	close(cp.out);
+	len = strbuf_read(&బఫరు, cp.బహిర్గతం, 1024);
+	close(cp.బహిర్గతం);
 
-	if (finish_command(&cp) || len < 0)
+	ఒకవేళ (ముగింపు_command(&cp) || len < 0)
 		die(_("stash failed"));
-	else if (!len)		/* no changes */
-		goto out;
-	strbuf_setlen(&buffer, buffer.len-1);
-	if (repo_get_oid(the_repository, buffer.buf, stash))
-		die(_("not a valid object: %s"), buffer.buf);
+	లేకపోతే ఒకవేళ (!len)		/* no changes */
+		వెళ్ళు బహిర్గతం;
+	strbuf_setlen(&బఫరు, బఫరు.len-1);
+	ఒకవేళ (repo_get_oid(the_repository, బఫరు.buf, stash))
+		die(_("not a valid object: %s"), బఫరు.buf);
 	rc = 0;
-out:
-	strbuf_release(&buffer);
-	return rc;
+బహిర్గతం:
+	strbuf_release(&బఫరు);
+	తిరిగి rc;
 }
 
-static void read_empty(const struct object_id *oid)
+స్థిర శూన్య read_ఖాళీలు(స్థిరరాశి నిర్మాణం object_id *oid)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process cmd = బిడ్డ_PROCESS_INIT;
 
-	strvec_pushl(&cmd.args, "read-tree", "-m", "-u",
-		     empty_tree_oid_hex(the_repository->hash_algo),
-		     oid_to_hex(oid), NULL);
+	strvec_pushl(&cmd.వాదనలు, "read-tree", "-m", "-u",
+		     ఖాళీలు_వృక్షం_oid_hex(the_repository->hash_algo),
+		     oid_గమ్యం_hex(oid), ఖాళీ);
 	cmd.git_cmd = 1;
 
-	if (run_command(&cmd))
+	ఒకవేళ (నిరంతరం_command(&cmd))
 		die(_("read-tree failed"));
 }
 
-static void reset_hard(const struct object_id *oid)
+స్థిర శూన్య reset_hard(స్థిరరాశి నిర్మాణం object_id *oid)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process cmd = బిడ్డ_PROCESS_INIT;
 
-	strvec_pushl(&cmd.args, "read-tree", "-v", "--reset", "-u",
-		     oid_to_hex(oid), NULL);
+	strvec_pushl(&cmd.వాదనలు, "read-tree", "-v", "--reset", "-u",
+		     oid_గమ్యం_hex(oid), ఖాళీ);
 	cmd.git_cmd = 1;
 
-	if (run_command(&cmd))
+	ఒకవేళ (నిరంతరం_command(&cmd))
 		die(_("read-tree failed"));
 }
 
-static void restore_state(const struct object_id *head,
-			  const struct object_id *stash)
+స్థిర శూన్య restore_state(స్థిరరాశి నిర్మాణం object_id *తల,
+			  స్థిరరాశి నిర్మాణం object_id *stash)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	నిర్మాణం బిడ్డ_process cmd = బిడ్డ_PROCESS_INIT;
 
-	reset_hard(head);
+	reset_hard(తల);
 
-	if (is_null_oid(stash))
-		goto refresh_cache;
+	ఒకవేళ (is_null_oid(stash))
+		వెళ్ళు refresh_cache;
 
-	strvec_pushl(&cmd.args, "stash", "apply", "--index", "--quiet", NULL);
-	strvec_push(&cmd.args, oid_to_hex(stash));
+	strvec_pushl(&cmd.వాదనలు, "stash", "apply", "--index", "--quiet", ఖాళీ);
+	strvec_నెట్టు(&cmd.వాదనలు, oid_గమ్యం_hex(stash));
 
 	/*
 	 * It is OK to ignore error here, for example when there was
 	 * nothing to restore.
 	 */
 	cmd.git_cmd = 1;
-	run_command(&cmd);
+	నిరంతరం_command(&cmd);
 
 refresh_cache:
-	discard_index(the_repository->index);
-	if (repo_read_index(the_repository) < 0)
+	discard_సూచీ(the_repository->సూచీ);
+	ఒకవేళ (repo_read_సూచీ(the_repository) < 0)
 		die(_("could not read index"));
 }
 
 /* This is called when no merge was necessary. */
-static void finish_up_to_date(void)
+స్థిర శూన్య ముగింపు_పైకి_గమ్యం_date(శూన్య)
 {
-	if (verbosity >= 0) {
-		if (squash)
+	ఒకవేళ (verbosity >= 0) {
+		ఒకవేళ (squash)
 			puts(_("Already up to date. (nothing to squash)"));
-		else
+		లేకపోతే
 			puts(_("Already up to date."));
 	}
-	remove_merge_branch_state(the_repository);
+	remove_విలీనం_branch_state(the_repository);
 }
 
-static void squash_message(struct commit *commit, struct commit_list *remoteheads)
+స్థిర శూన్య squash_సందేశం(నిర్మాణం commit *commit, నిర్మాణం commit_list *remoteheads)
 {
-	struct rev_info rev;
-	struct strbuf out = STRBUF_INIT;
-	struct commit_list *j;
-	struct pretty_print_context ctx = {0};
+	నిర్మాణం rev_info rev;
+	నిర్మాణం strbuf బహిర్గతం = STRBUF_INIT;
+	నిర్మాణం commit_list *j;
+	నిర్మాణం pretty_print_context ctx = {0};
 
-	printf(_("Squash commit -- not updating HEAD\n"));
+	రాయి(_("Squash commit -- not updating HEAD\n"));
 
-	repo_init_revisions(the_repository, &rev, NULL);
+	repo_init_revisions(the_repository, &rev, ఖాళీ);
 	diff_merges_suppress(&rev);
 	rev.commit_format = CMIT_FMT_MEDIUM;
 
 	commit->object.flags |= UNINTERESTING;
-	add_pending_object(&rev, &commit->object, NULL);
+	కూడు_pending_object(&rev, &commit->object, ఖాళీ);
 
-	for (j = remoteheads; j; j = j->next)
-		add_pending_object(&rev, &j->item->object, NULL);
+	కొరకు (j = remoteheads; j; j = j->తదుపరి)
+		కూడు_pending_object(&rev, &j->అంశం->object, ఖాళీ);
 
-	setup_revisions(0, NULL, &rev, NULL);
-	if (prepare_revision_walk(&rev))
+	అమరిక_revisions(0, ఖాళీ, &rev, ఖాళీ);
+	ఒకవేళ (prepare_revision_walk(&rev))
 		die(_("revision walk setup failed"));
 
 	ctx.abbrev = rev.abbrev;
-	ctx.date_mode = rev.date_mode;
+	ctx.date_బహుళకం = rev.date_బహుళకం;
 	ctx.fmt = rev.commit_format;
 
-	strbuf_addstr(&out, "Squashed commit of the following:\n");
-	while ((commit = get_revision(&rev)) != NULL) {
-		strbuf_addch(&out, '\n');
-		strbuf_addf(&out, "commit %s\n",
-			oid_to_hex(&commit->object.oid));
-		pretty_print_commit(&ctx, commit, &out);
+	strbuf_addstr(&బహిర్గతం, "Squashed commit of the following:\n");
+	అయితే ((commit = get_revision(&rev)) != ఖాళీ) {
+		strbuf_addch(&బహిర్గతం, '\n');
+		strbuf_addf(&బహిర్గతం, "commit %s\n",
+			oid_గమ్యం_hex(&commit->object.oid));
+		pretty_print_commit(&ctx, commit, &బహిర్గతం);
 	}
-	write_file_buf(git_path_squash_msg(the_repository), out.buf, out.len);
-	strbuf_release(&out);
+	write_file_buf(git_మార్గం_squash_సందేశం(the_repository), బహిర్గతం.buf, బహిర్గతం.len);
+	strbuf_release(&బహిర్గతం);
 	release_revisions(&rev);
 }
 
-static void finish(struct commit *head_commit,
-		   struct commit_list *remoteheads,
-		   const struct object_id *new_head, const char *msg)
+స్థిర శూన్య ముగింపు(నిర్మాణం commit *తల_commit,
+		   నిర్మాణం commit_list *remoteheads,
+		   స్థిరరాశి నిర్మాణం object_id *new_తల, స్థిరరాశి అక్షరం *సందేశం)
 {
-	struct strbuf reflog_message = STRBUF_INIT;
-	const struct object_id *head = &head_commit->object.oid;
+	నిర్మాణం strbuf reflog_సందేశం_2 = STRBUF_INIT;
+	స్థిరరాశి నిర్మాణం object_id *తల = &తల_commit->object.oid;
 
-	if (!msg)
-		strbuf_addstr(&reflog_message, getenv("GIT_REFLOG_ACTION"));
-	else {
-		if (verbosity >= 0)
-			printf("%s\n", msg);
-		strbuf_addf(&reflog_message, "%s: %s",
-			getenv("GIT_REFLOG_ACTION"), msg);
+	ఒకవేళ (!సందేశం)
+		strbuf_addstr(&reflog_సందేశం_2, getenv("GIT_REFLOG_ACTION"));
+	లేకపోతే {
+		ఒకవేళ (verbosity >= 0)
+			రాయి("%s\n", సందేశం);
+		strbuf_addf(&reflog_సందేశం_2, "%s: %s",
+			getenv("GIT_REFLOG_ACTION"), సందేశం);
 	}
-	if (squash) {
-		squash_message(head_commit, remoteheads);
-	} else {
-		if (verbosity >= 0 && !merge_msg.len)
-			printf(_("No merge message -- not updating HEAD\n"));
-		else {
+	ఒకవేళ (squash) {
+		squash_సందేశం(తల_commit, remoteheads);
+	} లేకపోతే {
+		ఒకవేళ (verbosity >= 0 && !విలీనం_సందేశం.len)
+			రాయి(_("No merge message -- not updating HEAD\n"));
+		లేకపోతే {
 			refs_update_ref(get_main_ref_store(the_repository),
-					reflog_message.buf, "HEAD", new_head,
-					head,
+					reflog_సందేశం_2.buf, "HEAD", new_తల,
+					తల,
 					0, UPDATE_REFS_DIE_ON_ERR);
 			/*
 			 * We ignore errors in 'gc --auto', since the
 			 * user should see them.
 			 */
-			run_auto_maintenance(the_repository, verbosity < 0);
+			నిరంతరం_auto_maintenance(the_repository, verbosity < 0);
 		}
 	}
-	if (new_head && show_diffstat) {
-		struct diff_options opts;
-		repo_diff_setup(the_repository, &opts);
+	ఒకవేళ (new_తల && show_diffstat) {
+		నిర్మాణం diff_options opts;
+		repo_diff_అమరిక(the_repository, &opts);
 		init_diffstat_widths(&opts);
 
-		switch (show_diffstat) {
-		case MERGE_SHOW_DIFFSTAT: /* 1 */
+		ఎంపిక (show_diffstat) {
+		స్థితి విలీనం_SHOW_DIFFSTAT: /* 1 */
 			opts.output_format |=
 				DIFF_FORMAT_SUMMARY | DIFF_FORMAT_DIFFSTAT;
-			break;
-		case MERGE_SHOW_COMPACTSUMMARY: /* 2 */
+			ఆపు;
+		స్థితి విలీనం_SHOW_COMPACTSUMMARY: /* 2 */
 			opts.output_format |= DIFF_FORMAT_DIFFSTAT;
 			opts.flags.stat_with_summary = 1;
-			break;
-		default:
-			break;
+			ఆపు;
+		అప్రమేయ:
+			ఆపు;
 		}
 		opts.detect_rename = DIFF_DETECT_RENAME;
-		diff_setup_done(&opts);
-		diff_tree_oid(head, new_head, "", &opts);
+		diff_అమరిక_పూర్తి(&opts);
+		diff_వృక్షం_oid(తల, new_తల, "", &opts);
 		diffcore_std(&opts);
 		diff_flush(&opts);
 	}
 
 	/* Run a post-merge hook */
-	run_hooks_l(the_repository, "post-merge", squash ? "1" : "0", NULL);
+	నిరంతరం_hooks_l(the_repository, "post-merge", squash ? "1" : "0", ఖాళీ);
 
-	if (new_head)
+	ఒకవేళ (new_తల)
 		apply_autostash_ref(the_repository, "MERGE_AUTOSTASH",
-				    NULL, NULL, NULL, NULL);
-	strbuf_release(&reflog_message);
+				    ఖాళీ, ఖాళీ, ఖాళీ, ఖాళీ);
+	strbuf_release(&reflog_సందేశం_2);
 }
 
 /* Get the name for the merge commit's message. */
-static void merge_name(const char *remote, struct strbuf *msg)
+స్థిర శూన్య విలీనం_name(స్థిరరాశి అక్షరం *remote, నిర్మాణం strbuf *సందేశం)
 {
-	struct commit *remote_head;
-	struct object_id branch_head;
-	struct strbuf bname = STRBUF_INIT;
-	struct merge_remote_desc *desc;
-	const char *ptr;
-	char *found_ref = NULL;
-	int len, early;
+	నిర్మాణం commit *remote_తల;
+	నిర్మాణం object_id branch_తల;
+	నిర్మాణం strbuf bname = STRBUF_INIT;
+	నిర్మాణం విలీనం_remote_desc *desc;
+	స్థిరరాశి అక్షరం *ptr;
+	అక్షరం *దొరికింది_ref = ఖాళీ;
+	పూర్ణాంకం len, early;
 
 	copy_branchname(the_repository, &bname, remote, 0);
 	remote = bname.buf;
 
-	oidclr(&branch_head, the_repository->hash_algo);
-	remote_head = get_merge_parent(remote);
-	if (!remote_head)
+	oidclr(&branch_తల, the_repository->hash_algo);
+	remote_తల = get_విలీనం_మాతృ(remote);
+	ఒకవేళ (!remote_తల)
 		die(_("'%s' does not point to a commit"), remote);
 
-	if (repo_dwim_ref(the_repository, remote, strlen(remote), &branch_head,
-			  &found_ref, 0) > 0) {
-		if (starts_with(found_ref, "refs/heads/")) {
-			strbuf_addf(msg, "%s\t\tbranch '%s' of .\n",
-				    oid_to_hex(&branch_head), remote);
-			goto cleanup;
+	ఒకవేళ (repo_dwim_ref(the_repository, remote, అక్షరశ్రేణి_పొడవు(remote), &branch_తల,
+			  &దొరికింది_ref, 0) > 0) {
+		ఒకవేళ (starts_with(దొరికింది_ref, "refs/heads/")) {
+			strbuf_addf(సందేశం, "%s\t\tbranch '%s' of .\n",
+				    oid_గమ్యం_hex(&branch_తల), remote);
+			వెళ్ళు cleanup;
 		}
-		if (starts_with(found_ref, "refs/tags/")) {
-			strbuf_addf(msg, "%s\t\ttag '%s' of .\n",
-				    oid_to_hex(&branch_head), remote);
-			goto cleanup;
+		ఒకవేళ (starts_with(దొరికింది_ref, "refs/tags/")) {
+			strbuf_addf(సందేశం, "%s\t\ttag '%s' of .\n",
+				    oid_గమ్యం_hex(&branch_తల), remote);
+			వెళ్ళు cleanup;
 		}
-		if (starts_with(found_ref, "refs/remotes/")) {
-			strbuf_addf(msg, "%s\t\tremote-tracking branch '%s' of .\n",
-				    oid_to_hex(&branch_head), remote);
-			goto cleanup;
+		ఒకవేళ (starts_with(దొరికింది_ref, "refs/remotes/")) {
+			strbuf_addf(సందేశం, "%s\t\tremote-tracking branch '%s' of .\n",
+				    oid_గమ్యం_hex(&branch_తల), remote);
+			వెళ్ళు cleanup;
 		}
 	}
 
 	/* See if remote matches <name>^^^.. or <name>~<number> */
-	for (len = 0, ptr = remote + strlen(remote);
+	కొరకు (len = 0, ptr = remote + అక్షరశ్రేణి_పొడవు(remote);
 	     remote < ptr && ptr[-1] == '^';
 	     ptr--)
 		len++;
-	if (len)
+	ఒకవేళ (len)
 		early = 1;
-	else {
+	లేకపోతే {
 		early = 0;
 		ptr = strrchr(remote, '~');
-		if (ptr) {
-			int seen_nonzero = 0;
+		ఒకవేళ (ptr) {
+			పూర్ణాంకం చూసిన_nonzero = 0;
 
 			len++; /* count ~ */
-			while (*++ptr && isdigit(*ptr)) {
-				seen_nonzero |= (*ptr != '0');
+			అయితే (*++ptr && అంకెనా(*ptr)) {
+				చూసిన_nonzero |= (*ptr != '0');
 				len++;
 			}
-			if (*ptr)
+			ఒకవేళ (*ptr)
 				len = 0; /* not ...~<number> */
-			else if (seen_nonzero)
+			లేకపోతే ఒకవేళ (చూసిన_nonzero)
 				early = 1;
-			else if (len == 1)
+			లేకపోతే ఒకవేళ (len == 1)
 				early = 1; /* "name~" is "name~1"! */
 		}
 	}
-	if (len) {
-		struct strbuf truname = STRBUF_INIT;
+	ఒకవేళ (len) {
+		నిర్మాణం strbuf truname = STRBUF_INIT;
 		strbuf_addf(&truname, "refs/heads/%s", remote);
 		strbuf_setlen(&truname, truname.len - len);
-		if (refs_ref_exists(get_main_ref_store(the_repository), truname.buf)) {
-			strbuf_addf(msg,
+		ఒకవేళ (refs_ref_exists(get_main_ref_store(the_repository), truname.buf)) {
+			strbuf_addf(సందేశం,
 				    "%s\t\tbranch '%s'%s of .\n",
-				    oid_to_hex(&remote_head->object.oid),
+				    oid_గమ్యం_hex(&remote_తల->object.oid),
 				    truname.buf + 11,
 				    (early ? " (early part)" : ""));
 			strbuf_release(&truname);
-			goto cleanup;
+			వెళ్ళు cleanup;
 		}
 		strbuf_release(&truname);
 	}
 
-	desc = merge_remote_util(remote_head);
-	if (desc && desc->obj && desc->obj->type == OBJ_TAG) {
-		strbuf_addf(msg, "%s\t\t%s '%s'\n",
-			    oid_to_hex(&desc->obj->oid),
+	desc = విలీనం_remote_util(remote_తల);
+	ఒకవేళ (desc && desc->obj && desc->obj->type == OBJ_ట్యాగ్) {
+		strbuf_addf(సందేశం, "%s\t\t%s '%s'\n",
+			    oid_గమ్యం_hex(&desc->obj->oid),
 			    type_name(desc->obj->type),
 			    remote);
-		goto cleanup;
+		వెళ్ళు cleanup;
 	}
 
-	strbuf_addf(msg, "%s\t\tcommit '%s'\n",
-		oid_to_hex(&remote_head->object.oid), remote);
+	strbuf_addf(సందేశం, "%s\t\tcommit '%s'\n",
+		oid_గమ్యం_hex(&remote_తల->object.oid), remote);
 cleanup:
-	free(found_ref);
+	విడుదల(దొరికింది_ref);
 	strbuf_release(&bname);
 }
 
-static void parse_branch_merge_options(char *bmo)
+స్థిర శూన్య parse_branch_విలీనం_options(అక్షరం *bmo)
 {
-	const char **argv;
-	int argc;
+	స్థిరరాశి అక్షరం **argv;
+	పూర్ణాంకం argc;
 
-	if (!bmo)
-		return;
-	argc = split_cmdline(bmo, &argv);
-	if (argc < 0)
+	ఒకవేళ (!bmo)
+		తిరిగి;
+	argc = విభజించు_cmdline(bmo, &argv);
+	ఒకవేళ (argc < 0)
 		die(_("Bad branch.%s.mergeoptions string: %s"), branch,
-		    _(split_cmdline_strerror(argc)));
+		    _(విభజించు_cmdline_strerror(argc)));
 	REALLOC_ARRAY(argv, argc + 2);
 	MOVE_ARRAY(argv + 1, argv, argc + 1);
 	argc++;
 	argv[0] = "branch.*.mergeoptions";
-	parse_options(argc, argv, NULL, builtin_merge_options,
-		      builtin_merge_usage, 0);
-	free(argv);
+	parse_options(argc, argv, ఖాళీ, builtin_విలీనం_options,
+		      builtin_విలీనం_usage, 0);
+	విడుదల(argv);
 }
 
-static int git_merge_config(const char *k, const char *v,
-			    const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం git_విలీనం_config(స్థిరరాశి అక్షరం *k, స్థిరరాశి అక్షరం *v,
+			    స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	int status;
-	const char *str;
+	పూర్ణాంకం స్థితి_2;
+	స్థిరరాశి అక్షరం *str;
 
-	if (branch &&
-	    skip_prefix(k, "branch.", &str) &&
-	    skip_prefix(str, branch, &str) &&
+	ఒకవేళ (branch &&
+	    skip_ఉపసర్గ(k, "branch.", &str) &&
+	    skip_ఉపసర్గ(str, branch, &str) &&
 	    !strcmp(str, ".mergeoptions")) {
-		free(branch_mergeoptions);
+		విడుదల(branch_mergeoptions);
 		branch_mergeoptions = xstrdup(v);
-		return 0;
+		తిరిగి 0;
 	}
 
-	if (!strcmp(k, "merge.diffstat") || !strcmp(k, "merge.stat")) {
-		int val = git_parse_maybe_bool_text(v);
-		switch (val) {
-		case 0:
+	ఒకవేళ (!strcmp(k, "merge.diffstat") || !strcmp(k, "merge.stat")) {
+		పూర్ణాంకం val = git_parse_maybe_bool_పాఠ్యం(v);
+		ఎంపిక (val) {
+		స్థితి 0:
 			show_diffstat = 0;
-			break;
-		case 1:
-			show_diffstat = MERGE_SHOW_DIFFSTAT;
-			break;
-		default:
-			if (!strcmp(v, "compact"))
-				show_diffstat = MERGE_SHOW_COMPACTSUMMARY;
+			ఆపు;
+		స్థితి 1:
+			show_diffstat = విలీనం_SHOW_DIFFSTAT;
+			ఆపు;
+		అప్రమేయ:
+			ఒకవేళ (!strcmp(v, "compact"))
+				show_diffstat = విలీనం_SHOW_COMPACTSUMMARY;
 			/*
 			 * We do not need to have an explicit
 			 *
@@ -694,359 +694,359 @@ static int git_merge_config(const char *k, const char *v,
 			 * here, because the catch-all uses the
 			 * diffstat style anyway.
 			 */
-			else
+			లేకపోతే
 				/*
 				 * A setting from a future?  It is not an
 				 * error grave enough to fail the command.
 				 * proceed using the default one.
 				 */
-				show_diffstat = MERGE_SHOW_DIFFSTAT;
-			break;
+				show_diffstat = విలీనం_SHOW_DIFFSTAT;
+			ఆపు;
 		}
-	} else if (!strcmp(k, "merge.verifysignatures")) {
+	} లేకపోతే ఒకవేళ (!strcmp(k, "merge.verifysignatures")) {
 		verify_signatures = git_config_bool(k, v);
-	} else if (!strcmp(k, "pull.twohead")) {
+	} లేకపోతే ఒకవేళ (!strcmp(k, "pull.twohead")) {
 		FREE_AND_NULL(pull_twohead);
-		return git_config_string(&pull_twohead, k, v);
-	} else if (!strcmp(k, "pull.octopus")) {
+		తిరిగి git_config_string(&pull_twohead, k, v);
+	} లేకపోతే ఒకవేళ (!strcmp(k, "pull.octopus")) {
 		FREE_AND_NULL(pull_octopus);
-		return git_config_string(&pull_octopus, k, v);
-	} else if (!strcmp(k, "commit.cleanup")) {
-		return git_config_string(&cleanup_arg, k, v);
-	} else if (!strcmp(k, "merge.ff")) {
-		int boolval = git_parse_maybe_bool(v);
-		if (0 <= boolval) {
+		తిరిగి git_config_string(&pull_octopus, k, v);
+	} లేకపోతే ఒకవేళ (!strcmp(k, "commit.cleanup")) {
+		తిరిగి git_config_string(&cleanup_arg, k, v);
+	} లేకపోతే ఒకవేళ (!strcmp(k, "merge.ff")) {
+		పూర్ణాంకం boolval = git_parse_maybe_bool(v);
+		ఒకవేళ (0 <= boolval) {
 			fast_forward = boolval ? FF_ALLOW : FF_NO;
-		} else if (v && !strcmp(v, "only")) {
+		} లేకపోతే ఒకవేళ (v && !strcmp(v, "only")) {
 			fast_forward = FF_ONLY;
 		} /* do not barf on values from future versions of git */
-		return 0;
-	} else if (!strcmp(k, "merge.defaulttoupstream")) {
-		default_to_upstream = git_config_bool(k, v);
-		return 0;
-	} else if (!strcmp(k, "commit.gpgsign")) {
-		sign_commit = git_config_bool(k, v) ? "" : NULL;
-		return 0;
-	} else if (!strcmp(k, "gpg.mintrustlevel")) {
+		తిరిగి 0;
+	} లేకపోతే ఒకవేళ (!strcmp(k, "merge.defaulttoupstream")) {
+		default_గమ్యం_upstream = git_config_bool(k, v);
+		తిరిగి 0;
+	} లేకపోతే ఒకవేళ (!strcmp(k, "commit.gpgsign")) {
+		sign_commit = git_config_bool(k, v) ? "" : ఖాళీ;
+		తిరిగి 0;
+	} లేకపోతే ఒకవేళ (!strcmp(k, "gpg.mintrustlevel")) {
 		check_trust_level = 0;
-	} else if (!strcmp(k, "merge.autostash")) {
+	} లేకపోతే ఒకవేళ (!strcmp(k, "merge.autostash")) {
 		autostash = git_config_bool(k, v);
-		return 0;
+		తిరిగి 0;
 	}
 
-	status = fmt_merge_msg_config(k, v, ctx, cb);
-	if (status)
-		return status;
-	return git_diff_ui_config(k, v, ctx, cb);
+	స్థితి_2 = fmt_విలీనం_సందేశం_config(k, v, ctx, cb);
+	ఒకవేళ (స్థితి_2)
+		తిరిగి స్థితి_2;
+	తిరిగి git_diff_ui_config(k, v, ctx, cb);
 }
 
-static int read_tree_trivial(struct object_id *common, struct object_id *head,
-			     struct object_id *one)
+స్థిర పూర్ణాంకం read_వృక్షం_trivial(నిర్మాణం object_id *common, నిర్మాణం object_id *తల,
+			     నిర్మాణం object_id *one)
 {
-	int i, nr_trees = 0;
-	struct tree *trees[MAX_UNPACK_TREES];
-	struct tree_desc t[MAX_UNPACK_TREES];
-	struct unpack_trees_options opts;
+	పూర్ణాంకం i, nr_trees = 0;
+	నిర్మాణం వృక్షం *trees[MAX_UNPACK_TREES];
+	నిర్మాణం వృక్షం_desc t[MAX_UNPACK_TREES];
+	నిర్మాణం unpack_trees_options opts;
 
-	memset(&opts, 0, sizeof(opts));
-	opts.head_idx = 2;
-	opts.src_index = the_repository->index;
-	opts.dst_index = the_repository->index;
+	memset(&opts, 0, పరిమాణం(opts));
+	opts.తల_idx = 2;
+	opts.src_సూచీ = the_repository->సూచీ;
+	opts.dst_సూచీ = the_repository->సూచీ;
 	opts.update = 1;
 	opts.verbose_update = 1;
 	opts.trivial_merges_only = 1;
-	opts.merge = 1;
+	opts.విలీనం = 1;
 	opts.preserve_ignored = 0; /* FIXME: !overwrite_ignore */
-	trees[nr_trees] = repo_parse_tree_indirect(the_repository, common);
-	if (!trees[nr_trees++])
-		return -1;
-	trees[nr_trees] = repo_parse_tree_indirect(the_repository, head);
-	if (!trees[nr_trees++])
-		return -1;
-	trees[nr_trees] = repo_parse_tree_indirect(the_repository, one);
-	if (!trees[nr_trees++])
-		return -1;
-	opts.fn = threeway_merge;
-	cache_tree_free(&the_repository->index->cache_tree);
-	for (i = 0; i < nr_trees; i++) {
-		repo_parse_tree(the_repository, trees[i]);
-		init_tree_desc(t+i, &trees[i]->object.oid,
-			       trees[i]->buffer, trees[i]->size);
+	trees[nr_trees] = repo_parse_వృక్షం_పరోక్ష(the_repository, common);
+	ఒకవేళ (!trees[nr_trees++])
+		తిరిగి -1;
+	trees[nr_trees] = repo_parse_వృక్షం_పరోక్ష(the_repository, తల);
+	ఒకవేళ (!trees[nr_trees++])
+		తిరిగి -1;
+	trees[nr_trees] = repo_parse_వృక్షం_పరోక్ష(the_repository, one);
+	ఒకవేళ (!trees[nr_trees++])
+		తిరిగి -1;
+	opts.fn = threeway_విలీనం;
+	cache_వృక్షం_free(&the_repository->సూచీ->cache_వృక్షం);
+	కొరకు (i = 0; i < nr_trees; i++) {
+		repo_parse_వృక్షం(the_repository, trees[i]);
+		init_వృక్షం_desc(t+i, &trees[i]->object.oid,
+			       trees[i]->బఫరు, trees[i]->కొలత);
 	}
-	if (unpack_trees(nr_trees, t, &opts))
-		return -1;
-	return 0;
+	ఒకవేళ (unpack_trees(nr_trees, t, &opts))
+		తిరిగి -1;
+	తిరిగి 0;
 }
 
-static void write_tree_trivial(struct object_id *oid)
+స్థిర శూన్య write_వృక్షం_trivial(నిర్మాణం object_id *oid)
 {
-	if (write_index_as_tree(oid, the_repository->index,
-				repo_get_index_file(the_repository),
-				0, NULL))
+	ఒకవేళ (write_సూచీ_as_వృక్షం(oid, the_repository->సూచీ,
+				repo_get_సూచీ_file(the_repository),
+				0, ఖాళీ))
 		die(_("git write-tree failed to write a tree"));
 }
 
-static int try_merge_strategy(const char *strategy, struct commit_list *common,
-			      struct commit_list *remoteheads,
-			      struct commit *head)
+స్థిర పూర్ణాంకం try_విలీనం_strategy(స్థిరరాశి అక్షరం *strategy, నిర్మాణం commit_list *common,
+			      నిర్మాణం commit_list *remoteheads,
+			      నిర్మాణం commit *తల)
 {
-	const char *head_arg = "HEAD";
+	స్థిరరాశి అక్షరం *తల_arg = "HEAD";
 
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET,
-					 SKIP_IF_UNCHANGED, 0, NULL, NULL,
-					 NULL) < 0)
+	ఒకవేళ (repo_refresh_and_write_సూచీ(the_repository, REFRESH_QUIET,
+					 SKIP_IF_UNCHANGED, 0, ఖాళీ, ఖాళీ,
+					 ఖాళీ) < 0)
 		die(_("Unable to write index."));
 
-	if (!strcmp(strategy, "recursive") || !strcmp(strategy, "subtree") ||
+	ఒకవేళ (!strcmp(strategy, "recursive") || !strcmp(strategy, "subtree") ||
 	    !strcmp(strategy, "ort")) {
-		struct lock_file lock = LOCK_INIT;
-		int clean, x;
-		struct commit *result;
-		struct commit_list *reversed = NULL;
-		struct merge_options o;
-		struct commit_list *j;
+		నిర్మాణం తాళం_file తాళం = తాళం_INIT;
+		పూర్ణాంకం clean, x;
+		నిర్మాణం commit *ఫలితం;
+		నిర్మాణం commit_list *reversed = ఖాళీ;
+		నిర్మాణం విలీనం_options o;
+		నిర్మాణం commit_list *j;
 
-		if (remoteheads->next) {
+		ఒకవేళ (remoteheads->తదుపరి) {
 			error(_("Not handling anything other than two heads merge."));
-			return 2;
+			తిరిగి 2;
 		}
 
-		init_ui_merge_options(&o, the_repository);
-		if (!strcmp(strategy, "subtree"))
-			o.subtree_shift = "";
+		init_ui_విలీనం_options(&o, the_repository);
+		ఒకవేళ (!strcmp(strategy, "subtree"))
+			o.subtree_జరుపు = "";
 
-		o.show_rename_progress =
-			show_progress == -1 ? isatty(2) : show_progress;
+		o.show_rename_పురోగతి =
+			show_పురోగతి == -1 ? isatty(2) : show_పురోగతి;
 
-		for (x = 0; x < xopts.nr; x++)
-			if (parse_merge_opt(&o, xopts.v[x]))
+		కొరకు (x = 0; x < xopts.nr; x++)
+			ఒకవేళ (parse_విలీనం_opt(&o, xopts.v[x]))
 				die(_("unknown strategy option: -X%s"), xopts.v[x]);
 
-		o.branch1 = head_arg;
-		o.branch2 = merge_remote_util(remoteheads->item)->name;
+		o.branch1 = తల_arg;
+		o.branch2 = విలీనం_remote_util(remoteheads->అంశం)->name;
 
-		for (j = common; j; j = j->next)
-			commit_list_insert(j->item, &reversed);
+		కొరకు (j = common; j; j = j->తదుపరి)
+			commit_list_చొప్పించు(j->అంశం, &reversed);
 
-		repo_hold_locked_index(the_repository, &lock,
-				       LOCK_DIE_ON_ERROR);
-		clean = merge_ort_recursive(&o, head, remoteheads->item,
-					    reversed, &result);
+		repo_hold_locked_సూచీ(the_repository, &తాళం,
+				       తాళం_DIE_ON_ERROR);
+		clean = విలీనం_ort_recursive(&o, తల, remoteheads->అంశం,
+					    reversed, &ఫలితం);
 		commit_list_free(reversed);
 		strbuf_release(&o.obuf);
 
-		if (clean < 0) {
-			rollback_lock_file(&lock);
-			return 2;
+		ఒకవేళ (clean < 0) {
+			rollback_తాళం_file(&తాళం);
+			తిరిగి 2;
 		}
-		if (write_locked_index(the_repository->index, &lock,
-				       COMMIT_LOCK | SKIP_IF_UNCHANGED))
-			die(_("unable to write %s"), repo_get_index_file(the_repository));
-		return clean ? 0 : 1;
-	} else {
-		return try_merge_command(the_repository,
+		ఒకవేళ (write_locked_సూచీ(the_repository->సూచీ, &తాళం,
+				       COMMIT_తాళం | SKIP_IF_UNCHANGED))
+			die(_("unable to write %s"), repo_get_సూచీ_file(the_repository));
+		తిరిగి clean ? 0 : 1;
+	} లేకపోతే {
+		తిరిగి try_విలీనం_command(the_repository,
 					 strategy, xopts.nr, xopts.v,
-					 common, head_arg, remoteheads);
+					 common, తల_arg, remoteheads);
 	}
 }
 
-static void count_diff_files(struct diff_queue_struct *q,
-			     struct diff_options *opt UNUSED, void *data)
+స్థిర శూన్య లెక్క_diff_files(నిర్మాణం diff_వరుస_struct *q,
+			     నిర్మాణం diff_options *opt వాడని, శూన్య *దత్తాంశం)
 {
-	int *count = data;
+	పూర్ణాంకం *లెక్క = దత్తాంశం;
 
-	(*count) += q->nr;
+	(*లెక్క) += q->nr;
 }
 
-static int count_unmerged_entries(void)
+స్థిర పూర్ణాంకం లెక్క_unmerged_entries(శూన్య)
 {
-	int i, ret = 0;
+	పూర్ణాంకం i, ret = 0;
 
-	for (i = 0; i < the_repository->index->cache_nr; i++)
-		if (ce_stage(the_repository->index->cache[i]))
+	కొరకు (i = 0; i < the_repository->సూచీ->cache_nr; i++)
+		ఒకవేళ (ce_stage(the_repository->సూచీ->cache[i]))
 			ret++;
 
-	return ret;
+	తిరిగి ret;
 }
 
-static void add_strategies(const char *string, unsigned attr)
+స్థిర శూన్య కూడు_strategies(స్థిరరాశి అక్షరం *string, గుర్తులేని attr)
 {
-	int i;
+	పూర్ణాంకం i;
 
-	if (string) {
-		struct string_list list = STRING_LIST_INIT_DUP;
-		struct string_list_item *item;
-		string_list_split(&list, string, " ", -1);
-		for_each_string_list_item(item, &list)
-			append_strategy(get_strategy(item->string));
+	ఒకవేళ (string) {
+		నిర్మాణం string_list list = STRING_LIST_INIT_DUP;
+		నిర్మాణం string_list_అంశం *అంశం;
+		string_list_విభజించు(&list, string, " ", -1);
+		for_each_string_list_అంశం(అంశం, &list)
+			append_strategy(get_strategy(అంశం->string));
 		string_list_clear(&list, 0);
-		return;
+		తిరిగి;
 	}
-	for (i = 0; i < ARRAY_SIZE(all_strategy); i++)
-		if (all_strategy[i].attr & attr)
+	కొరకు (i = 0; i < ARRAY_కొలత(all_strategy); i++)
+		ఒకవేళ (all_strategy[i].attr & attr)
 			append_strategy(&all_strategy[i]);
 
 }
 
-static void read_merge_msg(struct strbuf *msg)
+స్థిర శూన్య read_విలీనం_సందేశం(నిర్మాణం strbuf *సందేశం)
 {
-	const char *filename = git_path_merge_msg(the_repository);
-	strbuf_reset(msg);
-	if (strbuf_read_file(msg, filename, 0) < 0)
+	స్థిరరాశి అక్షరం *filename = git_మార్గం_విలీనం_సందేశం(the_repository);
+	strbuf_reset(సందేశం);
+	ఒకవేళ (strbuf_read_file(సందేశం, filename, 0) < 0)
 		die_errno(_("Could not read from '%s'"), filename);
 }
 
-static void write_merge_state(struct commit_list *);
-static void abort_commit(struct commit_list *remoteheads, const char *err_msg)
+స్థిర శూన్య write_విలీనం_state(నిర్మాణం commit_list *);
+స్థిర శూన్య abort_commit(నిర్మాణం commit_list *remoteheads, స్థిరరాశి అక్షరం *err_సందేశం)
 {
-	if (err_msg)
-		error("%s", err_msg);
+	ఒకవేళ (err_సందేశం)
+		error("%s", err_సందేశం);
 	fprintf(stderr,
 		_("Not committing merge; use 'git commit' to complete the merge.\n"));
-	write_merge_state(remoteheads);
-	exit(1);
+	write_విలీనం_state(remoteheads);
+	నిష్క్రమించు(1);
 }
 
-static const char merge_editor_comment[] =
+స్థిర స్థిరరాశి అక్షరం విలీనం_editor_comment[] =
 N_("Please enter a commit message to explain why this merge is necessary,\n"
    "especially if it merges an updated upstream into a topic branch.\n"
    "\n");
 
-static const char scissors_editor_comment[] =
+స్థిర స్థిరరాశి అక్షరం scissors_editor_comment[] =
 N_("An empty message aborts the commit.\n");
 
-static const char no_scissors_editor_comment[] =
+స్థిర స్థిరరాశి అక్షరం no_scissors_editor_comment[] =
 N_("Lines starting with '%s' will be ignored, and an empty message aborts\n"
    "the commit.\n");
 
-static void write_merge_heads(struct commit_list *);
-static void prepare_to_commit(struct commit_list *remoteheads)
+స్థిర శూన్య write_విలీనం_heads(నిర్మాణం commit_list *);
+స్థిర శూన్య prepare_గమ్యం_commit(నిర్మాణం commit_list *remoteheads)
 {
-	struct strbuf msg = STRBUF_INIT;
-	const char *index_file = repo_get_index_file(the_repository);
+	నిర్మాణం strbuf సందేశం = STRBUF_INIT;
+	స్థిరరాశి అక్షరం *సూచీ_file = repo_get_సూచీ_file(the_repository);
 
-	if (!no_verify) {
-		int invoked_hook;
+	ఒకవేళ (!no_verify) {
+		పూర్ణాంకం invoked_hook;
 
-		if (run_commit_hook(0 < option_edit, index_file, &invoked_hook,
-				    "pre-merge-commit", NULL))
-			abort_commit(remoteheads, NULL);
+		ఒకవేళ (నిరంతరం_commit_hook(0 < option_edit, సూచీ_file, &invoked_hook,
+				    "pre-merge-commit", ఖాళీ))
+			abort_commit(remoteheads, ఖాళీ);
 		/*
 		 * Re-read the index as pre-merge-commit hook could have updated it,
 		 * and write it out as a tree.  We must do this before we invoke
 		 * the editor and after we invoke run_status above.
 		 */
-		if (invoked_hook)
-			discard_index(the_repository->index);
+		ఒకవేళ (invoked_hook)
+			discard_సూచీ(the_repository->సూచీ);
 	}
-	read_index_from(the_repository->index, index_file,
+	read_సూచీ_from(the_repository->సూచీ, సూచీ_file,
 			repo_get_git_dir(the_repository));
-	strbuf_addbuf(&msg, &merge_msg);
-	if (squash)
+	strbuf_addbuf(&సందేశం, &విలీనం_సందేశం);
+	ఒకవేళ (squash)
 		BUG("the control must not reach here under --squash");
-	if (0 < option_edit) {
-		strbuf_addch(&msg, '\n');
-		if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS) {
-			wt_status_append_cut_line(&msg);
-			strbuf_commented_addf(&msg, comment_line_str, "\n");
+	ఒకవేళ (0 < option_edit) {
+		strbuf_addch(&సందేశం, '\n');
+		ఒకవేళ (cleanup_బహుళకం == COMMIT_సందేశం_CLEANUP_SCISSORS) {
+			wt_స్థితి_append_cut_పంక్తి(&సందేశం);
+			strbuf_commented_addf(&సందేశం, comment_పంక్తి_str, "\n");
 		}
-		strbuf_commented_addf(&msg, comment_line_str,
-				      _(merge_editor_comment));
-		if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS)
-			strbuf_commented_addf(&msg, comment_line_str,
+		strbuf_commented_addf(&సందేశం, comment_పంక్తి_str,
+				      _(విలీనం_editor_comment));
+		ఒకవేళ (cleanup_బహుళకం == COMMIT_సందేశం_CLEANUP_SCISSORS)
+			strbuf_commented_addf(&సందేశం, comment_పంక్తి_str,
 					      _(scissors_editor_comment));
-		else
-			strbuf_commented_addf(&msg, comment_line_str,
-				_(no_scissors_editor_comment), comment_line_str);
+		లేకపోతే
+			strbuf_commented_addf(&సందేశం, comment_పంక్తి_str,
+				_(no_scissors_editor_comment), comment_పంక్తి_str);
 	}
-	if (signoff)
-		append_signoff(&msg, ignored_log_message_bytes(msg.buf, msg.len), 0);
-	write_merge_heads(remoteheads);
-	write_file_buf(git_path_merge_msg(the_repository), msg.buf, msg.len);
-	if (run_commit_hook(0 < option_edit, repo_get_index_file(the_repository),
-			    NULL, "prepare-commit-msg",
-			    git_path_merge_msg(the_repository), "merge", NULL))
-		abort_commit(remoteheads, NULL);
-	if (0 < option_edit) {
-		if (launch_editor(git_path_merge_msg(the_repository), NULL, NULL))
-			abort_commit(remoteheads, NULL);
+	ఒకవేళ (signoff)
+		append_signoff(&సందేశం, ignored_log_సందేశం_బైట్లు(సందేశం.buf, సందేశం.len), 0);
+	write_విలీనం_heads(remoteheads);
+	write_file_buf(git_మార్గం_విలీనం_సందేశం(the_repository), సందేశం.buf, సందేశం.len);
+	ఒకవేళ (నిరంతరం_commit_hook(0 < option_edit, repo_get_సూచీ_file(the_repository),
+			    ఖాళీ, "prepare-commit-msg",
+			    git_మార్గం_విలీనం_సందేశం(the_repository), "merge", ఖాళీ))
+		abort_commit(remoteheads, ఖాళీ);
+	ఒకవేళ (0 < option_edit) {
+		ఒకవేళ (launch_editor(git_మార్గం_విలీనం_సందేశం(the_repository), ఖాళీ, ఖాళీ))
+			abort_commit(remoteheads, ఖాళీ);
 	}
 
-	if (!no_verify && run_commit_hook(0 < option_edit, repo_get_index_file(the_repository),
-					  NULL, "commit-msg",
-					  git_path_merge_msg(the_repository), NULL))
-		abort_commit(remoteheads, NULL);
+	ఒకవేళ (!no_verify && నిరంతరం_commit_hook(0 < option_edit, repo_get_సూచీ_file(the_repository),
+					  ఖాళీ, "commit-msg",
+					  git_మార్గం_విలీనం_సందేశం(the_repository), ఖాళీ))
+		abort_commit(remoteheads, ఖాళీ);
 
-	read_merge_msg(&msg);
-	cleanup_message(&msg, cleanup_mode, 0);
-	if (!msg.len)
+	read_విలీనం_సందేశం(&సందేశం);
+	cleanup_సందేశం(&సందేశం, cleanup_బహుళకం, 0);
+	ఒకవేళ (!సందేశం.len)
 		abort_commit(remoteheads, _("Empty commit message."));
-	strbuf_release(&merge_msg);
-	strbuf_addbuf(&merge_msg, &msg);
-	strbuf_release(&msg);
+	strbuf_release(&విలీనం_సందేశం);
+	strbuf_addbuf(&విలీనం_సందేశం, &సందేశం);
+	strbuf_release(&సందేశం);
 }
 
-static int merge_trivial(struct commit *head, struct commit_list *remoteheads)
+స్థిర పూర్ణాంకం విలీనం_trivial(నిర్మాణం commit *తల, నిర్మాణం commit_list *remoteheads)
 {
-	struct object_id result_tree, result_commit;
-	struct commit_list *parents = NULL, **pptr = &parents;
+	నిర్మాణం object_id ఫలితం_వృక్షం, ఫలితం_commit;
+	నిర్మాణం commit_list *parents = ఖాళీ, **pptr = &parents;
 
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET,
-					 SKIP_IF_UNCHANGED, 0, NULL, NULL,
-					 NULL) < 0)
-		return error(_("Unable to write index."));
+	ఒకవేళ (repo_refresh_and_write_సూచీ(the_repository, REFRESH_QUIET,
+					 SKIP_IF_UNCHANGED, 0, ఖాళీ, ఖాళీ,
+					 ఖాళీ) < 0)
+		తిరిగి error(_("Unable to write index."));
 
-	write_tree_trivial(&result_tree);
-	printf(_("Wonderful.\n"));
-	pptr = commit_list_append(head, pptr);
-	pptr = commit_list_append(remoteheads->item, pptr);
-	prepare_to_commit(remoteheads);
-	if (commit_tree(merge_msg.buf, merge_msg.len, &result_tree, parents,
-			&result_commit, NULL, sign_commit))
+	write_వృక్షం_trivial(&ఫలితం_వృక్షం);
+	రాయి(_("Wonderful.\n"));
+	pptr = commit_list_append(తల, pptr);
+	pptr = commit_list_append(remoteheads->అంశం, pptr);
+	prepare_గమ్యం_commit(remoteheads);
+	ఒకవేళ (commit_వృక్షం(విలీనం_సందేశం.buf, విలీనం_సందేశం.len, &ఫలితం_వృక్షం, parents,
+			&ఫలితం_commit, ఖాళీ, sign_commit))
 		die(_("failed to write commit object"));
-	finish(head, remoteheads, &result_commit, "In-index merge");
+	ముగింపు(తల, remoteheads, &ఫలితం_commit, "In-index merge");
 
-	remove_merge_branch_state(the_repository);
+	remove_విలీనం_branch_state(the_repository);
 	commit_list_free(parents);
-	return 0;
+	తిరిగి 0;
 }
 
-static int finish_automerge(struct commit *head,
-			    int head_subsumed,
-			    struct commit_list *common,
-			    struct commit_list *remoteheads,
-			    struct object_id *result_tree,
-			    const char *wt_strategy)
+స్థిర పూర్ణాంకం ముగింపు_automerge(నిర్మాణం commit *తల,
+			    పూర్ణాంకం తల_subsumed,
+			    నిర్మాణం commit_list *common,
+			    నిర్మాణం commit_list *remoteheads,
+			    నిర్మాణం object_id *ఫలితం_వృక్షం,
+			    స్థిరరాశి అక్షరం *wt_strategy)
 {
-	struct commit_list *parents = NULL;
-	struct strbuf buf = STRBUF_INIT;
-	struct object_id result_commit;
+	నిర్మాణం commit_list *parents = ఖాళీ;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
+	నిర్మాణం object_id ఫలితం_commit;
 
-	write_tree_trivial(result_tree);
+	write_వృక్షం_trivial(ఫలితం_వృక్షం);
 	commit_list_free(common);
 	parents = remoteheads;
-	if (!head_subsumed || fast_forward == FF_NO)
-		commit_list_insert(head, &parents);
-	prepare_to_commit(remoteheads);
-	if (commit_tree(merge_msg.buf, merge_msg.len, result_tree, parents,
-			&result_commit, NULL, sign_commit))
+	ఒకవేళ (!తల_subsumed || fast_forward == FF_NO)
+		commit_list_చొప్పించు(తల, &parents);
+	prepare_గమ్యం_commit(remoteheads);
+	ఒకవేళ (commit_వృక్షం(విలీనం_సందేశం.buf, విలీనం_సందేశం.len, ఫలితం_వృక్షం, parents,
+			&ఫలితం_commit, ఖాళీ, sign_commit))
 		die(_("failed to write commit object"));
 	strbuf_addf(&buf, "Merge made by the '%s' strategy.", wt_strategy);
-	finish(head, remoteheads, &result_commit, buf.buf);
+	ముగింపు(తల, remoteheads, &ఫలితం_commit, buf.buf);
 
 	strbuf_release(&buf);
-	remove_merge_branch_state(the_repository);
+	remove_విలీనం_branch_state(the_repository);
 	commit_list_free(parents);
-	return 0;
+	తిరిగి 0;
 }
 
-static int suggest_conflicts(void)
+స్థిర పూర్ణాంకం suggest_conflicts(శూన్య)
 {
-	const char *filename;
+	స్థిరరాశి అక్షరం *filename;
 	FILE *fp;
-	struct strbuf msgbuf = STRBUF_INIT;
+	నిర్మాణం strbuf msgbuf = STRBUF_INIT;
 
-	filename = git_path_merge_msg(the_repository);
+	filename = git_మార్గం_విలీనం_సందేశం(the_repository);
 	fp = xfopen(filename, "a");
 
 	/*
@@ -1056,136 +1056,136 @@ static int suggest_conflicts(void)
 	 * Thus, we will get the cleanup mode which is returned when we _are_
 	 * using an editor.
 	 */
-	append_conflicts_hint(the_repository->index, &msgbuf,
-			      get_cleanup_mode(cleanup_arg, 1));
+	append_conflicts_hint(the_repository->సూచీ, &msgbuf,
+			      get_cleanup_బహుళకం(cleanup_arg, 1));
 	fputs(msgbuf.buf, fp);
 	strbuf_release(&msgbuf);
 	fclose(fp);
 	repo_rerere(the_repository, allow_rerere_auto);
-	printf(_("Automatic merge failed; "
+	రాయి(_("Automatic merge failed; "
 			"fix conflicts and then commit the result.\n"));
-	return 1;
+	తిరిగి 1;
 }
 
-static int evaluate_result(void)
+స్థిర పూర్ణాంకం evaluate_ఫలితం(శూన్య)
 {
-	int cnt = 0;
-	struct rev_info rev;
+	పూర్ణాంకం cnt = 0;
+	నిర్మాణం rev_info rev;
 
 	/* Check how many files differ. */
 	repo_init_revisions(the_repository, &rev, "");
-	setup_revisions(0, NULL, &rev, NULL);
+	అమరిక_revisions(0, ఖాళీ, &rev, ఖాళీ);
 	rev.diffopt.output_format |=
 		DIFF_FORMAT_CALLBACK;
-	rev.diffopt.format_callback = count_diff_files;
-	rev.diffopt.format_callback_data = &cnt;
-	run_diff_files(&rev, 0);
+	rev.diffopt.format_callback = లెక్క_diff_files;
+	rev.diffopt.format_callback_దత్తాంశం = &cnt;
+	నిరంతరం_diff_files(&rev, 0);
 
 	/*
 	 * Check how many unmerged entries are
 	 * there.
 	 */
-	cnt += count_unmerged_entries();
+	cnt += లెక్క_unmerged_entries();
 
 	release_revisions(&rev);
-	return cnt;
+	తిరిగి cnt;
 }
 
 /*
  * Pretend as if the user told us to merge with the remote-tracking
  * branch we have for the upstream of the current branch
  */
-static int setup_with_upstream(const char ***argv)
+స్థిర పూర్ణాంకం అమరిక_with_upstream(స్థిరరాశి అక్షరం ***argv)
 {
-	struct branch *branch = branch_get(NULL);
-	int i;
-	const char **args;
+	నిర్మాణం branch *branch = branch_get(ఖాళీ);
+	పూర్ణాంకం i;
+	స్థిరరాశి అక్షరం **వాదనలు;
 
-	if (!branch)
+	ఒకవేళ (!branch)
 		die(_("No current branch."));
-	if (!branch->remote_name)
+	ఒకవేళ (!branch->remote_name)
 		die(_("No remote for the current branch."));
-	if (!branch->merge_nr)
+	ఒకవేళ (!branch->విలీనం_nr)
 		die(_("No default upstream defined for the current branch."));
 
-	args = xcalloc(st_add(branch->merge_nr, 1), sizeof(char *));
-	for (i = 0; i < branch->merge_nr; i++) {
-		if (!branch->merge[i]->dst)
+	వాదనలు = xcalloc(st_కూడు(branch->విలీనం_nr, 1), పరిమాణం(అక్షరం *));
+	కొరకు (i = 0; i < branch->విలీనం_nr; i++) {
+		ఒకవేళ (!branch->విలీనం[i]->dst)
 			die(_("No remote-tracking branch for %s from %s"),
-			    branch->merge[i]->src, branch->remote_name);
-		args[i] = branch->merge[i]->dst;
+			    branch->విలీనం[i]->src, branch->remote_name);
+		వాదనలు[i] = branch->విలీనం[i]->dst;
 	}
-	args[i] = NULL;
-	*argv = args;
-	return i;
+	వాదనలు[i] = ఖాళీ;
+	*argv = వాదనలు;
+	తిరిగి i;
 }
 
-static void write_merge_heads(struct commit_list *remoteheads)
+స్థిర శూన్య write_విలీనం_heads(నిర్మాణం commit_list *remoteheads)
 {
-	struct commit_list *j;
-	struct strbuf buf = STRBUF_INIT;
+	నిర్మాణం commit_list *j;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
 
-	for (j = remoteheads; j; j = j->next) {
-		struct object_id *oid;
-		struct commit *c = j->item;
-		struct merge_remote_desc *desc;
+	కొరకు (j = remoteheads; j; j = j->తదుపరి) {
+		నిర్మాణం object_id *oid;
+		నిర్మాణం commit *c = j->అంశం;
+		నిర్మాణం విలీనం_remote_desc *desc;
 
-		desc = merge_remote_util(c);
-		if (desc && desc->obj) {
+		desc = విలీనం_remote_util(c);
+		ఒకవేళ (desc && desc->obj) {
 			oid = &desc->obj->oid;
-		} else {
+		} లేకపోతే {
 			oid = &c->object.oid;
 		}
-		strbuf_addf(&buf, "%s\n", oid_to_hex(oid));
+		strbuf_addf(&buf, "%s\n", oid_గమ్యం_hex(oid));
 	}
-	write_file_buf(git_path_merge_head(the_repository), buf.buf, buf.len);
+	write_file_buf(git_మార్గం_విలీనం_తల(the_repository), buf.buf, buf.len);
 
 	strbuf_reset(&buf);
-	if (fast_forward == FF_NO)
+	ఒకవేళ (fast_forward == FF_NO)
 		strbuf_addstr(&buf, "no-ff");
-	write_file_buf(git_path_merge_mode(the_repository), buf.buf, buf.len);
+	write_file_buf(git_మార్గం_విలీనం_బహుళకం(the_repository), buf.buf, buf.len);
 	strbuf_release(&buf);
 }
 
-static void write_merge_state(struct commit_list *remoteheads)
+స్థిర శూన్య write_విలీనం_state(నిర్మాణం commit_list *remoteheads)
 {
-	write_merge_heads(remoteheads);
-	strbuf_addch(&merge_msg, '\n');
-	write_file_buf(git_path_merge_msg(the_repository), merge_msg.buf,
-		       merge_msg.len);
+	write_విలీనం_heads(remoteheads);
+	strbuf_addch(&విలీనం_సందేశం, '\n');
+	write_file_buf(git_మార్గం_విలీనం_సందేశం(the_repository), విలీనం_సందేశం.buf,
+		       విలీనం_సందేశం.len);
 }
 
-static int default_edit_option(void)
+స్థిర పూర్ణాంకం default_edit_option(శూన్య)
 {
-	static const char name[] = "GIT_MERGE_AUTOEDIT";
-	const char *e = getenv(name);
-	struct stat st_stdin, st_stdout;
+	స్థిర స్థిరరాశి అక్షరం name[] = "GIT_MERGE_AUTOEDIT";
+	స్థిరరాశి అక్షరం *e = getenv(name);
+	నిర్మాణం stat st_stdin, st_stdout;
 
-	if (have_message)
+	ఒకవేళ (have_సందేశం)
 		/* an explicit -m msg without --[no-]edit */
-		return 0;
+		తిరిగి 0;
 
-	if (e) {
-		int v = git_parse_maybe_bool(e);
-		if (v < 0)
+	ఒకవేళ (e) {
+		పూర్ణాంకం v = git_parse_maybe_bool(e);
+		ఒకవేళ (v < 0)
 			die(_("Bad value '%s' in environment '%s'"), e, name);
-		return v;
+		తిరిగి v;
 	}
 
 	/* Use editor if stdin and stdout are the same and is a tty */
-	return (!fstat(0, &st_stdin) &&
+	తిరిగి (!fstat(0, &st_stdin) &&
 		!fstat(1, &st_stdout) &&
 		isatty(0) && isatty(1) &&
 		st_stdin.st_dev == st_stdout.st_dev &&
 		st_stdin.st_ino == st_stdout.st_ino &&
-		st_stdin.st_mode == st_stdout.st_mode);
+		st_stdin.st_బహుళకం == st_stdout.st_బహుళకం);
 }
 
-static struct commit_list *reduce_parents(struct commit *head_commit,
-					  int *head_subsumed,
-					  struct commit_list *remoteheads)
+స్థిర నిర్మాణం commit_list *reduce_parents(నిర్మాణం commit *తల_commit,
+					  పూర్ణాంకం *తల_subsumed,
+					  నిర్మాణం commit_list *remoteheads)
 {
-	struct commit_list *parents, **remotes;
+	నిర్మాణం commit_list *parents, **remotes;
 
 	/*
 	 * Is the current HEAD reachable from another commit being
@@ -1194,146 +1194,146 @@ static struct commit_list *reduce_parents(struct commit *head_commit,
 	 * this variable to 0 when we find HEAD among the independent
 	 * tips being merged.
 	 */
-	*head_subsumed = 1;
+	*తల_subsumed = 1;
 
 	/* Find what parents to record by checking independent ones. */
 	parents = reduce_heads(remoteheads);
 	commit_list_free(remoteheads);
 
-	remoteheads = NULL;
+	remoteheads = ఖాళీ;
 	remotes = &remoteheads;
-	while (parents) {
-		struct commit *commit = pop_commit(&parents);
-		if (commit == head_commit)
-			*head_subsumed = 0;
-		else
-			remotes = &commit_list_insert(commit, remotes)->next;
+	అయితే (parents) {
+		నిర్మాణం commit *commit = తీయి_commit(&parents);
+		ఒకవేళ (commit == తల_commit)
+			*తల_subsumed = 0;
+		లేకపోతే
+			remotes = &commit_list_చొప్పించు(commit, remotes)->తదుపరి;
 	}
-	return remoteheads;
+	తిరిగి remoteheads;
 }
 
-static void prepare_merge_message(struct strbuf *merge_names, struct strbuf *merge_msg)
+స్థిర శూన్య prepare_విలీనం_సందేశం(నిర్మాణం strbuf *విలీనం_పేర్లు, నిర్మాణం strbuf *విలీనం_సందేశం)
 {
-	struct fmt_merge_msg_opts opts;
+	నిర్మాణం fmt_విలీనం_సందేశం_opts opts;
 
-	memset(&opts, 0, sizeof(opts));
-	opts.add_title = !have_message;
+	memset(&opts, 0, పరిమాణం(opts));
+	opts.కూడు_title = !have_సందేశం;
 	opts.shortlog_len = shortlog_len;
 	opts.credit_people = (0 < option_edit);
 	opts.into_name = into_name;
 
-	fmt_merge_msg(merge_names, merge_msg, &opts);
-	if (merge_msg->len)
-		strbuf_setlen(merge_msg, merge_msg->len - 1);
+	fmt_విలీనం_సందేశం(విలీనం_పేర్లు, విలీనం_సందేశం, &opts);
+	ఒకవేళ (విలీనం_సందేశం->len)
+		strbuf_setlen(విలీనం_సందేశం, విలీనం_సందేశం->len - 1);
 }
 
-static void handle_fetch_head(struct commit_list **remotes, struct strbuf *merge_names)
+స్థిర శూన్య handle_fetch_తల(నిర్మాణం commit_list **remotes, నిర్మాణం strbuf *విలీనం_పేర్లు)
 {
-	const char *filename;
-	int fd, pos, npos;
-	struct strbuf fetch_head_file = STRBUF_INIT;
-	const unsigned hexsz = the_hash_algo->hexsz;
+	స్థిరరాశి అక్షరం *filename;
+	పూర్ణాంకం fd, pos, npos;
+	నిర్మాణం strbuf fetch_తల_file = STRBUF_INIT;
+	స్థిరరాశి గుర్తులేని hexsz = the_hash_algo->hexsz;
 
-	if (!merge_names)
-		merge_names = &fetch_head_file;
+	ఒకవేళ (!విలీనం_పేర్లు)
+		విలీనం_పేర్లు = &fetch_తల_file;
 
-	filename = git_path_fetch_head(the_repository);
+	filename = git_మార్గం_fetch_తల(the_repository);
 	fd = xopen(filename, O_RDONLY);
 
-	if (strbuf_read(merge_names, fd, 0) < 0)
+	ఒకవేళ (strbuf_read(విలీనం_పేర్లు, fd, 0) < 0)
 		die_errno(_("could not read '%s'"), filename);
-	if (close(fd) < 0)
+	ఒకవేళ (close(fd) < 0)
 		die_errno(_("could not close '%s'"), filename);
 
-	for (pos = 0; pos < merge_names->len; pos = npos) {
-		struct object_id oid;
-		char *ptr;
-		struct commit *commit;
+	కొరకు (pos = 0; pos < విలీనం_పేర్లు->len; pos = npos) {
+		నిర్మాణం object_id oid;
+		అక్షరం *ptr;
+		నిర్మాణం commit *commit;
 
-		ptr = strchr(merge_names->buf + pos, '\n');
-		if (ptr)
-			npos = ptr - merge_names->buf + 1;
-		else
-			npos = merge_names->len;
+		ptr = strchr(విలీనం_పేర్లు->buf + pos, '\n');
+		ఒకవేళ (ptr)
+			npos = ptr - విలీనం_పేర్లు->buf + 1;
+		లేకపోతే
+			npos = విలీనం_పేర్లు->len;
 
-		if (npos - pos < hexsz + 2 ||
-		    get_oid_hex(merge_names->buf + pos, &oid))
-			commit = NULL; /* bad */
-		else if (memcmp(merge_names->buf + pos + hexsz, "\t\t", 2))
-			continue; /* not-for-merge */
-		else {
-			char saved = merge_names->buf[pos + hexsz];
-			merge_names->buf[pos + hexsz] = '\0';
-			commit = get_merge_parent(merge_names->buf + pos);
-			merge_names->buf[pos + hexsz] = saved;
+		ఒకవేళ (npos - pos < hexsz + 2 ||
+		    get_oid_hex(విలీనం_పేర్లు->buf + pos, &oid))
+			commit = ఖాళీ; /* bad */
+		లేకపోతే ఒకవేళ (memcmp(విలీనం_పేర్లు->buf + pos + hexsz, "\t\t", 2))
+			కొనసాగు; /* not-for-merge */
+		లేకపోతే {
+			అక్షరం saved = విలీనం_పేర్లు->buf[pos + hexsz];
+			విలీనం_పేర్లు->buf[pos + hexsz] = '\0';
+			commit = get_విలీనం_మాతృ(విలీనం_పేర్లు->buf + pos);
+			విలీనం_పేర్లు->buf[pos + hexsz] = saved;
 		}
-		if (!commit) {
-			if (ptr)
+		ఒకవేళ (!commit) {
+			ఒకవేళ (ptr)
 				*ptr = '\0';
 			die(_("not something we can merge in %s: %s"),
-			    filename, merge_names->buf + pos);
+			    filename, విలీనం_పేర్లు->buf + pos);
 		}
-		remotes = &commit_list_insert(commit, remotes)->next;
+		remotes = &commit_list_చొప్పించు(commit, remotes)->తదుపరి;
 	}
 
-	if (merge_names == &fetch_head_file)
-		strbuf_release(&fetch_head_file);
+	ఒకవేళ (విలీనం_పేర్లు == &fetch_తల_file)
+		strbuf_release(&fetch_తల_file);
 }
 
-static struct commit_list *collect_parents(struct commit *head_commit,
-					   int *head_subsumed,
-					   int argc, const char **argv,
-					   struct strbuf *merge_msg)
+స్థిర నిర్మాణం commit_list *collect_parents(నిర్మాణం commit *తల_commit,
+					   పూర్ణాంకం *తల_subsumed,
+					   పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv,
+					   నిర్మాణం strbuf *విలీనం_సందేశం)
 {
-	int i;
-	struct commit_list *remoteheads = NULL;
-	struct commit_list **remotes = &remoteheads;
-	struct strbuf merge_names = STRBUF_INIT, *autogen = NULL;
+	పూర్ణాంకం i;
+	నిర్మాణం commit_list *remoteheads = ఖాళీ;
+	నిర్మాణం commit_list **remotes = &remoteheads;
+	నిర్మాణం strbuf విలీనం_పేర్లు = STRBUF_INIT, *autogen = ఖాళీ;
 
-	if (merge_msg && (!have_message || shortlog_len))
-		autogen = &merge_names;
+	ఒకవేళ (విలీనం_సందేశం && (!have_సందేశం || shortlog_len))
+		autogen = &విలీనం_పేర్లు;
 
-	if (head_commit)
-		remotes = &commit_list_insert(head_commit, remotes)->next;
+	ఒకవేళ (తల_commit)
+		remotes = &commit_list_చొప్పించు(తల_commit, remotes)->తదుపరి;
 
-	if (argc == 1 && !strcmp(argv[0], "FETCH_HEAD")) {
-		handle_fetch_head(remotes, autogen);
-		remoteheads = reduce_parents(head_commit, head_subsumed, remoteheads);
-	} else {
-		for (i = 0; i < argc; i++) {
-			struct commit *commit = get_merge_parent(argv[i]);
-			if (!commit)
+	ఒకవేళ (argc == 1 && !strcmp(argv[0], "FETCH_HEAD")) {
+		handle_fetch_తల(remotes, autogen);
+		remoteheads = reduce_parents(తల_commit, తల_subsumed, remoteheads);
+	} లేకపోతే {
+		కొరకు (i = 0; i < argc; i++) {
+			నిర్మాణం commit *commit = get_విలీనం_మాతృ(argv[i]);
+			ఒకవేళ (!commit)
 				help_unknown_ref(argv[i], "merge",
 						 _("not something we can merge"));
-			remotes = &commit_list_insert(commit, remotes)->next;
+			remotes = &commit_list_చొప్పించు(commit, remotes)->తదుపరి;
 		}
-		remoteheads = reduce_parents(head_commit, head_subsumed, remoteheads);
-		if (autogen) {
-			struct commit_list *p;
-			for (p = remoteheads; p; p = p->next)
-				merge_name(merge_remote_util(p->item)->name, autogen);
+		remoteheads = reduce_parents(తల_commit, తల_subsumed, remoteheads);
+		ఒకవేళ (autogen) {
+			నిర్మాణం commit_list *p;
+			కొరకు (p = remoteheads; p; p = p->తదుపరి)
+				విలీనం_name(విలీనం_remote_util(p->అంశం)->name, autogen);
 		}
 	}
 
-	if (autogen) {
-		prepare_merge_message(autogen, merge_msg);
+	ఒకవేళ (autogen) {
+		prepare_విలీనం_సందేశం(autogen, విలీనం_సందేశం);
 		strbuf_release(autogen);
 	}
 
-	return remoteheads;
+	తిరిగి remoteheads;
 }
 
-static int merging_a_throwaway_tag(struct commit *commit)
+స్థిర పూర్ణాంకం merging_a_throwaway_ట్యాగ్(నిర్మాణం commit *commit)
 {
-	char *tag_ref;
-	struct object_id oid;
-	int is_throwaway_tag = 0;
+	అక్షరం *ట్యాగ్_ref;
+	నిర్మాణం object_id oid;
+	పూర్ణాంకం is_throwaway_ట్యాగ్ = 0;
 
 	/* Are we merging a tag? */
-	if (!merge_remote_util(commit) ||
-	    !merge_remote_util(commit)->obj ||
-	    merge_remote_util(commit)->obj->type != OBJ_TAG)
-		return is_throwaway_tag;
+	ఒకవేళ (!విలీనం_remote_util(commit) ||
+	    !విలీనం_remote_util(commit)->obj ||
+	    విలీనం_remote_util(commit)->obj->type != OBJ_ట్యాగ్)
+		తిరిగి is_throwaway_ట్యాగ్;
 
 	/*
 	 * Now we know we are merging a tag object.  Are we downstream
@@ -1349,161 +1349,161 @@ static int merging_a_throwaway_tag(struct commit *commit)
 	 * by default; otherwise we would not keep the signature
 	 * anywhere.
 	 */
-	tag_ref = xstrfmt("refs/tags/%s",
-			  ((struct tag *)merge_remote_util(commit)->obj)->tag);
-	if (!refs_read_ref(get_main_ref_store(the_repository), tag_ref, &oid) &&
-	    oideq(&oid, &merge_remote_util(commit)->obj->oid))
-		is_throwaway_tag = 0;
-	else
-		is_throwaway_tag = 1;
-	free(tag_ref);
-	return is_throwaway_tag;
+	ట్యాగ్_ref = xstrfmt("refs/tags/%s",
+			  ((నిర్మాణం ట్యాగ్ *)విలీనం_remote_util(commit)->obj)->ట్యాగ్);
+	ఒకవేళ (!refs_read_ref(get_main_ref_store(the_repository), ట్యాగ్_ref, &oid) &&
+	    oideq(&oid, &విలీనం_remote_util(commit)->obj->oid))
+		is_throwaway_ట్యాగ్ = 0;
+	లేకపోతే
+		is_throwaway_ట్యాగ్ = 1;
+	విడుదల(ట్యాగ్_ref);
+	తిరిగి is_throwaway_ట్యాగ్;
 }
 
-int cmd_merge(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo UNUSED)
+పూర్ణాంకం cmd_విలీనం(పూర్ణాంకం argc,
+	      స్థిరరాశి అక్షరం **argv,
+	      స్థిరరాశి అక్షరం *ఉపసర్గ,
+	      నిర్మాణం repository *repo వాడని)
 {
-	struct object_id result_tree, stash, head_oid;
-	struct commit *head_commit;
-	struct strbuf buf = STRBUF_INIT;
-	int i, ret = 0, head_subsumed;
-	int best_cnt = -1, merge_was_ok = 0, automerge_was_ok = 0;
-	struct commit_list *common = NULL;
-	const char *best_strategy = NULL, *wt_strategy = NULL;
-	struct commit_list *remoteheads = NULL, *p;
-	void *branch_to_free, *argv_to_free = NULL;
-	int orig_argc = argc;
-	int merge_log_config = -1;
+	నిర్మాణం object_id ఫలితం_వృక్షం, stash, తల_oid;
+	నిర్మాణం commit *తల_commit;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
+	పూర్ణాంకం i, ret = 0, తల_subsumed;
+	పూర్ణాంకం ఉత్తమ_cnt = -1, విలీనం_was_ok = 0, automerge_was_ok = 0;
+	నిర్మాణం commit_list *common = ఖాళీ;
+	స్థిరరాశి అక్షరం *ఉత్తమ_strategy = ఖాళీ, *wt_strategy = ఖాళీ;
+	నిర్మాణం commit_list *remoteheads = ఖాళీ, *p;
+	శూన్య *branch_గమ్యం_free, *argv_గమ్యం_free = ఖాళీ;
+	పూర్ణాంకం orig_argc = argc;
+	పూర్ణాంకం విలీనం_log_config = -1;
 
 	show_usage_with_options_if_asked(argc, argv,
-					 builtin_merge_usage, builtin_merge_options);
+					 builtin_విలీనం_usage, builtin_విలీనం_options);
 
-#ifndef WITH_BREAKING_CHANGES
+#నిర్వచితం_కాకపోతే WITH_BREAKING_CHANGES
 	warn_on_auto_comment_char = true;
-#endif /* !WITH_BREAKING_CHANGES */
+#అయితే_ముగింపు /* !WITH_BREAKING_CHANGES */
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_నిండిన_సూచీ = 0;
 
 	/*
 	 * Check if we are _not_ on a detached HEAD, i.e. if there is a
 	 * current branch.
 	 */
-	branch = branch_to_free = refs_resolve_refdup(get_main_ref_store(the_repository),
-						      "HEAD", 0, &head_oid,
-						      NULL);
-	if (branch)
-		skip_prefix(branch, "refs/heads/", &branch);
+	branch = branch_గమ్యం_free = refs_resolve_refdup(get_main_ref_store(the_repository),
+						      "HEAD", 0, &తల_oid,
+						      ఖాళీ);
+	ఒకవేళ (branch)
+		skip_ఉపసర్గ(branch, "refs/heads/", &branch);
 
 	init_diff_ui_defaults();
-	repo_config(the_repository, git_merge_config, &merge_log_config);
+	repo_config(the_repository, git_విలీనం_config, &విలీనం_log_config);
 
-	if (!branch || is_null_oid(&head_oid))
-		head_commit = NULL;
-	else
-		head_commit = lookup_commit_or_die(&head_oid, "HEAD");
+	ఒకవేళ (!branch || is_null_oid(&తల_oid))
+		తల_commit = ఖాళీ;
+	లేకపోతే
+		తల_commit = lookup_commit_or_die(&తల_oid, "HEAD");
 
-	if (branch_mergeoptions)
-		parse_branch_merge_options(branch_mergeoptions);
-	argc = parse_options(argc, argv, prefix, builtin_merge_options,
-			builtin_merge_usage, 0);
-	if (shortlog_len < 0)
-		shortlog_len = (merge_log_config > 0) ? merge_log_config : 0;
+	ఒకవేళ (branch_mergeoptions)
+		parse_branch_విలీనం_options(branch_mergeoptions);
+	argc = parse_options(argc, argv, ఉపసర్గ, builtin_విలీనం_options,
+			builtin_విలీనం_usage, 0);
+	ఒకవేళ (shortlog_len < 0)
+		shortlog_len = (విలీనం_log_config > 0) ? విలీనం_log_config : 0;
 
-	if (verbosity < 0 && show_progress == -1)
-		show_progress = 0;
+	ఒకవేళ (verbosity < 0 && show_పురోగతి == -1)
+		show_పురోగతి = 0;
 
-	if (abort_current_merge) {
-		int nargc = 2;
-		const char *nargv[] = {"reset", "--merge", NULL};
-		char stash_oid_hex[GIT_MAX_HEXSZ + 1];
-		struct object_id stash_oid = {0};
+	ఒకవేళ (abort_current_విలీనం) {
+		పూర్ణాంకం nargc = 2;
+		స్థిరరాశి అక్షరం *nargv[] = {"reset", "--merge", ఖాళీ};
+		అక్షరం stash_oid_hex[GIT_MAX_HEXSZ + 1];
+		నిర్మాణం object_id stash_oid = {0};
 
-		if (orig_argc != 2)
-			usage_msg_opt(_("--abort expects no arguments"),
-			      builtin_merge_usage, builtin_merge_options);
+		ఒకవేళ (orig_argc != 2)
+			usage_సందేశం_opt(_("--abort expects no arguments"),
+			      builtin_విలీనం_usage, builtin_విలీనం_options);
 
-		if (!file_exists(git_path_merge_head(the_repository)))
+		ఒకవేళ (!file_exists(git_మార్గం_విలీనం_తల(the_repository)))
 			die(_("There is no merge to abort (MERGE_HEAD missing)."));
 
-		if (!refs_read_ref(get_main_ref_store(the_repository), "MERGE_AUTOSTASH", &stash_oid))
+		ఒకవేళ (!refs_read_ref(get_main_ref_store(the_repository), "MERGE_AUTOSTASH", &stash_oid))
 			refs_delete_ref(get_main_ref_store(the_repository),
 					"", "MERGE_AUTOSTASH", &stash_oid,
 					REF_NO_DEREF);
 
 		/* Invoke 'git reset --merge' */
-		ret = cmd_reset(nargc, nargv, prefix, the_repository);
+		ret = cmd_reset(nargc, nargv, ఉపసర్గ, the_repository);
 
-		if (!is_null_oid(&stash_oid)) {
-			oid_to_hex_r(stash_oid_hex, &stash_oid);
+		ఒకవేళ (!is_null_oid(&stash_oid)) {
+			oid_గమ్యం_hex_r(stash_oid_hex, &stash_oid);
 			apply_autostash_oid(stash_oid_hex);
 		}
 
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	if (quit_current_merge) {
-		if (orig_argc != 2)
-			usage_msg_opt(_("--quit expects no arguments"),
-				      builtin_merge_usage,
-				      builtin_merge_options);
+	ఒకవేళ (quit_current_విలీనం) {
+		ఒకవేళ (orig_argc != 2)
+			usage_సందేశం_opt(_("--quit expects no arguments"),
+				      builtin_విలీనం_usage,
+				      builtin_విలీనం_options);
 
-		remove_merge_branch_state(the_repository);
-		goto done;
+		remove_విలీనం_branch_state(the_repository);
+		వెళ్ళు పూర్తి;
 	}
 
-	if (continue_current_merge) {
-		int nargc = 1;
-		const char *nargv[] = {"commit", NULL};
+	ఒకవేళ (continue_current_విలీనం) {
+		పూర్ణాంకం nargc = 1;
+		స్థిరరాశి అక్షరం *nargv[] = {"commit", ఖాళీ};
 
-		if (orig_argc != 2)
-			usage_msg_opt(_("--continue expects no arguments"),
-			      builtin_merge_usage, builtin_merge_options);
+		ఒకవేళ (orig_argc != 2)
+			usage_సందేశం_opt(_("--continue expects no arguments"),
+			      builtin_విలీనం_usage, builtin_విలీనం_options);
 
-		if (!file_exists(git_path_merge_head(the_repository)))
+		ఒకవేళ (!file_exists(git_మార్గం_విలీనం_తల(the_repository)))
 			die(_("There is no merge in progress (MERGE_HEAD missing)."));
 
 		/* Invoke 'git commit' */
-		ret = cmd_commit(nargc, nargv, prefix, the_repository);
-		goto done;
+		ret = cmd_commit(nargc, nargv, ఉపసర్గ, the_repository);
+		వెళ్ళు పూర్తి;
 	}
 
-	if (repo_read_index_unmerged(the_repository))
+	ఒకవేళ (repo_read_సూచీ_unmerged(the_repository))
 		die_resolve_conflict("merge");
 
-	if (file_exists(git_path_merge_head(the_repository))) {
+	ఒకవేళ (file_exists(git_మార్గం_విలీనం_తల(the_repository))) {
 		/*
 		 * There is no unmerged entry, don't advise 'git
 		 * add/rm <file>', just 'git commit'.
 		 */
-		if (advice_enabled(ADVICE_RESOLVE_CONFLICT))
+		ఒకవేళ (advice_enabled(ADVICE_RESOLVE_CONFLICT))
 			die(_("You have not concluded your merge (MERGE_HEAD exists).\n"
 				  "Please, commit your changes before you merge."));
-		else
+		లేకపోతే
 			die(_("You have not concluded your merge (MERGE_HEAD exists)."));
 	}
-	if (refs_ref_exists(get_main_ref_store(the_repository), "CHERRY_PICK_HEAD")) {
-		if (advice_enabled(ADVICE_RESOLVE_CONFLICT))
+	ఒకవేళ (refs_ref_exists(get_main_ref_store(the_repository), "CHERRY_PICK_HEAD")) {
+		ఒకవేళ (advice_enabled(ADVICE_RESOLVE_CONFLICT))
 			die(_("You have not concluded your cherry-pick (CHERRY_PICK_HEAD exists).\n"
 			    "Please, commit your changes before you merge."));
-		else
+		లేకపోతే
 			die(_("You have not concluded your cherry-pick (CHERRY_PICK_HEAD exists)."));
 	}
-	resolve_undo_clear_index(the_repository->index);
+	resolve_undo_clear_సూచీ(the_repository->సూచీ);
 
-	if (option_edit < 0)
+	ఒకవేళ (option_edit < 0)
 		option_edit = default_edit_option();
 
-	cleanup_mode = get_cleanup_mode(cleanup_arg, 0 < option_edit);
+	cleanup_బహుళకం = get_cleanup_బహుళకం(cleanup_arg, 0 < option_edit);
 
-	if (verbosity < 0)
+	ఒకవేళ (verbosity < 0)
 		show_diffstat = 0;
 
-	if (squash) {
-		if (fast_forward == FF_NO)
+	ఒకవేళ (squash) {
+		ఒకవేళ (fast_forward == FF_NO)
 			die(_("options '%s' and '%s' cannot be used together"), "--squash", "--no-ff.");
-		if (option_commit > 0)
+		ఒకవేళ (option_commit > 0)
 			die(_("options '%s' and '%s' cannot be used together"), "--squash", "--commit.");
 		/*
 		 * squash can now silently disable option_commit - this is not
@@ -1513,54 +1513,54 @@ int cmd_merge(int argc,
 		option_commit = 0;
 	}
 
-	if (option_commit < 0)
+	ఒకవేళ (option_commit < 0)
 		option_commit = 1;
 
-	if (!argc) {
-		if (default_to_upstream) {
-			argc = setup_with_upstream(&argv);
-			argv_to_free = argv;
+	ఒకవేళ (!argc) {
+		ఒకవేళ (default_గమ్యం_upstream) {
+			argc = అమరిక_with_upstream(&argv);
+			argv_గమ్యం_free = argv;
 		}
-		else
+		లేకపోతే
 			die(_("No commit specified and merge.defaultToUpstream not set."));
-	} else if (argc == 1 && !strcmp(argv[0], "-")) {
+	} లేకపోతే ఒకవేళ (argc == 1 && !strcmp(argv[0], "-")) {
 		argv[0] = "@{-1}";
 	}
 
-	if (!argc)
-		usage_with_options(builtin_merge_usage,
-			builtin_merge_options);
+	ఒకవేళ (!argc)
+		usage_with_options(builtin_విలీనం_usage,
+			builtin_విలీనం_options);
 
-	if (!head_commit) {
+	ఒకవేళ (!తల_commit) {
 		/*
 		 * If the merged head is a valid one there is no reason
 		 * to forbid "git merge" into a branch yet to be born.
 		 * We do the same for "git pull".
 		 */
-		struct object_id *remote_head_oid;
-		if (squash)
+		నిర్మాణం object_id *remote_తల_oid;
+		ఒకవేళ (squash)
 			die(_("Squash commit into empty head not supported yet"));
-		if (fast_forward == FF_NO)
+		ఒకవేళ (fast_forward == FF_NO)
 			die(_("Non-fast-forward commit does not make sense into "
 			    "an empty head"));
-		remoteheads = collect_parents(head_commit, &head_subsumed,
-					      argc, argv, NULL);
-		if (!remoteheads)
+		remoteheads = collect_parents(తల_commit, &తల_subsumed,
+					      argc, argv, ఖాళీ);
+		ఒకవేళ (!remoteheads)
 			die(_("%s - not something we can merge"), argv[0]);
-		if (remoteheads->next)
+		ఒకవేళ (remoteheads->తదుపరి)
 			die(_("Can merge only exactly one commit into empty head"));
 
-		if (verify_signatures)
-			verify_merge_signature(remoteheads->item, verbosity,
+		ఒకవేళ (verify_signatures)
+			verify_విలీనం_signature(remoteheads->అంశం, verbosity,
 					       check_trust_level);
 
-		remote_head_oid = &remoteheads->item->object.oid;
-		read_empty(remote_head_oid);
+		remote_తల_oid = &remoteheads->అంశం->object.oid;
+		read_ఖాళీలు(remote_తల_oid);
 		refs_update_ref(get_main_ref_store(the_repository),
-				"initial pull", "HEAD", remote_head_oid, NULL,
+				"initial pull", "HEAD", remote_తల_oid, ఖాళీ,
 				0,
 				UPDATE_REFS_DIE_ON_ERR);
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
 	/*
@@ -1568,199 +1568,199 @@ int cmd_merge(int argc,
 	 * the standard merge summary message to be appended
 	 * to the given message.
 	 */
-	remoteheads = collect_parents(head_commit, &head_subsumed,
-				      argc, argv, &merge_msg);
+	remoteheads = collect_parents(తల_commit, &తల_subsumed,
+				      argc, argv, &విలీనం_సందేశం);
 
-	if (!head_commit || !argc)
-		usage_with_options(builtin_merge_usage,
-			builtin_merge_options);
+	ఒకవేళ (!తల_commit || !argc)
+		usage_with_options(builtin_విలీనం_usage,
+			builtin_విలీనం_options);
 
-	if (verify_signatures) {
-		for (p = remoteheads; p; p = p->next) {
-			verify_merge_signature(p->item, verbosity,
+	ఒకవేళ (verify_signatures) {
+		కొరకు (p = remoteheads; p; p = p->తదుపరి) {
+			verify_విలీనం_signature(p->అంశం, verbosity,
 					       check_trust_level);
 		}
 	}
 
 	strbuf_addstr(&buf, "merge");
-	for (p = remoteheads; p; p = p->next)
-		strbuf_addf(&buf, " %s", merge_remote_util(p->item)->name);
+	కొరకు (p = remoteheads; p; p = p->తదుపరి)
+		strbuf_addf(&buf, " %s", విలీనం_remote_util(p->అంశం)->name);
 	setenv("GIT_REFLOG_ACTION", buf.buf, 0);
 	strbuf_reset(&buf);
 
-	for (p = remoteheads; p; p = p->next) {
-		struct commit *commit = p->item;
+	కొరకు (p = remoteheads; p; p = p->తదుపరి) {
+		నిర్మాణం commit *commit = p->అంశం;
 		strbuf_addf(&buf, "GITHEAD_%s",
-			    oid_to_hex(&commit->object.oid));
-		setenv(buf.buf, merge_remote_util(commit)->name, 1);
+			    oid_గమ్యం_hex(&commit->object.oid));
+		setenv(buf.buf, విలీనం_remote_util(commit)->name, 1);
 		strbuf_reset(&buf);
-		if (fast_forward != FF_ONLY && merging_a_throwaway_tag(commit))
+		ఒకవేళ (fast_forward != FF_ONLY && merging_a_throwaway_ట్యాగ్(commit))
 			fast_forward = FF_NO;
 	}
 
-	if (!use_strategies) {
-		if (!remoteheads)
+	ఒకవేళ (!use_strategies) {
+		ఒకవేళ (!remoteheads)
 			; /* already up-to-date */
-		else if (!remoteheads->next)
-			add_strategies(pull_twohead, DEFAULT_TWOHEAD);
-		else
-			add_strategies(pull_octopus, DEFAULT_OCTOPUS);
+		లేకపోతే ఒకవేళ (!remoteheads->తదుపరి)
+			కూడు_strategies(pull_twohead, DEFAULT_TWOHEAD);
+		లేకపోతే
+			కూడు_strategies(pull_octopus, DEFAULT_OCTOPUS);
 	}
 
-	for (i = 0; i < use_strategies_nr; i++) {
-		if (use_strategies[i]->attr & NO_FAST_FORWARD)
+	కొరకు (i = 0; i < use_strategies_nr; i++) {
+		ఒకవేళ (use_strategies[i]->attr & NO_FAST_FORWARD)
 			fast_forward = FF_NO;
-		if (use_strategies[i]->attr & NO_TRIVIAL)
+		ఒకవేళ (use_strategies[i]->attr & NO_TRIVIAL)
 			allow_trivial = 0;
 	}
 
-	if (!remoteheads)
+	ఒకవేళ (!remoteheads)
 		; /* already up-to-date */
-	else if (!remoteheads->next) {
-		if (repo_get_merge_bases(the_repository, head_commit,
-					 remoteheads->item, &common) < 0) {
+	లేకపోతే ఒకవేళ (!remoteheads->తదుపరి) {
+		ఒకవేళ (repo_get_విలీనం_bases(the_repository, తల_commit,
+					 remoteheads->అంశం, &common) < 0) {
 			ret = 2;
-			goto done;
+			వెళ్ళు పూర్తి;
 		}
-	} else {
-		struct commit_list *list = remoteheads;
-		commit_list_insert(head_commit, &list);
-		if (get_octopus_merge_bases(list, &common) < 0) {
-			free(list);
+	} లేకపోతే {
+		నిర్మాణం commit_list *list = remoteheads;
+		commit_list_చొప్పించు(తల_commit, &list);
+		ఒకవేళ (get_octopus_విలీనం_bases(list, &common) < 0) {
+			విడుదల(list);
 			ret = 2;
-			goto done;
+			వెళ్ళు పూర్తి;
 		}
-		free(list);
+		విడుదల(list);
 	}
 
 	refs_update_ref(get_main_ref_store(the_repository),
 			"updating ORIG_HEAD", "ORIG_HEAD",
-			&head_commit->object.oid, NULL, 0,
+			&తల_commit->object.oid, ఖాళీ, 0,
 			UPDATE_REFS_DIE_ON_ERR);
 
-	if (remoteheads && !common) {
+	ఒకవేళ (remoteheads && !common) {
 		/* No common ancestors found. */
-		if (!allow_unrelated_histories)
+		ఒకవేళ (!allow_unrelated_histories)
 			die(_("refusing to merge unrelated histories"));
 		/* otherwise, we need a real merge. */
-	} else if (!remoteheads ||
-		 (!remoteheads->next && !common->next &&
-		  common->item == remoteheads->item)) {
+	} లేకపోతే ఒకవేళ (!remoteheads ||
+		 (!remoteheads->తదుపరి && !common->తదుపరి &&
+		  common->అంశం == remoteheads->అంశం)) {
 		/*
 		 * If head can reach all the merge then we are up to date.
 		 * but first the most common case of merging one remote.
 		 */
-		finish_up_to_date();
-		goto done;
-	} else if (fast_forward != FF_NO && !remoteheads->next &&
-			!common->next &&
-			oideq(&common->item->object.oid, &head_commit->object.oid)) {
+		ముగింపు_పైకి_గమ్యం_date();
+		వెళ్ళు పూర్తి;
+	} లేకపోతే ఒకవేళ (fast_forward != FF_NO && !remoteheads->తదుపరి &&
+			!common->తదుపరి &&
+			oideq(&common->అంశం->object.oid, &తల_commit->object.oid)) {
 		/* Again the most common case of merging one remote. */
-		const char *msg = have_message ?
+		స్థిరరాశి అక్షరం *సందేశం = have_సందేశం ?
 			"Fast-forward (no commit created; -m option ignored)" :
 			"Fast-forward";
-		struct commit *commit;
+		నిర్మాణం commit *commit;
 
-		if (verbosity >= 0) {
-			printf(_("Updating %s..%s\n"),
-			       repo_find_unique_abbrev(the_repository, &head_commit->object.oid,
+		ఒకవేళ (verbosity >= 0) {
+			రాయి(_("Updating %s..%s\n"),
+			       repo_కనుగొను_unique_abbrev(the_repository, &తల_commit->object.oid,
 						       DEFAULT_ABBREV),
-			       repo_find_unique_abbrev(the_repository, &remoteheads->item->object.oid,
+			       repo_కనుగొను_unique_abbrev(the_repository, &remoteheads->అంశం->object.oid,
 						       DEFAULT_ABBREV));
 		}
-		commit = remoteheads->item;
-		if (!commit) {
+		commit = remoteheads->అంశం;
+		ఒకవేళ (!commit) {
 			ret = 1;
-			goto done;
+			వెళ్ళు పూర్తి;
 		}
 
-		if (autostash)
+		ఒకవేళ (autostash)
 			create_autostash_ref(the_repository, "MERGE_AUTOSTASH",
-					     NULL, false);
-		if (checkout_fast_forward(the_repository,
-					  &head_commit->object.oid,
+					     ఖాళీ, false);
+		ఒకవేళ (checkout_fast_forward(the_repository,
+					  &తల_commit->object.oid,
 					  &commit->object.oid,
 					  overwrite_ignore)) {
 			apply_autostash_ref(the_repository, "MERGE_AUTOSTASH",
-					    NULL, NULL, NULL, NULL);
+					    ఖాళీ, ఖాళీ, ఖాళీ, ఖాళీ);
 			ret = 1;
-			goto done;
+			వెళ్ళు పూర్తి;
 		}
 
-		finish(head_commit, remoteheads, &commit->object.oid, msg);
-		remove_merge_branch_state(the_repository);
-		goto done;
-	} else if (!remoteheads->next && common->next)
+		ముగింపు(తల_commit, remoteheads, &commit->object.oid, సందేశం);
+		remove_విలీనం_branch_state(the_repository);
+		వెళ్ళు పూర్తి;
+	} లేకపోతే ఒకవేళ (!remoteheads->తదుపరి && common->తదుపరి)
 		;
 		/*
 		 * We are not doing octopus and not fast-forward.  Need
 		 * a real merge.
 		 */
-	else if (!remoteheads->next && !common->next && option_commit) {
+	లేకపోతే ఒకవేళ (!remoteheads->తదుపరి && !common->తదుపరి && option_commit) {
 		/*
 		 * We are not doing octopus, not fast-forward, and have
 		 * only one common.
 		 */
-		refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL);
-		if (allow_trivial && fast_forward != FF_ONLY) {
+		refresh_సూచీ(the_repository->సూచీ, REFRESH_QUIET, ఖాళీ, ఖాళీ, ఖాళీ);
+		ఒకవేళ (allow_trivial && fast_forward != FF_ONLY) {
 			/*
 			 * Must first ensure that index matches HEAD before
 			 * attempting a trivial merge.
 			 */
-			struct tree *head_tree = repo_get_commit_tree(the_repository,
-								      head_commit);
-			struct strbuf sb = STRBUF_INIT;
+			నిర్మాణం వృక్షం *తల_వృక్షం = repo_get_commit_వృక్షం(the_repository,
+								      తల_commit);
+			నిర్మాణం strbuf sb = STRBUF_INIT;
 
-			if (repo_index_has_changes(the_repository, head_tree,
+			ఒకవేళ (repo_సూచీ_has_changes(the_repository, తల_వృక్షం,
 						   &sb)) {
 				error(_("Your local changes to the following files would be overwritten by merge:\n  %s"),
 				      sb.buf);
 				strbuf_release(&sb);
 				ret = 2;
-				goto done;
+				వెళ్ళు పూర్తి;
 			}
 
 			/* See if it is really trivial. */
 			git_committer_info(IDENT_STRICT);
-			printf(_("Trying really trivial in-index merge...\n"));
-			if (!read_tree_trivial(&common->item->object.oid,
-					       &head_commit->object.oid,
-					       &remoteheads->item->object.oid)) {
-				ret = merge_trivial(head_commit, remoteheads);
-				goto done;
+			రాయి(_("Trying really trivial in-index merge...\n"));
+			ఒకవేళ (!read_వృక్షం_trivial(&common->అంశం->object.oid,
+					       &తల_commit->object.oid,
+					       &remoteheads->అంశం->object.oid)) {
+				ret = విలీనం_trivial(తల_commit, remoteheads);
+				వెళ్ళు పూర్తి;
 			}
-			printf(_("Nope.\n"));
+			రాయి(_("Nope.\n"));
 		}
-	} else {
+	} లేకపోతే {
 		/*
 		 * An octopus.  If we can reach all the remote we are up
 		 * to date.
 		 */
-		int up_to_date = 1;
-		struct commit_list *j;
+		పూర్ణాంకం పైకి_గమ్యం_date = 1;
+		నిర్మాణం commit_list *j;
 
-		for (j = remoteheads; j; j = j->next) {
-			int ret = repo_in_merge_bases(the_repository,
-						      j->item, head_commit);
-			if (ret < 0)
-				exit(128);
-			if (!ret) {
-				up_to_date = 0;
-				break;
+		కొరకు (j = remoteheads; j; j = j->తదుపరి) {
+			పూర్ణాంకం ret = repo_లోపల_విలీనం_bases(the_repository,
+						      j->అంశం, తల_commit);
+			ఒకవేళ (ret < 0)
+				నిష్క్రమించు(128);
+			ఒకవేళ (!ret) {
+				పైకి_గమ్యం_date = 0;
+				ఆపు;
 			}
 		}
-		if (up_to_date) {
-			finish_up_to_date();
-			goto done;
+		ఒకవేళ (పైకి_గమ్యం_date) {
+			ముగింపు_పైకి_గమ్యం_date();
+			వెళ్ళు పూర్తి;
 		}
 	}
 
-	if (fast_forward == FF_ONLY)
+	ఒకవేళ (fast_forward == FF_ONLY)
 		die_ff_impossible();
 
-	if (autostash)
+	ఒకవేళ (autostash)
 		create_autostash_ref(the_repository, "MERGE_AUTOSTASH",
-				     NULL, false);
+				     ఖాళీ, false);
 
 	/* We are going to make a new commit. */
 	git_committer_info(IDENT_STRICT);
@@ -1777,17 +1777,17 @@ int cmd_merge(int argc,
 	 * and/or recover from merge strategies bailing while leaving the
 	 * index and working tree polluted.
 	 */
-	if (save_state(&stash))
+	ఒకవేళ (save_state(&stash))
 		oidclr(&stash, the_repository->hash_algo);
 
-	for (i = 0; i < use_strategies_nr; i++) {
-		int ret, cnt;
-		if (i) {
-			printf(_("Rewinding the tree to pristine...\n"));
-			restore_state(&head_commit->object.oid, &stash);
+	కొరకు (i = 0; i < use_strategies_nr; i++) {
+		పూర్ణాంకం ret, cnt;
+		ఒకవేళ (i) {
+			రాయి(_("Rewinding the tree to pristine...\n"));
+			restore_state(&తల_commit->object.oid, &stash);
 		}
-		if (use_strategies_nr != 1)
-			printf(_("Trying merge strategy %s...\n"),
+		ఒకవేళ (use_strategies_nr != 1)
+			రాయి(_("Trying merge strategy %s...\n"),
 				use_strategies[i]->name);
 		/*
 		 * Remember which strategy left the state in the working
@@ -1795,28 +1795,28 @@ int cmd_merge(int argc,
 		 */
 		wt_strategy = use_strategies[i]->name;
 
-		ret = try_merge_strategy(wt_strategy,
+		ret = try_విలీనం_strategy(wt_strategy,
 					 common, remoteheads,
-					 head_commit);
+					 తల_commit);
 		/*
 		 * The backend exits with 1 when conflicts are
 		 * left to be resolved, with 2 when it does not
 		 * handle the given merge at all.
 		 */
-		if (ret < 2) {
-			if (!ret) {
+		ఒకవేళ (ret < 2) {
+			ఒకవేళ (!ret) {
 				/*
 				 * This strategy worked; no point in trying
 				 * another.
 				 */
-				merge_was_ok = 1;
-				best_strategy = wt_strategy;
-				break;
+				విలీనం_was_ok = 1;
+				ఉత్తమ_strategy = wt_strategy;
+				ఆపు;
 			}
-			cnt = (use_strategies_nr > 1) ? evaluate_result() : 0;
-			if (best_cnt <= 0 || cnt <= best_cnt) {
-				best_strategy = wt_strategy;
-				best_cnt = cnt;
+			cnt = (use_strategies_nr > 1) ? evaluate_ఫలితం() : 0;
+			ఒకవేళ (ఉత్తమ_cnt <= 0 || cnt <= ఉత్తమ_cnt) {
+				ఉత్తమ_strategy = wt_strategy;
+				ఉత్తమ_cnt = cnt;
 			}
 		}
 	}
@@ -1825,66 +1825,66 @@ int cmd_merge(int argc,
 	 * If we have a resulting tree, that means the strategy module
 	 * auto resolved the merge cleanly.
 	 */
-	if (merge_was_ok && option_commit) {
+	ఒకవేళ (విలీనం_was_ok && option_commit) {
 		automerge_was_ok = 1;
-		ret = finish_automerge(head_commit, head_subsumed,
+		ret = ముగింపు_automerge(తల_commit, తల_subsumed,
 				       common, remoteheads,
-				       &result_tree, wt_strategy);
-		goto done;
+				       &ఫలితం_వృక్షం, wt_strategy);
+		వెళ్ళు పూర్తి;
 	}
 
 	/*
 	 * Pick the result from the best strategy and have the user fix
 	 * it up.
 	 */
-	if (!best_strategy) {
-		restore_state(&head_commit->object.oid, &stash);
-		if (use_strategies_nr > 1)
+	ఒకవేళ (!ఉత్తమ_strategy) {
+		restore_state(&తల_commit->object.oid, &stash);
+		ఒకవేళ (use_strategies_nr > 1)
 			fprintf(stderr,
 				_("No merge strategy handled the merge.\n"));
-		else
+		లేకపోతే
 			fprintf(stderr, _("Merge with strategy %s failed.\n"),
 				use_strategies[0]->name);
 		apply_autostash_ref(the_repository, "MERGE_AUTOSTASH",
-				    NULL, NULL, NULL, NULL);
+				    ఖాళీ, ఖాళీ, ఖాళీ, ఖాళీ);
 		ret = 2;
-		goto done;
-	} else if (best_strategy == wt_strategy)
+		వెళ్ళు పూర్తి;
+	} లేకపోతే ఒకవేళ (ఉత్తమ_strategy == wt_strategy)
 		; /* We already have its result in the working tree. */
-	else {
-		printf(_("Rewinding the tree to pristine...\n"));
-		restore_state(&head_commit->object.oid, &stash);
-		printf(_("Using the %s strategy to prepare resolving by hand.\n"),
-			best_strategy);
-		try_merge_strategy(best_strategy, common, remoteheads,
-				   head_commit);
+	లేకపోతే {
+		రాయి(_("Rewinding the tree to pristine...\n"));
+		restore_state(&తల_commit->object.oid, &stash);
+		రాయి(_("Using the %s strategy to prepare resolving by hand.\n"),
+			ఉత్తమ_strategy);
+		try_విలీనం_strategy(ఉత్తమ_strategy, common, remoteheads,
+				   తల_commit);
 	}
 
-	if (squash) {
-		finish(head_commit, remoteheads, NULL, NULL);
+	ఒకవేళ (squash) {
+		ముగింపు(తల_commit, remoteheads, ఖాళీ, ఖాళీ);
 
-		git_test_write_commit_graph_or_die(the_repository);
-	} else
-		write_merge_state(remoteheads);
+		git_test_write_commit_లేఖాచిత్రం_or_die(the_repository);
+	} లేకపోతే
+		write_విలీనం_state(remoteheads);
 
-	if (merge_was_ok)
+	ఒకవేళ (విలీనం_was_ok)
 		fprintf(stderr, _("Automatic merge went well; "
 			"stopped before committing as requested\n"));
-	else
+	లేకపోతే
 		ret = suggest_conflicts();
-	if (autostash)
-		printf(_("When finished, apply stashed changes with `git stash pop`\n"));
+	ఒకవేళ (autostash)
+		రాయి(_("When finished, apply stashed changes with `git stash pop`\n"));
 
-done:
-	if (!automerge_was_ok) {
+పూర్తి:
+	ఒకవేళ (!automerge_was_ok) {
 		commit_list_free(common);
 		commit_list_free(remoteheads);
 	}
 	strbuf_release(&buf);
-	free(branch_to_free);
-	free(argv_to_free);
-	free(pull_twohead);
-	free(pull_octopus);
-	discard_index(the_repository->index);
-	return ret;
+	విడుదల(branch_గమ్యం_free);
+	విడుదల(argv_గమ్యం_free);
+	విడుదల(pull_twohead);
+	విడుదల(pull_octopus);
+	discard_సూచీ(the_repository->సూచీ);
+	తిరిగి ret;
 }

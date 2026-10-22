@@ -3,176 +3,176 @@
  *
  * Copyright (c) 2006 Junio C Hamano
  */
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "path.h"
-#include "parse-options.h"
-#include "quote.h"
-#include "packfile.h"
-#include "object-file.h"
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "dir.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "path.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "quote.h"
+#అన్తర్భావ "packfile.h"
+#అన్తర్భావ "object-file.h"
 
-static unsigned long garbage;
-static off_t size_garbage;
-static int verbose;
-static unsigned long loose, packed, packed_loose;
-static off_t loose_size;
+స్థిర గుర్తులేని దీర్ఘ garbage;
+స్థిర off_t కొలత_garbage;
+స్థిర పూర్ణాంకం verbose;
+స్థిర గుర్తులేని దీర్ఘ loose, packed, packed_loose;
+స్థిర off_t loose_కొలత;
 
-static const char *bits_to_msg(unsigned seen_bits)
+స్థిర స్థిరరాశి అక్షరం *బిట్లు_గమ్యం_సందేశం(గుర్తులేని చూసిన_బిట్లు)
 {
-	switch (seen_bits) {
-	case 0:
-		return "no corresponding .idx or .pack";
-	case PACKDIR_FILE_GARBAGE:
-		return "garbage found";
-	case PACKDIR_FILE_PACK:
-		return "no corresponding .idx";
-	case PACKDIR_FILE_IDX:
-		return "no corresponding .pack";
-	case PACKDIR_FILE_PACK|PACKDIR_FILE_IDX:
-	default:
-		return NULL;
+	ఎంపిక (చూసిన_బిట్లు) {
+	స్థితి 0:
+		తిరిగి "no corresponding .idx or .pack";
+	స్థితి PACKDIR_FILE_GARBAGE:
+		తిరిగి "garbage found";
+	స్థితి PACKDIR_FILE_PACK:
+		తిరిగి "no corresponding .idx";
+	స్థితి PACKDIR_FILE_IDX:
+		తిరిగి "no corresponding .pack";
+	స్థితి PACKDIR_FILE_PACK|PACKDIR_FILE_IDX:
+	అప్రమేయ:
+		తిరిగి ఖాళీ;
 	}
 }
 
-static void real_report_garbage(unsigned seen_bits, const char *path)
+స్థిర శూన్య real_report_garbage(గుర్తులేని చూసిన_బిట్లు, స్థిరరాశి అక్షరం *మార్గం)
 {
-	struct stat st;
-	const char *desc = bits_to_msg(seen_bits);
+	నిర్మాణం stat st;
+	స్థిరరాశి అక్షరం *desc = బిట్లు_గమ్యం_సందేశం(చూసిన_బిట్లు);
 
-	if (!desc)
-		return;
+	ఒకవేళ (!desc)
+		తిరిగి;
 
-	if (!stat(path, &st))
-		size_garbage += st.st_size;
-	warning("%s: %s", desc, path);
+	ఒకవేళ (!stat(మార్గం, &st))
+		కొలత_garbage += st.st_కొలత;
+	warning("%s: %s", desc, మార్గం);
 	garbage++;
 }
 
-static void loose_garbage(const char *path)
+స్థిర శూన్య loose_garbage(స్థిరరాశి అక్షరం *మార్గం)
 {
-	if (verbose)
-		report_garbage(PACKDIR_FILE_GARBAGE, path);
+	ఒకవేళ (verbose)
+		report_garbage(PACKDIR_FILE_GARBAGE, మార్గం);
 }
 
-static int count_loose(const struct object_id *oid, const char *path,
-		       void *data UNUSED)
+స్థిర పూర్ణాంకం లెక్క_loose(స్థిరరాశి నిర్మాణం object_id *oid, స్థిరరాశి అక్షరం *మార్గం,
+		       శూన్య *దత్తాంశం వాడని)
 {
-	struct stat st;
+	నిర్మాణం stat st;
 
-	if (lstat(path, &st) || !S_ISREG(st.st_mode))
-		loose_garbage(path);
-	else {
-		loose_size += on_disk_bytes(st);
+	ఒకవేళ (lstat(మార్గం, &st) || !S_ISREG(st.st_బహుళకం))
+		loose_garbage(మార్గం);
+	లేకపోతే {
+		loose_కొలత += on_disk_బైట్లు(st);
 		loose++;
-		if (verbose && has_object_pack(the_repository, oid))
+		ఒకవేళ (verbose && has_object_pack(the_repository, oid))
 			packed_loose++;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static int count_cruft(const char *basename UNUSED, const char *path,
-		       void *data UNUSED)
+స్థిర పూర్ణాంకం లెక్క_cruft(స్థిరరాశి అక్షరం *basename వాడని, స్థిరరాశి అక్షరం *మార్గం,
+		       శూన్య *దత్తాంశం వాడని)
 {
-	loose_garbage(path);
-	return 0;
+	loose_garbage(మార్గం);
+	తిరిగి 0;
 }
 
-static int print_alternate(struct odb_files_dir *alternate, void *data UNUSED)
+స్థిర పూర్ణాంకం print_alternate(నిర్మాణం odb_files_dir *alternate, శూన్య *దత్తాంశం వాడని)
 {
-	printf("alternate: ");
-	quote_c_style(alternate->abspath, NULL, stdout, 0);
-	putchar('\n');
-	return 0;
+	రాయి("alternate: ");
+	quote_c_style(alternate->abspath, ఖాళీ, stdout, 0);
+	అక్షరం_రాయి('\n');
+	తిరిగి 0;
 }
 
-static char const * const count_objects_usage[] = {
+స్థిర అక్షరం స్థిరరాశి * స్థిరరాశి లెక్క_objects_usage[] = {
 	"git count-objects [-v] [-H | --human-readable]",
-	NULL
+	ఖాళీ
 };
 
-int cmd_count_objects(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo UNUSED)
+పూర్ణాంకం cmd_లెక్క_objects(పూర్ణాంకం argc,
+		      స్థిరరాశి అక్షరం **argv,
+		      స్థిరరాశి అక్షరం *ఉపసర్గ,
+		      నిర్మాణం repository *repo వాడని)
 {
-	int human_readable = 0;
-	struct option opts[] = {
+	పూర్ణాంకం human_readable = 0;
+	నిర్మాణం option opts[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose")),
 		OPT_BOOL('H', "human-readable", &human_readable,
 			 N_("print sizes in human readable format")),
-		OPT_END(),
+		OPT_చివర(),
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ఖాళీ);
 
-	argc = parse_options(argc, argv, prefix, opts, count_objects_usage, 0);
+	argc = parse_options(argc, argv, ఉపసర్గ, opts, లెక్క_objects_usage, 0);
 	/* we do not take arguments other than flags for now */
-	if (argc)
-		usage_with_options(count_objects_usage, opts);
-	if (verbose) {
+	ఒకవేళ (argc)
+		usage_with_options(లెక్క_objects_usage, opts);
+	ఒకవేళ (verbose) {
 		report_garbage = real_report_garbage;
 		report_linked_checkout_garbage(the_repository);
 	}
 
-	for_each_loose_file_in_source(the_repository->objects->source,
-				      count_loose, count_cruft, NULL, NULL);
+	for_each_loose_file_లోపల_ఆధారం(the_repository->objects->ఆధారం,
+				      లెక్క_loose, లెక్క_cruft, ఖాళీ, ఖాళీ);
 
-	if (verbose) {
-		struct packed_git *p;
-		unsigned long num_pack = 0;
-		off_t size_pack = 0;
-		struct strbuf loose_buf = STRBUF_INIT;
-		struct strbuf pack_buf = STRBUF_INIT;
-		struct strbuf garbage_buf = STRBUF_INIT;
+	ఒకవేళ (verbose) {
+		నిర్మాణం packed_git *p;
+		గుర్తులేని దీర్ఘ అంకె_pack = 0;
+		off_t కొలత_pack = 0;
+		నిర్మాణం strbuf loose_buf = STRBUF_INIT;
+		నిర్మాణం strbuf pack_buf = STRBUF_INIT;
+		నిర్మాణం strbuf garbage_buf = STRBUF_INIT;
 
 		repo_for_each_pack(the_repository, p) {
-			if (!p->pack_local)
-				continue;
-			if (open_pack_index(p))
-				continue;
-			packed += p->num_objects;
-			size_pack += p->pack_size + p->index_size;
-			num_pack++;
+			ఒకవేళ (!p->pack_local)
+				కొనసాగు;
+			ఒకవేళ (open_pack_సూచీ(p))
+				కొనసాగు;
+			packed += p->అంకె_objects;
+			కొలత_pack += p->pack_కొలత + p->సూచీ_కొలత;
+			అంకె_pack++;
 		}
 
-		if (human_readable) {
-			strbuf_humanise_bytes(&loose_buf, loose_size);
-			strbuf_humanise_bytes(&pack_buf, size_pack);
-			strbuf_humanise_bytes(&garbage_buf, size_garbage);
-		} else {
+		ఒకవేళ (human_readable) {
+			strbuf_humanise_బైట్లు(&loose_buf, loose_కొలత);
+			strbuf_humanise_బైట్లు(&pack_buf, కొలత_pack);
+			strbuf_humanise_బైట్లు(&garbage_buf, కొలత_garbage);
+		} లేకపోతే {
 			strbuf_addf(&loose_buf, "%lu",
-				    (unsigned long)(loose_size / 1024));
+				    (గుర్తులేని దీర్ఘ)(loose_కొలత / 1024));
 			strbuf_addf(&pack_buf, "%lu",
-				    (unsigned long)(size_pack / 1024));
+				    (గుర్తులేని దీర్ఘ)(కొలత_pack / 1024));
 			strbuf_addf(&garbage_buf, "%lu",
-				    (unsigned long)(size_garbage / 1024));
+				    (గుర్తులేని దీర్ఘ)(కొలత_garbage / 1024));
 		}
 
-		printf("count: %lu\n", loose);
-		printf("size: %s\n", loose_buf.buf);
-		printf("in-pack: %lu\n", packed);
-		printf("packs: %lu\n", num_pack);
-		printf("size-pack: %s\n", pack_buf.buf);
-		printf("prune-packable: %lu\n", packed_loose);
-		printf("garbage: %lu\n", garbage);
-		printf("size-garbage: %s\n", garbage_buf.buf);
-		odb_for_each_alternate(the_repository->objects, print_alternate, NULL);
+		రాయి("count: %lu\n", loose);
+		రాయి("size: %s\n", loose_buf.buf);
+		రాయి("in-pack: %lu\n", packed);
+		రాయి("packs: %lu\n", అంకె_pack);
+		రాయి("size-pack: %s\n", pack_buf.buf);
+		రాయి("prune-packable: %lu\n", packed_loose);
+		రాయి("garbage: %lu\n", garbage);
+		రాయి("size-garbage: %s\n", garbage_buf.buf);
+		odb_for_each_alternate(the_repository->objects, print_alternate, ఖాళీ);
 		strbuf_release(&loose_buf);
 		strbuf_release(&pack_buf);
 		strbuf_release(&garbage_buf);
-	} else {
-		struct strbuf buf = STRBUF_INIT;
-		if (human_readable)
-			strbuf_humanise_bytes(&buf, loose_size);
-		else
+	} లేకపోతే {
+		నిర్మాణం strbuf buf = STRBUF_INIT;
+		ఒకవేళ (human_readable)
+			strbuf_humanise_బైట్లు(&buf, loose_కొలత);
+		లేకపోతే
 			strbuf_addf(&buf, "%lu kilobytes",
-				    (unsigned long)(loose_size / 1024));
-		printf("%lu objects, %s\n", loose, buf.buf);
+				    (గుర్తులేని దీర్ఘ)(loose_కొలత / 1024));
+		రాయి("%lu objects, %s\n", loose, buf.buf);
 		strbuf_release(&buf);
 	}
-	return 0;
+	తిరిగి 0;
 }

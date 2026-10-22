@@ -1,208 +1,208 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hook.h"
-#include "parse-options.h"
-#include "thread-utils.h"
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hook.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "thread-utils.h"
 
-#define BUILTIN_HOOK_RUN_USAGE \
+#నిర్వచించు BUILTIN_HOOK_నిరంతరం_USAGE \
 	N_("git hook run [--allow-unknown-hook-name] [--ignore-missing] [--to-stdin=<path>] [(-j|--jobs) <n>]\n" \
 	   "<hook-name> [-- <hook-args>]")
-#define BUILTIN_HOOK_LIST_USAGE \
+#నిర్వచించు BUILTIN_HOOK_LIST_USAGE \
 	N_("git hook list [--allow-unknown-hook-name] [-z] [--show-scope] <hook-name>")
 
-static const char * const builtin_hook_usage[] = {
-	BUILTIN_HOOK_RUN_USAGE,
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_hook_usage[] = {
+	BUILTIN_HOOK_నిరంతరం_USAGE,
 	BUILTIN_HOOK_LIST_USAGE,
-	NULL
+	ఖాళీ
 };
 
-static const char * const builtin_hook_run_usage[] = {
-	BUILTIN_HOOK_RUN_USAGE,
-	NULL
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_hook_నిరంతరం_usage[] = {
+	BUILTIN_HOOK_నిరంతరం_USAGE,
+	ఖాళీ
 };
 
-static int list(int argc, const char **argv, const char *prefix,
-		 struct repository *repo)
+స్థిర పూర్ణాంకం list(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		 నిర్మాణం repository *repo)
 {
-	static const char *const builtin_hook_list_usage[] = {
+	స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి builtin_hook_list_usage[] = {
 		BUILTIN_HOOK_LIST_USAGE,
-		NULL
+		ఖాళీ
 	};
-	struct string_list *head;
-	struct string_list_item *item;
-	const char *hookname = NULL;
-	int line_terminator = '\n';
-	int show_scope = 0;
-	int allow_unknown = 0;
-	int ret = 0;
+	నిర్మాణం string_list *తల;
+	నిర్మాణం string_list_అంశం *అంశం;
+	స్థిరరాశి అక్షరం *hookname = ఖాళీ;
+	పూర్ణాంకం పంక్తి_terminator = '\n';
+	పూర్ణాంకం show_scope = 0;
+	పూర్ణాంకం allow_unknown = 0;
+	పూర్ణాంకం ret = 0;
 
-	struct option list_options[] = {
-		OPT_SET_INT('z', NULL, &line_terminator,
+	నిర్మాణం option list_options[] = {
+		OPT_సమితి_INT('z', ఖాళీ, &పంక్తి_terminator,
 			    N_("use NUL as line terminator"), '\0'),
 		OPT_BOOL(0, "show-scope", &show_scope,
 			 N_("show the config scope that defined each hook")),
 		OPT_BOOL(0, "allow-unknown-hook-name", &allow_unknown,
 			 N_("allow running a hook with a non-native hook name")),
-		OPT_END(),
+		OPT_చివర(),
 	};
 
-	argc = parse_options(argc, argv, prefix, list_options,
+	argc = parse_options(argc, argv, ఉపసర్గ, list_options,
 			     builtin_hook_list_usage, 0);
 
 	/*
 	 * The only unnamed argument provided should be the hook-name; if we add
 	 * arguments later they probably should be caught by parse_options.
 	 */
-	if (argc != 1)
-		usage_msg_opt(_("you must specify a hook event name to list"),
+	ఒకవేళ (argc != 1)
+		usage_సందేశం_opt(_("you must specify a hook event name to list"),
 			      builtin_hook_list_usage, list_options);
 
 	hookname = argv[0];
 
-	if (!allow_unknown && !is_known_hook(hookname)) {
+	ఒకవేళ (!allow_unknown && !is_తెలిసిన_hook(hookname)) {
 		error(_("unknown hook event '%s';\n"
 			"use --allow-unknown-hook-name to allow non-native hook names"),
 		      hookname);
-		return 1;
+		తిరిగి 1;
 	}
 
-	head = list_hooks(repo, hookname, NULL);
+	తల = list_hooks(repo, hookname, ఖాళీ);
 
-	if (!head->nr) {
+	ఒకవేళ (!తల->nr) {
 		warning(_("no hooks found for event '%s'"), hookname);
 		ret = 1; /* no hooks found */
-		goto cleanup;
+		వెళ్ళు cleanup;
 	}
 
-	for_each_string_list_item(item, head) {
-		struct hook *h = item->util;
+	for_each_string_list_అంశం(అంశం, తల) {
+		నిర్మాణం hook *h = అంశం->util;
 
-		switch (h->kind) {
-		case HOOK_TRADITIONAL:
-			printf("%s%c", _("hook from hookdir"), line_terminator);
-			break;
-		case HOOK_CONFIGURED: {
-			const char *name = h->u.configured.friendly_name;
-			const char *scope = show_scope ?
-				config_scope_name(h->u.configured.scope) : NULL;
+		ఎంపిక (h->రకం) {
+		స్థితి HOOK_TRADITIONAL:
+			రాయి("%s%c", _("hook from hookdir"), పంక్తి_terminator);
+			ఆపు;
+		స్థితి HOOK_CONFIGURED: {
+			స్థిరరాశి అక్షరం *name = h->u.configured.friendly_name;
+			స్థిరరాశి అక్షరం *scope = show_scope ?
+				config_scope_name(h->u.configured.scope) : ఖాళీ;
 			/*
 			 * Show the most relevant disable reason. Event-level
 			 * takes precedence: if the whole event is off, that
 			 * is what the user needs to know. The per-hook
 			 * "disabled" surfaces once the event is re-enabled.
 			 */
-			const char *disability =
+			స్థిరరాశి అక్షరం *disability =
 				h->u.configured.event_disabled ? "event-disabled\t" :
 				h->u.configured.disabled       ? "disabled\t"       :
 								 "";
-			if (scope)
-				printf("%s\t%s%s%c", scope, disability, name,
-				       line_terminator);
-			else
-				printf("%s%s%c", disability, name,
-				       line_terminator);
-			break;
+			ఒకవేళ (scope)
+				రాయి("%s\t%s%s%c", scope, disability, name,
+				       పంక్తి_terminator);
+			లేకపోతే
+				రాయి("%s%s%c", disability, name,
+				       పంక్తి_terminator);
+			ఆపు;
 		}
-		default:
+		అప్రమేయ:
 			BUG("unknown hook kind");
 		}
 	}
 
 cleanup:
-	string_list_clear_func(head, hook_free);
-	free(head);
-	return ret;
+	string_list_clear_func(తల, hook_free);
+	విడుదల(తల);
+	తిరిగి ret;
 }
 
-static int run(int argc, const char **argv, const char *prefix,
-	       struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం నిరంతరం(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+	       నిర్మాణం repository *repo వాడని)
 {
-	int i;
-	struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT;
-	int ignore_missing = 0;
-	int allow_unknown = 0;
-	int jobs = 0;
-	const char *hook_name;
-	struct option run_options[] = {
+	పూర్ణాంకం i;
+	నిర్మాణం నిరంతరం_hooks_opt opt = నిరంతరం_HOOKS_OPT_INIT;
+	పూర్ణాంకం ignore_missing = 0;
+	పూర్ణాంకం allow_unknown = 0;
+	పూర్ణాంకం jobs = 0;
+	స్థిరరాశి అక్షరం *hook_name;
+	నిర్మాణం option నిరంతరం_options[] = {
 		OPT_BOOL(0, "allow-unknown-hook-name", &allow_unknown,
 			 N_("allow running a hook with a non-native hook name")),
 		OPT_BOOL(0, "ignore-missing", &ignore_missing,
 			 N_("silently ignore missing requested <hook-name>")),
-		OPT_STRING(0, "to-stdin", &opt.path_to_stdin, N_("path"),
+		OPT_STRING(0, "to-stdin", &opt.మార్గం_గమ్యం_stdin, N_("path"),
 			   N_("file to read into hooks' stdin")),
 		OPT_INTEGER('j', "jobs", &jobs,
 			    N_("run up to <n> hooks simultaneously (-1 for CPU count)")),
-		OPT_END(),
+		OPT_చివర(),
 	};
-	int ret;
+	పూర్ణాంకం ret;
 
-	argc = parse_options(argc, argv, prefix, run_options,
-			     builtin_hook_run_usage,
+	argc = parse_options(argc, argv, ఉపసర్గ, నిరంతరం_options,
+			     builtin_hook_నిరంతరం_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (jobs == -1)
+	ఒకవేళ (jobs == -1)
 		opt.jobs = online_cpus();
-	else if (jobs < 0)
+	లేకపోతే ఒకవేళ (jobs < 0)
 		die(_("invalid value for -j: %d"
 		     " (use -1 for CPU count or a"
 		     " positive integer)"), jobs);
-	else
+	లేకపోతే
 		opt.jobs = jobs;
 
-	if (!argc)
-		goto usage;
+	ఒకవేళ (!argc)
+		వెళ్ళు usage;
 
 	/*
 	 * Having a -- for "run" when providing <hook-args> is
 	 * mandatory.
 	 */
-	if (argc > 1 && strcmp(argv[1], "--") &&
+	ఒకవేళ (argc > 1 && strcmp(argv[1], "--") &&
 	    strcmp(argv[1], "--end-of-options"))
-		goto usage;
+		వెళ్ళు usage;
 
 	/* Add our arguments, start after -- */
-	for (i = 2 ; i < argc; i++)
-		strvec_push(&opt.args, argv[i]);
+	కొరకు (i = 2 ; i < argc; i++)
+		strvec_నెట్టు(&opt.వాదనలు, argv[i]);
 
 	/* Need to take into account core.hooksPath */
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ఖాళీ);
 
 	hook_name = argv[0];
 
-	if (!allow_unknown && !is_known_hook(hook_name)) {
+	ఒకవేళ (!allow_unknown && !is_తెలిసిన_hook(hook_name)) {
 		error(_("unknown hook event '%s';\n"
 			"use --allow-unknown-hook-name to allow non-native hook names"),
 		      hook_name);
-		return 1;
+		తిరిగి 1;
 	}
 
-	if (!ignore_missing)
+	ఒకవేళ (!ignore_missing)
 		opt.error_if_missing = 1;
-	ret = run_hooks_opt(the_repository, hook_name, &opt);
-	if (ret < 0) /* error() return */
+	ret = నిరంతరం_hooks_opt(the_repository, hook_name, &opt);
+	ఒకవేళ (ret < 0) /* error() return */
 		ret = 1;
-	return ret;
+	తిరిగి ret;
 usage:
-	usage_with_options(builtin_hook_run_usage, run_options);
+	usage_with_options(builtin_hook_నిరంతరం_usage, నిరంతరం_options);
 }
 
-int cmd_hook(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo)
+పూర్ణాంకం cmd_hook(పూర్ణాంకం argc,
+	     స్థిరరాశి అక్షరం **argv,
+	     స్థిరరాశి అక్షరం *ఉపసర్గ,
+	     నిర్మాణం repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option builtin_hook_options[] = {
-		OPT_SUBCOMMAND("run", &fn, run),
+	parse_opt_subcommand_fn *fn = ఖాళీ;
+	నిర్మాణం option builtin_hook_options[] = {
+		OPT_SUBCOMMAND("run", &fn, నిరంతరం),
 		OPT_SUBCOMMAND("list", &fn, list),
-		OPT_END(),
+		OPT_చివర(),
 	};
 
-	argc = parse_options(argc, argv, NULL, builtin_hook_options,
+	argc = parse_options(argc, argv, ఖాళీ, builtin_hook_options,
 			     builtin_hook_usage, 0);
 
-	return fn(argc, argv, prefix, repo);
+	తిరిగి fn(argc, argv, ఉపసర్గ, repo);
 }

@@ -1,71 +1,71 @@
-#include "builtin.h"
-#include "config.h"
-#include "diff.h"
-#include "diffcore.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "object.h"
-#include "parse-options.h"
-#include "revision.h"
-#include "strbuf.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "diff.h"
+#అన్తర్భావ "diffcore.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hash.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "object.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "revision.h"
+#అన్తర్భావ "strbuf.h"
 
-static unsigned parse_mode_or_die(const char *mode, const char **end)
+స్థిర గుర్తులేని parse_బహుళకం_or_die(స్థిరరాశి అక్షరం *బహుళకం, స్థిరరాశి అక్షరం **చివర)
 {
 	uint16_t ret;
 
-	*end = parse_mode(mode, &ret);
-	if (!*end)
-		die(_("unable to parse mode: %s"), mode);
-	return ret;
+	*చివర = parse_బహుళకం(బహుళకం, &ret);
+	ఒకవేళ (!*చివర)
+		die(_("unable to parse mode: %s"), బహుళకం);
+	తిరిగి ret;
 }
 
-static void parse_oid_or_die(const char *hex, struct object_id *oid,
-			     const char **end, const struct git_hash_algo *algop)
+స్థిర శూన్య parse_oid_or_die(స్థిరరాశి అక్షరం *hex, నిర్మాణం object_id *oid,
+			     స్థిరరాశి అక్షరం **చివర, స్థిరరాశి నిర్మాణం git_hash_algo *algop)
 {
-	if (parse_oid_hex_algop(hex, oid, end, algop) || *(*end)++ != ' ')
+	ఒకవేళ (parse_oid_hex_algop(hex, oid, చివర, algop) || *(*చివర)++ != ' ')
 		die(_("unable to parse object id: %s"), hex);
 }
 
-int cmd_diff_pairs(int argc, const char **argv, const char *prefix,
-		   struct repository *repo)
+పూర్ణాంకం cmd_diff_జతలు(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+		   నిర్మాణం repository *repo)
 {
-	struct strbuf path_dst = STRBUF_INIT;
-	struct strbuf path = STRBUF_INIT;
-	struct strbuf meta = STRBUF_INIT;
-	struct option *parseopts;
-	struct rev_info revs;
-	int line_term = '\0';
-	int ret;
+	నిర్మాణం strbuf మార్గం_dst = STRBUF_INIT;
+	నిర్మాణం strbuf మార్గం = STRBUF_INIT;
+	నిర్మాణం strbuf meta = STRBUF_INIT;
+	నిర్మాణం option *parseopts;
+	నిర్మాణం rev_info revs;
+	పూర్ణాంకం పంక్తి_పదం = '\0';
+	పూర్ణాంకం ret;
 
-	const char * const builtin_diff_pairs_usage[] = {
+	స్థిరరాశి అక్షరం * స్థిరరాశి builtin_diff_జతలు_usage[] = {
 		N_("git diff-pairs -z [<diff-options>]"),
-		NULL
+		ఖాళీ
 	};
-	struct option builtin_diff_pairs_options[] = {
-		OPT_END()
+	నిర్మాణం option builtin_diff_జతలు_options[] = {
+		OPT_చివర()
 	};
 
-	repo_init_revisions(repo, &revs, prefix);
+	repo_init_revisions(repo, &revs, ఉపసర్గ);
 
 	/*
 	 * Diff options are usually parsed implicitly as part of
 	 * setup_revisions(). Explicitly handle parsing to ensure options are
 	 * printed in the usage message.
 	 */
-	parseopts = add_diff_options(builtin_diff_pairs_options, &revs.diffopt);
-	show_usage_with_options_if_asked(argc, argv, builtin_diff_pairs_usage, parseopts);
+	parseopts = కూడు_diff_options(builtin_diff_జతలు_options, &revs.diffopt);
+	show_usage_with_options_if_asked(argc, argv, builtin_diff_జతలు_usage, parseopts);
 
-	repo_config(repo, git_diff_basic_config, NULL);
+	repo_config(repo, git_diff_basic_config, ఖాళీ);
 	revs.diffopt.no_free = 1;
 	revs.disable_stdin = 1;
 	revs.abbrev = 0;
 	revs.diff = 1;
 
-	argc = parse_options(argc, argv, prefix, parseopts, builtin_diff_pairs_usage,
+	argc = parse_options(argc, argv, ఉపసర్గ, parseopts, builtin_diff_జతలు_usage,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_DASHDASH);
 
-	if (setup_revisions(argc, argv, &revs, NULL) > 1)
+	ఒకవేళ (అమరిక_revisions(argc, argv, &revs, ఖాళీ) > 1)
 		usagef(_("unrecognized argument: %s"), argv[0]);
 
 	/*
@@ -73,18 +73,18 @@ int cmd_diff_pairs(int argc, const char **argv, const char *prefix,
 	 * NUL-delimited (this mode does not affect patch output). At present
 	 * only NUL-delimited raw diff formatted input is supported.
 	 */
-	if (revs.diffopt.line_termination)
+	ఒకవేళ (revs.diffopt.పంక్తి_termination)
 		usage(_("working without -z is not supported"));
 
-	if (revs.prune_data.nr)
+	ఒకవేళ (revs.prune_దత్తాంశం.nr)
 		usage(_("pathspec arguments not supported"));
 
-	if (revs.pending.nr || revs.max_count != -1 ||
+	ఒకవేళ (revs.pending.nr || revs.max_లెక్క != -1 ||
 	    revs.min_age != (timestamp_t)-1 ||
 	    revs.max_age != (timestamp_t)-1)
 		usage(_("revision arguments not allowed"));
 
-	if (!revs.diffopt.output_format)
+	ఒకవేళ (!revs.diffopt.output_format)
 		revs.diffopt.output_format = DIFF_FORMAT_PATCH;
 
 	/*
@@ -93,21 +93,21 @@ int cmd_diff_pairs(int argc, const char **argv, const char *prefix,
 	 * diffcore_std() does not mess with rename information already present
 	 * in queued filepairs.
 	 */
-	if (!revs.diffopt.detect_rename)
+	ఒకవేళ (!revs.diffopt.detect_rename)
 		revs.diffopt.skip_resolving_statuses = 1;
 
-	while (1) {
-		struct object_id oid_a, oid_b;
-		struct diff_filepair *pair;
-		unsigned mode_a, mode_b;
-		const char *p;
-		char status;
+	అయితే (1) {
+		నిర్మాణం object_id oid_a, oid_b;
+		నిర్మాణం diff_filepair *pair;
+		గుర్తులేని బహుళకం_a, బహుళకం_b;
+		స్థిరరాశి అక్షరం *p;
+		అక్షరం స్థితి_2;
 
-		if (strbuf_getwholeline(&meta, stdin, line_term) == EOF)
-			break;
+		ఒకవేళ (strbuf_getwholeline(&meta, stdin, పంక్తి_పదం) == EOF)
+			ఆపు;
 
 		p = meta.buf;
-		if (!*p) {
+		ఒకవేళ (!*p) {
 			diffcore_std(&revs.diffopt);
 			diff_flush(&revs.diffopt);
 			/*
@@ -116,92 +116,92 @@ int cmd_diff_pairs(int argc, const char **argv, const char *prefix,
 			 */
 			fputc('\0', revs.diffopt.file);
 			fflush(revs.diffopt.file);
-			continue;
+			కొనసాగు;
 		}
 
-		if (*p != ':')
+		ఒకవేళ (*p != ':')
 			die(_("invalid raw diff input"));
 		p++;
 
-		mode_a = parse_mode_or_die(p, &p);
-		mode_b = parse_mode_or_die(p, &p);
+		బహుళకం_a = parse_బహుళకం_or_die(p, &p);
+		బహుళకం_b = parse_బహుళకం_or_die(p, &p);
 
-		if (S_ISDIR(mode_a) || S_ISDIR(mode_b))
+		ఒకవేళ (S_ISDIR(బహుళకం_a) || S_ISDIR(బహుళకం_b))
 			die(_("tree objects not supported"));
 
 		parse_oid_or_die(p, &oid_a, &p, repo->hash_algo);
 		parse_oid_or_die(p, &oid_b, &p, repo->hash_algo);
 
-		status = *p++;
+		స్థితి_2 = *p++;
 
-		if (strbuf_getwholeline(&path, stdin, line_term) == EOF)
+		ఒకవేళ (strbuf_getwholeline(&మార్గం, stdin, పంక్తి_పదం) == EOF)
 			die(_("got EOF while reading path"));
 
-		switch (status) {
-		case DIFF_STATUS_ADDED:
-			pair = diff_queue_addremove(&diff_queued_diff,
-						    &revs.diffopt, '+', mode_b,
-						    &oid_b, 1, path.buf, 0);
-			if (pair)
-				pair->status = status;
-			break;
+		ఎంపిక (స్థితి_2) {
+		స్థితి DIFF_స్థితి_ADDED:
+			pair = diff_వరుస_addremove(&diff_queued_diff,
+						    &revs.diffopt, '+', బహుళకం_b,
+						    &oid_b, 1, మార్గం.buf, 0);
+			ఒకవేళ (pair)
+				pair->స్థితి_2 = స్థితి_2;
+			ఆపు;
 
-		case DIFF_STATUS_DELETED:
-			pair = diff_queue_addremove(&diff_queued_diff,
-						    &revs.diffopt, '-', mode_a,
-						    &oid_a, 1, path.buf, 0);
-			if (pair)
-				pair->status = status;
-			break;
+		స్థితి DIFF_స్థితి_DELETED:
+			pair = diff_వరుస_addremove(&diff_queued_diff,
+						    &revs.diffopt, '-', బహుళకం_a,
+						    &oid_a, 1, మార్గం.buf, 0);
+			ఒకవేళ (pair)
+				pair->స్థితి_2 = స్థితి_2;
+			ఆపు;
 
-		case DIFF_STATUS_TYPE_CHANGED:
-		case DIFF_STATUS_MODIFIED:
-			pair = diff_queue_change(&diff_queued_diff, &revs.diffopt,
-						 mode_a, mode_b, &oid_a, &oid_b,
-						 1, 1, path.buf, 0, 0);
-			if (pair)
-				pair->status = status;
-			break;
+		స్థితి DIFF_స్థితి_TYPE_మారింది:
+		స్థితి DIFF_స్థితి_MODIFIED:
+			pair = diff_వరుస_change(&diff_queued_diff, &revs.diffopt,
+						 బహుళకం_a, బహుళకం_b, &oid_a, &oid_b,
+						 1, 1, మార్గం.buf, 0, 0);
+			ఒకవేళ (pair)
+				pair->స్థితి_2 = స్థితి_2;
+			ఆపు;
 
-		case DIFF_STATUS_RENAMED:
-		case DIFF_STATUS_COPIED: {
-				struct diff_filespec *a, *b;
-				unsigned int score;
+		స్థితి DIFF_స్థితి_RENAMED:
+		స్థితి DIFF_స్థితి_COPIED: {
+				నిర్మాణం diff_filespec *a, *b;
+				గుర్తులేని పూర్ణాంకం score;
 
-				if (strbuf_getwholeline(&path_dst, stdin, line_term) == EOF)
+				ఒకవేళ (strbuf_getwholeline(&మార్గం_dst, stdin, పంక్తి_పదం) == EOF)
 					die(_("got EOF while reading destination path"));
 
-				a = alloc_filespec(path.buf);
-				b = alloc_filespec(path_dst.buf);
-				fill_filespec(a, &oid_a, 1, mode_a);
-				fill_filespec(b, &oid_b, 1, mode_b);
+				a = alloc_filespec(మార్గం.buf);
+				b = alloc_filespec(మార్గం_dst.buf);
+				fill_filespec(a, &oid_a, 1, బహుళకం_a);
+				fill_filespec(b, &oid_b, 1, బహుళకం_b);
 
-				pair = diff_queue(&diff_queued_diff, a, b);
+				pair = diff_వరుస(&diff_queued_diff, a, b);
 
-				if (strtoul_ui(p, 10, &score))
+				ఒకవేళ (strtoul_ui(p, 10, &score))
 					die(_("unable to parse rename/copy score: %s"), p);
 
 				pair->score = score * MAX_SCORE / 100;
-				pair->status = status;
+				pair->స్థితి_2 = స్థితి_2;
 				pair->renamed_pair = 1;
 			}
-			break;
+			ఆపు;
 
-		default:
-			die(_("unknown diff status: %c"), status);
+		అప్రమేయ:
+			die(_("unknown diff status: %c"), స్థితి_2);
 		}
 	}
 
 	revs.diffopt.no_free = 0;
 	diffcore_std(&revs.diffopt);
 	diff_flush(&revs.diffopt);
-	ret = diff_result_code(&revs);
+	ret = diff_ఫలితం_సంకేతం(&revs);
 
-	strbuf_release(&path_dst);
-	strbuf_release(&path);
+	strbuf_release(&మార్గం_dst);
+	strbuf_release(&మార్గం);
 	strbuf_release(&meta);
 	release_revisions(&revs);
 	FREE_AND_NULL(parseopts);
 
-	return ret;
+	తిరిగి ret;
 }

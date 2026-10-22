@@ -3,132 +3,132 @@
  *
  * Copyright (C) Linus Torvalds, 2005
  */
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "lockfile.h"
-#include "object.h"
-#include "object-name.h"
-#include "tree.h"
-#include "tree-walk.h"
-#include "cache-tree.h"
-#include "unpack-trees.h"
-#include "parse-options.h"
-#include "resolve-undo.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "submodule.h"
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "hex.h"
+#అన్తర్భావ "lockfile.h"
+#అన్తర్భావ "object.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "tree.h"
+#అన్తర్భావ "tree-walk.h"
+#అన్తర్భావ "cache-tree.h"
+#అన్తర్భావ "unpack-trees.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "resolve-undo.h"
+#అన్తర్భావ "setup.h"
+#అన్తర్భావ "sparse-index.h"
+#అన్తర్భావ "submodule.h"
 
-static int nr_trees;
-static int read_empty;
-static struct tree *trees[MAX_UNPACK_TREES];
+స్థిర పూర్ణాంకం nr_trees;
+స్థిర పూర్ణాంకం read_ఖాళీలు;
+స్థిర నిర్మాణం వృక్షం *trees[MAX_UNPACK_TREES];
 
-static int list_tree(struct object_id *oid)
+స్థిర పూర్ణాంకం list_వృక్షం(నిర్మాణం object_id *oid)
 {
-	struct tree *tree;
+	నిర్మాణం వృక్షం *వృక్షం;
 
-	if (nr_trees >= MAX_UNPACK_TREES)
+	ఒకవేళ (nr_trees >= MAX_UNPACK_TREES)
 		die("I cannot read more than %d trees", MAX_UNPACK_TREES);
-	tree = repo_parse_tree_indirect(the_repository, oid);
-	if (!tree)
-		return -1;
-	trees[nr_trees++] = tree;
-	return 0;
+	వృక్షం = repo_parse_వృక్షం_పరోక్ష(the_repository, oid);
+	ఒకవేళ (!వృక్షం)
+		తిరిగి -1;
+	trees[nr_trees++] = వృక్షం;
+	తిరిగి 0;
 }
 
-static const char * const read_tree_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి read_వృక్షం_usage[] = {
 	N_("git read-tree [(-m [--trivial] [--aggressive] | --reset | --prefix=<prefix>)\n"
 	   "              [-u | -i]] [--index-output=<file>] [--no-sparse-checkout]\n"
 	   "              (--empty | <tree-ish1> [<tree-ish2> [<tree-ish3>]])"),
-	NULL
+	ఖాళీ
 };
 
-static int index_output_cb(const struct option *opt UNUSED, const char *arg,
-				 int unset)
+స్థిర పూర్ణాంకం సూచీ_output_cb(స్థిరరాశి నిర్మాణం option *opt వాడని, స్థిరరాశి అక్షరం *arg,
+				 పూర్ణాంకం unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	set_alternate_index_output(arg);
-	return 0;
+	సమితి_alternate_సూచీ_output(arg);
+	తిరిగి 0;
 }
 
-static int exclude_per_directory_cb(const struct option *opt, const char *arg,
-				    int unset)
+స్థిర పూర్ణాంకం exclude_చొప్పున_directory_cb(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg,
+				    పూర్ణాంకం unset)
 {
-	struct unpack_trees_options *opts;
+	నిర్మాణం unpack_trees_options *opts;
 
 	BUG_ON_OPT_NEG(unset);
 
-	opts = (struct unpack_trees_options *)opt->value;
+	opts = (నిర్మాణం unpack_trees_options *)opt->విలువ;
 
-	if (!opts->update)
+	ఒకవేళ (!opts->update)
 		die("--exclude-per-directory is meaningless unless -u");
-	if (strcmp(arg, ".gitignore"))
+	ఒకవేళ (strcmp(arg, ".gitignore"))
 		die("--exclude-per-directory argument must be .gitignore");
-	return 0;
+	తిరిగి 0;
 }
 
-static void debug_stage(const char *label, const struct cache_entry *ce,
-			struct unpack_trees_options *o)
+స్థిర శూన్య debug_stage(స్థిరరాశి అక్షరం *label, స్థిరరాశి నిర్మాణం cache_నమోదు *ce,
+			నిర్మాణం unpack_trees_options *o)
 {
-	printf("%s ", label);
-	if (!ce)
-		printf("(missing)\n");
-	else if (ce == o->df_conflict_entry)
-		printf("(conflict)\n");
-	else
-		printf("%06o #%d %s %.8s\n",
-		       ce->ce_mode, ce_stage(ce), ce->name,
-		       oid_to_hex(&ce->oid));
+	రాయి("%s ", label);
+	ఒకవేళ (!ce)
+		రాయి("(missing)\n");
+	లేకపోతే ఒకవేళ (ce == o->df_conflict_నమోదు)
+		రాయి("(conflict)\n");
+	లేకపోతే
+		రాయి("%06o #%d %s %.8s\n",
+		       ce->ce_బహుళకం, ce_stage(ce), ce->name,
+		       oid_గమ్యం_hex(&ce->oid));
 }
 
-static int debug_merge(const struct cache_entry * const *stages,
-		       struct unpack_trees_options *o)
+స్థిర పూర్ణాంకం debug_విలీనం(స్థిరరాశి నిర్మాణం cache_నమోదు * స్థిరరాశి *stages,
+		       నిర్మాణం unpack_trees_options *o)
 {
-	int i;
+	పూర్ణాంకం i;
 
-	printf("* %d-way merge\n", o->internal.merge_size);
+	రాయి("* %d-way merge\n", o->అంతర్గత.విలీనం_కొలత);
 	debug_stage("index", stages[0], o);
-	for (i = 1; i <= o->internal.merge_size; i++) {
-		char buf[24];
-		xsnprintf(buf, sizeof(buf), "ent#%d", i);
+	కొరకు (i = 1; i <= o->అంతర్గత.విలీనం_కొలత; i++) {
+		అక్షరం buf[24];
+		xsnprintf(buf, పరిమాణం(buf), "ent#%d", i);
 		debug_stage(buf, stages[i], o);
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static int git_read_tree_config(const char *var, const char *value,
-				const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం git_read_వృక్షం_config(స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *విలువ,
+				స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	if (!strcmp(var, "submodule.recurse"))
-		return git_default_submodule_config(var, value, cb);
+	ఒకవేళ (!strcmp(var, "submodule.recurse"))
+		తిరిగి git_default_submodule_config(var, విలువ, cb);
 
-	return git_default_config(var, value, ctx, cb);
+	తిరిగి git_default_config(var, విలువ, ctx, cb);
 }
 
-int cmd_read_tree(int argc,
-		  const char **argv,
-		  const char *cmd_prefix,
-		  struct repository *repo UNUSED)
+పూర్ణాంకం cmd_read_వృక్షం(పూర్ణాంకం argc,
+		  స్థిరరాశి అక్షరం **argv,
+		  స్థిరరాశి అక్షరం *cmd_ఉపసర్గ,
+		  నిర్మాణం repository *repo వాడని)
 {
-	int i, stage = 0;
-	struct object_id oid;
-	struct tree_desc t[MAX_UNPACK_TREES];
-	struct unpack_trees_options opts;
-	int prefix_set = 0;
-	struct lock_file lock_file = LOCK_INIT;
-	const struct option read_tree_options[] = {
-		OPT__SUPER_PREFIX(&opts.super_prefix),
-		OPT_CALLBACK_F(0, "index-output", NULL, N_("file"),
+	పూర్ణాంకం i, stage = 0;
+	నిర్మాణం object_id oid;
+	నిర్మాణం వృక్షం_desc t[MAX_UNPACK_TREES];
+	నిర్మాణం unpack_trees_options opts;
+	పూర్ణాంకం ఉపసర్గ_సమితి = 0;
+	నిర్మాణం తాళం_file తాళం_file = తాళం_INIT;
+	స్థిరరాశి నిర్మాణం option read_వృక్షం_options[] = {
+		OPT_SUPER_ఉపసర్గ(&opts.super_ఉపసర్గ),
+		OPT_CALLBACK_F(0, "index-output", ఖాళీ, N_("file"),
 		  N_("write resulting index to <file>"),
-		  PARSE_OPT_NONEG, index_output_cb),
-		OPT_BOOL(0, "empty", &read_empty,
+		  PARSE_OPT_NONEG, సూచీ_output_cb),
+		OPT_BOOL(0, "empty", &read_ఖాళీలు,
 			    N_("only empty the index")),
 		OPT__VERBOSE(&opts.verbose_update, N_("be verbose")),
-		OPT_GROUP(N_("Merging")),
-		OPT_BOOL('m', NULL, &opts.merge,
+		OPT_సమూహం(N_("Merging")),
+		OPT_BOOL('m', ఖాళీ, &opts.విలీనం,
 			 N_("perform a merge in addition to a read")),
 		OPT_BOOL(0, "trivial", &opts.trivial_merges_only,
 			 N_("3-way merge if no file level merging required")),
@@ -139,56 +139,56 @@ int cmd_read_tree(int argc,
 		{
 			.type = OPTION_STRING,
 			.long_name = "prefix",
-			.value = &opts.prefix,
+			.విలువ = &opts.ఉపసర్గ,
 			.argh = N_("<subdirectory>/"),
 			.help = N_("read the tree into the index under <subdirectory>/"),
 			.flags = PARSE_OPT_NONEG,
 		},
-		OPT_BOOL('u', NULL, &opts.update,
+		OPT_BOOL('u', ఖాళీ, &opts.update,
 			 N_("update working tree with merge result")),
 		OPT_CALLBACK_F(0, "exclude-per-directory", &opts,
 		  N_("gitignore"),
 		  N_("allow explicitly ignored files to be overwritten"),
-		  PARSE_OPT_NONEG, exclude_per_directory_cb),
-		OPT_BOOL('i', NULL, &opts.index_only,
+		  PARSE_OPT_NONEG, exclude_చొప్పున_directory_cb),
+		OPT_BOOL('i', ఖాళీ, &opts.సూచీ_only,
 			 N_("don't check the working tree after merging")),
-		OPT__DRY_RUN(&opts.dry_run, N_("don't update the index or the work tree")),
+		OPT_DRY_నిరంతరం(&opts.dry_నిరంతరం, N_("don't update the index or the work tree")),
 		OPT_BOOL(0, "no-sparse-checkout", &opts.skip_sparse_checkout,
 			 N_("skip applying sparse checkout filter")),
-		OPT_BOOL(0, "debug-unpack", &opts.internal.debug_unpack,
+		OPT_BOOL(0, "debug-unpack", &opts.అంతర్గత.debug_unpack,
 			 N_("debug unpack-trees")),
-		OPT_CALLBACK_F(0, "recurse-submodules", NULL,
+		OPT_CALLBACK_F(0, "recurse-submodules", ఖాళీ,
 			    "checkout", "control recursive updating of submodules",
 			    PARSE_OPT_OPTARG, option_parse_recurse_submodules_worktree_updater),
 		OPT__QUIET(&opts.quiet, N_("suppress feedback messages")),
-		OPT_END()
+		OPT_చివర()
 	};
 
-	memset(&opts, 0, sizeof(opts));
-	opts.head_idx = -1;
-	opts.src_index = the_repository->index;
-	opts.dst_index = the_repository->index;
+	memset(&opts, 0, పరిమాణం(opts));
+	opts.తల_idx = -1;
+	opts.src_సూచీ = the_repository->సూచీ;
+	opts.dst_సూచీ = the_repository->సూచీ;
 
-	repo_config(the_repository, git_read_tree_config, NULL);
+	repo_config(the_repository, git_read_వృక్షం_config, ఖాళీ);
 
-	argc = parse_options(argc, argv, cmd_prefix, read_tree_options,
-			     read_tree_usage, 0);
+	argc = parse_options(argc, argv, cmd_ఉపసర్గ, read_వృక్షం_options,
+			     read_వృక్షం_usage, 0);
 
-	prefix_set = opts.prefix ? 1 : 0;
-	if (1 < opts.merge + opts.reset + prefix_set)
+	ఉపసర్గ_సమితి = opts.ఉపసర్గ ? 1 : 0;
+	ఒకవేళ (1 < opts.విలీనం + opts.reset + ఉపసర్గ_సమితి)
 		die("Which one? -m, --reset, or --prefix?");
 
 	/* Prefix should not start with a directory separator */
-	if (opts.prefix && opts.prefix[0] == '/')
+	ఒకవేళ (opts.ఉపసర్గ && opts.ఉపసర్గ[0] == '/')
 		die("Invalid prefix, prefix cannot start with '/'");
 
-	if (opts.reset)
+	ఒకవేళ (opts.reset)
 		opts.reset = UNPACK_RESET_OVERWRITE_UNTRACKED;
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_నిండిన_సూచీ = 0;
 
-	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
+	repo_hold_locked_సూచీ(the_repository, &తాళం_file, తాళం_DIE_ON_ERROR);
 
 	/*
 	 * NEEDSWORK
@@ -199,84 +199,84 @@ int cmd_read_tree(int argc,
 	 * mode.
 	 */
 
-	if (opts.reset || opts.merge || opts.prefix) {
-		if (repo_read_index_unmerged(the_repository) && (opts.prefix || opts.merge))
+	ఒకవేళ (opts.reset || opts.విలీనం || opts.ఉపసర్గ) {
+		ఒకవేళ (repo_read_సూచీ_unmerged(the_repository) && (opts.ఉపసర్గ || opts.విలీనం))
 			die(_("You need to resolve your current index first"));
-		stage = opts.merge = 1;
+		stage = opts.విలీనం = 1;
 	}
-	resolve_undo_clear_index(the_repository->index);
+	resolve_undo_clear_సూచీ(the_repository->సూచీ);
 
-	for (i = 0; i < argc; i++) {
-		const char *arg = argv[i];
+	కొరకు (i = 0; i < argc; i++) {
+		స్థిరరాశి అక్షరం *arg = argv[i];
 
-		if (repo_get_oid(the_repository, arg, &oid))
+		ఒకవేళ (repo_get_oid(the_repository, arg, &oid))
 			die("Not a valid object name %s", arg);
-		if (list_tree(&oid) < 0)
+		ఒకవేళ (list_వృక్షం(&oid) < 0)
 			die("failed to unpack tree object %s", arg);
 		stage++;
 	}
-	if (!nr_trees && !read_empty && !opts.merge)
+	ఒకవేళ (!nr_trees && !read_ఖాళీలు && !opts.విలీనం)
 		warning("read-tree: emptying the index with no arguments is deprecated; use --empty");
-	else if (nr_trees > 0 && read_empty)
+	లేకపోతే ఒకవేళ (nr_trees > 0 && read_ఖాళీలు)
 		die("passing trees as arguments contradicts --empty");
 
-	if (1 < opts.index_only + opts.update)
+	ఒకవేళ (1 < opts.సూచీ_only + opts.update)
 		die("-u and -i at the same time makes no sense");
-	if ((opts.update || opts.index_only) && !opts.merge)
+	ఒకవేళ ((opts.update || opts.సూచీ_only) && !opts.విలీనం)
 		die("%s is meaningless without -m, --reset, or --prefix",
 		    opts.update ? "-u" : "-i");
-	if (opts.update && !opts.reset)
+	ఒకవేళ (opts.update && !opts.reset)
 		opts.preserve_ignored = 0;
 	/* otherwise, opts.preserve_ignored is irrelevant */
-	if (opts.merge && !opts.index_only)
-		setup_work_tree(the_repository);
+	ఒకవేళ (opts.విలీనం && !opts.సూచీ_only)
+		అమరిక_work_వృక్షం(the_repository);
 
-	if (opts.skip_sparse_checkout)
-		ensure_full_index(the_repository->index);
+	ఒకవేళ (opts.skip_sparse_checkout)
+		ensure_నిండిన_సూచీ(the_repository->సూచీ);
 
-	if (opts.merge) {
-		switch (stage - 1) {
-		case 0:
+	ఒకవేళ (opts.విలీనం) {
+		ఎంపిక (stage - 1) {
+		స్థితి 0:
 			die("you must specify at least one tree to merge");
-			break;
-		case 1:
-			opts.fn = opts.prefix ? bind_merge : oneway_merge;
-			break;
-		case 2:
-			opts.fn = twoway_merge;
-			opts.initial_checkout = is_index_unborn(the_repository->index);
-			break;
-		case 3:
-		default:
-			opts.fn = threeway_merge;
-			break;
+			ఆపు;
+		స్థితి 1:
+			opts.fn = opts.ఉపసర్గ ? bind_విలీనం : oneway_విలీనం;
+			ఆపు;
+		స్థితి 2:
+			opts.fn = twoway_విలీనం;
+			opts.initial_checkout = is_సూచీ_unborn(the_repository->సూచీ);
+			ఆపు;
+		స్థితి 3:
+		అప్రమేయ:
+			opts.fn = threeway_విలీనం;
+			ఆపు;
 		}
 
-		if (stage - 1 >= 3)
-			opts.head_idx = stage - 2;
-		else
-			opts.head_idx = 1;
+		ఒకవేళ (stage - 1 >= 3)
+			opts.తల_idx = stage - 2;
+		లేకపోతే
+			opts.తల_idx = 1;
 	}
 
-	if (opts.internal.debug_unpack)
-		opts.fn = debug_merge;
+	ఒకవేళ (opts.అంతర్గత.debug_unpack)
+		opts.fn = debug_విలీనం;
 
 	/* If we're going to prime_cache_tree later, skip cache tree update */
-	if (nr_trees == 1 && !opts.prefix)
-		opts.skip_cache_tree_update = 1;
+	ఒకవేళ (nr_trees == 1 && !opts.ఉపసర్గ)
+		opts.skip_cache_వృక్షం_update = 1;
 
-	cache_tree_free(&the_repository->index->cache_tree);
-	for (i = 0; i < nr_trees; i++) {
-		struct tree *tree = trees[i];
-		if (repo_parse_tree(the_repository, tree) < 0)
-			return 128;
-		init_tree_desc(t+i, &tree->object.oid, tree->buffer, tree->size);
+	cache_వృక్షం_free(&the_repository->సూచీ->cache_వృక్షం);
+	కొరకు (i = 0; i < nr_trees; i++) {
+		నిర్మాణం వృక్షం *వృక్షం = trees[i];
+		ఒకవేళ (repo_parse_వృక్షం(the_repository, వృక్షం) < 0)
+			తిరిగి 128;
+		init_వృక్షం_desc(t+i, &వృక్షం->object.oid, వృక్షం->బఫరు, వృక్షం->కొలత);
 	}
-	if (unpack_trees(nr_trees, t, &opts))
-		return 128;
+	ఒకవేళ (unpack_trees(nr_trees, t, &opts))
+		తిరిగి 128;
 
-	if (opts.internal.debug_unpack || opts.dry_run)
-		return 0; /* do not write the index out */
+	ఒకవేళ (opts.అంతర్గత.debug_unpack || opts.dry_నిరంతరం)
+		తిరిగి 0; /* do not write the index out */
 
 	/*
 	 * When reading only one tree (either the most basic form,
@@ -284,12 +284,12 @@ int cmd_read_tree(int argc,
 	 * valid cache-tree because the index must match exactly
 	 * what came from the tree.
 	 */
-	if (nr_trees == 1 && !opts.prefix)
-		prime_cache_tree(the_repository,
-				 the_repository->index,
+	ఒకవేళ (nr_trees == 1 && !opts.ఉపసర్గ)
+		ప్రధానసంఖ్య_cache_వృక్షం(the_repository,
+				 the_repository->సూచీ,
 				 trees[0]);
 
-	if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+	ఒకవేళ (write_locked_సూచీ(the_repository->సూచీ, &తాళం_file, COMMIT_తాళం))
 		die("unable to write new index file");
-	return 0;
+	తిరిగి 0;
 }

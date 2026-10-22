@@ -1,109 +1,109 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "gettext.h"
-#include "lockfile.h"
-#include "credential.h"
-#include "path.h"
-#include "string-list.h"
-#include "parse-options.h"
-#include "url.h"
-#include "write-or-die.h"
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "lockfile.h"
+#అన్తర్భావ "credential.h"
+#అన్తర్భావ "path.h"
+#అన్తర్భావ "string-list.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "url.h"
+#అన్తర్భావ "write-or-die.h"
 
-static struct lock_file credential_lock;
+స్థిర నిర్మాణం తాళం_file credential_తాళం;
 
-static int parse_credential_file(const char *fn,
-				  struct credential *c,
-				  void (*match_cb)(struct credential *),
-				  void (*other_cb)(struct strbuf *),
-				  int match_password)
+స్థిర పూర్ణాంకం parse_credential_file(స్థిరరాశి అక్షరం *fn,
+				  నిర్మాణం credential *c,
+				  శూన్య (*సరిపోలిక_cb)(నిర్మాణం credential *),
+				  శూన్య (*other_cb)(నిర్మాణం strbuf *),
+				  పూర్ణాంకం సరిపోలిక_password)
 {
 	FILE *fh;
-	struct strbuf line = STRBUF_INIT;
-	struct credential entry = CREDENTIAL_INIT;
-	int found_credential = 0;
+	నిర్మాణం strbuf పంక్తి = STRBUF_INIT;
+	నిర్మాణం credential నమోదు_2 = CREDENTIAL_INIT;
+	పూర్ణాంకం దొరికింది_credential = 0;
 
 	fh = fopen(fn, "r");
-	if (!fh) {
-		if (errno != ENOENT && errno != EACCES)
+	ఒకవేళ (!fh) {
+		ఒకవేళ (errno != ENOENT && errno != EACCES)
 			die_errno("unable to open %s", fn);
-		return found_credential;
+		తిరిగి దొరికింది_credential;
 	}
 
-	while (strbuf_getline_lf(&line, fh) != EOF) {
-		if (!credential_from_url_gently(&entry, line.buf, 1) &&
-		    entry.username && entry.password &&
-		    credential_match(c, &entry, match_password)) {
-			found_credential = 1;
-			if (match_cb) {
-				match_cb(&entry);
-				break;
+	అయితే (strbuf_getline_lf(&పంక్తి, fh) != EOF) {
+		ఒకవేళ (!credential_from_url_gently(&నమోదు_2, పంక్తి.buf, 1) &&
+		    నమోదు_2.username && నమోదు_2.password &&
+		    credential_సరిపోలిక(c, &నమోదు_2, సరిపోలిక_password)) {
+			దొరికింది_credential = 1;
+			ఒకవేళ (సరిపోలిక_cb) {
+				సరిపోలిక_cb(&నమోదు_2);
+				ఆపు;
 			}
 		}
-		else if (other_cb)
-			other_cb(&line);
+		లేకపోతే ఒకవేళ (other_cb)
+			other_cb(&పంక్తి);
 	}
 
-	credential_clear(&entry);
-	strbuf_release(&line);
+	credential_clear(&నమోదు_2);
+	strbuf_release(&పంక్తి);
 	fclose(fh);
-	return found_credential;
+	తిరిగి దొరికింది_credential;
 }
 
-static void print_entry(struct credential *c)
+స్థిర శూన్య print_నమోదు(నిర్మాణం credential *c)
 {
-	printf("username=%s\n", c->username);
-	printf("password=%s\n", c->password);
+	రాయి("username=%s\n", c->username);
+	రాయి("password=%s\n", c->password);
 }
 
-static void print_line(struct strbuf *buf)
+స్థిర శూన్య print_పంక్తి(నిర్మాణం strbuf *buf)
 {
 	strbuf_addch(buf, '\n');
-	write_or_die(get_lock_file_fd(&credential_lock), buf->buf, buf->len);
+	write_or_die(get_తాళం_file_fd(&credential_తాళం), buf->buf, buf->len);
 }
 
-static void rewrite_credential_file(const char *fn, struct credential *c,
-				    struct strbuf *extra, int match_password)
+స్థిర శూన్య rewrite_credential_file(స్థిరరాశి అక్షరం *fn, నిర్మాణం credential *c,
+				    నిర్మాణం strbuf *extra, పూర్ణాంకం సరిపోలిక_password)
 {
-	int timeout_ms = 1000;
+	పూర్ణాంకం timeout_ms = 1000;
 
 	repo_config_get_int(the_repository, "credentialstore.locktimeoutms", &timeout_ms);
-	if (hold_lock_file_for_update_timeout(&credential_lock, fn, 0, timeout_ms) < 0)
+	ఒకవేళ (hold_తాళం_file_for_update_timeout(&credential_తాళం, fn, 0, timeout_ms) < 0)
 		die_errno(_("unable to get credential storage lock in %d ms"), timeout_ms);
-	if (extra)
-		print_line(extra);
-	parse_credential_file(fn, c, NULL, print_line, match_password);
-	if (commit_lock_file(&credential_lock) < 0)
+	ఒకవేళ (extra)
+		print_పంక్తి(extra);
+	parse_credential_file(fn, c, ఖాళీ, print_పంక్తి, సరిపోలిక_password);
+	ఒకవేళ (commit_తాళం_file(&credential_తాళం) < 0)
 		die_errno("unable to write credential store");
 }
 
-static int is_rfc3986_reserved_or_unreserved(char ch)
+స్థిర పూర్ణాంకం is_rfc3986_reserved_or_unreserved(అక్షరం ch)
 {
-	if (is_rfc3986_unreserved(ch))
-		return 1;
-	switch (ch) {
-		case '!': case '*': case '\'': case '(': case ')': case ';':
-		case ':': case '@': case '&': case '=': case '+': case '$':
-		case ',': case '/': case '?': case '#': case '[': case ']':
-			return 1;
+	ఒకవేళ (is_rfc3986_unreserved(ch))
+		తిరిగి 1;
+	ఎంపిక (ch) {
+		స్థితి '!': స్థితి '*': స్థితి '\'': స్థితి '(': స్థితి ')': స్థితి ';':
+		స్థితి ':': స్థితి '@': స్థితి '&': స్థితి '=': స్థితి '+': స్థితి '$':
+		స్థితి ',': స్థితి '/': స్థితి '?': స్థితి '#': స్థితి '[': స్థితి ']':
+			తిరిగి 1;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static void store_credential_file(const char *fn, struct credential *c)
+స్థిర శూన్య store_credential_file(స్థిరరాశి అక్షరం *fn, నిర్మాణం credential *c)
 {
-	struct strbuf buf = STRBUF_INIT;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
 
 	strbuf_addf(&buf, "%s://", c->protocol);
 	strbuf_addstr_urlencode(&buf, c->username, is_rfc3986_unreserved);
 	strbuf_addch(&buf, ':');
 	strbuf_addstr_urlencode(&buf, c->password, is_rfc3986_unreserved);
 	strbuf_addch(&buf, '@');
-	if (c->host)
+	ఒకవేళ (c->host)
 		strbuf_addstr_urlencode(&buf, c->host, is_rfc3986_unreserved);
-	if (c->path) {
+	ఒకవేళ (c->మార్గం) {
 		strbuf_addch(&buf, '/');
-		strbuf_addstr_urlencode(&buf, c->path,
+		strbuf_addstr_urlencode(&buf, c->మార్గం,
 					is_rfc3986_reserved_or_unreserved);
 	}
 
@@ -111,9 +111,9 @@ static void store_credential_file(const char *fn, struct credential *c)
 	strbuf_release(&buf);
 }
 
-static void store_credential(const struct string_list *fns, struct credential *c)
+స్థిర శూన్య store_credential(స్థిరరాశి నిర్మాణం string_list *fns, నిర్మాణం credential *c)
 {
-	struct string_list_item *fn;
+	నిర్మాణం string_list_అంశం *fn;
 
 	/*
 	 * Sanity check that what we are storing is actually sensible.
@@ -122,25 +122,25 @@ static void store_credential(const struct string_list *fns, struct credential *c
 	 * we have no primary key. And without a username and password,
 	 * we are not actually storing a credential.
 	 */
-	if (!c->protocol || !(c->host || c->path) || !c->username || !c->password)
-		return;
+	ఒకవేళ (!c->protocol || !(c->host || c->మార్గం) || !c->username || !c->password)
+		తిరిగి;
 
-	for_each_string_list_item(fn, fns)
-		if (!access(fn->string, F_OK)) {
+	for_each_string_list_అంశం(fn, fns)
+		ఒకవేళ (!access(fn->string, F_OK)) {
 			store_credential_file(fn->string, c);
-			return;
+			తిరిగి;
 		}
 	/*
 	 * Write credential to the filename specified by fns->items[0], thus
 	 * creating it
 	 */
-	if (fns->nr)
-		store_credential_file(fns->items[0].string, c);
+	ఒకవేళ (fns->nr)
+		store_credential_file(fns->వస్తువులు[0].string, c);
 }
 
-static void remove_credential(const struct string_list *fns, struct credential *c)
+స్థిర శూన్య remove_credential(స్థిరరాశి నిర్మాణం string_list *fns, నిర్మాణం credential *c)
 {
-	struct string_list_item *fn;
+	నిర్మాణం string_list_అంశం *fn;
 
 	/*
 	 * Sanity check that we actually have something to match
@@ -150,73 +150,73 @@ static void remove_credential(const struct string_list *fns, struct credential *
 	 * to empty input. So explicitly disallow it, and require that the
 	 * pattern have some actual content to match.
 	 */
-	if (!c->protocol && !c->host && !c->path && !c->username)
-		return;
-	for_each_string_list_item(fn, fns)
-		if (!access(fn->string, F_OK))
-			rewrite_credential_file(fn->string, c, NULL, 1);
+	ఒకవేళ (!c->protocol && !c->host && !c->మార్గం && !c->username)
+		తిరిగి;
+	for_each_string_list_అంశం(fn, fns)
+		ఒకవేళ (!access(fn->string, F_OK))
+			rewrite_credential_file(fn->string, c, ఖాళీ, 1);
 }
 
-static void lookup_credential(const struct string_list *fns, struct credential *c)
+స్థిర శూన్య lookup_credential(స్థిరరాశి నిర్మాణం string_list *fns, నిర్మాణం credential *c)
 {
-	struct string_list_item *fn;
+	నిర్మాణం string_list_అంశం *fn;
 
-	for_each_string_list_item(fn, fns)
-		if (parse_credential_file(fn->string, c, print_entry, NULL, 0))
-			return; /* Found credential */
+	for_each_string_list_అంశం(fn, fns)
+		ఒకవేళ (parse_credential_file(fn->string, c, print_నమోదు, ఖాళీ, 0))
+			తిరిగి; /* Found credential */
 }
 
-int cmd_credential_store(int argc,
-			 const char **argv,
-			 const char *prefix,
-			 struct repository *repo UNUSED)
+పూర్ణాంకం cmd_credential_store(పూర్ణాంకం argc,
+			 స్థిరరాశి అక్షరం **argv,
+			 స్థిరరాశి అక్షరం *ఉపసర్గ,
+			 నిర్మాణం repository *repo వాడని)
 {
-	const char * const usage[] = {
+	స్థిరరాశి అక్షరం * స్థిరరాశి usage[] = {
 		"git credential-store [<options>] <action>",
-		NULL
+		ఖాళీ
 	};
-	const char *op;
-	struct credential c = CREDENTIAL_INIT;
-	struct string_list fns = STRING_LIST_INIT_DUP;
-	char *file = NULL;
-	struct option options[] = {
+	స్థిరరాశి అక్షరం *op;
+	నిర్మాణం credential c = CREDENTIAL_INIT;
+	నిర్మాణం string_list fns = STRING_LIST_INIT_DUP;
+	అక్షరం *file = ఖాళీ;
+	నిర్మాణం option options[] = {
 		OPT_STRING(0, "file", &file, "path",
 			   "fetch and store credentials in <path>"),
-		OPT_END()
+		OPT_చివర()
 	};
 
 	umask(077);
 
-	argc = parse_options(argc, (const char **)argv, prefix, options, usage, 0);
-	if (argc != 1)
+	argc = parse_options(argc, (స్థిరరాశి అక్షరం **)argv, ఉపసర్గ, options, usage, 0);
+	ఒకవేళ (argc != 1)
 		usage_with_options(usage, options);
 	op = argv[0];
 
-	if (file) {
+	ఒకవేళ (file) {
 		string_list_append(&fns, file);
-	} else {
-		if ((file = interpolate_path("~/.git-credentials", 0)))
+	} లేకపోతే {
+		ఒకవేళ ((file = interpolate_మార్గం("~/.git-credentials", 0)))
 			string_list_append_nodup(&fns, file);
 		file = xdg_config_home("credentials");
-		if (file)
+		ఒకవేళ (file)
 			string_list_append_nodup(&fns, file);
 	}
-	if (!fns.nr)
+	ఒకవేళ (!fns.nr)
 		die("unable to set up default path; use --file");
 
-	if (credential_read(&c, stdin, CREDENTIAL_OP_HELPER) < 0)
+	ఒకవేళ (credential_read(&c, stdin, CREDENTIAL_OP_HELPER) < 0)
 		die("unable to read credential");
 
-	if (!strcmp(op, "get"))
+	ఒకవేళ (!strcmp(op, "get"))
 		lookup_credential(&fns, &c);
-	else if (!strcmp(op, "erase"))
+	లేకపోతే ఒకవేళ (!strcmp(op, "erase"))
 		remove_credential(&fns, &c);
-	else if (!strcmp(op, "store"))
+	లేకపోతే ఒకవేళ (!strcmp(op, "store"))
 		store_credential(&fns, &c);
-	else
+	లేకపోతే
 		; /* Ignore unknown operation. */
 
 	string_list_clear(&fns, 0);
 	credential_clear(&c);
-	return 0;
+	తిరిగి 0;
 }

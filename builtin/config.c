@@ -1,23 +1,23 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "advice.h"
-#include "config.h"
-#include "color.h"
-#include "date.h"
-#include "editor.h"
-#include "environment.h"
-#include "gettext.h"
-#include "ident.h"
-#include "parse-options.h"
-#include "urlmatch.h"
-#include "path.h"
-#include "quote.h"
-#include "setup.h"
-#include "strbuf.h"
-#include "worktree.h"
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "abspath.h"
+#అన్తర్భావ "advice.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "color.h"
+#అన్తర్భావ "date.h"
+#అన్తర్భావ "editor.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "ident.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "urlmatch.h"
+#అన్తర్భావ "path.h"
+#అన్తర్భావ "quote.h"
+#అన్తర్భావ "setup.h"
+#అన్తర్భావ "strbuf.h"
+#అన్తర్భావ "worktree.h"
 
-static const char *const builtin_config_usage[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి builtin_config_usage[] = {
 	N_("git config list [<file-option>] [<display-option>] [--includes]"),
 	N_("git config get [<file-option>] [<display-option>] [--includes] [--all] [--regexp] [--value=<pattern>] [--fixed-value] [--default=<default>] [--url=<url>] <name>"),
 	N_("git config set [<file-option>] [--type=<type>] [--all] [--value=<pattern>] [--fixed-value] <name> <value>"),
@@ -26,136 +26,136 @@ static const char *const builtin_config_usage[] = {
 	N_("git config remove-section [<file-option>] <name>"),
 	N_("git config edit [<file-option>]"),
 	N_("git config [<file-option>] --get-colorbool <name> [<stdout-is-tty>]"),
-	NULL
+	ఖాళీ
 };
 
-static const char *const builtin_config_list_usage[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి builtin_config_list_usage[] = {
 	N_("git config list [<file-option>] [<display-option>] [--includes]"),
-	NULL
+	ఖాళీ
 };
 
-static const char *const builtin_config_get_usage[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి builtin_config_get_usage[] = {
 	N_("git config get [<file-option>] [<display-option>] [--includes] [--all] [--regexp=<regexp>] [--value=<pattern>] [--fixed-value] [--default=<default>] <name>"),
-	NULL
+	ఖాళీ
 };
 
-static const char *const builtin_config_set_usage[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి builtin_config_సమితి_usage[] = {
 	N_("git config set [<file-option>] [--type=<type>] [--comment=<message>] [--all] [--value=<pattern>] [--fixed-value] <name> <value>"),
-	NULL
+	ఖాళీ
 };
 
-static const char *const builtin_config_unset_usage[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి builtin_config_unset_usage[] = {
 	N_("git config unset [<file-option>] [--all] [--value=<pattern>] [--fixed-value] <name>"),
-	NULL
+	ఖాళీ
 };
 
-static const char *const builtin_config_rename_section_usage[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి builtin_config_rename_section_usage[] = {
 	N_("git config rename-section [<file-option>] <old-name> <new-name>"),
-	NULL
+	ఖాళీ
 };
 
-static const char *const builtin_config_remove_section_usage[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి builtin_config_remove_section_usage[] = {
 	N_("git config remove-section [<file-option>] <name>"),
-	NULL
+	ఖాళీ
 };
 
-static const char *const builtin_config_edit_usage[] = {
+స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి builtin_config_edit_usage[] = {
 	N_("git config edit [<file-option>]"),
-	NULL
+	ఖాళీ
 };
 
-#define CONFIG_LOCATION_OPTIONS(opts) \
-	OPT_GROUP(N_("Config file location")), \
+#నిర్వచించు CONFIG_LOCATION_OPTIONS(opts) \
+	OPT_సమూహం(N_("Config file location")), \
 	OPT_BOOL(0, "global", &opts.use_global_config, N_("use global config file")), \
 	OPT_BOOL(0, "system", &opts.use_system_config, N_("use system config file")), \
 	OPT_BOOL(0, "local", &opts.use_local_config, N_("use repository config file")), \
 	OPT_BOOL(0, "worktree", &opts.use_worktree_config, N_("use per-worktree config file")), \
-	OPT_STRING('f', "file", &opts.source.file, N_("file"), N_("use given config file")), \
-	OPT_STRING(0, "blob", &opts.source.blob, N_("blob-id"), N_("read config from given blob object"))
+	OPT_STRING('f', "file", &opts.ఆధారం.file, N_("file"), N_("use given config file")), \
+	OPT_STRING(0, "blob", &opts.ఆధారం.blob, N_("blob-id"), N_("read config from given blob object"))
 
-struct config_location_options {
-	struct git_config_source source;
-	struct config_options options;
-	char *file_to_free;
-	int use_global_config;
-	int use_system_config;
-	int use_local_config;
-	int use_worktree_config;
-	int respect_includes_opt;
+నిర్మాణం config_location_options {
+	నిర్మాణం git_config_ఆధారం ఆధారం;
+	నిర్మాణం config_options options;
+	అక్షరం *file_గమ్యం_free;
+	పూర్ణాంకం use_global_config;
+	పూర్ణాంకం use_system_config;
+	పూర్ణాంకం use_local_config;
+	పూర్ణాంకం use_worktree_config;
+	పూర్ణాంకం respect_includes_opt;
 };
-#define CONFIG_LOCATION_OPTIONS_INIT { \
+#నిర్వచించు CONFIG_LOCATION_OPTIONS_INIT { \
 	.respect_includes_opt = -1, \
 }
 
-enum config_type {
+గణన config_type {
 	TYPE_NONE = 0,
 	TYPE_BOOL,
 	TYPE_INT,
 	TYPE_BOOL_OR_INT,
-	TYPE_PATH,
+	TYPE_మార్గం,
 	TYPE_EXPIRY_DATE,
 	TYPE_COLOR,
 	TYPE_BOOL_OR_STR,
 };
 
-#define CONFIG_TYPE_OPTIONS(type) \
-	OPT_GROUP(N_("Type")), \
+#నిర్వచించు CONFIG_TYPE_OPTIONS(type) \
+	OPT_సమూహం(N_("Type")), \
 	OPT_CALLBACK('t', "type", &type, N_("type"), N_("value is given this type"), option_parse_type), \
-	OPT_CALLBACK_VALUE(0, "bool", &type, N_("value is \"true\" or \"false\""), TYPE_BOOL), \
-	OPT_CALLBACK_VALUE(0, "int", &type, N_("value is decimal number"), TYPE_INT), \
-	OPT_CALLBACK_VALUE(0, "bool-or-int", &type, N_("value is --bool or --int"), TYPE_BOOL_OR_INT), \
-	OPT_CALLBACK_VALUE(0, "bool-or-str", &type, N_("value is --bool or string"), TYPE_BOOL_OR_STR), \
-	OPT_CALLBACK_VALUE(0, "path", &type, N_("value is a path (file or directory name)"), TYPE_PATH), \
-	OPT_CALLBACK_VALUE(0, "expiry-date", &type, N_("value is an expiry date"), TYPE_EXPIRY_DATE)
+	OPT_CALLBACK_విలువ(0, "bool", &type, N_("value is \"true\" or \"false\""), TYPE_BOOL), \
+	OPT_CALLBACK_విలువ(0, "int", &type, N_("value is decimal number"), TYPE_INT), \
+	OPT_CALLBACK_విలువ(0, "bool-or-int", &type, N_("value is --bool or --int"), TYPE_BOOL_OR_INT), \
+	OPT_CALLBACK_విలువ(0, "bool-or-str", &type, N_("value is --bool or string"), TYPE_BOOL_OR_STR), \
+	OPT_CALLBACK_విలువ(0, "path", &type, N_("value is a path (file or directory name)"), TYPE_మార్గం), \
+	OPT_CALLBACK_విలువ(0, "expiry-date", &type, N_("value is an expiry date"), TYPE_EXPIRY_DATE)
 
-#define CONFIG_DISPLAY_OPTIONS(opts) \
-	OPT_GROUP(N_("Display options")), \
-	OPT_BOOL('z', "null", &opts.end_nul, N_("terminate values with NUL byte")), \
-	OPT_BOOL(0, "name-only", &opts.omit_values, N_("show variable names only")), \
+#నిర్వచించు CONFIG_DISPLAY_OPTIONS(opts) \
+	OPT_సమూహం(N_("Display options")), \
+	OPT_BOOL('z', "null", &opts.చివర_nul, N_("terminate values with NUL byte")), \
+	OPT_BOOL(0, "name-only", &opts.omit_విలువలు, N_("show variable names only")), \
 	OPT_BOOL(0, "show-origin", &opts.show_origin, N_("show origin of config (file, standard input, blob, command line)")), \
 	OPT_BOOL(0, "show-scope", &opts.show_scope, N_("show scope of config (worktree, local, global, system, command)")), \
-	OPT_BOOL(0, "show-names", &opts.show_keys, N_("show config keys in addition to their values")), \
+	OPT_BOOL(0, "show-names", &opts.show_కీలకాలు, N_("show config keys in addition to their values")), \
 	CONFIG_TYPE_OPTIONS(opts.type)
 
-struct config_display_options {
-	int end_nul;
-	int omit_values;
-	int show_origin;
-	int show_scope;
-	int show_keys;
-	enum config_type type;
-	char *default_value;
+నిర్మాణం config_display_options {
+	పూర్ణాంకం చివర_nul;
+	పూర్ణాంకం omit_విలువలు;
+	పూర్ణాంకం show_origin;
+	పూర్ణాంకం show_scope;
+	పూర్ణాంకం show_కీలకాలు;
+	గణన config_type type;
+	అక్షరం *default_విలువ;
 	/* Populated via `display_options_init()`. */
-	int term;
-	int delim;
-	int key_delim;
+	పూర్ణాంకం పదం;
+	పూర్ణాంకం delim;
+	పూర్ణాంకం కీలకం_delim;
 };
-#define CONFIG_DISPLAY_OPTIONS_INIT { \
-	.term = '\n', \
+#నిర్వచించు CONFIG_DISPLAY_OPTIONS_INIT { \
+	.పదం = '\n', \
 	.delim = '=', \
-	.key_delim = ' ', \
+	.కీలకం_delim = ' ', \
 	.type = TYPE_NONE, \
 }
 
-#define OPT_CALLBACK_VALUE(s, l, v, h, i) { \
+#నిర్వచించు OPT_CALLBACK_విలువ(s, l, v, h, i) { \
 	.type = OPTION_CALLBACK, \
 	.short_name = (s), \
 	.long_name = (l), \
-	.value = (v), \
+	.విలువ = (v), \
 	.help = (h), \
 	.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG, \
 	.callback = option_parse_type, \
 	.defval = (i), \
 }
 
-static int option_parse_type(const struct option *opt, const char *arg,
-			     int unset)
+స్థిర పూర్ణాంకం option_parse_type(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg,
+			     పూర్ణాంకం unset)
 {
-	int new_type, *to_type;
+	పూర్ణాంకం new_type, *గమ్యం_type;
 
-	if (unset) {
-		*((int *) opt->value) = 0;
-		return 0;
+	ఒకవేళ (unset) {
+		*((పూర్ణాంకం *) opt->విలువ) = 0;
+		తిరిగి 0;
 	}
 
 	/*
@@ -163,27 +163,27 @@ static int option_parse_type(const struct option *opt, const char *arg,
 	 * opt->defval.
 	 */
 	new_type = opt->defval;
-	if (!new_type) {
-		if (!strcmp(arg, "bool"))
+	ఒకవేళ (!new_type) {
+		ఒకవేళ (!strcmp(arg, "bool"))
 			new_type = TYPE_BOOL;
-		else if (!strcmp(arg, "int"))
+		లేకపోతే ఒకవేళ (!strcmp(arg, "int"))
 			new_type = TYPE_INT;
-		else if (!strcmp(arg, "bool-or-int"))
+		లేకపోతే ఒకవేళ (!strcmp(arg, "bool-or-int"))
 			new_type = TYPE_BOOL_OR_INT;
-		else if (!strcmp(arg, "bool-or-str"))
+		లేకపోతే ఒకవేళ (!strcmp(arg, "bool-or-str"))
 			new_type = TYPE_BOOL_OR_STR;
-		else if (!strcmp(arg, "path"))
-			new_type = TYPE_PATH;
-		else if (!strcmp(arg, "expiry-date"))
+		లేకపోతే ఒకవేళ (!strcmp(arg, "path"))
+			new_type = TYPE_మార్గం;
+		లేకపోతే ఒకవేళ (!strcmp(arg, "expiry-date"))
 			new_type = TYPE_EXPIRY_DATE;
-		else if (!strcmp(arg, "color"))
+		లేకపోతే ఒకవేళ (!strcmp(arg, "color"))
 			new_type = TYPE_COLOR;
-		else
+		లేకపోతే
 			die(_("unrecognized --type argument, %s"), arg);
 	}
 
-	to_type = opt->value;
-	if (*to_type && *to_type != new_type) {
+	గమ్యం_type = opt->విలువ;
+	ఒకవేళ (*గమ్యం_type && *గమ్యం_type != new_type) {
 		/*
 		 * Complain when there is a new type not equal to the old type.
 		 * This allows for combinations like '--int --type=int' and
@@ -192,206 +192,206 @@ static int option_parse_type(const struct option *opt, const char *arg,
 		 * --type=int'.
 		 */
 		error(_("only one type at a time"));
-		exit(129);
+		నిష్క్రమించు(129);
 	}
-	*to_type = new_type;
+	*గమ్యం_type = new_type;
 
-	return 0;
+	తిరిగి 0;
 }
 
-static void check_argc(int argc, int min, int max)
+స్థిర శూన్య check_argc(పూర్ణాంకం argc, పూర్ణాంకం min, పూర్ణాంకం max)
 {
-	if (argc >= min && argc <= max)
-		return;
-	if (min == max)
+	ఒకవేళ (argc >= min && argc <= max)
+		తిరిగి;
+	ఒకవేళ (min == max)
 		error(_("wrong number of arguments, should be %d"), min);
-	else
+	లేకపోతే
 		error(_("wrong number of arguments, should be from %d to %d"),
 		      min, max);
-	exit(129);
+	నిష్క్రమించు(129);
 }
 
-static NORETURN void die_missing_set_value(const char *arg)
+స్థిర NORETURN శూన్య die_missing_సమితి_విలువ(స్థిరరాశి అక్షరం *arg)
 {
-	const char *last_dot = strrchr(arg, '.');
-	const char *eq = last_dot ? strchr(last_dot + 1, '=') : NULL;
-	char *prefix = eq ? xstrndup(arg, eq - arg) : NULL;
+	స్థిరరాశి అక్షరం *చివరి_dot = strrchr(arg, '.');
+	స్థిరరాశి అక్షరం *eq = చివరి_dot ? strchr(చివరి_dot + 1, '=') : ఖాళీ;
+	అక్షరం *ఉపసర్గ = eq ? xstrndup(arg, eq - arg) : ఖాళీ;
 
-	if (prefix && git_config_key_is_valid(prefix)) {
+	ఒకవేళ (ఉపసర్గ && git_config_కీలకం_is_valid(ఉపసర్గ)) {
 		error(_("missing value to set to the variable '%s'"), arg);
 		advise(_("did you mean \"git config set %s %s\"?"),
-		       prefix, eq + 1);
-	} else if (git_config_key_is_valid(arg)) {
+		       ఉపసర్గ, eq + 1);
+	} లేకపోతే ఒకవేళ (git_config_కీలకం_is_valid(arg)) {
 		error(_("missing value to set to the variable '%s'"), arg);
-	} else {
+	} లేకపోతే {
 		error(_("missing value to set to a variable with an invalid name '%s'"),
 		      arg);
 	}
-	free(prefix);
-	exit(129);
+	విడుదల(ఉపసర్గ);
+	నిష్క్రమించు(129);
 }
 
-static void show_config_origin(const struct config_display_options *opts,
-			       const struct key_value_info *kvi,
-			       struct strbuf *buf)
+స్థిర శూన్య show_config_origin(స్థిరరాశి నిర్మాణం config_display_options *opts,
+			       స్థిరరాశి నిర్మాణం కీలకం_విలువ_info *kvi,
+			       నిర్మాణం strbuf *buf)
 {
-	const char term = opts->end_nul ? '\0' : '\t';
+	స్థిరరాశి అక్షరం పదం = opts->చివర_nul ? '\0' : '\t';
 
 	strbuf_addstr(buf, config_origin_type_name(kvi->origin_type));
 	strbuf_addch(buf, ':');
-	if (opts->end_nul)
+	ఒకవేళ (opts->చివర_nul)
 		strbuf_addstr(buf, kvi->filename ? kvi->filename : "");
-	else
-		quote_c_style(kvi->filename ? kvi->filename : "", buf, NULL, 0);
-	strbuf_addch(buf, term);
+	లేకపోతే
+		quote_c_style(kvi->filename ? kvi->filename : "", buf, ఖాళీ, 0);
+	strbuf_addch(buf, పదం);
 }
 
-static void show_config_scope(const struct config_display_options *opts,
-			      const struct key_value_info *kvi,
-			      struct strbuf *buf)
+స్థిర శూన్య show_config_scope(స్థిరరాశి నిర్మాణం config_display_options *opts,
+			      స్థిరరాశి నిర్మాణం కీలకం_విలువ_info *kvi,
+			      నిర్మాణం strbuf *buf)
 {
-	const char term = opts->end_nul ? '\0' : '\t';
-	const char *scope = config_scope_name(kvi->scope);
+	స్థిరరాశి అక్షరం పదం = opts->చివర_nul ? '\0' : '\t';
+	స్థిరరాశి అక్షరం *scope = config_scope_name(kvi->scope);
 
 	strbuf_addstr(buf, N_(scope));
-	strbuf_addch(buf, term);
+	strbuf_addch(buf, పదం);
 }
 
-struct strbuf_list {
-	struct strbuf *items;
-	int nr;
-	int alloc;
+నిర్మాణం strbuf_list {
+	నిర్మాణం strbuf *వస్తువులు;
+	పూర్ణాంకం nr;
+	పూర్ణాంకం alloc;
 };
 
-static int format_config_int64(struct strbuf *buf,
-			       const char *key_,
-			       const char *value_,
-			       const struct key_value_info *kvi,
-			       int gently)
+స్థిర పూర్ణాంకం format_config_int64(నిర్మాణం strbuf *buf,
+			       స్థిరరాశి అక్షరం *కీలకం_2,
+			       స్థిరరాశి అక్షరం *విలువ_2,
+			       స్థిరరాశి నిర్మాణం కీలకం_విలువ_info *kvi,
+			       పూర్ణాంకం gently)
 {
 	int64_t v = 0;
-	if (gently) {
-		if (!git_parse_int64(value_, &v))
-			return -1;
-	} else {
+	ఒకవేళ (gently) {
+		ఒకవేళ (!git_parse_int64(విలువ_2, &v))
+			తిరిగి -1;
+	} లేకపోతే {
 		/* may die() */
-		v = git_config_int64(key_, value_ ? value_ : "", kvi);
+		v = git_config_int64(కీలకం_2, విలువ_2 ? విలువ_2 : "", kvi);
 	}
 
 	strbuf_addf(buf, "%"PRId64, v);
-	return 0;
+	తిరిగి 0;
 }
 
-static int format_config_bool(struct strbuf *buf,
-			      const char *key_,
-			      const char *value_,
-			      int gently)
+స్థిర పూర్ణాంకం format_config_bool(నిర్మాణం strbuf *buf,
+			      స్థిరరాశి అక్షరం *కీలకం_2,
+			      స్థిరరాశి అక్షరం *విలువ_2,
+			      పూర్ణాంకం gently)
 {
-	int v = 0;
-	if (gently) {
-		if ((v = git_parse_maybe_bool(value_)) < 0)
-			return -1;
-	} else {
+	పూర్ణాంకం v = 0;
+	ఒకవేళ (gently) {
+		ఒకవేళ ((v = git_parse_maybe_bool(విలువ_2)) < 0)
+			తిరిగి -1;
+	} లేకపోతే {
 		/* may die() */
-		v = git_config_bool(key_, value_);
+		v = git_config_bool(కీలకం_2, విలువ_2);
 	}
 
 	strbuf_addstr(buf, v ? "true" : "false");
-	return 0;
+	తిరిగి 0;
 }
 
-static int format_config_bool_or_int(struct strbuf *buf,
-				     const char *key_,
-				     const char *value_,
-				     const struct key_value_info *kvi,
-				     int gently)
+స్థిర పూర్ణాంకం format_config_bool_or_int(నిర్మాణం strbuf *buf,
+				     స్థిరరాశి అక్షరం *కీలకం_2,
+				     స్థిరరాశి అక్షరం *విలువ_2,
+				     స్థిరరాశి నిర్మాణం కీలకం_విలువ_info *kvi,
+				     పూర్ణాంకం gently)
 {
-	int v, is_bool = 0;
+	పూర్ణాంకం v, is_bool = 0;
 
-	if (gently) {
-		v = git_parse_maybe_bool_text(value_);
+	ఒకవేళ (gently) {
+		v = git_parse_maybe_bool_పాఠ్యం(విలువ_2);
 
-		if (v >= 0)
+		ఒకవేళ (v >= 0)
 			is_bool = 1;
-		else if (!git_parse_int(value_, &v))
-			return -1;
-	} else {
-		v = git_config_bool_or_int(key_, value_, kvi,
+		లేకపోతే ఒకవేళ (!git_parse_int(విలువ_2, &v))
+			తిరిగి -1;
+	} లేకపోతే {
+		v = git_config_bool_or_int(కీలకం_2, విలువ_2, kvi,
 					   &is_bool);
 	}
 
-	if (is_bool)
+	ఒకవేళ (is_bool)
 		strbuf_addstr(buf, v ? "true" : "false");
-	else
+	లేకపోతే
 		strbuf_addf(buf, "%d", v);
 
-	return 0;
+	తిరిగి 0;
 }
 
 /* This mode is always gentle. */
-static int format_config_bool_or_str(struct strbuf *buf,
-				     const char *value_)
+స్థిర పూర్ణాంకం format_config_bool_or_str(నిర్మాణం strbuf *buf,
+				     స్థిరరాశి అక్షరం *విలువ_2)
 {
-	int v = git_parse_maybe_bool(value_);
-	if (v < 0)
-		strbuf_addstr(buf, value_);
-	else
+	పూర్ణాంకం v = git_parse_maybe_bool(విలువ_2);
+	ఒకవేళ (v < 0)
+		strbuf_addstr(buf, విలువ_2);
+	లేకపోతే
 		strbuf_addstr(buf, v ? "true" : "false");
-	return 0;
+	తిరిగి 0;
 }
 
-static int format_config_path(struct strbuf *buf,
-			      const char *key_,
-			      const char *value_,
-			      int gently)
+స్థిర పూర్ణాంకం format_config_మార్గం(నిర్మాణం strbuf *buf,
+			      స్థిరరాశి అక్షరం *కీలకం_2,
+			      స్థిరరాశి అక్షరం *విలువ_2,
+			      పూర్ణాంకం gently)
 {
-	char *v;
+	అక్షరం *v;
 
-	if (git_config_pathname(&v, key_, value_) < 0)
-		return -1;
+	ఒకవేళ (git_config_pathname(&v, కీలకం_2, విలువ_2) < 0)
+		తిరిగి -1;
 
-	if (v)
+	ఒకవేళ (v)
 		strbuf_addstr(buf, v);
-	else
-		return gently ? -1 : 1; /* :(optional)no-such-file */
+	లేకపోతే
+		తిరిగి gently ? -1 : 1; /* :(optional)no-such-file */
 
-	free(v);
-	return 0;
+	విడుదల(v);
+	తిరిగి 0;
 }
 
-static int format_config_expiry_date(struct strbuf *buf,
-				     const char *key_,
-				     const char *value_,
-				     int quietly)
+స్థిర పూర్ణాంకం format_config_expiry_date(నిర్మాణం strbuf *buf,
+				     స్థిరరాశి అక్షరం *కీలకం_2,
+				     స్థిరరాశి అక్షరం *విలువ_2,
+				     పూర్ణాంకం quietly)
 {
 	timestamp_t t;
-	if (quietly) {
-		if (parse_expiry_date(value_, &t))
-			return -1;
-	} else if (git_config_expiry_date(&t, key_, value_) < 0) {
-		return -1;
+	ఒకవేళ (quietly) {
+		ఒకవేళ (parse_expiry_date(విలువ_2, &t))
+			తిరిగి -1;
+	} లేకపోతే ఒకవేళ (git_config_expiry_date(&t, కీలకం_2, విలువ_2) < 0) {
+		తిరిగి -1;
 	}
 
 	strbuf_addf(buf, "%"PRItime, t);
-	return 0;
+	తిరిగి 0;
 }
 
-static int format_config_color(struct strbuf *buf,
-			       const char *key_,
-			       const char *value_,
-			       int gently)
+స్థిర పూర్ణాంకం format_config_color(నిర్మాణం strbuf *buf,
+			       స్థిరరాశి అక్షరం *కీలకం_2,
+			       స్థిరరాశి అక్షరం *విలువ_2,
+			       పూర్ణాంకం gently)
 {
-	char v[COLOR_MAXLEN];
+	అక్షరం v[COLOR_MAXLEN];
 
-	if (gently) {
-		if (color_parse_quietly(value_, v) < 0)
-			return -1;
-	} else if (git_config_color(v, key_, value_) < 0) {
-		return -1;
+	ఒకవేళ (gently) {
+		ఒకవేళ (color_parse_quietly(విలువ_2, v) < 0)
+			తిరిగి -1;
+	} లేకపోతే ఒకవేళ (git_config_color(v, కీలకం_2, విలువ_2) < 0) {
+		తిరిగి -1;
 	}
 
 	strbuf_addstr(buf, v);
-	return 0;
+	తిరిగి 0;
 }
 
 /*
@@ -403,156 +403,156 @@ static int format_config_color(struct strbuf *buf,
  * Note: 'gently' is currently ignored, but will be implemented in
  * a future change.
  */
-static int format_config(const struct config_display_options *opts,
-			 struct strbuf *buf, const char *key_,
-			 const char *value_, const struct key_value_info *kvi,
-			 int gently)
+స్థిర పూర్ణాంకం format_config(స్థిరరాశి నిర్మాణం config_display_options *opts,
+			 నిర్మాణం strbuf *buf, స్థిరరాశి అక్షరం *కీలకం_2,
+			 స్థిరరాశి అక్షరం *విలువ_2, స్థిరరాశి నిర్మాణం కీలకం_విలువ_info *kvi,
+			 పూర్ణాంకం gently)
 {
-	int res = 0;
-	if (opts->show_scope)
+	పూర్ణాంకం res = 0;
+	ఒకవేళ (opts->show_scope)
 		show_config_scope(opts, kvi, buf);
-	if (opts->show_origin)
+	ఒకవేళ (opts->show_origin)
 		show_config_origin(opts, kvi, buf);
-	if (opts->show_keys)
-		strbuf_addstr(buf, key_);
+	ఒకవేళ (opts->show_కీలకాలు)
+		strbuf_addstr(buf, కీలకం_2);
 
-	if (opts->omit_values)
-		goto terminator;
+	ఒకవేళ (opts->omit_విలువలు)
+		వెళ్ళు terminator;
 
-	if (opts->show_keys)
-		strbuf_addch(buf, opts->key_delim);
+	ఒకవేళ (opts->show_కీలకాలు)
+		strbuf_addch(buf, opts->కీలకం_delim);
 
-	switch (opts->type) {
-	case TYPE_INT:
-		res = format_config_int64(buf, key_, value_, kvi, gently);
-		break;
+	ఎంపిక (opts->type) {
+	స్థితి TYPE_INT:
+		res = format_config_int64(buf, కీలకం_2, విలువ_2, kvi, gently);
+		ఆపు;
 
-	case TYPE_BOOL:
-		res = format_config_bool(buf, key_, value_, gently);
-		break;
+	స్థితి TYPE_BOOL:
+		res = format_config_bool(buf, కీలకం_2, విలువ_2, gently);
+		ఆపు;
 
-	case TYPE_BOOL_OR_INT:
-		res = format_config_bool_or_int(buf, key_, value_, kvi, gently);
-		break;
+	స్థితి TYPE_BOOL_OR_INT:
+		res = format_config_bool_or_int(buf, కీలకం_2, విలువ_2, kvi, gently);
+		ఆపు;
 
-	case TYPE_BOOL_OR_STR:
-		res = format_config_bool_or_str(buf, value_);
-		break;
+	స్థితి TYPE_BOOL_OR_STR:
+		res = format_config_bool_or_str(buf, విలువ_2);
+		ఆపు;
 
-	case TYPE_PATH:
-		res = format_config_path(buf, key_, value_, gently);
-		break;
+	స్థితి TYPE_మార్గం:
+		res = format_config_మార్గం(buf, కీలకం_2, విలువ_2, gently);
+		ఆపు;
 
-	case TYPE_EXPIRY_DATE:
-		res = format_config_expiry_date(buf, key_, value_, gently);
-		break;
+	స్థితి TYPE_EXPIRY_DATE:
+		res = format_config_expiry_date(buf, కీలకం_2, విలువ_2, gently);
+		ఆపు;
 
-	case TYPE_COLOR:
-		res = format_config_color(buf, key_, value_, gently);
-		break;
+	స్థితి TYPE_COLOR:
+		res = format_config_color(buf, కీలకం_2, విలువ_2, gently);
+		ఆపు;
 
-	case TYPE_NONE:
-		if (value_) {
-			strbuf_addstr(buf, value_);
-		} else {
+	స్థితి TYPE_NONE:
+		ఒకవేళ (విలువ_2) {
+			strbuf_addstr(buf, విలువ_2);
+		} లేకపోతే {
 			/* Just show the key name; back out delimiter */
-			if (opts->show_keys)
+			ఒకవేళ (opts->show_కీలకాలు)
 				strbuf_setlen(buf, buf->len - 1);
 		}
-		break;
+		ఆపు;
 
-	default:
+	అప్రమేయ:
 		BUG("undefined type %d", opts->type);
 	}
 
 terminator:
-	strbuf_addch(buf, opts->term);
-	return res;
+	strbuf_addch(buf, opts->పదం);
+	తిరిగి res;
 }
 
-static int show_all_config(const char *key_, const char *value_,
-			   const struct config_context *ctx,
-			   void *cb)
+స్థిర పూర్ణాంకం show_all_config(స్థిరరాశి అక్షరం *కీలకం_2, స్థిరరాశి అక్షరం *విలువ_2,
+			   స్థిరరాశి నిర్మాణం config_context *ctx,
+			   శూన్య *cb)
 {
-	const struct config_display_options *opts = cb;
-	const struct key_value_info *kvi = ctx->kvi;
-	struct strbuf formatted = STRBUF_INIT;
+	స్థిరరాశి నిర్మాణం config_display_options *opts = cb;
+	స్థిరరాశి నిర్మాణం కీలకం_విలువ_info *kvi = ctx->kvi;
+	నిర్మాణం strbuf formatted = STRBUF_INIT;
 
-	if (format_config(opts, &formatted, key_, value_, kvi, 1) >= 0)
+	ఒకవేళ (format_config(opts, &formatted, కీలకం_2, విలువ_2, kvi, 1) >= 0)
 		fwrite(formatted.buf, 1, formatted.len, stdout);
 
 	strbuf_release(&formatted);
-	return 0;
+	తిరిగి 0;
 }
 
-#define GET_VALUE_ALL        (1 << 0)
-#define GET_VALUE_KEY_REGEXP (1 << 1)
+#నిర్వచించు GET_విలువ_ALL        (1 << 0)
+#నిర్వచించు GET_విలువ_కీలకం_REGEXP (1 << 1)
 
-struct collect_config_data {
-	const struct config_display_options *display_opts;
-	struct strbuf_list *values;
-	const char *value_pattern;
-	const char *key;
+నిర్మాణం collect_config_దత్తాంశం {
+	స్థిరరాశి నిర్మాణం config_display_options *display_opts;
+	నిర్మాణం strbuf_list *విలువలు;
+	స్థిరరాశి అక్షరం *విలువ_నమూనా;
+	స్థిరరాశి అక్షరం *కీలకం;
 	regex_t *regexp;
-	regex_t *key_regexp;
-	int do_not_match;
-	unsigned get_value_flags;
-	unsigned flags;
+	regex_t *కీలకం_regexp;
+	పూర్ణాంకం do_not_సరిపోలిక;
+	గుర్తులేని get_విలువ_flags;
+	గుర్తులేని flags;
 };
 
-static int collect_config(const char *key_, const char *value_,
-			  const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం collect_config(స్థిరరాశి అక్షరం *కీలకం_2, స్థిరరాశి అక్షరం *విలువ_2,
+			  స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	struct collect_config_data *data = cb;
-	struct strbuf_list *values = data->values;
-	const struct key_value_info *kvi = ctx->kvi;
-	int status;
+	నిర్మాణం collect_config_దత్తాంశం *దత్తాంశం = cb;
+	నిర్మాణం strbuf_list *విలువలు = దత్తాంశం->విలువలు;
+	స్థిరరాశి నిర్మాణం కీలకం_విలువ_info *kvi = ctx->kvi;
+	పూర్ణాంకం స్థితి_2;
 
-	if (!(data->get_value_flags & GET_VALUE_KEY_REGEXP) &&
-	    strcmp(key_, data->key))
-		return 0;
-	if ((data->get_value_flags & GET_VALUE_KEY_REGEXP) &&
-	    regexec(data->key_regexp, key_, 0, NULL, 0))
-		return 0;
-	if ((data->flags & CONFIG_FLAGS_FIXED_VALUE) &&
-	    strcmp(data->value_pattern, (value_?value_:"")))
-		return 0;
-	if (data->regexp &&
-	    (data->do_not_match ^ !!regexec(data->regexp, (value_?value_:""), 0, NULL, 0)))
-		return 0;
+	ఒకవేళ (!(దత్తాంశం->get_విలువ_flags & GET_విలువ_కీలకం_REGEXP) &&
+	    strcmp(కీలకం_2, దత్తాంశం->కీలకం))
+		తిరిగి 0;
+	ఒకవేళ ((దత్తాంశం->get_విలువ_flags & GET_విలువ_కీలకం_REGEXP) &&
+	    regexec(దత్తాంశం->కీలకం_regexp, కీలకం_2, 0, ఖాళీ, 0))
+		తిరిగి 0;
+	ఒకవేళ ((దత్తాంశం->flags & CONFIG_FLAGS_FIXED_విలువ) &&
+	    strcmp(దత్తాంశం->విలువ_నమూనా, (విలువ_2?విలువ_2:"")))
+		తిరిగి 0;
+	ఒకవేళ (దత్తాంశం->regexp &&
+	    (దత్తాంశం->do_not_సరిపోలిక ^ !!regexec(దత్తాంశం->regexp, (విలువ_2?విలువ_2:""), 0, ఖాళీ, 0)))
+		తిరిగి 0;
 
-	ALLOC_GROW(values->items, values->nr + 1, values->alloc);
-	strbuf_init(&values->items[values->nr], 0);
+	ALLOC_GROW(విలువలు->వస్తువులు, విలువలు->nr + 1, విలువలు->alloc);
+	strbuf_init(&విలువలు->వస్తువులు[విలువలు->nr], 0);
 
-	status = format_config(data->display_opts, &values->items[values->nr++],
-			       key_, value_, kvi, 0);
-	if (status < 0)
-		return status;
-	if (status) {
-		strbuf_release(&values->items[--values->nr]);
-		status = 0;
+	స్థితి_2 = format_config(దత్తాంశం->display_opts, &విలువలు->వస్తువులు[విలువలు->nr++],
+			       కీలకం_2, విలువ_2, kvi, 0);
+	ఒకవేళ (స్థితి_2 < 0)
+		తిరిగి స్థితి_2;
+	ఒకవేళ (స్థితి_2) {
+		strbuf_release(&విలువలు->వస్తువులు[--విలువలు->nr]);
+		స్థితి_2 = 0;
 	}
-	return status;
+	తిరిగి స్థితి_2;
 }
 
-static int get_value(const struct config_location_options *opts,
-		     const struct config_display_options *display_opts,
-		     const char *key_, const char *regex_,
-		     unsigned get_value_flags, unsigned flags)
+స్థిర పూర్ణాంకం get_విలువ(స్థిరరాశి నిర్మాణం config_location_options *opts,
+		     స్థిరరాశి నిర్మాణం config_display_options *display_opts,
+		     స్థిరరాశి అక్షరం *కీలకం_2, స్థిరరాశి అక్షరం *regex_,
+		     గుర్తులేని get_విలువ_flags, గుర్తులేని flags)
 {
-	int ret = CONFIG_GENERIC_ERROR;
-	struct strbuf_list values = {NULL};
-	struct collect_config_data data = {
+	పూర్ణాంకం ret = CONFIG_GENERIC_ERROR;
+	నిర్మాణం strbuf_list విలువలు = {ఖాళీ};
+	నిర్మాణం collect_config_దత్తాంశం దత్తాంశం = {
 		.display_opts = display_opts,
-		.values = &values,
-		.get_value_flags = get_value_flags,
+		.విలువలు = &విలువలు,
+		.get_విలువ_flags = get_విలువ_flags,
 		.flags = flags,
 	};
-	char *key = NULL;
-	int i;
+	అక్షరం *కీలకం = ఖాళీ;
+	పూర్ణాంకం i;
 
-	if (get_value_flags & GET_VALUE_KEY_REGEXP) {
-		char *tl;
+	ఒకవేళ (get_విలువ_flags & GET_విలువ_కీలకం_REGEXP) {
+		అక్షరం *tl;
 
 		/*
 		 * NEEDSWORK: this naive pattern lowercasing obviously does not
@@ -560,104 +560,104 @@ static int get_value(const struct config_location_options *opts,
 		 * Perhaps we should deprecate this altogether someday.
 		 */
 
-		key = xstrdup(key_);
-		for (tl = key + strlen(key) - 1;
-		     tl >= key && *tl != '.';
+		కీలకం = xstrdup(కీలకం_2);
+		కొరకు (tl = కీలకం + అక్షరశ్రేణి_పొడవు(కీలకం) - 1;
+		     tl >= కీలకం && *tl != '.';
 		     tl--)
 			*tl = tolower(*tl);
-		for (tl = key; *tl && *tl != '.'; tl++)
+		కొరకు (tl = కీలకం; *tl && *tl != '.'; tl++)
 			*tl = tolower(*tl);
 
-		data.key_regexp = (regex_t*)xmalloc(sizeof(regex_t));
-		if (regcomp(data.key_regexp, key, REG_EXTENDED)) {
-			error(_("invalid key pattern: %s"), key_);
-			FREE_AND_NULL(data.key_regexp);
-			ret = CONFIG_INVALID_PATTERN;
-			goto free_strings;
+		దత్తాంశం.కీలకం_regexp = (regex_t*)xmalloc(పరిమాణం(regex_t));
+		ఒకవేళ (regcomp(దత్తాంశం.కీలకం_regexp, కీలకం, REG_EXTENDED)) {
+			error(_("invalid key pattern: %s"), కీలకం_2);
+			FREE_AND_NULL(దత్తాంశం.కీలకం_regexp);
+			ret = CONFIG_INVALID_నమూనా;
+			వెళ్ళు free_అక్షరశ్రేణులు;
 		}
-	} else {
-		if (git_config_parse_key(key_, &key, NULL)) {
-			ret = CONFIG_INVALID_KEY;
-			goto free_strings;
+	} లేకపోతే {
+		ఒకవేళ (git_config_parse_కీలకం(కీలకం_2, &కీలకం, ఖాళీ)) {
+			ret = CONFIG_INVALID_కీలకం;
+			వెళ్ళు free_అక్షరశ్రేణులు;
 		}
 
-		data.key = key;
+		దత్తాంశం.కీలకం = కీలకం;
 	}
 
-	if (regex_ && (flags & CONFIG_FLAGS_FIXED_VALUE))
-		data.value_pattern = regex_;
-	else if (regex_) {
-		if (regex_[0] == '!') {
-			data.do_not_match = 1;
+	ఒకవేళ (regex_ && (flags & CONFIG_FLAGS_FIXED_విలువ))
+		దత్తాంశం.విలువ_నమూనా = regex_;
+	లేకపోతే ఒకవేళ (regex_) {
+		ఒకవేళ (regex_[0] == '!') {
+			దత్తాంశం.do_not_సరిపోలిక = 1;
 			regex_++;
 		}
 
-		data.regexp = (regex_t*)xmalloc(sizeof(regex_t));
-		if (regcomp(data.regexp, regex_, REG_EXTENDED)) {
+		దత్తాంశం.regexp = (regex_t*)xmalloc(పరిమాణం(regex_t));
+		ఒకవేళ (regcomp(దత్తాంశం.regexp, regex_, REG_EXTENDED)) {
 			error(_("invalid pattern: %s"), regex_);
-			FREE_AND_NULL(data.regexp);
-			ret = CONFIG_INVALID_PATTERN;
-			goto free_strings;
+			FREE_AND_NULL(దత్తాంశం.regexp);
+			ret = CONFIG_INVALID_నమూనా;
+			వెళ్ళు free_అక్షరశ్రేణులు;
 		}
 	}
 
-	config_with_options(collect_config, &data,
-			    &opts->source, the_repository,
+	config_with_options(collect_config, &దత్తాంశం,
+			    &opts->ఆధారం, the_repository,
 			    &opts->options);
 
-	if (!values.nr && display_opts->default_value) {
-		struct key_value_info kvi = KVI_INIT;
-		struct strbuf *item;
-		int status;
+	ఒకవేళ (!విలువలు.nr && display_opts->default_విలువ) {
+		నిర్మాణం కీలకం_విలువ_info kvi = KVI_INIT;
+		నిర్మాణం strbuf *అంశం;
+		పూర్ణాంకం స్థితి_2;
 
 		kvi_from_param(&kvi);
-		ALLOC_GROW(values.items, values.nr + 1, values.alloc);
-		item = &values.items[values.nr++];
-		strbuf_init(item, 0);
+		ALLOC_GROW(విలువలు.వస్తువులు, విలువలు.nr + 1, విలువలు.alloc);
+		అంశం = &విలువలు.వస్తువులు[విలువలు.nr++];
+		strbuf_init(అంశం, 0);
 
-		status = format_config(display_opts, item, key_,
-				       display_opts->default_value, &kvi, 0);
-		if (status < 0)
+		స్థితి_2 = format_config(display_opts, అంశం, కీలకం_2,
+				       display_opts->default_విలువ, &kvi, 0);
+		ఒకవేళ (స్థితి_2 < 0)
 			die(_("failed to format default config value: %s"),
-			    display_opts->default_value);
-		if (status) {
+			    display_opts->default_విలువ);
+		ఒకవేళ (స్థితి_2) {
 			/* default was a missing optional value */
-			values.nr--;
-			strbuf_release(item);
+			విలువలు.nr--;
+			strbuf_release(అంశం);
 		}
 	}
 
-	ret = !values.nr;
+	ret = !విలువలు.nr;
 
-	for (i = 0; i < values.nr; i++) {
-		struct strbuf *buf = values.items + i;
-		if ((get_value_flags & GET_VALUE_ALL) || i == values.nr - 1)
+	కొరకు (i = 0; i < విలువలు.nr; i++) {
+		నిర్మాణం strbuf *buf = విలువలు.వస్తువులు + i;
+		ఒకవేళ ((get_విలువ_flags & GET_విలువ_ALL) || i == విలువలు.nr - 1)
 			fwrite(buf->buf, 1, buf->len, stdout);
 		strbuf_release(buf);
 	}
-	free(values.items);
+	విడుదల(విలువలు.వస్తువులు);
 
-free_strings:
-	free(key);
-	if (data.key_regexp) {
-		regfree(data.key_regexp);
-		free(data.key_regexp);
+free_అక్షరశ్రేణులు:
+	విడుదల(కీలకం);
+	ఒకవేళ (దత్తాంశం.కీలకం_regexp) {
+		regfree(దత్తాంశం.కీలకం_regexp);
+		విడుదల(దత్తాంశం.కీలకం_regexp);
 	}
-	if (data.regexp) {
-		regfree(data.regexp);
-		free(data.regexp);
+	ఒకవేళ (దత్తాంశం.regexp) {
+		regfree(దత్తాంశం.regexp);
+		విడుదల(దత్తాంశం.regexp);
 	}
 
-	return ret;
+	తిరిగి ret;
 }
 
-static char *normalize_value(const char *key, const char *value,
-			     int type, struct key_value_info *kvi)
+స్థిర అక్షరం *normalize_విలువ(స్థిరరాశి అక్షరం *కీలకం, స్థిరరాశి అక్షరం *విలువ,
+			     పూర్ణాంకం type, నిర్మాణం కీలకం_విలువ_info *kvi)
 {
-	if (!value)
-		return NULL;
+	ఒకవేళ (!విలువ)
+		తిరిగి ఖాళీ;
 
-	if (type == 0 || type == TYPE_PATH || type == TYPE_EXPIRY_DATE)
+	ఒకవేళ (type == 0 || type == TYPE_మార్గం || type == TYPE_EXPIRY_DATE)
 		/*
 		 * We don't do normalization for TYPE_PATH here: If
 		 * the path is like ~/foobar/, we prefer to store
@@ -665,30 +665,30 @@ static char *normalize_value(const char *key, const char *value,
 		 * when retrieving the value.
 		 * Also don't do normalization for expiry dates.
 		 */
-		return xstrdup(value);
-	if (type == TYPE_INT)
-		return xstrfmt("%"PRId64, git_config_int64(key, value, kvi));
-	if (type == TYPE_BOOL)
-		return xstrdup(git_config_bool(key, value) ?  "true" : "false");
-	if (type == TYPE_BOOL_OR_INT) {
-		int is_bool, v;
-		v = git_config_bool_or_int(key, value, kvi, &is_bool);
-		if (!is_bool)
-			return xstrfmt("%d", v);
-		else
-			return xstrdup(v ? "true" : "false");
+		తిరిగి xstrdup(విలువ);
+	ఒకవేళ (type == TYPE_INT)
+		తిరిగి xstrfmt("%"PRId64, git_config_int64(కీలకం, విలువ, kvi));
+	ఒకవేళ (type == TYPE_BOOL)
+		తిరిగి xstrdup(git_config_bool(కీలకం, విలువ) ?  "true" : "false");
+	ఒకవేళ (type == TYPE_BOOL_OR_INT) {
+		పూర్ణాంకం is_bool, v;
+		v = git_config_bool_or_int(కీలకం, విలువ, kvi, &is_bool);
+		ఒకవేళ (!is_bool)
+			తిరిగి xstrfmt("%d", v);
+		లేకపోతే
+			తిరిగి xstrdup(v ? "true" : "false");
 	}
-	if (type == TYPE_BOOL_OR_STR) {
-		int v = git_parse_maybe_bool(value);
-		if (v < 0)
-			return xstrdup(value);
-		else
-			return xstrdup(v ? "true" : "false");
+	ఒకవేళ (type == TYPE_BOOL_OR_STR) {
+		పూర్ణాంకం v = git_parse_maybe_bool(విలువ);
+		ఒకవేళ (v < 0)
+			తిరిగి xstrdup(విలువ);
+		లేకపోతే
+			తిరిగి xstrdup(v ? "true" : "false");
 	}
-	if (type == TYPE_COLOR) {
-		char v[COLOR_MAXLEN];
-		if (git_config_color(v, key, value))
-			die(_("cannot parse color '%s'"), value);
+	ఒకవేళ (type == TYPE_COLOR) {
+		అక్షరం v[COLOR_MAXLEN];
+		ఒకవేళ (git_config_color(v, కీలకం, విలువ))
+			die(_("cannot parse color '%s'"), విలువ);
 
 		/*
 		 * The contents of `v` now contain an ANSI escape
@@ -697,224 +697,224 @@ static char *normalize_value(const char *key, const char *value,
 		 * "sanity-check", and return the given value, which we
 		 * know is representable as valid color code.
 		 */
-		return xstrdup(value);
+		తిరిగి xstrdup(విలువ);
 	}
 
 	BUG("cannot normalize type %d", type);
 }
 
-struct get_color_config_data {
-	int get_color_found;
-	const char *get_color_slot;
-	char parsed_color[COLOR_MAXLEN];
+నిర్మాణం get_color_config_దత్తాంశం {
+	పూర్ణాంకం get_color_దొరికింది;
+	స్థిరరాశి అక్షరం *get_color_స్థానం;
+	అక్షరం parsed_color[COLOR_MAXLEN];
 };
 
-static int git_get_color_config(const char *var, const char *value,
-				const struct config_context *ctx UNUSED,
-				void *cb)
+స్థిర పూర్ణాంకం git_get_color_config(స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *విలువ,
+				స్థిరరాశి నిర్మాణం config_context *ctx వాడని,
+				శూన్య *cb)
 {
-	struct get_color_config_data *data = cb;
+	నిర్మాణం get_color_config_దత్తాంశం *దత్తాంశం = cb;
 
-	if (!strcmp(var, data->get_color_slot)) {
-		if (!value)
+	ఒకవేళ (!strcmp(var, దత్తాంశం->get_color_స్థానం)) {
+		ఒకవేళ (!విలువ)
 			config_error_nonbool(var);
-		if (color_parse(value, data->parsed_color) < 0)
-			return -1;
-		data->get_color_found = 1;
+		ఒకవేళ (color_parse(విలువ, దత్తాంశం->parsed_color) < 0)
+			తిరిగి -1;
+		దత్తాంశం->get_color_దొరికింది = 1;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static int get_color(const struct config_location_options *opts,
-		      const char *var, const char *def_color)
+స్థిర పూర్ణాంకం get_color(స్థిరరాశి నిర్మాణం config_location_options *opts,
+		      స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *def_color)
 {
-	struct get_color_config_data data = {
-		.get_color_slot = var,
+	నిర్మాణం get_color_config_దత్తాంశం దత్తాంశం = {
+		.get_color_స్థానం = var,
 		.parsed_color[0] = '\0',
 	};
-	int ret;
+	పూర్ణాంకం ret;
 
-	config_with_options(git_get_color_config, &data,
-			    &opts->source, the_repository,
+	config_with_options(git_get_color_config, &దత్తాంశం,
+			    &opts->ఆధారం, the_repository,
 			    &opts->options);
 
-	if (!data.get_color_found && def_color) {
-		if (color_parse(def_color, data.parsed_color) < 0) {
+	ఒకవేళ (!దత్తాంశం.get_color_దొరికింది && def_color) {
+		ఒకవేళ (color_parse(def_color, దత్తాంశం.parsed_color) < 0) {
 			ret = error(_("unable to parse default color value"));
-			goto out;
+			వెళ్ళు బహిర్గతం;
 		}
 	}
 
 	ret = 0;
 
-out:
-	fputs(data.parsed_color, stdout);
-	return ret;
+బహిర్గతం:
+	fputs(దత్తాంశం.parsed_color, stdout);
+	తిరిగి ret;
 }
 
-struct get_colorbool_config_data {
-	enum git_colorbool get_colorbool_found;
-	enum git_colorbool get_diff_color_found;
-	enum git_colorbool get_color_ui_found;
-	const char *get_colorbool_slot;
+నిర్మాణం get_colorbool_config_దత్తాంశం {
+	గణన git_colorbool get_colorbool_దొరికింది;
+	గణన git_colorbool get_diff_color_దొరికింది;
+	గణన git_colorbool get_color_ui_దొరికింది;
+	స్థిరరాశి అక్షరం *get_colorbool_స్థానం;
 };
 
-static int git_get_colorbool_config(const char *var, const char *value,
-				    const struct config_context *ctx UNUSED,
-				    void *cb)
+స్థిర పూర్ణాంకం git_get_colorbool_config(స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *విలువ,
+				    స్థిరరాశి నిర్మాణం config_context *ctx వాడని,
+				    శూన్య *cb)
 {
-	struct get_colorbool_config_data *data = cb;
+	నిర్మాణం get_colorbool_config_దత్తాంశం *దత్తాంశం = cb;
 
-	if (!strcmp(var, data->get_colorbool_slot))
-		data->get_colorbool_found = git_config_colorbool(var, value);
-	else if (!strcmp(var, "diff.color"))
-		data->get_diff_color_found = git_config_colorbool(var, value);
-	else if (!strcmp(var, "color.ui"))
-		data->get_color_ui_found = git_config_colorbool(var, value);
-	return 0;
+	ఒకవేళ (!strcmp(var, దత్తాంశం->get_colorbool_స్థానం))
+		దత్తాంశం->get_colorbool_దొరికింది = git_config_colorbool(var, విలువ);
+	లేకపోతే ఒకవేళ (!strcmp(var, "diff.color"))
+		దత్తాంశం->get_diff_color_దొరికింది = git_config_colorbool(var, విలువ);
+	లేకపోతే ఒకవేళ (!strcmp(var, "color.ui"))
+		దత్తాంశం->get_color_ui_దొరికింది = git_config_colorbool(var, విలువ);
+	తిరిగి 0;
 }
 
-static int get_colorbool(const struct config_location_options *opts,
-			 const char *var, int print)
+స్థిర పూర్ణాంకం get_colorbool(స్థిరరాశి నిర్మాణం config_location_options *opts,
+			 స్థిరరాశి అక్షరం *var, పూర్ణాంకం print)
 {
-	struct get_colorbool_config_data data = {
-		.get_colorbool_slot = var,
-		.get_colorbool_found = GIT_COLOR_UNKNOWN,
-		.get_diff_color_found = GIT_COLOR_UNKNOWN,
-		.get_color_ui_found = GIT_COLOR_UNKNOWN,
+	నిర్మాణం get_colorbool_config_దత్తాంశం దత్తాంశం = {
+		.get_colorbool_స్థానం = var,
+		.get_colorbool_దొరికింది = GIT_COLOR_UNKNOWN,
+		.get_diff_color_దొరికింది = GIT_COLOR_UNKNOWN,
+		.get_color_ui_దొరికింది = GIT_COLOR_UNKNOWN,
 	};
-	bool result;
+	bool ఫలితం;
 
-	config_with_options(git_get_colorbool_config, &data,
-			    &opts->source, the_repository,
+	config_with_options(git_get_colorbool_config, &దత్తాంశం,
+			    &opts->ఆధారం, the_repository,
 			    &opts->options);
 
-	if (data.get_colorbool_found == GIT_COLOR_UNKNOWN) {
-		if (!strcmp(data.get_colorbool_slot, "color.diff"))
-			data.get_colorbool_found = data.get_diff_color_found;
-		if (data.get_colorbool_found == GIT_COLOR_UNKNOWN)
-			data.get_colorbool_found = data.get_color_ui_found;
+	ఒకవేళ (దత్తాంశం.get_colorbool_దొరికింది == GIT_COLOR_UNKNOWN) {
+		ఒకవేళ (!strcmp(దత్తాంశం.get_colorbool_స్థానం, "color.diff"))
+			దత్తాంశం.get_colorbool_దొరికింది = దత్తాంశం.get_diff_color_దొరికింది;
+		ఒకవేళ (దత్తాంశం.get_colorbool_దొరికింది == GIT_COLOR_UNKNOWN)
+			దత్తాంశం.get_colorbool_దొరికింది = దత్తాంశం.get_color_ui_దొరికింది;
 	}
 
-	if (data.get_colorbool_found == GIT_COLOR_UNKNOWN)
+	ఒకవేళ (దత్తాంశం.get_colorbool_దొరికింది == GIT_COLOR_UNKNOWN)
 		/* default value if none found in config */
-		data.get_colorbool_found = GIT_COLOR_AUTO;
+		దత్తాంశం.get_colorbool_దొరికింది = GIT_COLOR_AUTO;
 
-	result = want_color(data.get_colorbool_found);
+	ఫలితం = want_color(దత్తాంశం.get_colorbool_దొరికింది);
 
-	if (print) {
-		printf("%s\n", result ? "true" : "false");
-		return 0;
-	} else
-		return result ? 0 : 1;
+	ఒకవేళ (print) {
+		రాయి("%s\n", ఫలితం ? "true" : "false");
+		తిరిగి 0;
+	} లేకపోతే
+		తిరిగి ఫలితం ? 0 : 1;
 }
 
-static void check_write(const struct git_config_source *source)
+స్థిర శూన్య check_write(స్థిరరాశి నిర్మాణం git_config_ఆధారం *ఆధారం)
 {
-	if (!source->file && !startup_info->have_repository)
+	ఒకవేళ (!ఆధారం->file && !startup_info->have_repository)
 		die(_("not in a git directory"));
 
-	if (source->use_stdin)
+	ఒకవేళ (ఆధారం->use_stdin)
 		die(_("writing to stdin is not supported"));
 
-	if (source->blob)
+	ఒకవేళ (ఆధారం->blob)
 		die(_("writing config blobs is not supported"));
 }
 
-struct urlmatch_current_candidate_value {
-	char value_is_null;
-	struct strbuf value;
-	struct key_value_info kvi;
+నిర్మాణం urlmatch_current_candidate_విలువ {
+	అక్షరం విలువ_is_null;
+	నిర్మాణం strbuf విలువ;
+	నిర్మాణం కీలకం_విలువ_info kvi;
 };
 
-static int urlmatch_collect_fn(const char *var, const char *value,
-			       const struct config_context *ctx,
-			       void *cb)
+స్థిర పూర్ణాంకం urlmatch_collect_fn(స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *విలువ,
+			       స్థిరరాశి నిర్మాణం config_context *ctx,
+			       శూన్య *cb)
 {
-	struct string_list *values = cb;
-	struct string_list_item *item = string_list_insert(values, var);
-	struct urlmatch_current_candidate_value *matched = item->util;
-	const struct key_value_info *kvi = ctx->kvi;
+	నిర్మాణం string_list *విలువలు = cb;
+	నిర్మాణం string_list_అంశం *అంశం = string_list_చొప్పించు(విలువలు, var);
+	నిర్మాణం urlmatch_current_candidate_విలువ *matched = అంశం->util;
+	స్థిరరాశి నిర్మాణం కీలకం_విలువ_info *kvi = ctx->kvi;
 
-	if (!matched) {
-		matched = xmalloc(sizeof(*matched));
-		strbuf_init(&matched->value, 0);
-		item->util = matched;
-	} else {
-		strbuf_reset(&matched->value);
+	ఒకవేళ (!matched) {
+		matched = xmalloc(పరిమాణం(*matched));
+		strbuf_init(&matched->విలువ, 0);
+		అంశం->util = matched;
+	} లేకపోతే {
+		strbuf_reset(&matched->విలువ);
 	}
 	matched->kvi = *kvi;
 
-	if (value) {
-		strbuf_addstr(&matched->value, value);
-		matched->value_is_null = 0;
-	} else {
-		matched->value_is_null = 1;
+	ఒకవేళ (విలువ) {
+		strbuf_addstr(&matched->విలువ, విలువ);
+		matched->విలువ_is_null = 0;
+	} లేకపోతే {
+		matched->విలువ_is_null = 1;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-static int get_urlmatch(const struct config_location_options *opts,
-			const struct config_display_options *_display_opts,
-			const char *var, const char *url)
+స్థిర పూర్ణాంకం get_urlmatch(స్థిరరాశి నిర్మాణం config_location_options *opts,
+			స్థిరరాశి నిర్మాణం config_display_options *_display_opts,
+			స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *url)
 {
-	int ret;
-	char *section;
-	char *section_tail;
-	struct config_display_options display_opts = *_display_opts;
-	struct string_list_item *item;
-	struct urlmatch_config config = URLMATCH_CONFIG_INIT;
-	struct string_list values = STRING_LIST_INIT_DUP;
+	పూర్ణాంకం ret;
+	అక్షరం *section;
+	అక్షరం *section_తోక;
+	నిర్మాణం config_display_options display_opts = *_display_opts;
+	నిర్మాణం string_list_అంశం *అంశం;
+	నిర్మాణం urlmatch_config config = URLMATCH_CONFIG_INIT;
+	నిర్మాణం string_list విలువలు = STRING_LIST_INIT_DUP;
 
 	config.collect_fn = urlmatch_collect_fn;
-	config.cascade_fn = NULL;
-	config.cb = &values;
+	config.cascade_fn = ఖాళీ;
+	config.cb = &విలువలు;
 
-	if (!url_normalize(url, &config.url))
+	ఒకవేళ (!url_normalize(url, &config.url))
 		die("%s", config.url.err);
 
 	config.section = section = xstrdup_tolower(var);
-	section_tail = strchr(section, '.');
-	if (section_tail) {
-		*section_tail = '\0';
-		config.key = section_tail + 1;
-		display_opts.show_keys = 0;
-	} else {
-		config.key = NULL;
-		display_opts.show_keys = 1;
+	section_తోక = strchr(section, '.');
+	ఒకవేళ (section_తోక) {
+		*section_తోక = '\0';
+		config.కీలకం = section_తోక + 1;
+		display_opts.show_కీలకాలు = 0;
+	} లేకపోతే {
+		config.కీలకం = ఖాళీ;
+		display_opts.show_కీలకాలు = 1;
 	}
 
-	config_with_options(urlmatch_config_entry, &config,
-			    &opts->source, the_repository,
+	config_with_options(urlmatch_config_నమోదు, &config,
+			    &opts->ఆధారం, the_repository,
 			    &opts->options);
 
-	ret = !values.nr;
+	ret = !విలువలు.nr;
 
-	for_each_string_list_item(item, &values) {
-		struct urlmatch_current_candidate_value *matched = item->util;
-		struct strbuf buf = STRBUF_INIT;
-		int status;
+	for_each_string_list_అంశం(అంశం, &విలువలు) {
+		నిర్మాణం urlmatch_current_candidate_విలువ *matched = అంశం->util;
+		నిర్మాణం strbuf buf = STRBUF_INIT;
+		పూర్ణాంకం స్థితి_2;
 
-		status = format_config(&display_opts, &buf, item->string,
-				       matched->value_is_null ? NULL : matched->value.buf,
+		స్థితి_2 = format_config(&display_opts, &buf, అంశం->string,
+				       matched->విలువ_is_null ? ఖాళీ : matched->విలువ.buf,
 				       &matched->kvi, 0);
-		if (!status)
+		ఒకవేళ (!స్థితి_2)
 			fwrite(buf.buf, 1, buf.len, stdout);
 		strbuf_release(&buf);
 
-		strbuf_release(&matched->value);
+		strbuf_release(&matched->విలువ);
 	}
 	urlmatch_config_release(&config);
-	string_list_clear(&values, 1);
-	free(config.url.url);
+	string_list_clear(&విలువలు, 1);
+	విడుదల(config.url.url);
 
-	free(section);
-	return ret;
+	విడుదల(section);
+	తిరిగి ret;
 }
 
-static char *default_user_config(void)
+స్థిర అక్షరం *default_user_config(శూన్య)
 {
-	struct strbuf buf = STRBUF_INIT;
+	నిర్మాణం strbuf buf = STRBUF_INIT;
 	strbuf_addf(&buf,
 		    _("# This is Git's per-user configuration file.\n"
 		      "[user]\n"
@@ -923,42 +923,42 @@ static char *default_user_config(void)
 		      "#	email = %s\n"),
 		    ident_default_name(),
 		    ident_default_email());
-	return strbuf_detach(&buf, NULL);
+	తిరిగి strbuf_detach(&buf, ఖాళీ);
 }
 
-static void location_options_init(struct config_location_options *opts,
-				  const char *prefix)
+స్థిర శూన్య location_options_init(నిర్మాణం config_location_options *opts,
+				  స్థిరరాశి అక్షరం *ఉపసర్గ)
 {
-	if (!opts->source.file)
-		opts->source.file = opts->file_to_free =
+	ఒకవేళ (!opts->ఆధారం.file)
+		opts->ఆధారం.file = opts->file_గమ్యం_free =
 			xstrdup_or_null(getenv(CONFIG_ENVIRONMENT));
 
-	if (opts->use_global_config + opts->use_system_config +
+	ఒకవేళ (opts->use_global_config + opts->use_system_config +
 	    opts->use_local_config + opts->use_worktree_config +
-	    !!opts->source.file + !!opts->source.blob > 1) {
+	    !!opts->ఆధారం.file + !!opts->ఆధారం.blob > 1) {
 		error(_("only one config file at a time"));
-		exit(129);
+		నిష్క్రమించు(129);
 	}
 
-	if (!startup_info->have_repository) {
-		if (opts->use_local_config)
+	ఒకవేళ (!startup_info->have_repository) {
+		ఒకవేళ (opts->use_local_config)
 			die(_("--local can only be used inside a git repository"));
-		if (opts->source.blob)
+		ఒకవేళ (opts->ఆధారం.blob)
 			die(_("--blob can only be used inside a git repository"));
-		if (opts->use_worktree_config)
+		ఒకవేళ (opts->use_worktree_config)
 			die(_("--worktree can only be used inside a git repository"));
 	}
 
-	if (opts->source.file &&
-			!strcmp(opts->source.file, "-")) {
-		opts->source.file = NULL;
-		opts->source.use_stdin = 1;
-		opts->source.scope = CONFIG_SCOPE_COMMAND;
+	ఒకవేళ (opts->ఆధారం.file &&
+			!strcmp(opts->ఆధారం.file, "-")) {
+		opts->ఆధారం.file = ఖాళీ;
+		opts->ఆధారం.use_stdin = 1;
+		opts->ఆధారం.scope = CONFIG_SCOPE_COMMAND;
 	}
 
-	if (opts->use_global_config) {
-		opts->source.file = opts->file_to_free = git_global_config();
-		if (!opts->source.file)
+	ఒకవేళ (opts->use_global_config) {
+		opts->ఆధారం.file = opts->file_గమ్యం_free = git_global_config();
+		ఒకవేళ (!opts->ఆధారం.file)
 			/*
 			 * It is unknown if HOME/.gitconfig exists, so
 			 * we do not know if we should write to XDG
@@ -966,417 +966,417 @@ static void location_options_init(struct config_location_options *opts,
 			 * is set and points at a sane location.
 			 */
 			die(_("$HOME not set"));
-		opts->source.scope = CONFIG_SCOPE_GLOBAL;
-	} else if (opts->use_system_config) {
-		opts->source.file = opts->file_to_free = git_system_config();
-		opts->source.scope = CONFIG_SCOPE_SYSTEM;
-	} else if (opts->use_local_config) {
-		opts->source.file = opts->file_to_free = repo_git_path(the_repository, "config");
-		opts->source.scope = CONFIG_SCOPE_LOCAL;
-	} else if (opts->use_worktree_config) {
-		struct worktree **worktrees = get_worktrees(the_repository);
-		if (the_repository->repository_format_worktree_config)
-			opts->source.file = opts->file_to_free =
-				repo_git_path(the_repository, "config.worktree");
-		else if (worktrees[0] && worktrees[1])
+		opts->ఆధారం.scope = CONFIG_SCOPE_GLOBAL;
+	} లేకపోతే ఒకవేళ (opts->use_system_config) {
+		opts->ఆధారం.file = opts->file_గమ్యం_free = git_system_config();
+		opts->ఆధారం.scope = CONFIG_SCOPE_SYSTEM;
+	} లేకపోతే ఒకవేళ (opts->use_local_config) {
+		opts->ఆధారం.file = opts->file_గమ్యం_free = repo_git_మార్గం(the_repository, "config");
+		opts->ఆధారం.scope = CONFIG_SCOPE_LOCAL;
+	} లేకపోతే ఒకవేళ (opts->use_worktree_config) {
+		నిర్మాణం worktree **worktrees = get_worktrees(the_repository);
+		ఒకవేళ (the_repository->repository_format_worktree_config)
+			opts->ఆధారం.file = opts->file_గమ్యం_free =
+				repo_git_మార్గం(the_repository, "config.worktree");
+		లేకపోతే ఒకవేళ (worktrees[0] && worktrees[1])
 			die(_("--worktree cannot be used with multiple "
 			      "working trees unless the config\n"
 			      "extension worktreeConfig is enabled. "
 			      "Please read \"CONFIGURATION FILE\"\n"
 			      "section in \"git help worktree\" for details"));
-		else
-			opts->source.file = opts->file_to_free =
-				repo_git_path(the_repository, "config");
-		opts->source.scope = CONFIG_SCOPE_LOCAL;
+		లేకపోతే
+			opts->ఆధారం.file = opts->file_గమ్యం_free =
+				repo_git_మార్గం(the_repository, "config");
+		opts->ఆధారం.scope = CONFIG_SCOPE_LOCAL;
 		free_worktrees(worktrees);
-	} else if (opts->source.file) {
-		if (!is_absolute_path(opts->source.file) && prefix)
-			opts->source.file = opts->file_to_free =
-				prefix_filename(prefix, opts->source.file);
-		opts->source.scope = CONFIG_SCOPE_COMMAND;
-	} else if (opts->source.blob) {
-		opts->source.scope = CONFIG_SCOPE_COMMAND;
+	} లేకపోతే ఒకవేళ (opts->ఆధారం.file) {
+		ఒకవేళ (!is_absolute_మార్గం(opts->ఆధారం.file) && ఉపసర్గ)
+			opts->ఆధారం.file = opts->file_గమ్యం_free =
+				ఉపసర్గ_filename(ఉపసర్గ, opts->ఆధారం.file);
+		opts->ఆధారం.scope = CONFIG_SCOPE_COMMAND;
+	} లేకపోతే ఒకవేళ (opts->ఆధారం.blob) {
+		opts->ఆధారం.scope = CONFIG_SCOPE_COMMAND;
 	}
 
-	if (opts->respect_includes_opt == -1)
-		opts->options.respect_includes = !opts->source.file;
-	else
+	ఒకవేళ (opts->respect_includes_opt == -1)
+		opts->options.respect_includes = !opts->ఆధారం.file;
+	లేకపోతే
 		opts->options.respect_includes = opts->respect_includes_opt;
-	if (startup_info->have_repository) {
+	ఒకవేళ (startup_info->have_repository) {
 		opts->options.commondir = repo_get_common_dir(the_repository);
 		opts->options.git_dir = repo_get_git_dir(the_repository);
 	}
 }
 
-static void location_options_release(struct config_location_options *opts)
+స్థిర శూన్య location_options_release(నిర్మాణం config_location_options *opts)
 {
-	free(opts->file_to_free);
+	విడుదల(opts->file_గమ్యం_free);
 }
 
-static void display_options_init(struct config_display_options *opts)
+స్థిర శూన్య display_options_init(నిర్మాణం config_display_options *opts)
 {
-	if (opts->end_nul) {
-		opts->term = '\0';
+	ఒకవేళ (opts->చివర_nul) {
+		opts->పదం = '\0';
 		opts->delim = '\n';
-		opts->key_delim = '\n';
+		opts->కీలకం_delim = '\n';
 	}
 }
 
-static void display_options_init_list(struct config_display_options *opts)
+స్థిర శూన్య display_options_init_list(నిర్మాణం config_display_options *opts)
 {
-	opts->show_keys = 1;
+	opts->show_కీలకాలు = 1;
 
-	if (opts->end_nul) {
+	ఒకవేళ (opts->చివర_nul) {
 		display_options_init(opts);
-	} else {
-		opts->term = '\n';
+	} లేకపోతే {
+		opts->పదం = '\n';
 		opts->delim = ' ';
-		opts->key_delim = '=';
+		opts->కీలకం_delim = '=';
 	}
 }
 
-static int cmd_config_list(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం cmd_config_list(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			   నిర్మాణం repository *repo వాడని)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
-	struct option opts[] = {
+	నిర్మాణం config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	నిర్మాణం config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
+	నిర్మాణం option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		CONFIG_DISPLAY_OPTIONS(display_opts),
-		OPT_GROUP(N_("Other")),
+		OPT_సమూహం(N_("Other")),
 		OPT_BOOL(0, "includes", &location_opts.respect_includes_opt,
 			 N_("respect include directives on lookup")),
-		OPT_END(),
+		OPT_చివర(),
 	};
 
-	argc = parse_options(argc, argv, prefix, opts, builtin_config_list_usage, 0);
+	argc = parse_options(argc, argv, ఉపసర్గ, opts, builtin_config_list_usage, 0);
 	check_argc(argc, 0, 0);
 
-	location_options_init(&location_opts, prefix);
+	location_options_init(&location_opts, ఉపసర్గ);
 	display_options_init_list(&display_opts);
 
-	setup_auto_pager("config", 1);
+	అమరిక_auto_pager("config", 1);
 
-	if (config_with_options(show_all_config, &display_opts,
-				&location_opts.source, the_repository,
+	ఒకవేళ (config_with_options(show_all_config, &display_opts,
+				&location_opts.ఆధారం, the_repository,
 				&location_opts.options) < 0) {
-		if (location_opts.source.file)
+		ఒకవేళ (location_opts.ఆధారం.file)
 			die_errno(_("unable to read config file '%s'"),
-				  location_opts.source.file);
-		else
+				  location_opts.ఆధారం.file);
+		లేకపోతే
 			die(_("error processing config file(s)"));
 	}
 
 	location_options_release(&location_opts);
-	return 0;
+	తిరిగి 0;
 }
 
-static int cmd_config_get(int argc, const char **argv, const char *prefix,
-			  struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం cmd_config_get(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			  నిర్మాణం repository *repo వాడని)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
-	const char *value_pattern = NULL, *url = NULL;
-	int flags = 0;
-	unsigned get_value_flags = 0;
-	struct option opts[] = {
+	నిర్మాణం config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	నిర్మాణం config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
+	స్థిరరాశి అక్షరం *విలువ_నమూనా = ఖాళీ, *url = ఖాళీ;
+	పూర్ణాంకం flags = 0;
+	గుర్తులేని get_విలువ_flags = 0;
+	నిర్మాణం option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
-		OPT_GROUP(N_("Filter options")),
-		OPT_BIT(0, "all", &get_value_flags, N_("return all values for multi-valued config options"), GET_VALUE_ALL),
-		OPT_BIT(0, "regexp", &get_value_flags, N_("interpret the name as a regular expression"), GET_VALUE_KEY_REGEXP),
-		OPT_STRING(0, "value", &value_pattern, N_("pattern"), N_("show config with values matching the pattern")),
-		OPT_BIT(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_VALUE),
+		OPT_సమూహం(N_("Filter options")),
+		OPT_బిట్టు(0, "all", &get_విలువ_flags, N_("return all values for multi-valued config options"), GET_విలువ_ALL),
+		OPT_బిట్టు(0, "regexp", &get_విలువ_flags, N_("interpret the name as a regular expression"), GET_విలువ_కీలకం_REGEXP),
+		OPT_STRING(0, "value", &విలువ_నమూనా, N_("pattern"), N_("show config with values matching the pattern")),
+		OPT_బిట్టు(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_విలువ),
 		OPT_STRING(0, "url", &url, N_("URL"), N_("show config matching the given URL")),
 		CONFIG_DISPLAY_OPTIONS(display_opts),
-		OPT_GROUP(N_("Other")),
+		OPT_సమూహం(N_("Other")),
 		OPT_BOOL(0, "includes", &location_opts.respect_includes_opt,
 			 N_("respect include directives on lookup")),
-		OPT_STRING(0, "default", &display_opts.default_value,
+		OPT_STRING(0, "default", &display_opts.default_విలువ,
 			   N_("value"), N_("use default value when missing entry")),
-		OPT_END(),
+		OPT_చివర(),
 	};
-	int ret;
+	పూర్ణాంకం ret;
 
-	argc = parse_options(argc, argv, prefix, opts, builtin_config_get_usage,
+	argc = parse_options(argc, argv, ఉపసర్గ, opts, builtin_config_get_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 	check_argc(argc, 1, 1);
 
-	if ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
+	ఒకవేళ ((flags & CONFIG_FLAGS_FIXED_విలువ) && !విలువ_నమూనా)
 		die(_("--fixed-value only applies with 'value-pattern'"));
-	if (display_opts.default_value &&
-	    ((get_value_flags & GET_VALUE_ALL) || url))
+	ఒకవేళ (display_opts.default_విలువ &&
+	    ((get_విలువ_flags & GET_విలువ_ALL) || url))
 		die(_("--default= cannot be used with --all or --url="));
-	if (url && ((get_value_flags & GET_VALUE_ALL) ||
-		    (get_value_flags & GET_VALUE_KEY_REGEXP) ||
-		    value_pattern))
+	ఒకవేళ (url && ((get_విలువ_flags & GET_విలువ_ALL) ||
+		    (get_విలువ_flags & GET_విలువ_కీలకం_REGEXP) ||
+		    విలువ_నమూనా))
 		die(_("--url= cannot be used with --all, --regexp or --value"));
 
-	location_options_init(&location_opts, prefix);
+	location_options_init(&location_opts, ఉపసర్గ);
 	display_options_init(&display_opts);
 
-	if (display_opts.type != TYPE_COLOR)
-		setup_auto_pager("config", 1);
+	ఒకవేళ (display_opts.type != TYPE_COLOR)
+		అమరిక_auto_pager("config", 1);
 
-	if (url)
+	ఒకవేళ (url)
 		ret = get_urlmatch(&location_opts, &display_opts, argv[0], url);
-	else if (display_opts.type == TYPE_COLOR && !strlen(argv[0]) && display_opts.default_value)
-		ret = get_color(&location_opts, "", display_opts.default_value);
-	else
-		ret = get_value(&location_opts, &display_opts, argv[0], value_pattern,
-				get_value_flags, flags);
+	లేకపోతే ఒకవేళ (display_opts.type == TYPE_COLOR && !అక్షరశ్రేణి_పొడవు(argv[0]) && display_opts.default_విలువ)
+		ret = get_color(&location_opts, "", display_opts.default_విలువ);
+	లేకపోతే
+		ret = get_విలువ(&location_opts, &display_opts, argv[0], విలువ_నమూనా,
+				get_విలువ_flags, flags);
 
 	location_options_release(&location_opts);
-	return ret;
+	తిరిగి ret;
 }
 
-static int cmd_config_set(int argc, const char **argv, const char *prefix,
-			  struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం cmd_config_సమితి(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			  నిర్మాణం repository *repo వాడని)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	const char *value_pattern = NULL, *comment_arg = NULL;
-	char *comment = NULL;
-	int flags = 0, append = 0, type = 0;
-	struct option opts[] = {
+	నిర్మాణం config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	స్థిరరాశి అక్షరం *విలువ_నమూనా = ఖాళీ, *comment_arg = ఖాళీ;
+	అక్షరం *comment = ఖాళీ;
+	పూర్ణాంకం flags = 0, append = 0, type = 0;
+	నిర్మాణం option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		CONFIG_TYPE_OPTIONS(type),
-		OPT_GROUP(N_("Filter")),
-		OPT_BIT(0, "all", &flags, N_("replace multi-valued config option with new value"), CONFIG_FLAGS_MULTI_REPLACE),
-		OPT_STRING(0, "value", &value_pattern, N_("pattern"), N_("show config with values matching the pattern")),
-		OPT_BIT(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_VALUE),
-		OPT_GROUP(N_("Other")),
+		OPT_సమూహం(N_("Filter")),
+		OPT_బిట్టు(0, "all", &flags, N_("replace multi-valued config option with new value"), CONFIG_FLAGS_MULTI_REPLACE),
+		OPT_STRING(0, "value", &విలువ_నమూనా, N_("pattern"), N_("show config with values matching the pattern")),
+		OPT_బిట్టు(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_విలువ),
+		OPT_సమూహం(N_("Other")),
 		OPT_STRING(0, "comment", &comment_arg, N_("value"), N_("human-readable comment string (# will be prepended as needed)")),
 		OPT_BOOL(0, "append", &append, N_("add a new line without altering any existing values")),
-		OPT_END(),
+		OPT_చివర(),
 	};
-	struct key_value_info default_kvi = KVI_INIT;
-	char *value;
-	int ret;
+	నిర్మాణం కీలకం_విలువ_info default_kvi = KVI_INIT;
+	అక్షరం *విలువ;
+	పూర్ణాంకం ret;
 
-	argc = parse_options(argc, argv, prefix, opts, builtin_config_set_usage,
+	argc = parse_options(argc, argv, ఉపసర్గ, opts, builtin_config_సమితి_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
-	if (argc == 1)
-		die_missing_set_value(argv[0]);
+	ఒకవేళ (argc == 1)
+		die_missing_సమితి_విలువ(argv[0]);
 	check_argc(argc, 2, 2);
 
-	if ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
+	ఒకవేళ ((flags & CONFIG_FLAGS_FIXED_విలువ) && !విలువ_నమూనా)
 		die(_("--fixed-value only applies with --value=<pattern>"));
-	if (append && value_pattern)
+	ఒకవేళ (append && విలువ_నమూనా)
 		die(_("--append cannot be used with --value=<pattern>"));
-	if (append)
-		value_pattern = CONFIG_REGEX_NONE;
+	ఒకవేళ (append)
+		విలువ_నమూనా = CONFIG_REGEX_NONE;
 
 	comment = git_config_prepare_comment_string(comment_arg);
 
-	location_options_init(&location_opts, prefix);
-	check_write(&location_opts.source);
+	location_options_init(&location_opts, ఉపసర్గ);
+	check_write(&location_opts.ఆధారం);
 
-	value = normalize_value(argv[0], argv[1], type, &default_kvi);
+	విలువ = normalize_విలువ(argv[0], argv[1], type, &default_kvi);
 
-	if ((flags & CONFIG_FLAGS_MULTI_REPLACE) || value_pattern) {
-		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-							      argv[0], value, value_pattern,
+	ఒకవేళ ((flags & CONFIG_FLAGS_MULTI_REPLACE) || విలువ_నమూనా) {
+		ret = repo_config_సమితి_multivar_లోపల_file_gently(the_repository, location_opts.ఆధారం.file,
+							      argv[0], విలువ, విలువ_నమూనా,
 							      comment, flags);
-	} else {
-		ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file,
-						     argv[0], comment, value);
-		if (ret == CONFIG_NOTHING_SET)
+	} లేకపోతే {
+		ret = repo_config_సమితి_లోపల_file_gently(the_repository, location_opts.ఆధారం.file,
+						     argv[0], comment, విలువ);
+		ఒకవేళ (ret == CONFIG_NOTHING_సమితి)
 			error(_("cannot overwrite multiple values with a single value\n"
 			"       Use --value=<pattern>, --append or --all to change %s."), argv[0]);
 	}
 
 	location_options_release(&location_opts);
-	free(comment);
-	free(value);
-	return ret;
+	విడుదల(comment);
+	విడుదల(విలువ);
+	తిరిగి ret;
 }
 
-static int cmd_config_unset(int argc, const char **argv, const char *prefix,
-			    struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం cmd_config_unset(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			    నిర్మాణం repository *repo వాడని)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	const char *value_pattern = NULL;
-	int flags = 0;
-	struct option opts[] = {
+	నిర్మాణం config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	స్థిరరాశి అక్షరం *విలువ_నమూనా = ఖాళీ;
+	పూర్ణాంకం flags = 0;
+	నిర్మాణం option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
-		OPT_GROUP(N_("Filter")),
-		OPT_BIT(0, "all", &flags, N_("unset all multi-valued config options"), CONFIG_FLAGS_MULTI_REPLACE),
-		OPT_STRING(0, "value", &value_pattern, N_("pattern"), N_("unset multi-valued config options with matching values")),
-		OPT_BIT(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_VALUE),
-		OPT_END(),
+		OPT_సమూహం(N_("Filter")),
+		OPT_బిట్టు(0, "all", &flags, N_("unset all multi-valued config options"), CONFIG_FLAGS_MULTI_REPLACE),
+		OPT_STRING(0, "value", &విలువ_నమూనా, N_("pattern"), N_("unset multi-valued config options with matching values")),
+		OPT_బిట్టు(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_విలువ),
+		OPT_చివర(),
 	};
-	int ret;
+	పూర్ణాంకం ret;
 
-	argc = parse_options(argc, argv, prefix, opts, builtin_config_unset_usage,
+	argc = parse_options(argc, argv, ఉపసర్గ, opts, builtin_config_unset_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 	check_argc(argc, 1, 1);
 
-	if ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
+	ఒకవేళ ((flags & CONFIG_FLAGS_FIXED_విలువ) && !విలువ_నమూనా)
 		die(_("--fixed-value only applies with 'value-pattern'"));
 
-	location_options_init(&location_opts, prefix);
-	check_write(&location_opts.source);
+	location_options_init(&location_opts, ఉపసర్గ);
+	check_write(&location_opts.ఆధారం);
 
-	if ((flags & CONFIG_FLAGS_MULTI_REPLACE) || value_pattern)
-		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-							      argv[0], NULL, value_pattern,
-							      NULL, flags);
-	else
-		ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file, argv[0],
-						     NULL, NULL);
+	ఒకవేళ ((flags & CONFIG_FLAGS_MULTI_REPLACE) || విలువ_నమూనా)
+		ret = repo_config_సమితి_multivar_లోపల_file_gently(the_repository, location_opts.ఆధారం.file,
+							      argv[0], ఖాళీ, విలువ_నమూనా,
+							      ఖాళీ, flags);
+	లేకపోతే
+		ret = repo_config_సమితి_లోపల_file_gently(the_repository, location_opts.ఆధారం.file, argv[0],
+						     ఖాళీ, ఖాళీ);
 
 	location_options_release(&location_opts);
-	return ret;
+	తిరిగి ret;
 }
 
-static int cmd_config_rename_section(int argc, const char **argv, const char *prefix,
-				     struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం cmd_config_rename_section(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+				     నిర్మాణం repository *repo వాడని)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct option opts[] = {
+	నిర్మాణం config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	నిర్మాణం option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
-		OPT_END(),
+		OPT_చివర(),
 	};
-	int ret;
+	పూర్ణాంకం ret;
 
-	argc = parse_options(argc, argv, prefix, opts, builtin_config_rename_section_usage,
+	argc = parse_options(argc, argv, ఉపసర్గ, opts, builtin_config_rename_section_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 	check_argc(argc, 2, 2);
 
-	location_options_init(&location_opts, prefix);
-	check_write(&location_opts.source);
+	location_options_init(&location_opts, ఉపసర్గ);
+	check_write(&location_opts.ఆధారం);
 
-	ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
+	ret = repo_config_rename_section_లోపల_file(the_repository, location_opts.ఆధారం.file,
 						 argv[0], argv[1]);
-	if (ret < 0)
-		goto out;
-	else if (!ret)
+	ఒకవేళ (ret < 0)
+		వెళ్ళు బహిర్గతం;
+	లేకపోతే ఒకవేళ (!ret)
 		die(_("no such section: %s"), argv[0]);
 	ret = 0;
 
-out:
+బహిర్గతం:
 	location_options_release(&location_opts);
-	return ret;
+	తిరిగి ret;
 }
 
-static int cmd_config_remove_section(int argc, const char **argv, const char *prefix,
-				     struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం cmd_config_remove_section(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+				     నిర్మాణం repository *repo వాడని)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct option opts[] = {
+	నిర్మాణం config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	నిర్మాణం option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
-		OPT_END(),
+		OPT_చివర(),
 	};
-	int ret;
+	పూర్ణాంకం ret;
 
-	argc = parse_options(argc, argv, prefix, opts, builtin_config_remove_section_usage,
+	argc = parse_options(argc, argv, ఉపసర్గ, opts, builtin_config_remove_section_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 	check_argc(argc, 1, 1);
 
-	location_options_init(&location_opts, prefix);
-	check_write(&location_opts.source);
+	location_options_init(&location_opts, ఉపసర్గ);
+	check_write(&location_opts.ఆధారం);
 
-	ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
-						 argv[0], NULL);
-	if (ret < 0)
-		goto out;
-	else if (!ret)
+	ret = repo_config_rename_section_లోపల_file(the_repository, location_opts.ఆధారం.file,
+						 argv[0], ఖాళీ);
+	ఒకవేళ (ret < 0)
+		వెళ్ళు బహిర్గతం;
+	లేకపోతే ఒకవేళ (!ret)
 		die(_("no such section: %s"), argv[0]);
 	ret = 0;
 
-out:
+బహిర్గతం:
 	location_options_release(&location_opts);
-	return ret;
+	తిరిగి ret;
 }
 
-static int show_editor(struct config_location_options *opts)
+స్థిర పూర్ణాంకం show_editor(నిర్మాణం config_location_options *opts)
 {
-	char *config_file;
+	అక్షరం *config_file;
 
-	if (!opts->source.file && !startup_info->have_repository)
+	ఒకవేళ (!opts->ఆధారం.file && !startup_info->have_repository)
 		die(_("not in a git directory"));
-	if (opts->source.use_stdin)
+	ఒకవేళ (opts->ఆధారం.use_stdin)
 		die(_("editing stdin is not supported"));
-	if (opts->source.blob)
+	ఒకవేళ (opts->ఆధారం.blob)
 		die(_("editing blobs is not supported"));
-	repo_config(the_repository, git_default_config, NULL);
-	config_file = opts->source.file ?
-			xstrdup(opts->source.file) :
-			repo_git_path(the_repository, "config");
-	if (opts->use_global_config) {
-		int fd = open(config_file, O_CREAT | O_EXCL | O_WRONLY, 0666);
-		if (fd >= 0) {
-			char *content = default_user_config();
-			write_str_in_full(fd, content);
-			free(content);
+	repo_config(the_repository, git_default_config, ఖాళీ);
+	config_file = opts->ఆధారం.file ?
+			xstrdup(opts->ఆధారం.file) :
+			repo_git_మార్గం(the_repository, "config");
+	ఒకవేళ (opts->use_global_config) {
+		పూర్ణాంకం fd = open(config_file, O_CREAT | O_EXCL | O_WRONLY, 0666);
+		ఒకవేళ (fd >= 0) {
+			అక్షరం *content = default_user_config();
+			write_str_లోపల_నిండిన(fd, content);
+			విడుదల(content);
 			close(fd);
 		}
-		else if (errno != EEXIST)
+		లేకపోతే ఒకవేళ (errno != EEXIST)
 			die_errno(_("cannot create configuration file %s"), config_file);
 	}
-	if (launch_editor(config_file, NULL, NULL)) {
-		free(config_file);
-		return -1;
+	ఒకవేళ (launch_editor(config_file, ఖాళీ, ఖాళీ)) {
+		విడుదల(config_file);
+		తిరిగి -1;
 	}
-	free(config_file);
+	విడుదల(config_file);
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int cmd_config_edit(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+స్థిర పూర్ణాంకం cmd_config_edit(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ,
+			   నిర్మాణం repository *repo వాడని)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct option opts[] = {
+	నిర్మాణం config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	నిర్మాణం option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
-		OPT_END(),
+		OPT_చివర(),
 	};
-	int ret;
+	పూర్ణాంకం ret;
 
-	argc = parse_options(argc, argv, prefix, opts, builtin_config_edit_usage, 0);
+	argc = parse_options(argc, argv, ఉపసర్గ, opts, builtin_config_edit_usage, 0);
 	check_argc(argc, 0, 0);
 
-	location_options_init(&location_opts, prefix);
-	check_write(&location_opts.source);
+	location_options_init(&location_opts, ఉపసర్గ);
+	check_write(&location_opts.ఆధారం);
 
 	ret = show_editor(&location_opts);
 	location_options_release(&location_opts);
-	return ret;
+	తిరిగి ret;
 }
 
-static int cmd_config_actions(int argc, const char **argv, const char *prefix)
+స్థిర పూర్ణాంకం cmd_config_actions(పూర్ణాంకం argc, స్థిరరాశి అక్షరం **argv, స్థిరరాశి అక్షరం *ఉపసర్గ)
 {
-	enum {
+	గణన {
 		ACTION_GET = (1<<0),
 		ACTION_GET_ALL = (1<<1),
 		ACTION_GET_REGEXP = (1<<2),
 		ACTION_REPLACE_ALL = (1<<3),
-		ACTION_ADD = (1<<4),
+		ACTION_కూడు = (1<<4),
 		ACTION_UNSET = (1<<5),
 		ACTION_UNSET_ALL = (1<<6),
 		ACTION_RENAME_SECTION = (1<<7),
 		ACTION_REMOVE_SECTION = (1<<8),
 		ACTION_LIST = (1<<9),
 		ACTION_EDIT = (1<<10),
-		ACTION_SET = (1<<11),
-		ACTION_SET_ALL = (1<<12),
+		ACTION_సమితి = (1<<11),
+		ACTION_సమితి_ALL = (1<<12),
 		ACTION_GET_COLOR = (1<<13),
 		ACTION_GET_COLORBOOL = (1<<14),
 		ACTION_GET_URLMATCH = (1<<15),
 	};
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
-	const char *comment_arg = NULL;
-	int actions = 0;
-	unsigned flags = 0;
-	struct option opts[] = {
+	నిర్మాణం config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	నిర్మాణం config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
+	స్థిరరాశి అక్షరం *comment_arg = ఖాళీ;
+	పూర్ణాంకం actions = 0;
+	గుర్తులేని flags = 0;
+	నిర్మాణం option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
-		OPT_GROUP(N_("Action")),
+		OPT_సమూహం(N_("Action")),
 		OPT_CMDMODE(0, "get", &actions, N_("get value: name [<value-pattern>]"), ACTION_GET),
 		OPT_CMDMODE(0, "get-all", &actions, N_("get all values: key [<value-pattern>]"), ACTION_GET_ALL),
 		OPT_CMDMODE(0, "get-regexp", &actions, N_("get values for regexp: name-regex [<value-pattern>]"), ACTION_GET_REGEXP),
 		OPT_CMDMODE(0, "get-urlmatch", &actions, N_("get value specific for the URL: section[.var] URL"), ACTION_GET_URLMATCH),
 		OPT_CMDMODE(0, "replace-all", &actions, N_("replace all matching variables: name value [<value-pattern>]"), ACTION_REPLACE_ALL),
-		OPT_CMDMODE(0, "add", &actions, N_("add a new variable: name value"), ACTION_ADD),
+		OPT_CMDMODE(0, "add", &actions, N_("add a new variable: name value"), ACTION_కూడు),
 		OPT_CMDMODE(0, "unset", &actions, N_("remove a variable: name [<value-pattern>]"), ACTION_UNSET),
 		OPT_CMDMODE(0, "unset-all", &actions, N_("remove all matches: name [<value-pattern>]"), ACTION_UNSET_ALL),
 		OPT_CMDMODE(0, "rename-section", &actions, N_("rename section: old-name new-name"), ACTION_RENAME_SECTION),
@@ -1386,102 +1386,102 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 		OPT_CMDMODE(0, "get-color", &actions, N_("find the color configured: slot [<default>]"), ACTION_GET_COLOR),
 		OPT_CMDMODE(0, "get-colorbool", &actions, N_("find the color setting: slot [<stdout-is-tty>]"), ACTION_GET_COLORBOOL),
 		CONFIG_DISPLAY_OPTIONS(display_opts),
-		OPT_GROUP(N_("Other")),
-		OPT_STRING(0, "default", &display_opts.default_value,
+		OPT_సమూహం(N_("Other")),
+		OPT_STRING(0, "default", &display_opts.default_విలువ,
 			   N_("value"), N_("with --get, use default value when missing entry")),
 		OPT_STRING(0, "comment", &comment_arg, N_("value"), N_("human-readable comment string (# will be prepended as needed)")),
-		OPT_BIT(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_VALUE),
+		OPT_బిట్టు(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_విలువ),
 		OPT_BOOL(0, "includes", &location_opts.respect_includes_opt,
 			 N_("respect include directives on lookup")),
-		OPT_END(),
+		OPT_చివర(),
 	};
-	char *value = NULL, *comment = NULL;
-	int ret = 0;
-	int actions_implicit;
-	struct key_value_info default_kvi = KVI_INIT;
+	అక్షరం *విలువ = ఖాళీ, *comment = ఖాళీ;
+	పూర్ణాంకం ret = 0;
+	పూర్ణాంకం actions_implicit;
+	నిర్మాణం కీలకం_విలువ_info default_kvi = KVI_INIT;
 
-	argc = parse_options(argc, argv, prefix, opts,
+	argc = parse_options(argc, argv, ఉపసర్గ, opts,
 			     builtin_config_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 
-	location_options_init(&location_opts, prefix);
+	location_options_init(&location_opts, ఉపసర్గ);
 	display_options_init(&display_opts);
 
-	if ((actions & (ACTION_GET_COLOR|ACTION_GET_COLORBOOL)) && display_opts.type) {
+	ఒకవేళ ((actions & (ACTION_GET_COLOR|ACTION_GET_COLORBOOL)) && display_opts.type) {
 		error(_("--get-color and variable type are incoherent"));
-		exit(129);
+		నిష్క్రమించు(129);
 	}
 
 	actions_implicit = (actions == 0);
-	if (actions_implicit)
-		switch (argc) {
-		case 1: actions = ACTION_GET; break;
-		case 2: actions = ACTION_SET; break;
-		case 3: actions = ACTION_SET_ALL; break;
-		default:
+	ఒకవేళ (actions_implicit)
+		ఎంపిక (argc) {
+		స్థితి 1: actions = ACTION_GET; ఆపు;
+		స్థితి 2: actions = ACTION_సమితి; ఆపు;
+		స్థితి 3: actions = ACTION_సమితి_ALL; ఆపు;
+		అప్రమేయ:
 			error(_("no action specified"));
-			exit(129);
+			నిష్క్రమించు(129);
 		}
-	if (actions_implicit && argc == 1) {
-		const char *last_dot = strrchr(argv[0], '.');
-		if (last_dot && strchr(last_dot + 1, '='))
-			die_missing_set_value(argv[0]);
+	ఒకవేళ (actions_implicit && argc == 1) {
+		స్థిరరాశి అక్షరం *చివరి_dot = strrchr(argv[0], '.');
+		ఒకవేళ (చివరి_dot && strchr(చివరి_dot + 1, '='))
+			die_missing_సమితి_విలువ(argv[0]);
 	}
-	if (display_opts.omit_values &&
+	ఒకవేళ (display_opts.omit_విలువలు &&
 	    !(actions == ACTION_LIST || actions == ACTION_GET_REGEXP)) {
 		error(_("--name-only is only applicable to --list or --get-regexp"));
-		exit(129);
+		నిష్క్రమించు(129);
 	}
 
-	if (display_opts.show_origin && !(actions &
+	ఒకవేళ (display_opts.show_origin && !(actions &
 		(ACTION_GET|ACTION_GET_ALL|ACTION_GET_REGEXP|ACTION_LIST))) {
 		error(_("--show-origin is only applicable to --get, --get-all, "
 			"--get-regexp, and --list"));
-		exit(129);
+		నిష్క్రమించు(129);
 	}
 
-	if (display_opts.default_value && !(actions & ACTION_GET)) {
+	ఒకవేళ (display_opts.default_విలువ && !(actions & ACTION_GET)) {
 		error(_("--default is only applicable to --get"));
-		exit(129);
+		నిష్క్రమించు(129);
 	}
 
-	if (comment_arg &&
-	    !(actions & (ACTION_ADD|ACTION_SET|ACTION_SET_ALL|ACTION_REPLACE_ALL))) {
+	ఒకవేళ (comment_arg &&
+	    !(actions & (ACTION_కూడు|ACTION_సమితి|ACTION_సమితి_ALL|ACTION_REPLACE_ALL))) {
 		error(_("--comment is only applicable to add/set/replace operations"));
-		exit(129);
+		నిష్క్రమించు(129);
 	}
 
 	/* check usage of --fixed-value */
-	if (flags & CONFIG_FLAGS_FIXED_VALUE) {
-		int allowed_usage = 0;
+	ఒకవేళ (flags & CONFIG_FLAGS_FIXED_విలువ) {
+		పూర్ణాంకం allowed_usage = 0;
 
-		switch (actions) {
+		ఎంపిక (actions) {
 		/* git config --get <name> <value-pattern> */
-		case ACTION_GET:
+		స్థితి ACTION_GET:
 		/* git config --get-all <name> <value-pattern> */
-		case ACTION_GET_ALL:
+		స్థితి ACTION_GET_ALL:
 		/* git config --get-regexp <name-pattern> <value-pattern> */
-		case ACTION_GET_REGEXP:
+		స్థితి ACTION_GET_REGEXP:
 		/* git config --unset <name> <value-pattern> */
-		case ACTION_UNSET:
+		స్థితి ACTION_UNSET:
 		/* git config --unset-all <name> <value-pattern> */
-		case ACTION_UNSET_ALL:
+		స్థితి ACTION_UNSET_ALL:
 			allowed_usage = argc > 1 && !!argv[1];
-			break;
+			ఆపు;
 
 		/* git config <name> <value> <value-pattern> */
-		case ACTION_SET_ALL:
+		స్థితి ACTION_సమితి_ALL:
 		/* git config --replace-all <name> <value> <value-pattern> */
-		case ACTION_REPLACE_ALL:
+		స్థితి ACTION_REPLACE_ALL:
 			allowed_usage = argc > 2 && !!argv[2];
-			break;
+			ఆపు;
 
 		/* other options don't allow --fixed-value */
 		}
 
-		if (!allowed_usage) {
+		ఒకవేళ (!allowed_usage) {
 			error(_("--fixed-value only applies with 'value-pattern'"));
-			exit(129);
+			నిష్క్రమించు(129);
 		}
 	}
 
@@ -1491,154 +1491,154 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 	 * The following actions may produce more than one line of output and
 	 * should therefore be paged.
 	 */
-	if (actions & (ACTION_LIST | ACTION_GET_ALL | ACTION_GET_REGEXP | ACTION_GET_URLMATCH))
-		setup_auto_pager("config", 1);
+	ఒకవేళ (actions & (ACTION_LIST | ACTION_GET_ALL | ACTION_GET_REGEXP | ACTION_GET_URLMATCH))
+		అమరిక_auto_pager("config", 1);
 
-	if (actions == ACTION_LIST) {
+	ఒకవేళ (actions == ACTION_LIST) {
 		check_argc(argc, 0, 0);
 		display_options_init_list(&display_opts);
-		if (config_with_options(show_all_config, &display_opts,
-					&location_opts.source, the_repository,
+		ఒకవేళ (config_with_options(show_all_config, &display_opts,
+					&location_opts.ఆధారం, the_repository,
 					&location_opts.options) < 0) {
-			if (location_opts.source.file)
+			ఒకవేళ (location_opts.ఆధారం.file)
 				die_errno(_("unable to read config file '%s'"),
-					  location_opts.source.file);
-			else
+					  location_opts.ఆధారం.file);
+			లేకపోతే
 				die(_("error processing config file(s)"));
 		}
 	}
-	else if (actions == ACTION_EDIT) {
+	లేకపోతే ఒకవేళ (actions == ACTION_EDIT) {
 		ret = show_editor(&location_opts);
 	}
-	else if (actions == ACTION_SET) {
-		check_write(&location_opts.source);
+	లేకపోతే ఒకవేళ (actions == ACTION_సమితి) {
+		check_write(&location_opts.ఆధారం);
 		check_argc(argc, 2, 2);
-		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
-		ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file, argv[0], comment, value);
-		if (ret == CONFIG_NOTHING_SET)
+		విలువ = normalize_విలువ(argv[0], argv[1], display_opts.type, &default_kvi);
+		ret = repo_config_సమితి_లోపల_file_gently(the_repository, location_opts.ఆధారం.file, argv[0], comment, విలువ);
+		ఒకవేళ (ret == CONFIG_NOTHING_సమితి)
 			error(_("cannot overwrite multiple values with a single value\n"
 			"       Use a regexp, --add or --replace-all to change %s."), argv[0]);
 	}
-	else if (actions == ACTION_SET_ALL) {
-		check_write(&location_opts.source);
+	లేకపోతే ఒకవేళ (actions == ACTION_సమితి_ALL) {
+		check_write(&location_opts.ఆధారం);
 		check_argc(argc, 2, 3);
-		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
-		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-							      argv[0], value, argv[2],
+		విలువ = normalize_విలువ(argv[0], argv[1], display_opts.type, &default_kvi);
+		ret = repo_config_సమితి_multivar_లోపల_file_gently(the_repository, location_opts.ఆధారం.file,
+							      argv[0], విలువ, argv[2],
 							      comment, flags);
 	}
-	else if (actions == ACTION_ADD) {
-		check_write(&location_opts.source);
+	లేకపోతే ఒకవేళ (actions == ACTION_కూడు) {
+		check_write(&location_opts.ఆధారం);
 		check_argc(argc, 2, 2);
-		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
-		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-							      argv[0], value,
+		విలువ = normalize_విలువ(argv[0], argv[1], display_opts.type, &default_kvi);
+		ret = repo_config_సమితి_multivar_లోపల_file_gently(the_repository, location_opts.ఆధారం.file,
+							      argv[0], విలువ,
 							      CONFIG_REGEX_NONE,
 							      comment, flags);
 	}
-	else if (actions == ACTION_REPLACE_ALL) {
-		check_write(&location_opts.source);
+	లేకపోతే ఒకవేళ (actions == ACTION_REPLACE_ALL) {
+		check_write(&location_opts.ఆధారం);
 		check_argc(argc, 2, 3);
-		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
-		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-							      argv[0], value, argv[2],
+		విలువ = normalize_విలువ(argv[0], argv[1], display_opts.type, &default_kvi);
+		ret = repo_config_సమితి_multivar_లోపల_file_gently(the_repository, location_opts.ఆధారం.file,
+							      argv[0], విలువ, argv[2],
 							      comment, flags | CONFIG_FLAGS_MULTI_REPLACE);
 	}
-	else if (actions == ACTION_GET) {
+	లేకపోతే ఒకవేళ (actions == ACTION_GET) {
 		check_argc(argc, 1, 2);
-		ret = get_value(&location_opts, &display_opts, argv[0], argv[1],
+		ret = get_విలువ(&location_opts, &display_opts, argv[0], argv[1],
 				0, flags);
 	}
-	else if (actions == ACTION_GET_ALL) {
+	లేకపోతే ఒకవేళ (actions == ACTION_GET_ALL) {
 		check_argc(argc, 1, 2);
-		ret = get_value(&location_opts, &display_opts, argv[0], argv[1],
-				GET_VALUE_ALL, flags);
+		ret = get_విలువ(&location_opts, &display_opts, argv[0], argv[1],
+				GET_విలువ_ALL, flags);
 	}
-	else if (actions == ACTION_GET_REGEXP) {
-		display_opts.show_keys = 1;
+	లేకపోతే ఒకవేళ (actions == ACTION_GET_REGEXP) {
+		display_opts.show_కీలకాలు = 1;
 		check_argc(argc, 1, 2);
-		ret = get_value(&location_opts, &display_opts, argv[0], argv[1],
-				GET_VALUE_ALL|GET_VALUE_KEY_REGEXP, flags);
+		ret = get_విలువ(&location_opts, &display_opts, argv[0], argv[1],
+				GET_విలువ_ALL|GET_విలువ_కీలకం_REGEXP, flags);
 	}
-	else if (actions == ACTION_GET_URLMATCH) {
+	లేకపోతే ఒకవేళ (actions == ACTION_GET_URLMATCH) {
 		check_argc(argc, 2, 2);
 		ret = get_urlmatch(&location_opts, &display_opts, argv[0], argv[1]);
 	}
-	else if (actions == ACTION_UNSET) {
-		check_write(&location_opts.source);
+	లేకపోతే ఒకవేళ (actions == ACTION_UNSET) {
+		check_write(&location_opts.ఆధారం);
 		check_argc(argc, 1, 2);
-		if (argc == 2)
-			ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-								      argv[0], NULL, argv[1],
-								      NULL, flags);
-		else
-			ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file,
-							     argv[0], NULL, NULL);
+		ఒకవేళ (argc == 2)
+			ret = repo_config_సమితి_multivar_లోపల_file_gently(the_repository, location_opts.ఆధారం.file,
+								      argv[0], ఖాళీ, argv[1],
+								      ఖాళీ, flags);
+		లేకపోతే
+			ret = repo_config_సమితి_లోపల_file_gently(the_repository, location_opts.ఆధారం.file,
+							     argv[0], ఖాళీ, ఖాళీ);
 	}
-	else if (actions == ACTION_UNSET_ALL) {
-		check_write(&location_opts.source);
+	లేకపోతే ఒకవేళ (actions == ACTION_UNSET_ALL) {
+		check_write(&location_opts.ఆధారం);
 		check_argc(argc, 1, 2);
-		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-							      argv[0], NULL, argv[1],
-							      NULL, flags | CONFIG_FLAGS_MULTI_REPLACE);
+		ret = repo_config_సమితి_multivar_లోపల_file_gently(the_repository, location_opts.ఆధారం.file,
+							      argv[0], ఖాళీ, argv[1],
+							      ఖాళీ, flags | CONFIG_FLAGS_MULTI_REPLACE);
 	}
-	else if (actions == ACTION_RENAME_SECTION) {
-		check_write(&location_opts.source);
+	లేకపోతే ఒకవేళ (actions == ACTION_RENAME_SECTION) {
+		check_write(&location_opts.ఆధారం);
 		check_argc(argc, 2, 2);
-		ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
+		ret = repo_config_rename_section_లోపల_file(the_repository, location_opts.ఆధారం.file,
 							 argv[0], argv[1]);
-		if (ret < 0)
-			goto out;
-		else if (!ret)
+		ఒకవేళ (ret < 0)
+			వెళ్ళు బహిర్గతం;
+		లేకపోతే ఒకవేళ (!ret)
 			die(_("no such section: %s"), argv[0]);
-		else
+		లేకపోతే
 			ret = 0;
 	}
-	else if (actions == ACTION_REMOVE_SECTION) {
-		check_write(&location_opts.source);
+	లేకపోతే ఒకవేళ (actions == ACTION_REMOVE_SECTION) {
+		check_write(&location_opts.ఆధారం);
 		check_argc(argc, 1, 1);
-		ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
-							 argv[0], NULL);
-		if (ret < 0)
-			goto out;
-		else if (!ret)
+		ret = repo_config_rename_section_లోపల_file(the_repository, location_opts.ఆధారం.file,
+							 argv[0], ఖాళీ);
+		ఒకవేళ (ret < 0)
+			వెళ్ళు బహిర్గతం;
+		లేకపోతే ఒకవేళ (!ret)
 			die(_("no such section: %s"), argv[0]);
-		else
+		లేకపోతే
 			ret = 0;
 	}
-	else if (actions == ACTION_GET_COLOR) {
+	లేకపోతే ఒకవేళ (actions == ACTION_GET_COLOR) {
 		check_argc(argc, 1, 2);
 		ret = get_color(&location_opts, argv[0], argv[1]);
 	}
-	else if (actions == ACTION_GET_COLORBOOL) {
+	లేకపోతే ఒకవేళ (actions == ACTION_GET_COLORBOOL) {
 		check_argc(argc, 1, 2);
-		if (argc == 2)
+		ఒకవేళ (argc == 2)
 			color_stdout_is_tty = git_config_bool("command line", argv[1]);
 		ret = get_colorbool(&location_opts, argv[0], argc == 2);
 	}
 
-out:
+బహిర్గతం:
 	location_options_release(&location_opts);
-	free(comment);
-	free(value);
-	return ret;
+	విడుదల(comment);
+	విడుదల(విలువ);
+	తిరిగి ret;
 }
 
-int cmd_config(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+పూర్ణాంకం cmd_config(పూర్ణాంకం argc,
+	       స్థిరరాశి అక్షరం **argv,
+	       స్థిరరాశి అక్షరం *ఉపసర్గ,
+	       నిర్మాణం repository *repo)
 {
-	parse_opt_subcommand_fn *subcommand = NULL;
-	struct option subcommand_opts[] = {
+	parse_opt_subcommand_fn *subcommand = ఖాళీ;
+	నిర్మాణం option subcommand_opts[] = {
 		OPT_SUBCOMMAND("list", &subcommand, cmd_config_list),
 		OPT_SUBCOMMAND("get", &subcommand, cmd_config_get),
-		OPT_SUBCOMMAND("set", &subcommand, cmd_config_set),
+		OPT_SUBCOMMAND("set", &subcommand, cmd_config_సమితి),
 		OPT_SUBCOMMAND("unset", &subcommand, cmd_config_unset),
 		OPT_SUBCOMMAND("rename-section", &subcommand, cmd_config_rename_section),
 		OPT_SUBCOMMAND("remove-section", &subcommand, cmd_config_remove_section),
 		OPT_SUBCOMMAND("edit", &subcommand, cmd_config_edit),
-		OPT_END(),
+		OPT_చివర(),
 	};
 
 	/*
@@ -1649,13 +1649,13 @@ int cmd_config(int argc,
 	 * line in case no subcommand was given, which would otherwise confuse
 	 * us when parsing the legacy-style modes that don't use subcommands.
 	 */
-	argc = parse_options(argc, argv, prefix, subcommand_opts, builtin_config_usage,
+	argc = parse_options(argc, argv, ఉపసర్గ, subcommand_opts, builtin_config_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL|PARSE_OPT_KEEP_ARGV0|PARSE_OPT_KEEP_UNKNOWN_OPT);
-	if (subcommand) {
-		argc = parse_options(argc, argv, prefix, subcommand_opts, builtin_config_usage,
+	ఒకవేళ (subcommand) {
+		argc = parse_options(argc, argv, ఉపసర్గ, subcommand_opts, builtin_config_usage,
 		       PARSE_OPT_SUBCOMMAND_OPTIONAL|PARSE_OPT_KEEP_UNKNOWN_OPT);
-		return subcommand(argc, argv, prefix, repo);
+		తిరిగి subcommand(argc, argv, ఉపసర్గ, repo);
 	}
 
-	return cmd_config_actions(argc, argv, prefix);
+	తిరిగి cmd_config_actions(argc, argv, ఉపసర్గ);
 }

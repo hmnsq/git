@@ -1,55 +1,55 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "gettext.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "range-diff.h"
-#include "config.h"
-#include "parse.h"
-#include "color.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "object-name.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "range-diff.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "parse.h"
+#అన్తర్భావ "color.h"
 
 
-static const char * const builtin_range_diff_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_range_diff_usage[] = {
 N_("git range-diff [<options>] <old-base>..<old-tip> <new-base>..<new-tip>"),
 N_("git range-diff [<options>] <old-tip>...<new-tip>"),
 N_("git range-diff [<options>] <base> <old-tip> <new-tip>"),
-NULL
+ఖాళీ
 };
 
-static int parse_max_memory(const struct option *opt, const char *arg, int unset)
+స్థిర పూర్ణాంకం parse_max_జ్ఞాపకం(స్థిరరాశి నిర్మాణం option *opt, స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	size_t *max_memory = opt->value;
+	కొలత_t *max_జ్ఞాపకం = opt->విలువ;
 	uintmax_t val;
 
-	if (unset)
-		return 0;
+	ఒకవేళ (unset)
+		తిరిగి 0;
 
-	if (!git_parse_unsigned(arg, &val, SIZE_MAX))
-		return error(_("invalid max-memory value: %s"), arg);
+	ఒకవేళ (!git_parse_unsigned(arg, &val, కొలత_MAX))
+		తిరిగి error(_("invalid max-memory value: %s"), arg);
 
-	*max_memory = (size_t)val;
-	return 0;
+	*max_జ్ఞాపకం = (కొలత_t)val;
+	తిరిగి 0;
 }
 
-int cmd_range_diff(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+పూర్ణాంకం cmd_range_diff(పూర్ణాంకం argc,
+		   స్థిరరాశి అక్షరం **argv,
+		   స్థిరరాశి అక్షరం *ఉపసర్గ,
+		   నిర్మాణం repository *repo వాడని)
 {
-	struct diff_options diffopt = { NULL };
-	struct strvec log_arg = STRVEC_INIT;
-	struct strvec diff_merges_arg = STRVEC_INIT;
-	struct range_diff_options range_diff_opts = {
-		.creation_factor = RANGE_DIFF_CREATION_FACTOR_DEFAULT,
-		.max_memory = RANGE_DIFF_MAX_MEMORY_DEFAULT,
+	నిర్మాణం diff_options diffopt = { ఖాళీ };
+	నిర్మాణం strvec log_arg = STRVEC_INIT;
+	నిర్మాణం strvec diff_merges_arg = STRVEC_INIT;
+	నిర్మాణం range_diff_options range_diff_opts = {
+		.creation_గుణకం = RANGE_DIFF_CREATION_గుణకం_DEFAULT,
+		.max_జ్ఞాపకం = RANGE_DIFF_MAX_జ్ఞాపకం_DEFAULT,
 		.diffopt = &diffopt,
 		.log_arg = &log_arg
 	};
-	int simple_color = -1, left_only = 0, right_only = 0;
-	struct option range_diff_options[] = {
+	పూర్ణాంకం simple_color = -1, ఎడమ_only = 0, కుడి_only = 0;
+	నిర్మాణం option range_diff_options[] = {
 		OPT_INTEGER(0, "creation-factor",
-			    &range_diff_opts.creation_factor,
+			    &range_diff_opts.creation_గుణకం,
 			    N_("percentage by which creation is weighted")),
 		OPT_BOOL(0, "no-dual-color", &simple_color,
 			    N_("use simple diff colors")),
@@ -58,67 +58,67 @@ int cmd_range_diff(int argc,
 				  PARSE_OPT_OPTARG),
 		OPT_PASSTHRU_ARGV(0, "diff-merges", &diff_merges_arg,
 				  N_("style"), N_("passed to 'git log'"), 0),
-		OPT_CALLBACK(0, "max-memory", &range_diff_opts.max_memory,
+		OPT_CALLBACK(0, "max-memory", &range_diff_opts.max_జ్ఞాపకం,
 			     N_("size"),
 			     N_("maximum memory for cost matrix (default 4G)"),
-			     parse_max_memory),
-		OPT_PASSTHRU_ARGV(0, "remerge-diff", &diff_merges_arg, NULL,
+			     parse_max_జ్ఞాపకం),
+		OPT_PASSTHRU_ARGV(0, "remerge-diff", &diff_merges_arg, ఖాళీ,
 				  N_("passed to 'git log'"), PARSE_OPT_NOARG),
-		OPT_BOOL(0, "left-only", &left_only,
+		OPT_BOOL(0, "left-only", &ఎడమ_only,
 			 N_("only emit output related to the first range")),
-		OPT_BOOL(0, "right-only", &right_only,
+		OPT_BOOL(0, "right-only", &కుడి_only,
 			 N_("only emit output related to the second range")),
-		OPT_END()
+		OPT_చివర()
 	};
-	struct option *options;
-	int i, dash_dash = -1, res = 0;
-	struct strbuf range1 = STRBUF_INIT, range2 = STRBUF_INIT;
-	struct object_id oid;
-	const char *three_dots = NULL;
+	నిర్మాణం option *options;
+	పూర్ణాంకం i, dash_dash = -1, res = 0;
+	నిర్మాణం strbuf range1 = STRBUF_INIT, range2 = STRBUF_INIT;
+	నిర్మాణం object_id oid;
+	స్థిరరాశి అక్షరం *three_dots = ఖాళీ;
 
-	repo_config(the_repository, git_diff_ui_config, NULL);
+	repo_config(the_repository, git_diff_ui_config, ఖాళీ);
 
-	repo_diff_setup(the_repository, &diffopt);
+	repo_diff_అమరిక(the_repository, &diffopt);
 
-	options = add_diff_options(range_diff_options, &diffopt);
-	argc = parse_options(argc, argv, prefix, options,
+	options = కూడు_diff_options(range_diff_options, &diffopt);
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     builtin_range_diff_usage, PARSE_OPT_KEEP_DASHDASH);
 
-	diff_setup_done(&diffopt);
+	diff_అమరిక_పూర్తి(&diffopt);
 
 	/* force color when --dual-color was used */
-	if (!simple_color)
+	ఒకవేళ (!simple_color)
 		diffopt.use_color = GIT_COLOR_ALWAYS;
 
 	/* If `--diff-merges` was specified, imply `--merges` */
-	if (diff_merges_arg.nr) {
+	ఒకవేళ (diff_merges_arg.nr) {
 		range_diff_opts.include_merges = 1;
 		strvec_pushv(&log_arg, diff_merges_arg.v);
 	}
 
-	for (i = 0; i < argc; i++)
-		if (!strcmp(argv[i], "--")) {
+	కొరకు (i = 0; i < argc; i++)
+		ఒకవేళ (!strcmp(argv[i], "--")) {
 			dash_dash = i;
-			break;
+			ఆపు;
 		}
 
-	if (dash_dash == 3 ||
+	ఒకవేళ (dash_dash == 3 ||
 	    (dash_dash < 0 && argc > 2 &&
 	     !repo_get_oid_committish(the_repository, argv[0], &oid) &&
 	     !repo_get_oid_committish(the_repository, argv[1], &oid) &&
 	     !repo_get_oid_committish(the_repository, argv[2], &oid))) {
-		if (dash_dash < 0)
+		ఒకవేళ (dash_dash < 0)
 			; /* already validated arguments */
-		else if (repo_get_oid_committish(the_repository, argv[0], &oid))
-			usage_msg_optf(_("not a revision: '%s'"),
+		లేకపోతే ఒకవేళ (repo_get_oid_committish(the_repository, argv[0], &oid))
+			usage_సందేశం_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[0]);
-		else if (repo_get_oid_committish(the_repository, argv[1], &oid))
-			usage_msg_optf(_("not a revision: '%s'"),
+		లేకపోతే ఒకవేళ (repo_get_oid_committish(the_repository, argv[1], &oid))
+			usage_సందేశం_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[1]);
-		else if (repo_get_oid_committish(the_repository, argv[2], &oid))
-			usage_msg_optf(_("not a revision: '%s'"),
+		లేకపోతే ఒకవేళ (repo_get_oid_committish(the_repository, argv[2], &oid))
+			usage_సందేశం_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[2]);
 
@@ -127,18 +127,18 @@ int cmd_range_diff(int argc,
 
 		strvec_pushv(&log_arg, argv +
 			     (dash_dash < 0 ? 3 : dash_dash));
-	} else if (dash_dash == 2 ||
+	} లేకపోతే ఒకవేళ (dash_dash == 2 ||
 		   (dash_dash < 0 && argc > 1 &&
 		    is_range_diff_range(argv[0]) &&
 		    is_range_diff_range(argv[1]))) {
-		if (dash_dash < 0)
+		ఒకవేళ (dash_dash < 0)
 			; /* already validated arguments */
-		else if (!is_range_diff_range(argv[0]))
-			usage_msg_optf(_("not a commit range: '%s'"),
+		లేకపోతే ఒకవేళ (!is_range_diff_range(argv[0]))
+			usage_సందేశం_optf(_("not a commit range: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[0]);
-		else if (!is_range_diff_range(argv[1]))
-			usage_msg_optf(_("not a commit range: '%s'"),
+		లేకపోతే ఒకవేళ (!is_range_diff_range(argv[1]))
+			usage_సందేశం_optf(_("not a commit range: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[1]);
 
@@ -147,30 +147,30 @@ int cmd_range_diff(int argc,
 
 		strvec_pushv(&log_arg, argv +
 			     (dash_dash < 0 ? 2 : dash_dash));
-	} else if (dash_dash == 1 ||
+	} లేకపోతే ఒకవేళ (dash_dash == 1 ||
 		   (dash_dash < 0 && argc > 0 &&
-		    (three_dots = strstr(argv[0], "...")))) {
-		const char *a, *b;
-		int a_len;
+		    (three_dots = అక్షరశ్రేణి_శోధన(argv[0], "...")))) {
+		స్థిరరాశి అక్షరం *a, *b;
+		పూర్ణాంకం a_len;
 
-		if (dash_dash < 0)
+		ఒకవేళ (dash_dash < 0)
 			; /* already validated arguments */
-		else if (!(three_dots = strstr(argv[0], "...")))
-			usage_msg_optf(_("not a symmetric range: '%s'"),
+		లేకపోతే ఒకవేళ (!(three_dots = అక్షరశ్రేణి_శోధన(argv[0], "...")))
+			usage_సందేశం_optf(_("not a symmetric range: '%s'"),
 					 builtin_range_diff_usage, options,
 					 argv[0]);
 
-		if (three_dots == argv[0]) {
+		ఒకవేళ (three_dots == argv[0]) {
 			a = "HEAD";
-			a_len = strlen(a);
-		} else {
+			a_len = అక్షరశ్రేణి_పొడవు(a);
+		} లేకపోతే {
 			a = argv[0];
-			a_len = (int)(three_dots - a);
+			a_len = (పూర్ణాంకం)(three_dots - a);
 		}
 
-		if (three_dots[3])
+		ఒకవేళ (three_dots[3])
 			b = three_dots + 3;
-		else
+		లేకపోతే
 			b = "HEAD";
 
 		strbuf_addf(&range1, "%s..%.*s", b, a_len, a);
@@ -178,14 +178,14 @@ int cmd_range_diff(int argc,
 
 		strvec_pushv(&log_arg, argv +
 			     (dash_dash < 0 ? 1 : dash_dash));
-	} else
-		usage_msg_opt(_("need two commit ranges"),
+	} లేకపోతే
+		usage_సందేశం_opt(_("need two commit ranges"),
 			      builtin_range_diff_usage, options);
 	FREE_AND_NULL(options);
 
 	range_diff_opts.dual_color = simple_color < 1;
-	range_diff_opts.left_only = left_only;
-	range_diff_opts.right_only = right_only;
+	range_diff_opts.ఎడమ_only = ఎడమ_only;
+	range_diff_opts.కుడి_only = కుడి_only;
 	res = show_range_diff(range1.buf, range2.buf, &range_diff_opts);
 
 	strvec_clear(&log_arg);
@@ -193,5 +193,5 @@ int cmd_range_diff(int argc,
 	strbuf_release(&range1);
 	strbuf_release(&range2);
 
-	return res;
+	తిరిగి res;
 }

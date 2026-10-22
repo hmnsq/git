@@ -4,250 +4,250 @@
  * Copyright (C) Eric Biederman, 2005
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
+#నిర్వచించు USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
+#అన్తర్భావ "builtin.h"
 
-#include "attr.h"
-#include "config.h"
-#include "editor.h"
-#include "environment.h"
-#include "ident.h"
-#include "pager.h"
-#include "parse-options.h"
-#include "path.h"
-#include "refs.h"
-#include "run-command.h"
-#include "strbuf.h"
-#include "string-list.h"
+#అన్తర్భావ "attr.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "editor.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "ident.h"
+#అన్తర్భావ "pager.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "path.h"
+#అన్తర్భావ "refs.h"
+#అన్తర్భావ "run-command.h"
+#అన్తర్భావ "strbuf.h"
+#అన్తర్భావ "string-list.h"
 
-static const char * const var_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి var_usage[] = {
 	N_("git var [-z] -l"),
 	N_("git var [-z] <variable>..."),
-	NULL
+	ఖాళీ
 };
 
-enum ident_part {
+గణన ident_part {
 	IDENT_NAME,
 	IDENT_MAIL,
 	IDENT_DATE,
 };
 
-static char *ident_part(const char *ident, enum ident_part part)
+స్థిర అక్షరం *ident_part(స్థిరరాశి అక్షరం *ident, గణన ident_part part)
 {
-	struct ident_split split;
+	నిర్మాణం ident_విభజించు విభజించు;
 
-	if (!ident)
-		return NULL;
-	if (split_ident_line(&split, ident, strlen(ident)))
-		return NULL;
+	ఒకవేళ (!ident)
+		తిరిగి ఖాళీ;
+	ఒకవేళ (విభజించు_ident_పంక్తి(&విభజించు, ident, అక్షరశ్రేణి_పొడవు(ident)))
+		తిరిగి ఖాళీ;
 
-	switch (part) {
-	case IDENT_NAME:
-		if (!split.name_begin || !split.name_end)
+	ఎంపిక (part) {
+	స్థితి IDENT_NAME:
+		ఒకవేళ (!విభజించు.name_begin || !విభజించు.name_చివర)
 			BUG("split_ident_line() gave NULL names???");
-		return xmemdupz(split.name_begin,
-				split.name_end - split.name_begin);
-	case IDENT_MAIL:
-		if (!split.mail_begin || !split.mail_end)
+		తిరిగి xmemdupz(విభజించు.name_begin,
+				విభజించు.name_చివర - విభజించు.name_begin);
+	స్థితి IDENT_MAIL:
+		ఒకవేళ (!విభజించు.mail_begin || !విభజించు.mail_చివర)
 			BUG("split_ident_line() gave NULL mail???");
-		return xmemdupz(split.mail_begin,
-				split.mail_end - split.mail_begin);
-	case IDENT_DATE:
-		if (!split.date_begin || !split.tz_end)
+		తిరిగి xmemdupz(విభజించు.mail_begin,
+				విభజించు.mail_చివర - విభజించు.mail_begin);
+	స్థితి IDENT_DATE:
+		ఒకవేళ (!విభజించు.date_begin || !విభజించు.tz_చివర)
 			BUG("split_ident_line() gave NULL date/tz???");
-		return xmemdupz(split.date_begin,
-				split.tz_end - split.date_begin);
-	default:
+		తిరిగి xmemdupz(విభజించు.date_begin,
+				విభజించు.tz_చివర - విభజించు.date_begin);
+	అప్రమేయ:
 		BUG("unknown ident_part %d", part);
 	}
 }
 
-static char *committer(int ident_flag)
+స్థిర అక్షరం *committer(పూర్ణాంకం ident_flag)
 {
-	return xstrdup_or_null(git_committer_info(ident_flag));
+	తిరిగి xstrdup_or_null(git_committer_info(ident_flag));
 }
 
-static char *committer_name(int ident_flag)
+స్థిర అక్షరం *committer_name(పూర్ణాంకం ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_NAME);
+	తిరిగి ident_part(git_committer_info(ident_flag), IDENT_NAME);
 }
 
-static char *committer_email(int ident_flag)
+స్థిర అక్షరం *committer_email(పూర్ణాంకం ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_MAIL);
+	తిరిగి ident_part(git_committer_info(ident_flag), IDENT_MAIL);
 }
 
-static char *committer_date(int ident_flag)
+స్థిర అక్షరం *committer_date(పూర్ణాంకం ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_DATE);
+	తిరిగి ident_part(git_committer_info(ident_flag), IDENT_DATE);
 }
 
-static char *author(int ident_flag)
+స్థిర అక్షరం *author(పూర్ణాంకం ident_flag)
 {
-	return xstrdup_or_null(git_author_info(ident_flag));
+	తిరిగి xstrdup_or_null(git_author_info(ident_flag));
 }
 
-static char *author_name(int ident_flag)
+స్థిర అక్షరం *author_name(పూర్ణాంకం ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_NAME);
+	తిరిగి ident_part(git_author_info(ident_flag), IDENT_NAME);
 }
 
-static char *author_email(int ident_flag)
+స్థిర అక్షరం *author_email(పూర్ణాంకం ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_MAIL);
+	తిరిగి ident_part(git_author_info(ident_flag), IDENT_MAIL);
 }
 
-static char *author_date(int ident_flag)
+స్థిర అక్షరం *author_date(పూర్ణాంకం ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_DATE);
+	తిరిగి ident_part(git_author_info(ident_flag), IDENT_DATE);
 }
 
-static char *editor(int ident_flag UNUSED)
+స్థిర అక్షరం *editor(పూర్ణాంకం ident_flag వాడని)
 {
-	return xstrdup_or_null(git_editor());
+	తిరిగి xstrdup_or_null(git_editor());
 }
 
-static char *sequence_editor(int ident_flag UNUSED)
+స్థిర అక్షరం *sequence_editor(పూర్ణాంకం ident_flag వాడని)
 {
-	return xstrdup_or_null(git_sequence_editor());
+	తిరిగి xstrdup_or_null(git_sequence_editor());
 }
 
-static char *pager(int ident_flag UNUSED)
+స్థిర అక్షరం *pager(పూర్ణాంకం ident_flag వాడని)
 {
-	const char *pgm = git_pager(the_repository, 1);
+	స్థిరరాశి అక్షరం *pgm = git_pager(the_repository, 1);
 
-	if (!pgm)
+	ఒకవేళ (!pgm)
 		pgm = "cat";
-	return xstrdup(pgm);
+	తిరిగి xstrdup(pgm);
 }
 
-static char *default_branch(int ident_flag UNUSED)
+స్థిర అక్షరం *default_branch(పూర్ణాంకం ident_flag వాడని)
 {
-	return repo_default_branch_name(the_repository, 1);
+	తిరిగి repo_default_branch_name(the_repository, 1);
 }
 
-static char *shell_path(int ident_flag UNUSED)
+స్థిర అక్షరం *shell_మార్గం(పూర్ణాంకం ident_flag వాడని)
 {
-	return git_shell_path();
+	తిరిగి git_shell_మార్గం();
 }
 
-static char *git_attr_val_system(int ident_flag UNUSED)
+స్థిర అక్షరం *git_attr_val_system(పూర్ణాంకం ident_flag వాడని)
 {
-	if (git_attr_system_is_enabled()) {
-		char *file = xstrdup(git_attr_system_file());
-		normalize_path_copy(file, file);
-		return file;
+	ఒకవేళ (git_attr_system_is_enabled()) {
+		అక్షరం *file = xstrdup(git_attr_system_file());
+		normalize_మార్గం_copy(file, file);
+		తిరిగి file;
 	}
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
-static char *git_attr_val_global(int ident_flag UNUSED)
+స్థిర అక్షరం *git_attr_val_global(పూర్ణాంకం ident_flag వాడని)
 {
-	char *file = xstrdup_or_null(git_attr_global_file());
-	if (file) {
-		normalize_path_copy(file, file);
-		return file;
+	అక్షరం *file = xstrdup_or_null(git_attr_global_file());
+	ఒకవేళ (file) {
+		normalize_మార్గం_copy(file, file);
+		తిరిగి file;
 	}
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
-static char *git_config_val_system(int ident_flag UNUSED)
+స్థిర అక్షరం *git_config_val_system(పూర్ణాంకం ident_flag వాడని)
 {
-	if (git_config_system()) {
-		char *file = git_system_config();
-		normalize_path_copy(file, file);
-		return file;
+	ఒకవేళ (git_config_system()) {
+		అక్షరం *file = git_system_config();
+		normalize_మార్గం_copy(file, file);
+		తిరిగి file;
 	}
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
-static void git_config_val_global(struct string_list *list)
+స్థిర శూన్య git_config_val_global(నిర్మాణం string_list *list)
 {
-	char *user, *xdg;
+	అక్షరం *user, *xdg;
 
 	git_global_config_paths(&user, &xdg);
-	if (xdg && *xdg) {
-		normalize_path_copy(xdg, xdg);
+	ఒకవేళ (xdg && *xdg) {
+		normalize_మార్గం_copy(xdg, xdg);
 		string_list_append(list, xdg);
 	}
-	if (user && *user) {
-		normalize_path_copy(user, user);
+	ఒకవేళ (user && *user) {
+		normalize_మార్గం_copy(user, user);
 		string_list_append(list, user);
 	}
-	free(xdg);
-	free(user);
+	విడుదల(xdg);
+	విడుదల(user);
 }
 
-struct git_var {
-	const char *name;
-	char *(*read)(int);
-	void (*multiread)(struct string_list *);
+నిర్మాణం git_var {
+	స్థిరరాశి అక్షరం *name;
+	అక్షరం *(*పఠ)(పూర్ణాంకం);
+	శూన్య (*multiread)(నిర్మాణం string_list *);
 };
-static struct git_var git_vars[] = {
+స్థిర నిర్మాణం git_var git_vars[] = {
 	{
 		.name = "GIT_COMMITTER_IDENT",
-		.read = committer,
+		.పఠ = committer,
 	},
 	{
 		.name = "GIT_COMMITTER_NAME",
-		.read = committer_name,
+		.పఠ = committer_name,
 	},
 	{
 		.name = "GIT_COMMITTER_EMAIL",
-		.read = committer_email,
+		.పఠ = committer_email,
 	},
 	{
 		.name = "GIT_COMMITTER_DATE",
-		.read = committer_date,
+		.పఠ = committer_date,
 	},
 	{
 		.name = "GIT_AUTHOR_IDENT",
-		.read = author,
+		.పఠ = author,
 	},
 	{
 		.name = "GIT_AUTHOR_NAME",
-		.read = author_name,
+		.పఠ = author_name,
 	},
 	{
 		.name = "GIT_AUTHOR_EMAIL",
-		.read = author_email,
+		.పఠ = author_email,
 	},
 	{
 		.name = "GIT_AUTHOR_DATE",
-		.read = author_date,
+		.పఠ = author_date,
 	},
 	{
 		.name = "GIT_EDITOR",
-		.read = editor,
+		.పఠ = editor,
 	},
 	{
 		.name = "GIT_SEQUENCE_EDITOR",
-		.read = sequence_editor,
+		.పఠ = sequence_editor,
 	},
 	{
 		.name = "GIT_PAGER",
-		.read = pager,
+		.పఠ = pager,
 	},
 	{
 		.name = "GIT_DEFAULT_BRANCH",
-		.read = default_branch,
+		.పఠ = default_branch,
 	},
 	{
 		.name = "GIT_SHELL_PATH",
-		.read = shell_path,
+		.పఠ = shell_మార్గం,
 	},
 	{
 		.name = "GIT_ATTR_SYSTEM",
-		.read = git_attr_val_system,
+		.పఠ = git_attr_val_system,
 	},
 	{
 		.name = "GIT_ATTR_GLOBAL",
-		.read = git_attr_val_global,
+		.పఠ = git_attr_val_global,
 	},
 	{
 		.name = "GIT_CONFIG_SYSTEM",
-		.read = git_config_val_system,
+		.పఠ = git_config_val_system,
 	},
 	{
 		.name = "GIT_CONFIG_GLOBAL",
@@ -255,136 +255,136 @@ static struct git_var git_vars[] = {
 	},
 	{
 		.name = "",
-		.read = NULL,
+		.పఠ = ఖాళీ,
 	},
 };
 
-static void list_vars(int nul_term)
+స్థిర శూన్య list_vars(పూర్ణాంకం nul_పదం)
 {
-	struct git_var *ptr;
-	char delim = nul_term ? '\n' : '=';
-	char term = nul_term ? '\0' : '\n';
+	నిర్మాణం git_var *ptr;
+	అక్షరం delim = nul_పదం ? '\n' : '=';
+	అక్షరం పదం = nul_పదం ? '\0' : '\n';
 
-	for (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
-		if (ptr->read) {
-			char *val = ptr->read(0);
+	కొరకు (ptr = git_vars; ptr->పఠ || ptr->multiread; ptr++) {
+		ఒకవేళ (ptr->పఠ) {
+			అక్షరం *val = ptr->పఠ(0);
 
-			if (val) {
-				printf("%s%c%s%c", ptr->name, delim, val, term);
-				free(val);
+			ఒకవేళ (val) {
+				రాయి("%s%c%s%c", ptr->name, delim, val, పదం);
+				విడుదల(val);
 			}
-		} else {
-			struct string_list list = STRING_LIST_INIT_DUP;
+		} లేకపోతే {
+			నిర్మాణం string_list list = STRING_LIST_INIT_DUP;
 
 			ptr->multiread(&list);
-			for (size_t i = 0; i < list.nr; i++)
-				printf("%s%c%s%c", ptr->name, delim,
-				       list.items[i].string, term);
+			కొరకు (కొలత_t i = 0; i < list.nr; i++)
+				రాయి("%s%c%s%c", ptr->name, delim,
+				       list.వస్తువులు[i].string, పదం);
 			string_list_clear(&list, 0);
 		}
 	}
 }
 
-static const struct git_var *get_git_var(const char *var)
+స్థిర స్థిరరాశి నిర్మాణం git_var *get_git_var(స్థిరరాశి అక్షరం *var)
 {
-	struct git_var *ptr;
-	for (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
-		if (strcmp(var, ptr->name) == 0) {
-			return ptr;
+	నిర్మాణం git_var *ptr;
+	కొరకు (ptr = git_vars; ptr->పఠ || ptr->multiread; ptr++) {
+		ఒకవేళ (strcmp(var, ptr->name) == 0) {
+			తిరిగి ptr;
 		}
 	}
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
-static int show_config(const char *var, const char *value,
-		       const struct config_context *ctx, void *cb)
+స్థిర పూర్ణాంకం show_config(స్థిరరాశి అక్షరం *var, స్థిరరాశి అక్షరం *విలువ,
+		       స్థిరరాశి నిర్మాణం config_context *ctx, శూన్య *cb)
 {
-	int *nul_term = cb;
-	char delim = *nul_term ? '\n' : '=';
-	char term = *nul_term ? '\0' : '\n';
+	పూర్ణాంకం *nul_పదం = cb;
+	అక్షరం delim = *nul_పదం ? '\n' : '=';
+	అక్షరం పదం = *nul_పదం ? '\0' : '\n';
 
-	if (value)
-		printf("%s%c%s%c", var, delim, value, term);
-	else
-		printf("%s%c", var, term);
-	return git_default_config(var, value, ctx, cb);
+	ఒకవేళ (విలువ)
+		రాయి("%s%c%s%c", var, delim, విలువ, పదం);
+	లేకపోతే
+		రాయి("%s%c", var, పదం);
+	తిరిగి git_default_config(var, విలువ, ctx, cb);
 }
 
-int cmd_var(int argc,
-	    const char **argv,
-	    const char *prefix,
-	    struct repository *repo UNUSED)
+పూర్ణాంకం cmd_var(పూర్ణాంకం argc,
+	    స్థిరరాశి అక్షరం **argv,
+	    స్థిరరాశి అక్షరం *ఉపసర్గ,
+	    నిర్మాణం repository *repo వాడని)
 {
-	int list = 0;
-	int nul_term = 0;
-	char delim;
-	char term;
-	struct option options[] = {
-		OPT_BOOL('l', NULL, &list,
+	పూర్ణాంకం list = 0;
+	పూర్ణాంకం nul_పదం = 0;
+	అక్షరం delim;
+	అక్షరం పదం;
+	నిర్మాణం option options[] = {
+		OPT_BOOL('l', ఖాళీ, &list,
 			 N_("list all variables")),
-		OPT_BOOL('z', NULL, &nul_term,
+		OPT_BOOL('z', ఖాళీ, &nul_పదం,
 			 N_("terminate entries with NUL")),
-		OPT_END(),
+		OPT_చివర(),
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ఉపసర్గ, options,
 			     var_usage, PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (list) {
-		if (argc)
+	ఒకవేళ (list) {
+		ఒకవేళ (argc)
 			usage_with_options(var_usage, options);
-		repo_config(the_repository, show_config, &nul_term);
-		list_vars(nul_term);
-		return 0;
+		repo_config(the_repository, show_config, &nul_పదం);
+		list_vars(nul_పదం);
+		తిరిగి 0;
 	}
 
-	if (!argc)
+	ఒకవేళ (!argc)
 		usage_with_options(var_usage, options);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ఖాళీ);
 
-	delim = nul_term ? '\n' : '=';
-	term = nul_term ? '\0' : '\n';
+	delim = nul_పదం ? '\n' : '=';
+	పదం = nul_పదం ? '\0' : '\n';
 
-	for (int i = 0; i < argc; i++) {
-		const struct git_var *git_var = get_git_var(argv[i]);
+	కొరకు (పూర్ణాంకం i = 0; i < argc; i++) {
+		స్థిరరాశి నిర్మాణం git_var *git_var = get_git_var(argv[i]);
 
-		if (!git_var)
+		ఒకవేళ (!git_var)
 			usage_with_options(var_usage, options);
 
-		if (git_var->read) {
-			char *val = git_var->read(IDENT_STRICT);
+		ఒకవేళ (git_var->పఠ) {
+			అక్షరం *val = git_var->పఠ(IDENT_STRICT);
 
-			if (!val) {
-				if (argc == 1)
-					return 1;
-				continue;
+			ఒకవేళ (!val) {
+				ఒకవేళ (argc == 1)
+					తిరిగి 1;
+				కొనసాగు;
 			}
-			if (argc == 1)
-				printf("%s%c", val, term);
-			else
-				printf("%s%c%s%c", git_var->name, delim,
-				       val, term);
-			free(val);
-		} else {
-			struct string_list list = STRING_LIST_INIT_DUP;
+			ఒకవేళ (argc == 1)
+				రాయి("%s%c", val, పదం);
+			లేకపోతే
+				రాయి("%s%c%s%c", git_var->name, delim,
+				       val, పదం);
+			విడుదల(val);
+		} లేకపోతే {
+			నిర్మాణం string_list list = STRING_LIST_INIT_DUP;
 
 			git_var->multiread(&list);
-			if (argc == 1 && !list.nr) {
+			ఒకవేళ (argc == 1 && !list.nr) {
 				string_list_clear(&list, 0);
-				return 1;
+				తిరిగి 1;
 			}
-			for (size_t j = 0; j < list.nr; j++) {
-				if (argc == 1)
-					printf("%s%c", list.items[j].string,
-					       term);
-				else
-					printf("%s%c%s%c", git_var->name, delim,
-					       list.items[j].string, term);
+			కొరకు (కొలత_t j = 0; j < list.nr; j++) {
+				ఒకవేళ (argc == 1)
+					రాయి("%s%c", list.వస్తువులు[j].string,
+					       పదం);
+				లేకపోతే
+					రాయి("%s%c%s%c", git_var->name, delim,
+					       list.వస్తువులు[j].string, పదం);
 			}
 			string_list_clear(&list, 0);
 		}
 	}
 
-	return 0;
+	తిరిగి 0;
 }

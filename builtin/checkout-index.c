@@ -5,109 +5,109 @@
  *
  */
 
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#నిర్వచించు DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "lockfile.h"
-#include "quote.h"
-#include "cache-tree.h"
-#include "parse-options.h"
-#include "entry.h"
-#include "parallel-checkout.h"
-#include "read-cache-ll.h"
-#include "setup.h"
-#include "sparse-index.h"
+#అన్తర్భావ "builtin.h"
+#అన్తర్భావ "config.h"
+#అన్తర్భావ "environment.h"
+#అన్తర్భావ "gettext.h"
+#అన్తర్భావ "lockfile.h"
+#అన్తర్భావ "quote.h"
+#అన్తర్భావ "cache-tree.h"
+#అన్తర్భావ "parse-options.h"
+#అన్తర్భావ "entry.h"
+#అన్తర్భావ "parallel-checkout.h"
+#అన్తర్భావ "read-cache-ll.h"
+#అన్తర్భావ "setup.h"
+#అన్తర్భావ "sparse-index.h"
 
-#define CHECKOUT_ALL 4
-static int nul_term_line;
-static int checkout_stage; /* default to checkout stage0 */
-static int ignore_skip_worktree; /* default to 0 */
-static int to_tempfile = -1;
-static char topath[4][TEMPORARY_FILENAME_LENGTH + 1];
+#నిర్వచించు CHECKOUT_ALL 4
+స్థిర పూర్ణాంకం nul_పదం_పంక్తి;
+స్థిర పూర్ణాంకం checkout_stage; /* default to checkout stage0 */
+స్థిర పూర్ణాంకం ignore_skip_worktree; /* default to 0 */
+స్థిర పూర్ణాంకం గమ్యం_tempfile = -1;
+స్థిర అక్షరం topath[4][TEMPORARY_FILENAME_నిడివి + 1];
 
-static struct checkout state = CHECKOUT_INIT;
+స్థిర నిర్మాణం checkout state = CHECKOUT_INIT;
 
-static void write_tempfile_record(const char *name, const char *prefix)
+స్థిర శూన్య write_tempfile_రికార్డు(స్థిరరాశి అక్షరం *name, స్థిరరాశి అక్షరం *ఉపసర్గ)
 {
-	int i;
-	int have_tempname = 0;
+	పూర్ణాంకం i;
+	పూర్ణాంకం have_tempname = 0;
 
-	if (CHECKOUT_ALL == checkout_stage) {
-		for (i = 1; i < 4; i++)
-			if (topath[i][0]) {
+	ఒకవేళ (CHECKOUT_ALL == checkout_stage) {
+		కొరకు (i = 1; i < 4; i++)
+			ఒకవేళ (topath[i][0]) {
 				have_tempname = 1;
-				break;
+				ఆపు;
 			}
 
-		if (have_tempname) {
-			for (i = 1; i < 4; i++) {
-				if (i > 1)
-					putchar(' ');
-				if (topath[i][0])
+		ఒకవేళ (have_tempname) {
+			కొరకు (i = 1; i < 4; i++) {
+				ఒకవేళ (i > 1)
+					అక్షరం_రాయి(' ');
+				ఒకవేళ (topath[i][0])
 					fputs(topath[i], stdout);
-				else
-					putchar('.');
+				లేకపోతే
+					అక్షరం_రాయి('.');
 			}
 		}
-	} else if (topath[checkout_stage][0]) {
+	} లేకపోతే ఒకవేళ (topath[checkout_stage][0]) {
 		have_tempname = 1;
 		fputs(topath[checkout_stage], stdout);
 	}
 
-	if (have_tempname) {
-		putchar('\t');
-		write_name_quoted_relative(name, prefix, stdout,
-					   nul_term_line ? '\0' : '\n');
+	ఒకవేళ (have_tempname) {
+		అక్షరం_రాయి('\t');
+		write_name_quoted_relative(name, ఉపసర్గ, stdout,
+					   nul_పదం_పంక్తి ? '\0' : '\n');
 	}
 
-	for (i = 0; i < 4; i++) {
+	కొరకు (i = 0; i < 4; i++) {
 		topath[i][0] = 0;
 	}
 }
 
-static int checkout_file(struct index_state *index, const char *name, const char *prefix)
+స్థిర పూర్ణాంకం checkout_file(నిర్మాణం సూచీ_state *సూచీ, స్థిరరాశి అక్షరం *name, స్థిరరాశి అక్షరం *ఉపసర్గ)
 {
-	int namelen = strlen(name);
-	int pos = index_name_pos(index, name, namelen);
-	int has_same_name = 0;
-	int is_file = 0;
-	int is_skipped = 1;
-	int did_checkout = 0;
-	int errs = 0;
+	పూర్ణాంకం namelen = అక్షరశ్రేణి_పొడవు(name);
+	పూర్ణాంకం pos = సూచీ_name_pos(సూచీ, name, namelen);
+	పూర్ణాంకం has_same_name = 0;
+	పూర్ణాంకం is_file = 0;
+	పూర్ణాంకం is_skipped = 1;
+	పూర్ణాంకం did_checkout = 0;
+	పూర్ణాంకం errs = 0;
 
-	if (pos < 0)
+	ఒకవేళ (pos < 0)
 		pos = -pos - 1;
 
-	while (pos < index->cache_nr) {
-		struct cache_entry *ce = index->cache[pos];
-		if (ce_namelen(ce) != namelen ||
+	అయితే (pos < సూచీ->cache_nr) {
+		నిర్మాణం cache_నమోదు *ce = సూచీ->cache[pos];
+		ఒకవేళ (ce_namelen(ce) != namelen ||
 		    memcmp(ce->name, name, namelen))
-			break;
+			ఆపు;
 		has_same_name = 1;
 		pos++;
-		if (S_ISSPARSEDIR(ce->ce_mode))
-			break;
+		ఒకవేళ (S_ISSPARSEDIR(ce->ce_బహుళకం))
+			ఆపు;
 		is_file = 1;
-		if (!ignore_skip_worktree && ce_skip_worktree(ce))
-			break;
+		ఒకవేళ (!ignore_skip_worktree && ce_skip_worktree(ce))
+			ఆపు;
 		is_skipped = 0;
-		if (ce_stage(ce) != checkout_stage
+		ఒకవేళ (ce_stage(ce) != checkout_stage
 		    && (CHECKOUT_ALL != checkout_stage || !ce_stage(ce)))
-			continue;
+			కొనసాగు;
 		did_checkout = 1;
-		if (checkout_entry(ce, &state,
-				   to_tempfile ? topath[ce_stage(ce)] : NULL,
-				   NULL) < 0)
+		ఒకవేళ (checkout_నమోదు(ce, &state,
+				   గమ్యం_tempfile ? topath[ce_stage(ce)] : ఖాళీ,
+				   ఖాళీ) < 0)
 			errs++;
 	}
 
-	if (did_checkout) {
-		if (to_tempfile)
-			write_tempfile_record(name, prefix);
-		return errs > 0 ? -1 : 0;
+	ఒకవేళ (did_checkout) {
+		ఒకవేళ (గమ్యం_tempfile)
+			write_tempfile_రికార్డు(name, ఉపసర్గ);
+		తిరిగి errs > 0 ? -1 : 0;
 	}
 
 	/*
@@ -115,38 +115,38 @@ static int checkout_file(struct index_state *index, const char *name, const char
 	 * because we did find an entry but it was stage 0, that's not an
 	 * error.
 	 */
-	if (has_same_name && checkout_stage == CHECKOUT_ALL)
-		return 0;
+	ఒకవేళ (has_same_name && checkout_stage == CHECKOUT_ALL)
+		తిరిగి 0;
 
-	if (!state.quiet) {
+	ఒకవేళ (!state.quiet) {
 		fprintf(stderr, "git checkout-index: %s ", name);
-		if (!has_same_name)
+		ఒకవేళ (!has_same_name)
 			fprintf(stderr, "is not in the cache");
-		else if (!is_file)
+		లేకపోతే ఒకవేళ (!is_file)
 			fprintf(stderr, "is a sparse directory");
-		else if (is_skipped)
+		లేకపోతే ఒకవేళ (is_skipped)
 			fprintf(stderr, "has skip-worktree enabled; "
 					"use '--ignore-skip-worktree-bits' to checkout");
-		else if (checkout_stage)
+		లేకపోతే ఒకవేళ (checkout_stage)
 			fprintf(stderr, "does not exist at stage %d",
 				checkout_stage);
-		else
+		లేకపోతే
 			fprintf(stderr, "is unmerged");
 		fputc('\n', stderr);
 	}
-	return -1;
+	తిరిగి -1;
 }
 
-static int checkout_all(struct index_state *index, const char *prefix, int prefix_length)
+స్థిర పూర్ణాంకం checkout_all(నిర్మాణం సూచీ_state *సూచీ, స్థిరరాశి అక్షరం *ఉపసర్గ, పూర్ణాంకం ఉపసర్గ_నిడివి)
 {
-	int i, errs = 0;
-	struct cache_entry *last_ce = NULL;
+	పూర్ణాంకం i, errs = 0;
+	నిర్మాణం cache_నమోదు *చివరి_ce = ఖాళీ;
 
-	for (i = 0; i < index->cache_nr ; i++) {
-		struct cache_entry *ce = index->cache[i];
+	కొరకు (i = 0; i < సూచీ->cache_nr ; i++) {
+		నిర్మాణం cache_నమోదు *ce = సూచీ->cache[i];
 
-		if (S_ISSPARSEDIR(ce->ce_mode)) {
-			if (!ce_skip_worktree(ce))
+		ఒకవేళ (S_ISSPARSEDIR(ce->ce_బహుళకం)) {
+			ఒకవేళ (!ce_skip_worktree(ce))
 				BUG("sparse directory '%s' does not have skip-worktree set", ce->name);
 
 			/*
@@ -155,76 +155,76 @@ static int checkout_all(struct index_state *index, const char *prefix, int prefi
 			 * the loop on the current index position (now pointing to the
 			 * first entry inside the expanded sparse directory).
 			 */
-			if (ignore_skip_worktree) {
-				ensure_full_index(index);
-				ce = index->cache[i];
+			ఒకవేళ (ignore_skip_worktree) {
+				ensure_నిండిన_సూచీ(సూచీ);
+				ce = సూచీ->cache[i];
 			}
 		}
 
-		if (!ignore_skip_worktree && ce_skip_worktree(ce))
-			continue;
-		if (ce_stage(ce) != checkout_stage
+		ఒకవేళ (!ignore_skip_worktree && ce_skip_worktree(ce))
+			కొనసాగు;
+		ఒకవేళ (ce_stage(ce) != checkout_stage
 		    && (CHECKOUT_ALL != checkout_stage || !ce_stage(ce)))
-			continue;
-		if (prefix && *prefix &&
-		    (ce_namelen(ce) <= prefix_length ||
-		     memcmp(prefix, ce->name, prefix_length)))
-			continue;
-		if (last_ce && to_tempfile) {
-			if (ce_namelen(last_ce) != ce_namelen(ce)
-			    || memcmp(last_ce->name, ce->name, ce_namelen(ce)))
-				write_tempfile_record(last_ce->name, prefix);
+			కొనసాగు;
+		ఒకవేళ (ఉపసర్గ && *ఉపసర్గ &&
+		    (ce_namelen(ce) <= ఉపసర్గ_నిడివి ||
+		     memcmp(ఉపసర్గ, ce->name, ఉపసర్గ_నిడివి)))
+			కొనసాగు;
+		ఒకవేళ (చివరి_ce && గమ్యం_tempfile) {
+			ఒకవేళ (ce_namelen(చివరి_ce) != ce_namelen(ce)
+			    || memcmp(చివరి_ce->name, ce->name, ce_namelen(ce)))
+				write_tempfile_రికార్డు(చివరి_ce->name, ఉపసర్గ);
 		}
-		if (checkout_entry(ce, &state,
-				   to_tempfile ? topath[ce_stage(ce)] : NULL,
-				   NULL) < 0)
+		ఒకవేళ (checkout_నమోదు(ce, &state,
+				   గమ్యం_tempfile ? topath[ce_stage(ce)] : ఖాళీ,
+				   ఖాళీ) < 0)
 			errs++;
-		last_ce = ce;
+		చివరి_ce = ce;
 	}
-	if (last_ce && to_tempfile)
-		write_tempfile_record(last_ce->name, prefix);
-	return !!errs;
+	ఒకవేళ (చివరి_ce && గమ్యం_tempfile)
+		write_tempfile_రికార్డు(చివరి_ce->name, ఉపసర్గ);
+	తిరిగి !!errs;
 }
 
-static const char * const builtin_checkout_index_usage[] = {
+స్థిర స్థిరరాశి అక్షరం * స్థిరరాశి builtin_checkout_సూచీ_usage[] = {
 	N_("git checkout-index [<options>] [--] [<file>...]"),
-	NULL
+	ఖాళీ
 };
 
-static int option_parse_stage(const struct option *opt,
-			      const char *arg, int unset)
+స్థిర పూర్ణాంకం option_parse_stage(స్థిరరాశి నిర్మాణం option *opt,
+			      స్థిరరాశి అక్షరం *arg, పూర్ణాంకం unset)
 {
-	int *stage = opt->value;
+	పూర్ణాంకం *stage = opt->విలువ;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!strcmp(arg, "all")) {
+	ఒకవేళ (!strcmp(arg, "all")) {
 		*stage = CHECKOUT_ALL;
-	} else {
-		int ch = arg[0];
-		if ('1' <= ch && ch <= '3')
+	} లేకపోతే {
+		పూర్ణాంకం ch = arg[0];
+		ఒకవేళ ('1' <= ch && ch <= '3')
 			*stage = arg[0] - '0';
-		else
+		లేకపోతే
 			die(_("stage should be between 1 and 3 or all"));
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-int cmd_checkout_index(int argc,
-		       const char **argv,
-		       const char *prefix,
-		       struct repository *repo)
+పూర్ణాంకం cmd_checkout_సూచీ(పూర్ణాంకం argc,
+		       స్థిరరాశి అక్షరం **argv,
+		       స్థిరరాశి అక్షరం *ఉపసర్గ,
+		       నిర్మాణం repository *repo)
 {
-	int i;
-	struct lock_file lock_file = LOCK_INIT;
-	int all = 0;
-	int read_from_stdin = 0;
-	int prefix_length;
-	int force = 0, quiet = 0, not_new = 0;
-	int index_opt = 0;
-	int err = 0;
-	int pc_workers, pc_threshold;
-	struct option builtin_checkout_index_options[] = {
+	పూర్ణాంకం i;
+	నిర్మాణం తాళం_file తాళం_file = తాళం_INIT;
+	పూర్ణాంకం all = 0;
+	పూర్ణాంకం read_from_stdin = 0;
+	పూర్ణాంకం ఉపసర్గ_నిడివి;
+	పూర్ణాంకం force = 0, quiet = 0, not_new = 0;
+	పూర్ణాంకం సూచీ_opt = 0;
+	పూర్ణాంకం err = 0;
+	పూర్ణాంకం pc_workers, pc_పరిమితి;
+	నిర్మాణం option builtin_checkout_సూచీ_options[] = {
 		OPT_BOOL('a', "all", &all,
 			N_("check out all files in the index")),
 		OPT_BOOL(0, "ignore-skip-worktree-bits", &ignore_skip_worktree,
@@ -234,117 +234,117 @@ int cmd_checkout_index(int argc,
 			N_("no warning for existing files and files not in index")),
 		OPT_BOOL('n', "no-create", &not_new,
 			N_("don't checkout new files")),
-		OPT_BOOL('u', "index", &index_opt,
+		OPT_BOOL('u', "index", &సూచీ_opt,
 			 N_("update stat information in the index file")),
-		OPT_BOOL('z', NULL, &nul_term_line,
+		OPT_BOOL('z', ఖాళీ, &nul_పదం_పంక్తి,
 			N_("paths are separated with NUL character")),
 		OPT_BOOL(0, "stdin", &read_from_stdin,
 			N_("read list of paths from the standard input")),
-		OPT_BOOL(0, "temp", &to_tempfile,
+		OPT_BOOL(0, "temp", &గమ్యం_tempfile,
 			N_("write the content to temporary files")),
-		OPT_STRING(0, "prefix", &state.base_dir, N_("string"),
+		OPT_STRING(0, "prefix", &state.పునాది_dir, N_("string"),
 			N_("when creating files, prepend <string>")),
 		OPT_CALLBACK_F(0, "stage", &checkout_stage, "(1|2|3|all)",
 			N_("copy out the files from named stage"),
 			PARSE_OPT_NONEG, option_parse_stage),
-		OPT_END()
+		OPT_చివర()
 	};
 
 	show_usage_with_options_if_asked(argc, argv,
-					 builtin_checkout_index_usage,
-					 builtin_checkout_index_options);
-	repo_config(repo, git_default_config, NULL);
-	prefix_length = prefix ? strlen(prefix) : 0;
+					 builtin_checkout_సూచీ_usage,
+					 builtin_checkout_సూచీ_options);
+	repo_config(repo, git_default_config, ఖాళీ);
+	ఉపసర్గ_నిడివి = ఉపసర్గ ? అక్షరశ్రేణి_పొడవు(ఉపసర్గ) : 0;
 
 	prepare_repo_settings(repo);
-	repo->settings.command_requires_full_index = 0;
+	repo->settings.command_requires_నిండిన_సూచీ = 0;
 
-	if (repo_read_index(repo) < 0) {
+	ఒకవేళ (repo_read_సూచీ(repo) < 0) {
 		die("invalid cache");
 	}
 
-	argc = parse_options(argc, argv, prefix, builtin_checkout_index_options,
-			builtin_checkout_index_usage, 0);
-	state.istate = repo->index;
+	argc = parse_options(argc, argv, ఉపసర్గ, builtin_checkout_సూచీ_options,
+			builtin_checkout_సూచీ_usage, 0);
+	state.istate = repo->సూచీ;
 	state.force = force;
 	state.quiet = quiet;
 	state.not_new = not_new;
 
-	if (!state.base_dir)
-		state.base_dir = "";
-	state.base_dir_len = strlen(state.base_dir);
+	ఒకవేళ (!state.పునాది_dir)
+		state.పునాది_dir = "";
+	state.పునాది_dir_len = అక్షరశ్రేణి_పొడవు(state.పునాది_dir);
 
-	if (to_tempfile < 0)
-		to_tempfile = (checkout_stage == CHECKOUT_ALL);
-	if (!to_tempfile && checkout_stage == CHECKOUT_ALL)
+	ఒకవేళ (గమ్యం_tempfile < 0)
+		గమ్యం_tempfile = (checkout_stage == CHECKOUT_ALL);
+	ఒకవేళ (!గమ్యం_tempfile && checkout_stage == CHECKOUT_ALL)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--stage=all", "--no-temp");
 
 	/*
 	 * when --prefix is specified we do not want to update cache.
 	 */
-	if (index_opt && !state.base_dir_len && !to_tempfile) {
+	ఒకవేళ (సూచీ_opt && !state.పునాది_dir_len && !గమ్యం_tempfile) {
 		state.refresh_cache = 1;
-		state.istate = repo->index;
-		repo_hold_locked_index(repo, &lock_file,
-				       LOCK_DIE_ON_ERROR);
+		state.istate = repo->సూచీ;
+		repo_hold_locked_సూచీ(repo, &తాళం_file,
+				       తాళం_DIE_ON_ERROR);
 	}
 
-	get_parallel_checkout_configs(&pc_workers, &pc_threshold);
-	if (pc_workers > 1)
+	get_parallel_checkout_configs(&pc_workers, &pc_పరిమితి);
+	ఒకవేళ (pc_workers > 1)
 		init_parallel_checkout();
 
 	/* Check out named files first */
-	for (i = 0; i < argc; i++) {
-		const char *arg = argv[i];
-		char *p;
+	కొరకు (i = 0; i < argc; i++) {
+		స్థిరరాశి అక్షరం *arg = argv[i];
+		అక్షరం *p;
 
-		if (all)
+		ఒకవేళ (all)
 			die("git checkout-index: don't mix '--all' and explicit filenames");
-		if (read_from_stdin)
+		ఒకవేళ (read_from_stdin)
 			die("git checkout-index: don't mix '--stdin' and explicit filenames");
-		p = prefix_path(repo, prefix, prefix_length, arg);
-		err |= checkout_file(repo->index, p, prefix);
-		free(p);
+		p = ఉపసర్గ_మార్గం(repo, ఉపసర్గ, ఉపసర్గ_నిడివి, arg);
+		err |= checkout_file(repo->సూచీ, p, ఉపసర్గ);
+		విడుదల(p);
 	}
 
-	if (read_from_stdin) {
-		struct strbuf buf = STRBUF_INIT;
-		struct strbuf unquoted = STRBUF_INIT;
+	ఒకవేళ (read_from_stdin) {
+		నిర్మాణం strbuf buf = STRBUF_INIT;
+		నిర్మాణం strbuf unquoted = STRBUF_INIT;
 		strbuf_getline_fn getline_fn;
 
-		if (all)
+		ఒకవేళ (all)
 			die("git checkout-index: don't mix '--all' and '--stdin'");
 
-		getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-		while (getline_fn(&buf, stdin) != EOF) {
-			char *p;
-			if (!nul_term_line && buf.buf[0] == '"') {
+		getline_fn = nul_పదం_పంక్తి ? strbuf_getline_nul : strbuf_getline_lf;
+		అయితే (getline_fn(&buf, stdin) != EOF) {
+			అక్షరం *p;
+			ఒకవేళ (!nul_పదం_పంక్తి && buf.buf[0] == '"') {
 				strbuf_reset(&unquoted);
-				if (unquote_c_style(&unquoted, buf.buf, NULL))
+				ఒకవేళ (unquote_c_style(&unquoted, buf.buf, ఖాళీ))
 					die("line is badly quoted");
-				strbuf_swap(&buf, &unquoted);
+				strbuf_మార్పిడి(&buf, &unquoted);
 			}
-			p = prefix_path(repo, prefix, prefix_length, buf.buf);
-			err |= checkout_file(repo->index, p, prefix);
-			free(p);
+			p = ఉపసర్గ_మార్గం(repo, ఉపసర్గ, ఉపసర్గ_నిడివి, buf.buf);
+			err |= checkout_file(repo->సూచీ, p, ఉపసర్గ);
+			విడుదల(p);
 		}
 		strbuf_release(&unquoted);
 		strbuf_release(&buf);
 	}
 
-	if (all)
-		err |= checkout_all(repo->index, prefix, prefix_length);
+	ఒకవేళ (all)
+		err |= checkout_all(repo->సూచీ, ఉపసర్గ, ఉపసర్గ_నిడివి);
 
-	if (pc_workers > 1)
-		err |= run_parallel_checkout(&state, pc_workers, pc_threshold,
-					     NULL, NULL);
+	ఒకవేళ (pc_workers > 1)
+		err |= నిరంతరం_parallel_checkout(&state, pc_workers, pc_పరిమితి,
+					     ఖాళీ, ఖాళీ);
 
-	if (err)
-		return 1;
+	ఒకవేళ (err)
+		తిరిగి 1;
 
-	if (is_lock_file_locked(&lock_file) &&
-	    write_locked_index(repo->index, &lock_file, COMMIT_LOCK))
+	ఒకవేళ (is_తాళం_file_locked(&తాళం_file) &&
+	    write_locked_సూచీ(repo->సూచీ, &తాళం_file, COMMIT_తాళం))
 		die("Unable to write new index file");
-	return 0;
+	తిరిగి 0;
 }
