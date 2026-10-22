@@ -7,117 +7,117 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refs.h"
-#include "object-name.h"
-#include "odb.h"
-#include "odb/streaming.h"
-#include "pager.h"
-#include "color.h"
-#include "commit.h"
-#include "diff.h"
-#include "diffcore.h"
-#include "diff-merges.h"
-#include "revision.h"
-#include "log-tree.h"
-#include "oid-array.h"
-#include "oidset.h"
-#include "tag.h"
-#include "reflog-walk.h"
-#include "patch-ids.h"
-#include "path.h"
-#include "shortlog.h"
-#include "remote.h"
-#include "string-list.h"
-#include "parse-options.h"
-#include "line-log.h"
-#include "branch.h"
-#include "version.h"
-#include "mailmap.h"
-#include "progress.h"
-#include "commit-slab.h"
-#include "advice.h"
-#include "utf8.h"
+#ضمن "builtin.h"
+#ضمن "abspath.h"
+#ضمن "config.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "hex.h"
+#ضمن "refs.h"
+#ضمن "object-name.h"
+#ضمن "odb.h"
+#ضمن "odb/streaming.h"
+#ضمن "pager.h"
+#ضمن "color.h"
+#ضمن "commit.h"
+#ضمن "diff.h"
+#ضمن "diffcore.h"
+#ضمن "diff-merges.h"
+#ضمن "revision.h"
+#ضمن "log-tree.h"
+#ضمن "oid-array.h"
+#ضمن "oidset.h"
+#ضمن "tag.h"
+#ضمن "reflog-walk.h"
+#ضمن "patch-ids.h"
+#ضمن "path.h"
+#ضمن "shortlog.h"
+#ضمن "remote.h"
+#ضمن "string-list.h"
+#ضمن "parse-options.h"
+#ضمن "line-log.h"
+#ضمن "branch.h"
+#ضمن "version.h"
+#ضمن "mailmap.h"
+#ضمن "progress.h"
+#ضمن "commit-slab.h"
+#ضمن "advice.h"
+#ضمن "utf8.h"
 
-#include "commit-reach.h"
-#include "promisor-remote.h"
-#include "range-diff.h"
-#include "tmp-objdir.h"
-#include "tree.h"
-#include "userdiff.h"
-#include "write-or-die.h"
+#ضمن "commit-reach.h"
+#ضمن "promisor-remote.h"
+#ضمن "range-diff.h"
+#ضمن "tmp-objdir.h"
+#ضمن "tree.h"
+#ضمن "userdiff.h"
+#ضمن "write-or-die.h"
 
 #define MAIL_DEFAULT_WRAP 72
 #define COVER_FROM_AUTO_MAX_SUBJECT_LEN 100
 #define FORMAT_PATCH_NAME_MAX_DEFAULT 64
 
-static unsigned int force_in_body_from;
-static int stdout_mboxrd;
-static int format_no_prefix;
+ساكن unsigned صحيح force_in_body_from;
+ساكن صحيح stdout_mboxrd;
+ساكن صحيح format_no_prefix;
 
-static const char * const builtin_log_usage[] = {
+ساكن ثابت حرف * ثابت builtin_log_usage[] = {
 	N_("git log [<options>] [<revision-range>] [[--] <path>...]"),
 	N_("git show [<options>] <object>..."),
-	NULL
+	عدم
 };
 
-struct line_opt_callback_data {
-	struct rev_info *rev;
-	const char *prefix;
-	struct string_list args;
+بنية line_opt_callback_data {
+	بنية rev_info *rev;
+	ثابت حرف *prefix;
+	بنية string_list args;
 };
 
-static int session_is_interactive(void)
+ساكن صحيح session_is_interactive(فراغ)
 {
-	return isatty(1) || pager_in_use();
+	أرجع isatty(1) || pager_in_use();
 }
 
-static int auto_decoration_style(void)
+ساكن صحيح auto_decoration_style(فراغ)
 {
-	return session_is_interactive() ? DECORATE_SHORT_REFS : 0;
+	أرجع session_is_interactive() ? DECORATE_SHORT_REFS : 0;
 }
 
-static int parse_decoration_style(const char *value)
+ساكن صحيح parse_decoration_style(ثابت حرف *value)
 {
-	switch (git_parse_maybe_bool(value)) {
-	case 1:
-		return DECORATE_SHORT_REFS;
-	case 0:
-		return 0;
-	default:
-		break;
+	بدل (git_parse_maybe_bool(value)) {
+	حالة 1:
+		أرجع DECORATE_SHORT_REFS;
+	حالة 0:
+		أرجع 0;
+	افتراضي:
+		اكسر;
 	}
-	if (!strcmp(value, "full"))
-		return DECORATE_FULL_REFS;
-	else if (!strcmp(value, "short"))
-		return DECORATE_SHORT_REFS;
-	else if (!strcmp(value, "auto"))
-		return auto_decoration_style();
+	𐡄𐡍 (!strcmp(value, "full"))
+		أرجع DECORATE_FULL_REFS;
+	وإلا 𐡄𐡍 (!strcmp(value, "short"))
+		أرجع DECORATE_SHORT_REFS;
+	وإلا 𐡄𐡍 (!strcmp(value, "auto"))
+		أرجع auto_decoration_style();
 	/*
 	 * Please update _git_log() in git-completion.bash when you
 	 * add new decoration styles.
 	 */
-	return -1;
+	أرجع -1;
 }
 
-struct log_config {
-	int default_abbrev_commit;
-	int default_show_root;
-	int default_follow;
-	int default_show_signature;
-	int default_encode_email_headers;
-	int decoration_style;
-	int decoration_given;
-	int use_mailmap_config;
-	char *fmt_patch_subject_prefix;
-	int fmt_patch_name_max;
-	char *fmt_pretty;
-	char *default_date_mode;
+بنية log_config {
+	صحيح default_abbrev_commit;
+	صحيح default_show_root;
+	صحيح default_follow;
+	صحيح default_show_signature;
+	صحيح default_encode_email_headers;
+	صحيح decoration_style;
+	صحيح decoration_given;
+	صحيح use_mailmap_config;
+	حرف *fmt_patch_subject_prefix;
+	صحيح fmt_patch_name_max;
+	حرف *fmt_pretty;
+	حرف *default_date_mode;
 
 #ifndef WITH_BREAKING_CHANGES
 	/*
@@ -125,13 +125,13 @@ struct log_config {
 	 * is very deliberate.  This member is only to be used to
 	 * resurrect whatchanged that is deprecated.
 	 */
-	int i_still_use_this;
+	صحيح i_still_use_this;
 #endif
 };
 
-static void log_config_init(struct log_config *cfg)
+ساكن فراغ log_config_init(بنية log_config *cfg)
 {
-	memset(cfg, 0, sizeof(*cfg));
+	memset(cfg, 0, حجم(*cfg));
 	cfg->default_show_root = 1;
 	cfg->default_encode_email_headers = 1;
 	cfg->use_mailmap_config = 1;
@@ -140,70 +140,70 @@ static void log_config_init(struct log_config *cfg)
 	cfg->decoration_style = auto_decoration_style();
 }
 
-static void log_config_release(struct log_config *cfg)
+ساكن فراغ log_config_release(بنية log_config *cfg)
 {
-	free(cfg->default_date_mode);
-	free(cfg->fmt_pretty);
-	free(cfg->fmt_patch_subject_prefix);
+	حرر(cfg->default_date_mode);
+	حرر(cfg->fmt_pretty);
+	حرر(cfg->fmt_patch_subject_prefix);
 }
 
-static int use_default_decoration_filter = 1;
-static struct string_list decorate_refs_exclude = STRING_LIST_INIT_NODUP;
-static struct string_list decorate_refs_exclude_config = STRING_LIST_INIT_NODUP;
-static struct string_list decorate_refs_include = STRING_LIST_INIT_NODUP;
+ساكن صحيح use_default_decoration_filter = 1;
+ساكن بنية string_list decorate_refs_exclude = STRING_LIST_INIT_NODUP;
+ساكن بنية string_list decorate_refs_exclude_config = STRING_LIST_INIT_NODUP;
+ساكن بنية string_list decorate_refs_include = STRING_LIST_INIT_NODUP;
 
-static int clear_decorations_callback(const struct option *opt UNUSED,
-				      const char *arg, int unset)
+ساكن صحيح clear_decorations_callback(ثابت بنية option *opt UNUSED,
+				      ثابت حرف *arg, صحيح unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 	string_list_clear(&decorate_refs_include, 0);
 	string_list_clear(&decorate_refs_exclude, 0);
 	use_default_decoration_filter = 0;
-	return 0;
+	أرجع 0;
 }
 
-static int decorate_callback(const struct option *opt, const char *arg,
-			     int unset)
+ساكن صحيح decorate_callback(ثابت بنية option *opt, ثابت حرف *arg,
+			     صحيح unset)
 {
-	struct log_config *cfg = opt->value;
+	بنية log_config *cfg = opt->value;
 
-	if (unset)
+	𐡄𐡍 (unset)
 		cfg->decoration_style = 0;
-	else if (arg)
+	وإلا 𐡄𐡍 (arg)
 		cfg->decoration_style = parse_decoration_style(arg);
-	else
+	وإلا
 		cfg->decoration_style = DECORATE_SHORT_REFS;
 
-	if (cfg->decoration_style < 0)
+	𐡄𐡍 (cfg->decoration_style < 0)
 		die(_("invalid --decorate option: %s"), arg);
 
 	cfg->decoration_given = 1;
 
-	return 0;
+	أرجع 0;
 }
 
-static int log_line_range_callback(const struct option *option, const char *arg, int unset)
+ساكن صحيح log_line_range_callback(ثابت بنية option *option, ثابت حرف *arg, صحيح unset)
 {
-	struct line_opt_callback_data *data = option->value;
+	بنية line_opt_callback_data *data = option->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!arg)
-		return -1;
+	𐡄𐡍 (!arg)
+		أرجع -1;
 
 	data->rev->line_level_traverse = 1;
 	string_list_append(&data->args, arg);
 
-	return 0;
+	أرجع 0;
 }
 
-static void cmd_log_init_defaults(struct rev_info *rev,
-				  struct log_config *cfg)
+ساكن فراغ cmd_log_init_defaults(بنية rev_info *rev,
+				  بنية log_config *cfg)
 {
-	if (cfg->fmt_pretty)
+	𐡄𐡍 (cfg->fmt_pretty)
 		get_commit_format(cfg->fmt_pretty, rev);
-	if (cfg->default_follow)
+	𐡄𐡍 (cfg->default_follow)
 		rev->diffopt.flags.default_follow_renames = 1;
 	rev->verbose_header = 1;
 	init_diffstat_widths(&rev->diffopt);
@@ -216,19 +216,19 @@ static void cmd_log_init_defaults(struct rev_info *rev,
 	rev->show_signature = cfg->default_show_signature;
 	rev->encode_email_headers = cfg->default_encode_email_headers;
 
-	if (cfg->default_date_mode)
+	𐡄𐡍 (cfg->default_date_mode)
 		parse_date_format(cfg->default_date_mode, &rev->date_mode);
 }
 
-static void set_default_decoration_filter(struct decoration_filter *decoration_filter)
+ساكن فراغ set_default_decoration_filter(بنية decoration_filter *decoration_filter)
 {
-	char *value = NULL;
-	struct string_list *include = decoration_filter->include_ref_pattern;
-	const struct string_list *config_exclude;
+	حرف *value = عدم;
+	بنية string_list *include = decoration_filter->include_ref_pattern;
+	ثابت بنية string_list *config_exclude;
 
-	if (!repo_config_get_string_multi(the_repository, "log.excludeDecoration",
+	𐡄𐡍 (!repo_config_get_string_multi(the_repository, "log.excludeDecoration",
 					 &config_exclude)) {
-		struct string_list_item *item;
+		بنية string_list_item *item;
 		for_each_string_list_item(item, config_exclude)
 			string_list_append(decoration_filter->exclude_ref_config_pattern,
 					   item->string);
@@ -239,45 +239,45 @@ static void set_default_decoration_filter(struct decoration_filter *decoration_f
 	 * log.initialDecorationSet=all. Don't ever disable it by config,
 	 * since the command-line takes precedent.
 	 */
-	if (use_default_decoration_filter &&
+	𐡄𐡍 (use_default_decoration_filter &&
 	    !repo_config_get_string(the_repository, "log.initialdecorationset", &value) &&
 	    !strcmp("all", value))
 		use_default_decoration_filter = 0;
-	free(value);
+	حرر(value);
 
-	if (!use_default_decoration_filter ||
+	𐡄𐡍 (!use_default_decoration_filter ||
 	    decoration_filter->exclude_ref_pattern->nr ||
 	    decoration_filter->include_ref_pattern->nr ||
 	    decoration_filter->exclude_ref_config_pattern->nr)
-		return;
+		أرجع;
 
 	/*
 	 * No command-line or config options were given, so
 	 * populate with sensible defaults.
 	 */
-	for (size_t i = 0; i < ARRAY_SIZE(ref_namespace); i++) {
-		if (!ref_namespace[i].decoration)
-			continue;
+	لكل (size_t i = 0; i < ARRAY_SIZE(ref_namespace); i++) {
+		𐡄𐡍 (!ref_namespace[i].decoration)
+			استمر;
 
 		string_list_append(include, ref_namespace[i].ref);
 	}
 }
 
-static void cmd_log_init_finish(int argc, const char **argv, const char *prefix,
-			 struct rev_info *rev, struct setup_revision_opt *opt,
-			 struct log_config *cfg)
+ساكن فراغ cmd_log_init_finish(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+			 بنية rev_info *rev, بنية setup_revision_opt *opt,
+			 بنية log_config *cfg)
 {
-	struct userformat_want w;
-	int quiet = 0, source = 0, mailmap;
-	static struct line_opt_callback_data line_cb = {NULL, NULL, STRING_LIST_INIT_DUP};
-	struct decoration_filter decoration_filter = {
+	بنية userformat_want w;
+	صحيح quiet = 0, source = 0, mailmap;
+	ساكن بنية line_opt_callback_data line_cb = {عدم, عدم, STRING_LIST_INIT_DUP};
+	بنية decoration_filter decoration_filter = {
 		.exclude_ref_pattern = &decorate_refs_exclude,
 		.include_ref_pattern = &decorate_refs_include,
 		.exclude_ref_config_pattern = &decorate_refs_exclude_config,
 	};
-	static struct revision_sources revision_sources;
+	ساكن بنية revision_sources revision_sources;
 
-	const struct option builtin_log_options[] = {
+	ثابت بنية option builtin_log_options[] = {
 		OPT__QUIET(&quiet, N_("suppress diff output")),
 		OPT_BOOL(0, "source", &source, N_("show source")),
 		OPT_BOOL(0, "use-mailmap", &mailmap, N_("use mail map file")),
@@ -286,7 +286,7 @@ static void cmd_log_init_finish(int argc, const char **argv, const char *prefix,
 				"<use this deprecated command>"),
 #endif
 		OPT_ALIAS(0, "mailmap", "use-mailmap"),
-		OPT_CALLBACK_F(0, "clear-decorations", NULL, NULL,
+		OPT_CALLBACK_F(0, "clear-decorations", عدم, عدم,
 			       N_("clear all previously-defined decoration filters"),
 			       PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			       clear_decorations_callback),
@@ -294,9 +294,9 @@ static void cmd_log_init_finish(int argc, const char **argv, const char *prefix,
 				N_("pattern"), N_("only decorate refs that match <pattern>")),
 		OPT_STRING_LIST(0, "decorate-refs-exclude", &decorate_refs_exclude,
 				N_("pattern"), N_("do not decorate refs that match <pattern>")),
-		OPT_CALLBACK_F(0, "decorate", cfg, NULL, N_("decorate options"),
+		OPT_CALLBACK_F(0, "decorate", cfg, عدم, N_("decorate options"),
 			       PARSE_OPT_OPTARG, decorate_callback),
-		OPT_CALLBACK('L', NULL, &line_cb, "range:file",
+		OPT_CALLBACK('L', عدم, &line_cb, "range:file",
 			     N_("trace the evolution of line range <start>,<end> or function :<funcname> in <file>"),
 			     log_line_range_callback),
 		OPT_END()
@@ -311,59 +311,59 @@ static void cmd_log_init_finish(int argc, const char **argv, const char *prefix,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT |
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (quiet)
+	𐡄𐡍 (quiet)
 		rev->diffopt.output_format |= DIFF_FORMAT_NO_OUTPUT;
 	argc = setup_revisions(argc, argv, rev, opt);
 
 	/* Any arguments at this point are not recognized */
-	if (argc > 1)
+	𐡄𐡍 (argc > 1)
 		die(_("unrecognized argument: %s"), argv[1]);
 
-	if (rev->line_level_traverse && rev->prune_data.nr)
+	𐡄𐡍 (rev->line_level_traverse && rev->prune_data.nr)
 		die(_("-L<range>:<file> cannot be used with pathspec"));
 
-	memset(&w, 0, sizeof(w));
-	userformat_find_requirements(NULL, &w);
+	memset(&w, 0, حجم(w));
+	userformat_find_requirements(عدم, &w);
 
-	if (!rev->show_notes_given && (!rev->pretty_given || w.notes))
+	𐡄𐡍 (!rev->show_notes_given && (!rev->pretty_given || w.notes))
 		rev->show_notes = 1;
-	if (rev->show_notes)
+	𐡄𐡍 (rev->show_notes)
 		load_display_notes(&rev->notes_opt);
 
-	if ((rev->diffopt.pickaxe_opts & DIFF_PICKAXE_KINDS_MASK) ||
+	𐡄𐡍 ((rev->diffopt.pickaxe_opts & DIFF_PICKAXE_KINDS_MASK) ||
 	    rev->diffopt.filter || rev->diffopt.flags.follow_renames)
 		rev->always_show_header = 0;
 
-	if (source || w.source) {
+	𐡄𐡍 (source || w.source) {
 		init_revision_sources(&revision_sources);
 		rev->sources = &revision_sources;
 	}
 
-	if (mailmap) {
-		rev->mailmap = xmalloc(sizeof(struct string_list));
+	𐡄𐡍 (mailmap) {
+		rev->mailmap = xmalloc(حجم(بنية string_list));
 		string_list_init_nodup(rev->mailmap);
 		read_mailmap(the_repository, rev->mailmap);
 	}
 
-	if (rev->pretty_given && rev->commit_format == CMIT_FMT_RAW) {
+	𐡄𐡍 (rev->pretty_given && rev->commit_format == CMIT_FMT_RAW) {
 		/*
 		 * "log --pretty=raw" is special; ignore UI oriented
 		 * configuration variables such as decoration.
 		 */
-		if (!cfg->decoration_given)
+		𐡄𐡍 (!cfg->decoration_given)
 			cfg->decoration_style = 0;
-		if (!rev->abbrev_commit_given)
+		𐡄𐡍 (!rev->abbrev_commit_given)
 			rev->abbrev_commit = 0;
 	}
 
-	if (rev->commit_format == CMIT_FMT_USERFORMAT) {
-		if (!w.decorate) {
+	𐡄𐡍 (rev->commit_format == CMIT_FMT_USERFORMAT) {
+		𐡄𐡍 (!w.decorate) {
 			/*
 			 * Disable decoration loading if the format will not
 			 * show them anyway.
 			 */
 			cfg->decoration_style = 0;
-		} else if (!cfg->decoration_style) {
+		} وإلا 𐡄𐡍 (!cfg->decoration_style) {
 			/*
 			 * If we are going to show them, make sure we do load
 			 * them here, but taking care not to override a
@@ -373,37 +373,37 @@ static void cmd_log_init_finish(int argc, const char **argv, const char *prefix,
 		}
 	}
 
-	if (cfg->decoration_style || rev->simplify_by_decoration) {
+	𐡄𐡍 (cfg->decoration_style || rev->simplify_by_decoration) {
 		set_default_decoration_filter(&decoration_filter);
 
-		if (cfg->decoration_style)
+		𐡄𐡍 (cfg->decoration_style)
 			rev->show_decorations = 1;
 
 		load_ref_decorations(&decoration_filter, cfg->decoration_style);
 	}
 
-	if (rev->line_level_traverse)
+	𐡄𐡍 (rev->line_level_traverse)
 		line_log_init(rev, line_cb.prefix, &line_cb.args);
 
 	setup_pager(the_repository);
 }
 
-static void cmd_log_init(int argc, const char **argv, const char *prefix,
-			 struct rev_info *rev, struct setup_revision_opt *opt,
-			 struct log_config *cfg)
+ساكن فراغ cmd_log_init(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+			 بنية rev_info *rev, بنية setup_revision_opt *opt,
+			 بنية log_config *cfg)
 {
 	cmd_log_init_defaults(rev, cfg);
 	cmd_log_init_finish(argc, argv, prefix, rev, opt, cfg);
 }
 
-static int cmd_log_walk_no_free(struct rev_info *rev)
+ساكن صحيح cmd_log_walk_no_free(بنية rev_info *rev)
 {
-	struct commit *commit;
-	int saved_nrl = 0;
-	int saved_dcctc = 0;
-	int result;
+	بنية commit *commit;
+	صحيح saved_nrl = 0;
+	صحيح saved_dcctc = 0;
+	صحيح result;
 
-	if (prepare_revision_walk(rev))
+	𐡄𐡍 (prepare_revision_walk(rev))
 		die(_("revision walk setup failed"));
 
 	/*
@@ -411,14 +411,14 @@ static int cmd_log_walk_no_free(struct rev_info *rev)
 	 * and HAS_CHANGES being accumulated in rev->diffopt, so be careful to
 	 * retain that state information if replacing rev->diffopt in this loop
 	 */
-	while ((commit = get_revision(rev)) != NULL) {
-		if (!log_tree_commit(rev, commit) && rev->max_count >= 0)
+	طالما ((commit = get_revision(rev)) != عدم) {
+		𐡄𐡍 (!log_tree_commit(rev, commit) && rev->max_count >= 0)
 			/*
 			 * We decremented max_count in get_revision,
 			 * but we didn't actually show the commit.
 			 */
 			rev->max_count++;
-		if (!rev->reflog_info && !rev->remerge_diff) {
+		𐡄𐡍 (!rev->reflog_info && !rev->remerge_diff) {
 			/*
 			 * We may show a given commit multiple times when
 			 * walking the reflogs. Therefore we still need it.
@@ -430,108 +430,108 @@ static int cmd_log_walk_no_free(struct rev_info *rev)
 			free_commit_buffer(the_repository->parsed_objects,
 					   commit);
 			commit_list_free(commit->parents);
-			commit->parents = NULL;
+			commit->parents = عدم;
 		}
-		if (saved_nrl < rev->diffopt.needed_rename_limit)
+		𐡄𐡍 (saved_nrl < rev->diffopt.needed_rename_limit)
 			saved_nrl = rev->diffopt.needed_rename_limit;
-		if (rev->diffopt.degraded_cc_to_c)
+		𐡄𐡍 (rev->diffopt.degraded_cc_to_c)
 			saved_dcctc = 1;
 	}
 	rev->diffopt.degraded_cc_to_c = saved_dcctc;
 	rev->diffopt.needed_rename_limit = saved_nrl;
 
 	result = diff_result_code(rev);
-	if (rev->diffopt.output_format & DIFF_FORMAT_CHECKDIFF &&
+	𐡄𐡍 (rev->diffopt.output_format & DIFF_FORMAT_CHECKDIFF &&
 	    rev->diffopt.flags.check_failed) {
 		result = 02;
 	}
-	return result;
+	أرجع result;
 }
 
-static int cmd_log_walk(struct rev_info *rev)
+ساكن صحيح cmd_log_walk(بنية rev_info *rev)
 {
-	int retval;
+	صحيح retval;
 
 	rev->diffopt.no_free = 1;
 	retval = cmd_log_walk_no_free(rev);
 	rev->diffopt.no_free = 0;
 	diff_free(&rev->diffopt);
-	return retval;
+	أرجع retval;
 }
 
-static int git_log_config(const char *var, const char *value,
-			  const struct config_context *ctx, void *cb)
+ساكن صحيح git_log_config(ثابت حرف *var, ثابت حرف *value,
+			  ثابت بنية config_context *ctx, فراغ *cb)
 {
-	struct log_config *cfg = cb;
-	const char *slot_name;
+	بنية log_config *cfg = cb;
+	ثابت حرف *slot_name;
 
-	if (!strcmp(var, "format.pretty")) {
+	𐡄𐡍 (!strcmp(var, "format.pretty")) {
 		FREE_AND_NULL(cfg->fmt_pretty);
-		return git_config_string(&cfg->fmt_pretty, var, value);
+		أرجع git_config_string(&cfg->fmt_pretty, var, value);
 	}
-	if (!strcmp(var, "format.subjectprefix")) {
+	𐡄𐡍 (!strcmp(var, "format.subjectprefix")) {
 		FREE_AND_NULL(cfg->fmt_patch_subject_prefix);
-		return git_config_string(&cfg->fmt_patch_subject_prefix, var, value);
+		أرجع git_config_string(&cfg->fmt_patch_subject_prefix, var, value);
 	}
-	if (!strcmp(var, "format.filenamemaxlength")) {
+	𐡄𐡍 (!strcmp(var, "format.filenamemaxlength")) {
 		cfg->fmt_patch_name_max = git_config_int(var, value, ctx->kvi);
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "format.encodeemailheaders")) {
+	𐡄𐡍 (!strcmp(var, "format.encodeemailheaders")) {
 		cfg->default_encode_email_headers = git_config_bool(var, value);
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "log.abbrevcommit")) {
+	𐡄𐡍 (!strcmp(var, "log.abbrevcommit")) {
 		cfg->default_abbrev_commit = git_config_bool(var, value);
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "log.date")) {
+	𐡄𐡍 (!strcmp(var, "log.date")) {
 		FREE_AND_NULL(cfg->default_date_mode);
-		return git_config_string(&cfg->default_date_mode, var, value);
+		أرجع git_config_string(&cfg->default_date_mode, var, value);
 	}
-	if (!strcmp(var, "log.decorate")) {
+	𐡄𐡍 (!strcmp(var, "log.decorate")) {
 		cfg->decoration_style = parse_decoration_style(value);
-		if (cfg->decoration_style < 0)
+		𐡄𐡍 (cfg->decoration_style < 0)
 			cfg->decoration_style = 0; /* maybe warn? */
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "log.diffmerges")) {
-		if (!value)
-			return config_error_nonbool(var);
-		return diff_merges_config(value);
+	𐡄𐡍 (!strcmp(var, "log.diffmerges")) {
+		𐡄𐡍 (!value)
+			أرجع config_error_nonbool(var);
+		أرجع diff_merges_config(value);
 	}
-	if (!strcmp(var, "log.showroot")) {
+	𐡄𐡍 (!strcmp(var, "log.showroot")) {
 		cfg->default_show_root = git_config_bool(var, value);
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "log.follow")) {
+	𐡄𐡍 (!strcmp(var, "log.follow")) {
 		cfg->default_follow = git_config_bool(var, value);
-		return 0;
+		أرجع 0;
 	}
-	if (skip_prefix(var, "color.decorate.", &slot_name))
-		return parse_decorate_color_config(var, slot_name, value);
-	if (!strcmp(var, "log.mailmap")) {
+	𐡄𐡍 (skip_prefix(var, "color.decorate.", &slot_name))
+		أرجع parse_decorate_color_config(var, slot_name, value);
+	𐡄𐡍 (!strcmp(var, "log.mailmap")) {
 		cfg->use_mailmap_config = git_config_bool(var, value);
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "log.showsignature")) {
+	𐡄𐡍 (!strcmp(var, "log.showsignature")) {
 		cfg->default_show_signature = git_config_bool(var, value);
-		return 0;
+		أرجع 0;
 	}
 
-	return git_diff_ui_config(var, value, ctx, cb);
+	أرجع git_diff_ui_config(var, value, ctx, cb);
 }
 
 #ifndef WITH_BREAKING_CHANGES
-int cmd_whatchanged(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+صحيح cmd_whatchanged(صحيح argc,
+		    ثابت حرف **argv,
+		    ثابت حرف *prefix,
+		    بنية repository *repo UNUSED)
 {
-	struct log_config cfg;
-	struct rev_info rev;
-	struct setup_revision_opt opt;
-	int ret;
+	بنية log_config cfg;
+	بنية rev_info rev;
+	بنية setup_revision_opt opt;
+	صحيح ret;
 
 	log_config_init(&cfg);
 	init_diff_ui_defaults();
@@ -542,12 +542,12 @@ int cmd_whatchanged(int argc,
 
 	rev.diff = 1;
 	rev.simplify_history = 0;
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, حجم(opt));
 	opt.def = "HEAD";
 	opt.revarg_opt = REVARG_COMMITTISH;
 	cmd_log_init(argc, argv, prefix, &rev, &opt, &cfg);
 
-	if (!cfg.i_still_use_this)
+	𐡄𐡍 (!cfg.i_still_use_this)
 		you_still_use_that("git whatchanged",
 				   _("\n"
 				     "hint: You can replace 'git whatchanged <opts>' with:\n"
@@ -556,21 +556,21 @@ int cmd_whatchanged(int argc,
 				     "hint:\tgit config set --global alias.whatchanged 'log --raw --no-merges'\n"
 				     "\n"));
 
-	if (!rev.diffopt.output_format)
+	𐡄𐡍 (!rev.diffopt.output_format)
 		rev.diffopt.output_format = DIFF_FORMAT_RAW;
 
 	ret = cmd_log_walk(&rev);
 
 	release_revisions(&rev);
 	log_config_release(&cfg);
-	return ret;
+	أرجع ret;
 }
 #endif
 
-static void show_tagger(const char *buf, struct rev_info *rev)
+ساكن فراغ show_tagger(ثابت حرف *buf, بنية rev_info *rev)
 {
-	struct strbuf out = STRBUF_INIT;
-	struct pretty_print_context pp = {0};
+	بنية strbuf out = STRBUF_INIT;
+	بنية pretty_print_context pp = {0};
 
 	pp.fmt = rev->commit_format;
 	pp.date_mode = rev->date_mode;
@@ -579,107 +579,107 @@ static void show_tagger(const char *buf, struct rev_info *rev)
 	strbuf_release(&out);
 }
 
-static int show_blob_object(const struct object_id *oid, struct rev_info *rev, const char *obj_name)
+ساكن صحيح show_blob_object(ثابت بنية object_id *oid, بنية rev_info *rev, ثابت حرف *obj_name)
 {
-	struct object_id oidc;
-	struct object_context obj_context = {0};
-	char *buf;
+	بنية object_id oidc;
+	بنية object_context obj_context = {0};
+	حرف *buf;
 	unsigned long size;
 
 	fflush(rev->diffopt.file);
-	if (!rev->diffopt.flags.textconv_set_via_cmdline ||
+	𐡄𐡍 (!rev->diffopt.flags.textconv_set_via_cmdline ||
 	    !rev->diffopt.flags.allow_textconv)
-		return odb_stream_blob_to_fd(the_repository->objects, 1, oid, NULL, 0);
+		أرجع odb_stream_blob_to_fd(the_repository->objects, 1, oid, عدم, 0);
 
-	if (get_oid_with_context(the_repository, obj_name,
+	𐡄𐡍 (get_oid_with_context(the_repository, obj_name,
 				 GET_OID_RECORD_PATH,
 				 &oidc, &obj_context))
 		die(_("not a valid object name %s"), obj_name);
-	if (!obj_context.path ||
+	𐡄𐡍 (!obj_context.path ||
 	    !textconv_object(the_repository, obj_context.path,
 			     obj_context.mode, &oidc, 1, &buf, &size)) {
 		object_context_release(&obj_context);
-		return odb_stream_blob_to_fd(the_repository->objects, 1, oid, NULL, 0);
+		أرجع odb_stream_blob_to_fd(the_repository->objects, 1, oid, عدم, 0);
 	}
 
-	if (!buf)
+	𐡄𐡍 (!buf)
 		die(_("git show %s: bad file"), obj_name);
 
 	write_or_die(1, buf, size);
 	object_context_release(&obj_context);
-	free(buf);
-	return 0;
+	حرر(buf);
+	أرجع 0;
 }
 
-static int show_tag_object(const struct object_id *oid, struct rev_info *rev)
+ساكن صحيح show_tag_object(ثابت بنية object_id *oid, بنية rev_info *rev)
 {
 	size_t size;
-	enum object_type type;
-	char *buf = odb_read_object(the_repository->objects, oid, &type, &size);
+	تعداد object_type type;
+	حرف *buf = odb_read_object(the_repository->objects, oid, &type, &size);
 	unsigned long offset = 0;
 
-	if (!buf)
-		return error(_("could not read object %s"), oid_to_hex(oid));
+	𐡄𐡍 (!buf)
+		أرجع error(_("could not read object %s"), oid_to_hex(oid));
 
-	assert(type == OBJ_TAG);
-	while (offset < size && buf[offset] != '\n') {
+	أكد(type == OBJ_TAG);
+	طالما (offset < size && buf[offset] != '\n') {
 		unsigned long new_offset = offset + 1;
-		const char *ident;
-		while (new_offset < size && buf[new_offset++] != '\n')
+		ثابت حرف *ident;
+		طالما (new_offset < size && buf[new_offset++] != '\n')
 			; /* do nothing */
-		if (skip_prefix(buf + offset, "tagger ", &ident))
+		𐡄𐡍 (skip_prefix(buf + offset, "tagger ", &ident))
 			show_tagger(ident, rev);
 		offset = new_offset;
 	}
 
-	if (offset < size)
+	𐡄𐡍 (offset < size)
 		fwrite(buf + offset, size - offset, 1, rev->diffopt.file);
-	free(buf);
-	return 0;
+	حرر(buf);
+	أرجع 0;
 }
 
-static int show_tree_object(const struct object_id *oid UNUSED,
-			    struct strbuf *base UNUSED,
-			    const char *pathname, unsigned mode,
-			    void *context)
+ساكن صحيح show_tree_object(ثابت بنية object_id *oid UNUSED,
+			    بنية strbuf *base UNUSED,
+			    ثابت حرف *pathname, unsigned mode,
+			    فراغ *context)
 {
 	FILE *file = context;
 	fprintf(file, "%s%s\n", pathname, S_ISDIR(mode) ? "/" : "");
-	return 0;
+	أرجع 0;
 }
 
-static void show_setup_revisions_tweak(struct rev_info *rev)
+ساكن فراغ show_setup_revisions_tweak(بنية rev_info *rev)
 {
-	if (rev->first_parent_only)
+	𐡄𐡍 (rev->first_parent_only)
 		diff_merges_default_to_first_parent(rev);
-	else
+	وإلا
 		diff_merges_default_to_dense_combined(rev);
-	if (!rev->diffopt.output_format)
+	𐡄𐡍 (!rev->diffopt.output_format)
 		rev->diffopt.output_format = DIFF_FORMAT_PATCH;
 }
 
-int cmd_show(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo UNUSED)
+صحيح cmd_show(صحيح argc,
+	     ثابت حرف **argv,
+	     ثابت حرف *prefix,
+	     بنية repository *repo UNUSED)
 {
-	struct log_config cfg;
-	struct rev_info rev;
-	unsigned int i;
-	struct setup_revision_opt opt;
-	struct pathspec match_all;
-	int ret = 0;
+	بنية log_config cfg;
+	بنية rev_info rev;
+	unsigned صحيح i;
+	بنية setup_revision_opt opt;
+	بنية pathspec match_all;
+	صحيح ret = 0;
 
 	log_config_init(&cfg);
 	init_diff_ui_defaults();
 	repo_config(the_repository, git_log_config, &cfg);
 
-	if (the_repository->gitdir) {
+	𐡄𐡍 (the_repository->gitdir) {
 		prepare_repo_settings(the_repository);
 		the_repository->settings.command_requires_full_index = 0;
 	}
 
-	memset(&match_all, 0, sizeof(match_all));
+	memset(&match_all, 0, حجم(match_all));
 	repo_init_revisions(the_repository, &rev, prefix);
 	repo_config(the_repository, grep_config, &rev.grep_filter);
 
@@ -688,31 +688,31 @@ int cmd_show(int argc,
 	rev.no_walk = 1;
 	rev.diffopt.stat_width = -1; 	/* Scale to real terminal size */
 
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, حجم(opt));
 	opt.def = "HEAD";
 	opt.tweak = show_setup_revisions_tweak;
 	cmd_log_init(argc, argv, prefix, &rev, &opt, &cfg);
 
-	if (!rev.no_walk) {
+	𐡄𐡍 (!rev.no_walk) {
 		ret = cmd_log_walk(&rev);
 		release_revisions(&rev);
 		log_config_release(&cfg);
-		return ret;
+		أرجع ret;
 	}
 
 	rev.diffopt.no_free = 1;
-	for (i = 0; i < rev.pending.nr && !ret; i++) {
-		struct object *o = rev.pending.objects[i].item;
-		const char *name = rev.pending.objects[i].name;
-		switch (o->type) {
-		case OBJ_BLOB:
+	لكل (i = 0; i < rev.pending.nr && !ret; i++) {
+		بنية object *o = rev.pending.objects[i].item;
+		ثابت حرف *name = rev.pending.objects[i].name;
+		بدل (o->type) {
+		حالة OBJ_BLOB:
 			ret = show_blob_object(&o->oid, &rev, name);
-			break;
-		case OBJ_TAG: {
-			struct tag *t = (struct tag *)o;
-			struct object_id *oid = get_tagged_oid(t);
+			اكسر;
+		حالة OBJ_TAG: {
+			بنية tag *t = (بنية tag *)o;
+			بنية object_id *oid = get_tagged_oid(t);
 
-			if (rev.shown_one)
+			𐡄𐡍 (rev.shown_one)
 				putchar('\n');
 			fprintf(rev.diffopt.file, "%stag %s%s\n",
 					diff_get_color_opt(&rev.diffopt, DIFF_COMMIT),
@@ -720,35 +720,35 @@ int cmd_show(int argc,
 					diff_get_color_opt(&rev.diffopt, DIFF_RESET));
 			ret = show_tag_object(&o->oid, &rev);
 			rev.shown_one = 1;
-			if (ret)
-				break;
+			𐡄𐡍 (ret)
+				اكسر;
 			o = parse_object(the_repository, oid);
-			if (!o)
+			𐡄𐡍 (!o)
 				ret = error(_("could not read object %s"),
 					    oid_to_hex(oid));
 			rev.pending.objects[i].item = o;
 			i--;
-			break;
+			اكسر;
 		}
-		case OBJ_TREE:
-			if (rev.shown_one)
+		حالة OBJ_TREE:
+			𐡄𐡍 (rev.shown_one)
 				putchar('\n');
 			fprintf(rev.diffopt.file, "%stree %s%s\n\n",
 					diff_get_color_opt(&rev.diffopt, DIFF_COMMIT),
 					name,
 					diff_get_color_opt(&rev.diffopt, DIFF_RESET));
-			read_tree(the_repository, (struct tree *)o,
+			read_tree(the_repository, (بنية tree *)o,
 				  &match_all, show_tree_object,
 				  rev.diffopt.file);
 			rev.shown_one = 1;
-			break;
-		case OBJ_COMMIT:
+			اكسر;
+		حالة OBJ_COMMIT:
 		{
-			struct object_array old;
-			struct object_array blank = OBJECT_ARRAY_INIT;
+			بنية object_array old;
+			بنية object_array blank = OBJECT_ARRAY_INIT;
 
-			memcpy(&old, &rev.pending, sizeof(old));
-			memcpy(&rev.pending, &blank, sizeof(rev.pending));
+			memcpy(&old, &rev.pending, حجم(old));
+			memcpy(&rev.pending, &blank, حجم(rev.pending));
 
 			add_object_array(o, name, &rev.pending);
 			ret = cmd_log_walk_no_free(&rev);
@@ -758,10 +758,10 @@ int cmd_show(int argc,
 			 * object_array_clear(&pending). It was
 			 * cleared already in prepare_revision_walk()
 			 */
-			memcpy(&rev.pending, &old, sizeof(rev.pending));
-			break;
+			memcpy(&rev.pending, &old, حجم(rev.pending));
+			اكسر;
 		}
-		default:
+		افتراضي:
 			ret = error(_("unknown type: %d"), o->type);
 		}
 	}
@@ -771,21 +771,21 @@ int cmd_show(int argc,
 	release_revisions(&rev);
 	log_config_release(&cfg);
 
-	return ret;
+	أرجع ret;
 }
 
 /*
  * This is equivalent to "git log -g --abbrev-commit --pretty=oneline"
  */
-int cmd_log_reflog(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+صحيح cmd_log_reflog(صحيح argc,
+		   ثابت حرف **argv,
+		   ثابت حرف *prefix,
+		   بنية repository *repo UNUSED)
 {
-	struct log_config cfg;
-	struct rev_info rev;
-	struct setup_revision_opt opt;
-	int ret;
+	بنية log_config cfg;
+	بنية rev_info rev;
+	بنية setup_revision_opt opt;
+	صحيح ret;
 
 	log_config_init(&cfg);
 	init_diff_ui_defaults();
@@ -796,7 +796,7 @@ int cmd_log_reflog(int argc,
 	repo_config(the_repository, grep_config, &rev.grep_filter);
 
 	rev.verbose_header = 1;
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, حجم(opt));
 	opt.def = "HEAD";
 	cmd_log_init_defaults(&rev, &cfg);
 	rev.abbrev_commit = 1;
@@ -809,28 +809,28 @@ int cmd_log_reflog(int argc,
 
 	release_revisions(&rev);
 	log_config_release(&cfg);
-	return ret;
+	أرجع ret;
 }
 
-static void log_setup_revisions_tweak(struct rev_info *rev)
+ساكن فراغ log_setup_revisions_tweak(بنية rev_info *rev)
 {
-	if (rev->diffopt.flags.default_follow_renames &&
+	𐡄𐡍 (rev->diffopt.flags.default_follow_renames &&
 	    diff_check_follow_pathspec(&rev->prune_data, 0))
 		rev->diffopt.flags.follow_renames = 1;
 
-	if (rev->first_parent_only)
+	𐡄𐡍 (rev->first_parent_only)
 		diff_merges_default_to_first_parent(rev);
 }
 
-int cmd_log(int argc,
-	    const char **argv,
-	    const char *prefix,
-	    struct repository *repo UNUSED)
+صحيح cmd_log(صحيح argc,
+	    ثابت حرف **argv,
+	    ثابت حرف *prefix,
+	    بنية repository *repo UNUSED)
 {
-	struct log_config cfg;
-	struct rev_info rev;
-	struct setup_revision_opt opt;
-	int ret;
+	بنية log_config cfg;
+	بنية rev_info rev;
+	بنية setup_revision_opt opt;
+	صحيح ret;
 
 	log_config_init(&cfg);
 	init_diff_ui_defaults();
@@ -840,7 +840,7 @@ int cmd_log(int argc,
 	repo_config(the_repository, grep_config, &rev.grep_filter);
 
 	rev.always_show_header = 1;
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, حجم(opt));
 	opt.def = "HEAD";
 	opt.revarg_opt = REVARG_COMMITTISH;
 	opt.tweak = log_setup_revisions_tweak;
@@ -850,68 +850,68 @@ int cmd_log(int argc,
 
 	release_revisions(&rev);
 	log_config_release(&cfg);
-	return ret;
+	أرجع ret;
 }
 
 /* format-patch */
 
-enum cover_setting {
+تعداد cover_setting {
 	COVER_UNSET,
 	COVER_OFF,
 	COVER_ON,
 	COVER_AUTO
 };
 
-enum thread_level {
+تعداد thread_level {
 	THREAD_UNSET,
 	THREAD_SHALLOW,
 	THREAD_DEEP
 };
 
-enum cover_from_description {
+تعداد cover_from_description {
 	COVER_FROM_NONE,
 	COVER_FROM_MESSAGE,
 	COVER_FROM_SUBJECT,
 	COVER_FROM_AUTO
 };
 
-enum auto_base_setting {
+تعداد auto_base_setting {
 	AUTO_BASE_NEVER,
 	AUTO_BASE_ALWAYS,
 	AUTO_BASE_WHEN_ABLE
 };
 
-struct format_config {
-	struct log_config log;
-	enum thread_level thread;
-	int do_signoff;
-	enum auto_base_setting auto_base;
-	char *base_commit;
-	char *from;
-	char *signature;
-	char *signature_file;
-	enum cover_setting config_cover_letter;
-	char *fmt_cover_letter_commit_list;
-	char *config_output_directory;
-	enum cover_from_description cover_from_description_mode;
-	int show_notes;
-	struct display_notes_opt notes_opt;
-	int numbered_cmdline_opt;
-	int numbered;
-	int auto_number;
-	char *default_attach;
-	struct string_list extra_hdr;
-	struct string_list extra_to;
-	struct string_list extra_cc;
-	int keep_subject;
-	int subject_prefix;
-	struct strbuf sprefix;
-	char *fmt_patch_suffix;
+بنية format_config {
+	بنية log_config log;
+	تعداد thread_level thread;
+	صحيح do_signoff;
+	تعداد auto_base_setting auto_base;
+	حرف *base_commit;
+	حرف *from;
+	حرف *signature;
+	حرف *signature_file;
+	تعداد cover_setting config_cover_letter;
+	حرف *fmt_cover_letter_commit_list;
+	حرف *config_output_directory;
+	تعداد cover_from_description cover_from_description_mode;
+	صحيح show_notes;
+	بنية display_notes_opt notes_opt;
+	صحيح numbered_cmdline_opt;
+	صحيح numbered;
+	صحيح auto_number;
+	حرف *default_attach;
+	بنية string_list extra_hdr;
+	بنية string_list extra_to;
+	بنية string_list extra_cc;
+	صحيح keep_subject;
+	صحيح subject_prefix;
+	بنية strbuf sprefix;
+	حرف *fmt_patch_suffix;
 };
 
-static void format_config_init(struct format_config *cfg)
+ساكن فراغ format_config_init(بنية format_config *cfg)
 {
-	memset(cfg, 0, sizeof(*cfg));
+	memset(cfg, 0, حجم(*cfg));
 	log_config_init(&cfg->log);
 	cfg->cover_from_description_mode = COVER_FROM_MESSAGE;
 	cfg->auto_number = 1;
@@ -922,194 +922,194 @@ static void format_config_init(struct format_config *cfg)
 	cfg->fmt_patch_suffix = xstrdup(".patch");
 }
 
-static void format_config_release(struct format_config *cfg)
+ساكن فراغ format_config_release(بنية format_config *cfg)
 {
 	log_config_release(&cfg->log);
-	free(cfg->base_commit);
-	free(cfg->from);
-	free(cfg->signature);
-	free(cfg->signature_file);
-	free(cfg->config_output_directory);
-	free(cfg->default_attach);
+	حرر(cfg->base_commit);
+	حرر(cfg->from);
+	حرر(cfg->signature);
+	حرر(cfg->signature_file);
+	حرر(cfg->config_output_directory);
+	حرر(cfg->default_attach);
 	string_list_clear(&cfg->extra_hdr, 0);
 	string_list_clear(&cfg->extra_to, 0);
 	string_list_clear(&cfg->extra_cc, 0);
 	strbuf_release(&cfg->sprefix);
-	free(cfg->fmt_patch_suffix);
-	free(cfg->fmt_cover_letter_commit_list);
+	حرر(cfg->fmt_patch_suffix);
+	حرر(cfg->fmt_cover_letter_commit_list);
 }
 
-static enum cover_from_description parse_cover_from_description(const char *arg)
+ساكن تعداد cover_from_description parse_cover_from_description(ثابت حرف *arg)
 {
-	if (!arg || !strcmp(arg, "default"))
-		return COVER_FROM_MESSAGE;
-	else if (!strcmp(arg, "none"))
-		return COVER_FROM_NONE;
-	else if (!strcmp(arg, "message"))
-		return COVER_FROM_MESSAGE;
-	else if (!strcmp(arg, "subject"))
-		return COVER_FROM_SUBJECT;
-	else if (!strcmp(arg, "auto"))
-		return COVER_FROM_AUTO;
-	else
+	𐡄𐡍 (!arg || !strcmp(arg, "default"))
+		أرجع COVER_FROM_MESSAGE;
+	وإلا 𐡄𐡍 (!strcmp(arg, "none"))
+		أرجع COVER_FROM_NONE;
+	وإلا 𐡄𐡍 (!strcmp(arg, "message"))
+		أرجع COVER_FROM_MESSAGE;
+	وإلا 𐡄𐡍 (!strcmp(arg, "subject"))
+		أرجع COVER_FROM_SUBJECT;
+	وإلا 𐡄𐡍 (!strcmp(arg, "auto"))
+		أرجع COVER_FROM_AUTO;
+	وإلا
 		die(_("%s: invalid cover from description mode"), arg);
 }
 
-static void add_header(struct format_config *cfg, const char *value)
+ساكن فراغ add_header(بنية format_config *cfg, ثابت حرف *value)
 {
-	struct string_list_item *item;
-	int len = strlen(value);
-	while (len && value[len - 1] == '\n')
+	بنية string_list_item *item;
+	صحيح len = strlen(value);
+	طالما (len && value[len - 1] == '\n')
 		len--;
 
-	if (!strncasecmp(value, "to: ", 4)) {
+	𐡄𐡍 (!strncasecmp(value, "to: ", 4)) {
 		item = string_list_append(&cfg->extra_to, value + 4);
 		len -= 4;
-	} else if (!strncasecmp(value, "cc: ", 4)) {
+	} وإلا 𐡄𐡍 (!strncasecmp(value, "cc: ", 4)) {
 		item = string_list_append(&cfg->extra_cc, value + 4);
 		len -= 4;
-	} else {
+	} وإلا {
 		item = string_list_append(&cfg->extra_hdr, value);
 	}
 
 	item->string[len] = '\0';
 }
 
-static int git_format_config(const char *var, const char *value,
-			     const struct config_context *ctx, void *cb)
+ساكن صحيح git_format_config(ثابت حرف *var, ثابت حرف *value,
+			     ثابت بنية config_context *ctx, فراغ *cb)
 {
-	struct format_config *cfg = cb;
+	بنية format_config *cfg = cb;
 
-	if (!strcmp(var, "format.headers")) {
-		if (!value)
+	𐡄𐡍 (!strcmp(var, "format.headers")) {
+		𐡄𐡍 (!value)
 			die(_("format.headers without value"));
 		add_header(cfg, value);
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "format.suffix")) {
+	𐡄𐡍 (!strcmp(var, "format.suffix")) {
 		FREE_AND_NULL(cfg->fmt_patch_suffix);
-		return git_config_string(&cfg->fmt_patch_suffix, var, value);
+		أرجع git_config_string(&cfg->fmt_patch_suffix, var, value);
 	}
-	if (!strcmp(var, "format.to")) {
-		if (!value)
-			return config_error_nonbool(var);
+	𐡄𐡍 (!strcmp(var, "format.to")) {
+		𐡄𐡍 (!value)
+			أرجع config_error_nonbool(var);
 		string_list_append(&cfg->extra_to, value);
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "format.cc")) {
-		if (!value)
-			return config_error_nonbool(var);
+	𐡄𐡍 (!strcmp(var, "format.cc")) {
+		𐡄𐡍 (!value)
+			أرجع config_error_nonbool(var);
 		string_list_append(&cfg->extra_cc, value);
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "diff.color") || !strcmp(var, "color.diff") ||
+	𐡄𐡍 (!strcmp(var, "diff.color") || !strcmp(var, "color.diff") ||
 	    !strcmp(var, "color.ui") || !strcmp(var, "diff.submodule")) {
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "format.numbered")) {
-		if (value && !strcasecmp(value, "auto")) {
+	𐡄𐡍 (!strcmp(var, "format.numbered")) {
+		𐡄𐡍 (value && !strcasecmp(value, "auto")) {
 			cfg->auto_number = 1;
-			return 0;
+			أرجع 0;
 		}
 		cfg->numbered = git_config_bool(var, value);
 		cfg->auto_number = cfg->auto_number && cfg->numbered;
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "format.attach")) {
-		if (value && *value) {
+	𐡄𐡍 (!strcmp(var, "format.attach")) {
+		𐡄𐡍 (value && *value) {
 			FREE_AND_NULL(cfg->default_attach);
 			cfg->default_attach = xstrdup(value);
-		} else if (value && !*value) {
+		} وإلا 𐡄𐡍 (value && !*value) {
 			FREE_AND_NULL(cfg->default_attach);
-		} else {
+		} وإلا {
 			FREE_AND_NULL(cfg->default_attach);
 			cfg->default_attach = xstrdup(git_version_string);
 		}
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "format.thread")) {
-		if (value && !strcasecmp(value, "deep")) {
+	𐡄𐡍 (!strcmp(var, "format.thread")) {
+		𐡄𐡍 (value && !strcasecmp(value, "deep")) {
 			cfg->thread = THREAD_DEEP;
-			return 0;
+			أرجع 0;
 		}
-		if (value && !strcasecmp(value, "shallow")) {
+		𐡄𐡍 (value && !strcasecmp(value, "shallow")) {
 			cfg->thread = THREAD_SHALLOW;
-			return 0;
+			أرجع 0;
 		}
 		cfg->thread = git_config_bool(var, value) ? THREAD_SHALLOW : THREAD_UNSET;
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "format.signoff")) {
+	𐡄𐡍 (!strcmp(var, "format.signoff")) {
 		cfg->do_signoff = git_config_bool(var, value);
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "format.signature")) {
+	𐡄𐡍 (!strcmp(var, "format.signature")) {
 		FREE_AND_NULL(cfg->signature);
-		return git_config_string(&cfg->signature, var, value);
+		أرجع git_config_string(&cfg->signature, var, value);
 	}
-	if (!strcmp(var, "format.signaturefile")) {
+	𐡄𐡍 (!strcmp(var, "format.signaturefile")) {
 		FREE_AND_NULL(cfg->signature_file);
-		return git_config_pathname(&cfg->signature_file, var, value);
+		أرجع git_config_pathname(&cfg->signature_file, var, value);
 	}
-	if (!strcmp(var, "format.coverletter")) {
-		if (value && !strcasecmp(value, "auto")) {
+	𐡄𐡍 (!strcmp(var, "format.coverletter")) {
+		𐡄𐡍 (value && !strcasecmp(value, "auto")) {
 			cfg->config_cover_letter = COVER_AUTO;
-			return 0;
+			أرجع 0;
 		}
 		cfg->config_cover_letter = git_config_bool(var, value) ? COVER_ON : COVER_OFF;
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "format.commitlistformat")) {
+	𐡄𐡍 (!strcmp(var, "format.commitlistformat")) {
 		FREE_AND_NULL(cfg->fmt_cover_letter_commit_list);
-		return git_config_string(&cfg->fmt_cover_letter_commit_list, var, value);
+		أرجع git_config_string(&cfg->fmt_cover_letter_commit_list, var, value);
 	}
-	if (!strcmp(var, "format.outputdirectory")) {
+	𐡄𐡍 (!strcmp(var, "format.outputdirectory")) {
 		FREE_AND_NULL(cfg->config_output_directory);
-		return git_config_string(&cfg->config_output_directory, var, value);
+		أرجع git_config_string(&cfg->config_output_directory, var, value);
 	}
-	if (!strcmp(var, "format.useautobase")) {
-		if (value && !strcasecmp(value, "whenAble")) {
+	𐡄𐡍 (!strcmp(var, "format.useautobase")) {
+		𐡄𐡍 (value && !strcasecmp(value, "whenAble")) {
 			cfg->auto_base = AUTO_BASE_WHEN_ABLE;
-			return 0;
+			أرجع 0;
 		}
 		cfg->auto_base = git_config_bool(var, value) ? AUTO_BASE_ALWAYS : AUTO_BASE_NEVER;
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "format.from")) {
-		int b = git_parse_maybe_bool(value);
+	𐡄𐡍 (!strcmp(var, "format.from")) {
+		صحيح b = git_parse_maybe_bool(value);
 		FREE_AND_NULL(cfg->from);
-		if (b < 0)
+		𐡄𐡍 (b < 0)
 			cfg->from = xstrdup(value);
-		else if (b)
+		وإلا 𐡄𐡍 (b)
 			cfg->from = xstrdup(git_committer_info(IDENT_NO_DATE));
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "format.forceinbodyfrom")) {
+	𐡄𐡍 (!strcmp(var, "format.forceinbodyfrom")) {
 		force_in_body_from = git_config_bool(var, value);
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "format.notes")) {
-		int b = git_parse_maybe_bool(value);
-		if (b < 0)
+	𐡄𐡍 (!strcmp(var, "format.notes")) {
+		صحيح b = git_parse_maybe_bool(value);
+		𐡄𐡍 (b < 0)
 			enable_ref_display_notes(&cfg->notes_opt, &cfg->show_notes, value);
-		else if (b)
+		وإلا 𐡄𐡍 (b)
 			enable_default_display_notes(&cfg->notes_opt, &cfg->show_notes);
-		else
+		وإلا
 			disable_display_notes(&cfg->notes_opt, &cfg->show_notes);
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "format.coverfromdescription")) {
+	𐡄𐡍 (!strcmp(var, "format.coverfromdescription")) {
 		cfg->cover_from_description_mode = parse_cover_from_description(value);
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "format.mboxrd")) {
+	𐡄𐡍 (!strcmp(var, "format.mboxrd")) {
 		stdout_mboxrd = git_config_bool(var, value);
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "format.noprefix")) {
+	𐡄𐡍 (!strcmp(var, "format.noprefix")) {
 		format_no_prefix = git_parse_maybe_bool(value);
-		if (format_no_prefix < 0) {
-			int status = die_message(
+		𐡄𐡍 (format_no_prefix < 0) {
+			صحيح status = die_message(
 				_("bad boolean config value '%s' for '%s'"),
 				value, var);
 			advise(_("'%s' used to accept any value and "
@@ -1119,7 +1119,7 @@ static int git_format_config(const char *var, const char *value,
 			       var, "diff.noprefix");
 			exit(status);
 		}
-		return 0;
+		أرجع 0;
 	}
 
 	/*
@@ -1128,53 +1128,53 @@ static int git_format_config(const char *var, const char *value,
 	 * diff_ui_config completely, because we do care about some ui options
 	 * like color.
 	 */
-	if (!strcmp(var, "diff.noprefix"))
-		return 0;
+	𐡄𐡍 (!strcmp(var, "diff.noprefix"))
+		أرجع 0;
 
-	return git_log_config(var, value, ctx, &cfg->log);
+	أرجع git_log_config(var, value, ctx, &cfg->log);
 }
 
-static const char *output_directory = NULL;
-static int outdir_offset;
+ساكن ثابت حرف *output_directory = عدم;
+ساكن صحيح outdir_offset;
 
-static int open_next_file(struct commit *commit, const char *subject,
-			 struct rev_info *rev, int quiet)
+ساكن صحيح open_next_file(بنية commit *commit, ثابت حرف *subject,
+			 بنية rev_info *rev, صحيح quiet)
 {
-	struct strbuf filename = STRBUF_INIT;
+	بنية strbuf filename = STRBUF_INIT;
 
-	if (output_directory) {
+	𐡄𐡍 (output_directory) {
 		strbuf_addstr(&filename, output_directory);
 		strbuf_complete(&filename, '/');
 	}
 
-	if (rev->numbered_files)
+	𐡄𐡍 (rev->numbered_files)
 		strbuf_addf(&filename, "%d", rev->nr);
-	else if (commit)
+	وإلا 𐡄𐡍 (commit)
 		fmt_output_commit(&filename, commit, rev);
-	else
+	وإلا
 		fmt_output_subject(&filename, subject, rev);
 
-	if (!quiet)
+	𐡄𐡍 (!quiet)
 		printf("%s\n", filename.buf + outdir_offset);
 
-	if (!(rev->diffopt.file = fopen(filename.buf, "w"))) {
+	𐡄𐡍 (!(rev->diffopt.file = fopen(filename.buf, "w"))) {
 		error_errno(_("cannot open patch file %s"), filename.buf);
 		strbuf_release(&filename);
-		return -1;
+		أرجع -1;
 	}
 
 	strbuf_release(&filename);
-	return 0;
+	أرجع 0;
 }
 
-static void get_patch_ids(struct rev_info *rev, struct patch_ids *ids)
+ساكن فراغ get_patch_ids(بنية rev_info *rev, بنية patch_ids *ids)
 {
-	struct rev_info check_rev;
-	struct commit *commit, *c1, *c2;
-	struct object *o1, *o2;
+	بنية rev_info check_rev;
+	بنية commit *commit, *c1, *c2;
+	بنية object *o1, *o2;
 	unsigned flags1, flags2;
 
-	if (rev->pending.nr != 2)
+	𐡄𐡍 (rev->pending.nr != 2)
 		die(_("need exactly one range"));
 
 	o1 = rev->pending.objects[0].item;
@@ -1184,7 +1184,7 @@ static void get_patch_ids(struct rev_info *rev, struct patch_ids *ids)
 	c1 = lookup_commit_reference(the_repository, &o1->oid);
 	c2 = lookup_commit_reference(the_repository, &o2->oid);
 
-	if ((flags1 & UNINTERESTING) == (flags2 & UNINTERESTING))
+	𐡄𐡍 ((flags1 & UNINTERESTING) == (flags2 & UNINTERESTING))
 		die(_("not a range"));
 
 	init_patch_ids(the_repository, ids);
@@ -1196,10 +1196,10 @@ static void get_patch_ids(struct rev_info *rev, struct patch_ids *ids)
 	o2->flags ^= UNINTERESTING;
 	add_pending_object(&check_rev, o1, "o1");
 	add_pending_object(&check_rev, o2, "o2");
-	if (prepare_revision_walk(&check_rev))
+	𐡄𐡍 (prepare_revision_walk(&check_rev))
 		die(_("revision walk setup failed"));
 
-	while ((commit = get_revision(&check_rev)) != NULL) {
+	طالما ((commit = get_revision(&check_rev)) != عدم) {
 		add_commit_patch_id(commit, ids);
 	}
 
@@ -1210,62 +1210,62 @@ static void get_patch_ids(struct rev_info *rev, struct patch_ids *ids)
 	o2->flags = flags2;
 }
 
-static void gen_message_id(struct rev_info *info, const char *base)
+ساكن فراغ gen_message_id(بنية rev_info *info, ثابت حرف *base)
 {
-	struct strbuf buf = STRBUF_INIT;
+	بنية strbuf buf = STRBUF_INIT;
 	strbuf_addf(&buf, "%s.%"PRItime".git.%s", base,
-		    (timestamp_t) time(NULL),
+		    (timestamp_t) time(عدم),
 		    git_committer_info(IDENT_NO_NAME|IDENT_NO_DATE|IDENT_STRICT));
-	info->message_id = strbuf_detach(&buf, NULL);
+	info->message_id = strbuf_detach(&buf, عدم);
 }
 
-static void print_signature(const char *signature, FILE *file)
+ساكن فراغ print_signature(ثابت حرف *signature, FILE *file)
 {
-	if (!signature || !*signature)
-		return;
+	𐡄𐡍 (!signature || !*signature)
+		أرجع;
 
 	fprintf(file, "-- \n%s", signature);
-	if (signature[strlen(signature)-1] != '\n')
+	𐡄𐡍 (signature[strlen(signature)-1] != '\n')
 		putc('\n', file);
 	putc('\n', file);
 }
 
-static char *find_branch_name(struct rev_info *rev)
+ساكن حرف *find_branch_name(بنية rev_info *rev)
 {
-	struct object_id branch_oid;
-	const struct object_id *tip_oid;
-	const char *ref, *v;
-	char *full_ref, *branch = NULL;
-	int interesting_found = 0;
+	بنية object_id branch_oid;
+	ثابت بنية object_id *tip_oid;
+	ثابت حرف *ref, *v;
+	حرف *full_ref, *branch = عدم;
+	صحيح interesting_found = 0;
 	size_t idx;
 
-	for (size_t i = 0; i < rev->cmdline.nr; i++) {
-		if (rev->cmdline.rev[i].flags & UNINTERESTING)
-			continue;
-		if (interesting_found)
-			return NULL;
+	لكل (size_t i = 0; i < rev->cmdline.nr; i++) {
+		𐡄𐡍 (rev->cmdline.rev[i].flags & UNINTERESTING)
+			استمر;
+		𐡄𐡍 (interesting_found)
+			أرجع عدم;
 		interesting_found = 1;
 		idx = i;
 	}
-	if (!interesting_found)
-		return NULL;
+	𐡄𐡍 (!interesting_found)
+		أرجع عدم;
 	ref = rev->cmdline.rev[idx].name;
 	tip_oid = &rev->cmdline.rev[idx].item->oid;
-	if (repo_dwim_ref(the_repository, ref, strlen(ref), &branch_oid,
+	𐡄𐡍 (repo_dwim_ref(the_repository, ref, strlen(ref), &branch_oid,
 			  &full_ref, 0) &&
 	    skip_prefix(full_ref, "refs/heads/", &v) &&
 	    oideq(tip_oid, &branch_oid))
 		branch = xstrdup(v);
-	free(full_ref);
-	return branch;
+	حرر(full_ref);
+	أرجع branch;
 }
 
-static void show_diffstat(struct rev_info *rev,
-			  struct commit *origin, struct commit *head)
+ساكن فراغ show_diffstat(بنية rev_info *rev,
+			  بنية commit *origin, بنية commit *head)
 {
-	struct diff_options opts;
+	بنية diff_options opts;
 
-	memcpy(&opts, &rev->diffopt, sizeof(opts));
+	memcpy(&opts, &rev->diffopt, حجم(opts));
 	opts.output_format = DIFF_FORMAT_SUMMARY | DIFF_FORMAT_DIFFSTAT;
 	diff_setup_done(&opts);
 
@@ -1278,45 +1278,45 @@ static void show_diffstat(struct rev_info *rev,
 	fprintf(rev->diffopt.file, "\n");
 }
 
-static void read_desc_file(struct strbuf *buf, const char *desc_file)
+ساكن فراغ read_desc_file(بنية strbuf *buf, ثابت حرف *desc_file)
 {
-	if (strbuf_read_file(buf, desc_file, 0) < 0)
+	𐡄𐡍 (strbuf_read_file(buf, desc_file, 0) < 0)
 		die_errno(_("unable to read branch description file '%s'"),
 			  desc_file);
 }
 
-static void prepare_cover_text(struct pretty_print_context *pp,
-			       const char *description_file,
-			       const char *branch_name,
-			       struct strbuf *sb,
-			       const char *encoding,
-			       int need_8bit_cte,
-			       const struct format_config *cfg)
+ساكن فراغ prepare_cover_text(بنية pretty_print_context *pp,
+			       ثابت حرف *description_file,
+			       ثابت حرف *branch_name,
+			       بنية strbuf *sb,
+			       ثابت حرف *encoding,
+			       صحيح need_8bit_cte,
+			       ثابت بنية format_config *cfg)
 {
-	const char *subject = "*** SUBJECT HERE ***";
-	const char *body = "*** BLURB HERE ***";
-	struct strbuf description_sb = STRBUF_INIT;
-	struct strbuf subject_sb = STRBUF_INIT;
+	ثابت حرف *subject = "*** SUBJECT HERE ***";
+	ثابت حرف *body = "*** BLURB HERE ***";
+	بنية strbuf description_sb = STRBUF_INIT;
+	بنية strbuf subject_sb = STRBUF_INIT;
 
-	if (cfg->cover_from_description_mode == COVER_FROM_NONE)
-		goto do_pp;
+	𐡄𐡍 (cfg->cover_from_description_mode == COVER_FROM_NONE)
+		اذهب do_pp;
 
-	if (description_file && *description_file)
+	𐡄𐡍 (description_file && *description_file)
 		read_desc_file(&description_sb, description_file);
-	else if (branch_name && *branch_name)
+	وإلا 𐡄𐡍 (branch_name && *branch_name)
 		read_branch_desc(&description_sb, branch_name);
-	if (!description_sb.len)
-		goto do_pp;
+	𐡄𐡍 (!description_sb.len)
+		اذهب do_pp;
 
-	if (cfg->cover_from_description_mode == COVER_FROM_SUBJECT ||
+	𐡄𐡍 (cfg->cover_from_description_mode == COVER_FROM_SUBJECT ||
 	    cfg->cover_from_description_mode == COVER_FROM_AUTO)
 		body = format_subject(&subject_sb, description_sb.buf, " ");
 
-	if (cfg->cover_from_description_mode == COVER_FROM_MESSAGE ||
+	𐡄𐡍 (cfg->cover_from_description_mode == COVER_FROM_MESSAGE ||
 	    (cfg->cover_from_description_mode == COVER_FROM_AUTO &&
 	     subject_sb.len > COVER_FROM_AUTO_MAX_SUBJECT_LEN))
 		body = description_sb.buf;
-	else
+	وإلا
 		subject = subject_sb.buf;
 
 do_pp:
@@ -1327,60 +1327,60 @@ do_pp:
 	strbuf_release(&subject_sb);
 }
 
-struct rdiff_notes {
+بنية rdiff_notes {
 	/*
 	 * True if we want to override the notes behavior
 	 * of 'format-patch'
 	 */
 	bool override;
-	struct string_list notes;
+	بنية string_list notes;
 };
 
-static int rdiff_notes_cb(const struct option *option,
-			  const char *arg,
-			  int unset)
+ساكن صحيح rdiff_notes_cb(ثابت بنية option *option,
+			  ثابت حرف *arg,
+			  صحيح unset)
 {
-	struct option opt = *option;
-	struct rdiff_notes *rdiff_notes = option->value;
+	بنية option opt = *option;
+	بنية rdiff_notes *rdiff_notes = option->value;
 
 	rdiff_notes->override = 1;
 	opt.value = &rdiff_notes->notes;
-	return parse_opt_string_list(&opt, arg, unset);
+	أرجع parse_opt_string_list(&opt, arg, unset);
 }
 
-static int get_notes_refs(struct string_list_item *item, void *arg)
+ساكن صحيح get_notes_refs(بنية string_list_item *item, فراغ *arg)
 {
 	strvec_pushf(arg, "--notes=%s", item->string);
-	return 0;
+	أرجع 0;
 }
 
-static void get_notes_args(struct rdiff_notes *rdiff_notes,
-			   struct rev_info *rev)
+ساكن فراغ get_notes_args(بنية rdiff_notes *rdiff_notes,
+			   بنية rev_info *rev)
 {
-	if (rdiff_notes->override) {
-		if (rdiff_notes->notes.nr)
+	𐡄𐡍 (rdiff_notes->override) {
+		𐡄𐡍 (rdiff_notes->notes.nr)
 			for_each_string_list(&rdiff_notes->notes,
 					     get_notes_refs,
 					     &rev->rdiff_log_arg);
-		else
+		وإلا
 			strvec_push(&rev->rdiff_log_arg, "--no-notes");
-	} else if (!rev->show_notes) {
+	} وإلا 𐡄𐡍 (!rev->show_notes) {
 		strvec_push(&rev->rdiff_log_arg, "--no-notes");
-	} else if (rev->notes_opt.use_default_notes > 0 ||
+	} وإلا 𐡄𐡍 (rev->notes_opt.use_default_notes > 0 ||
 		   (rev->notes_opt.use_default_notes == -1 &&
 		    !rev->notes_opt.extra_notes_refs.nr)) {
 		strvec_push(&rev->rdiff_log_arg, "--notes");
-	} else {
+	} وإلا {
 		for_each_string_list(&rev->notes_opt.extra_notes_refs,
 				     get_notes_refs,
 				     &rev->rdiff_log_arg);
 	}
 }
 
-static void generate_shortlog_cover_letter(struct shortlog *log,
-					   struct rev_info *rev,
-					   struct commit **list,
-					   int nr)
+ساكن فراغ generate_shortlog_cover_letter(بنية shortlog *log,
+					   بنية rev_info *rev,
+					   بنية commit **list,
+					   صحيح nr)
 {
 	shortlog_init(log);
 	log->wrap_lines = 1;
@@ -1390,22 +1390,22 @@ static void generate_shortlog_cover_letter(struct shortlog *log,
 	log->file = rev->diffopt.file;
 	log->groups = SHORTLOG_GROUP_AUTHOR;
 	shortlog_finish_setup(log);
-	for (int i = 0; i < nr; i++)
+	لكل (صحيح i = 0; i < nr; i++)
 		shortlog_add_commit(log, list[i]);
 
 	shortlog_output(log);
 }
 
-static void generate_commit_list_cover(FILE *cover_file, const char *format,
-				       struct commit **list, int n)
+ساكن فراغ generate_commit_list_cover(FILE *cover_file, ثابت حرف *format,
+				       بنية commit **list, صحيح n)
 {
-	struct strbuf commit_line = STRBUF_INIT;
-	struct pretty_print_context ctx = {0};
-	struct rev_info rev = REV_INFO_INIT;
+	بنية strbuf commit_line = STRBUF_INIT;
+	بنية pretty_print_context ctx = {0};
+	بنية rev_info rev = REV_INFO_INIT;
 
 	rev.total = n;
 	ctx.rev = &rev;
-	for (int i = 1; i <= n; i++) {
+	لكل (صحيح i = 1; i <= n; i++) {
 		rev.nr = i;
 		repo_format_commit_message(the_repository, list[n - i], format,
 				&commit_line, &ctx);
@@ -1417,89 +1417,89 @@ static void generate_commit_list_cover(FILE *cover_file, const char *format,
 	strbuf_release(&commit_line);
 }
 
-static void make_cover_letter(struct rev_info *rev, int use_separate_file,
-			      struct commit *origin,
-			      int nr, struct commit **list,
-			      const char *description_file,
-			      const char *branch_name,
-			      int quiet,
-			      const struct format_config *cfg,
-			      const char *format)
+ساكن فراغ make_cover_letter(بنية rev_info *rev, صحيح use_separate_file,
+			      بنية commit *origin,
+			      صحيح nr, بنية commit **list,
+			      ثابت حرف *description_file,
+			      ثابت حرف *branch_name,
+			      صحيح quiet,
+			      ثابت بنية format_config *cfg,
+			      ثابت حرف *format)
 {
-	const char *from;
-	struct shortlog log;
-	struct strbuf sb = STRBUF_INIT;
-	int i;
-	const char *encoding = "UTF-8";
-	int need_8bit_cte = 0;
-	struct pretty_print_context pp = {0};
-	struct commit *head = list[0];
-	char *to_free = NULL;
+	ثابت حرف *from;
+	بنية shortlog log;
+	بنية strbuf sb = STRBUF_INIT;
+	صحيح i;
+	ثابت حرف *encoding = "UTF-8";
+	صحيح need_8bit_cte = 0;
+	بنية pretty_print_context pp = {0};
+	بنية commit *head = list[0];
+	حرف *to_free = عدم;
 
-	if (!cmit_fmt_is_mail(rev->commit_format))
+	𐡄𐡍 (!cmit_fmt_is_mail(rev->commit_format))
 		die(_("cover letter needs email format"));
 
 	from = cfg->from ? cfg->from : git_committer_info(0);
 
-	if (use_separate_file &&
-	    open_next_file(NULL, rev->numbered_files ? NULL : "cover-letter", rev, quiet))
+	𐡄𐡍 (use_separate_file &&
+	    open_next_file(عدم, rev->numbered_files ? عدم : "cover-letter", rev, quiet))
 		die(_("failed to create cover-letter file"));
 
 	log_write_email_headers(rev, head, &pp.after_subject, &need_8bit_cte, 0);
 
-	for (i = 0; !need_8bit_cte && i < nr; i++) {
-		const char *buf = repo_get_commit_buffer(the_repository,
-							 list[i], NULL);
-		if (has_non_ascii(buf))
+	لكل (i = 0; !need_8bit_cte && i < nr; i++) {
+		ثابت حرف *buf = repo_get_commit_buffer(the_repository,
+							 list[i], عدم);
+		𐡄𐡍 (has_non_ascii(buf))
 			need_8bit_cte = 1;
 		repo_unuse_commit_buffer(the_repository, list[i], buf);
 	}
 
-	if (!branch_name)
+	𐡄𐡍 (!branch_name)
 		branch_name = to_free = find_branch_name(rev);
 
 	pp.fmt = CMIT_FMT_EMAIL;
 	pp.date_mode.type = DATE_RFC2822;
 	pp.rev = rev;
 	pp.encode_email_headers = rev->encode_email_headers;
-	pp_user_info(&pp, NULL, &sb, from, encoding);
+	pp_user_info(&pp, عدم, &sb, from, encoding);
 	prepare_cover_text(&pp, description_file, branch_name, &sb,
 			   encoding, need_8bit_cte, cfg);
 	fprintf(rev->diffopt.file, "%s\n", sb.buf);
 
-	free(to_free);
-	free(pp.after_subject);
+	حرر(to_free);
+	حرر(pp.after_subject);
 	strbuf_release(&sb);
 
-	if (skip_prefix(format, "log:", &format))
+	𐡄𐡍 (skip_prefix(format, "log:", &format))
 		generate_commit_list_cover(rev->diffopt.file, format, list, nr);
-	else if (!strcmp(format, "shortlog"))
+	وإلا 𐡄𐡍 (!strcmp(format, "shortlog"))
 		generate_shortlog_cover_letter(&log, rev, list, nr);
-	else if (!strcmp(format, "modern"))
+	وإلا 𐡄𐡍 (!strcmp(format, "modern"))
 		generate_commit_list_cover(rev->diffopt.file, "%w(72)[%(count)/%(total)] %s",
 					   list, nr);
-	else if (strchr(format, '%'))
+	وإلا 𐡄𐡍 (strchr(format, '%'))
 		generate_commit_list_cover(rev->diffopt.file, format, list, nr);
-	else
+	وإلا
 		die(_("'%s' is not a valid format string"), format);
 
 	/* We can only do diffstat with a unique reference point */
-	if (origin)
+	𐡄𐡍 (origin)
 		show_diffstat(rev, origin, head);
 
-	if (rev->idiff_oid1) {
+	𐡄𐡍 (rev->idiff_oid1) {
 		fprintf_ln(rev->diffopt.file, "%s", rev->idiff_title);
 		show_interdiff(rev->idiff_oid1, rev->idiff_oid2, 0,
 			       &rev->diffopt);
 	}
 
-	if (rev->rdiff1) {
+	𐡄𐡍 (rev->rdiff1) {
 		/*
 		 * Pass minimum required diff-options to range-diff; others
 		 * can be added later if deemed desirable.
 		 */
-		struct diff_options opts;
-		struct range_diff_options range_diff_opts = {
+		بنية diff_options opts;
+		بنية range_diff_options range_diff_opts = {
 			.creation_factor = rev->creation_factor,
 			.dual_color = 1,
 			.max_memory = RANGE_DIFF_MAX_MEMORY_DEFAULT,
@@ -1516,298 +1516,298 @@ static void make_cover_letter(struct rev_info *rev, int use_separate_file,
 	}
 }
 
-static char *clean_message_id(const char *msg_id)
+ساكن حرف *clean_message_id(ثابت حرف *msg_id)
 {
-	char ch;
-	const char *a, *z, *m;
+	حرف ch;
+	ثابت حرف *a, *z, *m;
 
 	m = msg_id;
-	while ((ch = *m) && (isspace(ch) || (ch == '<')))
+	طالما ((ch = *m) && (isspace(ch) || (ch == '<')))
 		m++;
 	a = m;
-	z = NULL;
-	while ((ch = *m)) {
-		if (!isspace(ch) && (ch != '>'))
+	z = عدم;
+	طالما ((ch = *m)) {
+		𐡄𐡍 (!isspace(ch) && (ch != '>'))
 			z = m;
 		m++;
 	}
-	if (!z)
+	𐡄𐡍 (!z)
 		die(_("insane in-reply-to: %s"), msg_id);
-	if (++z == m)
-		return xstrdup(a);
-	return xmemdupz(a, z - a);
+	𐡄𐡍 (++z == m)
+		أرجع xstrdup(a);
+	أرجع xmemdupz(a, z - a);
 }
 
-static const char *set_outdir(const char *prefix, const char *output_directory)
+ساكن ثابت حرف *set_outdir(ثابت حرف *prefix, ثابت حرف *output_directory)
 {
-	if (output_directory && is_absolute_path(output_directory))
-		return output_directory;
+	𐡄𐡍 (output_directory && is_absolute_path(output_directory))
+		أرجع output_directory;
 
-	if (!prefix || !*prefix) {
-		if (output_directory)
-			return output_directory;
+	𐡄𐡍 (!prefix || !*prefix) {
+		𐡄𐡍 (output_directory)
+			أرجع output_directory;
 		/* The user did not explicitly ask for "./" */
 		outdir_offset = 2;
-		return "./";
+		أرجع "./";
 	}
 
 	outdir_offset = strlen(prefix);
-	if (!output_directory)
-		return prefix;
+	𐡄𐡍 (!output_directory)
+		أرجع prefix;
 
-	return prefix_filename(prefix, output_directory);
+	أرجع prefix_filename(prefix, output_directory);
 }
 
-static const char * const builtin_format_patch_usage[] = {
+ساكن ثابت حرف * ثابت builtin_format_patch_usage[] = {
 	N_("git format-patch [<options>] [<since> | <revision-range>]"),
-	NULL
+	عدم
 };
 
-struct keep_callback_data {
-	struct format_config *cfg;
-	struct rev_info *revs;
+بنية keep_callback_data {
+	بنية format_config *cfg;
+	بنية rev_info *revs;
 };
 
-static int keep_callback(const struct option *opt, const char *arg, int unset)
+ساكن صحيح keep_callback(ثابت بنية option *opt, ثابت حرف *arg, صحيح unset)
 {
-	struct keep_callback_data *data = opt->value;
+	بنية keep_callback_data *data = opt->value;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 	data->revs->total = -1;
 	data->cfg->keep_subject = 1;
-	return 0;
+	أرجع 0;
 }
 
-static int subject_prefix_callback(const struct option *opt, const char *arg,
-			    int unset)
+ساكن صحيح subject_prefix_callback(ثابت بنية option *opt, ثابت حرف *arg,
+			    صحيح unset)
 {
-	struct format_config *cfg = opt->value;
+	بنية format_config *cfg = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 	cfg->subject_prefix = 1;
 	strbuf_reset(&cfg->sprefix);
 	strbuf_addstr(&cfg->sprefix, arg);
-	return 0;
+	أرجع 0;
 }
 
-static int rfc_callback(const struct option *opt, const char *arg,
-			int unset)
+ساكن صحيح rfc_callback(ثابت بنية option *opt, ثابت حرف *arg,
+			صحيح unset)
 {
-	const char **rfc = opt->value;
+	ثابت حرف **rfc = opt->value;
 
 	*rfc = opt->value;
-	if (unset)
-		*rfc = NULL;
-	else
+	𐡄𐡍 (unset)
+		*rfc = عدم;
+	وإلا
 		*rfc = arg ? arg : "RFC";
-	return 0;
+	أرجع 0;
 }
 
-static int numbered_callback(const struct option *opt, const char *arg,
-			     int unset)
+ساكن صحيح numbered_callback(ثابت بنية option *opt, ثابت حرف *arg,
+			     صحيح unset)
 {
-	struct format_config *cfg = opt->value;
+	بنية format_config *cfg = opt->value;
 	BUG_ON_OPT_ARG(arg);
 	cfg->numbered = cfg->numbered_cmdline_opt = unset ? 0 : 1;
-	if (unset)
+	𐡄𐡍 (unset)
 		cfg->auto_number =  0;
-	return 0;
+	أرجع 0;
 }
 
-static int no_numbered_callback(const struct option *opt, const char *arg,
-				int unset)
+ساكن صحيح no_numbered_callback(ثابت بنية option *opt, ثابت حرف *arg,
+				صحيح unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	return numbered_callback(opt, arg, 1);
+	أرجع numbered_callback(opt, arg, 1);
 }
 
-static int output_directory_callback(const struct option *opt, const char *arg,
-			      int unset)
+ساكن صحيح output_directory_callback(ثابت بنية option *opt, ثابت حرف *arg,
+			      صحيح unset)
 {
-	const char **dir = (const char **)opt->value;
+	ثابت حرف **dir = (ثابت حرف **)opt->value;
 	BUG_ON_OPT_NEG(unset);
-	if (*dir)
+	𐡄𐡍 (*dir)
 		die(_("two output directories?"));
 	*dir = arg;
-	return 0;
+	أرجع 0;
 }
 
-static int thread_callback(const struct option *opt, const char *arg, int unset)
+ساكن صحيح thread_callback(ثابت بنية option *opt, ثابت حرف *arg, صحيح unset)
 {
-	struct format_config *cfg = opt->value;
+	بنية format_config *cfg = opt->value;
 
-	if (unset)
+	𐡄𐡍 (unset)
 		cfg->thread = THREAD_UNSET;
-	else if (!arg || !strcmp(arg, "shallow"))
+	وإلا 𐡄𐡍 (!arg || !strcmp(arg, "shallow"))
 		cfg->thread = THREAD_SHALLOW;
-	else if (!strcmp(arg, "deep"))
+	وإلا 𐡄𐡍 (!strcmp(arg, "deep"))
 		cfg->thread = THREAD_DEEP;
 	/*
 	 * Please update _git_formatpatch() in git-completion.bash
 	 * when you add new options.
 	 */
-	else
-		return 1;
-	return 0;
+	وإلا
+		أرجع 1;
+	أرجع 0;
 }
 
-static int attach_callback(const struct option *opt, const char *arg, int unset)
+ساكن صحيح attach_callback(ثابت بنية option *opt, ثابت حرف *arg, صحيح unset)
 {
-	struct rev_info *rev = (struct rev_info *)opt->value;
-	if (unset)
-		rev->mime_boundary = NULL;
-	else if (arg)
+	بنية rev_info *rev = (بنية rev_info *)opt->value;
+	𐡄𐡍 (unset)
+		rev->mime_boundary = عدم;
+	وإلا 𐡄𐡍 (arg)
 		rev->mime_boundary = arg;
-	else
+	وإلا
 		rev->mime_boundary = git_version_string;
 	rev->no_inline = unset ? 0 : 1;
-	return 0;
+	أرجع 0;
 }
 
-static int inline_callback(const struct option *opt, const char *arg, int unset)
+ساكن صحيح inline_callback(ثابت بنية option *opt, ثابت حرف *arg, صحيح unset)
 {
-	struct rev_info *rev = (struct rev_info *)opt->value;
-	if (unset)
-		rev->mime_boundary = NULL;
-	else if (arg)
+	بنية rev_info *rev = (بنية rev_info *)opt->value;
+	𐡄𐡍 (unset)
+		rev->mime_boundary = عدم;
+	وإلا 𐡄𐡍 (arg)
 		rev->mime_boundary = arg;
-	else
+	وإلا
 		rev->mime_boundary = git_version_string;
 	rev->no_inline = 0;
-	return 0;
+	أرجع 0;
 }
 
-static int header_callback(const struct option *opt, const char *arg,
-			   int unset)
+ساكن صحيح header_callback(ثابت بنية option *opt, ثابت حرف *arg,
+			   صحيح unset)
 {
-	struct format_config *cfg = opt->value;
+	بنية format_config *cfg = opt->value;
 
-	if (unset) {
+	𐡄𐡍 (unset) {
 		string_list_clear(&cfg->extra_hdr, 0);
 		string_list_clear(&cfg->extra_to, 0);
 		string_list_clear(&cfg->extra_cc, 0);
-	} else {
+	} وإلا {
 		add_header(cfg, arg);
 	}
-	return 0;
+	أرجع 0;
 }
 
-static int from_callback(const struct option *opt, const char *arg, int unset)
+ساكن صحيح from_callback(ثابت بنية option *opt, ثابت حرف *arg, صحيح unset)
 {
-	char **from = opt->value;
+	حرف **from = opt->value;
 
-	free(*from);
+	حرر(*from);
 
-	if (unset)
-		*from = NULL;
-	else if (arg)
+	𐡄𐡍 (unset)
+		*from = عدم;
+	وإلا 𐡄𐡍 (arg)
 		*from = xstrdup(arg);
-	else
+	وإلا
 		*from = xstrdup(git_committer_info(IDENT_NO_DATE));
-	return 0;
+	أرجع 0;
 }
 
-static int base_callback(const struct option *opt, const char *arg, int unset)
+ساكن صحيح base_callback(ثابت بنية option *opt, ثابت حرف *arg, صحيح unset)
 {
-	struct format_config *cfg = opt->value;
+	بنية format_config *cfg = opt->value;
 
-	if (unset) {
+	𐡄𐡍 (unset) {
 		cfg->auto_base = AUTO_BASE_NEVER;
 		FREE_AND_NULL(cfg->base_commit);
-	} else if (!strcmp(arg, "auto")) {
+	} وإلا 𐡄𐡍 (!strcmp(arg, "auto")) {
 		cfg->auto_base = AUTO_BASE_ALWAYS;
 		FREE_AND_NULL(cfg->base_commit);
-	} else {
+	} وإلا {
 		cfg->auto_base = AUTO_BASE_NEVER;
 		cfg->base_commit = xstrdup(arg);
 	}
-	return 0;
+	أرجع 0;
 }
 
-struct base_tree_info {
-	struct object_id base_commit;
-	int nr_patch_id, alloc_patch_id;
-	struct object_id *patch_id;
+بنية base_tree_info {
+	بنية object_id base_commit;
+	صحيح nr_patch_id, alloc_patch_id;
+	بنية object_id *patch_id;
 };
 
-static struct commit *get_base_commit(const struct format_config *cfg,
-				      struct commit **list,
+ساكن بنية commit *get_base_commit(ثابت بنية format_config *cfg,
+				      بنية commit **list,
 				      size_t total)
 {
-	struct commit *base = NULL;
-	struct commit **rev;
-	int auto_select, die_on_failure, ret;
+	بنية commit *base = عدم;
+	بنية commit **rev;
+	صحيح auto_select, die_on_failure, ret;
 	size_t i = 0, rev_nr = 0;
 
-	switch (cfg->auto_base) {
-	case AUTO_BASE_NEVER:
-		if (cfg->base_commit) {
+	بدل (cfg->auto_base) {
+	حالة AUTO_BASE_NEVER:
+		𐡄𐡍 (cfg->base_commit) {
 			auto_select = 0;
 			die_on_failure = 1;
-		} else {
+		} وإلا {
 			/* no base information is requested */
-			return NULL;
+			أرجع عدم;
 		}
-		break;
-	case AUTO_BASE_ALWAYS:
-	case AUTO_BASE_WHEN_ABLE:
-		if (cfg->base_commit) {
+		اكسر;
+	حالة AUTO_BASE_ALWAYS:
+	حالة AUTO_BASE_WHEN_ABLE:
+		𐡄𐡍 (cfg->base_commit) {
 			BUG("requested automatic base selection but a commit was provided");
-		} else {
+		} وإلا {
 			auto_select = 1;
 			die_on_failure = cfg->auto_base == AUTO_BASE_ALWAYS;
 		}
-		break;
-	default:
+		اكسر;
+	افتراضي:
 		BUG("unexpected automatic base selection method");
 	}
 
-	if (!auto_select) {
+	𐡄𐡍 (!auto_select) {
 		base = lookup_commit_reference_by_name(cfg->base_commit);
-		if (!base)
+		𐡄𐡍 (!base)
 			die(_("unknown commit %s"), cfg->base_commit);
-	} else {
-		struct branch *curr_branch = branch_get(NULL);
-		const char *upstream = branch_get_upstream(curr_branch, NULL);
-		if (upstream) {
-			struct commit_list *base_list = NULL;
-			struct commit *commit;
-			struct object_id oid;
+	} وإلا {
+		بنية branch *curr_branch = branch_get(عدم);
+		ثابت حرف *upstream = branch_get_upstream(curr_branch, عدم);
+		𐡄𐡍 (upstream) {
+			بنية commit_list *base_list = عدم;
+			بنية commit *commit;
+			بنية object_id oid;
 
-			if (repo_get_oid(the_repository, upstream, &oid)) {
-				if (die_on_failure)
+			𐡄𐡍 (repo_get_oid(the_repository, upstream, &oid)) {
+				𐡄𐡍 (die_on_failure)
 					die(_("failed to resolve '%s' as a valid ref"), upstream);
-				else
-					return NULL;
+				وإلا
+					أرجع عدم;
 			}
 			commit = lookup_commit_or_die(&oid, "upstream base");
-			if (repo_get_merge_bases_many(the_repository,
+			𐡄𐡍 (repo_get_merge_bases_many(the_repository,
 						      commit, total,
 						      list,
 						      &base_list) < 0 ||
 			    /* There should be one and only one merge base. */
 			    !base_list || base_list->next) {
-				if (die_on_failure) {
+				𐡄𐡍 (die_on_failure) {
 					die(_("could not find exact merge base"));
-				} else {
+				} وإلا {
 					commit_list_free(base_list);
-					return NULL;
+					أرجع عدم;
 				}
 			}
 			base = base_list->item;
 			commit_list_free(base_list);
-		} else {
-			if (die_on_failure)
+		} وإلا {
+			𐡄𐡍 (die_on_failure)
 				die(_("failed to get upstream, if you want to record base commit automatically,\n"
 				      "please use git branch --set-upstream-to to track a remote branch.\n"
 				      "Or you could specify base commit by --base=<base-commit-id> manually"));
-			else
-				return NULL;
+			وإلا
+				أرجع عدم;
 		}
 	}
 
 	ALLOC_ARRAY(rev, total);
-	for (i = 0; i < total; i++)
+	لكل (i = 0; i < total; i++)
 		rev[i] = list[i];
 
 	rev_nr = total;
@@ -1815,19 +1815,19 @@ static struct commit *get_base_commit(const struct format_config *cfg,
 	 * Get merge base through pair-wise computations
 	 * and store it in rev[0].
 	 */
-	while (rev_nr > 1) {
-		for (i = 0; i < rev_nr / 2; i++) {
-			struct commit_list *merge_base = NULL;
-			if (repo_get_merge_bases(the_repository,
+	طالما (rev_nr > 1) {
+		لكل (i = 0; i < rev_nr / 2; i++) {
+			بنية commit_list *merge_base = عدم;
+			𐡄𐡍 (repo_get_merge_bases(the_repository,
 						 rev[2 * i],
 						 rev[2 * i + 1], &merge_base) < 0 ||
 			    !merge_base || merge_base->next) {
-				if (die_on_failure) {
+				𐡄𐡍 (die_on_failure) {
 					die(_("failed to find exact merge base"));
-				} else {
+				} وإلا {
 					commit_list_free(merge_base);
-					free(rev);
-					return NULL;
+					حرر(rev);
+					أرجع عدم;
 				}
 			}
 
@@ -1835,52 +1835,52 @@ static struct commit *get_base_commit(const struct format_config *cfg,
 			commit_list_free(merge_base);
 		}
 
-		if (rev_nr % 2)
+		𐡄𐡍 (rev_nr % 2)
 			rev[i] = rev[2 * i];
 		rev_nr = DIV_ROUND_UP(rev_nr, 2);
 	}
 
 	ret = repo_in_merge_bases(the_repository, base, rev[0]);
-	if (ret < 0)
+	𐡄𐡍 (ret < 0)
 		exit(128);
-	if (!ret) {
-		if (die_on_failure) {
+	𐡄𐡍 (!ret) {
+		𐡄𐡍 (die_on_failure) {
 			die(_("base commit should be the ancestor of revision list"));
-		} else {
-			free(rev);
-			return NULL;
+		} وإلا {
+			حرر(rev);
+			أرجع عدم;
 		}
 	}
 
-	for (i = 0; i < total; i++) {
-		if (base == list[i]) {
-			if (die_on_failure) {
+	لكل (i = 0; i < total; i++) {
+		𐡄𐡍 (base == list[i]) {
+			𐡄𐡍 (die_on_failure) {
 				die(_("base commit shouldn't be in revision list"));
-			} else {
-				free(rev);
-				return NULL;
+			} وإلا {
+				حرر(rev);
+				أرجع عدم;
 			}
 		}
 	}
 
-	free(rev);
-	return base;
+	حرر(rev);
+	أرجع base;
 }
 
-define_commit_slab(commit_base, int);
+define_commit_slab(commit_base, صحيح);
 
-static void prepare_bases(struct base_tree_info *bases,
-			  struct commit *base,
-			  struct commit **list,
+ساكن فراغ prepare_bases(بنية base_tree_info *bases,
+			  بنية commit *base,
+			  بنية commit **list,
 			  size_t total)
 {
-	struct commit *commit;
-	struct rev_info revs;
-	struct diff_options diffopt;
-	struct commit_base commit_base;
+	بنية commit *commit;
+	بنية rev_info revs;
+	بنية diff_options diffopt;
+	بنية commit_base commit_base;
 
-	if (!base)
-		return;
+	𐡄𐡍 (!base)
+		أرجع;
 
 	init_commit_base(&commit_base);
 	repo_diff_setup(the_repository, &diffopt);
@@ -1889,10 +1889,10 @@ static void prepare_bases(struct base_tree_info *bases,
 
 	oidcpy(&bases->base_commit, &base->object.oid);
 
-	repo_init_revisions(the_repository, &revs, NULL);
+	repo_init_revisions(the_repository, &revs, عدم);
 	revs.max_parents = 1;
 	revs.topo_order = 1;
-	for (size_t i = 0; i < total; i++) {
+	لكل (size_t i = 0; i < total; i++) {
 		list[i]->object.flags &= ~UNINTERESTING;
 		add_pending_object(&revs, &list[i]->object, "rev_list");
 		*commit_base_at(&commit_base, list[i]) = 1;
@@ -1900,18 +1900,18 @@ static void prepare_bases(struct base_tree_info *bases,
 	base->object.flags |= UNINTERESTING;
 	add_pending_object(&revs, &base->object, "base");
 
-	if (prepare_revision_walk(&revs))
+	𐡄𐡍 (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
 	/*
 	 * Traverse the commits list, get prerequisite patch ids
 	 * and stuff them in bases structure.
 	 */
-	while ((commit = get_revision(&revs)) != NULL) {
-		struct object_id oid;
-		struct object_id *patch_id;
-		if (*commit_base_at(&commit_base, commit))
-			continue;
-		if (commit_patch_id(commit, &diffopt, &oid, 0))
+	طالما ((commit = get_revision(&revs)) != عدم) {
+		بنية object_id oid;
+		بنية object_id *patch_id;
+		𐡄𐡍 (*commit_base_at(&commit_base, commit))
+			استمر;
+		𐡄𐡍 (commit_patch_id(commit, &diffopt, &oid, 0))
 			die(_("cannot get patch id"));
 		ALLOC_GROW(bases->patch_id, bases->nr_patch_id + 1, bases->alloc_patch_id);
 		patch_id = bases->patch_id + bases->nr_patch_id;
@@ -1922,127 +1922,127 @@ static void prepare_bases(struct base_tree_info *bases,
 	release_revisions(&revs);
 }
 
-static void print_bases(struct base_tree_info *bases, FILE *file)
+ساكن فراغ print_bases(بنية base_tree_info *bases, FILE *file)
 {
-	int i;
+	صحيح i;
 
 	/* Only do this once, either for the cover or for the first one */
-	if (is_null_oid(&bases->base_commit))
-		return;
+	𐡄𐡍 (is_null_oid(&bases->base_commit))
+		أرجع;
 
 	/* Show the base commit */
 	fprintf(file, "\nbase-commit: %s\n", oid_to_hex(&bases->base_commit));
 
 	/* Show the prerequisite patches */
-	for (i = bases->nr_patch_id - 1; i >= 0; i--)
+	لكل (i = bases->nr_patch_id - 1; i >= 0; i--)
 		fprintf(file, "prerequisite-patch-id: %s\n", oid_to_hex(&bases->patch_id[i]));
 
-	free(bases->patch_id);
+	حرر(bases->patch_id);
 	bases->nr_patch_id = 0;
 	bases->alloc_patch_id = 0;
 	oidclr(&bases->base_commit, the_repository->hash_algo);
 }
 
-static const char *diff_title(struct strbuf *sb,
-			      const char *reroll_count,
-			      const char *generic,
-			      const char *rerolled)
+ساكن ثابت حرف *diff_title(بنية strbuf *sb,
+			      ثابت حرف *reroll_count,
+			      ثابت حرف *generic,
+			      ثابت حرف *rerolled)
 {
-	int v;
+	صحيح v;
 
 	/* RFC may be v0, so allow -v1 to diff against v0 */
-	if (reroll_count && !strtol_i(reroll_count, 10, &v) &&
+	𐡄𐡍 (reroll_count && !strtol_i(reroll_count, 10, &v) &&
 	    v >= 1)
 		strbuf_addf(sb, rerolled, v - 1);
-	else
+	وإلا
 		strbuf_addstr(sb, generic);
-	return sb->buf;
+	أرجع sb->buf;
 }
 
-static void infer_range_diff_ranges(struct strbuf *r1,
-				    struct strbuf *r2,
-				    const char *prev,
-				    struct commit *origin,
-				    struct commit *head)
+ساكن فراغ infer_range_diff_ranges(بنية strbuf *r1,
+				    بنية strbuf *r2,
+				    ثابت حرف *prev,
+				    بنية commit *origin,
+				    بنية commit *head)
 {
-	const char *head_oid = oid_to_hex(&head->object.oid);
-	int prev_is_range = is_range_diff_range(prev);
+	ثابت حرف *head_oid = oid_to_hex(&head->object.oid);
+	صحيح prev_is_range = is_range_diff_range(prev);
 
-	if (prev_is_range)
+	𐡄𐡍 (prev_is_range)
 		strbuf_addstr(r1, prev);
-	else
+	وإلا
 		strbuf_addf(r1, "%s..%s", head_oid, prev);
 
-	if (origin)
+	𐡄𐡍 (origin)
 		strbuf_addf(r2, "%s..%s", oid_to_hex(&origin->object.oid), head_oid);
-	else if (prev_is_range)
+	وإلا 𐡄𐡍 (prev_is_range)
 		die(_("failed to infer range-diff origin of current series"));
-	else {
+	وإلا {
 		warning(_("using '%s' as range-diff origin of current series"), prev);
 		strbuf_addf(r2, "%s..%s", prev, head_oid);
 	}
 }
 
-int cmd_format_patch(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo UNUSED)
+صحيح cmd_format_patch(صحيح argc,
+		     ثابت حرف **argv,
+		     ثابت حرف *prefix,
+		     بنية repository *repo UNUSED)
 {
-	struct format_config cfg;
-	struct commit *commit;
-	struct commit_stack list = COMMIT_STACK_INIT;
-	struct rev_info rev;
-	char *to_free = NULL;
-	struct setup_revision_opt s_r_opt;
+	بنية format_config cfg;
+	بنية commit *commit;
+	بنية commit_stack list = COMMIT_STACK_INIT;
+	بنية rev_info rev;
+	حرف *to_free = عدم;
+	بنية setup_revision_opt s_r_opt;
 	size_t total, i;
-	int use_stdout = 0;
-	int start_number = -1;
-	int just_numbers = 0;
-	int ignore_if_in_upstream = 0;
-	int cover_letter = -1;
-	const char *cover_letter_fmt = NULL;
-	int boundary_count = 0;
-	int no_binary_diff = 0;
-	int zero_commit = 0;
-	struct commit *origin = NULL;
-	const char *in_reply_to = NULL;
-	struct patch_ids ids;
-	struct strbuf buf = STRBUF_INIT;
-	int use_patch_format = 0;
-	int quiet = 0;
-	const char *reroll_count = NULL;
-	char *cover_from_description_arg = NULL;
-	char *description_file = NULL;
-	char *branch_name = NULL;
-	struct base_tree_info bases;
-	struct commit *base;
-	int show_progress = 0;
-	struct progress *progress = NULL;
-	struct oid_array idiff_prev = OID_ARRAY_INIT;
-	struct strbuf idiff_title = STRBUF_INIT;
-	const char *rdiff_prev = NULL;
-	struct strbuf rdiff1 = STRBUF_INIT;
-	struct strbuf rdiff2 = STRBUF_INIT;
-	struct strbuf rdiff_title = STRBUF_INIT;
-	struct rdiff_notes rdiff_notes = {
+	صحيح use_stdout = 0;
+	صحيح start_number = -1;
+	صحيح just_numbers = 0;
+	صحيح ignore_if_in_upstream = 0;
+	صحيح cover_letter = -1;
+	ثابت حرف *cover_letter_fmt = عدم;
+	صحيح boundary_count = 0;
+	صحيح no_binary_diff = 0;
+	صحيح zero_commit = 0;
+	بنية commit *origin = عدم;
+	ثابت حرف *in_reply_to = عدم;
+	بنية patch_ids ids;
+	بنية strbuf buf = STRBUF_INIT;
+	صحيح use_patch_format = 0;
+	صحيح quiet = 0;
+	ثابت حرف *reroll_count = عدم;
+	حرف *cover_from_description_arg = عدم;
+	حرف *description_file = عدم;
+	حرف *branch_name = عدم;
+	بنية base_tree_info bases;
+	بنية commit *base;
+	صحيح show_progress = 0;
+	بنية progress *progress = عدم;
+	بنية oid_array idiff_prev = OID_ARRAY_INIT;
+	بنية strbuf idiff_title = STRBUF_INIT;
+	ثابت حرف *rdiff_prev = عدم;
+	بنية strbuf rdiff1 = STRBUF_INIT;
+	بنية strbuf rdiff2 = STRBUF_INIT;
+	بنية strbuf rdiff_title = STRBUF_INIT;
+	بنية rdiff_notes rdiff_notes = {
 		.notes = STRING_LIST_INIT_NODUP,
 	};
-	const char *rfc = NULL;
-	int creation_factor = -1;
-	const char *signature = git_version_string;
-	char *signature_to_free = NULL;
-	char *signature_file_arg = NULL;
-	struct keep_callback_data keep_callback_data = {
+	ثابت حرف *rfc = عدم;
+	صحيح creation_factor = -1;
+	ثابت حرف *signature = git_version_string;
+	حرف *signature_to_free = عدم;
+	حرف *signature_file_arg = عدم;
+	بنية keep_callback_data keep_callback_data = {
 		.cfg = &cfg,
 		.revs = &rev,
 	};
-	const char *fmt_patch_suffix = NULL;
+	ثابت حرف *fmt_patch_suffix = عدم;
 
-	const struct option builtin_format_patch_options[] = {
-		OPT_CALLBACK_F('n', "numbered", &cfg, NULL,
+	ثابت بنية option builtin_format_patch_options[] = {
+		OPT_CALLBACK_F('n', "numbered", &cfg, عدم,
 			    N_("use [PATCH n/m] even with a single patch"),
 			    PARSE_OPT_NOARG, numbered_callback),
-		OPT_CALLBACK_F('N', "no-numbered", &cfg, NULL,
+		OPT_CALLBACK_F('N', "no-numbered", &cfg, عدم,
 			    N_("use [PATCH] even with multiple patches"),
 			    PARSE_OPT_NOARG | PARSE_OPT_NONEG, no_numbered_callback),
 		OPT_BOOL('s', "signoff", &cfg.do_signoff, N_("add a Signed-off-by trailer")),
@@ -2076,7 +2076,7 @@ int cmd_format_patch(int argc,
 		OPT_CALLBACK_F('o', "output-directory", &output_directory,
 			    N_("dir"), N_("store resulting files in <dir>"),
 			    PARSE_OPT_NONEG, output_directory_callback),
-		OPT_CALLBACK_F('k', "keep-subject", &keep_callback_data, NULL,
+		OPT_CALLBACK_F('k', "keep-subject", &keep_callback_data, عدم,
 			    N_("don't strip/add [PATCH]"),
 			    PARSE_OPT_NOARG | PARSE_OPT_NONEG, keep_callback),
 		OPT_BOOL(0, "no-binary", &no_binary_diff,
@@ -2141,7 +2141,7 @@ int cmd_format_patch(int argc,
 	repo_config(the_repository, grep_config, &rev.grep_filter);
 
 	rev.show_notes = cfg.show_notes;
-	memcpy(&rev.notes_opt, &cfg.notes_opt, sizeof(cfg.notes_opt));
+	memcpy(&rev.notes_opt, &cfg.notes_opt, حجم(cfg.notes_opt));
 	rev.commit_format = CMIT_FMT_EMAIL;
 	rev.encode_email_headers = cfg.log.default_encode_email_headers;
 	rev.expand_tabs_in_log_default = 0;
@@ -2150,15 +2150,15 @@ int cmd_format_patch(int argc,
 	rev.max_parents = 1;
 	rev.diffopt.flags.recursive = 1;
 	rev.diffopt.no_free = 1;
-	memset(&s_r_opt, 0, sizeof(s_r_opt));
+	memset(&s_r_opt, 0, حجم(s_r_opt));
 	s_r_opt.def = "HEAD";
 	s_r_opt.revarg_opt = REVARG_COMMITTISH;
 
 	strbuf_addstr(&cfg.sprefix, cfg.log.fmt_patch_subject_prefix);
-	if (format_no_prefix)
+	𐡄𐡍 (format_no_prefix)
 		diff_set_noprefix(&rev.diffopt);
 
-	if (cfg.default_attach) {
+	𐡄𐡍 (cfg.default_attach) {
 		rev.mime_boundary = cfg.default_attach;
 		rev.no_inline = 1;
 	}
@@ -2175,66 +2175,66 @@ int cmd_format_patch(int argc,
 
 	rev.force_in_body_from = force_in_body_from;
 
-	if (!fmt_patch_suffix)
+	𐡄𐡍 (!fmt_patch_suffix)
 		fmt_patch_suffix = cfg.fmt_patch_suffix;
 
 	/* Make sure "0000-$sub.patch" gives non-negative length for $sub */
-	if (cfg.log.fmt_patch_name_max <= cast_size_t_to_int(strlen("0000-") + strlen(fmt_patch_suffix)))
+	𐡄𐡍 (cfg.log.fmt_patch_name_max <= cast_size_t_to_int(strlen("0000-") + strlen(fmt_patch_suffix)))
 		cfg.log.fmt_patch_name_max = strlen("0000-") + strlen(fmt_patch_suffix);
 
-	if (cover_from_description_arg)
+	𐡄𐡍 (cover_from_description_arg)
 		cfg.cover_from_description_mode = parse_cover_from_description(cover_from_description_arg);
 
-	if (rfc && rfc[0]) {
+	𐡄𐡍 (rfc && rfc[0]) {
 		cfg.subject_prefix = 1;
-		if (rfc[0] == '-')
+		𐡄𐡍 (rfc[0] == '-')
 			strbuf_addf(&cfg.sprefix, " %s", rfc + 1);
-		else
+		وإلا
 			strbuf_insertf(&cfg.sprefix, 0, "%s ", rfc);
 	}
 
-	if (reroll_count) {
+	𐡄𐡍 (reroll_count) {
 		strbuf_addf(&cfg.sprefix, " v%s", reroll_count);
 		rev.reroll_count = reroll_count;
 	}
 
 	rev.subject_prefix = cfg.sprefix.buf;
 
-	for (i = 0; i < cfg.extra_hdr.nr; i++) {
+	لكل (i = 0; i < cfg.extra_hdr.nr; i++) {
 		strbuf_addstr(&buf, cfg.extra_hdr.items[i].string);
 		strbuf_addch(&buf, '\n');
 	}
 
-	if (cfg.extra_to.nr)
+	𐡄𐡍 (cfg.extra_to.nr)
 		strbuf_addstr(&buf, "To: ");
-	for (i = 0; i < cfg.extra_to.nr; i++) {
-		if (i)
+	لكل (i = 0; i < cfg.extra_to.nr; i++) {
+		𐡄𐡍 (i)
 			strbuf_addstr(&buf, "    ");
 		strbuf_addstr(&buf, cfg.extra_to.items[i].string);
-		if (i + 1 < cfg.extra_to.nr)
+		𐡄𐡍 (i + 1 < cfg.extra_to.nr)
 			strbuf_addch(&buf, ',');
 		strbuf_addch(&buf, '\n');
 	}
 
-	if (cfg.extra_cc.nr)
+	𐡄𐡍 (cfg.extra_cc.nr)
 		strbuf_addstr(&buf, "Cc: ");
-	for (i = 0; i < cfg.extra_cc.nr; i++) {
-		if (i)
+	لكل (i = 0; i < cfg.extra_cc.nr; i++) {
+		𐡄𐡍 (i)
 			strbuf_addstr(&buf, "    ");
 		strbuf_addstr(&buf, cfg.extra_cc.items[i].string);
-		if (i + 1 < cfg.extra_cc.nr)
+		𐡄𐡍 (i + 1 < cfg.extra_cc.nr)
 			strbuf_addch(&buf, ',');
 		strbuf_addch(&buf, '\n');
 	}
 
-	rev.extra_headers = to_free = strbuf_detach(&buf, NULL);
+	rev.extra_headers = to_free = strbuf_detach(&buf, عدم);
 
-	if (cfg.from) {
-		if (split_ident_line(&rev.from_ident, cfg.from, strlen(cfg.from)))
+	𐡄𐡍 (cfg.from) {
+		𐡄𐡍 (split_ident_line(&rev.from_ident, cfg.from, strlen(cfg.from)))
 			die(_("invalid ident line: %s"), cfg.from);
 	}
 
-	if (start_number < 0)
+	𐡄𐡍 (start_number < 0)
 		start_number = 1;
 
 	/*
@@ -2242,33 +2242,33 @@ int cmd_format_patch(int argc,
 	 * and it would conflict with --keep-subject (-k) from the
 	 * command line, reset "numbered".
 	 */
-	if (cfg.numbered && cfg.keep_subject && !cfg.numbered_cmdline_opt)
+	𐡄𐡍 (cfg.numbered && cfg.keep_subject && !cfg.numbered_cmdline_opt)
 		cfg.numbered = 0;
 
-	if (cfg.numbered && cfg.keep_subject)
+	𐡄𐡍 (cfg.numbered && cfg.keep_subject)
 		die(_("options '%s' and '%s' cannot be used together"), "-n", "-k");
-	if (cfg.keep_subject && cfg.subject_prefix)
+	𐡄𐡍 (cfg.keep_subject && cfg.subject_prefix)
 		die(_("options '%s' and '%s' cannot be used together"), "--subject-prefix/--rfc", "-k");
 	rev.preserve_subject = cfg.keep_subject;
 
 	argc = setup_revisions(argc, argv, &rev, &s_r_opt);
-	if (argc > 1)
+	𐡄𐡍 (argc > 1)
 		die(_("unrecognized argument: %s"), argv[1]);
 
-	if (rev.diffopt.output_format & DIFF_FORMAT_NAME)
+	𐡄𐡍 (rev.diffopt.output_format & DIFF_FORMAT_NAME)
 		die(_("--name-only does not make sense"));
-	if (rev.diffopt.output_format & DIFF_FORMAT_NAME_STATUS)
+	𐡄𐡍 (rev.diffopt.output_format & DIFF_FORMAT_NAME_STATUS)
 		die(_("--name-status does not make sense"));
-	if (rev.diffopt.output_format & DIFF_FORMAT_CHECKDIFF)
+	𐡄𐡍 (rev.diffopt.output_format & DIFF_FORMAT_CHECKDIFF)
 		die(_("--check does not make sense"));
-	if (rev.remerge_diff)
+	𐡄𐡍 (rev.remerge_diff)
 		die(_("--remerge-diff does not make sense"));
 
-	if (!use_patch_format &&
+	𐡄𐡍 (!use_patch_format &&
 		(!rev.diffopt.output_format ||
 		 rev.diffopt.output_format == DIFF_FORMAT_PATCH))
 		rev.diffopt.output_format = DIFF_FORMAT_DIFFSTAT | DIFF_FORMAT_SUMMARY;
-	if (!rev.diffopt.stat_width)
+	𐡄𐡍 (!rev.diffopt.stat_width)
 		rev.diffopt.stat_width = MAIL_DEFAULT_WRAP;
 
 	/* Always generate a patch */
@@ -2278,29 +2278,29 @@ int cmd_format_patch(int argc,
 	rev.zero_commit = zero_commit;
 	rev.patch_name_max = cfg.log.fmt_patch_name_max;
 
-	if (!rev.diffopt.flags.text && !no_binary_diff)
+	𐡄𐡍 (!rev.diffopt.flags.text && !no_binary_diff)
 		rev.diffopt.flags.binary = 1;
 
-	if (rev.show_notes)
+	𐡄𐡍 (rev.show_notes)
 		load_display_notes(&rev.notes_opt);
 
 	die_for_incompatible_opt3(use_stdout, "--stdout",
 				  rev.diffopt.close_file, "--output",
 				  !!output_directory, "--output-directory");
 
-	if (use_stdout && stdout_mboxrd)
+	𐡄𐡍 (use_stdout && stdout_mboxrd)
 		rev.commit_format = CMIT_FMT_MBOXRD;
 
-	if (use_stdout) {
+	𐡄𐡍 (use_stdout) {
 		setup_pager(the_repository);
-	} else if (!rev.diffopt.close_file) {
-		int saved;
+	} وإلا 𐡄𐡍 (!rev.diffopt.close_file) {
+		صحيح saved;
 
-		if (!output_directory)
+		𐡄𐡍 (!output_directory)
 			output_directory = cfg.config_output_directory;
 		output_directory = set_outdir(prefix, output_directory);
 
-		if (rev.diffopt.use_color != GIT_COLOR_ALWAYS)
+		𐡄𐡍 (rev.diffopt.use_color != GIT_COLOR_ALWAYS)
 			rev.diffopt.use_color = GIT_COLOR_NEVER;
 		/*
 		 * We consider <outdir> as 'outside of gitdir', therefore avoid
@@ -2308,24 +2308,24 @@ int cmd_format_patch(int argc,
 		 */
 		saved = repo_settings_get_shared_repository(the_repository);
 		repo_settings_set_shared_repository(the_repository, 0);
-		switch (safe_create_leading_directories_const(the_repository, output_directory)) {
-		case SCLD_OK:
-		case SCLD_EXISTS:
-			break;
-		default:
+		بدل (safe_create_leading_directories_const(the_repository, output_directory)) {
+		حالة SCLD_OK:
+		حالة SCLD_EXISTS:
+			اكسر;
+		افتراضي:
 			die(_("could not create leading directories "
 			      "of '%s'"), output_directory);
 		}
 		repo_settings_set_shared_repository(the_repository, saved);
-		if (mkdir(output_directory, 0777) < 0 && errno != EEXIST)
+		𐡄𐡍 (mkdir(output_directory, 0777) < 0 && errno != EEXIST)
 			die_errno(_("could not create directory '%s'"),
 				  output_directory);
 	}
 
-	if (rev.pending.nr == 1) {
-		int check_head = 0;
+	𐡄𐡍 (rev.pending.nr == 1) {
+		صحيح check_head = 0;
 
-		if (rev.max_count < 0 && !rev.show_root_diff) {
+		𐡄𐡍 (rev.max_count < 0 && !rev.show_root_diff) {
 			/*
 			 * This is traditional behaviour of "git format-patch
 			 * origin" that prepares what the origin side still
@@ -2341,18 +2341,18 @@ int cmd_format_patch(int argc,
 		 * get_revision() to do the usual traversal.
 		 */
 
-		if (!strcmp(rev.pending.objects[0].name, "HEAD"))
+		𐡄𐡍 (!strcmp(rev.pending.objects[0].name, "HEAD"))
 			check_head = 1;
 
-		if (check_head) {
-			const char *ref, *v;
+		𐡄𐡍 (check_head) {
+			ثابت حرف *ref, *v;
 			ref = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
 						      "HEAD",
 						      RESOLVE_REF_READING,
-						      NULL, NULL);
-			if (ref && skip_prefix(ref, "refs/heads/", &v))
+						      عدم, عدم);
+			𐡄𐡍 (ref && skip_prefix(ref, "refs/heads/", &v))
 				branch_name = xstrdup(v);
-			else
+			وإلا
 				branch_name = xstrdup(""); /* no branch */
 		}
 	}
@@ -2363,59 +2363,59 @@ int cmd_format_patch(int argc,
 	 */
 	rev.show_root_diff = 1;
 
-	if (ignore_if_in_upstream) {
+	𐡄𐡍 (ignore_if_in_upstream) {
 		/* Don't say anything if head and upstream are the same. */
-		if (rev.pending.nr == 2) {
-			struct object_array_entry *o = rev.pending.objects;
-			if (oideq(&o[0].item->oid, &o[1].item->oid))
-				goto done;
+		𐡄𐡍 (rev.pending.nr == 2) {
+			بنية object_array_entry *o = rev.pending.objects;
+			𐡄𐡍 (oideq(&o[0].item->oid, &o[1].item->oid))
+				اذهب done;
 		}
 		get_patch_ids(&rev, &ids);
 	}
 
-	if (prepare_revision_walk(&rev))
+	𐡄𐡍 (prepare_revision_walk(&rev))
 		die(_("revision walk setup failed"));
 	rev.boundary = 1;
-	while ((commit = get_revision(&rev)) != NULL) {
-		if (commit->object.flags & BOUNDARY) {
+	طالما ((commit = get_revision(&rev)) != عدم) {
+		𐡄𐡍 (commit->object.flags & BOUNDARY) {
 			boundary_count++;
-			origin = (boundary_count == 1) ? commit : NULL;
-			continue;
+			origin = (boundary_count == 1) ? commit : عدم;
+			استمر;
 		}
 
-		if (ignore_if_in_upstream && has_commit_patch_id(commit, &ids))
-			continue;
+		𐡄𐡍 (ignore_if_in_upstream && has_commit_patch_id(commit, &ids))
+			استمر;
 
 		commit_stack_push(&list, commit);
 	}
-	if (!list.nr)
+	𐡄𐡍 (!list.nr)
 		/* nothing to do */
-		goto done;
+		اذهب done;
 	total = list.nr;
 
-	if (!cover_letter_fmt) {
+	𐡄𐡍 (!cover_letter_fmt) {
 		cover_letter_fmt = cfg.fmt_cover_letter_commit_list;
-		if (!cover_letter_fmt)
+		𐡄𐡍 (!cover_letter_fmt)
 			cover_letter_fmt = "shortlog";
-	} else if (cover_letter == -1) {
+	} وإلا 𐡄𐡍 (cover_letter == -1) {
 		cover_letter = 1;
 	}
 
-	if (cover_letter == -1) {
-		if (cfg.config_cover_letter == COVER_AUTO)
+	𐡄𐡍 (cover_letter == -1) {
+		𐡄𐡍 (cfg.config_cover_letter == COVER_AUTO)
 			cover_letter = (total > 1);
-		else if ((idiff_prev.nr || rdiff_prev) && (total > 1))
+		وإلا 𐡄𐡍 ((idiff_prev.nr || rdiff_prev) && (total > 1))
 			cover_letter = (cfg.config_cover_letter != COVER_OFF);
-		else
+		وإلا
 			cover_letter = (cfg.config_cover_letter == COVER_ON);
 	}
-	if (!cfg.keep_subject && cfg.auto_number && (total > 1 || cover_letter))
+	𐡄𐡍 (!cfg.keep_subject && cfg.auto_number && (total > 1 || cover_letter))
 		cfg.numbered = 1;
-	if (cfg.numbered)
+	𐡄𐡍 (cfg.numbered)
 		rev.total = total + start_number - 1;
 
-	if (idiff_prev.nr) {
-		if (!cover_letter && total != 1)
+	𐡄𐡍 (idiff_prev.nr) {
+		𐡄𐡍 (!cover_letter && total != 1)
 			die(_("--interdiff requires --cover-letter or single patch"));
 		rev.idiff_oid1 = &idiff_prev.oid[idiff_prev.nr - 1];
 		rev.idiff_oid2 = get_commit_tree_oid(list.items[0]);
@@ -2424,13 +2424,13 @@ int cmd_format_patch(int argc,
 					     _("Interdiff against v%d:"));
 	}
 
-	if (creation_factor < 0)
+	𐡄𐡍 (creation_factor < 0)
 		creation_factor = CREATION_FACTOR_FOR_THE_SAME_SERIES;
-	else if (!rdiff_prev)
+	وإلا 𐡄𐡍 (!rdiff_prev)
 		die(_("the option '%s' requires '%s'"), "--creation-factor", "--range-diff");
 
-	if (rdiff_prev) {
-		if (!cover_letter && total != 1)
+	𐡄𐡍 (rdiff_prev) {
+		𐡄𐡍 (!cover_letter && total != 1)
 			die(_("--range-diff requires --cover-letter or single patch"));
 
 		infer_range_diff_ranges(&rdiff1, &rdiff2, rdiff_prev,
@@ -2453,43 +2453,43 @@ int cmd_format_patch(int argc,
 	 *   4. The `format.signatureFile` config.
 	 *   5. Default `git_version_string`.
 	 */
-	if (!signature) {
+	𐡄𐡍 (!signature) {
 		; /* --no-signature inhibits all signatures */
-	} else if (signature && signature != git_version_string) {
+	} وإلا 𐡄𐡍 (signature && signature != git_version_string) {
 		; /* non-default signature already set */
-	} else if (signature_file_arg || (cfg.signature_file && !cfg.signature)) {
-		struct strbuf buf = STRBUF_INIT;
-		const char *signature_file = signature_file_arg ?
+	} وإلا 𐡄𐡍 (signature_file_arg || (cfg.signature_file && !cfg.signature)) {
+		بنية strbuf buf = STRBUF_INIT;
+		ثابت حرف *signature_file = signature_file_arg ?
 			signature_file_arg : cfg.signature_file;
 
-		if (strbuf_read_file(&buf, signature_file, 128) < 0)
+		𐡄𐡍 (strbuf_read_file(&buf, signature_file, 128) < 0)
 			die_errno(_("unable to read signature file '%s'"), signature_file);
-		signature = signature_to_free = strbuf_detach(&buf, NULL);
-	} else if (cfg.signature) {
+		signature = signature_to_free = strbuf_detach(&buf, عدم);
+	} وإلا 𐡄𐡍 (cfg.signature) {
 		signature = cfg.signature;
 	}
 
-	memset(&bases, 0, sizeof(bases));
+	memset(&bases, 0, حجم(bases));
 	base = get_base_commit(&cfg, list.items, list.nr);
-	if (base) {
+	𐡄𐡍 (base) {
 		reset_revision_walk();
 		clear_object_flags(the_repository, UNINTERESTING);
 		prepare_bases(&bases, base, list.items, list.nr);
 	}
 
-	if (in_reply_to || cfg.thread || cover_letter) {
-		rev.ref_message_ids = xmalloc(sizeof(*rev.ref_message_ids));
+	𐡄𐡍 (in_reply_to || cfg.thread || cover_letter) {
+		rev.ref_message_ids = xmalloc(حجم(*rev.ref_message_ids));
 		string_list_init_dup(rev.ref_message_ids);
 	}
-	if (in_reply_to) {
-		char *msgid = clean_message_id(in_reply_to);
+	𐡄𐡍 (in_reply_to) {
+		حرف *msgid = clean_message_id(in_reply_to);
 		string_list_append_nodup(rev.ref_message_ids, msgid);
 	}
 	rev.numbered_files = just_numbers;
 	rev.patch_suffix = fmt_patch_suffix;
 
-	if (cover_letter) {
-		if (cfg.thread)
+	𐡄𐡍 (cover_letter) {
+		𐡄𐡍 (cfg.thread)
 			gen_message_id(&rev, "cover");
 		make_cover_letter(&rev, !!output_directory,
 				  origin, list.nr, list.items,
@@ -2500,26 +2500,26 @@ int cmd_format_patch(int argc,
 		total++;
 		start_number--;
 		/* interdiff/range-diff in cover-letter; omit from patches */
-		rev.idiff_oid1 = NULL;
-		rev.rdiff1 = NULL;
+		rev.idiff_oid1 = عدم;
+		rev.rdiff1 = عدم;
 	}
 	rev.add_signoff = cfg.do_signoff;
 
-	if (show_progress)
+	𐡄𐡍 (show_progress)
 		progress = start_delayed_progress(the_repository,
 						  _("Generating patches"), total);
-	while (list.nr) {
+	طالما (list.nr) {
 		size_t idx = list.nr - 1;
-		int shown;
+		صحيح shown;
 
 		display_progress(progress, total - idx);
 		commit = commit_stack_pop(&list);
 		rev.nr = total - idx + (start_number - 1);
 
 		/* Make the second and subsequent mails replies to the first */
-		if (cfg.thread) {
+		𐡄𐡍 (cfg.thread) {
 			/* Have we already had a message ID? */
-			if (rev.message_id) {
+			𐡄𐡍 (rev.message_id) {
 				/*
 				 * For deep threading: make every mail
 				 * a reply to the previous one, no
@@ -2541,19 +2541,19 @@ int cmd_format_patch(int argc,
 				 * letter is a reply to the
 				 * --in-reply-to, if specified.
 				 */
-				if (cfg.thread == THREAD_SHALLOW
+				𐡄𐡍 (cfg.thread == THREAD_SHALLOW
 				    && rev.ref_message_ids->nr > 0
 				    && (!cover_letter || rev.nr > 1))
-					free(rev.message_id);
-				else
+					حرر(rev.message_id);
+				وإلا
 					string_list_append_nodup(rev.ref_message_ids,
 								 rev.message_id);
 			}
 			gen_message_id(&rev, oid_to_hex(&commit->object.oid));
 		}
 
-		if (output_directory &&
-		    open_next_file(rev.numbered_files ? NULL : commit, NULL, &rev, quiet))
+		𐡄𐡍 (output_directory &&
+		    open_next_file(rev.numbered_files ? عدم : commit, عدم, &rev, quiet))
 			die(_("failed to create output files"));
 		shown = log_tree_commit(&rev, commit);
 		free_commit_buffer(the_repository->parsed_objects,
@@ -2565,25 +2565,25 @@ int cmd_format_patch(int argc,
 		 * the log; when using one file per patch, we do
 		 * not want the extra blank line.
 		 */
-		if (output_directory)
+		𐡄𐡍 (output_directory)
 			rev.shown_one = 0;
-		if (shown) {
+		𐡄𐡍 (shown) {
 			print_bases(&bases, rev.diffopt.file);
-			if (rev.mime_boundary)
+			𐡄𐡍 (rev.mime_boundary)
 				fprintf(rev.diffopt.file, "\n--%s%s--\n\n\n",
 				       mime_boundary_leader,
 				       rev.mime_boundary);
-			else
+			وإلا
 				print_signature(signature, rev.diffopt.file);
 		}
-		if (output_directory) {
+		𐡄𐡍 (output_directory) {
 			fclose(rev.diffopt.file);
-			rev.diffopt.file = NULL;
+			rev.diffopt.file = عدم;
 		}
 	}
 	stop_progress(&progress);
 	commit_stack_clear(&list);
-	if (ignore_if_in_upstream)
+	𐡄𐡍 (ignore_if_in_upstream)
 		free_patch_ids(&ids);
 
 done:
@@ -2592,51 +2592,51 @@ done:
 	strbuf_release(&rdiff1);
 	strbuf_release(&rdiff2);
 	strbuf_release(&rdiff_title);
-	free(description_file);
-	free(signature_file_arg);
-	free(signature_to_free);
-	free(branch_name);
-	free(to_free);
-	free(rev.message_id);
-	if (rev.ref_message_ids)
+	حرر(description_file);
+	حرر(signature_file_arg);
+	حرر(signature_to_free);
+	حرر(branch_name);
+	حرر(to_free);
+	حرر(rev.message_id);
+	𐡄𐡍 (rev.ref_message_ids)
 		string_list_clear(rev.ref_message_ids, 0);
-	free(rev.ref_message_ids);
+	حرر(rev.ref_message_ids);
 	rev.diffopt.no_free = 0;
 	release_revisions(&rev);
 	format_config_release(&cfg);
 	strvec_clear(&rev.rdiff_log_arg);
 	string_list_clear(&rdiff_notes.notes, 0);
-	return 0;
+	أرجع 0;
 }
 
-static int add_pending_commit(const char *arg, struct rev_info *revs, int flags)
+ساكن صحيح add_pending_commit(ثابت حرف *arg, بنية rev_info *revs, صحيح flags)
 {
-	struct object_id oid;
-	if (repo_get_oid(the_repository, arg, &oid) == 0) {
-		struct commit *commit = lookup_commit_reference(the_repository,
+	بنية object_id oid;
+	𐡄𐡍 (repo_get_oid(the_repository, arg, &oid) == 0) {
+		بنية commit *commit = lookup_commit_reference(the_repository,
 								&oid);
-		if (commit) {
+		𐡄𐡍 (commit) {
 			commit->object.flags |= flags;
 			add_pending_object(revs, &commit->object, arg);
-			return 0;
+			أرجع 0;
 		}
 	}
-	return -1;
+	أرجع -1;
 }
 
-static const char * const cherry_usage[] = {
+ساكن ثابت حرف * ثابت cherry_usage[] = {
 	N_("git cherry [-v] [<upstream> [<head> [<limit>]]]"),
-	NULL
+	عدم
 };
 
-static void print_commit(char sign, struct commit *commit, int verbose,
-			 int abbrev, FILE *file)
+ساكن فراغ print_commit(حرف sign, بنية commit *commit, صحيح verbose,
+			 صحيح abbrev, FILE *file)
 {
-	if (!verbose) {
+	𐡄𐡍 (!verbose) {
 		fprintf(file, "%c %s\n", sign,
 		       repo_find_unique_abbrev(the_repository, &commit->object.oid, abbrev));
-	} else {
-		struct strbuf buf = STRBUF_INIT;
+	} وإلا {
+		بنية strbuf buf = STRBUF_INIT;
 		pp_commit_easy(CMIT_FMT_ONELINE, commit, &buf);
 		fprintf(file, "%c %s %s\n", sign,
 		       repo_find_unique_abbrev(the_repository, &commit->object.oid, abbrev),
@@ -2654,55 +2654,55 @@ static void print_commit(char sign, struct commit *commit, int verbose,
  *
  * Clean up with diff_queue_clear() (from diffcore.h).
  */
-static void collect_diff_blob_oids(struct commit *commit,
-				   struct diff_options *opts,
-				   struct oidset *blobs)
+ساكن فراغ collect_diff_blob_oids(بنية commit *commit,
+				   بنية diff_options *opts,
+				   بنية oidset *blobs)
 {
-	struct diff_queue_struct *q;
+	بنية diff_queue_struct *q;
 
 	/*
 	 * Merge commits are filtered out by patch_id_defined() in patch-ids.c,
 	 * so we'll never be called with one.
 	 */
-	assert(!commit->parents || !commit->parents->next);
+	أكد(!commit->parents || !commit->parents->next);
 
-	if (commit->parents)
+	𐡄𐡍 (commit->parents)
 		diff_tree_oid(&commit->parents->item->object.oid,
 			      &commit->object.oid, "", opts);
-	else
+	وإلا
 		diff_root_tree_oid(&commit->object.oid, "", opts);
 	diffcore_std(opts);
 
 	q = &diff_queued_diff;
-	for (int i = 0; i < q->nr; i++) {
-		struct diff_filepair *p = q->queue[i];
-		struct userdiff_driver *drv;
+	لكل (صحيح i = 0; i < q->nr; i++) {
+		بنية diff_filepair *p = q->queue[i];
+		بنية userdiff_driver *drv;
 
 		/* Skip binary files */
 		drv = userdiff_find_by_path(opts->repo->index, p->one->path);
-		if (drv && drv->binary > 0)
-			continue;
+		𐡄𐡍 (drv && drv->binary > 0)
+			استمر;
 
-		if (DIFF_FILE_VALID(p->one) &&
+		𐡄𐡍 (DIFF_FILE_VALID(p->one) &&
 		    odb_read_object_info_extended(opts->repo->objects,
-						  &p->one->oid, NULL,
+						  &p->one->oid, عدم,
 						  OBJECT_INFO_FOR_PREFETCH))
 			oidset_insert(blobs, &p->one->oid);
-		if (DIFF_FILE_VALID(p->two) &&
+		𐡄𐡍 (DIFF_FILE_VALID(p->two) &&
 		    odb_read_object_info_extended(opts->repo->objects,
-						  &p->two->oid, NULL,
+						  &p->two->oid, عدم,
 						  OBJECT_INFO_FOR_PREFETCH))
 			oidset_insert(blobs, &p->two->oid);
 	}
 	diff_queue_clear(q);
 }
 
-static int always_match(const void *cmp_data UNUSED,
-			const struct hashmap_entry *entry1 UNUSED,
-			const struct hashmap_entry *entry2 UNUSED,
-			const void *keydata UNUSED)
+ساكن صحيح always_match(ثابت فراغ *cmp_data UNUSED,
+			ثابت بنية hashmap_entry *entry1 UNUSED,
+			ثابت بنية hashmap_entry *entry2 UNUSED,
+			ثابت فراغ *keydata UNUSED)
 {
-	return 0;
+	أرجع 0;
 }
 
 /*
@@ -2719,33 +2719,33 @@ static int always_match(const void *cmp_data UNUSED,
  * blobs to be read on demand, and we want to prefetch them all at
  * once instead.
  */
-static void prefetch_cherry_blobs(struct repository *repo,
-				  struct commit_list *list,
-				  struct patch_ids *ids)
+ساكن فراغ prefetch_cherry_blobs(بنية repository *repo,
+				  بنية commit_list *list,
+				  بنية patch_ids *ids)
 {
-	struct oidset blobs = OIDSET_INIT;
+	بنية oidset blobs = OIDSET_INIT;
 	hashmap_cmp_fn original_cmpfn;
 
 	/* Exit if we're not in a partial clone */
-	if (!repo_has_promisor_remote(repo))
-		return;
+	𐡄𐡍 (!repo_has_promisor_remote(repo))
+		أرجع;
 
 	/* Save original cmpfn, replace with always_match */
 	original_cmpfn = ids->patches.cmpfn;
 	ids->patches.cmpfn = always_match;
 
 	/* Find header-only collisions, gather blobs from those commits */
-	for (struct commit_list *l = list; l; l = l->next) {
-		struct commit *c = l->item;
+	لكل (بنية commit_list *l = list; l; l = l->next) {
+		بنية commit *c = l->item;
 		bool match_found = false;
-		for (struct patch_id *cur = patch_id_iter_first(c, ids);
+		لكل (بنية patch_id *cur = patch_id_iter_first(c, ids);
 		     cur;
 		     cur = patch_id_iter_next(cur, ids)) {
 			match_found = true;
 			collect_diff_blob_oids(cur->commit, &ids->diffopts,
 					       &blobs);
 		}
-		if (match_found)
+		𐡄𐡍 (match_found)
 			collect_diff_blob_oids(c, &ids->diffopts, &blobs);
 	}
 
@@ -2753,13 +2753,13 @@ static void prefetch_cherry_blobs(struct repository *repo,
 	ids->patches.cmpfn = original_cmpfn;
 
 	/* If we have any blobs to fetch, fetch them */
-	if (oidset_size(&blobs)) {
-		struct oid_array to_fetch = OID_ARRAY_INIT;
-		struct oidset_iter iter;
-		const struct object_id *oid;
+	𐡄𐡍 (oidset_size(&blobs)) {
+		بنية oid_array to_fetch = OID_ARRAY_INIT;
+		بنية oidset_iter iter;
+		ثابت بنية object_id *oid;
 
 		oidset_iter_init(&blobs, &iter);
-		while ((oid = oidset_iter_next(&iter)))
+		طالما ((oid = oidset_iter_next(&iter)))
 			oid_array_append(&to_fetch, oid);
 
 		promisor_remote_get_direct(repo, to_fetch.oid, to_fetch.nr);
@@ -2770,22 +2770,22 @@ static void prefetch_cherry_blobs(struct repository *repo,
 	oidset_clear(&blobs);
 }
 
-int cmd_cherry(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+صحيح cmd_cherry(صحيح argc,
+	       ثابت حرف **argv,
+	       ثابت حرف *prefix,
+	       بنية repository *repo UNUSED)
 {
-	struct rev_info revs;
-	struct patch_ids ids;
-	struct commit *commit;
-	struct commit_list *list = NULL;
-	struct branch *current_branch;
-	const char *upstream;
-	const char *head = "HEAD";
-	const char *limit = NULL;
-	int verbose = 0, abbrev = 0;
+	بنية rev_info revs;
+	بنية patch_ids ids;
+	بنية commit *commit;
+	بنية commit_list *list = عدم;
+	بنية branch *current_branch;
+	ثابت حرف *upstream;
+	ثابت حرف *head = "HEAD";
+	ثابت حرف *limit = عدم;
+	صحيح verbose = 0, abbrev = 0;
 
-	struct option options[] = {
+	بنية option options[] = {
 		OPT__ABBREV(&abbrev),
 		OPT__VERBOSE(&verbose, N_("be verbose")),
 		OPT_END()
@@ -2793,20 +2793,20 @@ int cmd_cherry(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, cherry_usage, 0);
 
-	switch (argc) {
-	case 3:
+	بدل (argc) {
+	حالة 3:
 		limit = argv[2];
 		/* FALLTHROUGH */
-	case 2:
+	حالة 2:
 		head = argv[1];
 		/* FALLTHROUGH */
-	case 1:
+	حالة 1:
 		upstream = argv[0];
-		break;
-	default:
-		current_branch = branch_get(NULL);
-		upstream = branch_get_upstream(current_branch, NULL);
-		if (!upstream) {
+		اكسر;
+	افتراضي:
+		current_branch = branch_get(عدم);
+		upstream = branch_get_upstream(current_branch, عدم);
+		𐡄𐡍 (!upstream) {
 			fprintf(stderr, _("Could not find a tracked"
 					" remote branch, please"
 					" specify <upstream> manually.\n"));
@@ -2817,42 +2817,42 @@ int cmd_cherry(int argc,
 	repo_init_revisions(the_repository, &revs, prefix);
 	revs.max_parents = 1;
 
-	if (add_pending_commit(head, &revs, 0))
+	𐡄𐡍 (add_pending_commit(head, &revs, 0))
 		die(_("unknown commit %s"), head);
-	if (add_pending_commit(upstream, &revs, UNINTERESTING))
+	𐡄𐡍 (add_pending_commit(upstream, &revs, UNINTERESTING))
 		die(_("unknown commit %s"), upstream);
 
 	/* Don't say anything if head and upstream are the same. */
-	if (revs.pending.nr == 2) {
-		struct object_array_entry *o = revs.pending.objects;
-		if (oideq(&o[0].item->oid, &o[1].item->oid))
-			return 0;
+	𐡄𐡍 (revs.pending.nr == 2) {
+		بنية object_array_entry *o = revs.pending.objects;
+		𐡄𐡍 (oideq(&o[0].item->oid, &o[1].item->oid))
+			أرجع 0;
 	}
 
 	get_patch_ids(&revs, &ids);
 
-	if (limit && add_pending_commit(limit, &revs, UNINTERESTING))
+	𐡄𐡍 (limit && add_pending_commit(limit, &revs, UNINTERESTING))
 		die(_("unknown commit %s"), limit);
 
 	/* reverse the list of commits */
-	if (prepare_revision_walk(&revs))
+	𐡄𐡍 (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
-	while ((commit = get_revision(&revs)) != NULL) {
+	طالما ((commit = get_revision(&revs)) != عدم) {
 		commit_list_insert(commit, &list);
 	}
 
 	prefetch_cherry_blobs(the_repository, list, &ids);
 
-	for (struct commit_list *l = list; l; l = l->next) {
-		char sign = '+';
+	لكل (بنية commit_list *l = list; l; l = l->next) {
+		حرف sign = '+';
 
 		commit = l->item;
-		if (has_commit_patch_id(commit, &ids))
+		𐡄𐡍 (has_commit_patch_id(commit, &ids))
 			sign = '-';
 		print_commit(sign, commit, verbose, abbrev, revs.diffopt.file);
 	}
 
 	commit_list_free(list);
 	free_patch_ids(&ids);
-	return 0;
+	أرجع 0;
 }

@@ -1,96 +1,96 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "attr.h"
-#include "environment.h"
-#include "gettext.h"
-#include "object-name.h"
-#include "quote.h"
-#include "setup.h"
-#include "parse-options.h"
-#include "write-or-die.h"
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "attr.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "object-name.h"
+#ضمن "quote.h"
+#ضمن "setup.h"
+#ضمن "parse-options.h"
+#ضمن "write-or-die.h"
 
-static int all_attrs;
-static int cached_attrs;
-static int stdin_paths;
-static char *source;
-static const char * const check_attr_usage[] = {
+ساكن صحيح all_attrs;
+ساكن صحيح cached_attrs;
+ساكن صحيح stdin_paths;
+ساكن حرف *source;
+ساكن ثابت حرف * ثابت check_attr_usage[] = {
 N_("git check-attr [--source <tree-ish>] [-a | --all | <attr>...] [--] <pathname>..."),
 N_("git check-attr --stdin [-z] [--source <tree-ish>] [-a | --all | <attr>...]"),
-NULL
+عدم
 };
 
-static int nul_term_line;
+ساكن صحيح nul_term_line;
 
-static const struct option check_attr_options[] = {
+ساكن ثابت بنية option check_attr_options[] = {
 	OPT_BOOL('a', "all", &all_attrs, N_("report all attributes set on file")),
 	OPT_BOOL(0,  "cached", &cached_attrs, N_("use .gitattributes only from the index")),
 	OPT_BOOL(0 , "stdin", &stdin_paths, N_("read file names from stdin")),
-	OPT_BOOL('z', NULL, &nul_term_line,
+	OPT_BOOL('z', عدم, &nul_term_line,
 		 N_("terminate input and output records by a NUL character")),
 	OPT_STRING(0, "source", &source, N_("<tree-ish>"), N_("which tree-ish to check attributes at")),
 	OPT_END()
 };
 
-static void output_attr(struct attr_check *check, const char *file)
+ساكن فراغ output_attr(بنية attr_check *check, ثابت حرف *file)
 {
-	int j;
-	int cnt = check->nr;
+	صحيح j;
+	صحيح cnt = check->nr;
 
-	for (j = 0; j < cnt; j++) {
-		const char *value = check->items[j].value;
+	لكل (j = 0; j < cnt; j++) {
+		ثابت حرف *value = check->items[j].value;
 
-		if (ATTR_TRUE(value))
+		𐡄𐡍 (ATTR_TRUE(value))
 			value = "set";
-		else if (ATTR_FALSE(value))
+		وإلا 𐡄𐡍 (ATTR_FALSE(value))
 			value = "unset";
-		else if (ATTR_UNSET(value))
+		وإلا 𐡄𐡍 (ATTR_UNSET(value))
 			value = "unspecified";
 
-		if (nul_term_line) {
+		𐡄𐡍 (nul_term_line) {
 			printf("%s%c" /* path */
 			       "%s%c" /* attrname */
 			       "%s%c" /* attrvalue */,
 			       file, 0,
 			       git_attr_name(check->items[j].attr), 0, value, 0);
-		} else {
-			quote_c_style(file, NULL, stdout, 0);
+		} وإلا {
+			quote_c_style(file, عدم, stdout, 0);
 			printf(": %s: %s\n",
 			       git_attr_name(check->items[j].attr), value);
 		}
 	}
 }
 
-static void check_attr(const char *prefix, struct attr_check *check,
-		       int collect_all,
-		       const char *file)
+ساكن فراغ check_attr(ثابت حرف *prefix, بنية attr_check *check,
+		       صحيح collect_all,
+		       ثابت حرف *file)
 
 {
-	char *full_path =
+	حرف *full_path =
 		prefix_path(the_repository, prefix, prefix ? strlen(prefix) : 0, file);
 
-	if (collect_all) {
+	𐡄𐡍 (collect_all) {
 		git_all_attrs(the_repository->index, full_path, check);
-	} else {
+	} وإلا {
 		git_check_attr(the_repository->index, full_path, check);
 	}
 	output_attr(check, file);
 
-	free(full_path);
+	حرر(full_path);
 }
 
-static void check_attr_stdin_paths(const char *prefix, struct attr_check *check,
-				   int collect_all)
+ساكن فراغ check_attr_stdin_paths(ثابت حرف *prefix, بنية attr_check *check,
+				   صحيح collect_all)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf unquoted = STRBUF_INIT;
+	بنية strbuf buf = STRBUF_INIT;
+	بنية strbuf unquoted = STRBUF_INIT;
 	strbuf_getline_fn getline_fn;
 
 	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	while (getline_fn(&buf, stdin) != EOF) {
-		if (!nul_term_line && buf.buf[0] == '"') {
+	طالما (getline_fn(&buf, stdin) != EOF) {
+		𐡄𐡍 (!nul_term_line && buf.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, buf.buf, NULL))
+			𐡄𐡍 (unquote_c_style(&unquoted, buf.buf, عدم))
 				die("line is badly quoted");
 			strbuf_swap(&buf, &unquoted);
 		}
@@ -101,25 +101,25 @@ static void check_attr_stdin_paths(const char *prefix, struct attr_check *check,
 	strbuf_release(&unquoted);
 }
 
-static NORETURN void error_with_usage(const char *msg)
+ساكن NORETURN فراغ error_with_usage(ثابت حرف *msg)
 {
 	error("%s", msg);
 	usage_with_options(check_attr_usage, check_attr_options);
 }
 
-int cmd_check_attr(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+صحيح cmd_check_attr(صحيح argc,
+		   ثابت حرف **argv,
+		   ثابت حرف *prefix,
+		   بنية repository *repo UNUSED)
 {
-	struct attr_check *check;
-	struct object_id initialized_oid;
-	int cnt, i, doubledash, filei;
+	بنية attr_check *check;
+	بنية object_id initialized_oid;
+	صحيح cnt, i, doubledash, filei;
 
-	if (!is_bare_repository(the_repository))
+	𐡄𐡍 (!is_bare_repository(the_repository))
 		setup_work_tree(the_repository);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, عدم);
 
 	argc = parse_options(argc, argv, prefix, check_attr_options,
 			     check_attr_usage, PARSE_OPT_KEEP_DASHDASH);
@@ -127,81 +127,81 @@ int cmd_check_attr(int argc,
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	if (repo_read_index(the_repository) < 0) {
+	𐡄𐡍 (repo_read_index(the_repository) < 0) {
 		die("invalid cache");
 	}
 
-	if (cached_attrs)
+	𐡄𐡍 (cached_attrs)
 		git_attr_set_direction(GIT_ATTR_INDEX);
 
 	doubledash = -1;
-	for (i = 0; doubledash < 0 && i < argc; i++) {
-		if (!strcmp(argv[i], "--"))
+	لكل (i = 0; doubledash < 0 && i < argc; i++) {
+		𐡄𐡍 (!strcmp(argv[i], "--"))
 			doubledash = i;
 	}
 
 	/* Process --all and/or attribute arguments: */
-	if (all_attrs) {
-		if (doubledash >= 1)
+	𐡄𐡍 (all_attrs) {
+		𐡄𐡍 (doubledash >= 1)
 			error_with_usage("Attributes and --all both specified");
 
 		cnt = 0;
 		filei = doubledash + 1;
-	} else if (doubledash == 0) {
+	} وإلا 𐡄𐡍 (doubledash == 0) {
 		error_with_usage("No attribute specified");
-	} else if (doubledash < 0) {
-		if (!argc)
+	} وإلا 𐡄𐡍 (doubledash < 0) {
+		𐡄𐡍 (!argc)
 			error_with_usage("No attribute specified");
 
-		if (stdin_paths) {
+		𐡄𐡍 (stdin_paths) {
 			/* Treat all arguments as attribute names. */
 			cnt = argc;
 			filei = argc;
-		} else {
+		} وإلا {
 			/* Treat exactly one argument as an attribute name. */
 			cnt = 1;
 			filei = 1;
 		}
-	} else {
+	} وإلا {
 		cnt = doubledash;
 		filei = doubledash + 1;
 	}
 
 	/* Check file argument(s): */
-	if (stdin_paths) {
-		if (filei < argc)
+	𐡄𐡍 (stdin_paths) {
+		𐡄𐡍 (filei < argc)
 			error_with_usage("Can't specify files with --stdin");
-	} else {
-		if (filei >= argc)
+	} وإلا {
+		𐡄𐡍 (filei >= argc)
 			error_with_usage("No file specified");
 	}
 
 	check = attr_check_alloc();
-	if (!all_attrs) {
-		for (i = 0; i < cnt; i++) {
-			const struct git_attr *a = git_attr(argv[i]);
+	𐡄𐡍 (!all_attrs) {
+		لكل (i = 0; i < cnt; i++) {
+			ثابت بنية git_attr *a = git_attr(argv[i]);
 
-			if (!a)
-				return error("%s: not a valid attribute name",
+			𐡄𐡍 (!a)
+				أرجع error("%s: not a valid attribute name",
 					     argv[i]);
 			attr_check_append(check, a);
 		}
 	}
 
-	if (source) {
-		if (repo_get_oid_tree(the_repository, source, &initialized_oid))
+	𐡄𐡍 (source) {
+		𐡄𐡍 (repo_get_oid_tree(the_repository, source, &initialized_oid))
 			die("%s: not a valid tree-ish source", source);
 		set_git_attr_source(source);
 	}
 
-	if (stdin_paths)
+	𐡄𐡍 (stdin_paths)
 		check_attr_stdin_paths(prefix, check, all_attrs);
-	else {
-		for (i = filei; i < argc; i++)
+	وإلا {
+		لكل (i = filei; i < argc; i++)
 			check_attr(prefix, check, all_attrs, argv[i]);
 		maybe_flush_or_die(stdout, "attribute to stdout");
 	}
 
 	attr_check_free(check);
-	return 0;
+	أرجع 0;
 }

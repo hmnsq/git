@@ -4,146 +4,146 @@
  * Copyright (c) 2006 Junio C Hamano
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "path.h"
-#include "parse-options.h"
-#include "quote.h"
-#include "packfile.h"
-#include "object-file.h"
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "dir.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "path.h"
+#ضمن "parse-options.h"
+#ضمن "quote.h"
+#ضمن "packfile.h"
+#ضمن "object-file.h"
 
-static unsigned long garbage;
-static off_t size_garbage;
-static int verbose;
-static unsigned long loose, packed, packed_loose;
-static off_t loose_size;
+ساكن unsigned long garbage;
+ساكن off_t size_garbage;
+ساكن صحيح verbose;
+ساكن unsigned long loose, packed, packed_loose;
+ساكن off_t loose_size;
 
-static const char *bits_to_msg(unsigned seen_bits)
+ساكن ثابت حرف *bits_to_msg(unsigned seen_bits)
 {
-	switch (seen_bits) {
-	case 0:
-		return "no corresponding .idx or .pack";
-	case PACKDIR_FILE_GARBAGE:
-		return "garbage found";
-	case PACKDIR_FILE_PACK:
-		return "no corresponding .idx";
-	case PACKDIR_FILE_IDX:
-		return "no corresponding .pack";
-	case PACKDIR_FILE_PACK|PACKDIR_FILE_IDX:
-	default:
-		return NULL;
+	بدل (seen_bits) {
+	حالة 0:
+		أرجع "no corresponding .idx or .pack";
+	حالة PACKDIR_FILE_GARBAGE:
+		أرجع "garbage found";
+	حالة PACKDIR_FILE_PACK:
+		أرجع "no corresponding .idx";
+	حالة PACKDIR_FILE_IDX:
+		أرجع "no corresponding .pack";
+	حالة PACKDIR_FILE_PACK|PACKDIR_FILE_IDX:
+	افتراضي:
+		أرجع عدم;
 	}
 }
 
-static void real_report_garbage(unsigned seen_bits, const char *path)
+ساكن فراغ real_report_garbage(unsigned seen_bits, ثابت حرف *path)
 {
-	struct stat st;
-	const char *desc = bits_to_msg(seen_bits);
+	بنية stat st;
+	ثابت حرف *desc = bits_to_msg(seen_bits);
 
-	if (!desc)
-		return;
+	𐡄𐡍 (!desc)
+		أرجع;
 
-	if (!stat(path, &st))
+	𐡄𐡍 (!stat(path, &st))
 		size_garbage += st.st_size;
 	warning("%s: %s", desc, path);
 	garbage++;
 }
 
-static void loose_garbage(const char *path)
+ساكن فراغ loose_garbage(ثابت حرف *path)
 {
-	if (verbose)
+	𐡄𐡍 (verbose)
 		report_garbage(PACKDIR_FILE_GARBAGE, path);
 }
 
-static int count_loose(const struct object_id *oid, const char *path,
-		       void *data UNUSED)
+ساكن صحيح count_loose(ثابت بنية object_id *oid, ثابت حرف *path,
+		       فراغ *data UNUSED)
 {
-	struct stat st;
+	بنية stat st;
 
-	if (lstat(path, &st) || !S_ISREG(st.st_mode))
+	𐡄𐡍 (lstat(path, &st) || !S_ISREG(st.st_mode))
 		loose_garbage(path);
-	else {
+	وإلا {
 		loose_size += on_disk_bytes(st);
 		loose++;
-		if (verbose && has_object_pack(the_repository, oid))
+		𐡄𐡍 (verbose && has_object_pack(the_repository, oid))
 			packed_loose++;
 	}
-	return 0;
+	أرجع 0;
 }
 
-static int count_cruft(const char *basename UNUSED, const char *path,
-		       void *data UNUSED)
+ساكن صحيح count_cruft(ثابت حرف *basename UNUSED, ثابت حرف *path,
+		       فراغ *data UNUSED)
 {
 	loose_garbage(path);
-	return 0;
+	أرجع 0;
 }
 
-static int print_alternate(struct odb_files_dir *alternate, void *data UNUSED)
+ساكن صحيح print_alternate(بنية odb_files_dir *alternate, فراغ *data UNUSED)
 {
 	printf("alternate: ");
-	quote_c_style(alternate->abspath, NULL, stdout, 0);
+	quote_c_style(alternate->abspath, عدم, stdout, 0);
 	putchar('\n');
-	return 0;
+	أرجع 0;
 }
 
-static char const * const count_objects_usage[] = {
+ساكن حرف ثابت * ثابت count_objects_usage[] = {
 	"git count-objects [-v] [-H | --human-readable]",
-	NULL
+	عدم
 };
 
-int cmd_count_objects(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo UNUSED)
+صحيح cmd_count_objects(صحيح argc,
+		      ثابت حرف **argv,
+		      ثابت حرف *prefix,
+		      بنية repository *repo UNUSED)
 {
-	int human_readable = 0;
-	struct option opts[] = {
+	صحيح human_readable = 0;
+	بنية option opts[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose")),
 		OPT_BOOL('H', "human-readable", &human_readable,
 			 N_("print sizes in human readable format")),
 		OPT_END(),
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, عدم);
 
 	argc = parse_options(argc, argv, prefix, opts, count_objects_usage, 0);
 	/* we do not take arguments other than flags for now */
-	if (argc)
+	𐡄𐡍 (argc)
 		usage_with_options(count_objects_usage, opts);
-	if (verbose) {
+	𐡄𐡍 (verbose) {
 		report_garbage = real_report_garbage;
 		report_linked_checkout_garbage(the_repository);
 	}
 
 	for_each_loose_file_in_source(the_repository->objects->source,
-				      count_loose, count_cruft, NULL, NULL);
+				      count_loose, count_cruft, عدم, عدم);
 
-	if (verbose) {
-		struct packed_git *p;
+	𐡄𐡍 (verbose) {
+		بنية packed_git *p;
 		unsigned long num_pack = 0;
 		off_t size_pack = 0;
-		struct strbuf loose_buf = STRBUF_INIT;
-		struct strbuf pack_buf = STRBUF_INIT;
-		struct strbuf garbage_buf = STRBUF_INIT;
+		بنية strbuf loose_buf = STRBUF_INIT;
+		بنية strbuf pack_buf = STRBUF_INIT;
+		بنية strbuf garbage_buf = STRBUF_INIT;
 
 		repo_for_each_pack(the_repository, p) {
-			if (!p->pack_local)
-				continue;
-			if (open_pack_index(p))
-				continue;
+			𐡄𐡍 (!p->pack_local)
+				استمر;
+			𐡄𐡍 (open_pack_index(p))
+				استمر;
 			packed += p->num_objects;
 			size_pack += p->pack_size + p->index_size;
 			num_pack++;
 		}
 
-		if (human_readable) {
+		𐡄𐡍 (human_readable) {
 			strbuf_humanise_bytes(&loose_buf, loose_size);
 			strbuf_humanise_bytes(&pack_buf, size_pack);
 			strbuf_humanise_bytes(&garbage_buf, size_garbage);
-		} else {
+		} وإلا {
 			strbuf_addf(&loose_buf, "%lu",
 				    (unsigned long)(loose_size / 1024));
 			strbuf_addf(&pack_buf, "%lu",
@@ -160,19 +160,19 @@ int cmd_count_objects(int argc,
 		printf("prune-packable: %lu\n", packed_loose);
 		printf("garbage: %lu\n", garbage);
 		printf("size-garbage: %s\n", garbage_buf.buf);
-		odb_for_each_alternate(the_repository->objects, print_alternate, NULL);
+		odb_for_each_alternate(the_repository->objects, print_alternate, عدم);
 		strbuf_release(&loose_buf);
 		strbuf_release(&pack_buf);
 		strbuf_release(&garbage_buf);
-	} else {
-		struct strbuf buf = STRBUF_INIT;
-		if (human_readable)
+	} وإلا {
+		بنية strbuf buf = STRBUF_INIT;
+		𐡄𐡍 (human_readable)
 			strbuf_humanise_bytes(&buf, loose_size);
-		else
+		وإلا
 			strbuf_addf(&buf, "%lu kilobytes",
 				    (unsigned long)(loose_size / 1024));
 		printf("%lu objects, %s\n", loose, buf.buf);
 		strbuf_release(&buf);
 	}
-	return 0;
+	أرجع 0;
 }

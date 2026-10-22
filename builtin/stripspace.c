@@ -1,45 +1,45 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "setup.h"
-#include "strbuf.h"
-#include "write-or-die.h"
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "parse-options.h"
+#ضمن "setup.h"
+#ضمن "strbuf.h"
+#ضمن "write-or-die.h"
 
-static void comment_lines(struct strbuf *buf)
+ساكن فراغ comment_lines(بنية strbuf *buf)
 {
-	char *msg;
+	حرف *msg;
 	size_t len;
 
 	msg = strbuf_detach(buf, &len);
 	strbuf_add_commented_lines(buf, msg, len, comment_line_str);
-	free(msg);
+	حرر(msg);
 }
 
-static const char * const stripspace_usage[] = {
+ساكن ثابت حرف * ثابت stripspace_usage[] = {
 	"git stripspace [-s | --strip-comments]",
 	"git stripspace [-c | --comment-lines]",
-	NULL
+	عدم
 };
 
-enum stripspace_mode {
+تعداد stripspace_mode {
 	STRIP_DEFAULT = 0,
 	STRIP_COMMENTS,
 	COMMENT_LINES
 };
 
-int cmd_stripspace(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+صحيح cmd_stripspace(صحيح argc,
+		   ثابت حرف **argv,
+		   ثابت حرف *prefix,
+		   بنية repository *repo UNUSED)
 {
-	struct strbuf buf = STRBUF_INIT;
-	enum stripspace_mode mode = STRIP_DEFAULT;
-	int nongit;
+	بنية strbuf buf = STRBUF_INIT;
+	تعداد stripspace_mode mode = STRIP_DEFAULT;
+	صحيح nongit;
 
-	const struct option options[] = {
+	ثابت بنية option options[] = {
 		OPT_CMDMODE('s', "strip-comments", &mode,
 			    N_("skip and remove all lines starting with comment character"),
 			    STRIP_COMMENTS),
@@ -50,24 +50,24 @@ int cmd_stripspace(int argc,
 	};
 
 	argc = parse_options(argc, argv, prefix, options, stripspace_usage, 0);
-	if (argc)
+	𐡄𐡍 (argc)
 		usage_with_options(stripspace_usage, options);
 
-	if (mode == STRIP_COMMENTS || mode == COMMENT_LINES) {
+	𐡄𐡍 (mode == STRIP_COMMENTS || mode == COMMENT_LINES) {
 		setup_git_directory_gently(the_repository, &nongit);
-		repo_config(the_repository, git_default_config, NULL);
+		repo_config(the_repository, git_default_config, عدم);
 	}
 
-	if (strbuf_read(&buf, 0, 1024) < 0)
+	𐡄𐡍 (strbuf_read(&buf, 0, 1024) < 0)
 		die_errno("could not read the input");
 
-	if (mode == STRIP_DEFAULT || mode == STRIP_COMMENTS)
+	𐡄𐡍 (mode == STRIP_DEFAULT || mode == STRIP_COMMENTS)
 		strbuf_stripspace(&buf,
-			  mode == STRIP_COMMENTS ? comment_line_str : NULL);
-	else
+			  mode == STRIP_COMMENTS ? comment_line_str : عدم);
+	وإلا
 		comment_lines(&buf);
 
 	write_or_die(1, buf.buf, buf.len);
 	strbuf_release(&buf);
-	return 0;
+	أرجع 0;
 }
