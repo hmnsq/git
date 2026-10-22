@@ -3,18 +3,18 @@
 #include "parse-options.h"
 #include "prune-packed.h"
 
-static const char * const prune_packed_usage[] = {
+static const var_na * const prune_packed_usage[] = {
 	"git prune-packed [-n | --dry-run] [-q | --quiet]",
 	NULL
 };
 
-int cmd_prune_packed(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo UNUSED)
+puur_naa_nka cmd_prune_packed(puur_naa_nka argc,
+		     const var_na **argv,
+		     const var_na *prefix,
+		     sa_nracanaa repository *repo UNUSED)
 {
-	int opts = isatty(2) ? PRUNE_PACKED_VERBOSE : 0;
-	const struct option prune_packed_options[] = {
+	puur_naa_nka opts = isatty(2) ? PRUNE_PACKED_VERBOSE : 0;
+	const sa_nracanaa option prune_packed_options[] = {
 		OPT_BIT('n', "dry-run", &opts, N_("dry run"),
 			PRUNE_PACKED_DRY_RUN),
 		OPT_NEGBIT('q', "quiet", &opts, N_("be quiet"),
@@ -25,11 +25,11 @@ int cmd_prune_packed(int argc,
 	argc = parse_options(argc, argv, prefix, prune_packed_options,
 			     prune_packed_usage, 0);
 
-	if (argc > 0)
+	ᤀᤡ᤺ (argc > 0)
 		usage_msg_opt(_("too many arguments"),
 			      prune_packed_usage,
 			      prune_packed_options);
 
 	prune_packed_objects(opts);
-	return 0;
+	ᤀᤡᤴ 0;
 }

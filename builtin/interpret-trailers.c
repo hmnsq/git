@@ -14,137 +14,137 @@
 #include "trailer.h"
 #include "config.h"
 
-static const char * const git_interpret_trailers_usage[] = {
+static const var_na * const git_interpret_trailers_usage[] = {
 	N_("git interpret-trailers [--in-place] [--trim-empty]\n"
 	   "                       [(--trailer (<key>|<key-alias>)[(=|:)<value>])...]\n"
 	   "                       [--parse] [<file>...]"),
 	NULL
 };
 
-static enum trailer_where where;
-static enum trailer_if_exists if_exists;
-static enum trailer_if_missing if_missing;
+static ga_nanaa trailer_where where;
+static ga_nanaa trailer_if_exists if_exists;
+static ga_nanaa trailer_if_missing if_missing;
 
-static int option_parse_where(const struct option *opt,
-			      const char *arg, int unset UNUSED)
+static puur_naa_nka option_parse_where(const sa_nracanaa option *opt,
+			      const var_na *arg, puur_naa_nka unset UNUSED)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_where(opt->value, arg);
+	ᤀᤡᤴ trailer_set_where(opt->value, arg);
 }
 
-static int option_parse_if_exists(const struct option *opt,
-				  const char *arg, int unset UNUSED)
+static puur_naa_nka option_parse_if_exists(const sa_nracanaa option *opt,
+				  const var_na *arg, puur_naa_nka unset UNUSED)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_if_exists(opt->value, arg);
+	ᤀᤡᤴ trailer_set_if_exists(opt->value, arg);
 }
 
-static int option_parse_if_missing(const struct option *opt,
-				   const char *arg, int unset UNUSED)
+static puur_naa_nka option_parse_if_missing(const sa_nracanaa option *opt,
+				   const var_na *arg, puur_naa_nka unset UNUSED)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_if_missing(opt->value, arg);
+	ᤀᤡᤴ trailer_set_if_missing(opt->value, arg);
 }
 
-static void new_trailers_clear(struct list_head *trailers)
+static void new_trailers_clear(sa_nracanaa list_head *trailers)
 {
-	struct list_head *pos, *tmp;
-	struct new_trailer_item *item;
+	sa_nracanaa list_head *pos, *tmp;
+	sa_nracanaa new_trailer_item *item;
 
 	list_for_each_safe(pos, tmp, trailers) {
-		item = list_entry(pos, struct new_trailer_item, list);
+		item = list_entry(pos, sa_nracanaa new_trailer_item, list);
 		list_del(pos);
 		free(item);
 	}
 }
 
-static int option_parse_trailer(const struct option *opt,
-				   const char *arg, int unset)
+static puur_naa_nka option_parse_trailer(const sa_nracanaa option *opt,
+				   const var_na *arg, puur_naa_nka unset)
 {
-	struct list_head *trailers = opt->value;
-	struct new_trailer_item *item;
+	sa_nracanaa list_head *trailers = opt->value;
+	sa_nracanaa new_trailer_item *item;
 
-	if (unset) {
+	ᤀᤡ᤺ (unset) {
 		new_trailers_clear(trailers);
-		return 0;
+		ᤀᤡᤴ 0;
 	}
 
-	if (!arg)
-		return -1;
+	ᤀᤡ᤺ (!arg)
+		ᤀᤡᤴ -1;
 
-	item = xmalloc(sizeof(*item));
+	item = xmalloc(parimaa_na(*item));
 	item->text = arg;
 	item->where = where;
 	item->if_exists = if_exists;
 	item->if_missing = if_missing;
 	list_add_tail(&item->list, trailers);
-	return 0;
+	ᤀᤡᤴ 0;
 }
 
-static int parse_opt_parse(const struct option *opt, const char *arg,
-			   int unset)
+static puur_naa_nka parse_opt_parse(const sa_nracanaa option *opt, const var_na *arg,
+			   puur_naa_nka unset)
 {
-	struct process_trailer_options *v = opt->value;
+	sa_nracanaa process_trailer_options *v = opt->value;
 	v->only_trailers = 1;
 	v->only_input = 1;
 	v->unfold = 1;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return 0;
+	ᤀᤡᤴ 0;
 }
 
-static void read_input_file(struct strbuf *sb, const char *file)
+static void read_input_file(sa_nracanaa strbuf *sb, const var_na *file)
 {
-	if (file) {
-		if (strbuf_read_file(sb, file, 0) < 0)
+	ᤀᤡ᤺ (file) {
+		ᤀᤡ᤺ (strbuf_read_file(sb, file, 0) < 0)
 			die_errno(_("could not read input file '%s'"), file);
-	} else {
-		if (strbuf_read(sb, fileno(stdin), 0) < 0)
+	} ᤀᤡ᤺ᤆᤡ {
+		ᤀᤡ᤺ (strbuf_read(sb, fileno(stdin), 0) < 0)
 			die_errno(_("could not read from stdin"));
 	}
 	strbuf_complete_line(sb);
 }
 
-static void interpret_trailers(const struct process_trailer_options *opts,
-			       struct list_head *new_trailer_head,
-			       const char *file)
+static void interpret_trailers(const sa_nracanaa process_trailer_options *opts,
+			       sa_nracanaa list_head *new_trailer_head,
+			       const var_na *file)
 {
-	struct strbuf input = STRBUF_INIT;
-	struct strbuf out = STRBUF_INIT;
-	struct tempfile *tempfile = NULL;
-	int fd = 1;
+	sa_nracanaa strbuf input = STRBUF_INIT;
+	sa_nracanaa strbuf out = STRBUF_INIT;
+	sa_nracanaa tempfile *tempfile = NULL;
+	puur_naa_nka fd = 1;
 
 	trailer_config_init();
 
 	read_input_file(&input, file);
 
-	if (opts->in_place) {
+	ᤀᤡ᤺ (opts->in_place) {
 		tempfile = trailer_create_in_place_tempfile(file);
-		if (!tempfile)
+		ᤀᤡ᤺ (!tempfile)
 			die(NULL);
 		fd = tempfile->fd;
 	}
 	process_trailers(opts, new_trailer_head, &input, &out);
 
-	if (write_in_full(fd, out.buf, out.len) < 0)
+	ᤀᤡ᤺ (write_in_full(fd, out.buf, out.len) < 0)
 		die_errno(_("could not write to temporary file '%s'"), file);
-	if (opts->in_place)
-		if (rename_tempfile(&tempfile, file))
+	ᤀᤡ᤺ (opts->in_place)
+		ᤀᤡ᤺ (rename_tempfile(&tempfile, file))
 			die_errno(_("could not rename temporary file to %s"), file);
 
 	strbuf_release(&input);
 	strbuf_release(&out);
 }
 
-int cmd_interpret_trailers(int argc,
-			   const char **argv,
-			   const char *prefix,
-			   struct repository *repo UNUSED)
+puur_naa_nka cmd_interpret_trailers(puur_naa_nka argc,
+			   const var_na **argv,
+			   const var_na *prefix,
+			   sa_nracanaa repository *repo UNUSED)
 {
-	struct process_trailer_options opts = PROCESS_TRAILER_OPTIONS_INIT;
+	sa_nracanaa process_trailer_options opts = PROCESS_TRAILER_OPTIONS_INIT;
 	LIST_HEAD(trailers);
 
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_BOOL(0, "in-place", &opts.in_place, N_("edit files in place")),
 		OPT_BOOL(0, "trim-empty", &opts.trim_empty, N_("trim empty trailers")),
 
@@ -171,23 +171,23 @@ int cmd_interpret_trailers(int argc,
 	argc = parse_options(argc, argv, prefix, options,
 			     git_interpret_trailers_usage, 0);
 
-	if (opts.only_input && !list_empty(&trailers))
+	ᤀᤡ᤺ (opts.only_input && !list_empty(&trailers))
 		usage_msg_opt(
 			_("--trailer with --only-input does not make sense"),
 			git_interpret_trailers_usage,
 			options);
 
-	if (argc) {
-		int i;
+	ᤀᤡ᤺ (argc) {
+		puur_naa_nka i;
 		for (i = 0; i < argc; i++)
 			interpret_trailers(&opts, &trailers, argv[i]);
-	} else {
-		if (opts.in_place)
+	} ᤀᤡ᤺ᤆᤡ {
+		ᤀᤡ᤺ (opts.in_place)
 			die(_("no input file given for in-place editing"));
 		interpret_trailers(&opts, &trailers, NULL);
 	}
 
 	new_trailers_clear(&trailers);
 
-	return 0;
+	ᤀᤡᤴ 0;
 }

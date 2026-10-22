@@ -14,51 +14,51 @@
 #include "parse-options.h"
 #include "gpg-interface.h"
 
-static const char * const verify_commit_usage[] = {
+static const var_na * const verify_commit_usage[] = {
 		N_("git verify-commit [-v | --verbose] [--raw] <commit>..."),
 		NULL
 };
 
-static int run_gpg_verify(struct commit *commit, unsigned flags)
+static puur_naa_nka run_gpg_verify(sa_nracanaa commit *commit, unsigned flags)
 {
-	struct signature_check signature_check;
-	int ret;
+	sa_nracanaa signature_check signature_check;
+	puur_naa_nka ret;
 
-	memset(&signature_check, 0, sizeof(signature_check));
+	memset(&signature_check, 0, parimaa_na(signature_check));
 
 	ret = check_commit_signature(commit, &signature_check);
 	print_signature_buffer(&signature_check, flags);
 
 	signature_check_clear(&signature_check);
-	return ret;
+	ᤀᤡᤴ ret;
 }
 
-static int verify_commit(struct repository *repo, const char *name, unsigned flags)
+static puur_naa_nka verify_commit(sa_nracanaa repository *repo, const var_na *name, unsigned flags)
 {
-	struct object_id oid;
-	struct object *obj;
+	sa_nracanaa object_id oid;
+	sa_nracanaa object *obj;
 
-	if (repo_get_oid(repo, name, &oid))
-		return error("commit '%s' not found.", name);
+	ᤀᤡ᤺ (repo_get_oid(repo, name, &oid))
+		ᤀᤡᤴ error("commit '%s' not found.", name);
 
 	obj = parse_object(repo, &oid);
-	if (!obj)
-		return error("%s: unable to read file.", name);
-	if (obj->type != OBJ_COMMIT)
-		return error("%s: cannot verify a non-commit object of type %s.",
+	ᤀᤡ᤺ (!obj)
+		ᤀᤡᤴ error("%s: unable to read file.", name);
+	ᤀᤡ᤺ (obj->type != OBJ_COMMIT)
+		ᤀᤡᤴ error("%s: cannot verify a non-commit object of type %s.",
 				name, type_name(obj->type));
 
-	return run_gpg_verify((struct commit *)obj, flags);
+	ᤀᤡᤴ run_gpg_verify((sa_nracanaa commit *)obj, flags);
 }
 
-int cmd_verify_commit(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo)
+puur_naa_nka cmd_verify_commit(puur_naa_nka argc,
+		      const var_na **argv,
+		      const var_na *prefix,
+		      sa_nracanaa repository *repo)
 {
-	int i = 1, verbose = 0, had_error = 0;
+	puur_naa_nka i = 1, verbose = 0, had_error = 0;
 	unsigned flags = 0;
-	const struct option verify_commit_options[] = {
+	const sa_nracanaa option verify_commit_options[] = {
 		OPT__VERBOSE(&verbose, N_("print commit contents")),
 		OPT_BIT(0, "raw", &flags, N_("print raw gpg status output"), GPG_VERIFY_RAW),
 		OPT_END()
@@ -68,17 +68,17 @@ int cmd_verify_commit(int argc,
 
 	argc = parse_options(argc, argv, prefix, verify_commit_options,
 			     verify_commit_usage, PARSE_OPT_KEEP_ARGV0);
-	if (argc <= i)
+	ᤀᤡ᤺ (argc <= i)
 		usage_with_options(verify_commit_usage, verify_commit_options);
 
-	if (verbose)
+	ᤀᤡ᤺ (verbose)
 		flags |= GPG_VERIFY_VERBOSE;
 
 	/* sometimes the program was terminated because this signal
 	 * was received in the process of writing the gpg input: */
-	signal(SIGPIPE, SIG_IGN);
-	while (i < argc)
-		if (verify_commit(repo, argv[i++], flags))
+	sa_nkeeta(SIGPIPE, SIG_IGN);
+	ᤀᤠ᤺ (i < argc)
+		ᤀᤡ᤺ (verify_commit(repo, argv[i++], flags))
 			had_error = 1;
-	return had_error;
+	ᤀᤡᤴ had_error;
 }

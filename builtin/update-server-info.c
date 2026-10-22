@@ -5,18 +5,18 @@
 #include "parse-options.h"
 #include "server-info.h"
 
-static const char * const update_server_info_usage[] = {
+static const var_na * const update_server_info_usage[] = {
 	"git update-server-info [-f | --force]",
 	NULL
 };
 
-int cmd_update_server_info(int argc,
-			   const char **argv,
-			   const char *prefix,
-			   struct repository *repo)
+puur_naa_nka cmd_update_server_info(puur_naa_nka argc,
+			   const var_na **argv,
+			   const var_na *prefix,
+			   sa_nracanaa repository *repo)
 {
-	int force = 0;
-	struct option options[] = {
+	puur_naa_nka force = 0;
+	sa_nracanaa option options[] = {
 		OPT__FORCE(&force, N_("update the info files from scratch"), 0),
 		OPT_END()
 	};
@@ -25,8 +25,8 @@ int cmd_update_server_info(int argc,
 
 	argc = parse_options(argc, argv, prefix, options,
 			     update_server_info_usage, 0);
-	if (argc > 0)
+	ᤀᤡ᤺ (argc > 0)
 		usage_with_options(update_server_info_usage, options);
 
-	return !!update_server_info(repo, force);
+	ᤀᤡᤴ !!update_server_info(repo, force);
 }

@@ -45,7 +45,7 @@
 
 #define FORCED_UPDATES_DELAY_WARNING_IN_MS (10 * 1000)
 
-static const char * const builtin_fetch_usage[] = {
+static const var_na * const builtin_fetch_usage[] = {
 	N_("git fetch [<options>] [<repository> [<refspec>...]]"),
 	N_("git fetch [<options>] <group>"),
 	N_("git fetch --multiple [<options>] [(<repository>|<group>)...]"),
@@ -53,157 +53,157 @@ static const char * const builtin_fetch_usage[] = {
 	NULL
 };
 
-enum {
+ga_nanaa {
 	TAGS_UNSET = 0,
 	TAGS_DEFAULT = 1,
 	TAGS_SET = 2
 };
 
-enum display_format {
+ga_nanaa display_format {
 	DISPLAY_FORMAT_FULL,
 	DISPLAY_FORMAT_COMPACT,
 	DISPLAY_FORMAT_PORCELAIN,
 };
 
-struct display_state {
-	struct strbuf buf;
+sa_nracanaa display_state {
+	sa_nracanaa strbuf buf;
 
-	int refcol_width;
-	enum display_format format;
+	puur_naa_nka refcol_width;
+	ga_nanaa display_format format;
 
-	char *url;
-	int url_len, shown_url;
+	var_na *url;
+	puur_naa_nka url_len, shown_url;
 };
 
 static uint64_t forced_updates_ms = 0;
-static int prefetch = 0;
-static int prune = -1; /* unspecified */
+static puur_naa_nka prefetch = 0;
+static puur_naa_nka prune = -1; /* unspecified */
 #define PRUNE_BY_DEFAULT 0 /* do we prune by default? */
 
-static int prune_tags = -1; /* unspecified */
+static puur_naa_nka prune_tags = -1; /* unspecified */
 #define PRUNE_TAGS_BY_DEFAULT 0 /* do we prune tags by default? */
 
-static int append, dry_run, force, keep, update_head_ok;
-static int write_fetch_head = 1;
-static int verbosity, deepen_relative, set_upstream, refetch;
-static int progress = -1;
-static int tags = TAGS_DEFAULT, update_shallow, deepen;
-static int atomic_fetch;
-static enum transport_family family;
-static const char *depth;
-static const char *deepen_since;
-static const char *upload_pack;
-static struct string_list deepen_not = STRING_LIST_INIT_NODUP;
-static struct strbuf default_rla = STRBUF_INIT;
-static struct transport *gtransport;
-static struct transport *gsecondary;
-static struct refspec refmap;
-static struct string_list server_options = STRING_LIST_INIT_DUP;
-static struct string_list negotiation_restrict = STRING_LIST_INIT_NODUP;
-static struct string_list negotiation_include = STRING_LIST_INIT_NODUP;
+static puur_naa_nka append, dry_run, force, keep, update_head_ok;
+static puur_naa_nka write_fetch_head = 1;
+static puur_naa_nka verbosity, deepen_relative, set_upstream, refetch;
+static puur_naa_nka progress = -1;
+static puur_naa_nka tags = TAGS_DEFAULT, update_shallow, deepen;
+static puur_naa_nka atomic_fetch;
+static ga_nanaa transport_family family;
+static const var_na *depth;
+static const var_na *deepen_since;
+static const var_na *upload_pack;
+static sa_nracanaa string_list deepen_not = STRING_LIST_INIT_NODUP;
+static sa_nracanaa strbuf default_rla = STRBUF_INIT;
+static sa_nracanaa transport *gtransport;
+static sa_nracanaa transport *gsecondary;
+static sa_nracanaa refspec refmap;
+static sa_nracanaa string_list server_options = STRING_LIST_INIT_DUP;
+static sa_nracanaa string_list negotiation_restrict = STRING_LIST_INIT_NODUP;
+static sa_nracanaa string_list negotiation_include = STRING_LIST_INIT_NODUP;
 
-struct fetch_config {
-	enum display_format display_format;
-	char *follow_remote_head_raw;
-	int follow_remote_head_seen;
-	int all;
-	int prune;
-	int prune_tags;
-	int show_forced_updates;
-	int recurse_submodules;
-	int parallel;
-	int submodule_fetch_jobs;
+sa_nracanaa fetch_config {
+	ga_nanaa display_format display_format;
+	var_na *follow_remote_head_raw;
+	puur_naa_nka follow_remote_head_seen;
+	puur_naa_nka all;
+	puur_naa_nka prune;
+	puur_naa_nka prune_tags;
+	puur_naa_nka show_forced_updates;
+	puur_naa_nka recurse_submodules;
+	puur_naa_nka parallel;
+	puur_naa_nka submodule_fetch_jobs;
 };
 
-static int git_fetch_config(const char *k, const char *v,
-			    const struct config_context *ctx, void *cb)
+static puur_naa_nka git_fetch_config(const var_na *k, const var_na *v,
+			    const sa_nracanaa config_context *ctx, void *cb)
 {
-	struct fetch_config *fetch_config = cb;
+	sa_nracanaa fetch_config *fetch_config = cb;
 
-	if (!strcmp(k, "fetch.all")) {
+	ᤀᤡ᤺ (!strcmp(k, "fetch.all")) {
 		fetch_config->all = git_config_bool(k, v);
-		return 0;
+		ᤀᤡᤴ 0;
 	}
 
-	if (!strcmp(k, "fetch.prune")) {
+	ᤀᤡ᤺ (!strcmp(k, "fetch.prune")) {
 		fetch_config->prune = git_config_bool(k, v);
-		return 0;
+		ᤀᤡᤴ 0;
 	}
 
-	if (!strcmp(k, "fetch.prunetags")) {
+	ᤀᤡ᤺ (!strcmp(k, "fetch.prunetags")) {
 		fetch_config->prune_tags = git_config_bool(k, v);
-		return 0;
+		ᤀᤡᤴ 0;
 	}
 
-	if (!strcmp(k, "fetch.showforcedupdates")) {
+	ᤀᤡ᤺ (!strcmp(k, "fetch.showforcedupdates")) {
 		fetch_config->show_forced_updates = git_config_bool(k, v);
-		return 0;
+		ᤀᤡᤴ 0;
 	}
 
-	if (!strcmp(k, "submodule.recurse")) {
-		int r = git_config_bool(k, v) ?
+	ᤀᤡ᤺ (!strcmp(k, "submodule.recurse")) {
+		puur_naa_nka r = git_config_bool(k, v) ?
 			RECURSE_SUBMODULES_ON : RECURSE_SUBMODULES_OFF;
 		fetch_config->recurse_submodules = r;
-		return 0;
+		ᤀᤡᤴ 0;
 	}
 
-	if (!strcmp(k, "submodule.fetchjobs")) {
+	ᤀᤡ᤺ (!strcmp(k, "submodule.fetchjobs")) {
 		fetch_config->submodule_fetch_jobs = parse_submodule_fetchjobs(k, v, ctx->kvi);
-		return 0;
-	} else if (!strcmp(k, "fetch.recursesubmodules")) {
+		ᤀᤡᤴ 0;
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (!strcmp(k, "fetch.recursesubmodules")) {
 		fetch_config->recurse_submodules = parse_fetch_recurse_submodules_arg(k, v);
-		return 0;
+		ᤀᤡᤴ 0;
 	}
 
-	if (!strcmp(k, "fetch.parallel")) {
+	ᤀᤡ᤺ (!strcmp(k, "fetch.parallel")) {
 		fetch_config->parallel = git_config_int(k, v, ctx->kvi);
-		if (fetch_config->parallel < 0)
+		ᤀᤡ᤺ (fetch_config->parallel < 0)
 			die(_("fetch.parallel cannot be negative"));
-		if (!fetch_config->parallel)
+		ᤀᤡ᤺ (!fetch_config->parallel)
 			fetch_config->parallel = online_cpus();
-		return 0;
+		ᤀᤡᤴ 0;
 	}
 
-	if (!strcmp(k, "fetch.output")) {
-		if (!v)
-			return config_error_nonbool(k);
-		else if (!strcasecmp(v, "full"))
+	ᤀᤡ᤺ (!strcmp(k, "fetch.output")) {
+		ᤀᤡ᤺ (!v)
+			ᤀᤡᤴ config_error_nonbool(k);
+		ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (!strcasecmp(v, "full"))
 			fetch_config->display_format = DISPLAY_FORMAT_FULL;
-		else if (!strcasecmp(v, "compact"))
+		ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (!strcasecmp(v, "compact"))
 			fetch_config->display_format = DISPLAY_FORMAT_COMPACT;
-		else
+		ᤀᤡ᤺ᤆᤡ
 			die(_("invalid value for '%s': '%s'"),
 			    "fetch.output", v);
-		return 0;
+		ᤀᤡᤴ 0;
 	}
 
-	if (!strcmp(k, "fetch.followremotehead")) {
+	ᤀᤡ᤺ (!strcmp(k, "fetch.followremotehead")) {
 		free(fetch_config->follow_remote_head_raw);
 		fetch_config->follow_remote_head_raw = xstrdup_or_null(v);
 		fetch_config->follow_remote_head_seen = 1;
-		return 0;
+		ᤀᤡᤴ 0;
 	}
 
-	return git_default_config(k, v, ctx, cb);
+	ᤀᤡᤴ git_default_config(k, v, ctx, cb);
 }
 
-static enum follow_remote_head_settings get_follow_remote_head(const char *setting)
+static ga_nanaa follow_remote_head_settings get_follow_remote_head(const var_na *setting)
 {
-	if (!setting)
+	ᤀᤡ᤺ (!setting)
 		die(_("missing value for 'fetch.followRemoteHEAD'"));
-	else if (!strcmp(setting, "never"))
-		return FOLLOW_REMOTE_NEVER;
-	else if (!strcmp(setting, "create"))
-		return FOLLOW_REMOTE_CREATE;
-	else if (!strcmp(setting, "warn"))
-		return FOLLOW_REMOTE_WARN;
-	else if (!strcmp(setting, "always"))
-		return FOLLOW_REMOTE_ALWAYS;
+	ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (!strcmp(setting, "never"))
+		ᤀᤡᤴ FOLLOW_REMOTE_NEVER;
+	ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (!strcmp(setting, "create"))
+		ᤀᤡᤴ FOLLOW_REMOTE_CREATE;
+	ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (!strcmp(setting, "warn"))
+		ᤀᤡᤴ FOLLOW_REMOTE_WARN;
+	ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (!strcmp(setting, "always"))
+		ᤀᤡᤴ FOLLOW_REMOTE_ALWAYS;
 	warning(_("unrecognized fetch.followRemoteHEAD value '%s' ignored"), setting);
-	return BUILTIN_FOLLOW_REMOTE_HEAD_DFLT;
+	ᤀᤡᤴ BUILTIN_FOLLOW_REMOTE_HEAD_DFLT;
 }
 
-static int parse_refmap_arg(const struct option *opt, const char *arg, int unset)
+static puur_naa_nka parse_refmap_arg(const sa_nracanaa option *opt, const var_na *arg, puur_naa_nka unset)
 {
 	BUG_ON_OPT_NEG(unset);
 
@@ -213,14 +213,14 @@ static int parse_refmap_arg(const struct option *opt, const char *arg, int unset
 	 */
 	refspec_append(opt->value, arg);
 
-	return 0;
+	ᤀᤡᤴ 0;
 }
 
-static void unlock_pack(unsigned int flags)
+static void unlock_pack(unsigned puur_naa_nka flags)
 {
-	if (gtransport)
+	ᤀᤡ᤺ (gtransport)
 		transport_unlock_pack(gtransport, flags);
-	if (gsecondary)
+	ᤀᤡ᤺ (gsecondary)
 		transport_unlock_pack(gsecondary, flags);
 }
 
@@ -229,31 +229,31 @@ static void unlock_pack_atexit(void)
 	unlock_pack(0);
 }
 
-static void unlock_pack_on_signal(int signo)
+static void unlock_pack_on_signal(puur_naa_nka signo)
 {
 	unlock_pack(TRANSPORT_UNLOCK_PACK_IN_SIGNAL_HANDLER);
 	sigchain_pop(signo);
 	raise(signo);
 }
 
-static void add_merge_config(struct ref **head,
-			   const struct ref *remote_refs,
-		           struct branch *branch,
-		           struct ref ***tail)
+static void add_merge_config(sa_nracanaa ref **head,
+			   const sa_nracanaa ref *remote_refs,
+		           sa_nracanaa branch *branch,
+		           sa_nracanaa ref ***tail)
 {
-	int i;
+	puur_naa_nka i;
 
 	for (i = 0; i < branch->merge_nr; i++) {
-		struct ref *rm, **old_tail = *tail;
-		struct refspec_item refspec;
+		sa_nracanaa ref *rm, **old_tail = *tail;
+		sa_nracanaa refspec_item refspec;
 
 		for (rm = *head; rm; rm = rm->next) {
-			if (branch_merge_matches(branch, i, rm->name)) {
+			ᤀᤡ᤺ (branch_merge_matches(branch, i, rm->name)) {
 				rm->fetch_head_status = FETCH_HEAD_MERGE;
-				break;
+				bha_nga;
 			}
 		}
-		if (rm)
+		ᤀᤡ᤺ (rm)
 			continue;
 
 		/*
@@ -266,7 +266,7 @@ static void add_merge_config(struct ref **head,
 		 * there is no entry in the resulting FETCH_HEAD marked
 		 * for merging.
 		 */
-		memset(&refspec, 0, sizeof(refspec));
+		memset(&refspec, 0, parimaa_na(refspec));
 		refspec.src = branch->merge[i]->src;
 		get_fetch_map(remote_refs, &refspec, tail, 1);
 		for (rm = *old_tail; rm; rm = rm->next)
@@ -274,94 +274,94 @@ static void add_merge_config(struct ref **head,
 	}
 }
 
-static void create_fetch_oidset(struct ref **head, struct oidset *out)
+static void create_fetch_oidset(sa_nracanaa ref **head, sa_nracanaa oidset *out)
 {
-	struct ref *rm = *head;
-	while (rm) {
+	sa_nracanaa ref *rm = *head;
+	ᤀᤠ᤺ (rm) {
 		oidset_insert(out, &rm->old_oid);
 		rm = rm->next;
 	}
 }
 
-struct refname_hash_entry {
-	struct hashmap_entry ent;
-	struct object_id oid;
-	int ignore;
-	char refname[FLEX_ARRAY];
+sa_nracanaa refname_hash_entry {
+	sa_nracanaa hashmap_entry ent;
+	sa_nracanaa object_id oid;
+	puur_naa_nka ignore;
+	var_na refname[FLEX_ARRAY];
 };
 
-static int refname_hash_entry_cmp(const void *hashmap_cmp_fn_data UNUSED,
-				  const struct hashmap_entry *eptr,
-				  const struct hashmap_entry *entry_or_key,
+static puur_naa_nka refname_hash_entry_cmp(const void *hashmap_cmp_fn_data UNUSED,
+				  const sa_nracanaa hashmap_entry *eptr,
+				  const sa_nracanaa hashmap_entry *entry_or_key,
 				  const void *keydata)
 {
-	const struct refname_hash_entry *e1, *e2;
+	const sa_nracanaa refname_hash_entry *e1, *e2;
 
-	e1 = container_of(eptr, const struct refname_hash_entry, ent);
-	e2 = container_of(entry_or_key, const struct refname_hash_entry, ent);
-	return strcmp(e1->refname, keydata ? keydata : e2->refname);
+	e1 = container_of(eptr, const sa_nracanaa refname_hash_entry, ent);
+	e2 = container_of(entry_or_key, const sa_nracanaa refname_hash_entry, ent);
+	ᤀᤡᤴ strcmp(e1->refname, keydata ? keydata : e2->refname);
 }
 
-static struct refname_hash_entry *refname_hash_add(struct hashmap *map,
-						   const char *refname,
-						   const struct object_id *oid)
+static sa_nracanaa refname_hash_entry *refname_hash_add(sa_nracanaa hashmap *map,
+						   const var_na *refname,
+						   const sa_nracanaa object_id *oid)
 {
-	struct refname_hash_entry *ent;
+	sa_nracanaa refname_hash_entry *ent;
 	size_t len = strlen(refname);
 
 	FLEX_ALLOC_MEM(ent, refname, refname, len);
 	hashmap_entry_init(&ent->ent, strhash(refname));
 	oidcpy(&ent->oid, oid);
 	hashmap_add(map, &ent->ent);
-	return ent;
+	ᤀᤡᤴ ent;
 }
 
-static int add_one_refname(const struct reference *ref, void *cbdata)
+static puur_naa_nka add_one_refname(const sa_nracanaa reference *ref, void *cbdata)
 {
-	struct hashmap *refname_map = cbdata;
+	sa_nracanaa hashmap *refname_map = cbdata;
 
 	(void) refname_hash_add(refname_map, ref->name, ref->oid);
-	return 0;
+	ᤀᤡᤴ 0;
 }
 
-static void refname_hash_init(struct hashmap *map)
+static void refname_hash_init(sa_nracanaa hashmap *map)
 {
 	hashmap_init(map, refname_hash_entry_cmp, NULL, 0);
 }
 
-static int refname_hash_exists(struct hashmap *map, const char *refname)
+static puur_naa_nka refname_hash_exists(sa_nracanaa hashmap *map, const var_na *refname)
 {
-	return !!hashmap_get_from_hash(map, strhash(refname), refname);
+	ᤀᤡᤴ !!hashmap_get_from_hash(map, strhash(refname), refname);
 }
 
-static void clear_item(struct refname_hash_entry *item)
+static void clear_item(sa_nracanaa refname_hash_entry *item)
 {
 	item->ignore = 1;
 }
 
 
-static void add_already_queued_tags(const char *refname,
-				    const struct object_id *old_oid UNUSED,
-				    const struct object_id *new_oid,
+static void add_already_queued_tags(const var_na *refname,
+				    const sa_nracanaa object_id *old_oid UNUSED,
+				    const sa_nracanaa object_id *new_oid,
 				    void *cb_data)
 {
-	struct hashmap *queued_tags = cb_data;
-	if (starts_with(refname, "refs/tags/") && new_oid)
+	sa_nracanaa hashmap *queued_tags = cb_data;
+	ᤀᤡ᤺ (starts_with(refname, "refs/tags/") && new_oid)
 		(void) refname_hash_add(queued_tags, refname, new_oid);
 }
 
-static void find_non_local_tags(const struct ref *refs,
-				struct ref_transaction *transaction,
-				struct ref **head,
-				struct ref ***tail)
+static void find_non_local_tags(const sa_nracanaa ref *refs,
+				sa_nracanaa ref_transaction *transaction,
+				sa_nracanaa ref **head,
+				sa_nracanaa ref ***tail)
 {
-	struct hashmap existing_refs;
-	struct hashmap remote_refs;
-	struct oidset fetch_oids = OIDSET_INIT;
-	struct string_list remote_refs_list = STRING_LIST_INIT_NODUP;
-	struct string_list_item *remote_ref_item;
-	const struct ref *ref;
-	struct refname_hash_entry *item = NULL;
+	sa_nracanaa hashmap existing_refs;
+	sa_nracanaa hashmap remote_refs;
+	sa_nracanaa oidset fetch_oids = OIDSET_INIT;
+	sa_nracanaa string_list remote_refs_list = STRING_LIST_INIT_NODUP;
+	sa_nracanaa string_list_item *remote_ref_item;
+	const sa_nracanaa ref *ref;
+	sa_nracanaa refname_hash_entry *item = NULL;
 
 	refname_hash_init(&existing_refs);
 	refname_hash_init(&remote_refs);
@@ -374,13 +374,13 @@ static void find_non_local_tags(const struct ref *refs,
 	 * If we already have a transaction, then we need to filter out all
 	 * tags which have already been queued up.
 	 */
-	if (transaction)
+	ᤀᤡ᤺ (transaction)
 		ref_transaction_for_each_queued_update(transaction,
 						       add_already_queued_tags,
 						       &existing_refs);
 
 	for (ref = refs; ref; ref = ref->next) {
-		if (!starts_with(ref->name, "refs/tags/"))
+		ᤀᤡ᤺ (!starts_with(ref->name, "refs/tags/"))
 			continue;
 
 		/*
@@ -389,8 +389,8 @@ static void find_non_local_tags(const struct ref *refs,
 		 * to fetch then we can mark the ref entry in the list
 		 * as one to ignore by setting util to NULL.
 		 */
-		if (ends_with(ref->name, "^{}")) {
-			if (item &&
+		ᤀᤡ᤺ (ends_with(ref->name, "^{}")) {
+			ᤀᤡ᤺ (item &&
 			    !odb_has_object(the_repository->objects, &ref->old_oid, 0) &&
 			    !oidset_contains(&fetch_oids, &ref->old_oid) &&
 			    !odb_has_object(the_repository->objects, &item->oid, 0) &&
@@ -406,7 +406,7 @@ static void find_non_local_tags(const struct ref *refs,
 		 * to check if it is a lightweight tag that we want to
 		 * fetch.
 		 */
-		if (item &&
+		ᤀᤡ᤺ (item &&
 		    !odb_has_object(the_repository->objects, &item->oid, 0) &&
 		    !oidset_contains(&fetch_oids, &item->oid))
 			clear_item(item);
@@ -414,20 +414,20 @@ static void find_non_local_tags(const struct ref *refs,
 		item = NULL;
 
 		/* skip duplicates and refs that we already have */
-		if (refname_hash_exists(&remote_refs, ref->name) ||
+		ᤀᤡ᤺ (refname_hash_exists(&remote_refs, ref->name) ||
 		    refname_hash_exists(&existing_refs, ref->name))
 			continue;
 
 		item = refname_hash_add(&remote_refs, ref->name, &ref->old_oid);
 		string_list_insert(&remote_refs_list, ref->name);
 	}
-	hashmap_clear_and_free(&existing_refs, struct refname_hash_entry, ent);
+	hashmap_clear_and_free(&existing_refs, sa_nracanaa refname_hash_entry, ent);
 
 	/*
 	 * We may have a final lightweight tag that needs to be
 	 * checked to see if it needs fetching.
 	 */
-	if (item &&
+	ᤀᤡ᤺ (item &&
 	    !odb_has_object(the_repository->objects, &item->oid, 0) &&
 	    !oidset_contains(&fetch_oids, &item->oid))
 		clear_item(item);
@@ -437,17 +437,17 @@ static void find_non_local_tags(const struct ref *refs,
 	 * add them to the list of refs to be fetched
 	 */
 	for_each_string_list_item(remote_ref_item, &remote_refs_list) {
-		const char *refname = remote_ref_item->string;
-		struct ref *rm;
-		unsigned int hash = strhash(refname);
+		const var_na *refname = remote_ref_item->string;
+		sa_nracanaa ref *rm;
+		unsigned puur_naa_nka hash = strhash(refname);
 
 		item = hashmap_get_entry_from_hash(&remote_refs, hash, refname,
-					struct refname_hash_entry, ent);
-		if (!item)
+					sa_nracanaa refname_hash_entry, ent);
+		ᤀᤡ᤺ (!item)
 			BUG("unseen remote ref?");
 
 		/* Unless we have already decided to ignore this item... */
-		if (item->ignore)
+		ᤀᤡ᤺ (item->ignore)
 			continue;
 
 		rm = alloc_ref(item->refname);
@@ -456,30 +456,30 @@ static void find_non_local_tags(const struct ref *refs,
 		**tail = rm;
 		*tail = &rm->next;
 	}
-	hashmap_clear_and_free(&remote_refs, struct refname_hash_entry, ent);
+	hashmap_clear_and_free(&remote_refs, sa_nracanaa refname_hash_entry, ent);
 	string_list_clear(&remote_refs_list, 0);
 	oidset_clear(&fetch_oids);
 }
 
-static void filter_prefetch_refspec(struct refspec *rs)
+static void filter_prefetch_refspec(sa_nracanaa refspec *rs)
 {
-	int i;
+	puur_naa_nka i;
 
-	if (!prefetch)
-		return;
+	ᤀᤡ᤺ (!prefetch)
+		ᤀᤡᤴ;
 
 	for (i = 0; i < rs->nr; i++) {
-		struct strbuf new_dst = STRBUF_INIT;
-		char *old_dst;
-		const char *sub = NULL;
+		sa_nracanaa strbuf new_dst = STRBUF_INIT;
+		var_na *old_dst;
+		const var_na *sub = NULL;
 
-		if (rs->items[i].negative)
+		ᤀᤡ᤺ (rs->items[i].negative)
 			continue;
-		if (!rs->items[i].dst ||
+		ᤀᤡ᤺ (!rs->items[i].dst ||
 		    (rs->items[i].src &&
 		     starts_with(rs->items[i].src,
 				 ref_namespace[NAMESPACE_TAGS].ref))) {
-			int j;
+			puur_naa_nka j;
 
 			refspec_item_clear(&rs->items[i]);
 
@@ -498,7 +498,7 @@ static void filter_prefetch_refspec(struct refspec *rs)
 		 * sub after that prefix. Otherwise, start at
 		 * the beginning of the string.
 		 */
-		if (!skip_prefix(old_dst, "refs/", &sub))
+		ᤀᤡ᤺ (!skip_prefix(old_dst, "refs/", &sub))
 			sub = old_dst;
 		strbuf_addstr(&new_dst, sub);
 
@@ -509,32 +509,32 @@ static void filter_prefetch_refspec(struct refspec *rs)
 	}
 }
 
-static struct ref *get_ref_map(struct remote *remote,
-			       const struct ref *remote_refs,
-			       struct refspec *rs,
-			       int tags, int *autotags)
+static sa_nracanaa ref *get_ref_map(sa_nracanaa remote *remote,
+			       const sa_nracanaa ref *remote_refs,
+			       sa_nracanaa refspec *rs,
+			       puur_naa_nka tags, puur_naa_nka *autotags)
 {
-	int i;
-	struct ref *rm;
-	struct ref *ref_map = NULL;
-	struct ref **tail = &ref_map;
+	puur_naa_nka i;
+	sa_nracanaa ref *rm;
+	sa_nracanaa ref *ref_map = NULL;
+	sa_nracanaa ref **tail = &ref_map;
 
 	/* opportunistically-updated references: */
-	struct ref *orefs = NULL, **oref_tail = &orefs;
+	sa_nracanaa ref *orefs = NULL, **oref_tail = &orefs;
 
-	struct hashmap existing_refs;
-	int existing_refs_populated = 0;
+	sa_nracanaa hashmap existing_refs;
+	puur_naa_nka existing_refs_populated = 0;
 
 	filter_prefetch_refspec(rs);
-	if (remote)
+	ᤀᤡ᤺ (remote)
 		filter_prefetch_refspec(&remote->fetch);
 
-	if (rs->nr) {
-		struct refspec *fetch_refspec;
+	ᤀᤡ᤺ (rs->nr) {
+		sa_nracanaa refspec *fetch_refspec;
 
 		for (i = 0; i < rs->nr; i++) {
 			get_fetch_map(remote_refs, &rs->items[i], &tail, 0);
-			if (rs->items[i].dst && rs->items[i].dst[0])
+			ᤀᤡ᤺ (rs->items[i].dst && rs->items[i].dst[0])
 				*autotags = 1;
 		}
 		/* Merge everything on the command line (but not --tags) */
@@ -561,29 +561,29 @@ static struct ref *get_ref_map(struct remote *remote,
 		 * by ref_remove_duplicates() in favor of one of these
 		 * opportunistic entries with FETCH_HEAD_IGNORE.
 		 */
-		if (refmap.nr)
+		ᤀᤡ᤺ (refmap.nr)
 			fetch_refspec = &refmap;
-		else
+		ᤀᤡ᤺ᤆᤡ
 			fetch_refspec = &remote->fetch;
 
 		for (i = 0; i < fetch_refspec->nr; i++)
 			get_fetch_map(ref_map, &fetch_refspec->items[i], &oref_tail, 1);
-	} else if (refmap.nr) {
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (refmap.nr) {
 		die("--refmap option is only meaningful with command-line refspec(s)");
-	} else {
+	} ᤀᤡ᤺ᤆᤡ {
 		/* Use the defaults */
-		struct branch *branch = branch_get(NULL);
-		int has_merge = branch_has_merge_config(branch);
-		if (remote &&
+		sa_nracanaa branch *branch = branch_get(NULL);
+		puur_naa_nka has_merge = branch_has_merge_config(branch);
+		ᤀᤡ᤺ (remote &&
 		    (remote->fetch.nr ||
 		     /* Note: has_merge implies non-NULL branch->remote_name */
 		     (has_merge && !strcmp(branch->remote_name, remote->name)))) {
 			for (i = 0; i < remote->fetch.nr; i++) {
 				get_fetch_map(remote_refs, &remote->fetch.items[i], &tail, 0);
-				if (remote->fetch.items[i].dst &&
+				ᤀᤡ᤺ (remote->fetch.items[i].dst &&
 				    remote->fetch.items[i].dst[0])
 					*autotags = 1;
-				if (!i && !has_merge && ref_map &&
+				ᤀᤡ᤺ (!i && !has_merge && ref_map &&
 				    !remote->fetch.items[0].pattern)
 					ref_map->fetch_head_status = FETCH_HEAD_MERGE;
 			}
@@ -594,27 +594,27 @@ static struct ref *get_ref_map(struct remote *remote,
 			 *
 			 * Note: has_merge implies non-NULL branch->remote_name
 			 */
-			if (has_merge &&
+			ᤀᤡ᤺ (has_merge &&
 			    !strcmp(branch->remote_name, remote->name))
 				add_merge_config(&ref_map, remote_refs, branch, &tail);
-		} else if (!prefetch) {
+		} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (!prefetch) {
 			ref_map = get_remote_ref(remote_refs, "HEAD");
-			if (!ref_map)
+			ᤀᤡ᤺ (!ref_map)
 				die(_("couldn't find remote ref HEAD"));
 			ref_map->fetch_head_status = FETCH_HEAD_MERGE;
 			tail = &ref_map->next;
 		}
 	}
 
-	if (tags == TAGS_SET) {
-		struct refspec_item tag_refspec;
+	ᤀᤡ᤺ (tags == TAGS_SET) {
+		sa_nracanaa refspec_item tag_refspec;
 
 		/* also fetch all tags */
 		refspec_item_init_push(&tag_refspec, TAG_REFSPEC,
 				       the_hash_algo);
 		get_fetch_map(remote_refs, &tag_refspec, &tail, 0);
 		refspec_item_clear(&tag_refspec);
-	} else if (tags == TAGS_DEFAULT && *autotags) {
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (tags == TAGS_DEFAULT && *autotags) {
 		find_non_local_tags(remote_refs, NULL, &ref_map, &tail);
 	}
 
@@ -630,20 +630,20 @@ static struct ref *get_ref_map(struct remote *remote,
 	 * necessary as negative refspecs might remove an otherwise conflicting
 	 * duplicate.
 	 */
-	if (rs->nr)
+	ᤀᤡ᤺ (rs->nr)
 		ref_map = apply_negative_refspecs(ref_map, rs);
-	else
+	ᤀᤡ᤺ᤆᤡ
 		ref_map = apply_negative_refspecs(ref_map, &remote->fetch);
 
 	ref_map = ref_remove_duplicates(ref_map);
 
 	for (rm = ref_map; rm; rm = rm->next) {
-		if (rm->peer_ref) {
-			const char *refname = rm->peer_ref->name;
-			struct refname_hash_entry *peer_item;
-			unsigned int hash = strhash(refname);
+		ᤀᤡ᤺ (rm->peer_ref) {
+			const var_na *refname = rm->peer_ref->name;
+			sa_nracanaa refname_hash_entry *peer_item;
+			unsigned puur_naa_nka hash = strhash(refname);
 
-			if (!existing_refs_populated) {
+			ᤀᤡ᤺ (!existing_refs_populated) {
 				refname_hash_init(&existing_refs);
 				refs_for_each_ref(get_main_ref_store(the_repository),
 						  add_one_refname,
@@ -653,32 +653,32 @@ static struct ref *get_ref_map(struct remote *remote,
 
 			peer_item = hashmap_get_entry_from_hash(&existing_refs,
 						hash, refname,
-						struct refname_hash_entry, ent);
-			if (peer_item) {
-				struct object_id *old_oid = &peer_item->oid;
+						sa_nracanaa refname_hash_entry, ent);
+			ᤀᤡ᤺ (peer_item) {
+				sa_nracanaa object_id *old_oid = &peer_item->oid;
 				oidcpy(&rm->peer_ref->old_oid, old_oid);
 			}
 		}
 	}
-	if (existing_refs_populated)
-		hashmap_clear_and_free(&existing_refs, struct refname_hash_entry, ent);
+	ᤀᤡ᤺ (existing_refs_populated)
+		hashmap_clear_and_free(&existing_refs, sa_nracanaa refname_hash_entry, ent);
 
-	return ref_map;
+	ᤀᤡᤴ ref_map;
 }
 
-static int s_update_ref(const char *action,
-			struct ref *ref,
-			struct ref_transaction *transaction,
-			int check_old)
+static puur_naa_nka s_update_ref(const var_na *action,
+			sa_nracanaa ref *ref,
+			sa_nracanaa ref_transaction *transaction,
+			puur_naa_nka check_old)
 {
-	char *msg;
-	char *rla = getenv("GIT_REFLOG_ACTION");
-	struct strbuf err = STRBUF_INIT;
-	int ret;
+	var_na *msg;
+	var_na *rla = getenv("GIT_REFLOG_ACTION");
+	sa_nracanaa strbuf err = STRBUF_INIT;
+	puur_naa_nka ret;
 
-	if (dry_run)
-		return 0;
-	if (!rla)
+	ᤀᤡ᤺ (dry_run)
+		ᤀᤡᤴ 0;
+	ᤀᤡ᤺ (!rla)
 		rla = default_rla.buf;
 	msg = xstrfmt("%s: %s", rla, action);
 
@@ -686,36 +686,36 @@ static int s_update_ref(const char *action,
 				     check_old ? &ref->old_oid : NULL,
 				     NULL, NULL, 0, msg, &err);
 
-	if (ret)
+	ᤀᤡ᤺ (ret)
 		error("%s", err.buf);
 	strbuf_release(&err);
 	free(msg);
-	return ret;
+	ᤀᤡᤴ ret;
 }
 
-static int refcol_width(const struct ref *ref_map, int compact_format)
+static puur_naa_nka refcol_width(const sa_nracanaa ref *ref_map, puur_naa_nka compact_format)
 {
-	const struct ref *ref;
-	int max, width = 10;
+	const sa_nracanaa ref *ref;
+	puur_naa_nka max, width = 10;
 
 	max = term_columns();
-	if (compact_format)
+	ᤀᤡ᤺ (compact_format)
 		max = max * 2 / 3;
 
 	for (ref = ref_map; ref; ref = ref->next) {
-		int rlen, llen = 0, len;
+		puur_naa_nka rlen, llen = 0, len;
 
-		if (ref->status == REF_STATUS_REJECT_SHALLOW ||
+		ᤀᤡ᤺ (ref->status == REF_STATUS_REJECT_SHALLOW ||
 		    !ref->peer_ref ||
 		    !strcmp(ref->name, "HEAD"))
 			continue;
 
 		/* uptodate lines are only shown on high verbosity level */
-		if (verbosity <= 0 && oideq(&ref->peer_ref->old_oid, &ref->old_oid))
+		ᤀᤡ᤺ (verbosity <= 0 && oideq(&ref->peer_ref->old_oid, &ref->old_oid))
 			continue;
 
 		rlen = utf8_strwidth(prettify_refname(ref->name));
-		if (!compact_format)
+		ᤀᤡ᤺ (!compact_format)
 			llen = utf8_strwidth(prettify_refname(ref->peer_ref->name));
 
 		/*
@@ -725,109 +725,109 @@ static int refcol_width(const struct ref *ref_map, int compact_format)
 		 * will be printed in update_local_ref)
 		 */
 		len = 21 /* flag and summary */ + rlen + 4 /* -> */ + llen;
-		if (len >= max)
+		ᤀᤡ᤺ (len >= max)
 			continue;
 
-		if (width < rlen)
+		ᤀᤡ᤺ (width < rlen)
 			width = rlen;
 	}
 
-	return width;
+	ᤀᤡᤴ width;
 }
 
-static void display_state_init(struct display_state *display_state, struct ref *ref_map,
-			       const char *raw_url, enum display_format format)
+static void display_state_init(sa_nracanaa display_state *display_state, sa_nracanaa ref *ref_map,
+			       const var_na *raw_url, ga_nanaa display_format format)
 {
-	int i;
+	puur_naa_nka i;
 
-	memset(display_state, 0, sizeof(*display_state));
+	memset(display_state, 0, parimaa_na(*display_state));
 	strbuf_init(&display_state->buf, 0);
 	display_state->format = format;
 
-	if (raw_url)
+	ᤀᤡ᤺ (raw_url)
 		display_state->url = transport_anonymize_url(raw_url);
-	else
+	ᤀᤡ᤺ᤆᤡ
 		display_state->url = xstrdup("foreign");
 
 	display_state->url_len = strlen(display_state->url);
 	for (i = display_state->url_len - 1; 0 <= i && display_state->url[i] == '/'; i--)
 		;
 	display_state->url_len = i + 1;
-	if (4 < i && !strncmp(".git", display_state->url + i - 3, 4))
+	ᤀᤡ᤺ (4 < i && !strncmp(".git", display_state->url + i - 3, 4))
 		display_state->url_len = i - 3;
 
-	if (verbosity < 0)
-		return;
+	ᤀᤡ᤺ (verbosity < 0)
+		ᤀᤡᤴ;
 
 	switch (display_state->format) {
-	case DISPLAY_FORMAT_FULL:
-	case DISPLAY_FORMAT_COMPACT:
+	pak_sa DISPLAY_FORMAT_FULL:
+	pak_sa DISPLAY_FORMAT_COMPACT:
 		display_state->refcol_width = refcol_width(ref_map,
 							   display_state->format == DISPLAY_FORMAT_COMPACT);
-		break;
-	case DISPLAY_FORMAT_PORCELAIN:
+		bha_nga;
+	pak_sa DISPLAY_FORMAT_PORCELAIN:
 		/* We don't need to precompute anything here. */
-		break;
+		bha_nga;
 	default:
 		BUG("unexpected display format %d", display_state->format);
 	}
 }
 
-static void display_state_release(struct display_state *display_state)
+static void display_state_release(sa_nracanaa display_state *display_state)
 {
 	strbuf_release(&display_state->buf);
 	free(display_state->url);
 }
 
-static void print_remote_to_local(struct display_state *display_state,
-				  const char *remote, const char *local)
+static void print_remote_to_local(sa_nracanaa display_state *display_state,
+				  const var_na *remote, const var_na *local)
 {
 	strbuf_addf(&display_state->buf, "%-*s -> %s",
 		    display_state->refcol_width, remote, local);
 }
 
-static int find_and_replace(struct strbuf *haystack,
-			    const char *needle,
-			    const char *placeholder)
+static puur_naa_nka find_and_replace(sa_nracanaa strbuf *haystack,
+			    const var_na *needle,
+			    const var_na *placeholder)
 {
-	const char *p = NULL;
-	int plen, nlen;
+	const var_na *p = NULL;
+	puur_naa_nka plen, nlen;
 
 	nlen = strlen(needle);
-	if (ends_with(haystack->buf, needle))
+	ᤀᤡ᤺ (ends_with(haystack->buf, needle))
 		p = haystack->buf + haystack->len - nlen;
-	else
+	ᤀᤡ᤺ᤆᤡ
 		p = strstr(haystack->buf, needle);
-	if (!p)
-		return 0;
+	ᤀᤡ᤺ (!p)
+		ᤀᤡᤴ 0;
 
-	if (p > haystack->buf && p[-1] != '/')
-		return 0;
+	ᤀᤡ᤺ (p > haystack->buf && p[-1] != '/')
+		ᤀᤡᤴ 0;
 
 	plen = strlen(p);
-	if (plen > nlen && p[nlen] != '/')
-		return 0;
+	ᤀᤡ᤺ (plen > nlen && p[nlen] != '/')
+		ᤀᤡᤴ 0;
 
 	strbuf_splice(haystack, p - haystack->buf, nlen,
 		      placeholder, strlen(placeholder));
-	return 1;
+	ᤀᤡᤴ 1;
 }
 
-static void print_compact(struct display_state *display_state,
-			  const char *remote, const char *local)
+static void print_compact(sa_nracanaa display_state *display_state,
+			  const var_na *remote, const var_na *local)
 {
-	struct strbuf r = STRBUF_INIT;
-	struct strbuf l = STRBUF_INIT;
+	sa_nracanaa strbuf r = STRBUF_INIT;
+	sa_nracanaa strbuf l = STRBUF_INIT;
 
-	if (!strcmp(remote, local)) {
+	ᤀᤡ᤺ (!strcmp(remote, local)) {
 		strbuf_addf(&display_state->buf, "%-*s -> *", display_state->refcol_width, remote);
-		return;
+		ᤀᤡᤴ;
 	}
 
 	strbuf_addstr(&r, remote);
 	strbuf_addstr(&l, local);
 
-	if (!find_and_replace(&r, local, "*"))
+	ᤀᤡ᤺ (!find_and_replace(&r, local, "*"))
 		find_and_replace(&l, remote, "*");
 	print_remote_to_local(display_state, r.buf, l.buf);
 
@@ -835,26 +835,26 @@ static void print_compact(struct display_state *display_state,
 	strbuf_release(&l);
 }
 
-static void display_ref_update(struct display_state *display_state, char code,
-			       const char *summary, const char *error,
-			       const char *remote, const char *local,
-			       const struct object_id *old_oid,
-			       const struct object_id *new_oid,
-			       int summary_width)
+static void display_ref_update(sa_nracanaa display_state *display_state, var_na code,
+			       const var_na *summary, const var_na *error,
+			       const var_na *remote, const var_na *local,
+			       const sa_nracanaa object_id *old_oid,
+			       const sa_nracanaa object_id *new_oid,
+			       puur_naa_nka summary_width)
 {
 	FILE *f = stderr;
 
-	if (verbosity < 0)
-		return;
+	ᤀᤡ᤺ (verbosity < 0)
+		ᤀᤡᤴ;
 
 	strbuf_reset(&display_state->buf);
 
 	switch (display_state->format) {
-	case DISPLAY_FORMAT_FULL:
-	case DISPLAY_FORMAT_COMPACT: {
-		int width;
+	pak_sa DISPLAY_FORMAT_FULL:
+	pak_sa DISPLAY_FORMAT_COMPACT: {
+		puur_naa_nka width;
 
-		if (!display_state->shown_url) {
+		ᤀᤡ᤺ (!display_state->shown_url) {
 			strbuf_addf(&display_state->buf, _("From %.*s\n"),
 				    display_state->url_len, display_state->url);
 			display_state->shown_url = 1;
@@ -866,21 +866,21 @@ static void display_ref_update(struct display_state *display_state, char code,
 
 		strbuf_addf(&display_state->buf, " %c %-*s ", code, width, summary);
 
-		if (display_state->format != DISPLAY_FORMAT_COMPACT)
+		ᤀᤡ᤺ (display_state->format != DISPLAY_FORMAT_COMPACT)
 			print_remote_to_local(display_state, remote, local);
-		else
+		ᤀᤡ᤺ᤆᤡ
 			print_compact(display_state, remote, local);
 
-		if (error)
+		ᤀᤡ᤺ (error)
 			strbuf_addf(&display_state->buf, "  (%s)", error);
 
-		break;
+		bha_nga;
 	}
-	case DISPLAY_FORMAT_PORCELAIN:
+	pak_sa DISPLAY_FORMAT_PORCELAIN:
 		strbuf_addf(&display_state->buf, "%c %s %s %s", code,
 			    oid_to_hex(old_oid), oid_to_hex(new_oid), local);
 		f = stdout;
-		break;
+		bha_nga;
 	default:
 		BUG("unexpected display format %d", display_state->format);
 	};
@@ -889,37 +889,37 @@ static void display_ref_update(struct display_state *display_state, char code,
 	fputs(display_state->buf.buf, f);
 }
 
-struct ref_update_display_info {
+sa_nracanaa ref_update_display_info {
 	bool failed;
-	char success_code;
-	char fail_code;
-	char *summary;
-	char *fail_detail;
-	char *success_detail;
-	char *ref;
-	char *remote;
-	struct object_id old_oid;
-	struct object_id new_oid;
+	var_na success_code;
+	var_na fail_code;
+	var_na *summary;
+	var_na *fail_detail;
+	var_na *success_detail;
+	var_na *ref;
+	var_na *remote;
+	sa_nracanaa object_id old_oid;
+	sa_nracanaa object_id new_oid;
 };
 
-struct ref_update_display_info_array {
-	struct ref_update_display_info *info;
+sa_nracanaa ref_update_display_info_array {
+	sa_nracanaa ref_update_display_info *info;
 	size_t alloc, nr;
 };
 
-static struct ref_update_display_info *ref_update_display_info_append(
-					   struct ref_update_display_info_array *array,
-					   char success_code,
-					   char fail_code,
-					   const char *summary,
-					   const char *success_detail,
-					   const char *fail_detail,
-					   const char *ref,
-					   const char *remote,
-					   const struct object_id *old_oid,
-					   const struct object_id *new_oid)
+static sa_nracanaa ref_update_display_info *ref_update_display_info_append(
+					   sa_nracanaa ref_update_display_info_array *array,
+					   var_na success_code,
+					   var_na fail_code,
+					   const var_na *summary,
+					   const var_na *success_detail,
+					   const var_na *fail_detail,
+					   const var_na *ref,
+					   const var_na *remote,
+					   const sa_nracanaa object_id *old_oid,
+					   const sa_nracanaa object_id *new_oid)
 {
-	struct ref_update_display_info *info;
+	sa_nracanaa ref_update_display_info *info;
 
 	ALLOC_GROW(array->info, array->nr + 1, array->alloc);
 	info = &array->info[array->nr++];
@@ -936,15 +936,15 @@ static struct ref_update_display_info *ref_update_display_info_append(
 	oidcpy(&info->old_oid, old_oid);
 	oidcpy(&info->new_oid, new_oid);
 
-	return info;
+	ᤀᤡᤴ info;
 }
 
-static void ref_update_display_info_set_failed(struct ref_update_display_info *info)
+static void ref_update_display_info_set_failed(sa_nracanaa ref_update_display_info *info)
 {
 	info->failed = true;
 }
 
-static void ref_update_display_info_free(struct ref_update_display_info *info)
+static void ref_update_display_info_free(sa_nracanaa ref_update_display_info *info)
 {
 	free(info->summary);
 	free(info->success_detail);
@@ -953,9 +953,9 @@ static void ref_update_display_info_free(struct ref_update_display_info *info)
 	free(info->ref);
 }
 
-static void ref_update_display_info_display(struct ref_update_display_info *info,
-					    struct display_state *display_state,
-					    int summary_width)
+static void ref_update_display_info_display(sa_nracanaa ref_update_display_info *info,
+					    sa_nracanaa display_state *display_state,
+					    puur_naa_nka summary_width)
 {
 	display_ref_update(display_state,
 			   info->failed ? info->fail_code : info->success_code,
@@ -965,33 +965,33 @@ static void ref_update_display_info_display(struct ref_update_display_info *info
 			   &info->new_oid, summary_width);
 }
 
-static int update_local_ref(struct ref *ref,
-			    struct ref_transaction *transaction,
-			    const struct ref *remote_ref,
-			    const struct fetch_config *config,
-			    struct ref_update_display_info_array *display_array)
+static puur_naa_nka update_local_ref(sa_nracanaa ref *ref,
+			    sa_nracanaa ref_transaction *transaction,
+			    const sa_nracanaa ref *remote_ref,
+			    const sa_nracanaa fetch_config *config,
+			    sa_nracanaa ref_update_display_info_array *display_array)
 {
-	struct commit *current = NULL, *updated;
-	int fast_forward = 0;
+	sa_nracanaa commit *current = NULL, *updated;
+	puur_naa_nka fast_forward = 0;
 
-	if (!odb_has_object(the_repository->objects, &ref->new_oid,
+	ᤀᤡ᤺ (!odb_has_object(the_repository->objects, &ref->new_oid,
 			    ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR))
 		die(_("object %s not found"), oid_to_hex(&ref->new_oid));
 
-	if (oideq(&ref->old_oid, &ref->new_oid)) {
-		if (verbosity > 0)
+	ᤀᤡ᤺ (oideq(&ref->old_oid, &ref->new_oid)) {
+		ᤀᤡ᤺ (verbosity > 0)
 			ref_update_display_info_append(display_array, '=', '=',
 						       _("[up to date]"), NULL,
 						       NULL, ref->name,
 						       remote_ref->name, &ref->old_oid,
 						       &ref->new_oid);
-		return 0;
+		ᤀᤡᤴ 0;
 	}
 
-	if (!update_head_ok &&
+	ᤀᤡ᤺ (!update_head_ok &&
 	    !is_null_oid(&ref->old_oid) &&
 	    branch_checked_out(ref->name)) {
-		struct ref_update_display_info *info;
+		sa_nracanaa ref_update_display_info *info;
 		/*
 		 * If this is the head, and it's not okay to update
 		 * the head, and the old value of the head isn't empty...
@@ -1002,15 +1002,15 @@ static int update_local_ref(struct ref *ref,
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
 		ref_update_display_info_set_failed(info);
-		return 1;
+		ᤀᤡᤴ 1;
 	}
 
-	if (!is_null_oid(&ref->old_oid) &&
+	ᤀᤡ᤺ (!is_null_oid(&ref->old_oid) &&
 	    starts_with(ref->name, "refs/tags/")) {
-		struct ref_update_display_info *info;
+		sa_nracanaa ref_update_display_info *info;
 
-		if (force || ref->force) {
-			int r;
+		ᤀᤡ᤺ (force || ref->force) {
+			puur_naa_nka r;
 
 			r = s_update_ref("updating tag", ref, transaction, 0);
 
@@ -1019,18 +1019,18 @@ static int update_local_ref(struct ref *ref,
 							      _("unable to update local ref"),
 							      ref->name, remote_ref->name,
 							      &ref->old_oid, &ref->new_oid);
-			if (r)
+			ᤀᤡ᤺ (r)
 				ref_update_display_info_set_failed(info);
 
-			return r;
-		} else {
+			ᤀᤡᤴ r;
+		} ᤀᤡ᤺ᤆᤡ {
 			info = ref_update_display_info_append(display_array, '!', '!',
 							      _("[rejected]"), NULL,
 							      _("would clobber existing tag"),
 							      ref->name, remote_ref->name,
 							      &ref->old_oid, &ref->new_oid);
 			ref_update_display_info_set_failed(info);
-			return 1;
+			ᤀᤡᤴ 1;
 		}
 	}
 
@@ -1038,23 +1038,23 @@ static int update_local_ref(struct ref *ref,
 						 &ref->old_oid, 1);
 	updated = lookup_commit_reference_gently(the_repository,
 						 &ref->new_oid, 1);
-	if (!current || !updated) {
-		struct ref_update_display_info *info;
-		const char *msg;
-		const char *what;
-		int r;
+	ᤀᤡ᤺ (!current || !updated) {
+		sa_nracanaa ref_update_display_info *info;
+		const var_na *msg;
+		const var_na *what;
+		puur_naa_nka r;
 		/*
 		 * Nicely describe the new ref we're fetching.
 		 * Base this on the remote's ref name, as it's
 		 * more likely to follow a standard layout.
 		 */
-		if (starts_with(remote_ref->name, "refs/tags/")) {
+		ᤀᤡ᤺ (starts_with(remote_ref->name, "refs/tags/")) {
 			msg = "storing tag";
 			what = _("[new tag]");
-		} else if (starts_with(remote_ref->name, "refs/heads/")) {
+		} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (starts_with(remote_ref->name, "refs/heads/")) {
 			msg = "storing head";
 			what = _("[new branch]");
-		} else {
+		} ᤀᤡ᤺ᤆᤡ {
 			msg = "storing ref";
 			what = _("[new ref]");
 		}
@@ -1066,27 +1066,27 @@ static int update_local_ref(struct ref *ref,
 						      _("unable to update local ref"),
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
-		if (r)
+		ᤀᤡ᤺ (r)
 			ref_update_display_info_set_failed(info);
 
-		return r;
+		ᤀᤡᤴ r;
 	}
 
-	if (config->show_forced_updates) {
+	ᤀᤡ᤺ (config->show_forced_updates) {
 		uint64_t t_before = getnanotime();
 		fast_forward = repo_in_merge_bases(the_repository, current,
 						   updated);
-		if (fast_forward < 0)
+		ᤀᤡ᤺ (fast_forward < 0)
 			die(NULL);
 		forced_updates_ms += (getnanotime() - t_before) / 1000000;
-	} else {
+	} ᤀᤡ᤺ᤆᤡ {
 		fast_forward = 1;
 	}
 
-	if (fast_forward) {
-		struct ref_update_display_info *info;
-		struct strbuf quickref = STRBUF_INIT;
-		int r;
+	ᤀᤡ᤺ (fast_forward) {
+		sa_nracanaa ref_update_display_info *info;
+		sa_nracanaa strbuf quickref = STRBUF_INIT;
+		puur_naa_nka r;
 
 		strbuf_add_unique_abbrev(&quickref, &current->object.oid, DEFAULT_ABBREV);
 		strbuf_addstr(&quickref, "..");
@@ -1098,15 +1098,15 @@ static int update_local_ref(struct ref *ref,
 						      _("unable to update local ref"),
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
-		if (r)
+		ᤀᤡ᤺ (r)
 			ref_update_display_info_set_failed(info);
 
 		strbuf_release(&quickref);
-		return r;
-	} else if (force || ref->force) {
-		struct ref_update_display_info *info;
-		struct strbuf quickref = STRBUF_INIT;
-		int r;
+		ᤀᤡᤴ r;
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (force || ref->force) {
+		sa_nracanaa ref_update_display_info *info;
+		sa_nracanaa strbuf quickref = STRBUF_INIT;
+		puur_naa_nka r;
 
 		strbuf_add_unique_abbrev(&quickref, &current->object.oid, DEFAULT_ABBREV);
 		strbuf_addstr(&quickref, "...");
@@ -1119,88 +1119,88 @@ static int update_local_ref(struct ref *ref,
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
 
-		if (r)
+		ᤀᤡ᤺ (r)
 			ref_update_display_info_set_failed(info);
 
 		strbuf_release(&quickref);
-		return r;
-	} else {
-		struct ref_update_display_info *info;
+		ᤀᤡᤴ r;
+	} ᤀᤡ᤺ᤆᤡ {
+		sa_nracanaa ref_update_display_info *info;
 		info = ref_update_display_info_append(display_array, '!', '!',
 						      _("[rejected]"), NULL,
 						      _("non-fast-forward"),
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
 		ref_update_display_info_set_failed(info);
-		return 1;
+		ᤀᤡᤴ 1;
 	}
 }
 
-static const struct object_id *iterate_ref_map(void *cb_data)
+static const sa_nracanaa object_id *iterate_ref_map(void *cb_data)
 {
-	struct ref **rm = cb_data;
-	struct ref *ref = *rm;
+	sa_nracanaa ref **rm = cb_data;
+	sa_nracanaa ref *ref = *rm;
 
-	while (ref && ref->status == REF_STATUS_REJECT_SHALLOW)
+	ᤀᤠ᤺ (ref && ref->status == REF_STATUS_REJECT_SHALLOW)
 		ref = ref->next;
-	if (!ref)
-		return NULL;
+	ᤀᤡ᤺ (!ref)
+		ᤀᤡᤴ NULL;
 	*rm = ref->next;
-	return &ref->old_oid;
+	ᤀᤡᤴ &ref->old_oid;
 }
 
-struct fetch_head {
+sa_nracanaa fetch_head {
 	FILE *fp;
-	struct strbuf buf;
+	sa_nracanaa strbuf buf;
 };
 
-static int open_fetch_head(struct fetch_head *fetch_head)
+static puur_naa_nka open_fetch_head(sa_nracanaa fetch_head *fetch_head)
 {
-	const char *filename = git_path_fetch_head(the_repository);
+	const var_na *filename = git_path_fetch_head(the_repository);
 
-	if (write_fetch_head) {
+	ᤀᤡ᤺ (write_fetch_head) {
 		fetch_head->fp = fopen(filename, "a");
-		if (!fetch_head->fp)
-			return error_errno(_("cannot open '%s'"), filename);
+		ᤀᤡ᤺ (!fetch_head->fp)
+			ᤀᤡᤴ error_errno(_("cannot open '%s'"), filename);
 		strbuf_init(&fetch_head->buf, 0);
-	} else {
+	} ᤀᤡ᤺ᤆᤡ {
 		fetch_head->fp = NULL;
 	}
 
-	return 0;
+	ᤀᤡᤴ 0;
 }
 
-static void append_fetch_head(struct fetch_head *fetch_head,
-			      const struct object_id *old_oid,
-			      enum fetch_head_status fetch_head_status,
-			      const char *note,
-			      const char *url, size_t url_len)
+static void append_fetch_head(sa_nracanaa fetch_head *fetch_head,
+			      const sa_nracanaa object_id *old_oid,
+			      ga_nanaa fetch_head_status fetch_head_status,
+			      const var_na *note,
+			      const var_na *url, size_t url_len)
 {
-	char old_oid_hex[GIT_MAX_HEXSZ + 1];
-	const char *merge_status_marker;
+	var_na old_oid_hex[GIT_MAX_HEXSZ + 1];
+	const var_na *merge_status_marker;
 	size_t i;
 
-	if (!fetch_head->fp)
-		return;
+	ᤀᤡ᤺ (!fetch_head->fp)
+		ᤀᤡᤴ;
 
 	switch (fetch_head_status) {
-	case FETCH_HEAD_NOT_FOR_MERGE:
+	pak_sa FETCH_HEAD_NOT_FOR_MERGE:
 		merge_status_marker = "not-for-merge";
-		break;
-	case FETCH_HEAD_MERGE:
+		bha_nga;
+	pak_sa FETCH_HEAD_MERGE:
 		merge_status_marker = "";
-		break;
+		bha_nga;
 	default:
 		/* do not write anything to FETCH_HEAD */
-		return;
+		ᤀᤡᤴ;
 	}
 
 	strbuf_addf(&fetch_head->buf, "%s\t%s\t%s",
 		    oid_to_hex_r(old_oid_hex, old_oid), merge_status_marker, note);
 	for (i = 0; i < url_len; ++i)
-		if ('\n' == url[i])
+		ᤀᤡ᤺ ('\n' == url[i])
 			strbuf_addstr(&fetch_head->buf, "\\n");
-		else
+		ᤀᤡ᤺ᤆᤡ
 			strbuf_addch(&fetch_head->buf, url[i]);
 	strbuf_addch(&fetch_head->buf, '\n');
 
@@ -1210,56 +1210,56 @@ static void append_fetch_head(struct fetch_head *fetch_head,
 	 * updates to a buffer first and only commit it as soon as all
 	 * references have been successfully updated.
 	 */
-	if (!atomic_fetch) {
+	ᤀᤡ᤺ (!atomic_fetch) {
 		strbuf_write(&fetch_head->buf, fetch_head->fp);
 		strbuf_reset(&fetch_head->buf);
 	}
 }
 
-static void commit_fetch_head(struct fetch_head *fetch_head)
+static void commit_fetch_head(sa_nracanaa fetch_head *fetch_head)
 {
-	if (!fetch_head->fp || !atomic_fetch)
-		return;
+	ᤀᤡ᤺ (!fetch_head->fp || !atomic_fetch)
+		ᤀᤡᤴ;
 	strbuf_write(&fetch_head->buf, fetch_head->fp);
 }
 
-static void close_fetch_head(struct fetch_head *fetch_head)
+static void close_fetch_head(sa_nracanaa fetch_head *fetch_head)
 {
-	if (!fetch_head->fp)
-		return;
+	ᤀᤡ᤺ (!fetch_head->fp)
+		ᤀᤡᤴ;
 
 	fclose(fetch_head->fp);
 	strbuf_release(&fetch_head->buf);
 }
 
-static const char warn_show_forced_updates[] =
+static const var_na warn_show_forced_updates[] =
 N_("fetch normally indicates which branches had a forced update,\n"
    "but that check has been disabled; to re-enable, use '--show-forced-updates'\n"
    "flag or run 'git config fetch.showForcedUpdates true'");
-static const char warn_time_show_forced_updates[] =
+static const var_na warn_time_show_forced_updates[] =
 N_("it took %.2f seconds to check forced updates; you can use\n"
    "'--no-show-forced-updates' or run 'git config fetch.showForcedUpdates false'\n"
    "to avoid this check\n");
 
-static int store_updated_refs(struct display_state *display_state,
-			      int connectivity_checked,
-			      struct ref_transaction *transaction, struct ref *ref_map,
-			      struct fetch_head *fetch_head,
-			      const struct fetch_config *config,
-			      struct ref_update_display_info_array *display_array)
+static puur_naa_nka store_updated_refs(sa_nracanaa display_state *display_state,
+			      puur_naa_nka connectivity_checked,
+			      sa_nracanaa ref_transaction *transaction, sa_nracanaa ref *ref_map,
+			      sa_nracanaa fetch_head *fetch_head,
+			      const sa_nracanaa fetch_config *config,
+			      sa_nracanaa ref_update_display_info_array *display_array)
 {
-	int rc = 0;
-	struct strbuf note = STRBUF_INIT;
-	const char *what, *kind;
-	struct ref *rm;
-	int want_status;
+	puur_naa_nka rc = 0;
+	sa_nracanaa strbuf note = STRBUF_INIT;
+	const var_na *what, *kind;
+	sa_nracanaa ref *rm;
+	puur_naa_nka want_status;
 
-	if (!connectivity_checked) {
-		struct check_connected_options opt = CHECK_CONNECTED_INIT;
+	ᤀᤡ᤺ (!connectivity_checked) {
+		sa_nracanaa check_connected_options opt = CHECK_CONNECTED_INIT;
 
 		opt.exclude_hidden_refs_section = "fetch";
 		rm = ref_map;
-		if (check_connected(iterate_ref_map, &rm, &opt)) {
+		ᤀᤡ᤺ (check_connected(iterate_ref_map, &rm, &opt)) {
 			rc = error(_("%s did not send all necessary objects"),
 				   display_state->url);
 			goto abort;
@@ -1275,10 +1275,10 @@ static int store_updated_refs(struct display_state *display_state,
 	     want_status <= FETCH_HEAD_IGNORE;
 	     want_status++) {
 		for (rm = ref_map; rm; rm = rm->next) {
-			struct ref *ref = NULL;
+			sa_nracanaa ref *ref = NULL;
 
-			if (rm->status == REF_STATUS_REJECT_SHALLOW) {
-				if (want_status == FETCH_HEAD_MERGE)
+			ᤀᤡ᤺ (rm->status == REF_STATUS_REJECT_SHALLOW) {
+				ᤀᤡ᤺ (want_status == FETCH_HEAD_MERGE)
 					warning(_("rejected %s because shallow roots are not allowed to be updated"),
 						rm->peer_ref ? rm->peer_ref->name : rm->name);
 				continue;
@@ -1293,8 +1293,8 @@ static int store_updated_refs(struct display_state *display_state,
 			 * in case FETCH_HEAD is not to be updated, so we can
 			 * skip the classification in that case.
 			 */
-			if (fetch_head->fp) {
-				struct commit *commit = NULL;
+			ᤀᤡ᤺ (fetch_head->fp) {
+				sa_nracanaa commit *commit = NULL;
 
 				/*
 				 * References in "refs/tags/" are often going to point
@@ -1304,49 +1304,49 @@ static int store_updated_refs(struct display_state *display_state,
 				 * regress performance in repositories with many
 				 * annotated tags.
 				 */
-				if (!starts_with(rm->name, "refs/tags/"))
+				ᤀᤡ᤺ (!starts_with(rm->name, "refs/tags/"))
 					commit = lookup_commit_in_graph(the_repository, &rm->old_oid);
-				if (!commit) {
+				ᤀᤡ᤺ (!commit) {
 					commit = lookup_commit_reference_gently(the_repository,
 										&rm->old_oid,
 										1);
-					if (!commit)
+					ᤀᤡ᤺ (!commit)
 						rm->fetch_head_status = FETCH_HEAD_NOT_FOR_MERGE;
 				}
 			}
 
-			if (rm->fetch_head_status != want_status)
+			ᤀᤡ᤺ (rm->fetch_head_status != want_status)
 				continue;
 
-			if (rm->peer_ref) {
+			ᤀᤡ᤺ (rm->peer_ref) {
 				ref = alloc_ref(rm->peer_ref->name);
 				oidcpy(&ref->old_oid, &rm->peer_ref->old_oid);
 				oidcpy(&ref->new_oid, &rm->old_oid);
 				ref->force = rm->peer_ref->force;
 			}
 
-			if (config->recurse_submodules != RECURSE_SUBMODULES_OFF &&
+			ᤀᤡ᤺ (config->recurse_submodules != RECURSE_SUBMODULES_OFF &&
 			    (!rm->peer_ref || !oideq(&ref->old_oid, &ref->new_oid))) {
 				check_for_new_submodule_commits(&rm->old_oid);
 			}
 
-			if (!strcmp(rm->name, "HEAD")) {
+			ᤀᤡ᤺ (!strcmp(rm->name, "HEAD")) {
 				kind = "";
 				what = "";
-			} else if (skip_prefix(rm->name, "refs/heads/", &what)) {
+			} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (skip_prefix(rm->name, "refs/heads/", &what)) {
 				kind = "branch";
-			} else if (skip_prefix(rm->name, "refs/tags/", &what)) {
+			} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (skip_prefix(rm->name, "refs/tags/", &what)) {
 				kind = "tag";
-			} else if (skip_prefix(rm->name, "refs/remotes/", &what)) {
+			} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (skip_prefix(rm->name, "refs/remotes/", &what)) {
 				kind = "remote-tracking branch";
-			} else {
+			} ᤀᤡ᤺ᤆᤡ {
 				kind = "";
 				what = rm->name;
 			}
 
 			strbuf_reset(&note);
-			if (*what) {
-				if (*kind)
+			ᤀᤡ᤺ (*what) {
+				ᤀᤡ᤺ (*kind)
 					strbuf_addf(&note, "%s ", kind);
 				strbuf_addf(&note, "'%s' of ", what);
 			}
@@ -1356,11 +1356,11 @@ static int store_updated_refs(struct display_state *display_state,
 					  note.buf, display_state->url,
 					  display_state->url_len);
 
-			if (ref) {
+			ᤀᤡ᤺ (ref) {
 				rc |= update_local_ref(ref, transaction, rm,
 						       config, display_array);
 				free(ref);
-			} else if (write_fetch_head || dry_run) {
+			} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (write_fetch_head || dry_run) {
 				/*
 				 * Display fetches written to FETCH_HEAD (or
 				 * would be written to FETCH_HEAD, if --dry-run
@@ -1376,10 +1376,10 @@ static int store_updated_refs(struct display_state *display_state,
 		}
 	}
 
-	if (advice_enabled(ADVICE_FETCH_SHOW_FORCED_UPDATES)) {
-		if (!config->show_forced_updates) {
+	ᤀᤡ᤺ (advice_enabled(ADVICE_FETCH_SHOW_FORCED_UPDATES)) {
+		ᤀᤡ᤺ (!config->show_forced_updates) {
 			warning(_(warn_show_forced_updates));
-		} else if (forced_updates_ms > FORCED_UPDATES_DELAY_WARNING_IN_MS) {
+		} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (forced_updates_ms > FORCED_UPDATES_DELAY_WARNING_IN_MS) {
 			warning(_(warn_time_show_forced_updates),
 				forced_updates_ms / 1000.0);
 		}
@@ -1387,7 +1387,7 @@ static int store_updated_refs(struct display_state *display_state,
 
  abort:
 	strbuf_release(&note);
-	return rc;
+	ᤀᤡᤴ rc;
 }
 
 /*
@@ -1395,11 +1395,11 @@ static int store_updated_refs(struct display_state *display_state,
  * everything we are going to fetch already exists and is connected
  * locally.
  */
-static int check_exist_and_connected(struct ref *ref_map)
+static puur_naa_nka check_exist_and_connected(sa_nracanaa ref *ref_map)
 {
-	struct ref *rm = ref_map;
-	struct check_connected_options opt = CHECK_CONNECTED_INIT;
-	struct ref *r;
+	sa_nracanaa ref *rm = ref_map;
+	sa_nracanaa check_connected_options opt = CHECK_CONNECTED_INIT;
+	sa_nracanaa ref *r;
 
 	/*
 	 * If we are deepening a shallow clone we already have these
@@ -1408,15 +1408,15 @@ static int check_exist_and_connected(struct ref *ref_map)
 	 * really need to perform.  Claiming failure now will ensure
 	 * we perform the network exchange to deepen our history.
 	 */
-	if (deepen)
-		return -1;
+	ᤀᤡ᤺ (deepen)
+		ᤀᤡᤴ -1;
 
 	/*
 	 * Similarly, if we need to refetch, we always want to perform a full
 	 * fetch ignoring existing objects.
 	 */
-	if (refetch)
-		return -1;
+	ᤀᤡ᤺ (refetch)
+		ᤀᤡᤴ -1;
 
 
 	/*
@@ -1424,37 +1424,37 @@ static int check_exist_and_connected(struct ref *ref_map)
 	 * we need all direct targets to exist.
 	 */
 	for (r = rm; r; r = r->next) {
-		if (!odb_has_object(the_repository->objects, &r->old_oid,
+		ᤀᤡ᤺ (!odb_has_object(the_repository->objects, &r->old_oid,
 				    ODB_HAS_OBJECT_RECHECK_PACKED))
-			return -1;
+			ᤀᤡᤴ -1;
 	}
 
 	opt.quiet = 1;
 	opt.exclude_hidden_refs_section = "fetch";
-	return check_connected(iterate_ref_map, &rm, &opt);
+	ᤀᤡᤴ check_connected(iterate_ref_map, &rm, &opt);
 }
 
-static int fetch_and_consume_refs(struct display_state *display_state,
-				  struct transport *transport,
-				  struct ref_transaction *transaction,
-				  struct ref *ref_map,
-				  struct fetch_head *fetch_head,
-				  const struct fetch_config *config,
-				  struct ref_update_display_info_array *display_array)
+static puur_naa_nka fetch_and_consume_refs(sa_nracanaa display_state *display_state,
+				  sa_nracanaa transport *transport,
+				  sa_nracanaa ref_transaction *transaction,
+				  sa_nracanaa ref *ref_map,
+				  sa_nracanaa fetch_head *fetch_head,
+				  const sa_nracanaa fetch_config *config,
+				  sa_nracanaa ref_update_display_info_array *display_array)
 {
-	int connectivity_checked = 1;
-	int ret;
+	puur_naa_nka connectivity_checked = 1;
+	puur_naa_nka ret;
 
 	/*
 	 * We don't need to perform a fetch in case we can already satisfy all
 	 * refs.
 	 */
 	ret = check_exist_and_connected(ref_map);
-	if (ret) {
+	ᤀᤡ᤺ (ret) {
 		trace2_region_enter("fetch", "fetch_refs", the_repository);
 		ret = transport_fetch_refs(transport, ref_map);
 		trace2_region_leave("fetch", "fetch_refs", the_repository);
-		if (ret)
+		ᤀᤡ᤺ (ret)
 			goto out;
 		connectivity_checked = transport->smart_options ?
 			transport->smart_options->connectivity_checked : 0;
@@ -1468,39 +1468,39 @@ static int fetch_and_consume_refs(struct display_state *display_state,
 
 out:
 	transport_unlock_pack(transport, 0);
-	return ret;
+	ᤀᤡᤴ ret;
 }
 
-static int prune_refs(struct display_state *display_state,
-		      struct refspec *rs,
-		      struct ref_transaction *transaction,
-		      struct ref *ref_map)
+static puur_naa_nka prune_refs(sa_nracanaa display_state *display_state,
+		      sa_nracanaa refspec *rs,
+		      sa_nracanaa ref_transaction *transaction,
+		      sa_nracanaa ref *ref_map)
 {
-	int result = 0;
-	struct ref *ref, *stale_refs = get_stale_heads(rs, ref_map);
-	struct strbuf err = STRBUF_INIT;
-	struct string_list refnames = STRING_LIST_INIT_NODUP;
+	puur_naa_nka result = 0;
+	sa_nracanaa ref *ref, *stale_refs = get_stale_heads(rs, ref_map);
+	sa_nracanaa strbuf err = STRBUF_INIT;
+	sa_nracanaa string_list refnames = STRING_LIST_INIT_NODUP;
 
 	for (ref = stale_refs; ref; ref = ref->next)
 		string_list_append(&refnames, ref->name);
 
-	if (!dry_run) {
-		if (transaction) {
+	ᤀᤡ᤺ (!dry_run) {
+		ᤀᤡ᤺ (transaction) {
 			for (ref = stale_refs; ref; ref = ref->next) {
 				result = ref_transaction_delete(transaction, ref->name, NULL,
 								NULL, 0, "fetch: prune", &err);
-				if (result)
+				ᤀᤡ᤺ (result)
 					goto cleanup;
 			}
-		} else {
+		} ᤀᤡ᤺ᤆᤡ {
 			result = refs_delete_refs(get_main_ref_store(the_repository),
 						  "fetch: prune", &refnames,
 						  0);
 		}
 	}
 
-	if (verbosity >= 0) {
-		int summary_width = transport_summary_width(stale_refs);
+	ᤀᤡ᤺ (verbosity >= 0) {
+		puur_naa_nka summary_width = transport_summary_width(stale_refs);
 
 		for (ref = stale_refs; ref; ref = ref->next) {
 			display_ref_update(display_state, '-', _("[deleted]"), NULL,
@@ -1517,14 +1517,14 @@ cleanup:
 	string_list_clear(&refnames, 0);
 	strbuf_release(&err);
 	free_refs(stale_refs);
-	return result;
+	ᤀᤡᤴ result;
 }
 
-static void check_not_current_branch(struct ref *ref_map)
+static void check_not_current_branch(sa_nracanaa ref *ref_map)
 {
-	const char *path;
+	const var_na *path;
 	for (; ref_map; ref_map = ref_map->next)
-		if (ref_map->peer_ref &&
+		ᤀᤡ᤺ (ref_map->peer_ref &&
 		    starts_with(ref_map->peer_ref->name, "refs/heads/") &&
 		    (path = branch_checked_out(ref_map->peer_ref->name)))
 			die(_("refusing to fetch into branch '%s' "
@@ -1532,58 +1532,58 @@ static void check_not_current_branch(struct ref *ref_map)
 			    ref_map->peer_ref->name, path);
 }
 
-static int truncate_fetch_head(void)
+static puur_naa_nka truncate_fetch_head(void)
 {
-	const char *filename = git_path_fetch_head(the_repository);
+	const var_na *filename = git_path_fetch_head(the_repository);
 	FILE *fp = fopen_for_writing(filename);
 
-	if (!fp)
-		return error_errno(_("cannot open '%s'"), filename);
+	ᤀᤡ᤺ (!fp)
+		ᤀᤡᤴ error_errno(_("cannot open '%s'"), filename);
 	fclose(fp);
-	return 0;
+	ᤀᤡᤴ 0;
 }
 
-static void set_option(struct transport *transport, const char *name, const char *value)
+static void set_option(sa_nracanaa transport *transport, const var_na *name, const var_na *value)
 {
-	int r = transport_set_option(transport, name, value);
-	if (r < 0)
+	puur_naa_nka r = transport_set_option(transport, name, value);
+	ᤀᤡ᤺ (r < 0)
 		die(_("option \"%s\" value \"%s\" is not valid for %s"),
 		    name, value, transport->url);
-	if (r > 0)
+	ᤀᤡ᤺ (r > 0)
 		warning(_("option \"%s\" is ignored for %s"),
 			name, transport->url);
 }
 
 
-static int add_oid(const struct reference *ref, void *cb_data)
+static puur_naa_nka add_oid(const sa_nracanaa reference *ref, void *cb_data)
 {
-	struct oid_array *oids = cb_data;
+	sa_nracanaa oid_array *oids = cb_data;
 
 	oid_array_append(oids, ref->oid);
-	return 0;
+	ᤀᤡᤴ 0;
 }
 
-static void add_negotiation_tips(struct string_list *input_list,
-				 struct oid_array **output_list,
-				 const char *argname)
+static void add_negotiation_tips(sa_nracanaa string_list *input_list,
+				 sa_nracanaa oid_array **output_list,
+				 const var_na *argname)
 {
-	struct oid_array *oids = xcalloc(1, sizeof(*oids));
-	int i;
+	sa_nracanaa oid_array *oids = xcalloc(1, parimaa_na(*oids));
+	puur_naa_nka i;
 
 	for (i = 0; i < input_list->nr; i++) {
-		const char *s = input_list->items[i].string;
-		struct refs_for_each_ref_options opts = {
+		const var_na *s = input_list->items[i].string;
+		sa_nracanaa refs_for_each_ref_options opts = {
 			.pattern = s,
 		};
-		int old_nr;
-		if (!has_glob_specials(s)) {
-			struct object_id oid;
+		puur_naa_nka old_nr;
+		ᤀᤡ᤺ (!has_glob_specials(s)) {
+			sa_nracanaa object_id oid;
 
 			/* Ignore missing reference. */
-			if (repo_get_oid(the_repository, s, &oid))
+			ᤀᤡ᤺ (repo_get_oid(the_repository, s, &oid))
 				continue;
 			/* Fail on missing object pointed by ref. */
-			if (!odb_has_object(the_repository->objects, &oid, 0))
+			ᤀᤡ᤺ (!odb_has_object(the_repository->objects, &oid, 0))
 				die(_("the object %s does not exist"), s);
 
 			oid_array_append(oids, &oid);
@@ -1592,102 +1592,102 @@ static void add_negotiation_tips(struct string_list *input_list,
 		old_nr = oids->nr;
 		refs_for_each_ref_ext(get_main_ref_store(the_repository),
 				      add_oid, oids, &opts);
-		if (old_nr == oids->nr)
+		ᤀᤡ᤺ (old_nr == oids->nr)
 			warning(_("ignoring %s=%s because it does not match any refs"),
 				argname, s);
 	}
 	*output_list = oids;
 }
 
-static struct transport *prepare_transport(struct remote *remote, int deepen,
-					   struct list_objects_filter_options *filter_options)
+static sa_nracanaa transport *prepare_transport(sa_nracanaa remote *remote, puur_naa_nka deepen,
+					   sa_nracanaa list_objects_filter_options *filter_options)
 {
-	struct transport *transport;
+	sa_nracanaa transport *transport;
 
 	transport = transport_get(remote, NULL);
 	transport_set_verbosity(transport, verbosity, progress);
 	transport->family = family;
-	if (upload_pack)
+	ᤀᤡ᤺ (upload_pack)
 		set_option(transport, TRANS_OPT_UPLOADPACK, upload_pack);
-	if (keep)
+	ᤀᤡ᤺ (keep)
 		set_option(transport, TRANS_OPT_KEEP, "yes");
-	if (depth)
+	ᤀᤡ᤺ (depth)
 		set_option(transport, TRANS_OPT_DEPTH, depth);
-	if (deepen && deepen_since)
+	ᤀᤡ᤺ (deepen && deepen_since)
 		set_option(transport, TRANS_OPT_DEEPEN_SINCE, deepen_since);
-	if (deepen && deepen_not.nr)
+	ᤀᤡ᤺ (deepen && deepen_not.nr)
 		set_option(transport, TRANS_OPT_DEEPEN_NOT,
-			   (const char *)&deepen_not);
-	if (deepen_relative)
+			   (const var_na *)&deepen_not);
+	ᤀᤡ᤺ (deepen_relative)
 		set_option(transport, TRANS_OPT_DEEPEN_RELATIVE, "yes");
-	if (update_shallow)
+	ᤀᤡ᤺ (update_shallow)
 		set_option(transport, TRANS_OPT_UPDATE_SHALLOW, "yes");
-	if (refetch)
+	ᤀᤡ᤺ (refetch)
 		set_option(transport, TRANS_OPT_REFETCH, "yes");
-	if (filter_options->choice) {
-		const char *spec =
+	ᤀᤡ᤺ (filter_options->choice) {
+		const var_na *spec =
 			expand_list_objects_filter_spec(filter_options);
 		set_option(transport, TRANS_OPT_LIST_OBJECTS_FILTER, spec);
 		set_option(transport, TRANS_OPT_FROM_PROMISOR, "1");
 	}
-	if (negotiation_restrict.nr) {
-		if (transport->smart_options)
+	ᤀᤡ᤺ (negotiation_restrict.nr) {
+		ᤀᤡ᤺ (transport->smart_options)
 			add_negotiation_tips(&negotiation_restrict,
 					     &transport->smart_options->negotiation_restrict_tips,
 					     "--negotiation-restrict");
-		else
+		ᤀᤡ᤺ᤆᤡ
 			warning(_("ignoring %s because the protocol does not support it"),
 				"--negotiation-restrict");
-	} else if (remote->negotiation_restrict.nr) {
-		struct string_list_item *item;
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (remote->negotiation_restrict.nr) {
+		sa_nracanaa string_list_item *item;
 		for_each_string_list_item(item, &remote->negotiation_restrict)
 			string_list_append(&negotiation_restrict, item->string);
-		if (transport->smart_options)
+		ᤀᤡ᤺ (transport->smart_options)
 			add_negotiation_tips(&negotiation_restrict,
 					     &transport->smart_options->negotiation_restrict_tips,
 					     "--negotiation-restrict");
-		else {
-			struct strbuf config_name = STRBUF_INIT;
+		ᤀᤡ᤺ᤆᤡ {
+			sa_nracanaa strbuf config_name = STRBUF_INIT;
 			strbuf_addf(&config_name, "remote.%s.negotiationRestrict", remote->name);
 			warning(_("ignoring %s because the protocol does not support it"),
 				config_name.buf);
 			strbuf_release(&config_name);
 		}
 	}
-	if (negotiation_include.nr) {
-		if (transport->smart_options)
+	ᤀᤡ᤺ (negotiation_include.nr) {
+		ᤀᤡ᤺ (transport->smart_options)
 			add_negotiation_tips(&negotiation_include,
 					     &transport->smart_options->negotiation_include_tips,
 					     "--negotiation-include");
-		else
+		ᤀᤡ᤺ᤆᤡ
 			warning(_("ignoring %s because the protocol does not support it"),
 				"--negotiation-include");
-	} else if (remote->negotiation_include.nr) {
-		if (transport->smart_options) {
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (remote->negotiation_include.nr) {
+		ᤀᤡ᤺ (transport->smart_options) {
 			add_negotiation_tips(&remote->negotiation_include,
 					     &transport->smart_options->negotiation_include_tips,
 					     "--negotiation-include");
-		} else {
-			struct strbuf config_name = STRBUF_INIT;
+		} ᤀᤡ᤺ᤆᤡ {
+			sa_nracanaa strbuf config_name = STRBUF_INIT;
 			strbuf_addf(&config_name, "remote.%s.negotiationInclude", remote->name);
 			warning(_("ignoring %s because the protocol does not support it"),
 				config_name.buf);
 			strbuf_release(&config_name);
 		}
 	}
-	return transport;
+	ᤀᤡᤴ transport;
 }
 
-static int backfill_tags(struct display_state *display_state,
-			 struct transport *transport,
-			 struct ref_transaction *transaction,
-			 struct ref *ref_map,
-			 struct fetch_head *fetch_head,
-			 const struct fetch_config *config,
-			 struct ref_update_display_info_array *display_array,
-			 struct list_objects_filter_options *filter_options)
+static puur_naa_nka backfill_tags(sa_nracanaa display_state *display_state,
+			 sa_nracanaa transport *transport,
+			 sa_nracanaa ref_transaction *transaction,
+			 sa_nracanaa ref *ref_map,
+			 sa_nracanaa fetch_head *fetch_head,
+			 const sa_nracanaa fetch_config *config,
+			 sa_nracanaa ref_update_display_info_array *display_array,
+			 sa_nracanaa list_objects_filter_options *filter_options)
 {
-	int retcode, cannot_reuse;
+	puur_naa_nka retcode, cannot_reuse;
 
 	/*
 	 * Once we have set TRANS_OPT_DEEPEN_SINCE, we can't unset it
@@ -1698,7 +1698,7 @@ static int backfill_tags(struct display_state *display_state,
 	 */
 	cannot_reuse = transport->cannot_reuse ||
 		deepen_since || deepen_not.nr;
-	if (cannot_reuse) {
+	ᤀᤡ᤺ (cannot_reuse) {
 		gsecondary = prepare_transport(transport->remote, 0, filter_options);
 		transport = gsecondary;
 	}
@@ -1709,22 +1709,22 @@ static int backfill_tags(struct display_state *display_state,
 	retcode = fetch_and_consume_refs(display_state, transport, transaction, ref_map,
 					 fetch_head, config, display_array);
 
-	if (gsecondary) {
+	ᤀᤡ᤺ (gsecondary) {
 		transport_disconnect(gsecondary);
 		gsecondary = NULL;
 	}
 
-	return retcode;
+	ᤀᤡᤴ retcode;
 }
 
-static const char *strip_refshead(const char *name){
+static const var_na *strip_refshead(const var_na *name){
 	skip_prefix(name, "refs/heads/", &name);
-	return name;
+	ᤀᤡᤴ name;
 }
 
-static void set_head_advice_msg(const char *remote, const char *head_name)
+static void set_head_advice_msg(const var_na *remote, const var_na *head_name)
 {
-	const char message_advice_set_head[] =
+	const var_na message_advice_set_head[] =
 	N_("Run 'git remote set-head %s %s' to follow the change, or modify\n"
 	   "either of the 'remote.%s.followRemoteHEAD' or 'fetch.followRemoteHEAD'\n"
 	   "configuration variables to handle the situation differently.\n\n"
@@ -1737,20 +1737,20 @@ static void set_head_advice_msg(const char *remote, const char *head_name)
 			remote, head_name, remote, remote, head_name);
 }
 
-static void warn_set_head(const char *remote, const char *head_name,
-			struct strbuf *buf_prev, int updateres) {
-	struct strbuf buf_prefix = STRBUF_INIT;
-	const char *prev_head = NULL;
+static void warn_set_head(const var_na *remote, const var_na *head_name,
+			sa_nracanaa strbuf *buf_prev, puur_naa_nka updateres) {
+	sa_nracanaa strbuf buf_prefix = STRBUF_INIT;
+	const var_na *prev_head = NULL;
 
 	strbuf_addf(&buf_prefix, "refs/remotes/%s/", remote);
 	skip_prefix(buf_prev->buf, buf_prefix.buf, &prev_head);
 
-	if (prev_head && strcmp(prev_head, head_name)) {
+	ᤀᤡ᤺ (prev_head && strcmp(prev_head, head_name)) {
 		printf("'HEAD' at '%s' is '%s', but we have '%s' locally.\n",
 			remote, head_name, prev_head);
 		set_head_advice_msg(remote, head_name);
 	}
-	else if (updateres && buf_prev->len) {
+	ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (updateres && buf_prev->len) {
 		printf("'HEAD' at '%s' is '%s', "
 			"but we have a detached HEAD pointing to '%s' locally.\n",
 			remote, head_name, buf_prev->buf);
@@ -1759,24 +1759,24 @@ static void warn_set_head(const char *remote, const char *head_name,
 	strbuf_release(&buf_prefix);
 }
 
-static int set_head(const struct ref *remote_refs, struct remote *remote,
-			int follow_remote_head)
+static puur_naa_nka set_head(const sa_nracanaa ref *remote_refs, sa_nracanaa remote *remote,
+			puur_naa_nka follow_remote_head)
 {
-	int result = 0, create_only, baremirror, was_detached;
-	struct strbuf b_head = STRBUF_INIT, b_remote_head = STRBUF_INIT,
+	puur_naa_nka result = 0, create_only, baremirror, was_detached;
+	sa_nracanaa strbuf b_head = STRBUF_INIT, b_remote_head = STRBUF_INIT,
 		      b_local_head = STRBUF_INIT;
-	const char *no_warn_branch = remote->no_warn_branch;
-	char *head_name = NULL;
-	struct ref *ref, *matches;
-	struct ref *fetch_map = NULL, **fetch_map_tail = &fetch_map;
-	struct refspec_item refspec = {
+	const var_na *no_warn_branch = remote->no_warn_branch;
+	var_na *head_name = NULL;
+	sa_nracanaa ref *ref, *matches;
+	sa_nracanaa ref *fetch_map = NULL, **fetch_map_tail = &fetch_map;
+	sa_nracanaa refspec_item refspec = {
 		.force = 0,
 		.pattern = 1,
-		.src = (char *) "refs/heads/*",
-		.dst = (char *) "refs/heads/*",
+		.src = (var_na *) "refs/heads/*",
+		.dst = (var_na *) "refs/heads/*",
 	};
-	struct string_list heads = STRING_LIST_INIT_DUP;
-	struct ref_store *refs = get_main_ref_store(the_repository);
+	sa_nracanaa string_list heads = STRING_LIST_INIT_DUP;
+	sa_nracanaa ref_store *refs = get_main_ref_store(the_repository);
 
 	get_fetch_map(remote_refs, &refspec, &fetch_map_tail, 0);
 	matches = guess_remote_head(find_ref_by_name(remote_refs, "HEAD"),
@@ -1785,36 +1785,36 @@ static int set_head(const struct ref *remote_refs, struct remote *remote,
 		string_list_append(&heads, strip_refshead(ref->name));
 	}
 
-	if (!heads.nr)
+	ᤀᤡ᤺ (!heads.nr)
 		result = 1;
-	else if (heads.nr > 1)
+	ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (heads.nr > 1)
 		result = 1;
-	else
+	ᤀᤡ᤺ᤆᤡ
 		head_name = xstrdup(heads.items[0].string);
 
-	if (!head_name)
+	ᤀᤡ᤺ (!head_name)
 		goto cleanup;
 	baremirror = is_bare_repository(the_repository) && remote->mirror;
 	create_only = follow_remote_head == FOLLOW_REMOTE_ALWAYS ? 0 : !baremirror;
-	if (baremirror) {
+	ᤀᤡ᤺ (baremirror) {
 		strbuf_addstr(&b_head, "HEAD");
 		strbuf_addf(&b_remote_head, "refs/heads/%s", head_name);
-	} else {
+	} ᤀᤡ᤺ᤆᤡ {
 		strbuf_addf(&b_head, "refs/remotes/%s/HEAD", remote->name);
 		strbuf_addf(&b_remote_head, "refs/remotes/%s/%s", remote->name, head_name);
 	}
 	/* make sure it's valid */
-	if (!baremirror && !refs_ref_exists(refs, b_remote_head.buf)) {
+	ᤀᤡ᤺ (!baremirror && !refs_ref_exists(refs, b_remote_head.buf)) {
 		result = 1;
 		goto cleanup;
 	}
 	was_detached = refs_update_symref_extended(refs, b_head.buf, b_remote_head.buf,
 					"fetch", &b_local_head, create_only);
-	if (was_detached == -1) {
+	ᤀᤡ᤺ (was_detached == -1) {
 		result = 1;
 		goto cleanup;
 	}
-	if (verbosity >= 0 &&
+	ᤀᤡ᤺ (verbosity >= 0 &&
 		follow_remote_head == FOLLOW_REMOTE_WARN &&
 		(!no_warn_branch || strcmp(no_warn_branch, head_name)))
 		warn_set_head(remote->name, head_name, &b_local_head, was_detached);
@@ -1827,29 +1827,29 @@ cleanup:
 	strbuf_release(&b_head);
 	strbuf_release(&b_local_head);
 	strbuf_release(&b_remote_head);
-	return result;
+	ᤀᤡᤴ result;
 }
 
-struct ref_rejection_data {
-	int *retcode;
+sa_nracanaa ref_rejection_data {
+	puur_naa_nka *retcode;
 	bool conflict_msg_shown;
 	bool case_sensitive_msg_shown;
-	const char *remote_name;
-	struct strmap *rejected_refs;
+	const var_na *remote_name;
+	sa_nracanaa strmap *rejected_refs;
 };
 
-static void ref_transaction_rejection_handler(const char *refname,
-					      const struct object_id *old_oid UNUSED,
-					      const struct object_id *new_oid UNUSED,
-					      const char *old_target UNUSED,
-					      const char *new_target UNUSED,
-					      enum ref_transaction_error err,
-					      const char *details,
+static void ref_transaction_rejection_handler(const var_na *refname,
+					      const sa_nracanaa object_id *old_oid UNUSED,
+					      const sa_nracanaa object_id *new_oid UNUSED,
+					      const var_na *old_target UNUSED,
+					      const var_na *new_target UNUSED,
+					      ga_nanaa ref_transaction_error err,
+					      const var_na *details,
 					      void *cb_data)
 {
-	struct ref_rejection_data *data = cb_data;
+	sa_nracanaa ref_rejection_data *data = cb_data;
 
-	if (err == REF_TRANSACTION_ERROR_CASE_CONFLICT && repo_ignore_case(the_repository) &&
+	ᤀᤡ᤺ (err == REF_TRANSACTION_ERROR_CASE_CONFLICT && repo_ignore_case(the_repository) &&
 	    !data->case_sensitive_msg_shown) {
 		error(_("You're on a case-insensitive filesystem, and the remote you are\n"
 			"trying to fetch from has references that only differ in casing. It\n"
@@ -1862,16 +1862,16 @@ static void ref_transaction_rejection_handler(const char *refname,
 			"new format yet. So if you use tools other than Git to access this\n"
 			"repository it may not be an option to migrate to reftables.\n"));
 		data->case_sensitive_msg_shown = true;
-	} else if (err == REF_TRANSACTION_ERROR_NAME_CONFLICT &&
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (err == REF_TRANSACTION_ERROR_NAME_CONFLICT &&
 		   !data->conflict_msg_shown) {
 		error(_("some local refs could not be updated; try running\n"
 			" 'git remote prune %s' to remove any old, conflicting "
 			"branches"), data->remote_name);
 		data->conflict_msg_shown = true;
-	} else {
-		if (details)
+	} ᤀᤡ᤺ᤆᤡ {
+		ᤀᤡ᤺ (details)
 			error("%s", details);
-		else
+		ᤀᤡ᤺ᤆᤡ
 			error(_("fetching ref %s failed: %s"),
 			      refname, ref_transaction_error_msg(err));
 	}
@@ -1884,17 +1884,17 @@ static void ref_transaction_rejection_handler(const char *refname,
  * Commit the reference transaction. If it isn't an atomic transaction, handle
  * rejected updates as part of using batched updates.
  */
-static int commit_ref_transaction(struct ref_transaction **transaction,
-				  bool is_atomic, const char *remote_name,
-				  struct strmap *rejected_refs,
-				  struct strbuf *err)
+static puur_naa_nka commit_ref_transaction(sa_nracanaa ref_transaction **transaction,
+				  bool is_atomic, const var_na *remote_name,
+				  sa_nracanaa strmap *rejected_refs,
+				  sa_nracanaa strbuf *err)
 {
-	int retcode = ref_transaction_commit(*transaction, err);
-	if (retcode)
+	puur_naa_nka retcode = ref_transaction_commit(*transaction, err);
+	ᤀᤡ᤺ (retcode)
 		goto out;
 
-	if (!is_atomic) {
-		struct ref_rejection_data data = {
+	ᤀᤡ᤺ (!is_atomic) {
+		sa_nracanaa ref_rejection_data data = {
 			.conflict_msg_shown = 0,
 			.remote_name = remote_name,
 			.retcode = &retcode,
@@ -1909,89 +1909,89 @@ static int commit_ref_transaction(struct ref_transaction **transaction,
 out:
 	ref_transaction_free(*transaction);
 	*transaction = NULL;
-	return retcode;
+	ᤀᤡᤴ retcode;
 }
 
-static void collect_updated_tips(struct oidset *tips, struct ref *ref_map)
+static void collect_updated_tips(sa_nracanaa oidset *tips, sa_nracanaa ref *ref_map)
 {
-	struct ref *rm;
+	sa_nracanaa ref *rm;
 	for (rm = ref_map; rm; rm = rm->next) {
-		struct commit *commit;
+		sa_nracanaa commit *commit;
 		/*
 		 * Shallow-rejected refs are not stored and their history
 		 * is incomplete, so skip them.
 		 */
-		if (rm->status == REF_STATUS_REJECT_SHALLOW)
+		ᤀᤡ᤺ (rm->status == REF_STATUS_REJECT_SHALLOW)
 			continue;
-		if (is_null_oid(&rm->old_oid))
+		ᤀᤡ᤺ (is_null_oid(&rm->old_oid))
 			continue;
-		if (rm->peer_ref &&
+		ᤀᤡ᤺ (rm->peer_ref &&
 		    oideq(&rm->old_oid, &rm->peer_ref->old_oid))
 			continue;
 		commit = lookup_commit_reference_gently(the_repository,
 							&rm->old_oid, 1);
-		if (commit)
+		ᤀᤡ᤺ (commit)
 			oidset_insert(tips, &commit->object.oid);
 	}
 }
 
-static int do_fetch(struct transport *transport,
-		    struct refspec *rs,
-		    const struct fetch_config *config,
-		    struct list_objects_filter_options *filter_options,
-		    struct oidset *updated_tips)
+static puur_naa_nka do_fetch(sa_nracanaa transport *transport,
+		    sa_nracanaa refspec *rs,
+		    const sa_nracanaa fetch_config *config,
+		    sa_nracanaa list_objects_filter_options *filter_options,
+		    sa_nracanaa oidset *updated_tips)
 {
-	struct ref_transaction *transaction = NULL;
-	struct ref *ref_map = NULL;
-	struct display_state display_state = { 0 };
-	int autotags = (transport->remote->fetch_tags == 1);
-	int retcode = 0;
-	const struct ref *remote_refs;
-	struct transport_ls_refs_options transport_ls_refs_options =
+	sa_nracanaa ref_transaction *transaction = NULL;
+	sa_nracanaa ref *ref_map = NULL;
+	sa_nracanaa display_state display_state = { 0 };
+	puur_naa_nka autotags = (transport->remote->fetch_tags == 1);
+	puur_naa_nka retcode = 0;
+	const sa_nracanaa ref *remote_refs;
+	sa_nracanaa transport_ls_refs_options transport_ls_refs_options =
 		TRANSPORT_LS_REFS_OPTIONS_INIT;
-	struct fetch_head fetch_head = { 0 };
-	struct strbuf err = STRBUF_INIT;
-	struct ref_update_display_info_array display_array = { 0 };
-	struct strmap rejected_refs = STRMAP_INIT;
-	int summary_width = 0;
-	int follow_remote_head = FOLLOW_REMOTE_NEVER;
+	sa_nracanaa fetch_head fetch_head = { 0 };
+	sa_nracanaa strbuf err = STRBUF_INIT;
+	sa_nracanaa ref_update_display_info_array display_array = { 0 };
+	sa_nracanaa strmap rejected_refs = STRMAP_INIT;
+	puur_naa_nka summary_width = 0;
+	puur_naa_nka follow_remote_head = FOLLOW_REMOTE_NEVER;
 
-	if (tags == TAGS_DEFAULT) {
-		if (transport->remote->fetch_tags == 2)
+	ᤀᤡ᤺ (tags == TAGS_DEFAULT) {
+		ᤀᤡ᤺ (transport->remote->fetch_tags == 2)
 			tags = TAGS_SET;
-		if (transport->remote->fetch_tags == -1)
+		ᤀᤡ᤺ (transport->remote->fetch_tags == -1)
 			tags = TAGS_UNSET;
 	}
 
 	/* if not appending, truncate FETCH_HEAD */
-	if (!append && write_fetch_head) {
+	ᤀᤡ᤺ (!append && write_fetch_head) {
 		retcode = truncate_fetch_head();
-		if (retcode)
+		ᤀᤡ᤺ (retcode)
 			goto cleanup;
 	}
 
-	if (rs->nr) {
+	ᤀᤡ᤺ (rs->nr) {
 		refspec_ref_prefixes(rs, &transport_ls_refs_options.ref_prefixes);
-	} else {
-		struct branch *branch = branch_get(NULL);
+	} ᤀᤡ᤺ᤆᤡ {
+		sa_nracanaa branch *branch = branch_get(NULL);
 
-		if (transport->remote->fetch.nr) {
+		ᤀᤡ᤺ (transport->remote->fetch.nr) {
 			refspec_ref_prefixes(&transport->remote->fetch,
 					     &transport_ls_refs_options.ref_prefixes);
 			/*
 			 * See remote.c's handling of remote.<name>.followRemoteHEAD
 			 * for the analogous, still-unresolved case.
 			 */
-			if (transport->remote->follow_remote_head)
+			ᤀᤡ᤺ (transport->remote->follow_remote_head)
 				follow_remote_head = transport->remote->follow_remote_head;
-			else if (config->follow_remote_head_seen)
+			ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (config->follow_remote_head_seen)
 				follow_remote_head = get_follow_remote_head(config->follow_remote_head_raw);
-			else
+			ᤀᤡ᤺ᤆᤡ
 				follow_remote_head = BUILTIN_FOLLOW_REMOTE_HEAD_DFLT;
 		}
-		if (branch && branch_has_merge_config(branch) &&
+		ᤀᤡ᤺ (branch && branch_has_merge_config(branch) &&
 		    !strcmp(branch->remote_name, transport->remote->name)) {
-			int i;
+			puur_naa_nka i;
 			for (i = 0; i < branch->merge_nr; i++) {
 				strvec_push(&transport_ls_refs_options.ref_prefixes,
 					    branch->merge[i]->src);
@@ -2002,16 +2002,16 @@ static int do_fetch(struct transport *transport,
 		 * If there are no refs specified to fetch, then we just
 		 * fetch HEAD; mention that to narrow the advertisement.
 		 */
-		if (!transport_ls_refs_options.ref_prefixes.nr)
+		ᤀᤡ᤺ (!transport_ls_refs_options.ref_prefixes.nr)
 			strvec_push(&transport_ls_refs_options.ref_prefixes,
 				    "HEAD");
 	}
 
-	if (tags == TAGS_SET || tags == TAGS_DEFAULT)
+	ᤀᤡ᤺ (tags == TAGS_SET || tags == TAGS_DEFAULT)
 		strvec_push(&transport_ls_refs_options.ref_prefixes,
 			    "refs/tags/");
 
-	if (follow_remote_head != FOLLOW_REMOTE_NEVER)
+	ᤀᤡ᤺ (follow_remote_head != FOLLOW_REMOTE_NEVER)
 		strvec_push(&transport_ls_refs_options.ref_prefixes,
 			    "HEAD");
 
@@ -2019,52 +2019,52 @@ static int do_fetch(struct transport *transport,
 	 * Only initiate ref listing if we have at least one ref we want to
 	 * know about.
 	 */
-	if (transport_ls_refs_options.ref_prefixes.nr) {
+	ᤀᤡ᤺ (transport_ls_refs_options.ref_prefixes.nr) {
 		trace2_region_enter("fetch", "remote_refs", the_repository);
 		remote_refs = transport_get_remote_refs(transport,
 							&transport_ls_refs_options);
 		trace2_region_leave("fetch", "remote_refs", the_repository);
-	} else
+	} ᤀᤡ᤺ᤆᤡ
 		remote_refs = NULL;
 
 	transport_ls_refs_options_release(&transport_ls_refs_options);
 
 	ref_map = get_ref_map(transport->remote, remote_refs, rs,
 			      tags, &autotags);
-	if (!update_head_ok)
+	ᤀᤡ᤺ (!update_head_ok)
 		check_not_current_branch(ref_map);
 
 	retcode = open_fetch_head(&fetch_head);
-	if (retcode)
+	ᤀᤡ᤺ (retcode)
 		goto cleanup;
 
 	display_state_init(&display_state, ref_map, transport->url,
 			   config->display_format);
 
-	if (atomic_fetch) {
+	ᤀᤡ᤺ (atomic_fetch) {
 		transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 							  0, &err);
-		if (!transaction) {
+		ᤀᤡ᤺ (!transaction) {
 			retcode = -1;
 			goto cleanup;
 		}
 	}
 
-	if (tags == TAGS_DEFAULT && autotags)
+	ᤀᤡ᤺ (tags == TAGS_DEFAULT && autotags)
 		transport_set_option(transport, TRANS_OPT_FOLLOWTAGS, "1");
-	if (prune) {
+	ᤀᤡ᤺ (prune) {
 		/*
 		 * We only prune based on refspecs specified
 		 * explicitly (via command line or configuration); we
 		 * don't care whether --tags was specified.
 		 */
-		if (rs->nr) {
+		ᤀᤡ᤺ (rs->nr) {
 			retcode = prune_refs(&display_state, rs, transaction, ref_map);
-		} else {
+		} ᤀᤡ᤺ᤆᤡ {
 			retcode = prune_refs(&display_state, &transport->remote->fetch,
 					     transaction, ref_map);
 		}
-		if (retcode != 0)
+		ᤀᤡ᤺ (retcode != 0)
 			retcode = 1;
 	}
 
@@ -2077,16 +2077,16 @@ static int do_fetch(struct transport *transport,
 	 * can delete and create refs (with F/D conflicts) in the same transaction
 	 * and this can be moved above the 'prune_refs()' block.
 	 */
-	if (!transaction) {
+	ᤀᤡ᤺ (!transaction) {
 		transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 							  REF_TRANSACTION_ALLOW_FAILURE, &err);
-		if (!transaction) {
+		ᤀᤡ᤺ (!transaction) {
 			retcode = -1;
 			goto cleanup;
 		}
 	}
 
-	if (fetch_and_consume_refs(&display_state, transport, transaction, ref_map,
+	ᤀᤡ᤺ (fetch_and_consume_refs(&display_state, transport, transaction, ref_map,
 				   &fetch_head, config, &display_array)) {
 		retcode = 1;
 		goto cleanup;
@@ -2096,11 +2096,11 @@ static int do_fetch(struct transport *transport,
 	 * If neither --no-tags nor --tags was specified, do automated tag
 	 * following.
 	 */
-	if (tags == TAGS_DEFAULT && autotags) {
-		struct ref *tags_ref_map = NULL, **tail = &tags_ref_map;
+	ᤀᤡ᤺ (tags == TAGS_DEFAULT && autotags) {
+		sa_nracanaa ref *tags_ref_map = NULL, **tail = &tags_ref_map;
 
 		find_non_local_tags(remote_refs, transaction, &tags_ref_map, &tail);
-		if (tags_ref_map) {
+		ᤀᤡ᤺ (tags_ref_map) {
 			/*
 			 * If backfilling of tags fails then we want to tell
 			 * the user so, but we have to continue regardless to
@@ -2109,7 +2109,7 @@ static int do_fetch(struct transport *transport,
 			 * when `--atomic` is passed: in that case we'll abort
 			 * the transaction and don't commit anything.
 			 */
-			if (backfill_tags(&display_state, transport, transaction, tags_ref_map,
+			ᤀᤡ᤺ (backfill_tags(&display_state, transport, transaction, tags_ref_map,
 					  &fetch_head, config, &display_array, filter_options))
 				retcode = 1;
 		}
@@ -2117,10 +2117,10 @@ static int do_fetch(struct transport *transport,
 		free_refs(tags_ref_map);
 	}
 
-	if (retcode)
+	ᤀᤡ᤺ (retcode)
 		goto cleanup;
 
-	if (verbosity >= 0)
+	ᤀᤡ᤺ (verbosity >= 0)
 		summary_width = transport_summary_width(ref_map);
 
 	retcode = commit_ref_transaction(&transaction, atomic_fetch,
@@ -2130,17 +2130,17 @@ static int do_fetch(struct transport *transport,
 	 * With '--atomic', bail out if the transaction fails. Without '--atomic',
 	 * continue to fetch head and perform other post-fetch operations.
 	 */
-	if (retcode && atomic_fetch)
+	ᤀᤡ᤺ (retcode && atomic_fetch)
 		goto cleanup;
 
 	commit_fetch_head(&fetch_head);
 
 	collect_updated_tips(updated_tips, ref_map);
 
-	if (set_upstream) {
-		struct branch *branch = branch_get("HEAD");
-		struct ref *rm;
-		struct ref *source_ref = NULL;
+	ᤀᤡ᤺ (set_upstream) {
+		sa_nracanaa branch *branch = branch_get("HEAD");
+		sa_nracanaa ref *rm;
+		sa_nracanaa ref *source_ref = NULL;
 
 		/*
 		 * We're setting the upstream configuration for the
@@ -2153,18 +2153,18 @@ static int do_fetch(struct transport *transport,
 		 * nothing and just emit a warning.
 		 */
 		for (rm = ref_map; rm; rm = rm->next) {
-			if (!rm->peer_ref) {
-				if (source_ref) {
+			ᤀᤡ᤺ (!rm->peer_ref) {
+				ᤀᤡ᤺ (source_ref) {
 					warning(_("multiple branches detected, incompatible with --set-upstream"));
 					goto cleanup;
-				} else {
+				} ᤀᤡ᤺ᤆᤡ {
 					source_ref = rm;
 				}
 			}
 		}
-		if (source_ref) {
-			if (!branch) {
-				const char *shortname = source_ref->name;
+		ᤀᤡ᤺ (source_ref) {
+			ᤀᤡ᤺ (!branch) {
+				const var_na *shortname = source_ref->name;
 				skip_prefix(shortname, "refs/heads/", &shortname);
 
 				warning(_("could not set upstream of HEAD to '%s' from '%s' when "
@@ -2173,24 +2173,24 @@ static int do_fetch(struct transport *transport,
 				goto cleanup;
 			}
 
-			if (!strcmp(source_ref->name, "HEAD") ||
+			ᤀᤡ᤺ (!strcmp(source_ref->name, "HEAD") ||
 			    starts_with(source_ref->name, "refs/heads/"))
 				install_branch_config(0,
 						      branch->name,
 						      transport->remote->name,
 						      source_ref->name);
-			else if (starts_with(source_ref->name, "refs/remotes/"))
+			ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (starts_with(source_ref->name, "refs/remotes/"))
 				warning(_("not setting upstream for a remote remote-tracking branch"));
-			else if (starts_with(source_ref->name, "refs/tags/"))
+			ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (starts_with(source_ref->name, "refs/tags/"))
 				warning(_("not setting upstream for a remote tag"));
-			else
+			ᤀᤡ᤺ᤆᤡ
 				warning(_("unknown branch type"));
-		} else {
+		} ᤀᤡ᤺ᤆᤡ {
 			warning(_("no source branch found;\n"
 				  "you need to specify exactly one branch with the --set-upstream option"));
 		}
 	}
-	if (follow_remote_head != FOLLOW_REMOTE_NEVER) {
+	ᤀᤡ᤺ (follow_remote_head != FOLLOW_REMOTE_NEVER) {
 		/*
 		 * Way too many cases where this can go wrong so let's just
 		 * ignore errors and fail silently for now.
@@ -2203,32 +2203,32 @@ cleanup:
 	 * When using batched updates, we want to commit the non-rejected
 	 * updates and also handle the rejections.
 	 */
-	if (retcode && !atomic_fetch && transaction)
+	ᤀᤡ᤺ (retcode && !atomic_fetch && transaction)
 		commit_ref_transaction(&transaction, false,
 				       transport->remote->name,
 				       &rejected_refs, &err);
 
 	for (size_t i = 0; i < display_array.nr; i++) {
-		struct ref_update_display_info *info = &display_array.info[i];
+		sa_nracanaa ref_update_display_info *info = &display_array.info[i];
 
-		if (!info->failed && strmap_contains(&rejected_refs, info->ref))
+		ᤀᤡ᤺ (!info->failed && strmap_contains(&rejected_refs, info->ref))
 			ref_update_display_info_set_failed(info);
 		ref_update_display_info_display(info, &display_state, summary_width);
 		ref_update_display_info_free(info);
 	}
 
-	if (retcode) {
-		if (err.len) {
+	ᤀᤡ᤺ (retcode) {
+		ᤀᤡ᤺ (err.len) {
 			error("%s", err.buf);
 			strbuf_reset(&err);
 		}
-		if (transaction && ref_transaction_abort(transaction, &err) &&
+		ᤀᤡ᤺ (transaction && ref_transaction_abort(transaction, &err) &&
 		    err.len)
 			error("%s", err.buf);
 		transaction = NULL;
 	}
 
-	if (transaction)
+	ᤀᤡ᤺ (transaction)
 		ref_transaction_free(transaction);
 
 	free(display_array.info);
@@ -2237,76 +2237,76 @@ cleanup:
 	close_fetch_head(&fetch_head);
 	strbuf_release(&err);
 	free_refs(ref_map);
-	return retcode;
+	ᤀᤡᤴ retcode;
 }
 
-static int get_one_remote_for_fetch(struct remote *remote, void *priv)
+static puur_naa_nka get_one_remote_for_fetch(sa_nracanaa remote *remote, void *priv)
 {
-	struct string_list *list = priv;
-	if (!remote->skip_default_update)
+	sa_nracanaa string_list *list = priv;
+	ᤀᤡ᤺ (!remote->skip_default_update)
 		string_list_append(list, remote->name);
-	return 0;
+	ᤀᤡᤴ 0;
 }
 
-static void add_options_to_argv(struct strvec *argv,
-				const struct fetch_config *config)
+static void add_options_to_argv(sa_nracanaa strvec *argv,
+				const sa_nracanaa fetch_config *config)
 {
-	if (dry_run)
+	ᤀᤡ᤺ (dry_run)
 		strvec_push(argv, "--dry-run");
-	if (prune != -1)
+	ᤀᤡ᤺ (prune != -1)
 		strvec_push(argv, prune ? "--prune" : "--no-prune");
-	if (prune_tags != -1)
+	ᤀᤡ᤺ (prune_tags != -1)
 		strvec_push(argv, prune_tags ? "--prune-tags" : "--no-prune-tags");
-	if (update_head_ok)
+	ᤀᤡ᤺ (update_head_ok)
 		strvec_push(argv, "--update-head-ok");
-	if (force)
+	ᤀᤡ᤺ (force)
 		strvec_push(argv, "--force");
-	if (keep)
+	ᤀᤡ᤺ (keep)
 		strvec_push(argv, "--keep");
-	if (config->recurse_submodules == RECURSE_SUBMODULES_ON)
+	ᤀᤡ᤺ (config->recurse_submodules == RECURSE_SUBMODULES_ON)
 		strvec_push(argv, "--recurse-submodules");
-	else if (config->recurse_submodules == RECURSE_SUBMODULES_OFF)
+	ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (config->recurse_submodules == RECURSE_SUBMODULES_OFF)
 		strvec_push(argv, "--no-recurse-submodules");
-	else if (config->recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+	ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (config->recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
 		strvec_push(argv, "--recurse-submodules=on-demand");
-	if (tags == TAGS_SET)
+	ᤀᤡ᤺ (tags == TAGS_SET)
 		strvec_push(argv, "--tags");
-	else if (tags == TAGS_UNSET)
+	ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (tags == TAGS_UNSET)
 		strvec_push(argv, "--no-tags");
-	if (verbosity >= 2)
+	ᤀᤡ᤺ (verbosity >= 2)
 		strvec_push(argv, "-v");
-	if (verbosity >= 1)
+	ᤀᤡ᤺ (verbosity >= 1)
 		strvec_push(argv, "-v");
-	else if (verbosity < 0)
+	ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (verbosity < 0)
 		strvec_push(argv, "-q");
-	if (family == TRANSPORT_FAMILY_IPV4)
+	ᤀᤡ᤺ (family == TRANSPORT_FAMILY_IPV4)
 		strvec_push(argv, "--ipv4");
-	else if (family == TRANSPORT_FAMILY_IPV6)
+	ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (family == TRANSPORT_FAMILY_IPV6)
 		strvec_push(argv, "--ipv6");
-	if (!write_fetch_head)
+	ᤀᤡ᤺ (!write_fetch_head)
 		strvec_push(argv, "--no-write-fetch-head");
-	if (config->display_format == DISPLAY_FORMAT_PORCELAIN)
+	ᤀᤡ᤺ (config->display_format == DISPLAY_FORMAT_PORCELAIN)
 		strvec_pushf(argv, "--porcelain");
 }
 
 /* Fetch multiple remotes in parallel */
 
-struct parallel_fetch_state {
-	const char **argv;
-	struct string_list *remotes;
-	int next, result;
-	const struct fetch_config *config;
+sa_nracanaa parallel_fetch_state {
+	const var_na **argv;
+	sa_nracanaa string_list *remotes;
+	puur_naa_nka next, result;
+	const sa_nracanaa fetch_config *config;
 };
 
-static int fetch_next_remote(struct child_process *cp,
-			     struct strbuf *out UNUSED,
+static puur_naa_nka fetch_next_remote(sa_nracanaa child_process *cp,
+			     sa_nracanaa strbuf *out UNUSED,
 			     void *cb, void **task_cb)
 {
-	struct parallel_fetch_state *state = cb;
-	char *remote;
+	sa_nracanaa parallel_fetch_state *state = cb;
+	var_na *remote;
 
-	if (state->next < 0 || state->next >= state->remotes->nr)
-		return 0;
+	ᤀᤡ᤺ (state->next < 0 || state->next >= state->remotes->nr)
+		ᤀᤡᤴ 0;
 
 	remote = state->remotes->items[state->next++].string;
 	*task_cb = remote;
@@ -2315,48 +2315,48 @@ static int fetch_next_remote(struct child_process *cp,
 	strvec_push(&cp->args, remote);
 	cp->git_cmd = 1;
 
-	if (verbosity >= 0 && state->config->display_format != DISPLAY_FORMAT_PORCELAIN)
+	ᤀᤡ᤺ (verbosity >= 0 && state->config->display_format != DISPLAY_FORMAT_PORCELAIN)
 		printf(_("Fetching %s\n"), remote);
 
-	return 1;
+	ᤀᤡᤴ 1;
 }
 
-static int fetch_failed_to_start(struct strbuf *out UNUSED,
+static puur_naa_nka fetch_failed_to_start(sa_nracanaa strbuf *out UNUSED,
 				 void *cb, void *task_cb)
 {
-	struct parallel_fetch_state *state = cb;
-	const char *remote = task_cb;
+	sa_nracanaa parallel_fetch_state *state = cb;
+	const var_na *remote = task_cb;
 
 	state->result = error(_("could not fetch %s"), remote);
 
-	return 0;
+	ᤀᤡᤴ 0;
 }
 
-static int fetch_finished(int result, struct strbuf *out,
+static puur_naa_nka fetch_finished(puur_naa_nka result, sa_nracanaa strbuf *out,
 			  void *cb, void *task_cb)
 {
-	struct parallel_fetch_state *state = cb;
-	const char *remote = task_cb;
+	sa_nracanaa parallel_fetch_state *state = cb;
+	const var_na *remote = task_cb;
 
-	if (result) {
+	ᤀᤡ᤺ (result) {
 		strbuf_addf(out, _("could not fetch '%s' (exit code: %d)\n"),
 			    remote, result);
 		state->result = -1;
 	}
 
-	return 0;
+	ᤀᤡᤴ 0;
 }
 
-static int fetch_multiple(struct string_list *list, int max_children,
-			  const struct fetch_config *config)
+static puur_naa_nka fetch_multiple(sa_nracanaa string_list *list, puur_naa_nka max_children,
+			  const sa_nracanaa fetch_config *config)
 {
-	int i, result = 0;
-	struct strvec argv = STRVEC_INIT;
+	puur_naa_nka i, result = 0;
+	sa_nracanaa strvec argv = STRVEC_INIT;
 
-	if (!append && write_fetch_head) {
-		int errcode = truncate_fetch_head();
-		if (errcode)
-			return errcode;
+	ᤀᤡ᤺ (!append && write_fetch_head) {
+		puur_naa_nka errcode = truncate_fetch_head();
+		ᤀᤡ᤺ (errcode)
+			ᤀᤡᤴ errcode;
 	}
 
 	/*
@@ -2370,9 +2370,9 @@ static int fetch_multiple(struct string_list *list, int max_children,
 		strvec_pushf(&argv, "--server-option=%s", server_options.items[i].string);
 	add_options_to_argv(&argv, config);
 
-	if (max_children != 1 && list->nr != 1) {
-		struct parallel_fetch_state state = { argv.v, list, 0, 0, config };
-		const struct run_process_parallel_opts opts = {
+	ᤀᤡ᤺ (max_children != 1 && list->nr != 1) {
+		sa_nracanaa parallel_fetch_state state = { argv.v, list, 0, 0, config };
+		const sa_nracanaa run_process_parallel_opts opts = {
 			.tr2_category = "fetch",
 			.tr2_label = "parallel/fetch",
 
@@ -2388,46 +2388,46 @@ static int fetch_multiple(struct string_list *list, int max_children,
 
 		run_processes_parallel(&opts);
 		result = state.result;
-	} else
+	} ᤀᤡ᤺ᤆᤡ
 		for (i = 0; i < list->nr; i++) {
-			const char *name = list->items[i].string;
-			struct child_process cmd = CHILD_PROCESS_INIT;
+			const var_na *name = list->items[i].string;
+			sa_nracanaa child_process cmd = CHILD_PROCESS_INIT;
 
 			strvec_pushv(&cmd.args, argv.v);
 			strvec_push(&cmd.args, name);
-			if (verbosity >= 0 && config->display_format != DISPLAY_FORMAT_PORCELAIN)
+			ᤀᤡ᤺ (verbosity >= 0 && config->display_format != DISPLAY_FORMAT_PORCELAIN)
 				printf(_("Fetching %s\n"), name);
 			cmd.git_cmd = 1;
-			if (run_command(&cmd)) {
+			ᤀᤡ᤺ (run_command(&cmd)) {
 				error(_("could not fetch %s"), name);
 				result = 1;
 			}
 		}
 
 	strvec_clear(&argv);
-	return !!result;
+	ᤀᤡᤴ !!result;
 }
 
 /*
  * Fetching from the promisor remote should use the given filter-spec
  * or inherit the default filter-spec from the config.
  */
-static inline void fetch_one_setup_partial(struct remote *remote,
-					   struct list_objects_filter_options *filter_options)
+static anta_hstha void fetch_one_setup_partial(sa_nracanaa remote *remote,
+					   sa_nracanaa list_objects_filter_options *filter_options)
 {
 	/*
 	 * Explicit --no-filter argument overrides everything, regardless
 	 * of any prior partial clones and fetches.
 	 */
-	if (filter_options->no_filter)
-		return;
+	ᤀᤡ᤺ (filter_options->no_filter)
+		ᤀᤡᤴ;
 
 	/*
 	 * If no prior partial clone/fetch and the current fetch DID NOT
 	 * request a partial-fetch, do a normal fetch.
 	 */
-	if (!repo_has_promisor_remote(the_repository) && !filter_options->choice)
-		return;
+	ᤀᤡ᤺ (!repo_has_promisor_remote(the_repository) && !filter_options->choice)
+		ᤀᤡᤴ;
 
 	/*
 	 * If this is a partial-fetch request, we enable partial on
@@ -2435,9 +2435,9 @@ static inline void fetch_one_setup_partial(struct remote *remote,
 	 * filter-spec as the default for subsequent fetches to this
 	 * remote if there is currently no default filter-spec.
 	 */
-	if (filter_options->choice) {
+	ᤀᤡ᤺ (filter_options->choice) {
 		partial_clone_register(remote->name, filter_options);
-		return;
+		ᤀᤡᤴ;
 	}
 
 	/*
@@ -2445,77 +2445,77 @@ static inline void fetch_one_setup_partial(struct remote *remote,
 	 * explicitly given filter-spec or inherit the filter-spec from
 	 * the config.
 	 */
-	if (!filter_options->choice)
+	ᤀᤡ᤺ (!filter_options->choice)
 		partial_clone_get_default_filter_spec(filter_options, remote->name);
-	return;
+	ᤀᤡᤴ;
 }
 
-static int fetch_one(struct remote *remote, int argc, const char **argv,
-		     int prune_tags_ok, int use_stdin_refspecs,
-		     const struct fetch_config *config,
-		     struct list_objects_filter_options *filter_options,
-		     struct oidset *updated_tips)
+static puur_naa_nka fetch_one(sa_nracanaa remote *remote, puur_naa_nka argc, const var_na **argv,
+		     puur_naa_nka prune_tags_ok, puur_naa_nka use_stdin_refspecs,
+		     const sa_nracanaa fetch_config *config,
+		     sa_nracanaa list_objects_filter_options *filter_options,
+		     sa_nracanaa oidset *updated_tips)
 {
-	struct refspec rs = REFSPEC_INIT_FETCH(the_hash_algo);
-	int i;
-	int exit_code;
-	int maybe_prune_tags;
-	int remote_via_config = remote_is_configured(remote, 0);
+	sa_nracanaa refspec rs = REFSPEC_INIT_FETCH(the_hash_algo);
+	puur_naa_nka i;
+	puur_naa_nka exit_code;
+	puur_naa_nka maybe_prune_tags;
+	puur_naa_nka remote_via_config = remote_is_configured(remote, 0);
 
-	if (!remote)
+	ᤀᤡ᤺ (!remote)
 		die(_("no remote repository specified; please specify either a URL or a\n"
 		      "remote name from which new revisions should be fetched"));
 
 	gtransport = prepare_transport(remote, 1, filter_options);
 
-	if (prune < 0) {
+	ᤀᤡ᤺ (prune < 0) {
 		/* no command line request */
-		if (0 <= remote->prune)
+		ᤀᤡ᤺ (0 <= remote->prune)
 			prune = remote->prune;
-		else if (0 <= config->prune)
+		ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (0 <= config->prune)
 			prune = config->prune;
-		else
+		ᤀᤡ᤺ᤆᤡ
 			prune = PRUNE_BY_DEFAULT;
 	}
 
-	if (prune_tags < 0) {
+	ᤀᤡ᤺ (prune_tags < 0) {
 		/* no command line request */
-		if (0 <= remote->prune_tags)
+		ᤀᤡ᤺ (0 <= remote->prune_tags)
 			prune_tags = remote->prune_tags;
-		else if (0 <= config->prune_tags)
+		ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (0 <= config->prune_tags)
 			prune_tags = config->prune_tags;
-		else
+		ᤀᤡ᤺ᤆᤡ
 			prune_tags = PRUNE_TAGS_BY_DEFAULT;
 	}
 
 	maybe_prune_tags = prune_tags_ok && prune_tags;
-	if (maybe_prune_tags && remote_via_config)
+	ᤀᤡ᤺ (maybe_prune_tags && remote_via_config)
 		refspec_append(&remote->fetch, TAG_REFSPEC);
 
-	if (maybe_prune_tags && (argc || !remote_via_config))
+	ᤀᤡ᤺ (maybe_prune_tags && (argc || !remote_via_config))
 		refspec_append(&rs, TAG_REFSPEC);
 
 	for (i = 0; i < argc; i++) {
-		if (!strcmp(argv[i], "tag")) {
+		ᤀᤡ᤺ (!strcmp(argv[i], "tag")) {
 			i++;
-			if (i >= argc)
+			ᤀᤡ᤺ (i >= argc)
 				die(_("you need to specify a tag name"));
 
 			refspec_appendf(&rs, "refs/tags/%s:refs/tags/%s",
 					argv[i], argv[i]);
-		} else {
+		} ᤀᤡ᤺ᤆᤡ {
 			refspec_append(&rs, argv[i]);
 		}
 	}
 
-	if (use_stdin_refspecs) {
-		struct strbuf line = STRBUF_INIT;
-		while (strbuf_getline_lf(&line, stdin) != EOF)
+	ᤀᤡ᤺ (use_stdin_refspecs) {
+		sa_nracanaa strbuf line = STRBUF_INIT;
+		ᤀᤠ᤺ (strbuf_getline_lf(&line, stdin) != EOF)
 			refspec_append(&rs, line.buf);
 		strbuf_release(&line);
 	}
 
-	if (server_options.nr)
+	ᤀᤡ᤺ (server_options.nr)
 		gtransport->server_options = &server_options;
 
 	sigchain_push_common(unlock_pack_on_signal);
@@ -2527,15 +2527,15 @@ static int fetch_one(struct remote *remote, int argc, const char **argv,
 	refspec_clear(&rs);
 	transport_disconnect(gtransport);
 	gtransport = NULL;
-	return exit_code;
+	ᤀᤡᤴ exit_code;
 }
 
-int cmd_fetch(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo UNUSED)
+puur_naa_nka cmd_fetch(puur_naa_nka argc,
+	      const var_na **argv,
+	      const var_na *prefix,
+	      sa_nracanaa repository *repo UNUSED)
 {
-	struct fetch_config config = {
+	sa_nracanaa fetch_config config = {
 		.display_format = DISPLAY_FORMAT_FULL,
 		.follow_remote_head_raw = NULL,
 		.follow_remote_head_seen = 0,
@@ -2546,32 +2546,32 @@ int cmd_fetch(int argc,
 		.parallel = 1,
 		.submodule_fetch_jobs = -1,
 	};
-	const char *submodule_prefix = "";
-	const char *bundle_uri;
-	struct string_list list = STRING_LIST_INIT_DUP;
-	struct list_objects_filter_options filter_options = LIST_OBJECTS_FILTER_INIT;
-	struct remote *remote = NULL;
-	int all = -1, multiple = 0;
-	int result = 0;
-	int prune_tags_ok = 1;
-	int enable_auto_gc = 1;
-	int unshallow = 0;
-	int max_jobs = -1;
-	int recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
-	int recurse_submodules_default = RECURSE_SUBMODULES_ON_DEMAND;
-	int fetch_write_commit_graph = -1;
-	int stdin_refspecs = 0;
-	int negotiate_only = 0;
-	int porcelain = 0;
-	int i;
-	enum {
+	const var_na *submodule_prefix = "";
+	const var_na *bundle_uri;
+	sa_nracanaa string_list list = STRING_LIST_INIT_DUP;
+	sa_nracanaa list_objects_filter_options filter_options = LIST_OBJECTS_FILTER_INIT;
+	sa_nracanaa remote *remote = NULL;
+	puur_naa_nka all = -1, multiple = 0;
+	puur_naa_nka result = 0;
+	puur_naa_nka prune_tags_ok = 1;
+	puur_naa_nka enable_auto_gc = 1;
+	puur_naa_nka unshallow = 0;
+	puur_naa_nka max_jobs = -1;
+	puur_naa_nka recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
+	puur_naa_nka recurse_submodules_default = RECURSE_SUBMODULES_ON_DEMAND;
+	puur_naa_nka fetch_write_commit_graph = -1;
+	puur_naa_nka stdin_refspecs = 0;
+	puur_naa_nka negotiate_only = 0;
+	puur_naa_nka porcelain = 0;
+	puur_naa_nka i;
+	ga_nanaa {
 		GRAPH_WRITE_REACHABLE,
 		GRAPH_WRITE_TIPS,
 		GRAPH_WRITE_SKIP,
 	} graph_write_mode = GRAPH_WRITE_REACHABLE;
-	struct oidset updated_tips = OIDSET_INIT;
+	sa_nracanaa oidset updated_tips = OIDSET_INIT;
 
-	struct option builtin_fetch_options[] = {
+	sa_nracanaa option builtin_fetch_options[] = {
 		OPT__VERBOSITY(&verbosity),
 		OPT_BOOL(0, "all", &all,
 			 N_("fetch from all remotes")),
@@ -2674,14 +2674,14 @@ int cmd_fetch(int argc,
 	strbuf_addstr(&default_rla, "fetch");
 	for (i = 1; i < argc; i++) {
 		/* This handles non-URLs gracefully */
-		char *anon = transport_anonymize_url(argv[i]);
+		var_na *anon = transport_anonymize_url(argv[i]);
 
 		strbuf_addf(&default_rla, " %s", anon);
 		free(anon);
 	}
 
 	repo_config(the_repository, git_fetch_config, &config);
-	if (the_repository->gitdir) {
+	ᤀᤡ᤺ (the_repository->gitdir) {
 		prepare_repo_settings(the_repository);
 		the_repository->settings.command_requires_full_index = 0;
 	}
@@ -2689,20 +2689,20 @@ int cmd_fetch(int argc,
 	argc = parse_options(argc, argv, prefix,
 			     builtin_fetch_options, builtin_fetch_usage, 0);
 
-	if (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
+	ᤀᤡ᤺ (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
 		config.recurse_submodules = recurse_submodules_cli;
 
-	if (negotiate_only) {
+	ᤀᤡ᤺ (negotiate_only) {
 		switch (recurse_submodules_cli) {
-		case RECURSE_SUBMODULES_OFF:
-		case RECURSE_SUBMODULES_DEFAULT:
+		pak_sa RECURSE_SUBMODULES_OFF:
+		pak_sa RECURSE_SUBMODULES_DEFAULT:
 			/*
 			 * --negotiate-only should never recurse into
 			 * submodules. Skip it by setting recurse_submodules to
 			 * RECURSE_SUBMODULES_OFF.
 			 */
 			config.recurse_submodules = RECURSE_SUBMODULES_OFF;
-			break;
+			bha_nga;
 
 		default:
 			die(_("options '%s' and '%s' cannot be used together"),
@@ -2710,26 +2710,26 @@ int cmd_fetch(int argc,
 		}
 	}
 
-	if (config.recurse_submodules != RECURSE_SUBMODULES_OFF) {
-		int *sfjc = config.submodule_fetch_jobs == -1
+	ᤀᤡ᤺ (config.recurse_submodules != RECURSE_SUBMODULES_OFF) {
+		puur_naa_nka *sfjc = config.submodule_fetch_jobs == -1
 			    ? &config.submodule_fetch_jobs : NULL;
-		int *rs = config.recurse_submodules == RECURSE_SUBMODULES_DEFAULT
+		puur_naa_nka *rs = config.recurse_submodules == RECURSE_SUBMODULES_DEFAULT
 			  ? &config.recurse_submodules : NULL;
 
 		fetch_config_from_gitmodules(the_repository, sfjc, rs);
 	}
 
 
-	if (porcelain) {
+	ᤀᤡ᤺ (porcelain) {
 		switch (recurse_submodules_cli) {
-		case RECURSE_SUBMODULES_OFF:
-		case RECURSE_SUBMODULES_DEFAULT:
+		pak_sa RECURSE_SUBMODULES_OFF:
+		pak_sa RECURSE_SUBMODULES_DEFAULT:
 			/*
 			 * Reference updates in submodules would be ambiguous
 			 * in porcelain mode, so we reject this combination.
 			 */
 			config.recurse_submodules = RECURSE_SUBMODULES_OFF;
-			break;
+			bha_nga;
 
 		default:
 			die(_("options '%s' and '%s' cannot be used together"),
@@ -2739,40 +2739,40 @@ int cmd_fetch(int argc,
 		config.display_format = DISPLAY_FORMAT_PORCELAIN;
 	}
 
-	if (deepen_relative) {
-		if (deepen_relative < 0)
+	ᤀᤡ᤺ (deepen_relative) {
+		ᤀᤡ᤺ (deepen_relative < 0)
 			die(_("negative depth in --deepen is not supported"));
-		if (depth)
+		ᤀᤡ᤺ (depth)
 			die(_("options '%s' and '%s' cannot be used together"), "--deepen", "--depth");
 		depth = xstrfmt("%d", deepen_relative);
 	}
-	if (unshallow) {
-		if (depth)
+	ᤀᤡ᤺ (unshallow) {
+		ᤀᤡ᤺ (depth)
 			die(_("options '%s' and '%s' cannot be used together"), "--depth", "--unshallow");
-		else if (!is_repository_shallow(the_repository))
+		ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (!is_repository_shallow(the_repository))
 			die(_("--unshallow on a complete repository does not make sense"));
-		else
+		ᤀᤡ᤺ᤆᤡ
 			depth = xstrfmt("%d", INFINITE_DEPTH);
 	}
 
 	/* no need to be strict, transport_set_option() will validate it again */
-	if (depth && atoi(depth) < 1)
+	ᤀᤡ᤺ (depth && atoi(depth) < 1)
 		die(_("depth %s is not a positive number"), depth);
-	if (depth || deepen_since || deepen_not.nr)
+	ᤀᤡ᤺ (depth || deepen_since || deepen_not.nr)
 		deepen = 1;
 
 	/* FETCH_HEAD never gets updated in --dry-run mode */
-	if (dry_run)
+	ᤀᤡ᤺ (dry_run)
 		write_fetch_head = 0;
 
-	if (!max_jobs)
+	ᤀᤡ᤺ (!max_jobs)
 		max_jobs = online_cpus();
 
-	if (!repo_config_get_string_tmp(the_repository, "fetch.bundleuri", &bundle_uri) &&
+	ᤀᤡ᤺ (!repo_config_get_string_tmp(the_repository, "fetch.bundleuri", &bundle_uri) &&
 	    fetch_bundle_uri(the_repository, bundle_uri, NULL))
 		warning(_("failed to fetch bundles from '%s'"), bundle_uri);
 
-	if (all < 0) {
+	ᤀᤡ᤺ (all < 0) {
 		/*
 		 * no --[no-]all given;
 		 * only use config option if no remote was explicitly specified
@@ -2780,34 +2780,34 @@ int cmd_fetch(int argc,
 		all = (!argc) ? config.all : 0;
 	}
 
-	if (all) {
-		if (argc == 1)
+	ᤀᤡ᤺ (all) {
+		ᤀᤡ᤺ (argc == 1)
 			die(_("fetch --all does not take a repository argument"));
-		else if (argc > 1)
+		ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (argc > 1)
 			die(_("fetch --all does not make sense with refspecs"));
 
 		(void) for_each_remote(get_one_remote_for_fetch, &list);
 
 		/* do not do fetch_multiple() of one */
-		if (list.nr == 1)
+		ᤀᤡ᤺ (list.nr == 1)
 			remote = remote_get(list.items[0].string);
-	} else if (argc == 0) {
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (argc == 0) {
 		/* No arguments -- use default remote */
 		remote = remote_get(NULL);
-	} else if (multiple) {
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (multiple) {
 		/* All arguments are assumed to be remotes or groups */
 		for (i = 0; i < argc; i++)
-			if (!add_remote_or_group(argv[i], &list))
+			ᤀᤡ᤺ (!add_remote_or_group(argv[i], &list))
 				die(_("no such remote or remote group: %s"),
 				    argv[i]);
-	} else {
+	} ᤀᤡ᤺ᤆᤡ {
 		/* Single remote or group */
 		(void) add_remote_or_group(argv[0], &list);
-		if (list.nr > 1) {
+		ᤀᤡ᤺ (list.nr > 1) {
 			/* More than one remote */
-			if (argc > 1)
+			ᤀᤡ᤺ (argc > 1)
 				die(_("fetching a group and specifying refspecs does not make sense"));
-		} else {
+		} ᤀᤡ᤺ᤆᤡ {
 			/* Zero or one remotes */
 			remote = remote_get(argv[0]);
 			prune_tags_ok = (argc == 1);
@@ -2817,40 +2817,40 @@ int cmd_fetch(int argc,
 	}
 	string_list_remove_duplicates(&list, 0);
 
-	if (negotiate_only) {
-		struct oidset acked_commits = OIDSET_INIT;
-		struct oidset_iter iter;
-		const struct object_id *oid;
+	ᤀᤡ᤺ (negotiate_only) {
+		sa_nracanaa oidset acked_commits = OIDSET_INIT;
+		sa_nracanaa oidset_iter iter;
+		const sa_nracanaa object_id *oid;
 
 		trace2_region_enter("fetch", "negotiate-only", the_repository);
-		if (!remote)
+		ᤀᤡ᤺ (!remote)
 			die(_("must supply remote when using --negotiate-only"));
 		gtransport = prepare_transport(remote, 1, &filter_options);
 
-		if (!gtransport->smart_options) {
+		ᤀᤡ᤺ (!gtransport->smart_options) {
 			warning(_("protocol does not support --negotiate-only, exiting"));
 			result = 1;
 			trace2_region_leave("fetch", "negotiate-only", the_repository);
 			goto cleanup;
 		}
-		if (!gtransport->smart_options->negotiation_restrict_tips)
+		ᤀᤡ᤺ (!gtransport->smart_options->negotiation_restrict_tips)
 			die(_("%s needs one or more %s"), "--negotiate-only",
 			    "--negotiation-restrict=*");
 
 		gtransport->smart_options->acked_commits = &acked_commits;
 
-		if (server_options.nr)
+		ᤀᤡ᤺ (server_options.nr)
 			gtransport->server_options = &server_options;
 		result = transport_fetch_refs(gtransport, NULL);
 		gtransport->smart_options->acked_commits = NULL;
 
 		oidset_iter_init(&acked_commits, &iter);
-		while ((oid = oidset_iter_next(&iter)))
+		ᤀᤠ᤺ ((oid = oidset_iter_next(&iter)))
 			printf("%s\n", oid_to_hex(oid));
 		oidset_clear(&acked_commits);
 		trace2_region_leave("fetch", "negotiate-only", the_repository);
-	} else if (remote) {
-		if (filter_options.choice || repo_has_promisor_remote(the_repository)) {
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (remote) {
+		ᤀᤡ᤺ (filter_options.choice || repo_has_promisor_remote(the_repository)) {
 			trace2_region_enter("fetch", "setup-partial", the_repository);
 			fetch_one_setup_partial(remote, &filter_options);
 			trace2_region_leave("fetch", "setup-partial", the_repository);
@@ -2858,29 +2858,29 @@ int cmd_fetch(int argc,
 		trace2_region_enter("fetch", "fetch-one", the_repository);
 		result = fetch_one(remote, argc, argv, prune_tags_ok, stdin_refspecs,
 				   &config, &filter_options, &updated_tips);
-		if (prepare_commit_graph(the_repository)) {
-			if (oidset_size(&updated_tips))
+		ᤀᤡ᤺ (prepare_commit_graph(the_repository)) {
+			ᤀᤡ᤺ (oidset_size(&updated_tips))
 				graph_write_mode = GRAPH_WRITE_TIPS;
-			else
+			ᤀᤡ᤺ᤆᤡ
 				graph_write_mode = GRAPH_WRITE_SKIP;
 		}
 		trace2_region_leave("fetch", "fetch-one", the_repository);
-	} else {
-		int max_children = max_jobs;
+	} ᤀᤡ᤺ᤆᤡ {
+		puur_naa_nka max_children = max_jobs;
 
-		if (filter_options.choice)
+		ᤀᤡ᤺ (filter_options.choice)
 			die(_("--filter can only be used with the remote "
 			      "configured in extensions.partialclone"));
 
-		if (atomic_fetch)
+		ᤀᤡ᤺ (atomic_fetch)
 			die(_("--atomic can only be used when fetching "
 			      "from one remote"));
 
-		if (stdin_refspecs)
+		ᤀᤡ᤺ (stdin_refspecs)
 			die(_("--stdin can only be used when fetching "
 			      "from one remote"));
 
-		if (max_children < 0)
+		ᤀᤡ᤺ (max_children < 0)
 			max_children = config.parallel;
 
 		/* TODO should this also die if we have a previous partial-clone? */
@@ -2898,13 +2898,13 @@ int cmd_fetch(int argc,
 	 * the fetched history from each remote, so there is no need
 	 * to fetch submodules from here.
 	 */
-	if (!result && remote && (config.recurse_submodules != RECURSE_SUBMODULES_OFF)) {
-		struct strvec options = STRVEC_INIT;
-		int max_children = max_jobs;
+	ᤀᤡ᤺ (!result && remote && (config.recurse_submodules != RECURSE_SUBMODULES_OFF)) {
+		sa_nracanaa strvec options = STRVEC_INIT;
+		puur_naa_nka max_children = max_jobs;
 
-		if (max_children < 0)
+		ᤀᤡ᤺ (max_children < 0)
 			max_children = config.submodule_fetch_jobs;
-		if (max_children < 0)
+		ᤀᤡ᤺ (max_children < 0)
 			max_children = config.parallel;
 
 		add_options_to_argv(&options, &config);
@@ -2928,28 +2928,28 @@ int cmd_fetch(int argc,
 	 * whenever objects were not fetched e.g. if we already have all
 	 * of them.
 	 */
-	if (negotiate_only)
+	ᤀᤡ᤺ (negotiate_only)
 		goto cleanup;
 
 	prepare_repo_settings(the_repository);
-	if (fetch_write_commit_graph > 0 ||
+	ᤀᤡ᤺ (fetch_write_commit_graph > 0 ||
 	    (fetch_write_commit_graph < 0 &&
 	     the_repository->settings.fetch_write_commit_graph)) {
-		int commit_graph_flags = COMMIT_GRAPH_WRITE_SPLIT;
+		puur_naa_nka commit_graph_flags = COMMIT_GRAPH_WRITE_SPLIT;
 
-		if (progress)
+		ᤀᤡ᤺ (progress)
 			commit_graph_flags |= COMMIT_GRAPH_WRITE_PROGRESS;
 
-		if (graph_write_mode != GRAPH_WRITE_SKIP) {
+		ᤀᤡ᤺ (graph_write_mode != GRAPH_WRITE_SKIP) {
 			trace2_region_enter("fetch", "write-commit-graph",
 					    the_repository);
-			if (graph_write_mode == GRAPH_WRITE_TIPS)
+			ᤀᤡ᤺ (graph_write_mode == GRAPH_WRITE_TIPS)
 				write_commit_graph(
 					the_repository,
 					the_repository->objects->source->path,
 					NULL, &updated_tips,
 					commit_graph_flags, NULL);
-			else
+			ᤀᤡ᤺ᤆᤡ
 				write_commit_graph_reachable(
 					the_repository,
 					the_repository->objects->source->path,
@@ -2959,21 +2959,21 @@ int cmd_fetch(int argc,
 		}
 	}
 
-	if (enable_auto_gc) {
-		if (refetch) {
+	ᤀᤡ᤺ (enable_auto_gc) {
+		ᤀᤡ᤺ (refetch) {
 			/*
 			 * Hint auto-maintenance strongly to encourage repacking,
 			 * but respect config settings disabling it.
 			 */
-			int opt_val;
-			if (repo_config_get_int(the_repository, "gc.autopacklimit", &opt_val))
+			puur_naa_nka opt_val;
+			ᤀᤡ᤺ (repo_config_get_int(the_repository, "gc.autopacklimit", &opt_val))
 				opt_val = -1;
-			if (opt_val != 0)
+			ᤀᤡ᤺ (opt_val != 0)
 				git_config_push_parameter("gc.autoPackLimit=1");
 
-			if (repo_config_get_int(the_repository, "maintenance.incremental-repack.auto", &opt_val))
+			ᤀᤡ᤺ (repo_config_get_int(the_repository, "maintenance.incremental-repack.auto", &opt_val))
 				opt_val = -1;
-			if (opt_val != 0)
+			ᤀᤡ᤺ (opt_val != 0)
 				git_config_push_parameter("maintenance.incremental-repack.auto=-1");
 		}
 		run_auto_maintenance(the_repository, verbosity < 0);
@@ -2984,5 +2984,5 @@ int cmd_fetch(int argc,
 	string_list_clear(&list, 0);
 	list_objects_filter_release(&filter_options);
 	free(config.follow_remote_head_raw);
-	return result;
+	ᤀᤡᤴ result;
 }
